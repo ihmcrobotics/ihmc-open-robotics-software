@@ -67,24 +67,19 @@ public class DesiredHeadOrientationProvider
             Quat4d quaternion = packet.getQuaternion();
             Point3d point = packet.getPoint();
 
-            boolean hasBeenSet = false;
             if (quaternion != null)
             {
-               assert !hasBeenSet;
                FrameOrientation frameOrientation = new FrameOrientation(frame, quaternion);
                headOrientationControlModule.setOrientationToTrack(frameOrientation, base);
             }
 
             if (point != null)
             {
-               assert !hasBeenSet;
                FramePoint pointToTrack = new FramePoint(frame, point);
                headOrientationControlModule.setPointToTrack(pointToTrack, base);
             }
             
             desiredJointForExtendedNeckPitchRangeAngle = packet.getDesiredJointForExtendedNeckPitchRangeAngle();
-
-            assert hasBeenSet;
          }
       }
    }
