@@ -10,6 +10,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.simulatedSensors.JointAndIMUSensorMap;
+import us.ihmc.sensorProcessing.simulatedSensors.PointPositionSensorMap;
 import us.ihmc.sensorProcessing.simulatedSensors.PointVelocitySensorMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
@@ -18,11 +19,13 @@ import us.ihmc.sensorProcessing.stateEstimation.ComposableOrientationEstimatorCr
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.JointStateFullRobotModelUpdater;
+import us.ihmc.sensorProcessing.stateEstimation.PointPositionSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.PointVelocitySensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.LinearAccelerationSensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.OrientationSensorConfiguration;
+import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionSensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocitySensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.SensorConfigurationFactory;
 import us.ihmc.utilities.math.MathTools;
@@ -40,6 +43,8 @@ public class SensorAndEstimatorAssembler
    private final ControlFlowGraph controlFlowGraph;
    private final StateEstimatorWithPorts orientationEstimator;
    private final JointAndIMUSensorDataSource jointSensorDataSource;
+   
+   private final PointPositionSensorDataSource pointPositionSensorDataSource;
    private final PointVelocitySensorDataSource pointVelocitySensorDataSource;
    
    private final DesiredCoMAndAngularAccelerationDataSource desiredCoMAndAngularAccelerationDataSource;
@@ -53,6 +58,9 @@ public class SensorAndEstimatorAssembler
 
       jointSensorDataSource = new JointAndIMUSensorDataSource(stateEstimatorSensorDefinitions);
       JointAndIMUSensorMap jointAndIMUSensorMap = jointSensorDataSource.getSensorMap();
+      
+      pointPositionSensorDataSource = new PointPositionSensorDataSource(stateEstimatorSensorDefinitions);
+      PointPositionSensorMap pointPositionSensorMap = pointPositionSensorDataSource.getSensorMap();
       
       pointVelocitySensorDataSource = new PointVelocitySensorDataSource(stateEstimatorSensorDefinitions);
       PointVelocitySensorMap pointVelocitySensorMap = pointVelocitySensorDataSource.getSensorMap();
@@ -70,6 +78,9 @@ public class SensorAndEstimatorAssembler
       Collection<LinearAccelerationSensorConfiguration> linearAccelerationSensorConfigurations =
          SensorConfigurationFactory.createLinearAccelerationSensorConfigurations(jointAndIMUSensorMap.getLinearAccelerationSensors());
 
+      Collection<PointPositionSensorConfiguration> pointPositionSensorConfigurations =
+            SensorConfigurationFactory.createPointPositionSensorConfigurations(pointPositionSensorMap.getPointPositionSensors());
+      
       Collection<PointVelocitySensorConfiguration> pointVelocitySensorConfigurations =
          SensorConfigurationFactory.createPointVelocitySensorConfigurations(pointVelocitySensorMap.getPointVelocitySensors());
 
@@ -96,6 +107,8 @@ public class SensorAndEstimatorAssembler
          orientationEstimatorCreator.addOrientationSensorConfigurations(orientationSensorConfigurations);
          orientationEstimatorCreator.addAngularVelocitySensorConfigurations(angularVelocitySensorConfigurations);
          orientationEstimatorCreator.addLinearAccelerationSensorConfigurations(linearAccelerationSensorConfigurations);
+         
+         orientationEstimatorCreator.addPointPositionSensorConfigurations(pointPositionSensorConfigurations);
          orientationEstimatorCreator.addPointVelocitySensorConfigurations(pointVelocitySensorConfigurations);
 
          // TODO: Not sure if we need to do this here:
@@ -149,6 +162,11 @@ public class SensorAndEstimatorAssembler
    public JointAndIMUSensorDataSource getJointAndIMUSensorDataSource()
    {
       return jointSensorDataSource;
+   }
+   
+   public PointPositionSensorDataSource getPointPositionSensorDataSource()
+   {
+      return pointPositionSensorDataSource;
    }
    
    public PointVelocitySensorDataSource getPointVelocitySensorDataSource()

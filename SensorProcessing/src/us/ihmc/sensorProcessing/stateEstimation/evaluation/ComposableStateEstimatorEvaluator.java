@@ -16,6 +16,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAccelerationsFromRobotStealerController;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
+import us.ihmc.sensorProcessing.stateEstimation.PointPositionSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.PointVelocitySensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -52,16 +53,18 @@ public class ComposableStateEstimatorEvaluator
       SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = generator.getSCSToInverseDynamicsJointMap();
 
 //      SensorNoiseParameters simulatedSensorNoiseParameters = SensorNoiseParametersForEvaluator.createVeryLittleSensorNoiseParameters();
-//      SensorNoiseParameters simulatedSensorNoiseParameters = SensorNoiseParametersForEvaluator.createSensorNoiseParameters();
-      SensorNoiseParameters simulatedSensorNoiseParameters = SensorNoiseParametersForEvaluator.createZeroNoiseParameters();
+      SensorNoiseParameters simulatedSensorNoiseParameters = SensorNoiseParametersForEvaluator.createSensorNoiseParameters();
+//      SensorNoiseParameters simulatedSensorNoiseParameters = SensorNoiseParametersForEvaluator.createZeroNoiseParameters();
 
       StateEstimatorSensorDefinitionsFromRobotFactory stateEstimatorSensorDefinitionsFromRobotFactory = new StateEstimatorSensorDefinitionsFromRobotFactory(scsToInverseDynamicsJointMap, 
-            robot, controlDT, imuMounts, robot.getVelocityPoints());
+            robot, controlDT, imuMounts, robot.getPositionPoints(), robot.getVelocityPoints());
       StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();;
       
       SimulatedSensorHolderAndReaderFromRobotFactory simulatedSensorHolderAndReaderFromRobotFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(
             stateEstimatorSensorDefinitionsFromRobotFactory,
-            scsToInverseDynamicsJointMap, robot, simulatedSensorNoiseParameters, controlDT, imuMounts, robot.getVelocityPoints(), registry);
+            scsToInverseDynamicsJointMap, robot, simulatedSensorNoiseParameters, controlDT, imuMounts, 
+            robot.getPositionPoints(), robot.getVelocityPoints(), 
+            registry);
       SimulatedSensorHolderAndReader simulatedSensorHolderAndReader = simulatedSensorHolderAndReaderFromRobotFactory.getSimulatedSensorHolderAndReader();
       
       Joint estimationJoint = robot.getRootJoint();
@@ -98,6 +101,9 @@ public class ComposableStateEstimatorEvaluator
       simulatedSensorHolderAndReader.setJointAndIMUSensorDataSource(jointSensorDataSource);
       DesiredCoMAndAngularAccelerationDataSource desiredCoMAndAngularAccelerationDataSource = new DesiredCoMAndAngularAccelerationDataSource(estimationFrame);
 
+      PointPositionSensorDataSource pointPositionSensorDataSource = sensorAndEstimatorAssembler.getPointPositionSensorDataSource();
+      simulatedSensorHolderAndReader.setPointPositionSensorDataSource(pointPositionSensorDataSource);
+      
       PointVelocitySensorDataSource pointVelocityDataSource = sensorAndEstimatorAssembler.getPointVelocitySensorDataSource();
       simulatedSensorHolderAndReader.setPointVelocitySensorDataSource(pointVelocityDataSource);
 

@@ -1,5 +1,6 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
@@ -10,7 +11,7 @@ import com.yobotics.simulationconstructionset.KinematicPoint;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
-public class SimulatedPointVelocitySensorFromRobot extends SimulatedSensor<Vector3d>
+public class SimulatedPointVelocitySensorFromRobot extends SimulatedSensor<Tuple3d>
 {
    private final KinematicPoint kinematicPoint;
    

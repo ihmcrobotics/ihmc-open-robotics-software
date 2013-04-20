@@ -7,15 +7,16 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 public class StateEstimatorSensorDefinitions
 {
-   private final  ArrayList<OneDoFJoint> oneDoFJointsForPositionSensors = new ArrayList<OneDoFJoint>();
-   private final  ArrayList<OneDoFJoint> oneDoFJointsForVelocitySensors = new ArrayList<OneDoFJoint>();
+   private final ArrayList<OneDoFJoint> oneDoFJointsForPositionSensors = new ArrayList<OneDoFJoint>();
+   private final ArrayList<OneDoFJoint> oneDoFJointsForVelocitySensors = new ArrayList<OneDoFJoint>();
 
    private final ArrayList<IMUDefinition> imuDefinitionsForOrientationSensors = new ArrayList<IMUDefinition>();
    private final ArrayList<IMUDefinition> imuDefinitionsForAngularVelocitySensors = new ArrayList<IMUDefinition>();
    private final ArrayList<IMUDefinition> imuDefinitionsForLinearAccelerationSensors = new ArrayList<IMUDefinition>();
-   
+
+   private final ArrayList<PointPositionSensorDefinition> pointPositionSensors = new ArrayList<PointPositionSensorDefinition>();
    private final ArrayList<PointVelocitySensorDefinition> pointVelocitySensors = new ArrayList<PointVelocitySensorDefinition>();
-   
+
    public StateEstimatorSensorDefinitions()
    {
    }
@@ -44,7 +45,12 @@ public class StateEstimatorSensorDefinitions
    {
       return imuDefinitionsForLinearAccelerationSensors;
    }
-   
+
+   public List<PointPositionSensorDefinition> getPointPositionSensorDefinitions()
+   {
+      return pointPositionSensors;
+   }
+
    public List<PointVelocitySensorDefinition> getPointVelocitySensorDefinitions()
    {
       return pointVelocitySensors;
@@ -54,7 +60,7 @@ public class StateEstimatorSensorDefinitions
    {
       oneDoFJointsForPositionSensors.add(oneDoFJoint);
    }
-   
+
    public void addJointVelocitySensorDefinition(OneDoFJoint oneDoFJoint)
    {
       oneDoFJointsForVelocitySensors.add(oneDoFJoint);
@@ -75,10 +81,14 @@ public class StateEstimatorSensorDefinitions
       imuDefinitionsForLinearAccelerationSensors.add(imuDefinition);
    }
 
+   public void addPointPositionSensorDefinition(PointPositionSensorDefinition pointPositionSensorDefinition)
+   {
+      pointPositionSensors.add(pointPositionSensorDefinition);
+   }
+
    public void addPointVelocitySensorDefinition(PointVelocitySensorDefinition pointVelocitySensorDefinition)
    {
       pointVelocitySensors.add(pointVelocitySensorDefinition);
    }
-
 
 }

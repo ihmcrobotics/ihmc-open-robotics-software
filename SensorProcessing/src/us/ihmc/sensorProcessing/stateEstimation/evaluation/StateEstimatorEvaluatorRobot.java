@@ -33,6 +33,8 @@ public class StateEstimatorEvaluatorRobot extends Robot
    private final Link bodyLink;
    private final FloatingJoint rootJoint;
    private final ArrayList<IMUMount> imuMounts = new ArrayList<IMUMount>();
+   
+   private final ArrayList<KinematicPoint> positionPoints = new ArrayList<KinematicPoint>();
    private final ArrayList<KinematicPoint> velocityPoints = new ArrayList<KinematicPoint>();
 
    private final Vector3d gravitationalAcceleration = new Vector3d(0.0, 0.0, -9.81);
@@ -65,8 +67,8 @@ public class StateEstimatorEvaluatorRobot extends Robot
       rootJoint.addIMUMount(imuMount0);
 
       Vector3d velocityPointOffsetVector0 = new Vector3d(0.0, 0.0, 0.2);
-      KinematicPoint velocityPoint0 = new KinematicPoint("vp0", velocityPointOffsetVector0, this);
-      rootJoint.addKinematicPoint(velocityPoint0);
+      KinematicPoint positionAndVelocityPoint0 = new KinematicPoint("vp0", velocityPointOffsetVector0, this);
+      rootJoint.addKinematicPoint(positionAndVelocityPoint0);
       
       this.addRootJoint(rootJoint);
 
@@ -136,8 +138,8 @@ public class StateEstimatorEvaluatorRobot extends Robot
          pinJoint2.addIMUMount(imuMount2);
 
          Vector3d velocityPointOffsetVector2 = new Vector3d(0.1, 0.2, 0.3);
-         KinematicPoint velocityPoint2 = new KinematicPoint("vp2", velocityPointOffsetVector2, this);
-         pinJoint2.addKinematicPoint(velocityPoint2);
+         KinematicPoint positionAndVelocityPoint2 = new KinematicPoint("vp2", velocityPointOffsetVector2, this);
+         pinJoint2.addKinematicPoint(positionAndVelocityPoint2);
          
 
          pinJoint1.addJoint(pinJoint2);
@@ -154,12 +156,16 @@ public class StateEstimatorEvaluatorRobot extends Robot
             pinJoint2.setQd(0.77);
          }
          
+         // Modify here what sensors are available:
          imuMounts.add(imuMount0);
          imuMounts.add(imuMount1);
          imuMounts.add(imuMount2);
 
-         velocityPoints.add(velocityPoint0);
-         velocityPoints.add(velocityPoint2);
+         positionPoints.add(positionAndVelocityPoint0);
+         positionPoints.add(positionAndVelocityPoint2);
+         
+         velocityPoints.add(positionAndVelocityPoint0);
+         velocityPoints.add(positionAndVelocityPoint2);
       }
 
       else
@@ -173,7 +179,8 @@ public class StateEstimatorEvaluatorRobot extends Robot
          rootJoint.addJoint(pinJoint1);
          
          imuMounts.add(imuMount0);
-         velocityPoints.add(velocityPoint0);
+         positionPoints.add(positionAndVelocityPoint0);
+         velocityPoints.add(positionAndVelocityPoint0);
       }
 
       this.setGravity(gravitationalAcceleration);
@@ -228,6 +235,11 @@ public class StateEstimatorEvaluatorRobot extends Robot
       return rootJoint;
    }
 
+   public ArrayList<KinematicPoint> getPositionPoints()
+   {
+      return positionPoints;
+   }
+   
    public ArrayList<KinematicPoint> getVelocityPoints()
    {
       return velocityPoints;

@@ -3,7 +3,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.t,root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMX</Variables>
 		<GraphConfiguration>
-			<Name>config1</Name>
+			<Name>config83</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -15,7 +15,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.StateEstimatorErrorCalculatorController.StateEstimatorErrorCalculator.orientationError</Variables>
 		<GraphConfiguration>
-			<Name>config2</Name>
+			<Name>config84</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -27,7 +27,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.StateEstimatorErrorCalculatorController.StateEstimatorErrorCalculator.angularVelocityError</Variables>
 		<GraphConfiguration>
-			<Name>config3</Name>
+			<Name>config85</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -39,7 +39,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.StateEstimatorErrorCalculatorController.StateEstimatorErrorCalculator.comPositionError</Variables>
 		<GraphConfiguration>
-			<Name>config4</Name>
+			<Name>config86</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -51,19 +51,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.StateEstimatorErrorCalculatorController.StateEstimatorErrorCalculator.comVelocityError</Variables>
 		<GraphConfiguration>
-			<Name>config5</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.imuMount2LinearAccelerationBiasEstimateX,root.ComposableStateEstimatorEvaluator.imuMount2LinearAccelerationRandomWalkBiasVectorCorruptor.imuMount2LinearAccelerationBiasX</Variables>
-		<GraphConfiguration>
-			<Name>config6</Name>
+			<Name>config87</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -75,19 +63,7 @@
 	<Graph>
 		<Variables>root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.imuMount0AngularVelocityBiasEstimateX</Variables>
 		<GraphConfiguration>
-			<Name>config7</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.imuMount1AngularVelocityBiasEstimateX</Variables>
-		<GraphConfiguration>
-			<Name>config8</Name>
+			<Name>config88</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -99,7 +75,7 @@
 	<Graph>
 		<Variables>root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.imuMount2AngularVelocityBiasEstimateX</Variables>
 		<GraphConfiguration>
-			<Name>config9</Name>
+			<Name>config89</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -109,9 +85,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.imuMount0LinearAccelerationBiasEstimateX</Variables>
+		<Variables>root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.imuMount0LinearAccelerationBiasEstimateX,root.ComposableStateEstimatorEvaluator.imuMount0LinearAccelerationRandomWalkBiasVectorCorruptor.imuMount0LinearAccelerationBiasX</Variables>
 		<GraphConfiguration>
-			<Name>config10</Name>
+			<Name>config90</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -123,7 +99,7 @@
 	<Graph>
 		<Variables>root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.imuMount1LinearAccelerationBiasEstimateX</Variables>
 		<GraphConfiguration>
-			<Name>config11</Name>
+			<Name>config91</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -133,9 +109,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.imuMount2LinearAccelerationBiasEstimateX</Variables>
+		<Variables>root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.imuMount2LinearAccelerationBiasEstimateX,root.ComposableStateEstimatorEvaluator.imuMount2LinearAccelerationRandomWalkBiasVectorCorruptor.imuMount2LinearAccelerationBiasX</Variables>
 		<GraphConfiguration>
-			<Name>config12</Name>
+			<Name>config92</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -152,13 +128,13 @@
 <Visible> true</Visible>
 </Main Viewport>
 
-<Graph Array Window Size>6</Graph Array Window Size><Graph Array Window1>
+<Graph Array Window Size>5</Graph Array Window Size><Graph Array Window1>
 <GraphGroup>
 	<Cols>3</Cols>
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.q_qx</Variables>
 		<GraphConfiguration>
-			<Name>config13</Name>
+			<Name>config93</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -170,7 +146,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.q_qy</Variables>
 		<GraphConfiguration>
-			<Name>config14</Name>
+			<Name>config94</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -182,7 +158,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.q_qz</Variables>
 		<GraphConfiguration>
-			<Name>config15</Name>
+			<Name>config95</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -194,7 +170,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.qd_wx,root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.orientationEstimatorOmegaX</Variables>
 		<GraphConfiguration>
-			<Name>config16</Name>
+			<Name>config96</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -206,7 +182,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.qd_wy,root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.orientationEstimatorOmegaY</Variables>
 		<GraphConfiguration>
-			<Name>config17</Name>
+			<Name>config97</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -218,7 +194,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.qd_wz,root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.orientationEstimatorOmegaZ</Variables>
 		<GraphConfiguration>
-			<Name>config18</Name>
+			<Name>config98</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -230,7 +206,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMdX,root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.orientationEstimatorCoMVelocityX</Variables>
 		<GraphConfiguration>
-			<Name>config19</Name>
+			<Name>config99</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -242,7 +218,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMdY</Variables>
 		<GraphConfiguration>
-			<Name>config20</Name>
+			<Name>config100</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -254,7 +230,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMdZ</Variables>
 		<GraphConfiguration>
-			<Name>config21</Name>
+			<Name>config101</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -266,7 +242,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMddX</Variables>
 		<GraphConfiguration>
-			<Name>config22</Name>
+			<Name>config102</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -278,7 +254,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMddY</Variables>
 		<GraphConfiguration>
-			<Name>config23</Name>
+			<Name>config103</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -290,7 +266,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMddZ</Variables>
 		<GraphConfiguration>
-			<Name>config24</Name>
+			<Name>config104</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -302,7 +278,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.qdd_wx,root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.orientationEstimatorOmegaY</Variables>
 		<GraphConfiguration>
-			<Name>config25</Name>
+			<Name>config105</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -314,7 +290,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.qdd_wy</Variables>
 		<GraphConfiguration>
-			<Name>config26</Name>
+			<Name>config106</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -326,7 +302,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.qdd_wz</Variables>
 		<GraphConfiguration>
-			<Name>config27</Name>
+			<Name>config107</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -340,9 +316,9 @@
 <GraphGroup>
 	<Cols>3</Cols>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.imuMount0OrientationQx</Variables>
+		<Variables>root.ComposableStateEstimatorEvaluator.imuMount0OrientationPerfectQx,root.ComposableStateEstimatorEvaluator.imuMount0OrientationNoisyQx</Variables>
 		<GraphConfiguration>
-			<Name>config28</Name>
+			<Name>config108</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -352,9 +328,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.imuMount0OrientationQy</Variables>
+		<Variables>root.ComposableStateEstimatorEvaluator.imuMount0OrientationPerfectQy,root.ComposableStateEstimatorEvaluator.imuMount0OrientationNoisyQy</Variables>
 		<GraphConfiguration>
-			<Name>config29</Name>
+			<Name>config109</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -364,9 +340,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.imuMount0OrientationQz</Variables>
+		<Variables>root.ComposableStateEstimatorEvaluator.imuMount0OrientationPerfectQz,root.ComposableStateEstimatorEvaluator.imuMount0OrientationNoisyQz</Variables>
 		<GraphConfiguration>
-			<Name>config30</Name>
+			<Name>config110</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -376,9 +352,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.imuMount0AngularVelocityX</Variables>
+		<Variables>root.ComposableStateEstimatorEvaluator.imuMount0AngularVelocityPerfectX,root.ComposableStateEstimatorEvaluator.imuMount0AngularVelocityNoisyX</Variables>
 		<GraphConfiguration>
-			<Name>config31</Name>
+			<Name>config111</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -388,9 +364,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.imuMount0AngularVelocityY</Variables>
+		<Variables>root.ComposableStateEstimatorEvaluator.imuMount0AngularVelocityPerfectY,root.ComposableStateEstimatorEvaluator.imuMount0AngularVelocityNoisyY</Variables>
 		<GraphConfiguration>
-			<Name>config32</Name>
+			<Name>config112</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -400,9 +376,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.imuMount0AngularVelocityZ</Variables>
+		<Variables>root.ComposableStateEstimatorEvaluator.imuMount0AngularVelocityPerfectZ,root.ComposableStateEstimatorEvaluator.imuMount0AngularVelocityNoisyZ</Variables>
 		<GraphConfiguration>
-			<Name>config33</Name>
+			<Name>config113</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -412,9 +388,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.imuMount0LinearAccelerationX</Variables>
+		<Variables>root.ComposableStateEstimatorEvaluator.imuMount0LinearAccelerationPerfectX,root.ComposableStateEstimatorEvaluator.imuMount0LinearAccelerationNoisyX</Variables>
 		<GraphConfiguration>
-			<Name>config34</Name>
+			<Name>config114</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -424,9 +400,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.imuMount0LinearAccelerationY</Variables>
+		<Variables>root.ComposableStateEstimatorEvaluator.imuMount0LinearAccelerationPerfectY,root.ComposableStateEstimatorEvaluator.imuMount0LinearAccelerationNoisyY</Variables>
 		<GraphConfiguration>
-			<Name>config35</Name>
+			<Name>config115</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -436,9 +412,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.imuMount0LinearAccelerationZ</Variables>
+		<Variables>root.ComposableStateEstimatorEvaluator.imuMount0LinearAccelerationPerfectZ,root.ComposableStateEstimatorEvaluator.imuMount0LinearAccelerationNoisyZ</Variables>
 		<GraphConfiguration>
-			<Name>config36</Name>
+			<Name>config116</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -448,9 +424,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.ComposableStateEstimatorEvaluator.imuMount0LinearAccelerationRandomWalkBiasVectorCorruptor.imuMount0LinearAccelerationBiasX,root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.imuMount0LinearAccelerationBiasEstimateX</Variables>
 		<GraphConfiguration>
-			<Name>config37</Name>
+			<Name>config117</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -460,9 +436,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.ComposableStateEstimatorEvaluator.imuMount0LinearAccelerationRandomWalkBiasVectorCorruptor.imuMount0LinearAccelerationBiasY,root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.imuMount0LinearAccelerationBiasEstimateY</Variables>
 		<GraphConfiguration>
-			<Name>config38</Name>
+			<Name>config118</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -472,9 +448,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.ComposableStateEstimatorEvaluator.imuMount0LinearAccelerationRandomWalkBiasVectorCorruptor.imuMount0LinearAccelerationBiasZ,root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.imuMount0LinearAccelerationBiasEstimateZ</Variables>
 		<GraphConfiguration>
-			<Name>config39</Name>
+			<Name>config119</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -484,9 +460,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.ComposableStateEstimatorEvaluator.imuMount0AngularVelocityRandomWalkBiasVectorCorruptor.imuMount0AngularVelocityBiasX,root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.imuMount0AngularVelocityBiasEstimateX</Variables>
 		<GraphConfiguration>
-			<Name>config40</Name>
+			<Name>config120</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -496,9 +472,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.ComposableStateEstimatorEvaluator.imuMount0AngularVelocityRandomWalkBiasVectorCorruptor.imuMount0AngularVelocityBiasY,root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.imuMount0AngularVelocityBiasEstimateY</Variables>
 		<GraphConfiguration>
-			<Name>config41</Name>
+			<Name>config121</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -508,9 +484,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.ComposableStateEstimatorEvaluator.imuMount0AngularVelocityRandomWalkBiasVectorCorruptor.imuMount0AngularVelocityBiasZ,root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.imuMount0AngularVelocityBiasEstimateZ</Variables>
 		<GraphConfiguration>
-			<Name>config42</Name>
+			<Name>config122</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -526,7 +502,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.imuMount1OrientationQx</Variables>
 		<GraphConfiguration>
-			<Name>config43</Name>
+			<Name>config123</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -538,7 +514,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.imuMount1OrientationQy</Variables>
 		<GraphConfiguration>
-			<Name>config44</Name>
+			<Name>config124</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -550,7 +526,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.imuMount1OrientationQz</Variables>
 		<GraphConfiguration>
-			<Name>config45</Name>
+			<Name>config125</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -562,7 +538,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.imuMount1AngularVelocityX</Variables>
 		<GraphConfiguration>
-			<Name>config46</Name>
+			<Name>config126</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -574,7 +550,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.imuMount1AngularVelocityY</Variables>
 		<GraphConfiguration>
-			<Name>config47</Name>
+			<Name>config127</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -586,7 +562,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.imuMount1AngularVelocityZ</Variables>
 		<GraphConfiguration>
-			<Name>config48</Name>
+			<Name>config128</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -598,7 +574,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.imuMount1LinearAccelerationX</Variables>
 		<GraphConfiguration>
-			<Name>config49</Name>
+			<Name>config129</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -610,7 +586,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.imuMount1LinearAccelerationY</Variables>
 		<GraphConfiguration>
-			<Name>config50</Name>
+			<Name>config130</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -622,7 +598,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.imuMount1LinearAccelerationZ</Variables>
 		<GraphConfiguration>
-			<Name>config51</Name>
+			<Name>config131</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -634,7 +610,7 @@
 	<Graph>
 		<Variables></Variables>
 		<GraphConfiguration>
-			<Name>config52</Name>
+			<Name>config132</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -646,7 +622,7 @@
 	<Graph>
 		<Variables></Variables>
 		<GraphConfiguration>
-			<Name>config53</Name>
+			<Name>config133</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -658,7 +634,7 @@
 	<Graph>
 		<Variables></Variables>
 		<GraphConfiguration>
-			<Name>config54</Name>
+			<Name>config134</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -670,7 +646,7 @@
 	<Graph>
 		<Variables></Variables>
 		<GraphConfiguration>
-			<Name>config55</Name>
+			<Name>config135</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -682,7 +658,7 @@
 	<Graph>
 		<Variables></Variables>
 		<GraphConfiguration>
-			<Name>config56</Name>
+			<Name>config136</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -694,7 +670,7 @@
 	<Graph>
 		<Variables></Variables>
 		<GraphConfiguration>
-			<Name>config57</Name>
+			<Name>config137</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -710,7 +686,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.imuMount2OrientationQx,root.ComposableStateEstimatorEvaluator.imuMount2OrientationNoisyQx</Variables>
 		<GraphConfiguration>
-			<Name>config58</Name>
+			<Name>config138</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -722,7 +698,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.imuMount2OrientationQy,root.ComposableStateEstimatorEvaluator.imuMount2OrientationNoisyQy</Variables>
 		<GraphConfiguration>
-			<Name>config59</Name>
+			<Name>config139</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -734,7 +710,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.imuMount2OrientationQz,root.ComposableStateEstimatorEvaluator.imuMount2OrientationNoisyQz</Variables>
 		<GraphConfiguration>
-			<Name>config60</Name>
+			<Name>config140</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -746,7 +722,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.imuMount2AngularVelocityX,root.ComposableStateEstimatorEvaluator.imuMount2AngularVelocityNoisyX</Variables>
 		<GraphConfiguration>
-			<Name>config61</Name>
+			<Name>config141</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -758,7 +734,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.imuMount2AngularVelocityY,root.ComposableStateEstimatorEvaluator.imuMount2AngularVelocityNoisyY</Variables>
 		<GraphConfiguration>
-			<Name>config62</Name>
+			<Name>config142</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -770,7 +746,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.imuMount2AngularVelocityZ,root.ComposableStateEstimatorEvaluator.imuMount2AngularVelocityNoisyZ</Variables>
 		<GraphConfiguration>
-			<Name>config63</Name>
+			<Name>config143</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -782,7 +758,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.imuMount2LinearAccelerationX,root.ComposableStateEstimatorEvaluator.imuMount2LinearAccelerationNoisyX</Variables>
 		<GraphConfiguration>
-			<Name>config64</Name>
+			<Name>config144</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -794,7 +770,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.imuMount2LinearAccelerationY,root.ComposableStateEstimatorEvaluator.imuMount2LinearAccelerationNoisyY</Variables>
 		<GraphConfiguration>
-			<Name>config65</Name>
+			<Name>config145</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -806,7 +782,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEvaluatorRobot.imuMount2LinearAccelerationZ,root.ComposableStateEstimatorEvaluator.imuMount2LinearAccelerationNoisyZ</Variables>
 		<GraphConfiguration>
-			<Name>config66</Name>
+			<Name>config146</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -818,7 +794,7 @@
 	<Graph>
 		<Variables>root.ComposableStateEstimatorEvaluator.imuMount2AngularVelocityRandomWalkBiasVectorCorruptor.imuMount2AngularVelocityBiasX,root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.imuMount2AngularVelocityBiasEstimateX</Variables>
 		<GraphConfiguration>
-			<Name>config67</Name>
+			<Name>config147</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -830,7 +806,7 @@
 	<Graph>
 		<Variables>root.ComposableStateEstimatorEvaluator.imuMount2AngularVelocityRandomWalkBiasVectorCorruptor.imuMount2AngularVelocityBiasY,root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.imuMount2AngularVelocityBiasEstimateY</Variables>
 		<GraphConfiguration>
-			<Name>config68</Name>
+			<Name>config148</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -842,7 +818,7 @@
 	<Graph>
 		<Variables>root.ComposableStateEstimatorEvaluator.imuMount2AngularVelocityRandomWalkBiasVectorCorruptor.imuMount2AngularVelocityBiasZ,root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.imuMount2AngularVelocityBiasEstimateZ</Variables>
 		<GraphConfiguration>
-			<Name>config69</Name>
+			<Name>config149</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -854,7 +830,7 @@
 	<Graph>
 		<Variables>root.ComposableStateEstimatorEvaluator.imuMount2LinearAccelerationRandomWalkBiasVectorCorruptor.imuMount2LinearAccelerationBiasX,root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.imuMount2LinearAccelerationBiasEstimateX</Variables>
 		<GraphConfiguration>
-			<Name>config70</Name>
+			<Name>config150</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -866,7 +842,7 @@
 	<Graph>
 		<Variables>root.ComposableStateEstimatorEvaluator.imuMount2LinearAccelerationRandomWalkBiasVectorCorruptor.imuMount2LinearAccelerationBiasY,root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.imuMount2LinearAccelerationBiasEstimateY</Variables>
 		<GraphConfiguration>
-			<Name>config71</Name>
+			<Name>config151</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -878,7 +854,7 @@
 	<Graph>
 		<Variables>root.ComposableStateEstimatorEvaluator.imuMount2LinearAccelerationRandomWalkBiasVectorCorruptor.imuMount2LinearAccelerationBiasZ,root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.imuMount2LinearAccelerationBiasEstimateZ</Variables>
 		<GraphConfiguration>
-			<Name>config72</Name>
+			<Name>config152</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -892,9 +868,9 @@
 <GraphGroup>
 	<Cols>3</Cols>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMX,root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.orientationEstimatorCoMPositionX</Variables>
+		<Variables>root.ComposableStateEstimatorEvaluator.vp0PointPositionPerfectX,root.ComposableStateEstimatorEvaluator.vp0PointPositionNoisyX</Variables>
 		<GraphConfiguration>
-			<Name>config73</Name>
+			<Name>config153</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -904,9 +880,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMY,root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.orientationEstimatorCoMPositionY</Variables>
+		<Variables>root.ComposableStateEstimatorEvaluator.vp0PointPositionPerfectY,root.ComposableStateEstimatorEvaluator.vp0PointPositionNoisyY</Variables>
 		<GraphConfiguration>
-			<Name>config74</Name>
+			<Name>config154</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -916,9 +892,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMZ,root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.orientationEstimatorCoMPositionZ</Variables>
+		<Variables>root.ComposableStateEstimatorEvaluator.vp0PointPositionPerfectZ,root.ComposableStateEstimatorEvaluator.vp0PointPositionNoisyZ</Variables>
 		<GraphConfiguration>
-			<Name>config75</Name>
+			<Name>config155</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -928,9 +904,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMdX,root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.orientationEstimatorCoMVelocityX</Variables>
+		<Variables>root.ComposableStateEstimatorEvaluator.vp2PointPositionPerfectX,root.ComposableStateEstimatorEvaluator.vp2PointPositionNoisyX</Variables>
 		<GraphConfiguration>
-			<Name>config76</Name>
+			<Name>config156</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -940,9 +916,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMdY,root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.orientationEstimatorCoMVelocityY</Variables>
+		<Variables>root.ComposableStateEstimatorEvaluator.vp2PointPositionPerfectY,root.ComposableStateEstimatorEvaluator.vp2PointPositionNoisyY</Variables>
 		<GraphConfiguration>
-			<Name>config77</Name>
+			<Name>config157</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -952,9 +928,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMdZ,root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.orientationEstimatorCoMVelocityZ</Variables>
+		<Variables>root.ComposableStateEstimatorEvaluator.vp2PointPositionPerfectZ,root.ComposableStateEstimatorEvaluator.vp2PointPositionNoisyZ</Variables>
 		<GraphConfiguration>
-			<Name>config78</Name>
+			<Name>config158</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -963,50 +939,10 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
-	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMddX</Variables>
-		<GraphConfiguration>
-			<Name>config79</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMddY</Variables>
-		<GraphConfiguration>
-			<Name>config80</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMddZ</Variables>
-		<GraphConfiguration>
-			<Name>config81</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-</GraphGroup>
-</Graph Array Window5><Graph Array Window6>
-<GraphGroup>
-	<Cols>3</Cols>
 	<Graph>
 		<Variables>root.ComposableStateEstimatorEvaluator.vp0PointVelocityPerfectX,root.ComposableStateEstimatorEvaluator.vp0PointVelocityNoisyX</Variables>
 		<GraphConfiguration>
-			<Name>config82</Name>
+			<Name>config159</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1018,7 +954,7 @@
 	<Graph>
 		<Variables>root.ComposableStateEstimatorEvaluator.vp0PointVelocityPerfectY,root.ComposableStateEstimatorEvaluator.vp0PointVelocityNoisyY</Variables>
 		<GraphConfiguration>
-			<Name>config83</Name>
+			<Name>config160</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1030,7 +966,7 @@
 	<Graph>
 		<Variables>root.ComposableStateEstimatorEvaluator.vp0PointVelocityPerfectZ,root.ComposableStateEstimatorEvaluator.vp0PointVelocityNoisyZ</Variables>
 		<GraphConfiguration>
-			<Name>config84</Name>
+			<Name>config161</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1042,7 +978,7 @@
 	<Graph>
 		<Variables>root.ComposableStateEstimatorEvaluator.vp2PointVelocityPerfectX,root.ComposableStateEstimatorEvaluator.vp2PointVelocityNoisyX</Variables>
 		<GraphConfiguration>
-			<Name>config85</Name>
+			<Name>config162</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1054,7 +990,7 @@
 	<Graph>
 		<Variables>root.ComposableStateEstimatorEvaluator.vp2PointVelocityPerfectY,root.ComposableStateEstimatorEvaluator.vp2PointVelocityNoisyY</Variables>
 		<GraphConfiguration>
-			<Name>config86</Name>
+			<Name>config163</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1066,43 +1002,7 @@
 	<Graph>
 		<Variables>root.ComposableStateEstimatorEvaluator.vp2PointVelocityPerfectZ,root.ComposableStateEstimatorEvaluator.vp2PointVelocityNoisyZ</Variables>
 		<GraphConfiguration>
-			<Name>config87</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config88</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config89</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config90</Name>
+			<Name>config164</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1112,7 +1012,7 @@
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-</Graph Array Window6>
+</Graph Array Window5>
 
 <Extra Panels>
 <Main Viewport>
@@ -1122,8 +1022,8 @@
 <Current View>Normal View</Current View>
  <Canvas 1> 
  <Camera X>0.0</Camera X>
- <Camera Y>-5.23828125</Camera Y>
- <Camera Z>0.94921875</Camera Z>
+ <Camera Y>-6.0</Camera Y>
+ <Camera Z>1.0</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>

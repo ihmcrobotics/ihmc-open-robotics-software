@@ -29,8 +29,10 @@ import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.simulatedSensors.PointPositionSensorDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.PointVelocitySensorDefinition;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationDataSource;
+import us.ihmc.sensorProcessing.stateEstimation.PointPositionSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.PointVelocitySensorDataSource;
 import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.MathTools;
@@ -122,6 +124,7 @@ public abstract class MomentumBasedController implements RobotController
    protected final InverseDynamicsCalculator inverseDynamicsCalculator;
    
    private final DesiredCoMAndAngularAccelerationGrabber desiredCoMAndAngularAccelerationGrabber;
+   private PointPositionSensorGrabber pointPositionSensorGrabber;
    private PointVelocitySensorGrabber pointVelocitySensorGrabber;
 
    protected final EnumYoVariable<RobotSide> upcomingSupportLeg; // FIXME: not general enough; this should not be here
@@ -393,6 +396,11 @@ public abstract class MomentumBasedController implements RobotController
          pointVelocitySensorGrabber.set();
       }
       
+      if (pointPositionSensorGrabber != null)
+      {
+         pointPositionSensorGrabber.set();
+      }
+      
       inverseDynamicsCalculator.compute();
       
       doAdditionalTorqueControl();
@@ -509,6 +517,14 @@ public abstract class MomentumBasedController implements RobotController
       desiredCoMAndAngularAccelerationGrabber.attachDesiredCoMAndAngularAccelerationDataSource(desiredCoMAndAngularAccelerationDataSource);
    }
    
+   public void attachPointPositionSensorDataSource(Collection<PointPositionSensorDefinition> pointPositionSensorDefinitions, PointPositionSensorDataSource pointPositionSensorDataSource)
+   {
+      if (this.pointPositionSensorGrabber != null) throw new RuntimeException("Already have set pointPositionSensorDataSource");
+
+      this.pointPositionSensorGrabber = new PointPositionSensorGrabber(pointPositionSensorDefinitions);
+      pointPositionSensorGrabber.attachPointPositionSensorDataSource(pointPositionSensorDataSource);
+   }
+   
    public void attachPointVelocitySensorDataSource(Collection<PointVelocitySensorDefinition> pointVelocitySensorDefinitions, PointVelocitySensorDataSource pointVelocitySensorDataSource)
    {
       if (this.pointVelocitySensorGrabber != null) throw new RuntimeException("Already have set pointVelocitySensorDataSource");
@@ -516,5 +532,6 @@ public abstract class MomentumBasedController implements RobotController
       this.pointVelocitySensorGrabber = new PointVelocitySensorGrabber(pointVelocitySensorDefinitions);
       pointVelocitySensorGrabber.attachPointVelocitySensorDataSource(pointVelocitySensorDataSource);
    }
+
 
 }

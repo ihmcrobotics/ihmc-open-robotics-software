@@ -1,5 +1,6 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
@@ -8,7 +9,7 @@ import com.yobotics.simulationconstructionset.IMUMount;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
-public class SimulatedLinearAccelerationSensorFromRobot extends SimulatedSensor<Vector3d>
+public class SimulatedLinearAccelerationSensorFromRobot extends SimulatedSensor<Tuple3d>
 {
    private final IMUMount imuMount;
 
