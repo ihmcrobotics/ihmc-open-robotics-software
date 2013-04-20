@@ -4,11 +4,23 @@ import javax.vecmath.Vector3d;
 
 public class PointVelocityDataObject
 {
+   private Vector3d offsetFromJointInJointFrame = new Vector3d();
    private final Vector3d velocity = new Vector3d();
-   public double velocityTrustFactor = 0.0;
+
+   public double covarianceScaling = 1.0;
 
    public PointVelocityDataObject()
    {
+   }
+
+   public void getOffsetFromJointInJointFrame(Vector3d offsetFromJointInJointFrameToPack)
+   {
+      offsetFromJointInJointFrameToPack.set(this.offsetFromJointInJointFrame);
+   }
+
+   public void setOffsetFromJointInJointFrame(Vector3d offsetFromJointInJointFrame)
+   {
+      this.offsetFromJointInJointFrame.set(offsetFromJointInJointFrame);
    }
 
    public void getVelocity(Vector3d velocityToPack)
@@ -21,19 +33,20 @@ public class PointVelocityDataObject
       this.velocity.set(velocity);
    }
 
-   public double getVelocityTrustFactor()
+   public double getCovarianceScaling()
    {
-      return velocityTrustFactor;
+      return covarianceScaling;
    }
 
-   public void setVelocityTrustFactor(double velocityTrustFactor)
+   public void setCovarianceScaling(double covarianceScaling)
    {
-      this.velocityTrustFactor = velocityTrustFactor;
+      this.covarianceScaling = covarianceScaling;
    }
 
    public void set(PointVelocityDataObject pointVelocityDataObject)
    {
+      this.offsetFromJointInJointFrame.set(pointVelocityDataObject.offsetFromJointInJointFrame);
       this.velocity.set(pointVelocityDataObject.velocity);
-      this.velocityTrustFactor = pointVelocityDataObject.velocityTrustFactor;
+      this.covarianceScaling = pointVelocityDataObject.covarianceScaling;
    }
 }

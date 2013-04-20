@@ -44,6 +44,16 @@ public abstract class AbstractMeasurementModelElement implements MeasurementMode
 
       return scaledMeasurementCovarianceMatrixBlock;
    }
+   
+   public double getCovarianceMatrixScaling()
+   {
+      return covarianceMatrixScaling.getDoubleValue();
+   }
+   
+   public void setCovarianceMatrixScaling(double covarianceMatrixScaling)
+   {
+      this.covarianceMatrixScaling.set(covarianceMatrixScaling);
+   }
 
    public void setNoiseStandardDeviation(double standardDeviation)
    {

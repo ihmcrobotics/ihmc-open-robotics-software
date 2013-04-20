@@ -63,6 +63,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
       this.angularVelocityPort = angularVelocityPort;
 
       this.pointVelocityMeasurementInputPort = pointVelocityMeasurementInputPort;
+      this.pointVelocityMeasurementInputPort.setData(new PointVelocityDataObject());
 
       this.estimationFrame = estimationFrame;
       this.stationaryPointLink = stationaryPointLink;
@@ -121,6 +122,13 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
       MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, outputMatrixBlocks.get(orientationPort));
    }
 
+   @Override
+   public DenseMatrix64F getMeasurementCovarianceMatrixBlock()
+   {
+      this.setCovarianceMatrixScaling(pointVelocityMeasurementInputPort.getData().getCovarianceScaling());
+      return super.getMeasurementCovarianceMatrixBlock();
+   }
+   
    public DenseMatrix64F computeResidual()
    {
       computeVelocityOfStationaryPoint(tempFrameVector);
