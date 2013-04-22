@@ -4,8 +4,10 @@ import boofcv.struct.FastQueue;
 import boofcv.struct.FastQueueArray_F64;
 import georegression.fitting.MotionTransformPoint;
 import georegression.fitting.se.MotionSe3PointSVD_F64;
+import georegression.geometry.RotationMatrixGenerator;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.se.Se3_F64;
+import georegression.struct.so.Rodrigues;
 import georegression.transform.se.SePointOps_F64;
 import org.ddogleg.nn.FactoryNearestNeighbor;
 import org.ddogleg.nn.NearestNeighbor;
@@ -41,6 +43,10 @@ public class IcpCloud3D {
    FastQueue<double[]> refArray = new FastQueueArray_F64(3);
 
 
+   // modified list of 'current' point cloud after applying the most recent estimate of camera motion
+   // Much less numerical errors when applying the total transform as compared to compounding transforms
+   FastQueue<Point3D_F64> currentModified = new FastQueue<Point3D_F64>(Point3D_F64.class,true);
+
    double[] work = new double[3];
    NnData<Point3D_F64> bestMatch = new NnData<Point3D_F64>();
 
@@ -49,6 +55,9 @@ public class IcpCloud3D {
 
    Se3_F64 work0 = new Se3_F64();
    Se3_F64 total = new Se3_F64();
+
+   // used to check for convergence
+   Rodrigues rod = new Rodrigues();
 
    /**
     * Constructor in which parameters and internal algorithms are specified
@@ -115,12 +124,18 @@ public class IcpCloud3D {
     */
    public boolean setCurrent( List<Point3D_F64> current ) {
 
+      currentModified.reset();
+      for( Point3D_F64 p : current ) {
+         currentModified.grow().set(p);
+      }
+
       total.reset();
       for( int i = 0; i < maxIterations; i++ ) {
          src.reset();
          dst.reset();
 
-         for( Point3D_F64 p : current ) {
+         // find nearest-neighbors
+         for( Point3D_F64 p : currentModified.toList() ) {
 
             work[0] = p.x;
             work[1] = p.y;
@@ -135,20 +150,22 @@ public class IcpCloud3D {
          if( !motionAlg.process(src.toList(),dst.toList()) )
             return false;
 
+         // apply found motion
+         total.concat(motionAlg.getMotion(),work0);
+         total.set(work0);
+
          Se3_F64 found = motionAlg.getMotion();
          double change = found.getT().normSq();
+         RotationMatrixGenerator.matrixToRodrigues(found.getR(),rod);
 
-         System.out.println("change "+change);
-         if( change < convergenceTol )
+         if( change < convergenceTol && Math.abs(rod.theta) < convergenceTol )
             break;
 
          // apply found transform
-         for( Point3D_F64 p : current ) {
-            SePointOps_F64.transformReverse(found,p,p);
+         for( int j = 0; j < current.size(); j++ ) {
+            Point3D_F64 p = current.get(j);
+            SePointOps_F64.transformReverse(total,p,currentModified.get(j));
          }
-
-         total.concat(motionAlg.getMotion(),work0);
-         total.set(work0);
       }
 
       return true;

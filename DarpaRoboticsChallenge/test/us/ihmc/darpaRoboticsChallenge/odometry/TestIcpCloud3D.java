@@ -85,10 +85,9 @@ public class TestIcpCloud3D {
       assertEquals(0,euler[1],1e-8);
       assertEquals(0,euler[2],1e-8);
 
-
-      assertEquals(expected.getT().x,found.getT().x,1e-3);
-      assertEquals(expected.getT().y,found.getT().y,1e-3);
-      assertEquals(expected.getT().z,found.getT().z,1e-3);
+      assertEquals(expected.getT().x,found.getT().x,1e-8);
+      assertEquals(expected.getT().y,found.getT().y,1e-8);
+      assertEquals(expected.getT().z,found.getT().z,1e-8);
    }
 
    @Test
@@ -118,21 +117,19 @@ public class TestIcpCloud3D {
 
       Se3_F64 found = alg.getReferenceToCurrent();
       double euler[] = RotationMatrixGenerator.matrixToEulerXYZ(found.getR());
-      assertEquals(-0.1,euler[0],1e-3);
-      assertEquals(0.05,euler[1],1e-3);
-      assertEquals(0.07,euler[2],1e-3);
+      assertEquals(-0.1,euler[0],1e-8);
+      assertEquals(0.05,euler[1],1e-8);
+      assertEquals(0.07,euler[2],1e-8);
 
-
-      assertEquals(expected.getT().x,found.getT().x,1e-2);
-      assertEquals(expected.getT().y,found.getT().y,1e-2);
-      assertEquals(expected.getT().z,found.getT().z,1e-2);
+      assertEquals(expected.getT().x,found.getT().x,1e-7);
+      assertEquals(expected.getT().y,found.getT().y,1e-7);
+      assertEquals(expected.getT().z,found.getT().z,1e-7);
    }
 
    private IcpCloud3D createIcp(double maxDist) {
 
       MotionTransformPoint<Se3_F64, Point3D_F64> motionAlg = new MotionSe3PointSVD_F64();
       NearestNeighbor<Point3D_F64> nn = FactoryNearestNeighbor.kdtree();
-
 
       return new IcpCloud3D(maxDist,100,1e-12,motionAlg,nn);
    }
