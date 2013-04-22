@@ -1,17 +1,15 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import com.yobotics.simulationconstructionset.PlaybackListener;
-import us.ihmc.utilities.net.KryoObjectServer;
+import us.ihmc.utilities.net.ObjectCommunicator;
 
-/**
- * User: Matt
- * Date: 3/26/13
- */
+import com.yobotics.simulationconstructionset.PlaybackListener;
+
+
 public class SCSPlaybackListener implements PlaybackListener
 {
-   public KryoObjectServer networkServer;
+   public ObjectCommunicator networkServer;
 
-   public SCSPlaybackListener(KryoObjectServer networkServer)
+   public SCSPlaybackListener(ObjectCommunicator networkServer)
    {
       this.networkServer = networkServer;
    }
@@ -22,7 +20,7 @@ public class SCSPlaybackListener implements PlaybackListener
 
    public void stop()
    {
-      System.out.println("stopped");
+      System.out.println("SCSPlaybackListener: stopped");
       networkServer.consumeObject(new SCSListenerPacket());
    }
 
