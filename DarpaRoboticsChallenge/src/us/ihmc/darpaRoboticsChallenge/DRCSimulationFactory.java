@@ -242,7 +242,8 @@ public class DRCSimulationFactory
       }
 
       final HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, robotControllersAndParameters,
-                                                                           fullRobotModelForSimulation, commonAvatarEnvironmentInterface,
+                                                                           fullRobotModelForSimulation, referenceFramesForController,
+                                                                           commonAvatarEnvironmentInterface,
                                                                            simulatedRobot.getAllExternalForcePoints(), robotInitialSetup, scsInitialSetup,
                                                                            guiInitialSetup, guiSetterUpperRegistry, dynamicGraphicObjectsListRegistry);
 
