@@ -572,9 +572,10 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       @Override
       public void doAction()
       {
-         if (endEffectorControlModules.get(transferToSide) != null && endEffectorControlModules.get(transferToSide).onHeel() && footSwitches.get(transferToSide).hasFootHitGround())
+         ContactablePlaneBody transferFoot = bipedFeet.get(transferToSide);
+         if (endEffectorControlModules.get(transferFoot) != null && endEffectorControlModules.get(transferFoot).onHeel() && footSwitches.get(transferToSide).hasFootHitGround())
          {
-            setFlatFootContactState(bipedFeet.get(transferToSide));
+            setFlatFootContactState(transferFoot);
          }
          
          // note: this has to be done before the ICP trajectory generator is initialized, since it is using nextFootstep
