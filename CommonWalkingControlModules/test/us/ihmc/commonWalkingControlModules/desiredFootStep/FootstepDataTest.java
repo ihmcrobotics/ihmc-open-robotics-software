@@ -98,7 +98,7 @@ public class FootstepDataTest
       QueueBasedStreamingDataProducer<FootstepDataList> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepDataList>();
       ObjectCommunicator tcpServer = createAndStartStreamingDataTCPServer(queueBasedStreamingDataProducer, port);
 
-      FootstepPathConsumerForTest footstepPathConsumer = new FootstepPathConsumerForTest();
+      FootstepPathConsumer footstepPathConsumer = new FootstepPathConsumer();
       ObjectCommunicator tcpClient = createStreamingDataConsumer(FootstepDataList.class, footstepPathConsumer, port);
       ThreadTools.sleep(100);
       queueBasedStreamingDataProducer.startProducingData();
@@ -106,7 +106,7 @@ public class FootstepDataTest
       // create test footsteps
       ArrayList<Footstep> sentFootsteps = createRandomFootsteps(50);
       FootstepDataList footstepsData = convertFootstepsToFootstepData(sentFootsteps);
-
+ 
       queueBasedStreamingDataProducer.queueDataToSend(footstepsData);
       ThreadTools.sleep(100);
 
@@ -171,7 +171,7 @@ public class FootstepDataTest
       pauseQueueBasedStreamingDataProducer.addConsumer(streamingDataTCPServer);
 
       // create one client for two types of data
-      FootstepPathConsumerForTest footstepPathConsumer = new FootstepPathConsumerForTest();
+      FootstepPathConsumer footstepPathConsumer = new FootstepPathConsumer();
       PauseConsumer pauseConsumer = new PauseConsumer();
       
       
@@ -422,7 +422,7 @@ public class FootstepDataTest
    }
 
 
-   private class FootstepPathConsumerForTest implements ObjectConsumer<FootstepDataList>
+   private class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
    {
       ArrayList<Footstep> reconstructedFootstepPath = new ArrayList<Footstep>();
 
