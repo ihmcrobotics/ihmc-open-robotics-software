@@ -7,14 +7,17 @@ import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
-import sensor_msgs.Image;
-import std_msgs.Float64;
+import sensor_msgs.CompressedImage;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.keyboardAndMouse.RepeatingReleasedEventsFixer;
 
 import java.awt.*;
 import java.awt.color.ColorSpace;
-import java.awt.image.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.DataBuffer;
 import java.net.URISyntaxException;
 
 /**
@@ -26,11 +29,11 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 {
 	private static final boolean COLOR_IMAGE = true;
 	private static final String STEREO_NAMESPACE = "/multisense_sl/camera/";
-	private static final String IMAGE = "image_rect" + (COLOR_IMAGE ? "_color" : "");
+   private static final String IMAGE = "image_rect" + (COLOR_IMAGE ? "_color/compressed" : "/compressed");
 
 	private static boolean RECORD = false;
 
-	private Subscriber<Image> leftEyeImageSubscriber, rightEyeImageSubscriber;
+	private Subscriber<CompressedImage> leftEyeImageSubscriber, rightEyeImageSubscriber;
 	private BufferedImage leftEyeImage, rightEyeImage;
 
 	private Subscriber<std_msgs.Float64> steeringWheelStateSubscriber, handBrakeStateSubscriber, gasPedalStateSubscriber, brakePedalStateSubscriber;
@@ -84,8 +87,8 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 	protected abstract void handleStateGasPedal( std_msgs.Float64 message );
 	protected abstract void handleStateBreakPedal( std_msgs.Float64 message );
 
-	protected abstract void handleImageLeft( Image message );
-	protected abstract void handleImageRight( Image message );
+	protected abstract void handleImageLeft( CompressedImage message );
+	protected abstract void handleImageRight( CompressedImage message );
 
 	private void setUpVehicleStateSubscriberListeners()
 	{
@@ -126,17 +129,17 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 
 	private void setUpCameraSubscriberListeners()
 	{
-		leftEyeImageSubscriber.addMessageListener(new MessageListener<Image>()
+		leftEyeImageSubscriber.addMessageListener(new MessageListener<CompressedImage>()
 		{
-			public void onNewMessage(Image message)
+			public void onNewMessage(CompressedImage message)
 			{
 				handleImageLeft(message);
 			}
 		});
 
-		rightEyeImageSubscriber.addMessageListener(new MessageListener<Image>()
+		rightEyeImageSubscriber.addMessageListener(new MessageListener<CompressedImage>()
 		{
-			public void onNewMessage(Image message)
+			public void onNewMessage(CompressedImage message)
 			{
 				handleImageRight(message);
 			}
@@ -156,8 +159,8 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 
 	private void setupSubscribers(ConnectedNode connectedNode)
 	{
-		leftEyeImageSubscriber = connectedNode.newSubscriber(STEREO_NAMESPACE + "left/" + IMAGE, Image._TYPE);
-		rightEyeImageSubscriber = connectedNode.newSubscriber(STEREO_NAMESPACE + "right/" + IMAGE, Image._TYPE);
+		leftEyeImageSubscriber = connectedNode.newSubscriber(STEREO_NAMESPACE + "left/" + IMAGE, CompressedImage._TYPE);
+		rightEyeImageSubscriber = connectedNode.newSubscriber(STEREO_NAMESPACE + "right/" + IMAGE, CompressedImage._TYPE);
 
 		steeringWheelStateSubscriber = connectedNode.newSubscriber("/drc_vehicle/hand_wheel/state", std_msgs.Float64._TYPE);
 		handBrakeStateSubscriber = connectedNode.newSubscriber("/drc_vehicle/hand_brake/state", std_msgs.Float64._TYPE);
@@ -272,22 +275,9 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 	}
 
 
-	protected BufferedImage bufferedImageFromRosMessage(Image imageMessage)
+	protected BufferedImage bufferedImageFromRosMessage(CompressedImage imageMessage)
 	{
-		int width = imageMessage.getWidth();
-		int height = imageMessage.getHeight();
-
-		byte[] payload = imageMessage.getData().array();
-		DataBuffer dataBuffer = new DataBufferByte(payload, payload.length, imageMessage.getData().arrayOffset());
-		SampleModel sampleModel = colorModel.createCompatibleSampleModel(width, height);
-		WritableRaster raster = Raster.createWritableRaster(sampleModel, dataBuffer, null);
-
-		int bufferedImageColorType = (COLOR_IMAGE ? BufferedImage.TYPE_INT_BGR : BufferedImage.TYPE_BYTE_GRAY);
-
-		BufferedImage ret = new BufferedImage(width, height, bufferedImageColorType);
-		ret.setData(raster);
-
-		return ret;
+		return RosTools.bufferedImageFromRosMessageJpeg(colorModel, imageMessage);
 	}
 
 	public static void main(String[] args) throws URISyntaxException {
