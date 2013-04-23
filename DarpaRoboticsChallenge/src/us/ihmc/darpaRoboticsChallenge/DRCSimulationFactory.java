@@ -58,9 +58,11 @@ public class DRCSimulationFactory
 
       DRCRobotJointMap jointMap = robotInterface.getJointMap();
 
+      double estimateDT = DRCConfigParameters.ESTIMATE_DT;
       double simulateDT = robotInterface.getSimulateDT();
       double controlDT = controllerFactory.getControlDT();
-      int simulationTicksPerControlTick = (int) (controlDT / simulateDT);
+      int estimationTicksPerControlTick = (int) (estimateDT / simulateDT);
+      
 
       SDFRobot simulatedRobot = robotInterface.getRobot();
       YoVariableRegistry registry = simulatedRobot.getRobotsYoVariableRegistry();
@@ -127,11 +129,11 @@ public class DRCSimulationFactory
       
       DRCController robotController = new DRCController(initialCoMPositionAndEstimationLinkOrientation, robotInterface.getFullRobotModelFactory(), controllerFactory,
             robotInterface.getFootSwitches(), robotInterface.getWristForceSensors(), sensorReaderFactory, outputWriter,
-            jointMap, lidarControllerInterface, gravity, controlDT, robotInterface.getRobot().getYoTime(), networkServer, dynamicGraphicObjectsListRegistry,
+            jointMap, lidarControllerInterface, gravity, estimateDT, controlDT, networkServer, dynamicGraphicObjectsListRegistry,
             guiSetterUpperRegistry, registry);
 
       final HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, robotController,
-            simulationTicksPerControlTick, commonAvatarEnvironmentInterface, simulatedRobot.getAllExternalForcePoints(), robotInitialSetup, scsInitialSetup,
+            estimationTicksPerControlTick, commonAvatarEnvironmentInterface, simulatedRobot.getAllExternalForcePoints(), robotInitialSetup, scsInitialSetup,
             guiInitialSetup, guiSetterUpperRegistry, dynamicGraphicObjectsListRegistry);
 
       if (COMPUTE_ESTIMATOR_ERROR)
@@ -140,7 +142,7 @@ public class DRCSimulationFactory
          StateEstimatorWithPorts stateEstimator = drcStateEstimator.getStateEstimator();
 
          StateEstimatorErrorCalculatorController stateEstimatorErrorCalculatorController = new StateEstimatorErrorCalculatorController(stateEstimator, simulatedRobot, simulatedRobot.getRootJoint());
-         simulatedRobot.setController(stateEstimatorErrorCalculatorController, simulationTicksPerControlTick);
+         simulatedRobot.setController(stateEstimatorErrorCalculatorController, estimationTicksPerControlTick);
       }
       
       if (simulatedRobot instanceof GazeboRobot)
@@ -150,7 +152,7 @@ public class DRCSimulationFactory
 
       if (networkProccesorCommunicator != null)
       {
-         simulatedRobot.setController(new DRCPerfectPoseEstimator(simulatedRobot, networkProccesorCommunicator, robotInterface.getTimeStampProvider()), simulationTicksPerControlTick);
+         simulatedRobot.setController(new DRCPerfectPoseEstimator(simulatedRobot, networkProccesorCommunicator, robotInterface.getTimeStampProvider()), estimationTicksPerControlTick);
       }
 
       return humanoidRobotSimulation;
