@@ -53,7 +53,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivatives
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMXYTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantCoPInstantaneousCapturePointTrajectory;
-import us.ihmc.commonWalkingControlModules.trajectories.ConstantVelocityTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.ContactStatesAndUpcomingFootstepData;
 import us.ihmc.commonWalkingControlModules.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.CurrentOrientationProvider;
@@ -66,7 +65,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.SettableOrientationProvi
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.YoVariableDoubleProvider;
 import us.ihmc.controlFlow.ControlFlowInputPort;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
@@ -93,8 +91,8 @@ import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.util.PDController;
-import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.math.filter.GlitchFilteredBooleanYoVariable;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
@@ -104,7 +102,6 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionAction;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
-import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
@@ -143,6 +140,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final YoFramePoint2d finalDesiredICPInWorld = new YoFramePoint2d("finalDesiredICPInWorld", "", worldFrame, registry);
 
    protected final SideDependentList<FootSwitchInterface> footSwitches;
+   protected final SideDependentList<GlitchFilteredBooleanYoVariable> filteredFootSwitches = new SideDependentList<GlitchFilteredBooleanYoVariable>();
 
    private final DoubleYoVariable minOrbitalEnergyForSingleSupport = new DoubleYoVariable("minOrbitalEnergyForSingleSupport", registry);
    private final DoubleYoVariable amountToBeInsideSingleSupport = new DoubleYoVariable("amountToBeInsideSingleSupport", registry);
@@ -269,6 +267,9 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          ContactablePlaneBody bipedFoot = bipedFeet.get(robotSide);
          contactStates.get(bipedFoot).set(bipedFoot.getContactPoints2d(), coefficientOfFriction.getDoubleValue());    // flat feet
          String sideString = robotSide.getCamelCaseNameForStartOfExpression();
+         
+         int windowFilterSize = landOnHeels.getBooleanValue() ? 0 : 3;
+         filteredFootSwitches.put(robotSide, new GlitchFilteredBooleanYoVariable(sideString + "FilteredFootswitch", registry, windowFilterSize));
 
          PositionTrajectoryGenerator swingPositionTrajectoryGenerator = footPositionTrajectoryGenerators.get(robotSide);
          DoubleTrajectoryGenerator heelPitchTrajectoryGenerator = (heelPitchTrajectoryGenerators == null) ? null : heelPitchTrajectoryGenerators.get(robotSide);
@@ -562,7 +563,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private class DoubleSupportState extends State<WalkingState>
    {
       private final RobotSide transferToSide;
-
+      
       public DoubleSupportState(RobotSide transferToSide)
       {
          super((transferToSide == null) ? WalkingState.DOUBLE_SUPPORT : transferStateEnums.get(transferToSide));
@@ -573,7 +574,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       public void doAction()
       {
          ContactablePlaneBody transferFoot = bipedFeet.get(transferToSide);
-         if (endEffectorControlModules.get(transferFoot) != null && endEffectorControlModules.get(transferFoot).onHeel() && footSwitches.get(transferToSide).hasFootHitGround())
+         updateFootswitchFilter(transferToSide);
+         if (endEffectorControlModules.get(transferFoot) != null && endEffectorControlModules.get(transferFoot).onHeel() && filteredFootSwitches.get(transferToSide).getBooleanValue())
          {
             setFlatFootContactState(transferFoot);
          }
@@ -994,6 +996,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          double minimumSwingFraction = 0.5;
          double minimumSwingTime = swingTimeCalculationProvider.getValue() * minimumSwingFraction;
          
+         updateFootswitchFilter(swingSide);
          FootSwitchInterface footSwitch = footSwitches.get(swingSide);
          boolean footSwitchActivated;
          
@@ -1011,7 +1014,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          
          else
          {
-            footSwitchActivated = footSwitch.hasFootHitGround();
+            footSwitchActivated = filteredFootSwitches.get(swingSide).getBooleanValue();
          }
          
          boolean footHitGround = (stateMachine.timeInCurrentState() > minimumSwingTime) && footSwitchActivated;
@@ -1604,4 +1607,11 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       return nextNextFootstep;
    }
+   
+   private void updateFootswitchFilter(RobotSide robotSide)
+   {
+      if(robotSide != null)
+         filteredFootSwitches.get(robotSide).update(footSwitches.get(robotSide).hasFootHitGround());
+   }
+   
 }
