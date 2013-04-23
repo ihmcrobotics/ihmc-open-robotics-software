@@ -1,11 +1,14 @@
 package us.ihmc.darpaRoboticsChallenge.initialSetup;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.SdfLoader.SDFRobot;
 
 public class SquaredUpDRCDemo01OutsidePen extends SquaredUpDRCRobotInitialSetup
 {
    private final double offsetX, offsetY;
    private final double yaw;
+   private Vector3d newOffset = null;
    
    public SquaredUpDRCDemo01OutsidePen(double groundZ)
    {
@@ -21,8 +24,13 @@ public class SquaredUpDRCDemo01OutsidePen extends SquaredUpDRCRobotInitialSetup
    {  
       super.initializeRobot(robot);
       
-      offset.setX(offset.getX() + offsetX);
-      offset.setY(offset.getY() + offsetY);
+      if (newOffset == null)
+      {
+         newOffset = new Vector3d(offset);
+         newOffset.add(new Vector3d(offsetX, offsetY, 0.0));
+      }
+      
+      offset.set(newOffset);
       
       robot.setPositionInWorld(offset);
       robot.setOrientation(yaw, 0.0, 0.0);
