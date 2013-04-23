@@ -272,7 +272,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          contactStates.get(bipedFoot).set(bipedFoot.getContactPoints2d(), coefficientOfFriction.getDoubleValue());    // flat feet
          String sideString = robotSide.getCamelCaseNameForStartOfExpression();
          
-         int windowFilterSize = landOnHeels() ? 0 : 3;
+         int windowFilterSize = landOnHeels() ? 3 : 0;
          filteredFootSwitches.put(robotSide, new GlitchFilteredBooleanYoVariable(sideString + "FilteredFootswitch", registry, windowFilterSize));
 
          PositionTrajectoryGenerator swingPositionTrajectoryGenerator = footPositionTrajectoryGenerators.get(robotSide);
@@ -314,7 +314,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       minOrbitalEnergyForSingleSupport.set(0.007);    // 0.008
       amountToBeInsideSingleSupport.set(0.0);
       amountToBeInsideDoubleSupport.set(0.03);    // 0.02);    // TODO: necessary for stairs...
-      transferTimeProvider.set(0.3);    // 0.5);    // 0.2);    // 0.6;    // 0.3
+      transferTimeProvider.set(0.2);    // 0.5);    // 0.2);    // 0.6;    // 0.3
       stopInDoubleSupporTrajectoryTime.set(0.5);
       this.userDesiredPelvisPitch.set(desiredPelvisPitch);
       this.stayOnToes.set(stayOntoes);
