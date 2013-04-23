@@ -73,7 +73,6 @@ public class MomentumSolver implements MomentumSolverInterface
 
 
    private final List<InverseDynamicsJoint> unconstrainedJoints = new ArrayList<InverseDynamicsJoint>();
-   private final DoubleYoVariable aHatRootCondition = new DoubleYoVariable("aHatRootCondition", registry);
 
    public MomentumSolver(SixDoFJoint rootJoint, RigidBody elevator, ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator,
                          LinearSolver<DenseMatrix64F> jacobianSolver, double controlDT, YoVariableRegistry parentRegistry)
@@ -244,14 +243,6 @@ public class MomentumSolver implements MomentumSolverInterface
                      DenseMatrix64F momentumMultipliers)
    {
       DenseMatrix64F aHatRoot = aHats.get(rootJoint);
-
-      // TODO: testing
-      if (momentumSubspace.getNumCols() == 3)
-      {
-         DenseMatrix64F aHatRootMomentum = new DenseMatrix64F(momentumSubspace.getNumCols(), aHatRoot.getNumCols());
-         CommonOps.multTransA(momentumSubspace, aHatRoot, aHatRootMomentum);
-         this.aHatRootCondition.set(NormOps.conditionP2(aHatRootMomentum));
-      }
 
       rootJointSolver.solveAndSetRootJointAcceleration(vdotRoot, aHatRoot, b, accelerationSubspace, accelerationMultipliers, momentumSubspace,
             momentumMultipliers, rootJoint, jointAccelerationValidMap);
