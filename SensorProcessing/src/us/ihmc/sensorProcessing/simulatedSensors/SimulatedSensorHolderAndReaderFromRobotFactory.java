@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
+import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.sensorProcessing.signalCorruption.GaussianOrientationCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianVectorCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.RandomWalkBiasVectorCorruptor;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
@@ -18,6 +20,7 @@ import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.KinematicPoint;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.Robot;
+import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class SimulatedSensorHolderAndReaderFromRobotFactory
@@ -255,5 +258,23 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory
    public StateEstimatorSensorDefinitions getStateEstimatorSensorDefinitions()
    {
       return stateEstimatorSensorDefinitions;
+   }
+
+   public void getCenterOfMassPostion(FramePoint estimatedCoMPosition)
+   {
+      estimatedCoMPosition.setX(estimatedCoMPosition.getX() + 0.0855);
+      estimatedCoMPosition.setZ(estimatedCoMPosition.getZ() + 0.9904); //1.2); 
+      
+      Point3d comPoint = new Point3d();
+      try
+      {
+         robot.doDynamicsButDoNotIntegrate();
+      }
+      catch (UnreasonableAccelerationException e)
+      {
+         throw new RuntimeException("UnreasonableAccelerationException in getCenterOfMassPostion");
+      }
+      robot.computeCenterOfMass(comPoint);
+      
    }
 }
