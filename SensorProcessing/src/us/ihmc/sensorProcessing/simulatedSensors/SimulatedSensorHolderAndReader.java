@@ -6,6 +6,7 @@ import java.util.Set;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.PointPositionSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.PointVelocitySensorDataSource;
@@ -15,6 +16,10 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 public class SimulatedSensorHolderAndReader implements Runnable
 {
+   
+   private ControlFlowElement controllerDispatcher;
+   
+   
    private final LinkedHashMap<OneDoFJoint, SimulatedOneDoFJointPositionSensor> jointPositionSensors = new LinkedHashMap<OneDoFJoint,
                                                                                                           SimulatedOneDoFJointPositionSensor>();
    private final LinkedHashMap<OneDoFJoint, SimulatedOneDoFJointVelocitySensor> jointVelocitySensors = new LinkedHashMap<OneDoFJoint,
@@ -39,6 +44,7 @@ public class SimulatedSensorHolderAndReader implements Runnable
    private PointPositionSensorDataSource pointPositionSensorDataSource;
    private PointVelocitySensorDataSource pointVelocitySensorDataSource;
 
+   
    public SimulatedSensorHolderAndReader()
    {
    }
@@ -98,6 +104,12 @@ public class SimulatedSensorHolderAndReader implements Runnable
 
    public void run()
    {
+      if(controllerDispatcher != null)
+      {
+         controllerDispatcher.waitUntilComputationIsDone();
+      }
+      
+      
       Set<OneDoFJoint> jointsForPositionSensors = jointPositionSensors.keySet();
       for (OneDoFJoint oneDoFJoint : jointsForPositionSensors)
       {
@@ -173,6 +185,14 @@ public class SimulatedSensorHolderAndReader implements Runnable
             pointVelocitySensorDataSource.setPointVelocitySensorValue(pointVelocitySensorDefinition, value);
          }
       }
+      if(controllerDispatcher != null)
+      {
+         controllerDispatcher.startComputation();
+      }
+   }
 
+   public void setControllerDispatcher(ControlFlowElement controllerDispatcher)
+   {
+      this.controllerDispatcher = controllerDispatcher;
    }
 }

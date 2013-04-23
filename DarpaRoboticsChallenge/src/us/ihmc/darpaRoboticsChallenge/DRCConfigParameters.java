@@ -13,8 +13,7 @@ public class DRCConfigParameters
    
    public static final boolean SHOW_BANDWIDTH_DIALOG = false;
 
-   // Set to simulate one tick delay between, as it will be in Gazebo. This will also run the controller in a different thread!
-   public static final boolean SIMULATE_DELAY = true;
+   public static final double ESTIMATE_DT = 0.001;
 
 
    // Set whether or not to use GFE Robot Model
@@ -58,15 +57,23 @@ public class DRCConfigParameters
    // LIDAR:
    public static final boolean STREAM_POLAR_LIDAR = true;
    public static final double LIDAR_SPINDLE_VELOCITY = 0.25;
+
    static final int LIDAR_UPDATE_RATE_OVERRIDE = 3;
    static final int LIDAR_SWEEPS_PER_SCAN = 6;    // 1
+
    static final int LIDAR_POINTS_PER_SWEEP = 70;    // 640
+
    static final boolean OVERRIDE_DRC_LIDAR_CONFIG = true;
+
    public static final float LIDAR_MIN_DISTANCE = 0.2f;
    public static final float LIDAR_MAX_DISTANCE = 10.0f;
+
    public static final float LIDAR_SWEEP_MAX_YAW = 0.8f;
+
    public static final float LIDAR_SWEEP_MIN_YAW = -0.8f;
+
    public static final float LIDAR_SCAN_MAX_ROLL = 0.4f;    // rolling the lidar to simulated a faster update rate
+
    public static final float LDIAR_SCAN_MIN_ROLL = -0.3f;
    public static final double LIDAR_NOISE_LEVEL_OVERRIDE = 0.005;    // DRCGazebo will simulate with: 0.005
    public static final boolean DEBUG_GAZEBO_LIDAR = false;
@@ -79,7 +86,7 @@ public class DRCConfigParameters
    public static final boolean POPULATE_OCTREE_FROM_REJECTS = false;
    public static final boolean USE_UPREZZING_IN_LIDAR_UPDATE_TO_OCTREE = true;
    public static final boolean HIDE_THINGS_ABOVE_HEAD_FROM_LIDAR = true;
-   
+
    // Footstep Generator
    public static final double BOUNDING_BOX_FOR_FOOTSTEP_HEIGHT_FINDING_SIDE_LENGTH =
       (1 + 0.3) * 2
