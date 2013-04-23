@@ -141,14 +141,14 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       }
    }
 
-   @Test
+/*   @Test
    public void testUnhandledPoints()
    {
       super.testUnhandledPoints();
-   }
+   }*/
 
    @Override
-   public HeightMap getHeightMap(int minX, int minY, int maxX, int maxY, double resolution)
+   public HeightMap getHeightMap(double minX, double minY, double maxX, double maxY, double resolution)
    {
       return new GroundOnlyQuadTree(minX, minY, maxX, maxY, resolution, HEIGHT_THRESHOLD);
    }

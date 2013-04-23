@@ -12,7 +12,7 @@ import us.ihmc.utilities.dataStructures.hyperCubeTree.RecursableHyperTreeNode;
 import us.ihmc.utilities.math.dataStructures.HeightMap;
 import us.ihmc.utilities.math.geometry.InclusionFunction;
 
-public class GroundOnlyQuadTree extends HyperCubeTree<Float, GroundOnlyQuadTreeData> implements HeightMap
+public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, GroundOnlyQuadTreeData> implements HeightMap
 {
    private final double constantResolution;
    private final double heightThreshold;
@@ -33,23 +33,25 @@ public class GroundOnlyQuadTree extends HyperCubeTree<Float, GroundOnlyQuadTreeD
 
    public double heightAtPoint(double x, double y)
    {
-      HyperCubeLeaf<Float> hyperCubeLeaf = this.get(new double[] {x, y});
+      HyperCubeLeaf<GroundAirDescriptor> hyperCubeLeaf = this.get(new double[] {x, y});
       if (hyperCubeLeaf == null)
          return Double.NaN;
       if (hyperCubeLeaf.getValue() == null)
          return Double.NaN;
+      if (hyperCubeLeaf.getValue().getHeight() == null)
+         return Double.NaN;
 
-      return hyperCubeLeaf.getValue();
+      return hyperCubeLeaf.getValue().getHeight();
    }
 
    public boolean addPoint(double x, double y, double z)
    {
-      return this.put(new double[] {x, y}, (float) z);
+      return this.put(new double[] {x, y}, new GroundAirDescriptor((float) z,null));
    }
 
    public boolean containsPoint(double x, double y)
    {
-      HyperCubeLeaf<Float> hyperCubeLeaf = this.get(new double[] {x, y});
+      HyperCubeLeaf<GroundAirDescriptor> hyperCubeLeaf = this.get(new double[] {x, y});
       if (hyperCubeLeaf == null)
          return false;
       if (hyperCubeLeaf.getValue() == null)
@@ -66,25 +68,25 @@ public class GroundOnlyQuadTree extends HyperCubeTree<Float, GroundOnlyQuadTreeD
    public boolean put(double[] location, Float value)
    {
       checkDimensionality(location);
-      HyperCubeLeaf<Float> leaf = new HyperCubeLeaf<Float>(value, location);
+      HyperCubeLeaf<GroundAirDescriptor> leaf = new HyperCubeLeaf<GroundAirDescriptor>(new GroundAirDescriptor(value,null), location);
 
       return this.putRecursively(this.getRootNode(), leaf);
    }
 
-   private void puntLeaf(HyperCubeLeaf<Float> leafToPunt)
+   private void puntLeaf(HyperCubeLeaf<GroundAirDescriptor> leafToPunt)
    {
       // PclTODO: implement punting to octree.
    }
 
-   public void mergeOneLevel(RecursableHyperTreeNode<Float, GroundOnlyQuadTreeData> node)
+   public void mergeOneLevel(RecursableHyperTreeNode<GroundAirDescriptor, GroundOnlyQuadTreeData> node)
    {
       if (!node.hasChildren())
          return;
-      HyperCubeLeaf<Float> firstLeaf = null;
+      HyperCubeLeaf<GroundAirDescriptor> firstLeaf = null;
       boolean stuffAboveToMatch = node.getChild(0).getMetaData().getIsStuffAboveMe();
       for (int i = 0; i < node.getChildNumber(); i++)
       {
-         RecursableHyperTreeNode<Float, GroundOnlyQuadTreeData> lowerLevelNode = node.getChild(i);
+         RecursableHyperTreeNode<GroundAirDescriptor, GroundOnlyQuadTreeData> lowerLevelNode = node.getChild(i);
          if (lowerLevelNode.hasChildren())
             return;
          boolean childHasIncompatibleMetaData = stuffAboveToMatch != lowerLevelNode.getMetaData().getIsStuffAboveMe();
@@ -111,7 +113,7 @@ public class GroundOnlyQuadTree extends HyperCubeTree<Float, GroundOnlyQuadTreeD
       node.setMetaData(new GroundOnlyQuadTreeData(stuffAboveToMatch));
    }
 
-   private boolean putRecursively(RecursableHyperTreeNode<Float, GroundOnlyQuadTreeData> node, final HyperCubeLeaf<Float> leaf)
+   private boolean putRecursively(RecursableHyperTreeNode<GroundAirDescriptor, GroundOnlyQuadTreeData> node, final HyperCubeLeaf<GroundAirDescriptor> leaf)
    {
       if (node.hasChildren())
       {
@@ -129,8 +131,8 @@ public class GroundOnlyQuadTree extends HyperCubeTree<Float, GroundOnlyQuadTreeD
          return true;
       }
 
-      boolean newLeafIsSignificantyAboveOldLeaf = (leaf.getValue() - node.getLeaf().getValue()) > heightThreshold;
-      boolean newLeafIsSignificantyBelowOldLeaf = (leaf.getValue() - node.getLeaf().getValue()) < heightThreshold;
+      boolean newLeafIsSignificantyAboveOldLeaf = (leaf.getValue().getHeight() - node.getLeaf().getValue().getHeight()) > heightThreshold;
+      boolean newLeafIsSignificantyBelowOldLeaf = (leaf.getValue().getHeight() - node.getLeaf().getValue().getHeight()) < heightThreshold;
 
       if (node.getMetaData().getIsStuffAboveMe() && newLeafIsSignificantyAboveOldLeaf)
       {
@@ -146,7 +148,7 @@ public class GroundOnlyQuadTree extends HyperCubeTree<Float, GroundOnlyQuadTreeD
 
       if (canSplit(node))
       {
-         HyperCubeLeaf<Float> oldLeaf = node.getLeaf();
+         HyperCubeLeaf<GroundAirDescriptor> oldLeaf = node.getLeaf();
 
          node.setLeaf(null);
          node.split();
@@ -186,11 +188,11 @@ public class GroundOnlyQuadTree extends HyperCubeTree<Float, GroundOnlyQuadTreeD
       return true;
    }
 
-   public void setDefaultLeafInAllEmptyChildren(RecursableHyperTreeNode<Float, GroundOnlyQuadTreeData> node, Float value)
+   public void setDefaultLeafInAllEmptyChildren(RecursableHyperTreeNode<GroundAirDescriptor, GroundOnlyQuadTreeData> node, GroundAirDescriptor value)
    {
       for (int i = 0; i < node.getChildNumber(); i++)
       {
-         RecursableHyperTreeNode<Float, GroundOnlyQuadTreeData> child = node.getChild(i);
+         RecursableHyperTreeNode<GroundAirDescriptor, GroundOnlyQuadTreeData> child = node.getChild(i);
          if (child.getLeaf() == null)
          {
             double[] childMiddle = new double[node.getDimensionality()];
@@ -199,12 +201,12 @@ public class GroundOnlyQuadTree extends HyperCubeTree<Float, GroundOnlyQuadTreeD
                childMiddle[j] = child.getBounds(j).midpoint();
             }
 
-            child.setLeaf(new HyperCubeLeaf<Float>(value, childMiddle));
+            child.setLeaf(new HyperCubeLeaf<GroundAirDescriptor>(value, childMiddle));
          }
       }
    }
 
-   public void setAllChildrenStuffAbove(RecursableHyperTreeNode<Float, GroundOnlyQuadTreeData> node, boolean hasStuffAbove)
+   public void setAllChildrenStuffAbove(RecursableHyperTreeNode<GroundAirDescriptor, GroundOnlyQuadTreeData> node, boolean hasStuffAbove)
    {
       for (int i = 0; i < node.getChildNumber(); i++)
       {
@@ -225,7 +227,7 @@ public class GroundOnlyQuadTree extends HyperCubeTree<Float, GroundOnlyQuadTreeD
       {
          for (double y = centerY - extentY * 0.5; y <= centerY + extentY * 0.5; y += resolution)
          {
-            Float f = (Float) get((float) x, (float) y);
+            Float f = get(x, y);
             if (f != null)
                points.add(new Point3d(x, y, f));
 
@@ -245,7 +247,7 @@ public class GroundOnlyQuadTree extends HyperCubeTree<Float, GroundOnlyQuadTreeD
       {
          for (double y = yCenter - yExtent * 0.5; y <= yCenter + yExtent * 0.5; y += constantResolution)
          {
-            Float f = (Float) get((float) x, (float) y);
+            Float f = get(x, y);
             if (f != null)
             {
                Point3d point3d = new Point3d(x, y, f);
@@ -259,7 +261,7 @@ public class GroundOnlyQuadTree extends HyperCubeTree<Float, GroundOnlyQuadTreeD
       return points;
    }
 
-   protected boolean canSplit(RecursableHyperTreeNode<Float, GroundOnlyQuadTreeData> node)
+   protected boolean canSplit(RecursableHyperTreeNode<GroundAirDescriptor, GroundOnlyQuadTreeData> node)
    {
       for (int i = 0; i < node.getDimensionality(); i++)
       {
@@ -270,33 +272,33 @@ public class GroundOnlyQuadTree extends HyperCubeTree<Float, GroundOnlyQuadTreeD
       return true;
    }
 
-   private void replaceLeaf(RecursableHyperTreeNode<Float, GroundOnlyQuadTreeData> node, HyperCubeLeaf<Float> leaf)
+   private void replaceLeaf(RecursableHyperTreeNode<GroundAirDescriptor, GroundOnlyQuadTreeData> node, HyperCubeLeaf<GroundAirDescriptor> leaf)
    {
-      HyperCubeLeaf<Float> oldLeaf = node.getLeaf();
+      HyperCubeLeaf<GroundAirDescriptor> oldLeaf = node.getLeaf();
       node.setLeaf(mergeLeaves(oldLeaf, leaf));
    }
 
-   protected HyperCubeLeaf<Float> mergeLeaves(HyperCubeLeaf<Float> oldLeaf, HyperCubeLeaf<Float> newLeaf)
+   protected HyperCubeLeaf<GroundAirDescriptor> mergeLeaves(HyperCubeLeaf<GroundAirDescriptor> oldLeaf, HyperCubeLeaf<GroundAirDescriptor> newLeaf)
    {
       // PclTODO: this needs work.
       return newLeaf;
    }
 
    @Override
-   protected boolean canMergeLeaves(HyperCubeLeaf<Float> firstLeaf, HyperCubeLeaf<Float> secondLeaf)
+   protected boolean canMergeLeaves(HyperCubeLeaf<GroundAirDescriptor> firstLeaf, HyperCubeLeaf<GroundAirDescriptor> secondLeaf)
    {
-      float diff = (firstLeaf.getValue() - secondLeaf.getValue());
+      float diff = (firstLeaf.getValue().getHeight() - secondLeaf.getValue().getHeight());
 
       return (diff < heightThreshold) && (diff > -heightThreshold);
    }
 
    public Float get(double xToTest, double yToTest)
    {
-      HyperCubeLeaf<Float> resultLeaf = this.get(toLocation(xToTest, yToTest));
+      HyperCubeLeaf<GroundAirDescriptor> resultLeaf = this.get(toLocation(xToTest, yToTest));
       if (null == resultLeaf)
          return null;
 
-      return resultLeaf.getValue();
+      return resultLeaf.getValue().getHeight();
    }
 
    public void put(float x, float y, float value)
@@ -304,7 +306,7 @@ public class GroundOnlyQuadTree extends HyperCubeTree<Float, GroundOnlyQuadTreeD
       this.put(toLocation(x, y), value);
    }
 
-   public RecursableHyperTreeNode<Float, GroundOnlyQuadTreeData> getLeafNodeAtLocation(float xToTest, float yToTest)
+   public RecursableHyperTreeNode<GroundAirDescriptor, GroundOnlyQuadTreeData> getLeafNodeAtLocation(float xToTest, float yToTest)
    {
       return getLeafNodeAtLocation(toLocation(xToTest, yToTest));
    }
