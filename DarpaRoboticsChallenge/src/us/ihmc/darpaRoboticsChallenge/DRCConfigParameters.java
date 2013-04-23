@@ -11,6 +11,8 @@ public class DRCConfigParameters
    public static final String GAZEBO_HOST = "localhost";//"10.4.42.2";    // "localhost";
    public static final String[] JOINTS_TO_IGNORE_FOR_GAZEBO = {"hokuyo_joint"};
    public static final boolean SHOW_SCS_GUI_FOR_GAZEBO = true;
+   
+   public static final boolean USE_STATE_ESTIMATOR = true;
 
    public static final String ROS_MASTER_URI = "http://" + GAZEBO_HOST + ":11311";
 
@@ -93,6 +95,7 @@ public class DRCConfigParameters
    public static final boolean POPULATE_OCTREE_FROM_REJECTS = false;
    public static final boolean USE_UPREZZING_IN_LIDAR_UPDATE_TO_OCTREE = false;
    public static final boolean HIDE_THINGS_ABOVE_HEAD_FROM_LIDAR = false;
+
 
 
 

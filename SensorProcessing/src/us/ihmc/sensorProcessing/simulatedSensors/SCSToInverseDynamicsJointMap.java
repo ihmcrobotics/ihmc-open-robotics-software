@@ -1,10 +1,14 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
 import com.yobotics.simulationconstructionset.FloatingJoint;
@@ -72,12 +76,33 @@ public class SCSToInverseDynamicsJointMap
       }
    }
 
-   public static SCSToInverseDynamicsJointMap createByName(FloatingJoint floatingRootJoint, SixDoFJoint sixDoFRootJoint,
-           Collection<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints, OneDoFJoint[] oneDoFJoints)
+   public static SCSToInverseDynamicsJointMap createByName(FloatingJoint floatingRootJoint, SixDoFJoint sixDoFRootJoint)
    {
       SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = new SCSToInverseDynamicsJointMap();
+      
+      
+      InverseDynamicsJoint[] inverseDynamicsJoints = ScrewTools.computeSubtreeJoints(sixDoFRootJoint.getSuccessor());
+      HashMap<String, OneDoFJoint> inverseDynamicsJointsByName = new HashMap<String, OneDoFJoint>();
+      
+      for(InverseDynamicsJoint inverseDynamicsJoint : inverseDynamicsJoints)
+      {
+         if(inverseDynamicsJoint instanceof OneDoFJoint)
+         {
+            inverseDynamicsJointsByName.put(inverseDynamicsJoint.getName(), (OneDoFJoint) inverseDynamicsJoint);
+         }
+         else
+         {
+            throw new RuntimeException(inverseDynamicsJoint.getName() + " is not an OneDoFJoint");
+         }
+      }
+      
+      
+      ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
+      floatingRootJoint.recursiveGetOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);
+      
+      
 
-      if (oneDoFJoints.length != oneDegreeOfFreedomJoints.size())
+      if (inverseDynamicsJointsByName.size() != oneDegreeOfFreedomJoints.size())
       {
          throw new RuntimeException("oneDoFJoints.length != oneDegreeOfFreedomJoints.size()");
       }
@@ -87,7 +112,7 @@ public class SCSToInverseDynamicsJointMap
       for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
       {
          String name = oneDegreeOfFreedomJoint.getName();
-         OneDoFJoint oneDoFJoint = findJointWithName(name, oneDoFJoints);
+         OneDoFJoint oneDoFJoint = inverseDynamicsJointsByName.get(name);
 
          scsToInverseDynamicsJointMap.addLinkedJoints(oneDegreeOfFreedomJoint, oneDoFJoint);
       }
@@ -95,16 +120,4 @@ public class SCSToInverseDynamicsJointMap
       return scsToInverseDynamicsJointMap;
    }
 
-   private static OneDoFJoint findJointWithName(String name, OneDoFJoint[] oneDoFJoints)
-   {
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
-      {
-         if (oneDoFJoint.getName().equals(name))
-         {
-            return oneDoFJoint;
-         }
-      }
-
-      throw new RuntimeException("Could not find OneDoFJoint with name : " + name);
-   }
 }
