@@ -146,14 +146,14 @@ public class MomentumSolver2 implements MomentumSolverInterface
 
       for (InverseDynamicsJoint joint : baseToEndEffectorJacobian.getJointsInOrder())
       {
-         int[] indicesIntoBlock = ScrewTools.computeIndicesForJoint(jointsInOrder, joint);
+         int[] indicesIntoBlock = ScrewTools.computeIndicesForJoint(baseToEndEffectorJacobian.getJointsInOrder(), joint);
          int[] indicesIntoBigMatrix = columnsForJoints.get(joint);
 
          for (int i = 0; i < indicesIntoBlock.length; i++)
          {
             int blockIndex = indicesIntoBlock[i];
             int bigMatrixIndex = indicesIntoBigMatrix[i];
-            CommonOps.extract(JBlock, 0, JBlock.getNumCols(), blockIndex, blockIndex + 1, AJ, ajIndex, bigMatrixIndex);
+            CommonOps.extract(JBlock, 0, JBlock.getNumRows(), blockIndex, blockIndex + 1, AJ, ajIndex, bigMatrixIndex);
          }
       }
 
@@ -200,27 +200,30 @@ public class MomentumSolver2 implements MomentumSolverInterface
 
    private final DenseMatrix64F NA = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F b = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F sTranspose = new DenseMatrix64F(1, 1);
    public void solve(DenseMatrix64F accelerationSubspace, DenseMatrix64F accelerationMultipliers, DenseMatrix64F momentumSubspace,
                      DenseMatrix64F momentumMultipliers)
    {
-      int[] columnsForRootJoint = columnsForJoints.get(rootJoint);
-      for (int i = 0; i < accelerationSubspace.getNumRows(); i++)
-      {
-         for (int j = 0; j < accelerationSubspace.getNumCols(); j++)
-         {
-            AJ.set(ajIndex + i, columnsForRootJoint[j], accelerationSubspace.get(i, j));
-         }
-      }
-      CommonOps.insert(accelerationMultipliers, bp, ajIndex, 0);
-      ajIndex += accelerationSubspace.getNumRows();
+      sTranspose.reshape(accelerationSubspace.getNumCols(), accelerationSubspace.getNumRows());
+      CommonOps.transpose(accelerationSubspace, sTranspose);
 
-      NA.reshape(momentumSubspace.getNumRows(), centroidalMomentumMatrix.getMatrix().getNumCols());
-      CommonOps.mult(momentumSubspace, centroidalMomentumMatrix.getMatrix(), NA);
+      int[] indicesIntoBigMatrix = columnsForJoints.get(rootJoint);
+      for (int i = 0; i < sTranspose.getNumCols(); i++)
+      {
+         int bigMatrixIndex = indicesIntoBigMatrix[i];
+         CommonOps.extract(sTranspose, 0, sTranspose.getNumRows(), i, i + 1, AJ, ajIndex, bigMatrixIndex);
+      }
+
+      CommonOps.insert(accelerationMultipliers, bp, ajIndex, 0);
+      ajIndex += sTranspose.getNumRows();
+
+      NA.reshape(momentumSubspace.getNumCols(), centroidalMomentumMatrix.getMatrix().getNumCols());
+      CommonOps.multTransA(momentumSubspace, centroidalMomentumMatrix.getMatrix(), NA);
       CommonOps.insert(NA, AJ, ajIndex, 0);
 
       // N * (hdot - Adotv)
       b.reshape(momentumMultipliers.getNumRows(), 1);
-      CommonOps.mult(momentumSubspace, adotV, b);
+      CommonOps.multTransA(momentumSubspace, adotV, b);
       CommonOps.changeSign(b);
       CommonOps.addEquals(b, momentumMultipliers);
       CommonOps.insert(b, bp, ajIndex, 0);
