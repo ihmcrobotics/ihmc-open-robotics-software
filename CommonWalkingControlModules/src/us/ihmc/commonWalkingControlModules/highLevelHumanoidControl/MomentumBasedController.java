@@ -21,11 +21,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDi
 import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributorOutputData;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeControlModule;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeData;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumSolver;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAccelerationControlModule;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAccelerationData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.*;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -122,7 +118,7 @@ public abstract class MomentumBasedController implements RobotController
    protected final MomentumRateOfChangeControlModule momentumRateOfChangeControlModule;
    protected final RootJointAccelerationControlModule rootJointAccelerationControlModule;
    protected final GroundReactionWrenchDistributor groundReactionWrenchDistributor;
-   protected final MomentumSolver solver;
+   protected final MomentumSolverInterface solver;
    protected final InverseDynamicsCalculator inverseDynamicsCalculator;
 
    private final DesiredCoMAndAngularAccelerationGrabber desiredCoMAndAngularAccelerationGrabber;

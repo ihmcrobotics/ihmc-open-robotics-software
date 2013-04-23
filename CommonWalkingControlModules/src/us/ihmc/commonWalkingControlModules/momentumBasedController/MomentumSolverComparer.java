@@ -55,7 +55,7 @@ public class MomentumSolverComparer
 
       double dt = 1e-8;
       centerOfMassFrame.update();
-      MomentumSolver solver = createAndInitializeMomentumSolver(elevator, rootJoint, joints, dt, centerOfMassFrame);
+      MomentumSolverInterface solver = createAndInitializeMomentumSolver(elevator, rootJoint, joints, dt, centerOfMassFrame);
 
       long startNanos = System.nanoTime();
 
@@ -84,12 +84,12 @@ public class MomentumSolverComparer
       return (stopNanos - startNanos) * 1e-9 / nTests;
    }
 
-   private static MomentumSolver createAndInitializeMomentumSolver(RigidBody elevator, SixDoFJoint rootJoint, ArrayList<RevoluteJoint> joints, double dt,
+   private static MomentumSolverInterface createAndInitializeMomentumSolver(RigidBody elevator, SixDoFJoint rootJoint, ArrayList<RevoluteJoint> joints, double dt,
            ReferenceFrame centerOfMassFrame)
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
       TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), elevator);
-      MomentumSolver solver = new MomentumSolver(rootJoint, elevator, centerOfMassFrame, twistCalculator, LinearSolverFactory.linear(SpatialMotionVector.SIZE),
+      MomentumSolverInterface solver = new MomentumSolver(rootJoint, elevator, centerOfMassFrame, twistCalculator, LinearSolverFactory.linear(SpatialMotionVector.SIZE),
                                  dt, registry);
       solver.initialize();
       ScrewTestTools.integrateVelocities(rootJoint, dt);

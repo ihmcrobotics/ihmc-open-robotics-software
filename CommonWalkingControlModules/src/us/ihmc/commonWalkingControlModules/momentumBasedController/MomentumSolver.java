@@ -32,7 +32,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools;
 
-public class MomentumSolver
+public class MomentumSolver implements MomentumSolverInterface
 {
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -73,6 +73,7 @@ public class MomentumSolver
 
 
    private final List<InverseDynamicsJoint> unconstrainedJoints = new ArrayList<InverseDynamicsJoint>();
+   private final DoubleYoVariable aHatRootCondition = new DoubleYoVariable("aHatRootCondition", registry);
 
    public MomentumSolver(SixDoFJoint rootJoint, RigidBody elevator, ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator,
                          LinearSolver<DenseMatrix64F> jacobianSolver, double controlDT, YoVariableRegistry parentRegistry)
@@ -155,7 +156,7 @@ public class MomentumSolver
    }
 
    public void setDesiredSpatialAcceleration(InverseDynamicsJoint[] constrainedJoints, GeometricJacobian jacobian,
-           TaskspaceConstraintData taskspaceConstraintData)
+                                             TaskspaceConstraintData taskspaceConstraintData)
    {
       checkNullspaceDimensions(jacobian, taskspaceConstraintData.getNullspaceMultipliers());
       checkSelectionMatrixHasSameNumberOfRowsAsConstrainedJoints(taskspaceConstraintData.getSelectionMatrix(), constrainedJoints);
@@ -243,8 +244,17 @@ public class MomentumSolver
                      DenseMatrix64F momentumMultipliers)
    {
       DenseMatrix64F aHatRoot = aHats.get(rootJoint);
+
+      // TODO: testing
+      if (momentumSubspace.getNumCols() == 3)
+      {
+         DenseMatrix64F aHatRootMomentum = new DenseMatrix64F(momentumSubspace.getNumCols(), aHatRoot.getNumCols());
+         CommonOps.multTransA(momentumSubspace, aHatRoot, aHatRootMomentum);
+         this.aHatRootCondition.set(NormOps.conditionP2(aHatRootMomentum));
+      }
+
       rootJointSolver.solveAndSetRootJointAcceleration(vdotRoot, aHatRoot, b, accelerationSubspace, accelerationMultipliers, momentumSubspace,
-              momentumMultipliers, rootJoint, jointAccelerationValidMap);
+            momentumMultipliers, rootJoint, jointAccelerationValidMap);
       jointSpaceConstraintResolver.solveAndSetJointspaceAccelerations(jointSpaceAccelerations, jointAccelerationValidMap);
       taskSpaceConstraintResolver.solveAndSetTaskSpaceAccelerations(jointAccelerationValidMap);
 
