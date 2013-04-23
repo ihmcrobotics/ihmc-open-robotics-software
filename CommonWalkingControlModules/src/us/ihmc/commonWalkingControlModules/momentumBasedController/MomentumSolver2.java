@@ -215,19 +215,22 @@ public class MomentumSolver2 implements MomentumSolverInterface
       }
 
       CommonOps.insert(accelerationMultipliers, bp, ajIndex, 0);
-      ajIndex += sTranspose.getNumRows();
+      // don't increment ajIndex so that we can overwrite the last couple of columns to solve for other cases too
+//      ajIndex += sTranspose.getNumRows();
 
       NA.reshape(momentumSubspace.getNumCols(), centroidalMomentumMatrix.getMatrix().getNumCols());
       CommonOps.multTransA(momentumSubspace, centroidalMomentumMatrix.getMatrix(), NA);
-      CommonOps.insert(NA, AJ, ajIndex, 0);
+      CommonOps.insert(NA, AJ, ajIndex + sTranspose.getNumRows(), 0);
 
       // N * (hdot - Adotv)
       b.reshape(momentumMultipliers.getNumRows(), 1);
       CommonOps.multTransA(momentumSubspace, adotV, b);
       CommonOps.changeSign(b);
       CommonOps.addEquals(b, momentumMultipliers);
-      CommonOps.insert(b, bp, ajIndex, 0);
-      ajIndex += momentumSubspace.getNumRows();
+      CommonOps.insert(b, bp, ajIndex + sTranspose.getNumRows(), 0);
+
+      // don't increment ajIndex so that we can overwrite the last couple of columns to solve for other cases too
+//      ajIndex += momentumSubspace.getNumRows();
 
       // TODO: solve AJ * vdot = bp
       solver.setA(AJ);
