@@ -17,10 +17,10 @@ import us.ihmc.utilities.keyboardAndMouse.RepeatingReleasedEventsFixer;
 
 public class GazeboCameraBenchmarker extends AbstractNodeMain
 {
-	public static final String MASTER = "http://10.4.42.4:11311";
-	public static final String TOPIC_NAME = "/image_raw";
+	public static final String MASTER = "http://localhost:11311";
+	public static final String TOPIC_NAME = "/multisense_sl/camera/left/image_raw/compressed";
 	
-	private Subscriber<sensor_msgs.Image> cameraSubscriber;
+	private Subscriber<sensor_msgs.CompressedImage> cameraSubscriber;
 	private String topicName;
 	
 	private long initialTime;
@@ -46,9 +46,9 @@ public class GazeboCameraBenchmarker extends AbstractNodeMain
 	
 	private void setupCameraSubscriberListener()
 	{
-		cameraSubscriber.addMessageListener(new MessageListener<sensor_msgs.Image>()
+		cameraSubscriber.addMessageListener(new MessageListener<sensor_msgs.CompressedImage>()
 		{
-			public void onNewMessage(sensor_msgs.Image message)
+			public void onNewMessage(sensor_msgs.CompressedImage message)
 			{
 				if (framesReceived == 0.0)
 					initialTime = System.currentTimeMillis();
@@ -64,7 +64,7 @@ public class GazeboCameraBenchmarker extends AbstractNodeMain
 	
 	private void setupSubscriber(ConnectedNode connectedNode)
 	{
-		cameraSubscriber = connectedNode.newSubscriber(topicName, sensor_msgs.Image._TYPE);
+		cameraSubscriber = connectedNode.newSubscriber(topicName, sensor_msgs.CompressedImage._TYPE);
 	}
 	
 	public static void main(String[] args) throws URISyntaxException
