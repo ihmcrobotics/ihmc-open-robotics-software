@@ -13,24 +13,21 @@ import com.yobotics.simulationconstructionset.robotController.RawOutputWriter;
 public class SDFPerfectSimulatedOutputWriter implements RawOutputWriter
 {
    private final String name;
-
+   private final SDFRobot robot;
    private final ArrayList<Pair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<Pair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
 
-   public SDFPerfectSimulatedOutputWriter(SDFRobot robot, FullRobotModel fullRobotModel)
+   public SDFPerfectSimulatedOutputWriter(SDFRobot robot)
    {
       this.name = robot.getName() + "SimulatedSensorReader";
-      
-      OneDoFJoint[] revoluteJointsArray = fullRobotModel.getOneDoFJoints();
+      this.robot = robot;
+   }
+   
+   public SDFPerfectSimulatedOutputWriter(SDFRobot robot, SDFFullRobotModel fullRobotModel)
+   {
+      this.name = robot.getName() + "SimulatedSensorReader";
+      this.robot = robot;
 
-      for (OneDoFJoint revoluteJoint : revoluteJointsArray)
-      {
-         String name = revoluteJoint.getName();
-         OneDegreeOfFreedomJoint oneDoFJoint = robot.getOneDoFJoint(name);
-
-         Pair<OneDegreeOfFreedomJoint,OneDoFJoint> jointPair = new Pair<OneDegreeOfFreedomJoint, OneDoFJoint>(oneDoFJoint, revoluteJoint);
-         this.revoluteJoints.add(jointPair);
-      }
-
+      setFullRobotModel(fullRobotModel);
    }
 
    public void initialize()
@@ -40,6 +37,22 @@ public class SDFPerfectSimulatedOutputWriter implements RawOutputWriter
    public YoVariableRegistry getYoVariableRegistry()
    {
       return null;
+   }
+   
+   public void setFullRobotModel(FullRobotModel fullRobotModel)
+   {
+      revoluteJoints.clear();
+      OneDoFJoint[] revoluteJointsArray = fullRobotModel.getOneDoFJoints();
+      
+      for (OneDoFJoint revoluteJoint : revoluteJointsArray)
+      {
+         String name = revoluteJoint.getName();
+         OneDegreeOfFreedomJoint oneDoFJoint = robot.getOneDoFJoint(name);
+         
+         Pair<OneDegreeOfFreedomJoint,OneDoFJoint> jointPair = new Pair<OneDegreeOfFreedomJoint, OneDoFJoint>(oneDoFJoint, revoluteJoint);
+         this.revoluteJoints.add(jointPair);
+      }
+      
    }
 
    public String getName()

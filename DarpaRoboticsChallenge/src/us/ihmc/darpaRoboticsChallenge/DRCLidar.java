@@ -7,7 +7,6 @@ import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.TimestampProvider;
 import us.ihmc.utilities.polarLidarGeometry.PolarLidarScanDefinition;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.simulatedSensors.FastPolarRayCastLIDAR;
@@ -41,7 +40,7 @@ public class DRCLidar
       }
    }
 
-   static void setupDRCRobotLidar(HumanoidRobotSimulation<SDFRobot> sdfRobotSimulation, ObjectCommunicator objectCommunicator, OneDoFJoint lidarJoint,
+   static void setupDRCRobotLidar(HumanoidRobotSimulation<SDFRobot> sdfRobotSimulation, ObjectCommunicator objectCommunicator,
          TimestampProvider timestampProvider, boolean startLidar)
    {
       Graphics3DAdapter graphics3dAdapter = sdfRobotSimulation.getSimulationConstructionSet().getGraphics3dAdapter();
@@ -65,7 +64,6 @@ public class DRCLidar
             if (PRINT_ALL_POSSIBLE_JOINT_NAMES)
                System.out.println("DRCLidar availiable joints: " + sdfRobotSimulation.getRobot().getOneDoFJoints());
             OneDegreeOfFreedomJoint neckJoint = sdfRobotSimulation.getRobot().getOneDoFJoint("neck_ay");
-            polarLidar.setControllerLidarJoint(lidarJoint);
             polarLidar.setSimulationNeckJoint(neckJoint);
             polarLidar.setLidarDaemonParameters(updateParameters);
             SimulatedLIDARSensorNoiseParameters noiseParameters = new SimulatedLIDARSensorNoiseParameters();
