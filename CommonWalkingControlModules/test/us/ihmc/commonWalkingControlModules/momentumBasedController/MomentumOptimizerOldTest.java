@@ -31,7 +31,7 @@ import us.ihmc.utilities.test.JUnitTools;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
-public class MomentumOptimizerTest
+public class MomentumOptimizerOldTest
 {
    private static final Vector3d X = new Vector3d(1.0, 0.0, 0.0);
    private static final Vector3d Y = new Vector3d(0.0, 1.0, 0.0);
@@ -112,7 +112,7 @@ public class MomentumOptimizerTest
       FrameVector desiredAngularCentroidalMomentumRate = new FrameVector(centerOfMassFrame, RandomTools.generateRandomVector(random));
       FrameVector desiredLinearCentroidalMomentumRate = new FrameVector(centerOfMassFrame, RandomTools.generateRandomVector(random));
       YoVariableRegistry registry = new YoVariableRegistry("test");
-      MomentumOptimizer optimizer = new BasicMomentumOptimizer(rootJoint, elevator, centerOfMassFrame, dt, registry);
+      MomentumOptimizerOld optimizer = new BasicMomentumOptimizerOld(rootJoint, elevator, centerOfMassFrame, dt, registry);
 
       initializeOptimizer(elevator, rootJoint, joints, dt, desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate, optimizer);
       checkAgainstInverseDynamicsCalculator(rootJoint, desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate, 1e-6);
@@ -121,7 +121,7 @@ public class MomentumOptimizerTest
 
 
    public static void initializeOptimizer(RigidBody elevator, SixDoFJoint rootJoint, List<RevoluteJoint> joints, double dt,
-         FrameVector desiredAngularCentroidalMomentumRate, FrameVector desiredLinearCentroidalMomentumRate, MomentumOptimizer optimizer)
+         FrameVector desiredAngularCentroidalMomentumRate, FrameVector desiredLinearCentroidalMomentumRate, MomentumOptimizerOld optimizer)
    {
       optimizer.initialize();
       ScrewTestTools.integrateVelocities(rootJoint, dt);
@@ -184,13 +184,13 @@ public class MomentumOptimizerTest
       JUnitTools.assertTuple3dEquals(desiredLinearCentroidalMomentumRate.getVector(), rootJointWrench.getLinearPartCopy(), epsilonInverseDynamics);
    }
 
-   private static final class BasicMomentumOptimizer extends MomentumOptimizer
+   private static final class BasicMomentumOptimizerOld extends MomentumOptimizerOld
    {
       private final SixDoFJoint rootJoint;
       private final DenseMatrix64F sixDoFJointAccelerations = new DenseMatrix64F(6, 1);
 
-      private BasicMomentumOptimizer(SixDoFJoint rootJoint, RigidBody elevator, ReferenceFrame centerOfMassFrame, double controlDT,
-                                     YoVariableRegistry parentRegistry)
+      private BasicMomentumOptimizerOld(SixDoFJoint rootJoint, RigidBody elevator, ReferenceFrame centerOfMassFrame, double controlDT,
+                                        YoVariableRegistry parentRegistry)
       {
          super(elevator, centerOfMassFrame, controlDT, parentRegistry);
          this.rootJoint = rootJoint;

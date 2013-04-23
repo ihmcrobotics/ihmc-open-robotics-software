@@ -12,7 +12,9 @@ import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.*;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * @author twan
@@ -36,17 +38,20 @@ public class MomentumSolver2 implements MomentumSolverInterface
    private final DenseMatrix64F AJ;
    private final DenseMatrix64F bp;
    private final DenseMatrix64F vdot;
+   private final DenseMatrix64F nullspacePart;
 
    private final LinkedHashMap<InverseDynamicsJoint, int[]> columnsForJoints = new LinkedHashMap<InverseDynamicsJoint, int[]>();
 
    private final DenseMatrix64F adotV = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
    private final DenseMatrix64F v;
    private final DenseMatrix64F hdot = new DenseMatrix64F(Momentum.SIZE, 1);
+   private final LinearSolver<DenseMatrix64F> jacobianSolver;
 
    private int ajIndex = 0;
    private final int nDegreesOfFreedom;
 
    private final LinearSolver<DenseMatrix64F> solver;
+   private final Map<GeometricJacobian, TaskspaceConstraintData> taskSpaceConstraintMap = new HashMap<GeometricJacobian, TaskspaceConstraintData>();
 
    public MomentumSolver2(SixDoFJoint rootJoint, RigidBody elevator, ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator,
                           LinearSolver<DenseMatrix64F> jacobianSolver, double controlDT, YoVariableRegistry parentRegistry)
@@ -63,11 +68,13 @@ public class MomentumSolver2 implements MomentumSolverInterface
       MatrixYoVariableConversionTools.populateYoVariables(yoPreviousCentroidalMomentumMatrix, "previousCMMatrix", registry);
 
       this.controlDT = controlDT;
+      this.jacobianSolver = jacobianSolver;
 
       nDegreesOfFreedom = ScrewTools.computeDegreesOfFreedom(jointsInOrder);
       this.AJ = new DenseMatrix64F(nDegreesOfFreedom, nDegreesOfFreedom);
       this.bp = new DenseMatrix64F(nDegreesOfFreedom, 1);
       this.vdot = new DenseMatrix64F(nDegreesOfFreedom, 1);
+      this.nullspacePart = new DenseMatrix64F(nDegreesOfFreedom, 1);
       this.v = new DenseMatrix64F(nDegreesOfFreedom, 1);
 
       for (InverseDynamicsJoint joint : jointsInOrder)
@@ -75,7 +82,7 @@ public class MomentumSolver2 implements MomentumSolverInterface
          columnsForJoints.put(joint, ScrewTools.computeIndicesForJoint(jointsInOrder, joint));
       }
 
-      solver = LinearSolverFactory.linear(nDegreesOfFreedom); // TODO
+      solver = LinearSolverFactory.pseudoInverse(true);
 
       parentRegistry.addChild(registry);
       reset();
@@ -93,6 +100,7 @@ public class MomentumSolver2 implements MomentumSolverInterface
       ajIndex = 0;
       AJ.zero();
       bp.zero();
+      nullspacePart.zero();
    }
 
    public void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration)
@@ -116,10 +124,15 @@ public class MomentumSolver2 implements MomentumSolverInterface
 
    public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
    {
+      setDesiredSpatialAcceleration(jacobian.getJointsInOrder(), jacobian, taskspaceConstraintData);
+   }
+
+   public void setDesiredSpatialAcceleration(InverseDynamicsJoint[] constrainedJoints, GeometricJacobian jacobian, TaskspaceConstraintData
+         taskspaceConstraintData)
+   {
       // (S * J) * vdot = S * (Tdot - Jdot * v)
 
       SpatialAccelerationVector taskSpaceAcceleration = taskspaceConstraintData.getSpatialAcceleration();
-      DenseMatrix64F nullspaceMultiplier = taskspaceConstraintData.getNullspaceMultipliers(); // TODO
       DenseMatrix64F selectionMatrix = taskspaceConstraintData.getSelectionMatrix();
 
       RigidBody base = getBase(taskSpaceAcceleration);
@@ -159,13 +172,9 @@ public class MomentumSolver2 implements MomentumSolverInterface
 
       CommonOps.insert(pBlock, bp, ajIndex, 0);
 
-      ajIndex +=  JBlock.getNumRows();
-   }
+      taskSpaceConstraintMap.put(jacobian, taskspaceConstraintData);
 
-   public void setDesiredSpatialAcceleration(InverseDynamicsJoint[] constrainedJoints, GeometricJacobian jacobian, TaskspaceConstraintData
-         taskspaceConstraintData)
-   {
-      setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
+      ajIndex +=  JBlock.getNumRows();
    }
 
    public void compute()
@@ -232,12 +241,51 @@ public class MomentumSolver2 implements MomentumSolverInterface
       // don't increment ajIndex so that we can overwrite the last couple of columns to solve for other cases too
 //      ajIndex += momentumSubspace.getNumRows();
 
-      // TODO: solve AJ * vdot = bp
       solver.setA(AJ);
       solver.solve(bp, vdot);
 
+//      setNullspaceComponents(vdot);
+
       ScrewTools.setDesiredAccelerations(jointsInOrder, vdot);
    }
+
+//   private void setNullspaceComponents(DenseMatrix64F vdot)
+//   {
+//      for (GeometricJacobian jacobian : taskSpaceConstraintMap.keySet())
+//      {
+//         TaskspaceConstraintData taskspaceConstraintData = taskSpaceConstraintMap.get(jacobian);
+//
+//         DenseMatrix64F nullspaceMultiplier = taskspaceConstraintData.getNullspaceMultipliers();
+//         int nullity = nullspaceMultiplier.getNumRows();
+//
+//         if (nullity > 0)
+//         {
+//            DenseMatrix64F selectionMatrix = taskspaceConstraintData.getSelectionMatrix();
+//
+//            jacobian.compute();
+//            DenseMatrix64F reducedJacobianMatrix = new DenseMatrix64F(selectionMatrix.getNumRows(), jacobian.getNumberOfColumns());
+//            CommonOps.mult(selectionMatrix, jacobian.getJacobianMatrix(), reducedJacobianMatrix);
+//
+//            NullspaceCalculator nullspaceCalculator = new NullspaceCalculator(reducedJacobianMatrix.getNumRows(), true);
+//            nullspaceCalculator.setMatrix(reducedJacobianMatrix, nullity);
+//
+//            int[] columnsForJoints = ScrewTools.computeIndicesForJoint(jointsInOrder, jacobian.getJointsInOrder());
+//            DenseMatrix64F vdotPart = new DenseMatrix64F(columnsForJoints.length, 1);
+//            for (int i = 0; i < columnsForJoints.length; i++)
+//            {
+//               vdotPart.set(i, 0, vdot.get(columnsForJoints[i], 0));
+//            }
+//
+//            nullspaceCalculator.removeNullspaceComponent(vdotPart);
+//            nullspaceCalculator.addNullspaceComponent(vdotPart, nullspaceMultiplier);
+//
+//            for (int i = 0; i < columnsForJoints.length; i++)
+//            {
+//               vdot.set(columnsForJoints[i], 0, vdotPart.get(i, 0));
+//            }
+//         }
+//      }
+//   }
 
    public void solve(RootJointAccelerationData rootJointAccelerationData, MomentumRateOfChangeData momentumRateOfChangeData)
    {

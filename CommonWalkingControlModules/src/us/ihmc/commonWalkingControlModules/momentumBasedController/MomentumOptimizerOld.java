@@ -20,7 +20,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
-public abstract class MomentumOptimizer implements Lmdif_fcn
+public abstract class MomentumOptimizerOld implements Lmdif_fcn
 {
    private final String name = getClass().getSimpleName();
    protected final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -54,7 +54,7 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
    private final InverseDynamicsJoint[] jointsInOrder;
 
 
-   public MomentumOptimizer(RigidBody elevator, ReferenceFrame centerOfMassFrame, double controlDT, YoVariableRegistry parentRegistry)
+   public MomentumOptimizerOld(RigidBody elevator, ReferenceFrame centerOfMassFrame, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.jointsInOrder = ScrewTools.computeJointsInOrder(elevator);
       int nDegreesOfFreedom = ScrewTools.computeDegreesOfFreedom(jointsInOrder);

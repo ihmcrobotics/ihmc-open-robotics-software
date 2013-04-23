@@ -701,7 +701,7 @@ public class MomentumSolverTest
       nullspaceCalculator.setMatrix(jacobian.getJacobianMatrix(), nullity);
       DenseMatrix64F nullspace = nullspaceCalculator.getNullspace();
 
-      InverseDynamicsJoint[] jointList = ScrewTools.computeJointsInOrder(base);
+      InverseDynamicsJoint[] jointList = ScrewTools.computeSubtreeJoints(base);
       DenseMatrix64F vdotTaskSpace = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jointList), 1);
       ScrewTools.packDesiredJointAccelerationsMatrix(jointList, vdotTaskSpace);
       DenseMatrix64F nullspaceMultiplierCheck = new DenseMatrix64F(nullspace.getNumCols(), vdotTaskSpace.getNumCols());
@@ -729,7 +729,7 @@ public class MomentumSolverTest
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
 
-      MomentumSolverInterface solver = new MomentumSolver(rootJoint, elevator, centerOfMassFrame, twistCalculator, jacobianSolver, dt, registry);
+      MomentumSolverInterface solver = new MomentumSolver2(rootJoint, elevator, centerOfMassFrame, twistCalculator, jacobianSolver, dt, registry);
       solver.initialize();
 
       for (SixDoFJoint sixDoFJoint : sixDoFJoints)

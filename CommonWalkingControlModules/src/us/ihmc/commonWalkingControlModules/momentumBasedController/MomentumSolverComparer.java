@@ -123,7 +123,7 @@ public class MomentumSolverComparer
       double dt = 1e-8;
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", worldFrame, elevator);
       centerOfMassFrame.update();
-      MomentumOptimizer optimizer = createAndInitializeMomentumOptimizer(elevator, rootJoint, joints, dt, centerOfMassFrame);
+      MomentumOptimizerOld optimizer = createAndInitializeMomentumOptimizer(elevator, rootJoint, joints, dt, centerOfMassFrame);
 
       long startNanos = System.nanoTime();
 
@@ -140,11 +140,11 @@ public class MomentumSolverComparer
       return (stopNanos - startNanos) * 1e-9 / nTests;
    }
 
-   private static MomentumOptimizer createAndInitializeMomentumOptimizer(RigidBody elevator, SixDoFJoint rootJoint, ArrayList<RevoluteJoint> joints, double dt,
+   private static MomentumOptimizerOld createAndInitializeMomentumOptimizer(RigidBody elevator, SixDoFJoint rootJoint, ArrayList<RevoluteJoint> joints, double dt,
            ReferenceFrame centerOfMassFrame)
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
-      MomentumOptimizer optimizer = new BasicMomentumOptimizer(rootJoint, elevator, centerOfMassFrame, dt, registry);
+      MomentumOptimizerOld optimizer = new BasicMomentumOptimizerOld(rootJoint, elevator, centerOfMassFrame, dt, registry);
       optimizer.initialize();
       ScrewTestTools.integrateVelocities(rootJoint, dt);
       ScrewTestTools.integrateVelocities(joints, dt);
@@ -154,13 +154,13 @@ public class MomentumSolverComparer
    }
 
 
-   private static final class BasicMomentumOptimizer extends MomentumOptimizer
+   private static final class BasicMomentumOptimizerOld extends MomentumOptimizerOld
    {
       private final SixDoFJoint rootJoint;
       private final DenseMatrix64F sixDoFJointAccelerations = new DenseMatrix64F(6, 1);
 
-      private BasicMomentumOptimizer(SixDoFJoint rootJoint, RigidBody elevator, ReferenceFrame centerOfMassFrame, double controlDT,
-                                     YoVariableRegistry parentRegistry)
+      private BasicMomentumOptimizerOld(SixDoFJoint rootJoint, RigidBody elevator, ReferenceFrame centerOfMassFrame, double controlDT,
+                                        YoVariableRegistry parentRegistry)
       {
          super(elevator, centerOfMassFrame, controlDT, parentRegistry);
          this.rootJoint = rootJoint;
