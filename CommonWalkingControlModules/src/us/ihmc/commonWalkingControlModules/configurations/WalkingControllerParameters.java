@@ -26,8 +26,6 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    
    public abstract double nominalHeightAboveAnkle();
    
-   public abstract boolean landOnHeels();
-   
    public abstract SideDependentList<Transform3D> getHandControlFramesWithRespectToFrameAfterWrist();
 
    boolean finishSwingWhenTrajectoryDone();

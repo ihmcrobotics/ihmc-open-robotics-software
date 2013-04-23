@@ -161,9 +161,4 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    {
       return DRCRobotParameters.DRC_ROBOT_ANKLE_HEIGHT;
    }
-
-   public boolean landOnHeels()
-   {
-      return false;
-   }
 }
