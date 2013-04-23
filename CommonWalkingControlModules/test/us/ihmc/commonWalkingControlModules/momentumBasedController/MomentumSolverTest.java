@@ -54,7 +54,7 @@ import us.ihmc.utilities.test.JUnitTools;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 
-//TODO: tests where MomentumSolver is called multiple times in a row
+//TODO: tests where MomentumSolver2 is called multiple times in a row
 public class MomentumSolverTest
 {
    private static final Vector3d X = new Vector3d(1.0, 0.0, 0.0);
@@ -729,7 +729,7 @@ public class MomentumSolverTest
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
 
-      MomentumSolverInterface solver = new MomentumSolver(rootJoint, elevator, centerOfMassFrame, twistCalculator, jacobianSolver, dt, registry);
+      MomentumSolverInterface solver = new MomentumSolver2(rootJoint, elevator, centerOfMassFrame, twistCalculator, jacobianSolver, dt, registry);
       solver.initialize();
 
       for (SixDoFJoint sixDoFJoint : sixDoFJoints)
