@@ -133,6 +133,8 @@ public class SensorAndEstimatorAssembler
       parentRegistry.addChild(registry);
       
       controlFlowGraph.initializeAfterConnections();
+      controlFlowGraph.startComputation();
+      controlFlowGraph.waitUntilComputationIsDone();
 
       if (VISUALIZE_CONTROL_FLOW_GRAPH)
       {

@@ -17,7 +17,7 @@ public class StateEstimatorErrorCalculatorController implements RobotController
    private final StateEstimatorErrorCalculator composableStateEstimatorEvaluatorErrorCalculator;
 
    public StateEstimatorErrorCalculatorController(StateEstimator orientationEstimator,
-           Robot robot, Joint estimationJoint, double controlDT)
+           Robot robot, Joint estimationJoint)
    {      
       this.gravitationalAcceleration = new Vector3d();
       robot.getGravity(gravitationalAcceleration);

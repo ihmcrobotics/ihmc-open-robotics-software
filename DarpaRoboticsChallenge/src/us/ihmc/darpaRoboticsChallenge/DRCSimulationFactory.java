@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import java.util.ArrayList;
 
+import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.GazeboStateCommunicator.GazeboRobot;
@@ -21,6 +22,8 @@ import us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRob
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAccelerationsFromRobotStealerController;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.StateEstimatorErrorCalculatorController;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectCommunicator;
 
@@ -28,7 +31,9 @@ import com.yobotics.simulationconstructionset.GroundContactPoint;
 import com.yobotics.simulationconstructionset.IMUMount;
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.KinematicPoint;
+import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.RobotControllerAndParameters;
+import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
@@ -40,6 +45,7 @@ public class DRCSimulationFactory
    // private static final SensorNoiseParameters sensorNoiseParamters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersGazeboSDF();
    private static final SensorNoiseParameters sensorNoiseParamters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersALittleNoise();
    // private static final SensorNoiseParameters sensorNoiseParamters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersZeroNoise();
+   private static final boolean COMPUTE_ESTIMATOR_ERROR = true;
    
    public static HumanoidRobotSimulation<SDFRobot> createSimulation(ControllerFactory controllerFactory,
          CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCRobotInterface robotInterface, RobotInitialSetup<SDFRobot> robotInitialSetup,
@@ -114,7 +120,10 @@ public class DRCSimulationFactory
       Vector3d gravity = new Vector3d();
       robotInterface.getRobot().getGravity(gravity);
       
-      DRCController robotController = new DRCController(robotInterface.getFullRobotModelFactory(), controllerFactory,
+      //TODO: Can only do this if have a simulation...
+      Point3d initialCoMPosition = getInitialCoMPosition(robotInitialSetup, simulatedRobot);
+      
+      DRCController robotController = new DRCController(initialCoMPosition, robotInterface.getFullRobotModelFactory(), controllerFactory,
             robotInterface.getFootSwitches(), robotInterface.getWristForceSensors(), sensorReaderFactory, outputWriter,
             jointMap, lidarControllerInterface, gravity, controlDT, robotInterface.getRobot().getYoTime(), networkServer, dynamicGraphicObjectsListRegistry,
             guiSetterUpperRegistry, registry);
@@ -123,6 +132,15 @@ public class DRCSimulationFactory
             simulationTicksPerControlTick, commonAvatarEnvironmentInterface, simulatedRobot.getAllExternalForcePoints(), robotInitialSetup, scsInitialSetup,
             guiInitialSetup, guiSetterUpperRegistry, dynamicGraphicObjectsListRegistry);
 
+      if (COMPUTE_ESTIMATOR_ERROR)
+      {
+         DRCStateEstimator drcStateEstimator = robotController.getDRCStateEstimator();
+         StateEstimatorWithPorts stateEstimator = drcStateEstimator.getStateEstimator();
+
+         StateEstimatorErrorCalculatorController stateEstimatorErrorCalculatorController = new StateEstimatorErrorCalculatorController(stateEstimator, simulatedRobot, simulatedRobot.getRootJoint());
+         simulatedRobot.setController(stateEstimatorErrorCalculatorController, simulationTicksPerControlTick);
+      }
+      
       if (simulatedRobot instanceof GazeboRobot)
       {
          ((GazeboRobot) simulatedRobot).registerWithSCS(humanoidRobotSimulation.getSimulationConstructionSet());
@@ -136,6 +154,35 @@ public class DRCSimulationFactory
       return humanoidRobotSimulation;
    }
 
+   private static Point3d getInitialCoMPosition(RobotInitialSetup<SDFRobot> robotInitialSetup, SDFRobot simulatedRobot)
+   {
+      // The following is to get the initial CoM position from the robot. 
+      // It is cheating for now, and we need to move to where the 
+      // robot itself determines coordinates, and the sensors are all
+      // in the robot-determined world coordinates..
+      Point3d initialCoMPosition = new Point3d();
+      robotInitialSetup.initializeRobot(simulatedRobot);
+      updateTheRobot(simulatedRobot);
+      
+      simulatedRobot.computeCenterOfMass(initialCoMPosition);
+
+      return initialCoMPosition;
+   }
+
+   private static void updateTheRobot(Robot robot)
+   {
+      try
+      {
+         robot.update();
+         robot.doDynamicsButDoNotIntegrate();
+         robot.update();
+      }
+      catch (UnreasonableAccelerationException e)
+      {
+         throw new RuntimeException("UnreasonableAccelerationException");
+      }
+   }
+   
    public static DesiredCoMAccelerationsFromRobotStealerController createAndAddDesiredCoMAccelerationFromRobotStealerController(ReferenceFrame estimationFrame,
          double controlDT, int simulationTicksPerControlTick, SDFRobot simulatedRobot, ArrayList<RobotControllerAndParameters> robotControllersAndParameters)
    {
