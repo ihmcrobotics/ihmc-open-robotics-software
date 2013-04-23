@@ -174,6 +174,11 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
 
    }
 
+   public Quat4d getRootJointToWorldRotationQuaternion()
+   {
+      return rootJoint.getQuaternion();
+   }
+   
    public void getRootJointToWorldTransform(Transform3D transform)
    {
       rootJoint.getTransformToWorld(transform);

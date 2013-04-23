@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge;
 import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.GazeboStateCommunicator.GazeboRobot;
@@ -24,6 +25,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderF
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAccelerationsFromRobotStealerController;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.StateEstimatorErrorCalculatorController;
+import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectCommunicator;
 
@@ -121,9 +123,9 @@ public class DRCSimulationFactory
       robotInterface.getRobot().getGravity(gravity);
       
       //TODO: Can only do this if have a simulation...
-      Point3d initialCoMPosition = getInitialCoMPosition(robotInitialSetup, simulatedRobot);
+      Pair<Point3d, Quat4d> initialCoMPositionAndEstimationLinkOrientation = getInitialCoMPositionAndEstimationLinkOrientation(robotInitialSetup, simulatedRobot);
       
-      DRCController robotController = new DRCController(initialCoMPosition, robotInterface.getFullRobotModelFactory(), controllerFactory,
+      DRCController robotController = new DRCController(initialCoMPositionAndEstimationLinkOrientation, robotInterface.getFullRobotModelFactory(), controllerFactory,
             robotInterface.getFootSwitches(), robotInterface.getWristForceSensors(), sensorReaderFactory, outputWriter,
             jointMap, lidarControllerInterface, gravity, controlDT, robotInterface.getRobot().getYoTime(), networkServer, dynamicGraphicObjectsListRegistry,
             guiSetterUpperRegistry, registry);
@@ -154,7 +156,7 @@ public class DRCSimulationFactory
       return humanoidRobotSimulation;
    }
 
-   private static Point3d getInitialCoMPosition(RobotInitialSetup<SDFRobot> robotInitialSetup, SDFRobot simulatedRobot)
+   private static Pair<Point3d, Quat4d> getInitialCoMPositionAndEstimationLinkOrientation(RobotInitialSetup<SDFRobot> robotInitialSetup, SDFRobot simulatedRobot)
    {
       // The following is to get the initial CoM position from the robot. 
       // It is cheating for now, and we need to move to where the 
@@ -166,7 +168,8 @@ public class DRCSimulationFactory
       
       simulatedRobot.computeCenterOfMass(initialCoMPosition);
 
-      return initialCoMPosition;
+      Quat4d initialEstimationLinkOrientation = simulatedRobot.getRootJointToWorldRotationQuaternion();
+      return new Pair<Point3d, Quat4d>(initialCoMPosition, initialEstimationLinkOrientation);
    }
 
    private static void updateTheRobot(Robot robot)
