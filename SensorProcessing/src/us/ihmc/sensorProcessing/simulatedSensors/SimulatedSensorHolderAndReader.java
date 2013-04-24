@@ -185,6 +185,7 @@ public class SimulatedSensorHolderAndReader implements Runnable
             pointVelocitySensorDataSource.setPointVelocitySensorValue(pointVelocitySensorDefinition, value);
          }
       }
+      
       if(controllerDispatcher != null)
       {
          controllerDispatcher.startComputation();
