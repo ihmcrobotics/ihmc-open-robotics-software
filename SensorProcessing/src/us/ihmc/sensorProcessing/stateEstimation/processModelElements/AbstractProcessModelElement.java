@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.stateEstimation.processModelElements;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Set;
 
 import org.ejml.data.DenseMatrix64F;
@@ -16,8 +16,8 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public abstract class AbstractProcessModelElement implements ProcessModelElement
 {
-   protected final HashMap<ControlFlowOutputPort<?>, DenseMatrix64F> stateMatrixBlocks;
-   protected final HashMap<ControlFlowInputPort<?>, DenseMatrix64F> inputMatrixBlocks;
+   protected final LinkedHashMap<ControlFlowOutputPort<?>, DenseMatrix64F> stateMatrixBlocks;
+   protected final LinkedHashMap<ControlFlowInputPort<?>, DenseMatrix64F> inputMatrixBlocks;
    private final DenseMatrix64F processNoiseCovarianceBlock;
    private final DenseMatrix64F scaledProcessNoiseCovarianceMatrixBlock;
    private final DoubleYoVariable covarianceMatrixScaling;
@@ -29,8 +29,8 @@ public abstract class AbstractProcessModelElement implements ProcessModelElement
          YoVariableRegistry registry)
    {
       this.outputState = outputState;
-      this.stateMatrixBlocks = new HashMap<ControlFlowOutputPort<?>, DenseMatrix64F>();
-      this.inputMatrixBlocks = new HashMap<ControlFlowInputPort<?>, DenseMatrix64F>();
+      this.stateMatrixBlocks = new LinkedHashMap<ControlFlowOutputPort<?>, DenseMatrix64F>();
+      this.inputMatrixBlocks = new LinkedHashMap<ControlFlowInputPort<?>, DenseMatrix64F>();
       this.processNoiseCovarianceBlock = new DenseMatrix64F(size, size);
       this.scaledProcessNoiseCovarianceMatrixBlock = new DenseMatrix64F(size, size);
       this.covarianceMatrixScaling = new DoubleYoVariable(name + "CovScaling", registry);

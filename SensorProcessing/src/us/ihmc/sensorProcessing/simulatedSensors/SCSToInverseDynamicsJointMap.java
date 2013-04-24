@@ -2,7 +2,6 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
@@ -82,7 +81,7 @@ public class SCSToInverseDynamicsJointMap
       
       
       InverseDynamicsJoint[] inverseDynamicsJoints = ScrewTools.computeSubtreeJoints(sixDoFRootJoint.getSuccessor());
-      HashMap<String, OneDoFJoint> inverseDynamicsJointsByName = new HashMap<String, OneDoFJoint>();
+      LinkedHashMap<String, OneDoFJoint> inverseDynamicsJointsByName = new LinkedHashMap<String, OneDoFJoint>();
       
       for(InverseDynamicsJoint inverseDynamicsJoint : inverseDynamicsJoints)
       {
