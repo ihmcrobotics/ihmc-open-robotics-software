@@ -1,8 +1,8 @@
 package us.ihmc.SdfLoader;
 
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Set;
 
 import javax.media.j3d.Transform3D;
@@ -41,7 +41,7 @@ public class SDFFullRobotModel implements FullRobotModel
    private final SixDoFJoint rootJoint;
 
 //   private final ArrayList<RevoluteJoint> revoluteJoints = new ArrayList<RevoluteJoint>();
-   private final HashMap<String, OneDoFJoint> oneDoFJoints = new HashMap<String, OneDoFJoint>();
+   private final LinkedHashMap<String, OneDoFJoint> oneDoFJoints = new LinkedHashMap<String, OneDoFJoint>();
 
    private final EnumMap<NeckJointName, OneDoFJoint> neckJoints = ContainerTools.createEnumMap(NeckJointName.class);
    private final EnumMap<SpineJointName, OneDoFJoint> spineJoints = ContainerTools.createEnumMap(SpineJointName.class);

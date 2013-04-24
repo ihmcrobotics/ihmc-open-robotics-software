@@ -1,20 +1,32 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolver;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.ops.CommonOps;
+
 import us.ihmc.utilities.CheckTools;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.*;
+import us.ihmc.utilities.screwTheory.CentroidalMomentumMatrix;
+import us.ihmc.utilities.screwTheory.DesiredJointAccelerationCalculator;
+import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.Momentum;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.SixDoFJoint;
+import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.utilities.screwTheory.SpatialForceVector;
+import us.ihmc.utilities.screwTheory.SpatialMotionVector;
+import us.ihmc.utilities.screwTheory.TwistCalculator;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools;
 
 /**
  * @author twan
@@ -51,7 +63,7 @@ public class MomentumSolver2 implements MomentumSolverInterface
    private final int nDegreesOfFreedom;
 
    private final LinearSolver<DenseMatrix64F> solver;
-   private final Map<GeometricJacobian, TaskspaceConstraintData> taskSpaceConstraintMap = new HashMap<GeometricJacobian, TaskspaceConstraintData>();
+   private final Map<GeometricJacobian, TaskspaceConstraintData> taskSpaceConstraintMap = new LinkedHashMap<GeometricJacobian, TaskspaceConstraintData>();
 
    public MomentumSolver2(SixDoFJoint rootJoint, RigidBody elevator, ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator,
                           LinearSolver<DenseMatrix64F> jacobianSolver, double controlDT, YoVariableRegistry parentRegistry)

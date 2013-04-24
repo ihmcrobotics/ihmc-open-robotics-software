@@ -3,7 +3,7 @@ package us.ihmc.SdfLoader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
 import javax.xml.bind.JAXBException;
@@ -19,7 +19,7 @@ import us.ihmc.utilities.Pair;
 
 public class SDFWorldLoader
 {
-   public HashMap<String, Graphics3DObject> visuals = new HashMap<String, Graphics3DObject>();
+   public LinkedHashMap<String, Graphics3DObject> visuals = new LinkedHashMap<String, Graphics3DObject>();
    private final JaxbSDFLoader jaxbSDFLoader;
 
    public SDFWorldLoader(File file, String resourceDirectory) throws FileNotFoundException, JAXBException

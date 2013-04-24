@@ -2,6 +2,7 @@ package us.ihmc.SdfLoader;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -20,8 +21,8 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
    private final ArrayList<String> resourceDirectories;
    private final ArrayList<SDFLinkHolder> rootLinks = new ArrayList<SDFLinkHolder>();
    private final Transform3D transformToRoot;
-   private final HashMap<String, SDFJointHolder> joints = new HashMap<String, SDFJointHolder>();
-   private final HashMap<String, SDFLinkHolder> links = new HashMap<String, SDFLinkHolder>();
+   private final LinkedHashMap<String, SDFJointHolder> joints = new LinkedHashMap<String, SDFJointHolder>();
+   private final LinkedHashMap<String, SDFLinkHolder> links = new LinkedHashMap<String, SDFLinkHolder>();
    
    
    public GeneralizedSDFRobotModel(String name, SDFModel model, ArrayList<String> resourceDirectories)

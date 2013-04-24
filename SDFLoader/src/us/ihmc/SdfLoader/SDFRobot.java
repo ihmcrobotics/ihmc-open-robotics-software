@@ -2,7 +2,7 @@ package us.ihmc.SdfLoader;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.media.j3d.Transform3D;
@@ -14,9 +14,9 @@ import javax.vecmath.Vector3d;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Camera;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.IMU;
-import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.IMU.IMUNoise;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.IMU.IMUNoise.NoiseParameters;
+import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Noise;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Range;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Scan;
@@ -62,15 +62,15 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
 
    private final ArrayList<String> resourceDirectories;
 
-   private final HashMap<String, OneDegreeOfFreedomJoint> oneDoFJoints = new HashMap<String, OneDegreeOfFreedomJoint>();
-   private final HashMap<String, Transform3D> jointTransforms = new HashMap<String, Transform3D>();
+   private final LinkedHashMap<String, OneDegreeOfFreedomJoint> oneDoFJoints = new LinkedHashMap<String, OneDegreeOfFreedomJoint>();
+   private final LinkedHashMap<String, Transform3D> jointTransforms = new LinkedHashMap<String, Transform3D>();
 
 
    private final FloatingJoint rootJoint;
 
    private final SideDependentList<ArrayList<GroundContactPoint>> footGroundContactPoints = new SideDependentList<ArrayList<GroundContactPoint>>();
 
-   private final HashMap<String, SDFCamera> cameras = new HashMap<String, SDFCamera>();
+   private final LinkedHashMap<String, SDFCamera> cameras = new LinkedHashMap<String, SDFCamera>();
 
    public SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap)
    {
@@ -123,7 +123,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
          footGroundContactPoints.put(robotSide, new ArrayList<GroundContactPoint>());
       }
 
-      HashMap<String, Integer> counters = new HashMap<String, Integer>();
+      LinkedHashMap<String, Integer> counters = new LinkedHashMap<String, Integer>();
       if (sdfJointNameMap != null)
       {
          for (Pair<String, Vector3d> jointContactPoint : sdfJointNameMap.getJointNameGroundContactPointMap())

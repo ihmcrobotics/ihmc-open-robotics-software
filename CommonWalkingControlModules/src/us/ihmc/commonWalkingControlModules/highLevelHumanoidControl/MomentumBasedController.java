@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -33,8 +32,8 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.simulatedSensors.PointPositionSensorDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.PointVelocitySensorDefinition;
-import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredAccelerationAndPointDataProducer;
+import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.PointPositionSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.PointVelocitySensorDataSource;
 import us.ihmc.utilities.math.DampedLeastSquaresSolver;
@@ -87,13 +86,13 @@ public abstract class MomentumBasedController implements RobotController, Desire
    protected final CommonWalkingReferenceFrames referenceFrames;
    protected final TwistCalculator twistCalculator;
    protected final List<ContactablePlaneBody> contactablePlaneBodies;
-   protected final HashMap<ContactablePlaneBody, YoFramePoint> filteredCentersOfPressureWorld = new HashMap<ContactablePlaneBody, YoFramePoint>();
-   private final HashMap<ContactablePlaneBody, YoFramePoint2d> unfilteredCentersOfPressure2d = new HashMap<ContactablePlaneBody, YoFramePoint2d>();
-   private final HashMap<ContactablePlaneBody, AlphaFilteredYoFramePoint2d> filteredCentersOfPressure2d = new HashMap<ContactablePlaneBody,
+   protected final LinkedHashMap<ContactablePlaneBody, YoFramePoint> filteredCentersOfPressureWorld = new LinkedHashMap<ContactablePlaneBody, YoFramePoint>();
+   private final LinkedHashMap<ContactablePlaneBody, YoFramePoint2d> unfilteredCentersOfPressure2d = new LinkedHashMap<ContactablePlaneBody, YoFramePoint2d>();
+   private final LinkedHashMap<ContactablePlaneBody, AlphaFilteredYoFramePoint2d> filteredCentersOfPressure2d = new LinkedHashMap<ContactablePlaneBody,
                                                                                                              AlphaFilteredYoFramePoint2d>();
-   private final HashMap<ContactablePlaneBody, DoubleYoVariable> groundReactionForceMagnitudes = new HashMap<ContactablePlaneBody, DoubleYoVariable>();
+   private final LinkedHashMap<ContactablePlaneBody, DoubleYoVariable> groundReactionForceMagnitudes = new LinkedHashMap<ContactablePlaneBody, DoubleYoVariable>();
    private final DoubleYoVariable alphaCoP = new DoubleYoVariable("alphaCoP", registry);
-   private final HashMap<ContactablePlaneBody, BooleanYoVariable> copFilterResetRequests = new HashMap<ContactablePlaneBody, BooleanYoVariable>();
+   private final LinkedHashMap<ContactablePlaneBody, BooleanYoVariable> copFilterResetRequests = new LinkedHashMap<ContactablePlaneBody, BooleanYoVariable>();
    protected final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
    protected final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
    protected final DoubleYoVariable yoTime;
@@ -117,7 +116,7 @@ public abstract class MomentumBasedController implements RobotController, Desire
    protected final YoFrameVector groundReactionTorqueCheck;
    protected final YoFrameVector groundReactionForceCheck;
 
-   protected final HashMap<OneDoFJoint, DoubleYoVariable> desiredAccelerationYoVariables = new HashMap<OneDoFJoint, DoubleYoVariable>();
+   protected final LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredAccelerationYoVariables = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
 
    protected final SpatialForceVector gravitationalWrench;
    protected final ProcessedOutputsInterface processedOutputs;

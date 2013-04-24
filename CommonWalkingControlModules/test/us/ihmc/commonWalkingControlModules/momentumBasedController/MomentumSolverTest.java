@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -105,7 +105,7 @@ public class MomentumSolverTest
       SpatialForceVector desiredMomentumRate = new SpatialForceVector(centerOfMassFrame, RandomTools.generateRandomVector(random),
                                                   RandomTools.generateRandomVector(random));
 
-      Map<InverseDynamicsJoint, DenseMatrix64F> jointAccelerations = new HashMap<InverseDynamicsJoint, DenseMatrix64F>();
+      Map<InverseDynamicsJoint, DenseMatrix64F> jointAccelerations = new LinkedHashMap<InverseDynamicsJoint, DenseMatrix64F>();
       for (RevoluteJoint joint : revoluteJoints)
       {
          DenseMatrix64F jointSpaceAcceleration = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
@@ -155,7 +155,7 @@ public class MomentumSolverTest
       SpatialForceVector desiredMomentumRate = new SpatialForceVector(centerOfMassFrame, RandomTools.generateRandomVector(random),
                                                   RandomTools.generateRandomVector(random));
 
-      Map<InverseDynamicsJoint, DenseMatrix64F> jointAccelerations = new HashMap<InverseDynamicsJoint, DenseMatrix64F>();
+      Map<InverseDynamicsJoint, DenseMatrix64F> jointAccelerations = new LinkedHashMap<InverseDynamicsJoint, DenseMatrix64F>();
       for (RevoluteJoint joint : revoluteJoints)
       {
          DenseMatrix64F jointSpaceAcceleration = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);

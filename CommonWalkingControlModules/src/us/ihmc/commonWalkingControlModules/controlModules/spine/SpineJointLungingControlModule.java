@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.spine;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.vecmath.Matrix3d;
@@ -46,8 +46,8 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
 
 	private final FrameVector forceVectorDueToGravity;
 	
-	private HashMap<InverseDynamicsJoint, FrameVector> torqueAboutJointOriginDueToGravity;
-	private HashMap<InverseDynamicsJoint, Double> torqueAboutJointOriginDueToGravityAboutJointAxis;
+	private LinkedHashMap<InverseDynamicsJoint, FrameVector> torqueAboutJointOriginDueToGravity;
+	private LinkedHashMap<InverseDynamicsJoint, Double> torqueAboutJointOriginDueToGravityAboutJointAxis;
 	private final double maxHipTorque;
 	
 
@@ -113,12 +113,12 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
 
 		this.forceVectorDueToGravity = new FrameVector(worldFrame, 0.0, 0.0, gravity * upperBodyMoI.getMass());
 		
-		this.torqueAboutJointOriginDueToGravity = new HashMap<InverseDynamicsJoint, FrameVector>(3);
+		this.torqueAboutJointOriginDueToGravity = new LinkedHashMap<InverseDynamicsJoint, FrameVector>(3);
 		this.torqueAboutJointOriginDueToGravity.put(spineRollIDjoint, new FrameVector(worldFrame));
 		this.torqueAboutJointOriginDueToGravity.put(spineYawIDjoint, new FrameVector(worldFrame));
 		this.torqueAboutJointOriginDueToGravity.put(spinePitchIDjoint, new FrameVector(worldFrame));
 		
-		this.torqueAboutJointOriginDueToGravityAboutJointAxis = new HashMap<InverseDynamicsJoint, Double>(3);
+		this.torqueAboutJointOriginDueToGravityAboutJointAxis = new LinkedHashMap<InverseDynamicsJoint, Double>(3);
 
 		populateYoVariables();
 		populateControllers();

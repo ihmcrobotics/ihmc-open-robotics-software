@@ -5,7 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.xml.bind.JAXBContext;
@@ -20,7 +20,7 @@ import us.ihmc.utilities.FileTools;
 
 public class JaxbSDFLoader
 {
-   private final HashMap<String, GeneralizedSDFRobotModel> generalizedSDFRobotModels = new HashMap<String, GeneralizedSDFRobotModel>();
+   private final LinkedHashMap<String, GeneralizedSDFRobotModel> generalizedSDFRobotModels = new LinkedHashMap<String, GeneralizedSDFRobotModel>();
    private final ArrayList<SDFWorld.Road> roads = new ArrayList<SDFWorld.Road>();
 
    

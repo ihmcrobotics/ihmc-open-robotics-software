@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
@@ -16,8 +15,8 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
 {
    private final ReferenceFrame centerOfMassFrame;
 
-   private final HashMap<PlaneContactState, Double> coefficientsOfFriction = new HashMap<PlaneContactState, Double>();
-   private final HashMap<PlaneContactState, Double> rotationalCoefficientsOfFriction = new HashMap<PlaneContactState, Double>();
+   private final LinkedHashMap<PlaneContactState, Double> coefficientsOfFriction = new LinkedHashMap<PlaneContactState, Double>();
+   private final LinkedHashMap<PlaneContactState, Double> rotationalCoefficientsOfFriction = new LinkedHashMap<PlaneContactState, Double>();
 
    private final LinkedHashMap<PlaneContactState, FrameVector> forces = new LinkedHashMap<PlaneContactState, FrameVector>();
    private final LinkedHashMap<PlaneContactState, FramePoint2d> centersOfPressure = new LinkedHashMap<PlaneContactState, FramePoint2d>();

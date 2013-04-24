@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.media.j3d.Transform3D;
@@ -59,7 +59,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
                                  SideDependentList<HandControllerInterface> handControllers, LidarControllerInterface lidarControllerInterface, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
                                  YoVariableRegistry registry, GUISetterUpperRegistry guiSetterUpperRegistry, ProcessedOutputsInterface processedOutputs)
    {
-      HashMap<ContactablePlaneBody, RigidBody> contactablePlaneBodiesAndBases = new HashMap<ContactablePlaneBody, RigidBody>();
+      LinkedHashMap<ContactablePlaneBody, RigidBody> contactablePlaneBodiesAndBases = new LinkedHashMap<ContactablePlaneBody, RigidBody>();
 
       // TODO: code duplication from driving controller
       InverseDynamicsJoint[] allJoints = ScrewTools.computeJointsInOrder(fullRobotModel.getElevator());
