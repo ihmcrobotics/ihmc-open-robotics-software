@@ -2,8 +2,8 @@ package us.ihmc.sensorProcessing.stateEstimation;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,21 +21,21 @@ import us.ihmc.utilities.math.MatrixTools;
 
 public class ProcessModelElementGroup
 {
-   private final Map<ControlFlowOutputPort<?>, ProcessModelElement> stateToProcessModelElementMap = new HashMap<ControlFlowOutputPort<?>, ProcessModelElement>();
+   private final Map<ControlFlowOutputPort<?>, ProcessModelElement> stateToProcessModelElementMap = new LinkedHashMap<ControlFlowOutputPort<?>, ProcessModelElement>();
    private final List<ControlFlowInputPort<?>> allInputs;
-   private final Map<ControlFlowInputPort<?>, Integer> processInputStartIndices = new HashMap<ControlFlowInputPort<?>, Integer>();
+   private final Map<ControlFlowInputPort<?>, Integer> processInputStartIndices = new LinkedHashMap<ControlFlowInputPort<?>, Integer>();
 
    private final List<ControlFlowOutputPort<?>> allStates = new ArrayList<ControlFlowOutputPort<?>>();
-   private final Map<ControlFlowOutputPort<?>, Integer> allStateStartIndices = new HashMap<ControlFlowOutputPort<?>, Integer>();
-   private final Map<ControlFlowOutputPort<?>, Integer> stateSizes = new HashMap<ControlFlowOutputPort<?>, Integer>();
-   private final Map<ControlFlowInputPort<?>, Integer> inputSizes = new HashMap<ControlFlowInputPort<?>, Integer>();
+   private final Map<ControlFlowOutputPort<?>, Integer> allStateStartIndices = new LinkedHashMap<ControlFlowOutputPort<?>, Integer>();
+   private final Map<ControlFlowOutputPort<?>, Integer> stateSizes = new LinkedHashMap<ControlFlowOutputPort<?>, Integer>();
+   private final Map<ControlFlowInputPort<?>, Integer> inputSizes = new LinkedHashMap<ControlFlowInputPort<?>, Integer>();
    private final int inputMatrixSize;
    private final int stateMatrixSize;
 
    // continuous time process model (requires discretization)
    private final List<ProcessModelElement> continuousTimeProcessModelElements = new ArrayList<ProcessModelElement>();
    private final List<ControlFlowOutputPort<?>> continuousTimeStates;
-   private final Map<ControlFlowOutputPort<?>, Integer> continuousStateStartIndices = new HashMap<ControlFlowOutputPort<?>, Integer>();
+   private final Map<ControlFlowOutputPort<?>, Integer> continuousStateStartIndices = new LinkedHashMap<ControlFlowOutputPort<?>, Integer>();
    private final boolean isContinuousTimeModelTimeVariant;
    private final StateSpaceSystemDiscretizer discretizer;
    private final DenseMatrix64F FContinuous;
@@ -45,7 +45,7 @@ public class ProcessModelElementGroup
    // discrete time process model (does not require discretization)
    private final List<ProcessModelElement> discreteTimeProcessModelElements = new ArrayList<ProcessModelElement>();
    private final List<ControlFlowOutputPort<?>> discreteTimeStates;
-   private final Map<ControlFlowOutputPort<?>, Integer> discreteStateStartIndices = new HashMap<ControlFlowOutputPort<?>, Integer>();
+   private final Map<ControlFlowOutputPort<?>, Integer> discreteStateStartIndices = new LinkedHashMap<ControlFlowOutputPort<?>, Integer>();
    private final boolean isDiscreteTimeModelTimeVariant;
    private final DenseMatrix64F FDiscrete;
    private final DenseMatrix64F GDiscrete;

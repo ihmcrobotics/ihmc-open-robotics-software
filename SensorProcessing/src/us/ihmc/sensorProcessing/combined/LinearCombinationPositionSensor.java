@@ -1,12 +1,13 @@
 package us.ihmc.sensorProcessing.combined;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import us.ihmc.sensorProcessing.ProcessedPositionSensor;
 
 public class LinearCombinationPositionSensor implements ProcessedPositionSensor
 {
-   private HashMap<ProcessedPositionSensor, Double> sensorsAndCoefficients = new HashMap<ProcessedPositionSensor, Double>();
+   private LinkedHashMap<ProcessedPositionSensor, Double> sensorsAndCoefficients = new LinkedHashMap<ProcessedPositionSensor, Double>();
    
    public LinearCombinationPositionSensor(HashMap<ProcessedPositionSensor, Double> sensorsAndCoefficients)
    {

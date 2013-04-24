@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,7 +16,7 @@ public class MeasurementModel
 {
    private final List<MeasurementModelElement> measurementModelElements;
 
-   private final Map<MeasurementModelElement, Integer> measurementStartIndices = new HashMap<MeasurementModelElement, Integer>();
+   private final Map<MeasurementModelElement, Integer> measurementStartIndices = new LinkedHashMap<MeasurementModelElement, Integer>();
    private final Map<ControlFlowOutputPort<?>, Integer> stateStartIndices;
 
    private final DenseMatrix64F H;
@@ -28,7 +28,7 @@ public class MeasurementModel
    public MeasurementModel(List<MeasurementModelElement> measurementModelElements, Map<ControlFlowOutputPort<?>, Integer> stateStartIndices, int stateMatrixSize)
    {
       this.measurementModelElements = measurementModelElements;
-      Map<MeasurementModelElement, Integer> measurementSizes = new HashMap<MeasurementModelElement, Integer>();
+      Map<MeasurementModelElement, Integer> measurementSizes = new LinkedHashMap<MeasurementModelElement, Integer>();
       computeMeasurementSizes(measurementModelElements, measurementSizes);
       MatrixTools.computeIndicesIntoVector(measurementModelElements, measurementStartIndices, measurementSizes);
 

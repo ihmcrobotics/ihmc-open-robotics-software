@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,7 +27,7 @@ public abstract class AbstractMeasurementModelElement implements MeasurementMode
       this.measurementPort = measurementPort;
       measurementCovarianceMatrixBlock = new DenseMatrix64F(covarianceMatrixSize, covarianceMatrixSize);
       scaledMeasurementCovarianceMatrixBlock = new DenseMatrix64F(covarianceMatrixSize, covarianceMatrixSize);
-      outputMatrixBlocks = new HashMap<ControlFlowOutputPort<?>, DenseMatrix64F>();
+      outputMatrixBlocks = new LinkedHashMap<ControlFlowOutputPort<?>, DenseMatrix64F>();
       covarianceMatrixScaling = new DoubleYoVariable(name + "CovScaling", registry);
       covarianceMatrixScaling.set(1.0);
    }

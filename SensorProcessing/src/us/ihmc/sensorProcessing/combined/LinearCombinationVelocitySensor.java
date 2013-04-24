@@ -1,12 +1,13 @@
 package us.ihmc.sensorProcessing.combined;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import us.ihmc.sensorProcessing.ProcessedVelocitySensor;
 
 public class LinearCombinationVelocitySensor implements ProcessedVelocitySensor
 {
-   private HashMap<ProcessedVelocitySensor, Double> sensorsAndCoefficients = new HashMap<ProcessedVelocitySensor, Double>();
+   private LinkedHashMap<ProcessedVelocitySensor, Double> sensorsAndCoefficients = new LinkedHashMap<ProcessedVelocitySensor, Double>();
    
    public LinearCombinationVelocitySensor(HashMap<ProcessedVelocitySensor, Double> sensorsAndCoefficients)
    {      

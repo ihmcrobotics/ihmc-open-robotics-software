@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +15,7 @@ public class ProcessModel
    private final DenseMatrix64F F;
    private final DenseMatrix64F G;
    private final DenseMatrix64F Q;
-   private final Map<ControlFlowOutputPort<?>, Integer> stateStartIndices = new HashMap<ControlFlowOutputPort<?>, Integer>();
+   private final Map<ControlFlowOutputPort<?>, Integer> stateStartIndices = new LinkedHashMap<ControlFlowOutputPort<?>, Integer>();
    private final DenseMatrix64F correctionBlock = new DenseMatrix64F(1, 1);
    private final int stateMatrixSize;
    private final int inputMatrixSize;

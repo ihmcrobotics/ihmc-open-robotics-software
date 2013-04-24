@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.combined;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import us.ihmc.sensorProcessing.ProcessedPositionSensor;
 import us.ihmc.utilities.math.MathTools;
@@ -19,12 +19,12 @@ public class WeightedSubtractionPositionSensor extends LinearCombinationPosition
       super(createSensorsAndCoefficientsMap(sensor1, sensor2, weight1, weight2));
    }
 
-   private static HashMap<ProcessedPositionSensor, Double> createSensorsAndCoefficientsMap(ProcessedPositionSensor sensor1, ProcessedPositionSensor sensor2, double weight1, double weight2)
+   private static LinkedHashMap<ProcessedPositionSensor, Double> createSensorsAndCoefficientsMap(ProcessedPositionSensor sensor1, ProcessedPositionSensor sensor2, double weight1, double weight2)
    {
       MathTools.checkIfInRange(weight1, 0.0, Double.POSITIVE_INFINITY);
       MathTools.checkIfInRange(weight2, 0.0, Double.POSITIVE_INFINITY);
       
-      HashMap<ProcessedPositionSensor, Double> ret = new HashMap<ProcessedPositionSensor, Double>();
+      LinkedHashMap<ProcessedPositionSensor, Double> ret = new LinkedHashMap<ProcessedPositionSensor, Double>();
       ret.put(sensor1, weight1);
       ret.put(sensor2, -weight2);
       return ret;

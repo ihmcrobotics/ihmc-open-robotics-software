@@ -1,7 +1,7 @@
 package us.ihmc.sensorProcessing.encoder.comparison;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import us.ihmc.sensorProcessing.encoder.SimulatedEncoder;
 import us.ihmc.sensorProcessing.encoder.processors.EncoderProcessor;
@@ -23,9 +23,9 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 public class EncoderProcessorComparer
 {
    private final YoVariableRegistry registry;
-   private final HashMap<EncoderProcessor, String> encoderProcessors = new HashMap<EncoderProcessor, String>();
-   private final HashMap<EncoderProcessor, DoubleYoVariable> processedPositions = new HashMap<EncoderProcessor, DoubleYoVariable>();
-   private final HashMap<EncoderProcessor, DoubleYoVariable> processedRates = new HashMap<EncoderProcessor, DoubleYoVariable>();
+   private final LinkedHashMap<EncoderProcessor, String> encoderProcessors = new LinkedHashMap<EncoderProcessor, String>();
+   private final LinkedHashMap<EncoderProcessor, DoubleYoVariable> processedPositions = new LinkedHashMap<EncoderProcessor, DoubleYoVariable>();
+   private final LinkedHashMap<EncoderProcessor, DoubleYoVariable> processedRates = new LinkedHashMap<EncoderProcessor, DoubleYoVariable>();
    private final IntegerYoVariable rawTicks;
    private final DoubleYoVariable rawPosition;
    private final DoubleYoVariable time;
