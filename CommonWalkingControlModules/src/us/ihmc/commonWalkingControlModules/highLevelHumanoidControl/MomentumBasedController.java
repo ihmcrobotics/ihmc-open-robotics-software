@@ -21,7 +21,12 @@ import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDi
 import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributorOutputData;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.*;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeControlModule;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumSolver;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumSolverInterface;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAccelerationControlModule;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAccelerationData;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -29,6 +34,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.simulatedSensors.PointPositionSensorDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.PointVelocitySensorDefinition;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationDataSource;
+import us.ihmc.sensorProcessing.stateEstimation.DesiredAccelerationAndPointDataProducer;
 import us.ihmc.sensorProcessing.stateEstimation.PointPositionSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.PointVelocitySensorDataSource;
 import us.ihmc.utilities.math.DampedLeastSquaresSolver;
@@ -67,7 +73,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
-public abstract class MomentumBasedController implements RobotController
+public abstract class MomentumBasedController implements RobotController, DesiredAccelerationAndPointDataProducer
 {
    private final String name = getClass().getSimpleName();
    protected final YoVariableRegistry registry = new YoVariableRegistry(name);
