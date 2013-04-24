@@ -1,5 +1,6 @@
 package us.ihmc.graphics3DAdapter.camera;
 
+import javax.vecmath.Tuple3d;
 
 
 public class CameraConfiguration
@@ -114,6 +115,16 @@ public class CameraConfiguration
       this.dollyDX = dollyDX;
       this.dollyDY = dollyDY;
       this.dollyDZ = dollyDZ;
+   }
+
+   public void setCameraFix(Tuple3d cameraFix)
+   {
+      setCameraFix(cameraFix.getX(), cameraFix.getY(), cameraFix.getZ());
+   }
+
+   public void setCameraPosition(Tuple3d cameraPosition)
+   {
+      setCameraPosition(cameraPosition.getX(), cameraPosition.getY(), cameraPosition.getZ());
    }
 
    public void setCameraFix(double fixX, double fixY, double fixZ)
