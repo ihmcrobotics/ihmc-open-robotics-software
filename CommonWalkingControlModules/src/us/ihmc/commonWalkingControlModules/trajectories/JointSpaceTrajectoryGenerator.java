@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import us.ihmc.commonWalkingControlModules.kinematics.BodyPositionInTimeEstimator;
 import us.ihmc.commonWalkingControlModules.kinematics.LegInverseKinematicsCalculator;
@@ -74,9 +74,9 @@ public class JointSpaceTrajectoryGenerator
    private final SideDependentList<YoFramePoint> initialPositionInAnkleZUpFrame = new SideDependentList<YoFramePoint>(); 
    private final YoFramePoint finalPositionInPelvisFrame;
    private final YoFrameOrientation finalOrientationInPelvisFrame;
-   private final HashMap<LegJointName, DoubleYoVariable> initialJointAngles = new HashMap<LegJointName, DoubleYoVariable>();
-   private final HashMap<LegJointName, DoubleYoVariable> initialJointVelocities = new HashMap<LegJointName, DoubleYoVariable>();
-   private final HashMap<LegJointName, DoubleYoVariable> initialJointAccelerations = new HashMap<LegJointName, DoubleYoVariable>();
+   private final LinkedHashMap<LegJointName, DoubleYoVariable> initialJointAngles = new LinkedHashMap<LegJointName, DoubleYoVariable>();
+   private final LinkedHashMap<LegJointName, DoubleYoVariable> initialJointVelocities = new LinkedHashMap<LegJointName, DoubleYoVariable>();
+   private final LinkedHashMap<LegJointName, DoubleYoVariable> initialJointAccelerations = new LinkedHashMap<LegJointName, DoubleYoVariable>();
 
    private final DoubleYoVariable swingDuration;
 

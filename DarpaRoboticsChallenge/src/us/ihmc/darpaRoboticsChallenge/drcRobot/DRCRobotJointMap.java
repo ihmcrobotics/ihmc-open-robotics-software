@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.drcRobot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.vecmath.Point2d;
@@ -40,14 +41,14 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
    private final SpineJointName[] spineJoints = {SpineJointName.SPINE_PITCH, SpineJointName.SPINE_ROLL, SpineJointName.SPINE_YAW};
    private final NeckJointName[] neckJoints = {NeckJointName.LOWER_NECK_PITCH};
 
-   private final HashMap<String, JointRole> jointRoles = new HashMap<String, JointRole>();
+   private final LinkedHashMap<String, JointRole> jointRoles = new LinkedHashMap<String, JointRole>();
 
-   private final HashMap<String, Pair<RobotSide, LegJointName>> legJointNames = new HashMap<String, Pair<RobotSide, LegJointName>>();
-   private final HashMap<String, Pair<RobotSide, ArmJointName>> armJointNames = new HashMap<String, Pair<RobotSide, ArmJointName>>();
-   private final HashMap<String, SpineJointName> spineJointNames = new HashMap<String, SpineJointName>();
-   private final HashMap<String, NeckJointName> neckJointNames = new HashMap<String, NeckJointName>();
+   private final LinkedHashMap<String, Pair<RobotSide, LegJointName>> legJointNames = new LinkedHashMap<String, Pair<RobotSide, LegJointName>>();
+   private final LinkedHashMap<String, Pair<RobotSide, ArmJointName>> armJointNames = new LinkedHashMap<String, Pair<RobotSide, ArmJointName>>();
+   private final LinkedHashMap<String, SpineJointName> spineJointNames = new LinkedHashMap<String, SpineJointName>();
+   private final LinkedHashMap<String, NeckJointName> neckJointNames = new LinkedHashMap<String, NeckJointName>();
 
-   private final HashMap<String, Pair<RobotSide, LimbName>> limbNames = new HashMap<String, Pair<RobotSide, LimbName>>();
+   private final LinkedHashMap<String, Pair<RobotSide, LimbName>> limbNames = new LinkedHashMap<String, Pair<RobotSide, LimbName>>();
 
    private final SideDependentList<String> jointBeforeFeetNames = new SideDependentList<String>();
 

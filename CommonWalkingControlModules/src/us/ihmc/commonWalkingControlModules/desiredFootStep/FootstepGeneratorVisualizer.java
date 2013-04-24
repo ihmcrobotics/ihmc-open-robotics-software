@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -47,8 +47,8 @@ public class FootstepGeneratorVisualizer
    private final ArrayList<YoFramePose> contactPoses = new ArrayList<YoFramePose>();
    private final ArrayList<YoFrameConvexPolygon2d> contactPolygonsWorld = new ArrayList<YoFrameConvexPolygon2d>();
 
-   private final HashMap<String, YoFramePose> contactPosesHashMap = new HashMap<String, YoFramePose>();
-   private final HashMap<String, YoFrameConvexPolygon2d> contactPolygonsHashMap = new HashMap<String, YoFrameConvexPolygon2d>();
+   private final LinkedHashMap<String, YoFramePose> contactPosesHashMap = new LinkedHashMap<String, YoFramePose>();
+   private final LinkedHashMap<String, YoFrameConvexPolygon2d> contactPolygonsHashMap = new LinkedHashMap<String, YoFrameConvexPolygon2d>();
 
 
    public FootstepGeneratorVisualizer(int maxNumberOfContacts, int maxPointsPerContact, YoVariableRegistry parentRegistry,

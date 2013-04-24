@@ -1,7 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.ros;
 
 import java.net.URI;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
 import org.ros.internal.message.Message;
@@ -17,8 +17,8 @@ import org.ros.node.topic.Subscriber;
 
 public class RosMainNode implements NodeMain
 {
-   private final HashMap<String, RosTopicSubscriberInterface<? extends Message>> subscribers = new HashMap<String, RosTopicSubscriberInterface<? extends Message>>();
-   private final HashMap<String, RosTopicPublisher<? extends Message>> publishers = new HashMap<String, RosTopicPublisher<? extends Message>>();
+   private final LinkedHashMap<String, RosTopicSubscriberInterface<? extends Message>> subscribers = new LinkedHashMap<String, RosTopicSubscriberInterface<? extends Message>>();
+   private final LinkedHashMap<String, RosTopicPublisher<? extends Message>> publishers = new LinkedHashMap<String, RosTopicPublisher<? extends Message>>();
    
    private final URI masterURI;
    private boolean isStarted = false;

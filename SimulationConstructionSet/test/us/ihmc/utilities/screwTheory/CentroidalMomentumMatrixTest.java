@@ -1,6 +1,6 @@
 package us.ihmc.utilities.screwTheory;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Random;
 
 import javax.media.j3d.Transform3D;
@@ -32,7 +32,7 @@ public class CentroidalMomentumMatrixTest
 
       Robot robot = new Robot("robot");
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      HashMap<RevoluteJoint, PinJoint> jointMap = new HashMap<RevoluteJoint, PinJoint>();
+      LinkedHashMap<RevoluteJoint, PinJoint> jointMap = new LinkedHashMap<RevoluteJoint, PinJoint>();
       ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3D());
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
       double gravity = 0.0;

@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class DRCDashboardTypes
 {
@@ -10,7 +10,7 @@ public class DRCDashboardTypes
       QUAL1, QUAL2, QUAL3, QUAL4, VRC1, VRC2, VRC3, DRIVING_TASK1, DRIVING_TASK1_WITH_EXTERNAL_CAMS, DRIVING_TEST_TRACK_WITH_EXTERNAL_CAMS;
    }
 
-   private static final HashMap<DRCTask, String> taskPath = new HashMap<DRCTask, String>()
+   private static final LinkedHashMap<DRCTask, String> taskPath = new LinkedHashMap<DRCTask, String>()
    {
       private static final long serialVersionUID = 7295926598139266176L;
 

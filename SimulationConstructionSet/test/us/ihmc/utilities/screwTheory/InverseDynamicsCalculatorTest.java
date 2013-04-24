@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Random;
 
 import javax.media.j3d.Transform3D;
@@ -112,7 +113,7 @@ public class InverseDynamicsCalculatorTest
    {
       Robot robot = new Robot("robot");
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      HashMap<RevoluteJoint, PinJoint> jointMap = new HashMap<RevoluteJoint, PinJoint>();
+      LinkedHashMap<RevoluteJoint, PinJoint> jointMap = new LinkedHashMap<RevoluteJoint, PinJoint>();
       ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3D());
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
       Vector3d[] jointAxes = {X, Y, Z, X};
@@ -132,7 +133,7 @@ public class InverseDynamicsCalculatorTest
    {
       Robot robot = new Robot("robot");
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      HashMap<RevoluteJoint, PinJoint> jointMap = new HashMap<RevoluteJoint, PinJoint>();
+      LinkedHashMap<RevoluteJoint, PinJoint> jointMap = new LinkedHashMap<RevoluteJoint, PinJoint>();
       ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3D());
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
       double gravity = 0.0;
@@ -157,7 +158,7 @@ public class InverseDynamicsCalculatorTest
    {
       Robot robot = new Robot("robot");
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      HashMap<RevoluteJoint, PinJoint> jointMap = new HashMap<RevoluteJoint, PinJoint>();
+      LinkedHashMap<RevoluteJoint, PinJoint> jointMap = new LinkedHashMap<RevoluteJoint, PinJoint>();
       ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3D());
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
       double gravity = -9.8;
@@ -182,7 +183,7 @@ public class InverseDynamicsCalculatorTest
    {
       Robot robot = new Robot("robot");
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      HashMap<RevoluteJoint, PinJoint> jointMap = new HashMap<RevoluteJoint, PinJoint>();
+      LinkedHashMap<RevoluteJoint, PinJoint> jointMap = new LinkedHashMap<RevoluteJoint, PinJoint>();
       ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3D());
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
       Vector3d[] jointAxes = {X, Y, Z, X};
@@ -200,7 +201,7 @@ public class InverseDynamicsCalculatorTest
    {
       Robot robot = new Robot("robot");
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      HashMap<RevoluteJoint, PinJoint> jointMap = new HashMap<RevoluteJoint, PinJoint>();
+      LinkedHashMap<RevoluteJoint, PinJoint> jointMap = new LinkedHashMap<RevoluteJoint, PinJoint>();
       ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3D());
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
       Vector3d[] jointAxes = {X, Y, Z, X};

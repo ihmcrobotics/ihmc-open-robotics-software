@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
@@ -20,7 +21,7 @@ public class FootPolygonVisualizer implements Updatable
 {
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
-   private final HashMap<PlaneContactState, YoFrameConvexPolygon2d> yoFootPolygons = new HashMap<PlaneContactState, YoFrameConvexPolygon2d>();
+   private final HashMap<PlaneContactState, YoFrameConvexPolygon2d> yoFootPolygons = new LinkedHashMap<PlaneContactState, YoFrameConvexPolygon2d>();
    private static final List<Color> colors = new ArrayList<Color>();
    static
    {

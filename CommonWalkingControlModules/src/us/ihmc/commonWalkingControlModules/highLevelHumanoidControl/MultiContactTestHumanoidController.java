@@ -3,14 +3,15 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributor;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributor;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeControlModule;
@@ -49,20 +50,20 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
    private final ChestOrientationControlModule chestOrientationControlModule;
 
    private final List<OneDoFJoint> positionControlJoints;
-   private final HashMap<OneDoFJoint, Double> desiredJointPositions = new HashMap<OneDoFJoint, Double>();
+   private final LinkedHashMap<OneDoFJoint, Double> desiredJointPositions = new LinkedHashMap<OneDoFJoint, Double>();
 
    private final ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationPort;
    private final YoFrameOrientation desiredPelvisOrientation = new YoFrameOrientation("desiredPelvis", worldFrame, registry);
 
    private final ReferenceFrame pelvisFrame;
 
-   private final HashMap<ContactablePlaneBody, EndEffectorControlModule> endEffectorControlModules = new HashMap<ContactablePlaneBody,
+   private final LinkedHashMap<ContactablePlaneBody, EndEffectorControlModule> endEffectorControlModules = new LinkedHashMap<ContactablePlaneBody,
                                                                                                         EndEffectorControlModule>();
-   private final HashMap<ContactablePlaneBody, GeometricJacobian> jacobians = new HashMap<ContactablePlaneBody, GeometricJacobian>();
-   private final HashMap<ContactablePlaneBody, FixedPositionTrajectoryGenerator> swingPositionTrajectoryGenerators = new HashMap<ContactablePlaneBody,
+   private final LinkedHashMap<ContactablePlaneBody, GeometricJacobian> jacobians = new LinkedHashMap<ContactablePlaneBody, GeometricJacobian>();
+   private final LinkedHashMap<ContactablePlaneBody, FixedPositionTrajectoryGenerator> swingPositionTrajectoryGenerators = new LinkedHashMap<ContactablePlaneBody,
                                                                                                                         FixedPositionTrajectoryGenerator>();
-   private final HashMap<ContactablePlaneBody, FixedOrientationTrajectoryGenerator> swingOrientationTrajectoryGenerators =
-      new HashMap<ContactablePlaneBody, FixedOrientationTrajectoryGenerator>();
+   private final LinkedHashMap<ContactablePlaneBody, FixedOrientationTrajectoryGenerator> swingOrientationTrajectoryGenerators =
+      new LinkedHashMap<ContactablePlaneBody, FixedOrientationTrajectoryGenerator>();
 
 
    public MultiContactTestHumanoidController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian,

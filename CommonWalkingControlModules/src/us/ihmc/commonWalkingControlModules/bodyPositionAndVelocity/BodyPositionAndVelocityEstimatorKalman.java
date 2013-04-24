@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.bodyPositionAndVelocity;
 
 import java.util.EnumMap;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.vecmath.Tuple3d;
@@ -36,8 +36,8 @@ public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVe
    private final ProcessedTimeSensorsReadOnlyInterface processedTimeSensorsReadOnlyInterface;
    private final SensorProcessor bodyReferenceFrameUpdater;
 
-   private final HashMap<BodyPositionEstimator, Integer> bodyPositionEstimatorIndices = new HashMap<BodyPositionEstimator, Integer>();
-   private final HashMap<BodyVelocityEstimator, Integer> bodyVelocityEstimatorIndices = new HashMap<BodyVelocityEstimator, Integer>();
+   private final LinkedHashMap<BodyPositionEstimator, Integer> bodyPositionEstimatorIndices = new LinkedHashMap<BodyPositionEstimator, Integer>();
+   private final LinkedHashMap<BodyVelocityEstimator, Integer> bodyVelocityEstimatorIndices = new LinkedHashMap<BodyVelocityEstimator, Integer>();
    private final BodyPositionEstimator bodyPositionEstimatorVicon;
 
    private final EnumMap<Direction, KalmanFilter> kalmanFilters = new EnumMap<Direction, KalmanFilter>(Direction.class);

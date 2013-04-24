@@ -1,7 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -74,7 +74,7 @@ public class DRCDemoEnvironmentSimpleSteeringWheelContact implements CommonAvata
       
       ExternalForcePoint[] pts = new ExternalForcePoint[wheelPts.size() + boxPts.size()];
       
-      Set<GroundContactPoint> set = new HashSet<GroundContactPoint>();
+      Set<GroundContactPoint> set = new LinkedHashSet<GroundContactPoint>();
       
       set.addAll(wheelPts);
       set.addAll(boxPts);

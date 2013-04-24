@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.sensors;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -121,7 +121,7 @@ public class MassMatrixEstimatingToolRigidBody
       jointsToIgnore.addAll(twistCalculator.getRootBody().getChildrenJoints());
       jointsToIgnore.remove(toolJoint);
       
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(ReferenceFrame.getWorldFrame(), new HashMap<RigidBody, Wrench>(),
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(ReferenceFrame.getWorldFrame(), new LinkedHashMap<RigidBody, Wrench>(),
             jointsToIgnore, spatialAccelerationCalculator, twistCalculator);
 
          

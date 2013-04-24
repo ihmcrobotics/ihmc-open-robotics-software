@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
@@ -43,8 +43,8 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
    private final ReferenceFrame centerOfMassFrame;
 
    private final SideDependentList<PlaneContactState> contactStates = new SideDependentList<PlaneContactState>();
-   private final HashMap<PlaneContactState, FrameVector> forces = new HashMap<PlaneContactState, FrameVector>();
-   private final HashMap<PlaneContactState, Double> normalTorques = new HashMap<PlaneContactState, Double>();
+   private final LinkedHashMap<PlaneContactState, FrameVector> forces = new LinkedHashMap<PlaneContactState, FrameVector>();
+   private final LinkedHashMap<PlaneContactState, Double> normalTorques = new LinkedHashMap<PlaneContactState, Double>();
    private final SideDependentList<FramePoint2d> centersOfPressureInZUp = new SideDependentList<FramePoint2d>();
    private final SideDependentList<FramePoint2d> centersOfPressure = new SideDependentList<FramePoint2d>();
 

@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.head;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -20,8 +20,8 @@ public class DesiredHeadOrientationProvider
    private HeadOrientationControlModule headOrientationControlModule;
 
    private ObjectConsumer<HeadOrientationPacket> headOrientationPacketConsumer;
-   private final HashMap<String, ReferenceFrame> availableHeadControlFrames = new HashMap<String, ReferenceFrame>();
-   private final HashMap<String, RigidBody> availableBases = new HashMap<String, RigidBody>();
+   private final LinkedHashMap<String, ReferenceFrame> availableHeadControlFrames = new LinkedHashMap<String, ReferenceFrame>();
+   private final LinkedHashMap<String, RigidBody> availableBases = new LinkedHashMap<String, RigidBody>();
    
    private double desiredJointForExtendedNeckPitchRangeAngle = 0.0;
 
