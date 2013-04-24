@@ -58,8 +58,18 @@ public class SquaredUpDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot
       
       offset.setZ(groundZ + pelvisToFoot);
 //      offset.add(robot.getPositionInWorld());
-      robot.setPositionInWorld(offset);
-      
+      robot.setPositionInWorld(offset);      
+   }
+   
+   
+   public void getOffset(Vector3d offsetToPack)
+   {
+      offsetToPack.set(offset);
+   }
+   
+   public void setOffset(Vector3d offset)
+   {
+      this.offset.set(offset);
    }
 
 }
