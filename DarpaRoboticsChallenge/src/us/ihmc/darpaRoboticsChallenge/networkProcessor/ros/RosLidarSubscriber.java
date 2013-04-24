@@ -15,16 +15,14 @@ public abstract class RosLidarSubscriber extends AbstractRosTopicSubscriber<sens
    public void onNewMessage(LaserScan message)
    {
       long timestamp = message.getHeader().getStamp().totalNsecs();
-      float[] ranges = message.getRanges();
 
-      PolarLidarScanDefinition polarLidarScanDefinition = new PolarLidarScanDefinition(ranges.length, 1, message.getAngleMax(), message.getAngleMin(),
-                                                             message.getAngleIncrement(), message.getTimeIncrement(), message.getScanTime(), 0.0f, 0.0f,
-                                                             message.getRangeMin(), message.getRangeMax());
+      PolarLidarScanDefinition polarLidarScanDefinition = new PolarLidarScanDefinition(message.getRanges().length, 1, message.getAngleMax(),
+                                                             message.getAngleMin(), message.getAngleIncrement(), message.getTimeIncrement(),
+                                                             message.getScanTime(), 0.0f, 0.0f, message.getRangeMin(), message.getRangeMax());
 
       verifyDataFromGazeboRemainsTheSame(polarLidarScanDefinition);
 
-      newScan(timestamp, ranges, polarLidarScanDefinition, message.getRangeMin(), message.getRangeMax(), message.getTimeIncrement());
-
+      newScan(timestamp, message.getRanges(), polarLidarScanDefinition, message.getRangeMin(), message.getRangeMax(), message.getTimeIncrement());
    }
 
    private void verifyDataFromGazeboRemainsTheSame(PolarLidarScanDefinition polarLidarScanDefinition)
@@ -35,7 +33,7 @@ public abstract class RosLidarSubscriber extends AbstractRosTopicSubscriber<sens
 
    private void verifyTimeIncrementRemainsZero(PolarLidarScanDefinition polarLidarScanDefinition)
    {
-      if(polarLidarScanDefinition.timeIncrement != 0.0)
+      if (polarLidarScanDefinition.timeIncrement != 0.0)
       {
          System.err.println("WARNING: Gazebo LIDAR time increment no longer zero: " + polarLidarScanDefinition.timeIncrement);
       }
@@ -43,13 +41,13 @@ public abstract class RosLidarSubscriber extends AbstractRosTopicSubscriber<sens
 
    private void verifyLidarScanDefinitionDoesNotChange(PolarLidarScanDefinition polarLidarScanDefinition)
    {
-      if(initialPolarLidarScanDefinition == null)
+      if (initialPolarLidarScanDefinition == null)
       {
          initialPolarLidarScanDefinition = polarLidarScanDefinition;
       }
       else
       {
-         if(!polarLidarScanDefinition.equals(initialPolarLidarScanDefinition))
+         if (!polarLidarScanDefinition.equals(initialPolarLidarScanDefinition))
          {
             System.err.println("WARNING: your scan definition has changed");
             System.err.println("old scan definition:\n" + initialPolarLidarScanDefinition);
