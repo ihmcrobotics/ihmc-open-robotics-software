@@ -56,7 +56,7 @@ public class DRCConfigParameters
    
    // LIDAR:
    public static final boolean STREAM_POLAR_LIDAR = true;
-   public static final double LIDAR_SPINDLE_VELOCITY = 0.25;
+   public static final double LIDAR_SPINDLE_VELOCITY = 0.0;
 
    static final int LIDAR_UPDATE_RATE_OVERRIDE = 3;
    static final int LIDAR_SWEEPS_PER_SCAN = 6;    // 1
@@ -75,11 +75,17 @@ public class DRCConfigParameters
    public static final float LIDAR_SCAN_MAX_ROLL = 0.4f;    // rolling the lidar to simulated a faster update rate
 
    public static final float LDIAR_SCAN_MIN_ROLL = -0.3f;
+
+   public static final float LIDAR_ANGLE_INCREMENT = (float) Math.toRadians(0.25);
+   public static final float LIDAR_TIME_INCREMENT = 0.0f;
+   public static final float LIDAR_SCAN_TIME = 0.0f;
+
+
    public static final double LIDAR_NOISE_LEVEL_OVERRIDE = 0.005;    // DRCGazebo will simulate with: 0.005
    public static final boolean DEBUG_GAZEBO_LIDAR = false;
 
    // LIDAR Processor
-   public static final boolean USE_QUAD_TREE = true;
+   public static final boolean USE_QUAD_TREE = false;
    public static final double GRID_RESOLUTION = 0.005;  // in meters
    public static final float QUADTREE_HEIGHT_THRESHOLD = 0.005f;
    public static final double LIDAR_BLINDNESS_CYLINDAR_SQUARED_RADIUS = 0.1;
