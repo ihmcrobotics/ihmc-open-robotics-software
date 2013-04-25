@@ -19,22 +19,17 @@ import us.ihmc.darpaRoboticsChallenge.sensors.DRCPerfectPoseEstimator;
 import us.ihmc.projectM.R2Sim02.initialSetup.GuiInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.ScsInitialSetup;
-import us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRobotGenerator;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
-import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAccelerationsFromRobotStealerController;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.StateEstimatorErrorCalculatorController;
 import us.ihmc.utilities.Pair;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectCommunicator;
 
 import com.yobotics.simulationconstructionset.GroundContactPoint;
 import com.yobotics.simulationconstructionset.IMUMount;
-import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.KinematicPoint;
 import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.RobotControllerAndParameters;
 import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
@@ -188,25 +183,25 @@ public class DRCSimulationFactory
       }
    }
    
-   public static DesiredCoMAccelerationsFromRobotStealerController createAndAddDesiredCoMAccelerationFromRobotStealerController(ReferenceFrame estimationFrame,
-         double controlDT, int simulationTicksPerControlTick, SDFRobot simulatedRobot, ArrayList<RobotControllerAndParameters> robotControllersAndParameters)
-   {
-      InverseDynamicsJointsFromSCSRobotGenerator generator = new InverseDynamicsJointsFromSCSRobotGenerator(simulatedRobot);
-
-      // TODO: Better way to get estimationJoint
-      Joint estimationJoint = simulatedRobot.getRootJoints().get(0);
-      double comAccelerationProcessNoiseStandardDeviation = Math.sqrt(1e-1);
-      double angularAccelerationProcessNoiseStandardDeviation = Math.sqrt(1e-1);
-
-      DesiredCoMAccelerationsFromRobotStealerController desiredCoMAccelerationsFromRobotStealerController = new DesiredCoMAccelerationsFromRobotStealerController(
-            estimationFrame, comAccelerationProcessNoiseStandardDeviation, angularAccelerationProcessNoiseStandardDeviation, generator, estimationJoint,
-            controlDT);
-
-      RobotControllerAndParameters desiredCoMAccelerationsFromRobotStealerControllerAndParameters = new RobotControllerAndParameters(
-            desiredCoMAccelerationsFromRobotStealerController, simulationTicksPerControlTick);
-      robotControllersAndParameters.add(desiredCoMAccelerationsFromRobotStealerControllerAndParameters);
-
-      return desiredCoMAccelerationsFromRobotStealerController;
-   }
+//   public static DesiredCoMAccelerationsFromRobotStealerController createAndAddDesiredCoMAccelerationFromRobotStealerController(ReferenceFrame estimationFrame,
+//         double controlDT, int simulationTicksPerControlTick, SDFRobot simulatedRobot, ArrayList<RobotControllerAndParameters> robotControllersAndParameters)
+//   {
+//      InverseDynamicsJointsFromSCSRobotGenerator generator = new InverseDynamicsJointsFromSCSRobotGenerator(simulatedRobot);
+//
+//      // TODO: Better way to get estimationJoint
+//      Joint estimationJoint = simulatedRobot.getRootJoints().get(0);
+//      double comAccelerationProcessNoiseStandardDeviation = Math.sqrt(1e-1);
+//      double angularAccelerationProcessNoiseStandardDeviation = Math.sqrt(1e-1);
+//
+//      DesiredCoMAccelerationsFromRobotStealerController desiredCoMAccelerationsFromRobotStealerController = new DesiredCoMAccelerationsFromRobotStealerController(
+//            estimationFrame, comAccelerationProcessNoiseStandardDeviation, angularAccelerationProcessNoiseStandardDeviation, generator, estimationJoint,
+//            controlDT);
+//
+//      RobotControllerAndParameters desiredCoMAccelerationsFromRobotStealerControllerAndParameters = new RobotControllerAndParameters(
+//            desiredCoMAccelerationsFromRobotStealerController, simulationTicksPerControlTick);
+//      robotControllersAndParameters.add(desiredCoMAccelerationsFromRobotStealerControllerAndParameters);
+//
+//      return desiredCoMAccelerationsFromRobotStealerController;
+//   }
 
 }

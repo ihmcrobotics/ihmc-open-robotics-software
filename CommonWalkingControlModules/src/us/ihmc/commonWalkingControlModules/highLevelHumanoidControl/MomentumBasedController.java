@@ -33,9 +33,8 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.simulatedSensors.PointPositionSensorDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.PointVelocitySensorDefinition;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredAccelerationAndPointDataProducer;
-import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationDataSource;
-import us.ihmc.sensorProcessing.stateEstimation.PointPositionSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.PointVelocitySensorDataSource;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
 import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -556,19 +555,18 @@ public abstract class MomentumBasedController implements RobotController, Desire
       return filteredCentersOfPressure2d.get(contactablePlaneBody).getFramePoint2dCopy();
    }
 
-   public void attachDesiredCoMAndAngularAccelerationDataSource(DesiredCoMAndAngularAccelerationDataSource desiredCoMAndAngularAccelerationDataSource)
-   {
-      desiredCoMAndAngularAccelerationGrabber.attachDesiredCoMAndAngularAccelerationDataSource(desiredCoMAndAngularAccelerationDataSource);
-   }
-
-   public void attachPointPositionSensorDataSource(Collection<PointPositionSensorDefinition> pointPositionSensorDefinitions,
-           PointPositionSensorDataSource pointPositionSensorDataSource)
+   public void attachStateEstimatorDataFromControllerSink(StateEstimationDataFromControllerSink stateEstimatorDataFromControllerSink, boolean usePositionDataFromController)
    {
       if (this.pointPositionSensorGrabber != null)
          throw new RuntimeException("Already have set pointPositionSensorDataSource");
-
-      this.pointPositionSensorGrabber = new PointPositionSensorGrabber(pointPositionSensorDefinitions);
-      pointPositionSensorGrabber.attachPointPositionSensorDataSource(pointPositionSensorDataSource);
+      
+      
+      desiredCoMAndAngularAccelerationGrabber.attachStateEstimationDataFromControllerSink(stateEstimatorDataFromControllerSink);
+      
+      if(usePositionDataFromController)
+      {
+         this.pointPositionSensorGrabber = new PointPositionSensorGrabber(stateEstimatorDataFromControllerSink);
+      }
    }
 
    public void attachPointVelocitySensorDataSource(Collection<PointVelocitySensorDefinition> pointVelocitySensorDefinitions,

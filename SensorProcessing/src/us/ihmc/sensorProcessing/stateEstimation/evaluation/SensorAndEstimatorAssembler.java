@@ -16,11 +16,10 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.ComposableOrientationAndCoMEstimatorCreator;
 import us.ihmc.sensorProcessing.stateEstimation.ComposableOrientationEstimatorCreator;
-import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.JointStateFullRobotModelUpdater;
-import us.ihmc.sensorProcessing.stateEstimation.PointPositionSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.PointVelocitySensorDataSource;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSource;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.LinearAccelerationSensorConfiguration;
@@ -44,12 +43,10 @@ public class SensorAndEstimatorAssembler
    private final StateEstimatorWithPorts orientationEstimator;
    private final JointAndIMUSensorDataSource jointSensorDataSource;
    
-   private final PointPositionSensorDataSource pointPositionSensorDataSource;
    private final PointVelocitySensorDataSource pointVelocitySensorDataSource;
    
-   private final DesiredCoMAndAngularAccelerationDataSource desiredCoMAndAngularAccelerationDataSource;
-   
-   public SensorAndEstimatorAssembler(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions,
+  
+   public SensorAndEstimatorAssembler(StateEstimationDataFromControllerSource stateEstimatorDataFromControllerSource, StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions,
          SensorNoiseParameters sensorNoiseParametersForEstimator, Vector3d gravitationalAcceleration, 
          FullInverseDynamicsStructure inverseDynamicsStructure, double controlDT,
          YoVariableRegistry parentRegistry)
@@ -59,14 +56,12 @@ public class SensorAndEstimatorAssembler
       jointSensorDataSource = new JointAndIMUSensorDataSource(stateEstimatorSensorDefinitions);
       JointAndIMUSensorMap jointAndIMUSensorMap = jointSensorDataSource.getSensorMap();
       
-      pointPositionSensorDataSource = new PointPositionSensorDataSource(stateEstimatorSensorDefinitions);
-      PointPositionSensorMap pointPositionSensorMap = pointPositionSensorDataSource.getSensorMap();
+      PointPositionSensorMap pointPositionSensorMap = stateEstimatorDataFromControllerSource.getPointPositionSensorMap();
       
       pointVelocitySensorDataSource = new PointVelocitySensorDataSource(stateEstimatorSensorDefinitions);
       PointVelocitySensorMap pointVelocitySensorMap = pointVelocitySensorDataSource.getSensorMap();
       
       ReferenceFrame estimationFrame = inverseDynamicsStructure.getEstimationFrame();
-      desiredCoMAndAngularAccelerationDataSource = new DesiredCoMAndAngularAccelerationDataSource(estimationFrame);      
 
       // Sensor configurations for estimator
       Collection<OrientationSensorConfiguration> orientationSensorConfigurations =
@@ -128,7 +123,7 @@ public class SensorAndEstimatorAssembler
          orientationEstimator = orientationEstimatorCreator.createOrientationEstimator(controlFlowGraph, controlDT, estimationFrame, registry);
       }
       
-      desiredCoMAndAngularAccelerationDataSource.connectDesiredAccelerationPorts(controlFlowGraph, orientationEstimator);
+      stateEstimatorDataFromControllerSource.connectDesiredAccelerationPorts(controlFlowGraph, orientationEstimator);
 
       parentRegistry.addChild(registry);
       
@@ -166,19 +161,10 @@ public class SensorAndEstimatorAssembler
       return jointSensorDataSource;
    }
    
-   public PointPositionSensorDataSource getPointPositionSensorDataSource()
-   {
-      return pointPositionSensorDataSource;
-   }
    
    public PointVelocitySensorDataSource getPointVelocitySensorDataSource()
    {
       return pointVelocitySensorDataSource;
    }
 
-   public DesiredCoMAndAngularAccelerationDataSource getDesiredCoMAndAngularAccelerationDataSource()
-   {
-      return desiredCoMAndAngularAccelerationDataSource;
-   }
-  
 }

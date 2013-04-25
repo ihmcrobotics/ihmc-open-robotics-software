@@ -44,7 +44,7 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
 
    private final double controlDT;
 
-   private DesiredCoMAndAngularAccelerationDataSource desiredCoMAndAngularAccelerationDataSource;
+   private StateEstimationDataFromControllerSink desiredCoMAndAngularAccelerationDataSource;
    private final CenterOfMassAccelerationFromFullRobotModelStealer centerOfMassAccelerationFromFullRobotModelStealer;
    private final AngularAccelerationFromRobotStealer angularAccelerationFromRobotStealer;
       
@@ -208,7 +208,7 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
       return getName();
    }
    
-   public void attachDesiredCoMAndAngularAccelerationDataSource(DesiredCoMAndAngularAccelerationDataSource desiredCoMAndAngularAccelerationDataSource)
+   public void attachStateEstimationDataFromControllerSink(StateEstimationDataFromControllerSink desiredCoMAndAngularAccelerationDataSource)
    {
       this.desiredCoMAndAngularAccelerationDataSource = desiredCoMAndAngularAccelerationDataSource;
    }

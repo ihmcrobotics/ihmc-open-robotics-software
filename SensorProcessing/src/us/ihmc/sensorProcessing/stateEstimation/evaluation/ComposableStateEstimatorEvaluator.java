@@ -11,10 +11,10 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAccelerationsFromRobotStealerController;
-import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
-import us.ihmc.sensorProcessing.stateEstimation.PointPositionSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.PointVelocitySensorDataSource;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSource;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -85,7 +85,10 @@ public class ComposableStateEstimatorEvaluator
 //      SensorNoiseParameters sensorNoiseParametersForEstimator = SensorNoiseParametersForEvaluator.createLotsOfSensorNoiseParameters();
       SensorNoiseParameters sensorNoiseParametersForEstimator = SensorNoiseParametersForEvaluator.createTunedNoiseParametersForEvaluator();
 
-      SensorAndEstimatorAssembler sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(simulatedSensorHolderAndReaderFromRobotFactory.getStateEstimatorSensorDefinitions(),
+      final StateEstimationDataFromControllerSource stateEstimatorDataFromControllerSource = new StateEstimationDataFromControllerSource(estimationFrame, simulatedSensorHolderAndReaderFromRobotFactory.getStateEstimatorSensorDefinitions());
+      final StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink = new StateEstimationDataFromControllerSink(estimationFrame, simulatedSensorHolderAndReaderFromRobotFactory.getStateEstimatorSensorDefinitions());
+      
+      SensorAndEstimatorAssembler sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(stateEstimatorDataFromControllerSource, simulatedSensorHolderAndReaderFromRobotFactory.getStateEstimatorSensorDefinitions(),
             sensorNoiseParametersForEstimator, gravitationalAcceleration,
             inverseDynamicsStructure, controlDT,
             registry);
@@ -95,26 +98,35 @@ public class ComposableStateEstimatorEvaluator
       JointAndIMUSensorDataSource jointSensorDataSource = sensorAndEstimatorAssembler.getJointAndIMUSensorDataSource();
       
       simulatedSensorHolderAndReader.setJointAndIMUSensorDataSource(jointSensorDataSource);
-      DesiredCoMAndAngularAccelerationDataSource desiredCoMAndAngularAccelerationDataSource = new DesiredCoMAndAngularAccelerationDataSource(estimationFrame);
 
-      PointPositionSensorDataSource pointPositionSensorDataSource = sensorAndEstimatorAssembler.getPointPositionSensorDataSource();
-      simulatedSensorHolderAndReader.setPointPositionSensorDataSource(pointPositionSensorDataSource);
       
       PointVelocitySensorDataSource pointVelocityDataSource = sensorAndEstimatorAssembler.getPointVelocitySensorDataSource();
       simulatedSensorHolderAndReader.setPointVelocitySensorDataSource(pointVelocityDataSource);
+      simulatedSensorHolderAndReader.setStateEstimationDataFromControllerSink(stateEstimationDataFromControllerSink);
 
-      desiredCoMAccelerationsFromRobotStealerController.attachDesiredCoMAndAngularAccelerationDataSource(desiredCoMAndAngularAccelerationDataSource);
+      desiredCoMAccelerationsFromRobotStealerController.attachStateEstimationDataFromControllerSink(stateEstimationDataFromControllerSink);
       
-      RunnableRunnerController runnableRunnerController = new RunnableRunnerController();
-      runnableRunnerController.addRunnable(simulatedSensorHolderAndReader);
-      robot.setController(runnableRunnerController, simTicksPerControlDT);
 
       ControlFlowGraphExecutorController controlFlowGraphExecutorController = new ControlFlowGraphExecutorController(controlFlowGraph);
       
       StateEstimatorErrorCalculatorController composableStateEstimatorEvaluatorController =
          new StateEstimatorErrorCalculatorController(orientationEstimator, robot, estimationJoint);
       
+      
       robot.setController(desiredCoMAccelerationsFromRobotStealerController, simTicksPerControlDT);
+      RunnableRunnerController runnableRunnerController = new RunnableRunnerController();
+      runnableRunnerController.addRunnable(simulatedSensorHolderAndReader);
+      runnableRunnerController.addRunnable(new Runnable()
+      {
+         
+         public void run()
+         {
+            stateEstimatorDataFromControllerSource.set(stateEstimationDataFromControllerSink);
+         }
+      });
+      robot.setController(runnableRunnerController, simTicksPerControlDT);
+      
+      
       robot.setController(controlFlowGraphExecutorController, simTicksPerControlDT);
       robot.setController(composableStateEstimatorEvaluatorController, simTicksPerControlDT);
 

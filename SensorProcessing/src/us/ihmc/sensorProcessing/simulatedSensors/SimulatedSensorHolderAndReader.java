@@ -8,8 +8,8 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
-import us.ihmc.sensorProcessing.stateEstimation.PointPositionSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.PointVelocitySensorDataSource;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -41,7 +41,8 @@ public class SimulatedSensorHolderAndReader implements Runnable
 
    private JointAndIMUSensorDataSource jointAndIMUSensorDataSource;
    
-   private PointPositionSensorDataSource pointPositionSensorDataSource;
+   
+   private StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink;
    private PointVelocitySensorDataSource pointVelocitySensorDataSource;
 
    
@@ -90,11 +91,6 @@ public class SimulatedSensorHolderAndReader implements Runnable
    public void setJointAndIMUSensorDataSource(JointAndIMUSensorDataSource jointAndIMUSensorDataSource)
    {
       this.jointAndIMUSensorDataSource = jointAndIMUSensorDataSource;
-   }
-
-   public void setPointPositionSensorDataSource(PointPositionSensorDataSource pointPositionSensorDataSource)
-   {
-      this.pointPositionSensorDataSource = pointPositionSensorDataSource;
    }
    
    public void setPointVelocitySensorDataSource(PointVelocitySensorDataSource pointVelocitySensorDataSource)
@@ -160,7 +156,7 @@ public class SimulatedSensorHolderAndReader implements Runnable
          jointAndIMUSensorDataSource.setLinearAccelerationSensorValue(imuDefinition, value);
       }
 
-      if (pointPositionSensorDataSource != null)
+      if (stateEstimationDataFromControllerSink != null)
       {
          Set<PointPositionSensorDefinition> pointPositionSensorDefinitions = pointPositionSensors.keySet();
          for (PointPositionSensorDefinition pointPositionSensorDefinition : pointPositionSensorDefinitions)
@@ -169,7 +165,7 @@ public class SimulatedSensorHolderAndReader implements Runnable
             pointPositionSensor.startComputation();
             pointPositionSensor.waitUntilComputationIsDone();
             PointPositionDataObject value = pointPositionSensor.getPointPositionOutputPort().getData();
-            pointPositionSensorDataSource.setPointPositionSensorValue(pointPositionSensorDefinition, value);
+            stateEstimationDataFromControllerSink.setPointPositionSensorValue(pointPositionSensorDefinition, value);
          }
       }
       
@@ -195,5 +191,10 @@ public class SimulatedSensorHolderAndReader implements Runnable
    public void setControllerDispatcher(ControlFlowElement controllerDispatcher)
    {
       this.controllerDispatcher = controllerDispatcher;
+   }
+
+   public void setStateEstimationDataFromControllerSink(StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink)
+   {
+      this.stateEstimationDataFromControllerSink = stateEstimationDataFromControllerSink;
    }
 }
