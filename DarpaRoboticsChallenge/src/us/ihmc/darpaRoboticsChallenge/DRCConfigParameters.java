@@ -76,7 +76,7 @@ public class DRCConfigParameters
    public static final boolean DEBUG_GAZEBO_LIDAR = false;
 
    // LIDAR Processor
-   public static final DRCLidarDataStoreType DRCLIDAR_DATA_STORE_TYPE = DRCLidarDataStoreType.GROUND_ONLY_QUAD_TREE_AND_OCTREE;
+   public static final DRCLidarDataStoreType DRCLIDAR_DATA_STORE_TYPE = DRCLidarDataStoreType.QUAD_TREE_AND_VOXELS;
    public static final double GRID_RESOLUTION = 0.005;    // in meters
    public static final double OCTREE_RESOLUTION = 0.05;
    public static final float QUADTREE_HEIGHT_THRESHOLD = 0.005f;
