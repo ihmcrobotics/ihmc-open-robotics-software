@@ -8,7 +8,6 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
-import us.ihmc.sensorProcessing.stateEstimation.PointVelocitySensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
@@ -43,7 +42,6 @@ public class SimulatedSensorHolderAndReader implements Runnable
    
    
    private StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink;
-   private PointVelocitySensorDataSource pointVelocitySensorDataSource;
 
    
    public SimulatedSensorHolderAndReader()
@@ -91,11 +89,6 @@ public class SimulatedSensorHolderAndReader implements Runnable
    public void setJointAndIMUSensorDataSource(JointAndIMUSensorDataSource jointAndIMUSensorDataSource)
    {
       this.jointAndIMUSensorDataSource = jointAndIMUSensorDataSource;
-   }
-   
-   public void setPointVelocitySensorDataSource(PointVelocitySensorDataSource pointVelocitySensorDataSource)
-   {
-      this.pointVelocitySensorDataSource = pointVelocitySensorDataSource;
    }
 
    public void run()
@@ -167,10 +160,8 @@ public class SimulatedSensorHolderAndReader implements Runnable
             PointPositionDataObject value = pointPositionSensor.getPointPositionOutputPort().getData();
             stateEstimationDataFromControllerSink.setPointPositionSensorValue(pointPositionSensorDefinition, value);
          }
-      }
-      
-      if (pointVelocitySensorDataSource != null)
-      {
+         
+         
          Set<PointVelocitySensorDefinition> pointVelocitySensorDefinitions = pointVelocitySensors.keySet();
          for (PointVelocitySensorDefinition pointVelocitySensorDefinition : pointVelocitySensorDefinitions)
          {
@@ -178,9 +169,10 @@ public class SimulatedSensorHolderAndReader implements Runnable
             pointVelocitySensor.startComputation();
             pointVelocitySensor.waitUntilComputationIsDone();
             PointVelocityDataObject value = pointVelocitySensor.getPointVelocityOutputPort().getData();
-            pointVelocitySensorDataSource.setPointVelocitySensorValue(pointVelocitySensorDefinition, value);
+            stateEstimationDataFromControllerSink.setPointVelocitySensorValue(pointVelocitySensorDefinition, value);
          }
       }
+      
       
       if(controllerDispatcher != null)
       {

@@ -12,7 +12,6 @@ import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAccelerationsFromRobotStealerController;
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
-import us.ihmc.sensorProcessing.stateEstimation.PointVelocitySensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSource;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
@@ -98,10 +97,6 @@ public class ComposableStateEstimatorEvaluator
       JointAndIMUSensorDataSource jointSensorDataSource = sensorAndEstimatorAssembler.getJointAndIMUSensorDataSource();
       
       simulatedSensorHolderAndReader.setJointAndIMUSensorDataSource(jointSensorDataSource);
-
-      
-      PointVelocitySensorDataSource pointVelocityDataSource = sensorAndEstimatorAssembler.getPointVelocitySensorDataSource();
-      simulatedSensorHolderAndReader.setPointVelocitySensorDataSource(pointVelocityDataSource);
       simulatedSensorHolderAndReader.setStateEstimationDataFromControllerSink(stateEstimationDataFromControllerSink);
 
       desiredCoMAccelerationsFromRobotStealerController.attachStateEstimationDataFromControllerSink(stateEstimationDataFromControllerSink);

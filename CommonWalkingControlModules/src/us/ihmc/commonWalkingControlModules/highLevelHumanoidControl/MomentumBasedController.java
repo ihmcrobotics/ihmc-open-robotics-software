@@ -33,7 +33,6 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.simulatedSensors.PointPositionSensorDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.PointVelocitySensorDefinition;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredAccelerationAndPointDataProducer;
-import us.ihmc.sensorProcessing.stateEstimation.PointVelocitySensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
 import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.MathTools;
@@ -566,17 +565,8 @@ public abstract class MomentumBasedController implements RobotController, Desire
       if(usePositionDataFromController)
       {
          this.pointPositionSensorGrabber = new PointPositionSensorGrabber(stateEstimatorDataFromControllerSink);
+         this.pointVelocitySensorGrabber = new PointVelocitySensorGrabber(stateEstimatorDataFromControllerSink);
       }
-   }
-
-   public void attachPointVelocitySensorDataSource(Collection<PointVelocitySensorDefinition> pointVelocitySensorDefinitions,
-           PointVelocitySensorDataSource pointVelocitySensorDataSource)
-   {
-      if (this.pointVelocitySensorGrabber != null)
-         throw new RuntimeException("Already have set pointVelocitySensorDataSource");
-
-      this.pointVelocitySensorGrabber = new PointVelocitySensorGrabber(pointVelocitySensorDefinitions);
-      pointVelocitySensorGrabber.attachPointVelocitySensorDataSource(pointVelocitySensorDataSource);
    }
 
 
