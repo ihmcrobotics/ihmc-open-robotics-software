@@ -8,6 +8,8 @@ import javax.vecmath.Vector3d;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
 import us.ihmc.utilities.math.geometry.AngleTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -43,10 +45,11 @@ public class StateEstimatorErrorCalculator
       parentRegistry.addChild(registry);
    }
 
-
+   private final FrameOrientation estimatedOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
+   
    private void computeOrientationError()
    {
-      FrameOrientation estimatedOrientation = orientationEstimator.getEstimatedOrientation();
+      orientationEstimator.getEstimatedOrientation(estimatedOrientation);
       Quat4d estimatedOrientationQuat4d = new Quat4d();
       estimatedOrientation.getQuaternion(estimatedOrientationQuat4d);
 
@@ -62,9 +65,13 @@ public class StateEstimatorErrorCalculator
       orientationError.set(Math.abs(errorAngle));
    }
 
+   private final FrameVector estimatedAngularVelocityFrameVector = new FrameVector(ReferenceFrame.getWorldFrame());
+   
    private void computeAngularVelocityError()
    {
-      Vector3d estimatedAngularVelocity = orientationEstimator.getEstimatedAngularVelocity().getVectorCopy();
+      orientationEstimator.getEstimatedAngularVelocity(estimatedAngularVelocityFrameVector);
+      
+      Vector3d estimatedAngularVelocity = estimatedAngularVelocityFrameVector.getVectorCopy();
       Vector3d actualAngularVelocity = new Vector3d();
       estimationJoint.getAngularVelocityInBody(actualAngularVelocity);
 
@@ -72,6 +79,8 @@ public class StateEstimatorErrorCalculator
       angularVelocityError.set(actualAngularVelocity.length());
    }
 
+   private final FramePoint estimatedCoMPosition = new FramePoint();
+   
    private void computeCoMPositionError()
    {
       Point3d comPoint = new Point3d();
@@ -82,11 +91,14 @@ public class StateEstimatorErrorCalculator
       perfectCoMPosition.set(comPoint);
       
       Vector3d comError = new Vector3d();
-      comError.set(orientationEstimator.getEstimatedCoMPosition().getPointCopy());
+      orientationEstimator.getEstimatedCoMPosition(estimatedCoMPosition);
+      comError.set(estimatedCoMPosition.getPointCopy());
       comError.sub(comPoint);
 
       comPositionError.set(comError.length());
    }
+
+   private final FrameVector estimatedCoMVelocityFrameVector = new FrameVector();
 
    private void computeCoMVelocityError()
    {
@@ -98,7 +110,8 @@ public class StateEstimatorErrorCalculator
       linearVelocity.scale(1.0 / mass);
       perfectCoMVelocity.set(linearVelocity);
       
-      Vector3d estimatedCoMVelocity = orientationEstimator.getEstimatedCoMVelocity().getVectorCopy();
+      orientationEstimator.getEstimatedCoMVelocity(estimatedCoMVelocityFrameVector);
+      Vector3d estimatedCoMVelocity = estimatedCoMVelocityFrameVector.getVectorCopy();
 
       estimatedCoMVelocity.sub(linearVelocity);
       comVelocityError.set(estimatedCoMVelocity.length());

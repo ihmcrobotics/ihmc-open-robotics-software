@@ -8,19 +8,19 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 
 public interface StateEstimator
 {
-   public abstract FrameOrientation getEstimatedOrientation();
+   public abstract void getEstimatedOrientation(FrameOrientation frameOrientationToPack);
    
    public abstract void setEstimatedOrientation(FrameOrientation estimatedOrientation);
 
-   public abstract FrameVector getEstimatedAngularVelocity();
+   public abstract void getEstimatedAngularVelocity(FrameVector estimatedAngularVelocityToPack);
 
    public abstract void setEstimatedAngularVelocity(FrameVector estimatedAngularVelocity);
    
-   public abstract FramePoint getEstimatedCoMPosition();
+   public abstract void getEstimatedCoMPosition(FramePoint estimatedCoMPositionToPack);
 
    public abstract void setEstimatedCoMPosition(FramePoint estimatedCoMPosition);
 
-   public abstract FrameVector getEstimatedCoMVelocity();
+   public abstract void getEstimatedCoMVelocity(FrameVector estimatedCoMVelocityToPack);
 
    public abstract void setEstimatedCoMVelocity(FrameVector estimatedCoMVelocity);
 

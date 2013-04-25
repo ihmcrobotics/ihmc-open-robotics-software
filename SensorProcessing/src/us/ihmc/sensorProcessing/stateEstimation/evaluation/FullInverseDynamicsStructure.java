@@ -68,10 +68,13 @@ public class FullInverseDynamicsStructure
       spatialAccelerationCalculator.compute();
    }
 
+   private final FrameOrientation estimatedOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
+   private final FrameVector estimatedAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
+   
    public void updateRootJointBasedOnEstimator(StateEstimator estimator)
    {
-      FrameOrientation estimatedOrientation = estimator.getEstimatedOrientation();
-      FrameVector estimatedAngularVelocity = estimator.getEstimatedAngularVelocity();
+      estimator.getEstimatedOrientation(estimatedOrientation);
+      estimator.getEstimatedAngularVelocity(estimatedAngularVelocity);
 
       updateRootJointBasedOnEstimator(estimatedOrientation, estimatedAngularVelocity);
    }

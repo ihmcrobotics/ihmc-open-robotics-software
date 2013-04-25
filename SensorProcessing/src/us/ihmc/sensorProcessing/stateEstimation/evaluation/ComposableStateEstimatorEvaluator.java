@@ -136,11 +136,13 @@ public class ComposableStateEstimatorEvaluator
          robot.getRootJoint().getRotationToWorld(rotationMatrix);
          Vector3d angularVelocityInBody = robot.getRootJoint().getAngularVelocityInBody();
 
-         FrameOrientation estimatedOrientation = orientationEstimator.getEstimatedOrientation();
+         FrameOrientation estimatedOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
+         orientationEstimator.getEstimatedOrientation(estimatedOrientation);
          estimatedOrientation.set(rotationMatrix);
          orientationEstimator.setEstimatedOrientation(estimatedOrientation);
 
-         FrameVector estimatedAngularVelocity = orientationEstimator.getEstimatedAngularVelocity();
+         FrameVector estimatedAngularVelocity = new FrameVector();
+         orientationEstimator.getEstimatedAngularVelocity(estimatedAngularVelocity);
          estimatedAngularVelocity.set(angularVelocityInBody);
          orientationEstimator.setEstimatedAngularVelocity(estimatedAngularVelocity);
 
