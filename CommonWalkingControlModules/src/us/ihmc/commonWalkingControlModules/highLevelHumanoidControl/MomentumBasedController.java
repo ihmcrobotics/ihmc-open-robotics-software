@@ -1,9 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -36,10 +33,7 @@ import us.ihmc.sensorProcessing.stateEstimation.DesiredAccelerationAndPointDataP
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
 import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FramePoint2d;
-import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.*;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
@@ -289,26 +283,20 @@ public abstract class MomentumBasedController implements RobotController, Desire
       momentumRateOfChangeControlModule.waitUntilComputationIsDone();
       MomentumRateOfChangeData momentumRateOfChangeData = momentumRateOfChangeControlModule.getMomentumRateOfChangeOutputPort().getData();
 
-      computeDesiredAccelerationsAndWrenches(rootJointAccelerationData, momentumRateOfChangeData);
+      LinkedHashMap<ContactablePlaneBody, ? extends PlaneContactState> contactStates = this.contactStates;
 
-      updatePositionAndVelocitySensorGrabbers();
 
-      inverseDynamicsCalculator.compute();
 
-      doAdditionalTorqueControl();
+      Map<ContactablePlaneBody, Wrench> externalWrenches = new LinkedHashMap<ContactablePlaneBody, Wrench>();
 
-      if (processedOutputs != null)
-         fullRobotModel.setTorques(processedOutputs);
-      updateYoVariables();
-   }
+      // < TODO: start extract class
 
-   private void computeDesiredAccelerationsAndWrenches(RootJointAccelerationData rootJointAccelerationData, MomentumRateOfChangeData momentumRateOfChangeData)
-   {
+
       solver.compute();
       solver.solve(rootJointAccelerationData.getAccelerationSubspace(), rootJointAccelerationData.getAccelerationMultipliers(),
                    momentumRateOfChangeData.getMomentumSubspace(), momentumRateOfChangeData.getMomentumMultipliers());
 
-      SpatialForceVector totalGroundReactionWrench = new SpatialForceVector(centerOfMassFrame);
+      SpatialForceVector totalGroundReactionWrench = new SpatialForceVector();
       solver.getRateOfChangeOfMomentum(totalGroundReactionWrench);
       totalGroundReactionWrench.add(gravitationalWrench);
 
@@ -364,7 +352,6 @@ public abstract class MomentumBasedController implements RobotController, Desire
             double normalTorque = distributedWrenches.getNormalTorque(contactState);
 
             unfilteredCentersOfPressure2d.get(contactablePlaneBody).set(cop);
-            groundReactionForceMagnitudes.get(contactablePlaneBody).set(force.length());
 
             AlphaFilteredYoFramePoint2d filteredCoP2d = filteredCentersOfPressure2d.get(contactablePlaneBody);
             BooleanYoVariable copFilterResetRequest = copFilterResetRequests.get(contactablePlaneBody);
@@ -386,7 +373,7 @@ public abstract class MomentumBasedController implements RobotController, Desire
             WrenchDistributorTools.computeWrench(groundReactionWrench, force, cop, normalTorque);
             groundReactionWrench.changeFrame(rigidBody.getBodyFixedFrame());
             wrenches.add(groundReactionWrench);
-            inverseDynamicsCalculator.setExternalWrench(rigidBody, groundReactionWrench);
+            externalWrenches.put(contactablePlaneBody, groundReactionWrench);
          }
          else
          {
@@ -406,11 +393,32 @@ public abstract class MomentumBasedController implements RobotController, Desire
 
       solver.solve(desiredCentroidalMomentumRate);
 
+
+      // TODO: end extract class >
+
+
+      for (ContactablePlaneBody contactablePlaneBody : externalWrenches.keySet())
+      {
+         inverseDynamicsCalculator.setExternalWrench(contactablePlaneBody.getRigidBody(), externalWrenches.get(contactablePlaneBody));
+         FrameVector force = externalWrenches.get(contactablePlaneBody).getLinearPartAsFrameVectorCopy(); // TODO: copy
+         groundReactionForceMagnitudes.get(contactablePlaneBody).set(force.length());
+      }
+
       SpatialForceVector groundReactionWrenchCheck = inverseDynamicsCalculator.computeTotalExternalWrench(centerOfMassFrame);
       groundReactionTorqueCheck.set(groundReactionWrenchCheck.getAngularPartCopy());
       groundReactionForceCheck.set(groundReactionWrenchCheck.getLinearPartCopy());
 
       this.desiredCoMAndAngularAccelerationGrabber.set(inverseDynamicsCalculator.getSpatialAccelerationCalculator(), desiredCentroidalMomentumRate);
+
+      updatePositionAndVelocitySensorGrabbers();
+
+      inverseDynamicsCalculator.compute();
+
+      doAdditionalTorqueControl();
+
+      if (processedOutputs != null)
+         fullRobotModel.setTorques(processedOutputs);
+      updateYoVariables();
    }
 
    private void updatePositionAndVelocitySensorGrabbers()
@@ -562,10 +570,10 @@ public abstract class MomentumBasedController implements RobotController, Desire
    {
       if (this.pointPositionSensorGrabber != null)
          throw new RuntimeException("Already have set pointPositionSensorDataSource");
-      
-      
+
+
       desiredCoMAndAngularAccelerationGrabber.attachStateEstimationDataFromControllerSink(stateEstimatorDataFromControllerSink);
-      
+
       if(usePositionDataFromController)
       {
          this.pointPositionSensorGrabber = new PointPositionSensorGrabber(stateEstimatorDataFromControllerSink);
