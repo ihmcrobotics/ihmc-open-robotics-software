@@ -7,6 +7,7 @@ import javax.vecmath.Point3d;
 
 import us.ihmc.utilities.dataStructures.hyperCubeTree.HyperCubeLeaf;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.HyperCubeTree;
+import us.ihmc.utilities.dataStructures.hyperCubeTree.Octree;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.OneDimensionalBounds;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.RecursableHyperTreeNode;
 import us.ihmc.utilities.math.dataStructures.HeightMap;
@@ -46,7 +47,7 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
 
    public boolean addPoint(double x, double y, double z)
    {
-      return this.put(new double[] {x, y}, new GroundAirDescriptor((float) z,null));
+      return this.put(new double[] {x, y}, (float)z);
    }
 
    public boolean containsPoint(double x, double y)
@@ -75,7 +76,11 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
 
    private void puntLeaf(HyperCubeLeaf<GroundAirDescriptor> leafToPunt)
    {
-      // PclTODO: implement punting to octree.
+      if (null==octree)
+         return;
+      double[] location = new double[]{leafToPunt.getLocation()[0],leafToPunt.getLocation()[1],leafToPunt.getValue().getHeight()};
+      octree.upRezz(location);
+      octree.put(location, true);
    }
 
    public void mergeOneLevel(RecursableHyperTreeNode<GroundAirDescriptor, GroundOnlyQuadTreeData> node)
@@ -344,6 +349,11 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    public void remove(double x, double y)
    {
       this.remove(this.get(toLocation(x, y)));
+   }
+   private Octree octree;
+   public void setOctree(Octree octree)
+   {
+      this.octree=octree;
    }
 
 }
