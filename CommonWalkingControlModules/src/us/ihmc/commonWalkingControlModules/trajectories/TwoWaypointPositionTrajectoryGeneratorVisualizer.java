@@ -17,6 +17,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 import com.yobotics.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
@@ -46,6 +47,7 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
 
    private final BagOfBalls trajectoryBagOfBalls;
    private final DynamicGraphicPosition[] dynamicFixedPositions = new DynamicGraphicPosition[4];
+   private final DynamicGraphicVector[] dynamicFixedVelocities = new DynamicGraphicVector[2];
 
    public TwoWaypointPositionTrajectoryGeneratorVisualizer() throws SimulationExceededMaximumTimeException
    {
@@ -68,7 +70,10 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
       dynamicFixedPositions[1] = new DynamicGraphicPosition(namePrefix + "DynamicWaypointPosition0", waypoints.get(0), 0.01, YoAppearance.White());
       dynamicFixedPositions[2] = new DynamicGraphicPosition(namePrefix + "DynamicWaypointPosition1", waypoints.get(1), 0.01, YoAppearance.White());
       dynamicFixedPositions[3] = new DynamicGraphicPosition(namePrefix + "DynamicFinalPosition", finalPosition, 0.01, YoAppearance.White());
+      dynamicFixedVelocities[0] = new DynamicGraphicVector(namePrefix + "DynamicInitialVelocity", initialPosition, initialVelocity, YoAppearance.Red());
+      dynamicFixedVelocities[1] = new DynamicGraphicVector(namePrefix + "DynamicFinalVelocity", finalPosition, finalVelocity, YoAppearance.Red());
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects(namePrefix + "DynamicFixedPositions", dynamicFixedPositions);
+      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects(namePrefix + "DynamicFixedVelocities", dynamicFixedVelocities);
 
       initialPosition.set(0.0, 0.0, 0.0);
       finalPosition.set(1.0, 0.0, 0.0);
@@ -89,6 +94,7 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
 
       SliderBoardConfigurationManager sliderBoardConfigurationManager = new SliderBoardConfigurationManager(scs);
       YoFramePoint[] positions = new YoFramePoint[] {initialPosition, waypoints.get(0), waypoints.get(1), finalPosition};
+      YoFrameVector[] velocities = new YoFrameVector[] {initialVelocity, finalVelocity};
       
       for (int i = 0; i < positions.length; i++)
       {
@@ -97,18 +103,25 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
          sliderBoardConfigurationManager.setSlider(i + 1, positions[i].getYoZ(), -2.0, 2.0);
       }
 
-
+      for (int i = 0; i < velocities.length; i++)
+      {
+         sliderBoardConfigurationManager.setSlider(i + 5, velocities[i].getYoX(), -2.0, 2.0);
+         sliderBoardConfigurationManager.setSlider(i + 5, velocities[i].getYoY(), -2.0, 2.0);
+         sliderBoardConfigurationManager.setSlider(i + 5, velocities[i].getYoZ(), -2.0, 2.0);
+      }
+      
+      sliderBoardConfigurationManager.setSlider(7, stepTime, 0.01, 2.0);
+      
       Thread thread = new Thread(scs);
 
       thread.start();
-
-      scs.setInPoint();
 
       while (true)
       {
          if (drawTrajectory.getBooleanValue())
          {
             drawTrajectory.set(false);
+            
             trajectoryGenerator.initialize();
 
             for (int tick = 0; tick < numberOfTicks; tick++)
