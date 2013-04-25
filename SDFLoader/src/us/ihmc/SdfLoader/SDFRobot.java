@@ -31,7 +31,7 @@ import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.polarLidarGeometry.LIDARScanDefinition;
-import us.ihmc.utilities.polarLidarGeometry.PolarLidarScanDefinition;
+import us.ihmc.utilities.polarLidarGeometry.PolarLidarScanParameters;
 import us.ihmc.utilities.screwTheory.RigidBodyInertia;
 
 import com.yobotics.simulationconstructionset.CameraMount;
@@ -507,7 +507,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
                      }
                   }
 
-                  PolarLidarScanDefinition polarDefinition = new PolarLidarScanDefinition(sdfSamples, 1, (float) sdfMaxAngle, (float) sdfMinAngle, 0.0f, 0.0f,
+                  PolarLidarScanParameters polarDefinition = new PolarLidarScanParameters(sdfSamples, 1, (float) sdfMaxAngle, (float) sdfMinAngle, 0.0f, 0.0f,
                                                                 (float) sdfMinRange);
                   LIDARScanDefinition lidarScanDefinition = LIDARScanDefinition.PlanarSweep(sdfMaxAngle - sdfMinAngle, sdfSamples);
                   Transform3D transform3d = SDFConversionsHelper.poseToTransform(sensor.getPose());
