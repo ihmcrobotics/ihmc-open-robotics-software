@@ -51,12 +51,12 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    public DRCDemo01NavigationEnvironment()
    {
       combinedTerrainObject = new CombinedTerrainObject("Rocks with a wall");
-      setUpPath1();
+      setUpPath1Rocks();
       setUpPath2();
       setUpPath3();
       setUpPath4();
-      setUpPath5();
-      setUpPath6();
+      setUpPath5NarrowDoor();
+      setUpPath6Barriers();
       setUpPath7();
       setUpPath8();
 
@@ -85,7 +85,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       }
    }
 
-   private void setUpPath1()
+   private void setUpPath1Rocks()
    {
       createCoursePath(8, 90);
       addRocks();
@@ -182,7 +182,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    }
 
 
-   private void setUpPath5()
+   private void setUpPath5NarrowDoor()
    {
       AppearanceDefinition color = YoAppearance.DarkGray();
 
@@ -203,7 +203,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
    }
 
-   private void setUpPath6()
+   private void setUpPath6Barriers()
    {
       AppearanceDefinition color = YoAppearance.DarkGray();
       double courseAngle = -135.0;
@@ -213,10 +213,19 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       double startDistance = 4.0;
       double spacing = 1.0;
 
+      double barrierWidth = 3.0;
+      double platformWidth = 0.8;
+      
       for (int i = 0; i < numberOfStepOvers; i++)
       {
          double[] newPoint = rotateAroundOrigin(startDistance + (i * spacing), 0, courseAngle);
-         setUpWall(newPoint[0], newPoint[1], 3.0, 0.15, heightIncrease * (i + 1), courseAngle, color);
+         setUpWall(newPoint[0], newPoint[1], barrierWidth, 0.15, heightIncrease * (i + 1), courseAngle, color);
+      }
+      
+      for (int i = 0; i < numberOfStepOvers; i++)
+      {
+         double[] newPoint = rotateAroundOrigin(startDistance + (i * spacing), (barrierWidth - platformWidth)/2.0 + 0.001, courseAngle);
+         setUpWall(newPoint[0], newPoint[1], platformWidth, 0.4 * spacing, heightIncrease * (i + 1) + 0.001, courseAngle, color);
       }
 
    }
