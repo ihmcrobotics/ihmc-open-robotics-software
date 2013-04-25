@@ -18,7 +18,6 @@ import us.ihmc.sensorProcessing.stateEstimation.ComposableOrientationAndCoMEstim
 import us.ihmc.sensorProcessing.stateEstimation.ComposableOrientationEstimatorCreator;
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.JointStateFullRobotModelUpdater;
-import us.ihmc.sensorProcessing.stateEstimation.PointVelocitySensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSource;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
@@ -43,8 +42,6 @@ public class SensorAndEstimatorAssembler
    private final StateEstimatorWithPorts orientationEstimator;
    private final JointAndIMUSensorDataSource jointSensorDataSource;
    
-   private final PointVelocitySensorDataSource pointVelocitySensorDataSource;
-   
   
    public SensorAndEstimatorAssembler(StateEstimationDataFromControllerSource stateEstimatorDataFromControllerSource, StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions,
          SensorNoiseParameters sensorNoiseParametersForEstimator, Vector3d gravitationalAcceleration, 
@@ -57,9 +54,7 @@ public class SensorAndEstimatorAssembler
       JointAndIMUSensorMap jointAndIMUSensorMap = jointSensorDataSource.getSensorMap();
       
       PointPositionSensorMap pointPositionSensorMap = stateEstimatorDataFromControllerSource.getPointPositionSensorMap();
-      
-      pointVelocitySensorDataSource = new PointVelocitySensorDataSource(stateEstimatorSensorDefinitions);
-      PointVelocitySensorMap pointVelocitySensorMap = pointVelocitySensorDataSource.getSensorMap();
+      PointVelocitySensorMap pointVelocitySensorMap = stateEstimatorDataFromControllerSource.getPointVelocitySensorMap();
       
       ReferenceFrame estimationFrame = inverseDynamicsStructure.getEstimationFrame();
 
@@ -159,12 +154,6 @@ public class SensorAndEstimatorAssembler
    public JointAndIMUSensorDataSource getJointAndIMUSensorDataSource()
    {
       return jointSensorDataSource;
-   }
-   
-   
-   public PointVelocitySensorDataSource getPointVelocitySensorDataSource()
-   {
-      return pointVelocitySensorDataSource;
    }
 
 }
