@@ -74,10 +74,10 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
 
    public SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap)
    {
-      this(generalizedSDFRobotModel, sdfJointNameMap, true);
+      this(generalizedSDFRobotModel, sdfJointNameMap, true, true);
    }
 
-   protected SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean enableDamping)
+   protected SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean enableTorqueVelocityLimits, boolean enableDamping)
    {
       super(generalizedSDFRobotModel.getName());
       this.resourceDirectories = generalizedSDFRobotModel.getResourceDirectories();
@@ -107,10 +107,9 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
 
       addRootJoint(rootJoint);
 
-      boolean enableTorqueVelocityLimits = false;
       if (sdfJointNameMap != null)
       {
-         enableTorqueVelocityLimits = sdfJointNameMap.enableTorqueVelocityLimits();
+         enableTorqueVelocityLimits = enableTorqueVelocityLimits && sdfJointNameMap.enableTorqueVelocityLimits();
       }
 
       for (SDFJointHolder child : rootLink.getChildren())
