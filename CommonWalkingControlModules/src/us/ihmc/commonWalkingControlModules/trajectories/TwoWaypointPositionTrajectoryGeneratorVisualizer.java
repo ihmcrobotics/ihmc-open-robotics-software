@@ -88,7 +88,7 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
 
       int initialBufferSize = 8192;
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot[] {new Robot("null")}, graphics3DAdapterToUse, initialBufferSize);
-      scs.setDT(stepTime.getDoubleValue() / (double) numberOfTicks, 100);
+      scs.setDT(stepTime.getDoubleValue() / (double) numberOfTicks, 5);
       scs.addYoVariableRegistry(registry);
       dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
 
@@ -120,6 +120,7 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
       {
          if (drawTrajectory.getBooleanValue())
          {
+            scs.setInPoint();
             drawTrajectory.set(false);
             
             trajectoryGenerator.initialize();
