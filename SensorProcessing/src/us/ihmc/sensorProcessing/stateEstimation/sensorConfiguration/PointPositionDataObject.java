@@ -50,4 +50,9 @@ public class PointPositionDataObject
       this.position.set(pointPositionDataObject.position);
       this.covarianceScaling = pointPositionDataObject.covarianceScaling;
    }
+   
+   public String toString()
+   {
+      return position.toString();
+   }
 }
