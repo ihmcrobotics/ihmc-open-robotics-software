@@ -281,8 +281,6 @@ public abstract class MomentumBasedController implements RobotController, Desire
 
       doMotionControl();
 
-      solver.compute();
-
       rootJointAccelerationControlModule.startComputation();
       rootJointAccelerationControlModule.waitUntilComputationIsDone();
       RootJointAccelerationData rootJointAccelerationData = rootJointAccelerationControlModule.getRootJointAccelerationOutputPort().getData();
@@ -291,6 +289,22 @@ public abstract class MomentumBasedController implements RobotController, Desire
       momentumRateOfChangeControlModule.waitUntilComputationIsDone();
       MomentumRateOfChangeData momentumRateOfChangeData = momentumRateOfChangeControlModule.getMomentumRateOfChangeOutputPort().getData();
 
+      computeDesiredAccelerationsAndWrenches(rootJointAccelerationData, momentumRateOfChangeData);
+
+      updatePositionAndVelocitySensorGrabbers();
+
+      inverseDynamicsCalculator.compute();
+
+      doAdditionalTorqueControl();
+
+      if (processedOutputs != null)
+         fullRobotModel.setTorques(processedOutputs);
+      updateYoVariables();
+   }
+
+   private void computeDesiredAccelerationsAndWrenches(RootJointAccelerationData rootJointAccelerationData, MomentumRateOfChangeData momentumRateOfChangeData)
+   {
+      solver.compute();
       solver.solve(rootJointAccelerationData.getAccelerationSubspace(), rootJointAccelerationData.getAccelerationMultipliers(),
                    momentumRateOfChangeData.getMomentumSubspace(), momentumRateOfChangeData.getMomentumMultipliers());
 
@@ -397,16 +411,6 @@ public abstract class MomentumBasedController implements RobotController, Desire
       groundReactionForceCheck.set(groundReactionWrenchCheck.getLinearPartCopy());
 
       this.desiredCoMAndAngularAccelerationGrabber.set(inverseDynamicsCalculator.getSpatialAccelerationCalculator(), desiredCentroidalMomentumRate);
-
-      updatePositionAndVelocitySensorGrabbers();
-
-      inverseDynamicsCalculator.compute();
-
-      doAdditionalTorqueControl();
-
-      if (processedOutputs != null)
-         fullRobotModel.setTorques(processedOutputs);
-      updateYoVariables();
    }
 
    private void updatePositionAndVelocitySensorGrabbers()
