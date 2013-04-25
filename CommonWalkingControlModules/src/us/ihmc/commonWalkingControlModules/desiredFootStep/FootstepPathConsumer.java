@@ -9,7 +9,7 @@ import javax.vecmath.Point3d;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
-import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.trajectories.SimpleTwoWaypointTrajectoryParameters;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
@@ -65,16 +65,16 @@ public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
             switch (footstepData.getTrajectoryWaypointGenerationMethod())
             {
                case BY_GROUND_CLEARANCE :
-                  trajectoryParameters = new TwoWaypointTrajectoryParameters(footstepData.getTrajectoryWaypointGroundClearance());
+                  trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(footstepData.getTrajectoryWaypointGroundClearance());
                   break;
                case BY_BOX :
-                  trajectoryParameters = new TwoWaypointTrajectoryParameters(footstepData.getTrajectoryBox());
+                  trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(footstepData.getTrajectoryBox());
                   break;
                case BY_POINTS :
-                  trajectoryParameters = new TwoWaypointTrajectoryParameters(footstepData.getTrajectoryWaypoints());
+                  trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(footstepData.getTrajectoryWaypoints());
                   break;
                case DEFAULT :
-                  trajectoryParameters = new TwoWaypointTrajectoryParameters();
+                  trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters();
                   break;
             }
          }

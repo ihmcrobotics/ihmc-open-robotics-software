@@ -53,12 +53,12 @@ public class TwoWaypointPositionTrajectoryGeneratorTest {
 		YoPositionProvider finalPositionProvider = new YoPositionProvider(finalPosition);
 		VectorProvider finalVelocityProvider = new ConstantVectorProvider(new FrameVector(worldFrame, new double[]{0.1, 0.01, -0.02}));
 		
-		TrajectoryParameters trajectoryParameters = new TwoWaypointTrajectoryParameters(waypoints);
+		TrajectoryParameters trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(waypoints);
 		TrajectoryParametersProvider trajectoryParametersProvider = new TrajectoryParametersProvider(trajectoryParameters);
 		
 		TwoWaypointPositionTrajectoryGenerator trajectory = new TwoWaypointPositionTrajectoryGenerator("", worldFrame, stepTimeProvider,
-				initialPositionProvider, initialVelocityProvider, finalPositionProvider, finalVelocityProvider, trajectoryParametersProvider, new YoVariableRegistry(""), 0.2, 20,
-				null, null);
+				initialPositionProvider, initialVelocityProvider, finalPositionProvider, finalVelocityProvider, trajectoryParametersProvider, new YoVariableRegistry(""), 20,
+				null, null, false);
 		
 		List<Point3d> points = new ArrayList<Point3d>();
 		points.add(firstIntermediatePosition);
