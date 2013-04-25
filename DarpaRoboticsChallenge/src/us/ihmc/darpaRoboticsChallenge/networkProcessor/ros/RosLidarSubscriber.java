@@ -1,5 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.ros;
 
+import com.yobotics.simulationconstructionset.simulatedSensors.PolarLidarScan;
 import sensor_msgs.LaserScan;
 import us.ihmc.utilities.polarLidarGeometry.PolarLidarScanParameters;
 
@@ -26,7 +27,8 @@ public abstract class RosLidarSubscriber extends AbstractRosTopicSubscriber<sens
          verifyDataFromGazeboRemainsTheSame(polarLidarScanParameters);
       }
 
-      newScan(timestamp, message.getRanges(), polarLidarScanParameters, message.getRangeMin(), message.getRangeMax(), message.getTimeIncrement());
+      PolarLidarScan polarLidarScan = new PolarLidarScan(message.getHeader().getStamp().totalNsecs(), message.getRanges(), polarLidarScanParameters);
+      newScan(polarLidarScan);
    }
 
    private void verifyDataFromGazeboRemainsTheSame(PolarLidarScanParameters polarLidarScanParameters)
@@ -61,7 +63,6 @@ public abstract class RosLidarSubscriber extends AbstractRosTopicSubscriber<sens
       }
    }
 
-   protected abstract void newScan(long timeStamp, float[] ranges, PolarLidarScanParameters scanDefinition, double rangeMin, double rangeMax,
-                                   double timeIncrement);
+   protected abstract void newScan(PolarLidarScan polarLidarScan);
 
 }
