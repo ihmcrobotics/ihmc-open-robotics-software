@@ -127,7 +127,6 @@ public class ColorImageLabelApp extends JPanel implements ActionListener {
       ImageMiscOps.fill(selected,0);
    }
 
-   @Override
    public void actionPerformed(ActionEvent e) {
       if( e.getSource() == buttonClear ) {
          synchronized ( work ) {
@@ -193,7 +192,6 @@ public class ColorImageLabelApp extends JPanel implements ActionListener {
          }
       }
 
-      @Override
       public void componentResized(ComponentEvent e) {
          synchronized ( work ) {
             // adjust output size to the window size
@@ -206,16 +204,12 @@ public class ColorImageLabelApp extends JPanel implements ActionListener {
          }
       }
 
-      @Override
       public void componentMoved(ComponentEvent e) {}
 
-      @Override
       public void componentShown(ComponentEvent e) {}
 
-      @Override
       public void componentHidden(ComponentEvent e) {}
 
-      @Override
       public void mouseDragged(MouseEvent e) {
          // compute coordinates in the original image
          int x = (int)(e.getX()/scale);
@@ -243,31 +237,25 @@ public class ColorImageLabelApp extends JPanel implements ActionListener {
          repaint((int)(r.x0*scale),(int)(r.y0*scale),(int)((r.x1-r.x0)*scale),(int)((r.y1-r.y0)*scale));
       }
 
-      @Override
       public void mouseMoved(MouseEvent e) { }
 
-      @Override
       public void mouseClicked(MouseEvent e) {}
 
-      @Override
       public void mousePressed(MouseEvent e) {}
 
-      @Override
       public void mouseReleased(MouseEvent e) {
          synchronized ( work ) {
             scatter.update(hsv, selected);
          }
       }
 
-      @Override
       public void mouseEntered(MouseEvent e) {}
 
-      @Override
       public void mouseExited(MouseEvent e) {}
    }
 
    public static void main( String args[] ) {
-      BufferedImage input = UtilImageIO.loadImage("../ImageProcessing/media/images/start.jpg");
+      BufferedImage input = UtilImageIO.loadImage("../ImageProcessing/media/drcsim_2_6/left000001.png");
 
       ColorImageLabelApp app = new ColorImageLabelApp(input);
       ShowImages.showWindow(app,"Train HSV Classifier");
