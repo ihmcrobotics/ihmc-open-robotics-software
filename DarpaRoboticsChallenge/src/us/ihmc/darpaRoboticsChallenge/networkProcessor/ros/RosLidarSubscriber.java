@@ -1,11 +1,12 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.ros;
 
 import sensor_msgs.LaserScan;
-import us.ihmc.utilities.polarLidarGeometry.PolarLidarScanDefinition;
+import us.ihmc.utilities.polarLidarGeometry.PolarLidarScanParameters;
 
 public abstract class RosLidarSubscriber extends AbstractRosTopicSubscriber<sensor_msgs.LaserScan>
 {
-   PolarLidarScanDefinition initialPolarLidarScanDefinition = null;
+   private boolean DEBUG = false;
+   private PolarLidarScanParameters initialPolarLidarScanParameters = null;
 
    public RosLidarSubscriber()
    {
@@ -16,48 +17,51 @@ public abstract class RosLidarSubscriber extends AbstractRosTopicSubscriber<sens
    {
       long timestamp = message.getHeader().getStamp().totalNsecs();
 
-      PolarLidarScanDefinition polarLidarScanDefinition = new PolarLidarScanDefinition(message.getRanges().length, 1, message.getAngleMax(),
+      PolarLidarScanParameters polarLidarScanParameters = new PolarLidarScanParameters(message.getRanges().length, 1, message.getAngleMax(),
                                                              message.getAngleMin(), message.getAngleIncrement(), message.getTimeIncrement(),
                                                              message.getScanTime(), 0.0f, 0.0f, message.getRangeMin(), message.getRangeMax());
 
-      verifyDataFromGazeboRemainsTheSame(polarLidarScanDefinition);
-
-      newScan(timestamp, message.getRanges(), polarLidarScanDefinition, message.getRangeMin(), message.getRangeMax(), message.getTimeIncrement());
-   }
-
-   private void verifyDataFromGazeboRemainsTheSame(PolarLidarScanDefinition polarLidarScanDefinition)
-   {
-      verifyLidarScanDefinitionDoesNotChange(polarLidarScanDefinition);
-      verifyTimeIncrementRemainsZero(polarLidarScanDefinition);
-   }
-
-   private void verifyTimeIncrementRemainsZero(PolarLidarScanDefinition polarLidarScanDefinition)
-   {
-      if (polarLidarScanDefinition.timeIncrement != 0.0)
+      if (DEBUG)
       {
-         System.err.println("WARNING: Gazebo LIDAR time increment no longer zero: " + polarLidarScanDefinition.timeIncrement);
+         verifyDataFromGazeboRemainsTheSame(polarLidarScanParameters);
+      }
+
+      newScan(timestamp, message.getRanges(), polarLidarScanParameters, message.getRangeMin(), message.getRangeMax(), message.getTimeIncrement());
+   }
+
+   private void verifyDataFromGazeboRemainsTheSame(PolarLidarScanParameters polarLidarScanParameters)
+   {
+      verifyLidarScanDefinitionDoesNotChange(polarLidarScanParameters);
+      verifyTimeIncrementRemainsZero(polarLidarScanParameters);
+   }
+
+   private void verifyTimeIncrementRemainsZero(PolarLidarScanParameters polarLidarScanParameters)
+   {
+      if (polarLidarScanParameters.timeIncrement != 0.0)
+      {
+         System.err.println("WARNING: Gazebo LIDAR time increment no longer zero: " + polarLidarScanParameters.timeIncrement);
       }
    }
 
-   private void verifyLidarScanDefinitionDoesNotChange(PolarLidarScanDefinition polarLidarScanDefinition)
+   private void verifyLidarScanDefinitionDoesNotChange(PolarLidarScanParameters polarLidarScanParameters)
    {
-      if (initialPolarLidarScanDefinition == null)
+      if (initialPolarLidarScanParameters == null)
       {
-         initialPolarLidarScanDefinition = polarLidarScanDefinition;
+         initialPolarLidarScanParameters = polarLidarScanParameters;
       }
       else
       {
-         if (!polarLidarScanDefinition.equals(initialPolarLidarScanDefinition))
+         if (!polarLidarScanParameters.equals(initialPolarLidarScanParameters))
          {
             System.err.println("WARNING: your scan definition has changed");
-            System.err.println("old scan definition:\n" + initialPolarLidarScanDefinition);
-            System.err.println("new scan definition:\n" + polarLidarScanDefinition);
-            initialPolarLidarScanDefinition = polarLidarScanDefinition;
+            System.err.println("old scan definition:\n" + initialPolarLidarScanParameters);
+            System.err.println("new scan definition:\n" + polarLidarScanParameters);
+            initialPolarLidarScanParameters = polarLidarScanParameters;
          }
       }
    }
 
-   protected abstract void newScan(long timeStamp, float[] ranges, PolarLidarScanDefinition scanDefinition, double rangeMin, double rangeMax,
+   protected abstract void newScan(long timeStamp, float[] ranges, PolarLidarScanParameters scanDefinition, double rangeMin, double rangeMax,
                                    double timeIncrement);
 
 }

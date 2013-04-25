@@ -6,7 +6,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.TimestampProvider;
-import us.ihmc.utilities.polarLidarGeometry.PolarLidarScanDefinition;
+import us.ihmc.utilities.polarLidarGeometry.PolarLidarScanParameters;
 
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.simulatedSensors.FastPolarRayCastLIDAR;
@@ -55,7 +55,7 @@ public class DRCLidar
             polarLidar.setWorld(graphics3dAdapter);
             if (DRCConfigParameters.OVERRIDE_DRC_LIDAR_CONFIG)
             {
-               PolarLidarScanDefinition largeScan = new PolarLidarScanDefinition(DRCConfigParameters.LIDAR_POINTS_PER_SWEEP,
+               PolarLidarScanParameters largeScan = new PolarLidarScanParameters(DRCConfigParameters.LIDAR_POINTS_PER_SWEEP,
                      DRCConfigParameters.LIDAR_SWEEPS_PER_SCAN, DRCConfigParameters.LIDAR_SWEEP_MAX_YAW, DRCConfigParameters.LIDAR_SWEEP_MIN_YAW,
                      DRCConfigParameters.LIDAR_SCAN_MAX_ROLL, DRCConfigParameters.LDIAR_SCAN_MIN_ROLL, DRCConfigParameters.LIDAR_MIN_DISTANCE);
                polarLidar.setScan(largeScan);
