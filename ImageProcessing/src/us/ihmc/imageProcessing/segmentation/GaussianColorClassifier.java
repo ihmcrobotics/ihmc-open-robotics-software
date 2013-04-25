@@ -6,8 +6,6 @@ import boofcv.struct.image.MultiSpectral;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -16,10 +14,10 @@ import java.io.InputStream;
  */
 public class GaussianColorClassifier {
 
-   public static Gaussian3D train( InputStream in ) throws IOException {
+   public static Gaussian3D_F64 train( InputStream in ) throws IOException {
       LabeledPixelCodec.Set set = LabeledPixelCodec.read(in);
 
-      Gaussian3D out = new Gaussian3D();
+      Gaussian3D_F64 out = new Gaussian3D_F64();
 
       int N = set.values.size();
 
@@ -73,7 +71,7 @@ public class GaussianColorClassifier {
       return a*chan0 + b*chan1 + c*chan2;
    }
 
-   public static void classify( MultiSpectral<ImageFloat32> input , Gaussian3D model , double thresholdChiSq,
+   public static void classify( MultiSpectral<ImageFloat32> input , Gaussian3D_F64 model , double thresholdChiSq,
                                 ImageUInt8 output ) {
       ImageFloat32 A = input.getBand(0);
       ImageFloat32 B = input.getBand(1);
@@ -96,13 +94,13 @@ public class GaussianColorClassifier {
       }
    }
 
-   public static void classify( MultiSpectral<ImageFloat32> input , Gaussian3D models[] , double thresholdChiSq,
+   public static void classify( MultiSpectral<ImageFloat32> input , Gaussian3D_F64 models[] , double thresholdChiSq,
                                 ImageUInt8 output ) {
       ImageFloat32 A = input.getBand(0);
       ImageFloat32 B = input.getBand(1);
       ImageFloat32 C = input.getBand(2);
 
-      for( Gaussian3D model : models )
+      for( Gaussian3D_F64 model : models )
          model.computeInverse();
 
       for( int y = 0; y < input.height; y++ ) {
@@ -113,7 +111,7 @@ public class GaussianColorClassifier {
 
             boolean positive = false;
             for( int i = 0; i < models.length; i++ ) {
-               Gaussian3D model = models[i];
+               Gaussian3D_F64 model = models[i];
 
                double dist = chisq(model.mean,model.covarianceInv,a,b,c);
                if( dist <= thresholdChiSq ) {
@@ -129,7 +127,7 @@ public class GaussianColorClassifier {
       }
    }
 
-   public static void classifyEuclidean( MultiSpectral<ImageFloat32> input , Gaussian3D model , double threshold,
+   public static void classifyEuclidean( MultiSpectral<ImageFloat32> input , Gaussian3D_F64 model , double threshold,
                                          ImageUInt8 output ) {
       threshold = threshold*threshold;
 

@@ -5,9 +5,12 @@ import org.ejml.ops.CommonOps;
 import org.ejml.ops.CovarianceOps;
 
 /**
+ * Gaussian distribution in 3D
+ *
  * @author Peter Abeles
  */
-public class Gaussian3D {
+public class Gaussian3D_F64
+{
    public double[] mean = new double[3];
    public DenseMatrix64F covariance = new DenseMatrix64F(3,3);
    public DenseMatrix64F covarianceInv = new DenseMatrix64F(3,3);

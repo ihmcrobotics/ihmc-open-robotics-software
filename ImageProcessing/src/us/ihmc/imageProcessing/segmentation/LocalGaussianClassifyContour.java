@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class LocalGaussianClassifyContour {
 
-   Gaussian3D []models;
+   Gaussian3D_F64[]models;
    double thresholdChiSq;
 
    ImageUInt8 binary;
@@ -28,11 +28,11 @@ public class LocalGaussianClassifyContour {
 
    int maxIterations = 5;
 
-   public LocalGaussianClassifyContour(Gaussian3D[] models, double thresholdChiSq ) {
+   public LocalGaussianClassifyContour(Gaussian3D_F64[] models, double thresholdChiSq ) {
       this.models = models;
       this.thresholdChiSq = thresholdChiSq;
 
-      for( Gaussian3D model : models ) {
+      for( Gaussian3D_F64 model : models ) {
          model.computeInverse();
       }
    }
@@ -104,7 +104,7 @@ public class LocalGaussianClassifyContour {
          float v1 = band1.unsafe_get(x,y);
          float v2 = band2.unsafe_get(x,y);
 
-         for( Gaussian3D model : models ) {
+         for( Gaussian3D_F64 model : models ) {
             double chisq = GaussianColorClassifier.chisq(model.mean,model.covarianceInv,v0,v1,v2);
             if( chisq <= thresholdChiSq ) {
                changeValue(x, y, 1);
