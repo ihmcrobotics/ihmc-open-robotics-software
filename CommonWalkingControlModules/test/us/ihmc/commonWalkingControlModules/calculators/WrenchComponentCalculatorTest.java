@@ -39,7 +39,7 @@ public class WrenchComponentCalculatorTest
       transformToParent.set(new Vector3d(1.0, 0.0, 0.0));
       originFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("", ReferenceFrame.getWorldFrame(), transformToParent, false, false, true);
             
-      calculator = new WrenchComponentCalculator(contactPoints, originFrame);
+      calculator = new WrenchComponentCalculator(contactPoints, originFrame, new int[]{0, 3, 5});
       
       point0.setForce(new Vector3d(0.0, 0.0, 1.0));
       point1.setForce(new Vector3d(0.0, 0.0, 0.0));
@@ -47,7 +47,7 @@ public class WrenchComponentCalculatorTest
       point0.getYoPosition().set(new Point3d(1.0, 1.0, 0.0));
       point1.getYoPosition().set(new Point3d(-1.0, 0.0, 0.0));
       
-      double[] tauXFXAndFZ = calculator.getWrenchComponents(new int[]{0, 3, 5});
+      double[] tauXFXAndFZ = calculator.getWrenchComponents();
       assertTrue(tauXFXAndFZ.length == 3);
       assertEquals(tauXFXAndFZ[0], 1.0, epsilon);
       assertEquals(tauXFXAndFZ[1], 0.0, epsilon);
@@ -57,7 +57,7 @@ public class WrenchComponentCalculatorTest
       transformToParent.set(new Vector3d(-1.0, -1.0, 0.0));
       originFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("", ReferenceFrame.getWorldFrame(), transformToParent, false, false, true);
 
-      calculator = new WrenchComponentCalculator(contactPoints, originFrame);
+      calculator = new WrenchComponentCalculator(contactPoints, originFrame, new int[]{0, 1, 2, 3, 4, 5});
       
       point0.setForce(new Vector3d(-1.0, 1.0, 0.0));
       point1.setForce(new Vector3d(-1.0, 1.0, 0.0));
