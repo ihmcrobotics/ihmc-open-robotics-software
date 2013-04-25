@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
@@ -410,24 +409,24 @@ public class ComposableOrientationAndCoMEstimatorCreator
          controlFlowGraph.connectElements(pointVelocitySensorConfiguration.getOutputPort(), pointVelocityMeasurementInputPort);
       }
 
-      public FrameOrientation getEstimatedOrientation()
+      public void getEstimatedOrientation(FrameOrientation estimatedOrientationToPack)
       {
-         return orientationStatePort.getData();
+         estimatedOrientationToPack.setAndChangeFrame(orientationStatePort.getData());
       }
 
-      public FrameVector getEstimatedAngularVelocity()
+      public void getEstimatedAngularVelocity(FrameVector estimatedAngularVelocityToPack)
       {
-         return angularVelocityStatePort.getData();
+         estimatedAngularVelocityToPack.setAndChangeFrame(angularVelocityStatePort.getData());
       }
 
-      public FramePoint getEstimatedCoMPosition()
+      public void getEstimatedCoMPosition(FramePoint estimatedCoMPositionToPack)
       {
-         return centerOfMassPositionStatePort.getData();
+         estimatedCoMPositionToPack.setAndChangeFrame(centerOfMassPositionStatePort.getData());
       }
       
-      public FrameVector getEstimatedCoMVelocity()
+      public void getEstimatedCoMVelocity(FrameVector estimatedCoMVelocityToPack)
       {
-         return centerOfMassVelocityStatePort.getData();
+         estimatedCoMVelocityToPack.setAndChangeFrame(centerOfMassVelocityStatePort.getData());
       }
 
       public void setEstimatedOrientation(FrameOrientation orientation)

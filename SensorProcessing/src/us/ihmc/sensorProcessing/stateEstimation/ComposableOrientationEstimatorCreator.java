@@ -87,8 +87,8 @@ public class ComposableOrientationEstimatorCreator
    {
       private final ControlFlowGraph controlFlowGraph;
       
-      private final ControlFlowOutputPort<FrameOrientation> orientationPort;
-      private final ControlFlowOutputPort<FrameVector> angularVelocityPort;
+      private final ControlFlowOutputPort<FrameOrientation> orientationStatePort;
+      private final ControlFlowOutputPort<FrameVector> angularVelocityStatePort;
 
       private final ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort;
       private final ControlFlowInputPort<FrameVector> desiredAngularAccelerationInputPort;
@@ -100,8 +100,8 @@ public class ComposableOrientationEstimatorCreator
 
          this.controlFlowGraph = controlFlowGraph;
          
-         orientationPort = new YoFrameQuaternionControlFlowOutputPort(this, name, ReferenceFrame.getWorldFrame(), parentRegistry);
-         angularVelocityPort = new YoFrameVectorControlFlowOutputPort(this, name + "Omega", estimationFrame, registry);
+         orientationStatePort = new YoFrameQuaternionControlFlowOutputPort(this, name, ReferenceFrame.getWorldFrame(), parentRegistry);
+         angularVelocityStatePort = new YoFrameVectorControlFlowOutputPort(this, name + "Omega", estimationFrame, registry);
 
          this.inverseDynamicsStructureInputPort = createInputPort();
          this.desiredAngularAccelerationInputPort = createInputPort();
@@ -126,17 +126,17 @@ public class ComposableOrientationEstimatorCreator
 
       private void addOrientationProcessModelElement()
       {
-         ProcessModelElement orientationProcessModelElement = new OrientationProcessModelElement(angularVelocityPort, orientationPort, "orientation", registry);
-         addProcessModelElement(orientationPort, orientationProcessModelElement);
+         ProcessModelElement orientationProcessModelElement = new OrientationProcessModelElement(angularVelocityStatePort, orientationStatePort, "orientation", registry);
+         addProcessModelElement(orientationStatePort, orientationProcessModelElement);
       }
 
       private void addAngularVelocityProcessModelElement(ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph)
       {
-         AngularVelocityProcessModelElement angularVelocityProcessModelElement = new AngularVelocityProcessModelElement(estimationFrame, angularVelocityPort,
+         AngularVelocityProcessModelElement angularVelocityProcessModelElement = new AngularVelocityProcessModelElement(estimationFrame, angularVelocityStatePort,
                desiredAngularAccelerationInputPort, "angularVelocity", registry);
 
          angularVelocityProcessModelElement.setProcessNoiseCovarianceBlock(angularAccelerationNoiseCovariance);
-         addProcessModelElement(angularVelocityPort, angularVelocityProcessModelElement);
+         addProcessModelElement(angularVelocityStatePort, angularVelocityProcessModelElement);
       }
 
       private void addOrientationSensor(ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph,
@@ -147,7 +147,7 @@ public class ComposableOrientationEstimatorCreator
          String name = orientationSensorConfiguration.getName();
          DenseMatrix64F orientationNoiseCovariance = orientationSensorConfiguration.getOrientationNoiseCovariance();
 
-         OrientationMeasurementModelElement orientationMeasurementModel = new OrientationMeasurementModelElement(orientationPort, orientationMeasurementPort,
+         OrientationMeasurementModelElement orientationMeasurementModel = new OrientationMeasurementModelElement(orientationStatePort, orientationMeasurementPort,
                                                                              estimationFrame, measurementFrame, name, registry);
          orientationMeasurementModel.setNoiseCovariance(orientationNoiseCovariance);
 
@@ -171,7 +171,7 @@ public class ComposableOrientationEstimatorCreator
          String name = angularVelocitySensorConfiguration.getName();
          DenseMatrix64F angularVelocityNoiseCovariance = angularVelocitySensorConfiguration.getAngularVelocityNoiseCovariance();
 
-         AngularVelocityMeasurementModelElement angularVelocityMeasurementModel = new AngularVelocityMeasurementModelElement(angularVelocityPort, biasPort,
+         AngularVelocityMeasurementModelElement angularVelocityMeasurementModel = new AngularVelocityMeasurementModelElement(angularVelocityStatePort, biasPort,
                                                                                      angularVelocityMeasurementPort, orientationEstimationLink,
                                                                                      estimationFrame, measurementLink, measurementFrame,
                                                                                      inverseDynamicsStructureInputPort, name, registry);
@@ -181,34 +181,34 @@ public class ComposableOrientationEstimatorCreator
          controlFlowGraph.connectElements(angularVelocitySensorConfiguration.getOutputPort(), angularVelocityMeasurementPort);
       }
 
-      public FrameOrientation getEstimatedOrientation()
+      public void getEstimatedOrientation(FrameOrientation estimatedOrientationToPack)
       {
-         return orientationPort.getData();
+         estimatedOrientationToPack.setAndChangeFrame(orientationStatePort.getData());
       }
 
-      public FrameVector getEstimatedAngularVelocity()
+      public void getEstimatedAngularVelocity(FrameVector estimatedAngularVelocityToPack)
       {
-         return angularVelocityPort.getData();
+         estimatedAngularVelocityToPack.setAndChangeFrame(angularVelocityStatePort.getData());
       }
 
-      public FramePoint getEstimatedCoMPosition()
+      public void getEstimatedCoMPosition(FramePoint estimatedCoMPositionToPack)
       {
-         return null;
+         // Do nothing.
       }
-
-      public FrameVector getEstimatedCoMVelocity()
+      
+      public void getEstimatedCoMVelocity(FrameVector estimatedCoMVelocityToPack)
       {
-         return null;
+         // Do nothing.
       }
 
       public void setEstimatedOrientation(FrameOrientation orientation)
       {
-         orientationPort.setData(orientation);
+         orientationStatePort.setData(orientation);
       }
 
       public void setEstimatedAngularVelocity(FrameVector angularVelocity)
       {
-         angularVelocityPort.setData(angularVelocity);
+         angularVelocityStatePort.setData(angularVelocity);
       }
 
       public void setEstimatedCoMPosition(FramePoint estimatedCoMPosition)
