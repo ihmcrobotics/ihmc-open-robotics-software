@@ -16,9 +16,9 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import com.yobotics.simulationconstructionset.GroundContactPoint;
 import com.yobotics.simulationconstructionset.Robot;
 
-public class WrenchComponentCalculatorTest
+public class GroundContactPointBasedWrenchCalculatorTest
 {
-   WrenchComponentCalculator calculator;
+   GroundContactPointBasedWrenchCalculator calculator;
    Transform3D transformToParent;
    ReferenceFrame originFrame;
    
@@ -39,7 +39,7 @@ public class WrenchComponentCalculatorTest
       transformToParent.set(new Vector3d(1.0, 0.0, 0.0));
       originFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("", ReferenceFrame.getWorldFrame(), transformToParent, false, false, true);
             
-      calculator = new WrenchComponentCalculator(contactPoints, originFrame, new int[]{0, 3, 5});
+      calculator = new GroundContactPointBasedWrenchCalculator(contactPoints, originFrame);
       
       point0.setForce(new Vector3d(0.0, 0.0, 1.0));
       point1.setForce(new Vector3d(0.0, 0.0, 0.0));
@@ -47,17 +47,16 @@ public class WrenchComponentCalculatorTest
       point0.getYoPosition().set(new Point3d(1.0, 1.0, 0.0));
       point1.getYoPosition().set(new Point3d(-1.0, 0.0, 0.0));
       
-      double[] tauXFXAndFZ = calculator.getWrenchComponents();
-      assertTrue(tauXFXAndFZ.length == 3);
+      double[] tauXFXAndFZ = calculator.getWrench();
       assertEquals(tauXFXAndFZ[0], 1.0, epsilon);
-      assertEquals(tauXFXAndFZ[1], 0.0, epsilon);
-      assertEquals(tauXFXAndFZ[2], 1.0, epsilon);
+      assertEquals(tauXFXAndFZ[3], 0.0, epsilon);
+      assertEquals(tauXFXAndFZ[5], 1.0, epsilon);
       
       transformToParent = new Transform3D();
       transformToParent.set(new Vector3d(-1.0, -1.0, 0.0));
       originFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("", ReferenceFrame.getWorldFrame(), transformToParent, false, false, true);
 
-      calculator = new WrenchComponentCalculator(contactPoints, originFrame, new int[]{0, 1, 2, 3, 4, 5});
+      calculator = new GroundContactPointBasedWrenchCalculator(contactPoints, originFrame);
       
       point0.setForce(new Vector3d(-1.0, 1.0, 0.0));
       point1.setForce(new Vector3d(-1.0, 1.0, 0.0));
@@ -65,7 +64,7 @@ public class WrenchComponentCalculatorTest
       point0.getYoPosition().set(new Point3d(0.0, 0.0, 1.0));
       point1.getYoPosition().set(new Point3d(-2.0, -2.0, 1.0));
       
-      double[] wholeWrench = calculator.getWrenchComponents();
+      double[] wholeWrench = calculator.getWrench();
       assertTrue(wholeWrench.length == 6);
       assertEquals(wholeWrench[0], - 2.0, epsilon);
       assertEquals(wholeWrench[1], - 2.0, epsilon);
