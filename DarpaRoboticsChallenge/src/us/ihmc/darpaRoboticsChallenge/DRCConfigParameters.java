@@ -16,13 +16,11 @@ public class DRCConfigParameters
 
    public static final double ESTIMATE_DT = 0.001;
 
-
    // Set whether or not to use GFE Robot Model
    public static final boolean USE_GFE_ROBOT_MODEL = true;
 
    // Convenience field
    public static final boolean USE_R2_ROBOT_MODEL = !USE_GFE_ROBOT_MODEL;
-
 
    // Networking
    public static final String GAZEBO_HOST = "localhost";    // "10.4.42.2";    // "localhost";
@@ -56,10 +54,10 @@ public class DRCConfigParameters
 
 
    // LIDAR:
-   public static final double LIDAR_SPINDLE_VELOCITY = 3.25;
-   
+   public static final double LIDAR_SPINDLE_VELOCITY = 0.5;
+
    public static final boolean STREAM_POLAR_LIDAR = true;
-   static final int LIDAR_UPDATE_RATE_OVERRIDE = 3; 
+   static final int LIDAR_UPDATE_RATE_OVERRIDE = 3;
    static final int LIDAR_SWEEPS_PER_SCAN = 6;    // 1
    static final int LIDAR_POINTS_PER_SWEEP = 70;    // 640
    static final boolean OVERRIDE_DRC_LIDAR_CONFIG = true;
@@ -76,10 +74,10 @@ public class DRCConfigParameters
    public static final boolean DEBUG_GAZEBO_LIDAR = false;
 
    // LIDAR Processor
-   public static final DRCLidarDataStoreType DRCLIDAR_DATA_STORE_TYPE = DRCLidarDataStoreType.QUAD_TREE_AND_VOXELS;
-   public static final double GRID_RESOLUTION = 0.005;    // in meters
+   public static final DRCLidarDataStoreType DRCLIDAR_DATA_STORE_TYPE = DRCLidarDataStoreType.QUAD_TREE;
+   public static final double GRID_RESOLUTION = 0.025;    // in meters
    public static final double OCTREE_RESOLUTION = 0.05;
-   public static final float QUADTREE_HEIGHT_THRESHOLD = 0.005f;
+   public static final float QUADTREE_HEIGHT_THRESHOLD = 0.025f;
    public static final double LIDAR_BLINDNESS_CYLINDAR_SQUARED_RADIUS = 0.1;
    public static final boolean HIDE_THINGS_ABOVE_HEAD_FROM_LIDAR = true;
 
@@ -88,8 +86,5 @@ public class DRCConfigParameters
       (1 + 0.3) * 2
       * Math.sqrt(DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD * DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD
                   + 0.25 * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH);
-
-
-
 
 }
