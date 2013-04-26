@@ -149,7 +149,7 @@ public class SensorConfigurationFactory
          ControlFlowOutputPort<PointPositionDataObject> outputPort = pointPositionSensors.get(pointPositionSensorDefinition);
 
          PointPositionSensorConfiguration pointPositionSensorConfiguration = new PointPositionSensorConfiguration(outputPort, sensorName,
-                                                                                estimatedMeasurementBody, estimatedPositionPoint, pointPositionNoiseCovariance);
+               estimatedPositionPoint, pointPositionNoiseCovariance);
 
          pointPositionSensorConfigurations.add(pointPositionSensorConfiguration);
       }
