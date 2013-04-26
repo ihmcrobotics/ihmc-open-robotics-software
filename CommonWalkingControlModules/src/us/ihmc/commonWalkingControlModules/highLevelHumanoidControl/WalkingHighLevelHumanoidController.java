@@ -1377,13 +1377,13 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private void doChestControl()
    {
       chestOrientationControlModule.compute();
-      solver.setDesiredSpatialAcceleration(chestOrientationControlModule.getJacobian(), chestOrientationControlModule.getTaskspaceConstraintData());
+      momentumControlModule.setDesiredSpatialAcceleration(chestOrientationControlModule.getJacobian(), chestOrientationControlModule.getTaskspaceConstraintData());
    }
 
    public void doHeadControl()
    {
       headOrientationControlModule.compute();
-      solver.setDesiredSpatialAcceleration(headOrientationControlModule.getJacobian(), headOrientationControlModule.getTaskspaceConstraintData());
+      momentumControlModule.setDesiredSpatialAcceleration(headOrientationControlModule.getJacobian(), headOrientationControlModule.getTaskspaceConstraintData());
 
       if (jointForExtendedNeckPitchRange != null)
       {
@@ -1409,7 +1409,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          manipulationStateMachines.get(robotSide).waitUntilComputationIsDone();
 
          TaskspaceConstraintData taskspaceConstraintData = manipulationStateMachines.get(robotSide).getTaskspaceConstraintData();
-         solver.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
+         momentumControlModule.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
       }
    }
 
@@ -1503,7 +1503,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          endEffectorControlModule.waitUntilComputationIsDone();
          TaskspaceConstraintData taskspaceConstraintData = endEffectorControlModule.getTaskSpaceConstraintOutputPort().getData();
          GeometricJacobian jacobian = endEffectorControlModule.getJacobian();
-         solver.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
+         momentumControlModule.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
       }
    }
 

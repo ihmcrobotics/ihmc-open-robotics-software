@@ -159,7 +159,7 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
    private void doChestcontrol()
    {
       chestOrientationControlModule.compute();
-      solver.setDesiredSpatialAcceleration(spineJacobian, chestOrientationControlModule.getTaskspaceConstraintData());
+      momentumControlModule.setDesiredSpatialAcceleration(spineJacobian, chestOrientationControlModule.getTaskspaceConstraintData());
    }
 
    private void doEndEffectorControl()
@@ -175,7 +175,7 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
          endEffectorControlModule.waitUntilComputationIsDone();
          TaskspaceConstraintData taskspaceConstraintData = endEffectorControlModule.getTaskSpaceConstraintOutputPort().getData();
          GeometricJacobian jacobian = endEffectorControlModule.getJacobian();
-         solver.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
+         momentumControlModule.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
       }
    }
 
