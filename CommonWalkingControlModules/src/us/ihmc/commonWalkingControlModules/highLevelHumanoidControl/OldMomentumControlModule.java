@@ -34,7 +34,7 @@ import us.ihmc.utilities.screwTheory.*;
 import javax.vecmath.Vector3d;
 import java.util.*;
 
-public class OldMomentumControlModule
+public class OldMomentumControlModule implements MomentumControlModule
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -114,6 +114,17 @@ public class OldMomentumControlModule
    {
       alphaGroundReactionWrench.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(groundReactionWrenchBreakFrequencyHertz, controlDT));
 
+   }
+
+   public void initialize()
+   {
+      solver.initialize();
+   }
+
+   public void reset()
+   {
+      solver.reset();
+      externalWrenches.clear();
    }
 
    public void compute(RootJointAccelerationData rootJointAccelerationData, MomentumRateOfChangeData
@@ -199,17 +210,6 @@ public class OldMomentumControlModule
    public void resetGroundReactionWrenchFilter()
    {
       groundReactionWrenchFilterResetRequest.set(true);
-   }
-
-   public void reset()
-   {
-      solver.reset();
-      externalWrenches.clear();
-   }
-
-   public void initialize()
-   {
-      solver.initialize();
    }
 
    public FramePoint2d getCoP(ContactablePlaneBody contactablePlaneBody)

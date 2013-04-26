@@ -51,7 +51,7 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
    public ICPAndMomentumBasedController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
            CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime, double gravityZ,
            TwistCalculator twistCalculator, SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
-           double controlDT, ProcessedOutputsInterface processedOutputs, OldMomentumControlModule momentumControlModule, ArrayList<Updatable> updatables,
+           double controlDT, ProcessedOutputsInterface processedOutputs, MomentumControlModule momentumControlModule, ArrayList<Updatable> updatables,
            MomentumRateOfChangeControlModule momentumRateOfChangeControlModule, RootJointAccelerationControlModule rootJointAccelerationControlModule,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
