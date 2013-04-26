@@ -76,9 +76,9 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects(namePrefix + "DynamicFixedVelocities", dynamicFixedVelocities);
 
       initialPosition.set(0.0, 0.0, 0.0);
-      finalPosition.set(1.0, 0.0, 0.0);
-      waypoints.get(0).set(1.0 / 3.0, 0.1, 0.1);
-      waypoints.get(1).set(2.0 / 3.0, -0.1, 0.2);
+      finalPosition.set(0.6, 0.0, 0.0);
+      waypoints.get(0).set(0.2, 0.0, 0.1);
+      waypoints.get(1).set(0.4, 0.0, 0.1);
       initialVelocity.set(0.1, 0.1, 0.1);
       finalVelocity.set(0.0, 0.0, -0.1);
       stepTime.set(0.6);
