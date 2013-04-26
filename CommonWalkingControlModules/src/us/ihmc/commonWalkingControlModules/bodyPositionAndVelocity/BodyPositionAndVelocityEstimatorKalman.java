@@ -286,7 +286,7 @@ public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVe
    {
       for (Direction direction : Direction.values())
       {
-         YoKalmanFilter kalmanFilter = new YoKalmanFilter("kalman" + direction, nStates, nInputs, nMeasurements, registry);
+         YoKalmanFilter kalmanFilter = new YoKalmanFilter("kalman" + direction, registry);
          updateKalmanFilterConfiguration(kalmanFilter, controlDT);
          kalmanFilters.put(direction, kalmanFilter);
       }

@@ -55,7 +55,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
            RigidBody stationaryPointLink, FramePoint stationaryPoint, ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort,
            YoVariableRegistry registry)
    {
-      super(pointVelocityMeasurementInputPort, SIZE, name, registry);
+      super(SIZE, name, registry);
 
       this.centerOfMassPositionPort = centerOfMassPositionPort;
       this.centerOfMassVelocityPort = centerOfMassVelocityPort;

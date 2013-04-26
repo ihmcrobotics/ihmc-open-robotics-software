@@ -53,7 +53,7 @@ public class ConstantAccelerationKalmanSetup implements RobotController
 
    private void populateAndConfigureYoKalmanFilter(double controlDT)
    {
-      yoKalmanFilter = new YoKalmanFilter(name + "YoKalman", nStates, nInputs, nMeasurements, registry);
+      yoKalmanFilter = new YoKalmanFilter(name + "YoKalman", registry);
       updateYoKalmanFilterConfiguration(controlDT);
    }
 
