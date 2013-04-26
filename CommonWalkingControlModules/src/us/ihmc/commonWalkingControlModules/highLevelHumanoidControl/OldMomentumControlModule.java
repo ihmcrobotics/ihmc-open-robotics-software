@@ -204,6 +204,7 @@ public class OldMomentumControlModule
    public void reset()
    {
       solver.reset();
+      externalWrenches.clear();
    }
 
    public void initialize()

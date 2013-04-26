@@ -21,13 +21,9 @@ import us.ihmc.commonWalkingControlModules.sensors.FingerForceSensors;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.ScrewTools;
-import us.ihmc.utilities.screwTheory.TotalMassCalculator;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.utilities.screwTheory.*;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -113,10 +109,17 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       rootJointAccelerationControlModule.setProportionalGains(100.0, 100.0, 100.0);
       rootJointAccelerationControlModule.setDerivativeGains(20.0, 20.0, 20.0);
 
+      DampedLeastSquaresSolver jacobianSolver = new DampedLeastSquaresSolver(SpatialMotionVector.SIZE);
+      jacobianSolver.setAlpha(5e-2);
+
+      OldMomentumControlModule momentumControlModule = new OldMomentumControlModule(fullRobotModel.getRootJoint(), contactablePlaneBodiesAndBases.keySet(), gravityZ, groundReactionWrenchDistributor,
+            referenceFrames.getCenterOfMassFrame(), controlDT, twistCalculator, jacobianSolver, dynamicGraphicObjectsListRegistry, registry);
       double groundReactionWrenchBreakFrequencyHertz = 7.0;
+      momentumControlModule.setGroundReactionWrenchBreakFrequencyHertz(groundReactionWrenchBreakFrequencyHertz);
+
       MultiContactTestHumanoidController ret = new MultiContactTestHumanoidController(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ,
                                                   twistCalculator, contactablePlaneBodiesAndBases, controlDT, processedOutputs,
-                                                  groundReactionWrenchDistributor, null, momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
+                                                  momentumControlModule, null, momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
                                                   groundReactionWrenchBreakFrequencyHertz, momentumRateOfChangeControlModule.getDesiredCoMPositionInputPort(),
                                                   rootJointAccelerationControlModule.getDesiredPelvisOrientationTrajectoryInputPort(),
                                                   dynamicGraphicObjectsListRegistry);

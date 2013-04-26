@@ -89,14 +89,13 @@ public abstract class MomentumBasedController implements RobotController, Desire
                                   CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime,
                                   double gravityZ, TwistCalculator twistCalculator, Collection<? extends ContactablePlaneBody> contactablePlaneBodies,
                                   double controlDT, ProcessedOutputsInterface processedOutputs,
-                                  GroundReactionWrenchDistributor groundReactionWrenchDistributor, ArrayList<Updatable> updatables,
+                                  OldMomentumControlModule momentumControlModule, ArrayList<Updatable> updatables,
                                   MomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
                                   RootJointAccelerationControlModule rootJointAccelerationControlModule, double groundReactionWrenchBreakFrequencyHertz,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
-      LinearSolver<DenseMatrix64F> jacobianSolver = createJacobianSolver();
+      this.momentumControlModule = momentumControlModule;
 
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
@@ -172,17 +171,7 @@ public abstract class MomentumBasedController implements RobotController, Desire
       this.momentumRateOfChangeControlModule = momentumRateOfChangeControlModule;
       this.rootJointAccelerationControlModule = rootJointAccelerationControlModule;
 
-      this.momentumControlModule = new OldMomentumControlModule(rootJoint, contactablePlaneBodies, gravityZ, groundReactionWrenchDistributor,
-            centerOfMassFrame, controlDT, twistCalculator, jacobianSolver, dynamicGraphicObjectsListRegistry, registry);
       momentumControlModule.setGroundReactionWrenchBreakFrequencyHertz(groundReactionWrenchBreakFrequencyHertz);
-   }
-
-   protected static LinearSolver<DenseMatrix64F> createJacobianSolver()
-   {
-      DampedLeastSquaresSolver jacobianSolver = new DampedLeastSquaresSolver(SpatialMotionVector.SIZE);
-      jacobianSolver.setAlpha(5e-2);
-
-      return jacobianSolver;
    }
 
    protected static double computeDesiredAcceleration(double k, double d, double qDesired, double qdDesired, OneDoFJoint joint)

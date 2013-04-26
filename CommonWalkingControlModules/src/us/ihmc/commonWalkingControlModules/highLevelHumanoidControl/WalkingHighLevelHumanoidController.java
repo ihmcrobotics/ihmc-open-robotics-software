@@ -221,7 +221,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
            SideDependentList<FootSwitchInterface> footSwitches, double gravityZ, DoubleYoVariable yoTime, double controlDT,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, FootstepProvider footstepProvider, DesiredHandPoseProvider handPoseProvider,
            HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters, DesiredHeadOrientationProvider desiredHeadOrientationProvider,
-           CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, GroundReactionWrenchDistributor groundReactionWrenchDistributor,
+           CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, OldMomentumControlModule momentumControlModule,
            SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators,
            SideDependentList<DoubleTrajectoryGenerator> heelPitchTrajectoryGenerators, HeelPitchTouchdownProvidersManager heelPitchTouchdownProvidersManager, SwingTimeCalculationProvider swingTimeCalculationProvider,
            YoPositionProvider finalPositionProvider, TrajectoryParametersProvider trajectoryParametersProvider, boolean stayOntoes, double desiredPelvisPitch,
@@ -232,7 +232,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
            FinalDesiredICPCalculator finalDesiredICPCalculator, SideDependentList<HandControllerInterface> handControllers)
    {
       super(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, bipedFeet,
-            bipedSupportPolygons, controlDT, processedOutputs, groundReactionWrenchDistributor, updatables, momentumRateOfChangeControlModule,
+            bipedSupportPolygons, controlDT, processedOutputs, momentumControlModule, updatables, momentumRateOfChangeControlModule,
             rootJointAccelerationControlModule, walkingControllerParameters.getGroundReactionWrenchBreakFrequencyHertz(), dynamicGraphicObjectsListRegistry);
 
       this.finalDesiredICPCalculator = finalDesiredICPCalculator;
