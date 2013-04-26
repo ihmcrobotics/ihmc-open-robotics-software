@@ -55,10 +55,12 @@ public class OldMomentumControlModule
 
 
    private final List<ContactablePlaneBody> contactablePlaneBodies;
+   private final Map<ContactablePlaneBody, Wrench> externalWrenches = new HashMap<ContactablePlaneBody, Wrench>();
 
    protected final DoubleYoVariable alphaGroundReactionWrench = new DoubleYoVariable("alphaGroundReactionWrench", registry);
    private final BooleanYoVariable groundReactionWrenchFilterResetRequest = new BooleanYoVariable("groundReactionWrenchFilterResetRequest", registry);
    private final double controlDT;
+   private final SpatialForceVector desiredCentroidalMomentumRate = new SpatialForceVector();
 
 
    public OldMomentumControlModule(SixDoFJoint rootJoint, Collection<? extends ContactablePlaneBody> contactablePlaneBodies, double gravityZ,
@@ -114,8 +116,8 @@ public class OldMomentumControlModule
 
    }
 
-   public SpatialForceVector computeDesiredAccelerationsAndExternalWrenches(RootJointAccelerationData rootJointAccelerationData, MomentumRateOfChangeData
-         momentumRateOfChangeData, LinkedHashMap<ContactablePlaneBody, ? extends PlaneContactState> contactStates, Map<ContactablePlaneBody, Wrench> externalWrenches, RobotSide upcomingSupportLeg)
+   public void compute(RootJointAccelerationData rootJointAccelerationData, MomentumRateOfChangeData
+         momentumRateOfChangeData, LinkedHashMap<ContactablePlaneBody, ? extends PlaneContactState> contactStates, RobotSide upcomingSupportLeg)
    {
       solver.compute();
       solver.solve(rootJointAccelerationData.getAccelerationSubspace(), rootJointAccelerationData.getAccelerationMultipliers(),
@@ -143,13 +145,10 @@ public class OldMomentumControlModule
       totalGroundReactionWrench.setLinearPart(desiredGroundReactionForce.getFrameVectorCopy().getVector());
 
       GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData = new GroundReactionWrenchDistributorInputData();
-
       groundReactionWrenchDistributorInputData.reset();
-
       for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodies)
       {
          PlaneContactState contactState = contactStates.get(contactablePlaneBody);
-
          List<FramePoint> footContactPoints = contactState.getContactPoints();
 
          if (footContactPoints.size() > 0)
@@ -157,7 +156,6 @@ public class OldMomentumControlModule
             groundReactionWrenchDistributorInputData.addContact(contactState);
          }
       }
-
       groundReactionWrenchDistributorInputData.setSpatialForceVectorAndUpcomingSupportSide(totalGroundReactionWrench, upcomingSupportLeg);
 
       GroundReactionWrenchDistributorOutputData distributedWrenches = new GroundReactionWrenchDistributorOutputData();
@@ -192,12 +190,10 @@ public class OldMomentumControlModule
       }
 
       Wrench admissibleGroundReactionWrench = TotalWrenchCalculator.computeTotalWrench(externalWrenches.values(), totalGroundReactionWrench.getExpressedInFrame());
-      SpatialForceVector desiredCentroidalMomentumRate = new SpatialForceVector();
       desiredCentroidalMomentumRate.set(admissibleGroundReactionWrench);
       desiredCentroidalMomentumRate.sub(gravitationalWrench);
 
       solver.solve(desiredCentroidalMomentumRate);
-      return desiredCentroidalMomentumRate;
    }
 
    public void resetGroundReactionWrenchFilter()
@@ -228,5 +224,15 @@ public class OldMomentumControlModule
    public void setDesiredSpatialAcceleration(GeometricJacobian spineJacobian, TaskspaceConstraintData taskspaceConstraintData)
    {
       solver.setDesiredSpatialAcceleration(spineJacobian, taskspaceConstraintData);
+   }
+
+   public SpatialForceVector getDesiredCentroidalMomentumRate()
+   {
+      return desiredCentroidalMomentumRate;
+   }
+
+   public Map<ContactablePlaneBody, Wrench> getExternalWrenches()
+   {
+      return externalWrenches;
    }
 }
