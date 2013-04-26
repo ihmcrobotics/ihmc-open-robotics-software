@@ -121,15 +121,6 @@ public class Graphics3DObject
     * @param rotationAngle the angle to rotate around the specified axis in radians.
     * @param rotationAxis Axis around which to rotate. Either Link.X, Link.Y or Link.Z
     */
-   public void rotate(double rotationAngle, int rotationAxis)
-   {
-      if(rotationAxis == 0)
-         rotate(rotationAngle, Axis.X);
-      else if(rotationAxis == 1)
-         rotate(rotationAngle, Axis.Y);
-      else if(rotationAxis == 2)
-         rotate(rotationAngle, Axis.Z);
-   }
    
    public void rotate(double rotationAngle, Axis rotationAxis)
    {
