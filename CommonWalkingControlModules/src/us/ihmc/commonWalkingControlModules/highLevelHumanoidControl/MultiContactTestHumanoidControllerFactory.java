@@ -49,11 +49,12 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       this.handContactSides = handContactSides;
    }
 
-   public MomentumBasedController create(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, FingerForceSensors fingerForceSensors,
-                                 DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian,
-                                 SideDependentList<ContactablePlaneBody> feet, double controlDT, SideDependentList<FootSwitchInterface> footSwitches,
-                                 SideDependentList<HandControllerInterface> handControllers, LidarControllerInterface lidarControllerInterface, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-                                 YoVariableRegistry registry, GUISetterUpperRegistry guiSetterUpperRegistry, ProcessedOutputsInterface processedOutputs)
+   public MomentumBasedController create(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
+           CommonWalkingReferenceFrames referenceFrames, FingerForceSensors fingerForceSensors, DoubleYoVariable yoTime, double gravityZ,
+           TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian, SideDependentList<ContactablePlaneBody> feet, double controlDT,
+           SideDependentList<FootSwitchInterface> footSwitches, SideDependentList<HandControllerInterface> handControllers,
+           LidarControllerInterface lidarControllerInterface, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry,
+           GUISetterUpperRegistry guiSetterUpperRegistry, ProcessedOutputsInterface processedOutputs)
    {
       LinkedHashMap<ContactablePlaneBody, RigidBody> contactablePlaneBodiesAndBases = new LinkedHashMap<ContactablePlaneBody, RigidBody>();
 
@@ -112,15 +113,16 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       DampedLeastSquaresSolver jacobianSolver = new DampedLeastSquaresSolver(SpatialMotionVector.SIZE);
       jacobianSolver.setAlpha(5e-2);
 
-      OldMomentumControlModule momentumControlModule = new OldMomentumControlModule(fullRobotModel.getRootJoint(), contactablePlaneBodiesAndBases.keySet(), gravityZ, groundReactionWrenchDistributor,
-            referenceFrames.getCenterOfMassFrame(), controlDT, twistCalculator, jacobianSolver, dynamicGraphicObjectsListRegistry, registry);
+      OldMomentumControlModule momentumControlModule = new OldMomentumControlModule(fullRobotModel.getRootJoint(), contactablePlaneBodiesAndBases.keySet(),
+                                                          gravityZ, groundReactionWrenchDistributor, referenceFrames.getCenterOfMassFrame(), controlDT,
+                                                          twistCalculator, jacobianSolver, dynamicGraphicObjectsListRegistry, registry);
       double groundReactionWrenchBreakFrequencyHertz = 7.0;
       momentumControlModule.setGroundReactionWrenchBreakFrequencyHertz(groundReactionWrenchBreakFrequencyHertz);
 
-      MultiContactTestHumanoidController ret = new MultiContactTestHumanoidController(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ,
-                                                  twistCalculator, contactablePlaneBodiesAndBases, controlDT, processedOutputs,
-                                                  momentumControlModule, null, momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
-                                                  groundReactionWrenchBreakFrequencyHertz, momentumRateOfChangeControlModule.getDesiredCoMPositionInputPort(),
+      MultiContactTestHumanoidController ret = new MultiContactTestHumanoidController(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian,
+                                                  referenceFrames, yoTime, gravityZ, twistCalculator, contactablePlaneBodiesAndBases, controlDT,
+                                                  processedOutputs, momentumControlModule, null, momentumRateOfChangeControlModule,
+                                                  rootJointAccelerationControlModule, momentumRateOfChangeControlModule.getDesiredCoMPositionInputPort(),
                                                   rootJointAccelerationControlModule.getDesiredPelvisOrientationTrajectoryInputPort(),
                                                   dynamicGraphicObjectsListRegistry);
 

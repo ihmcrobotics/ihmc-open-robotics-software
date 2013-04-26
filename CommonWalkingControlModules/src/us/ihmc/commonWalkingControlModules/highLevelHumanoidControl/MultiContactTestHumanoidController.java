@@ -9,7 +9,6 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributor;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
@@ -58,25 +57,25 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
    private final ReferenceFrame pelvisFrame;
 
    private final LinkedHashMap<ContactablePlaneBody, EndEffectorControlModule> endEffectorControlModules = new LinkedHashMap<ContactablePlaneBody,
-                                                                                                        EndEffectorControlModule>();
+                                                                                                              EndEffectorControlModule>();
    private final LinkedHashMap<ContactablePlaneBody, GeometricJacobian> jacobians = new LinkedHashMap<ContactablePlaneBody, GeometricJacobian>();
-   private final LinkedHashMap<ContactablePlaneBody, FixedPositionTrajectoryGenerator> swingPositionTrajectoryGenerators = new LinkedHashMap<ContactablePlaneBody,
-                                                                                                                        FixedPositionTrajectoryGenerator>();
+   private final LinkedHashMap<ContactablePlaneBody, FixedPositionTrajectoryGenerator> swingPositionTrajectoryGenerators =
+      new LinkedHashMap<ContactablePlaneBody, FixedPositionTrajectoryGenerator>();
    private final LinkedHashMap<ContactablePlaneBody, FixedOrientationTrajectoryGenerator> swingOrientationTrajectoryGenerators =
       new LinkedHashMap<ContactablePlaneBody, FixedOrientationTrajectoryGenerator>();
 
 
-   public MultiContactTestHumanoidController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian,
-           CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator,
-           HashMap<ContactablePlaneBody, RigidBody> contactablePlaneBodiesAndBases, double controlDT, ProcessedOutputsInterface processedOutputs,
-           OldMomentumControlModule momentumControlModule, ArrayList<Updatable> updatables,
+   public MultiContactTestHumanoidController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
+           CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime, double gravityZ,
+           TwistCalculator twistCalculator, HashMap<ContactablePlaneBody, RigidBody> contactablePlaneBodiesAndBases, double controlDT,
+           ProcessedOutputsInterface processedOutputs, OldMomentumControlModule momentumControlModule, ArrayList<Updatable> updatables,
            MomentumRateOfChangeControlModule momentumRateOfChangeControlModule, RootJointAccelerationControlModule rootJointAccelerationControlModule,
-           double groundReactionWrenchBreakFrequencyHertz, ControlFlowInputPort<FramePoint> desiredCoMPositionPort,
-           ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationPort, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           ControlFlowInputPort<FramePoint> desiredCoMPositionPort, ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationPort,
+           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      super(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, contactablePlaneBodiesAndBases.keySet(), controlDT,
-            processedOutputs, momentumControlModule, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
-            groundReactionWrenchBreakFrequencyHertz, dynamicGraphicObjectsListRegistry);
+      super(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator,
+            contactablePlaneBodiesAndBases.keySet(), controlDT, processedOutputs, momentumControlModule, updatables, momentumRateOfChangeControlModule,
+            rootJointAccelerationControlModule, dynamicGraphicObjectsListRegistry);
       this.desiredCoMPositionPort = desiredCoMPositionPort;
       this.desiredPelvisOrientationPort = desiredPelvisOrientationPort;
 
@@ -111,8 +110,8 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
                                                                                       worldFrame, registry);
          swingOrientationTrajectoryGenerators.put(contactablePlaneBody, swingOrientationTrajectoryGenerator);
 
-         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(contactablePlaneBody, jacobian, swingPositionTrajectoryGenerator, null,
-                                                                swingOrientationTrajectoryGenerator, null, yoTime, twistCalculator, registry);
+         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(contactablePlaneBody, jacobian, swingPositionTrajectoryGenerator,
+                                                                null, swingOrientationTrajectoryGenerator, null, yoTime, twistCalculator, registry);
          endEffectorControlModules.put(contactablePlaneBody, endEffectorControlModule);
 
          positionControlJoints.removeAll(Arrays.asList(jacobian.getJointsInOrder()));
@@ -214,6 +213,6 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
    protected void doAdditionalTorqueControl()
    {
       // TODO Auto-generated method stub
-      
+
    }
 }

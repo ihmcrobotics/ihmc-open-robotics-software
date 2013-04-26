@@ -91,7 +91,7 @@ public abstract class MomentumBasedController implements RobotController, Desire
                                   double controlDT, ProcessedOutputsInterface processedOutputs,
                                   OldMomentumControlModule momentumControlModule, ArrayList<Updatable> updatables,
                                   MomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
-                                  RootJointAccelerationControlModule rootJointAccelerationControlModule, double groundReactionWrenchBreakFrequencyHertz,
+                                  RootJointAccelerationControlModule rootJointAccelerationControlModule,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
@@ -170,8 +170,6 @@ public abstract class MomentumBasedController implements RobotController, Desire
 
       this.momentumRateOfChangeControlModule = momentumRateOfChangeControlModule;
       this.rootJointAccelerationControlModule = rootJointAccelerationControlModule;
-
-      momentumControlModule.setGroundReactionWrenchBreakFrequencyHertz(groundReactionWrenchBreakFrequencyHertz);
    }
 
    protected static double computeDesiredAcceleration(double k, double d, double qDesired, double qdDesired, OneDoFJoint joint)
