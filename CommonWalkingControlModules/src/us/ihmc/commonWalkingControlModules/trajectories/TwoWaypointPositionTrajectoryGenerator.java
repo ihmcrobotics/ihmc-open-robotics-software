@@ -93,7 +93,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
                  dynamicGraphicObjectsListRegistry);
          fixedPointBagOfBalls = new BagOfBalls(6, 0.02, namePrefix + "WaypointBagOfBalls", registry, dynamicGraphicObjectsListRegistry);
       }
-      
+
       else
       {
          trajectoryBagOfBalls = null;
@@ -409,13 +409,18 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
             break;
 
-         case DEFAULT :
-            waypoints = getWaypointsAtGroundClearance(SimpleTwoWaypointTrajectoryParameters.getDefaultGroundClearance());
+         case STEP_ON :
+            waypoints = getWaypointsForStepOn();
 
             break;
 
          case BY_BOX :
             waypoints = getWaypointsFromABox(trajectoryParameters.getBox());
+
+            break;
+
+         default :
+            waypoints = getWaypointsAtGroundClearance(SimpleTwoWaypointTrajectoryParameters.getDefaultGroundClearance());
 
             break;
       }
@@ -425,6 +430,20 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          waypoints.get(i).changeFrame(referenceFrame);
          allPositions[waypointIndices[i]].set(waypoints.get(i));
       }
+   }
+
+   private List<FramePoint> getWaypointsForStepOn()
+   {
+      List<FramePoint> waypoints = new ArrayList<FramePoint>();
+      waypoints.add(allPositions[endpointIndices[0]].getFramePointCopy());
+      waypoints.add(allPositions[endpointIndices[1]].getFramePointCopy());
+
+      for (FramePoint waypoint : waypoints)
+      {
+         waypoint.setZ(waypoints.get(1).getZ() + SimpleTwoWaypointTrajectoryParameters.getDefaultGroundClearance());
+      }
+
+      return waypoints;
    }
 
    private List<FramePoint> getWaypointsAtGroundClearance(double groundClearance)

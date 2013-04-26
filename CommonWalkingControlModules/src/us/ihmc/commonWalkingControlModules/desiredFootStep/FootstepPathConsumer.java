@@ -17,7 +17,6 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectConsumer;
 
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
-import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypointGenerationMethod;
 
 /**
  * User: Matt
@@ -74,11 +73,11 @@ public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
                case BY_POINTS :
                   trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(footstepData.getTrajectoryWaypoints());
                   break;
-               case STEP_ON :
-                  trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(TrajectoryWaypointGenerationMethod.STEP_ON);
-                  break;
                case DEFAULT :
                   trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters();
+                  break;
+                default:
+                  trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(footstepData.getTrajectoryWaypointGenerationMethod());
                   break;
             }
          }
