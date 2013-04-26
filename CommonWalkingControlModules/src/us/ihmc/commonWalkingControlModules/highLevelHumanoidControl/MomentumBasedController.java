@@ -314,11 +314,6 @@ public abstract class MomentumBasedController implements RobotController, Desire
       momentumControlModule.resetGroundReactionWrenchFilter();
    }
 
-   protected void resetCoPFilter(ContactablePlaneBody contactableBody)
-   {
-      momentumControlModule.resetCoPFilter(contactableBody);
-   }
-
    protected abstract void doAdditionalTorqueControl();
 
    private void callUpdatables()
