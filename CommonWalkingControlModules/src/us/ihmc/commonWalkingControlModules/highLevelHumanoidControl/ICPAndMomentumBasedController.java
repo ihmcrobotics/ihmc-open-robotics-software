@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.FootPolygonVisualizer;
 import us.ihmc.commonWalkingControlModules.calculators.Omega0Calculator;
-import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributor;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
@@ -49,16 +48,16 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
    private final DoubleYoVariable omega0;
    private final Omega0Calculator omega0Calculator;
 
-   public ICPAndMomentumBasedController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames,
-           DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator, SideDependentList<? extends ContactablePlaneBody> bipedFeet,
-           BipedSupportPolygons bipedSupportPolygons, double controlDT, ProcessedOutputsInterface processedOutputs,
-           OldMomentumControlModule momentumControlModule, ArrayList<Updatable> updatables,
+   public ICPAndMomentumBasedController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
+           CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime, double gravityZ,
+           TwistCalculator twistCalculator, SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
+           double controlDT, ProcessedOutputsInterface processedOutputs, OldMomentumControlModule momentumControlModule, ArrayList<Updatable> updatables,
            MomentumRateOfChangeControlModule momentumRateOfChangeControlModule, RootJointAccelerationControlModule rootJointAccelerationControlModule,
-           double groundReactionWrenchBreakFrequencyHertz, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      super(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, bipedFeet.values(), controlDT, processedOutputs,
-            momentumControlModule, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
-            groundReactionWrenchBreakFrequencyHertz, dynamicGraphicObjectsListRegistry);
+      super(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, bipedFeet.values(),
+            controlDT, processedOutputs, momentumControlModule, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
+            dynamicGraphicObjectsListRegistry);
 
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
       this.omega0Calculator = new Omega0Calculator(centerOfMassFrame, totalMass);
@@ -100,7 +99,7 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
          throw new RuntimeException("omega0 is NaN");
       this.omega0.set(omega0);
    }
-   
+
    protected void computeCapturePoint()
    {
       FramePoint centerOfMass = computeCenterOfMass();
