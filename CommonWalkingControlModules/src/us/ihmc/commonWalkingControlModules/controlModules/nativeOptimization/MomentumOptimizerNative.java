@@ -105,7 +105,45 @@ public class MomentumOptimizerNative
    private final double[] vd = new double[nDoF];
    private double optval = 0.0;
 
-   public int solve(double[] A, double[] b, double[] C, double[] Js, double[] ps, double[] Ws, double[] Lambda, double[] Q, double[] c, double[] rhoMin, double[] N, double[] z, double wRho) throws NoConvergenceException
+   /**
+    * CVXGen problem statement:
+    *
+    * parameters
+    * A (wrenchLength, nDoF)
+    * b (wrenchLength, 1)
+    * C (wrenchLength, wrenchLength) diagonal psd
+    *
+    * Js (nDoF, nDoF)
+    * ps (nDoF, 1)
+    * Ws (nDoF, nDoF) diagonal psd
+    *
+    * Lambda (nDoF, nDoF) diagonal psd
+    *
+    * Q (wrenchLength, nContacts * nSupportVectors * nPointsPerContact)
+    * c (wrenchLength, 1)
+    * rhoMin (nSupportVectors * nPointsPerContact * nContacts) positive
+    * wRho positive
+    *
+    * N (nDoF, nNull)
+    * z(nNull, 1)
+    * end
+    *
+    * variables
+    * rho (nContacts * nSupportVectors * nPointsPerContact)
+    * vd (nDoF)
+    * end
+    *
+    * minimize
+    * quad(A * vd - b, C) + quad(Js * vd - ps, Ws) + wRho * quad(rho) + quad(vd, Lambda)
+    * subject to
+    * Q * rho == A * vd + c
+    * N' * vd == z
+    * rho >= rhoMin
+    * end
+    */
+   public int solve(double[] A, double[] b, double[] C, double[] Js, double[] ps, double[] Ws, double[] Lambda, double[] Q, double[] c, double[] rhoMin,
+                    double[] N, double[] z, double wRho)
+           throws NoConvergenceException
    {
       int numberOfIterations;
 
@@ -163,11 +201,11 @@ public class MomentumOptimizerNative
    {
       double[] A = new double[wrenchLength * nDoF];
       double[] b = new double[wrenchLength];
-      double[] C = new double[wrenchLength]; // diagonal
+      double[] C = new double[wrenchLength];    // diagonal
       double[] Js = new double[nDoF * nDoF];
       double[] ps = new double[nDoF];
-      double[] Ws = new double[nDoF]; // diagonal
-      double[] Lambda = new double[nDoF]; // diagonal
+      double[] Ws = new double[nDoF];    // diagonal
+      double[] Lambda = new double[nDoF];    // diagonal
       double[] Q = new double[wrenchLength * nContacts * nSupportVectors * nPointsPerContact];
       double[] c = new double[wrenchLength];
       double[] rhoMin = new double[nSupportVectors * nPointsPerContact * nContacts];
@@ -188,7 +226,7 @@ public class MomentumOptimizerNative
             double timePerSolveMillis = deltaTimeSeconds / nSolves * 1e3;
             System.out.println("10000 iterations took " + deltaTimeSeconds + " seconds. Time per solve (ms): " + timePerSolveMillis);
 
-//            System.out.println(Arrays.toString(momentumOptimizerNative.getRho()));
+//          System.out.println(Arrays.toString(momentumOptimizerNative.getRho()));
 
             time = System.nanoTime();
          }
@@ -197,7 +235,8 @@ public class MomentumOptimizerNative
       }
    }
 
-   private static void load_default_data(double[] A, double[] b, double[] C, double[] Js, double[] ps, double[] Ws, double[] Lambda, double[] Q, double[] c, double[] rhoMin, double[] N, double[] z, double[] wRho)
+   private static void load_default_data(double[] A, double[] b, double[] C, double[] Js, double[] ps, double[] Ws, double[] Lambda, double[] Q, double[] c,
+           double[] rhoMin, double[] N, double[] z, double[] wRho)
    {
       A[0] = 0.20319161029830202;
       A[1] = 0.8325912904724193;

@@ -47,10 +47,6 @@ public class OldMomentumControlModule implements MomentumControlModule
    private final AlphaFilteredYoFrameVector desiredGroundReactionTorque;
    private final AlphaFilteredYoFrameVector desiredGroundReactionForce;
 
-
-   private final LinkedHashMap<ContactablePlaneBody, YoFramePoint> centersOfPressureWorld = new LinkedHashMap<ContactablePlaneBody, YoFramePoint>();
-   private final LinkedHashMap<ContactablePlaneBody, YoFramePoint2d> centersOfPressure2d = new LinkedHashMap<ContactablePlaneBody, YoFramePoint2d>();
-
    private final SpatialForceVector gravitationalWrench;
 
 
@@ -65,7 +61,8 @@ public class OldMomentumControlModule implements MomentumControlModule
 
    public OldMomentumControlModule(SixDoFJoint rootJoint, Collection<? extends ContactablePlaneBody> contactablePlaneBodies, double gravityZ,
                                    GroundReactionWrenchDistributor groundReactionWrenchDistributor, ReferenceFrame centerOfMassFrame, double controlDT, TwistCalculator twistCalculator, LinearSolver<DenseMatrix64F> jacobianSolver,
-                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+
+                                   YoVariableRegistry parentRegistry)
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
@@ -85,25 +82,6 @@ public class OldMomentumControlModule implements MomentumControlModule
             alphaGroundReactionWrench, unfilteredDesiredGroundReactionTorque);
       this.desiredGroundReactionForce = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("desiredGroundReactionForce", "", registry,
             alphaGroundReactionWrench, unfilteredDesiredGroundReactionForce);
-
-      for (ContactablePlaneBody contactableBody : contactablePlaneBodies)
-      {
-         String copName = contactableBody.getRigidBody().getName() + "CoP";
-         String listName = "cops";
-
-         YoFramePoint2d cop2d = new YoFramePoint2d(copName + "2d", "", contactableBody.getPlaneFrame(), registry);
-         centersOfPressure2d.put(contactableBody, cop2d);
-
-         YoFramePoint cop = new YoFramePoint(copName, ReferenceFrame.getWorldFrame(), registry);
-         centersOfPressureWorld.put(contactableBody, cop);
-
-         if (dynamicGraphicObjectsListRegistry != null)
-         {
-            DynamicGraphicPosition copViz = cop.createDynamicGraphicPosition(copName, 0.005, YoAppearance.Navy(), DynamicGraphicPosition.GraphicType.BALL);
-            dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, copViz);
-            dynamicGraphicObjectsListRegistry.registerArtifact(listName, copViz.createArtifact());
-         }
-      }
 
       gravitationalWrench = new SpatialForceVector(centerOfMassFrame, new Vector3d(0.0, 0.0, totalMass * gravityZ), new Vector3d());
 
@@ -184,19 +162,10 @@ public class OldMomentumControlModule implements MomentumControlModule
             FramePoint2d cop = distributedWrenches.getCenterOfPressure(contactState);
             double normalTorque = distributedWrenches.getNormalTorque(contactState);
 
-            centersOfPressure2d.get(contactablePlaneBody).set(cop);
-
-            FramePoint cop3d = cop.toFramePoint();
-            cop3d.changeFrame(ReferenceFrame.getWorldFrame());
-            centersOfPressureWorld.get(contactablePlaneBody).set(cop3d);
-
             Wrench groundReactionWrench = new Wrench(rigidBody.getBodyFixedFrame(), contactState.getPlaneFrame());
+            externalWrenches.put(contactablePlaneBody, groundReactionWrench);
             WrenchDistributorTools.computeWrench(groundReactionWrench, force, cop, normalTorque);
             groundReactionWrench.changeFrame(rigidBody.getBodyFixedFrame());
-            externalWrenches.put(contactablePlaneBody, groundReactionWrench);
-         } else
-         {
-            centersOfPressureWorld.get(contactablePlaneBody).setToNaN();
          }
       }
 
@@ -212,19 +181,14 @@ public class OldMomentumControlModule implements MomentumControlModule
       groundReactionWrenchFilterResetRequest.set(true);
    }
 
-   public FramePoint2d getCoP(ContactablePlaneBody contactablePlaneBody)
-   {
-      return centersOfPressure2d.get(contactablePlaneBody).getFramePoint2dCopy();
-   }
-
    public void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration)
    {
       solver.setDesiredJointAcceleration(joint, jointAcceleration);
    }
 
-   public void setDesiredSpatialAcceleration(GeometricJacobian spineJacobian, TaskspaceConstraintData taskspaceConstraintData)
+   public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
    {
-      solver.setDesiredSpatialAcceleration(spineJacobian, taskspaceConstraintData);
+      solver.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
    }
 
    public SpatialForceVector getDesiredCentroidalMomentumRate()
