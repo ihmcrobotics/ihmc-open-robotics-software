@@ -5,11 +5,15 @@ import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeControlModule;
@@ -18,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAcce
 import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAccelerationData;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.simulatedSensors.PointPositionSensorDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.PointVelocitySensorDefinition;
@@ -49,6 +54,7 @@ public abstract class MomentumBasedController implements RobotController, Desire
    protected final TwistCalculator twistCalculator;
    protected final List<ContactablePlaneBody> contactablePlaneBodies;
 
+   private final LinkedHashMap<ContactablePlaneBody, DoubleYoVariable> normalTorques = new LinkedHashMap<ContactablePlaneBody, DoubleYoVariable>();
    private final LinkedHashMap<ContactablePlaneBody, DoubleYoVariable> groundReactionForceMagnitudes = new LinkedHashMap<ContactablePlaneBody,
          DoubleYoVariable>();
    protected final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
@@ -67,6 +73,9 @@ public abstract class MomentumBasedController implements RobotController, Desire
    protected final YoFrameVector groundReactionTorqueCheck;
    protected final YoFrameVector groundReactionForceCheck;
 
+   private final LinkedHashMap<ContactablePlaneBody, YoFramePoint> centersOfPressureWorld = new LinkedHashMap<ContactablePlaneBody, YoFramePoint>();
+   private final LinkedHashMap<ContactablePlaneBody, YoFramePoint2d> centersOfPressure2d = new LinkedHashMap<ContactablePlaneBody, YoFramePoint2d>();
+
    protected final LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredAccelerationYoVariables = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
 
    protected final ProcessedOutputsInterface processedOutputs;
@@ -81,6 +90,8 @@ public abstract class MomentumBasedController implements RobotController, Desire
 
    protected final SpatialForceVector gravitationalWrench;
    protected final EnumYoVariable<RobotSide> upcomingSupportLeg = EnumYoVariable.create("upcomingSupportLeg", "", RobotSide.class, registry, true);    // FIXME: not general enough; this should not be here
+
+   private final CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
 
    public MomentumBasedController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
                                   CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime,
@@ -135,8 +146,26 @@ public abstract class MomentumBasedController implements RobotController, Desire
       {
          DoubleYoVariable forceMagnitude = new DoubleYoVariable(contactableBody.getRigidBody().getName() + "ForceMagnitude", registry);
          groundReactionForceMagnitudes.put(contactableBody, forceMagnitude);
-      }
 
+         DoubleYoVariable normalTorque = new DoubleYoVariable(contactableBody.getRigidBody().getName() + "NormalTorque", registry);
+         normalTorques.put(contactableBody, normalTorque);
+
+         String copName = contactableBody.getRigidBody().getName() + "CoP";
+         String listName = "cops";
+
+         YoFramePoint2d cop2d = new YoFramePoint2d(copName + "2d", "", contactableBody.getPlaneFrame(), registry);
+         centersOfPressure2d.put(contactableBody, cop2d);
+
+         YoFramePoint cop = new YoFramePoint(copName, ReferenceFrame.getWorldFrame(), registry);
+         centersOfPressureWorld.put(contactableBody, cop);
+
+         if (dynamicGraphicObjectsListRegistry != null)
+         {
+            DynamicGraphicPosition copViz = cop.createDynamicGraphicPosition(copName, 0.005, YoAppearance.Navy(), DynamicGraphicPosition.GraphicType.BALL);
+            dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, copViz);
+            dynamicGraphicObjectsListRegistry.registerArtifact(listName, copViz.createArtifact());
+         }
+      }
 
       if (updatables != null)
       {
@@ -198,33 +227,43 @@ public abstract class MomentumBasedController implements RobotController, Desire
       momentumRateOfChangeControlModule.waitUntilComputationIsDone();
       MomentumRateOfChangeData momentumRateOfChangeData = momentumRateOfChangeControlModule.getMomentumRateOfChangeOutputPort().getData();
 
-      LinkedHashMap<ContactablePlaneBody, ? extends PlaneContactState> contactStates = this.contactStates;
-
-
 
       momentumControlModule.compute(rootJointAccelerationData,
             momentumRateOfChangeData,
-            contactStates, upcomingSupportLeg.getEnumValue());
+            this.contactStates, upcomingSupportLeg.getEnumValue());
 
       SpatialForceVector desiredCentroidalMomentumRate = momentumControlModule.getDesiredCentroidalMomentumRate();
 
       Map<? extends ContactablePlaneBody, Wrench> externalWrenches = momentumControlModule.getExternalWrenches();
       for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodies)
       {
-         PlaneContactState contactState = contactStates.get(contactablePlaneBody);
+         PlaneContactState contactState = this.contactStates.get(contactablePlaneBody);
          List<FramePoint> footContactPoints = contactState.getContactPoints();
 
          if (footContactPoints.size() > 0)
          {
-            inverseDynamicsCalculator.setExternalWrench(contactablePlaneBody.getRigidBody(), externalWrenches.get(contactablePlaneBody));
-            FrameVector force = externalWrenches.get(contactablePlaneBody).getLinearPartAsFrameVectorCopy(); // TODO: copy
-            groundReactionForceMagnitudes.get(contactablePlaneBody).set(force.length());
+            Wrench wrench = externalWrenches.get(contactablePlaneBody);
+            inverseDynamicsCalculator.setExternalWrench(contactablePlaneBody.getRigidBody(), wrench);
 
-            // TODO: move filteredCentersOfPressureWorld to here
-         } else
+            FrameVector force = wrench.getLinearPartAsFrameVectorCopy();
+
+            FramePoint2d cop = new FramePoint2d(ReferenceFrame.getWorldFrame());
+            double normalTorque = centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(cop, wrench, contactablePlaneBody.getPlaneFrame());
+
+            centersOfPressure2d.get(contactablePlaneBody).set(cop);
+
+            FramePoint cop3d = cop.toFramePoint();
+            cop3d.changeFrame(ReferenceFrame.getWorldFrame());
+
+            centersOfPressureWorld.get(contactablePlaneBody).set(cop3d);
+            groundReactionForceMagnitudes.get(contactablePlaneBody).set(force.length());
+            normalTorques.get(contactablePlaneBody).set(normalTorque);
+         }
+         else
          {
             groundReactionForceMagnitudes.get(contactablePlaneBody).set(0.0);
-            // TODO: move filteredCentersOfPressureWorld to here
+//            centersOfPressure2d.get(contactablePlaneBody).set(Double.NaN, Double.NaN);
+            centersOfPressureWorld.get(contactablePlaneBody).setToNaN();
          }
       }
 
@@ -388,7 +427,7 @@ public abstract class MomentumBasedController implements RobotController, Desire
 
    protected FramePoint2d getCoP(ContactablePlaneBody contactablePlaneBody)
    {
-      return momentumControlModule.getCoP(contactablePlaneBody);
+      return centersOfPressure2d.get(contactablePlaneBody).getFramePoint2dCopy();
    }
 
    public void attachStateEstimatorDataFromControllerSink(StateEstimationDataFromControllerSink stateEstimatorDataFromControllerSink,

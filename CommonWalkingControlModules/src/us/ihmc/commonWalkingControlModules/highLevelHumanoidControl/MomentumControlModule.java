@@ -31,11 +31,9 @@ public interface MomentumControlModule
 
    void resetGroundReactionWrenchFilter();
 
-   FramePoint2d getCoP(ContactablePlaneBody contactablePlaneBody);
-
    void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration);
 
-   void setDesiredSpatialAcceleration(GeometricJacobian spineJacobian, TaskspaceConstraintData taskspaceConstraintData);
+   void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData);
 
    SpatialForceVector getDesiredCentroidalMomentumRate();
 

@@ -115,7 +115,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
 
       OldMomentumControlModule momentumControlModule = new OldMomentumControlModule(fullRobotModel.getRootJoint(), contactablePlaneBodiesAndBases.keySet(),
                                                           gravityZ, groundReactionWrenchDistributor, referenceFrames.getCenterOfMassFrame(), controlDT,
-                                                          twistCalculator, jacobianSolver, dynamicGraphicObjectsListRegistry, registry);
+                                                          twistCalculator, jacobianSolver, registry);
       double groundReactionWrenchBreakFrequencyHertz = 7.0;
       momentumControlModule.setGroundReactionWrenchBreakFrequencyHertz(groundReactionWrenchBreakFrequencyHertz);
 
