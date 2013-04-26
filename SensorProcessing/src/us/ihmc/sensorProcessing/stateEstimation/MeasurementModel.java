@@ -19,28 +19,26 @@ public class MeasurementModel
    private final Map<MeasurementModelElement, Integer> measurementStartIndices = new LinkedHashMap<MeasurementModelElement, Integer>();
    private final Map<ControlFlowOutputPort<?>, Integer> stateStartIndices;
 
-   private final DenseMatrix64F H;
-   private final DenseMatrix64F R;
-   private final DenseMatrix64F residual;
+   private final DenseMatrix64F H = new DenseMatrix64F(1, 1); // reshape dynamically
+   private final DenseMatrix64F R = new DenseMatrix64F(1, 1); // reshape dynamically
+   private final DenseMatrix64F residual = new DenseMatrix64F(1, 1); // reshape dynamically
 
-   private final int measurementOutputMatrixSize;
+   private final Map<MeasurementModelElement,Integer> measurementSizes = new LinkedHashMap<MeasurementModelElement, Integer>();
+   private final int stateMatrixSize;
+   private int measurementOutputMatrixSize;
 
    public MeasurementModel(List<MeasurementModelElement> measurementModelElements, Map<ControlFlowOutputPort<?>, Integer> stateStartIndices, int stateMatrixSize)
    {
       this.measurementModelElements = measurementModelElements;
-      Map<MeasurementModelElement, Integer> measurementSizes = new LinkedHashMap<MeasurementModelElement, Integer>();
-      computeMeasurementSizes(measurementModelElements, measurementSizes);
-      MatrixTools.computeIndicesIntoVector(measurementModelElements, measurementStartIndices, measurementSizes);
-
       this.stateStartIndices = stateStartIndices;
-      measurementOutputMatrixSize = computeTotalSize(measurementSizes.values());
-      this.H = new DenseMatrix64F(measurementOutputMatrixSize, stateMatrixSize);
-      this.R = new DenseMatrix64F(measurementOutputMatrixSize, measurementOutputMatrixSize);
-      this.residual = new DenseMatrix64F(measurementOutputMatrixSize, 1);
+      this.stateMatrixSize = stateMatrixSize;
+      reshapeMatrices(); // TODO: get rid of this
    }
 
    public void updateMatrices()
    {
+      reshapeMatrices();
+
       // TODO: check if necessary:
       H.zero();
       R.zero();
@@ -121,5 +119,16 @@ public class MeasurementModel
    public int getOutputMatrixSize()
    {
       return measurementOutputMatrixSize;
+   }
+
+   private void reshapeMatrices()
+   {
+      measurementSizes.clear();
+      computeMeasurementSizes(measurementModelElements, measurementSizes);
+      MatrixTools.computeIndicesIntoVector(measurementModelElements, measurementStartIndices, measurementSizes);
+      measurementOutputMatrixSize = computeTotalSize(measurementSizes.values());
+      H.reshape(measurementOutputMatrixSize, stateMatrixSize);
+      R.reshape(measurementOutputMatrixSize, measurementOutputMatrixSize);
+      residual.reshape(measurementOutputMatrixSize, 1);
    }
 }

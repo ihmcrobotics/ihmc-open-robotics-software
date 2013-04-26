@@ -46,7 +46,7 @@ public class PointPositionMeasurementModelElement extends AbstractMeasurementMod
                                                FramePoint stationaryPoint,
                                                YoVariableRegistry registry)
    {
-      super(pointPositionMeasurementInputPort, SIZE, name, registry);
+      super(SIZE, name, registry);
 
       this.centerOfMassPositionPort = centerOfMassPositionPort;
       this.orientationPort = orientationPort;

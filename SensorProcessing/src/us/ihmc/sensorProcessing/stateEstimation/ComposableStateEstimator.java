@@ -111,8 +111,7 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
 
       public ComposableStateEstimatorKalmanFilter(ProcessModel processModel, MeasurementModel measurementModel)
       {
-         super(ComposableStateEstimatorKalmanFilter.class.getSimpleName(), processModel.getStateMatrixSize(), processModel.getInputMatrixSize(),
-               measurementModel.getOutputMatrixSize(), ComposableStateEstimator.this.registry);
+         super(ComposableStateEstimatorKalmanFilter.class.getSimpleName(), ComposableStateEstimator.this.registry);
          this.processModel = processModel;
          this.measurementModel = measurementModel;
          correction = new DenseMatrix64F(processModel.getStateMatrixSize(), 1);

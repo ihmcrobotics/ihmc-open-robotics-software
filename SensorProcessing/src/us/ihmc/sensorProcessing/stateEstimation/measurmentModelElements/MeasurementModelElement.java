@@ -18,6 +18,4 @@ public interface MeasurementModelElement
    public abstract DenseMatrix64F computeResidual();
 
    public abstract Set<ControlFlowOutputPort<?>> getStatePorts();
-
-   public abstract ControlFlowInputPort<?> getMeasurementPort();
 }

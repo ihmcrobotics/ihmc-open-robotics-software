@@ -20,11 +20,9 @@ public abstract class AbstractMeasurementModelElement implements MeasurementMode
    private final DenseMatrix64F measurementCovarianceMatrixBlock;
    private final DenseMatrix64F scaledMeasurementCovarianceMatrixBlock;
    private final DoubleYoVariable covarianceMatrixScaling;
-   private final ControlFlowInputPort<?> measurementPort;
 
-   public AbstractMeasurementModelElement(ControlFlowInputPort<?> measurementPort, int covarianceMatrixSize, String name, YoVariableRegistry registry)
+   public AbstractMeasurementModelElement(int covarianceMatrixSize, String name, YoVariableRegistry registry)
    {
-      this.measurementPort = measurementPort;
       measurementCovarianceMatrixBlock = new DenseMatrix64F(covarianceMatrixSize, covarianceMatrixSize);
       scaledMeasurementCovarianceMatrixBlock = new DenseMatrix64F(covarianceMatrixSize, covarianceMatrixSize);
       outputMatrixBlocks = new LinkedHashMap<ControlFlowOutputPort<?>, DenseMatrix64F>();
@@ -44,22 +42,10 @@ public abstract class AbstractMeasurementModelElement implements MeasurementMode
 
       return scaledMeasurementCovarianceMatrixBlock;
    }
-   
-   public double getCovarianceMatrixScaling()
-   {
-      return covarianceMatrixScaling.getDoubleValue();
-   }
-   
+
    public void setCovarianceMatrixScaling(double covarianceMatrixScaling)
    {
       this.covarianceMatrixScaling.set(covarianceMatrixScaling);
-   }
-
-   public void setNoiseStandardDeviation(double standardDeviation)
-   {
-      double variance = MathTools.square(standardDeviation);
-      CommonOps.setIdentity(measurementCovarianceMatrixBlock);
-      CommonOps.scale(variance, measurementCovarianceMatrixBlock);
    }
 
    public void setNoiseCovariance(DenseMatrix64F measurementNoiseCovariance)
@@ -71,9 +57,5 @@ public abstract class AbstractMeasurementModelElement implements MeasurementMode
    {
       return outputMatrixBlocks.keySet();
    }
-   
-   public ControlFlowInputPort<?> getMeasurementPort()
-   {
-      return measurementPort;
-   }
+
 }

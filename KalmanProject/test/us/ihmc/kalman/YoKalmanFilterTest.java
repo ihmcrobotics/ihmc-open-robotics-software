@@ -4,6 +4,8 @@ import static org.junit.Assert.fail;
 
 import java.util.Random;
 
+import com.yobotics.simulationconstructionset.YoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistryChangedListener;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.EjmlUnitTests;
@@ -18,7 +20,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 public class YoKalmanFilterTest
 {
    private static final boolean DEBUG = false;
-   
+
    private Random random;
    private YoVariableRegistry parentRegistry;
 
@@ -52,15 +54,12 @@ public class YoKalmanFilterTest
    public void testCompareToSimple()
    {
       KalmanFilterSimple kalmanFilterSimple = new KalmanFilterSimple();
-      YoKalmanFilter yoKalmanFilter = new YoKalmanFilter("yo", nStates, nInputs, nMeasurements, parentRegistry);
+      YoKalmanFilter yoKalmanFilter = new YoKalmanFilter("yo", parentRegistry);
       KalmanFilter[] kalmanFilters = {kalmanFilterSimple, yoKalmanFilter};
 
       for (KalmanFilter kalmanFilter : kalmanFilters)
       {
-         kalmanFilter.configure(F, G, H);
-         kalmanFilter.setProcessNoiseCovariance(Q);
-         kalmanFilter.setMeasurementNoiseCovariance(R);
-         kalmanFilter.setState(x, P);
+         configureFilter(kalmanFilter);
          kalmanFilter.predict(u);
          kalmanFilter.update(y);
       }
@@ -75,7 +74,8 @@ public class YoKalmanFilterTest
       YoKalmanFilter yoKalmanFilter = null;
       try
       {
-         yoKalmanFilter = new YoKalmanFilter("yo", nStates, nInputs, nMeasurements, parentRegistry);
+         yoKalmanFilter = new YoKalmanFilter("yo", parentRegistry);
+         configureFilter(yoKalmanFilter);
          yoKalmanFilter.setDoChecks(true);
          Q = RandomMatrices.createSymmPosDef(nStates, random);
          yoKalmanFilter.setProcessNoiseCovariance(Q);
@@ -95,7 +95,8 @@ public class YoKalmanFilterTest
       YoKalmanFilter yoKalmanFilter = null;
       try
       {
-         yoKalmanFilter = new YoKalmanFilter("yo", nStates, nInputs, nMeasurements, parentRegistry);
+         yoKalmanFilter = new YoKalmanFilter("yo", parentRegistry);
+         configureFilter(yoKalmanFilter);
          yoKalmanFilter.setDoChecks(true);
          R = RandomMatrices.createSymmPosDef(nMeasurements, random);
          yoKalmanFilter.setMeasurementNoiseCovariance(R);
@@ -109,10 +110,11 @@ public class YoKalmanFilterTest
       yoKalmanFilter.setMeasurementNoiseCovariance(R);
    }
 
-   @Test(expected = ArrayIndexOutOfBoundsException.class)
+   @Test(expected = RuntimeException.class)
    public void testWrongSize()
    {
-      YoKalmanFilter yoKalmanFilter = new YoKalmanFilter("yo", nStates, nInputs, nMeasurements, parentRegistry);
+      YoKalmanFilter yoKalmanFilter = new YoKalmanFilter("yo", parentRegistry);
+      yoKalmanFilter.setDoChecks(true);
       yoKalmanFilter.setProcessNoiseCovariance(new DenseMatrix64F(nStates + 1, nStates + 1));
    }
 
@@ -143,12 +145,12 @@ public class YoKalmanFilterTest
          ys[i] = RandomMatrices.createRandom(nMeasurements, 1, random);
       }
 
-      YoKalmanFilter yoKalmanFilter1 = new YoKalmanFilter("yo1", nStates, nInputs, nMeasurements, parentRegistry);
-      YoKalmanFilter yoKalmanFilter2 = new YoKalmanFilter("yo2", nStates, nInputs, nMeasurements, new YoVariableRegistry("testRegistry2"));
-      KalmanFilter[] kalmanFilters = {yoKalmanFilter1, yoKalmanFilter2};
+      final DataBuffer dataBuffer = new DataBuffer();
+      parentRegistry.attachYoVariableRegistryChangedListener(new YoVariableToDataBufferAdder(dataBuffer));
 
-      DataBuffer dataBuffer = new DataBuffer();
-      dataBuffer.addVariables(parentRegistry.getAllVariablesIncludingDescendants());
+      YoKalmanFilter yoKalmanFilter1 = new YoKalmanFilter("yo1", parentRegistry);
+      YoKalmanFilter yoKalmanFilter2 = new YoKalmanFilter("yo2", new YoVariableRegistry("testRegistry2"));
+      KalmanFilter[] kalmanFilters = {yoKalmanFilter1, yoKalmanFilter2};
 
       for (KalmanFilter kalmanFilter : kalmanFilters)
       {
@@ -197,15 +199,13 @@ public class YoKalmanFilterTest
    {
       nStates = 5;
       nInputs = 1;
-      nMeasurements = 1;
+      nMeasurements = 2;
       createRandomParameters(nStates, nInputs, nMeasurements);
-      YoKalmanFilter kalmanFilter = new YoKalmanFilter("yo", nStates, nInputs, nMeasurements, parentRegistry);
-      R.set(0, Double.POSITIVE_INFINITY);
+      YoKalmanFilter kalmanFilter = new YoKalmanFilter("yo", parentRegistry);
+      R.set(0, 0, Double.POSITIVE_INFINITY);
+      R.set(1, 1, Double.POSITIVE_INFINITY);
 
-      kalmanFilter.configure(F, G, H);
-      kalmanFilter.setProcessNoiseCovariance(Q);
-      kalmanFilter.setMeasurementNoiseCovariance(R);
-      kalmanFilter.setState(x, P);
+      configureFilter(kalmanFilter);
 
       kalmanFilter.predict(u);
       DenseMatrix64F stateBeforeUpdate = new DenseMatrix64F(kalmanFilter.getState());
@@ -219,6 +219,14 @@ public class YoKalmanFilterTest
       EjmlUnitTests.assertEquals(covarianceBeforeUpdate, covarianceAfterUpdate, 1e-8);
    }
 
+   private void configureFilter(KalmanFilter kalmanFilter)
+   {
+      kalmanFilter.configure(F, G, H);
+      kalmanFilter.setProcessNoiseCovariance(Q);
+      kalmanFilter.setMeasurementNoiseCovariance(R);
+      kalmanFilter.setState(x, P);
+   }
+
    @Test
    public void testTwoUpdatesVersusOne()
    {
@@ -228,8 +236,8 @@ public class YoKalmanFilterTest
       createRandomParameters(nStates, nInputs, nMeasurements);
       R = RandomMatrices.createDiagonal(nMeasurements, 0.0, 1.0, random);
 
-      YoKalmanFilter yoKalmanFilter0 = new YoKalmanFilter("yo0", nStates, nInputs, nMeasurements, parentRegistry);
-      YoKalmanFilter yoKalmanFilter1 = new YoKalmanFilter("yo1", nStates, nInputs, nMeasurements, parentRegistry);
+      YoKalmanFilter yoKalmanFilter0 = new YoKalmanFilter("yo0", parentRegistry);
+      YoKalmanFilter yoKalmanFilter1 = new YoKalmanFilter("yo1", parentRegistry);
       KalmanFilter[] kalmanFilters = {yoKalmanFilter0, yoKalmanFilter1};
 
       for (KalmanFilter kalmanFilter : kalmanFilters)
@@ -271,12 +279,9 @@ public class YoKalmanFilterTest
       nMeasurements = 4;
       createRandomParameters(nStates, nInputs, nMeasurements);
 
-      YoKalmanFilter kalmanFilter = new YoKalmanFilter("yo", nStates, nInputs, nMeasurements, parentRegistry);
+      YoKalmanFilter kalmanFilter = new YoKalmanFilter("yo", parentRegistry);
 
-      kalmanFilter.configure(F, G, H);
-      kalmanFilter.setProcessNoiseCovariance(Q);
-      kalmanFilter.setMeasurementNoiseCovariance(R);
-      kalmanFilter.setState(x, P);
+      configureFilter(kalmanFilter);
 
       DenseMatrix64F trueState = new DenseMatrix64F(x);
       DenseMatrix64F estimatedState = kalmanFilter.getState();
@@ -372,12 +377,9 @@ public class YoKalmanFilterTest
       nMeasurements = 8;
       createRandomParameters(nStates, nInputs, nMeasurements);
 
-      YoKalmanFilter kalmanFilter = new YoKalmanFilter("yo", nStates, nInputs, nMeasurements, parentRegistry);
+      YoKalmanFilter kalmanFilter = new YoKalmanFilter("yo", parentRegistry);
 
-      kalmanFilter.configure(F, G, H);
-      kalmanFilter.setProcessNoiseCovariance(Q);
-      kalmanFilter.setMeasurementNoiseCovariance(R);
-      kalmanFilter.setState(x, P);
+      configureFilter(kalmanFilter);
 
       int numberOfTicksToTest = 1000;
 
@@ -457,7 +459,7 @@ public class YoKalmanFilterTest
          CommonOps.mult(FP, FTranspose, FPFTranspose);
 
          DenseMatrix64F K = kalmanFilter.getKGain();
-         
+
          printIfDebug("K = " + K);
          printIfDebug("H = " + H);
 
@@ -512,12 +514,50 @@ public class YoKalmanFilterTest
       u = RandomMatrices.createRandom(nInputs, 1, random);
       y = RandomMatrices.createRandom(nMeasurements, 1, random);
    }
-   
+
    private void printIfDebug(String toPrint)
    {
       if (DEBUG)
       {
          System.out.println(toPrint);
+      }
+   }
+
+   private static class YoVariableToDataBufferAdder implements YoVariableRegistryChangedListener
+   {
+      private final DataBuffer dataBuffer;
+
+      public YoVariableToDataBufferAdder(DataBuffer dataBuffer)
+      {
+         this.dataBuffer = dataBuffer;
+      }
+
+      public void yoVariableWasRegistered(YoVariableRegistry registry, YoVariable registeredYoVariable)
+      {
+         try
+         {
+            dataBuffer.addVariable(registeredYoVariable);
+         }
+         catch (RepeatDataBufferEntryException e)
+         {
+            e.printStackTrace();
+         }
+      }
+
+      public void yoVariableRegistryWasAdded(YoVariableRegistry addedYoVariableRegistry)
+      {
+         try
+         {
+            dataBuffer.addVariables(addedYoVariableRegistry.getAllVariablesIncludingDescendants());
+         }
+         catch (RepeatDataBufferEntryException e)
+         {
+            e.printStackTrace();
+         }
+      }
+
+      public void yoVariableRegistryWasCleared(YoVariableRegistry clearedYoVariableRegistry)
+      {
       }
    }
 }

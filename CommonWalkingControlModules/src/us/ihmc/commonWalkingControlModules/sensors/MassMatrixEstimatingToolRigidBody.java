@@ -131,7 +131,7 @@ public class MassMatrixEstimatingToolRigidBody
       calculatedObjectWrench = new Wrench(wristFrame, wristFrame);
       
       objectMass = new AlphaFilteredYoVariable("objectMass", registry, AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(1.0, controlDT));
-      objectCoMFilter = new YoKalmanFilter(name + "Filter", 3, 0, 3, registry);
+      objectCoMFilter = new YoKalmanFilter(name + "Filter", registry);
       CommonOps.setIdentity(F);
       
       CommonOps.setIdentity(R);
@@ -142,6 +142,8 @@ public class MassMatrixEstimatingToolRigidBody
       
       CommonOps.setIdentity(P);
       CommonOps.scale(100.0, P);
+
+      objectCoMFilter.configure(F, G, H);
       reset();
       
       RDiagonal = new DoubleYoVariable("RDiagonal", registry);

@@ -1,16 +1,12 @@
 package us.ihmc.kalman;
 
-import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.checkPositiveDefinite;
-import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.checkSize;
-import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.getFromYoVariables;
-import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.getFromYoVariablesSymmetric;
-import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.getNumberOfElementsForSymmetricMatrix;
-import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.storeInYoVariables;
-import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.storeInYoVariablesSymmetric;
+import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.*;
 import static org.ejml.ops.CommonOps.addEquals;
 import static org.ejml.ops.CommonOps.sub;
 import static org.ejml.ops.CommonOps.subEquals;
+import static us.ihmc.utilities.CheckTools.checkMatrixDimensions;
 
+import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import org.ejml.alg.dense.mult.MatrixMatrixMult;
 import org.ejml.alg.dense.mult.MatrixVectorMult;
 import org.ejml.data.DenseMatrix64F;
@@ -22,7 +18,9 @@ import org.ejml.ops.MatrixFeatures;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -37,82 +35,71 @@ public class YoKalmanFilter implements KalmanFilter
    // Dynamics (x = F x + G u + w; y = H x + v)
    // x is the state, u is the input, w is process noise.
    // v is sensor noise.
-   private final DenseMatrix64F F;
-   private final DenseMatrix64F G;
-   private final DenseMatrix64F H;
+   private final DenseMatrix64F F = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F G = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F H = new DenseMatrix64F(1, 1);
 
    // Noise model
    // Q is the covariance matrix for the process noise.
    // R is the covariance matrix for the sensor noise.
-   private final DenseMatrix64F Q;
-   private final DenseMatrix64F R;
+   private final DenseMatrix64F Q = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F R = new DenseMatrix64F(1, 1);
 
    // System state estimate (x is state, P is state noise covariance matrix)
-   private final DenseMatrix64F x;
-   private final DenseMatrix64F P;
+   private final DenseMatrix64F x = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F P = new DenseMatrix64F(1, 1);
 
    // These are pre-declared for efficiency reasons
-   private final DenseMatrix64F a, b;
-   private final DenseMatrix64F r, S, S_inv, c, d;
-   private final DenseMatrix64F K;
+   private final DenseMatrix64F a = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F b = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F r = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F S = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F S_inv = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F c = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F d = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F K = new DenseMatrix64F(1, 1);
 
    private final LinearSolver<DenseMatrix64F> solver;
 
    // YoVariables
-   private final DoubleYoVariable[][] yoF;
-   private final DoubleYoVariable[][] yoG;
-   private final DoubleYoVariable[][] yoH;
-   private final DoubleYoVariable[] yoQ;
-   private final DoubleYoVariable[] yoR;
-   private final DoubleYoVariable[] yoX;
-   private final DoubleYoVariable[] yoP;
+   private final List<List<DoubleYoVariable>> yoF = new ArrayList<List<DoubleYoVariable>>();
+   private final List<List<DoubleYoVariable>> yoG = new ArrayList<List<DoubleYoVariable>>();
+   private final List<List<DoubleYoVariable>> yoH = new ArrayList<List<DoubleYoVariable>>();
+   private final List<List<DoubleYoVariable>> yoQ = new ArrayList<List<DoubleYoVariable>>();
+   private final List<List<DoubleYoVariable>> yoR = new ArrayList<List<DoubleYoVariable>>();
+   private final List<List<DoubleYoVariable>> yoP = new ArrayList<List<DoubleYoVariable>>();
+   private final List<DoubleYoVariable> yoX = new ArrayList<DoubleYoVariable>();
+
+   private final IntegerYoVariable nStates;
+   private final IntegerYoVariable nInputs;
+   private final IntegerYoVariable nMeasurements;
 
    private final BooleanYoVariable updateCovarianceAndGain;
 
    private boolean doChecks = false;
 
-   public YoKalmanFilter(String name, int nStates, int nInputs, int nMeasurements, YoVariableRegistry parentRegistry)
+   public YoKalmanFilter(String name, YoVariableRegistry parentRegistry)
    {
-      F = new DenseMatrix64F(nStates, nStates);
-      G = new DenseMatrix64F(nStates, nInputs);
-      H = new DenseMatrix64F(nMeasurements, nStates);
+      registry = new YoVariableRegistry(name);
+      nStates = new IntegerYoVariable("nStates", registry);
+      nInputs = new IntegerYoVariable("nInputs", registry);
+      nMeasurements = new IntegerYoVariable("nMeasurements", registry);
 
-      Q = new DenseMatrix64F(nStates, nStates);
-      R = new DenseMatrix64F(nMeasurements, nMeasurements);
-
-      a = new DenseMatrix64F(nStates, 1);
-      b = new DenseMatrix64F(nStates, nStates);
-      r = new DenseMatrix64F(nMeasurements, 1);
-      S = new DenseMatrix64F(nMeasurements, nMeasurements);
-      S_inv = new DenseMatrix64F(nMeasurements, nMeasurements);
-      c = new DenseMatrix64F(nMeasurements, nStates);
-      d = new DenseMatrix64F(nStates, nMeasurements);
-      K = new DenseMatrix64F(nStates, nMeasurements);
-      x = new DenseMatrix64F(nStates, 1);
-      P = new DenseMatrix64F(nStates, nStates);
 
       // covariance matrices are symmetric positive semi-definite
-      solver = LinearSolverFactory.symmPosDef(nStates);
+      int matrixWidth = 0; // only used to decide which algorithm to use. we typically use small matrices, so this is fine
+      solver = LinearSolverFactory.symmPosDef(matrixWidth);
 
       // wrap the solver so that it doesn't modify the input
 //    solver = new LinearSolverSafe<DenseMatrix64F>(solver);
       // A little bit more performance can be gained by letting S be modified.  In some
       // applications S should not be modified.
 
-      registry = new YoVariableRegistry(name);
-      yoF = new DoubleYoVariable[F.getNumRows()][F.getNumCols()];
-      yoG = new DoubleYoVariable[G.getNumRows()][G.getNumCols()];
-      yoH = new DoubleYoVariable[H.getNumRows()][H.getNumCols()];
-      yoR = new DoubleYoVariable[getNumberOfElementsForSymmetricMatrix(R.getNumRows())];
-      yoQ = new DoubleYoVariable[getNumberOfElementsForSymmetricMatrix(Q.getNumRows())];
-      yoX = new DoubleYoVariable[x.getNumRows()];
-      yoP = new DoubleYoVariable[getNumberOfElementsForSymmetricMatrix(P.getNumRows())];
 
       updateCovarianceAndGain = new BooleanYoVariable(name + "UpdateCovarianceAndGain",
               "Whether or not to update the state covariance matrix and the kalman gain K matrix each update", registry);
       updateCovarianceAndGain.set(true);
 
-      populateYoVariables(nStates, nMeasurements);
       parentRegistry.addChild(registry);
    }
 
@@ -123,25 +110,38 @@ public class YoKalmanFilter implements KalmanFilter
 
    public void configure(DenseMatrix64F F, DenseMatrix64F G, DenseMatrix64F H)
    {
+      nStates.set(F.getNumRows());
+      nInputs.set(G.getNumCols());
+      nMeasurements.set(H.getNumRows());
+
       if (doChecks)
       {
-         checkSize(F, this.F);
-         checkSize(G, this.G);
-         checkSize(H, this.H);
+         checkMatrixDimensions(F, nStates.getIntegerValue(), nStates.getIntegerValue());
+         checkMatrixDimensions(G, nStates.getIntegerValue(), nInputs.getIntegerValue());
+         checkMatrixDimensions(H, nMeasurements.getIntegerValue(), nStates.getIntegerValue());
       }
 
-      storeInYoVariables(F, yoF);
-      storeInYoVariables(G, yoG);
-      storeInYoVariables(H, yoH);
+      populateYoVariablesMatrix(yoF, F.getNumRows(), F.getNumCols(), "F", registry);
+      populateYoVariablesMatrix(yoG, G.getNumRows(), G.getNumCols(), "G", registry);
+      populateYoVariablesMatrix(yoH, H.getNumRows(), H.getNumCols(), "H", registry);
+      populateYoVariablesVector(yoX, nStates.getIntegerValue(), "x", registry);
+      populateYoVariablesSymmetricMatrix(yoP, nStates.getIntegerValue(), "P", registry);
+
+      storeInYoVariablesMatrix(F, yoF);
+      storeInYoVariablesMatrix(G, yoG);
+      storeInYoVariablesMatrix(H, yoH);
    }
+
 
    public void setProcessNoiseCovariance(DenseMatrix64F Q)
    {
       if (doChecks)
       {
-         checkSize(Q, this.Q);
-         checkPositiveDefinite(Q);
+         checkPositiveSemiDefinite(Q);
+         checkMatrixDimensions(Q, nStates.getIntegerValue(), nStates.getIntegerValue());
       }
+
+      populateYoVariablesSymmetricMatrix(yoQ, Q.getNumRows(), "Q", registry);
 
       storeInYoVariablesSymmetric(Q, yoQ);
    }
@@ -150,27 +150,40 @@ public class YoKalmanFilter implements KalmanFilter
    {
       if (doChecks)
       {
-         checkSize(R, this.R);
-         checkPositiveDefinite(R);
+         checkPositiveSemiDefinite(R);
+         checkMatrixDimensions(R, nMeasurements.getIntegerValue(), nMeasurements.getIntegerValue());
       }
+
+      populateYoVariablesSymmetricMatrix(yoR, R.getNumRows(), "R", registry);
 
       storeInYoVariablesSymmetric(R, yoR);
    }
 
    public void setState(DenseMatrix64F x, DenseMatrix64F P)
    {
-      storeInYoVariables(x, yoX);
+      if (doChecks)
+      {
+         checkMatrixDimensions(x, nStates.getIntegerValue(), 1);
+         checkMatrixDimensions(P, nStates.getIntegerValue(), nStates.getIntegerValue());
+      }
+
+      storeInYoVariablesVector(x, yoX);
       storeInYoVariablesSymmetric(P, yoP);
    }
 
    public void predict(DenseMatrix64F u)
    {
+      if (doChecks)
+      {
+         checkMatrixDimensions(u, nInputs.getIntegerValue(), 1);
+      }
+
       checkForNaN(u);
 
       getVariablesForPredictFromYoVariables();
 
       updateAPrioriState(x, u);
-      storeInYoVariables(x, yoX);
+      storeInYoVariablesVector(x, yoX);
 
       if (updateCovarianceAndGain.getBooleanValue())
       {
@@ -181,6 +194,8 @@ public class YoKalmanFilter implements KalmanFilter
 
    protected void updateAPrioriState(DenseMatrix64F x, DenseMatrix64F u)
    {
+      a.reshape(nStates.getIntegerValue(), 1);
+
       // x = F x + G u
       MatrixVectorMult.mult(F, x, a);
       x.set(a);
@@ -194,6 +209,10 @@ public class YoKalmanFilter implements KalmanFilter
 
    private void updateAPrioriCovariance()
    {
+      int nStates = this.nStates.getIntegerValue();
+      P.reshape(nStates, nStates);
+      b.reshape(nStates, nStates);
+
       // P = F P F' + Q
       MatrixMatrixMult.mult_small(F, P, b);
       MatrixMatrixMult.multTransB(b, F, P);
@@ -212,7 +231,7 @@ public class YoKalmanFilter implements KalmanFilter
       }
 
       updateAPosterioriState(x, y, K);
-      storeInYoVariables(x, yoX);
+      storeInYoVariablesVector(x, yoX);
 
       if (updateCovarianceAndGain.getBooleanValue())
       {
@@ -223,18 +242,18 @@ public class YoKalmanFilter implements KalmanFilter
 
    private void getVariablesForPredictFromYoVariables()
    {
-      getFromYoVariables(F, yoF);
-      getFromYoVariables(G, yoG);
+      getFromYoVariablesMatrix(F, yoF);
+      getFromYoVariablesMatrix(G, yoG);
       getFromYoVariablesSymmetric(Q, yoQ);
-      getFromYoVariables(x, yoX);
+      getFromYoVariablesVector(x, yoX);
       getFromYoVariablesSymmetric(P, yoP);
    }
 
    private void getVariablesForUpdateFromYoVariables()
    {
-      getFromYoVariables(H, yoH);
+      getFromYoVariablesMatrix(H, yoH);
       getFromYoVariablesSymmetric(R, yoR);
-      getFromYoVariables(x, yoX);
+      getFromYoVariablesVector(x, yoX);
       getFromYoVariablesSymmetric(P, yoP);
    }
 
@@ -251,6 +270,14 @@ public class YoKalmanFilter implements KalmanFilter
 
    private void updateKalmanGainMatrixK()
    {
+      int nMeasurements = this.nMeasurements.getIntegerValue();
+      int nStates = this.nStates.getIntegerValue();
+      c.reshape(nMeasurements, nStates);
+      S.reshape(nMeasurements, nMeasurements);
+      S_inv.reshape(nMeasurements, nMeasurements);
+      d.reshape(nStates, nMeasurements);
+      K.reshape(nStates, nMeasurements);
+
       // S = H P H' + R
       MatrixMatrixMult.mult_small(H, P, c);
       MatrixMatrixMult.multTransB(c, H, S);
@@ -274,6 +301,8 @@ public class YoKalmanFilter implements KalmanFilter
 
    protected void updateAPosterioriState(DenseMatrix64F x, DenseMatrix64F y, DenseMatrix64F K)
    {
+      r.reshape(nMeasurements.getIntegerValue(), 1);
+
       // r = y - H x
       MatrixVectorMult.mult(H, x, r);
       sub(y, r, r);
@@ -285,7 +314,7 @@ public class YoKalmanFilter implements KalmanFilter
 
    public DenseMatrix64F getState()
    {
-      getFromYoVariables(x, yoX);
+      getFromYoVariablesVector(x, yoX);
 
       return x;
    }
@@ -307,30 +336,19 @@ public class YoKalmanFilter implements KalmanFilter
       this.doChecks = doChecks;
    }
 
-   private void populateYoVariables(int nStates, int nMeasurements)
-   {
-      MatrixYoVariableConversionTools.populateYoVariables(yoF, "F", registry);
-      MatrixYoVariableConversionTools.populateYoVariables(yoG, "G", registry);
-      MatrixYoVariableConversionTools.populateYoVariables(yoH, "H", registry);
-      MatrixYoVariableConversionTools.populateYoVariablesSymmetric(yoQ, "Q", nStates, registry);
-      MatrixYoVariableConversionTools.populateYoVariablesSymmetric(yoR, "R", nMeasurements, registry);
-      MatrixYoVariableConversionTools.populateYoVariables(yoX, "x", registry);
-      MatrixYoVariableConversionTools.populateYoVariablesSymmetric(yoP, "P", nStates, registry);
-   }
-
    public int getNumberOfStates()
    {
-      return F.getNumRows();
+      return nStates.getIntegerValue();
    }
 
    public int getNumberOfInputs()
    {
-      return G.getNumCols();
+      return nInputs.getIntegerValue();
    }
 
    public int getNumberOfMeasurements()
    {
-      return H.getNumRows();
+      return nMeasurements.getIntegerValue();
    }
 
    // Iteratively computes the K Matrix. Assumes the process and measurement covariances are already set.
