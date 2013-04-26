@@ -29,7 +29,7 @@ public class DRCMultiContact
    private final MultiContactTestEnvironment environment;
 
    public DRCMultiContact(DRCRobotModel robotModel, DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner,
-                          double timePerRecordTick, int simulationDataBufferSize, String ipAddress, int portNumber)
+                          double timePerRecordTick, int simulationDataBufferSize)
    {
        DRCRobotParameters.ENABLE_JOINT_VELOCITY_TORQUE_LIMITS = false; // doesn't work with joint torque limits
 
@@ -116,10 +116,8 @@ public class DRCMultiContact
 
       double timePerRecordTick = 0.005;
       int simulationDataBufferSize = 16000;
-      String ipAddress = null;
-      int portNumber = -1;
       new DRCMultiContact(DRCRobotModel.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, guiInitialSetup, automaticSimulationRunner, timePerRecordTick,
-                          simulationDataBufferSize, ipAddress, portNumber);
+                          simulationDataBufferSize);
    }
 
    public SimulationConstructionSet getSimulationConstructionSet()

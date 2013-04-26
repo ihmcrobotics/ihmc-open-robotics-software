@@ -52,12 +52,12 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
    public ICPAndMomentumBasedController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames,
            DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator, SideDependentList<? extends ContactablePlaneBody> bipedFeet,
            BipedSupportPolygons bipedSupportPolygons, double controlDT, ProcessedOutputsInterface processedOutputs,
-           GroundReactionWrenchDistributor groundReactionWrenchDistributor, ArrayList<Updatable> updatables,
+           OldMomentumControlModule momentumControlModule, ArrayList<Updatable> updatables,
            MomentumRateOfChangeControlModule momentumRateOfChangeControlModule, RootJointAccelerationControlModule rootJointAccelerationControlModule,
            double groundReactionWrenchBreakFrequencyHertz, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       super(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, bipedFeet.values(), controlDT, processedOutputs,
-            groundReactionWrenchDistributor, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
+            momentumControlModule, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
             groundReactionWrenchBreakFrequencyHertz, dynamicGraphicObjectsListRegistry);
 
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());

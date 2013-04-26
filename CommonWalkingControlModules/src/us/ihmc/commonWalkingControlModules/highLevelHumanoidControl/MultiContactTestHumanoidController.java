@@ -69,13 +69,13 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
    public MultiContactTestHumanoidController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian,
            CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator,
            HashMap<ContactablePlaneBody, RigidBody> contactablePlaneBodiesAndBases, double controlDT, ProcessedOutputsInterface processedOutputs,
-           GroundReactionWrenchDistributor groundReactionWrenchDistributor, ArrayList<Updatable> updatables,
+           OldMomentumControlModule momentumControlModule, ArrayList<Updatable> updatables,
            MomentumRateOfChangeControlModule momentumRateOfChangeControlModule, RootJointAccelerationControlModule rootJointAccelerationControlModule,
            double groundReactionWrenchBreakFrequencyHertz, ControlFlowInputPort<FramePoint> desiredCoMPositionPort,
            ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationPort, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       super(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, contactablePlaneBodiesAndBases.keySet(), controlDT,
-            processedOutputs, groundReactionWrenchDistributor, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
+            processedOutputs, momentumControlModule, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
             groundReactionWrenchBreakFrequencyHertz, dynamicGraphicObjectsListRegistry);
       this.desiredCoMPositionPort = desiredCoMPositionPort;
       this.desiredPelvisOrientationPort = desiredPelvisOrientationPort;
