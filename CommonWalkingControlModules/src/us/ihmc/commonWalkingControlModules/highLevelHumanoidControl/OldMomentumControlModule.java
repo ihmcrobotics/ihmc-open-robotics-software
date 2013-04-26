@@ -5,7 +5,6 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFrameVector;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
@@ -49,13 +48,8 @@ public class OldMomentumControlModule
    private final AlphaFilteredYoFrameVector desiredGroundReactionForce;
 
 
-   private final LinkedHashMap<ContactablePlaneBody, YoFramePoint> filteredCentersOfPressureWorld = new LinkedHashMap<ContactablePlaneBody, YoFramePoint>();
-   private final LinkedHashMap<ContactablePlaneBody, YoFramePoint2d> unfilteredCentersOfPressure2d = new LinkedHashMap<ContactablePlaneBody, YoFramePoint2d>();
-   private final LinkedHashMap<ContactablePlaneBody, AlphaFilteredYoFramePoint2d> filteredCentersOfPressure2d = new LinkedHashMap<ContactablePlaneBody,
-         AlphaFilteredYoFramePoint2d>();
-   
-   private final DoubleYoVariable alphaCoP = new DoubleYoVariable("alphaCoP", registry);
-   private final LinkedHashMap<ContactablePlaneBody, BooleanYoVariable> copFilterResetRequests = new LinkedHashMap<ContactablePlaneBody, BooleanYoVariable>();
+   private final LinkedHashMap<ContactablePlaneBody, YoFramePoint> centersOfPressureWorld = new LinkedHashMap<ContactablePlaneBody, YoFramePoint>();
+   private final LinkedHashMap<ContactablePlaneBody, YoFramePoint2d> centersOfPressure2d = new LinkedHashMap<ContactablePlaneBody, YoFramePoint2d>();
 
    private final SpatialForceVector gravitationalWrench;
 
@@ -95,17 +89,11 @@ public class OldMomentumControlModule
          String copName = contactableBody.getRigidBody().getName() + "CoP";
          String listName = "cops";
 
-         copFilterResetRequests.put(contactableBody, new BooleanYoVariable(copName + "FilterResetRequest", registry));
-
          YoFramePoint2d cop2d = new YoFramePoint2d(copName + "2d", "", contactableBody.getPlaneFrame(), registry);
-         unfilteredCentersOfPressure2d.put(contactableBody, cop2d);
-
-         AlphaFilteredYoFramePoint2d filteredCoP2d = AlphaFilteredYoFramePoint2d.createAlphaFilteredYoFramePoint2d(copName + "2dFilt", "", registry, alphaCoP,
-               cop2d);
-         filteredCentersOfPressure2d.put(contactableBody, filteredCoP2d);
+         centersOfPressure2d.put(contactableBody, cop2d);
 
          YoFramePoint cop = new YoFramePoint(copName, ReferenceFrame.getWorldFrame(), registry);
-         filteredCentersOfPressureWorld.put(contactableBody, cop);
+         centersOfPressureWorld.put(contactableBody, cop);
 
          if (dynamicGraphicObjectsListRegistry != null)
          {
@@ -175,9 +163,6 @@ public class OldMomentumControlModule
       GroundReactionWrenchDistributorOutputData distributedWrenches = new GroundReactionWrenchDistributorOutputData();
       groundReactionWrenchDistributor.solve(distributedWrenches, groundReactionWrenchDistributorInputData);
 
-      List<Wrench> wrenches = new ArrayList<Wrench>();
-      List<FramePoint2d> cops = new ArrayList<FramePoint2d>();
-
       for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodies)
       {
          RigidBody rigidBody = contactablePlaneBody.getRigidBody();
@@ -190,37 +175,23 @@ public class OldMomentumControlModule
             FramePoint2d cop = distributedWrenches.getCenterOfPressure(contactState);
             double normalTorque = distributedWrenches.getNormalTorque(contactState);
 
-            unfilteredCentersOfPressure2d.get(contactablePlaneBody).set(cop);
+            centersOfPressure2d.get(contactablePlaneBody).set(cop);
 
-            AlphaFilteredYoFramePoint2d filteredCoP2d = filteredCentersOfPressure2d.get(contactablePlaneBody);
-            BooleanYoVariable copFilterResetRequest = copFilterResetRequests.get(contactablePlaneBody);
-            if (copFilterResetRequest.getBooleanValue())
-            {
-               filteredCoP2d.reset();
-               copFilterResetRequest.set(false);
-            }
-
-            filteredCoP2d.update();
-            filteredCoP2d.getFramePoint2d(cop);
-
-            cops.add(cop);
             FramePoint cop3d = cop.toFramePoint();
             cop3d.changeFrame(ReferenceFrame.getWorldFrame());
-            filteredCentersOfPressureWorld.get(contactablePlaneBody).set(cop3d);
+            centersOfPressureWorld.get(contactablePlaneBody).set(cop3d);
 
             Wrench groundReactionWrench = new Wrench(rigidBody.getBodyFixedFrame(), contactState.getPlaneFrame());
             WrenchDistributorTools.computeWrench(groundReactionWrench, force, cop, normalTorque);
             groundReactionWrench.changeFrame(rigidBody.getBodyFixedFrame());
-            wrenches.add(groundReactionWrench);
             externalWrenches.put(contactablePlaneBody, groundReactionWrench);
          } else
          {
-            resetCoPFilter(contactablePlaneBody);
-            filteredCentersOfPressureWorld.get(contactablePlaneBody).setToNaN();
+            centersOfPressureWorld.get(contactablePlaneBody).setToNaN();
          }
       }
 
-      Wrench admissibleGroundReactionWrench = TotalWrenchCalculator.computeTotalWrench(wrenches, totalGroundReactionWrench.getExpressedInFrame());
+      Wrench admissibleGroundReactionWrench = TotalWrenchCalculator.computeTotalWrench(externalWrenches.values(), totalGroundReactionWrench.getExpressedInFrame());
       SpatialForceVector desiredCentroidalMomentumRate = new SpatialForceVector();
       desiredCentroidalMomentumRate.set(admissibleGroundReactionWrench);
       desiredCentroidalMomentumRate.sub(gravitationalWrench);
@@ -232,11 +203,6 @@ public class OldMomentumControlModule
    public void resetGroundReactionWrenchFilter()
    {
       groundReactionWrenchFilterResetRequest.set(true);
-   }
-
-   public void resetCoPFilter(ContactablePlaneBody contactableBody)
-   {
-      copFilterResetRequests.get(contactableBody).set(true);
    }
 
    public void reset()
@@ -251,7 +217,7 @@ public class OldMomentumControlModule
 
    public FramePoint2d getCoP(ContactablePlaneBody contactablePlaneBody)
    {
-      return filteredCentersOfPressure2d.get(contactablePlaneBody).getFramePoint2dCopy();
+      return centersOfPressure2d.get(contactablePlaneBody).getFramePoint2dCopy();
    }
 
    public void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration)
