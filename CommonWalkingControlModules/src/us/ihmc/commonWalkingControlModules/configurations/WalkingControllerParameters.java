@@ -28,5 +28,5 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    
    public abstract SideDependentList<Transform3D> getHandControlFramesWithRespectToFrameAfterWrist();
 
-   boolean finishSwingWhenTrajectoryDone();
+   public abstract boolean finishSwingWhenTrajectoryDone();
 }
