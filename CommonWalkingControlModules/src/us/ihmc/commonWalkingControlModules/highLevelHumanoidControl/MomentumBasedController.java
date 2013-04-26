@@ -217,13 +217,14 @@ public abstract class MomentumBasedController implements RobotController, Desire
       LinkedHashMap<ContactablePlaneBody, ? extends PlaneContactState> contactStates = this.contactStates;
 
 
-      Map<ContactablePlaneBody, Wrench> externalWrenches = new LinkedHashMap<ContactablePlaneBody, Wrench>();
 
-      SpatialForceVector desiredCentroidalMomentumRate = momentumControlModule.computeDesiredAccelerationsAndExternalWrenches(rootJointAccelerationData,
+      momentumControlModule.compute(rootJointAccelerationData,
             momentumRateOfChangeData,
-            contactStates, externalWrenches, upcomingSupportLeg.getEnumValue());
+            contactStates, upcomingSupportLeg.getEnumValue());
 
+      SpatialForceVector desiredCentroidalMomentumRate = momentumControlModule.getDesiredCentroidalMomentumRate();
 
+      Map<? extends ContactablePlaneBody, Wrench> externalWrenches = momentumControlModule.getExternalWrenches();
       for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodies)
       {
          PlaneContactState contactState = contactStates.get(contactablePlaneBody);
