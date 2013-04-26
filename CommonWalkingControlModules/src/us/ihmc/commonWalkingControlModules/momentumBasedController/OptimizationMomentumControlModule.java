@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools;
@@ -12,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.Mom
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.MomentumControlModule;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.CheckTools;
+import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.*;
@@ -63,6 +65,31 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
 
    private final MomentumOptimizerNative momentumOptimizerNative;
+
+
+   private int wrenchLength = MomentumOptimizerNative.wrenchLength;
+   private int nDoF = MomentumOptimizerNative.nDoF;
+   private int nContacts = MomentumOptimizerNative.nContacts;
+   private int nPointsPerContact = MomentumOptimizerNative.nPointsPerContact;
+   private int nSupportVectors = MomentumOptimizerNative.nSupportVectors;
+   private int nNull = MomentumOptimizerNative.nNull;
+
+   private final BooleanYoVariable converged = new BooleanYoVariable("converged", registry);
+   private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable("hasNotConvergedInPast", registry);
+
+   private final double[] A = new double[wrenchLength * nDoF]; // centroidal momentum matrix
+   private final double[] b = new double[wrenchLength]; // right hand side of momentum rate of change equation
+   private final double[] C = new double[wrenchLength]; // momentum rate of change objective scaling. Diagonal.
+   private final double[] Js = new double[nDoF * nDoF]; // Jacobian for secondary motion constraints
+   private final double[] ps = new double[nDoF]; // right hand side for secondary motion constraints
+   private final double[] Ws = new double[nDoF];    // weighting matrix for secondary motion constraints. Diagonal.
+   private final double[] Lambda = new double[nDoF];    // joint acceleration regularization matrix (damped least squares). Diagonal.
+   private final double[] Q = new double[wrenchLength * nContacts * nSupportVectors * nPointsPerContact]; // basis vector multipliers --> ground reaction wrench transformation matrix
+   private final double[] c = new double[wrenchLength]; // Adot * v - Wg
+   private final double[] rhoMin = new double[nSupportVectors * nPointsPerContact * nContacts]; // minimum basis vector multipliers
+   private final double[] N = new double[nDoF * nNull]; // nullspace
+   private final double[] z = new double[nNull]; // nullspace multipliers
+   private double wRho;
 
    public OptimizationMomentumControlModule(SixDoFJoint rootJoint, RigidBody elevator, ReferenceFrame centerOfMassFrame,
            LinearSolver<DenseMatrix64F> jacobianSolver, double controlDT, YoVariableRegistry parentRegistry)
@@ -125,6 +152,23 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
       ScrewTools.packJointVelocitiesMatrix(jointsInOrder, v);
       CommonOps.mult(centroidalMomentumMatrixDerivative, v, adotV);
+
+      try
+      {
+         momentumOptimizerNative.solve(A, b, C, Js, ps, Ws, Lambda, Q, c, rhoMin, N, z, wRho);
+      }
+      catch (NoConvergenceException e)
+      {
+         if (!hasNotConvergedInPast.getBooleanValue())
+         {
+            e.printStackTrace();
+            System.err.println("WARNING: Only showing the stack trace of the first " + e.getClass().getSimpleName()
+                  + ". This may be happening more than once. See value of YoVariable " + converged.getName() + ".");
+         }
+
+         converged.set(false);
+         hasNotConvergedInPast.set(true);
+      }
    }
 
    public void resetGroundReactionWrenchFilter()
