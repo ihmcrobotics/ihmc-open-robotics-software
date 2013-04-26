@@ -73,9 +73,6 @@ public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
                case BY_POINTS :
                   trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(footstepData.getTrajectoryWaypoints());
                   break;
-               case DEFAULT :
-                  trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters();
-                  break;
                 default:
                   trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(footstepData.getTrajectoryWaypointGenerationMethod());
                   break;

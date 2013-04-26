@@ -435,6 +435,17 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          waypoints.get(i).changeFrame(referenceFrame);
          allPositions[waypointIndices[i]].set(waypoints.get(i));
       }
+      
+      checkForEqualWaypoints();
+   }
+
+   private void checkForEqualWaypoints()
+   {
+      //hack in case waypoints are equal
+      if (allPositions[waypointIndices[0]].getFramePointCopy().epsilonEquals(allPositions[waypointIndices[1]].getFramePointCopy(), .001))
+      {
+         allPositions[waypointIndices[0]].setZ(allPositions[waypointIndices[0]].getZ() + .01);
+      }
    }
 
    private List<FramePoint> getWaypointForHighStep()
@@ -563,7 +574,6 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       return timeIntoStep.getDoubleValue() >= stepTime.getDoubleValue();
    }
 
-   // TODO consider incorporating initial velocity to waypoint placement
    private List<FramePoint> getWaypointsFromABox(Box3d box)
    {
       Transform3D boxTransform = box.getTransformCopy();
