@@ -7,11 +7,9 @@ import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolver;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributor;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeControlModule;
@@ -25,7 +23,6 @@ import us.ihmc.sensorProcessing.simulatedSensors.PointPositionSensorDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.PointVelocitySensorDefinition;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredAccelerationAndPointDataProducer;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
-import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -80,7 +77,7 @@ public abstract class MomentumBasedController implements RobotController, Desire
    private final DesiredCoMAndAngularAccelerationGrabber desiredCoMAndAngularAccelerationGrabber;
    private PointPositionSensorGrabber pointPositionSensorGrabber;
    private PointVelocitySensorGrabber pointVelocitySensorGrabber;
-   protected final OldMomentumControlModule momentumControlModule;
+   protected final MomentumControlModule momentumControlModule;
 
    protected final SpatialForceVector gravitationalWrench;
    protected final EnumYoVariable<RobotSide> upcomingSupportLeg = EnumYoVariable.create("upcomingSupportLeg", "", RobotSide.class, registry, true);    // FIXME: not general enough; this should not be here
@@ -89,7 +86,7 @@ public abstract class MomentumBasedController implements RobotController, Desire
                                   CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime,
                                   double gravityZ, TwistCalculator twistCalculator, Collection<? extends ContactablePlaneBody> contactablePlaneBodies,
                                   double controlDT, ProcessedOutputsInterface processedOutputs,
-                                  OldMomentumControlModule momentumControlModule, ArrayList<Updatable> updatables,
+                                  MomentumControlModule momentumControlModule, ArrayList<Updatable> updatables,
                                   MomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
                                   RootJointAccelerationControlModule rootJointAccelerationControlModule,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)

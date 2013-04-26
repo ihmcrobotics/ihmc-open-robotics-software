@@ -68,7 +68,7 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
    public MultiContactTestHumanoidController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
            CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime, double gravityZ,
            TwistCalculator twistCalculator, HashMap<ContactablePlaneBody, RigidBody> contactablePlaneBodiesAndBases, double controlDT,
-           ProcessedOutputsInterface processedOutputs, OldMomentumControlModule momentumControlModule, ArrayList<Updatable> updatables,
+           ProcessedOutputsInterface processedOutputs, MomentumControlModule momentumControlModule, ArrayList<Updatable> updatables,
            MomentumRateOfChangeControlModule momentumRateOfChangeControlModule, RootJointAccelerationControlModule rootJointAccelerationControlModule,
            ControlFlowInputPort<FramePoint> desiredCoMPositionPort, ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationPort,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)

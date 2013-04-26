@@ -220,7 +220,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
            SideDependentList<FootSwitchInterface> footSwitches, double gravityZ, DoubleYoVariable yoTime, double controlDT,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, FootstepProvider footstepProvider, DesiredHandPoseProvider handPoseProvider,
            HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters, DesiredHeadOrientationProvider desiredHeadOrientationProvider,
-           CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, OldMomentumControlModule momentumControlModule,
+           CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, MomentumControlModule momentumControlModule,
            SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators,
            SideDependentList<DoubleTrajectoryGenerator> heelPitchTrajectoryGenerators, HeelPitchTouchdownProvidersManager heelPitchTouchdownProvidersManager, SwingTimeCalculationProvider swingTimeCalculationProvider,
            YoPositionProvider finalPositionProvider, TrajectoryParametersProvider trajectoryParametersProvider, boolean stayOntoes, double desiredPelvisPitch,
