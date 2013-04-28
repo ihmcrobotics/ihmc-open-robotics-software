@@ -4,7 +4,10 @@ import static org.junit.Assert.assertFalse;
 
 import java.util.ArrayList;
 
+import javax.vecmath.Point3d;
+
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
@@ -13,6 +16,8 @@ import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCEnvironmentModel;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseSimulation;
 import us.ihmc.darpaRoboticsChallenge.HumanoidRobotSimulation;
+import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
+import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.ThreadTools;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -29,12 +34,15 @@ public class DRCSimulationTestHelper
    private final NothingChangedVerifier nothingChangedVerifier;
    private BlockingSimulationRunner blockingSimulationRunner;
    
-   public DRCSimulationTestHelper(DRCDemo01StartingLocation selectedLocation, DRCEnvironmentModel selectedEnvironment, boolean checkNothingChanged)
+   private final boolean createMovie;
+
+   public DRCSimulationTestHelper(DRCDemo01StartingLocation selectedLocation, DRCEnvironmentModel selectedEnvironment, boolean checkNothingChanged, boolean createMovie)
    {
       teamObjectCommunicator = new ScriptedFootstepDataListObjectCommunicator("Team");
       ScriptedFootstepDataListObjectCommunicator drcNetworkObjectCommunicator = new ScriptedFootstepDataListObjectCommunicator("DRCNetwork");
 
       this.checkNothingChanged = checkNothingChanged;
+      this.createMovie = createMovie;
       
       boolean startOutsidePen = false;
       boolean useGazebo = false;
@@ -115,6 +123,51 @@ public class DRCSimulationTestHelper
    {
       blockingSimulationRunner.destroySimulation();
       blockingSimulationRunner = null;
+   }
+
+   public boolean simulateAndBlockAndCatchExceptions(double simulationTime)
+   {
+      try
+      {
+         simulateAndBlock(simulationTime);
+         return true;
+      }
+      catch(Exception e)
+      {
+         return false;
+      }
+   }
+   
+   public void createMovie(SimulationConstructionSet scs, int callStackHeight)
+   {
+      if (createMovie)
+      {
+         BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(scs, callStackHeight);
+      }
+   }
+   
+   public RobotSide[] createRobotSidesStartingFrom(RobotSide robotSide, int length)
+   {
+      RobotSide[] ret = new RobotSide[length];
+
+      for (int i = 0; i < length; i++)
+      {
+         ret[i] = robotSide;
+         robotSide = robotSide.getOppositeSide();
+      }
+
+      return ret;
+   }
+   
+   public void setupCameraForUnitTest(SimulationConstructionSet scs, Point3d cameraFix, Point3d cameraPosition)
+   {
+      CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
+      cameraConfiguration.setCameraFix(cameraFix);
+      cameraConfiguration.setCameraPosition(cameraPosition);
+      cameraConfiguration.setCameraTracking(false, true, true, false);
+      cameraConfiguration.setCameraDolly(false, true, true, false);
+      scs.setupCamera(cameraConfiguration);
+      scs.selectCamera("testCamera");
    }
 
 }
