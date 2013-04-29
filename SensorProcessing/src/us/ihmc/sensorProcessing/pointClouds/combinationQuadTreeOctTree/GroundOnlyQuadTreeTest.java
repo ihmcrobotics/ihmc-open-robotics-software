@@ -27,7 +27,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       float xMax = 1.0f;
       float yMax = 1.0f;
 
-      GroundOnlyQuadTree quadTree1 = new GroundOnlyQuadTree(xMin, yMin, xMax, yMax, 1.0, 0.1);
+      GroundOnlyQuadTree quadTree1 = new GroundOnlyQuadTree(xMin, yMin, xMax, yMax, 1.0, 0.1, 100000);
       GroundOnlyQuadTree quadTree = quadTree1;
       assertNull(quadTree.get(0.2f, 0.2f));
       quadTree.put(0.5f, 0.5f, 20.0f);
@@ -51,7 +51,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       float xMax = 2.0f;
       float yMax = 2.0f;
 
-      GroundOnlyQuadTree quadTree1 = new GroundOnlyQuadTree(xMin, yMin, xMax, yMax, 1.0, 0.1);
+      GroundOnlyQuadTree quadTree1 = new GroundOnlyQuadTree(xMin, yMin, xMax, yMax, 1.0, 0.1, 100000);
       GroundOnlyQuadTree quadTree = quadTree1;
 
       float ground = 0.1f;
@@ -150,7 +150,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
    @Override
    public HeightMap getHeightMap(double minX, double minY, double maxX, double maxY, double resolution)
    {
-      return new GroundOnlyQuadTree(minX, minY, maxX, maxY, resolution, HEIGHT_THRESHOLD);
+      return new GroundOnlyQuadTree(minX, minY, maxX, maxY, resolution, HEIGHT_THRESHOLD, 100000);
    }
 
    protected GroundOnlyQuadTree createDefaultQuadTree(float quadTreeResolution)
@@ -161,7 +161,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       float yMax = 4.0f;
 
       float heightThreshold = ALTERNATE_HEIGHT_THRESHOLD;
-      return new GroundOnlyQuadTree(xMin, yMin, xMax, yMax, quadTreeResolution, heightThreshold);
+      return new GroundOnlyQuadTree(xMin, yMin, xMax, yMax, quadTreeResolution, heightThreshold, 100000);
    }
 
    @Test

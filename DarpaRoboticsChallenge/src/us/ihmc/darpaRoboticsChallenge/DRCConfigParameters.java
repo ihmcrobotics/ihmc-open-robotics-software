@@ -57,15 +57,15 @@ public class DRCConfigParameters
    public static final double LIDAR_SPINDLE_VELOCITY = 0.5;
 
    public static final boolean STREAM_POLAR_LIDAR = true;
-   static final int LIDAR_UPDATE_RATE_OVERRIDE = 3;
-   static final int LIDAR_SWEEPS_PER_SCAN = 6;    // 1
-   static final int LIDAR_POINTS_PER_SWEEP = 70;    // 640
+   static final int LIDAR_UPDATE_RATE_OVERRIDE = 5;//3
+   static final int LIDAR_SWEEPS_PER_SCAN = 1;//6;    // 1
+   static final int LIDAR_POINTS_PER_SWEEP = 640;// 70;    // 640
    static final boolean OVERRIDE_DRC_LIDAR_CONFIG = true;
    public static final float LIDAR_MIN_DISTANCE = 0.2f;
    public static final float LIDAR_MAX_DISTANCE = 10.0f;
    public static final float LIDAR_SWEEP_MAX_YAW = 0.8f;
    public static final float LIDAR_SWEEP_MIN_YAW = -0.8f;
-   public static final float LIDAR_SCAN_MAX_ROLL = 0.4f;    // rolling the lidar to simulated a faster update rate
+   public static final float LIDAR_SCAN_MAX_ROLL = 0.4f;    // rolls the LIDAR to simulate a faster update rate.
    public static final float LDIAR_SCAN_MIN_ROLL = -0.3f;
    public static final float LIDAR_ANGLE_INCREMENT = (float) Math.toRadians(0.25);
    public static final float LIDAR_TIME_INCREMENT = 0.0f;
@@ -74,12 +74,13 @@ public class DRCConfigParameters
    public static final boolean DEBUG_GAZEBO_LIDAR = false;
 
    // LIDAR Processor
-   public static final DRCLidarDataStoreType DRCLIDAR_DATA_STORE_TYPE = DRCLidarDataStoreType.QUAD_TREE;
-   public static final double GRID_RESOLUTION = 0.025;    // in meters
+   public static final boolean LIDAR_PROCESSOR_TIMING_REPORTING_ON = false;
+   public static final DRCLidarDataStoreType DRCLIDAR_DATA_STORE_TYPE = DRCLidarDataStoreType.GROUND_ONLY_QUAD_TREE_AND_OCTREE;
+   public static final double GRID_RESOLUTION = 0.1;    // in meters
    public static final double OCTREE_RESOLUTION = 0.05;
    public static final float QUADTREE_HEIGHT_THRESHOLD = 0.025f;
    public static final double LIDAR_BLINDNESS_CYLINDAR_SQUARED_RADIUS = 0.1;
-   public static final boolean HIDE_THINGS_ABOVE_HEAD_FROM_LIDAR = true;
+   public static final boolean HIDE_THINGS_ABOVE_HEAD_FROM_LIDAR = false;
 
    // Footstep Generator
    public static final double BOUNDING_BOX_FOR_FOOTSTEP_HEIGHT_FINDING_SIDE_LENGTH =
