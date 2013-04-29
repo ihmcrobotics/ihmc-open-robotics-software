@@ -74,7 +74,7 @@ public class YoPointPositionDataObjectListOutputPort extends ControlFlowOutputPo
             int index = yoPointPositionDataObjects.size();
             yoPointPositionDataObjectToUse = new YoPointPositionDataObject(namePrefix + index, referenceFrame, registry);
             yoPointPositionDataObjects.add(yoPointPositionDataObjectToUse);
-            validMap.put(yoPointPositionDataObjectToUse, new BooleanYoVariable(namePrefix + index, registry));
+            validMap.put(yoPointPositionDataObjectToUse, new BooleanYoVariable(namePrefix + "Valid" + index, registry));
          }
 
          yoPointPositionDataObjectToUse.set(pointPositionDataObject);
