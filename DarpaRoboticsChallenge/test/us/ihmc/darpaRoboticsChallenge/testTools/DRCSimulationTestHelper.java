@@ -95,7 +95,8 @@ public class DRCSimulationTestHelper
          ArrayList<String> stringsToIgnore = new ArrayList<String>();
          stringsToIgnore.add("nano");
          stringsToIgnore.add("milli");
-
+         stringsToIgnore.add("Timer");
+         
          boolean writeNewBaseFile = nothingChangedVerifier.getWriteNewBaseFile();
 
          double maxPercentDifference = 0.001;
