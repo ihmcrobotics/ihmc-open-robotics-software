@@ -6,10 +6,13 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.media.j3d.Transform3D;
-import javax.vecmath.Vector3d;
 
+import org.ejml.data.DenseMatrix64F;
+
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.IMUMount;
 import com.yobotics.simulationconstructionset.KinematicPoint;
@@ -22,25 +25,55 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
    private final Robot robot;
 
    private final LinkedHashMap<IMUMount, IMUDefinition> imuDefinitions;
+   private final Map<WrenchCalculatorInterface,ForceSensorDefinition> forceSensorDefinitions;
 
    private final StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
 
    public StateEstimatorSensorDefinitionsFromRobotFactory(SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap, Robot robot, double controlDT,
-           ArrayList<IMUMount> imuMounts, ArrayList<KinematicPoint> positionPoints, ArrayList<KinematicPoint> velocityPoints)
+           ArrayList<IMUMount> imuMounts, ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators,  ArrayList<KinematicPoint> positionPoints, ArrayList<KinematicPoint> velocityPoints)
    {
       this.scsToInverseDynamicsJointMap = scsToInverseDynamicsJointMap;
       this.robot = robot;
 
       this.imuDefinitions = generateIMUDefinitions(imuMounts);
+      this.forceSensorDefinitions = generateForceSensorDefinitions(groundContactPointBasedWrenchCalculators);
 
+      
       stateEstimatorSensorDefinitions = new StateEstimatorSensorDefinitions();
 
+      createAndAddForceSensorDefinitions(forceSensorDefinitions);
       createAndAddOneDoFPositionAndVelocitySensors();
       createAndAddOrientationSensors(imuDefinitions);
       createAndAddAngularVelocitySensors(imuDefinitions);
       createAndAddLinearAccelerationSensors(imuDefinitions);
    }
    
+   private void createAndAddForceSensorDefinitions(Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitions)
+   {
+      for(ForceSensorDefinition forceSensorDefinition : forceSensorDefinitions.values())
+      {
+         stateEstimatorSensorDefinitions.addForceSensorDefinition(forceSensorDefinition);
+      }
+   }
+
+   private LinkedHashMap<WrenchCalculatorInterface, ForceSensorDefinition> generateForceSensorDefinitions(
+         ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators)
+   {
+      
+      LinkedHashMap<WrenchCalculatorInterface,ForceSensorDefinition> forceSensorDefinitions = new LinkedHashMap<WrenchCalculatorInterface, ForceSensorDefinition>();
+      DenseMatrix64F selectionMatrix = new DenseMatrix64F(Wrench.SIZE, Wrench.SIZE);
+      for(WrenchCalculatorInterface groundContactPointBasedWrenchCalculator : groundContactPointBasedWrenchCalculators)
+      {
+         OneDegreeOfFreedomJoint forceTorqueSensorJoint = groundContactPointBasedWrenchCalculator.getJoint();
+         OneDoFJoint oneDoFSensorJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint(forceTorqueSensorJoint);
+         ReferenceFrame sensorFrame =  oneDoFSensorJoint.getFrameAfterJoint();
+         ForceSensorDefinition sensorDefinition = new ForceSensorDefinition(forceTorqueSensorJoint.getName(), selectionMatrix, sensorFrame, sensorFrame);
+         forceSensorDefinitions.put(groundContactPointBasedWrenchCalculator, sensorDefinition);
+         
+      }
+      return forceSensorDefinitions;
+   }
+
    public Map<IMUMount, IMUDefinition> getIMUDefinitions()
    {
       return imuDefinitions;
@@ -114,5 +147,10 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
 
          stateEstimatorSensorDefinitions.addLinearAccelerationSensorDefinition(imuDefinition);
       }
+   }
+
+   public Map<WrenchCalculatorInterface, ForceSensorDefinition> getForceSensorDefinitions()
+   {
+      return forceSensorDefinitions;
    }
 }

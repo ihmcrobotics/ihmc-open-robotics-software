@@ -1,6 +1,13 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
-import com.yobotics.simulationconstructionset.*;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.sensorProcessing.signalCorruption.GaussianOrientationCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianVectorCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.RandomWalkBiasVectorCorruptor;
@@ -8,11 +15,14 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Set;
+import com.yobotics.simulationconstructionset.FloatingJoint;
+import com.yobotics.simulationconstructionset.IMUMount;
+import com.yobotics.simulationconstructionset.Joint;
+import com.yobotics.simulationconstructionset.KinematicPoint;
+import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
+import com.yobotics.simulationconstructionset.Robot;
+import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class SimulatedSensorHolderAndReaderFromRobotFactory
 {
@@ -22,17 +32,19 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory
    private final SensorNoiseParameters sensorNoiseParameters;
    
    private final ArrayList<IMUMount> imuMounts;
+   private final ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators;
    private final ArrayList<KinematicPoint> positionPoints;
    private final ArrayList<KinematicPoint> velocityPoints;
    
 
    private Map<IMUMount, IMUDefinition> imuDefinitions;
+   private Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitions;
    private SimulatedSensorHolderAndReader simulatedSensorHolderAndReader;
    private StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
    
    
    public SimulatedSensorHolderAndReaderFromRobotFactory(Robot robot, SensorNoiseParameters sensorNoiseParameters, double controlDT,
-         ArrayList<IMUMount> imuMounts, ArrayList<KinematicPoint> positionPoints, ArrayList<KinematicPoint> velocityPoints, YoVariableRegistry registry)
+         ArrayList<IMUMount> imuMounts, ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators, ArrayList<KinematicPoint> positionPoints, ArrayList<KinematicPoint> velocityPoints, YoVariableRegistry registry)
    {
       
       this.registry = registry;
@@ -41,6 +53,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory
       
       this.controlDT = controlDT;
       this.imuMounts = imuMounts;
+      this.groundContactPointBasedWrenchCalculators = groundContactPointBasedWrenchCalculators;
       this.positionPoints = positionPoints;
       this.velocityPoints = velocityPoints;
 
@@ -62,20 +75,32 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory
       {
          SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = SCSToInverseDynamicsJointMap.createByName((FloatingJoint) rootJoint, sixDoFJoint);
          StateEstimatorSensorDefinitionsFromRobotFactory stateEstimatorSensorDefinitionsFromRobotFactory = new StateEstimatorSensorDefinitionsFromRobotFactory(
-               scsToInverseDynamicsJointMap, robot, controlDT, imuMounts, positionPoints, velocityPoints);
+               scsToInverseDynamicsJointMap, robot, controlDT, imuMounts, groundContactPointBasedWrenchCalculators, positionPoints, velocityPoints);
          
          this.stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
          this.imuDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getIMUDefinitions();
+         this.forceSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getForceSensorDefinitions();
+         
          this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReader();
          
          createAndAddOrientationSensors(imuDefinitions, registry);
          createAndAddAngularVelocitySensors(imuDefinitions, registry);
+         createAndAddForceSensors(forceSensorDefinitions, registry);
          createAndAddLinearAccelerationSensors(imuDefinitions, registry);
          createAndAddOneDoFPositionAndVelocitySensors(scsToInverseDynamicsJointMap);
       }
       else
       {
          throw new RuntimeException("Not FloatingJoint rootjoint found");
+      }
+   }
+
+   private void createAndAddForceSensors(Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitions2, YoVariableRegistry registry)
+   {
+      for(Entry<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitionEntry : forceSensorDefinitions2.entrySet())
+      {         
+         WrenchCalculatorInterface groundContactPointBasedWrenchCalculator = forceSensorDefinitionEntry.getKey();
+         simulatedSensorHolderAndReader.addForceTorqueSensorPort(forceSensorDefinitionEntry.getValue(), groundContactPointBasedWrenchCalculator);
       }
    }
 
