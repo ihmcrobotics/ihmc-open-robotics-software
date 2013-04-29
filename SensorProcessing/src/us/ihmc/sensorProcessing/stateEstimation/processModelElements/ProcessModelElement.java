@@ -10,6 +10,8 @@ import us.ihmc.sensorProcessing.stateEstimation.TimeDomain;
 
 public interface ProcessModelElement
 {
+   public abstract String getName();
+   
    public abstract void computeMatrixBlocks();
 
    public abstract DenseMatrix64F getStateMatrixBlock(ControlFlowOutputPort<?> statePort);

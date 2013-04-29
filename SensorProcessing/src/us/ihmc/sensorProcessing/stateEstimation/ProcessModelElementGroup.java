@@ -2,6 +2,8 @@ package us.ihmc.sensorProcessing.stateEstimation;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -60,8 +62,10 @@ public class ProcessModelElementGroup
 
    private final DenseMatrix64F correctionBlock = new DenseMatrix64F(1, 1);
 
-   public ProcessModelElementGroup(Collection<ProcessModelElement> processModelElements, double controlDT)
+   public ProcessModelElementGroup(Collection<ProcessModelElement> processModelElementCollection, double controlDT)
    {
+      ArrayList<ProcessModelElement> processModelElements = sortProcessModelElements(processModelElementCollection);
+      
       populateStateToProcessModelElementMap(stateToProcessModelElementMap, processModelElements);
       classifyProcessModelElements(continuousTimeProcessModelElements, discreteTimeProcessModelElements, processModelElements);
       determineSizes(stateSizes, inputSizes, stateToProcessModelElementMap);
@@ -103,6 +107,16 @@ public class ProcessModelElementGroup
       this.controlDT = controlDT;
 
       update(true);
+   }
+
+   public ArrayList<ProcessModelElement> sortProcessModelElements(Collection<ProcessModelElement> processModelElementCollection)
+   {
+      ArrayList<ProcessModelElement> processModelElements = new ArrayList<ProcessModelElement>();
+      processModelElements.addAll(processModelElementCollection);
+      
+      ProcessModelElementAlphabeticalComparator nameComparator = new ProcessModelElementAlphabeticalComparator();
+      Collections.sort(processModelElements, nameComparator);
+      return processModelElements;
    }
 
    public void updateMatrixBlocks()
@@ -348,5 +362,32 @@ public class ProcessModelElementGroup
 
       CommonOps.insert(QContinuous, Q, 0, 0);
       CommonOps.insert(QDiscrete, Q, QContinuous.getNumRows(), QContinuous.getNumCols());
+   }
+   
+   private class ProcessModelElementAlphabeticalComparator implements Comparator<ProcessModelElement>
+   {
+      public int compare(ProcessModelElement o1, ProcessModelElement o2)
+      {
+         if (o1 == o2) return 0;
+         
+         int stringCompare = o1.getName().compareTo(o2.getName());
+         if (stringCompare == 0) throw new RuntimeException("Two ProcessModelElements have the same name! " + o1.getName());
+         
+         return stringCompare;
+      }
+   }
+   
+   public String toString()
+   {
+      String ret = "";
+      
+      for (ControlFlowOutputPort<?> statePort : stateToProcessModelElementMap.keySet())
+      {
+         ProcessModelElement processModelElement = stateToProcessModelElementMap.get(statePort);
+         
+         ret = ret + processModelElement.getName() + "\n";
+      }
+      
+      return ret;
    }
 }
