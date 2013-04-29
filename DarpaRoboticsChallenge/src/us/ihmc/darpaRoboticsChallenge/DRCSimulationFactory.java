@@ -16,11 +16,14 @@ import us.ihmc.commonWalkingControlModules.controllers.NullLidarController;
 import us.ihmc.commonWalkingControlModules.controllers.PIDLidarTorqueController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCPerfectPoseEstimator;
+import us.ihmc.darpaRoboticsChallenge.sensors.GazeboForceSensor;
 import us.ihmc.projectM.R2Sim02.initialSetup.GuiInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.ScsInitialSetup;
+import us.ihmc.sensorProcessing.simulatedSensors.GroundContactPointBasedWrenchCalculator;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
+import us.ihmc.sensorProcessing.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.StateEstimatorErrorCalculatorController;
 import us.ihmc.utilities.Pair;
@@ -29,6 +32,7 @@ import us.ihmc.utilities.net.ObjectCommunicator;
 import com.yobotics.simulationconstructionset.GroundContactPoint;
 import com.yobotics.simulationconstructionset.IMUMount;
 import com.yobotics.simulationconstructionset.KinematicPoint;
+import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -108,20 +112,49 @@ public class DRCSimulationFactory
          }
       }
 
+      ArrayList<OneDegreeOfFreedomJoint> forceTorqueSensorJoints = new ArrayList<OneDegreeOfFreedomJoint>();   
+      // TODO: Get from SDF file
+      forceTorqueSensorJoints.add(simulatedRobot.getOneDoFJoint("l_leg_lax"));
+      forceTorqueSensorJoints.add(simulatedRobot.getOneDoFJoint("r_leg_lax"));
+      
+      forceTorqueSensorJoints.add(simulatedRobot.getOneDoFJoint("l_arm_mwx"));
+      forceTorqueSensorJoints.add(simulatedRobot.getOneDoFJoint("r_arm_mwx"));
+      
+      ArrayList<WrenchCalculatorInterface> wrenchProviders = new ArrayList<WrenchCalculatorInterface>();
+      
+      if(simulatedRobot instanceof GazeboRobot)
+      {
+         for(OneDegreeOfFreedomJoint sensorJoint : forceTorqueSensorJoints)
+         {
+            GazeboForceSensor gazeboForceSensor = new GazeboForceSensor((GazeboRobot) simulatedRobot, sensorJoint);
+            wrenchProviders.add(gazeboForceSensor);
+         }
+      }
+      else
+      {
+         for(OneDegreeOfFreedomJoint sensorJoint : forceTorqueSensorJoints)
+         {
+            ArrayList<GroundContactPoint> groundContactPoints = new ArrayList<GroundContactPoint>();
+            sensorJoint.recursiveGetAllGroundContactPoints(groundContactPoints);
+            GroundContactPointBasedWrenchCalculator groundContactPointBasedWrenchCalculator = new GroundContactPointBasedWrenchCalculator(groundContactPoints, sensorJoint);
+            wrenchProviders.add(groundContactPointBasedWrenchCalculator);
+         }
+      }
+
 
       
       SimulatedSensorHolderAndReaderFromRobotFactory sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(simulatedRobot,
-            sensorNoiseParameters, controlDT, imuMounts, positionPoints, velocityPoints, registry);
+            sensorNoiseParameters, controlDT, allIMUMounts, wrenchProviders, positionPoints, velocityPoints, registry);
 
       
       Vector3d gravity = new Vector3d();
       robotInterface.getRobot().getGravity(gravity);
       
-      //TODO: Can only do this if have a simulation...
+      //TODO: Can only do this if we have a simulation...
       Pair<Point3d, Quat4d> initialCoMPositionAndEstimationLinkOrientation = getInitialCoMPositionAndEstimationLinkOrientation(robotInitialSetup, simulatedRobot);
       
       DRCController robotController = new DRCController(initialCoMPositionAndEstimationLinkOrientation, robotInterface.getFullRobotModelFactory(), controllerFactory,
-            robotInterface.getFootSwitches(), robotInterface.getWristForceSensors(), sensorReaderFactory, outputWriter,
+            sensorReaderFactory, outputWriter,
             jointMap, lidarControllerInterface, gravity, estimateDT, controlDT, networkServer, dynamicGraphicObjectsListRegistry,
             guiSetterUpperRegistry, registry);
 

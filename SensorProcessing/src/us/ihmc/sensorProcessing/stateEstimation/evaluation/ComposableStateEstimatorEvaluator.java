@@ -10,6 +10,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRob
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
+import us.ihmc.sensorProcessing.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAccelerationsFromRobotStealerController;
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
@@ -56,7 +57,7 @@ public class ComposableStateEstimatorEvaluator
       
       SimulatedSensorHolderAndReaderFromRobotFactory simulatedSensorHolderAndReaderFromRobotFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(
             robot, simulatedSensorNoiseParameters, controlDT, imuMounts, 
-            robot.getPositionPoints(), robot.getVelocityPoints(), 
+            new ArrayList<WrenchCalculatorInterface>(), robot.getPositionPoints(), robot.getVelocityPoints(), 
             registry);
       
       simulatedSensorHolderAndReaderFromRobotFactory.build(inverseDynamicsStructure.getRootJoint());
@@ -97,7 +98,6 @@ public class ComposableStateEstimatorEvaluator
       JointAndIMUSensorDataSource jointSensorDataSource = sensorAndEstimatorAssembler.getJointAndIMUSensorDataSource();
       
       simulatedSensorHolderAndReader.setJointAndIMUSensorDataSource(jointSensorDataSource);
-      simulatedSensorHolderAndReader.setStateEstimationDataFromControllerSink(stateEstimationDataFromControllerSink);
 
       desiredCoMAccelerationsFromRobotStealerController.attachStateEstimationDataFromControllerSink(stateEstimationDataFromControllerSink);
       

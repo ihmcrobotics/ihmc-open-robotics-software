@@ -14,6 +14,13 @@ public class StateEstimatorSensorDefinitions
    private final ArrayList<IMUDefinition> imuDefinitionsForAngularVelocitySensors = new ArrayList<IMUDefinition>();
    private final ArrayList<IMUDefinition> imuDefinitionsForLinearAccelerationSensors = new ArrayList<IMUDefinition>();
 
+   private final ArrayList<ForceSensorDefinition> forceSensorDefinitions = new ArrayList<ForceSensorDefinition>();
+
+   public ArrayList<ForceSensorDefinition> getForceSensorDefinitions()
+   {
+      return forceSensorDefinitions;
+   }
+
    public StateEstimatorSensorDefinitions()
    {
    }
@@ -67,4 +74,9 @@ public class StateEstimatorSensorDefinitions
    {
       imuDefinitionsForLinearAccelerationSensors.add(imuDefinition);
    }
+   public void addForceSensorDefinition(ForceSensorDefinition forceSensorDefinition)
+   {
+      forceSensorDefinitions.add(forceSensorDefinition);
+   }
+
 }

@@ -1,16 +1,15 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
 import java.util.LinkedHashMap;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.controlFlow.ControlFlowElement;
+import us.ihmc.sensorProcessing.sensorData.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
-import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
-import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
-import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 public class SimulatedSensorHolderAndReader implements Runnable
@@ -32,10 +31,13 @@ public class SimulatedSensorHolderAndReader implements Runnable
    private final LinkedHashMap<IMUDefinition, SimulatedLinearAccelerationSensorFromRobot> linearAccelerationSensors =
       new LinkedHashMap<IMUDefinition, SimulatedLinearAccelerationSensorFromRobot>();
 
+   private final LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensors = new LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface>();
+   
+
    private JointAndIMUSensorDataSource jointAndIMUSensorDataSource;
    
    
-   private StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink;
+   private ForceSensorDataHolder forceSensorDataHolder;
 
    
    public SimulatedSensorHolderAndReader()
@@ -66,6 +68,12 @@ public class SimulatedSensorHolderAndReader implements Runnable
    {
       linearAccelerationSensors.put(imuDefinition, linearAccelerationSensor);
    }
+   
+   public void addForceTorqueSensorPort(ForceSensorDefinition forceSensorDefinition, WrenchCalculatorInterface groundContactPointBasedWrenchCalculator)
+   {
+      forceTorqueSensors.put(forceSensorDefinition, groundContactPointBasedWrenchCalculator);
+   }
+
 
    public void setJointAndIMUSensorDataSource(JointAndIMUSensorDataSource jointAndIMUSensorDataSource)
    {
@@ -130,6 +138,20 @@ public class SimulatedSensorHolderAndReader implements Runnable
          jointAndIMUSensorDataSource.setLinearAccelerationSensorValue(imuDefinition, value);
       }
       
+      
+      if(forceSensorDataHolder != null)
+      {
+         for(Entry<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensorEntry : forceTorqueSensors.entrySet())
+         {
+            final WrenchCalculatorInterface forceTorqueSensor = forceTorqueSensorEntry.getValue();
+            forceTorqueSensor.startComputation();
+            forceTorqueSensor.waitUntilComputationIsDone();  
+            forceSensorDataHolder.setForceSensorValue(forceTorqueSensorEntry.getKey(), forceTorqueSensor.getForceSensorOutputPort().getData());
+         }
+      }
+      
+      
+      
       if(controllerDispatcher != null)
       {
          controllerDispatcher.startComputation();
@@ -141,8 +163,9 @@ public class SimulatedSensorHolderAndReader implements Runnable
       this.controllerDispatcher = controllerDispatcher;
    }
 
-   public void setStateEstimationDataFromControllerSink(StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink)
+   
+   public void setForceSensorDataHolder(ForceSensorDataHolder forceSensorDataHolder)
    {
-      this.stateEstimationDataFromControllerSink = stateEstimationDataFromControllerSink;
+      this.forceSensorDataHolder = forceSensorDataHolder;
    }
 }
