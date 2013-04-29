@@ -2,6 +2,7 @@ package us.ihmc.sensorProcessing.stateEstimation;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -50,12 +51,12 @@ public class ProcessModelAssembler
          if (processModelElement != otherProcessModelElement)
          {
             Set<ControlFlowOutputPort<?>> otherStatesInvolved = getStatesInvolved(otherProcessModelElement);
-            Set<ControlFlowOutputPort<?>> stateIntersection = new HashSet<ControlFlowOutputPort<?>>(statesInvolved);
+            Set<ControlFlowOutputPort<?>> stateIntersection = new LinkedHashSet<ControlFlowOutputPort<?>>(statesInvolved);
             stateIntersection.retainAll(otherStatesInvolved);
             boolean stateCouplingExists = stateIntersection.size() > 0;
 
             Set<ControlFlowInputPort<?>> otherInputs = otherProcessModelElement.getInputs();
-            Set<ControlFlowInputPort<?>> inputIntersection = new HashSet<ControlFlowInputPort<?>>(inputs);
+            Set<ControlFlowInputPort<?>> inputIntersection = new LinkedHashSet<ControlFlowInputPort<?>>(inputs);
             inputIntersection.retainAll(otherInputs);
             boolean inputCouplingExists = inputIntersection.size() > 0;
 
@@ -70,7 +71,7 @@ public class ProcessModelAssembler
 
    private Set<ControlFlowOutputPort<?>> getStatesInvolved(ProcessModelElement processModelElement)
    {
-      Set<ControlFlowOutputPort<?>> allStatesInvolved = new HashSet<ControlFlowOutputPort<?>>(processModelElement.getInputStates());
+      Set<ControlFlowOutputPort<?>> allStatesInvolved = new LinkedHashSet<ControlFlowOutputPort<?>>(processModelElement.getInputStates());
       allStatesInvolved.add(processModelElement.getOutputState());
       return allStatesInvolved;
    }

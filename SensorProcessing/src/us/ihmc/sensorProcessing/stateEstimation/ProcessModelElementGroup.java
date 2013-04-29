@@ -2,8 +2,8 @@ package us.ihmc.sensorProcessing.stateEstimation;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -301,7 +301,7 @@ public class ProcessModelElementGroup
 
    private static List<ControlFlowOutputPort<?>> determineStateList(List<ProcessModelElement> processModelElements)
    {
-      Set<ControlFlowOutputPort<?>> stateSet = new HashSet<ControlFlowOutputPort<?>>();
+      Set<ControlFlowOutputPort<?>> stateSet = new LinkedHashSet<ControlFlowOutputPort<?>>();
 
       for (ProcessModelElement processModelElement : processModelElements)
       {
@@ -314,7 +314,7 @@ public class ProcessModelElementGroup
 
    private static List<ControlFlowInputPort<?>> determineInputList(Collection<ProcessModelElement> processModelElements)
    {
-      Set<ControlFlowInputPort<?>> inputSet = new HashSet<ControlFlowInputPort<?>>();
+      Set<ControlFlowInputPort<?>> inputSet = new LinkedHashSet<ControlFlowInputPort<?>>();
 
       for (ProcessModelElement processModelElement : processModelElements)
       {

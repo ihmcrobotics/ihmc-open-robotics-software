@@ -1,8 +1,8 @@
 package us.ihmc.SdfLoader;
 
 import java.util.EnumMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import javax.media.j3d.Transform3D;
@@ -81,8 +81,8 @@ public class SDFFullRobotModel implements FullRobotModel
          addJointsRecursively(sdfJoint, pelvis, MatrixTools.IDENTITY);
       }
 
-      Set<RigidBody> excludeBodiesForUpperBody = new HashSet<RigidBody>();
-      Set<RigidBody> excludeBodiesForLowerBody = new HashSet<RigidBody>();
+      Set<RigidBody> excludeBodiesForUpperBody = new LinkedHashSet<RigidBody>();
+      Set<RigidBody> excludeBodiesForLowerBody = new LinkedHashSet<RigidBody>();
 
       for (InverseDynamicsJoint joint : pelvis.getChildrenJoints())
       {

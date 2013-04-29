@@ -57,7 +57,7 @@ public class YoPointPositionDataObjectListOutputPortTest
 
    private Set<PointPositionDataObject> createData(Random random, List<ReferenceFrame> frames, int nDataMax)
    {
-      Set<PointPositionDataObject> dataIn = new HashSet<PointPositionDataObject>();
+      Set<PointPositionDataObject> dataIn = new LinkedHashSet<PointPositionDataObject>();
 
       int nData = random.nextInt(nDataMax);
       for (int j = 0; j < nData; j++)
