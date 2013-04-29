@@ -8,6 +8,7 @@ import java.util.Set;
 import javax.media.j3d.Transform3D;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -62,6 +63,7 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
       
       LinkedHashMap<WrenchCalculatorInterface,ForceSensorDefinition> forceSensorDefinitions = new LinkedHashMap<WrenchCalculatorInterface, ForceSensorDefinition>();
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(Wrench.SIZE, Wrench.SIZE);
+      CommonOps.setIdentity(selectionMatrix);
       for(WrenchCalculatorInterface groundContactPointBasedWrenchCalculator : groundContactPointBasedWrenchCalculators)
       {
          OneDegreeOfFreedomJoint forceTorqueSensorJoint = groundContactPointBasedWrenchCalculator.getJoint();
