@@ -264,7 +264,7 @@ public class DRCFlatGroundWalkingTest
       int simulationDataBufferSize = 16000;
       boolean doChestOrientationControl = true;
 
-      RobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(2.0, 3.0, 0.0);
+      RobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(0.1, 0.4, 0.0);
       DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel);
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotInterface.getSimulateDT());
 
