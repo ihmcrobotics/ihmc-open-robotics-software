@@ -37,11 +37,6 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 
 public class DRCSimulationFactory
 {
-
-
-   // private static final SensorNoiseParameters sensorNoiseParamters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersGazeboSDF();
-   private static final SensorNoiseParameters sensorNoiseParamters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersALittleNoise();
-   // private static final SensorNoiseParameters sensorNoiseParamters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersZeroNoise();
    private static final boolean COMPUTE_ESTIMATOR_ERROR = true;
    
    public static HumanoidRobotSimulation<SDFRobot> createSimulation(ControllerFactory controllerFactory,
@@ -68,13 +63,16 @@ public class DRCSimulationFactory
       // TODO: Build LIDAR here
       LidarControllerInterface lidarControllerInterface;
 
+      SensorNoiseParameters sensorNoiseParameters;
       if (simulatedRobot instanceof GazeboRobot)
       {
          lidarControllerInterface = new NullLidarController();
+         sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersZeroNoise();
       }
       else
       {
          lidarControllerInterface = new PIDLidarTorqueController(DRCConfigParameters.LIDAR_SPINDLE_VELOCITY, controlDT, registry);
+         sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersALittleNoise();
       }
 
       //    SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMapForEstimator;
@@ -87,7 +85,7 @@ public class DRCSimulationFactory
       for (IMUMount imuMount : allIMUMounts)
       {
          // Only add the main one now. Not the head one.
-         //          if (imuMount.getName().equals("head_imu_sensor")) imuMounts.add(imuMount);
+//                   if (imuMount.getName().equals("head_imu_sensor")) imuMounts.add(imuMount);
          if (imuMount.getName().equals("imu_sensor"))
             imuMounts.add(imuMount);
       }
@@ -113,7 +111,7 @@ public class DRCSimulationFactory
 
       
       SimulatedSensorHolderAndReaderFromRobotFactory sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(simulatedRobot,
-            sensorNoiseParamters, controlDT, allIMUMounts, positionPoints, velocityPoints, registry);
+            sensorNoiseParameters, controlDT, imuMounts, positionPoints, velocityPoints, registry);
 
       
       Vector3d gravity = new Vector3d();
