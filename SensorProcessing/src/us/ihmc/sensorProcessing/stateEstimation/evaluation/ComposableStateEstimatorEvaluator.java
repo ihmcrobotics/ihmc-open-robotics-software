@@ -84,7 +84,7 @@ public class ComposableStateEstimatorEvaluator
 //      SensorNoiseParameters sensorNoiseParametersForEstimator = SensorNoiseParametersForEvaluator.createLotsOfSensorNoiseParameters();
       SensorNoiseParameters sensorNoiseParametersForEstimator = SensorNoiseParametersForEvaluator.createTunedNoiseParametersForEvaluator();
 
-      final StateEstimationDataFromControllerSource stateEstimatorDataFromControllerSource = new StateEstimationDataFromControllerSource(estimationFrame, simulatedSensorHolderAndReaderFromRobotFactory.getStateEstimatorSensorDefinitions(), registry);
+      final StateEstimationDataFromControllerSource stateEstimatorDataFromControllerSource = new StateEstimationDataFromControllerSource(estimationFrame, registry);
       final StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink = new StateEstimationDataFromControllerSink(estimationFrame, simulatedSensorHolderAndReaderFromRobotFactory.getStateEstimatorSensorDefinitions());
       
       SensorAndEstimatorAssembler sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(stateEstimatorDataFromControllerSource, simulatedSensorHolderAndReaderFromRobotFactory.getStateEstimatorSensorDefinitions(),

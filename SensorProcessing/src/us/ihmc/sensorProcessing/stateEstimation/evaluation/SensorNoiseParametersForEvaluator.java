@@ -12,13 +12,10 @@ public class SensorNoiseParametersForEvaluator
 
       sensorNoiseParameters.setComAccelerationProcessNoiseStandardDeviation(0.3);
       sensorNoiseParameters.setAngularAccelerationProcessNoiseStandardDeviation(0.1);
-      
+
       sensorNoiseParameters.setOrientationMeasurementStandardDeviation(Math.sqrt(0.01));
       sensorNoiseParameters.setAngularVelocityMeasurementStandardDeviation(0.1);
       sensorNoiseParameters.setLinearAccelerationMeasurementStandardDeviation(1.0);
-      
-      sensorNoiseParameters.setPointPositionMeasurementStandardDeviation(0.1);
-      sensorNoiseParameters.setPointVelocityMeasurementStandardDeviation(0.1);
 
       sensorNoiseParameters.setAngularVelocityBiasProcessNoiseStandardDeviation(0.003);
       sensorNoiseParameters.setLinearAccelerationBiasProcessNoiseStandardDeviation(0.01);
@@ -28,20 +25,17 @@ public class SensorNoiseParametersForEvaluator
 
       return sensorNoiseParameters;
    }
-   
+
    public static SensorNoiseParameters createLotsOfSensorNoiseParameters()
    {
       SensorNoiseParameters sensorNoiseParameters = new SensorNoiseParameters();
 
       sensorNoiseParameters.setComAccelerationProcessNoiseStandardDeviation(0.01);
       sensorNoiseParameters.setAngularAccelerationProcessNoiseStandardDeviation(0.001);
-      
+
       sensorNoiseParameters.setOrientationMeasurementStandardDeviation(0.2);
       sensorNoiseParameters.setAngularVelocityMeasurementStandardDeviation(0.2);
       sensorNoiseParameters.setLinearAccelerationMeasurementStandardDeviation(2.0);
-      
-      sensorNoiseParameters.setPointPositionMeasurementStandardDeviation(0.5);
-      sensorNoiseParameters.setPointVelocityMeasurementStandardDeviation(0.5);
 
       sensorNoiseParameters.setAngularVelocityBiasProcessNoiseStandardDeviation(1e-6);
       sensorNoiseParameters.setLinearAccelerationBiasProcessNoiseStandardDeviation(1e-6);
@@ -51,20 +45,17 @@ public class SensorNoiseParametersForEvaluator
 
       return sensorNoiseParameters;
    }
-   
+
    public static SensorNoiseParameters createVeryLittleSensorNoiseParameters()
    {
       SensorNoiseParameters sensorNoiseParameters = new SensorNoiseParameters();
 
       sensorNoiseParameters.setComAccelerationProcessNoiseStandardDeviation(1e-4);
       sensorNoiseParameters.setAngularAccelerationProcessNoiseStandardDeviation(1e-4);
-      
+
       sensorNoiseParameters.setOrientationMeasurementStandardDeviation(Math.sqrt(1e-4));
       sensorNoiseParameters.setAngularVelocityMeasurementStandardDeviation(1e-4);
       sensorNoiseParameters.setLinearAccelerationMeasurementStandardDeviation(1e-4);
-      
-      sensorNoiseParameters.setPointPositionMeasurementStandardDeviation(1e-4);
-      sensorNoiseParameters.setPointVelocityMeasurementStandardDeviation(1e-4);
 
       sensorNoiseParameters.setAngularVelocityBiasProcessNoiseStandardDeviation(0.003);
       sensorNoiseParameters.setLinearAccelerationBiasProcessNoiseStandardDeviation(0.003);
@@ -81,13 +72,10 @@ public class SensorNoiseParametersForEvaluator
 
       sensorNoiseParameters.setComAccelerationProcessNoiseStandardDeviation(0.3);
       sensorNoiseParameters.setAngularAccelerationProcessNoiseStandardDeviation(0.3);
-      
+
       sensorNoiseParameters.setOrientationMeasurementStandardDeviation(0.05);
       sensorNoiseParameters.setAngularVelocityMeasurementStandardDeviation(0.05);
       sensorNoiseParameters.setLinearAccelerationMeasurementStandardDeviation(1.0);
-      
-      sensorNoiseParameters.setPointPositionMeasurementStandardDeviation(0.2);
-      sensorNoiseParameters.setPointVelocityMeasurementStandardDeviation(0.2);
 
       sensorNoiseParameters.setAngularVelocityBiasProcessNoiseStandardDeviation(0.001);
       sensorNoiseParameters.setLinearAccelerationBiasProcessNoiseStandardDeviation(0.001);
@@ -97,7 +85,7 @@ public class SensorNoiseParametersForEvaluator
 
       return sensorNoiseParameters;
    }
-   
+
    public static SensorNoiseParameters createZeroNoiseParameters()
    {
       return new SensorNoiseParameters();

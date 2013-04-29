@@ -10,9 +10,6 @@ public class SensorNoiseParameters
    private double orientationMeasurementStandardDeviation = 0.0;
    private double angularVelocityMeasurementStandardDeviation = 0.0;
    private double linearAccelerationMeasurementStandardDeviation = 0.0;
-   
-   private double pointPositionMeasurementStandardDeviation = 0.0;
-   private double pointVelocityMeasurementStandardDeviation = 0.0;
 
    private double angularVelocityBiasProcessNoiseStandardDeviation = 0.0;
    private double linearAccelerationBiasProcessNoiseStandardDeviation = 0.0;
@@ -76,16 +73,6 @@ public class SensorNoiseParameters
       vectorToPack.set(initialLinearVelocityBias);
    }
 
-   public double getPointPositionMeasurementStandardDeviation()
-   {
-      return pointPositionMeasurementStandardDeviation;
-   }
-   
-   public double getPointVelocityMeasurementStandardDeviation()
-   {
-      return pointVelocityMeasurementStandardDeviation;
-   }
-
    public void setOrientationMeasurementStandardDeviation(double orientationMeasurementStandardDeviation)
    {
       this.orientationMeasurementStandardDeviation = orientationMeasurementStandardDeviation;
@@ -99,16 +86,6 @@ public class SensorNoiseParameters
    public void setLinearAccelerationMeasurementStandardDeviation(double linearAccelerationMeasurementStandardDeviation)
    {
       this.linearAccelerationMeasurementStandardDeviation = linearAccelerationMeasurementStandardDeviation;
-   }
-
-   public void setPointPositionMeasurementStandardDeviation(double pointPositionMeasurementStandardDeviation)
-   {
-      this.pointPositionMeasurementStandardDeviation = pointPositionMeasurementStandardDeviation;
-   }
-   
-   public void setPointVelocityMeasurementStandardDeviation(double pointVelocityMeasurementStandardDeviation)
-   {
-      this.pointVelocityMeasurementStandardDeviation = pointVelocityMeasurementStandardDeviation;
    }
 
    public void setAngularVelocityBiasProcessNoiseStandardDeviation(double angularVelocityBiasProcessNoiseStandardDeviation)
