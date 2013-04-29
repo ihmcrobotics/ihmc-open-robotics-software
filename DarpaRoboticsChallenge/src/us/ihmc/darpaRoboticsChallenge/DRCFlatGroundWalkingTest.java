@@ -32,6 +32,8 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 
+import javax.vecmath.Point3d;
+
 public class DRCFlatGroundWalkingTest
 {
    private static final boolean ALWAYS_SHOW_GUI = false;
@@ -180,7 +182,7 @@ public class DRCFlatGroundWalkingTest
       double walkingTimeDuration = 90.0;
 
       boolean useVelocityAndHeadingScript = true;
-      boolean cheatWithGroundHeightAtForFootstep = true;
+      boolean cheatWithGroundHeightAtForFootstep = false;
 
       GroundProfile groundProfile = new FlatGroundProfile();
 
@@ -262,7 +264,7 @@ public class DRCFlatGroundWalkingTest
       int simulationDataBufferSize = 16000;
       boolean doChestOrientationControl = true;
 
-      RobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(0.0);
+      RobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(2.0, 3.0, 0.0);
       DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel);
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotInterface.getSimulateDT());
 

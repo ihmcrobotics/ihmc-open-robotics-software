@@ -242,6 +242,15 @@ public class YoKalmanFilter implements KalmanFilter
 
    private void getVariablesForPredictFromYoVariables()
    {
+      int nStates = this.nStates.getIntegerValue();
+      int nInputs = this.nInputs.getIntegerValue();
+
+      F.reshape(nStates, nStates);
+      G.reshape(nStates, nInputs);
+      Q.reshape(nStates, nStates);
+      x.reshape(nStates, 1);
+      P.reshape(nStates, nStates);
+
       getFromYoVariablesMatrix(F, yoF);
       getFromYoVariablesMatrix(G, yoG);
       getFromYoVariablesSymmetric(Q, yoQ);
@@ -251,6 +260,13 @@ public class YoKalmanFilter implements KalmanFilter
 
    private void getVariablesForUpdateFromYoVariables()
    {
+      int nMeasurements = this.nMeasurements.getIntegerValue();
+      int nStates = this.nStates.getIntegerValue();
+      H.reshape(nMeasurements, nStates);
+      R.reshape(nMeasurements, nMeasurements);
+      x.reshape(nStates, 1);
+      P.reshape(nStates, nStates);
+
       getFromYoVariablesMatrix(H, yoH);
       getFromYoVariablesSymmetric(R, yoR);
       getFromYoVariablesVector(x, yoX);
@@ -314,6 +330,8 @@ public class YoKalmanFilter implements KalmanFilter
 
    public DenseMatrix64F getState()
    {
+      int nStates = this.nStates.getIntegerValue();
+      x.reshape(nStates, 1);
       getFromYoVariablesVector(x, yoX);
 
       return x;
@@ -321,6 +339,8 @@ public class YoKalmanFilter implements KalmanFilter
 
    public DenseMatrix64F getCovariance()
    {
+      int nStates = this.nStates.getIntegerValue();
+      P.reshape(nStates, nStates);
       getFromYoVariablesSymmetric(P, yoP);
 
       return P;

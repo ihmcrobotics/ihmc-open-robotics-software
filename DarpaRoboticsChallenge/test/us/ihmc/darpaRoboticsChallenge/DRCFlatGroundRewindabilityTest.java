@@ -132,7 +132,7 @@ public class DRCFlatGroundRewindabilityTest
    private SimulationConstructionSet setupScs()
    {
       boolean useVelocityAndHeadingScript = true;
-      boolean cheatWithGroundHeightAtForFootstep = true;
+      boolean cheatWithGroundHeightAtForFootstep = false;
 
       GroundProfile groundProfile = new FlatGroundProfile();
 

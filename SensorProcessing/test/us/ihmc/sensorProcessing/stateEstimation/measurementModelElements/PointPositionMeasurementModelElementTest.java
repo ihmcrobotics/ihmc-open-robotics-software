@@ -5,7 +5,6 @@ package us.ihmc.sensorProcessing.stateEstimation.measurementModelElements;
 import java.util.Random;
 
 import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
@@ -19,7 +18,6 @@ import us.ihmc.controlFlow.NullControlFlowElement;
 import us.ihmc.sensorProcessing.stateEstimation.CenterOfMassBasedFullRobotModelUpdater;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.PointPositionMeasurementModelElement;
-import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.PointVelocityMeasurementModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -30,7 +28,6 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTestTools.RandomFloatingChain;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
-import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -80,8 +77,8 @@ public class PointPositionMeasurementModelElementTest
 
       FramePoint stationaryPoint = new FramePoint(measurementFrame, RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0));
       PointPositionMeasurementModelElement modelElement = new PointPositionMeasurementModelElement(name, pointPositionMeasurementInputPort,
-                                                             centerOfMassPositionPort, orientationPort, estimationFrame, stationaryPoint,
-                                                             registry);
+                                                             centerOfMassPositionPort, orientationPort, estimationFrame,
+            registry);
 
       randomFloatingChain.setRandomPositionsAndVelocities(random);
       twistCalculator.compute();
@@ -124,7 +121,7 @@ public class PointPositionMeasurementModelElementTest
    {
       FramePoint pointInWorld = point.changeFrameCopy(ReferenceFrame.getWorldFrame());
       PointPositionDataObject pointPositionDataObject = new PointPositionDataObject();
-      pointPositionDataObject.setPosition(pointInWorld.getPoint());
+      pointPositionDataObject.set(point, pointInWorld);
       pointPositionMeasurementInputPort.setData(pointPositionDataObject);
    }
 }

@@ -14,8 +14,6 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.simulatedSensors.IMUDefinition;
-import us.ihmc.sensorProcessing.simulatedSensors.PointPositionSensorDefinition;
-import us.ihmc.sensorProcessing.simulatedSensors.PointVelocitySensorDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -124,69 +122,6 @@ public class SensorConfigurationFactory
       }
 
       return linearAccelerationSensorConfigurations;
-   }
-
-   public ArrayList<PointPositionSensorConfiguration> createPointPositionSensorConfigurations(Map<PointPositionSensorDefinition,
-                    ControlFlowOutputPort<PointPositionDataObject>> pointPositionSensors)
-   {
-      ArrayList<PointPositionSensorConfiguration> pointPositionSensorConfigurations = new ArrayList<PointPositionSensorConfiguration>();
-
-      Set<PointPositionSensorDefinition> pointPositionSensorDefinitions = pointPositionSensors.keySet();
-      for (PointPositionSensorDefinition pointPositionSensorDefinition : pointPositionSensorDefinitions)
-      {
-         String sensorName = pointPositionSensorDefinition.getName() + "PointPosition";
-
-         double pointPositionMeasurementStandardDeviation = sensorNoiseParameters.getPointPositionMeasurementStandardDeviation();
-         DenseMatrix64F pointPositionNoiseCovariance = createDiagonalCovarianceMatrix(pointPositionMeasurementStandardDeviation, 3);
-
-         RigidBody estimatedMeasurementBody = pointPositionSensorDefinition.getRigidBody();
-         ReferenceFrame estimatedFrameAfterJoint = estimatedMeasurementBody.getParentJoint().getFrameAfterJoint();
-
-         Vector3d offset = new Vector3d();
-         pointPositionSensorDefinition.getOffset(offset);
-         FramePoint estimatedPositionPoint = new FramePoint(estimatedFrameAfterJoint, offset);
-
-         ControlFlowOutputPort<PointPositionDataObject> outputPort = pointPositionSensors.get(pointPositionSensorDefinition);
-
-         PointPositionSensorConfiguration pointPositionSensorConfiguration = new PointPositionSensorConfiguration(outputPort, sensorName,
-               estimatedPositionPoint, pointPositionNoiseCovariance);
-
-         pointPositionSensorConfigurations.add(pointPositionSensorConfiguration);
-      }
-
-      return pointPositionSensorConfigurations;
-   }
-
-
-   public ArrayList<PointVelocitySensorConfiguration> createPointVelocitySensorConfigurations(Map<PointVelocitySensorDefinition,
-                    ControlFlowOutputPort<PointVelocityDataObject>> pointVelocitySensors)
-   {
-      ArrayList<PointVelocitySensorConfiguration> pointVelocitySensorConfigurations = new ArrayList<PointVelocitySensorConfiguration>();
-
-      Set<PointVelocitySensorDefinition> pointVelocitySensorDefinitions = pointVelocitySensors.keySet();
-      for (PointVelocitySensorDefinition pointVelocitySensorDefinition : pointVelocitySensorDefinitions)
-      {
-         String sensorName = pointVelocitySensorDefinition.getName() + "PointVelocity";
-
-         double pointVelocityMeasurementStandardDeviation = sensorNoiseParameters.getPointVelocityMeasurementStandardDeviation();
-         DenseMatrix64F pointVelocityNoiseCovariance = createDiagonalCovarianceMatrix(pointVelocityMeasurementStandardDeviation, 3);
-
-         RigidBody estimatedMeasurementBody = pointVelocitySensorDefinition.getRigidBody();
-         ReferenceFrame estimatedFrameAfterJoint = estimatedMeasurementBody.getParentJoint().getFrameAfterJoint();
-
-         Vector3d offset = new Vector3d();
-         pointVelocitySensorDefinition.getOffset(offset);
-         FramePoint estimatedVelocityPoint = new FramePoint(estimatedFrameAfterJoint, offset);
-
-         ControlFlowOutputPort<PointVelocityDataObject> outputPort = pointVelocitySensors.get(pointVelocitySensorDefinition);
-
-         PointVelocitySensorConfiguration pointVelocitySensorConfiguration = new PointVelocitySensorConfiguration(outputPort, sensorName,
-                                                                                estimatedMeasurementBody, estimatedVelocityPoint, pointVelocityNoiseCovariance);
-
-         pointVelocitySensorConfigurations.add(pointVelocitySensorConfiguration);
-      }
-
-      return pointVelocitySensorConfigurations;
    }
 
    private static DenseMatrix64F createDiagonalCovarianceMatrix(double standardDeviation, int size)

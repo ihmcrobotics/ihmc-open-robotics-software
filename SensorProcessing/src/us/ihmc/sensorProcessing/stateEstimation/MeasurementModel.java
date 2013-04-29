@@ -37,6 +37,11 @@ public class MeasurementModel
 
    public void updateMatrices()
    {
+      for (MeasurementModelElement measurementModelElement : measurementModelElements)
+      {
+         measurementModelElement.computeMatrixBlocks();
+      }
+
       reshapeMatrices();
 
       // TODO: check if necessary:
@@ -45,7 +50,6 @@ public class MeasurementModel
 
       for (MeasurementModelElement measurementModelElement : measurementModelElements)
       {
-         measurementModelElement.computeMatrixBlocks();
          int measurementStartIndex = measurementStartIndices.get(measurementModelElement);
 
          for (ControlFlowOutputPort<?> statePort : measurementModelElement.getStatePorts())

@@ -32,12 +32,6 @@ public class SimulatedSensorHolderAndReader implements Runnable
    private final LinkedHashMap<IMUDefinition, SimulatedLinearAccelerationSensorFromRobot> linearAccelerationSensors =
       new LinkedHashMap<IMUDefinition, SimulatedLinearAccelerationSensorFromRobot>();
 
-   private final LinkedHashMap<PointPositionSensorDefinition, SimulatedPointPositionSensorFromRobot> pointPositionSensors =
-         new LinkedHashMap<PointPositionSensorDefinition, SimulatedPointPositionSensorFromRobot>();
-   
-   private final LinkedHashMap<PointVelocitySensorDefinition, SimulatedPointVelocitySensorFromRobot> pointVelocitySensors =
-      new LinkedHashMap<PointVelocitySensorDefinition, SimulatedPointVelocitySensorFromRobot>();
-
    private JointAndIMUSensorDataSource jointAndIMUSensorDataSource;
    
    
@@ -72,19 +66,6 @@ public class SimulatedSensorHolderAndReader implements Runnable
    {
       linearAccelerationSensors.put(imuDefinition, linearAccelerationSensor);
    }
-
-   public void addPointPositionSensorPort(PointPositionSensorDefinition pointPositionSensorDefinition,
-           SimulatedPointPositionSensorFromRobot pointPositionSensor)
-   {
-      pointPositionSensors.put(pointPositionSensorDefinition, pointPositionSensor);
-   }
-   
-   public void addPointVelocitySensorPort(PointVelocitySensorDefinition pointVelocitySensorDefinition,
-         SimulatedPointVelocitySensorFromRobot pointVelocitySensor)
- {
-    pointVelocitySensors.put(pointVelocitySensorDefinition, pointVelocitySensor);
- }
-
 
    public void setJointAndIMUSensorDataSource(JointAndIMUSensorDataSource jointAndIMUSensorDataSource)
    {
@@ -148,31 +129,6 @@ public class SimulatedSensorHolderAndReader implements Runnable
          Vector3d value = linearAccelerationSensor.getLinearAccelerationOutputPort().getData();
          jointAndIMUSensorDataSource.setLinearAccelerationSensorValue(imuDefinition, value);
       }
-
-      if (stateEstimationDataFromControllerSink != null)
-      {
-         Set<PointPositionSensorDefinition> pointPositionSensorDefinitions = pointPositionSensors.keySet();
-         for (PointPositionSensorDefinition pointPositionSensorDefinition : pointPositionSensorDefinitions)
-         {
-            SimulatedPointPositionSensorFromRobot pointPositionSensor = pointPositionSensors.get(pointPositionSensorDefinition);
-            pointPositionSensor.startComputation();
-            pointPositionSensor.waitUntilComputationIsDone();
-            PointPositionDataObject value = pointPositionSensor.getPointPositionOutputPort().getData();
-            stateEstimationDataFromControllerSink.setPointPositionSensorValue(pointPositionSensorDefinition, value);
-         }
-         
-         
-         Set<PointVelocitySensorDefinition> pointVelocitySensorDefinitions = pointVelocitySensors.keySet();
-         for (PointVelocitySensorDefinition pointVelocitySensorDefinition : pointVelocitySensorDefinitions)
-         {
-            SimulatedPointVelocitySensorFromRobot pointVelocitySensor = pointVelocitySensors.get(pointVelocitySensorDefinition);
-            pointVelocitySensor.startComputation();
-            pointVelocitySensor.waitUntilComputationIsDone();
-            PointVelocityDataObject value = pointVelocitySensor.getPointVelocityOutputPort().getData();
-            stateEstimationDataFromControllerSink.setPointVelocitySensorValue(pointVelocitySensorDefinition, value);
-         }
-      }
-      
       
       if(controllerDispatcher != null)
       {

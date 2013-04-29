@@ -24,9 +24,6 @@ import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
-import us.ihmc.sensorProcessing.simulatedSensors.PointPositionSensorDefinition;
-import us.ihmc.sensorProcessing.simulatedSensors.PointVelocitySensorDefinition;
-import us.ihmc.sensorProcessing.stateEstimation.DesiredAccelerationAndPointDataProducer;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -35,11 +32,10 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.*;
 
-import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 import java.util.*;
 
-public abstract class MomentumBasedController implements RobotController, DesiredAccelerationAndPointDataProducer
+public abstract class MomentumBasedController implements RobotController
 {
    private final String name = getClass().getSimpleName();
    protected final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -56,7 +52,7 @@ public abstract class MomentumBasedController implements RobotController, Desire
 
    private final LinkedHashMap<ContactablePlaneBody, DoubleYoVariable> normalTorques = new LinkedHashMap<ContactablePlaneBody, DoubleYoVariable>();
    private final LinkedHashMap<ContactablePlaneBody, DoubleYoVariable> groundReactionForceMagnitudes = new LinkedHashMap<ContactablePlaneBody,
-         DoubleYoVariable>();
+                                                                                                          DoubleYoVariable>();
    protected final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
    protected final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
    protected final DoubleYoVariable yoTime;
@@ -84,8 +80,8 @@ public abstract class MomentumBasedController implements RobotController, Desire
    protected final InverseDynamicsCalculator inverseDynamicsCalculator;
 
    private final DesiredCoMAndAngularAccelerationGrabber desiredCoMAndAngularAccelerationGrabber;
-   private PointPositionSensorGrabber pointPositionSensorGrabber;
-   private PointVelocitySensorGrabber pointVelocitySensorGrabber;
+   private final PointPositionGrabber pointPositionGrabber;
+
    protected final MomentumControlModule momentumControlModule;
 
    protected final SpatialForceVector gravitationalWrench;
@@ -96,10 +92,10 @@ public abstract class MomentumBasedController implements RobotController, Desire
    public MomentumBasedController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
                                   CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime,
                                   double gravityZ, TwistCalculator twistCalculator, Collection<? extends ContactablePlaneBody> contactablePlaneBodies,
-                                  double controlDT, ProcessedOutputsInterface processedOutputs,
-                                  MomentumControlModule momentumControlModule, ArrayList<Updatable> updatables,
-                                  MomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
+                                  double controlDT, ProcessedOutputsInterface processedOutputs, MomentumControlModule momentumControlModule,
+                                  ArrayList<Updatable> updatables, MomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
                                   RootJointAccelerationControlModule rootJointAccelerationControlModule,
+                                  StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
@@ -123,7 +119,17 @@ public abstract class MomentumBasedController implements RobotController, Desire
 
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
 
-      this.desiredCoMAndAngularAccelerationGrabber = new DesiredCoMAndAngularAccelerationGrabber(estimationLink, estimationFrame, totalMass);
+      if (stateEstimationDataFromControllerSink != null)
+      {
+         this.desiredCoMAndAngularAccelerationGrabber = new DesiredCoMAndAngularAccelerationGrabber(stateEstimationDataFromControllerSink, estimationLink,
+                 estimationFrame, totalMass);
+         this.pointPositionGrabber = new PointPositionGrabber(stateEstimationDataFromControllerSink, registry);
+      }
+      else
+      {
+         this.desiredCoMAndAngularAccelerationGrabber = null;
+         this.pointPositionGrabber = null;
+      }
 
       gravitationalWrench = new SpatialForceVector(centerOfMassFrame, new Vector3d(0.0, 0.0, totalMass * gravityZ), new Vector3d());
 
@@ -179,7 +185,7 @@ public abstract class MomentumBasedController implements RobotController, Desire
       {
          RigidBody rigidBody = contactablePlaneBody.getRigidBody();
          YoPlaneContactState contactState = new YoPlaneContactState(rigidBody.getName(), contactablePlaneBody.getBodyFrame(),
-               contactablePlaneBody.getPlaneFrame(), registry);
+                                               contactablePlaneBody.getPlaneFrame(), registry);
          double coefficientOfFriction = 1.0;    // TODO: magic number...
          contactState.set(contactablePlaneBody.getContactPoints2d(), coefficientOfFriction);    // initialize with flat 'feet'
          contactStates.put(contactablePlaneBody, contactState);
@@ -228,9 +234,7 @@ public abstract class MomentumBasedController implements RobotController, Desire
       MomentumRateOfChangeData momentumRateOfChangeData = momentumRateOfChangeControlModule.getMomentumRateOfChangeOutputPort().getData();
 
 
-      momentumControlModule.compute(rootJointAccelerationData,
-            momentumRateOfChangeData,
-            this.contactStates, upcomingSupportLeg.getEnumValue());
+      momentumControlModule.compute(rootJointAccelerationData, momentumRateOfChangeData, this.contactStates, upcomingSupportLeg.getEnumValue());
 
       SpatialForceVector desiredCentroidalMomentumRate = momentumControlModule.getDesiredCentroidalMomentumRate();
 
@@ -262,14 +266,15 @@ public abstract class MomentumBasedController implements RobotController, Desire
          else
          {
             groundReactionForceMagnitudes.get(contactablePlaneBody).set(0.0);
-//            centersOfPressure2d.get(contactablePlaneBody).set(Double.NaN, Double.NaN);
+
+//          centersOfPressure2d.get(contactablePlaneBody).set(Double.NaN, Double.NaN);
             centersOfPressureWorld.get(contactablePlaneBody).setToNaN();
          }
       }
 
       SpatialForceVector totalGroundReactionWrench = new SpatialForceVector(centerOfMassFrame);
       Wrench admissibleGroundReactionWrench = TotalWrenchCalculator.computeTotalWrench(externalWrenches.values(),
-            totalGroundReactionWrench.getExpressedInFrame());
+                                                 totalGroundReactionWrench.getExpressedInFrame());
       admissibleDesiredGroundReactionTorque.set(admissibleGroundReactionWrench.getAngularPartCopy());
       admissibleDesiredGroundReactionForce.set(admissibleGroundReactionWrench.getLinearPartCopy());
 
@@ -277,9 +282,11 @@ public abstract class MomentumBasedController implements RobotController, Desire
       groundReactionTorqueCheck.set(groundReactionWrenchCheck.getAngularPartCopy());
       groundReactionForceCheck.set(groundReactionWrenchCheck.getLinearPartCopy());
 
-      this.desiredCoMAndAngularAccelerationGrabber.set(inverseDynamicsCalculator.getSpatialAccelerationCalculator(), desiredCentroidalMomentumRate);
+      if (desiredCoMAndAngularAccelerationGrabber != null)
+         this.desiredCoMAndAngularAccelerationGrabber.set(inverseDynamicsCalculator.getSpatialAccelerationCalculator(), desiredCentroidalMomentumRate);
 
-      updatePositionAndVelocitySensorGrabbers();
+      if (pointPositionGrabber != null)
+         pointPositionGrabber.set(contactStates);
 
       inverseDynamicsCalculator.compute();
 
@@ -288,49 +295,6 @@ public abstract class MomentumBasedController implements RobotController, Desire
       if (processedOutputs != null)
          fullRobotModel.setTorques(processedOutputs);
       updateYoVariables();
-   }
-
-   private void updatePositionAndVelocitySensorGrabbers()
-   {
-      if (pointPositionSensorGrabber != null)
-      {
-         ArrayList<PointPositionSensorDefinition> pointPositionSensorDefinitions = pointPositionSensorGrabber.getPointPositionSensorDefinitions();
-
-         for (PointPositionSensorDefinition pointPositionSensorDefinition : pointPositionSensorDefinitions)
-         {
-            // TODO: Record and pass on the estimated position. Determine the offset based on state or whatever...
-            // TODO: Determine the covariance based on the state and the pointPositionSensorDefinition. One means trust this, infinity means don't
-            double covarianceScaling = Math.random();
-
-            if (covarianceScaling < 0.5)
-               covarianceScaling = Double.POSITIVE_INFINITY;
-            Point3d positionInWorld = new Point3d();
-            Vector3d offsetFromJointInJointFrame = new Vector3d();
-            pointPositionSensorDefinition.getOffset(offsetFromJointInJointFrame);
-
-            pointPositionSensorGrabber.setPositionAndCovarianceScaling(pointPositionSensorDefinition, offsetFromJointInJointFrame, positionInWorld,
-                  covarianceScaling);
-         }
-      }
-
-      if (pointVelocitySensorGrabber != null)
-      {
-         ArrayList<PointVelocitySensorDefinition> pointVelocitySensorDefinitions = pointVelocitySensorGrabber.getPointVelocitySensorDefinitions();
-
-         for (PointVelocitySensorDefinition pointVelocitySensorDefinition : pointVelocitySensorDefinitions)
-         {
-            // Determine the covariance based on the state and the pointVelocitySensorDefinition.
-            double covarianceScaling = Math.random();
-            if (covarianceScaling < 0.5)
-               covarianceScaling = Double.POSITIVE_INFINITY;
-
-            Vector3d offsetFromJointInJointFrame = new Vector3d();
-            pointVelocitySensorDefinition.getOffset(offsetFromJointInJointFrame);
-
-            pointVelocitySensorGrabber.setVelocityToZeroAndCovarianceScaling(pointVelocitySensorDefinition, offsetFromJointInJointFrame, covarianceScaling);
-         }
-      }
-
    }
 
    protected void resetGroundReactionWrenchFilter()
@@ -428,21 +392,5 @@ public abstract class MomentumBasedController implements RobotController, Desire
    protected FramePoint2d getCoP(ContactablePlaneBody contactablePlaneBody)
    {
       return centersOfPressure2d.get(contactablePlaneBody).getFramePoint2dCopy();
-   }
-
-   public void attachStateEstimatorDataFromControllerSink(StateEstimationDataFromControllerSink stateEstimatorDataFromControllerSink,
-                                                          boolean usePositionDataFromController)
-   {
-      if (this.pointPositionSensorGrabber != null)
-         throw new RuntimeException("Already have set pointPositionSensorDataSource");
-
-
-      desiredCoMAndAngularAccelerationGrabber.attachStateEstimationDataFromControllerSink(stateEstimatorDataFromControllerSink);
-
-      if (usePositionDataFromController)
-      {
-         this.pointPositionSensorGrabber = new PointPositionSensorGrabber(stateEstimatorDataFromControllerSink);
-         this.pointVelocitySensorGrabber = new PointVelocitySensorGrabber(stateEstimatorDataFromControllerSink);
-      }
    }
 }

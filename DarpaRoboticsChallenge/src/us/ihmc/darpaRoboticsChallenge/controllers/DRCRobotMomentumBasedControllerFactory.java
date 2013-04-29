@@ -14,6 +14,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.remote.serialization.JointConfigurationDataSender;
@@ -43,8 +44,8 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
    }
 
    public MomentumBasedController getController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, double controlDT, DoubleYoVariable yoTime,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, GUISetterUpperRegistry guiSetterUpperRegistry, TwistCalculator twistCalculator,
-           CenterOfMassJacobian centerOfMassJacobian, SideDependentList<FootSwitchInterface> footSwitches, SideDependentList<HandControllerInterface> handControllers, LidarControllerInterface lidarControllerInterface)
+                                                DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, GUISetterUpperRegistry guiSetterUpperRegistry, TwistCalculator twistCalculator,
+                                                CenterOfMassJacobian centerOfMassJacobian, SideDependentList<FootSwitchInterface> footSwitches, SideDependentList<HandControllerInterface> handControllers, LidarControllerInterface lidarControllerInterface, StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink)
    {
       double footForward = DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD;
       double footBack = DRCRobotParameters.DRC_ROBOT_FOOT_BACK;
@@ -75,7 +76,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       double gravityZ = 9.81;
 
       MomentumBasedController highLevelHumanoidController = highLevelHumanoidControllerFactory.create(estimationLink, estimationFrame, fullRobotModel, referenceFrames, null, yoTime, gravityZ,
-                                                       twistCalculator, centerOfMassJacobian, bipedFeet, controlDT, footSwitches, handControllers, lidarControllerInterface,
+                                                       twistCalculator, centerOfMassJacobian, bipedFeet, controlDT, footSwitches, handControllers, lidarControllerInterface, stateEstimationDataFromControllerSink,
                                                        dynamicGraphicObjectsListRegistry, specificRegistry, guiSetterUpperRegistry, null);
       highLevelHumanoidController.getYoVariableRegistry().addChild(specificRegistry);
 

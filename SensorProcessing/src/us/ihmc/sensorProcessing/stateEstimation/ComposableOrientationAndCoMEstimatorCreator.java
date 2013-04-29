@@ -1,14 +1,14 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
+import org.ejml.ops.CommonOps;
+import org.ejml.ops.SpecializedOps;
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
@@ -16,11 +16,10 @@ import us.ihmc.sensorProcessing.controlFlowPorts.YoFramePointControlFlowOutputPo
 import us.ihmc.sensorProcessing.controlFlowPorts.YoFrameQuaternionControlFlowOutputPort;
 import us.ihmc.sensorProcessing.controlFlowPorts.YoFrameVectorControlFlowOutputPort;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.AggregatePointPositionMeasurementModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.AngularVelocityMeasurementModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.LinearAccelerationMeasurementModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.OrientationMeasurementModelElement;
-import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.PointPositionMeasurementModelElement;
-import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.PointVelocityMeasurementModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.processModelElements.AngularAccelerationProcessModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.processModelElements.AngularVelocityProcessModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.processModelElements.BiasProcessModelElement;
@@ -33,9 +32,6 @@ import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVeloc
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.LinearAccelerationSensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.OrientationSensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
-import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionSensorConfiguration;
-import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
-import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocitySensorConfiguration;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -50,7 +46,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
    private static final int VECTOR3D_LENGTH = 3;
 
    private final RigidBody orientationEstimationLink;
-   
+
    private final ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort;
 
    private final DenseMatrix64F angularAccelerationNoiseCovariance;
@@ -59,12 +55,9 @@ public class ComposableOrientationAndCoMEstimatorCreator
    private final List<OrientationSensorConfiguration> orientationSensorConfigurations = new ArrayList<OrientationSensorConfiguration>();
    private final List<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations = new ArrayList<AngularVelocitySensorConfiguration>();
    private final List<LinearAccelerationSensorConfiguration> linearAccelerationSensorConfigurations = new ArrayList<LinearAccelerationSensorConfiguration>();
-   
-   private final List<PointPositionSensorConfiguration> pointPositionSensorConfigurations = new ArrayList<PointPositionSensorConfiguration>();
-   private final List<PointVelocitySensorConfiguration> pointVelocitySensorConfigurations = new ArrayList<PointVelocitySensorConfiguration>();
 
    public ComposableOrientationAndCoMEstimatorCreator(DenseMatrix64F angularAccelerationNoiseCovariance, DenseMatrix64F comAccelerationNoiseCovariance,
-         RigidBody orientationEstimationLink, ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort)
+           RigidBody orientationEstimationLink, ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort)
    {
       this.angularAccelerationNoiseCovariance = angularAccelerationNoiseCovariance;
       this.comAccelerationNoiseCovariance = comAccelerationNoiseCovariance;
@@ -111,70 +104,42 @@ public class ComposableOrientationAndCoMEstimatorCreator
       this.linearAccelerationSensorConfigurations.add(linearAccelerationSensorConfiguration);
    }
 
-   public void addPointPositionSensorConfigurations(Collection<PointPositionSensorConfiguration> pointPositionSensorConfigurations)
+   public ComposableOrientationAndCoMEstimator createOrientationEstimator(ControlFlowGraph controlFlowGraph, double controlDT, SixDoFJoint rootJoint,
+           RigidBody estimationLink, ReferenceFrame estimationFrame, YoVariableRegistry registry)
    {
-      for (PointPositionSensorConfiguration pointPositionSensorConfiguration : pointPositionSensorConfigurations)
-      {
-         this.addPointPositionSensorConfiguration(pointPositionSensorConfiguration);
-      }
-   }
-   
-   public void addPointPositionSensorConfiguration(PointPositionSensorConfiguration pointPositionSensorConfiguration)
-   {
-      this.pointPositionSensorConfigurations.add(pointPositionSensorConfiguration);      
-   }
-   
-   public void addPointVelocitySensorConfigurations(Collection<PointVelocitySensorConfiguration> pointVelocitySensorConfigurations)
-   {
-      for (PointVelocitySensorConfiguration pointVelocitySensorConfiguration : pointVelocitySensorConfigurations)
-      {
-         this.addPointVelocitySensorConfiguration(pointVelocitySensorConfiguration);
-      }
-   }
-   
-   public void addPointVelocitySensorConfiguration(PointVelocitySensorConfiguration pointVelocitySensorConfiguration)
-   {
-      this.pointVelocitySensorConfigurations.add(pointVelocitySensorConfiguration);      
-   }
-   
-   public StateEstimatorWithPorts createOrientationEstimator(ControlFlowGraph controlFlowGraph, double controlDT, SixDoFJoint rootJoint, RigidBody estimationLink,
-         ReferenceFrame estimationFrame, YoVariableRegistry registry)
-   {
-      return new ComposableOrientationAndCoMEstimator("orientationEstimator", controlDT, rootJoint, estimationLink, 
-            estimationFrame, controlFlowGraph,
-            inverseDynamicsStructureOutputPort,
-            registry);
+      return new ComposableOrientationAndCoMEstimator("orientationEstimator", controlDT, rootJoint, estimationLink, estimationFrame, controlFlowGraph,
+              inverseDynamicsStructureOutputPort, registry);
    }
 
-   private class ComposableOrientationAndCoMEstimator extends ComposableStateEstimator implements StateEstimatorWithPorts
+   public class ComposableOrientationAndCoMEstimator extends ComposableStateEstimator implements StateEstimatorWithPorts
    {
       private final ControlFlowGraph controlFlowGraph;
-      
+
       private final ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort;
       private final ControlFlowInputPort<FrameVector> desiredCenterOfMassAccelerationInputPort;
       private final ControlFlowInputPort<FrameVector> desiredAngularAccelerationInputPort;
-      
+      private final ControlFlowInputPort<Set<PointPositionDataObject>> pointPositionInputPort;
+
       private final ControlFlowOutputPort<FrameOrientation> orientationStatePort;
       private final ControlFlowOutputPort<FrameVector> angularVelocityStatePort;
       private final ControlFlowOutputPort<FramePoint> centerOfMassPositionStatePort;
       private final ControlFlowOutputPort<FrameVector> centerOfMassVelocityStatePort;
       private final ControlFlowOutputPort<FrameVector> centerOfMassAccelerationStatePort;
       private final ControlFlowOutputPort<FrameVector> angularAccelerationStatePort;
-      private final ControlFlowOutputPort<FullInverseDynamicsStructure> updatedInverseDynamicsStructureOutputPort;
 
+      private final ControlFlowOutputPort<FullInverseDynamicsStructure> updatedInverseDynamicsStructureOutputPort;
       private final CenterOfMassBasedFullRobotModelUpdater centerOfMassBasedFullRobotModelUpdater;
-      
+
       public ComposableOrientationAndCoMEstimator(String name, double controlDT, SixDoFJoint rootJoint, RigidBody estimationLink,
-            ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph, 
-            ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort,
-            YoVariableRegistry parentRegistry)
+              ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph,
+              ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort, YoVariableRegistry parentRegistry)
       {
          super(name, controlDT, parentRegistry);
-         
+
          this.controlFlowGraph = controlFlowGraph;
          this.inverseDynamicsStructureInputPort = createInputPort();
          controlFlowGraph.connectElements(inverseDynamicsStructureOutputPort, inverseDynamicsStructureInputPort);
-         
+
          inverseDynamicsStructureInputPort.setData(inverseDynamicsStructureOutputPort.getData());
 
          orientationStatePort = new YoFrameQuaternionControlFlowOutputPort(this, name, ReferenceFrame.getWorldFrame(), parentRegistry);
@@ -183,11 +148,13 @@ public class ComposableOrientationAndCoMEstimatorCreator
          centerOfMassPositionStatePort = new YoFramePointControlFlowOutputPort(this, name + "CoMPosition", ReferenceFrame.getWorldFrame(), registry);
          centerOfMassVelocityStatePort = new YoFrameVectorControlFlowOutputPort(this, name + "CoMVelocity", ReferenceFrame.getWorldFrame(), registry);
          centerOfMassAccelerationStatePort = new YoFrameVectorControlFlowOutputPort(this, name + "CoMAcceleration", ReferenceFrame.getWorldFrame(), registry);
-         
+
          this.updatedInverseDynamicsStructureOutputPort = createOutputPort();
-         
-         desiredAngularAccelerationInputPort = createProcessInputPort(VECTOR3D_LENGTH);
-         desiredCenterOfMassAccelerationInputPort = createProcessInputPort(VECTOR3D_LENGTH);
+
+         desiredAngularAccelerationInputPort = createInputPort();
+         desiredCenterOfMassAccelerationInputPort = createInputPort();
+         pointPositionInputPort = createInputPort();
+         pointPositionInputPort.setData(new HashSet<PointPositionDataObject>());
 
          addOrientationProcessModelElement();
          addAngularVelocityProcessModelElement(estimationFrame, desiredAngularAccelerationInputPort);
@@ -211,36 +178,28 @@ public class ComposableOrientationAndCoMEstimatorCreator
          {
             addLinearAccelerationSensor(estimationFrame, controlFlowGraph, linearAccelerationSensorConfiguration);
          }
-         
-         for (PointPositionSensorConfiguration pointPositionSensorConfiguration : pointPositionSensorConfigurations)
+
+         addAggregatedPointPositionMeasurementModelElement(pointPositionInputPort, estimationFrame);
+
+         this.centerOfMassBasedFullRobotModelUpdater = new CenterOfMassBasedFullRobotModelUpdater(inverseDynamicsStructureInputPort,
+                 centerOfMassPositionStatePort, centerOfMassVelocityStatePort, centerOfMassAccelerationStatePort, orientationStatePort,
+                 angularVelocityStatePort, angularAccelerationStatePort);
+
+         Runnable runnable = new Runnable()
          {
-            addPointPositionSensor(estimationFrame, controlFlowGraph, pointPositionSensorConfiguration);
-         }
-         
-         for (PointVelocitySensorConfiguration pointVelocitySensorConfiguration : pointVelocitySensorConfigurations)
-         {
-            addPointVelocitySensor(estimationFrame, controlFlowGraph, pointVelocitySensorConfiguration);
-         }
-
-         this.centerOfMassBasedFullRobotModelUpdater = new CenterOfMassBasedFullRobotModelUpdater(
-               inverseDynamicsStructureInputPort, 
-               centerOfMassPositionStatePort, centerOfMassVelocityStatePort, centerOfMassAccelerationStatePort,
-               orientationStatePort, angularVelocityStatePort, angularAccelerationStatePort);
-
-         Runnable runnable = new Runnable(){
-
             public void run()
             {
-               //TODO: Less magic at a distance communication here.
+               // TODO: Less magic at a distance communication here.
                centerOfMassBasedFullRobotModelUpdater.run();
                updatedInverseDynamicsStructureOutputPort.setData(inverseDynamicsStructureInputPort.getData());
-            }};
+            }
+         };
 
-            addPostStateChangeRunnable(runnable);
-         
-         initialize();
+         addPostStateChangeRunnable(runnable);
+
+//         initialize();
       }
-      
+
       private void addOrientationProcessModelElement()
       {
          ProcessModelElement processModelElement = new OrientationProcessModelElement(angularVelocityStatePort, orientationStatePort, "orientation", registry);
@@ -250,7 +209,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
       private void addAngularVelocityProcessModelElement(ReferenceFrame estimationFrame, ControlFlowInputPort<FrameVector> angularAccelerationInputPort)
       {
          AngularVelocityProcessModelElement processModelElement = new AngularVelocityProcessModelElement(estimationFrame, angularVelocityStatePort,
-               angularAccelerationInputPort, "angularVelocity", registry);
+                                                                     angularAccelerationInputPort, "angularVelocity", registry);
 
          processModelElement.setProcessNoiseCovarianceBlock(angularAccelerationNoiseCovariance);
          addProcessModelElement(angularVelocityStatePort, processModelElement);
@@ -259,7 +218,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
       private void addAngularAccelerationProcessModelElement(ReferenceFrame estimationFrame, ControlFlowInputPort<FrameVector> angularAccelerationInputPort)
       {
          AngularAccelerationProcessModelElement processModelElement = new AngularAccelerationProcessModelElement("angularAcceleration", estimationFrame,
-               registry, angularAccelerationStatePort, angularAccelerationInputPort);
+                                                                         registry, angularAccelerationStatePort, angularAccelerationInputPort);
          processModelElement.setProcessNoiseCovarianceBlock(angularAccelerationNoiseCovariance);
          addProcessModelElement(angularAccelerationStatePort, processModelElement);
       }
@@ -267,14 +226,14 @@ public class ComposableOrientationAndCoMEstimatorCreator
       private void addCoMPositionProcessModelElement()
       {
          CenterOfMassPositionProcessModelElement processModelElement = new CenterOfMassPositionProcessModelElement(centerOfMassPositionStatePort,
-               centerOfMassVelocityStatePort, "CoMPosition", registry);
+                                                                          centerOfMassVelocityStatePort, "CoMPosition", registry);
          addProcessModelElement(centerOfMassPositionStatePort, processModelElement);
       }
 
       private void addCoMVelocityProcessModelElement(ControlFlowInputPort<FrameVector> centerOfMassAccelerationInputPort)
       {
          CenterOfMassVelocityProcessModelElement processModelElement = new CenterOfMassVelocityProcessModelElement(centerOfMassVelocityStatePort,
-               centerOfMassAccelerationInputPort, "CoMVelocity", registry);
+                                                                          centerOfMassAccelerationInputPort, "CoMVelocity", registry);
          processModelElement.setProcessNoiseCovarianceBlock(comAccelerationNoiseCovariance);
          addProcessModelElement(centerOfMassVelocityStatePort, processModelElement);
       }
@@ -282,21 +241,23 @@ public class ComposableOrientationAndCoMEstimatorCreator
       private void addCoMAccelerationProcessModelElement(ControlFlowInputPort<FrameVector> centerOfMassAccelerationInputPort)
       {
          CenterOfMassAccelerationProcessModelElement processModelElement = new CenterOfMassAccelerationProcessModelElement("CoMAcceleration", registry,
-               centerOfMassAccelerationStatePort, centerOfMassAccelerationInputPort);
+                                                                              centerOfMassAccelerationStatePort, centerOfMassAccelerationInputPort);
          processModelElement.setProcessNoiseCovarianceBlock(comAccelerationNoiseCovariance);
          addProcessModelElement(centerOfMassAccelerationStatePort, processModelElement);
       }
 
       private void addOrientationSensor(ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph,
-            OrientationSensorConfiguration orientationSensorConfiguration)
+                                        OrientationSensorConfiguration orientationSensorConfiguration)
       {
          ReferenceFrame measurementFrame = orientationSensorConfiguration.getMeasurementFrame();
-         ControlFlowInputPort<Matrix3d> orientationMeasurementPort = createMeasurementInputPort(VECTOR3D_LENGTH);
+         ControlFlowInputPort<Matrix3d> measurementInputPort = createInputPort();
+
+         ControlFlowInputPort<Matrix3d> orientationMeasurementPort = measurementInputPort;
          String name = orientationSensorConfiguration.getName();
          DenseMatrix64F orientationNoiseCovariance = orientationSensorConfiguration.getOrientationNoiseCovariance();
 
          OrientationMeasurementModelElement orientationMeasurementModel = new OrientationMeasurementModelElement(orientationStatePort,
-               orientationMeasurementPort, estimationFrame, measurementFrame, name, registry);
+                                                                             orientationMeasurementPort, estimationFrame, measurementFrame, name, registry);
          orientationMeasurementModel.setNoiseCovariance(orientationNoiseCovariance);
 
          addMeasurementModelElement(orientationMeasurementModel);
@@ -304,12 +265,14 @@ public class ComposableOrientationAndCoMEstimatorCreator
       }
 
       private void addAngularVelocitySensor(ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph,
-            AngularVelocitySensorConfiguration angularVelocitySensorConfiguration)
+              AngularVelocitySensorConfiguration angularVelocitySensorConfiguration)
       {
          String biasName = angularVelocitySensorConfiguration.getName() + "BiasEstimate";
          ReferenceFrame measurementFrame = angularVelocitySensorConfiguration.getMeasurementFrame();
          RigidBody measurementLink = angularVelocitySensorConfiguration.getAngularVelocityMeasurementLink();
-         ControlFlowInputPort<Vector3d> angularVelocityMeasurementPort = createMeasurementInputPort(VECTOR3D_LENGTH);
+         ControlFlowInputPort<Vector3d> measurementInputPort = createInputPort();
+
+         ControlFlowInputPort<Vector3d> angularVelocityMeasurementPort = measurementInputPort;
 
          ControlFlowOutputPort<FrameVector> biasPort = new YoFrameVectorControlFlowOutputPort(this, biasName, measurementFrame, registry);
          BiasProcessModelElement biasProcessModelElement = new BiasProcessModelElement(biasPort, measurementFrame, biasName, registry);
@@ -320,8 +283,9 @@ public class ComposableOrientationAndCoMEstimatorCreator
          DenseMatrix64F angularVelocityNoiseCovariance = angularVelocitySensorConfiguration.getAngularVelocityNoiseCovariance();
 
          AngularVelocityMeasurementModelElement angularVelocityMeasurementModel = new AngularVelocityMeasurementModelElement(angularVelocityStatePort,
-               biasPort, angularVelocityMeasurementPort, orientationEstimationLink, estimationFrame, measurementLink, measurementFrame, inverseDynamicsStructureInputPort, name,
-               registry);
+                                                                                     biasPort, angularVelocityMeasurementPort, orientationEstimationLink,
+                                                                                     estimationFrame, measurementLink, measurementFrame,
+                                                                                     inverseDynamicsStructureInputPort, name, registry);
          angularVelocityMeasurementModel.setNoiseCovariance(angularVelocityNoiseCovariance);
 
          addMeasurementModelElement(angularVelocityMeasurementModel);
@@ -329,12 +293,14 @@ public class ComposableOrientationAndCoMEstimatorCreator
       }
 
       private void addLinearAccelerationSensor(ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph,
-            LinearAccelerationSensorConfiguration linearAccelerationSensorConfiguration)
+              LinearAccelerationSensorConfiguration linearAccelerationSensorConfiguration)
       {
          String biasName = linearAccelerationSensorConfiguration.getName() + "BiasEstimate";
          ReferenceFrame measurementFrame = linearAccelerationSensorConfiguration.getMeasurementFrame();
          RigidBody measurementLink = linearAccelerationSensorConfiguration.getLinearAccelerationMeasurementLink();
-         ControlFlowInputPort<Vector3d> linearAccelerationMeasurementInputPort = createMeasurementInputPort(VECTOR3D_LENGTH);
+         ControlFlowInputPort<Vector3d> measurementInputPort = createInputPort();
+
+         ControlFlowInputPort<Vector3d> linearAccelerationMeasurementInputPort = measurementInputPort;
 
          ControlFlowOutputPort<FrameVector> biasPort = new YoFrameVectorControlFlowOutputPort(this, biasName, measurementFrame, registry);
 
@@ -349,64 +315,30 @@ public class ComposableOrientationAndCoMEstimatorCreator
          double gZ = linearAccelerationSensorConfiguration.getGravityZ();
 
          LinearAccelerationMeasurementModelElement linearAccelerationMeasurementModel = new LinearAccelerationMeasurementModelElement(name, registry,
-               centerOfMassPositionStatePort, centerOfMassVelocityStatePort, centerOfMassAccelerationStatePort, orientationStatePort, angularVelocityStatePort,
-               angularAccelerationStatePort, biasPort, linearAccelerationMeasurementInputPort, 
-               inverseDynamicsStructureInputPort, measurementLink,
-               measurementFrame, orientationEstimationLink, estimationFrame, gZ);
+                                                                                           centerOfMassPositionStatePort, centerOfMassVelocityStatePort,
+                                                                                           centerOfMassAccelerationStatePort, orientationStatePort,
+                                                                                           angularVelocityStatePort, angularAccelerationStatePort, biasPort,
+                                                                                           linearAccelerationMeasurementInputPort,
+                                                                                           inverseDynamicsStructureInputPort, measurementLink,
+                                                                                           measurementFrame, orientationEstimationLink, estimationFrame, gZ);
 
          linearAccelerationMeasurementModel.setNoiseCovariance(linearAccelerationNoiseCovariance);
 
          addMeasurementModelElement(linearAccelerationMeasurementModel);
          controlFlowGraph.connectElements(linearAccelerationSensorConfiguration.getOutputPort(), linearAccelerationMeasurementInputPort);
       }
-      
-      
-      private void addPointPositionSensor(ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph,
-            PointPositionSensorConfiguration pointPositionSensorConfiguration)
+
+
+      private void addAggregatedPointPositionMeasurementModelElement(ControlFlowInputPort<Set<PointPositionDataObject>> pointPositionInputPort,
+              ReferenceFrame estimationFrame)
       {
-         FramePoint stationaryPoint = pointPositionSensorConfiguration.getPointPositionMeasurementPoint();
-
-         ControlFlowInputPort<PointPositionDataObject> pointPositionMeasurementInputPort = createInputPort();
-
-         String name = pointPositionSensorConfiguration.getName();
-
-         DenseMatrix64F pointPositionNoiseCovariance = pointPositionSensorConfiguration.getPointPositionNoiseCovariance();
-
-         PointPositionMeasurementModelElement pointPositionMeasurementModelElement = new PointPositionMeasurementModelElement(
-               name, pointPositionMeasurementInputPort, 
-               centerOfMassPositionStatePort, orientationStatePort, 
-               estimationFrame, stationaryPoint, registry);
-
-         pointPositionMeasurementModelElement.setNoiseCovariance(pointPositionNoiseCovariance);
-
-         addMeasurementModelElement(pointPositionMeasurementModelElement);
-         controlFlowGraph.connectElements(pointPositionSensorConfiguration.getOutputPort(), pointPositionMeasurementInputPort);
-      }
-      
-      
-      private void addPointVelocitySensor(ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph,
-            PointVelocitySensorConfiguration pointVelocitySensorConfiguration)
-      {
-         RigidBody measurementLink = pointVelocitySensorConfiguration.getPointVelocityMeasurementLink();
-         FramePoint stationaryPoint = pointVelocitySensorConfiguration.getPointVelocityMeasurementPoint();
-
-         ControlFlowInputPort<PointVelocityDataObject> pointVelocityMeasurementInputPort = createInputPort();
-
-         String name = pointVelocitySensorConfiguration.getName();
-
-         DenseMatrix64F pointVelocityNoiseCovariance = pointVelocitySensorConfiguration.getPointVelocityNoiseCovariance();
-
-
-         PointVelocityMeasurementModelElement pointVelocityMeasurementModelElement = new PointVelocityMeasurementModelElement(
-               name, pointVelocityMeasurementInputPort, 
-               centerOfMassPositionStatePort, centerOfMassVelocityStatePort, orientationStatePort, 
-               angularVelocityStatePort, estimationFrame, 
-               measurementLink, stationaryPoint, inverseDynamicsStructureInputPort, registry);
-
-         pointVelocityMeasurementModelElement.setNoiseCovariance(pointVelocityNoiseCovariance);
-
-         addMeasurementModelElement(pointVelocityMeasurementModelElement);
-         controlFlowGraph.connectElements(pointVelocitySensorConfiguration.getOutputPort(), pointVelocityMeasurementInputPort);
+         AggregatePointPositionMeasurementModelElement element = new AggregatePointPositionMeasurementModelElement(pointPositionInputPort,
+                                                                    centerOfMassPositionStatePort, orientationStatePort, estimationFrame);
+         DenseMatrix64F covariance = new DenseMatrix64F(3, 3);
+         CommonOps.setIdentity(covariance);
+         CommonOps.scale(1e-2, covariance);
+         element.setNoiseCovariance(covariance); // TODO
+         addMeasurementModelElement(element);
       }
 
       public void getEstimatedOrientation(FrameOrientation estimatedOrientationToPack)
@@ -423,7 +355,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
       {
          estimatedCoMPositionToPack.setAndChangeFrame(centerOfMassPositionStatePort.getData());
       }
-      
+
       public void getEstimatedCoMVelocity(FrameVector estimatedCoMVelocityToPack)
       {
          estimatedCoMVelocityToPack.setAndChangeFrame(centerOfMassVelocityStatePort.getData());
@@ -446,7 +378,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
          inverseDynamicsStructure.updateInternalState();
          updatedInverseDynamicsStructureOutputPort.setData(inverseDynamicsStructure);
       }
-      
+
       public void setEstimatedCoMPosition(FramePoint estimatedCoMPosition)
       {
          centerOfMassPositionStatePort.setData(estimatedCoMPosition);
@@ -455,7 +387,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
          inverseDynamicsStructure.updateInternalState();
          updatedInverseDynamicsStructureOutputPort.setData(inverseDynamicsStructure);
       }
-      
+
       public void setEstimatedCoMVelocity(FrameVector estimatedCoMVelocity)
       {
          centerOfMassVelocityStatePort.setData(estimatedCoMVelocity);
@@ -488,6 +420,11 @@ public class ComposableOrientationAndCoMEstimatorCreator
       public ControlFlowInputPort<FrameVector> getDesiredCenterOfMassAccelerationInputPort()
       {
          return desiredCenterOfMassAccelerationInputPort;
+      }
+
+      public ControlFlowInputPort<Set<PointPositionDataObject>> getPointPositionInputPort()
+      {
+         return pointPositionInputPort;
       }
 
       public ControlFlowGraph getControlFlowGraph()
