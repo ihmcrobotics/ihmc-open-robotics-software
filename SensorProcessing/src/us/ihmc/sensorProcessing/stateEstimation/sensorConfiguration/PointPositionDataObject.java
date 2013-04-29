@@ -1,58 +1,41 @@
 package us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class PointPositionDataObject
 {
-   private Vector3d offsetFromJointInJointFrame = new Vector3d();
-   private final Point3d position = new Point3d();
+   protected final FramePoint measurementPointInBodyFrame = new FramePoint();
+   protected final FramePoint positionOfMeasurementPointInWorldFrame = new FramePoint(ReferenceFrame.getWorldFrame());
 
-   public double covarianceScaling = 1.0;
-
-   public PointPositionDataObject()
+   public void set(FramePoint measurementPointInBodyFrame, FramePoint positionOfMeasurementPointInWorldFrame)
    {
+      this.measurementPointInBodyFrame.setAndChangeFrame(measurementPointInBodyFrame);
+      this.positionOfMeasurementPointInWorldFrame.set(positionOfMeasurementPointInWorldFrame);
    }
 
-   public void getOffsetFromJointInJointFrame(Vector3d offsetFromJointInJointFrameToPack)
+   public FramePoint getMeasurementPointInWorldFrame()
    {
-      offsetFromJointInJointFrameToPack.set(this.offsetFromJointInJointFrame );
-   }
-   
-   public void setOffsetFromJointInJointFrame(Vector3d offsetFromJointInJointFrame)
-   {
-      this.offsetFromJointInJointFrame.set(offsetFromJointInJointFrame);
-   }  
-   
-   public void getPosition(Point3d positionToPack)
-   {
-      positionToPack.set(position);
+      return positionOfMeasurementPointInWorldFrame;
    }
 
-   public void setPosition(Point3d position)
+   public FramePoint getMeasurementPointInBodyFrame()
    {
-      this.position.set(position);
+      return measurementPointInBodyFrame;
    }
 
-   public double getCovarianceScaling()
+   public void set(PointPositionDataObject other)
    {
-      return covarianceScaling;
+      set(other.getMeasurementPointInBodyFrame(), other.getMeasurementPointInWorldFrame());
    }
 
-   public void setCovarianceScaling(double covarianceScaling)
+   public boolean epsilonEquals(PointPositionDataObject other, double epsilon)
    {
-      this.covarianceScaling = covarianceScaling;
-   }
+      if (getMeasurementPointInBodyFrame().getReferenceFrame() != other.getMeasurementPointInBodyFrame().getReferenceFrame())
+         return false;
 
-   public void set(PointPositionDataObject pointPositionDataObject)
-   {
-      this.offsetFromJointInJointFrame.set(pointPositionDataObject.offsetFromJointInJointFrame);
-      this.position.set(pointPositionDataObject.position);
-      this.covarianceScaling = pointPositionDataObject.covarianceScaling;
-   }
-   
-   public String toString()
-   {
-      return position.toString();
+      boolean bodyPointsEqual = getMeasurementPointInBodyFrame().epsilonEquals(other.getMeasurementPointInBodyFrame(), epsilon);
+      boolean worldPointsEqual = getMeasurementPointInWorldFrame().epsilonEquals(other.getMeasurementPointInWorldFrame(), epsilon);
+      return bodyPointsEqual && worldPointsEqual;
    }
 }

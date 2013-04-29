@@ -46,20 +46,6 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
 //      System.out.println(statistics.getMean());
    }
 
-   public <T> ControlFlowInputPort<T> createProcessInputPort(int size)
-   {
-      ControlFlowInputPort<T> processInputPort = createInputPort();
-
-      return processInputPort;
-   }
-
-   public <T> ControlFlowInputPort<T> createMeasurementInputPort(int size)
-   {
-      ControlFlowInputPort<T> measurementInputPort = createInputPort();
-
-      return measurementInputPort;
-   }
-
    public void addProcessModelElement(ControlFlowOutputPort<?> statePort, ProcessModelElement processModelElement)
    {
       processModelAssembler.addProcessModelElement(processModelElement, statePort);
@@ -79,7 +65,6 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
 
    public void initialize()
    {
-
       ProcessModel processModel = processModelAssembler.getProcessModel();
       MeasurementModel measurementModel = new MeasurementModel(measurementModelElements, processModel.getStateStartIndices(), processModel.getStateMatrixSize());
       kalmanFilter = new ComposableStateEstimatorKalmanFilter(processModel, measurementModel);

@@ -3,6 +3,7 @@ package us.ihmc.sensorProcessing.stateEstimation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -23,6 +24,7 @@ import us.ihmc.sensorProcessing.stateEstimation.processModelElements.Orientation
 import us.ihmc.sensorProcessing.stateEstimation.processModelElements.ProcessModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.OrientationSensorConfiguration;
+import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -143,7 +145,9 @@ public class ComposableOrientationEstimatorCreator
                                         OrientationSensorConfiguration orientationSensorConfiguration)
       {
          ReferenceFrame measurementFrame = orientationSensorConfiguration.getMeasurementFrame();
-         ControlFlowInputPort<Matrix3d> orientationMeasurementPort = createMeasurementInputPort(VECTOR3D_LENGTH);
+         ControlFlowInputPort<Matrix3d> measurementInputPort = createInputPort();
+
+         ControlFlowInputPort<Matrix3d> orientationMeasurementPort = measurementInputPort;
          String name = orientationSensorConfiguration.getName();
          DenseMatrix64F orientationNoiseCovariance = orientationSensorConfiguration.getOrientationNoiseCovariance();
 
@@ -161,7 +165,9 @@ public class ComposableOrientationEstimatorCreator
          String biasName = angularVelocitySensorConfiguration.getName() + "BiasEstimate";
          ReferenceFrame measurementFrame = angularVelocitySensorConfiguration.getMeasurementFrame();
          RigidBody measurementLink = angularVelocitySensorConfiguration.getAngularVelocityMeasurementLink();
-         ControlFlowInputPort<Vector3d> angularVelocityMeasurementPort = createMeasurementInputPort(VECTOR3D_LENGTH);
+         ControlFlowInputPort<Vector3d> measurementInputPort = createInputPort();
+
+         ControlFlowInputPort<Vector3d> angularVelocityMeasurementPort = measurementInputPort;
 
          ControlFlowOutputPort<FrameVector> biasPort = new YoFrameVectorControlFlowOutputPort(this, biasName, measurementFrame, registry);
          BiasProcessModelElement biasProcessModelElement = new BiasProcessModelElement(biasPort, measurementFrame, biasName, registry);
@@ -242,6 +248,11 @@ public class ComposableOrientationEstimatorCreator
       }
 
       public ControlFlowInputPort<FrameVector> getDesiredCenterOfMassAccelerationInputPort()
+      {
+         return null;
+      }
+
+      public ControlFlowInputPort<Set<PointPositionDataObject>> getPointPositionInputPort()
       {
          return null;
       }

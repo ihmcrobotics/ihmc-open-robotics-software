@@ -84,7 +84,7 @@ public class ComposableStateEstimatorEvaluator
 //      SensorNoiseParameters sensorNoiseParametersForEstimator = SensorNoiseParametersForEvaluator.createLotsOfSensorNoiseParameters();
       SensorNoiseParameters sensorNoiseParametersForEstimator = SensorNoiseParametersForEvaluator.createTunedNoiseParametersForEvaluator();
 
-      final StateEstimationDataFromControllerSource stateEstimatorDataFromControllerSource = new StateEstimationDataFromControllerSource(estimationFrame, simulatedSensorHolderAndReaderFromRobotFactory.getStateEstimatorSensorDefinitions());
+      final StateEstimationDataFromControllerSource stateEstimatorDataFromControllerSource = new StateEstimationDataFromControllerSource(estimationFrame, simulatedSensorHolderAndReaderFromRobotFactory.getStateEstimatorSensorDefinitions(), registry);
       final StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink = new StateEstimationDataFromControllerSink(estimationFrame, simulatedSensorHolderAndReaderFromRobotFactory.getStateEstimatorSensorDefinitions());
       
       SensorAndEstimatorAssembler sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(stateEstimatorDataFromControllerSource, simulatedSensorHolderAndReaderFromRobotFactory.getStateEstimatorSensorDefinitions(),
@@ -93,7 +93,7 @@ public class ComposableStateEstimatorEvaluator
             registry);
 
       ControlFlowGraph controlFlowGraph = sensorAndEstimatorAssembler.getControlFlowGraph();
-      StateEstimatorWithPorts orientationEstimator = sensorAndEstimatorAssembler.getOrientationEstimator();
+      StateEstimatorWithPorts orientationEstimator = sensorAndEstimatorAssembler.getEstimator();
       JointAndIMUSensorDataSource jointSensorDataSource = sensorAndEstimatorAssembler.getJointAndIMUSensorDataSource();
       
       simulatedSensorHolderAndReader.setJointAndIMUSensorDataSource(jointSensorDataSource);

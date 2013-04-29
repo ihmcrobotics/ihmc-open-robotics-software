@@ -200,18 +200,18 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
           *                = zUpcomingSwing + upcomingSwingMinZ - footstepMinZ
           */
 
-         FramePoint upcomingSwingAnkle = new FramePoint(upcomingSwingFoot.getBodyFrame());
-         upcomingSwingAnkle.changeFrame(worldFrame);
-         double zUpcomingSwing = upcomingSwingAnkle.getZ();
-
-         FrameVector searchDirection = new FrameVector(upcomingSupportAnkleZUpFrame, 0.0, 0.0, -1.0);
-         FramePoint upcomingSwingMinZPoint = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(upcomingSwingFoot.getContactPoints(),
-                                                searchDirection, 1).get(0);
-         upcomingSwingMinZPoint.changeFrame(ankleZUpFrames.get(upcomingSwingLegSide));
-         double upcomingSwingMinZ = upcomingSwingMinZPoint.getZ();
-
-         double zFootstep = zUpcomingSwing + upcomingSwingMinZ - footstepMinZ;
-         footstepPosition.setZ(zFootstep);
+//         FramePoint upcomingSwingAnkle = new FramePoint(upcomingSwingFoot.getBodyFrame());
+//         upcomingSwingAnkle.changeFrame(worldFrame);
+//         double zUpcomingSwing = upcomingSwingAnkle.getZ();
+//
+//         FrameVector searchDirection = new FrameVector(upcomingSupportAnkleZUpFrame, 0.0, 0.0, -1.0);
+//         FramePoint upcomingSwingMinZPoint = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(upcomingSwingFoot.getContactPoints(),
+//                                                searchDirection, 1).get(0);
+//         upcomingSwingMinZPoint.changeFrame(ankleZUpFrames.get(upcomingSwingLegSide));
+//         double upcomingSwingMinZ = upcomingSwingMinZPoint.getZ();
+//
+//         double zFootstep = zUpcomingSwing + upcomingSwingMinZ - footstepMinZ;
+//         footstepPosition.setZ(zFootstep);
       }
       else
       {

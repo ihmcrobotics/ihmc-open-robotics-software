@@ -1,0 +1,144 @@
+package us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements;
+
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+import us.ihmc.controlFlow.ControlFlowInputPort;
+import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+
+import java.util.*;
+
+/**
+ * @author twan
+ *         Date: 4/27/13
+ */
+public class AggregatePointPositionMeasurementModelElement implements MeasurementModelElement
+{
+   private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final List<PointPositionMeasurementModelElement> elementPool = new ArrayList<PointPositionMeasurementModelElement>();
+   private final ControlFlowInputPort<Set<PointPositionDataObject>> inputPort;
+   private final ControlFlowOutputPort<FramePoint> centerOfMassPositionPort;
+   private final ControlFlowOutputPort<FrameOrientation> orientationPort;
+   private final ReferenceFrame estimationFrame;
+   private final Set<ControlFlowOutputPort<?>> statePorts = new LinkedHashSet<ControlFlowOutputPort<?>>();
+
+   private final Map<ControlFlowOutputPort<?>, DenseMatrix64F> outputMatrixBlocks = new LinkedHashMap<ControlFlowOutputPort<?>, DenseMatrix64F>();
+   private final DenseMatrix64F measurementCovarianceMatrixBlock = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F residual = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F singlePointCovariance = new DenseMatrix64F(PointPositionMeasurementModelElement.SIZE, PointPositionMeasurementModelElement.SIZE);
+
+   private int nElementsInUse;
+
+
+   public AggregatePointPositionMeasurementModelElement(ControlFlowInputPort<Set<PointPositionDataObject>> inputPort,
+           ControlFlowOutputPort<FramePoint> centerOfMassPositionPort, ControlFlowOutputPort<FrameOrientation> orientationPort, ReferenceFrame estimationFrame)
+   {
+      this.inputPort = inputPort;
+      this.centerOfMassPositionPort = centerOfMassPositionPort;
+      this.orientationPort = orientationPort;
+      this.estimationFrame = estimationFrame;
+
+      statePorts.add(centerOfMassPositionPort);
+      statePorts.add(orientationPort);
+
+      for (ControlFlowOutputPort<?> statePort : statePorts)
+      {
+         outputMatrixBlocks.put(statePort, new DenseMatrix64F(1, 1));
+      }
+   }
+
+   public void computeMatrixBlocks()
+   {
+      Set<PointPositionDataObject> pointPositionDataObjects = inputPort.getData();
+      nElementsInUse = pointPositionDataObjects.size();
+
+      for (int i = elementPool.size(); i < nElementsInUse; i++)
+      {
+         String name = "pointPosition" + i;
+         ControlFlowInputPort<PointPositionDataObject> pointPositionMeasurementInputPort = new ControlFlowInputPort<PointPositionDataObject>(null);
+         PointPositionMeasurementModelElement element = new PointPositionMeasurementModelElement(name, pointPositionMeasurementInputPort,
+                                                           centerOfMassPositionPort, orientationPort, estimationFrame, registry);
+         element.setNoiseCovariance(singlePointCovariance);
+         elementPool.add(element);
+      }
+
+      reshapeAndZeroMatrices();
+
+      int rowIndex = 0;
+      int elementIndex = 0;
+      for (PointPositionDataObject pointPositionDataObject : pointPositionDataObjects)
+      {
+         PointPositionMeasurementModelElement element = elementPool.get(elementIndex);
+         element.getPointPositionMeasurementInputPort().setData(pointPositionDataObject);
+         element.computeMatrixBlocks();
+
+         for (ControlFlowOutputPort<?> statePort : statePorts)
+         {
+            DenseMatrix64F outputMatrixBlock = element.getOutputMatrixBlock(statePort);
+            CommonOps.insert(outputMatrixBlock, outputMatrixBlocks.get(statePort), rowIndex, 0);
+         }
+
+         CommonOps.insert(element.getMeasurementCovarianceMatrixBlock(), measurementCovarianceMatrixBlock, rowIndex, rowIndex);
+
+         rowIndex += PointPositionMeasurementModelElement.SIZE;
+         elementIndex++;
+      }
+   }
+
+   private void reshapeAndZeroMatrices()
+   {
+      int size = nElementsInUse * PointPositionMeasurementModelElement.SIZE;
+      for (ControlFlowOutputPort<?> statePort : statePorts)
+      {
+         DenseMatrix64F outputMatrixBlock = outputMatrixBlocks.get(statePort);
+         outputMatrixBlock.reshape(size, PointPositionMeasurementModelElement.SIZE);
+         outputMatrixBlock.zero();
+      }
+      measurementCovarianceMatrixBlock.reshape(size, size);
+      measurementCovarianceMatrixBlock.zero();
+      residual.reshape(size, 1);
+      residual.zero();
+   }
+
+   public DenseMatrix64F getOutputMatrixBlock(ControlFlowOutputPort<?> statePort)
+   {
+      return outputMatrixBlocks.get(statePort);
+   }
+
+   public DenseMatrix64F getMeasurementCovarianceMatrixBlock()
+   {
+      return measurementCovarianceMatrixBlock;
+   }
+
+   public DenseMatrix64F computeResidual()
+   {
+      int rowStart = 0;
+      for (int i = 0; i < nElementsInUse; i++)
+      {
+         PointPositionMeasurementModelElement element = elementPool.get(i);
+         DenseMatrix64F residualBlock = element.computeResidual();
+         CommonOps.insert(residualBlock, residual, rowStart, 0);
+         rowStart += PointPositionMeasurementModelElement.SIZE;
+      }
+
+      return residual;
+   }
+
+   public Set<ControlFlowOutputPort<?>> getStatePorts()
+   {
+      return statePorts;
+   }
+
+   public void setNoiseCovariance(DenseMatrix64F covariance)
+   {
+      singlePointCovariance.set(covariance);
+      for (PointPositionMeasurementModelElement pointPositionMeasurementModelElement : elementPool)
+      {
+         pointPositionMeasurementModelElement.setNoiseCovariance(covariance);
+      }
+   }
+}

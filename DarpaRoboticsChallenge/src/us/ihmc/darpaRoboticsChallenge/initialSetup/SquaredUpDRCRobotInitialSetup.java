@@ -11,6 +11,8 @@ public class SquaredUpDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot
    private final double groundZ;
    private final Transform3D rootToWorld = new Transform3D();
    private final Vector3d offset = new Vector3d();
+   private final double rootJointX;
+   private final double rootJointY;
 
    public SquaredUpDRCRobotInitialSetup()
    {
@@ -19,6 +21,13 @@ public class SquaredUpDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot
 
    public SquaredUpDRCRobotInitialSetup(double groundZ)
    {
+      this(0.0, 0.0, groundZ);
+   }
+
+   public SquaredUpDRCRobotInitialSetup(double rootJointX, double rootJointY, double groundZ)
+   {
+      this.rootJointX = rootJointX;
+      this.rootJointY = rootJointY;
       this.groundZ = groundZ;
    }
 
@@ -54,6 +63,8 @@ public class SquaredUpDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot
       double pelvisToFoot = 0.887;
 
 
+      offset.setX(rootJointX);
+      offset.setY(rootJointY);
       offset.setZ(groundZ + pelvisToFoot);
 
 //    offset.add(robot.getPositionInWorld());

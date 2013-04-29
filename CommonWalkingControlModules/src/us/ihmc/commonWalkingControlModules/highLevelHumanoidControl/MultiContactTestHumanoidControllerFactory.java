@@ -21,6 +21,7 @@ import us.ihmc.commonWalkingControlModules.sensors.FingerForceSensors;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
 import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.*;
@@ -53,8 +54,9 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
            CommonWalkingReferenceFrames referenceFrames, FingerForceSensors fingerForceSensors, DoubleYoVariable yoTime, double gravityZ,
            TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian, SideDependentList<ContactablePlaneBody> feet, double controlDT,
            SideDependentList<FootSwitchInterface> footSwitches, SideDependentList<HandControllerInterface> handControllers,
-           LidarControllerInterface lidarControllerInterface, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry,
-           GUISetterUpperRegistry guiSetterUpperRegistry, ProcessedOutputsInterface processedOutputs)
+           LidarControllerInterface lidarControllerInterface, StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink,
+           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry, GUISetterUpperRegistry guiSetterUpperRegistry,
+           ProcessedOutputsInterface processedOutputs)
    {
       LinkedHashMap<ContactablePlaneBody, RigidBody> contactablePlaneBodiesAndBases = new LinkedHashMap<ContactablePlaneBody, RigidBody>();
 
@@ -124,7 +126,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
                                                   processedOutputs, momentumControlModule, null, momentumRateOfChangeControlModule,
                                                   rootJointAccelerationControlModule, momentumRateOfChangeControlModule.getDesiredCoMPositionInputPort(),
                                                   rootJointAccelerationControlModule.getDesiredPelvisOrientationTrajectoryInputPort(),
-                                                  dynamicGraphicObjectsListRegistry);
+                                                  stateEstimationDataFromControllerSink, dynamicGraphicObjectsListRegistry);
 
 
 

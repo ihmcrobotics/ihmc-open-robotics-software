@@ -22,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenc
 import us.ihmc.commonWalkingControlModules.trajectories.FixedOrientationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.FixedPositionTrajectoryGenerator;
 import us.ihmc.controlFlow.ControlFlowInputPort;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -70,12 +71,12 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
            TwistCalculator twistCalculator, HashMap<ContactablePlaneBody, RigidBody> contactablePlaneBodiesAndBases, double controlDT,
            ProcessedOutputsInterface processedOutputs, MomentumControlModule momentumControlModule, ArrayList<Updatable> updatables,
            MomentumRateOfChangeControlModule momentumRateOfChangeControlModule, RootJointAccelerationControlModule rootJointAccelerationControlModule,
-           ControlFlowInputPort<FramePoint> desiredCoMPositionPort, ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationPort,
+           ControlFlowInputPort<FramePoint> desiredCoMPositionPort, ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationPort, StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       super(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator,
             contactablePlaneBodiesAndBases.keySet(), controlDT, processedOutputs, momentumControlModule, updatables, momentumRateOfChangeControlModule,
-            rootJointAccelerationControlModule, dynamicGraphicObjectsListRegistry);
+            rootJointAccelerationControlModule, stateEstimationDataFromControllerSink, dynamicGraphicObjectsListRegistry);
       this.desiredCoMPositionPort = desiredCoMPositionPort;
       this.desiredPelvisOrientationPort = desiredPelvisOrientationPort;
 

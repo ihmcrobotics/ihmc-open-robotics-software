@@ -161,7 +161,7 @@ public class DRCSimulationFactory
       // in the robot-determined world coordinates..
       Point3d initialCoMPosition = new Point3d();
       robotInitialSetup.initializeRobot(simulatedRobot);
-      updateTheRobot(simulatedRobot);
+      updateRobot(simulatedRobot);
       
       simulatedRobot.computeCenterOfMass(initialCoMPosition);
 
@@ -169,7 +169,7 @@ public class DRCSimulationFactory
       return new Pair<Point3d, Quat4d>(initialCoMPosition, initialEstimationLinkOrientation);
    }
 
-   private static void updateTheRobot(Robot robot)
+   private static void updateRobot(Robot robot)
    {
       try
       {

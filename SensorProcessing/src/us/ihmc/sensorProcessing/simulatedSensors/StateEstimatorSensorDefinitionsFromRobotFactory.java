@@ -22,9 +22,7 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
    private final Robot robot;
 
    private final LinkedHashMap<IMUMount, IMUDefinition> imuDefinitions;
-   private final LinkedHashMap<KinematicPoint, PointVelocitySensorDefinition> pointVelocitySensorDefinitions;
-   private final LinkedHashMap<KinematicPoint, PointPositionSensorDefinition> pointPositionSensorDefinitions;
-   
+
    private final StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
 
    public StateEstimatorSensorDefinitionsFromRobotFactory(SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap, Robot robot, double controlDT,
@@ -34,8 +32,6 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
       this.robot = robot;
 
       this.imuDefinitions = generateIMUDefinitions(imuMounts);
-      this.pointPositionSensorDefinitions = generatePointPositionSensorDefinitions(positionPoints);
-      this.pointVelocitySensorDefinitions = generatePointVelocitySensorDefinitions(velocityPoints);
 
       stateEstimatorSensorDefinitions = new StateEstimatorSensorDefinitions();
 
@@ -43,24 +39,11 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
       createAndAddOrientationSensors(imuDefinitions);
       createAndAddAngularVelocitySensors(imuDefinitions);
       createAndAddLinearAccelerationSensors(imuDefinitions);
-      
-      createAndAddPointPositionSensors(positionPoints);
-      createAndAddPointVelocitySensors(velocityPoints);
    }
    
    public Map<IMUMount, IMUDefinition> getIMUDefinitions()
    {
       return imuDefinitions;
-   }
-   
-   public Map<KinematicPoint, PointPositionSensorDefinition> getPointPositionSensorDefinitions()
-   {
-      return pointPositionSensorDefinitions;
-   }
-   
-   public Map<KinematicPoint, PointVelocitySensorDefinition> getPointVelocitySensorDefinitions()
-   {
-      return pointVelocitySensorDefinitions;
    }
 
    public StateEstimatorSensorDefinitions getStateEstimatorSensorDefinitions()
@@ -83,43 +66,6 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
 
       return imuDefinitions;
    }
-
-   private LinkedHashMap<KinematicPoint, PointPositionSensorDefinition> generatePointPositionSensorDefinitions(ArrayList<KinematicPoint> positionPoints)
-   {
-      LinkedHashMap<KinematicPoint, PointPositionSensorDefinition> pointPositionSensorDefinitions = new LinkedHashMap<KinematicPoint,
-                                                                                                       PointPositionSensorDefinition>();
-
-      for (KinematicPoint kinematicPoint : positionPoints)
-      {
-         RigidBody rigidBody = scsToInverseDynamicsJointMap.getRigidBody(kinematicPoint.getParentJoint());
-         Vector3d offset = new Vector3d();
-         kinematicPoint.getOffset(offset);
-
-         PointPositionSensorDefinition pointPositionSensorDefinition = new PointPositionSensorDefinition(kinematicPoint.getName(), rigidBody, offset);
-         pointPositionSensorDefinitions.put(kinematicPoint, pointPositionSensorDefinition);
-      }
-
-      return pointPositionSensorDefinitions;
-   }
-   
-   private LinkedHashMap<KinematicPoint, PointVelocitySensorDefinition> generatePointVelocitySensorDefinitions(ArrayList<KinematicPoint> velocityPoints)
-   {
-      LinkedHashMap<KinematicPoint, PointVelocitySensorDefinition> pointVelocitySensorDefinitions = new LinkedHashMap<KinematicPoint,
-                                                                                                       PointVelocitySensorDefinition>();
-
-      for (KinematicPoint kinematicPoint : velocityPoints)
-      {
-         RigidBody rigidBody = scsToInverseDynamicsJointMap.getRigidBody(kinematicPoint.getParentJoint());
-         Vector3d offset = new Vector3d();
-         kinematicPoint.getOffset(offset);
-
-         PointVelocitySensorDefinition pointVelocitySensorDefinition = new PointVelocitySensorDefinition(kinematicPoint.getName(), rigidBody, offset);
-         pointVelocitySensorDefinitions.put(kinematicPoint, pointVelocitySensorDefinition);
-      }
-
-      return pointVelocitySensorDefinitions;
-   }
-
 
    public void createAndAddOneDoFPositionAndVelocitySensors()
    {
@@ -167,24 +113,6 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
          IMUDefinition imuDefinition = imuDefinitions.get(imuMount);
 
          stateEstimatorSensorDefinitions.addLinearAccelerationSensorDefinition(imuDefinition);
-      }
-   }
-   
-   public void createAndAddPointPositionSensors(ArrayList<KinematicPoint> positionPoints)
-   {
-      for (KinematicPoint kinematicPoint : positionPoints)
-      {
-         PointPositionSensorDefinition pointPositionSensorDefinition = pointPositionSensorDefinitions.get(kinematicPoint);
-         stateEstimatorSensorDefinitions.addPointPositionSensorDefinition(pointPositionSensorDefinition);
-      }
-   }
-
-   public void createAndAddPointVelocitySensors(ArrayList<KinematicPoint> velocityPoints)
-   {
-      for (KinematicPoint kinematicPoint : velocityPoints)
-      {
-         PointVelocitySensorDefinition pointVelocitySensorDefinition = pointVelocitySensorDefinitions.get(kinematicPoint);
-         stateEstimatorSensorDefinitions.addPointVelocitySensorDefinition(pointVelocitySensorDefinition);
       }
    }
 }

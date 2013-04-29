@@ -1,12 +1,6 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Set;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import com.yobotics.simulationconstructionset.*;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianOrientationCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianVectorCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.RandomWalkBiasVectorCorruptor;
@@ -14,14 +8,11 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
-import com.yobotics.simulationconstructionset.FloatingJoint;
-import com.yobotics.simulationconstructionset.IMUMount;
-import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.KinematicPoint;
-import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Set;
 
 public class SimulatedSensorHolderAndReaderFromRobotFactory
 {
@@ -36,8 +27,6 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory
    
 
    private Map<IMUMount, IMUDefinition> imuDefinitions;
-   private Map<KinematicPoint, PointPositionSensorDefinition> pointPositionSensorDefinitions;
-   private Map<KinematicPoint, PointVelocitySensorDefinition> pointVelocitySensorDefinitions;
    private SimulatedSensorHolderAndReader simulatedSensorHolderAndReader;
    private StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
    
@@ -77,16 +66,11 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory
          
          this.stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
          this.imuDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getIMUDefinitions();
-         this.pointPositionSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getPointPositionSensorDefinitions();
-         this.pointVelocitySensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getPointVelocitySensorDefinitions();
-         
          this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReader();
          
          createAndAddOrientationSensors(imuDefinitions, registry);
          createAndAddAngularVelocitySensors(imuDefinitions, registry);
          createAndAddLinearAccelerationSensors(imuDefinitions, registry);
-         createAndAddPointPositionSensors(positionPoints, registry);
-         createAndAddPointVelocitySensors(velocityPoints, registry);
          createAndAddOneDoFPositionAndVelocitySensors(scsToInverseDynamicsJointMap);
       }
       else
@@ -206,52 +190,6 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory
          }
 
          simulatedSensorHolderAndReader.addLinearAccelerationSensorPort(imuDefinition, linearAccelerationSensor);
-      }
-   }
-
-   public void createAndAddPointPositionSensors(ArrayList<KinematicPoint> positionPoints, YoVariableRegistry registry)
-   {
-      for (KinematicPoint kinematicPoint : positionPoints)
-      {
-         String sensorName = kinematicPoint.getName() + "PointPosition";
-
-         SimulatedPointPositionSensorFromRobot pointPositionSensor = new SimulatedPointPositionSensorFromRobot(sensorName, kinematicPoint, registry);
-
-         if (sensorNoiseParameters != null)
-         {
-            GaussianVectorCorruptor pointPositionCorruptor = new GaussianVectorCorruptor(1257L, sensorName, registry);
-
-            double pointPositionMeasurementStandardDeviation = sensorNoiseParameters.getPointPositionMeasurementStandardDeviation();
-            pointPositionCorruptor.setStandardDeviation(pointPositionMeasurementStandardDeviation);
-            pointPositionSensor.addSignalCorruptor(pointPositionCorruptor);
-         }
-
-         PointPositionSensorDefinition pointPositionSensorDefinition = pointPositionSensorDefinitions.get(kinematicPoint);
-
-         simulatedSensorHolderAndReader.addPointPositionSensorPort(pointPositionSensorDefinition, pointPositionSensor);
-      }
-   }
-
-   public void createAndAddPointVelocitySensors(ArrayList<KinematicPoint> velocityPoints, YoVariableRegistry registry)
-   {
-      for (KinematicPoint kinematicPoint : velocityPoints)
-      {
-         String sensorName = kinematicPoint.getName() + "PointVelocity";
-
-         SimulatedPointVelocitySensorFromRobot pointVelocitySensor = new SimulatedPointVelocitySensorFromRobot(sensorName, kinematicPoint, registry);
-
-         if (sensorNoiseParameters != null)
-         {
-            GaussianVectorCorruptor pointVelocityCorruptor = new GaussianVectorCorruptor(1257L, sensorName, registry);
-
-            double pointVelocityMeasurementStandardDeviation = sensorNoiseParameters.getPointVelocityMeasurementStandardDeviation();
-            pointVelocityCorruptor.setStandardDeviation(pointVelocityMeasurementStandardDeviation);
-            pointVelocitySensor.addSignalCorruptor(pointVelocityCorruptor);
-         }
-
-         PointVelocitySensorDefinition pointVelocitySensorDefinition = pointVelocitySensorDefinitions.get(kinematicPoint);
-
-         simulatedSensorHolderAndReader.addPointVelocitySensorPort(pointVelocitySensorDefinition, pointVelocitySensor);
       }
    }
 
