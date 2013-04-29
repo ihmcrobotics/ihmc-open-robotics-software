@@ -1,16 +1,15 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import org.apache.commons.lang.mutable.MutableBoolean;
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.YoPointPositionDataObject;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author twan
@@ -20,6 +19,7 @@ public class YoPointPositionDataObjectListOutputPort extends ControlFlowOutputPo
 {
    private final YoVariableRegistry registry;
    private final List<YoPointPositionDataObject> yoPointPositionDataObjects = new ArrayList<YoPointPositionDataObject>();
+   private final Map<YoPointPositionDataObject, BooleanYoVariable> validMap = new LinkedHashMap<YoPointPositionDataObject, BooleanYoVariable>();
    private final String namePrefix;
 
    public YoPointPositionDataObjectListOutputPort(ControlFlowElement controlFlowElement, String namePrefix, YoVariableRegistry registry)
@@ -37,7 +37,7 @@ public class YoPointPositionDataObjectListOutputPort extends ControlFlowOutputPo
 
       for (YoPointPositionDataObject yoPointPositionDataObject : yoPointPositionDataObjects)
       {
-         if (yoPointPositionDataObject.isValid())
+         if (validMap.get(yoPointPositionDataObject).getBooleanValue())
             data.add(yoPointPositionDataObject);
       }
 
@@ -46,9 +46,9 @@ public class YoPointPositionDataObjectListOutputPort extends ControlFlowOutputPo
 
    public void setData(Set<PointPositionDataObject> data)
    {
-      for (YoPointPositionDataObject yoPointPositionDataObject : yoPointPositionDataObjects)
+      for (BooleanYoVariable validVariable : validMap.values())
       {
-         yoPointPositionDataObject.setValid(false);
+         validVariable.set(false);
       }
 
       for (PointPositionDataObject pointPositionDataObject : data)
@@ -60,7 +60,7 @@ public class YoPointPositionDataObjectListOutputPort extends ControlFlowOutputPo
          for (YoPointPositionDataObject yoPointPositionDataObject : yoPointPositionDataObjects)
          {
             boolean frameOK = yoPointPositionDataObject.getMeasurementPointInBodyFrame().getReferenceFrame() == referenceFrame;
-            boolean isAvailable = !yoPointPositionDataObject.isValid();
+            boolean isAvailable = !validMap.get(yoPointPositionDataObject).getBooleanValue();
             if (frameOK && isAvailable)
             {
                yoPointPositionDataObjectToUse = yoPointPositionDataObject;
@@ -71,12 +71,14 @@ public class YoPointPositionDataObjectListOutputPort extends ControlFlowOutputPo
 
          if (yoPointPositionDataObjectToUse == null)
          {
-            yoPointPositionDataObjectToUse = new YoPointPositionDataObject(namePrefix + yoPointPositionDataObjects.size(), referenceFrame, registry);
+            int index = yoPointPositionDataObjects.size();
+            yoPointPositionDataObjectToUse = new YoPointPositionDataObject(namePrefix + index, referenceFrame, registry);
             yoPointPositionDataObjects.add(yoPointPositionDataObjectToUse);
+            validMap.put(yoPointPositionDataObjectToUse, new BooleanYoVariable(namePrefix + index, registry));
          }
 
          yoPointPositionDataObjectToUse.set(pointPositionDataObject);
-         yoPointPositionDataObjectToUse.setValid(true);
+         validMap.get(yoPointPositionDataObjectToUse).set(true);
       }
    }
 
