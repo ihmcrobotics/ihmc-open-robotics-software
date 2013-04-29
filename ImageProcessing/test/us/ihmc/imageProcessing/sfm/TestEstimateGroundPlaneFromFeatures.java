@@ -91,7 +91,7 @@ public class TestEstimateGroundPlaneFromFeatures
       GeometryMath_F64.mult(R, expectedT, expectedT);
 
       // check the rotation matrix
-      Se3_F64 found = groundAlg.getLeftToGround();
+      Se3_F64 found = groundAlg.getGroundToLeft();
       assertEquals(expectedT.x , found.T.x,1e-8);
       assertEquals(expectedT.y , found.T.y,1e-8);
       assertEquals(expectedT.z , found.T.z,1e-8);
