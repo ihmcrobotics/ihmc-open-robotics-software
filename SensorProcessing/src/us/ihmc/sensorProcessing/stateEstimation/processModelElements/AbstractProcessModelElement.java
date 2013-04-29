@@ -25,6 +25,8 @@ public abstract class AbstractProcessModelElement implements ProcessModelElement
    private final boolean isTimeVariant;
    private final ControlFlowOutputPort<?> outputState;
 
+   private final String name;
+   
    public AbstractProcessModelElement(ControlFlowOutputPort<?> outputState, TimeDomain timeDomain, boolean isTimeVariant, int size, String name,
          YoVariableRegistry registry)
    {
@@ -37,8 +39,14 @@ public abstract class AbstractProcessModelElement implements ProcessModelElement
       this.covarianceMatrixScaling.set(1.0);
       this.timeDomain = timeDomain;
       this.isTimeVariant = isTimeVariant;
+      this.name = name;
    }
 
+   public String getName()
+   {
+      return name;
+   }
+   
    public DenseMatrix64F getStateMatrixBlock(ControlFlowOutputPort<?> statePort)
    {
       return stateMatrixBlocks.get(statePort);

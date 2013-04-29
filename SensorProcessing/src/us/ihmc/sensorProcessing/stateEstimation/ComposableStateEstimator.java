@@ -19,6 +19,8 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class ComposableStateEstimator extends AbstractControlFlowElement
 {
+   private static final boolean DEGUG = false;
+   
    protected final YoVariableRegistry registry;
    protected ComposableStateEstimatorKalmanFilter kalmanFilter;
    private final List<Runnable> postStateChangeRunnables = new ArrayList<Runnable>();
@@ -66,6 +68,9 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
    public void initialize()
    {
       ProcessModel processModel = processModelAssembler.getProcessModel();
+      
+      printIfDebug("\nComposableStateEstimator. processModel:\n" + processModel + "\n");
+      
       MeasurementModel measurementModel = new MeasurementModel(measurementModelElements, processModel.getStateStartIndices(), processModel.getStateMatrixSize());
       kalmanFilter = new ComposableStateEstimatorKalmanFilter(processModel, measurementModel);
 
@@ -136,4 +141,10 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
          runnable.run();
       }
    }
+   
+   private void printIfDebug(String message)
+   {
+      if (DEGUG) System.out.println(message);
+   }
+
 }

@@ -117,4 +117,15 @@ public class ProcessModel
    {
       return inputMatrixSize;
    }
+   
+   public String toString()
+   {
+      String ret = "";
+      for (ProcessModelElementGroup processModelElementGroup : processModelElementGroups)
+      {
+         ret = ret + processModelElementGroup.toString();  
+      }
+
+      return ret;
+   }
 }
