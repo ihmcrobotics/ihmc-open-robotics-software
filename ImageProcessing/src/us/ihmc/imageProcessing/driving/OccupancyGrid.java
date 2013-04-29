@@ -8,7 +8,7 @@ import georegression.struct.point.Point2D_I32;
  */
 public class OccupancyGrid
 {
-   double map[];
+   public double map[];
    int width;
    int height;
    double cellSize;

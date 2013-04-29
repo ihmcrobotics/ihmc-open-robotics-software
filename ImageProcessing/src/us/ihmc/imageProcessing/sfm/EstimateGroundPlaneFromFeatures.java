@@ -2,6 +2,7 @@ package us.ihmc.imageProcessing.sfm;
 
 import boofcv.alg.geo.MultiViewOps;
 import boofcv.alg.geo.PerspectiveOps;
+import boofcv.alg.geo.h.HomographyInducedStereo3Pts;
 import boofcv.alg.sfm.robust.DistanceHomographySq;
 import boofcv.alg.sfm.robust.GenerateHomographyLinear;
 import boofcv.struct.FastQueue;
@@ -14,11 +15,14 @@ import georegression.struct.homo.UtilHomography;
 import georegression.struct.point.Point2D_F64;
 import georegression.struct.point.Vector3D_F64;
 import georegression.struct.se.Se3_F64;
+import org.ddogleg.fitting.modelset.ModelGenerator;
 import org.ddogleg.fitting.modelset.ModelMatcher;
 import org.ddogleg.fitting.modelset.ransac.Ransac;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.SpecializedOps;
+import org.ejml.simple.SimpleMatrix;
+import org.ejml.simple.SimpleSVD;
 
 import java.util.List;
 
@@ -44,14 +48,11 @@ public class EstimateGroundPlaneFromFeatures
    // transform from left to right camera
    Se3_F64 l2r;
 
-   // The estimated transform from left camera to the ground frame
-   Se3_F64 leftToGround = new Se3_F64();
-
    // Use RANSAC to estimate the Fundamental matrix
    ModelMatcher<Homography2D_F64,AssociatedPair> robustH;
 
-   double distanceFromPlane;
-   Vector3D_F64 normal = new Vector3D_F64();
+
+   SelectBestHomography selectBest;
 
    FastQueue<AssociatedPair> matches = new FastQueue<AssociatedPair>(AssociatedPair.class,true);
 
@@ -60,15 +61,51 @@ public class EstimateGroundPlaneFromFeatures
       this.stereo = stereo;
       l2r = stereo.getRightToLeft().invert(null);
 
+      selectBest = new SelectBestHomography(stereo);
+
 //      stereo.print();
 
-      GenerateHomographyLinear generateH = new GenerateHomographyLinear(true);
+//      Se3_F64 r2l = stereo.getRightToLeft();
+      Se3_F64 l2r = stereo.getRightToLeft().invert(null);
+      DenseMatrix64F K = PerspectiveOps.calibrationMatrix(stereo.getLeft(),null);
+      DenseMatrix64F E = MultiViewOps.createEssential(l2r.getR(),l2r.T);
+      DenseMatrix64F F = MultiViewOps.createFundamental(E,K);
 
       // Input will be normalized coordinates, but error will be in pixels
       DistanceHomographySq errorMetric = new DistanceHomographySq();
 
 
-      robustH = new Ransac<Homography2D_F64, AssociatedPair>(123123,generateH,errorMetric,500,0.2*0.2);
+      robustH = new Ransac<Homography2D_F64, AssociatedPair>(123123,new Foo(F),errorMetric,250,0.2*0.2);
+   }
+
+   private static class Foo implements ModelGenerator<Homography2D_F64,AssociatedPair> {
+
+      HomographyInducedStereo3Pts alg;
+
+      public Foo( DenseMatrix64F F ) {
+         alg = new HomographyInducedStereo3Pts();
+         alg.setFundamental(F,null);
+      }
+
+      public Homography2D_F64 createModelInstance()
+      {
+         return new Homography2D_F64();
+      }
+
+      public boolean generate(List<AssociatedPair> pairs, Homography2D_F64 H)
+      {
+         if( !alg.process(pairs.get(0),pairs.get(1),pairs.get(2)) )
+            return false;
+
+         UtilHomography.convert(alg.getHomography(),H);
+
+         return true;
+      }
+
+      public int getMinimumPoints()
+      {
+         return 3;
+      }
    }
 
    public boolean process( List<Point2D_F64> left , List<Point2D_F64> right ) {
@@ -89,11 +126,9 @@ public class EstimateGroundPlaneFromFeatures
       // Estimate the plane's normal and the distance from the plane
       estimatePlane(matches.toList());
 
-      System.out.println("Distance from plane: "+distanceFromPlane);
-      normal.print();
+      System.out.println("Distance from plane: "+selectBest.getDistanceFromPlane());
+      selectBest.getNormal().print();
 
-      // Find a transform from camera to plane coordinate system
-      computeTransform();
 
       return true;
    }
@@ -110,83 +145,8 @@ public class EstimateGroundPlaneFromFeatures
       if( !robustH.process(matches) )
          throw new IllegalArgumentException("Failed");
 
-      // convert it into a Euclidean homography
-      // H = K_b*H'_ab*inv(K_a)
       DenseMatrix64F Hd = UtilHomography.convert(robustH.getModel(), (DenseMatrix64F) null);
-
-      DenseMatrix64F Ka = PerspectiveOps.calibrationMatrix(stereo.getLeft(),null);
-      DenseMatrix64F Kb_inv = PerspectiveOps.calibrationMatrix(stereo.getRight(),null);
-      CommonOps.invert(Kb_inv);
-
-      DenseMatrix64F temp = new DenseMatrix64F(3,3);
-      DenseMatrix64F H = new DenseMatrix64F(3,3);
-      CommonOps.mult(Kb_inv,Hd,temp);
-      CommonOps.mult(temp,Ka,H);
-
-      // decompose homography to get transform
-      List<Tuple2<Se3_F64,Vector3D_F64>> solutions = MultiViewOps.decomposeHomography(H);
-
-//      for( Tuple2<Se3_F64,Vector3D_F64> l : solutions ) {
-//         System.out.println("-------------");
-//         l.data0.getR().print();
-//         l.data0.getT().print();
-//         System.out.println(l.data1);
-//      }
-
-      // Select the best solution based on how similar it is to the known camera baseline
-      double bestScore = Double.MAX_VALUE;
-      int bestIndex = -1;
-
-      for( int i = 0; i < 4; i++ ) {
-         Tuple2<Se3_F64,Vector3D_F64> l = solutions.get(i);
-
-         double score = scoreHypothesis(l.getData0());
-
-         if( score < bestScore ) {
-            bestScore = score;
-            bestIndex = i;
-         }
-      }
-
-      Se3_F64 bestTran = solutions.get(bestIndex).data0;
-      Vector3D_F64 bestNorm = solutions.get(bestIndex).data1;
-
-      distanceFromPlane = l2r.getT().norm()/bestTran.getT().norm();
-      normal.set(bestNorm);
-      normal.normalize();
-   }
-
-   /**
-    * Scores hypotheses based on how similar they are to the known camera transformation.  Closer to zero is better
-    */
-   public double scoreHypothesis( Se3_F64 hypothesis ) {
-      DenseMatrix64F A = new DenseMatrix64F(3,3);
-      CommonOps.multTransA(l2r.getR(), hypothesis.getR(), A);
-      DenseMatrix64F I = CommonOps.identity(3);
-
-      Vector3D_F64 v0 = l2r.getT().copy();
-      Vector3D_F64 v1 = hypothesis.getT().copy();
-      v0.normalize();
-      v1.normalize();
-
-      double difference = SpecializedOps.diffNormF(A,I);
-
-      double dot = v0.dot(v1);
-
-      return difference + (1-dot);
-   }
-
-   private void computeTransform() {
-      // make sure the normal is pointing downwards (+y) to simplify later calculations
-      if( normal.y < 0 )
-         normal.ip_times(-1);
-
-      double rotX = Math.atan2(normal.z,normal.y);
-      double rotZ = Math.atan2(normal.x,normal.y);
-
-      RotationMatrixGenerator.eulerXYZ(rotX,0,rotZ, leftToGround.R);
-      leftToGround.T.set(normal);
-      leftToGround.T.ip_times(distanceFromPlane);
+      selectBest.process(Hd,true);
    }
 
    public void getInliers( List<Point2D_F64> left , List<Point2D_F64> right ,
@@ -200,18 +160,18 @@ public class EstimateGroundPlaneFromFeatures
       }
    }
 
-   public Se3_F64 getLeftToGround()
+   public Se3_F64 getGroundToLeft()
    {
-      return leftToGround;
+      return selectBest.getGroundToLeft();
    }
 
    public double getDistanceFromPlane()
    {
-      return distanceFromPlane;
+      return selectBest.getDistanceFromPlane();
    }
 
    public Vector3D_F64 getNormal()
    {
-      return normal;
+      return selectBest.getNormal();
    }
 }

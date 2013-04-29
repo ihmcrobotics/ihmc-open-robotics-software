@@ -29,7 +29,7 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 {
 	private static final boolean COLOR_IMAGE = true;
 	private static final String STEREO_NAMESPACE = "/multisense_sl/camera/";
-   private static final String IMAGE = "image_rect" + (COLOR_IMAGE ? "_color/compressed" : "/compressed");
+   private static final String IMAGE = "image_raw" + (COLOR_IMAGE ? "/compressed" : "/compressed");
 
 	private static boolean RECORD = false;
 
@@ -38,7 +38,7 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 
 	private Subscriber<std_msgs.Float64> steeringWheelStateSubscriber, handBrakeStateSubscriber, gasPedalStateSubscriber, brakePedalStateSubscriber;
 
-	private Publisher<std_msgs.Float64> steeringWheelCommandPublisher, gasPedalCommandPublisher, brakePedalCommandPublisher, handBrakeCommandPublisher;
+	protected Publisher<std_msgs.Float64> steeringWheelCommandPublisher, gasPedalCommandPublisher, brakePedalCommandPublisher, handBrakeCommandPublisher;
 	private std_msgs.Float64 steeringWheelCommand, gasPedalCommand, brakePedalCommand, handBrakeCommand;
 
 	private Publisher<geometry_msgs.Pose> teleportInToCarPublisher, teleportOutOfCarPublisher;
