@@ -17,19 +17,23 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
 {
    private final double constantResolution;
    private final double heightThreshold;
+   private int numberOfNodes = 0;
+   private int maxNodes=1000;
 
-   public GroundOnlyQuadTree(double minX, double minY, double maxX, double maxY, double resolution, double heightThreshold)
+   public GroundOnlyQuadTree(double minX, double minY, double maxX, double maxY, double resolution, double heightThreshold, int maxNodes)
    {
-      this(toBounds(minX, maxX, minY, maxY), resolution, heightThreshold);
+      this(toBounds(minX, maxX, minY, maxY), resolution, heightThreshold, maxNodes);
 
    }
 
-   private GroundOnlyQuadTree(OneDimensionalBounds[] bounds, double resolution, double heightThreshold)
+   private GroundOnlyQuadTree(OneDimensionalBounds[] bounds, double resolution, double heightThreshold, int maxNodes)
    {
       super(bounds);
       this.constantResolution = resolution;
       this.heightThreshold = heightThreshold;
       this.getRootNode().setMetaData(new GroundOnlyQuadTreeData(false));
+      this.maxNodes = maxNodes;
+      numberOfNodes = 1;
    }
 
    public double heightAtPoint(double x, double y)
@@ -268,6 +272,8 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
 
    protected boolean canSplit(RecursableHyperTreeNode<GroundAirDescriptor, GroundOnlyQuadTreeData> node)
    {
+      if (this.numberOfNodes>=this.maxNodes)
+         return false;
       for (int i = 0; i < node.getDimensionality(); i++)
       {
          if (node.getBounds(i).size() <= constantResolution)
@@ -311,6 +317,16 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
       this.put(toLocation(x, y), value);
    }
 
+   public void nodeAdded(String id, OneDimensionalBounds[] bounds, HyperCubeLeaf<GroundAirDescriptor> leaf)
+   {
+      super.nodeAdded(id, bounds, leaf);
+      this.numberOfNodes++;
+   }
+   public void nodeRemoved(String id)
+   {
+      super.nodeRemoved(id);
+      this.numberOfNodes--;
+   }
    public RecursableHyperTreeNode<GroundAirDescriptor, GroundOnlyQuadTreeData> getLeafNodeAtLocation(float xToTest, float yToTest)
    {
       return getLeafNodeAtLocation(toLocation(xToTest, yToTest));
@@ -355,5 +371,7 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    {
       this.octree=octree;
    }
+   
+   
 
 }
