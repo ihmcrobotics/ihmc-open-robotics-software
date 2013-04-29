@@ -54,7 +54,7 @@ public class DRCConfigParameters
 
 
    // LIDAR:
-   public static final double LIDAR_SPINDLE_VELOCITY = 0.5;
+   public static final double LIDAR_SPINDLE_VELOCITY = 5.0;
 
    public static final boolean STREAM_POLAR_LIDAR = true;
    static final int LIDAR_UPDATE_RATE_OVERRIDE = 5;//3
