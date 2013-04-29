@@ -15,7 +15,6 @@ import us.ihmc.utilities.screwTheory.*;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author twan
@@ -36,7 +35,6 @@ public class MomentumSolver3 implements MomentumSolverInterface
 
    private final double controlDT;
 
-   private final DenseMatrix64F A;
    private final DenseMatrix64F b;
 
    private final DenseMatrix64F Jp = new DenseMatrix64F(1, 1);
@@ -45,6 +43,7 @@ public class MomentumSolver3 implements MomentumSolverInterface
    private final List<DenseMatrix64F> JpList = new ArrayList<DenseMatrix64F>();
    private final List<DenseMatrix64F> ppList = new ArrayList<DenseMatrix64F>();
 
+   private int motionConstraintIndex = 0;
 
    private final DenseMatrix64F vdot;
 
@@ -76,7 +75,6 @@ public class MomentumSolver3 implements MomentumSolverInterface
       this.controlDT = controlDT;
 
       nDegreesOfFreedom = ScrewTools.computeDegreesOfFreedom(jointsInOrder);
-      this.A = new DenseMatrix64F(SpatialMotionVector.SIZE, nDegreesOfFreedom);
       this.b = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
 
       this.vdot = new DenseMatrix64F(nDegreesOfFreedom, 1);
@@ -102,8 +100,7 @@ public class MomentumSolver3 implements MomentumSolverInterface
 
    public void reset()
    {
-      JpList.clear();
-      ppList.clear();
+      motionConstraintIndex = 0;
    }
 
    public void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration)
@@ -111,17 +108,29 @@ public class MomentumSolver3 implements MomentumSolverInterface
       CheckTools.checkEquals(joint.getDegreesOfFreedom(), jointAcceleration.getNumRows());
       int[] columnsForJoint = this.columnsForJoints.get(joint);
 
-      DenseMatrix64F JpBlock = new DenseMatrix64F(joint.getDegreesOfFreedom(), nDegreesOfFreedom);
+
+      DenseMatrix64F JpBlock = getMatrixFromList(JpList, motionConstraintIndex, joint.getDegreesOfFreedom(), nDegreesOfFreedom);
+      new DenseMatrix64F(joint.getDegreesOfFreedom(), nDegreesOfFreedom);
       for (int i = 0; i < joint.getDegreesOfFreedom(); i++)
       {
          JpBlock.set(i, columnsForJoint[i], 1.0);
       }
 
-      DenseMatrix64F ppBlock = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
+      DenseMatrix64F ppBlock = getMatrixFromList(ppList, motionConstraintIndex, joint.getDegreesOfFreedom(), 1);
       ppBlock.set(jointAcceleration);
 
-      JpList.add(JpBlock);
-      ppList.add(ppBlock);
+      motionConstraintIndex++;
+   }
+
+   private DenseMatrix64F getMatrixFromList(List<DenseMatrix64F> matrixList, int index, int nRows, int nColumns)
+   {
+      for (int i = matrixList.size(); i <= index; i++)
+      {
+         matrixList.add(new DenseMatrix64F(1, 1));
+      }
+      DenseMatrix64F ret = matrixList.get(index);
+      ret.reshape(nRows, nColumns);
+      return ret;
    }
 
    private final SpatialAccelerationVector convectiveTerm = new SpatialAccelerationVector();
@@ -158,7 +167,7 @@ public class MomentumSolver3 implements MomentumSolverInterface
       DenseMatrix64F JpBlockCompact = new DenseMatrix64F(selectionMatrix.getNumRows(), baseToEndEffectorJacobian.getNumberOfColumns()); // TODO: garbage
       CommonOps.mult(selectionMatrix, baseToEndEffectorJacobian.getJacobianMatrix(), JpBlockCompact);
 
-      DenseMatrix64F JpFullBlock = new DenseMatrix64F(JpBlockCompact.getNumRows(), nDegreesOfFreedom); // TODO: garbage
+      DenseMatrix64F JpFullBlock = getMatrixFromList(JpList, motionConstraintIndex, JpBlockCompact.getNumRows(), nDegreesOfFreedom);
 
       for (InverseDynamicsJoint joint : baseToEndEffectorJacobian.getJointsInOrder())
       {
@@ -172,13 +181,13 @@ public class MomentumSolver3 implements MomentumSolverInterface
             CommonOps.extract(JpBlockCompact, 0, JpBlockCompact.getNumRows(), compactBlockIndex, compactBlockIndex + 1, JpFullBlock, 0, fullBlockIndex);
          }
       }
-      JpList.add(JpFullBlock);
 
-      DenseMatrix64F ppBlock = new DenseMatrix64F(selectionMatrix.getNumRows(), 1);
+      DenseMatrix64F ppBlock = getMatrixFromList(ppList, motionConstraintIndex, selectionMatrix.getNumRows(), 1);
       taskSpaceAcceleration.packMatrix(taskSpaceAccelerationMatrix, 0);
       CommonOps.mult(selectionMatrix, taskSpaceAccelerationMatrix, ppBlock);
       CommonOps.multAdd(-1.0, selectionMatrix, convectiveTermMatrix, ppBlock);
-      ppList.add(ppBlock);
+
+      motionConstraintIndex++;
    }
 
    public void compute()
@@ -240,7 +249,6 @@ public class MomentumSolver3 implements MomentumSolverInterface
          setDesiredSpatialAcceleration(rootJoint.getMotionSubspace(), rootJointTaskspaceConstraintData);
       }
 
-
       // sTranspose
       sTranspose.reshape(momentumSubspace.getNumCols(), momentumSubspace.getNumRows());
       CommonOps.transpose(momentumSubspace, sTranspose);
@@ -271,7 +279,6 @@ public class MomentumSolver3 implements MomentumSolverInterface
       bMinusAJPlusP.set(b);
       CommonOps.multAdd(-1.0, sTransposeA, JpPluspp, bMinusAJPlusP);
 
-
       // P
       P.reshape(JpPlus.getNumRows(), Jp.getNumCols());
       CommonOps.setIdentity(P);
@@ -280,7 +287,6 @@ public class MomentumSolver3 implements MomentumSolverInterface
       // AP
       AP.reshape(sTransposeA.getNumRows(), P.getNumCols());
       CommonOps.mult(sTransposeA, P, AP);
-
 
       // APPlusbMinusAJpPluspp
       APPlusbMinusAJpPluspp.reshape(AP.getNumCols(), bMinusAJPlusP.getNumCols());
@@ -300,7 +306,7 @@ public class MomentumSolver3 implements MomentumSolverInterface
          throw new RuntimeException("JpList.size() != ppList.size()");
 
       int jpRows = 0;
-      for (int i = 0; i < JpList.size(); i++)
+      for (int i = 0; i < motionConstraintIndex; i++)
       {
          jpRows += JpList.get(i).getNumRows();
       }
@@ -308,7 +314,7 @@ public class MomentumSolver3 implements MomentumSolverInterface
       pp.reshape(jpRows, 1);
 
       int rowNumber = 0;
-      for (int i = 0; i < JpList.size(); i++)
+      for (int i = 0; i < motionConstraintIndex; i++)
       {
          DenseMatrix64F JpBlock = JpList.get(i);
          CommonOps.insert(JpBlock, Jp, rowNumber, 0);
