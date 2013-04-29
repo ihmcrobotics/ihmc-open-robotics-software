@@ -1,14 +1,17 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
-
 import org.ejml.ops.CommonOps;
-import org.ejml.ops.SpecializedOps;
+
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
@@ -154,7 +157,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
          desiredAngularAccelerationInputPort = createInputPort();
          desiredCenterOfMassAccelerationInputPort = createInputPort();
          pointPositionInputPort = createInputPort();
-         pointPositionInputPort.setData(new HashSet<PointPositionDataObject>());
+         pointPositionInputPort.setData(new LinkedHashSet<PointPositionDataObject>());
 
          addOrientationProcessModelElement();
          addAngularVelocityProcessModelElement(estimationFrame, desiredAngularAccelerationInputPort);
