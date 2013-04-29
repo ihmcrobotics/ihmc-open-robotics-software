@@ -63,6 +63,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolation
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SettableOrientationProvider;
+import us.ihmc.commonWalkingControlModules.trajectories.SimpleTwoWaypointTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.YoVariableDoubleProvider;
 import us.ihmc.controlFlow.ControlFlowInputPort;
@@ -109,6 +110,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGe
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParametersProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypointGenerationMethod;
 import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider;
 
 public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedController
@@ -591,6 +593,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
          // note: this has to be done before the ICP trajectory generator is initialized, since it is using nextFootstep
          checkForFootsteps();
+         checkForHighSteps(transferToSide);
 
          if (icpTrajectoryGenerator.isDone())
          {
@@ -805,6 +808,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
                {
                   nextNextFootstepIndex.increment();
                }
+               
             }
 
             else
@@ -1641,5 +1645,23 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       if (robotSide != null)
          filteredFootSwitches.get(robotSide).update(footSwitches.get(robotSide).hasFootHitGround());
    }
+   
+   private void checkForHighSteps(RobotSide transferToSide)
+   {
+      if(transferToSide != null && nextFootstepList.size() > 0)
+      {         
+         ReferenceFrame initialSwingFrame = bipedFeet.get(transferToSide.getOppositeSide()).getRigidBody().getParentJoint().getFrameAfterJoint();
 
+         Footstep nextFootstep = nextFootstepList.get(nextFootstepIndex.getIntegerValue());
+
+         FramePoint finalFootPoseInInitialFrame = nextFootstep.getPositionInFrame(initialSwingFrame);
+         double slopeBetweenFootsteps = finalFootPoseInInitialFrame.getZ() / finalFootPoseInInitialFrame.getX();
+         boolean useHighSteps = (!Double.isNaN(slopeBetweenFootsteps)) && finalFootPoseInInitialFrame.getX() > 0.08 && slopeBetweenFootsteps > 0.5;
+
+         if (useHighSteps)
+         {
+            mapFromFootstepsToTrajectoryParameters.put(nextFootstep, new SimpleTwoWaypointTrajectoryParameters(TrajectoryWaypointGenerationMethod.HIGH_STEP));
+         }      
+      }
+   }
 }
