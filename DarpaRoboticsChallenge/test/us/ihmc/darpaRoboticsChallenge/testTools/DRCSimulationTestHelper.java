@@ -36,7 +36,7 @@ public class DRCSimulationTestHelper
    
    private final boolean createMovie;
 
-   public DRCSimulationTestHelper(DRCDemo01StartingLocation selectedLocation, DRCEnvironmentModel selectedEnvironment, boolean checkNothingChanged, boolean createMovie)
+   public DRCSimulationTestHelper(String name, DRCDemo01StartingLocation selectedLocation, DRCEnvironmentModel selectedEnvironment, boolean checkNothingChanged, boolean createMovie)
    {
       teamObjectCommunicator = new ScriptedFootstepDataListObjectCommunicator("Team");
       ScriptedFootstepDataListObjectCommunicator drcNetworkObjectCommunicator = new ScriptedFootstepDataListObjectCommunicator("DRCNetwork");
@@ -56,7 +56,7 @@ public class DRCSimulationTestHelper
 
       if (checkNothingChanged)
       {
-         nothingChangedVerifier = new NothingChangedVerifier("DRCWalkingUpToRampTest", drcSimulation.getSimulationConstructionSet());
+         nothingChangedVerifier = new NothingChangedVerifier(name, drcSimulation.getSimulationConstructionSet());
       }
       else
       {
