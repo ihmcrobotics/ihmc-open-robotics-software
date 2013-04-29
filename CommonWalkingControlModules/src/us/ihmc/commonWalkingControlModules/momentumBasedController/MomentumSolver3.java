@@ -213,23 +213,46 @@ public class MomentumSolver3 implements MomentumSolverInterface
    }
 
    private final DenseMatrix64F sTranspose = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F sTransposeA = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F JpPlus = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F JpPluspp = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F P = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F AP = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F bMinusAJPlusP = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
+   private final DenseMatrix64F bMinusAJPlusP = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F APPlusbMinusAJpPluspp = new DenseMatrix64F(1, 1);
 
 
    public void solve(DenseMatrix64F accelerationSubspace, DenseMatrix64F accelerationMultipliers, DenseMatrix64F momentumSubspace,
                      DenseMatrix64F momentumMultipliers)
    {
-      // TODO: subspaces
-      CommonOps.sub(momentumMultipliers, adotV, b);
+      if (accelerationSubspace.getNumCols() > 0)
+      {
+         TaskspaceConstraintData rootJointTaskspaceConstraintData = new TaskspaceConstraintData();
+         DenseMatrix64F rootJointAccelerationMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
+         CommonOps.mult(accelerationSubspace, accelerationMultipliers, rootJointAccelerationMatrix);
+         SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint(), rootJointAccelerationMatrix);
+         spatialAcceleration.changeBodyFrameNoRelativeAcceleration(rootJoint.getSuccessor().getBodyFixedFrame());
+         spatialAcceleration.changeFrameNoRelativeMotion(rootJoint.getSuccessor().getBodyFixedFrame());
+         DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(SpatialMotionVector.SIZE, 0);
+         DenseMatrix64F selectionMatrix = new DenseMatrix64F(accelerationSubspace.getNumCols(), accelerationSubspace.getNumRows());
+         CommonOps.transpose(accelerationSubspace, selectionMatrix);
+         rootJointTaskspaceConstraintData.set(spatialAcceleration, nullspaceMultipliers, selectionMatrix);
+         setDesiredSpatialAcceleration(rootJoint.getMotionSubspace(), rootJointTaskspaceConstraintData);
+      }
 
-      // add root joint constraint (just call the same function)
-      sTranspose.reshape(accelerationSubspace.getNumCols(), accelerationSubspace.getNumRows());
-      CommonOps.transpose(accelerationSubspace, sTranspose);
+
+      // sTranspose
+      sTranspose.reshape(momentumSubspace.getNumCols(), momentumSubspace.getNumRows());
+      CommonOps.transpose(momentumSubspace, sTranspose);
+
+      // b
+      b.reshape(sTranspose.getNumRows(), 1);
+      b.set(momentumMultipliers);
+      CommonOps.multAdd(-1.0, sTranspose, adotV, b);
+
+      // sTransposeA
+      sTransposeA.reshape(sTranspose.getNumRows(), centroidalMomentumMatrix.getMatrix().getNumCols());
+      CommonOps.mult(sTranspose, centroidalMomentumMatrix.getMatrix(), sTransposeA);
 
       // assemble Jp, pp
       assemblePrimaryMotionConstraints();
@@ -244,8 +267,9 @@ public class MomentumSolver3 implements MomentumSolverInterface
       CommonOps.mult(JpPlus, pp, JpPluspp);
 
       // bMinusAJPlusp
+      bMinusAJPlusP.reshape(b.getNumRows(), b.getNumCols());
       bMinusAJPlusP.set(b);
-      CommonOps.multAdd(-1.0, centroidalMomentumMatrix.getMatrix(), JpPluspp, bMinusAJPlusP);
+      CommonOps.multAdd(-1.0, sTransposeA, JpPluspp, bMinusAJPlusP);
 
 
       // P
@@ -254,8 +278,8 @@ public class MomentumSolver3 implements MomentumSolverInterface
       CommonOps.multAdd(-1.0, JpPlus, Jp, P);
 
       // AP
-      AP.reshape(centroidalMomentumMatrix.getMatrix().getNumRows(), P.getNumCols());
-      CommonOps.mult(centroidalMomentumMatrix.getMatrix(), P, AP);
+      AP.reshape(sTransposeA.getNumRows(), P.getNumCols());
+      CommonOps.mult(sTransposeA, P, AP);
 
 
       // APPlusbMinusAJpPluspp
