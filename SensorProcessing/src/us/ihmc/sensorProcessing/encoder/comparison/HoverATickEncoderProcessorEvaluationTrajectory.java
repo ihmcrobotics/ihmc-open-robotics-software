@@ -1,7 +1,11 @@
 package us.ihmc.sensorProcessing.encoder.comparison;
 
+import java.util.Random;
+
 public class HoverATickEncoderProcessorEvaluationTrajectory implements EncoderProcessorEvaluationTrajectory
 {
+   private Random random = new Random(1123L);
+   
    private double q;
    private double qd;
    private final double encoderTicksPerPosition;
@@ -13,7 +17,7 @@ public class HoverATickEncoderProcessorEvaluationTrajectory implements EncoderPr
 
    public void update(double time)
    {
-      q = 0.9 / encoderTicksPerPosition * (0.5 - Math.random());
+      q = 0.9 / encoderTicksPerPosition * (0.5 - random.nextDouble());
       qd = 0;
    }
 
