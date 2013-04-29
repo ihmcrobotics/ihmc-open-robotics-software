@@ -123,7 +123,7 @@ public abstract class MomentumBasedController implements RobotController
       {
          this.desiredCoMAndAngularAccelerationGrabber = new DesiredCoMAndAngularAccelerationGrabber(stateEstimationDataFromControllerSink, estimationLink,
                  estimationFrame, totalMass);
-         this.pointPositionGrabber = new PointPositionGrabber(stateEstimationDataFromControllerSink, registry);
+         this.pointPositionGrabber = new PointPositionGrabber(stateEstimationDataFromControllerSink, registry, controlDT, 0.0);
       }
       else
       {
