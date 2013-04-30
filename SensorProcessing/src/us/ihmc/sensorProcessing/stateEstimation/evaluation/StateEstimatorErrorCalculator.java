@@ -35,6 +35,8 @@ public class StateEstimatorErrorCalculator
    private final YoFramePoint perfectCoMPosition = new YoFramePoint("perfectCoMPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector perfectCoMVelocity = new YoFrameVector("perfectCoMVelocity", ReferenceFrame.getWorldFrame(), registry);
    
+   private final YoFrameVector perfectAngularVelocity = new YoFrameVector("perfectAngularVelocity", ReferenceFrame.getWorldFrame(), registry);
+
    public StateEstimatorErrorCalculator(Robot robot, Joint estimationJoint, StateEstimator orientationEstimator,
            YoVariableRegistry parentRegistry)
    {
@@ -75,6 +77,8 @@ public class StateEstimatorErrorCalculator
       Vector3d actualAngularVelocity = new Vector3d();
       estimationJoint.getAngularVelocityInBody(actualAngularVelocity);
 
+      perfectAngularVelocity.set(actualAngularVelocity);
+      
       actualAngularVelocity.sub(estimatedAngularVelocity);
       angularVelocityError.set(actualAngularVelocity.length());
    }

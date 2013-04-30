@@ -345,7 +345,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
                                                                     centerOfMassPositionStatePort, orientationStatePort, estimationFrame);
          DenseMatrix64F covariance = new DenseMatrix64F(3, 3);
          CommonOps.setIdentity(covariance);
-         CommonOps.scale(1e-2, covariance);
+         CommonOps.scale(5e-2, covariance); //(1e-2, covariance);
          element.setNoiseCovariance(covariance); // TODO
          addMeasurementModelElement(element);
       }

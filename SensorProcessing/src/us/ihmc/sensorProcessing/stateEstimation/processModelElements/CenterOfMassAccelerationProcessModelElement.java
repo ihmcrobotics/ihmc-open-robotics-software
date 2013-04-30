@@ -14,6 +14,8 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class CenterOfMassAccelerationProcessModelElement extends AbstractProcessModelElement
 {
+   private static final boolean USE_INPUT_ACCELERATION = false;
+   
    private static final int SIZE = 3;
    private final ControlFlowOutputPort<FrameVector> centerOfMassAccelerationStatePort;
    private final ControlFlowInputPort<FrameVector> centerOfMassAccelerationInputPort;
@@ -26,7 +28,11 @@ public class CenterOfMassAccelerationProcessModelElement extends AbstractProcess
       this.centerOfMassAccelerationStatePort = centerOfMassAccelerationStatePort;
       this.centerOfMassAccelerationInputPort = centerOfMassAccelerationInputPort;
       
-      computeCenterOfMassAccelerationInputMatrixBlock();
+      if (USE_INPUT_ACCELERATION) computeCenterOfMassAccelerationInputMatrixBlock();
+      else
+      {
+         computeCenterOfMassAccelerationStateMatrixBlock();
+      }
    }
 
    private void computeCenterOfMassAccelerationInputMatrixBlock()
@@ -34,6 +40,13 @@ public class CenterOfMassAccelerationProcessModelElement extends AbstractProcess
       DenseMatrix64F centerOfMassAccelerationInputBlock = new DenseMatrix64F(SIZE, SIZE);
       CommonOps.setIdentity(centerOfMassAccelerationInputBlock);
       inputMatrixBlocks.put(centerOfMassAccelerationInputPort, centerOfMassAccelerationInputBlock);
+   }
+   
+   private void computeCenterOfMassAccelerationStateMatrixBlock()
+   {
+      stateMatrixBlocks.put(centerOfMassAccelerationStatePort, new DenseMatrix64F(SIZE, SIZE));
+      DenseMatrix64F comAccelerationMatrixBlock = stateMatrixBlocks.get(centerOfMassAccelerationStatePort);
+      CommonOps.setIdentity(comAccelerationMatrixBlock);
    }
 
    public void computeMatrixBlocks()
@@ -43,8 +56,17 @@ public class CenterOfMassAccelerationProcessModelElement extends AbstractProcess
 
    public void propagateState(double dt)
    {
-      comAcceleration.set(centerOfMassAccelerationInputPort.getData());
-      centerOfMassAccelerationStatePort.setData(comAcceleration);
+      if (USE_INPUT_ACCELERATION)
+      {
+         comAcceleration.set(centerOfMassAccelerationInputPort.getData());
+         centerOfMassAccelerationStatePort.setData(comAcceleration); 
+      }
+
+      else
+      {
+         comAcceleration.set(centerOfMassAccelerationStatePort.getData());
+         centerOfMassAccelerationStatePort.setData(comAcceleration);
+      }
    }
 
    public void correctState(DenseMatrix64F correction)
