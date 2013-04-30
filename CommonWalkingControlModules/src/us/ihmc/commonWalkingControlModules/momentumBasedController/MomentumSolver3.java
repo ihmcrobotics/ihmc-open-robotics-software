@@ -37,17 +37,7 @@ public class MomentumSolver3 implements MomentumSolverInterface
 
    private final DenseMatrix64F b;
 
-   private final DenseMatrix64F Jp = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F pp = new DenseMatrix64F(1, 1);
-
-   private final List<DenseMatrix64F> JpList = new ArrayList<DenseMatrix64F>();
-   private final List<DenseMatrix64F> ppList = new ArrayList<DenseMatrix64F>();
-
-   private int motionConstraintIndex = 0;
-
    private final DenseMatrix64F vdot;
-
-   private final LinkedHashMap<InverseDynamicsJoint, int[]> columnsForJoints = new LinkedHashMap<InverseDynamicsJoint, int[]>();
 
    private final DenseMatrix64F adotV = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
    private final DenseMatrix64F v;
@@ -56,12 +46,15 @@ public class MomentumSolver3 implements MomentumSolverInterface
    private final int nDegreesOfFreedom;
 
    private final LinearSolver<DenseMatrix64F> solver;
+   private final MotionConstraintHandler motionConstraintHandler;
 
    public MomentumSolver3(SixDoFJoint rootJoint, RigidBody elevator, ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator,
                           LinearSolver<DenseMatrix64F> jacobianSolver, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.rootJoint = rootJoint;
       this.jointsInOrder = ScrewTools.computeSupportAndSubtreeJoints(rootJoint.getSuccessor());
+
+      this.motionConstraintHandler = new MotionConstraintHandler(jointsInOrder);
 
       this.centroidalMomentumMatrix = new CentroidalMomentumMatrix(elevator, centerOfMassFrame);
       this.previousCentroidalMomentumMatrix = new DenseMatrix64F(centroidalMomentumMatrix.getMatrix().getNumRows(),
@@ -80,11 +73,6 @@ public class MomentumSolver3 implements MomentumSolverInterface
       this.vdot = new DenseMatrix64F(nDegreesOfFreedom, 1);
       this.v = new DenseMatrix64F(nDegreesOfFreedom, 1);
 
-      for (InverseDynamicsJoint joint : jointsInOrder)
-      {
-         columnsForJoints.put(joint, ScrewTools.computeIndicesForJoint(jointsInOrder, joint));
-      }
-
       solver = LinearSolverFactory.pseudoInverse(true);
 
       parentRegistry.addChild(registry);
@@ -100,42 +88,13 @@ public class MomentumSolver3 implements MomentumSolverInterface
 
    public void reset()
    {
-      motionConstraintIndex = 0;
+      motionConstraintHandler.reset();
    }
 
    public void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration)
    {
-      CheckTools.checkEquals(joint.getDegreesOfFreedom(), jointAcceleration.getNumRows());
-      int[] columnsForJoint = this.columnsForJoints.get(joint);
-
-
-      DenseMatrix64F JpBlock = getMatrixFromList(JpList, motionConstraintIndex, joint.getDegreesOfFreedom(), nDegreesOfFreedom);
-      new DenseMatrix64F(joint.getDegreesOfFreedom(), nDegreesOfFreedom);
-      for (int i = 0; i < joint.getDegreesOfFreedom(); i++)
-      {
-         JpBlock.set(i, columnsForJoint[i], 1.0);
-      }
-
-      DenseMatrix64F ppBlock = getMatrixFromList(ppList, motionConstraintIndex, joint.getDegreesOfFreedom(), 1);
-      ppBlock.set(jointAcceleration);
-
-      motionConstraintIndex++;
+      motionConstraintHandler.setDesiredJointAcceleration(joint, jointAcceleration);
    }
-
-   private DenseMatrix64F getMatrixFromList(List<DenseMatrix64F> matrixList, int index, int nRows, int nColumns)
-   {
-      for (int i = matrixList.size(); i <= index; i++)
-      {
-         matrixList.add(new DenseMatrix64F(1, 1));
-      }
-      DenseMatrix64F ret = matrixList.get(index);
-      ret.reshape(nRows, nColumns);
-      return ret;
-   }
-
-   private final SpatialAccelerationVector convectiveTerm = new SpatialAccelerationVector();
-   private final DenseMatrix64F convectiveTermMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
-   private final DenseMatrix64F taskSpaceAccelerationMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
 
    public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
    {
@@ -145,49 +104,7 @@ public class MomentumSolver3 implements MomentumSolverInterface
    public void setDesiredSpatialAcceleration(InverseDynamicsJoint[] constrainedJoints, GeometricJacobian jacobian, TaskspaceConstraintData
          taskspaceConstraintData)
    {
-      // (S * J) * vdot = S * (Tdot - Jdot * v)
-
-      SpatialAccelerationVector taskSpaceAcceleration = taskspaceConstraintData.getSpatialAcceleration();
-      DenseMatrix64F selectionMatrix = taskspaceConstraintData.getSelectionMatrix();
-
-      RigidBody base = getBase(taskSpaceAcceleration);
-      RigidBody endEffector = getEndEffector(taskSpaceAcceleration);
-
-      // TODO: inefficient
-      GeometricJacobian baseToEndEffectorJacobian = new GeometricJacobian(base, endEffector, taskSpaceAcceleration.getExpressedInFrame());    // FIXME: garbage, repeated computation
-      baseToEndEffectorJacobian.compute();
-
-      // TODO: inefficient
-      DesiredJointAccelerationCalculator desiredJointAccelerationCalculator = new DesiredJointAccelerationCalculator(baseToEndEffectorJacobian, null);    // TODO: garbage
-      desiredJointAccelerationCalculator.computeJacobianDerivativeTerm(convectiveTerm);
-      convectiveTerm.getBodyFrame().checkReferenceFrameMatch(taskSpaceAcceleration.getBodyFrame());
-      convectiveTerm.getExpressedInFrame().checkReferenceFrameMatch(taskSpaceAcceleration.getExpressedInFrame());
-      convectiveTerm.packMatrix(convectiveTermMatrix, 0);
-
-      DenseMatrix64F JpBlockCompact = new DenseMatrix64F(selectionMatrix.getNumRows(), baseToEndEffectorJacobian.getNumberOfColumns()); // TODO: garbage
-      CommonOps.mult(selectionMatrix, baseToEndEffectorJacobian.getJacobianMatrix(), JpBlockCompact);
-
-      DenseMatrix64F JpFullBlock = getMatrixFromList(JpList, motionConstraintIndex, JpBlockCompact.getNumRows(), nDegreesOfFreedom);
-
-      for (InverseDynamicsJoint joint : baseToEndEffectorJacobian.getJointsInOrder())
-      {
-         int[] indicesIntoCompactBlock = ScrewTools.computeIndicesForJoint(baseToEndEffectorJacobian.getJointsInOrder(), joint);
-         int[] indicesIntoFullBlock = columnsForJoints.get(joint);
-
-         for (int i = 0; i < indicesIntoCompactBlock.length; i++)
-         {
-            int compactBlockIndex = indicesIntoCompactBlock[i];
-            int fullBlockIndex = indicesIntoFullBlock[i];
-            CommonOps.extract(JpBlockCompact, 0, JpBlockCompact.getNumRows(), compactBlockIndex, compactBlockIndex + 1, JpFullBlock, 0, fullBlockIndex);
-         }
-      }
-
-      DenseMatrix64F ppBlock = getMatrixFromList(ppList, motionConstraintIndex, selectionMatrix.getNumRows(), 1);
-      taskSpaceAcceleration.packMatrix(taskSpaceAccelerationMatrix, 0);
-      CommonOps.mult(selectionMatrix, taskSpaceAccelerationMatrix, ppBlock);
-      CommonOps.multAdd(-1.0, selectionMatrix, convectiveTermMatrix, ppBlock);
-
-      motionConstraintIndex++;
+      motionConstraintHandler.setDesiredSpatialAcceleration(constrainedJoints, jacobian, taskspaceConstraintData);
    }
 
    public void compute()
@@ -242,7 +159,7 @@ public class MomentumSolver3 implements MomentumSolverInterface
          SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint(), rootJointAccelerationMatrix);
          spatialAcceleration.changeBodyFrameNoRelativeAcceleration(rootJoint.getSuccessor().getBodyFixedFrame());
          spatialAcceleration.changeFrameNoRelativeMotion(rootJoint.getSuccessor().getBodyFixedFrame());
-         DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(SpatialMotionVector.SIZE, 0);
+         DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 1);
          DenseMatrix64F selectionMatrix = new DenseMatrix64F(accelerationSubspace.getNumCols(), accelerationSubspace.getNumRows());
          CommonOps.transpose(accelerationSubspace, selectionMatrix);
          rootJointTaskspaceConstraintData.set(spatialAcceleration, nullspaceMultipliers, selectionMatrix);
@@ -263,7 +180,9 @@ public class MomentumSolver3 implements MomentumSolverInterface
       CommonOps.mult(sTranspose, centroidalMomentumMatrix.getMatrix(), sTransposeA);
 
       // assemble Jp, pp
-      assemblePrimaryMotionConstraints();
+      motionConstraintHandler.compute();;
+      DenseMatrix64F Jp = motionConstraintHandler.getJacobian();
+      DenseMatrix64F pp = motionConstraintHandler.getRightHandSide();
 
       // J+
       JpPlus.reshape(Jp.getNumCols(), Jp.getNumRows());
@@ -300,31 +219,6 @@ public class MomentumSolver3 implements MomentumSolverInterface
       ScrewTools.setDesiredAccelerations(jointsInOrder, vdot);
    }
 
-   private void assemblePrimaryMotionConstraints()
-   {
-      if (JpList.size() != ppList.size())
-         throw new RuntimeException("JpList.size() != ppList.size()");
-
-      int jpRows = 0;
-      for (int i = 0; i < motionConstraintIndex; i++)
-      {
-         jpRows += JpList.get(i).getNumRows();
-      }
-      Jp.reshape(jpRows, nDegreesOfFreedom);
-      pp.reshape(jpRows, 1);
-
-      int rowNumber = 0;
-      for (int i = 0; i < motionConstraintIndex; i++)
-      {
-         DenseMatrix64F JpBlock = JpList.get(i);
-         CommonOps.insert(JpBlock, Jp, rowNumber, 0);
-
-         DenseMatrix64F ppBlock = ppList.get(i);
-         CommonOps.insert(ppBlock, pp, rowNumber, 0);
-
-         rowNumber += JpBlock.getNumRows();
-      }
-   }
 
    public void solve(RootJointAccelerationData rootJointAccelerationData, MomentumRateOfChangeData momentumRateOfChangeData)
    {
@@ -337,29 +231,5 @@ public class MomentumSolver3 implements MomentumSolverInterface
       CommonOps.mult(centroidalMomentumMatrix.getMatrix(), vdot, hdot);
       CommonOps.addEquals(hdot, adotV);
       rateOfChangeOfMomentumToPack.set(centroidalMomentumMatrix.getReferenceFrame(), hdot);
-   }
-
-   private RigidBody getBase(SpatialAccelerationVector taskSpaceAcceleration)
-   {
-      for (InverseDynamicsJoint joint : jointsInOrder)
-      {
-         RigidBody predecessor = joint.getPredecessor();
-         if (predecessor.getBodyFixedFrame() == taskSpaceAcceleration.getBaseFrame())
-            return predecessor;
-      }
-
-      throw new RuntimeException("Base for " + taskSpaceAcceleration + " could not be determined");
-   }
-
-   private RigidBody getEndEffector(SpatialAccelerationVector taskSpaceAcceleration)
-   {
-      for (InverseDynamicsJoint joint : jointsInOrder)
-      {
-         RigidBody successor = joint.getSuccessor();
-         if (successor.getBodyFixedFrame() == taskSpaceAcceleration.getBodyFrame())
-            return successor;
-      }
-
-      throw new RuntimeException("End effector for " + taskSpaceAcceleration + " could not be determined");
    }
 }

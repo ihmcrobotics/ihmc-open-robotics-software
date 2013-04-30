@@ -729,7 +729,7 @@ public class MomentumSolverTest
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
 
-      MomentumSolverInterface solver = new MomentumSolver(rootJoint, elevator, centerOfMassFrame, twistCalculator, jacobianSolver, dt, registry);
+      MomentumSolverInterface solver = new MomentumSolver3(rootJoint, elevator, centerOfMassFrame, twistCalculator, jacobianSolver, dt, registry);
       solver.initialize();
 
       for (SixDoFJoint sixDoFJoint : sixDoFJoints)
