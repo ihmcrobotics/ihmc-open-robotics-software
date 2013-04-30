@@ -17,12 +17,14 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCSimulationOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCPerfectPoseEstimator;
+import us.ihmc.darpaRoboticsChallenge.sensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.darpaRoboticsChallenge.sensors.GazeboForceSensor;
 import us.ihmc.projectM.R2Sim02.initialSetup.GuiInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.ScsInitialSetup;
 import us.ihmc.sensorProcessing.simulatedSensors.GroundContactPointBasedWrenchCalculator;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
@@ -146,10 +148,21 @@ public class DRCSimulationFactory
       }
 
 
-      
-      SimulatedSensorHolderAndReaderFromRobotFactory sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(simulatedRobot,
-            sensorNoiseParameters, controlDT, imuMounts, wrenchProviders, positionPoints, velocityPoints, registry);
-      RobotController controller = new RunnableRunnerController(sensorReaderFactory.getSensorReader());
+      SensorReaderFactory sensorReaderFactory;
+      RobotController controller;
+      if(DRCConfigParameters.USE_PERFECT_SENSORS)
+      {
+         DRCPerfectSensorReaderFactory drcPerfectSensorReaderFactory = new DRCPerfectSensorReaderFactory(simulatedRobot, wrenchProviders, controlDT);
+         controller = drcPerfectSensorReaderFactory.getSensorReader();
+         sensorReaderFactory = drcPerfectSensorReaderFactory;
+      }
+      else
+      {
+         SimulatedSensorHolderAndReaderFromRobotFactory simulatedSensorHolderAndReaderFromRobotFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(simulatedRobot,
+               sensorNoiseParameters, controlDT, imuMounts, wrenchProviders, positionPoints, velocityPoints, registry);
+         controller = new RunnableRunnerController(simulatedSensorHolderAndReaderFromRobotFactory.getSensorReader());
+         sensorReaderFactory = simulatedSensorHolderAndReaderFromRobotFactory;
+      }
       
       Vector3d gravity = new Vector3d();
       robotInterface.getRobot().getGravity(gravity);
@@ -159,14 +172,14 @@ public class DRCSimulationFactory
       
       DRCController robotController = new DRCController(initialCoMPositionAndEstimationLinkOrientation, robotInterface.getFullRobotModelFactory(), controllerFactory,
             sensorReaderFactory, outputWriter,
-            jointMap, lidarControllerInterface, gravity, estimateDT, controlDT, networkProccesorCommunicator, teamComputerServer, DRCConfigParameters.USE_ESTIMATED_POSE_FOR_SENSOR_TRANFORMS, robotInterface.getTimeStampProvider(), dynamicGraphicObjectsListRegistry,
+            jointMap, lidarControllerInterface, gravity, estimateDT, controlDT, networkProccesorCommunicator, teamComputerServer, DRCConfigParameters.USE_ESTIMATED_POSE_FOR_SENSOR_TRANSFORMS, robotInterface.getTimeStampProvider(), dynamicGraphicObjectsListRegistry,
             guiSetterUpperRegistry, registry);
 
       final HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, robotController,
             controller, estimationTicksPerControlTick, commonAvatarEnvironmentInterface, simulatedRobot.getAllExternalForcePoints(), robotInitialSetup, scsInitialSetup,
             guiInitialSetup, guiSetterUpperRegistry, dynamicGraphicObjectsListRegistry);
 
-      if (COMPUTE_ESTIMATOR_ERROR)
+      if (COMPUTE_ESTIMATOR_ERROR && robotController.getDRCStateEstimator() != null)
       {
          DRCStateEstimator drcStateEstimator = robotController.getDRCStateEstimator();
          StateEstimatorWithPorts stateEstimator = drcStateEstimator.getStateEstimator();
@@ -180,7 +193,7 @@ public class DRCSimulationFactory
          ((GazeboRobot) simulatedRobot).registerWithSCS(humanoidRobotSimulation.getSimulationConstructionSet());
       }
 
-      if (networkProccesorCommunicator != null && !DRCConfigParameters.USE_ESTIMATED_POSE_FOR_SENSOR_TRANFORMS)
+      if (networkProccesorCommunicator != null && !DRCConfigParameters.USE_ESTIMATED_POSE_FOR_SENSOR_TRANSFORMS)
       {
          simulatedRobot.setController(new DRCPerfectPoseEstimator(simulatedRobot, networkProccesorCommunicator, robotInterface.getTimeStampProvider()), estimationTicksPerControlTick);
       }
