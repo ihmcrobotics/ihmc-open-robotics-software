@@ -23,7 +23,7 @@ public class DRCConfigParameters
    public static final boolean USE_R2_ROBOT_MODEL = !USE_GFE_ROBOT_MODEL;
 
    // Networking
-   public static final String GAZEBO_HOST = "10.4.42.3"; // "localhost";    // "10.4.42.2";    // "localhost";
+   public static final String GAZEBO_HOST = "localhost";    // "10.4.42.2";    // "localhost";
    public static final String ROS_MASTER_URI = "http://" + GAZEBO_HOST + ":11311";
    public static final String SCS_MACHINE_IP_ADDRESS = "localhost";    // "10.100.0.37";
    public static final int CONTROLLER_TO_UI_TCP_PORT = 4893;
@@ -76,7 +76,7 @@ public class DRCConfigParameters
    // LIDAR Processor
    public static final boolean LIDAR_PROCESSOR_TIMING_REPORTING_ON = false;
    public static final DRCLidarDataStoreType DRCLIDAR_DATA_STORE_TYPE = DRCLidarDataStoreType.GROUND_ONLY_QUAD_TREE_AND_OCTREE;
-   public static final double GRID_RESOLUTION = 0.1;    // in meters
+   public static final double GRID_RESOLUTION = 0.05;    // in meters
    public static final double OCTREE_RESOLUTION = 0.05;
    public static final float QUADTREE_HEIGHT_THRESHOLD = 0.025f;
    public static final double LIDAR_BLINDNESS_CYLINDAR_SQUARED_RADIUS = 0.1;
