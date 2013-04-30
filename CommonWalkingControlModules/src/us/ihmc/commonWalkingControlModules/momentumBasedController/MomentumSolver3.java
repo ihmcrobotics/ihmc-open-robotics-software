@@ -7,14 +7,9 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolver;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.ops.CommonOps;
-import us.ihmc.utilities.CheckTools;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.*;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
 
 /**
  * @author twan
@@ -47,6 +42,7 @@ public class MomentumSolver3 implements MomentumSolverInterface
 
    private final LinearSolver<DenseMatrix64F> solver;
    private final MotionConstraintHandler motionConstraintHandler;
+   private final HardMotionConstraintEnforcer hardMotionConstraintEnforcer = new HardMotionConstraintEnforcer();
 
    public MomentumSolver3(SixDoFJoint rootJoint, RigidBody elevator, ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator,
                           LinearSolver<DenseMatrix64F> jacobianSolver, double controlDT, YoVariableRegistry parentRegistry)
@@ -140,11 +136,7 @@ public class MomentumSolver3 implements MomentumSolverInterface
 
    private final DenseMatrix64F sTranspose = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F sTransposeA = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F JpPlus = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F JpPluspp = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F P = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F AP = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F bMinusAJPlusP = new DenseMatrix64F(1, 1);
+
    private final DenseMatrix64F APPlusbMinusAJpPluspp = new DenseMatrix64F(1, 1);
 
 
@@ -180,32 +172,15 @@ public class MomentumSolver3 implements MomentumSolverInterface
       CommonOps.mult(sTranspose, centroidalMomentumMatrix.getMatrix(), sTransposeA);
 
       // assemble Jp, pp
-      motionConstraintHandler.compute();;
+      motionConstraintHandler.compute();
       DenseMatrix64F Jp = motionConstraintHandler.getJacobian();
       DenseMatrix64F pp = motionConstraintHandler.getRightHandSide();
 
-      // J+
-      JpPlus.reshape(Jp.getNumCols(), Jp.getNumRows());
-      solver.setA(Jp);
-      solver.invert(JpPlus);
-
-      // J+p
-      JpPluspp.reshape(JpPlus.getNumRows(), pp.getNumCols());
-      CommonOps.mult(JpPlus, pp, JpPluspp);
-
-      // bMinusAJPlusp
-      bMinusAJPlusP.reshape(b.getNumRows(), b.getNumCols());
-      bMinusAJPlusP.set(b);
-      CommonOps.multAdd(-1.0, sTransposeA, JpPluspp, bMinusAJPlusP);
-
-      // P
-      P.reshape(JpPlus.getNumRows(), Jp.getNumCols());
-      CommonOps.setIdentity(P);
-      CommonOps.multAdd(-1.0, JpPlus, Jp, P);
-
-      // AP
-      AP.reshape(sTransposeA.getNumRows(), P.getNumCols());
-      CommonOps.mult(sTransposeA, P, AP);
+      hardMotionConstraintEnforcer.compute(sTransposeA, b, Jp, pp);
+      DenseMatrix64F P = hardMotionConstraintEnforcer.getP();
+      DenseMatrix64F AP = hardMotionConstraintEnforcer.getAP();
+      DenseMatrix64F bMinusAJPlusP = hardMotionConstraintEnforcer.getbMinusAJPlusP();
+      DenseMatrix64F jPlusp = hardMotionConstraintEnforcer.getJPlusp();
 
       // APPlusbMinusAJpPluspp
       APPlusbMinusAJpPluspp.reshape(AP.getNumCols(), bMinusAJPlusP.getNumCols());
@@ -213,7 +188,7 @@ public class MomentumSolver3 implements MomentumSolverInterface
       solver.solve(bMinusAJPlusP, APPlusbMinusAJpPluspp);
 
       // vdot
-      vdot.set(JpPluspp);
+      vdot.set(jPlusp);
       CommonOps.multAdd(P, APPlusbMinusAJpPluspp, vdot);
 
       ScrewTools.setDesiredAccelerations(jointsInOrder, vdot);
