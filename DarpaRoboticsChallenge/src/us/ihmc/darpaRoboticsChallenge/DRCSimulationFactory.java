@@ -41,7 +41,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 
 public class DRCSimulationFactory
 {
-   private static final boolean COMPUTE_ESTIMATOR_ERROR = true;
+   private static final boolean COMPUTE_ESTIMATOR_ERROR = false;
    
    public static HumanoidRobotSimulation<SDFRobot> createSimulation(ControllerFactory controllerFactory,
          CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCRobotInterface robotInterface, RobotInitialSetup<SDFRobot> robotInitialSetup,
