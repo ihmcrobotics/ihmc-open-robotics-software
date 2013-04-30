@@ -11,7 +11,9 @@ public class DRCConfigParameters
    public static final boolean USE_ESTIMATED_POSE_FOR_SENSOR_TRANSFORMS = false;
    
    public static final boolean USE_PERFECT_SENSORS = false;
-   
+   static{
+      if (USE_PERFECT_SENSORS) System.err.println("Warning! Using Perfect Sensors!");
+   }
    public static final boolean USE_GAZEBO_PHYSICS = false;
    public static final String[] JOINTS_TO_IGNORE_FOR_GAZEBO = {"hokuyo_joint"};
    public static final boolean SHOW_SCS_GUI_FOR_GAZEBO = true;
