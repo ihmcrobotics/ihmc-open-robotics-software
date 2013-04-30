@@ -45,7 +45,7 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
          Transform3D transform = new Transform3D();
 
          double x = 0.20;
-         double y = robotSide.negateIfRightSide(0.30);
+         double y = robotSide.negateIfRightSide(0.35); //0.30);
          double z = -0.40;
          transform.setTranslation(new Vector3d(x, y, z));
 

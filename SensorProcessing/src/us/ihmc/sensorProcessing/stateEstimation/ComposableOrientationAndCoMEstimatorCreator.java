@@ -23,11 +23,14 @@ import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.Aggregat
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.AngularVelocityMeasurementModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.LinearAccelerationMeasurementModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.OrientationMeasurementModelElement;
+import us.ihmc.sensorProcessing.stateEstimation.processModelElements.AbstractProcessModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.processModelElements.AngularAccelerationProcessModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.processModelElements.AngularVelocityProcessModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.processModelElements.BiasProcessModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.processModelElements.CenterOfMassAccelerationProcessModelElement;
+import us.ihmc.sensorProcessing.stateEstimation.processModelElements.CenterOfMassPositionDiscreteProcessModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.processModelElements.CenterOfMassPositionProcessModelElement;
+import us.ihmc.sensorProcessing.stateEstimation.processModelElements.CenterOfMassVelocityDiscreteProcessModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.processModelElements.CenterOfMassVelocityProcessModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.processModelElements.OrientationProcessModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.processModelElements.ProcessModelElement;
@@ -46,6 +49,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class ComposableOrientationAndCoMEstimatorCreator
 {
+   private static final boolean USE_DISCRETE_COM_PROCESS_MODEL_ELEMENTS = true;
    private static final int VECTOR3D_LENGTH = 3;
 
    private final RigidBody orientationEstimationLink;
@@ -163,8 +167,8 @@ public class ComposableOrientationAndCoMEstimatorCreator
          addAngularVelocityProcessModelElement(estimationFrame, desiredAngularAccelerationInputPort);
          addAngularAccelerationProcessModelElement(estimationFrame, desiredAngularAccelerationInputPort);
 
-         addCoMPositionProcessModelElement();
-         addCoMVelocityProcessModelElement(desiredCenterOfMassAccelerationInputPort);
+         addCoMPositionProcessModelElement(controlDT);
+         addCoMVelocityProcessModelElement(controlDT, desiredCenterOfMassAccelerationInputPort);
          addCoMAccelerationProcessModelElement(desiredCenterOfMassAccelerationInputPort);
 
          for (OrientationSensorConfiguration orientationSensorConfiguration : orientationSensorConfigurations)
@@ -226,18 +230,39 @@ public class ComposableOrientationAndCoMEstimatorCreator
          addProcessModelElement(angularAccelerationStatePort, processModelElement);
       }
 
-      private void addCoMPositionProcessModelElement()
+      private void addCoMPositionProcessModelElement(double controlDT)
       {
-         CenterOfMassPositionProcessModelElement processModelElement = new CenterOfMassPositionProcessModelElement(centerOfMassPositionStatePort,
-                                                                          centerOfMassVelocityStatePort, "CoMPosition", registry);
+         AbstractProcessModelElement processModelElement;
+         
+         if (USE_DISCRETE_COM_PROCESS_MODEL_ELEMENTS)
+         {
+            processModelElement = new CenterOfMassPositionDiscreteProcessModelElement(controlDT, centerOfMassPositionStatePort,
+                  centerOfMassVelocityStatePort, "CoMPosition", registry);
+         }
+         else
+         {
+            processModelElement = new CenterOfMassPositionProcessModelElement(centerOfMassPositionStatePort,
+                  centerOfMassVelocityStatePort, "CoMPosition", registry);
+         }
          addProcessModelElement(centerOfMassPositionStatePort, processModelElement);
       }
 
-      private void addCoMVelocityProcessModelElement(ControlFlowInputPort<FrameVector> centerOfMassAccelerationInputPort)
+      private void addCoMVelocityProcessModelElement(double controlDT, ControlFlowInputPort<FrameVector> centerOfMassAccelerationInputPort)
       {
-         CenterOfMassVelocityProcessModelElement processModelElement = new CenterOfMassVelocityProcessModelElement(centerOfMassVelocityStatePort,
-                                                                          centerOfMassAccelerationInputPort, "CoMVelocity", registry);
-         processModelElement.setProcessNoiseCovarianceBlock(comAccelerationNoiseCovariance);
+         AbstractProcessModelElement processModelElement;
+         
+         if (USE_DISCRETE_COM_PROCESS_MODEL_ELEMENTS)
+         {
+            processModelElement = new CenterOfMassVelocityDiscreteProcessModelElement(controlDT, centerOfMassVelocityStatePort,
+                  centerOfMassAccelerationStatePort, "CoMVelocity", registry);
+         }
+         else
+         {
+            processModelElement = new CenterOfMassVelocityProcessModelElement(centerOfMassVelocityStatePort,
+                  centerOfMassAccelerationInputPort, "CoMVelocity", registry);
+            processModelElement.setProcessNoiseCovarianceBlock(comAccelerationNoiseCovariance);
+         }
+
          addProcessModelElement(centerOfMassVelocityStatePort, processModelElement);
       }
 
