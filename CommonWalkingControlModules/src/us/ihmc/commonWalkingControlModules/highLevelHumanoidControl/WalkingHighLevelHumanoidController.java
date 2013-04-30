@@ -782,6 +782,11 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
             if (nextFootstep != null)
             {
+               if (pointPositionGrabber != null)
+               {
+                  pointPositionGrabber.setExpectedFootstep(nextFootstep);
+               }
+
                Footstep nextNextFootstep = footstepProvider.peek();
 
                nextFootstepList.add(nextFootstep);

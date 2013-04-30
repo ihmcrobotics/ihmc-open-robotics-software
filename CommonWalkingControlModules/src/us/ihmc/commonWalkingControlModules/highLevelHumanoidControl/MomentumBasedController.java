@@ -80,7 +80,7 @@ public abstract class MomentumBasedController implements RobotController
    protected final InverseDynamicsCalculator inverseDynamicsCalculator;
 
    private final DesiredCoMAndAngularAccelerationGrabber desiredCoMAndAngularAccelerationGrabber;
-   private final PointPositionGrabber pointPositionGrabber;
+   protected final PointPositionGrabber pointPositionGrabber;
 
    protected final MomentumControlModule momentumControlModule;
 
