@@ -1,8 +1,13 @@
 package us.ihmc.SdfLoader;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.media.j3d.Transform3D;
@@ -10,6 +15,9 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFJointNameMap.JointRole;
+import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
+import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Camera;
+import us.ihmc.SdfLoader.xmlDescription.SDFSensor.IMU;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
@@ -22,6 +30,7 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.RobotSpecificJoin
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.containers.ContainerTools;
 import us.ihmc.utilities.math.MatrixTools;
@@ -56,6 +65,9 @@ public class SDFFullRobotModel implements FullRobotModel
 
    private final SideDependentList<RigidBody> feet = new SideDependentList<RigidBody>();
    private final SideDependentList<RigidBody> hands = new SideDependentList<RigidBody>();
+   private final ArrayList<IMUDefinition> imuDefinitions = new ArrayList<IMUDefinition>();
+   private final HashMap<String, ReferenceFrame> cameraFrames = new HashMap<String, ReferenceFrame>();
+   private final HashMap<String, ReferenceFrame> lidarFrames = new HashMap<String, ReferenceFrame>();
 
    public SDFFullRobotModel(SDFLinkHolder rootLink, SDFJointNameMap sdfJointNameMap)
    {
@@ -76,6 +88,7 @@ public class SDFFullRobotModel implements FullRobotModel
 //            + "; izz: " + rootLink.getInertia().m22 + "; COM Offset: " + rootLink.getCoMOffset());
       pelvis = ScrewTools.addRigidBody(rootLink.getName(), rootJoint, rootLink.getInertia(), rootLink.getMass(), rootLink.getCoMOffset());
 
+      addSensorDefinitions(rootJoint, rootLink);
       for (SDFJointHolder sdfJoint : rootLink.getChildren())
       {
          addJointsRecursively(sdfJoint, pelvis, MatrixTools.IDENTITY);
@@ -106,6 +119,59 @@ public class SDFFullRobotModel implements FullRobotModel
       lowerBody = ScrewTools.computeRigidBodiesInOrder(elevator, excludeBodiesForLowerBody);
       upperBody = ScrewTools.computeRigidBodiesInOrder(pelvis, excludeBodiesForUpperBody);
 
+   }
+   
+   private void addSensorDefinitions(InverseDynamicsJoint joint, SDFLinkHolder child)
+   {
+      if (child.getSensors() != null)
+      {
+         for (SDFSensor sensor : child.getSensors())
+         {
+            Transform3D pose = SDFConversionsHelper.poseToTransform(sensor.getPose());
+            if ("imu".equals(sensor.getType()))
+            {
+               final IMU imu = sensor.getImu();
+
+               if (imu != null)
+               {
+                  IMUDefinition imuDefinition = new IMUDefinition(sensor.getName(), joint.getSuccessor(), pose);
+
+                  imuDefinitions.add(imuDefinition);
+               }
+               else
+               {
+                  System.err.println("JAXB loader: No imu section defined for imu sensor " + sensor.getName() + ", ignoring sensor.");
+               }
+            }
+            else if("multicamera".equals(sensor.getType()))
+            {
+               List<Camera> cameras = sensor.getCamera();
+               if(cameras != null)
+               {
+                  ReferenceFrame sensorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(sensor.getName(), joint.getFrameAfterJoint(), pose);
+                  for(Camera camera : cameras)
+                  {
+                     Transform3D cameraTransform = SDFConversionsHelper.poseToTransform(camera.getPose()); 
+                     
+                     ReferenceFrame cameraFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(sensor.getName() + "_" + camera.getName(), sensorFrame, cameraTransform);
+                     cameraFrames.put(cameraFrame.getName(), cameraFrame);
+                  }
+                  
+               }
+               else
+               {
+                  System.err.println("JAXB loader: No camera section defined for camera sensor " + sensor.getName() + ", ignoring sensor.");
+               }
+               
+            }
+            else if("ray".equals(sensor.getType()))
+            {
+               ReferenceFrame lidarFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(sensor.getName(), joint.getFrameAfterJoint(), pose);
+               lidarFrames.put(sensor.getName(), lidarFrame);
+            }
+
+         }
+      }
    }
 
    private void addJointsRecursively(SDFJointHolder joint, RigidBody parentBody, Matrix3d chainRotationIn)
@@ -200,6 +266,8 @@ public class SDFFullRobotModel implements FullRobotModel
             break;
          }
       }
+      
+      addSensorDefinitions(inverseDynamicsJoint, childLink);
 
       for (SDFJointHolder sdfJoint : childLink.getChildren())
       {
@@ -350,8 +418,30 @@ public class SDFFullRobotModel implements FullRobotModel
       return oneDoFJointsAsArray;
    }
    
+   public Map<String, OneDoFJoint> getOneDoFJointsAsMap()
+   {
+      return Collections.unmodifiableMap(oneDoFJoints);
+   }
+   
    public OneDoFJoint getOneDoFJointByName(String name)
    {
       return oneDoFJoints.get(name);
+   }
+   
+   public IMUDefinition[] getIMUDefinitions()
+   {
+      IMUDefinition[] imuDefinitions = new IMUDefinition[this.imuDefinitions.size()];
+      this.imuDefinitions.toArray(imuDefinitions);
+      return imuDefinitions;
+   }
+   
+   public ReferenceFrame getCameraFrame(String name)
+   {
+      return cameraFrames.get(name);
+   }
+   
+   public ReferenceFrame getLidarFrame(String name)
+   {
+      return lidarFrames.get(name);
    }
 }

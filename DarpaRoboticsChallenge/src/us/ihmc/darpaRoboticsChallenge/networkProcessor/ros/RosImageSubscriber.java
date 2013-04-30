@@ -61,7 +61,7 @@ public abstract class RosImageSubscriber extends AbstractRosTopicSubscriber<sens
 
       };
 
-      RosMainNode rosMainNode = new RosMainNode(new URI("http://localhost:11311"));
+      RosMainNode rosMainNode = new RosMainNode(new URI("http://localhost:11311"), "darpaRoboticsChallange/rosImageSubscriber");
       rosMainNode.attachSubscriber("/multisense_sl/camera/left/image_rect_color/compressed", leftImageReceiver);
       rosMainNode.attachSubscriber("/multisense_sl/camera/right/image_rect_color/compressed", rightImageReceiver);
       rosMainNode.execute();

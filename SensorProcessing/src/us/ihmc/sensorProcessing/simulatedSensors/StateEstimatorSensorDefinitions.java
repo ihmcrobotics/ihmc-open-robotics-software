@@ -3,6 +3,7 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 public class StateEstimatorSensorDefinitions

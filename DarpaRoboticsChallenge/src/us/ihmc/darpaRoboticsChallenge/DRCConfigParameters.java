@@ -8,6 +8,9 @@ import us.ihmc.graphics3DAdapter.camera.VideoSettingsH264LowLatency;
 
 public class DRCConfigParameters
 {
+   public static final boolean USE_ESTIMATED_POSE_FOR_SENSOR_TRANFORMS = false;
+   
+   
    public static final boolean USE_GAZEBO_PHYSICS = false;
    public static final String[] JOINTS_TO_IGNORE_FOR_GAZEBO = {"hokuyo_joint"};
    public static final boolean SHOW_SCS_GUI_FOR_GAZEBO = true;

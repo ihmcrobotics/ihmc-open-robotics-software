@@ -23,10 +23,12 @@ public class RosMainNode implements NodeMain
    private final URI masterURI;
    private boolean isStarted = false;
    
+   private final String graphName;
    
-   public RosMainNode(URI masterURI)
+   public RosMainNode(URI masterURI, String graphName)
    {
       this.masterURI = masterURI;
+      this.graphName = graphName;
    }
    
    public void attachPublisher(String topicName, RosTopicPublisher<? extends Message> publisher)
@@ -89,7 +91,7 @@ public class RosMainNode implements NodeMain
 
    public final GraphName getDefaultNodeName()
    {
-      return GraphName.of("darpaRoboticsChallenge/RosMainNode");
+      return GraphName.of(graphName);
    }
    
    public void execute()

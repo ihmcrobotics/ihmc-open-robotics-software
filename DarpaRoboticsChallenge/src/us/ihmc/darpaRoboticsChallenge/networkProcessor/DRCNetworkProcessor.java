@@ -36,7 +36,7 @@ public class DRCNetworkProcessor
 
       System.out.println("Connecting to ROS");
       RosMainNode rosMainNode;
-      rosMainNode = new RosMainNode(rosCoreURI);
+      rosMainNode = new RosMainNode(rosCoreURI, "darpaRoboticsChallange/networkProcessor");
 
       RosClockSubscriber timeProvider = new RosClockSubscriber();
       rosMainNode.attachSubscriber("/clock", timeProvider);

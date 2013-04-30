@@ -50,7 +50,6 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 public class ComposableOrientationAndCoMEstimatorCreator
 {
    private static final boolean USE_DISCRETE_COM_PROCESS_MODEL_ELEMENTS = true;
-   private static final int VECTOR3D_LENGTH = 3;
 
    private final RigidBody orientationEstimationLink;
 

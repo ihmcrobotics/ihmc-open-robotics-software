@@ -7,7 +7,6 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.GazeboStateCommunicator.GazeboRobot;
-import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
@@ -15,6 +14,8 @@ import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.NullLidarController;
 import us.ihmc.commonWalkingControlModules.controllers.PIDLidarTorqueController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
+import us.ihmc.darpaRoboticsChallenge.outputs.DRCSimulationOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCPerfectPoseEstimator;
 import us.ihmc.darpaRoboticsChallenge.sensors.GazeboForceSensor;
 import us.ihmc.projectM.R2Sim02.initialSetup.GuiInitialSetup;
@@ -25,6 +26,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.RunnableRunnerController;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.StateEstimatorErrorCalculatorController;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.net.ObjectCommunicator;
@@ -37,6 +39,7 @@ import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
+import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class DRCSimulationFactory
@@ -45,7 +48,7 @@ public class DRCSimulationFactory
    
    public static HumanoidRobotSimulation<SDFRobot> createSimulation(ControllerFactory controllerFactory,
          CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCRobotInterface robotInterface, RobotInitialSetup<SDFRobot> robotInitialSetup,
-         ScsInitialSetup scsInitialSetup, GuiInitialSetup guiInitialSetup, ObjectCommunicator networkServer, ObjectCommunicator networkProccesorCommunicator)
+         ScsInitialSetup scsInitialSetup, GuiInitialSetup guiInitialSetup, ObjectCommunicator teamComputerServer, ObjectCommunicator networkProccesorCommunicator)
    {
       GUISetterUpperRegistry guiSetterUpperRegistry = new GUISetterUpperRegistry();
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
@@ -62,7 +65,7 @@ public class DRCSimulationFactory
       YoVariableRegistry registry = simulatedRobot.getRobotsYoVariableRegistry();
       simulatedRobot.setDynamicIntegrationMethod(scsInitialSetup.getDynamicIntegrationMethod());
 
-      SDFPerfectSimulatedOutputWriter outputWriter = new SDFPerfectSimulatedOutputWriter(simulatedRobot);
+      DRCOutputWriter outputWriter = new DRCSimulationOutputWriter(simulatedRobot);
 
       // TODO: Build LIDAR here
       LidarControllerInterface lidarControllerInterface;
@@ -146,7 +149,7 @@ public class DRCSimulationFactory
       
       SimulatedSensorHolderAndReaderFromRobotFactory sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(simulatedRobot,
             sensorNoiseParameters, controlDT, imuMounts, wrenchProviders, positionPoints, velocityPoints, registry);
-
+      RobotController controller = new RunnableRunnerController(sensorReaderFactory.getSensorReader());
       
       Vector3d gravity = new Vector3d();
       robotInterface.getRobot().getGravity(gravity);
@@ -156,11 +159,11 @@ public class DRCSimulationFactory
       
       DRCController robotController = new DRCController(initialCoMPositionAndEstimationLinkOrientation, robotInterface.getFullRobotModelFactory(), controllerFactory,
             sensorReaderFactory, outputWriter,
-            jointMap, lidarControllerInterface, gravity, estimateDT, controlDT, networkServer, dynamicGraphicObjectsListRegistry,
+            jointMap, lidarControllerInterface, gravity, estimateDT, controlDT, networkProccesorCommunicator, teamComputerServer, DRCConfigParameters.USE_ESTIMATED_POSE_FOR_SENSOR_TRANFORMS, robotInterface.getTimeStampProvider(), dynamicGraphicObjectsListRegistry,
             guiSetterUpperRegistry, registry);
 
       final HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, robotController,
-            estimationTicksPerControlTick, commonAvatarEnvironmentInterface, simulatedRobot.getAllExternalForcePoints(), robotInitialSetup, scsInitialSetup,
+            controller, estimationTicksPerControlTick, commonAvatarEnvironmentInterface, simulatedRobot.getAllExternalForcePoints(), robotInitialSetup, scsInitialSetup,
             guiInitialSetup, guiSetterUpperRegistry, dynamicGraphicObjectsListRegistry);
 
       if (COMPUTE_ESTIMATOR_ERROR)
@@ -177,7 +180,7 @@ public class DRCSimulationFactory
          ((GazeboRobot) simulatedRobot).registerWithSCS(humanoidRobotSimulation.getSimulationConstructionSet());
       }
 
-      if (networkProccesorCommunicator != null)
+      if (networkProccesorCommunicator != null && !DRCConfigParameters.USE_ESTIMATED_POSE_FOR_SENSOR_TRANFORMS)
       {
          simulatedRobot.setController(new DRCPerfectPoseEstimator(simulatedRobot, networkProccesorCommunicator, robotInterface.getTimeStampProvider()), estimationTicksPerControlTick);
       }

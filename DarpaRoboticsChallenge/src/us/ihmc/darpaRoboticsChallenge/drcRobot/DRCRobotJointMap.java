@@ -1,7 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.drcRobot;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -27,6 +26,11 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
    private final String pelvisName = "pelvis";
    private final String headName = "head";
    private final String lidarJointName = "hokuyo_joint";
+   
+   private final String lidarSensorName = "head_hokuyo_sensor";
+   private final String leftCameraName = "stereo_camera_left";
+   private final String rightCameraName = "stereo_camera_right";
+   
    private final double ankleHeight = DRCRobotParameters.DRC_ROBOT_ANKLE_HEIGHT;
 
    private final LegJointName[] legJoints =
@@ -330,5 +334,20 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
    public boolean enableTorqueVelocityLimits()
    {
       return DRCRobotParameters.ENABLE_JOINT_VELOCITY_TORQUE_LIMITS;
+   }
+
+   public String getLeftCameraName()
+   {
+      return leftCameraName;
+   }
+
+   public String getLidarSensorName()
+   {
+      return lidarSensorName;
+   }
+
+   public String getRightCameraName()
+   {
+      return rightCameraName;
    }
 }
