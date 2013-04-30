@@ -86,7 +86,7 @@ public class SensorAndEstimatorAssembler
       inverseDynamicsStructure.updateInternalState();
 
       estimator = orientationEstimatorCreator.createOrientationEstimator(controlFlowGraph, controlDT,
-            inverseDynamicsStructure.getRootJoint(), estimationLink, estimationFrame, registry);
+            estimationFrame, registry);
 
       stateEstimatorDataFromControllerSource.connectDesiredAccelerationPorts(controlFlowGraph, estimator);
 

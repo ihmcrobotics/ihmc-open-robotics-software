@@ -1,17 +1,8 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
@@ -23,17 +14,7 @@ import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.Aggregat
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.AngularVelocityMeasurementModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.LinearAccelerationMeasurementModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.OrientationMeasurementModelElement;
-import us.ihmc.sensorProcessing.stateEstimation.processModelElements.AbstractProcessModelElement;
-import us.ihmc.sensorProcessing.stateEstimation.processModelElements.AngularAccelerationProcessModelElement;
-import us.ihmc.sensorProcessing.stateEstimation.processModelElements.AngularVelocityProcessModelElement;
-import us.ihmc.sensorProcessing.stateEstimation.processModelElements.BiasProcessModelElement;
-import us.ihmc.sensorProcessing.stateEstimation.processModelElements.CenterOfMassAccelerationProcessModelElement;
-import us.ihmc.sensorProcessing.stateEstimation.processModelElements.CenterOfMassPositionDiscreteProcessModelElement;
-import us.ihmc.sensorProcessing.stateEstimation.processModelElements.CenterOfMassPositionProcessModelElement;
-import us.ihmc.sensorProcessing.stateEstimation.processModelElements.CenterOfMassVelocityDiscreteProcessModelElement;
-import us.ihmc.sensorProcessing.stateEstimation.processModelElements.CenterOfMassVelocityProcessModelElement;
-import us.ihmc.sensorProcessing.stateEstimation.processModelElements.OrientationProcessModelElement;
-import us.ihmc.sensorProcessing.stateEstimation.processModelElements.ProcessModelElement;
+import us.ihmc.sensorProcessing.stateEstimation.processModelElements.*;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.LinearAccelerationSensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.OrientationSensorConfiguration;
@@ -43,9 +24,10 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
+import java.util.*;
 
 public class ComposableOrientationAndCoMEstimatorCreator
 {
@@ -110,10 +92,10 @@ public class ComposableOrientationAndCoMEstimatorCreator
       this.linearAccelerationSensorConfigurations.add(linearAccelerationSensorConfiguration);
    }
 
-   public ComposableOrientationAndCoMEstimator createOrientationEstimator(ControlFlowGraph controlFlowGraph, double controlDT, SixDoFJoint rootJoint,
-           RigidBody estimationLink, ReferenceFrame estimationFrame, YoVariableRegistry registry)
+   public ComposableOrientationAndCoMEstimator createOrientationEstimator(ControlFlowGraph controlFlowGraph, double controlDT,
+                                                                          ReferenceFrame estimationFrame, YoVariableRegistry registry)
    {
-      return new ComposableOrientationAndCoMEstimator("orientationEstimator", controlDT, rootJoint, estimationLink, estimationFrame, controlFlowGraph,
+      return new ComposableOrientationAndCoMEstimator("orientationEstimator", controlDT, estimationFrame, controlFlowGraph,
               inverseDynamicsStructureOutputPort, registry);
    }
 
@@ -136,9 +118,9 @@ public class ComposableOrientationAndCoMEstimatorCreator
       private final ControlFlowOutputPort<FullInverseDynamicsStructure> updatedInverseDynamicsStructureOutputPort;
       private final CenterOfMassBasedFullRobotModelUpdater centerOfMassBasedFullRobotModelUpdater;
 
-      public ComposableOrientationAndCoMEstimator(String name, double controlDT, SixDoFJoint rootJoint, RigidBody estimationLink,
-              ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph,
-              ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort, YoVariableRegistry parentRegistry)
+      public ComposableOrientationAndCoMEstimator(String name, double controlDT,
+                                                  ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph,
+                                                  ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort, YoVariableRegistry parentRegistry)
       {
          super(name, controlDT, parentRegistry);
 
