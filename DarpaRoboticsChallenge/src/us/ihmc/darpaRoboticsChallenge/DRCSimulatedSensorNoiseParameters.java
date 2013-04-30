@@ -89,7 +89,7 @@ public class DRCSimulatedSensorNoiseParameters
       double gazeboAngularVelocityBiasMean = 0.000001;
       
       double gazeboLinearAccelerationBiasStandardDeviation = 0.017000;
-      double gazeboLinearAccelerationBiasMean = 0.100000;
+      double gazeboLinearAccelerationBiasMean =  0.100000;
       
       Vector3d initialLinearAccelerationBias = computeGazeboBiasVector(gazeboLinearAccelerationBiasMean, gazeboLinearAccelerationBiasStandardDeviation, random);
       Vector3d initialAngularVelocityBias = computeGazeboBiasVector(gazeboAngularVelocityBiasMean, gazeboAngularVelocityBiasStandardDeviation, random);
@@ -114,6 +114,23 @@ public class DRCSimulatedSensorNoiseParameters
 
       sensorNoiseParameters.setAngularVelocityBiasProcessNoiseStandardDeviation(1e-8);
       sensorNoiseParameters.setLinearAccelerationBiasProcessNoiseStandardDeviation(0.02); //1e-3);
+
+      return sensorNoiseParameters;
+   }
+   
+   public static SensorNoiseParameters createNoiseParametersForEstimatorJerryTuningApril30()
+   {
+      SensorNoiseParameters sensorNoiseParameters = new SensorNoiseParameters();
+
+      sensorNoiseParameters.setComAccelerationProcessNoiseStandardDeviation(1.0); //0.3);
+      sensorNoiseParameters.setAngularAccelerationProcessNoiseStandardDeviation(1e3); //0.3);
+      
+      sensorNoiseParameters.setOrientationMeasurementStandardDeviation(0.01);
+      sensorNoiseParameters.setAngularVelocityMeasurementStandardDeviation(0.1);
+      sensorNoiseParameters.setLinearAccelerationMeasurementStandardDeviation(0.1); //0.1);
+
+      sensorNoiseParameters.setAngularVelocityBiasProcessNoiseStandardDeviation(1e-6);
+      sensorNoiseParameters.setLinearAccelerationBiasProcessNoiseStandardDeviation(0.001); //1e-6); //0.02); //1e-3);
 
       return sensorNoiseParameters;
    }
