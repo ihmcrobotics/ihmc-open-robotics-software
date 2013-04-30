@@ -77,6 +77,7 @@ public class DRCSimulationFactory
       {
          lidarControllerInterface = new PIDLidarTorqueController(DRCConfigParameters.LIDAR_SPINDLE_VELOCITY, controlDT, registry);
          sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersALittleNoise();
+//         sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersGazeboSDF();
       }
 
       //    SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMapForEstimator;
@@ -144,7 +145,7 @@ public class DRCSimulationFactory
 
       
       SimulatedSensorHolderAndReaderFromRobotFactory sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(simulatedRobot,
-            sensorNoiseParameters, controlDT, allIMUMounts, wrenchProviders, positionPoints, velocityPoints, registry);
+            sensorNoiseParameters, controlDT, imuMounts, wrenchProviders, positionPoints, velocityPoints, registry);
 
       
       Vector3d gravity = new Vector3d();

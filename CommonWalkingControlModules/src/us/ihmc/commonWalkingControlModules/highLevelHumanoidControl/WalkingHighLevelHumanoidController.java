@@ -144,8 +144,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final YoFramePoint2d finalDesiredICPInWorld = new YoFramePoint2d("finalDesiredICPInWorld", "", worldFrame, registry);
 
    protected final SideDependentList<FootSwitchInterface> footSwitches;
-   protected final SideDependentList<GlitchFilteredBooleanYoVariable> filteredFootSwitches = new SideDependentList<GlitchFilteredBooleanYoVariable>();
-   protected final SideDependentList<GlitchFilteredBooleanYoVariable> filteredHeelSwitches = new SideDependentList<GlitchFilteredBooleanYoVariable>();
 
    private final DoubleYoVariable minOrbitalEnergyForSingleSupport = new DoubleYoVariable("minOrbitalEnergyForSingleSupport", registry);
    private final DoubleYoVariable amountToBeInsideSingleSupport = new DoubleYoVariable("amountToBeInsideSingleSupport", registry);
@@ -276,10 +274,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          ContactablePlaneBody bipedFoot = bipedFeet.get(robotSide);
          contactStates.get(bipedFoot).set(bipedFoot.getContactPoints2d(), coefficientOfFriction.getDoubleValue());    // flat feet
          String sideString = robotSide.getCamelCaseNameForStartOfExpression();
-
-         int footFilterWindowSize = landOnHeels() ? 3 : 0;
-         filteredFootSwitches.put(robotSide, new GlitchFilteredBooleanYoVariable(sideString + "FilteredFootswitch", registry, footFilterWindowSize));
-         filteredHeelSwitches.put(robotSide, new GlitchFilteredBooleanYoVariable(sideString + "FilteredHeelswitch", registry, footFilterWindowSize));
 
          PositionTrajectoryGenerator swingPositionTrajectoryGenerator = footPositionTrajectoryGenerators.get(robotSide);
          DoubleTrajectoryGenerator heelPitchTrajectoryGenerator = (heelPitchTrajectoryGenerators == null) ? null : heelPitchTrajectoryGenerators.get(robotSide);
@@ -583,7 +577,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       public void doAction()
       {
          ContactablePlaneBody transferFoot = bipedFeet.get(transferToSide);
-         updateFootswitchFilter(transferToSide);
 
          if ((endEffectorControlModules.get(transferFoot) != null) && endEffectorControlModules.get(transferFoot).onHeel()
                  && footSwitches.get(transferToSide).hasFootHitGround())
@@ -891,6 +884,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       @Override
       public void doTransitionIntoAction()
       {
+         footSwitches.get(swingSide).reset();
+
          Footstep nextFootstep = getNextFootstep();
          boolean nextFootstepHasBeenReplaced = false;
          Footstep oldNextFootstep = nextFootstep;
@@ -1018,14 +1013,12 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       public boolean checkCondition()
       {
          RobotSide swingSide = getSupportLeg().getOppositeSide();
-         double minimumSwingFraction = 0.5;
-         double minimumSwingTime = swingTimeCalculationProvider.getValue() * minimumSwingFraction;
+         boolean hasMinimumTimePassed = hasMinimumTimePassed();
 
-         updateFootswitchFilter(swingSide);
          FootSwitchInterface footSwitch = footSwitches.get(swingSide);
-         boolean footSwitchActivated;
 
          // TODO probably make all FootSwitches in this class be HeelSwitches and get rid of instanceof
+         boolean footSwitchActivated;
          if (landOnHeels())
          {
             if (!(footSwitch instanceof HeelSwitch))
@@ -1034,28 +1027,30 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
             }
 
             HeelSwitch heelSwitch = (HeelSwitch) footSwitch;
-            filteredHeelSwitches.get(swingSide).update(heelSwitch.hasHeelHitGround());
-            footSwitchActivated = filteredHeelSwitches.get(swingSide).getBooleanValue();
+            footSwitchActivated = heelSwitch.hasHeelHitGround();
          }
-
          else
          {
-            footSwitchActivated = filteredFootSwitches.get(swingSide).getBooleanValue();
+            footSwitchActivated = footSwitch.hasFootHitGround();
          }
-
-         boolean footHitGround = (stateMachine.timeInCurrentState() > minimumSwingTime) && footSwitchActivated;
-
 
          if (walkingControllerParameters.finishSwingWhenTrajectoryDone())
          {
             boolean trajectoryDone = icpTrajectoryGenerator.isDone();    // endEffectorControlModule.isTrajectoryDone();
 
-            return trajectoryDone || footHitGround;
+            return hasMinimumTimePassed && (trajectoryDone || footSwitchActivated);
          }
          else
          {
-            return footHitGround;
+            return hasMinimumTimePassed && footSwitchActivated;
          }
+      }
+
+      private boolean hasMinimumTimePassed()
+      {
+         double minimumSwingFraction = 0.5;
+         double minimumSwingTime = swingTimeCalculationProvider.getValue() * minimumSwingFraction;
+         return stateMachine.timeInCurrentState() > minimumSwingTime;
       }
    }
 
@@ -1640,12 +1635,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       return (heelPitchTouchdownProvidersManager != null) && (heelPitchTouchdownProvidersManager.getAngle() != 0.0);
    }
 
-   private void updateFootswitchFilter(RobotSide robotSide)
-   {
-      if (robotSide != null)
-         filteredFootSwitches.get(robotSide).update(footSwitches.get(robotSide).hasFootHitGround());
-   }
-   
    private void checkForHighSteps(RobotSide transferToSide)
    {
       if(transferToSide != null && nextFootstepList.size() > 0)
