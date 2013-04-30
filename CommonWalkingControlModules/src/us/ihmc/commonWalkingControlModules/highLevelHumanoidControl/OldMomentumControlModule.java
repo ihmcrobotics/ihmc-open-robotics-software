@@ -79,7 +79,7 @@ public class OldMomentumControlModule implements MomentumControlModule
 
       this.solver = new MomentumSolver(rootJoint, rootJoint.getPredecessor(), centerOfMassFrame, twistCalculator, jacobianSolver, controlDT, registry);
 
-      double totalMass = TotalMassCalculator.computeMass(ScrewTools.computeSupportAndSubtreeBodies(false, rootJoint.getSuccessor()));
+      double totalMass = TotalMassCalculator.computeMass(ScrewTools.computeSupportAndSubtreeSuccessors(rootJoint.getSuccessor()));
 
       this.contactablePlaneBodies = new ArrayList<ContactablePlaneBody>(contactablePlaneBodies);
       this.groundReactionWrenchDistributor = groundReactionWrenchDistributor;
