@@ -8,7 +8,8 @@ import javax.vecmath.Vector3d;
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRobotGenerator;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
-import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReader;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAccelerationsFromRobotStealerController;
@@ -55,14 +56,14 @@ public class ComposableStateEstimatorEvaluator
 
 
       
-      SimulatedSensorHolderAndReaderFromRobotFactory simulatedSensorHolderAndReaderFromRobotFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(
+      SensorReaderFactory simulatedSensorHolderAndReaderFromRobotFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(
             robot, simulatedSensorNoiseParameters, controlDT, imuMounts, 
             new ArrayList<WrenchCalculatorInterface>(), robot.getPositionPoints(), robot.getVelocityPoints(), 
             registry);
       
-      simulatedSensorHolderAndReaderFromRobotFactory.build(inverseDynamicsStructure.getRootJoint());
+      simulatedSensorHolderAndReaderFromRobotFactory.build(inverseDynamicsStructure.getRootJoint(), null);
       
-      SimulatedSensorHolderAndReader simulatedSensorHolderAndReader = simulatedSensorHolderAndReaderFromRobotFactory.getSimulatedSensorHolderAndReader();
+      SensorReader simulatedSensorHolderAndReader = simulatedSensorHolderAndReaderFromRobotFactory.getSensorReader();
       
       Joint estimationJoint = robot.getRootJoint();
       robot.update();
@@ -110,7 +111,7 @@ public class ComposableStateEstimatorEvaluator
       
       robot.setController(desiredCoMAccelerationsFromRobotStealerController, simTicksPerControlDT);
       RunnableRunnerController runnableRunnerController = new RunnableRunnerController();
-      runnableRunnerController.addRunnable(simulatedSensorHolderAndReader);
+      runnableRunnerController.addRunnable((Runnable) simulatedSensorHolderAndReader);
       runnableRunnerController.addRunnable(new Runnable()
       {
          

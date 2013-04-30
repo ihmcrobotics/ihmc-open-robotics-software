@@ -7,6 +7,4 @@
   <review status="doc reviewed" notes="2009-10-07"/>
   <url>http://ros.org/wiki/bullet</url>
   <depend stack="ros" />
-  <depend stack="common_rosdeps" />
-
 </stack>

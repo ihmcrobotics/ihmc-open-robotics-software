@@ -2,12 +2,11 @@
 # Do not use, testing only
 Header header
 
-string[] name
-uint32[] index
-float64[] damping
-float64[] kp_position
-float64[] ki_position
-float64[] kd_position
-float64[] kp_velocity
-float64[] i_effort_min
-float64[] i_effort_max
+float32[] damping
+float32[] kp_position
+float32[] ki_position
+float32[] kd_position
+float32[] kp_velocity
+float32[] i_effort_min
+float32[] i_effort_max
+uint8[] k_effort

@@ -373,19 +373,25 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
             if ("camera".equals(sensor.getType()) || "multicamera".equals(sensor.getType()))
             {
                // TODO: handle left and right sides of multicamera
-               final Camera camera = sensor.getCamera();
-
-               if (camera != null)
+               final List<Camera> cameras = sensor.getCamera();
+               
+               if (cameras != null)
                {
                   Transform3D pose = SDFConversionsHelper.poseToTransform(sensor.getPose());
-                  double fieldOfView = Double.parseDouble(camera.getHorizontalFov());
-                  double clipNear = Double.parseDouble(camera.getClip().getNear());
-                  double clipFar = Double.parseDouble(camera.getClip().getFar());
-                  CameraMount mount = new CameraMount(sensor.getName(), pose, fieldOfView, clipNear, clipFar, this);
-                  scsJoint.addCameraMount(mount);
-
-                  SDFCamera sdfCamera = new SDFCamera(Integer.parseInt(camera.getImage().getWidth()), Integer.parseInt(camera.getImage().getHeight()));
-                  cameras.put(sensor.getName(), sdfCamera);
+                  for(Camera camera : cameras)
+                  {
+                     Transform3D cameraTransform = new Transform3D(pose);
+                     cameraTransform.mul(SDFConversionsHelper.poseToTransform(camera.getPose()));
+                     
+                     double fieldOfView = Double.parseDouble(camera.getHorizontalFov());
+                     double clipNear = Double.parseDouble(camera.getClip().getNear());
+                     double clipFar = Double.parseDouble(camera.getClip().getFar());
+                     CameraMount mount = new CameraMount(sensor.getName() + "_" + camera.getName(), cameraTransform, fieldOfView, clipNear, clipFar, this);
+                     scsJoint.addCameraMount(mount);
+   
+                     SDFCamera sdfCamera = new SDFCamera(Integer.parseInt(camera.getImage().getWidth()), Integer.parseInt(camera.getImage().getHeight()));
+                     this.cameras.put(sensor.getName(), sdfCamera);
+                  }
                }
                else
                {

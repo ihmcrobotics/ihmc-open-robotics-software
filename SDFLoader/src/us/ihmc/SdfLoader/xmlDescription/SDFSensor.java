@@ -1,5 +1,7 @@
 package us.ihmc.SdfLoader.xmlDescription;
 
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 
@@ -9,7 +11,7 @@ public class SDFSensor
    private String type;
    private String updateRate;
    private String pose;
-   private Camera camera;
+   private List<Camera> camera;
    private Ray ray;
    private IMU imu;
 
@@ -57,13 +59,13 @@ public class SDFSensor
       this.pose = pose;
    }
 
-   public Camera getCamera()
+   public List<Camera> getCamera()
    {
       return camera;
    }
 
    @XmlElement(name = "camera")
-   public void setCamera(Camera camera)
+   public void setCamera(List<Camera> camera)
    {
       this.camera = camera;
    }
@@ -303,6 +305,7 @@ public class SDFSensor
 
    public static class Camera
    {
+      private String name;
       private String pose;
       private String horizontalFov;
       private SensorImage image;
@@ -350,6 +353,17 @@ public class SDFSensor
       public void setClip(Clip clip)
       {
          this.clip = clip;
+      }
+
+      @XmlAttribute(name = "name")
+      public String getName()
+      {
+         return name;
+      }
+
+      public void setName(String name)
+      {
+         this.name = name;
       }
 
       public static class SensorImage

@@ -5,13 +5,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.sensorProcessing.signalCorruption.GaussianOrientationCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianVectorCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.RandomWalkBiasVectorCorruptor;
-import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
@@ -21,10 +20,9 @@ import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.KinematicPoint;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
-public class SimulatedSensorHolderAndReaderFromRobotFactory
+public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorReaderFactory
 {
    private final YoVariableRegistry registry;
    private final Robot robot;
@@ -37,19 +35,19 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory
    private final ArrayList<KinematicPoint> velocityPoints;
    
 
+   private final SimulatedSensorHolderAndReader simulatedSensorHolderAndReader;
    private Map<IMUMount, IMUDefinition> imuDefinitions;
    private Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitions;
-   private SimulatedSensorHolderAndReader simulatedSensorHolderAndReader;
    private StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
    
    
    public SimulatedSensorHolderAndReaderFromRobotFactory(Robot robot, SensorNoiseParameters sensorNoiseParameters, double controlDT,
          ArrayList<IMUMount> imuMounts, ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators, ArrayList<KinematicPoint> positionPoints, ArrayList<KinematicPoint> velocityPoints, YoVariableRegistry registry)
    {
-      
       this.registry = registry;
       this.robot = robot;
       this.sensorNoiseParameters = sensorNoiseParameters;
+      this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReader(); 
       
       this.controlDT = controlDT;
       this.imuMounts = imuMounts;
@@ -60,7 +58,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory
 
    }
 
-   public void build(SixDoFJoint sixDoFJoint)
+   public void build(SixDoFJoint sixDoFJoint, IMUDefinition[] imuDefinition)
    {
       
       
@@ -80,8 +78,6 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory
          this.stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
          this.imuDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getIMUDefinitions();
          this.forceSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getForceSensorDefinitions();
-         
-         this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReader();
          
          createAndAddOrientationSensors(imuDefinitions, registry);
          createAndAddAngularVelocitySensors(imuDefinitions, registry);
@@ -104,12 +100,12 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory
       }
    }
 
-   public SimulatedSensorHolderAndReader getSimulatedSensorHolderAndReader()
+   public SimulatedSensorHolderAndReader getSensorReader()
    {
       return simulatedSensorHolderAndReader;
    }
 
-   public void createAndAddOneDoFPositionAndVelocitySensors(SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap)
+   private void createAndAddOneDoFPositionAndVelocitySensors(SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap)
    {
       ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
       robot.getAllOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);
@@ -126,7 +122,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory
       }
    }
 
-   public void createAndAddOrientationSensors(Map<IMUMount, IMUDefinition> imuDefinitions, YoVariableRegistry registry)
+   private void createAndAddOrientationSensors(Map<IMUMount, IMUDefinition> imuDefinitions, YoVariableRegistry registry)
    {
       Set<IMUMount> imuMounts = imuDefinitions.keySet();
 
@@ -150,7 +146,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory
       }
    }
 
-   public void createAndAddAngularVelocitySensors(Map<IMUMount, IMUDefinition> imuDefinitions, YoVariableRegistry registry)
+   private void createAndAddAngularVelocitySensors(Map<IMUMount, IMUDefinition> imuDefinitions, YoVariableRegistry registry)
    {
       Set<IMUMount> imuMounts = imuDefinitions.keySet();
 
@@ -185,7 +181,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory
       }
    }
 
-   public void createAndAddLinearAccelerationSensors(Map<IMUMount, IMUDefinition> imuDefinitions, YoVariableRegistry registry)
+   private void createAndAddLinearAccelerationSensors(Map<IMUMount, IMUDefinition> imuDefinitions, YoVariableRegistry registry)
    {
       Set<IMUMount> imuMounts = imuDefinitions.keySet();
 
@@ -223,21 +219,21 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory
       return stateEstimatorSensorDefinitions;
    }
 
-   public void getCenterOfMassPostion(FramePoint estimatedCoMPosition)
-   {
-      estimatedCoMPosition.setX(estimatedCoMPosition.getX() + 0.0855);
-      estimatedCoMPosition.setZ(estimatedCoMPosition.getZ() + 0.9904); //1.2); 
-      
-      Point3d comPoint = new Point3d();
-      try
-      {
-         robot.doDynamicsButDoNotIntegrate();
-      }
-      catch (UnreasonableAccelerationException e)
-      {
-         throw new RuntimeException("UnreasonableAccelerationException in getCenterOfMassPostion");
-      }
-      robot.computeCenterOfMass(comPoint);
-      
-   }
+//   private void getCenterOfMassPostion(FramePoint estimatedCoMPosition)
+//   {
+//      estimatedCoMPosition.setX(estimatedCoMPosition.getX() + 0.0855);
+//      estimatedCoMPosition.setZ(estimatedCoMPosition.getZ() + 0.9904); //1.2); 
+//      
+//      Point3d comPoint = new Point3d();
+//      try
+//      {
+//         robot.doDynamicsButDoNotIntegrate();
+//      }
+//      catch (UnreasonableAccelerationException e)
+//      {
+//         throw new RuntimeException("UnreasonableAccelerationException in getCenterOfMassPostion");
+//      }
+//      robot.computeCenterOfMass(comPoint);
+//      
+//   }
 }

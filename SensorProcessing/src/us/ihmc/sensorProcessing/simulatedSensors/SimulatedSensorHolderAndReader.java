@@ -10,9 +10,10 @@ import javax.vecmath.Vector3d;
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.sensorProcessing.sensorData.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
+import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
-public class SimulatedSensorHolderAndReader implements Runnable
+public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
 {
    
    private ControlFlowElement controllerDispatcher;

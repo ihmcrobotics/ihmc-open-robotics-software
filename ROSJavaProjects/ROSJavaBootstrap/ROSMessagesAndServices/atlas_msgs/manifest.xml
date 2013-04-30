@@ -13,6 +13,7 @@
   <depend package="tf"/>
   <depend package="trajectory_msgs"/>
   <depend package="actionlib"/>
+  <depend package="actionlib_msgs"/>
   <depend package="control_msgs"/>
   <depend package="osrf_msgs"/>
   <!-- generate these here

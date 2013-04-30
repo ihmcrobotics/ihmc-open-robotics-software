@@ -22,7 +22,6 @@
   <depend package="rosgraph_msgs" />
   <depend package="trajectory_msgs" />
   <depend package="pcl_ros" />
-  <depend package="pcl" />
   <depend package="image_transport" />
   <export>
     <cpp cflags="-I${prefix}/cfg/cpp -I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib" />

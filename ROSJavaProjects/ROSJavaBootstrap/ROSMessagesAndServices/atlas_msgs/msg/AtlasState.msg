@@ -40,9 +40,7 @@ int32 r_arm_elx = 25
 int32 r_arm_uwy = 26
 int32 r_arm_mwx = 27
 
-# using JointCommands to store joint_states information
-# joint_states.name[] array is left empty, use the enum list above
-#osrf_msgs/JointCommands joint_states
+# repeating data from osrf_msgs/JointCommands as joint_states
 float32[] position
 float32[] velocity
 float32[] effort
@@ -52,6 +50,10 @@ float32[] kd_position
 float32[] kp_velocity
 float32[] i_effort_min
 float32[] i_effort_max
+
+uint8[] k_effort       # k_effort can be an unsigned int 8value from 0 to 255, 
+                       # at run time, a double between 0 and 1 is obtained
+                       # by dividing by 255.0d.
 
 
 #sensor_msgs/Imu imu 

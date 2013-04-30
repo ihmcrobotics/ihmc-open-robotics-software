@@ -8,6 +8,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 public class JointAndIMUSensorMap
