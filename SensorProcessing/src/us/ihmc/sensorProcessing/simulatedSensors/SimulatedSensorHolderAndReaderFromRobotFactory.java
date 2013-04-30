@@ -219,6 +219,11 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
       return stateEstimatorSensorDefinitions;
    }
 
+   public boolean useStateEstimator()
+   {
+      return true;
+   }
+
 //   private void getCenterOfMassPostion(FramePoint estimatedCoMPosition)
 //   {
 //      estimatedCoMPosition.setX(estimatedCoMPosition.getX() + 0.0855);

@@ -11,5 +11,7 @@ public interface SensorReaderFactory
    public abstract SensorReader getSensorReader();
 
    public abstract StateEstimatorSensorDefinitions getStateEstimatorSensorDefinitions();
+   
+   public abstract boolean useStateEstimator();
 
 }

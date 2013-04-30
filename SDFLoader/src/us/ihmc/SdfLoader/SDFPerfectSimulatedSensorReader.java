@@ -10,7 +10,9 @@ import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.Twist;
 
@@ -27,23 +29,35 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader
 
    private final ArrayList<Pair<OneDegreeOfFreedomJoint, OneDoFJoint>> revoluteJoints = new ArrayList<Pair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
 
+   
+   
    public SDFPerfectSimulatedSensorReader(SDFRobot robot, FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames)
+   {
+      this(robot, fullRobotModel.getRootJoint(), referenceFrames);
+   }
+   
+   public SDFPerfectSimulatedSensorReader(SDFRobot robot, SixDoFJoint rootJoint, CommonWalkingReferenceFrames referenceFrames)
    {
       this.name = robot.getName() + "SimulatedSensorReader";
       this.robot = robot;
       this.referenceFrames = referenceFrames;
 
-      rootJoint = fullRobotModel.getRootJoint();
+      this.rootJoint = rootJoint;
 
-      OneDoFJoint[] revoluteJointsArray = fullRobotModel.getOneDoFJoints();
+      InverseDynamicsJoint[] jointsArray = ScrewTools.computeSubtreeJoints(rootJoint.getSuccessor());
 
-      for (OneDoFJoint revoluteJoint : revoluteJointsArray)
+      for (InverseDynamicsJoint joint : jointsArray)
       {
-         String name = revoluteJoint.getName();
-         OneDegreeOfFreedomJoint oneDoFJoint = robot.getOneDoFJoint(name);
-
-         Pair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair = new Pair<OneDegreeOfFreedomJoint, OneDoFJoint>(oneDoFJoint, revoluteJoint);
-         this.revoluteJoints.add(jointPair);
+         
+         if(joint instanceof OneDoFJoint)
+         {
+            OneDoFJoint oneDoFJoint = (OneDoFJoint) joint;
+            String name = oneDoFJoint.getName();
+            OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint = robot.getOneDoFJoint(name);
+   
+            Pair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair = new Pair<OneDegreeOfFreedomJoint, OneDoFJoint>(oneDegreeOfFreedomJoint, oneDoFJoint);
+            this.revoluteJoints.add(jointPair);
+         }
       }
 
    }
@@ -99,6 +113,10 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader
       if (referenceFrames != null)
       {
          referenceFrames.updateFrames();
+      }
+      else
+      {
+         rootJoint.getPredecessor().updateFramesRecursively();
       }
    }
 
