@@ -80,7 +80,7 @@ public class DRCConfigParameters
    public static final double OCTREE_RESOLUTION = 0.05;
    public static final float QUADTREE_HEIGHT_THRESHOLD = 0.025f;
    public static final double LIDAR_BLINDNESS_CYLINDAR_SQUARED_RADIUS = 0.1;
-   public static final boolean HIDE_THINGS_ABOVE_HEAD_FROM_LIDAR = false;
+   public static final boolean HIDE_THINGS_ABOVE_HEAD_FROM_LIDAR = true;
 
    // Footstep Generator
    public static final double BOUNDING_BOX_FOR_FOOTSTEP_HEIGHT_FINDING_SIDE_LENGTH =
