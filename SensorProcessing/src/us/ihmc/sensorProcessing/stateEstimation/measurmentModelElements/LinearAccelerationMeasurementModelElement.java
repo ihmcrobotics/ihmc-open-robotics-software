@@ -405,7 +405,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
       tempFramePoint.setToZero(measurementFrame);
       spatialAccelerationCalculator.packLinearAccelerationOfBodyFixedPoint(estimatedMeasurement, measurementLink, tempFramePoint);
       estimatedMeasurement.changeFrame(gravitationalAcceleration.getReferenceFrame());
-      estimatedMeasurement.add(gravitationalAcceleration);
+      estimatedMeasurement.sub(gravitationalAcceleration);
       estimatedMeasurement.changeFrame(measurementFrame);
    }
 }

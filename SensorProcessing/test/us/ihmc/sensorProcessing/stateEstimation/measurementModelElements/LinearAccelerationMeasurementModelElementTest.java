@@ -80,7 +80,7 @@ public class LinearAccelerationMeasurementModelElementTest
 
       ControlFlowInputPort<Vector3d> linearAccelerationMeasurementInputPort = new ControlFlowInputPort<Vector3d>(controlFlowElement);
       double gZ = -9.81;
-      Vector3d gravitationalAcceleration = new Vector3d(0.0, 0.0, gZ);
+      Vector3d gravitationalAcceleration = new Vector3d(0.0, 0.0, -gZ);
 
       SimulatedLinearAccelerationSensor sensor = new SimulatedLinearAccelerationSensor("test", measurementLink, measurementFrame, inverseDynamicsStructure.getSpatialAccelerationCalculator(), gravitationalAcceleration, registry);
       
