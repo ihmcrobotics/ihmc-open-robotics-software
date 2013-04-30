@@ -51,10 +51,15 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
    {
       robot.setGravity(gravity);
 
-      double groundKz = 165.0;
-      double groundBz = 55.0;
-      double groundKxy = 27500.0;
-      double groundBxy = 1100.0;
+//      double groundKz = 165.0;
+//      double groundBz = 55.0;
+//      double groundKxy = 27500.0;
+//      double groundBxy = 1100.0;
+
+      double groundKz = 300;
+      double groundBz = 100.0;
+      double groundKxy = 50000.0;
+      double groundBxy = 2000.0;
 
 //      double alphaStick = 1.0;
 //      double alphaSlip = 0.5;
