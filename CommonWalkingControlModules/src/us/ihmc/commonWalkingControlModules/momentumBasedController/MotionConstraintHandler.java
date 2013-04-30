@@ -106,6 +106,10 @@ public class MotionConstraintHandler
          CommonOps.transpose(nullspace, nCompactBlock);
          DenseMatrix64F nFullBLock = getMatrixFromList(nList, nullspaceIndex, nullity, nDegreesOfFreedom);
          compactBlockToFullBlock(jacobian.getJointsInOrder(), nCompactBlock, nFullBLock);
+
+         DenseMatrix64F zBlock = getMatrixFromList(zList, nullspaceIndex, nullity, 1);
+         zBlock.set(nullspaceMultipliers);
+
          nullspaceIndex++;
       }
    }
@@ -167,13 +171,13 @@ public class MotionConstraintHandler
       int rowNumber = 0;
       for (int i = 0; i < size; i++)
       {
-         DenseMatrix64F JpBlock = matrixList.get(i);
-         CommonOps.insert(JpBlock, matrix, rowNumber, 0);
+         DenseMatrix64F matrixBlock = matrixList.get(i);
+         CommonOps.insert(matrixBlock, matrix, rowNumber, 0);
 
-         DenseMatrix64F ppBlock = vectorList.get(i);
-         CommonOps.insert(ppBlock, vector, rowNumber, 0);
+         DenseMatrix64F vectorBlock = vectorList.get(i);
+         CommonOps.insert(vectorBlock, vector, rowNumber, 0);
 
-         rowNumber += JpBlock.getNumRows();
+         rowNumber += matrixBlock.getNumRows();
       }
    }
 
