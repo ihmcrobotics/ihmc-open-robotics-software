@@ -518,10 +518,10 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
                   Transform3D transform3d = SDFConversionsHelper.poseToTransform(sensor.getPose());
 
                   // the laser does not come out of the center of the scanner. having it come from the center causes rings.
-                  Vector3d offset = new Vector3d();
-                  transform3d.get(offset);
-                  offset.setZ(offset.getZ() + 0.05);
-                  transform3d.setTranslation(offset);
+//                  Vector3d offset = new Vector3d();
+//                  transform3d.get(offset);
+//                  offset.setZ(offset.getZ() + 0.05);
+//                  transform3d.setTranslation(offset);
                   SimulatedLIDARSensorNoiseParameters noiseParameters = new SimulatedLIDARSensorNoiseParameters();
                   noiseParameters.setGaussianNoiseStandardDeviation(sdfGaussianStdDev);
                   noiseParameters.setGaussianNoiseMean(sdfGaussianMean);
