@@ -885,6 +885,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       public void doTransitionIntoAction()
       {
          footSwitches.get(swingSide).reset();
+         if(footSwitches.get(swingSide) instanceof HeelSwitch) ((HeelSwitch) footSwitches.get(swingSide)).resetHeelSwitch();
 
          Footstep nextFootstep = getNextFootstep();
          boolean nextFootstepHasBeenReplaced = false;
@@ -1003,9 +1004,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       }
    }
 
-
    private class DoneWithSingleSupportCondition implements StateTransitionCondition
-   {
+   {      
       public DoneWithSingleSupportCondition(EndEffectorControlModule endEffectorControlModule)
       {
       }
