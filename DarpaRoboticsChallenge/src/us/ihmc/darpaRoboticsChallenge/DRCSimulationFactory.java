@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.NullLidarController;
 import us.ihmc.commonWalkingControlModules.controllers.PIDLidarTorqueController;
+import us.ihmc.darpaRoboticsChallenge.controllers.EstimationLinkHolder;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCSimulationOutputWriter;
@@ -35,6 +36,7 @@ import us.ihmc.utilities.net.ObjectCommunicator;
 
 import com.yobotics.simulationconstructionset.GroundContactPoint;
 import com.yobotics.simulationconstructionset.IMUMount;
+import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.KinematicPoint;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.Robot;
@@ -184,7 +186,18 @@ public class DRCSimulationFactory
          DRCStateEstimator drcStateEstimator = robotController.getDRCStateEstimator();
          StateEstimatorWithPorts stateEstimator = drcStateEstimator.getStateEstimator();
 
-         StateEstimatorErrorCalculatorController stateEstimatorErrorCalculatorController = new StateEstimatorErrorCalculatorController(stateEstimator, simulatedRobot, simulatedRobot.getRootJoint());
+         Joint estimationJoint;
+         if (EstimationLinkHolder.usingChestLink())
+         {
+            estimationJoint = simulatedRobot.getChestJoint();
+            if (estimationJoint == null) throw new RuntimeException("Couldn't find chest joint!");
+         }
+         else
+         {
+            estimationJoint = simulatedRobot.getPelvisJoint();
+         }
+         
+         StateEstimatorErrorCalculatorController stateEstimatorErrorCalculatorController = new StateEstimatorErrorCalculatorController(stateEstimator, simulatedRobot, estimationJoint);
          simulatedRobot.setController(stateEstimatorErrorCalculatorController, estimationTicksPerControlTick);
       }
       

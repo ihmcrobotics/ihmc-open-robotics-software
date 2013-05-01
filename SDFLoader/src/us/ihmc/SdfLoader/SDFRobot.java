@@ -77,7 +77,8 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
       this(generalizedSDFRobotModel, sdfJointNameMap, true, true);
    }
 
-   protected SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean enableTorqueVelocityLimits, boolean enableDamping)
+   protected SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean enableTorqueVelocityLimits,
+                      boolean enableDamping)
    {
       super(generalizedSDFRobotModel.getName());
       this.resourceDirectories = generalizedSDFRobotModel.getResourceDirectories();
@@ -177,7 +178,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
    {
       return rootJoint.getQuaternion();
    }
-   
+
    public void getRootJointToWorldTransform(Transform3D transform)
    {
       rootJoint.getTransformToWorld(transform);
@@ -374,21 +375,21 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
             {
                // TODO: handle left and right sides of multicamera
                final List<Camera> cameras = sensor.getCamera();
-               
+
                if (cameras != null)
                {
                   Transform3D pose = SDFConversionsHelper.poseToTransform(sensor.getPose());
-                  for(Camera camera : cameras)
+                  for (Camera camera : cameras)
                   {
                      Transform3D cameraTransform = new Transform3D(pose);
                      cameraTransform.mul(SDFConversionsHelper.poseToTransform(camera.getPose()));
-                     
+
                      double fieldOfView = Double.parseDouble(camera.getHorizontalFov());
                      double clipNear = Double.parseDouble(camera.getClip().getNear());
                      double clipFar = Double.parseDouble(camera.getClip().getFar());
                      CameraMount mount = new CameraMount(sensor.getName() + "_" + camera.getName(), cameraTransform, fieldOfView, clipNear, clipFar, this);
                      scsJoint.addCameraMount(mount);
-   
+
                      SDFCamera sdfCamera = new SDFCamera(Integer.parseInt(camera.getImage().getWidth()), Integer.parseInt(camera.getImage().getHeight()));
                      this.cameras.put(sensor.getName(), sdfCamera);
                   }
@@ -512,16 +513,16 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
                      }
                   }
 
-                  PolarLidarScanParameters polarDefinition = new PolarLidarScanParameters(sdfSamples, 1, (float) sdfMaxAngle, (float) sdfMinAngle, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-                                                                (float) sdfMinRange, (float) sdfMaxRange);
+                  PolarLidarScanParameters polarDefinition = new PolarLidarScanParameters(sdfSamples, 1, (float) sdfMaxAngle, (float) sdfMinAngle, 0.0f, 0.0f,
+                                                                0.0f, 0.0f, 0.0f, (float) sdfMinRange, (float) sdfMaxRange);
                   LIDARScanDefinition lidarScanDefinition = LIDARScanDefinition.PlanarSweep(sdfMaxAngle - sdfMinAngle, sdfSamples);
                   Transform3D transform3d = SDFConversionsHelper.poseToTransform(sensor.getPose());
 
                   // the laser does not come out of the center of the scanner. having it come from the center causes rings.
-//                  Vector3d offset = new Vector3d();
-//                  transform3d.get(offset);
-//                  offset.setZ(offset.getZ() + 0.05);
-//                  transform3d.setTranslation(offset);
+//                Vector3d offset = new Vector3d();
+//                transform3d.get(offset);
+//                offset.setZ(offset.getZ() + 0.05);
+//                transform3d.setTranslation(offset);
                   SimulatedLIDARSensorNoiseParameters noiseParameters = new SimulatedLIDARSensorNoiseParameters();
                   noiseParameters.setGaussianNoiseStandardDeviation(sdfGaussianStdDev);
                   noiseParameters.setGaussianNoiseMean(sdfGaussianMean);
@@ -668,5 +669,41 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
    public void getAngularVelocityInBody(Vector3d vectorToPack)
    {
       rootJoint.getAngularVelocityInBody(vectorToPack);
+   }
+
+   public Joint getChestJoint()
+   {
+      return getJoint("back_ubx");
+   }
+
+   private Joint getJoint(String jointName)
+   {
+      return getJointRecursively(this.getRootJoints(), jointName);
+   }
+
+   private Joint getJointRecursively(ArrayList<Joint> joints, String jointName)
+   {
+      for (Joint joint : joints)
+      {
+         String nextJointName = joint.getName();
+         System.out.println(nextJointName);
+         if (nextJointName.equals(jointName))
+         {
+            return joint;
+         }
+
+         ArrayList<Joint> children = joint.getChildrenJoints();
+
+         Joint foundJoint = getJointRecursively(children, jointName);
+         if (foundJoint != null)
+            return foundJoint;
+      }
+      
+      return null;
+   }
+
+   public FloatingJoint getPelvisJoint()
+   {
+      return getRootJoint();
    }
 }
