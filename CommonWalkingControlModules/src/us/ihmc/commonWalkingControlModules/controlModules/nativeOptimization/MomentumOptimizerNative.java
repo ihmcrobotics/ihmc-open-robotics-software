@@ -140,10 +140,31 @@ public class MomentumOptimizerNative
     * N' * vd == z
     * rho >= rhoMin
     * end
+    * @param momentumOptimizerNativeInput
     */
-   public int solve(double[] A, double[] b, double[] C, double[] Js, double[] ps, double[] Ws, double[] Lambda, double[] Q, double[] c, double[] rhoMin,
-                    double[] N, double[] z, double wRho)
+   public int solve(MomentumOptimizerNativeInput momentumOptimizerNativeInput)
            throws NoConvergenceException
+   {
+      double[] A = momentumOptimizerNativeInput.getA();
+      double[] b = momentumOptimizerNativeInput.getB();
+      double[] C = momentumOptimizerNativeInput.getC();
+      double[] Js = momentumOptimizerNativeInput.getJs();
+      double[] ps = momentumOptimizerNativeInput.getPs();
+      double[] Ws = momentumOptimizerNativeInput.getWs();
+      double[] Lambda = momentumOptimizerNativeInput.getLambda();
+      double[] Q = momentumOptimizerNativeInput.getQ();
+      double[] c = momentumOptimizerNativeInput.getc();
+      double[] N = momentumOptimizerNativeInput.getN();
+      double[] z = momentumOptimizerNativeInput.getZ();
+      double[] rhoMin = momentumOptimizerNativeInput.getRhoMin();
+      double wRho = momentumOptimizerNativeInput.getwRho();
+
+      return solve(A, b, C, Js, ps, Ws, Lambda, Q, c, N, z, rhoMin, wRho);
+
+   }
+
+   private int solve(double[] A, double[] b, double[] C, double[] Js, double[] ps, double[] Ws, double[] Lambda, double[] Q, double[] c, double[] rhoMin,
+                     double[] N, double[] z, double wRho) throws NoConvergenceException
    {
       int numberOfIterations;
 
@@ -179,8 +200,8 @@ public class MomentumOptimizerNative
       }
 
       return numberOfIterations;
-
    }
+
 
    public double[] getRho()
    {
