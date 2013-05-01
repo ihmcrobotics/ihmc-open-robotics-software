@@ -32,14 +32,13 @@ public class DRCDoubleElevationChangeSimulation
 
       boolean useVelocityAndHeadingScript = false;
       boolean cheatWithGroundHeightAtForFootstep = false;
-      boolean doChestOrientationControl = false;
 
       DRCRobotWalkingControllerParameters drcControlParameters = new DRCRobotWalkingControllerParameters();
       
       DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(drcControlParameters, robotInterface, 
             robotInitialSetup, guiInitialSetup, scsInitialSetup, 
-            useVelocityAndHeadingScript, automaticSimulationRunner, 0.005, 16000, 
-            doChestOrientationControl, cheatWithGroundHeightAtForFootstep);
+            useVelocityAndHeadingScript, automaticSimulationRunner, 0.005, 16000,
+            cheatWithGroundHeightAtForFootstep);
       
       ((BooleanYoVariable) drcFlatGroundWalkingTrack.getSimulationConstructionSet().getVariable("walk")).set(true);
       ((DoubleYoVariable) drcFlatGroundWalkingTrack.getSimulationConstructionSet().getVariable("desiredVelocityX")).set(1.0);
