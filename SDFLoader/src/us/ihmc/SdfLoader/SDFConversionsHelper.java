@@ -12,7 +12,7 @@ public class SDFConversionsHelper
 
    public static String sanitizeJointName(String dirtyName)
    {
-      return dirtyName.replace(".", "_");
+      return dirtyName.trim().replaceAll("[//[//]///]", "").replace(".", "_");
    }
 
    public static Vector3d stringToNormalizedVector3d(String vector)

@@ -118,7 +118,7 @@ public class SDFJointHolder
    
    public static String createValidVariableName(String name)
    {
-      name = name.replaceAll("[//[//]///]", "");
+      name = name.trim().replaceAll("[//[//]///]", "");
       return name;
    }
    

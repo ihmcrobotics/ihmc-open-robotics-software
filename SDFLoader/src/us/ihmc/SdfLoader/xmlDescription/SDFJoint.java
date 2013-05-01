@@ -8,8 +8,8 @@ public class SDFJoint
    private String name;
    private String type;
 
-   private LinkReference child;
-   private LinkReference parent;
+   private String child;
+   private String parent;
    private String pose;
 
    private String threadPitch;
@@ -39,13 +39,13 @@ public class SDFJoint
       this.type = type;
    }
 
-   public LinkReference getParent()
+   public String getParent()
    {
       return parent;
    }
 
    @XmlElement(name = "parent")
-   public void setParent(LinkReference parent)
+   public void setParent(String parent)
    {
       this.parent = parent;
    }
@@ -92,35 +92,6 @@ public class SDFJoint
    public void setAxis2(Axis axis2)
    {
       this.axis2 = axis2;
-   }
-
-   public static class LinkReference
-   {
-      private String linkName;
-      private String pose;
-
-      public String getPose()
-      {
-         return pose;
-      }
-
-      @XmlElement(name = "pose")
-      public void setPose(String pose)
-      {
-         this.pose = pose;
-      }
-
-      public String getLinkName()
-      {
-         return linkName;
-      }
-
-      @XmlElement(name = "link_name")
-      public void setLinkName(String linkName)
-      {
-         this.linkName = linkName;
-      }
-
    }
 
    public static class Axis
@@ -251,13 +222,13 @@ public class SDFJoint
       return name;
    }
 
-   public LinkReference getChild()
+   public String getChild()
    {
       return child;
    }
 
    @XmlElement(name = "child")
-   public void setChild(LinkReference child)
+   public void setChild(String child)
    {
       this.child = child;
    }

@@ -8,7 +8,7 @@ import us.ihmc.graphics3DAdapter.camera.VideoSettingsH264LowLatency;
 
 public class DRCConfigParameters
 {
-   public static final boolean USE_ESTIMATED_POSE_FOR_SENSOR_TRANSFORMS = false;
+   public static final boolean USE_ESTIMATED_POSE_FOR_SENSOR_TRANSFORMS = true;
    
    public static final boolean USE_PERFECT_SENSORS = false;
    static{

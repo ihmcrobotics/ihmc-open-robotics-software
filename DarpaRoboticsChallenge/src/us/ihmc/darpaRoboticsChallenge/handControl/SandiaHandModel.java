@@ -4,7 +4,7 @@ import java.util.EnumMap;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.robotSide.RobotSide;
-import us.ihmc.sensorProcessing.sensorData.ForceSensorData;
+import us.ihmc.sensorProcessing.sensors.ForceSensorData;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 public class SandiaHandModel
