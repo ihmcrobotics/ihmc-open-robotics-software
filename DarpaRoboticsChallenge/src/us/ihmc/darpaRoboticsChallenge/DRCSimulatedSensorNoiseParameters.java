@@ -11,6 +11,7 @@ import us.ihmc.utilities.math.geometry.Direction;
 public class DRCSimulatedSensorNoiseParameters
 {
    private static final Random random = new Random(1999L);
+   private static final boolean TURN_IMU_BIASES_OFF = true;
 
    public static SensorNoiseParameters createSensorNoiseParametersZeroNoise()
    {
@@ -85,18 +86,21 @@ public class DRCSimulatedSensorNoiseParameters
       sensorNoiseParameters.setAngularVelocityBiasProcessNoiseStandardDeviation(0.0);
       sensorNoiseParameters.setLinearAccelerationBiasProcessNoiseStandardDeviation(0.0);
 
-      double gazeboAngularVelocityBiasStandardDeviation = 0.000008;
-      double gazeboAngularVelocityBiasMean = 0.000001;
-      
-      double gazeboLinearAccelerationBiasStandardDeviation = 0.017000;
-      double gazeboLinearAccelerationBiasMean =  0.100000;
-      
-      Vector3d initialLinearAccelerationBias = computeGazeboBiasVector(gazeboLinearAccelerationBiasMean, gazeboLinearAccelerationBiasStandardDeviation, random);
-      Vector3d initialAngularVelocityBias = computeGazeboBiasVector(gazeboAngularVelocityBiasMean, gazeboAngularVelocityBiasStandardDeviation, random);
+      if (!TURN_IMU_BIASES_OFF)
+      {
+         double gazeboAngularVelocityBiasStandardDeviation = 0.000008;
+         double gazeboAngularVelocityBiasMean = 0.000001;
 
-      sensorNoiseParameters.setInitialLinearVelocityBias(initialLinearAccelerationBias);
-      sensorNoiseParameters.setInitialAngularVelocityBias(initialAngularVelocityBias);
+         double gazeboLinearAccelerationBiasStandardDeviation = 0.017000;
+         double gazeboLinearAccelerationBiasMean =  0.100000;
 
+         Vector3d initialLinearAccelerationBias = computeGazeboBiasVector(gazeboLinearAccelerationBiasMean, gazeboLinearAccelerationBiasStandardDeviation, random);
+         Vector3d initialAngularVelocityBias = computeGazeboBiasVector(gazeboAngularVelocityBiasMean, gazeboAngularVelocityBiasStandardDeviation, random);
+
+         sensorNoiseParameters.setInitialLinearVelocityBias(initialLinearAccelerationBias);
+         sensorNoiseParameters.setInitialAngularVelocityBias(initialAngularVelocityBias);
+      }
+      
       return sensorNoiseParameters;
    }
 
