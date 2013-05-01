@@ -232,7 +232,7 @@ public class LegJointPositionControlModule
 //         }
 //         else
 //         {
-//            processedOutputs.setDamping(robotSide, legJointName, kdGains.get(legJointName).getDoubleValue());
+//            processedOutputs.setDampingParameter(robotSide, legJointName, kdGains.get(legJointName).getDoubleValue());
 //            double desiredJointVelocity = useDesiredVelocities
 //                                          ? desiredJointVelocities.get(legJointName).getDoubleValue() * desiredVelocityScale.getDoubleValue() : 0.0;
 //            processedOutputs.setDesiredJointVelocity(robotSide, legJointName, desiredJointVelocity);
@@ -286,7 +286,7 @@ public class LegJointPositionControlModule
 //   {
 //      for (LegJointName legJointName : legJointNames)
 //      {
-//         processedOutputs.setDamping(robotSide, legJointName, 0.0);
+//         processedOutputs.setDampingParameter(robotSide, legJointName, 0.0);
 //      }
 //   }
 

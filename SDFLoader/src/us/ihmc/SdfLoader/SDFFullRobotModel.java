@@ -206,6 +206,8 @@ public class SDFFullRobotModel implements FullRobotModel
       default:
          throw new RuntimeException("Joint type not implemented: " + joint.getType());
       }
+
+      inverseDynamicsJoint.setDampingParameter(joint.getDamping());
       
       oneDoFJoints.put(joint.getName(), inverseDynamicsJoint);
       
