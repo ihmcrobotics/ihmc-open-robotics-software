@@ -21,9 +21,7 @@ public class MomentumOptimizerNativeInput
 
    public MomentumOptimizerNativeInput()
    {
-      int nSupportVectors = MomentumOptimizerNative.nSupportVectors;
-      int nPointsPerContact = MomentumOptimizerNative.nPointsPerContact;
-      int nContacts = MomentumOptimizerNative.nContacts;
+      int rhoSize = MomentumOptimizerNative.rhoSize;
       int wrenchLength = MomentumOptimizerNative.wrenchLength;
       int nDoF = MomentumOptimizerNative.nDoF;
       int nNull = MomentumOptimizerNative.nNull;
@@ -35,9 +33,9 @@ public class MomentumOptimizerNativeInput
       ps = new double[nDoF];
       Ws = new double[nDoF];    // diagonal
       Lambda = new double[nDoF];    // diagonal
-      Q = new double[wrenchLength * nContacts * nSupportVectors * nPointsPerContact];
+      Q = new double[wrenchLength * rhoSize];
       c = new double[wrenchLength];
-      rhoMin = new double[nSupportVectors * nPointsPerContact * nContacts];
+      rhoMin = new double[rhoSize];
       N = new double[nDoF * nNull];
       z = new double[nNull];
    }

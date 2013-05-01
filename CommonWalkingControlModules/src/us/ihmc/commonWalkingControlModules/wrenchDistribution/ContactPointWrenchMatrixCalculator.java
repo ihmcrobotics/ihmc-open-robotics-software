@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.data.RowD1Matrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.WrenchDistributorTools;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.ContactPointWrenchOptimizerNative;
 import us.ihmc.utilities.math.MatrixTools;
@@ -82,7 +82,7 @@ public class ContactPointWrenchMatrixCalculator
       return q;
    }
 
-   public void computeWrenches(Collection<PlaneContactState> contactStates, DenseMatrix64F rho)
+   public void computeWrenches(Collection<? extends PlaneContactState> contactStates, DenseMatrix64F rho)
    {
       int columnNumber = 0;
       for (PlaneContactState contactState : contactStates)

@@ -14,6 +14,7 @@ public class MomentumOptimizerNative
    public static final int wrenchLength = 6;
    public static final int nDoF = 34;
    public static final int nNull = 4;
+   public static final int rhoSize = nSupportVectors * nPointsPerContact * nContacts;
 
    private static native void initialize();
 
@@ -103,7 +104,7 @@ public class MomentumOptimizerNative
 
    private final double[] rho = new double[nPointsPerContact * nSupportVectors * nContacts];
    private final double[] vd = new double[nDoF];
-   private double optval = 0.0;
+   private final MomentumOptimizerNativeOutput momentumOptimizerNativeOutput = new MomentumOptimizerNativeOutput();
 
    /**
     * CVXGen problem statement:
@@ -142,7 +143,7 @@ public class MomentumOptimizerNative
     * end
     * @param momentumOptimizerNativeInput
     */
-   public int solve(MomentumOptimizerNativeInput momentumOptimizerNativeInput)
+   public void solve(MomentumOptimizerNativeInput momentumOptimizerNativeInput)
            throws NoConvergenceException
    {
       double[] A = momentumOptimizerNativeInput.getA();
@@ -159,12 +160,18 @@ public class MomentumOptimizerNative
       double[] rhoMin = momentumOptimizerNativeInput.getRhoMin();
       double wRho = momentumOptimizerNativeInput.getwRho();
 
-      return solve(A, b, C, Js, ps, Ws, Lambda, Q, c, N, z, rhoMin, wRho);
+      solve(A, b, C, Js, ps, Ws, Lambda, Q, c, N, z, rhoMin, wRho);
 
    }
 
-   private int solve(double[] A, double[] b, double[] C, double[] Js, double[] ps, double[] Ws, double[] Lambda, double[] Q, double[] c, double[] rhoMin,
-                     double[] N, double[] z, double wRho) throws NoConvergenceException
+   public MomentumOptimizerNativeOutput getOutput()
+   {
+      return momentumOptimizerNativeOutput;
+   }
+
+   private void solve(double[] A, double[] b, double[] C, double[] Js, double[] ps, double[] Ws, double[] Lambda, double[] Q,
+                                               double[] c, double[] rhoMin,
+                                               double[] N, double[] z, double wRho) throws NoConvergenceException
    {
       int numberOfIterations;
 
@@ -191,31 +198,16 @@ public class MomentumOptimizerNative
          vdDoubleBuffer.rewind();
          vdDoubleBuffer.get(vd);
 
-         optval = getOptValNative();
+         momentumOptimizerNativeOutput.setJointAccelerations(vd);
+         momentumOptimizerNativeOutput.setOptVal(getOptValNative());
+         momentumOptimizerNativeOutput.setRho(rho);
+         momentumOptimizerNativeOutput.setNumberOfIterations(numberOfIterations);
       }
 
       if (numberOfIterations < 0)
       {
          throw new NoConvergenceException();
       }
-
-      return numberOfIterations;
-   }
-
-
-   public double[] getRho()
-   {
-      return rho;
-   }
-
-   public double[] getVd()
-   {
-      return vd;
-   }
-
-   public double getOptval()
-   {
-      return optval;
    }
 
    public static void main(String[] args) throws NoConvergenceException
