@@ -1,0 +1,16 @@
+<launch>
+  <!-- Control Synchronization Parameters -->
+  <!-- delay_window_size: paging window that will allow delay_max_per_window-seconds of delay. -->
+  <!-- delay_max_per_window: total cumulative delay in seconds allotted per delay_window_size. -->
+  <!-- delay_max_per_step: maximum delay per simulation time step. -->
+  <param name="/atlas/delay_window_size" type="double" value="5.0"/>
+  <param name="/atlas/delay_max_per_window" type="double" value="100.0"/>
+  <param name="/atlas/delay_max_per_step" type="double" value="100.0"/>
+
+  <arg name="gzname" default="gazebo"/>
+  <!-- default launch file for starting an Atlas robot -->
+  <include file="$(find atlas_utils)/launch/atlas.launch">
+    <arg name="gzname" value="$(arg gzname)"/>
+    <arg name="gzworld" value="atlas.world"/>
+  </include>
+</launch>

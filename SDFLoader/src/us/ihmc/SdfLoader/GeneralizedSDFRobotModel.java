@@ -37,17 +37,16 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
       // Populate maps
       for (SDFLink sdfLink : sdfLinks)
       {
-         links.put(sdfLink.getName(), new SDFLinkHolder(sdfLink));
+         links.put(SDFConversionsHelper.sanitizeJointName(sdfLink.getName()), new SDFLinkHolder(sdfLink));
       }
       
       if(sdfJoints != null)
       {
          for (SDFJoint sdfJoint : sdfJoints)
          {
-            String parent = sdfJoint.getParent().getLinkName();
-            String child = sdfJoint.getChild().getLinkName();
-            
-            joints.put(sdfJoint.getName(), new SDFJointHolder(sdfJoint, links.get(parent), links.get(child)));
+            String parent = SDFConversionsHelper.sanitizeJointName(sdfJoint.getParent());
+            String child = SDFConversionsHelper.sanitizeJointName(sdfJoint.getChild());
+            joints.put(SDFConversionsHelper.sanitizeJointName(sdfJoint.getName()), new SDFJointHolder(sdfJoint, links.get(parent), links.get(child)));
          }
       }
 

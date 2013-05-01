@@ -39,7 +39,7 @@ public class SDFLinkHolder
 
    public SDFLinkHolder(SDFLink sdfLink)
    {
-     name = SDFJointHolder.createValidVariableName(sdfLink.getName());
+     name = SDFConversionsHelper.sanitizeJointName(sdfLink.getName());
      transformToModelReferenceFrame = SDFConversionsHelper.poseToTransform(sdfLink.getPose());
      
      if(sdfLink.getInertial() != null)

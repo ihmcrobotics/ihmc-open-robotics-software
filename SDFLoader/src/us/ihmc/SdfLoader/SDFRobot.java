@@ -140,10 +140,10 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
             jointTransforms.get(jointName).transform(gcOffset);
 
 
-            GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + SDFJointHolder.createValidVariableName(jointName) + "_" + count++, gcOffset,
+            GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + SDFConversionsHelper.sanitizeJointName(jointName) + "_" + count++, gcOffset,
                                                        this);
 
-            ExternalForcePoint externalForcePoint = new ExternalForcePoint("ef_" + SDFJointHolder.createValidVariableName(jointName) + "_" + count++, gcOffset,
+            ExternalForcePoint externalForcePoint = new ExternalForcePoint("ef_" + SDFConversionsHelper.sanitizeJointName(jointName) + "_" + count++, gcOffset,
                                                        this);
 
             oneDoFJoints.get(jointName).addGroundContactPoint(groundContactPoint);
@@ -178,7 +178,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
    {
       return rootJoint.getQuaternion();
    }
-
+   
    public void getRootJointToWorldTransform(Transform3D transform)
    {
       rootJoint.getTransformToWorld(transform);
@@ -375,21 +375,21 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
             {
                // TODO: handle left and right sides of multicamera
                final List<Camera> cameras = sensor.getCamera();
-
+               
                if (cameras != null)
                {
                   Transform3D pose = SDFConversionsHelper.poseToTransform(sensor.getPose());
-                  for (Camera camera : cameras)
+                  for(Camera camera : cameras)
                   {
                      Transform3D cameraTransform = new Transform3D(pose);
                      cameraTransform.mul(SDFConversionsHelper.poseToTransform(camera.getPose()));
-
+                     
                      double fieldOfView = Double.parseDouble(camera.getHorizontalFov());
                      double clipNear = Double.parseDouble(camera.getClip().getNear());
                      double clipFar = Double.parseDouble(camera.getClip().getFar());
                      CameraMount mount = new CameraMount(sensor.getName() + "_" + camera.getName(), cameraTransform, fieldOfView, clipNear, clipFar, this);
                      scsJoint.addCameraMount(mount);
-
+   
                      SDFCamera sdfCamera = new SDFCamera(Integer.parseInt(camera.getImage().getWidth()), Integer.parseInt(camera.getImage().getHeight()));
                      this.cameras.put(sensor.getName(), sdfCamera);
                   }

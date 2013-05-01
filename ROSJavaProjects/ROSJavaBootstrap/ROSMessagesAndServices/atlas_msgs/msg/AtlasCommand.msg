@@ -32,3 +32,5 @@ uint8[] k_effort       # k_effort can be an unsigned int 8value from 0 to 255,
 
 float32[] i_effort_min
 float32[] i_effort_max
+
+uint8 desired_controller_period_ms # max allowed controller update period in milli-seconds simulation time for controller synchronization.  See SynchronizationStatistics.msg for tracking synchronization status.
