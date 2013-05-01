@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.momentumBasedController;
+package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -12,6 +12,9 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.MomentumOptimizerNative;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.MomentumOptimizerNativeInput;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.MomentumControlModule;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAccelerationData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.CheckTools;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
