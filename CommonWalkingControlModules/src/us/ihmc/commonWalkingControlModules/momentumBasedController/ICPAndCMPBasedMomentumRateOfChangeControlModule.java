@@ -6,7 +6,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.WrenchDistributorTools;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionMomentControlModule;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionMomentControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.CapturabilityBasedDesiredCoPVisualizer;
 import us.ihmc.controlFlow.AbstractControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowInputPort;

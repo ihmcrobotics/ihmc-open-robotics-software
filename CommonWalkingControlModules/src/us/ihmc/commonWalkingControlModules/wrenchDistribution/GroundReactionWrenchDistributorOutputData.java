@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controlModules;
+package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 
 import java.util.LinkedHashMap;
 

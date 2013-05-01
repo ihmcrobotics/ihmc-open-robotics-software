@@ -1552,7 +1552,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       if (contactPoints.size() < oldNumberOfContactPoints)
       {
-         resetGroundReactionWrenchFilter();    // so that we don't end up with CoPs outside of the base of support
+//         resetGroundReactionWrenchFilter();    // so that we don't end up with CoPs outside of the base of support
       }
    }
 

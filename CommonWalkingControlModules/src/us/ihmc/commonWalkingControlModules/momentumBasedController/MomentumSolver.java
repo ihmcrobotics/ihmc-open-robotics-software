@@ -78,7 +78,7 @@ public class MomentumSolver implements MomentumSolverInterface
                          LinearSolver<DenseMatrix64F> jacobianSolver, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.rootJoint = rootJoint;
-      this.jointsInOrder = ScrewTools.computeJointsInOrder(elevator);
+      this.jointsInOrder = ScrewTools.computeSupportAndSubtreeJoints(rootJoint.getSuccessor());
       this.jointsInOrderList = Collections.unmodifiableList(Arrays.asList(jointsInOrder));
 
       int size = Momentum.SIZE;

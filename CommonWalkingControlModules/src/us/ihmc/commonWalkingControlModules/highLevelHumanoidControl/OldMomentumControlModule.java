@@ -14,9 +14,9 @@ import org.ejml.factory.LinearSolver;
 import us.ihmc.commonWalkingControlModules.WrenchDistributorTools;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
-import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributor;
-import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributorInputData;
-import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributorOutputData;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributor;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributorInputData;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributorOutputData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumSolver;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAccelerationData;
@@ -54,7 +54,7 @@ public class OldMomentumControlModule implements MomentumControlModule
 
    private final YoFrameVector unfilteredDesiredGroundReactionTorque;
    private final YoFrameVector unfilteredDesiredGroundReactionForce;
-   
+
    private final AlphaFilteredYoFrameVector desiredGroundReactionTorque;
    private final AlphaFilteredYoFrameVector desiredGroundReactionForce;
 
@@ -71,9 +71,8 @@ public class OldMomentumControlModule implements MomentumControlModule
 
 
    public OldMomentumControlModule(SixDoFJoint rootJoint, Collection<? extends ContactablePlaneBody> contactablePlaneBodies, double gravityZ,
-                                   GroundReactionWrenchDistributor groundReactionWrenchDistributor, ReferenceFrame centerOfMassFrame, double controlDT, TwistCalculator twistCalculator, LinearSolver<DenseMatrix64F> jacobianSolver,
-
-                                   YoVariableRegistry parentRegistry)
+                                   GroundReactionWrenchDistributor groundReactionWrenchDistributor, ReferenceFrame centerOfMassFrame, double controlDT,
+                                   TwistCalculator twistCalculator, LinearSolver<DenseMatrix64F> jacobianSolver, YoVariableRegistry parentRegistry)
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
@@ -90,9 +89,9 @@ public class OldMomentumControlModule implements MomentumControlModule
       this.controlDT = controlDT;
 
       this.desiredGroundReactionTorque = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("desiredGroundReactionTorque", "", registry,
-            alphaGroundReactionWrench, unfilteredDesiredGroundReactionTorque);
+              alphaGroundReactionWrench, unfilteredDesiredGroundReactionTorque);
       this.desiredGroundReactionForce = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("desiredGroundReactionForce", "", registry,
-            alphaGroundReactionWrench, unfilteredDesiredGroundReactionForce);
+              alphaGroundReactionWrench, unfilteredDesiredGroundReactionForce);
 
       gravitationalWrench = new SpatialForceVector(centerOfMassFrame, new Vector3d(0.0, 0.0, totalMass * gravityZ), new Vector3d());
 
@@ -116,12 +115,12 @@ public class OldMomentumControlModule implements MomentumControlModule
       externalWrenches.clear();
    }
 
-   public void compute(RootJointAccelerationData rootJointAccelerationData, MomentumRateOfChangeData
-         momentumRateOfChangeData, LinkedHashMap<ContactablePlaneBody, ? extends PlaneContactState> contactStates, RobotSide upcomingSupportLeg)
+   public void compute(RootJointAccelerationData rootJointAccelerationData, MomentumRateOfChangeData momentumRateOfChangeData,
+                       LinkedHashMap<ContactablePlaneBody, ? extends PlaneContactState> contactStates, RobotSide upcomingSupportLeg)
    {
       solver.compute();
       solver.solve(rootJointAccelerationData.getAccelerationSubspace(), rootJointAccelerationData.getAccelerationMultipliers(),
-            momentumRateOfChangeData.getMomentumSubspace(), momentumRateOfChangeData.getMomentumMultipliers());
+                   momentumRateOfChangeData.getMomentumSubspace(), momentumRateOfChangeData.getMomentumMultipliers());
 
       SpatialForceVector totalGroundReactionWrench = new SpatialForceVector();
       solver.getRateOfChangeOfMomentum(totalGroundReactionWrench);
@@ -146,6 +145,7 @@ public class OldMomentumControlModule implements MomentumControlModule
 
       GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData = new GroundReactionWrenchDistributorInputData();
       groundReactionWrenchDistributorInputData.reset();
+
       for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodies)
       {
          PlaneContactState contactState = contactStates.get(contactablePlaneBody);
@@ -156,6 +156,7 @@ public class OldMomentumControlModule implements MomentumControlModule
             groundReactionWrenchDistributorInputData.addContact(contactState);
          }
       }
+
       groundReactionWrenchDistributorInputData.setSpatialForceVectorAndUpcomingSupportSide(totalGroundReactionWrench, upcomingSupportLeg);
 
       GroundReactionWrenchDistributorOutputData distributedWrenches = new GroundReactionWrenchDistributorOutputData();
@@ -180,7 +181,8 @@ public class OldMomentumControlModule implements MomentumControlModule
          }
       }
 
-      Wrench admissibleGroundReactionWrench = TotalWrenchCalculator.computeTotalWrench(externalWrenches.values(), totalGroundReactionWrench.getExpressedInFrame());
+      Wrench admissibleGroundReactionWrench = TotalWrenchCalculator.computeTotalWrench(externalWrenches.values(),
+                                                 totalGroundReactionWrench.getExpressedInFrame());
       desiredCentroidalMomentumRate.set(admissibleGroundReactionWrench);
       desiredCentroidalMomentumRate.sub(gravitationalWrench);
 
