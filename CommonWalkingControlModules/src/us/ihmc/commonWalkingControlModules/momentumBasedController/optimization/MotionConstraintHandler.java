@@ -1,8 +1,9 @@
-package us.ihmc.commonWalkingControlModules.momentumBasedController;
+package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.data.RowD1Matrix64F;
 import org.ejml.ops.CommonOps;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.utilities.CheckTools;
 import us.ihmc.utilities.math.NullspaceCalculator;
 import us.ihmc.utilities.screwTheory.*;
