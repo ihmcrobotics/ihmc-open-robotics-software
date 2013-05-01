@@ -12,9 +12,13 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -229,7 +233,7 @@ public class FootstepPathCoordinatorTest
       Random random = new Random(777);
       for (int footstepNumber = 0; footstepNumber < numberToTest; footstepNumber++)
       {
-         RigidBody endEffector = new RigidBody("rigid_" + footstepNumber, ReferenceFrame.getWorldFrame());
+         RigidBody endEffector = createRigidBody("rigid_" + footstepNumber);
          ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createRandomContactablePlaneBodyForTests(random, endEffector);
 
          FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(footstepNumber, 0.0, 0.0), new Quat4d(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
@@ -249,5 +253,12 @@ public class FootstepPathCoordinatorTest
          footsteps.add(footstep);
       }
       return footsteps;
+   }
+
+   private RigidBody createRigidBody(String name)
+   {
+      RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
+      SixDoFJoint joint = new SixDoFJoint("joint", elevator, elevator.getBodyFixedFrame());
+      return ScrewTools.addRigidBody(name, joint, new Matrix3d(), 0.0, new Vector3d());
    }
 }
