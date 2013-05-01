@@ -69,7 +69,7 @@ public class DRCSimulationFactory
       YoVariableRegistry registry = simulatedRobot.getRobotsYoVariableRegistry();
       simulatedRobot.setDynamicIntegrationMethod(scsInitialSetup.getDynamicIntegrationMethod());
 
-      DRCOutputWriter outputWriter = new DRCSimulationOutputWriter(simulatedRobot);
+      DRCOutputWriter outputWriter = new DRCSimulationOutputWriter(simulatedRobot, controlDT);
 
       // TODO: Build LIDAR here
       LidarControllerInterface lidarControllerInterface;

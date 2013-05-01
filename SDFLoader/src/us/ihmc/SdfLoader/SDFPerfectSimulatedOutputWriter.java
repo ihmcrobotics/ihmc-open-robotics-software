@@ -13,8 +13,8 @@ import com.yobotics.simulationconstructionset.robotController.RawOutputWriter;
 public class SDFPerfectSimulatedOutputWriter implements RawOutputWriter
 {
    private final String name;
-   private final SDFRobot robot;
-   private final ArrayList<Pair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<Pair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
+   protected final SDFRobot robot;
+   protected final ArrayList<Pair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<Pair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
 
    public SDFPerfectSimulatedOutputWriter(SDFRobot robot)
    {
