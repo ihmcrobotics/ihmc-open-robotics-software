@@ -8,9 +8,9 @@ import us.ihmc.graphics3DAdapter.camera.VideoSettingsH264LowLatency;
 
 public class DRCConfigParameters
 {
-   public static final boolean USE_ESTIMATED_POSE_FOR_SENSOR_TRANSFORMS = true;
+   public static final boolean USE_ESTIMATED_POSE_FOR_SENSOR_TRANSFORMS = false;
    
-   public static final boolean USE_PERFECT_SENSORS = false;
+   public static final boolean USE_PERFECT_SENSORS = true;
    static{
       if (USE_PERFECT_SENSORS) System.err.println("Warning! Using Perfect Sensors!");
    }
@@ -47,7 +47,7 @@ public class DRCConfigParameters
 
    // Video Settings
    public static final boolean STREAM_VIDEO = true;
-   public static final VideoSettings VIDEOSETTINGS = new VideoSettingsH264LowLatency(800, 600, Quality.MEDIUM);
+   public static final VideoSettings VIDEOSETTINGS = new VideoSettingsH264LowLatency(800, 800, Quality.MEDIUM);
 
    // public static final VideoSettings VIDEOSETTINGS = new VideoSettingsH264LowLatency(200, 150, Quality.LOW);
 
