@@ -144,7 +144,6 @@ public class DRCFlatGroundRewindabilityTest
       DRCRobotModel robotModel = DRCRobotModel.getDefaultRobotModel();
       double timePerRecordTick = 0.005;
       int simulationDataBufferSize = 16000;
-      boolean doChestOrientationControl = true;
 
       RobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(0.0);
       DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel);
@@ -152,8 +151,8 @@ public class DRCFlatGroundRewindabilityTest
 
       DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(drcControlParameters, robotInterface, robotInitialSetup,
                                                                guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript, automaticSimulationRunner,
-                                                               timePerRecordTick, simulationDataBufferSize, doChestOrientationControl,
-                                                               cheatWithGroundHeightAtForFootstep);
+                                                               timePerRecordTick, simulationDataBufferSize,
+            cheatWithGroundHeightAtForFootstep);
 
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
 
