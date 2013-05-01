@@ -10,6 +10,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.MomentumOptimizerNative;
+import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.MomentumOptimizerNativeInput;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.MomentumControlModule;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.CheckTools;
@@ -153,9 +154,12 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       ScrewTools.packJointVelocitiesMatrix(jointsInOrder, v);
       CommonOps.mult(centroidalMomentumMatrixDerivative, v, adotV);
 
+      MomentumOptimizerNativeInput momentumOptimizerNativeInput = new MomentumOptimizerNativeInput();
+//      momentumOptimizerNativeInput.setA(A);
+
       try
       {
-         momentumOptimizerNative.solve(A, b, C, Js, ps, Ws, Lambda, Q, c, rhoMin, N, z, wRho);
+         momentumOptimizerNative.solve(momentumOptimizerNativeInput);
       }
       catch (NoConvergenceException e)
       {
