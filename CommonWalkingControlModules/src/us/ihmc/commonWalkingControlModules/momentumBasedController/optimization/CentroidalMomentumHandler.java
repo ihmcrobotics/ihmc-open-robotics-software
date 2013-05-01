@@ -22,6 +22,7 @@ public class CentroidalMomentumHandler
    private final CentroidalMomentumMatrix centroidalMomentumMatrix;
    private final DenseMatrix64F adotV = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
    private final DenseMatrix64F centroidalMomentumMatrixPart = new DenseMatrix64F(1, 1);
+   private final SpatialForceVector centroidalMomentumRate;
 
    private final DenseMatrix64F centroidalMomentumMatrixDerivative;
    private final DenseMatrix64F previousCentroidalMomentumMatrix;
@@ -31,6 +32,8 @@ public class CentroidalMomentumHandler
    private final InverseDynamicsJoint[] jointsInOrder;
    private final DenseMatrix64F v;
    private final Map<InverseDynamicsJoint, int[]> columnsForJoints = new LinkedHashMap<InverseDynamicsJoint, int[]>();
+   private final DenseMatrix64F hdot = new DenseMatrix64F(Momentum.SIZE, 1);
+   private final ReferenceFrame centerOfMassFrame;
 
    public CentroidalMomentumHandler(InverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame, double controlDT, YoVariableRegistry parentRegistry)
    {
@@ -54,7 +57,17 @@ public class CentroidalMomentumHandler
          columnsForJoints.put(joint, ScrewTools.computeIndicesForJoint(jointsInOrder, joint));
       }
 
+      centroidalMomentumRate = new SpatialForceVector(centerOfMassFrame);
+      this.centerOfMassFrame = centerOfMassFrame;
+
       parentRegistry.addChild(registry);
+   }
+
+   public void initialize()
+   {
+      centroidalMomentumMatrix.compute();
+      previousCentroidalMomentumMatrix.set(centroidalMomentumMatrix.getMatrix());
+      MatrixYoVariableConversionTools.storeInYoVariables(previousCentroidalMomentumMatrix, yoPreviousCentroidalMomentumMatrix);
    }
 
    public void compute()
@@ -90,5 +103,18 @@ public class CentroidalMomentumHandler
    public DenseMatrix64F getCentroidalMomentumConvectiveTerm()
    {
       return adotV;
+   }
+
+   public void computeCentroidalMomentumRate(InverseDynamicsJoint[] jointsToOptimizeFor, DenseMatrix64F jointAccelerations)
+   {
+      DenseMatrix64F centroidalMomentumMatrixPart = getCentroidalMomentumMatrixPart(jointsToOptimizeFor);
+      CommonOps.mult(centroidalMomentumMatrixPart, jointAccelerations, hdot);
+      CommonOps.addEquals(hdot, adotV);
+      centroidalMomentumRate.set(centerOfMassFrame, hdot);
+   }
+
+   public SpatialForceVector getCentroidalMomentumRate()
+   {
+      return centroidalMomentumRate;
    }
 }

@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 import us.ihmc.utilities.screwTheory.Momentum;
 
@@ -45,5 +46,13 @@ public class MomentumOptimizationSettings
    public double getDampedLeastSquaresFactor()
    {
       return lambda;
+   }
+
+   public DenseMatrix64F getDampedLeastSquaresFactorMatrix(int size)
+   {
+      DenseMatrix64F ret = new DenseMatrix64F(size, size);
+      CommonOps.setIdentity(ret);
+      CommonOps.scale(lambda, ret);
+      return ret;
    }
 }
