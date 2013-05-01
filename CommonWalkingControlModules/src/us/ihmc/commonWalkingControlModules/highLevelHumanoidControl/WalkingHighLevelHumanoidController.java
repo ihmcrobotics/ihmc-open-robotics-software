@@ -95,7 +95,6 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.util.PDController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.math.filter.GlitchFilteredBooleanYoVariable;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
@@ -1644,18 +1643,22 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    {
       if(transferToSide != null && nextFootstepList.size() > 0)
       {         
-         ReferenceFrame initialSwingFrame = bipedFeet.get(transferToSide.getOppositeSide()).getRigidBody().getParentJoint().getFrameAfterJoint();
+         ReferenceFrame initialSoleFrame = bipedFeet.get(transferToSide.getOppositeSide()).getRigidBody().getParentJoint().getFrameAfterJoint();
 
          Footstep nextFootstep = nextFootstepList.get(nextFootstepIndex.getIntegerValue());
-
-         FramePoint finalFootPoseInInitialFrame = nextFootstep.getPositionInFrame(initialSwingFrame);
-         double slopeBetweenFootsteps = finalFootPoseInInitialFrame.getZ() / finalFootPoseInInitialFrame.getX();
-         boolean useHighSteps = (!Double.isNaN(slopeBetweenFootsteps)) && finalFootPoseInInitialFrame.getX() > 0.08 && slopeBetweenFootsteps > 0.5;
-
-         if (useHighSteps)
+         ReferenceFrame finalSoleFrame = nextFootstep.getSoleReferenceFrame();
+         
+         FramePoint finalPosition = new FramePoint(finalSoleFrame);
+         finalPosition.changeFrame(initialSoleFrame);
+         
+         double minimumHeightIncreaseForHighSteps = 0.07;
+         boolean useHighSteps = finalPosition.getZ() >= minimumHeightIncreaseForHighSteps;
+         
+         if(useHighSteps)
          {
-            mapFromFootstepsToTrajectoryParameters.put(nextFootstep, new SimpleTwoWaypointTrajectoryParameters(TrajectoryWaypointGenerationMethod.HIGH_STEP));
-         }      
+            TrajectoryParameters highStepTrajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(TrajectoryWaypointGenerationMethod.HIGH_STEP);
+            mapFromFootstepsToTrajectoryParameters.put(nextFootstep, highStepTrajectoryParameters);                
+         }    
       }
    }
 }
