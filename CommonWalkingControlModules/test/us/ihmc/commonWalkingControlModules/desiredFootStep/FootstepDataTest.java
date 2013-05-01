@@ -7,8 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
@@ -35,6 +37,8 @@ import us.ihmc.utilities.net.NetProtocol;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.test.JUnitTools;
 
 /**
@@ -306,9 +310,11 @@ public class FootstepDataTest
    {
       Random random = new Random(77);
       ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
+
+
       for (int footstepNumber = 0; footstepNumber < number; footstepNumber++)
       {
-         RigidBody endEffector = new RigidBody("rigid_" + footstepNumber, ReferenceFrame.getWorldFrame());
+         RigidBody endEffector = createRigidBody("rigid_" + footstepNumber);
          ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createRandomContactablePlaneBodyForTests(random, endEffector);
 
          FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(footstepNumber, 0.0, 0.0),
@@ -394,8 +400,9 @@ public class FootstepDataTest
 
       public void consumeObject(FootstepData packet)
       {
-         RigidBody endEffector = new RigidBody(packet.getRigidBodyName(), ReferenceFrame.getWorldFrame());
-         ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector, ReferenceFrame.getWorldFrame());
+         RigidBody endEffector = createRigidBody(packet.getRigidBodyName());
+         ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector, ReferenceFrame
+               .getWorldFrame());
 
          
          FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), packet.getLocation(), packet.getOrientation());
@@ -431,7 +438,9 @@ public class FootstepDataTest
       {
          for (FootstepData footstepData : packet)
          {
-            RigidBody endEffector = new RigidBody(footstepData.getRigidBodyName(), ReferenceFrame.getWorldFrame());
+            String name = footstepData.getRigidBodyName();
+            RigidBody endEffector = createRigidBody(name);
+
             ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector, ReferenceFrame.getWorldFrame());
 
             FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
@@ -456,6 +465,13 @@ public class FootstepDataTest
       {
          return reconstructedFootstepPath;
       }
+   }
+
+   private RigidBody createRigidBody(String name)
+   {
+      RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
+      SixDoFJoint joint = new SixDoFJoint("joint", elevator, elevator.getBodyFixedFrame());
+      return ScrewTools.addRigidBody(name, joint, new Matrix3d(), 0.0, new Vector3d());
    }
 
 
