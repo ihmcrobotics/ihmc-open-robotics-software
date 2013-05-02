@@ -3,15 +3,19 @@ package us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 
 import us.ihmc.utilities.dataStructures.hyperCubeTree.HyperCubeLeaf;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.HyperCubeTree;
+import us.ihmc.utilities.dataStructures.hyperCubeTree.LineSegmentSearchVolume;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.Octree;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.OneDimensionalBounds;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.RecursableHyperTreeNode;
 import us.ihmc.utilities.math.dataStructures.HeightMap;
 import us.ihmc.utilities.math.geometry.InclusionFunction;
+import us.ihmc.utilities.math.geometry.PointToLineUnProjector;
+import us.ihmc.utilities.test.LowPassTimingReporter;
 
 public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, GroundOnlyQuadTreeData> implements HeightMap
 {
@@ -19,6 +23,7 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    private final double heightThreshold;
    private int numberOfNodes = 0;
    private int maxNodes=1000;
+   private LowPassTimingReporter clearingTimer = new LowPassTimingReporter(7);
 
    public GroundOnlyQuadTree(double minX, double minY, double maxX, double maxY, double resolution, double heightThreshold, int maxNodes)
    {
@@ -34,7 +39,9 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
       this.getRootNode().setMetaData(new GroundOnlyQuadTreeData(false));
       this.maxNodes = maxNodes;
       numberOfNodes = 1;
+//      clearingTimer.setupRecording("GroundOnlyQuadTree", "perform the lidar beam search", 10000L, 20000L);
    }
+
 
    public double heightAtPoint(double x, double y)
    {
@@ -52,6 +59,32 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    public boolean addPoint(double x, double y, double z)
    {
       return this.put(new double[] {x, y}, (float)z);
+   }
+   private PointToLineUnProjector unProjector = new PointToLineUnProjector();
+   public void addLidarRay(Point3d origin, Point3d end)
+   {
+      clearingTimer.startTime();
+      Point2d point1 = new Point2d(origin.getX(),origin.getY());
+      Point2d point2 = new Point2d(end.getX(),end.getY());
+      LineSegmentSearchVolume lineSegment = new LineSegmentSearchVolume(point1, point2);
+      List<RecursableHyperTreeNode<GroundAirDescriptor, GroundOnlyQuadTreeData>> hyperVolumeIntersection = this.getHyperVolumeIntersection(lineSegment);
+      unProjector.setLine(point1, point2, origin.getZ(), end.getZ());
+      for (int i=0;i<hyperVolumeIntersection.size();i++)
+      {
+//         if (null==hyperVolumeIntersection.get(i).getLeaf())
+//            hyperVolumeIntersection.get(i).setLeaf(new HyperCubeLeaf<GroundAirDescriptor>(new GroundAirDescriptor(height, minClearHeight), location))
+         GroundAirDescriptor leafValue = hyperVolumeIntersection.get(i).getLeaf().getValue();
+         Float minClearHeight = leafValue.getMinClearHeight();
+         double[] intersection = lineSegment.intersectionWithBounds(hyperVolumeIntersection.get(i).getBoundsCopy());
+         float newMinClearHeight = (float) unProjector.unProject(intersection[0], intersection[1]);
+         if (null==minClearHeight)
+            leafValue.setMinClearHeight(newMinClearHeight);
+         if (newMinClearHeight<minClearHeight)
+            leafValue.setMinClearHeight(newMinClearHeight);
+         hyperVolumeIntersection.get(i).getMetaData();
+         
+      }
+      clearingTimer.endTime();
    }
 
    public boolean containsPoint(double x, double y)
