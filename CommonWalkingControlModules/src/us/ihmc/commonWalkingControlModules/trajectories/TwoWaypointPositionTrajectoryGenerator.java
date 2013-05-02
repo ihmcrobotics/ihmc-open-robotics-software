@@ -296,8 +296,6 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       double[] arcLengths = getArcLengthsApproximatedByDistance(nonAccelerationEndpointIndices);
       double totalArcLength = getTotalArcLength(arcLengths);
       double arcLengthOfMiddleSpline = arcLengths[2];
-
-      System.out.println(Arrays.toString(arcLengths));
       
       return arcLengthOfMiddleSpline < WAYPOINT_CLOSENESS_FACTOR * totalArcLength;
    }
