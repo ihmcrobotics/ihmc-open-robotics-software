@@ -1658,7 +1658,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          soleFrameTransform.get(soleFrameTranslation);
          initialSoleBelowPlaneOfFinalSole = soleFrameTranslation.z < 0.0;
          
-         double ankleHeightThreshold = 0.04;
+         double ankleHeightThreshold = 0.07; //0.04;
          Vector3d initialPositionWorld = new Vector3d();
          initialSoleFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame()).get(initialPositionWorld);
          Vector3d finalPositionWorld = new Vector3d();
