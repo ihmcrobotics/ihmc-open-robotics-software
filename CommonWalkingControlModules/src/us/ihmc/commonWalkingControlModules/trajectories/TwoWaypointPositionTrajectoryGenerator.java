@@ -33,7 +33,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.YoConcatenatedSpli
 public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
    private final static double EPSILON = 1e-3;
-   private final static double WAYPOINT_CLOSENESS_FACTOR = .1;    // waypoints are considered close together if the distance between them is less than the total
+   private final static double WAYPOINT_CLOSENESS_FACTOR = .15;    // waypoints are considered close together if the distance between them is less than the total
    // distance times this fraction; waypoints that are close together are both set to their midpoint and passed through at a velocity of zero
 
    private final WalkingControllerParameters walkingControllerParameters;
@@ -294,8 +294,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    {
       double[] arcLengths = getArcLengthsApproximatedByDistance(nonAccelerationEndpointIndices);
       double totalArcLength = getTotalArcLength(arcLengths);
-      double arcLengthOfMiddleSpline = arcLengths[2];
-      
+      double arcLengthOfMiddleSpline = arcLengths[1];
       return arcLengthOfMiddleSpline < WAYPOINT_CLOSENESS_FACTOR * totalArcLength;
    }
 
