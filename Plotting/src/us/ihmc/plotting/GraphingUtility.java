@@ -27,17 +27,18 @@ public class GraphingUtility
 {
    public static ChartPanel createGraph(String title, String xAxisLabel, String yAxisLabel, XYDataset dataset)
    {
-      return createGraph(title, xAxisLabel, yAxisLabel, dataset, true, false);
+      return createGraph(title, xAxisLabel, yAxisLabel, dataset, true, false, true);
    }
 
-   public static ChartPanel createGraph(String title, String xAxisLabel, String yAxisLabel, XYDataset dataset, boolean showSeriesShape, boolean independentYaxes)
+   public static ChartPanel createGraph(String title, String xAxisLabel, String yAxisLabel, XYDataset dataset, boolean showSeriesShape, boolean independentYaxes, boolean showLegend)
    {
       // create the chart
       final JFreeChart chart = ChartFactory.createXYLineChart(title,    // chart title
          xAxisLabel,    // x axis label
          yAxisLabel,    // y axis label
          dataset,    // data
-         PlotOrientation.VERTICAL, true,    // include legend
+         PlotOrientation.VERTICAL,
+         showLegend, // include legend
          true,    // tooltips
          false    // urls
             );
@@ -198,21 +199,30 @@ public class GraphingUtility
 
       plot.setRangeAxis(valueAxis);
 
-      font = chart.getLegend().getItemFont();
-      size = font.getSize();
-      size += amount;
-      bigger = new Font(font.getName(), font.getStyle(), size);
-      chart.getLegend().setItemFont(bigger);
+       if ( chart.getLegend() != null )
+       {
+           font = chart.getLegend().getItemFont();
+           size = font.getSize();
+           size += amount;
+           bigger = new Font(font.getName(), font.getStyle(), size);
+           chart.getLegend().setItemFont(bigger);
+       }
    }
 
-   public static ChartPanel createGraph(String title, String xAxisLabel, String yAxisLabel, XYDataset dataset, double minRange, double maxRange)
+    public static ChartPanel createGraph(String title, String xAxisLabel, String yAxisLabel, XYDataset dataset, double minRange, double maxRange)
+    {
+       return createGraph(title,xAxisLabel,yAxisLabel,dataset,minRange,maxRange,true);
+    }
+
+    public static ChartPanel createGraph(String title, String xAxisLabel, String yAxisLabel, XYDataset dataset, double minRange, double maxRange, boolean showLegend)
    {
       // create the chart
       final JFreeChart chart = ChartFactory.createXYLineChart(title,    // chart title
          xAxisLabel,    // x axis label
          yAxisLabel,    // y axis label
          dataset,    // data
-         PlotOrientation.VERTICAL, true,    // include legend
+         PlotOrientation.VERTICAL,
+         showLegend,    // include legend
          true,    // tooltips
          false    // urls
             );
