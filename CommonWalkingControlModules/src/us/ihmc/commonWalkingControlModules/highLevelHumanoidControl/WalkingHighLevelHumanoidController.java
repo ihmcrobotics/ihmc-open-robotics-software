@@ -1640,19 +1640,34 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    }
 
    private void checkForHighSteps(RobotSide transferToSide)
-   {
+   {      
       if(transferToSide != null && nextFootstepList.size() > 0)
-      {         
-         ReferenceFrame initialSoleFrame = bipedFeet.get(transferToSide.getOppositeSide()).getRigidBody().getParentJoint().getFrameAfterJoint();
-
+      {
+         boolean ankleHeightIncreaseAboveThreshold;
+         boolean initialSoleBelowPlaneOfFinalSole; // to avoid high steps when on a ramp
+                  
+         ReferenceFrame initialSoleFrame = (nextFootstepIndex.getIntegerValue() < 2) ? bipedFeet.get(transferToSide.getOppositeSide()).getRigidBody()
+               .getParentJoint().getFrameAfterJoint() : nextFootstepList.get(nextFootstepIndex.getIntegerValue() - 2).getSoleReferenceFrame();
+               // NOTE: the foot may have moved so its ideal to get the previous footstep, rather than the current foot frame, if possible
+               
          Footstep nextFootstep = nextFootstepList.get(nextFootstepIndex.getIntegerValue());
          ReferenceFrame finalSoleFrame = nextFootstep.getSoleReferenceFrame();
          
-         FramePoint finalPosition = new FramePoint(finalSoleFrame);
-         finalPosition.changeFrame(initialSoleFrame);
+         Transform3D soleFrameTransform = initialSoleFrame.getTransformToDesiredFrame(finalSoleFrame);
+         Vector3d soleFrameTranslation = new Vector3d();
+         soleFrameTransform.get(soleFrameTranslation);
+         initialSoleBelowPlaneOfFinalSole = soleFrameTranslation.z < 0.0;
          
-         double minimumHeightIncreaseForHighSteps = 0.07;
-         boolean useHighSteps = finalPosition.getZ() >= minimumHeightIncreaseForHighSteps;
+         double ankleHeightThreshold = 0.04;
+         Vector3d initialPositionWorld = new Vector3d();
+         initialSoleFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame()).get(initialPositionWorld);
+         Vector3d finalPositionWorld = new Vector3d();
+         finalSoleFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame()).get(finalPositionWorld);
+         Vector3d translationWorld = new Vector3d(finalPositionWorld);
+         translationWorld.sub(initialPositionWorld);
+         ankleHeightIncreaseAboveThreshold = translationWorld.z > ankleHeightThreshold;
+         
+         boolean useHighSteps = ankleHeightIncreaseAboveThreshold && initialSoleBelowPlaneOfFinalSole;
          
          if(useHighSteps)
          {
