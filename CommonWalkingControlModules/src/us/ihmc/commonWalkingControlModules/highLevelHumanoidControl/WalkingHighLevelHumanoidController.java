@@ -912,8 +912,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
          if (landOnHeels())
          {
-            nextFootstep = Footstep.copyButChangePitch(nextFootstep, heelPitchTouchdownProvidersManager.getAngle());
-            heelPitchTouchdownProvidersManager.updateAngularSpeed();
+            nextFootstep = Footstep.copyButChangePitch(nextFootstep, heelPitchTouchdownProvidersManager.getInitialAngle());
+            heelPitchTouchdownProvidersManager.updateInitialAngularSpeed();
             nextFootstepHasBeenReplaced = true;
          }
 
@@ -1636,7 +1636,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
    private boolean landOnHeels()
    {
-      return (heelPitchTouchdownProvidersManager != null) && (heelPitchTouchdownProvidersManager.getAngle() != 0.0);
+      return (heelPitchTouchdownProvidersManager != null) && (heelPitchTouchdownProvidersManager.getInitialAngle() != 0.0);
    }
 
    private void checkForHighSteps(RobotSide transferToSide)
