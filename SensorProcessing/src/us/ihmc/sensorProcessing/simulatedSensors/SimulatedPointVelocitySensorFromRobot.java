@@ -5,7 +5,10 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.RigidBody;
 
 import com.yobotics.simulationconstructionset.KinematicPoint;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -15,15 +18,25 @@ public class SimulatedPointVelocitySensorFromRobot extends SimulatedSensor<Tuple
 {
    private final KinematicPoint kinematicPoint;
    
+   private final RigidBody rigidBody;
+   private final ReferenceFrame bodyFrame;
+   
    private final Vector3d pointVelocity = new Vector3d();
+   private final FramePoint measurementPointInBodyFrame = new FramePoint();
+   private final FrameVector velocityOfMeasurementPointInWorldFrame = new FrameVector();
+   
    private final PointVelocityDataObject pointVelocityDataObject = new PointVelocityDataObject();
    
    private final YoFrameVector yoFrameVectorPerfect, yoFrameVectorNoisy;
 
-   private final ControlFlowOutputPort<PointVelocityDataObject> pointVelocityOutputPort = createOutputPort();
+   private final ControlFlowOutputPort<PointVelocityDataObject> pointVelocityOutputPort = createOutputPort("pointVelocityOutputPort");
 
-   public SimulatedPointVelocitySensorFromRobot(String name, KinematicPoint kinematicPoint, YoVariableRegistry registry)
+   public SimulatedPointVelocitySensorFromRobot(String name, RigidBody rigidBody,
+        ReferenceFrame bodyFrame, KinematicPoint kinematicPoint, YoVariableRegistry registry)
    {
+      this.bodyFrame = bodyFrame;
+      this.rigidBody = rigidBody;
+      
       this.kinematicPoint = kinematicPoint;
 
       this.yoFrameVectorPerfect = new YoFrameVector(name + "Perfect", ReferenceFrame.getWorldFrame(), registry);
@@ -38,7 +51,10 @@ public class SimulatedPointVelocitySensorFromRobot extends SimulatedSensor<Tuple
       corrupt(pointVelocity);
       yoFrameVectorNoisy.set(pointVelocity);
       
-      pointVelocityDataObject.setVelocity(pointVelocity);
+      measurementPointInBodyFrame.set(bodyFrame, kinematicPoint.getOffsetCopy());
+      velocityOfMeasurementPointInWorldFrame.set(ReferenceFrame.getWorldFrame(), pointVelocity);
+      
+      pointVelocityDataObject.set(rigidBody, measurementPointInBodyFrame, velocityOfMeasurementPointInWorldFrame);
       pointVelocityOutputPort.setData(pointVelocityDataObject);
    }
 

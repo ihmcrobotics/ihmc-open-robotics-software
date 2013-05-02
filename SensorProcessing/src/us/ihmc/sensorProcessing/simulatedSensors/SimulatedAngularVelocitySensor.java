@@ -21,7 +21,7 @@ public class SimulatedAngularVelocitySensor extends SimulatedSensor<Vector3d>
    private final Vector3d angularVelocity = new Vector3d();
    private final YoFrameVector yoFrameVectorPerfect, yoFrameVectorNoisy;
    
-   private final ControlFlowOutputPort<Vector3d> angularVelocityOutputPort = createOutputPort();
+   private final ControlFlowOutputPort<Vector3d> angularVelocityOutputPort = createOutputPort("angularVelocityOutputPort");
 
    public SimulatedAngularVelocitySensor(String name, TwistCalculator twistCalculator, RigidBody rigidBody, ReferenceFrame measurementFrame, YoVariableRegistry registry)
    {

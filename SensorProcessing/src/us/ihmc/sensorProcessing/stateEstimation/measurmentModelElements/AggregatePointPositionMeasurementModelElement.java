@@ -59,7 +59,7 @@ public class AggregatePointPositionMeasurementModelElement implements Measuremen
       for (int i = elementPool.size(); i < nElementsInUse; i++)
       {
          String name = "pointPosition" + i;
-         ControlFlowInputPort<PointPositionDataObject> pointPositionMeasurementInputPort = new ControlFlowInputPort<PointPositionDataObject>(null);
+         ControlFlowInputPort<PointPositionDataObject> pointPositionMeasurementInputPort = new ControlFlowInputPort<PointPositionDataObject>("pointPositionMeasurementInputPort", null);
          PointPositionMeasurementModelElement element = new PointPositionMeasurementModelElement(name, pointPositionMeasurementInputPort,
                                                            centerOfMassPositionPort, orientationPort, estimationFrame, registry);
          element.setNoiseCovariance(singlePointCovariance);

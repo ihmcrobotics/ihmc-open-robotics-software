@@ -14,7 +14,7 @@ public class YoFramePointControlFlowOutputPort extends ControlFlowOutputPort<Fra
 
    public YoFramePointControlFlowOutputPort(ControlFlowElement controlFlowElement, String namePrefix, ReferenceFrame frame, YoVariableRegistry registry)
    {
-      super(controlFlowElement);
+      super(namePrefix, controlFlowElement);
       yoFramePoint = new YoFramePoint(namePrefix, frame, registry);
       super.setData(new FramePoint(frame));
    }

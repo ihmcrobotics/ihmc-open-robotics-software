@@ -165,7 +165,7 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
          stateMachine.setCurrentState(ManipulationState.MOVE_HAND_TO_POSITION_IN_CHESTFRAME);
       }
 
-      ControlFlowOutputPort<TaskspaceConstraintData> desiredAccelerationOutputPort = createOutputPort();
+      ControlFlowOutputPort<TaskspaceConstraintData> desiredAccelerationOutputPort = createOutputPort("desiredAccelerationOutputPort");
       desiredAccelerationOutputPort.setData(taskspaceConstraintData);
 
       if (dynamicGraphicObjectsListRegistry != null)

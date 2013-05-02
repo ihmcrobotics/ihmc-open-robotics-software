@@ -15,8 +15,8 @@ public class RootJointAngularAccelerationControlModule extends AbstractControlFl
 {
    private final YoVariableRegistry registry;
 
-   private final ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort = createInputPort();
-   private final ControlFlowOutputPort<RootJointAccelerationData> rootJointAccelerationOutputPort = createOutputPort();
+   private final ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort = createInputPort("desiredPelvisOrientationTrajectoryInputPort");
+   private final ControlFlowOutputPort<RootJointAccelerationData> rootJointAccelerationOutputPort = createOutputPort("rootJointAccelerationOutputPort");
 
    private final RigidBodyOrientationControlModule rootJointOrientationControlModule;
 

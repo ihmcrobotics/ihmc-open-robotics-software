@@ -26,7 +26,7 @@ public class SimulatedLinearAccelerationSensor extends SimulatedSensor<Vector3d>
    private final ReferenceFrame measurementFrame;
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
-   private final ControlFlowOutputPort<Vector3d> linearAccelerationOutputPort = createOutputPort();
+   private final ControlFlowOutputPort<Vector3d> linearAccelerationOutputPort = createOutputPort("linearAccelerationOutputPort");
    private final FrameVector gravitationalAcceleration;
 
    public SimulatedLinearAccelerationSensor(String name, RigidBody rigidBody, ReferenceFrame measurementFrame,

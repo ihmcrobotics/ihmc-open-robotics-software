@@ -24,7 +24,7 @@ public class YoPointPositionDataObjectListOutputPort extends ControlFlowOutputPo
 
    public YoPointPositionDataObjectListOutputPort(ControlFlowElement controlFlowElement, String namePrefix, YoVariableRegistry registry)
    {
-      super(controlFlowElement);
+      super(namePrefix, controlFlowElement);
       super.setData(new LinkedHashSet<PointPositionDataObject>());
       this.namePrefix = namePrefix;
       this.registry = registry;

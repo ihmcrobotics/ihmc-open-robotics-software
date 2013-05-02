@@ -16,7 +16,7 @@ public class SimulatedAngularVelocitySensorFromRobot extends SimulatedSensor<Tup
    private final Vector3d angularVelocity = new Vector3d();
    private final YoFrameVector yoFrameVectorPerfect, yoFrameVectorNoisy;
    
-   private final ControlFlowOutputPort<Vector3d> angularVelocityOutputPort = createOutputPort();
+   private final ControlFlowOutputPort<Vector3d> angularVelocityOutputPort = createOutputPort("angularVelocityOutputPort");
 
    public SimulatedAngularVelocitySensorFromRobot(String name, IMUMount imuMount, YoVariableRegistry registry)
    {

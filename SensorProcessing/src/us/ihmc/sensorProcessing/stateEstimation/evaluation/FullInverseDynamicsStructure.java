@@ -1,13 +1,9 @@
 package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 
-import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
-import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
-import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 public class FullInverseDynamicsStructure
@@ -29,7 +25,7 @@ public class FullInverseDynamicsStructure
 
       this.estimationLink = estimationLink;
    }
-
+   
    public SixDoFJoint getRootJoint()
    {
       return rootJoint;
@@ -65,4 +61,5 @@ public class FullInverseDynamicsStructure
       twistCalculator.compute();
       spatialAccelerationCalculator.compute();
    }
+
 }

@@ -1,52 +1,67 @@
 package us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration;
 
-import javax.vecmath.Vector3d;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.RigidBody;
 
 public class PointVelocityDataObject
 {
-   private Vector3d offsetFromJointInJointFrame = new Vector3d();
-   private final Vector3d velocity = new Vector3d();
+   protected RigidBody rigidBody;
+   protected final FramePoint measurementPointInBodyFrame = new FramePoint();
+//   protected final FramePoint positionOfMeasurementPointInWorldFrame = new FramePoint(ReferenceFrame.getWorldFrame());
+   protected final FrameVector velocityOfMeasurementPointInWorldFrame = new FrameVector(ReferenceFrame.getWorldFrame());
 
-   public double covarianceScaling = 1.0;
-
-   public PointVelocityDataObject()
+   public void set(RigidBody rigidBody, FramePoint measurementPointInBodyFrame, 
+//         FramePoint positionOfMeasurementPointInWorldFrame, 
+         FrameVector velocityOfMeasurementPointInWorldFrame)
    {
+      this.rigidBody = rigidBody;
+      this.measurementPointInBodyFrame.setAndChangeFrame(measurementPointInBodyFrame);
+//      this.positionOfMeasurementPointInWorldFrame.set(positionOfMeasurementPointInWorldFrame);
+      this.velocityOfMeasurementPointInWorldFrame.set(velocityOfMeasurementPointInWorldFrame);
    }
 
-   public void getOffsetFromJointInJointFrame(Vector3d offsetFromJointInJointFrameToPack)
+   public RigidBody getRigidBody()
    {
-      offsetFromJointInJointFrameToPack.set(this.offsetFromJointInJointFrame);
+      return rigidBody;
+   }
+   
+//   public FramePoint getMeasurementPointInWorldFrame()
+//   {
+//      return positionOfMeasurementPointInWorldFrame;
+//   }
+   
+   public FrameVector getVelocityOfMeasurementPointInWorldFrame()
+   {
+      return velocityOfMeasurementPointInWorldFrame;
    }
 
-   public void setOffsetFromJointInJointFrame(Vector3d offsetFromJointInJointFrame)
+   public FramePoint getMeasurementPointInBodyFrame()
    {
-      this.offsetFromJointInJointFrame.set(offsetFromJointInJointFrame);
+      return measurementPointInBodyFrame;
    }
 
-   public void getVelocity(Vector3d velocityToPack)
+   public void set(PointVelocityDataObject other)
    {
-      velocityToPack.set(velocity);
+      set(other.getRigidBody(), other.getMeasurementPointInBodyFrame(), 
+//            other.getMeasurementPointInWorldFrame(), 
+            other.getVelocityOfMeasurementPointInWorldFrame());
    }
 
-   public void setVelocity(Vector3d velocity)
+   public boolean epsilonEquals(PointVelocityDataObject other, double epsilon)
    {
-      this.velocity.set(velocity);
+      if (getMeasurementPointInBodyFrame().getReferenceFrame() != other.getMeasurementPointInBodyFrame().getReferenceFrame())
+         return false;
+
+      boolean rigidBodyEqual = getRigidBody().getName().equals(other.getRigidBody().getName());
+      boolean bodyPointsEqual = getMeasurementPointInBodyFrame().epsilonEquals(other.getMeasurementPointInBodyFrame(), epsilon);
+//      boolean worldPointsEqual = getMeasurementPointInWorldFrame().epsilonEquals(other.getMeasurementPointInWorldFrame(), epsilon);
+      boolean worldVelocitiesEqual = getVelocityOfMeasurementPointInWorldFrame().epsilonEquals(other.getVelocityOfMeasurementPointInWorldFrame(), epsilon);
+      return rigidBodyEqual && bodyPointsEqual 
+            //&& worldPointsEqual 
+            && worldVelocitiesEqual;
    }
 
-   public double getCovarianceScaling()
-   {
-      return covarianceScaling;
-   }
 
-   public void setCovarianceScaling(double covarianceScaling)
-   {
-      this.covarianceScaling = covarianceScaling;
-   }
-
-   public void set(PointVelocityDataObject pointVelocityDataObject)
-   {
-      this.offsetFromJointInJointFrame.set(pointVelocityDataObject.offsetFromJointInJointFrame);
-      this.velocity.set(pointVelocityDataObject.velocity);
-      this.covarianceScaling = pointVelocityDataObject.covarianceScaling;
-   }
 }

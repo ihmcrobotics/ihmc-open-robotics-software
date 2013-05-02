@@ -14,8 +14,8 @@ import com.yobotics.simulationconstructionset.util.EuclideanPositionController;
 public class CoMBasedMomentumRateOfChangeControlModule extends AbstractControlFlowElement implements MomentumRateOfChangeControlModule
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final ControlFlowInputPort<FramePoint> desiredCenterOfMassInputPort = createInputPort();
-   private final ControlFlowOutputPort<MomentumRateOfChangeData> momentumRateOfChangeOutputPort = createOutputPort();
+   private final ControlFlowInputPort<FramePoint> desiredCenterOfMassInputPort = createInputPort("desiredCenterOfMassInputPort");
+   private final ControlFlowOutputPort<MomentumRateOfChangeData> momentumRateOfChangeOutputPort = createOutputPort("momentumRateOfChangeOutputPort");
    private final MomentumRateOfChangeData momentumRateOfChangeData;
    private final ReferenceFrame centerOfMassFrame;
    private final CenterOfMassJacobian centerOfMassJacobian;
