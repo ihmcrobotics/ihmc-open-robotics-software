@@ -35,7 +35,7 @@ public class JointStateFullRobotModelUpdater extends AbstractControlFlowElement
       InverseDynamicsJoint[] joints = ScrewTools.computeJointsInOrder(inverseDynamicsStructure.getTwistCalculator().getRootBody());
       this.oneDoFJoints = ScrewTools.filterJoints(joints, OneDoFJoint.class);
 
-      this.inverseDynamicsStructureOutputPort = createOutputPort();
+      this.inverseDynamicsStructureOutputPort = createOutputPort("inverseDynamicsStructureOutputPort");
       inverseDynamicsStructureOutputPort.setData(inverseDynamicsStructure);
 
       for (OneDoFJoint oneDoFJoint : oneDoFJoints)
@@ -49,13 +49,13 @@ public class JointStateFullRobotModelUpdater extends AbstractControlFlowElement
       for (OneDoFJoint oneDoFJoint : oneDoFJoints)
       {
          ControlFlowOutputPort<Double> positionSensorOutputPort = positionSensorPorts.get(oneDoFJoint);
-         ControlFlowInputPort<Double> positionSensorInputPort = createInputPort();
+         ControlFlowInputPort<Double> positionSensorInputPort = createInputPort("positionSensorInputPort");
 
          positionSensorInputPorts.put(oneDoFJoint, positionSensorInputPort);
          controlFlowGraph.connectElements(positionSensorOutputPort, positionSensorInputPort);
 
          ControlFlowOutputPort<Double> velocitySensorOutputPort = velocitySensorPorts.get(oneDoFJoint);
-         ControlFlowInputPort<Double> velocitySensorInputPort = createInputPort();
+         ControlFlowInputPort<Double> velocitySensorInputPort = createInputPort("velocitySensorInputPort");
 
          velocitySensorInputPorts.put(oneDoFJoint, velocitySensorInputPort);
          controlFlowGraph.connectElements(velocitySensorOutputPort, velocitySensorInputPort);

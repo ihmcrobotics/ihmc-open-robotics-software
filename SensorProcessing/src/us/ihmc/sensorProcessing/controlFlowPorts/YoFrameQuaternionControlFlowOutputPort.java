@@ -14,7 +14,7 @@ public class YoFrameQuaternionControlFlowOutputPort extends ControlFlowOutputPor
 
    public YoFrameQuaternionControlFlowOutputPort(ControlFlowElement controlFlowElement, String namePrefix, ReferenceFrame frame, YoVariableRegistry registry)
    {
-      super(controlFlowElement);
+      super(namePrefix, controlFlowElement);
       yoFrameQuaternion = new YoFrameQuaternion(namePrefix, frame, registry);
       super.setData(new FrameOrientation(frame));
    }

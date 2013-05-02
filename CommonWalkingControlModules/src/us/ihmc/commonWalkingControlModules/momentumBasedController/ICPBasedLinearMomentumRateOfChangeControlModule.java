@@ -22,13 +22,13 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 
 public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractControlFlowElement implements ICPBasedMomentumRateOfChangeControlModule
 {
-   private final ControlFlowInputPort<Double> desiredCenterOfMassHeightAccelerationInputPort = createInputPort();
-   private final ControlFlowInputPort<BipedSupportPolygons> bipedSupportPolygonsInputPort = createInputPort();
-   private final ControlFlowInputPort<RobotSide> supportLegInputPort = createInputPort();
-   private final ControlFlowInputPort<CapturePointData> capturePointInputPort = createInputPort();
-   private final ControlFlowInputPort<CapturePointTrajectoryData> desiredCapturePointTrajectoryInputPort = createInputPort();
+   private final ControlFlowInputPort<Double> desiredCenterOfMassHeightAccelerationInputPort = createInputPort("desiredCenterOfMassHeightAccelerationInputPort");
+   private final ControlFlowInputPort<BipedSupportPolygons> bipedSupportPolygonsInputPort = createInputPort("bipedSupportPolygonsInputPort");
+   private final ControlFlowInputPort<RobotSide> supportLegInputPort = createInputPort("supportLegInputPort");
+   private final ControlFlowInputPort<CapturePointData> capturePointInputPort = createInputPort("capturePointInputPort");
+   private final ControlFlowInputPort<CapturePointTrajectoryData> desiredCapturePointTrajectoryInputPort = createInputPort("desiredCapturePointTrajectoryInputPort");
 
-   private final ControlFlowOutputPort<MomentumRateOfChangeData> momentumRateOfChangeOutputPort = createOutputPort();
+   private final ControlFlowOutputPort<MomentumRateOfChangeData> momentumRateOfChangeOutputPort = createOutputPort("momentumRateOfChangeOutputPort");
    private final MomentumRateOfChangeData momentumRateOfChangeData;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());

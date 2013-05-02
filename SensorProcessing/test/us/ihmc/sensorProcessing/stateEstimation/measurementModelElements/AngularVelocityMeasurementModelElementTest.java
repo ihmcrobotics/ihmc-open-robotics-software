@@ -45,8 +45,8 @@ public class AngularVelocityMeasurementModelElementTest
 
       ControlFlowElement controlFlowElement = new NullControlFlowElement();
 
-      ControlFlowOutputPort<FrameVector> angularVelocityStatePort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
-      ControlFlowOutputPort<FrameVector> biasStatePort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
+      ControlFlowOutputPort<FrameVector> angularVelocityStatePort = new ControlFlowOutputPort<FrameVector>("angularVelocityStatePort", controlFlowElement);
+      ControlFlowOutputPort<FrameVector> biasStatePort = new ControlFlowOutputPort<FrameVector>("biasStatePort", controlFlowElement);
       ControlFlowInputPort<Vector3d> angularVelocityMeasurementInputPort = new ControlFlowInputPort<Vector3d>(controlFlowElement);
       
       

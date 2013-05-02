@@ -25,7 +25,7 @@ public class SimulatedOrientationSensor extends SimulatedSensor<Matrix3d>
    private final YoFrameQuaternion yoFrameQuaternionPerfect, yoFrameQuaternionNoisy;
    private final DoubleYoVariable rotationAngleNoise;
    
-   private final ControlFlowOutputPort<Matrix3d> orientationOutputPort = createOutputPort();
+   private final ControlFlowOutputPort<Matrix3d> orientationOutputPort = createOutputPort("orientationOutputPort");
 
    public SimulatedOrientationSensor(String name, ReferenceFrame frameUsedForPerfectOrientation, YoVariableRegistry registry)
    {

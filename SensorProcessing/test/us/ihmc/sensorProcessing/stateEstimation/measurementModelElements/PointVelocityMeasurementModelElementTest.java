@@ -68,19 +68,19 @@ public class PointVelocityMeasurementModelElementTest
 
       ControlFlowInputPort<PointVelocityDataObject> pointVelocityMeasurementInputPort = new ControlFlowInputPort<PointVelocityDataObject>(controlFlowElement);
 
-      ControlFlowOutputPort<FramePoint> centerOfMassPositionPort = new ControlFlowOutputPort<FramePoint>(controlFlowElement);
-      ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
-      ControlFlowOutputPort<FrameVector> centerOfMassAccelerationPort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
+      ControlFlowOutputPort<FramePoint> centerOfMassPositionPort = new ControlFlowOutputPort<FramePoint>("centerOfMassPositionPort", controlFlowElement);
+      ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort = new ControlFlowOutputPort<FrameVector>("centerOfMassVelocityPort", controlFlowElement);
+      ControlFlowOutputPort<FrameVector> centerOfMassAccelerationPort = new ControlFlowOutputPort<FrameVector>("centerOfMassAccelerationPort", controlFlowElement);
 
-      ControlFlowOutputPort<FrameOrientation> orientationPort = new ControlFlowOutputPort<FrameOrientation>(controlFlowElement);
-      ControlFlowOutputPort<FrameVector> angularVelocityPort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
-      ControlFlowOutputPort<FrameVector> angularAccelerationPort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
+      ControlFlowOutputPort<FrameOrientation> orientationPort = new ControlFlowOutputPort<FrameOrientation>("orientationPort", controlFlowElement);
+      ControlFlowOutputPort<FrameVector> angularVelocityPort = new ControlFlowOutputPort<FrameVector>("angularVelocityPort", controlFlowElement);
+      ControlFlowOutputPort<FrameVector> angularAccelerationPort = new ControlFlowOutputPort<FrameVector>("angularAccelerationPort", controlFlowElement);
 
       RigidBody stationaryPointLink = measurementLink;
       FramePoint stationaryPoint = new FramePoint(measurementFrame, RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0));
       PointVelocityMeasurementModelElement modelElement = new PointVelocityMeasurementModelElement(name, pointVelocityMeasurementInputPort,
                                                              centerOfMassPositionPort, centerOfMassVelocityPort, orientationPort, angularVelocityPort,
-                                                             estimationFrame, stationaryPointLink, stationaryPoint, inverseDynamicsStructureInputPort,
+                                                             estimationFrame, inverseDynamicsStructureInputPort,
                                                              registry);
 
       randomFloatingChain.setRandomPositionsAndVelocities(random);
@@ -101,7 +101,7 @@ public class PointVelocityMeasurementModelElementTest
 
       updater.run();
 
-      setMeasuredPointVelocityToActual(twistCalculator, stationaryPointLink, stationaryPoint, pointVelocityMeasurementInputPort);
+      setMeasuredPointVelocityToActual(inverseDynamicsStructure, twistCalculator, stationaryPointLink, stationaryPoint, pointVelocityMeasurementInputPort);
 
       DenseMatrix64F zeroResidual = modelElement.computeResidual();
       DenseMatrix64F zeroVector = new DenseMatrix64F(3, 1);
@@ -124,19 +124,20 @@ public class PointVelocityMeasurementModelElementTest
               perturbation, tol, updater);
    }
 
-   private void setMeasuredPointVelocityToActual(TwistCalculator twistCalculator, RigidBody stationaryPointLink, FramePoint point,
+   private void setMeasuredPointVelocityToActual(FullInverseDynamicsStructure inverseDynamicsStructure, TwistCalculator twistCalculator, RigidBody stationaryPointLink, FramePoint measurementPointInBodyFrame,
            ControlFlowInputPort<PointVelocityDataObject> pointVelocityMeasurementInputPort)
    {
       Twist twist = new Twist();
       twistCalculator.packTwistOfBody(twist, stationaryPointLink);
       twist.changeFrame(twist.getBaseFrame());
-      point = point.changeFrameCopy(twist.getBaseFrame());
-      FrameVector pointVelocity = new FrameVector(twist.getBaseFrame());
-      twist.packVelocityOfPointFixedInBodyFrame(pointVelocity, point);
-      pointVelocity.changeFrame(ReferenceFrame.getWorldFrame());
+      FramePoint pointInTwistBaseFrame = measurementPointInBodyFrame.changeFrameCopy(twist.getBaseFrame());
+      FrameVector velocityOfMeasurementPointInWorldFrame = new FrameVector(twist.getBaseFrame());
+      twist.packVelocityOfPointFixedInBodyFrame(velocityOfMeasurementPointInWorldFrame, pointInTwistBaseFrame);
+      velocityOfMeasurementPointInWorldFrame.changeFrame(ReferenceFrame.getWorldFrame());
       
       PointVelocityDataObject pointVelocityDataObject = new PointVelocityDataObject();
-      pointVelocityDataObject.setVelocity(pointVelocity.getVectorCopy());
+      pointVelocityDataObject.set(stationaryPointLink, measurementPointInBodyFrame, velocityOfMeasurementPointInWorldFrame);
+   
       pointVelocityMeasurementInputPort.setData(pointVelocityDataObject);
    }
 }

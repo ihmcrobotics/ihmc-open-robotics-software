@@ -1,15 +1,15 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.EnumYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.vecmath.Vector3d;
+
 import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
@@ -25,15 +25,35 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenc
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.RigidBodyToIndexMap;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.*;
+import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
+import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.utilities.screwTheory.SpatialForceVector;
+import us.ihmc.utilities.screwTheory.TotalMassCalculator;
+import us.ihmc.utilities.screwTheory.TotalWrenchCalculator;
+import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.utilities.screwTheory.Wrench;
 
-import javax.vecmath.Vector3d;
-import java.util.*;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.EnumYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.robotController.RobotController;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public abstract class MomentumBasedController implements RobotController
 {
@@ -123,6 +143,7 @@ public abstract class MomentumBasedController implements RobotController
       {
          this.desiredCoMAndAngularAccelerationGrabber = new DesiredCoMAndAngularAccelerationGrabber(stateEstimationDataFromControllerSink, estimationLink,
                  estimationFrame, totalMass);
+         
          this.pointPositionGrabber = new PointPositionGrabber(stateEstimationDataFromControllerSink, registry, controlDT, 0.0);
       }
       else

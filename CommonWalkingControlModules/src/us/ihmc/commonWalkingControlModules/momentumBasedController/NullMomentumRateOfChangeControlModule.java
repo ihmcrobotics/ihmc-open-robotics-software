@@ -5,7 +5,7 @@ import us.ihmc.controlFlow.ControlFlowOutputPort;
 
 public class NullMomentumRateOfChangeControlModule extends AbstractControlFlowElement implements MomentumRateOfChangeControlModule
 {
-   private final ControlFlowOutputPort<MomentumRateOfChangeData> momentumRateOfChangeOutputPort = createOutputPort();
+   private final ControlFlowOutputPort<MomentumRateOfChangeData> momentumRateOfChangeOutputPort = createOutputPort("momentumRateOfChangeOutputPort");
 
    public NullMomentumRateOfChangeControlModule()
    {

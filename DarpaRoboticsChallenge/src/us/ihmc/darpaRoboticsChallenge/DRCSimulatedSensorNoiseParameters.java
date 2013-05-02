@@ -131,7 +131,7 @@ public class DRCSimulatedSensorNoiseParameters
       
       sensorNoiseParameters.setOrientationMeasurementStandardDeviation(0.01);
       sensorNoiseParameters.setAngularVelocityMeasurementStandardDeviation(0.1);
-      sensorNoiseParameters.setLinearAccelerationMeasurementStandardDeviation(0.1); //0.1);
+      sensorNoiseParameters.setLinearAccelerationMeasurementStandardDeviation(1.0); //0.1); //0.1);
 
       sensorNoiseParameters.setAngularVelocityBiasProcessNoiseStandardDeviation(1e-6);
       sensorNoiseParameters.setLinearAccelerationBiasProcessNoiseStandardDeviation(0.001); //1e-6); //0.02); //1e-3);

@@ -61,7 +61,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.vp0PointPositionCovScaling,root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.vp2PointPositionCovScaling</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -73,7 +73,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.vp0PointVelocityCovScaling,root.ComposableStateEstimatorEvaluator.SensorAndEstimatorAssembler.orientationEstimator.vp2PointVelocityCovScaling</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config7</Name>
 			<ScalingMethod>1</ScalingMethod>

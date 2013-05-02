@@ -25,6 +25,7 @@ import us.ihmc.sensorProcessing.stateEstimation.processModelElements.ProcessMode
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.OrientationSensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
+import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -105,8 +106,8 @@ public class ComposableOrientationEstimatorCreator
          orientationStatePort = new YoFrameQuaternionControlFlowOutputPort(this, name, ReferenceFrame.getWorldFrame(), parentRegistry);
          angularVelocityStatePort = new YoFrameVectorControlFlowOutputPort(this, name + "Omega", estimationFrame, registry);
 
-         this.inverseDynamicsStructureInputPort = createInputPort();
-         this.desiredAngularAccelerationInputPort = createInputPort();
+         this.inverseDynamicsStructureInputPort = createInputPort("inverseDynamicsStructureInputPort");
+         this.desiredAngularAccelerationInputPort = createInputPort("desiredAngularAccelerationInputPort");
 
          addOrientationProcessModelElement();
          addAngularVelocityProcessModelElement(estimationFrame, controlFlowGraph);
@@ -145,7 +146,7 @@ public class ComposableOrientationEstimatorCreator
                                         OrientationSensorConfiguration orientationSensorConfiguration)
       {
          ReferenceFrame measurementFrame = orientationSensorConfiguration.getMeasurementFrame();
-         ControlFlowInputPort<Matrix3d> measurementInputPort = createInputPort();
+         ControlFlowInputPort<Matrix3d> measurementInputPort = createInputPort("orientationMeasurementInputPort");
 
          ControlFlowInputPort<Matrix3d> orientationMeasurementPort = measurementInputPort;
          String name = orientationSensorConfiguration.getName();
@@ -165,7 +166,7 @@ public class ComposableOrientationEstimatorCreator
          String biasName = angularVelocitySensorConfiguration.getName() + "BiasEstimate";
          ReferenceFrame measurementFrame = angularVelocitySensorConfiguration.getMeasurementFrame();
          RigidBody measurementLink = angularVelocitySensorConfiguration.getAngularVelocityMeasurementLink();
-         ControlFlowInputPort<Vector3d> measurementInputPort = createInputPort();
+         ControlFlowInputPort<Vector3d> measurementInputPort = createInputPort("angularVelocityMeasurementInputPort");
 
          ControlFlowInputPort<Vector3d> angularVelocityMeasurementPort = measurementInputPort;
 
@@ -253,6 +254,11 @@ public class ComposableOrientationEstimatorCreator
       }
 
       public ControlFlowInputPort<Set<PointPositionDataObject>> getPointPositionInputPort()
+      {
+         return null;
+      }
+      
+      public ControlFlowInputPort<Set<PointVelocityDataObject>> getPointVelocityInputPort()
       {
          return null;
       }

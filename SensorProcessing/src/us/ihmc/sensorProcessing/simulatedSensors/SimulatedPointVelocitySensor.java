@@ -29,7 +29,7 @@ public class SimulatedPointVelocitySensor extends SimulatedSensor<Vector3d>
 
    private final TwistCalculator twistCalculator;
 
-   private final ControlFlowOutputPort<Vector3d> pointVelocityOutputPort = createOutputPort();
+   private final ControlFlowOutputPort<Vector3d> pointVelocityOutputPort = createOutputPort("pointVelocityOutputPort");
 
    public SimulatedPointVelocitySensor(String name, RigidBody rigidBody, FramePoint pointToMeasureVelocityOf,
            TwistCalculator twistCalculator, YoVariableRegistry registry)
