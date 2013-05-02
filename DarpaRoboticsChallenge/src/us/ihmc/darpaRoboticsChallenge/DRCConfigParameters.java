@@ -71,8 +71,8 @@ public class DRCConfigParameters
    public static final float LIDAR_MAX_DISTANCE = 10.0f;
    public static final float LIDAR_SWEEP_MAX_YAW = 0.8f;
    public static final float LIDAR_SWEEP_MIN_YAW = -0.8f;
-   public static final float LIDAR_SCAN_MAX_ROLL = 0.4f;    // rolls the LIDAR to simulate a faster update rate.
-   public static final float LDIAR_SCAN_MIN_ROLL = -0.3f;
+   public static final float LIDAR_SCAN_MAX_ROLL = 0.0f;    // rolls the LIDAR to simulate a faster update rate.
+   public static final float LDIAR_SCAN_MIN_ROLL = 0.0f;
    public static final float LIDAR_ANGLE_INCREMENT = (float) Math.toRadians(0.25);
    public static final float LIDAR_TIME_INCREMENT = 0.0f;
    public static final float LIDAR_SCAN_TIME = 0.0f;
