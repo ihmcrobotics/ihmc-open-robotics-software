@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.media.j3d.Transform3D;
@@ -33,6 +34,8 @@ import com.yobotics.simulationconstructionset.util.trajectory.YoConcatenatedSpli
 public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
    private final static double EPSILON = 1e-3;
+   private final static double WAYPOINT_CLOSENESS_FACTOR = .1;    // waypoints are considered close together if the distance between them is less than the total
+   // distance times this fraction; waypoints that are close together are both set to their midpoint and passed through at a velocity of zero
 
    private final WalkingControllerParameters walkingControllerParameters;
 
@@ -77,6 +80,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    private final YoConcatenatedSplines concatenatedSplinesWithArcLengthApproximatedByDistance;
    private final YoConcatenatedSplines concatenatedSplinesWithArcLengthCalculatedIteratively;
+
+   private boolean waypointsAreTheSamePoint = false;
 
    public TwoWaypointPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
            PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider finalPositionProvider,
@@ -208,10 +213,14 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
       arcLengths = getArcLengthsApproximatedByDistance(allIndices);
       setWaypointAndAccelerationEndpointTimesAndVelocities(arcLengths);
-      setConcatenatedSplines(concatenatedSplinesWithArcLengthApproximatedByDistance);
 
-      arcLengths = getArcLengthsCalculatedIteratively();
-      setWaypointAndAccelerationEndpointTimesAndVelocities(arcLengths);
+      if (!waypointsAreTheSamePoint)
+      {
+         setConcatenatedSplines(concatenatedSplinesWithArcLengthApproximatedByDistance);
+         arcLengths = getArcLengthsCalculatedIteratively();
+         setWaypointAndAccelerationEndpointTimesAndVelocities(arcLengths);
+      }
+
       setConcatenatedSplines(concatenatedSplinesWithArcLengthCalculatedIteratively);
 
       if (visualize.getBooleanValue())
@@ -251,7 +260,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    private void setWaypointAndAccelerationEndpointTimesAndVelocities(double[] arcLengths)
    {
-      double waypointSpeed = getWaypointSpeed(arcLengths);
+      double waypointSpeed = waypointsAreTheSamePoint ? 0.0 : getWaypointSpeed(arcLengths);
+
       for (int i = 0; i < 2; i++)
       {
          FrameVector waypointVelocity = getOppositeWaypointToEndpoint(i);
@@ -261,10 +271,46 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          allVelocities[accelerationEndpointIndices[i]].set(waypointVelocity);
       }
 
-      allTimes[1].set(2 * arcLengths[0] / (allVelocities[0].length() + waypointSpeed));
-      allTimes[2].set(allTimes[1].getDoubleValue() + arcLengths[1] / waypointSpeed);
-      allTimes[3].set(allTimes[2].getDoubleValue() + arcLengths[2] / waypointSpeed);
-      allTimes[4].set(allTimes[3].getDoubleValue() + arcLengths[3] / waypointSpeed);
+      if (waypointsAreTheSamePoint)
+      {
+         double totalArcLength = getTotalArcLength(arcLengths);
+         allTimes[1].set((arcLengths[0] + arcLengths[1]) / totalArcLength * stepTime.getDoubleValue());
+
+         for (int i = 2; i < 5; i++)
+         {
+            allTimes[i].set(allTimes[1].getDoubleValue());
+         }
+      }
+
+      else
+      {
+         allTimes[1].set(2 * arcLengths[0] / (allVelocities[0].length() + waypointSpeed));
+         allTimes[2].set(allTimes[1].getDoubleValue() + arcLengths[1] / waypointSpeed);
+         allTimes[3].set(allTimes[2].getDoubleValue() + arcLengths[2] / waypointSpeed);
+         allTimes[4].set(allTimes[3].getDoubleValue() + arcLengths[3] / waypointSpeed);
+      }
+   }
+
+   private boolean waypointsAreCloseTogether()
+   {
+      double[] arcLengths = getArcLengthsApproximatedByDistance(nonAccelerationEndpointIndices);
+      double totalArcLength = getTotalArcLength(arcLengths);
+      double arcLengthOfMiddleSpline = arcLengths[2];
+
+      System.out.println(Arrays.toString(arcLengths));
+      
+      return arcLengthOfMiddleSpline < WAYPOINT_CLOSENESS_FACTOR * totalArcLength;
+   }
+
+   private double getTotalArcLength(double[] arcLengths)
+   {
+      double totalArcLength = 0.0;
+      for (int i = 0; i < arcLengths.length; i++)
+      {
+         totalArcLength += arcLengths[i];
+      }
+
+      return totalArcLength;
    }
 
    private double getWaypointSpeed(double[] arcLengths)
@@ -346,7 +392,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    private double[] getArcLengthsApproximatedByDistance(int[] indices)
    {
-      double[] arcLengths = new double[indices.length];
+      double[] arcLengths = new double[indices.length - 1];
 
       for (int i = 0; i < indices.length - 1; i++)
       {
@@ -390,8 +436,6 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    {
       List<FramePoint> waypoints = null;
 
-      // TODO check distance between waypoints
-
       switch (trajectoryParameters.getWaypointGenerationMethod())
       {
          case BY_POINTS :
@@ -416,7 +460,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
          case HIGH_STEP :
             waypoints = getWaypointForHighStep();
-            
+
             break;
 
          case BY_BOX :
@@ -435,16 +479,29 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          waypoints.get(i).changeFrame(referenceFrame);
          allPositions[waypointIndices[i]].set(waypoints.get(i));
       }
-      
-      checkForEqualWaypoints();
+
+      checkForCloseWaypoints();
    }
 
-   private void checkForEqualWaypoints()
+   private void checkForCloseWaypoints()
    {
-      //hack in case waypoints are equal
-      if (allPositions[waypointIndices[0]].getFramePointCopy().epsilonEquals(allPositions[waypointIndices[1]].getFramePointCopy(), .001))
+      if (waypointsAreCloseTogether())
       {
-         allPositions[waypointIndices[0]].setZ(allPositions[waypointIndices[0]].getZ() + .01);
+         FramePoint midpoint = allPositions[waypointIndices[0]].getFramePointCopy();
+         midpoint.add(allPositions[waypointIndices[1]].getFramePointCopy());
+         midpoint.scale(0.5);
+         
+         for (int i = 0; i < 2; i++)
+         {
+            allPositions[waypointIndices[i]].set(midpoint);
+         }
+         
+         waypointsAreTheSamePoint = true;
+      }
+
+      else
+      {
+         waypointsAreTheSamePoint = false;
       }
    }
 
@@ -466,22 +523,23 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       List<FramePoint> waypoints = new ArrayList<FramePoint>();
       waypoints.add(allPositions[endpointIndices[0]].getFramePointCopy());
       waypoints.add(allPositions[endpointIndices[1]].getFramePointCopy());
-      int indexOfMaxZ = waypoints.get(0).getZ() > waypoints.get(1).getZ() ? 0 : 1;
+      int indexOfMaxZ = (waypoints.get(0).getZ() > waypoints.get(1).getZ()) ? 0 : 1;
 
       for (FramePoint waypoint : waypoints)
       {
          waypoint.setZ(waypoints.get(indexOfMaxZ).getZ() + SimpleTwoWaypointTrajectoryParameters.getLowStepGroundClearance());
       }
-      
+
       FrameVector maxZPointOffset = allPositions[endpointIndices[1]].getFrameVectorCopy();
       maxZPointOffset.sub(allPositions[endpointIndices[0]].getFrameVectorCopy());
       maxZPointOffset.setZ(0.0);
-     
+
       double fractionOfStepDistanceToMoveWaypointForStepOnOrOff = SimpleTwoWaypointTrajectoryParameters.getFractionOfStepDistanceToMoveWaypointForStepOnOrOff();
       maxZPointOffset.scale(fractionOfStepDistanceToMoveWaypointForStepOnOrOff);
-      if(indexOfMaxZ == 1) maxZPointOffset.scale(-1.0);
+      if (indexOfMaxZ == 1)
+         maxZPointOffset.scale(-1.0);
       waypoints.get(indexOfMaxZ).add(maxZPointOffset);
-      
+
       return waypoints;
    }
 
