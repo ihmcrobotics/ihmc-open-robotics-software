@@ -8,6 +8,7 @@ import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 import sensor_msgs.CompressedImage;
+import std_msgs.Int8;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.keyboardAndMouse.RepeatingReleasedEventsFixer;
@@ -37,6 +38,9 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 	private BufferedImage leftEyeImage, rightEyeImage;
 
 	private Subscriber<std_msgs.Float64> steeringWheelStateSubscriber, handBrakeStateSubscriber, gasPedalStateSubscriber, brakePedalStateSubscriber;
+
+   protected Publisher<Int8> directionPublisher;
+   Int8 directionCommand;
 
 	protected Publisher<std_msgs.Float64> steeringWheelCommandPublisher, gasPedalCommandPublisher, brakePedalCommandPublisher, handBrakeCommandPublisher;
 	private std_msgs.Float64 steeringWheelCommand, gasPedalCommand, brakePedalCommand, handBrakeCommand;
@@ -155,9 +159,11 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 
 		teleportInToCarPublisher = connectedNode.newPublisher("/drc_world/robot_enter_car", geometry_msgs.Pose._TYPE);
 		teleportOutOfCarPublisher = connectedNode.newPublisher("/drc_world/robot_exit_car", geometry_msgs.Pose._TYPE);
+
+      directionPublisher = connectedNode.newPublisher("/drc_vehicle/direction/cmd", Int8._TYPE);
 	}
 
-	private void setupSubscribers(ConnectedNode connectedNode)
+	protected void setupSubscribers(ConnectedNode connectedNode)
 	{
 		leftEyeImageSubscriber = connectedNode.newSubscriber(STEREO_NAMESPACE + "left/" + IMAGE, CompressedImage._TYPE);
 		rightEyeImageSubscriber = connectedNode.newSubscriber(STEREO_NAMESPACE + "right/" + IMAGE, CompressedImage._TYPE);
@@ -178,6 +184,12 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 		setupEnterCarPoseMessage();
 		setupExitCarPoseMessage();
 	}
+
+   private void setUpDirectionMessage()
+   {
+      directionCommand = directionPublisher.newMessage();
+      directionCommand.setData((byte)1);
+   }
 
 	private void setUpHandBrakeMessage()
 	{
@@ -278,16 +290,5 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 	protected BufferedImage bufferedImageFromRosMessage(CompressedImage imageMessage)
 	{
 		return RosTools.bufferedImageFromRosMessageJpeg(colorModel, imageMessage);
-	}
-
-	public static void main(String[] args) throws URISyntaxException {
-		try
-		{
-			RosRun.main(new String[]{"us.ihmc.darpaRoboticsChallenge.DRCGazeboDrivingInterface"});
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
 	}
 }
