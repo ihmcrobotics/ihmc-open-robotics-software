@@ -8,8 +8,7 @@ import us.ihmc.graphics3DAdapter.camera.VideoSettingsH264LowLatency;
 
 public class DRCConfigParameters
 {
-   public static final boolean USE_ESTIMATED_POSE_FOR_SENSOR_TRANSFORMS = false;
-   
+  
    public static final boolean USE_PERFECT_SENSORS = false;
    static{
       if (USE_PERFECT_SENSORS) System.err.println("Warning! Using Perfect Sensors!");
@@ -29,7 +28,7 @@ public class DRCConfigParameters
    public static final boolean USE_R2_ROBOT_MODEL = !USE_GFE_ROBOT_MODEL;
 
    // Networking
-   public static final String GAZEBO_HOST = "10.4.42.3";    // "localhost";
+   public static final String GAZEBO_HOST = "localhost";
    public static final String ROS_MASTER_URI = "http://" + GAZEBO_HOST + ":11311";
    public static final String SCS_MACHINE_IP_ADDRESS = "localhost";    // "10.100.0.37";
    public static final int CONTROLLER_TO_UI_TCP_PORT = 4893;

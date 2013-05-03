@@ -6,7 +6,7 @@ import com.yobotics.simulationconstructionset.robotController.RobotControlElemen
 
 public interface DRCOutputWriter extends RobotControlElement
 {
-   public abstract void writeAfterController();
+   public abstract void writeAfterController(long timestamp);
    public abstract void writeAfterEstimator();
    
    public abstract void writeAfterSimulationTick();

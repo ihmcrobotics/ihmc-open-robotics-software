@@ -23,17 +23,16 @@ import com.yobotics.simulationconstructionset.KinematicPoint;
 public class DRCPerfectSensorReaderFactory implements SensorReaderFactory
 {
    private final SDFRobot robot;
-   private final double controlDT;
    
    private final ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators;
    
    private StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
-   private final DRCPerfectSensorReader perfectSensorReader = new DRCPerfectSensorReader();
+   private final DRCPerfectSensorReader perfectSensorReader;
    
-   public DRCPerfectSensorReaderFactory(SDFRobot robot, ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators, double controlDT)
+   public DRCPerfectSensorReaderFactory(SDFRobot robot, ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators, double estimateDT)
    {
       this.robot = robot;
-      this.controlDT = controlDT;
+      this.perfectSensorReader = new DRCPerfectSensorReader(estimateDT);
       this.groundContactPointBasedWrenchCalculators = groundContactPointBasedWrenchCalculators;
    }
    
@@ -43,7 +42,7 @@ public class DRCPerfectSensorReaderFactory implements SensorReaderFactory
       SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = SCSToInverseDynamicsJointMap.createByName((FloatingJoint) rootJoint, sixDoFJoint);
 
       StateEstimatorSensorDefinitionsFromRobotFactory stateEstimatorSensorDefinitionsFromRobotFactory = new StateEstimatorSensorDefinitionsFromRobotFactory(
-            scsToInverseDynamicsJointMap, robot, controlDT, new ArrayList<IMUMount>(), groundContactPointBasedWrenchCalculators,
+            scsToInverseDynamicsJointMap, robot, new ArrayList<IMUMount>(), groundContactPointBasedWrenchCalculators,
             new ArrayList<KinematicPoint>(), new ArrayList<KinematicPoint>());
       this.stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
       

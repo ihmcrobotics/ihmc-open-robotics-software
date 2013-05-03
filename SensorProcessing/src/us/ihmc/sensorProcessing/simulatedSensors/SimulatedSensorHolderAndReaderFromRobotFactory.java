@@ -26,7 +26,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
 {
    private final YoVariableRegistry registry;
    private final Robot robot;
-   private final double controlDT;
+   private final double estimateDT;
    private final SensorNoiseParameters sensorNoiseParameters;
    
    private final ArrayList<IMUMount> imuMounts;
@@ -41,15 +41,15 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
    private StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
    
    
-   public SimulatedSensorHolderAndReaderFromRobotFactory(Robot robot, SensorNoiseParameters sensorNoiseParameters, double controlDT,
+   public SimulatedSensorHolderAndReaderFromRobotFactory(Robot robot, SensorNoiseParameters sensorNoiseParameters, double estimateDT,
          ArrayList<IMUMount> imuMounts, ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators, ArrayList<KinematicPoint> positionPoints, ArrayList<KinematicPoint> velocityPoints, YoVariableRegistry registry)
    {
       this.registry = registry;
       this.robot = robot;
       this.sensorNoiseParameters = sensorNoiseParameters;
-      this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReader(); 
+      this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReader(estimateDT, registry); 
       
-      this.controlDT = controlDT;
+      this.estimateDT = estimateDT;
       this.imuMounts = imuMounts;
       this.groundContactPointBasedWrenchCalculators = groundContactPointBasedWrenchCalculators;
       this.positionPoints = positionPoints;
@@ -73,7 +73,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
       {
          SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = SCSToInverseDynamicsJointMap.createByName((FloatingJoint) rootJoint, sixDoFJoint);
          StateEstimatorSensorDefinitionsFromRobotFactory stateEstimatorSensorDefinitionsFromRobotFactory = new StateEstimatorSensorDefinitionsFromRobotFactory(
-               scsToInverseDynamicsJointMap, robot, controlDT, imuMounts, groundContactPointBasedWrenchCalculators, positionPoints, velocityPoints);
+               scsToInverseDynamicsJointMap, robot, imuMounts, groundContactPointBasedWrenchCalculators, positionPoints, velocityPoints);
          
          this.stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
          this.imuDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getIMUDefinitions();
@@ -165,7 +165,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
             angularVelocityCorruptor.setStandardDeviation(angularVelocityMeasurementStandardDeviation);
             angularVelocitySensor.addSignalCorruptor(angularVelocityCorruptor);
 
-            RandomWalkBiasVectorCorruptor biasVectorCorruptor = new RandomWalkBiasVectorCorruptor(1236L, sensorName, controlDT, registry);
+            RandomWalkBiasVectorCorruptor biasVectorCorruptor = new RandomWalkBiasVectorCorruptor(1236L, sensorName, estimateDT, registry);
 
             Vector3d initialAngularVelocityBias = new Vector3d();
             sensorNoiseParameters.getInitialAngularVelocityBias(initialAngularVelocityBias);
@@ -199,7 +199,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
             linearAccelerationCorruptor.setStandardDeviation(linearAccelerationMeasurementStandardDeviation);
             linearAccelerationSensor.addSignalCorruptor(linearAccelerationCorruptor);
 
-            RandomWalkBiasVectorCorruptor biasVectorCorruptor = new RandomWalkBiasVectorCorruptor(1286L, sensorName, controlDT, registry);
+            RandomWalkBiasVectorCorruptor biasVectorCorruptor = new RandomWalkBiasVectorCorruptor(1286L, sensorName, estimateDT, registry);
 
             Vector3d initialLinearAccelerationBias = new Vector3d();
             sensorNoiseParameters.getInitialLinearVelocityBias(initialLinearAccelerationBias);
