@@ -1,5 +1,6 @@
 package us.ihmc.SdfLoader;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -46,7 +47,14 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
          {
             String parent = SDFConversionsHelper.sanitizeJointName(sdfJoint.getParent());
             String child = SDFConversionsHelper.sanitizeJointName(sdfJoint.getChild());
-            joints.put(SDFConversionsHelper.sanitizeJointName(sdfJoint.getName()), new SDFJointHolder(sdfJoint, links.get(parent), links.get(child)));
+            try
+            {
+               joints.put(SDFConversionsHelper.sanitizeJointName(sdfJoint.getName()), new SDFJointHolder(sdfJoint, links.get(parent), links.get(child)));
+            }
+            catch (IOException e)
+            {
+               System.err.println(e);
+            }
          }
       }
 

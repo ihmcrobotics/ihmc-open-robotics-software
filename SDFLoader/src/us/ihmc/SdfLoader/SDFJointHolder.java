@@ -3,7 +3,10 @@ package us.ihmc.SdfLoader;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
+import com.jcraft.jsch.IO;
 import us.ihmc.SdfLoader.xmlDescription.SDFJoint;
+
+import java.io.IOException;
 
 public class SDFJointHolder
 {
@@ -35,7 +38,7 @@ public class SDFJointHolder
    private double contactKd;
    private double maxVel;
 
-   public SDFJointHolder(SDFJoint sdfJoint, SDFLinkHolder parent, SDFLinkHolder child)
+   public SDFJointHolder(SDFJoint sdfJoint, SDFLinkHolder parent, SDFLinkHolder child)   throws IOException
    {
       name = createValidVariableName(sdfJoint.getName());
       String typeString = sdfJoint.getType();
@@ -50,7 +53,7 @@ public class SDFJointHolder
       }
       else
       {
-         throw new RuntimeException("Joint type " + typeString + " not implemented yet");
+         throw new IOException("Joint type " + typeString + " not implemented yet");
       }
 
       axis = SDFConversionsHelper.stringToNormalizedVector3d(sdfJoint.getAxis().getXyz());
@@ -105,7 +108,7 @@ public class SDFJointHolder
 
       if(parent == null || child == null)
       {
-         throw new RuntimeException("Cannot make joint with null parent or child links, joint name is " + sdfJoint.getName());
+         throw new IOException("Cannot make joint with null parent or child links, joint name is " + sdfJoint.getName());
       }
       
       this.parent = parent;
