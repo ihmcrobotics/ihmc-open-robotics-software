@@ -65,6 +65,7 @@ public class TcpClient {
     channelBufferFactory = new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN);
     bootstrap = new ClientBootstrap(channelFactory);
     bootstrap.setOption("bufferFactory", channelBufferFactory);
+    bootstrap.setOption("tcpNoDelay", true);
     setConnectionTimeout(DEFAULT_CONNECTION_TIMEOUT_DURATION, DEFAULT_CONNECTION_TIMEOUT_UNIT);
     setKeepAlive(DEFAULT_KEEP_ALIVE);
     namedChannelHandlers = Lists.newArrayList();
