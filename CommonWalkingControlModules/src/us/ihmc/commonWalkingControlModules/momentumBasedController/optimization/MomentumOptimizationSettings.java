@@ -18,13 +18,16 @@ public class MomentumOptimizationSettings
    private final DoubleYoVariable linearMomentumZWeight = new DoubleYoVariable("linearMomentumZWeight", registry);
    private final DoubleYoVariable angularMomentumXYWeight = new DoubleYoVariable("angularMomentumXYWeight", registry);
    private final DoubleYoVariable angularMomentumZWeight = new DoubleYoVariable("angularMomentumZWeight", registry);
+   private final double[] momentumWeightDiagonal = new double[Momentum.SIZE];
 
-   private final DenseMatrix64F momentumSubspaceProjector = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
-   private final DenseMatrix64F tempMatrix = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
    private final DenseMatrix64F C = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
    private double wRho;
    private double lambda;
    private double rhoMin;
+
+   private final DenseMatrix64F momentumSubspaceProjector = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
+   private final DenseMatrix64F tempMatrix = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
+   private final Momentum tempMomentum = new Momentum(); // just to make sure that the ordering of force and torque are correct
 
    public MomentumOptimizationSettings(YoVariableRegistry parentRegistry)
    {
@@ -57,8 +60,19 @@ public class MomentumOptimizationSettings
    public DenseMatrix64F getMomentumDotWeight(DenseMatrix64F momentumSubspace)
    {
       CommonOps.multOuter(momentumSubspace, momentumSubspaceProjector);
-      tempMatrix.zero();
-//      tempMatrix.set // TODO: set diagonal elements, C = projector * tempMatrix.
+
+      tempMomentum.setLinearPartX(linearMomentumXYWeight.getDoubleValue());
+      tempMomentum.setLinearPartY(linearMomentumXYWeight.getDoubleValue());
+      tempMomentum.setLinearPartZ(linearMomentumZWeight.getDoubleValue());
+
+      tempMomentum.setAngularPartX(angularMomentumXYWeight.getDoubleValue());
+      tempMomentum.setAngularPartY(angularMomentumXYWeight.getDoubleValue());
+      tempMomentum.setAngularPartZ(angularMomentumXYWeight.getDoubleValue());
+
+      tempMomentum.packMatrix(momentumWeightDiagonal);
+      CommonOps.diag(tempMatrix, Momentum.SIZE, momentumWeightDiagonal);
+
+      CommonOps.mult(momentumSubspaceProjector, tempMatrix, C);
 
       return C;
    }
