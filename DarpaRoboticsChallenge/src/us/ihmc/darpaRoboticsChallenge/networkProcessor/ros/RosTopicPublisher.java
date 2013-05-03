@@ -39,7 +39,7 @@ public abstract class RosTopicPublisher<T extends Message>
    protected T getMessage()
    {
       checkInitialized();
-      return message;
+      return publisher.newMessage();
    }
    
    private void checkInitialized()
