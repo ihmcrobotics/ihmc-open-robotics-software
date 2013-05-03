@@ -73,7 +73,10 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
 
    public String[] getHeadOrientationControlJointNames()
    {
-      return new String[] {"back_lbz", "back_ubx", "neck_ay"};
+      // Get rid of back_ubx to prevent hip roll jumps.
+//      return new String[] {"back_lbz", "back_ubx", "neck_ay"}; // Pelvis will jump around with these setting.
+      return new String[] {"back_lbz", "neck_ay"}; 
+//      return new String[] {"neck_ay"};
    }
 
    public String[] getChestOrientationControlJointNames()
