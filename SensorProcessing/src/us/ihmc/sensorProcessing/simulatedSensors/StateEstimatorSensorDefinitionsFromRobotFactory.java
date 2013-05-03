@@ -30,7 +30,7 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
 
    private final StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
 
-   public StateEstimatorSensorDefinitionsFromRobotFactory(SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap, Robot robot, double controlDT,
+   public StateEstimatorSensorDefinitionsFromRobotFactory(SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap, Robot robot, 
            ArrayList<IMUMount> imuMounts, ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators,  ArrayList<KinematicPoint> positionPoints, ArrayList<KinematicPoint> velocityPoints)
    {
       this.scsToInverseDynamicsJointMap = scsToInverseDynamicsJointMap;

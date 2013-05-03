@@ -17,7 +17,6 @@ import us.ihmc.darpaRoboticsChallenge.controllers.EstimationLinkHolder;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCSimulationOutputWriter;
-import us.ihmc.darpaRoboticsChallenge.sensors.DRCPerfectPoseEstimator;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.darpaRoboticsChallenge.sensors.GazeboForceSensor;
 import us.ihmc.projectM.R2Sim02.initialSetup.GuiInitialSetup;
@@ -154,14 +153,14 @@ public class DRCSimulationFactory
       RobotController controller;
       if(DRCConfigParameters.USE_PERFECT_SENSORS)
       {
-         DRCPerfectSensorReaderFactory drcPerfectSensorReaderFactory = new DRCPerfectSensorReaderFactory(simulatedRobot, wrenchProviders, controlDT);
+         DRCPerfectSensorReaderFactory drcPerfectSensorReaderFactory = new DRCPerfectSensorReaderFactory(simulatedRobot, wrenchProviders, estimateDT);
          controller = drcPerfectSensorReaderFactory.getSensorReader();
          sensorReaderFactory = drcPerfectSensorReaderFactory;
       }
       else
       {
          SimulatedSensorHolderAndReaderFromRobotFactory simulatedSensorHolderAndReaderFromRobotFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(simulatedRobot,
-               sensorNoiseParameters, controlDT, imuMounts, wrenchProviders, positionPoints, velocityPoints, registry);
+               sensorNoiseParameters, estimateDT, imuMounts, wrenchProviders, positionPoints, velocityPoints, registry);
          controller = new RunnableRunnerController(simulatedSensorHolderAndReaderFromRobotFactory.getSensorReader());
          sensorReaderFactory = simulatedSensorHolderAndReaderFromRobotFactory;
       }
@@ -174,7 +173,7 @@ public class DRCSimulationFactory
       
       DRCController robotController = new DRCController(initialCoMPositionAndEstimationLinkOrientation, robotInterface.getFullRobotModelFactory(), controllerFactory,
             sensorReaderFactory, outputWriter,
-            jointMap, lidarControllerInterface, gravity, estimateDT, controlDT, networkProccesorCommunicator, teamComputerServer, DRCConfigParameters.USE_ESTIMATED_POSE_FOR_SENSOR_TRANSFORMS, robotInterface.getTimeStampProvider(), dynamicGraphicObjectsListRegistry,
+            jointMap, lidarControllerInterface, gravity, estimateDT, controlDT, networkProccesorCommunicator, teamComputerServer, robotInterface.getTimeStampProvider(), dynamicGraphicObjectsListRegistry,
             guiSetterUpperRegistry, registry);
 
       final HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, robotController,
@@ -206,10 +205,6 @@ public class DRCSimulationFactory
          ((GazeboRobot) simulatedRobot).registerWithSCS(humanoidRobotSimulation.getSimulationConstructionSet());
       }
 
-      if (networkProccesorCommunicator != null && !DRCConfigParameters.USE_ESTIMATED_POSE_FOR_SENSOR_TRANSFORMS)
-      {
-         simulatedRobot.setController(new DRCPerfectPoseEstimator(simulatedRobot, networkProccesorCommunicator, robotInterface.getTimeStampProvider()), estimationTicksPerControlTick);
-      }
 
       return humanoidRobotSimulation;
    }

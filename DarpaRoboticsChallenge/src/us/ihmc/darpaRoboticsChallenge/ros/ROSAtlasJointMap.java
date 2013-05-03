@@ -1,40 +1,49 @@
 package us.ihmc.darpaRoboticsChallenge.ros;
 
-import static atlas_msgs.AtlasState.back_lbz;
-import static atlas_msgs.AtlasState.back_mby;
-import static atlas_msgs.AtlasState.back_ubx;
-import static atlas_msgs.AtlasState.l_arm_elx;
-import static atlas_msgs.AtlasState.l_arm_ely;
-import static atlas_msgs.AtlasState.l_arm_mwx;
-import static atlas_msgs.AtlasState.l_arm_shx;
-import static atlas_msgs.AtlasState.l_arm_usy;
-import static atlas_msgs.AtlasState.l_arm_uwy;
-import static atlas_msgs.AtlasState.l_leg_kny;
-import static atlas_msgs.AtlasState.l_leg_lax;
-import static atlas_msgs.AtlasState.l_leg_lhy;
-import static atlas_msgs.AtlasState.l_leg_mhx;
-import static atlas_msgs.AtlasState.l_leg_uay;
-import static atlas_msgs.AtlasState.l_leg_uhz;
-import static atlas_msgs.AtlasState.neck_ay;
-import static atlas_msgs.AtlasState.r_arm_elx;
-import static atlas_msgs.AtlasState.r_arm_ely;
-import static atlas_msgs.AtlasState.r_arm_mwx;
-import static atlas_msgs.AtlasState.r_arm_shx;
-import static atlas_msgs.AtlasState.r_arm_usy;
-import static atlas_msgs.AtlasState.r_arm_uwy;
-import static atlas_msgs.AtlasState.r_leg_kny;
-import static atlas_msgs.AtlasState.r_leg_lax;
-import static atlas_msgs.AtlasState.r_leg_lhy;
-import static atlas_msgs.AtlasState.r_leg_mhx;
-import static atlas_msgs.AtlasState.r_leg_uay;
-import static atlas_msgs.AtlasState.r_leg_uhz;
-
 import java.util.Map;
 
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 public class ROSAtlasJointMap
 {
+   /*
+    * Copied from
+    *    https://bitbucket.org/osrf/drcsim/raw/default/ros/atlas_msgs/msg/AtlasState.msg
+    */
+   
+   
+   public final static int back_lbz  = 0;
+   public final static int back_mby  = 1;
+   public final static int back_ubx  = 2;
+   public final static int neck_ay   = 3;
+   public final static int l_leg_uhz = 4;
+   public final static int l_leg_mhx = 5;
+   public final static int l_leg_lhy = 6;
+   public final static int l_leg_kny = 7;
+   public final static int l_leg_uay = 8;
+   public final static int l_leg_lax = 9;
+   public final static int r_leg_uhz = 10;
+   public final static int r_leg_mhx = 11;
+   public final static int r_leg_lhy = 12;
+   public final static int r_leg_kny = 13;
+   public final static int r_leg_uay = 14;
+   public final static int r_leg_lax = 15;
+   public final static int l_arm_usy = 16;
+   public final static int l_arm_shx = 17;
+   public final static int l_arm_ely = 18;
+   public final static int l_arm_elx = 19;
+   public final static int l_arm_uwy = 20;
+   public final static int l_arm_mwx = 21;
+   public final static int r_arm_usy = 22;
+   public final static int r_arm_shx = 23;
+   public final static int r_arm_ely = 24;
+   public final static int r_arm_elx = 25;
+   public final static int r_arm_uwy = 26;
+   public final static int r_arm_mwx = 27;
+   
+   
+   public final static int numberOfJoints = r_arm_mwx + 1; 
+   
    public static OneDoFJoint[] getJointMap(Map<String, OneDoFJoint> jointsByName)
    {
       OneDoFJoint[] joints = new OneDoFJoint[atlas_msgs.AtlasState.r_arm_mwx + 1];

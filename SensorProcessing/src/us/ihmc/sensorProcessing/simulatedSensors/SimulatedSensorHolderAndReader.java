@@ -3,20 +3,33 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
 import us.ihmc.utilities.IMUDefinition;
+import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+
+import com.yobotics.simulationconstructionset.IntegerYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
 {
+   private final static boolean RUN_MULTITHREADED = true;
    
-   private ControlFlowElement controllerDispatcher;
+   private final YoVariableRegistry registry = new YoVariableRegistry("DRCPerfectSensorReader");
+   private final IntegerYoVariable step = new IntegerYoVariable("step", registry);
+   private final long estimateDTinNs;
+   
+   private ControllerDispatcher controllerDispatcher;
    
    
    private final LinkedHashMap<OneDoFJoint, SimulatedOneDoFJointPositionSensor> jointPositionSensors = new LinkedHashMap<OneDoFJoint,
@@ -39,10 +52,24 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
    
    
    private ForceSensorDataHolder forceSensorDataHolder;
+   
+   /*
+    * Multithreading support
+    */
+   private final DispatcherExecutor dispatcherExecutor = new DispatcherExecutor();
+   private final ExecutorService dispatcherExecutorPool = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory("dispatcherExecutor"));
+   private Future<?> dispatcherFuture;
 
    
-   public SimulatedSensorHolderAndReader()
+   public SimulatedSensorHolderAndReader(double estimateDT, YoVariableRegistry parentRegistry)
    {
+      this.estimateDTinNs = TimeTools.toNanoSeconds(estimateDT);
+      step.set(29831);
+      
+      if(parentRegistry != null)
+      {
+         parentRegistry.addChild(registry);
+      }
    }
 
    public void addJointPositionSensorPort(OneDoFJoint oneDoFJoint, SimulatedOneDoFJointPositionSensor jointPositionSensor)
@@ -85,8 +112,27 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
    {
       if(controllerDispatcher != null)
       {
+         if(RUN_MULTITHREADED)
+         {
+            if(dispatcherFuture != null)
+            {
+               try
+               {
+                  dispatcherFuture.get();
+               }
+               catch (InterruptedException e)
+               {
+                  System.err.println(e);
+               }
+               catch (ExecutionException e)
+               {
+                  throw new RuntimeException(e);
+               }
+            }
+         }
          controllerDispatcher.waitUntilComputationIsDone();
       }
+      step.increment();
       
       
       Set<OneDoFJoint> jointsForPositionSensors = jointPositionSensors.keySet();
@@ -155,11 +201,18 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
       
       if(controllerDispatcher != null)
       {
-         controllerDispatcher.startComputation();
+         if(RUN_MULTITHREADED)
+         {
+            dispatcherFuture = dispatcherExecutorPool.submit(dispatcherExecutor);
+         }
+         else
+         {
+            dispatcherExecutor.run();
+         }
       }
    }
 
-   public void setControllerDispatcher(ControlFlowElement controllerDispatcher)
+   public void setControllerDispatcher(ControllerDispatcher controllerDispatcher)
    {
       this.controllerDispatcher = controllerDispatcher;
    }
@@ -168,5 +221,15 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
    public void setForceSensorDataHolder(ForceSensorDataHolder forceSensorDataHolder)
    {
       this.forceSensorDataHolder = forceSensorDataHolder;
+   }
+   
+   private class DispatcherExecutor implements Runnable
+   {
+
+      public void run()
+      {
+         controllerDispatcher.startEstimator(estimateDTinNs * step.getIntegerValue());
+      }
+      
    }
 }

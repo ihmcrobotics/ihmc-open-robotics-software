@@ -9,15 +9,15 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter implements DRCOutputWriter
 {
-   private final double controlDT;
+//   private final double controlDT;
    public DRCSimulationOutputWriter(SDFRobot robot, double controlDT)
    {
       super(robot);
-      this.controlDT = controlDT;
+//      this.controlDT = controlDT;
 
    }
 
-   public void writeAfterController()
+   public void writeAfterController(long timestamp)
    {
       // Do not write here, because it will set the robot's torques while the simulation is running
    }

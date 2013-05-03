@@ -3,13 +3,15 @@ package us.ihmc.darpaRoboticsChallenge.sensors;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
-import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
+import us.ihmc.sensorProcessing.simulatedSensors.ControllerDispatcher;
 import us.ihmc.sensorProcessing.simulatedSensors.ForceSensorDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
+import us.ihmc.utilities.math.TimeTools;
 
+import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RawSensorReader;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
@@ -17,16 +19,19 @@ import com.yobotics.simulationconstructionset.robotController.RobotController;
 public class DRCPerfectSensorReader implements SensorReader, RobotController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("DRCPerfectSensorReader");
+   private final IntegerYoVariable step = new IntegerYoVariable("step", registry);
+   private final long estimateDTinNs;
    private RawSensorReader rawSensorReader;
-   private ControlFlowElement controllerDispatcher;
+   private ControllerDispatcher controllerDispatcher;
 
    private final LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensors = new LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface>();
 
    private ForceSensorDataHolder forceSensorDataHolder;
    
-   public DRCPerfectSensorReader()
+   public DRCPerfectSensorReader(double estimateDT)
    {
-      
+      this.estimateDTinNs = TimeTools.toNanoSeconds(estimateDT);
+      step.set(9807);
    }
 
    public void setSensorReader(RawSensorReader rawSensorReader)
@@ -38,7 +43,7 @@ public class DRCPerfectSensorReader implements SensorReader, RobotController
    {
    }
 
-   public void setControllerDispatcher(ControlFlowElement controllerDispatcher)
+   public void setControllerDispatcher(ControllerDispatcher controllerDispatcher)
    {
       this.controllerDispatcher = controllerDispatcher;
    }
@@ -70,6 +75,7 @@ public class DRCPerfectSensorReader implements SensorReader, RobotController
 
    public void doControl()
    {
+      step.increment();
       if(controllerDispatcher != null)
       {
          controllerDispatcher.waitUntilComputationIsDone();
@@ -79,7 +85,7 @@ public class DRCPerfectSensorReader implements SensorReader, RobotController
       
       if(controllerDispatcher != null)
       {
-         controllerDispatcher.startComputation();
+         controllerDispatcher.startEstimator(estimateDTinNs * step.getIntegerValue());
       }
    }
 
