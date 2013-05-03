@@ -30,6 +30,11 @@ public class GraphingUtility
       return createGraph(title, xAxisLabel, yAxisLabel, dataset, true, false, true);
    }
 
+   public static ChartPanel createGraph(String title, String xAxisLabel, String yAxisLabel, XYDataset dataset, boolean showSeriesShape, boolean independentYaxes)
+   {
+      return createGraph(title, xAxisLabel, yAxisLabel, dataset, showSeriesShape, independentYaxes, true);
+   }
+
    public static ChartPanel createGraph(String title, String xAxisLabel, String yAxisLabel, XYDataset dataset, boolean showSeriesShape, boolean independentYaxes, boolean showLegend)
    {
       // create the chart
