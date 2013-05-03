@@ -67,7 +67,7 @@ public class MomentumOptimizationSettings
 
       tempMomentum.setAngularPartX(angularMomentumXYWeight.getDoubleValue());
       tempMomentum.setAngularPartY(angularMomentumXYWeight.getDoubleValue());
-      tempMomentum.setAngularPartZ(angularMomentumXYWeight.getDoubleValue());
+      tempMomentum.setAngularPartZ(angularMomentumZWeight.getDoubleValue());
 
       tempMomentum.packMatrix(momentumWeightDiagonal);
       CommonOps.diag(tempMatrix, Momentum.SIZE, momentumWeightDiagonal);
