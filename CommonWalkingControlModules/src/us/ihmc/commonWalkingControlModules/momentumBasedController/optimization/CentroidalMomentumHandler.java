@@ -5,6 +5,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeData;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.*;
@@ -33,6 +34,7 @@ public class CentroidalMomentumHandler
    private final DenseMatrix64F v;
    private final Map<InverseDynamicsJoint, int[]> columnsForJoints = new LinkedHashMap<InverseDynamicsJoint, int[]>();
    private final DenseMatrix64F hdot = new DenseMatrix64F(Momentum.SIZE, 1);
+   private final DenseMatrix64F centroidalMomentumEquationRightHandSide = new DenseMatrix64F(Momentum.SIZE, 1);
    private final ReferenceFrame centerOfMassFrame;
 
    public CentroidalMomentumHandler(InverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame, double controlDT, YoVariableRegistry parentRegistry)
@@ -116,5 +118,14 @@ public class CentroidalMomentumHandler
    public SpatialForceVector getCentroidalMomentumRate()
    {
       return centroidalMomentumRate;
+   }
+
+   public DenseMatrix64F getMomentumDotEquationRightHandSide(MomentumRateOfChangeData momentumRateOfChangeData)
+   {
+      DenseMatrix64F momentumSubspace = momentumRateOfChangeData.getMomentumSubspace();
+      DenseMatrix64F momentumMultipliers = momentumRateOfChangeData.getMomentumMultipliers();
+      CommonOps.mult(momentumSubspace, momentumMultipliers, centroidalMomentumEquationRightHandSide);
+      CommonOps.subEquals(centroidalMomentumEquationRightHandSide, adotV);
+      return centroidalMomentumEquationRightHandSide;
    }
 }
