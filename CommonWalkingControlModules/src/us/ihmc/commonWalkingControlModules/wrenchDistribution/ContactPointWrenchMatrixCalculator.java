@@ -138,4 +138,9 @@ public class ContactPointWrenchMatrixCalculator
       }
       return wrench;
    }
+
+   public Map<PlaneContactState, Wrench> getWrenches()
+   {
+      return wrenches;
+   }
 }
