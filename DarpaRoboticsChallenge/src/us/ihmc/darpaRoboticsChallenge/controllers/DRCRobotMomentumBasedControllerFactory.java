@@ -9,7 +9,6 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
-import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
@@ -35,17 +34,18 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 {
    private final HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory;
    private final ObjectCommunicator server;
-
+   private final boolean useGazeboPhysics;
 
    public DRCRobotMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory)
    {
-      this(highLevelHumanoidControllerFactory, null);
+      this(highLevelHumanoidControllerFactory, null, false);
    }
 
-   public DRCRobotMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory, ObjectCommunicator server)
+   public DRCRobotMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory, ObjectCommunicator server, boolean useGazeboPhysics)
    {
       this.highLevelHumanoidControllerFactory = highLevelHumanoidControllerFactory;
       this.server = server;
+      this.useGazeboPhysics = useGazeboPhysics;
    }
 
    public MomentumBasedController getController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
@@ -103,7 +103,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       jointConfigurationDataSender.startUpdateThread(updatePeriodInMilliseconds);
    }
 
-   private static SideDependentList<FootSwitchInterface> createFootSwitches(SideDependentList<ContactablePlaneBody> bipedFeet,
+   private SideDependentList<FootSwitchInterface> createFootSwitches(SideDependentList<ContactablePlaneBody> bipedFeet,
                                                                             ForceSensorDataHolder forceSensorDataHolder, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry)
    {
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<FootSwitchInterface>();
@@ -111,7 +111,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       {
          ForceSensorData footForceSensor = forceSensorDataHolder.getByName(robotSide.getShortLowerCaseName() + "_leg_lax");
          WrenchBasedFootSwitch wrenchBasedFootSwitch = new WrenchBasedFootSwitch(footForceSensor, 0.02, bipedFeet.get(robotSide),
-                                                          dynamicGraphicObjectsListRegistry, registry);
+                                                          dynamicGraphicObjectsListRegistry, useGazeboPhysics, registry);
          footSwitches.put(robotSide, wrenchBasedFootSwitch);
       }
 

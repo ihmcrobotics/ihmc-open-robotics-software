@@ -29,7 +29,6 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class SensorAndEstimatorAssembler
 {
-   private static final boolean ESTIMATE_COM = true;
    private static final boolean VISUALIZE_CONTROL_FLOW_GRAPH = false;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 

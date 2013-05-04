@@ -38,8 +38,6 @@ import com.yobotics.simulationconstructionset.IMUMount;
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.KinematicPoint;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
@@ -169,7 +167,7 @@ public class DRCSimulationFactory
       robotInterface.getRobot().getGravity(gravity);
       
       //TODO: Can only do this if we have a simulation...
-      Pair<Point3d, Quat4d> initialCoMPositionAndEstimationLinkOrientation = getInitialCoMPositionAndEstimationLinkOrientation(robotInitialSetup, simulatedRobot);
+      Pair<Point3d, Quat4d> initialCoMPositionAndEstimationLinkOrientation = null;//getInitialCoMPositionAndEstimationLinkOrientation(robotInitialSetup, simulatedRobot);
       
       DRCController robotController = new DRCController(initialCoMPositionAndEstimationLinkOrientation, robotInterface.getFullRobotModelFactory(), controllerFactory,
             sensorReaderFactory, outputWriter,
@@ -209,35 +207,35 @@ public class DRCSimulationFactory
       return humanoidRobotSimulation;
    }
 
-   private static Pair<Point3d, Quat4d> getInitialCoMPositionAndEstimationLinkOrientation(RobotInitialSetup<SDFRobot> robotInitialSetup, SDFRobot simulatedRobot)
-   {
-      // The following is to get the initial CoM position from the robot. 
-      // It is cheating for now, and we need to move to where the 
-      // robot itself determines coordinates, and the sensors are all
-      // in the robot-determined world coordinates..
-      Point3d initialCoMPosition = new Point3d();
-      robotInitialSetup.initializeRobot(simulatedRobot);
-      updateRobot(simulatedRobot);
-      
-      simulatedRobot.computeCenterOfMass(initialCoMPosition);
-
-      Quat4d initialEstimationLinkOrientation = simulatedRobot.getRootJointToWorldRotationQuaternion();
-      return new Pair<Point3d, Quat4d>(initialCoMPosition, initialEstimationLinkOrientation);
-   }
-
-   private static void updateRobot(Robot robot)
-   {
-      try
-      {
-         robot.update();
-         robot.doDynamicsButDoNotIntegrate();
-         robot.update();
-      }
-      catch (UnreasonableAccelerationException e)
-      {
-         throw new RuntimeException("UnreasonableAccelerationException");
-      }
-   }
+//   private static Pair<Point3d, Quat4d> getInitialCoMPositionAndEstimationLinkOrientation(RobotInitialSetup<SDFRobot> robotInitialSetup, SDFRobot simulatedRobot)
+//   {
+//      // The following is to get the initial CoM position from the robot. 
+//      // It is cheating for now, and we need to move to where the 
+//      // robot itself determines coordinates, and the sensors are all
+//      // in the robot-determined world coordinates..
+//      Point3d initialCoMPosition = new Point3d();
+//      robotInitialSetup.initializeRobot(simulatedRobot);
+//      updateRobot(simulatedRobot);
+//      
+//      simulatedRobot.computeCenterOfMass(initialCoMPosition);
+//
+//      Quat4d initialEstimationLinkOrientation = simulatedRobot.getRootJointToWorldRotationQuaternion();
+//      return new Pair<Point3d, Quat4d>(initialCoMPosition, initialEstimationLinkOrientation);
+//   }
+//
+//   private static void updateRobot(Robot robot)
+//   {
+//      try
+//      {
+//         robot.update();
+//         robot.doDynamicsButDoNotIntegrate();
+//         robot.update();
+//      }
+//      catch (UnreasonableAccelerationException e)
+//      {
+//         throw new RuntimeException("UnreasonableAccelerationException");
+//      }
+//   }
    
 //   public static DesiredCoMAccelerationsFromRobotStealerController createAndAddDesiredCoMAccelerationFromRobotStealerController(ReferenceFrame estimationFrame,
 //         double controlDT, int simulationTicksPerControlTick, SDFRobot simulatedRobot, ArrayList<RobotControllerAndParameters> robotControllersAndParameters)
