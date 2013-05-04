@@ -160,7 +160,7 @@ public class MomentumOptimizerNative
       double[] rhoMin = momentumOptimizerNativeInput.getRhoMin();
       double wRho = momentumOptimizerNativeInput.getwRho();
 
-      solve(A, b, C, Js, ps, Ws, Lambda, Q, c, N, z, rhoMin, wRho);
+      solve(A, b, C, Js, ps, Ws, Lambda, Q, c, rhoMin, N, z, wRho);
 
    }
 

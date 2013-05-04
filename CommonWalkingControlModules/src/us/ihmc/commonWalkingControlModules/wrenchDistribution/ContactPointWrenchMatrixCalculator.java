@@ -33,7 +33,7 @@ public class ContactPointWrenchMatrixCalculator
    private final DenseMatrix64F qBlock = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F rhoBlock = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F wrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
-   private DenseMatrix64F rhoMin;
+   private final DenseMatrix64F rhoMin;
 
    public ContactPointWrenchMatrixCalculator(ReferenceFrame centerOfMassFrame, int nSupportVectorsPerContactPoint, int nColumns)
    {
@@ -44,6 +44,7 @@ public class ContactPointWrenchMatrixCalculator
          normalizedSupportVectors.add(new FrameVector(ReferenceFrame.getWorldFrame()));
       }
       q = new DenseMatrix64F(Wrench.SIZE, nColumns);
+      rhoMin = new DenseMatrix64F(nColumns, 1);
    }
 
    public DenseMatrix64F getRhoMin(Collection<? extends PlaneContactState> contactStates, double rhoMinScalar)

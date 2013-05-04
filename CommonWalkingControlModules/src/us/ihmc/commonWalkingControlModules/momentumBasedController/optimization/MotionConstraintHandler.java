@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
+import org.apache.commons.lang.mutable.MutableDouble;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.data.RowD1Matrix64F;
 import org.ejml.ops.CommonOps;
@@ -30,12 +31,14 @@ public class MotionConstraintHandler
    private final List<DenseMatrix64F> jList = new ArrayList<DenseMatrix64F>();
    private final List<DenseMatrix64F> pList = new ArrayList<DenseMatrix64F>();
    private final List<DenseMatrix64F> nList = new ArrayList<DenseMatrix64F>();
-
    private final List<DenseMatrix64F> zList = new ArrayList<DenseMatrix64F>();
+   private final List<MutableDouble> weightList = new ArrayList<MutableDouble>();
+
    private final DenseMatrix64F j = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F p = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F z = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F n = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F ws = new DenseMatrix64F(1, 1);
 
    private final DenseMatrix64F jBlockCompact = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F sJ = new DenseMatrix64F(1, 1);
@@ -48,6 +51,7 @@ public class MotionConstraintHandler
    {
       this.jointsInOrder = jointsInOrder;
       this.nDegreesOfFreedom = ScrewTools.computeDegreesOfFreedom(jointsInOrder);
+
       for (InverseDynamicsJoint joint : jointsInOrder)
       {
          columnsForJoints.put(joint, ScrewTools.computeIndicesForJoint(jointsInOrder, joint));
@@ -60,8 +64,8 @@ public class MotionConstraintHandler
       nullspaceIndex = 0;
    }
 
-   public void setDesiredSpatialAcceleration(InverseDynamicsJoint[] constrainedJoints, GeometricJacobian jacobian, TaskspaceConstraintData
-         taskspaceConstraintData)
+   public void setDesiredSpatialAcceleration(InverseDynamicsJoint[] constrainedJoints, GeometricJacobian jacobian,
+           TaskspaceConstraintData taskspaceConstraintData, double weight)
    {
       // (S * J) * vdot = S * (Tdot - Jdot * v)
 
@@ -93,6 +97,9 @@ public class MotionConstraintHandler
       taskSpaceAcceleration.packMatrix(taskSpaceAccelerationMatrix, 0);
       CommonOps.mult(selectionMatrix, taskSpaceAccelerationMatrix, pBlock);
       CommonOps.multAdd(-1.0, selectionMatrix, convectiveTermMatrix, pBlock);
+
+      MutableDouble weightBlock = getMutableDoubleFromList(weightList, motionConstraintIndex);
+      weightBlock.setValue(weight);
 
       motionConstraintIndex++;
 
@@ -131,29 +138,37 @@ public class MotionConstraintHandler
       }
    }
 
-   public void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration)
+   public void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration, double weight)
    {
       CheckTools.checkEquals(joint.getDegreesOfFreedom(), jointAcceleration.getNumRows());
       int[] columnsForJoint = this.columnsForJoints.get(joint);
 
-
-      DenseMatrix64F JpBlock = getMatrixFromList(jList, motionConstraintIndex, joint.getDegreesOfFreedom(), nDegreesOfFreedom);
-      new DenseMatrix64F(joint.getDegreesOfFreedom(), nDegreesOfFreedom);
-      for (int i = 0; i < joint.getDegreesOfFreedom(); i++)
+      if (columnsForJoint != null) // don't do anything for joints that are not in the list
       {
-         JpBlock.set(i, columnsForJoint[i], 1.0);
+         DenseMatrix64F jBlock = getMatrixFromList(jList, motionConstraintIndex, joint.getDegreesOfFreedom(), nDegreesOfFreedom);
+         new DenseMatrix64F(joint.getDegreesOfFreedom(), nDegreesOfFreedom);
+
+         for (int i = 0; i < joint.getDegreesOfFreedom(); i++)
+         {
+            jBlock.set(i, columnsForJoint[i], 1.0);
+         }
+
+         DenseMatrix64F ppBlock = getMatrixFromList(pList, motionConstraintIndex, joint.getDegreesOfFreedom(), 1);
+         ppBlock.set(jointAcceleration);
+
+         MutableDouble weightBlock = getMutableDoubleFromList(weightList, motionConstraintIndex);
+         weightBlock.setValue(weight);
+
+         motionConstraintIndex++;
       }
 
-      DenseMatrix64F ppBlock = getMatrixFromList(pList, motionConstraintIndex, joint.getDegreesOfFreedom(), 1);
-      ppBlock.set(jointAcceleration);
-
-      motionConstraintIndex++;
    }
 
    public void compute()
    {
       assembleEquation(jList, pList, motionConstraintIndex, j, p);
       assembleEquation(nList, zList, nullspaceIndex, n, z);
+      assembleWeightMatrix(weightList, jList, motionConstraintIndex, ws);
    }
 
    private void assembleEquation(List<DenseMatrix64F> matrixList, List<DenseMatrix64F> vectorList, int size, DenseMatrix64F matrix, DenseMatrix64F vector)
@@ -166,6 +181,7 @@ public class MotionConstraintHandler
       {
          nRows += matrixList.get(i).getNumRows();
       }
+
       matrix.reshape(nRows, nDegreesOfFreedom);
       vector.reshape(nRows, 1);
 
@@ -179,6 +195,31 @@ public class MotionConstraintHandler
          CommonOps.insert(vectorBlock, vector, rowNumber, 0);
 
          rowNumber += matrixBlock.getNumRows();
+      }
+   }
+
+   private void assembleWeightMatrix(List<MutableDouble> weightList, List<DenseMatrix64F> jacobianList, int nConstraints, DenseMatrix64F weightMatrix)
+   {
+      CheckTools.checkEquals(weightList.size(), jacobianList.size());
+
+      int size = 0;
+      for (int i = 0; i < nConstraints; i++)
+      {
+         size += jacobianList.get(i).getNumRows();
+      }
+
+      weightMatrix.reshape(size, size);
+      weightMatrix.zero();
+      int matrixIndex = 0;
+      for (int i = 0; i < nConstraints; i++)
+      {
+         double weight = weightList.get(i).doubleValue();
+         int blockSize = jacobianList.get(i).getNumRows();
+         for (int blockIndex = 0; blockIndex < blockSize; blockIndex++)
+         {
+            weightMatrix.set(matrixIndex, matrixIndex, weight);
+            matrixIndex++;
+         }
       }
    }
 
@@ -202,14 +243,33 @@ public class MotionConstraintHandler
       return z;
    }
 
+   public DenseMatrix64F getWeightMatrix()
+   {
+      return ws;
+   }
+
    private static DenseMatrix64F getMatrixFromList(List<DenseMatrix64F> matrixList, int index, int nRows, int nColumns)
    {
       for (int i = matrixList.size(); i <= index; i++)
       {
          matrixList.add(new DenseMatrix64F(1, 1));
       }
+
       DenseMatrix64F ret = matrixList.get(index);
       ret.reshape(nRows, nColumns);
+
+      return ret;
+   }
+
+   private static MutableDouble getMutableDoubleFromList(List<MutableDouble> mutableDoubleList, int index)
+   {
+      for (int i = mutableDoubleList.size(); i <= index; i++)
+      {
+         mutableDoubleList.add(new MutableDouble());
+      }
+
+      MutableDouble ret = mutableDoubleList.get(index);
+
       return ret;
    }
 
@@ -236,4 +296,6 @@ public class MotionConstraintHandler
 
       throw new RuntimeException("End effector for " + taskSpaceAcceleration + " could not be determined");
    }
+
+
 }

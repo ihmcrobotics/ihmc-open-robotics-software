@@ -91,7 +91,7 @@ public class MomentumSolver3 implements MomentumSolverInterface
 
    public void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration)
    {
-      motionConstraintHandler.setDesiredJointAcceleration(joint, jointAcceleration);
+      motionConstraintHandler.setDesiredJointAcceleration(joint, jointAcceleration, Double.POSITIVE_INFINITY);
    }
 
    public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
@@ -102,7 +102,7 @@ public class MomentumSolver3 implements MomentumSolverInterface
    public void setDesiredSpatialAcceleration(InverseDynamicsJoint[] constrainedJoints, GeometricJacobian jacobian, TaskspaceConstraintData
          taskspaceConstraintData)
    {
-      motionConstraintHandler.setDesiredSpatialAcceleration(constrainedJoints, jacobian, taskspaceConstraintData);
+      motionConstraintHandler.setDesiredSpatialAcceleration(constrainedJoints, jacobian, taskspaceConstraintData, Double.POSITIVE_INFINITY);
    }
 
    public void compute()
@@ -180,8 +180,8 @@ public class MomentumSolver3 implements MomentumSolverInterface
 
       hardMotionConstraintEnforcer.compute(sTransposeA, b, Jp, pp);
       DenseMatrix64F P = hardMotionConstraintEnforcer.getP();
-      DenseMatrix64F AP = hardMotionConstraintEnforcer.getAP();
-      DenseMatrix64F bMinusAJPlusP = hardMotionConstraintEnforcer.getbMinusAJPlusP();
+      DenseMatrix64F AP = hardMotionConstraintEnforcer.getConstrainedCentroidalMomentumMatrix();
+      DenseMatrix64F bMinusAJPlusP = hardMotionConstraintEnforcer.getConstrainedMomentumEquationRightHandSide();
       DenseMatrix64F jPlusp = hardMotionConstraintEnforcer.getJPlusp();
 
       // APPlusbMinusAJpPluspp
