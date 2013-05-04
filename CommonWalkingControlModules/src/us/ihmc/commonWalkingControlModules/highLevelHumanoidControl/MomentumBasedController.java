@@ -108,6 +108,7 @@ public abstract class MomentumBasedController implements RobotController
    protected final EnumYoVariable<RobotSide> upcomingSupportLeg = EnumYoVariable.create("upcomingSupportLeg", "", RobotSide.class, registry, true);    // FIXME: not general enough; this should not be here
 
    private final CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
+   private final Map<ContactablePlaneBody, FramePoint2d> cops = new LinkedHashMap<ContactablePlaneBody, FramePoint2d>();
 
    public MomentumBasedController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
                                   CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime,
@@ -144,7 +145,7 @@ public abstract class MomentumBasedController implements RobotController
          this.desiredCoMAndAngularAccelerationGrabber = new DesiredCoMAndAngularAccelerationGrabber(stateEstimationDataFromControllerSink, estimationLink,
                  estimationFrame, totalMass);
          
-         this.pointPositionGrabber = new PointPositionGrabber(stateEstimationDataFromControllerSink, registry, controlDT, 0.0);
+         this.pointPositionGrabber = new PointPositionGrabber(stateEstimationDataFromControllerSink, registry, controlDT, 0.0, 0.01);
       }
       else
       {
@@ -260,6 +261,7 @@ public abstract class MomentumBasedController implements RobotController
       SpatialForceVector desiredCentroidalMomentumRate = momentumControlModule.getDesiredCentroidalMomentumRate();
 
       Map<? extends ContactablePlaneBody, Wrench> externalWrenches = momentumControlModule.getExternalWrenches();
+      cops.clear();
       for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodies)
       {
          PlaneContactState contactState = this.contactStates.get(contactablePlaneBody);
@@ -274,6 +276,7 @@ public abstract class MomentumBasedController implements RobotController
 
             FramePoint2d cop = new FramePoint2d(ReferenceFrame.getWorldFrame());
             double normalTorque = centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(cop, wrench, contactablePlaneBody.getPlaneFrame());
+            cops.put(contactablePlaneBody, cop);
 
             centersOfPressure2d.get(contactablePlaneBody).set(cop);
 
@@ -307,7 +310,7 @@ public abstract class MomentumBasedController implements RobotController
          this.desiredCoMAndAngularAccelerationGrabber.set(inverseDynamicsCalculator.getSpatialAccelerationCalculator(), desiredCentroidalMomentumRate);
 
       if (pointPositionGrabber != null)
-         pointPositionGrabber.set(contactStates);
+         pointPositionGrabber.set(contactStates, cops);
 
       inverseDynamicsCalculator.compute();
 
