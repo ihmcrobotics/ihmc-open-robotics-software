@@ -41,9 +41,11 @@ public class DRCFlatGroundWalkingTrack
       double minStepWidth = 0.15;
       double maxStepWidth = 0.4;
       double stepPitch = 0.0;
+      boolean useFastTouchdowns = DRCConfigParameters.USING_GAZEBO;
+
       FlatGroundWalkingHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory =
          new FlatGroundWalkingHighLevelHumanoidControllerFactory(drcControlParameters, inPlaceWidth, maxStepLength, minStepWidth, maxStepWidth, stepPitch,
-            useVelocityAndHeadingScript);
+            useVelocityAndHeadingScript, useFastTouchdowns);
 
       if (cheatWithGroundHeightAtForFootstep)
       {
