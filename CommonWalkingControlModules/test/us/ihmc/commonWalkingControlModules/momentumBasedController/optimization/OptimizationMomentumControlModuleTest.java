@@ -3,13 +3,14 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import org.ejml.ops.EjmlUnitTests;
+import org.ejml.ops.RandomMatrices;
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
+import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.MomentumOptimizerNative;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAccelerationData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointWrenchMatrixCalculator;
@@ -24,7 +25,6 @@ import us.ihmc.utilities.test.JUnitTools;
 
 import javax.vecmath.Vector3d;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -44,7 +44,10 @@ public class OptimizationMomentumControlModuleTest
    public void test()
    {
       Random random = new Random(1223525L);
-      Vector3d[] jointAxes = new Vector3d[] {X, Y, Z, Z, X, Y, X, Y};
+      Vector3d[] jointAxes = new Vector3d[]
+      {
+         X, Y, Z, Z, X, Y, X, Y
+      };
       ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
       randomFloatingChain.setRandomPositionsAndVelocities(random);
 
@@ -60,16 +63,11 @@ public class OptimizationMomentumControlModuleTest
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", ReferenceFrame.getWorldFrame(), rootJoint.getSuccessor());
       InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(rootJoint.getSuccessor());
       OptimizationMomentumControlModule momentumControlModule = new OptimizationMomentumControlModule(rootJoint, centerOfMassFrame, controlDT, registry,
-            jointsToOptimizeFor, momentumOptimizationSettings, gravityZ);
+                                                                   jointsToOptimizeFor, momentumOptimizationSettings, gravityZ);
 
-      RootJointAccelerationData rootJointAccelerationData = new RootJointAccelerationData(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint());
+      RootJointAccelerationData rootJointAccelerationData = new RootJointAccelerationData(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(),
+                                                               rootJoint.getFrameAfterJoint());
       rootJointAccelerationData.setEmpty();
-
-      MomentumRateOfChangeData momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
-      SpatialForceVector momentumRateOfChangeIn = new SpatialForceVector(centerOfMassFrame);
-      momentumRateOfChangeIn.set(centerOfMassFrame, RandomTools.generateRandomVector(random), RandomTools.generateRandomVector(random));
-      momentumRateOfChangeData.set(momentumRateOfChangeIn);
-
 
       RigidBody endEffector = randomFloatingChain.getLeafBody();
       ReferenceFrame soleFrame = endEffector.getBodyFixedFrame();
@@ -79,6 +77,12 @@ public class OptimizationMomentumControlModuleTest
       contactState.set(contactablePlaneBody.getContactPoints2d(), coefficientOfFriction);
       contactStates.put(contactablePlaneBody, contactState);
 
+      MomentumRateOfChangeData momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
+      SpatialForceVector momentumRateOfChangeIn = generateRandomFeasibleMomentumRateOfChange(centerOfMassFrame, contactStates, totalMass, gravityZ, random,
+                                                     momentumOptimizationSettings.getRhoMinScalar());
+      momentumRateOfChangeData.set(momentumRateOfChangeIn);
+
+
       RobotSide upcomingSupportLeg = null;
       momentumControlModule.compute(rootJointAccelerationData, momentumRateOfChangeData, contactStates, upcomingSupportLeg);
       SpatialForceVector momentumRateOfChangeOut = momentumControlModule.getDesiredCentroidalMomentumRate();
@@ -86,23 +90,44 @@ public class OptimizationMomentumControlModuleTest
       assertWrenchesSumUpToMomentumDot(momentumControlModule.getExternalWrenches(), momentumRateOfChangeOut, gravityZ, totalMass, centerOfMassFrame);
       assertWrenchesInFrictionCones(momentumControlModule.getExternalWrenches(), contactStates, coefficientOfFriction);
 
-//      double epsilon = 1e-3;
-//      JUnitTools.assertSpatialForceVectorEquals(momentumRateOfChangeIn, momentumRateOfChangeOut, epsilon);
+      DenseMatrix64F vd = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor), 1);
+      ScrewTools.packDesiredJointAccelerationsMatrix(jointsToOptimizeFor, vd);
+
+      double epsilon = 1e-3;
+      JUnitTools.assertSpatialForceVectorEquals(momentumRateOfChangeIn, momentumRateOfChangeOut, epsilon);
+
+   }
+
+   private SpatialForceVector generateRandomFeasibleMomentumRateOfChange(ReferenceFrame centerOfMassFrame,
+           LinkedHashMap<ContactablePlaneBody, PlaneContactState> contactStates, double totalMass, double gravityZ, Random random, double rhoMin)
+
+   {
+      ContactPointWrenchMatrixCalculator contactPointWrenchMatrixCalculator = new ContactPointWrenchMatrixCalculator(centerOfMassFrame,
+                                                                                 MomentumOptimizerNative.nSupportVectors, MomentumOptimizerNative.rhoSize);
+      contactPointWrenchMatrixCalculator.computeMatrix(contactStates.values());
+      DenseMatrix64F rho = new DenseMatrix64F(MomentumOptimizerNative.rhoSize, 1);
+      RandomMatrices.setRandom(rho, random);
+      CommonOps.add(rho, rhoMin);
+      contactPointWrenchMatrixCalculator.computeWrenches(contactStates.values(), rho);
+      Wrench ret = TotalWrenchCalculator.computeTotalWrench(contactPointWrenchMatrixCalculator.getWrenches().values(), centerOfMassFrame);
+      ret.setLinearPartZ(ret.getLinearPartZ() - totalMass * gravityZ);
+
+      return ret;
    }
 
    private static MomentumOptimizationSettings createStandardOptimizationSettings(YoVariableRegistry registry)
    {
       MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(registry);
       momentumOptimizationSettings.setMomentumWeight(1.0, 1.0, 1.0, 1.0);
-      momentumOptimizationSettings.setDampedLeastSquaresFactor(5e-2);
-      momentumOptimizationSettings.setGroundReactionForceRegularization(1e-4);
+      momentumOptimizationSettings.setDampedLeastSquaresFactor(1e-11);
+      momentumOptimizationSettings.setGroundReactionForceRegularization(1e-9);
       momentumOptimizationSettings.setRhoMin(0.0);
+
       return momentumOptimizationSettings;
    }
 
    private void assertWrenchesSumUpToMomentumDot(Map<ContactablePlaneBody, Wrench> externalWrenches, SpatialForceVector desiredCentroidalMomentumRate,
-                                                 double gravityZ, double mass,
-                                                 ReferenceFrame centerOfMassFrame)
+           double gravityZ, double mass, ReferenceFrame centerOfMassFrame)
    {
       SpatialForceVector totalWrench = new Wrench(centerOfMassFrame, centerOfMassFrame);
       for (Wrench wrench : externalWrenches.values())
@@ -119,8 +144,8 @@ public class OptimizationMomentumControlModuleTest
       JUnitTools.assertSpatialForceVectorEquals(desiredCentroidalMomentumRate, totalWrench, 1e-3);
    }
 
-   private void assertWrenchesInFrictionCones(Map<ContactablePlaneBody, Wrench> externalWrenches, LinkedHashMap<ContactablePlaneBody, PlaneContactState>
-         contactStates, double coefficientOfFriction)
+   private void assertWrenchesInFrictionCones(Map<ContactablePlaneBody, Wrench> externalWrenches,
+           LinkedHashMap<ContactablePlaneBody, PlaneContactState> contactStates, double coefficientOfFriction)
    {
       CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
 
