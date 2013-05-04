@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 import us.ihmc.utilities.math.MatrixTools;
 
 public class MomentumOptimizerNativeInput
@@ -19,6 +20,20 @@ public class MomentumOptimizerNativeInput
    private final double[] z;
    private double wRho;
 
+   // conversion helpers
+   private final DenseMatrix64F AMatrix;
+   private final DenseMatrix64F bMatrix;
+   private final DenseMatrix64F CMatrix;
+   private final DenseMatrix64F JsMatrix;
+   private final DenseMatrix64F psMatrix;
+   private final DenseMatrix64F WsMatrix;
+   private final DenseMatrix64F LambdaMatrix;
+   private final DenseMatrix64F QMatrix;
+   private final DenseMatrix64F cMatrix;
+   private final DenseMatrix64F rhoMinMatrix;
+   private final DenseMatrix64F NMatrix;
+   private final DenseMatrix64F zMatrix;
+
    public MomentumOptimizerNativeInput()
    {
       int rhoSize = MomentumOptimizerNative.rhoSize;
@@ -26,18 +41,31 @@ public class MomentumOptimizerNativeInput
       int nDoF = MomentumOptimizerNative.nDoF;
       int nNull = MomentumOptimizerNative.nNull;
 
-      A = new double[wrenchLength * nDoF];
-      b = new double[wrenchLength];
-      C = new double[wrenchLength];    // diagonal
-      Js = new double[nDoF * nDoF];
-      ps = new double[nDoF];
-      Ws = new double[nDoF];    // diagonal
-      Lambda = new double[nDoF];    // diagonal
-      Q = new double[wrenchLength * rhoSize];
-      c = new double[wrenchLength];
-      rhoMin = new double[rhoSize];
-      N = new double[nDoF * nNull];
-      z = new double[nNull];
+      AMatrix = new DenseMatrix64F(wrenchLength, nDoF);
+      bMatrix = new DenseMatrix64F(wrenchLength, 1);
+      CMatrix = new DenseMatrix64F(wrenchLength, wrenchLength);
+      JsMatrix = new DenseMatrix64F(nDoF, nDoF);
+      psMatrix = new DenseMatrix64F(nDoF, 1);
+      WsMatrix = new DenseMatrix64F(nDoF, nDoF);
+      LambdaMatrix = new DenseMatrix64F(nDoF, nDoF);
+      QMatrix = new DenseMatrix64F(wrenchLength, rhoSize);
+      cMatrix = new DenseMatrix64F(wrenchLength, 1);
+      rhoMinMatrix = new DenseMatrix64F(rhoSize, 1);
+      NMatrix = new DenseMatrix64F(nDoF, nNull);
+      zMatrix = new DenseMatrix64F(nNull, 1);
+
+      A = new double[AMatrix.getNumElements()];
+      b = new double[bMatrix.getNumElements()];
+      C = new double[CMatrix.getNumRows()];    // diagonal
+      Js = new double[JsMatrix.getNumElements()];
+      ps = new double[psMatrix.getNumElements()];
+      Ws = new double[WsMatrix.getNumRows()];    // diagonal
+      Lambda = new double[LambdaMatrix.getNumRows()];    // diagonal
+      Q = new double[QMatrix.getNumElements()];
+      c = new double[cMatrix.getNumElements()];
+      rhoMin = new double[rhoMinMatrix.getNumElements()];
+      N = new double[NMatrix.getNumElements()];
+      z = new double[zMatrix.getNumElements()];
    }
 
    public double[] getA()
@@ -107,62 +135,77 @@ public class MomentumOptimizerNativeInput
 
    public void setCentroidalMomentumMatrix(DenseMatrix64F A)
    {
-      MatrixTools.denseMatrixToArrayColumnMajor(A, this.A);
+      CommonOps.insert(A, this.AMatrix, 0, 0);
+      MatrixTools.denseMatrixToArrayColumnMajor(this.AMatrix, this.A);
    }
 
    public void setMomentumDotEquationRightHandSide(DenseMatrix64F b)
    {
-      MatrixTools.denseMatrixToArrayColumnMajor(b, this.b);
+      CommonOps.insert(b, this.bMatrix, 0, 0);
+      MatrixTools.denseMatrixToArrayColumnMajor(this.bMatrix, this.b);
    }
 
-   public void setMomentumDotWeight(DenseMatrix64F c)
+   public void setMomentumDotWeight(DenseMatrix64F C)
    {
-      MatrixTools.extractDiagonal(c, this.c);
+      // diagonal
+      CommonOps.insert(C, this.CMatrix, 0, 0);
+      MatrixTools.extractDiagonal(this.CMatrix, this.C);
    }
 
    public void setSecondaryConstraintJacobian(DenseMatrix64F Js)
    {
-      MatrixTools.denseMatrixToArrayColumnMajor(Js, this.Js);
+      CommonOps.insert(Js, this.JsMatrix, 0, 0);
+      MatrixTools.denseMatrixToArrayColumnMajor(this.JsMatrix, this.Js);
    }
 
    public void setSecondaryConstraintRightHandSide(DenseMatrix64F ps)
    {
-      MatrixTools.denseMatrixToArrayColumnMajor(ps, this.ps);
+      CommonOps.insert(ps, this.psMatrix, 0, 0);
+      MatrixTools.denseMatrixToArrayColumnMajor(this.psMatrix, this.ps);
    }
 
    public void setSecondaryConstraintWeight(DenseMatrix64F Ws)
    {
-      MatrixTools.extractDiagonal(Ws, this.Ws);
+      // diagonal
+      CommonOps.insert(Ws, this.WsMatrix, 0, 0);
+      MatrixTools.extractDiagonal(this.WsMatrix, this.Ws);
    }
 
    public void setJointAccelerationRegularization(DenseMatrix64F Lambda)
    {
-      MatrixTools.extractDiagonal(Lambda, this.Lambda);
+      // diagonal
+      CommonOps.insert(Lambda, this.LambdaMatrix, 0, 0);
+      MatrixTools.extractDiagonal(this.LambdaMatrix, this.Lambda);
    }
 
    public void setContactPointWrenchMatrix(DenseMatrix64F Q)
    {
-      MatrixTools.denseMatrixToArrayColumnMajor(Q, this.Q);
+      CommonOps.insert(Q, this.QMatrix, 0, 0);
+      MatrixTools.denseMatrixToArrayColumnMajor(this.QMatrix, this.Q);
    }
 
    public void setWrenchEquationRightHandSide(DenseMatrix64F c)
    {
-      MatrixTools.denseMatrixToArrayColumnMajor(c, this.c);
+      CommonOps.insert(c, this.cMatrix, 0, 0);
+      MatrixTools.denseMatrixToArrayColumnMajor(this.cMatrix, this.c);
    }
 
    public void setRhoMin(DenseMatrix64F rhoMin)
    {
-      MatrixTools.denseMatrixToArrayColumnMajor(rhoMin, this.rhoMin);
+      CommonOps.insert(rhoMin, this.rhoMinMatrix, 0, 0);
+      MatrixTools.denseMatrixToArrayColumnMajor(this.rhoMinMatrix, this.rhoMin);
    }
 
    public void setNullspaceMatrix(DenseMatrix64F N)
    {
-      MatrixTools.denseMatrixToArrayColumnMajor(N, this.N);
+      CommonOps.insert(N, this.NMatrix, 0, 0);
+      MatrixTools.denseMatrixToArrayColumnMajor(this.NMatrix, this.N);
    }
 
    public void setNullspaceMultipliers(DenseMatrix64F z)
    {
-      MatrixTools.denseMatrixToArrayColumnMajor(z, this.z);
+      CommonOps.insert(z, this.zMatrix, 0, 0);
+      MatrixTools.denseMatrixToArrayColumnMajor(this.zMatrix, this.z);
    }
 
    public void setGroundReactionForceRegularization(double wRho)

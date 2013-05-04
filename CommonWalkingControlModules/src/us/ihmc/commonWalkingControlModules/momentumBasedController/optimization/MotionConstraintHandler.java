@@ -43,6 +43,7 @@ public class MotionConstraintHandler
    private final DenseMatrix64F jBlockCompact = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F sJ = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F nCompactBlock = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F nTranspose = new DenseMatrix64F(1, 1);
 
    private int motionConstraintIndex = 0;
    private int nullspaceIndex = 0;
@@ -124,6 +125,7 @@ public class MotionConstraintHandler
 
    private void compactBlockToFullBlock(InverseDynamicsJoint[] joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullBlock)
    {
+      fullBlock.zero();
       for (InverseDynamicsJoint joint : joints)
       {
          int[] indicesIntoCompactBlock = ScrewTools.computeIndicesForJoint(joints, joint);
@@ -146,7 +148,7 @@ public class MotionConstraintHandler
       if (columnsForJoint != null) // don't do anything for joints that are not in the list
       {
          DenseMatrix64F jBlock = getMatrixFromList(jList, motionConstraintIndex, joint.getDegreesOfFreedom(), nDegreesOfFreedom);
-         new DenseMatrix64F(joint.getDegreesOfFreedom(), nDegreesOfFreedom);
+         jBlock.zero();
 
          for (int i = 0; i < joint.getDegreesOfFreedom(); i++)
          {
@@ -167,7 +169,10 @@ public class MotionConstraintHandler
    public void compute()
    {
       assembleEquation(jList, pList, motionConstraintIndex, j, p);
-      assembleEquation(nList, zList, nullspaceIndex, n, z);
+      assembleEquation(nList, zList, nullspaceIndex, nTranspose, z);
+      nTranspose.reshape(n.getNumCols(), n.getNumRows());
+      CommonOps.transpose(nTranspose, n);
+
       assembleWeightMatrix(weightList, jList, motionConstraintIndex, ws);
    }
 
@@ -233,7 +238,7 @@ public class MotionConstraintHandler
       return p;
    }
 
-   public DenseMatrix64F getNullspaceTransposeMatrix()
+   public DenseMatrix64F getNullspaceMatrix()
    {
       return n;
    }
@@ -296,6 +301,4 @@ public class MotionConstraintHandler
 
       throw new RuntimeException("End effector for " + taskSpaceAcceleration + " could not be determined");
    }
-
-
 }
