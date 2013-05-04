@@ -30,7 +30,7 @@ public class DRCPerfectSensorReader implements SensorReader, RobotController
    
    public DRCPerfectSensorReader(double estimateDT)
    {
-      this.estimateDTinNs = TimeTools.toNanoSeconds(estimateDT);
+      this.estimateDTinNs = TimeTools.secondsToNanoSeconds(estimateDT);
       step.set(9807);
    }
 

@@ -8,13 +8,10 @@ import us.ihmc.graphics3DAdapter.camera.VideoSettingsH264LowLatency;
 
 public class DRCConfigParameters
 {
-   public static final boolean USING_GAZEBO = false;
    public static final boolean USE_GAZEBO_PHYSICS = false; //TODO: What does this one do?
 
    public static final boolean USE_PERFECT_SENSORS = false;
    static{
-      if (USING_GAZEBO) System.err.println("Controller assumes we are using Gazebo physics!");
-      else System.err.println("Controller assumes we are using SCS physics!");
       
       if (USE_PERFECT_SENSORS) System.err.println("Warning! Using Perfect Sensors!");
    }
@@ -32,10 +29,10 @@ public class DRCConfigParameters
    public static final boolean USE_R2_ROBOT_MODEL = !USE_GFE_ROBOT_MODEL;
 
    // Networking
-   public static final String CLOUD_MINION3_IP = "10.4.42.5"; //"10.4.42.3";    // "localhost";
-   public static final String CLOUD_MONSTER_JR_IP = "10.4.42.3";    // "localhost";
-//   public static final String GAZEBO_HOST = "localHost"; 
-   public static final String GAZEBO_HOST = CLOUD_MINION3_IP;
+   public static final String LOCALHOST = "localhost";
+   public static final String CLOUD_MINION3_IP = "10.4.42.5";
+   public static final String CLOUD_MONSTER_JR_IP = "10.4.42.3";
+   public static final String GAZEBO_HOST = LOCALHOST;
    
    
    public static final String ROS_MASTER_URI = "http://" + GAZEBO_HOST + ":11311";

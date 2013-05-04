@@ -63,7 +63,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
    
    public SimulatedSensorHolderAndReader(double estimateDT, YoVariableRegistry parentRegistry)
    {
-      this.estimateDTinNs = TimeTools.toNanoSeconds(estimateDT);
+      this.estimateDTinNs = TimeTools.secondsToNanoSeconds(estimateDT);
       step.set(29831);
       
       if(parentRegistry != null)
@@ -178,6 +178,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
       Set<IMUDefinition> linearAccelerationSensorDefinitions = linearAccelerationSensors.keySet();
       for (IMUDefinition imuDefinition : linearAccelerationSensorDefinitions)
       {
+
          SimulatedLinearAccelerationSensorFromRobot linearAccelerationSensor = linearAccelerationSensors.get(imuDefinition);
          linearAccelerationSensor.startComputation();
          linearAccelerationSensor.waitUntilComputationIsDone();

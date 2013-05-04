@@ -31,6 +31,8 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
    private final String leftCameraName = "stereo_camera_left";
    private final String rightCameraName = "stereo_camera_right";
    
+   private final String[] imuSensorsToUse = { "imu_sensor" };
+   
    private final double ankleHeight = DRCRobotParameters.DRC_ROBOT_ANKLE_HEIGHT;
 
    private final LegJointName[] legJoints =
@@ -349,5 +351,10 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
    public String getRightCameraName()
    {
       return rightCameraName;
+   }
+   
+   public String[] getIMUSensorsToUse()
+   {
+      return imuSensorsToUse;
    }
 }

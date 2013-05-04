@@ -1,6 +1,9 @@
 package us.ihmc.SdfLoader;
 
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Quat4d;
@@ -25,6 +28,10 @@ public class SDFFullRobotModelVisualizer implements RawOutputWriter
    private SixDoFJoint rootJoint;
    private final ArrayList<Pair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<Pair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
 
+   private final SCSUpdateRunner scsUpdateRunner = new SCSUpdateRunner();
+   private final Executor scsUpdaterExecutor = Executors.newSingleThreadExecutor();
+   private final AtomicBoolean updaterIsRunning = new AtomicBoolean(false); 
+   
    public SDFFullRobotModelVisualizer(SDFRobot robot, SimulationConstructionSet scs)
    {
       this.name = robot.getName() + "SimulatedSensorReader";
@@ -75,23 +82,38 @@ public class SDFFullRobotModelVisualizer implements RawOutputWriter
    private final Quat4d tempOrientation = new Quat4d();
    public void write()
    {
-      if(rootJoint != null)
+      if(!updaterIsRunning.get())
       {
-         Transform3D rootTransform = rootJoint.getJointTransform3D();
-         rootTransform.get(tempOrientation, tempPosition);
-         robot.setOrientation(tempOrientation);
-         robot.setPositionInWorld(tempPosition);
+         updaterIsRunning.set(true);
+         if(rootJoint != null)
+         {
+            Transform3D rootTransform = rootJoint.getJointTransform3D();
+            rootTransform.get(tempOrientation, tempPosition);
+            robot.setOrientation(tempOrientation);
+            robot.setPositionInWorld(tempPosition);
+         }
+         
+         for (Pair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair : revoluteJoints)
+         {
+            OneDegreeOfFreedomJoint pinJoint = jointPair.first();
+            OneDoFJoint revoluteJoint = jointPair.second();
+   
+            pinJoint.setQ(revoluteJoint.getQ());
+            pinJoint.setQd(revoluteJoint.getQd());
+         }
+         robot.setTime(robot.getTime() + scs.getDT());
+         scsUpdaterExecutor.execute(scsUpdateRunner);
       }
-      
-      for (Pair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair : revoluteJoints)
-      {
-         OneDegreeOfFreedomJoint pinJoint = jointPair.first();
-         OneDoFJoint revoluteJoint = jointPair.second();
-
-         pinJoint.setQ(revoluteJoint.getQ());
-      }
-      robot.setTime(robot.getTime() + scs.getDT());
-      scs.tickAndUpdate();
    }
 
+   private class SCSUpdateRunner implements Runnable
+   {
+
+      public void run()
+      {
+         scs.tickAndUpdate();
+         updaterIsRunning.set(false);
+      }
+      
+   }
 }
