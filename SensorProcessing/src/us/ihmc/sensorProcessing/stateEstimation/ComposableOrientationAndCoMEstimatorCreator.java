@@ -51,8 +51,8 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class ComposableOrientationAndCoMEstimatorCreator
 {
-   private static final double pointVelocityMeasurementStandardDeviation = 6.0; //3.0;  //1.0;
-   private static final double pointPositionMeasurementStandardDeviation = 0.03; //0.3; //0.03;
+   private static final double pointVelocityMeasurementStandardDeviation = 2.0; //6.0; //6.0; //3.0;  //1.0;
+   private static final double pointPositionMeasurementStandardDeviation = 0.3; //0.03;  //0.03; //0.3; //0.03;
    
    private static final boolean USE_DISCRETE_COM_PROCESS_MODEL_ELEMENTS = true;
 
@@ -426,7 +426,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
          centerOfMassBasedFullRobotModelUpdater.run();
          FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureInputPort.getData();
          inverseDynamicsStructure.updateInternalState();
-         updatedInverseDynamicsStructureOutputPort.setData(inverseDynamicsStructure);
+         setUpdatedInverseDynamicsStructureOutputPort(inverseDynamicsStructure);
       }
 
       public void setEstimatedAngularVelocity(FrameVector angularVelocity)
@@ -435,7 +435,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
          centerOfMassBasedFullRobotModelUpdater.run();
          FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureInputPort.getData();
          inverseDynamicsStructure.updateInternalState();
-         updatedInverseDynamicsStructureOutputPort.setData(inverseDynamicsStructure);
+         setUpdatedInverseDynamicsStructureOutputPort(inverseDynamicsStructure);
       }
 
       public void setEstimatedCoMPosition(FramePoint estimatedCoMPosition)
@@ -444,7 +444,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
          centerOfMassBasedFullRobotModelUpdater.run();
          FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureInputPort.getData();
          inverseDynamicsStructure.updateInternalState();
-         updatedInverseDynamicsStructureOutputPort.setData(inverseDynamicsStructure);
+         setUpdatedInverseDynamicsStructureOutputPort(inverseDynamicsStructure);
       }
 
       public void setEstimatedCoMVelocity(FrameVector estimatedCoMVelocity)
@@ -453,6 +453,11 @@ public class ComposableOrientationAndCoMEstimatorCreator
          centerOfMassBasedFullRobotModelUpdater.run();
          FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureInputPort.getData();
          inverseDynamicsStructure.updateInternalState();
+         setUpdatedInverseDynamicsStructureOutputPort(inverseDynamicsStructure);
+      }
+      
+      private void setUpdatedInverseDynamicsStructureOutputPort(FullInverseDynamicsStructure inverseDynamicsStructure)
+      {
          updatedInverseDynamicsStructureOutputPort.setData(inverseDynamicsStructure);
       }
 
