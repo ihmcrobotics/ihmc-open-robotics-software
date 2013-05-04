@@ -34,8 +34,6 @@ public class MomentumSolver3 implements MomentumSolverInterface
 
    private final DenseMatrix64F b;
 
-   private final DenseMatrix64F vdot;
-
    private final DenseMatrix64F adotV = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
    private final DenseMatrix64F v;
    private final DenseMatrix64F hdot = new DenseMatrix64F(Momentum.SIZE, 1);
@@ -68,7 +66,6 @@ public class MomentumSolver3 implements MomentumSolverInterface
       nDegreesOfFreedom = ScrewTools.computeDegreesOfFreedom(jointsInOrder);
       this.b = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
 
-      this.vdot = new DenseMatrix64F(nDegreesOfFreedom, 1);
       this.v = new DenseMatrix64F(nDegreesOfFreedom, 1);
 
       solver = LinearSolverFactory.pseudoInverse(true);
@@ -179,21 +176,20 @@ public class MomentumSolver3 implements MomentumSolverInterface
       DenseMatrix64F pp = motionConstraintHandler.getRightHandSide();
 
       hardMotionConstraintEnforcer.compute(sTransposeA, b, Jp, pp);
-      DenseMatrix64F P = hardMotionConstraintEnforcer.getP();
       DenseMatrix64F AP = hardMotionConstraintEnforcer.getConstrainedCentroidalMomentumMatrix();
       DenseMatrix64F bMinusAJPlusP = hardMotionConstraintEnforcer.getConstrainedMomentumEquationRightHandSide();
-      DenseMatrix64F jPlusp = hardMotionConstraintEnforcer.getJPlusp();
 
       // APPlusbMinusAJpPluspp
       APPlusbMinusAJpPluspp.reshape(AP.getNumCols(), bMinusAJPlusP.getNumCols());
       solver.setA(AP);
       solver.solve(bMinusAJPlusP, APPlusbMinusAJpPluspp);
 
-      // vdot
-      vdot.set(jPlusp);
-      CommonOps.multAdd(P, APPlusbMinusAJpPluspp, vdot);
+      DenseMatrix64F vdot = hardMotionConstraintEnforcer.computeConstrainedJointAccelerations(APPlusbMinusAJpPluspp);
 
       ScrewTools.setDesiredAccelerations(jointsInOrder, vdot);
+
+      CommonOps.mult(centroidalMomentumMatrix.getMatrix(), vdot, hdot);
+      CommonOps.addEquals(hdot, adotV);
    }
 
 
@@ -205,8 +201,6 @@ public class MomentumSolver3 implements MomentumSolverInterface
 
    public void getRateOfChangeOfMomentum(SpatialForceVector rateOfChangeOfMomentumToPack)
    {
-      CommonOps.mult(centroidalMomentumMatrix.getMatrix(), vdot, hdot);
-      CommonOps.addEquals(hdot, adotV);
       rateOfChangeOfMomentumToPack.set(centroidalMomentumMatrix.getReferenceFrame(), hdot);
    }
 }

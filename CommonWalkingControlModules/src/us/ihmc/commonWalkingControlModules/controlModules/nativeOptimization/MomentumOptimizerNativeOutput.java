@@ -14,20 +14,22 @@ public class MomentumOptimizerNativeOutput
    private double optVal;
    private int numberOfIterations;
 
-   public MomentumOptimizerNativeOutput()
+   public MomentumOptimizerNativeOutput(int nDoF, int rhoSize)
    {
-      vd = new DenseMatrix64F(MomentumOptimizerNative.nDoF, 1);
-      rho = new DenseMatrix64F(MomentumOptimizerNative.rhoSize, 1);
+      vd = new DenseMatrix64F(nDoF, 1);
+      rho = new DenseMatrix64F(rhoSize, 1);
    }
 
    public void setRho(double[] rho)
    {
-      MatrixTools.setMatrixColumnFromArray(this.rho, 0, rho);
+      for (int i = 0; i < this.rho.getNumRows(); i++)
+         this.rho.set(i, 0, rho[i]);
    }
 
    public void setJointAccelerations(double[] vd)
    {
-      MatrixTools.setMatrixColumnFromArray(this.vd, 0, vd);
+      for (int i = 0; i < this.vd.getNumRows(); i++)
+         this.vd.set(i, 0, vd[i]);
    }
 
    public void setOptVal(double optVal)
