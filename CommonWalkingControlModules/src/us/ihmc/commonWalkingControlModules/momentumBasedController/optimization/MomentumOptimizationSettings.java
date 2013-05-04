@@ -70,7 +70,7 @@ public class MomentumOptimizationSettings
       tempMomentum.setAngularPartZ(angularMomentumZWeight.getDoubleValue());
 
       tempMomentum.packMatrix(momentumWeightDiagonal);
-      CommonOps.diag(tempMatrix, Momentum.SIZE, momentumWeightDiagonal);
+      CommonOps.diag(C, Momentum.SIZE, momentumWeightDiagonal);
 
       CommonOps.mult(momentumSubspaceProjector, tempMatrix, C);
 

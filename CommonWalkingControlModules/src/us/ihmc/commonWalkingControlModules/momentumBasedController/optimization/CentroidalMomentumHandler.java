@@ -4,6 +4,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools;
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.RowD1Matrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeData;
 import us.ihmc.utilities.math.MatrixTools;
@@ -97,11 +98,6 @@ public class CentroidalMomentumHandler
       return centroidalMomentumMatrixPart;
    }
 
-   public DenseMatrix64F getCentroidalMomentumMatrix()
-   {
-      return centroidalMomentumMatrix.getMatrix();
-   }
-
    public DenseMatrix64F getCentroidalMomentumConvectiveTerm()
    {
       return adotV;
@@ -124,6 +120,7 @@ public class CentroidalMomentumHandler
    {
       DenseMatrix64F momentumSubspace = momentumRateOfChangeData.getMomentumSubspace();
       DenseMatrix64F momentumMultipliers = momentumRateOfChangeData.getMomentumMultipliers();
+
       CommonOps.mult(momentumSubspace, momentumMultipliers, centroidalMomentumEquationRightHandSide);
       CommonOps.subEquals(centroidalMomentumEquationRightHandSide, adotV);
       return centroidalMomentumEquationRightHandSide;
