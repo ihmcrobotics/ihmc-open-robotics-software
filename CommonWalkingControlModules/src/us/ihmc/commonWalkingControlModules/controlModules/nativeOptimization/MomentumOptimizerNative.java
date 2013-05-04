@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 
+import us.ihmc.utilities.CheckTools;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 
 public class MomentumOptimizerNative
@@ -104,7 +105,14 @@ public class MomentumOptimizerNative
 
    private final double[] rho = new double[nPointsPerContact * nSupportVectors * nContacts];
    private final double[] vd = new double[nDoF];
-   private final MomentumOptimizerNativeOutput momentumOptimizerNativeOutput = new MomentumOptimizerNativeOutput();
+   private final MomentumOptimizerNativeOutput momentumOptimizerNativeOutput;
+
+   public MomentumOptimizerNative(int nDoF, int rhoSize)
+   {
+      CheckTools.checkRange(nDoF, 0, this.nDoF);
+      CheckTools.checkRange(rhoSize, 0, this.rhoSize);
+      momentumOptimizerNativeOutput = new MomentumOptimizerNativeOutput(nDoF, rhoSize);
+   }
 
    /**
     * CVXGen problem statement:
@@ -227,7 +235,7 @@ public class MomentumOptimizerNative
       double[] wRho = new double[1];
       load_default_data(A, b, C, Js, ps, Ws, Lambda, Q, c, rhoMin, N, z, wRho);
 
-      MomentumOptimizerNative momentumOptimizerNative = new MomentumOptimizerNative();
+      MomentumOptimizerNative momentumOptimizerNative = new MomentumOptimizerNative(nDoF, rhoSize);
 
       long time = System.nanoTime();
       int nSolves = 10000;

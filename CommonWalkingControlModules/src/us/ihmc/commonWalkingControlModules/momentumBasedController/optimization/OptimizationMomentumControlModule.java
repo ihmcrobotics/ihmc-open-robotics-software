@@ -58,7 +58,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       this.contactPointWrenchMatrixCalculator = new ContactPointWrenchMatrixCalculator(centerOfMassFrame, MomentumOptimizerNative.nSupportVectors,
               MomentumOptimizerNative.rhoSize);
 
-      this.momentumOptimizerNative = new MomentumOptimizerNative();
+      this.momentumOptimizerNative = new MomentumOptimizerNative(ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor), MomentumOptimizerNative.rhoSize); // TODO: reduce rhoSize?
       this.momentumOptimizationSettings = momentumOptimizationSettings;
 
       this.jointsToOptimizeFor = jointsToOptimizeFor;
@@ -111,7 +111,6 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       centroidalMomentumHandler.compute();
       primaryMotionConstraintHandler.compute();
 
-      // TODO: reenable
       hardMotionConstraintEnforcer.compute(centroidalMomentumHandler.getCentroidalMomentumMatrixPart(jointsToOptimizeFor),
               centroidalMomentumHandler.getMomentumDotEquationRightHandSide(momentumRateOfChangeData), primaryMotionConstraintHandler.getJacobian(),
               primaryMotionConstraintHandler.getRightHandSide());
