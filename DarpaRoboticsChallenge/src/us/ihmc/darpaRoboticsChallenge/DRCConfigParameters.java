@@ -8,7 +8,12 @@ import us.ihmc.graphics3DAdapter.camera.VideoSettingsH264LowLatency;
 
 public class DRCConfigParameters
 {
-   public static final boolean USE_GAZEBO_PHYSICS = false; //TODO: What does this one do?
+   public static final boolean INITIALIZE_ESTIMATOR_TO_ACTUAL = true;
+static{
+      if (INITIALIZE_ESTIMATOR_TO_ACTUAL) System.err.println("Warning! Initializing Estimator to Actual!");
+   }
+
+   public static final boolean USE_GAZEBO_PHYSICS = false; //TODO: This one is needed just for FlatGroundWalkingTrack in Gazebo...
 
    public static final boolean USE_PERFECT_SENSORS = false;
    static{

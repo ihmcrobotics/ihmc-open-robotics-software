@@ -29,7 +29,8 @@ public class StateEstimatorErrorCalculator
 
    private final DoubleYoVariable orientationError = new DoubleYoVariable("orientationError", registry);
    private final DoubleYoVariable angularVelocityError = new DoubleYoVariable("angularVelocityError", registry);
-   private final DoubleYoVariable comPositionError = new DoubleYoVariable("comPositionError", registry);
+   private final DoubleYoVariable comXYPositionError = new DoubleYoVariable("comXYPositionError", registry);
+   private final DoubleYoVariable comZPositionError = new DoubleYoVariable("comZPositionError", registry);
    private final DoubleYoVariable comVelocityError = new DoubleYoVariable("comVelocityError", registry);
 
    private final YoFramePoint perfectCoMPosition = new YoFramePoint("perfectCoMPosition", ReferenceFrame.getWorldFrame(), registry);
@@ -99,7 +100,10 @@ public class StateEstimatorErrorCalculator
       comError.set(estimatedCoMPosition.getPointCopy());
       comError.sub(comPoint);
 
-      comPositionError.set(comError.length());
+      comZPositionError.set(comError.getZ());
+
+      comError.setZ(0.0);
+      comXYPositionError.set(comError.length());
    }
 
    private final FrameVector estimatedCoMVelocityFrameVector = new FrameVector();
