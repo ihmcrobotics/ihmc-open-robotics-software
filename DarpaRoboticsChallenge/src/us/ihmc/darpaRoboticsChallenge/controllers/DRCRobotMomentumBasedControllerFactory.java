@@ -73,11 +73,6 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 
          ContactablePlaneBody foot = new RectangularContactableBody(footBody, soleFrame, footForward, -footBack, left, right);
          bipedFeet.put(robotSide, foot);
-
-         if (handControllers != null)
-         {
-            specificRegistry.addChild(handControllers.get(robotSide).getYoVariableRegistry());
-         }
       }
 
       SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(bipedFeet, forceSensorDataHolder, dynamicGraphicObjectsListRegistry, specificRegistry);
