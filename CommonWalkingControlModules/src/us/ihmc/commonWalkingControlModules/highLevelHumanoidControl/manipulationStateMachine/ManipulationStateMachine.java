@@ -219,7 +219,6 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
             toolBody.control(manipulationState.getDesiredHandAcceleration(), wrench);
 //            inverseDynamicsCalculator.setExternalWrench(handController.getWristJoint().getSuccessor(), wrench);
          }
-         handController.doControl();
       }
    }
 
@@ -308,9 +307,5 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
 
    public void doAdditionalTorqueControl()
    {
-      if (handController != null)
-      {
-         handController.doTorqueControl();
-      }
    }
 }

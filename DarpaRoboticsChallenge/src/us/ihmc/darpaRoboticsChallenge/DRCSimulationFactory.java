@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.controllers.NullLidarController;
 import us.ihmc.commonWalkingControlModules.controllers.PIDLidarTorqueController;
 import us.ihmc.darpaRoboticsChallenge.controllers.EstimationLinkHolder;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.darpaRoboticsChallenge.handControl.SimulatedHandControllerDispatcher;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCSimulationOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCPerfectSensorReaderFactory;
@@ -42,7 +43,7 @@ import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
-import com.yobotics.simulationconstructionset.robotController.RobotController;
+import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class DRCSimulationFactory
@@ -68,7 +69,7 @@ public class DRCSimulationFactory
       YoVariableRegistry registry = simulatedRobot.getRobotsYoVariableRegistry();
       simulatedRobot.setDynamicIntegrationMethod(scsInitialSetup.getDynamicIntegrationMethod());
 
-      DRCOutputWriter outputWriter = new DRCSimulationOutputWriter(simulatedRobot, controlDT);
+      DRCOutputWriter drcOutputWriter = new DRCSimulationOutputWriter(simulatedRobot, controlDT);
 
       // TODO: Build LIDAR here
       LidarControllerInterface lidarControllerInterface;
@@ -150,20 +151,24 @@ public class DRCSimulationFactory
 
 
       SensorReaderFactory sensorReaderFactory;
-      RobotController controller;
+      ModularRobotController controller = new ModularRobotController("SensorReaders");
       if(DRCConfigParameters.USE_PERFECT_SENSORS)
       {
          DRCPerfectSensorReaderFactory drcPerfectSensorReaderFactory = new DRCPerfectSensorReaderFactory(simulatedRobot, wrenchProviders, estimateDT);
-         controller = drcPerfectSensorReaderFactory.getSensorReader();
+         controller.addRobotController(drcPerfectSensorReaderFactory.getSensorReader());
          sensorReaderFactory = drcPerfectSensorReaderFactory;
       }
       else
       {
          SimulatedSensorHolderAndReaderFromRobotFactory simulatedSensorHolderAndReaderFromRobotFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(simulatedRobot,
                sensorNoiseParameters, estimateDT, imuMounts, wrenchProviders, positionPoints, velocityPoints, registry);
-         controller = new RunnableRunnerController(simulatedSensorHolderAndReaderFromRobotFactory.getSensorReader());
+         controller.addRobotController(new RunnableRunnerController(simulatedSensorHolderAndReaderFromRobotFactory.getSensorReader()));
          sensorReaderFactory = simulatedSensorHolderAndReaderFromRobotFactory;
       }
+      
+      SimulatedHandControllerDispatcher handControllerDispatcher = new SimulatedHandControllerDispatcher(simulatedRobot);
+      controller.addRobotController(handControllerDispatcher);
+      
       
       Vector3d gravity = new Vector3d();
       robotInterface.getRobot().getGravity(gravity);
@@ -175,10 +180,10 @@ public class DRCSimulationFactory
          initialCoMPositionAndEstimationLinkOrientation = getInitialCoMPositionAndEstimationLinkOrientation(robotInitialSetup, simulatedRobot);
       }
 
-      DRCController robotController = new DRCController(initialCoMPositionAndEstimationLinkOrientation, robotInterface.getFullRobotModelFactory(), controllerFactory,
-            sensorReaderFactory, outputWriter,
-            jointMap, lidarControllerInterface, gravity, estimateDT, controlDT, networkProccesorCommunicator, teamComputerServer, robotInterface.getTimeStampProvider(), dynamicGraphicObjectsListRegistry,
-            guiSetterUpperRegistry, registry);
+      DRCController robotController = new DRCController(initialCoMPositionAndEstimationLinkOrientation, robotInterface.getFullRobotModelFactory(),
+            controllerFactory, sensorReaderFactory, drcOutputWriter, handControllerDispatcher, jointMap, lidarControllerInterface, gravity, estimateDT, controlDT,
+            networkProccesorCommunicator, teamComputerServer, robotInterface.getTimeStampProvider(), dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry,
+            registry);
 
       final HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, robotController,
             controller, estimationTicksPerControlTick, commonAvatarEnvironmentInterface, simulatedRobot.getAllExternalForcePoints(), robotInitialSetup, scsInitialSetup,

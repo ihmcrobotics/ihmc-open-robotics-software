@@ -1,5 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.handControl;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
@@ -17,29 +18,54 @@ public class SandiaHandModel
       PINKY
    }
    
-   private final EnumMap<SandiaFingerName, OneDoFJoint> fingerJoints = new EnumMap<SandiaFingerName, OneDoFJoint>(SandiaFingerName.class);
+   public enum SandiaFingerJointName
+   {
+      BASEJOINT,
+      FIRSTJOINT,
+      SECONDJOINT
+   }
+   
+   private final EnumMap<SandiaFingerName, EnumMap<SandiaFingerJointName, FingerJoint>> handJoints = new EnumMap<SandiaFingerName, EnumMap<SandiaFingerJointName, FingerJoint>>(
+         SandiaFingerName.class);
+   
+   private final ArrayList<FingerJoint> allJoints = new ArrayList<FingerJoint>();
+   
    private final ForceSensorData wristForceSensor;
    private final OneDoFJoint wristJoint;
    private final RobotSide robotSide;
 
    public SandiaHandModel(SDFFullRobotModel fullRobotModel, ForceSensorData forceSensorDataForController, RobotSide robotSide)
    {
-      String prefix = robotSide == RobotSide.LEFT ? "left_" : "right_";
-
       this.robotSide = robotSide;
-      
-      fingerJoints.put(SandiaFingerName.THUMB, fullRobotModel.getOneDoFJointByName(prefix + "f3_j0"));
-      fingerJoints.put(SandiaFingerName.INDEX, fullRobotModel.getOneDoFJointByName(prefix + "f0_j0"));
-      fingerJoints.put(SandiaFingerName.MIDDLE, fullRobotModel.getOneDoFJointByName(prefix + "f1_j0"));
-      fingerJoints.put(SandiaFingerName.PINKY, fullRobotModel.getOneDoFJointByName(prefix + "f2_j0"));
+      String prefix = robotSide == RobotSide.LEFT ? "left_" : "right_";
+      addFingerJoints(prefix + "f3", SandiaFingerName.THUMB);
+      addFingerJoints(prefix + "f0", SandiaFingerName.INDEX);
+      addFingerJoints(prefix + "f1", SandiaFingerName.MIDDLE);
+      addFingerJoints(prefix + "f2", SandiaFingerName.PINKY);
       
       this.wristForceSensor = forceSensorDataForController;
       wristJoint = fullRobotModel.getOneDoFJointByName(robotSide.getShortLowerCaseName() + "_arm_mwx");
    }
-
-   public OneDoFJoint getBaseJoint(SandiaFingerName name)
+   
+   private FingerJoint addFingerJoint(String name)
    {
-      return fingerJoints.get(name);
+      FingerJoint fingerJoint = new FingerJoint(name);
+      allJoints.add(fingerJoint);
+      return fingerJoint;
+   }
+   
+   private void addFingerJoints(String prefix, SandiaFingerName finger)
+   {
+      EnumMap<SandiaFingerJointName, FingerJoint> fingerJoints = new EnumMap<SandiaFingerJointName, FingerJoint>(SandiaFingerJointName.class);
+      fingerJoints.put(SandiaFingerJointName.BASEJOINT, addFingerJoint(prefix + "_j0"));
+      fingerJoints.put(SandiaFingerJointName.FIRSTJOINT, addFingerJoint(prefix + "_j1"));
+      fingerJoints.put(SandiaFingerJointName.SECONDJOINT, addFingerJoint(prefix + "_j2"));
+      handJoints.put(finger, fingerJoints);
+   }
+
+   public EnumMap<SandiaFingerJointName, FingerJoint> getFingerJoints(SandiaFingerName finger)
+   {
+      return handJoints.get(finger);
    }
    
    public RobotSide getRobotSide()
@@ -55,5 +81,10 @@ public class SandiaHandModel
    public ForceSensorData getWristForceSensor()
    {
       return wristForceSensor;
+   }
+
+   public ArrayList<FingerJoint> getHandJoints()
+   {
+      return allJoints;
    }
 }
