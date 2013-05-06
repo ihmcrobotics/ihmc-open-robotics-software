@@ -8,16 +8,19 @@ import us.ihmc.graphics3DAdapter.camera.VideoSettingsH264LowLatency;
 
 public class DRCConfigParameters
 {
-   public static final boolean INITIALIZE_ESTIMATOR_TO_ACTUAL = true;
+   public static final boolean INITIALIZE_ESTIMATOR_TO_ACTUAL = false;
 
 
-   public static final boolean USE_GAZEBO_PHYSICS = false; //TODO: This one is needed just for FlatGroundWalkingTrack in Gazebo...
+   public static final boolean USE_GAZEBO_PHYSICS = false;    // TODO: This one is needed just for FlatGroundWalkingTrack in Gazebo...
 
    public static final boolean USE_PERFECT_SENSORS = false;
-   static{
-      
-      if (USE_PERFECT_SENSORS) System.err.println("Warning! Using Perfect Sensors!");
+
+   static
+   {
+      if (USE_PERFECT_SENSORS)
+         System.err.println("Warning! Using Perfect Sensors!");
    }
+
    public static final String[] JOINTS_TO_IGNORE_FOR_GAZEBO = {"hokuyo_joint"};
    public static final boolean SHOW_SCS_GUI_FOR_GAZEBO = true;
 
@@ -36,9 +39,9 @@ public class DRCConfigParameters
    public static final String CLOUD_MINION1_IP = "10.4.42.2";
    public static final String CLOUD_MINION3_IP = "10.4.42.5";
    public static final String CLOUD_MONSTER_JR_IP = "10.4.42.3";
-   public static final String GAZEBO_HOST = LOCALHOST;
-   
-   
+   public static final String GAZEBO_HOST = CLOUD_MINION1_IP;
+
+
    public static final String ROS_MASTER_URI = "http://" + GAZEBO_HOST + ":11311";
    public static final String SCS_MACHINE_IP_ADDRESS = "localhost";    // "10.100.0.37";
    public static final int CONTROLLER_TO_UI_TCP_PORT = 4893;
@@ -72,9 +75,9 @@ public class DRCConfigParameters
    public static final double LIDAR_SPINDLE_VELOCITY = 5.0;
 
    public static final boolean STREAM_POLAR_LIDAR = true;
-   static final int LIDAR_UPDATE_RATE_OVERRIDE = 5;//3
-   static final int LIDAR_SWEEPS_PER_SCAN = 1;//6;    // 1
-   static final int LIDAR_POINTS_PER_SWEEP = 640;// 70;    // 640
+   static final int LIDAR_UPDATE_RATE_OVERRIDE = 5;    // 3
+   static final int LIDAR_SWEEPS_PER_SCAN = 1;    // 6;    // 1
+   static final int LIDAR_POINTS_PER_SWEEP = 640;    // 70;    // 640
    static final boolean OVERRIDE_DRC_LIDAR_CONFIG = true;
    public static final float LIDAR_MIN_DISTANCE = 0.2f;
    public static final float LIDAR_MAX_DISTANCE = 10.0f;
