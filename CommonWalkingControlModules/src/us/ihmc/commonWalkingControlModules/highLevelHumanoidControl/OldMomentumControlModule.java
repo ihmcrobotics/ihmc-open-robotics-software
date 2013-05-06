@@ -1,10 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.vecmath.Vector3d;
 
@@ -27,16 +23,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.ScrewTools;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
-import us.ihmc.utilities.screwTheory.SpatialForceVector;
-import us.ihmc.utilities.screwTheory.TotalMassCalculator;
-import us.ihmc.utilities.screwTheory.TotalWrenchCalculator;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
-import us.ihmc.utilities.screwTheory.Wrench;
+import us.ihmc.utilities.screwTheory.*;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -68,6 +55,9 @@ public class OldMomentumControlModule implements MomentumControlModule
    private final BooleanYoVariable groundReactionWrenchFilterResetRequest = new BooleanYoVariable("groundReactionWrenchFilterResetRequest", registry);
    private final double controlDT;
    private final SpatialForceVector desiredCentroidalMomentumRate = new SpatialForceVector();
+   private final RootJointAccelerationData rootJointAccelerationData;
+   private final MomentumRateOfChangeData momentumRateOfChangeData;
+   private final SixDoFJoint rootJoint;
 
 
    public OldMomentumControlModule(SixDoFJoint rootJoint, Collection<? extends ContactablePlaneBody> contactablePlaneBodies, double gravityZ,
@@ -93,7 +83,11 @@ public class OldMomentumControlModule implements MomentumControlModule
       this.desiredGroundReactionForce = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("desiredGroundReactionForce", "", registry,
               alphaGroundReactionWrench, unfilteredDesiredGroundReactionForce);
 
-      gravitationalWrench = new SpatialForceVector(centerOfMassFrame, new Vector3d(0.0, 0.0, totalMass * gravityZ), new Vector3d());
+      this.gravitationalWrench = new SpatialForceVector(centerOfMassFrame, new Vector3d(0.0, 0.0, totalMass * gravityZ), new Vector3d());
+
+      this.rootJointAccelerationData = new RootJointAccelerationData(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint());
+      this.momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
+      this.rootJoint = rootJoint;
 
       parentRegistry.addChild(registry);
    }
@@ -115,8 +109,7 @@ public class OldMomentumControlModule implements MomentumControlModule
       externalWrenches.clear();
    }
 
-   public void compute(RootJointAccelerationData rootJointAccelerationData, MomentumRateOfChangeData momentumRateOfChangeData,
-                       LinkedHashMap<ContactablePlaneBody, ? extends PlaneContactState> contactStates, RobotSide upcomingSupportLeg)
+   public void compute(LinkedHashMap<ContactablePlaneBody, ? extends PlaneContactState> contactStates, RobotSide upcomingSupportLeg)
    {
       solver.compute();
       solver.solve(rootJointAccelerationData.getAccelerationSubspace(), rootJointAccelerationData.getAccelerationMultipliers(),
@@ -201,7 +194,23 @@ public class OldMomentumControlModule implements MomentumControlModule
 
    public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
    {
-      solver.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
+      InverseDynamicsJoint[] jointsInOrder = jacobian.getJointsInOrder();
+      if (Arrays.asList(jointsInOrder).contains(rootJoint))
+      {
+         DenseMatrix64F selectionMatrix = taskspaceConstraintData.getSelectionMatrix();
+         SpatialAccelerationVector spatialAcceleration = taskspaceConstraintData.getSpatialAcceleration();
+
+         rootJointAccelerationData.setUsingSelectionMatrix(selectionMatrix, spatialAcceleration);
+      }
+      else
+      {
+         solver.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
+      }
+   }
+
+   public void setDesiredRateOfChangeOfMomentum(MomentumRateOfChangeData momentumRateOfChangeData)
+   {
+      this.momentumRateOfChangeData.set(momentumRateOfChangeData);
    }
 
    public SpatialForceVector getDesiredCentroidalMomentumRate()

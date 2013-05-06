@@ -10,16 +10,15 @@ import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
+import org.ejml.data.RowD1Matrix64F;
+import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeControlModule;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeData;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAccelerationControlModule;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAccelerationData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.*;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -32,18 +31,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
-import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.ScrewTools;
-import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
-import us.ihmc.utilities.screwTheory.SpatialForceVector;
-import us.ihmc.utilities.screwTheory.TotalMassCalculator;
-import us.ihmc.utilities.screwTheory.TotalWrenchCalculator;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
-import us.ihmc.utilities.screwTheory.Wrench;
+import us.ihmc.utilities.screwTheory.*;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
@@ -109,6 +97,11 @@ public abstract class MomentumBasedController implements RobotController
 
    private final CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
    private final Map<ContactablePlaneBody, FramePoint2d> cops = new LinkedHashMap<ContactablePlaneBody, FramePoint2d>();
+   private final TaskspaceConstraintData rootJointTaskSpaceConstraintData = new TaskspaceConstraintData();
+   private final SpatialAccelerationVector rootJointAcceleration;
+   private final DenseMatrix64F rootJointAccelerationMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
+   private final DenseMatrix64F rootJointNullspaceMultipliers = new DenseMatrix64F(0, 1);
+   private final DenseMatrix64F rootJointSelectionMatrix = new DenseMatrix64F(1, 1);
 
    public MomentumBasedController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
                                   CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime,
@@ -224,6 +217,9 @@ public abstract class MomentumBasedController implements RobotController
 
       this.momentumRateOfChangeControlModule = momentumRateOfChangeControlModule;
       this.rootJointAccelerationControlModule = rootJointAccelerationControlModule;
+
+      SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
+      this.rootJointAcceleration = new SpatialAccelerationVector(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint());
    }
 
    protected static double computeDesiredAcceleration(double k, double d, double qDesired, double qdDesired, OneDoFJoint joint)
@@ -256,7 +252,16 @@ public abstract class MomentumBasedController implements RobotController
       MomentumRateOfChangeData momentumRateOfChangeData = momentumRateOfChangeControlModule.getMomentumRateOfChangeOutputPort().getData();
 
 
-      momentumControlModule.compute(rootJointAccelerationData, momentumRateOfChangeData, this.contactStates, upcomingSupportLeg.getEnumValue());
+      CommonOps.mult(rootJointAccelerationData.getAccelerationSubspace(), rootJointAccelerationData.getAccelerationMultipliers(), rootJointAccelerationMatrix);
+      rootJointAcceleration.set(rootJointAccelerationMatrix);
+
+      DenseMatrix64F accelerationSubspace = rootJointAccelerationData.getAccelerationSubspace();
+      rootJointSelectionMatrix.reshape(accelerationSubspace.getNumCols(), accelerationSubspace.getNumRows());
+      CommonOps.transpose(accelerationSubspace, rootJointSelectionMatrix);
+      rootJointTaskSpaceConstraintData.set(rootJointAcceleration, rootJointNullspaceMultipliers, rootJointSelectionMatrix);
+      momentumControlModule.setDesiredSpatialAcceleration(fullRobotModel.getRootJoint().getMotionSubspace(), rootJointTaskSpaceConstraintData);
+      momentumControlModule.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
+      momentumControlModule.compute(this.contactStates, upcomingSupportLeg.getEnumValue());
 
       SpatialForceVector desiredCentroidalMomentumRate = momentumControlModule.getDesiredCentroidalMomentumRate();
 

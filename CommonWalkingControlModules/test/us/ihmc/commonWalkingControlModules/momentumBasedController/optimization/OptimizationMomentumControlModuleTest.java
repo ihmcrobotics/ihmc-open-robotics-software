@@ -15,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateO
 import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAccelerationData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointWrenchMatrixCalculator;
 import us.ihmc.robotSide.RobotSide;
-import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.CenterOfMassReferenceFrame;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -65,9 +64,6 @@ public class OptimizationMomentumControlModuleTest
       OptimizationMomentumControlModule momentumControlModule = new OptimizationMomentumControlModule(rootJoint, centerOfMassFrame, controlDT, registry,
                                                                    jointsToOptimizeFor, momentumOptimizationSettings, gravityZ);
 
-      RootJointAccelerationData rootJointAccelerationData = new RootJointAccelerationData(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(),
-                                                               rootJoint.getFrameAfterJoint());
-      rootJointAccelerationData.setEmpty();
 
       RigidBody endEffector = randomFloatingChain.getLeafBody();
       ReferenceFrame soleFrame = endEffector.getBodyFixedFrame();
@@ -84,7 +80,8 @@ public class OptimizationMomentumControlModuleTest
 
 
       RobotSide upcomingSupportLeg = null;
-      momentumControlModule.compute(rootJointAccelerationData, momentumRateOfChangeData, contactStates, upcomingSupportLeg);
+      momentumControlModule.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
+      momentumControlModule.compute(contactStates, upcomingSupportLeg);
       SpatialForceVector momentumRateOfChangeOut = momentumControlModule.getDesiredCentroidalMomentumRate();
 
       assertWrenchesSumUpToMomentumDot(momentumControlModule.getExternalWrenches(), momentumRateOfChangeOut, gravityZ, totalMass, centerOfMassFrame);
