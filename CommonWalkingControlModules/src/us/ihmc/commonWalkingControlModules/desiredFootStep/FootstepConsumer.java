@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.vecmath.Point3d;
@@ -85,6 +86,28 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
    public Footstep peek()
    {
       return footstepQueue.peek();
+   }
+   
+   public Footstep peekPeek()
+   {
+      Iterator<Footstep> iterator = footstepQueue.iterator();
+      
+      if (iterator.hasNext()) 
+      {
+         iterator.next();
+      }
+      else
+      {
+         return null;
+      }
+      if (iterator.hasNext()) 
+      {
+         return iterator.next();
+      }
+      else
+      {
+         return null;
+      }
    }
 
    public boolean isEmpty()

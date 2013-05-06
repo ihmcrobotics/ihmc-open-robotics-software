@@ -6,6 +6,8 @@ public interface FootstepProvider
 
    public abstract Footstep peek();
 
+   public abstract Footstep peekPeek();
+
    public abstract boolean isEmpty();
 
    public void notifyComplete();

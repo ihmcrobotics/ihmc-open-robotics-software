@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import us.ihmc.utilities.io.streamingData.QueueBasedStreamingDataProducer;
@@ -73,6 +74,28 @@ public class FootstepPathCoordinator implements FootstepProvider
    public Footstep peek()
    {
       return footstepQueue.peek();
+   }
+   
+   public Footstep peekPeek()
+   {
+      Iterator<Footstep> iterator = footstepQueue.iterator();
+      
+      if (iterator.hasNext()) 
+      {
+         iterator.next();
+      }
+      else
+      {
+         return null;
+      }
+      if (iterator.hasNext()) 
+      {
+         return iterator.next();
+      }
+      else
+      {
+         return null;
+      }
    }
 
    private void notifyConsumersOfStatus(Footstep footstep, FootstepStatus.Status status)
