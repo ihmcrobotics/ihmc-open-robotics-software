@@ -20,7 +20,7 @@ public class SCSPlaybackListener implements PlaybackListener
 
    public void stop()
    {
-      System.out.println("SCSPlaybackListener: stopped");
+//      System.out.println("SCSPlaybackListener: stopped");
       networkServer.consumeObject(new SCSListenerPacket());
    }
 
