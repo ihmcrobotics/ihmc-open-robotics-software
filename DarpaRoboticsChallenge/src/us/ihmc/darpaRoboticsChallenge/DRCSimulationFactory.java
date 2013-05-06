@@ -179,6 +179,7 @@ public class DRCSimulationFactory
       Pair<Point3d, Quat4d> initialCoMPositionAndEstimationLinkOrientation = null;
       if (DRCConfigParameters.INITIALIZE_ESTIMATOR_TO_ACTUAL)
       {
+         System.err.println("Warning! Initializing Estimator to Actual!");
          initialCoMPositionAndEstimationLinkOrientation = getInitialCoMPositionAndEstimationLinkOrientation(robotInitialSetup, simulatedRobot);
       }
 

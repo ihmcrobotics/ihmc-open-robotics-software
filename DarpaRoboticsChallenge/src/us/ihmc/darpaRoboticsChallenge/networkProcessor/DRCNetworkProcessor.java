@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
@@ -81,6 +82,7 @@ public class DRCNetworkProcessor
 
    private void connect()
    {
+      System.out.println("Connecting network processor");
       try
       {
          fieldComputerClient.connect();
@@ -92,4 +94,9 @@ public class DRCNetworkProcessor
       }
    }
 
+   
+   public static void main(String[] args) throws URISyntaxException
+   {
+      new DRCNetworkProcessor(new URI(DRCConfigParameters.ROS_MASTER_URI));
+   }
 }
