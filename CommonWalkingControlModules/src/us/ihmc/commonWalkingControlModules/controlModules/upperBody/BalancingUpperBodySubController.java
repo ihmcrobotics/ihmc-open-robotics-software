@@ -720,7 +720,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 		double CoMHeight = processedSensors.getCenterOfMassPositionInFrame(worldFrame).getZ();
 		double omega0 = Math.sqrt( gravity / CoMHeight );
 
-		// icp(timeCurrent + elapsedTimeToStop) = cmp(timeCurrent) + [ icp(timeCurrent) - cmp(timeCurrent) ] * exp(omega0 * elapsedTimeToStop)
+		// instantaneousCapturePoint(timeCurrent + elapsedTimeToStop) = cmp(timeCurrent) + [ instantaneousCapturePoint(timeCurrent) - cmp(timeCurrent) ] * exp(omega0 * elapsedTimeToStop)
 		double deltaTPrime = omega0 * elapsedTimeToStop;
 
 		FramePoint2d icpPredicted = new FramePoint2d(icpCurrent.getReferenceFrame(), icpCurrent.getPointCopy());

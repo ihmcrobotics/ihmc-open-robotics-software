@@ -173,8 +173,8 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
          outsideToe2d.add(direction.toFrameVector2d());
       }
 
-      //         FramePoint2d icpInside = icp;
-      //         FramePoint2d icpOutside = new FramePoint2d(icp);
+      //         FramePoint2d icpInside = instantaneousCapturePoint;
+      //         FramePoint2d icpOutside = new FramePoint2d(instantaneousCapturePoint);
       //
       //         icpInside.setY(icpInside.getY() + (upcomingSwingLeg == RobotSide.LEFT ? -1.0 : 1.0) * minICPToEdgeY.getDoubleValue());
       //         icpOutside.setY(icpOutside.getY() + (upcomingSwingLeg == RobotSide.LEFT ? 1.0 : -1.0) * minICPToEdgeY.getDoubleValue());
