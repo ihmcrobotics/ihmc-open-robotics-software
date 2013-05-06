@@ -211,9 +211,4 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
          contactState.set(new ArrayList<FramePoint2d>(), coefficientOfFriction);
    }
 
-   protected void doAdditionalTorqueControl()
-   {
-      // TODO Auto-generated method stub
-
-   }
 }

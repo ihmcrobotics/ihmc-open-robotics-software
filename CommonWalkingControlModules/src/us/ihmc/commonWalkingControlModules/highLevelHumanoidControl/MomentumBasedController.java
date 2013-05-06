@@ -319,8 +319,6 @@ public abstract class MomentumBasedController implements RobotController
 
       inverseDynamicsCalculator.compute();
 
-      doAdditionalTorqueControl();
-
       if (processedOutputs != null)
          fullRobotModel.setTorques(processedOutputs);
       updateYoVariables();
@@ -330,8 +328,6 @@ public abstract class MomentumBasedController implements RobotController
    {
       momentumControlModule.resetGroundReactionWrenchFilter();
    }
-
-   protected abstract void doAdditionalTorqueControl();
 
    private void callUpdatables()
    {

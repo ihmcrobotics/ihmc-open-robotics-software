@@ -304,8 +304,4 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
    {
       return taskspaceConstraintData;
    }
-
-   public void doAdditionalTorqueControl()
-   {
-   }
 }

@@ -1279,7 +1279,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       if (lidarControllerInterface != null)
       {
-         setOneDoFJointAcceleration(lidarControllerInterface.getLidarJoint(), lidarControllerInterface.getDesiredAcceleration());
+         setOneDoFJointAcceleration(lidarControllerInterface.getLidarJoint(), 0.0);
       }
    }
 
@@ -1525,19 +1525,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       FrameConvexPolygon2d footPolygon = FrameConvexPolygon2d.constructByProjectionOntoXYPlane(contactPoints, referenceFrame);
 
       return footPolygon;
-   }
-
-   protected void doAdditionalTorqueControl()
-   {
-      if (lidarControllerInterface != null)
-      {
-         lidarControllerInterface.doAdditionalTorqueControl();
-      }
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         manipulationStateMachines.get(robotSide).doAdditionalTorqueControl();
-      }
    }
 
    private boolean landOnHeels()
