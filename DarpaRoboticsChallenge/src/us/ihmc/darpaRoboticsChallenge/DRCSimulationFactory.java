@@ -82,7 +82,7 @@ public class DRCSimulationFactory
       }
       else
       {
-         lidarControllerInterface = new PIDLidarTorqueController(DRCConfigParameters.LIDAR_SPINDLE_VELOCITY, controlDT, registry);
+         lidarControllerInterface = new PIDLidarTorqueController(DRCConfigParameters.LIDAR_SPINDLE_VELOCITY, controlDT);
 //         sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersALittleNoise();
          sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersGazeboSDF();
       }
@@ -150,7 +150,7 @@ public class DRCSimulationFactory
       }
 
 
-      SensorReaderFactory sensorReaderFactory;
+      SensorReaderFactory sensorReaderFactory; // this is the connection between the ModularRobotController and the DRCController below
       ModularRobotController controller = new ModularRobotController("SensorReaders");
       if(DRCConfigParameters.USE_PERFECT_SENSORS)
       {
@@ -168,6 +168,8 @@ public class DRCSimulationFactory
       
       SimulatedHandControllerDispatcher handControllerDispatcher = new SimulatedHandControllerDispatcher(simulatedRobot, estimationTicksPerControlTick);
       controller.addRobotController(handControllerDispatcher);
+
+      controller.addRobotController(lidarControllerInterface);
       
       
       Vector3d gravity = new Vector3d();
