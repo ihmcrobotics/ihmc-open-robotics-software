@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.momentumBasedController;
+package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;

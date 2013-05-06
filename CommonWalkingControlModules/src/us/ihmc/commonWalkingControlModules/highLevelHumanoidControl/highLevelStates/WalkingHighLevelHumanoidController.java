@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
+package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,20 +27,13 @@ import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationCo
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepUtils;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.*;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredHandPoseProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.ManipulationStateMachine;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointData;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointTrajectoryData;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.ICPBasedMomentumRateOfChangeControlModule;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.OrientationTrajectoryData;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAccelerationControlModule;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.FinalDesiredICPCalculator;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPBasedMomentumRateOfChangeControlModule;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.*;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
@@ -1318,7 +1311,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    {
       chestOrientationControlModule.compute();
       momentumControlModule.setDesiredSpatialAcceleration(chestOrientationControlModule.getJacobian(),
-              chestOrientationControlModule.getTaskspaceConstraintData());
+            chestOrientationControlModule.getTaskspaceConstraintData());
    }
 
    public void doHeadControl()
