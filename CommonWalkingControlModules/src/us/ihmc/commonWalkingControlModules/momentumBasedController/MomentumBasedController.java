@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.vecmath.Vector3d;
 
+import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import org.ejml.data.DenseMatrix64F;
 
 import org.ejml.ops.CommonOps;
@@ -17,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
 import us.ihmc.commonWalkingControlModules.stateEstimation.DesiredCoMAndAngularAccelerationGrabber;
 import us.ihmc.commonWalkingControlModules.stateEstimation.PointPositionGrabber;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
@@ -41,7 +43,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
-public abstract class MomentumBasedController implements RobotController
+public class MomentumBasedController implements RobotController
 {
    private final String name = getClass().getSimpleName();
    protected final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -101,13 +103,15 @@ public abstract class MomentumBasedController implements RobotController
    private final DenseMatrix64F rootJointNullspaceMultipliers = new DenseMatrix64F(0, 1);
    private final DenseMatrix64F rootJointSelectionMatrix = new DenseMatrix64F(1, 1);
 
+   private final StateMachine<HighLevelState> stateMachine;
+
    public MomentumBasedController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
                                   CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime,
                                   double gravityZ, TwistCalculator twistCalculator, Collection<? extends ContactablePlaneBody> contactablePlaneBodies,
                                   double controlDT, ProcessedOutputsInterface processedOutputs, MomentumControlModule momentumControlModule,
                                   ArrayList<Updatable> updatables, MomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
                                   RootJointAccelerationControlModule rootJointAccelerationControlModule,
-                                  StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink,
+                                  StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink, StateMachine<HighLevelState> stateMachine,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
@@ -115,6 +119,7 @@ public abstract class MomentumBasedController implements RobotController
 
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
+      this.stateMachine = stateMachine;
       this.fullRobotModel = fullRobotModel;
       this.centerOfMassJacobian = centerOfMassJacobian;
       this.referenceFrames = referenceFrames;
@@ -230,7 +235,11 @@ public abstract class MomentumBasedController implements RobotController
       inverseDynamicsCalculator.setExternalWrench(fullRobotModel.getHand(robotSide), handWrench);
    }
 
-   public abstract void doMotionControl();
+   public void doMotionControl()
+   {
+      stateMachine.checkTransitionConditions();
+      stateMachine.doAction();
+   }
 
    public final void doControl()
    {

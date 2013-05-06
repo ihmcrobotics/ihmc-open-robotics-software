@@ -78,7 +78,7 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
    {
       super(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator,
             contactablePlaneBodiesAndBases.keySet(), controlDT, processedOutputs, momentumControlModule, updatables, momentumRateOfChangeControlModule,
-            rootJointAccelerationControlModule, stateEstimationDataFromControllerSink, dynamicGraphicObjectsListRegistry);
+            rootJointAccelerationControlModule, stateEstimationDataFromControllerSink, null, dynamicGraphicObjectsListRegistry);
       this.desiredCoMPositionPort = desiredCoMPositionPort;
       this.desiredPelvisOrientationPort = desiredPelvisOrientationPort;
 
