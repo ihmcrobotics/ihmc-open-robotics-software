@@ -9,6 +9,7 @@ public class TransferToAndNextFootstepsData
 {
    private FrameConvexPolygon2d transferToFootPolygonInSoleFrame;
    
+   private Footstep transferFromFootstep;
    private Footstep transferToFootstep;
    private RobotSide transferToSide;
    
@@ -26,6 +27,16 @@ public class TransferToAndNextFootstepsData
    public Footstep getTransferToFootstep()
    {
       return transferToFootstep;
+   }
+   
+   public Footstep getTransferFromFootstep()
+   {
+      return transferFromFootstep;
+   }
+   
+   public void setTransferFromFootstep(Footstep transferFromFootstep)
+   {
+      this.transferFromFootstep = transferFromFootstep;
    }
    
    public void setTransferToFootstep(Footstep transferToFootstep)

@@ -45,6 +45,12 @@ public class DesiredFootstepCalculatorFootstepProviderWrapper implements Footste
    {
       return desiredFootstepCalculator.predictFootstepAfterDesiredFootstep(nextSwingLeg.getEnumValue(), lastPolledFootstep);
    }
+   
+   public Footstep peekPeek()
+   {
+      Footstep nextOne = desiredFootstepCalculator.predictFootstepAfterDesiredFootstep(nextSwingLeg.getEnumValue(), lastPolledFootstep);
+      return desiredFootstepCalculator.predictFootstepAfterDesiredFootstep(nextSwingLeg.getEnumValue().getOppositeSide(), nextOne);
+   }
 
    public boolean isEmpty()
    {

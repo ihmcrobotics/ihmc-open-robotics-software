@@ -655,25 +655,21 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
          else
          {
-            FramePose currentFramePose = new FramePose(referenceFrames.getFootFrame(transferToSide));
-            currentFramePose.changeFrame(worldFrame);
 
-            FrameConvexPolygon2d footPolygon = computeFootPolygon(transferToSide, referenceFrames.getSoleFrame(transferToSide));
-            PoseReferenceFrame currentPoseReferenceFrame = new PoseReferenceFrame("currentPose", currentFramePose);
+            Footstep transferFromFootstep = createFootstepFromFootAndContactablePlaneBody(referenceFrames.getFootFrame(transferToSide.getOppositeSide()), 
+                  bipedFeet.get(transferToSide.getOppositeSide()));
+            Footstep transferToFootstep = createFootstepFromFootAndContactablePlaneBody(referenceFrames.getFootFrame(transferToSide), bipedFeet.get(transferToSide));
 
-            ContactablePlaneBody contactablePlaneBody = bipedFeet.get(transferToSide);
-            ReferenceFrame soleReferenceFrame = FootstepUtils.createSoleFrame(currentPoseReferenceFrame, contactablePlaneBody);
-            List<FramePoint> expectedContactPoints = FootstepUtils.getContactPointsInFrame(contactablePlaneBody, soleReferenceFrame);
-            boolean trustHeight = true;
-
-            Footstep transferToFootstep = new Footstep(contactablePlaneBody, currentPoseReferenceFrame, soleReferenceFrame, expectedContactPoints, trustHeight);
+            
+            FrameConvexPolygon2d transferToFootPolygon = computeFootPolygon(transferToSide, referenceFrames.getSoleFrame(transferToSide));
 
             Footstep nextFootstep = upcomingFootstepList.getNextFootstep();
             Footstep nextNextFootstep = upcomingFootstepList.getNextNextFootstep();
 
             TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
+            transferToAndNextFootstepsData.setTransferFromFootstep(transferFromFootstep);
             transferToAndNextFootstepsData.setTransferToFootstep(transferToFootstep);
-            transferToAndNextFootstepsData.setTransferToFootPolygonInSoleFrame(footPolygon);
+            transferToAndNextFootstepsData.setTransferToFootPolygonInSoleFrame(transferToFootPolygon);
             transferToAndNextFootstepsData.setTransferToSide(transferToSide);
             transferToAndNextFootstepsData.setNextFootstep(nextFootstep);
             transferToAndNextFootstepsData.setNextNextFootstep(nextNextFootstep);
@@ -1049,12 +1045,15 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       return ret;
    }
 
-   private FramePoint2d getSingleSupportFinalDesiredICPForWalking(Footstep desiredFootstep, Footstep footstepAfterThisOne, RobotSide swingSide)
+   private FramePoint2d getSingleSupportFinalDesiredICPForWalking(Footstep transferToFootstep, RobotSide swingSide)
    {
       ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
       FramePoint2d initialDesiredICP = desiredICP.getFramePoint2dCopy();
       initialDesiredICP.changeFrame(referenceFrame);
 
+      Footstep transferFromFootstep = createFootstepFromFootAndContactablePlaneBody(referenceFrames.getFootFrame(swingSide.getOppositeSide()), 
+            bipedFeet.get(swingSide.getOppositeSide()));
+      
       FrameConvexPolygon2d footPolygon;
       ContactablePlaneBody contactableBody = bipedFeet.get(swingSide);
       if (stayOnToes.getBooleanValue())
@@ -1069,12 +1068,13 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
 
-      transferToAndNextFootstepsData.setTransferToFootstep(desiredFootstep);
+      transferToAndNextFootstepsData.setTransferFromFootstep(transferFromFootstep);
+      transferToAndNextFootstepsData.setTransferToFootstep(transferToFootstep);
 
       transferToAndNextFootstepsData.setTransferToFootPolygonInSoleFrame(footPolygon);
       transferToAndNextFootstepsData.setTransferToSide(swingSide);
-      transferToAndNextFootstepsData.setNextFootstep(footstepAfterThisOne);
-      transferToAndNextFootstepsData.setNextNextFootstep(null);
+      transferToAndNextFootstepsData.setNextFootstep(upcomingFootstepList.getNextNextFootstep());
+      transferToAndNextFootstepsData.setNextNextFootstep(upcomingFootstepList.getNextNextNextFootstep());
       transferToAndNextFootstepsData.setEstimatedStepTime(swingTimeCalculationProvider.getValue() + transferTimeProvider.getValue());
       transferToAndNextFootstepsData.setW0(getOmega0());
 
@@ -1222,9 +1222,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          desiredICP.set(capturePoint.getFramePoint2dCopy());    // TODO: currently necessary for stairs because of the omega0 jump, but should get rid of this
       }
 
-      Footstep nextNextFootstep = upcomingFootstepList.getNextNextFootstep();
-
-      FramePoint2d finalDesiredICP = getSingleSupportFinalDesiredICPForWalking(nextFootstep, nextNextFootstep, swingSide);
+      FramePoint2d finalDesiredICP = getSingleSupportFinalDesiredICPForWalking(nextFootstep, swingSide);
 
       ContactablePlaneBody swingFoot = bipedFeet.get(swingSide);
       setContactStateForSwing(swingFoot);
@@ -1570,5 +1568,21 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
             mapFromFootstepsToTrajectoryParameters.put(nextFootstep, highStepTrajectoryParameters);                
          }    
       }
+   }
+   
+   
+   public static Footstep createFootstepFromFootAndContactablePlaneBody(ReferenceFrame footReferenceFrame, ContactablePlaneBody contactablePlaneBody)
+   {
+      FramePose framePose = new FramePose(footReferenceFrame);
+      framePose.changeFrame(ReferenceFrame.getWorldFrame());
+
+      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("poseReferenceFrame", framePose);
+
+      ReferenceFrame soleReferenceFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, contactablePlaneBody);
+      List<FramePoint> expectedContactPoints = FootstepUtils.getContactPointsInFrame(contactablePlaneBody, soleReferenceFrame);
+      boolean trustHeight = true;
+
+      Footstep footstep = new Footstep(contactablePlaneBody, poseReferenceFrame, soleReferenceFrame, expectedContactPoints, trustHeight);
+      return footstep;
    }
 }

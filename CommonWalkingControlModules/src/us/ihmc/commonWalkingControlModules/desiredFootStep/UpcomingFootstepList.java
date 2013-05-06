@@ -25,9 +25,11 @@ public class UpcomingFootstepList
 
    private final IntegerYoVariable nextFootstepIndex = new IntegerYoVariable("nextFootstepIndex", registry);
    private final IntegerYoVariable nextNextFootstepIndex = new IntegerYoVariable("nextNextFootstepIndex", registry);
+   private final IntegerYoVariable nextNextNextFootstepIndex = new IntegerYoVariable("nextNextNextFootstepIndex", registry);
 
    private final List<Footstep> nextFootstepList = new ArrayList<Footstep>();
    private final ArrayList<Footstep> nextNextFootstepList = new ArrayList<Footstep>();
+   private final ArrayList<Footstep> nextNextNextFootstepList = new ArrayList<Footstep>();
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -52,6 +54,11 @@ public class UpcomingFootstepList
          {
             nextNextFootstepList.remove(i);
          }
+         
+         for (int i = nextNextNextFootstepList.size() - 1; i > nextNextNextFootstepIndex.getIntegerValue(); i--)
+         {
+            nextNextNextFootstepList.remove(i);
+         }
 
          Footstep nextFootstep = footstepProvider.poll();
 
@@ -62,8 +69,6 @@ public class UpcomingFootstepList
                pointPositionGrabber.setExpectedFootstep(nextFootstep);
             }
 
-            Footstep nextNextFootstep = footstepProvider.peek();
-
             nextFootstepList.add(nextFootstep);
             nextFootstepIndex.set(nextFootstepList.size() - 1);
 
@@ -72,6 +77,7 @@ public class UpcomingFootstepList
 
             readyToGrabNextFootstep.set(false);
 
+            Footstep nextNextFootstep = footstepProvider.peek();
             if (nextNextFootstep != null)
             {
                nextNextFootstepList.add(nextNextFootstep);
@@ -80,6 +86,17 @@ public class UpcomingFootstepList
             else
             {
                nextNextFootstepIndex.increment();
+            }
+            
+            Footstep nextNextNextFootstep = footstepProvider.peekPeek();
+            if (nextNextNextFootstep != null)
+            {
+               nextNextNextFootstepList.add(nextNextNextFootstep);
+               nextNextNextFootstepIndex.set(nextNextNextFootstepList.size() - 1);
+            }
+            else
+            {
+               nextNextNextFootstepIndex.increment();
             }
 
          }
@@ -90,6 +107,8 @@ public class UpcomingFootstepList
             nextFootstepIndex.set(0);
             nextNextFootstepList.clear();
             nextNextFootstepIndex.set(0);
+            nextNextNextFootstepList.clear();
+            nextNextNextFootstepIndex.set(0);
          }
       }
    }
@@ -110,6 +129,15 @@ public class UpcomingFootstepList
       Footstep nextNextFootstep = nextNextFootstepList.get(nextNextFootstepIndex.getIntegerValue());
 
       return nextNextFootstep;
+   }
+   
+   public Footstep getNextNextNextFootstep()
+   {
+      if (nextNextNextFootstepIndex.getIntegerValue() >= nextNextNextFootstepList.size())
+         return null;
+      Footstep nextNextNextFootstep = nextNextNextFootstepList.get(nextNextNextFootstepIndex.getIntegerValue());
+
+      return nextNextNextFootstep;
    }
 
    public void notifyComplete()
