@@ -37,7 +37,7 @@ public class RobotJointLimitWatcher implements RobotController
          OneDoFJoint oneDoFJoint = oneDoFJoints[i];
          variablesToTrack[i] = new DoubleYoVariable(oneDoFJoint.getName(), doNotRegister);
 
-         double reductionFactor = 0.95;
+         double reductionFactor = 0.99;
          double lowerLimit = reductionFactor * oneDoFJoint.getJointLimitLower();
          double upperLimit = reductionFactor * oneDoFJoint.getJointLimitUpper();
 
