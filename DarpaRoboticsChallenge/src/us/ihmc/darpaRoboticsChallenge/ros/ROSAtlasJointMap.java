@@ -44,6 +44,8 @@ public class ROSAtlasJointMap
    
    public final static int numberOfJoints = r_arm_mwx + 1; 
    
+   
+   
    public static OneDoFJoint[] getJointMap(Map<String, OneDoFJoint> jointsByName)
    {
       OneDoFJoint[] joints = new OneDoFJoint[atlas_msgs.AtlasState.r_arm_mwx + 1];

@@ -166,7 +166,7 @@ public class DRCSimulationFactory
          sensorReaderFactory = simulatedSensorHolderAndReaderFromRobotFactory;
       }
       
-      SimulatedHandControllerDispatcher handControllerDispatcher = new SimulatedHandControllerDispatcher(simulatedRobot);
+      SimulatedHandControllerDispatcher handControllerDispatcher = new SimulatedHandControllerDispatcher(simulatedRobot, estimationTicksPerControlTick);
       controller.addRobotController(handControllerDispatcher);
       
       
