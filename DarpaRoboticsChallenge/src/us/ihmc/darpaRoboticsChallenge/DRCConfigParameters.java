@@ -35,6 +35,7 @@ static{
 
    // Networking
    public static final String LOCALHOST = "localhost";
+   public static final String CLOUD_MINION1_IP = "10.4.42.2";
    public static final String CLOUD_MINION3_IP = "10.4.42.5";
    public static final String CLOUD_MONSTER_JR_IP = "10.4.42.3";
    public static final String GAZEBO_HOST = LOCALHOST;
