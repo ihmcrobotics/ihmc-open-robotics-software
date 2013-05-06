@@ -26,14 +26,15 @@ public interface MomentumControlModule
 
    void reset();
 
-   void compute(RootJointAccelerationData rootJointAccelerationData, MomentumRateOfChangeData
-         momentumRateOfChangeData, LinkedHashMap<ContactablePlaneBody, ? extends PlaneContactState> contactStates, RobotSide upcomingSupportLeg);
+   void compute(LinkedHashMap<ContactablePlaneBody, ? extends PlaneContactState> contactStates, RobotSide upcomingSupportSide);
 
    void resetGroundReactionWrenchFilter();
 
    void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration);
 
    void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData);
+
+   void setDesiredRateOfChangeOfMomentum(MomentumRateOfChangeData momentumRateOfChangeData);
 
    SpatialForceVector getDesiredCentroidalMomentumRate();
 

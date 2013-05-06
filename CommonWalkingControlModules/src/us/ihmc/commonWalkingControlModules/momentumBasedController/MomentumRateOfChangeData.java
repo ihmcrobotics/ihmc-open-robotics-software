@@ -56,4 +56,10 @@ public class MomentumRateOfChangeData
    {
       return momentumMultipliers;
    }
+
+   public void set(MomentumRateOfChangeData other)
+   {
+      this.momentumSubspace.setReshape(other.momentumSubspace);
+      this.momentumMultipliers.setReshape(other.momentumMultipliers);
+   }
 }
