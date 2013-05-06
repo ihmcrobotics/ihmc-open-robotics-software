@@ -352,7 +352,12 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          ReferenceFrame[] availableHeadOrientationControlFrames = new ReferenceFrame[] {pelvisZUpFrame, pelvisFrame, ReferenceFrame.getWorldFrame()};
          headOrientationControlModule = new HeadOrientationControlModule(neckJacobian, pelvis, elevator, twistCalculator,
                  availableHeadOrientationControlFrames, walkingControllerParameters, registry, dynamicGraphicObjectsListRegistry);
-         headOrientationControlModule.setOrientationToTrack(new FrameOrientation(pelvisZUpFrame), pelvis);
+
+         // Setting initial head pitch
+         // This magic number (0.67) is a good default head pitch for getting good LIDAR point coverage of ground by feet
+         // it would be in DRC config parameters, but the would require updating several nested constructors with an additional parameter
+         FrameOrientation orientation = new FrameOrientation(pelvisZUpFrame, 0.0, 0.67, 0.0);
+         headOrientationControlModule.setOrientationToTrack(new FrameOrientation(orientation), pelvis);
          double headKp = 40.0;
          double headZeta = 1.0;
          double headKd = GainCalculator.computeDerivativeGain(headKp, headZeta);
