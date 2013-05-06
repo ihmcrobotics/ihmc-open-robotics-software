@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+import org.ejml.ops.EjmlUnitTests;
 import org.ejml.ops.RandomMatrices;
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
@@ -22,6 +23,7 @@ import us.ihmc.utilities.test.JUnitTools;
 
 import javax.vecmath.Vector3d;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -69,12 +71,22 @@ public class OptimizationMomentumControlModuleTest
       momentumRateOfChangeData.set(momentumRateOfChangeIn);
 
       momentumControlModule.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
+
+      List<RevoluteJoint> revoluteJoints = randomFloatingChain.getRevoluteJoints();
+      InverseDynamicsJoint[] revoluteJointsArray = revoluteJoints.toArray(new InverseDynamicsJoint[revoluteJoints.size()]);
+      DenseMatrix64F desiredJointAccelerations = setRandomJointAccelerations(random, momentumControlModule, revoluteJoints);
+
       momentumControlModule.compute(contactStates, null);
       SpatialForceVector momentumRateOfChangeOut = momentumControlModule.getDesiredCentroidalMomentumRate();
 
       assertWrenchesSumUpToMomentumDot(momentumControlModule.getExternalWrenches(), momentumRateOfChangeOut, gravityZ, totalMass, centerOfMassFrame);
       assertWrenchesInFrictionCones(momentumControlModule.getExternalWrenches(), contactStates, coefficientOfFriction);
       JUnitTools.assertSpatialForceVectorEquals(momentumRateOfChangeIn, momentumRateOfChangeOut, 1e-3);
+
+      DenseMatrix64F jointAccelerationsBack = new DenseMatrix64F(desiredJointAccelerations.getNumRows(), 1);
+      ScrewTools.packDesiredJointAccelerationsMatrix(revoluteJointsArray, jointAccelerationsBack);
+
+      EjmlUnitTests.assertEquals(desiredJointAccelerations, jointAccelerationsBack, 1e-9);
    }
 
    private OptimizationMomentumControlModule createMomentumControlModule(InverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame,
@@ -85,6 +97,22 @@ public class OptimizationMomentumControlModuleTest
 
       return new OptimizationMomentumControlModule(rootJoint, centerOfMassFrame, controlDT, registry, jointsToOptimizeFor, momentumOptimizationSettings,
               gravityZ);
+   }
+
+   private static DenseMatrix64F setRandomJointAccelerations(Random random, OptimizationMomentumControlModule momentumControlModule, List<? extends InverseDynamicsJoint>
+         joints)
+   {
+      DenseMatrix64F desiredJointAccelerations = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(joints), 1);
+      int index = 0;
+      for (InverseDynamicsJoint joint : joints)
+      {
+         DenseMatrix64F jointAcceleration = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
+         RandomMatrices.setRandom(jointAcceleration, random);
+         momentumControlModule.setDesiredJointAcceleration(joint, jointAcceleration);
+         CommonOps.insert(jointAcceleration, desiredJointAccelerations, index, 0);
+         index += joint.getDegreesOfFreedom();
+      }
+      return desiredJointAccelerations;
    }
 
    private void addContactState(double coefficientOfFriction, RigidBody endEffector, LinkedHashMap<ContactablePlaneBody, PlaneContactState> contactStates)
