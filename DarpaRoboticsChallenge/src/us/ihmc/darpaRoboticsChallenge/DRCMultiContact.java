@@ -80,6 +80,13 @@ public class DRCMultiContact
 
       
       MidiSliderBoard sliderBoard = new MidiSliderBoard(simulationConstructionSet);
+      String prefix = "r_handFinalDesired";
+//      sliderBoard.setSlider(1, prefix + "PositionX", simulationConstructionSet, -1, 1);
+//      sliderBoard.setSlider(2, prefix + "PositionY", simulationConstructionSet, -1, 1);
+//      sliderBoard.setSlider(3, prefix + "PositionZ", simulationConstructionSet, 0.5, 2);
+//      sliderBoard.setSlider(4, prefix + "OrientationYaw", simulationConstructionSet, -Math.PI, Math.PI);
+//      sliderBoard.setSlider(5, prefix + "OrientationPitch", simulationConstructionSet, -Math.PI, Math.PI);
+//      sliderBoard.setSlider(6, prefix + "OrientationRoll", simulationConstructionSet, -Math.PI, Math.PI);
       sliderBoard.setSlider(1, "desiredCoMX", simulationConstructionSet, -0.2, 0.2);
       sliderBoard.setSlider(2, "desiredCoMY", simulationConstructionSet, -0.2, 0.2);
       sliderBoard.setSlider(3, "desiredCoMZ", simulationConstructionSet, 0.8, 1.2);
