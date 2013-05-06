@@ -3,6 +3,8 @@ package us.ihmc.darpaRoboticsChallenge;
 import java.awt.Dimension;
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.ComponentColorModel;
@@ -10,6 +12,7 @@ import java.awt.image.DataBuffer;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -29,21 +32,28 @@ class ExternalCameraFeed extends AbstractNodeMain
 {
 	public static final boolean COLOR_IMAGE = true;
 	
-//	private static boolean RECORD = false;
+	private boolean showRecordingButtons;
+	private static boolean RECORD = false;
 	
 	private Subscriber<sensor_msgs.CompressedImage> cameraSubscriber;
 	private BufferedImage cameraImage;
 	private String cameraName, topicName;
-	private JFrame cameraFrame;
-	private JPanel cameraPanel;
-//	private ConcurrentBackgroundVideoExporter cameraVideoExporter;
+	private JFrame cameraFrame, recordButtonFrame;
+	private JPanel cameraPanel, recordButtonPanel;
+	private JButton startRecordingButton, stopRecordingButton;
+	private ConcurrentBackgroundVideoExporter cameraVideoExporter;
 
 	private ColorSpace colorSpace;
 	private ColorModel colorModel;
 	
-//	private ConnectedNode connectedNode;
+	private ConnectedNode connectedNode;
 	
 	public ExternalCameraFeed(String cameraName, String topicName)
+	{
+	   new ExternalCameraFeed(cameraName, topicName, false);
+	}
+	
+	public ExternalCameraFeed(String cameraName, String topicName, boolean showRecordingButtons)
 	{
 		new RepeatingReleasedEventsFixer().install();
 		
@@ -52,6 +62,8 @@ class ExternalCameraFeed extends AbstractNodeMain
 		
 		colorSpace = (COLOR_IMAGE ? ColorSpace.getInstance(ColorSpace.CS_sRGB) : ColorSpace.getInstance(ColorSpace.CS_GRAY));
 		colorModel = new ComponentColorModel(colorSpace, false, false, Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
+		
+		this.showRecordingButtons = showRecordingButtons;
 	}
 	
 	public GraphName getDefaultNodeName() {
@@ -60,7 +72,7 @@ class ExternalCameraFeed extends AbstractNodeMain
 	
 	public void onStart(ConnectedNode connectedNode)
 	{
-//		this.connectedNode = connectedNode;
+		this.connectedNode = connectedNode;
 		
 		setupJFrame();
 		
@@ -71,7 +83,7 @@ class ExternalCameraFeed extends AbstractNodeMain
 	
 	private void setupCameraSubscriberListener()
 	{
-		cameraSubscriber.addMessageListener(new MessageListener<sensor_msgs.CompressedImage>()
+	   cameraSubscriber.addMessageListener(new MessageListener<sensor_msgs.CompressedImage>()
 		{
 
 			public void onNewMessage(sensor_msgs.CompressedImage message)
@@ -79,8 +91,8 @@ class ExternalCameraFeed extends AbstractNodeMain
 				if (cameraFrame.isVisible())
 				{
 					cameraImage = RosTools.bufferedImageFromRosMessageJpeg(colorModel, message);
-//					if (RECORD)
-//						cameraVideoExporter.pushImage(RosTools.bufferedImageFromRosMessageJpeg(colorModel, message), message.getHeader().getStamp().totalNsecs());
+					if (RECORD)
+						cameraVideoExporter.pushImage(RosTools.bufferedImageFromRosMessageJpeg(colorModel, message), message.getHeader().getStamp().totalNsecs());
 					cameraPanel.getGraphics().drawImage(cameraImage.getScaledInstance(cameraImage.getWidth(), cameraImage.getHeight(), 0), 0, 0, null);
 				}
 			}
@@ -95,33 +107,95 @@ class ExternalCameraFeed extends AbstractNodeMain
 	
 	private void setupJFrame()
 	{
-		cameraFrame = new JFrame(topicName);
-		cameraFrame.setMinimumSize(new Dimension(1024, 544));
+		setupCameraFrame();
+		
+		setupRecordButtonFrame();
+	}
+
+
+   private void setupCameraFrame()
+   {
+      cameraFrame = new JFrame(topicName);
+		cameraFrame.setMinimumSize(new Dimension(800, 800));
 		
 		cameraPanel = new JPanel();
-		
 		cameraFrame.add(cameraPanel);
-		cameraFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
+		cameraFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		cameraFrame.setVisible(true);
-	}
-	
+   }
+
+   private void setupRecordButtonFrame()
+   {
+      recordButtonFrame = new JFrame("Record");
+      recordButtonFrame.setMinimumSize(new Dimension(300, 40));
+      
+      recordButtonPanel = new JPanel();
+      
+      setupRecordButtonPanel();
+      
+      recordButtonFrame.add(recordButtonPanel);
+      recordButtonFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      
+      recordButtonFrame.setVisible(showRecordingButtons);
+   }
+
+   private void setupRecordButtonPanel()
+   {
+      startRecordingButton = new JButton("Start Recording");
+      stopRecordingButton = new JButton("Stop Recording");
+      
+      stopRecordingButton.setEnabled(false);
+      
+      recordButtonPanel.add(startRecordingButton);
+      recordButtonPanel.add(stopRecordingButton);
+      
+      startRecordingButton.addActionListener(new ActionListener()
+      {
+         public void actionPerformed(ActionEvent e)
+         {
+            RECORD = true;
+            
+            startRecordingButton.setEnabled(false);
+            stopRecordingButton.setEnabled(true);
+            
+            cameraVideoExporter = new ConcurrentBackgroundVideoExporter(System.getProperty("user.home") + "/" + cameraName);
+            cameraVideoExporter.start(connectedNode.getCurrentTime().totalNsecs());
+         }  
+      });
+      
+      stopRecordingButton.addActionListener(new ActionListener()
+      {
+         public void actionPerformed(ActionEvent e)
+         {
+            RECORD = false;
+            
+            cameraVideoExporter.finish();
+            
+            stopRecordingButton.setEnabled(false);
+            startRecordingButton.setEnabled(true);
+         }  
+      });
+   }
+   
 	public static void main(String[] args) throws URISyntaxException
 	{
-		if (args.length < 3)
-		{
-			System.err.println("Insufficient arguments provided. Please provide IP of MASTER, camera name, and topic name.");
-			args = new String[] {"I'm going ", "to break ", "your camera."};
-		}
-		
-		URI master = new URI(args[0]);
-		
 		try
 		{
-			ExternalCameraFeed externalCamera = new ExternalCameraFeed(args[1], args[2]);
-			NodeConfiguration nodeConfiguration = RosTools.createNodeConfiguration(master);
-			NodeMainExecutor nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
-			nodeMainExecutor.execute(externalCamera, nodeConfiguration);
+		   if (args.length < 3)
+		      throw new IllegalArgumentException("Insufficient arguments provided. Please provide IP of MASTER, camera name, and topic name.");
+		   else 
+		   {
+		      URI master = new URI(args[0]);
+		      ExternalCameraFeed externalCamera;
+		      if (args.length == 3)
+		         externalCamera = new ExternalCameraFeed(args[1], args[2]);
+		      else
+		         externalCamera = new ExternalCameraFeed(args[1], args[2], args[3].equals("true"));
+		      NodeConfiguration nodeConfiguration = RosTools.createNodeConfiguration(master);
+		      NodeMainExecutor nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
+		      nodeMainExecutor.execute(externalCamera, nodeConfiguration);
+		   }
 		}
 		catch (Exception e)
 		{
