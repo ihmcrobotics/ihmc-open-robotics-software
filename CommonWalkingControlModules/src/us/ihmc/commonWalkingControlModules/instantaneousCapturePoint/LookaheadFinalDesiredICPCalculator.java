@@ -37,7 +37,9 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
    private final DynamicGraphicCoordinateSystem transferFromCoordinateSystem, transferToCoordinateSystem, nextStepCoordinateSystem, nextNextStepCoordinateSystem;
 
    private final YoFrameConvexPolygon2d transferFromPolygon, transferToPolygon, nextStepPolygon, nextNextStepPolygon;
-
+   private final DynamicGraphicYoFramePolygon transferFromPolygonViz, transferToPolygonViz, nextStepPolygonViz, nextNextStepPolygonViz;
+   
+   
    private final ShiftInsideFinalDesiredICPCalculator shiftInsideFinalDesiredICPCalculator = new ShiftInsideFinalDesiredICPCalculator(registry, 0.0, 0.04);
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -74,13 +76,13 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
          YoAppearance.makeTransparent(nextFootstepPolygonAppearance, 0.5);
          AppearanceDefinition nextNextFootstepPolygonAppearance = YoAppearance.Lavender();
 
-         DynamicGraphicYoFramePolygon transferFromPolygonViz = new DynamicGraphicYoFramePolygon("transferFromPolygon", transferFromPolygon, "transferFromPolygon", "",
+         transferFromPolygonViz = new DynamicGraphicYoFramePolygon("transferFromPolygon", transferFromPolygon, "transferFromPolygon", "",
                registry, polygonVizScale, transferFromPolygonAppearance);
-         DynamicGraphicYoFramePolygon transferToPolygonViz = new DynamicGraphicYoFramePolygon("transferToPolygon", transferToPolygon, "transferToPolygon", "",
+         transferToPolygonViz = new DynamicGraphicYoFramePolygon("transferToPolygon", transferToPolygon, "transferToPolygon", "",
                                                                 registry, polygonVizScale, transferToPolygonAppearance);
-         DynamicGraphicYoFramePolygon nextStepPolygonViz = new DynamicGraphicYoFramePolygon("nextStepPolygon", nextStepPolygon, "nextStepPolygon", "",
+         nextStepPolygonViz = new DynamicGraphicYoFramePolygon("nextStepPolygon", nextStepPolygon, "nextStepPolygon", "",
                                                               registry, polygonVizScale, nextFootstepPolygonAppearance);
-         DynamicGraphicYoFramePolygon nextNextStepPolygonViz = new DynamicGraphicYoFramePolygon("nextNextStepPolygon", nextNextStepPolygon,
+         nextNextStepPolygonViz = new DynamicGraphicYoFramePolygon("nextNextStepPolygon", nextNextStepPolygon,
                                                                   "nextNextStepPolygon", "", registry, polygonVizScale, nextNextFootstepPolygonAppearance);
 
          transferFromPolygonViz.setPosition(0.0, 0.0, 0.001);
@@ -93,7 +95,6 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
          dynamicGraphicObjectsList.add(nextStepPolygonViz);
          dynamicGraphicObjectsList.add(nextNextStepPolygonViz);
 
-
          transferFromCoordinateSystem = new DynamicGraphicCoordinateSystem("transferFromPose", "", registry, 0.2);
          transferToCoordinateSystem = new DynamicGraphicCoordinateSystem("transferToPose", "", registry, 0.2);
          nextStepCoordinateSystem = new DynamicGraphicCoordinateSystem("nextStepPose", "", registry, 0.2);
@@ -105,7 +106,6 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
          dynamicGraphicObjectsList.add(nextNextStepCoordinateSystem);
 
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
-
       }
 
       else
@@ -115,6 +115,11 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
          nextStepPolygon = null;
          nextNextStepPolygon = null;
 
+         transferFromPolygonViz = null;
+         transferToPolygonViz = null;
+         nextStepPolygonViz = null;
+         nextNextStepPolygonViz = null;
+         
          transferFromCoordinateSystem = null;
          transferToCoordinateSystem = null;
          nextStepCoordinateSystem = null;
@@ -256,25 +261,26 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
          return;
 
       Footstep transferFromFootstep = transferToAndNextFootstepsData.getTransferFromFootstep();
-      visualizeFootstep(transferFromFootstep, transferFromPolygon, transferFromCoordinateSystem);
+      visualizeFootstep(transferFromFootstep, transferFromPolygon, transferFromPolygonViz, transferFromCoordinateSystem);
       
       Footstep transferToFootstep = transferToAndNextFootstepsData.getTransferToFootstep();
-      visualizeFootstep(transferToFootstep, transferToPolygon, transferToCoordinateSystem);
+      visualizeFootstep(transferToFootstep, transferToPolygon, transferToPolygonViz, transferToCoordinateSystem);
 
       Footstep nextFootstep = transferToAndNextFootstepsData.getNextFootstep();
-      visualizeFootstep(nextFootstep, nextStepPolygon, nextStepCoordinateSystem);
+      visualizeFootstep(nextFootstep, nextStepPolygon, nextStepPolygonViz, nextStepCoordinateSystem);
  
       Footstep nextNextFootstep = transferToAndNextFootstepsData.getNextNextFootstep();
-      visualizeFootstep(nextNextFootstep, nextNextStepPolygon, nextNextStepCoordinateSystem);
-     
+      visualizeFootstep(nextNextFootstep, nextNextStepPolygon, nextNextStepPolygonViz, nextNextStepCoordinateSystem);
    }
 
-   private static void visualizeFootstep(Footstep footstep, YoFrameConvexPolygon2d footstepPolygon, DynamicGraphicCoordinateSystem footstepCoordinateSystem)
+   private static void visualizeFootstep(Footstep footstep, YoFrameConvexPolygon2d footstepPolygon, DynamicGraphicYoFramePolygon footstepPolygonViz, DynamicGraphicCoordinateSystem footstepCoordinateSystem)
    {
       if (footstep != null)
       {
-         FrameConvexPolygon2d nextFootPolygon = FootstepUtils.getProjectedFootPolygonInFrame(footstep, ReferenceFrame.getWorldFrame());
+         FrameConvexPolygon2d nextFootPolygon = FootstepUtils.getProjectedFootPolygonInFrame(footstep, footstep.getSoleReferenceFrame());
          footstepPolygon.setConvexPolygon2d(nextFootPolygon.getConvexPolygon2d());
+         
+         footstepPolygonViz.setToReferenceFrame(footstep.getSoleReferenceFrame());
          footstepCoordinateSystem.setToReferenceFrame(footstep.getPoseReferenceFrame());
       }
       else
