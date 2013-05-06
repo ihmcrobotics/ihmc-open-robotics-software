@@ -12,9 +12,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.MomentumOptimizerNative;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeData;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAccelerationData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointWrenchMatrixCalculator;
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.CenterOfMassReferenceFrame;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -39,6 +37,10 @@ public class OptimizationMomentumControlModuleTest
    private static final Vector3d Y = new Vector3d(0.0, 1.0, 0.0);
    private static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
 
+   private final double controlDT = 5e-3;
+   private final double gravityZ = 9.81;
+   private final double coefficientOfFriction = 1.0;
+
    @Test
    public void test()
    {
@@ -51,48 +53,48 @@ public class OptimizationMomentumControlModuleTest
       randomFloatingChain.setRandomPositionsAndVelocities(random);
 
       InverseDynamicsJoint rootJoint = randomFloatingChain.getRootJoint();
-      double totalMass = TotalMassCalculator.computeSubTreeMass(randomFloatingChain.getElevator());
-
-      double controlDT = 5e-3;
-      double gravityZ = 9.81;
-      double coefficientOfFriction = 1.0;
-      YoVariableRegistry registry = new YoVariableRegistry("test");
-      MomentumOptimizationSettings momentumOptimizationSettings = createStandardOptimizationSettings(registry);
-
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", ReferenceFrame.getWorldFrame(), rootJoint.getSuccessor());
-      InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(rootJoint.getSuccessor());
-      OptimizationMomentumControlModule momentumControlModule = new OptimizationMomentumControlModule(rootJoint, centerOfMassFrame, controlDT, registry,
-                                                                   jointsToOptimizeFor, momentumOptimizationSettings, gravityZ);
+      centerOfMassFrame.update();
 
+      MomentumOptimizationSettings momentumOptimizationSettings = createStandardOptimizationSettings();
+      OptimizationMomentumControlModule momentumControlModule = createMomentumControlModule(rootJoint, centerOfMassFrame, momentumOptimizationSettings);
 
-      RigidBody endEffector = randomFloatingChain.getLeafBody();
-      ReferenceFrame soleFrame = endEffector.getBodyFixedFrame();
-      ContactablePlaneBody contactablePlaneBody = new RectangularContactableBody(endEffector, soleFrame, 1.0, -1.0, 1.0, -1.0);
       LinkedHashMap<ContactablePlaneBody, PlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, PlaneContactState>();
-      YoPlaneContactState contactState = new YoPlaneContactState("testContactState", endEffector.getParentJoint().getFrameAfterJoint(), soleFrame, registry);
-      contactState.set(contactablePlaneBody.getContactPoints2d(), coefficientOfFriction);
-      contactStates.put(contactablePlaneBody, contactState);
+      addContactState(coefficientOfFriction, randomFloatingChain.getLeafBody(), contactStates);
 
       MomentumRateOfChangeData momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
+      double totalMass = TotalMassCalculator.computeSubTreeMass(randomFloatingChain.getElevator());
       SpatialForceVector momentumRateOfChangeIn = generateRandomFeasibleMomentumRateOfChange(centerOfMassFrame, contactStates, totalMass, gravityZ, random,
                                                      momentumOptimizationSettings.getRhoMinScalar());
       momentumRateOfChangeData.set(momentumRateOfChangeIn);
 
-
-      RobotSide upcomingSupportLeg = null;
       momentumControlModule.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
-      momentumControlModule.compute(contactStates, upcomingSupportLeg);
+      momentumControlModule.compute(contactStates, null);
       SpatialForceVector momentumRateOfChangeOut = momentumControlModule.getDesiredCentroidalMomentumRate();
 
       assertWrenchesSumUpToMomentumDot(momentumControlModule.getExternalWrenches(), momentumRateOfChangeOut, gravityZ, totalMass, centerOfMassFrame);
       assertWrenchesInFrictionCones(momentumControlModule.getExternalWrenches(), contactStates, coefficientOfFriction);
+      JUnitTools.assertSpatialForceVectorEquals(momentumRateOfChangeIn, momentumRateOfChangeOut, 1e-3);
+   }
 
-      DenseMatrix64F vd = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor), 1);
-      ScrewTools.packDesiredJointAccelerationsMatrix(jointsToOptimizeFor, vd);
+   private OptimizationMomentumControlModule createMomentumControlModule(InverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame,
+           MomentumOptimizationSettings momentumOptimizationSettings)
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("test");
+      InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(rootJoint.getSuccessor());
 
-      double epsilon = 1e-3;
-      JUnitTools.assertSpatialForceVectorEquals(momentumRateOfChangeIn, momentumRateOfChangeOut, epsilon);
+      return new OptimizationMomentumControlModule(rootJoint, centerOfMassFrame, controlDT, registry, jointsToOptimizeFor, momentumOptimizationSettings,
+              gravityZ);
+   }
 
+   private void addContactState(double coefficientOfFriction, RigidBody endEffector, LinkedHashMap<ContactablePlaneBody, PlaneContactState> contactStates)
+   {
+      ReferenceFrame soleFrame = endEffector.getBodyFixedFrame();
+      ContactablePlaneBody contactablePlaneBody = new RectangularContactableBody(endEffector, soleFrame, 1.0, -1.0, 1.0, -1.0);
+      YoPlaneContactState contactState = new YoPlaneContactState("testContactState", endEffector.getParentJoint().getFrameAfterJoint(), soleFrame,
+                                            new YoVariableRegistry("bla"));
+      contactState.set(contactablePlaneBody.getContactPoints2d(), coefficientOfFriction);
+      contactStates.put(contactablePlaneBody, contactState);
    }
 
    private SpatialForceVector generateRandomFeasibleMomentumRateOfChange(ReferenceFrame centerOfMassFrame,
@@ -112,12 +114,12 @@ public class OptimizationMomentumControlModuleTest
       return ret;
    }
 
-   private static MomentumOptimizationSettings createStandardOptimizationSettings(YoVariableRegistry registry)
+   private static MomentumOptimizationSettings createStandardOptimizationSettings()
    {
-      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(registry);
+      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(new YoVariableRegistry("test1"));
       momentumOptimizationSettings.setMomentumWeight(1.0, 1.0, 1.0, 1.0);
       momentumOptimizationSettings.setDampedLeastSquaresFactor(1e-11);
-      momentumOptimizationSettings.setGroundReactionForceRegularization(1e-9);
+      momentumOptimizationSettings.setGroundReactionForceRegularization(1e-5);
       momentumOptimizationSettings.setRhoMin(0.0);
 
       return momentumOptimizationSettings;
