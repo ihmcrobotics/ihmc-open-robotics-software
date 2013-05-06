@@ -11,21 +11,21 @@ import java.io.IOException;
 public class CreateGaussianModelApp {
    public static void main( String args[] ) throws IOException {
       Gaussian3D_F64 model;
-      String roadName = "road.txt";
+      String roadName = "test_line.txt";
       String lineName = "line.txt";
 //      String coneBlack = "cone_black.txt";
 //      String coneOrange = "cone_orange.txt";
 //
-//      System.out.println("Loading model");
-//      Gaussian3D_F64 model = GaussianColorClassifier.train(new FileInputStream(roadName));
-//      model.print();
-
-//      BoofMiscOps.saveXML(model,"gaussian_road.xml");
-
-      model = GaussianColorClassifier.train(new FileInputStream(lineName));
+      System.out.println("Loading model");
+      model = GaussianColorClassifier.train(new FileInputStream(roadName));
       model.print();
 
-      BoofMiscOps.saveXML(model,"gaussian_line.xml");
+      BoofMiscOps.saveXML(model,"test_line.xml");
+
+//      model = GaussianColorClassifier.train(new FileInputStream(lineName));
+//      model.print();
+//
+//      BoofMiscOps.saveXML(model,"gaussian_line.xml");
 
 //      model = GaussianColorClassifier.train(new FileInputStream(coneBlack));
 //      model.print();
