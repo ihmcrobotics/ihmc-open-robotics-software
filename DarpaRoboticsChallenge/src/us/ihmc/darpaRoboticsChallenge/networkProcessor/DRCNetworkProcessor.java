@@ -3,8 +3,13 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor;
 import java.io.IOException;
 import java.net.URI;
 
+import us.ihmc.SdfLoader.JaxbSDFLoader;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCNetClassList;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCSensorParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.GazeboCameraReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.SCSCameraDataReceiver;
@@ -24,6 +29,9 @@ public class DRCNetworkProcessor
    private final KryoObjectServer teamComputerServer;
    private final RobotPoseBuffer robotPoseBuffer;
 
+   
+   private final SDFFullRobotModel fullRobotModel;
+   private final DRCRobotJointMap jointMap;
 
    /*
     * This will become a stand-alone application in the final competition. Do
@@ -42,7 +50,7 @@ public class DRCNetworkProcessor
       rosMainNode.attachSubscriber("/clock", timeProvider);
 
       new GazeboCameraReceiver(robotPoseBuffer, DRCConfigParameters.VIDEOSETTINGS, rosMainNode, teamComputerServer, DRCSensorParameters.FIELD_OF_VIEW);
-      new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, teamComputerServer);
+      new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, teamComputerServer, fullRobotModel, jointMap);
       rosMainNode.execute();
       connect();
    }
@@ -51,7 +59,7 @@ public class DRCNetworkProcessor
    {
       this();
       new SCSCameraDataReceiver(robotPoseBuffer, DRCConfigParameters.VIDEOSETTINGS, scsCommunicator, teamComputerServer);
-      new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, teamComputerServer);
+      new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, teamComputerServer, fullRobotModel, jointMap);
       connect();
    }
 
@@ -65,6 +73,10 @@ public class DRCNetworkProcessor
             new DRCNetClassList());
 
       robotPoseBuffer = new RobotPoseBuffer(fieldComputerClient, 1000);
+      
+      jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_SANDIA_HANDS, false);  
+      JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
+      fullRobotModel = loader.createFullRobotModel(jointMap);
    }
 
    private void connect()
