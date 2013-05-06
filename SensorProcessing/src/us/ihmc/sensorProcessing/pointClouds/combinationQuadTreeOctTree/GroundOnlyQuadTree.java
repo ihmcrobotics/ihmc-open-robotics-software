@@ -404,6 +404,12 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    {
       this.octree=octree;
    }
+
+   public void treeCleared()
+   {
+      // TODO Auto-generated method stub
+      
+   }
    
    
 
