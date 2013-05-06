@@ -23,7 +23,9 @@ public class SDFFullRobotModelVisualizer implements RawOutputWriter
 {
    private final String name;
    private final SDFRobot robot;
-   private final SimulationConstructionSet scs;
+   private final double estimatorDT;
+
+   private SimulationConstructionSet scs;
    
    private SixDoFJoint rootJoint;
    private final ArrayList<Pair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<Pair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
@@ -32,13 +34,18 @@ public class SDFFullRobotModelVisualizer implements RawOutputWriter
    private final Executor scsUpdaterExecutor = Executors.newSingleThreadExecutor();
    private final AtomicBoolean updaterIsRunning = new AtomicBoolean(false); 
    
-   public SDFFullRobotModelVisualizer(SDFRobot robot, SimulationConstructionSet scs)
+   public SDFFullRobotModelVisualizer(SDFRobot robot, double estimatorDT)
    {
       this.name = robot.getName() + "SimulatedSensorReader";
       this.robot = robot;
-      this.scs = scs;
+      this.estimatorDT = estimatorDT;
    }
 
+   public void registerSCS(SimulationConstructionSet scs)
+   {
+      this.scs = scs;
+   }
+   
    public void initialize()
    {
    }
@@ -101,7 +108,7 @@ public class SDFFullRobotModelVisualizer implements RawOutputWriter
             pinJoint.setQ(revoluteJoint.getQ());
             pinJoint.setQd(revoluteJoint.getQd());
          }
-         robot.setTime(robot.getTime() + scs.getDT());
+         robot.setTime(robot.getTime() + estimatorDT);
          scsUpdaterExecutor.execute(scsUpdateRunner);
       }
    }
@@ -111,7 +118,10 @@ public class SDFFullRobotModelVisualizer implements RawOutputWriter
 
       public void run()
       {
-         scs.tickAndUpdate();
+         if(scs != null)
+         {
+            scs.tickAndUpdate();
+         }
          updaterIsRunning.set(false);
       }
       
