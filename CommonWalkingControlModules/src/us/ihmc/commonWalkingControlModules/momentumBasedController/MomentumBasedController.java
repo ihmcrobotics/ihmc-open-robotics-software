@@ -388,7 +388,8 @@ public class MomentumBasedController implements RobotController
       setOneDoFJointAcceleration(joint, desiredAcceleration);
    }
 
-   protected void setOneDoFJointAcceleration(OneDoFJoint joint, double desiredAcceleration)
+   // TODO: visibility changed for "public"
+   public void setOneDoFJointAcceleration(OneDoFJoint joint, double desiredAcceleration)
    {
       DenseMatrix64F jointAcceleration = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
       jointAcceleration.set(0, 0, desiredAcceleration);
@@ -478,4 +479,25 @@ public class MomentumBasedController implements RobotController
    {
       return referenceFrames.getPelvisZUpFrame();
    }
+
+   public EnumYoVariable<RobotSide> getUpcomingSupportLeg()
+   {
+      return upcomingSupportLeg;
+   }
+
+   public InverseDynamicsCalculator getInverseDynamicsCalculator()
+   {
+      return inverseDynamicsCalculator;
+   }
+
+   public CommonWalkingReferenceFrames getReferenceFrames()
+   {
+      return referenceFrames;
+   }
+
+   public PointPositionGrabber getPointPositionGrabber()
+   {
+      return pointPositionGrabber;
+   }
+
 }
