@@ -8,10 +8,10 @@ public class JojosICPutilities
 {
    public JojosICPutilities()
    {
-   };
+   }
 
    public static void extrapolateDCMpos(DenseMatrix64F constCoPcurrentStep, double time, double dcmConst, DenseMatrix64F ficalICPcurrentFootStep,
-         DenseMatrix64F finalDoubleSupportICP)
+           DenseMatrix64F finalDoubleSupportICP)
    {
       double exponentialTerm = Math.exp(time / dcmConst);
       DenseMatrix64F tempVect = new DenseMatrix64F(3, 1);
@@ -21,7 +21,7 @@ public class JojosICPutilities
    }
 
    public static void extrapolateDCMposAndVel(DenseMatrix64F constCoPcurrentStep, double time, double dcmConst, DenseMatrix64F ficalICPcurrentFootStep,
-         DenseMatrix64F finalDoubleSupportICPpos, DenseMatrix64F finalDoubleSupportICPvel)
+           DenseMatrix64F finalDoubleSupportICPpos, DenseMatrix64F finalDoubleSupportICPvel)
    {
       double exponentialTerm = Math.exp(time / dcmConst);
       DenseMatrix64F tempVect = new DenseMatrix64F(3, 1);
@@ -30,22 +30,20 @@ public class JojosICPutilities
       CommonOps.add(constCoPcurrentStep, tempVect, finalDoubleSupportICPpos);
       CommonOps.scale(1 / dcmConst, tempVect, finalDoubleSupportICPvel);
    }
-   
-   
-   public static void discreteIntegrateCoMAndGetCoMVelocity(double sampleTime, double dcmConst, DenseMatrix64F icp, DenseMatrix64F comPosition, DenseMatrix64F comVelocity)
-   {
-      double exponentialFactor = Math.exp(-sampleTime/dcmConst); 
-      DenseMatrix64F tempMatrix = new DenseMatrix64F(3,1);
-      
-      CommonOps.sub(comPosition, icp, tempMatrix); 
-      CommonOps.scale(exponentialFactor, tempMatrix); 
-      CommonOps.add(icp, tempMatrix, comPosition); 
-      
-      CommonOps.sub(comPosition, icp, comVelocity); 
-      CommonOps.scale(- 1/dcmConst, comVelocity); 
-   }
-   
-   
-}
 
-//~ Formatted by Jindent --- http://www.jindent.com
+
+   public static void discreteIntegrateCoMAndGetCoMVelocity(double sampleTime, double dcmConst, DenseMatrix64F icp, DenseMatrix64F comPosition,
+           DenseMatrix64F comVelocity)
+   {
+      double exponentialFactor = Math.exp(-sampleTime / dcmConst);
+      DenseMatrix64F tempMatrix = new DenseMatrix64F(3, 1);
+
+      CommonOps.sub(comPosition, icp, tempMatrix);
+      CommonOps.scale(exponentialFactor, tempMatrix);
+      CommonOps.add(icp, tempMatrix, comPosition);
+
+      CommonOps.sub(comPosition, icp, comVelocity);
+      CommonOps.scale(-1 / dcmConst, comVelocity);
+   }
+
+}

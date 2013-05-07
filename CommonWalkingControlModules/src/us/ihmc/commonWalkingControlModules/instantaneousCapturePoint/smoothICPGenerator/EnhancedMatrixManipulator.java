@@ -9,7 +9,6 @@ public class EnhancedMatrixManipulator
    {
    }
 
-   ;
 
    public static void setMatrixColumnToVector(int columnIndex, DenseMatrix64F Matrix, DenseMatrix64F vector)
    {
@@ -55,5 +54,3 @@ public class EnhancedMatrixManipulator
       return row;
    }
 }
-
-//~ Formatted by Jindent --- http://www.jindent.com

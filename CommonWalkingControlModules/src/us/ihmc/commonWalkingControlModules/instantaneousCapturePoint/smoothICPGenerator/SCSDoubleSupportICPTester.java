@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator;
 
-
-
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
@@ -13,7 +11,6 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 
 public class SCSDoubleSupportICPTester
 {
-
    public static void main(String[] args)
    {
       Robot testRobot = new Robot("testRobot");
@@ -41,13 +38,13 @@ public class SCSDoubleSupportICPTester
 
       double singleSupportTime = 0.6;
       double doubleSupportTime = 0.2;
-      double initialTransferSupportTime = 0.4; 
+      double initialTransferSupportTime = 0.4;
       double steppingTime = singleSupportTime + doubleSupportTime;
       RobotController controller = new SCSDoubleSupportICPTesterController5(dynamicGraphicObjectsListRegistry, testRobot.getYoTime(), scs.getDT(),
-            singleSupportTime, doubleSupportTime, initialTransferSupportTime, testRobot);
+                                      singleSupportTime, doubleSupportTime, initialTransferSupportTime, testRobot);
       controller.initialize();
 
-      testRobot.setController(controller, 1); // Jojo: was 5 before
+      testRobot.setController(controller, 1);    // Jojo: was 5 before
 
       dynamicGraphicObjectsListRegistry.addArtifactListsToPlotter(simulationOverheadPlotter.getPlotter());
       dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
@@ -56,4 +53,3 @@ public class SCSDoubleSupportICPTester
       scs.simulate(7.5 * steppingTime);
    }
 }
-
