@@ -71,7 +71,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       LinkedHashMap<ContactablePlaneBody, RigidBody> contactablePlaneBodiesAndBases = new LinkedHashMap<ContactablePlaneBody, RigidBody>();
 
       // TODO: code duplication from driving controller
-      InverseDynamicsJoint[] allJoints = ScrewTools.computeJointsInOrder(fullRobotModel.getElevator());
+      InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
       SideDependentList<ContactablePlaneBody> hands = new SideDependentList<ContactablePlaneBody>();
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -169,12 +169,12 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       multiContactBehavior.addStateTransition(noStateTransition);
       highLevelStateMachine.addState(multiContactBehavior);
 
-      ArrayList<YoVariableRegistry> multiContactStateRegistry = new ArrayList<YoVariableRegistry>();
-      multiContactStateRegistry.add(multiContactBehavior.getYoVariableRegistry());
+      ArrayList<YoVariableRegistry> multiContactControllerRegistry = new ArrayList<YoVariableRegistry>();
+      multiContactControllerRegistry.add(multiContactBehavior.getYoVariableRegistry());
 
       // This is the "highest level" controller that enables switching between the different controllers (walking, multi-contact, driving, etc.)
       HighLevelHumanoidControllerManager ret = new HighLevelHumanoidControllerManager(highLevelStateMachine, HighLevelState.MULTI_CONTACT,
-            momentumBasedController, multiContactStateRegistry);
+            momentumBasedController, multiContactControllerRegistry);
 
       return ret;
    }
