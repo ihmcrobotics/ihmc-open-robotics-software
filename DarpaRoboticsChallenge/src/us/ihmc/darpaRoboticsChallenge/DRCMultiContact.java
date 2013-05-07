@@ -49,7 +49,7 @@ public class DRCMultiContact
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
 
       environment = new MultiContactTestEnvironment(robotInitialSetup, jointMap, dynamicGraphicObjectsListRegistry, footContactSides, handContactSides);
-      final PlainDRCRobot robotInterface = new PlainDRCRobot(robotModel);
+      final PlainDRCRobot robotInterface = new PlainDRCRobot(robotModel, false);
       scsInitialSetup = new DRCSCSInitialSetup(environment, robotInterface.getSimulateDT());
       scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
 
