@@ -229,8 +229,7 @@ public class MomentumBasedController implements RobotController
       this.momentumRateOfChangeControlModule = momentumRateOfChangeControlModule;
       this.rootJointAccelerationControlModule = rootJointAccelerationControlModule;
 
-      SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
-      this.rootJointAcceleration = new SpatialAccelerationVector(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint());
+      this.rootJointAcceleration = new SpatialAccelerationVector();
    }
 
    protected static double computeDesiredAcceleration(double k, double d, double qDesired, double qdDesired, OneDoFJoint joint)
@@ -269,7 +268,8 @@ public class MomentumBasedController implements RobotController
 
 
       CommonOps.mult(rootJointAccelerationData.getAccelerationSubspace(), rootJointAccelerationData.getAccelerationMultipliers(), rootJointAccelerationMatrix);
-      rootJointAcceleration.set(rootJointAccelerationMatrix);
+      rootJointAcceleration.set(rootJointAccelerationData.getBodyFrame(), rootJointAccelerationData.getBaseFrame(), rootJointAccelerationData.getExpressedInFrame(), rootJointAccelerationMatrix, 0);
+      rootJointAcceleration.changeFrameNoRelativeMotion(rootJointAccelerationData.getBodyFrame());
 
       DenseMatrix64F accelerationSubspace = rootJointAccelerationData.getAccelerationSubspace();
       rootJointSelectionMatrix.reshape(accelerationSubspace.getNumCols(), accelerationSubspace.getNumRows());
