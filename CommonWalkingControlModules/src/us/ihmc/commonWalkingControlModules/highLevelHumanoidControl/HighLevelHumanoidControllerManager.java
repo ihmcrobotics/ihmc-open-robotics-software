@@ -50,23 +50,19 @@ public class HighLevelHumanoidControllerManager implements RobotController
       momentumBasedController.doSecondaryControl();
    }
 
-   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
-   @Override
    public String getName()
    {
       return this.getClass().getSimpleName();
    }
 
-   @Override
    public String getDescription()
    {
-      // TODO Auto-generated method stub
-      return null;
+      return getName();
    }
 
 }
