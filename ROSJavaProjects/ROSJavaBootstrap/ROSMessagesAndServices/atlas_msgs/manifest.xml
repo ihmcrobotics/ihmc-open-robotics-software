@@ -16,6 +16,7 @@
   <depend package="actionlib_msgs"/>
   <depend package="control_msgs"/>
   <depend package="osrf_msgs"/>
+  <depend package="sandia_hand_msgs"/>
   <!-- generate these here
   <depend package="gazebo_msgs"/>
   -->

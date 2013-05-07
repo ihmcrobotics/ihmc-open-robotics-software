@@ -138,7 +138,7 @@ public class SDFFullRobotModel implements FullRobotModel
 
                if (imu != null)
                {
-                  IMUDefinition imuDefinition = new IMUDefinition(sensor.getName(), joint.getSuccessor(), pose);
+                  IMUDefinition imuDefinition = new IMUDefinition(child.getName() + "_" + sensor.getName(), joint.getSuccessor(), pose);
 
                   imuDefinitions.add(imuDefinition);
                }
@@ -168,7 +168,7 @@ public class SDFFullRobotModel implements FullRobotModel
                }
                
             }
-            else if("ray".equals(sensor.getType()))
+            else if("ray".equals(sensor.getType()) || "gpu_ray".equals(sensor.getType()))
             {
                if(joint instanceof RevoluteJoint)
                {

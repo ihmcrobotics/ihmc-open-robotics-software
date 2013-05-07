@@ -22,16 +22,19 @@ import us.ihmc.utilities.Pair;
 
 public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointNames
 {
-   private final String chestName = "utorso";
-   private final String pelvisName = "pelvis";
-   private final String headName = "head";
-   private final String lidarJointName = "hokuyo_joint";
    
-   private final String lidarSensorName = "head_hokuyo_sensor";
-   private final String leftCameraName = "stereo_camera_left";
-   private final String rightCameraName = "stereo_camera_right";
    
-   private final String[] imuSensorsToUse = { "imu_sensor" };
+   public static final String chestName = "utorso";
+   public static final String pelvisName = "pelvis";
+   public static final String headName = "head";
+   public static final String lidarJointName = "hokuyo_joint";
+   
+   public static final String lidarSensorName = "head_hokuyo_sensor";
+   public static final String leftCameraName = "stereo_camera_left";
+   public static final String rightCameraName = "stereo_camera_right";
+   
+   public static final String bodyIMUSensor = "pelvis_imu_sensor";
+   public static final String[] imuSensorsToUse = { bodyIMUSensor };
    
    private final double ankleHeight = DRCRobotParameters.DRC_ROBOT_ANKLE_HEIGHT;
 

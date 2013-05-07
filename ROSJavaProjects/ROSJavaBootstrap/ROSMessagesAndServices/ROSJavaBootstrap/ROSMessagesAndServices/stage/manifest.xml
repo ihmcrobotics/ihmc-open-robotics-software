@@ -1,0 +1,45 @@
+<package>
+<description brief="Stage">
+
+<p>
+This package contains the <a href="http://rtv.github.com/Stage/">Stage robot simulator</a>, from the <a href="http://playerstage.sf.net">Player Project</a>.
+This package provides the latest development version of Stage (git://github.com/rtv/Stage.git). See also the <a href="http://github.com/rtv/Stage">Stage project page at GitHub</a>.
+</p>
+<p>
+This package also provides stageros, a ROS node that uses Stage.
+</p>
+
+</description>
+<author>Richard Vaughan, with contributions from many others. See web page for a full credits list.</author>
+<license>GPL</license>
+<review status="Doc reviewed" notes=""/>
+<url>http://playerstage.sourceforge.net/doc/Stage-3.2.1</url>
+<versioncontrol type="svn" url="https://playerstage.svn.sourceforge.net/svnroot/playerstage/code/stage/branches/stage-ros"/>
+
+  <depend package="roscpp" />
+  <depend package="std_msgs" />
+  <depend package="nav_msgs" />
+  <depend package="sensor_msgs" />
+  <depend package="geometry_msgs" />
+  <depend package="tf" />
+
+  <export> 
+    <cpp cflags="`PKG_CONFIG_PATH=${prefix}/lib64/pkgconfig:${prefix}/lib/pkgconfig:$PKG_CONFIG_PATH pkg-config --cflags stage`" 
+         lflags="`PKG_CONFIG_PATH=${prefix}/lib64/pkgconfig:${prefix}/lib/pkgconfig:$PKG_CONFIG_PATH pkg-config --libs stage`"/> 
+    <rosdoc external="http://playerstage.sourceforge.net/doc/Stage-3.2.1/namespaces.html" />
+  </export> 
+
+<rosdep name="autoconf"/>
+<rosdep name="automake"/>
+<rosdep name="libtool"/>
+<rosdep name="gtk2"/>
+<rosdep name="fltk"/>
+<rosdep name="pkg-config"/>
+<rosdep name="libjpeg"/>
+<rosdep name="opengl"/>
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+</package>
+
+

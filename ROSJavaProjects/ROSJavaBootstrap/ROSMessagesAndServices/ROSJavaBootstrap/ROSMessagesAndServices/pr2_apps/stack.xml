@@ -1,0 +1,22 @@
+<stack>
+  <description brief="PR2 applications">Basic applications for the PR2 robot</description>
+  <author>Maintained by Wim Meeussen</author>
+  <license>BSD</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/pr2_apps</url>
+  <depend stack="arm_navigation" /> <!-- kinematics_msgs -->
+  <depend stack="common" /> <!-- actionlib -->
+  <depend stack="common_msgs" /> <!-- sensor_msgs, actionlib_msgs, trajectory_msgs, geometry_msgs -->
+  <depend stack="image_common" /> <!-- polled_camera -->
+  <depend stack="joystick_drivers" /> <!-- ps3joy -->
+  <depend stack="pr2_common" /> <!-- pr2_msgs -->
+  <depend stack="pr2_common_actions" /> <!-- pr2_common_action_msgs, pr2_tuck_arms_action -->
+  <depend stack="pr2_controllers" /> <!-- pr2_controllers_msgs -->
+  <depend stack="pr2_mechanism" /> <!-- pr2_controller_manager, pr2_mechanism_msgs -->
+  <depend stack="robot_model" /> <!-- urdf -->
+  <depend stack="ros" />
+  <depend stack="ros_comm" /> <!-- rospy, topic_tools, std_msgs, roscpp -->
+  <depend stack="multimaster_experimental" /> <!-- app_manager -->
+  <depend stack="wg_common" /> <!-- willow_maps -->
+
+</stack>

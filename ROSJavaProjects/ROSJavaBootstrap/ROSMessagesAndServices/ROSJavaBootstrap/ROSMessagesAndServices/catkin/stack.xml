@@ -1,0 +1,30 @@
+<stack>
+  <name>catkin</name>
+  <version>0.4.5</version>
+  <description>Willow Garage low-level build system macros and infrastructure.</description>
+  <author email="straszheim@willowgarage.com">Troy Straszheim</author>
+  <author>Morten Kjaergaard</author>
+  <author>Brian Gerkey</author>
+  <maintainer email="dthomas@willowgarage.com">Dirk Thomas</maintainer>
+  <license>BSD</license>
+  <copyright>Willow Garage</copyright>
+  <url>http://www.ros.org/wiki/catkin</url>
+
+  <build_depends>cmake</build_depends>
+  <build_depends>gtest</build_depends>
+  <build_depends>python-argparse</build_depends>
+  <build_depends>python-empy</build_depends>
+  <build_depends>python-nose</build_depends>
+  <build_depends>python-rospkg</build_depends>
+  <build_depends>python-setuptools</build_depends>
+  <build_depends>python-yaml</build_depends>
+
+  <depends>cmake</depends>
+  <depends>gtest</depends>
+  <depends>python-argparse</depends>
+  <depends>python-empy</depends>
+  <depends>python-nose</depends>
+  <depends>python-rospkg</depends>
+  <depends>python-setuptools</depends>
+  <depends>python-yaml</depends>
+</stack>

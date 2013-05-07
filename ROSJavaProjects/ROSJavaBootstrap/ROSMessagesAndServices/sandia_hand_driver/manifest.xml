@@ -10,5 +10,3 @@
   <depend package="sandia_hand_msgs"/>
   <depend package="osrf_msgs"/>
 </package>
-
-

@@ -1,0 +1,20 @@
+<stack>
+  <description brief="pr2_common_actions">pr2_common_actions</description>
+  <author>Maintained by Melonee Wise</author>
+  <license>BSD</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/pr2_common_actions</url>
+  <depend stack="actionlib" /> <!-- actionlib -->
+  <depend stack="common_msgs" /> <!-- sensor_msgs, actionlib_msgs, trajectory_msgs, geometry_msgs -->
+  <depend stack="geometry" /> <!-- tf, angles -->
+  <depend stack="laser_pipeline" /> <!-- laser_geometry -->
+  <depend stack="orocos_kinematics_dynamics" /> <!-- kdl -->
+  <depend stack="perception_pcl" /> <!-- pcl_ros -->
+  <depend stack="pr2_common" /> <!-- pr2_msgs -->
+  <depend stack="pr2_controllers" /> <!-- joint_trajectory_action, pr2_controllers_msgs -->
+  <depend stack="pr2_kinematics" /> <!-- pr2_arm_kinematics -->
+  <depend stack="robot_model" /> <!-- urdf -->
+  <depend stack="ros" /> <!-- roslib -->
+  <depend stack="ros_comm" /> <!-- rospy, roscpp -->
+  <depend stack="common_rosdeps" />
+</stack>

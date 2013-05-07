@@ -39,14 +39,14 @@ public abstract class RosTopicPublisher<T extends Message>
    protected T getMessage()
    {
       checkInitialized();
-      return publisher.newMessage();
+      return message;
    }
    
    private void checkInitialized()
    {
       if(publisher == null)
       {
-         throw new RuntimeException("RosTopicPublisher not registered with RosMainNode");
+         throw new RuntimeException("RosTopicPublisher is not registered with RosMainNode");
       }
    }
 

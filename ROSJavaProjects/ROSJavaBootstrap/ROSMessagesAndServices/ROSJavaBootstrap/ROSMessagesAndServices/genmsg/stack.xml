@@ -1,0 +1,17 @@
+<stack>
+  <name>genmsg</name>
+  <version>0.3.10</version>
+  <description>
+    Willow Garage low level build system macros and infrastructure
+  </description>
+  <author email="straszheim@willowgarage.com">Troy Straszheim</author>
+  <author>Morten Kjaergaard</author>
+  <author>Ken Conley</author>
+  <maintainer email="kwc@willowgarage.com">Ken Conley</maintainer>
+  <license>BSD</license>
+  <copyright>Willow Garage</copyright>
+  <url>http://www.ros.org/wiki/genmsg</url>
+  <build_type>python_distutils</build_type>
+
+  <build_depends>catkin</build_depends>
+</stack>

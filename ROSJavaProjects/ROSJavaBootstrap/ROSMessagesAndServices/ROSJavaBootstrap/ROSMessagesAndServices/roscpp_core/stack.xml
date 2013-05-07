@@ -1,0 +1,20 @@
+<stack>
+  <name>roscpp_core</name>
+  <version>0.2.6</version>
+  <description>
+    Underlying data libraries for roscpp messages.
+  </description>
+  <author>Josh Faust</author>
+  <maintainer email="dthomas@willowgarage.com">Dirk Thomas</maintainer>
+  <license>BSD,LGPL</license>  
+  <copyright>Willow Garage</copyright>
+  <url>http://www.ros.org/wiki/roscpp_core</url>
+  <review status="doc reviewed" notes="REP 100"/>
+
+  <build_depends>boost</build_depends>
+  <build_depends>catkin</build_depends>
+  <build_depends>ros</build_depends> <!-- rosclean, roslang, roslib, rosunit -->
+
+  <depends>boost</depends>
+  <depends>ros</depends> <!-- rosclean, roslang, roslib, rosunit -->
+</stack>

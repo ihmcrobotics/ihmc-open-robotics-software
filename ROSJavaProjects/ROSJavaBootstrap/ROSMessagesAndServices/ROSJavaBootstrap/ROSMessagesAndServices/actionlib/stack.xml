@@ -1,0 +1,29 @@
+<stack>
+  <name>actionlib</name>
+  <version>1.8.7</version>
+  <description brief="A standardized interface for interfacing with preemptable tasks.">
+    The actionlib stack provides a standardized interface for
+    interfacing with preemptable tasks. Examples of this include moving
+    the base to a target location, performing a laser scan and returning
+    the resulting point cloud, detecting the handle of a door, etc.
+  </description>
+  <author>Eitan Marder-Eppstein</author>
+  <author>Vijay Pradeep</author>
+  <maintainer email="eitan@willowgarage.com">Eitan Marder-Eppstein</maintainer>
+  <license>BSD</license>
+  <copyright>Willow Garage</copyright>  
+  <url>http://www.ros.org/wiki/actionlib</url>
+  <review status="doc reviewed" notes="2009-10-07"/>
+
+  <build_depends>catkin</build_depends>
+  <build_depends>common_msgs</build_depends> <!-- actionlib_msgs -->
+  <build_depends>genmsg</build_depends>
+  <build_depends>langs-dev</build_depends>
+  <build_depends>ros</build_depends>
+  <build_depends>ros_comm</build_depends> <!-- rostest, rospy, roscpp -->
+
+  <depends>common_msgs</depends> <!-- actionlib_msgs -->
+  <depends>langs</depends>
+  <depends>ros</depends>
+  <depends>ros_comm</depends> <!-- rostest, rospy, roscpp -->
+</stack>

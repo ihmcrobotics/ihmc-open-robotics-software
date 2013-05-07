@@ -98,8 +98,13 @@ public class DRCSimulationFactory
       {
          // Only add the main one now. Not the head one.
 //                   if (imuMount.getName().equals("head_imu_sensor")) imuMounts.add(imuMount);
-         if (imuMount.getName().equals("imu_sensor"))
-            imuMounts.add(imuMount);
+         for(String imuSensorName : jointMap.getIMUSensorsToUse())
+         {
+            if (imuMount.getName().equals(imuSensorName))
+            {
+               imuMounts.add(imuMount);
+            }
+         }
       }
 
       ArrayList<KinematicPoint> positionPoints = new ArrayList<KinematicPoint>();

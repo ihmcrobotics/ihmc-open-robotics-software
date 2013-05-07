@@ -1,0 +1,17 @@
+<stack>
+  <description brief="PR2 Power Drivers">
+
+     Power drivers for the PR2 robot.
+
+  </description>
+  <author>Maintained by Blaise Gassend</author>
+  <license>BSD</license>  
+  <review status="Doc reviewed" notes="Dec 2009"/>
+  <url>http://ros.org/wiki/pr2_power_drivers</url>
+  <depend stack="common_msgs" /> <!-- diagnostic_msgs -->
+  <depend stack="diagnostics" /> <!-- diagnostic_updater -->
+  <depend stack="driver_common" /> <!-- dynamic_reconfigure -->
+  <depend stack="pr2_common" /> <!-- pr2_msgs -->
+  <depend stack="ros" /> <!-- rospy, std_msgs, roscpp -->
+
+</stack>

@@ -1,0 +1,12 @@
+<stack>
+  <description brief="geometry_tutorials">geometry_tutorials</description>
+  <author>Maintained by Tully Foote</author>
+  <license>BSD</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/geometry_tutorials</url>
+  <depend stack="geometry" /> <!-- tf -->
+  <depend stack="ros" />
+  <depend stack="ros_comm" /> <!-- tf, turtlesim, rospy, roscpp -->
+  <depend stack="ros_tutorials" /> <!-- turtlesim -->
+
+</stack>

@@ -1,0 +1,46 @@
+package sandia_hand_msgs;
+
+public interface RawFingerState extends org.ros.internal.message.Message {
+  static final java.lang.String _TYPE = "sandia_hand_msgs/RawFingerState";
+  static final java.lang.String _DEFINITION = "uint32 fmcb_time\nuint32 pp_time\nuint32 dp_time\nuint16[6]  pp_tactile\nuint16[12] dp_tactile\nuint32 pp_strain\nint16[3] mm_accel\nint16[3] pp_accel\nint16[3] dp_accel\nuint16[3] mm_mag\nuint16[3] pp_mag\nuint16[3] dp_mag\nuint16[4] pp_temp\nuint16[4] dp_temp\nuint16[3] fmcb_temp\nuint16 fmcb_voltage\nuint16 fmcb_pb_current\nint32[3] hall_tgt\nint32[3] hall_pos\nint16[3] fmcb_effort\n";
+  int getFmcbTime();
+  void setFmcbTime(int value);
+  int getPpTime();
+  void setPpTime(int value);
+  int getDpTime();
+  void setDpTime(int value);
+  short[] getPpTactile();
+  void setPpTactile(short[] value);
+  short[] getDpTactile();
+  void setDpTactile(short[] value);
+  int getPpStrain();
+  void setPpStrain(int value);
+  short[] getMmAccel();
+  void setMmAccel(short[] value);
+  short[] getPpAccel();
+  void setPpAccel(short[] value);
+  short[] getDpAccel();
+  void setDpAccel(short[] value);
+  short[] getMmMag();
+  void setMmMag(short[] value);
+  short[] getPpMag();
+  void setPpMag(short[] value);
+  short[] getDpMag();
+  void setDpMag(short[] value);
+  short[] getPpTemp();
+  void setPpTemp(short[] value);
+  short[] getDpTemp();
+  void setDpTemp(short[] value);
+  short[] getFmcbTemp();
+  void setFmcbTemp(short[] value);
+  short getFmcbVoltage();
+  void setFmcbVoltage(short value);
+  short getFmcbPbCurrent();
+  void setFmcbPbCurrent(short value);
+  int[] getHallTgt();
+  void setHallTgt(int[] value);
+  int[] getHallPos();
+  void setHallPos(int[] value);
+  short[] getFmcbEffort();
+  void setFmcbEffort(short[] value);
+}

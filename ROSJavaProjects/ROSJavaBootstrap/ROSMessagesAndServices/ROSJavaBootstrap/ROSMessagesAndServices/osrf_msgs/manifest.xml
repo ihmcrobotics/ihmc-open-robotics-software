@@ -1,0 +1,7 @@
+<package>
+  <description brief="osrf_msgs">
+    osrf messages
+  </description>
+  <author>Brian Gerkey, John Hsu, Morgan Quigley</author>
+  <license>Apache 2.0</license>
+</package>

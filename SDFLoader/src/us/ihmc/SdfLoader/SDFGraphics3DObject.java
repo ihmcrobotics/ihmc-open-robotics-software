@@ -189,6 +189,10 @@ public class SDFGraphics3DObject extends Graphics3DObject
 
    private String convertToFullPath(ArrayList<String> resourceDirectories, String meshPath)
    {
+      if(meshPath.equals("__default__"))
+      {
+         meshPath = "file://media/materials/scripts/gazebo.material";
+      }
       for (String resourceDirectory : resourceDirectories)
       {
          String fullPath;
