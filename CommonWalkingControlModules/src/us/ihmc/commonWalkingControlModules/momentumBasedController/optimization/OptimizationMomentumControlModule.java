@@ -137,20 +137,19 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
       DenseMatrix64F jointAccelerations = hardMotionConstraintEnforcer.computeConstrainedJointAccelerations(output.getJointAccelerations());
 
-//      DenseMatrix64F jointAccelerations = output.getJointAccelerations();
       ScrewTools.setDesiredAccelerations(jointsToOptimizeFor, jointAccelerations);
 
-      for (InverseDynamicsJoint inverseDynamicsJoint : jointsToOptimizeFor)
-      {
-         System.out.print(inverseDynamicsJoint.getName() + ": ");
-         DenseMatrix64F desiredAccelerationMatrix = new DenseMatrix64F(inverseDynamicsJoint.getDegreesOfFreedom(), 1);
-         inverseDynamicsJoint.packDesiredAccelerationMatrix(desiredAccelerationMatrix, 0);
-         for (int i = 0; i < desiredAccelerationMatrix.getNumRows(); i++)
-         {
-            System.out.print(desiredAccelerationMatrix.get(i) + ", ");
-         }
-         System.out.println();
-      }
+//      for (InverseDynamicsJoint inverseDynamicsJoint : jointsToOptimizeFor)
+//      {
+//         System.out.print(inverseDynamicsJoint.getName() + ": ");
+//         DenseMatrix64F desiredAccelerationMatrix = new DenseMatrix64F(inverseDynamicsJoint.getDegreesOfFreedom(), 1);
+//         inverseDynamicsJoint.packDesiredAccelerationMatrix(desiredAccelerationMatrix, 0);
+//         for (int i = 0; i < desiredAccelerationMatrix.getNumRows(); i++)
+//         {
+//            System.out.print(desiredAccelerationMatrix.get(i) + ", ");
+//         }
+//         System.out.println();
+//      }
 
       centroidalMomentumHandler.computeCentroidalMomentumRate(jointsToOptimizeFor, jointAccelerations);
    }
