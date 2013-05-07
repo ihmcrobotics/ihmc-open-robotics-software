@@ -133,7 +133,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
             null, momentumRateOfChangeControlModule, rootJointAccelerationControlModule, stateEstimationDataFromControllerSink,
             dynamicGraphicObjectsListRegistry);
 
-      MultiContactTestHumanoidController multiContactState = new MultiContactTestHumanoidController(fullRobotModel, yoTime, twistCalculator,
+      MultiContactTestHumanoidController multiContactBehavior = new MultiContactTestHumanoidController(fullRobotModel, yoTime, twistCalculator,
             contactablePlaneBodiesAndBases, momentumRateOfChangeControlModule.getDesiredCoMPositionInputPort(),
             rootJointAccelerationControlModule.getDesiredPelvisOrientationTrajectoryInputPort(), momentumBasedController);
 
@@ -141,17 +141,17 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
 
       for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodiesAndBases.keySet())
       {
-         multiContactState.setContactablePlaneBodiesInContact(contactablePlaneBody, false, coefficientOfFriction);
+         multiContactBehavior.setContactablePlaneBodiesInContact(contactablePlaneBody, false, coefficientOfFriction);
       }
 
       for (RobotSide robotSide : footContactSides)
       {
-         multiContactState.setContactablePlaneBodiesInContact(feet.get(robotSide), true, coefficientOfFriction);
+         multiContactBehavior.setContactablePlaneBodiesInContact(feet.get(robotSide), true, coefficientOfFriction);
       }
 
       for (RobotSide robotSide : handContactSides)
       {
-         multiContactState.setContactablePlaneBodiesInContact(hands.get(robotSide), true, coefficientOfFriction);
+         multiContactBehavior.setContactablePlaneBodiesInContact(hands.get(robotSide), true, coefficientOfFriction);
       }
 
       // Creation of the "highest level" state machine.
@@ -166,13 +166,13 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
          }
       });
 
-      multiContactState.addStateTransition(noStateTransition);
-      highLevelStateMachine.addState(multiContactState);
+      multiContactBehavior.addStateTransition(noStateTransition);
+      highLevelStateMachine.addState(multiContactBehavior);
 
       ArrayList<YoVariableRegistry> multiContactStateRegistry = new ArrayList<YoVariableRegistry>();
-      multiContactStateRegistry.add(multiContactState.getYoVariableRegistry());
+      multiContactStateRegistry.add(multiContactBehavior.getYoVariableRegistry());
 
-      // This is the "highest level" controller that enables switching between the different controllers (walking, multi-contact, driving)
+      // This is the "highest level" controller that enables switching between the different controllers (walking, multi-contact, driving, etc.)
       HighLevelHumanoidControllerManager ret = new HighLevelHumanoidControllerManager(highLevelStateMachine, HighLevelState.MULTI_CONTACT,
             momentumBasedController, multiContactStateRegistry);
 
