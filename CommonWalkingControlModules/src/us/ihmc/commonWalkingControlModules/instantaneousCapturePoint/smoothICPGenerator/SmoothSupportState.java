@@ -3,12 +3,11 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPG
 
 public class SmoothSupportState
 {
-
    private boolean isFirstStep;
    private boolean isSingleSupport;
    private double singleSupportTime;
    private double doubleSupportTime;
-   private double initialTransferSupportTime; 
+   private double initialTransferSupportTime;
    private double currentTime;
    private double moveTime;
    private double steppingTime;
@@ -20,13 +19,13 @@ public class SmoothSupportState
 
    public void initializeSupportState(boolean isSingleSupportIni, double singleSupportTimeExt, double doubleSuppotTimeExt, double initialTransferSupportTimeExt)
    {
-      isFirstStep = true; 
-      
+      isFirstStep = true;
+
       singleSupportTime = singleSupportTimeExt;
 
       doubleSupportTime = doubleSuppotTimeExt;
-      
-      initialTransferSupportTime = initialTransferSupportTimeExt; 
+
+      initialTransferSupportTime = initialTransferSupportTimeExt;
 
       isSingleSupport = isSingleSupportIni;
 
@@ -53,11 +52,12 @@ public class SmoothSupportState
          moveTime = singleSupportTime;
       else
       {
-         if(isFirstStep)
+         if (isFirstStep)
          {
             moveTime = initialTransferSupportTime;
          }
-         else moveTime = doubleSupportTime;
+         else
+            moveTime = doubleSupportTime;
       }
    }
 
@@ -65,6 +65,7 @@ public class SmoothSupportState
    {
       isSingleSupport = !isSingleSupport;
       updateMoveTime();
+
       return isSingleSupport;
    }
 
@@ -77,8 +78,9 @@ public class SmoothSupportState
          if (!isSingleSupport)
          {
             stepListUpdateRequestFlag = true;
-            isFirstStep = false; 
+            isFirstStep = false;
          }
+
          this.swapState();
 
          currentTime = 0;
@@ -87,13 +89,13 @@ public class SmoothSupportState
       }
    }
 
-   
+
    public boolean getIsFirstStep()
    {
       return isFirstStep;
    }
-   
-   
+
+
    public boolean getIsSingleSupport()
    {
       return isSingleSupport;
@@ -112,6 +114,7 @@ public class SmoothSupportState
    public double getSteppingTime()
    {
       steppingTime = singleSupportTime + doubleSupportTime;
+
       return steppingTime;
    }
 
@@ -124,11 +127,11 @@ public class SmoothSupportState
    {
       return singleSupportTime;
    }
-   
+
    public double getInitialTransferSupportTime()
    {
       return initialTransferSupportTime;
    }
-   
+
 
 }
