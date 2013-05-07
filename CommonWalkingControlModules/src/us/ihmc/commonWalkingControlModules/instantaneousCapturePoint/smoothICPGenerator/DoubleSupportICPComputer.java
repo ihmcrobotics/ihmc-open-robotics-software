@@ -13,16 +13,27 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class DoubleSupportICPComputer
 {
-   private YoVariableRegistry registry;
+   private FramePoint tempFramePointI = new FramePoint();
+   private FramePoint tempFramePointIminus1 = new FramePoint();
 
-   FramePoint tempFramePointI = new FramePoint();
-   FramePoint tempFramePointIminus1 = new FramePoint();
+   private final DenseMatrix64F paramMatrix = new DenseMatrix64F(3, 4);
+
+   private final DenseMatrix64F desiredDCMposOfTime = new DenseMatrix64F(3, 1);
+   private final DenseMatrix64F desiredDCMvelOfTime = new DenseMatrix64F(3, 1);
+   private final DenseMatrix64F desiredECMPofTime = new DenseMatrix64F(3, 1);
+
+   private final DenseMatrix64F initialDoubleSupportICPpos = new DenseMatrix64F(3, 1);
+   private final DenseMatrix64F initialDoubleSupportICPvel = new DenseMatrix64F(3, 1);
+   private final DenseMatrix64F finalDoubleSupportICPpos = new DenseMatrix64F(3, 1);
+   private final DenseMatrix64F finalDoubleSupportICPvel = new DenseMatrix64F(3, 1);
 
 
+   private boolean finalStepReached;
+   private int finalCounter;
+
+   
    public DoubleSupportICPComputer(YoVariableRegistry registryExt)
    {
-      registry = registryExt;
-
 //    tempFramePointI.set("pointTemp1","",ReferenceFrame.getWorldFrame(), registry);
 //    tempFramePointIminus1 =  new YoFramePoint("pointTemp2","",ReferenceFrame.getWorldFrame(), registry);
 
@@ -30,41 +41,25 @@ public class DoubleSupportICPComputer
       finalCounter = 0;
 
    }
-
-   private DenseMatrix64F paramMatrix = new DenseMatrix64F(3, 4);
-
-   private DenseMatrix64F desiredDCMposOfTime = new DenseMatrix64F(3, 1);
-   private DenseMatrix64F desiredDCMvelOfTime = new DenseMatrix64F(3, 1);
-   private DenseMatrix64F desiredECMPofTime = new DenseMatrix64F(3, 1);
-
-   private DenseMatrix64F initialDoubleSupportICPpos = new DenseMatrix64F(3, 1);
-   private DenseMatrix64F initialDoubleSupportICPvel = new DenseMatrix64F(3, 1);
-   private DenseMatrix64F finalDoubleSupportICPpos = new DenseMatrix64F(3, 1);
-   private DenseMatrix64F finalDoubleSupportICPvel = new DenseMatrix64F(3, 1);
-
-
-   private boolean finalStepReached;
-   private int finalCounter;
-
    public DenseMatrix64F getInitialDoubleSupportICPpos()
    {
       return initialDoubleSupportICPpos;
    }
 
-   public DenseMatrix64F getInitialDoubleSupportICPvel()
-   {
-      return initialDoubleSupportICPvel;
-   }
+//   public DenseMatrix64F getInitialDoubleSupportICPvel()
+//   {
+//      return initialDoubleSupportICPvel;
+//   }
 
    public DenseMatrix64F getFinalDoubleSupportICPpos()
    {
       return finalDoubleSupportICPpos;
    }
 
-   public DenseMatrix64F getFinalDoubleSupportICPvel()
-   {
-      return finalDoubleSupportICPvel;
-   }
+//   public DenseMatrix64F getFinalDoubleSupportICPvel()
+//   {
+//      return finalDoubleSupportICPvel;
+//   }
 
    public DenseMatrix64F getDesiredDCMposOfTime()
    {
@@ -81,15 +76,15 @@ public class DoubleSupportICPComputer
       return desiredECMPofTime;
    }
 
-   public DenseMatrix64F getPolynomialParamMatrix()
-   {
-      return paramMatrix;
-   }
+//   public DenseMatrix64F getPolynomialParamMatrix()
+//   {
+//      return paramMatrix;
+//   }
 
-   public DenseMatrix64F getPolynomialParamMatrixColumn(int colIndex)
-   {
-      return EnhancedMatrixManipulator.getMatrixColumn(colIndex, paramMatrix);
-   }
+//   public DenseMatrix64F getPolynomialParamMatrixColumn(int colIndex)
+//   {
+//      return EnhancedMatrixManipulator.getMatrixColumn(colIndex, paramMatrix);
+//   }
 
    public void reset()
    {
@@ -98,7 +93,7 @@ public class DoubleSupportICPComputer
 
    }
 
-   public void updateDCMCornerPoints(ArrayList<DenseMatrix64F> constantEquivalentCoPs, double dcmConst, double steppingTime,
+   private void updateDCMCornerPoints(ArrayList<DenseMatrix64F> constantEquivalentCoPs, double dcmConst, double steppingTime,
                                      ArrayList<DenseMatrix64F> initialICPs)
    {
       int initialICPsSize = initialICPs.size();
@@ -113,7 +108,7 @@ public class DoubleSupportICPComputer
    }
 
 
-   public void computeDoubleSupportpolynomialParams(ArrayList<DenseMatrix64F> constantEquivalentCoPs, double dcmConst, double steppingTime,
+   public void computeDoubleSupportPolynomialParams(ArrayList<DenseMatrix64F> constantEquivalentCoPs, double dcmConst, double steppingTime,
            double doubleSupport_firstStep_Fraction, ArrayList<DenseMatrix64F> initialICPs, boolean isFirstStep, double initialTransferSupportTime,
            double doubleSupportTime)
    {
@@ -130,8 +125,8 @@ public class DoubleSupportICPComputer
 
 
 
-      double DoubleSupportTimeCurrentStep = -doubleSupport_firstStep_Fraction * currentDoubleSupportTime;
-      double DoubleSupportTimeNextStep = (1 - doubleSupport_firstStep_Fraction) * doubleSupportTime;
+      double doubleSupportTimeCurrentStep = -doubleSupport_firstStep_Fraction * currentDoubleSupportTime;
+      double doubleSupportTimeNextStep = (1 - doubleSupport_firstStep_Fraction) * doubleSupportTime;
       double doubleSupportTimePow2 = Math.pow(currentDoubleSupportTime, 2);
       double doubleSupportTimePow3 = Math.pow(currentDoubleSupportTime, 3);
 
@@ -161,7 +156,7 @@ public class DoubleSupportICPComputer
       }
       else
       {
-         JojosICPutilities.extrapolateDCMposAndVel(constantEquivalentCoPs.get(0), steppingTime + DoubleSupportTimeCurrentStep, dcmConst, initialICPs.get(0),
+         JojosICPutilities.extrapolateDCMposAndVel(constantEquivalentCoPs.get(0), steppingTime + doubleSupportTimeCurrentStep, dcmConst, initialICPs.get(0),
                  initialDoubleSupportICPpos, initialDoubleSupportICPvel);
       }
 
@@ -169,7 +164,7 @@ public class DoubleSupportICPComputer
 
       // Calculate DCM position and velocity at end of Double Support phase
 
-      JojosICPutilities.extrapolateDCMposAndVel(constantEquivalentCoPs.get(1), DoubleSupportTimeNextStep, dcmConst, initialICPs.get(1),
+      JojosICPutilities.extrapolateDCMposAndVel(constantEquivalentCoPs.get(1), doubleSupportTimeNextStep, dcmConst, initialICPs.get(1),
               finalDoubleSupportICPpos, finalDoubleSupportICPvel);
 
       // Calculate time-dependency matrix for polynomial calculation (part of inversion problem)
@@ -227,7 +222,7 @@ public class DoubleSupportICPComputer
       }
       else
       {
-         computeDoubleSupportpolynomialParams(constantEquivalentCoPs, dcmConst, steppingTime, doubleSupport_firstStep_Fraction, initialICPs, isFirstStep,
+         computeDoubleSupportPolynomialParams(constantEquivalentCoPs, dcmConst, steppingTime, doubleSupport_firstStep_Fraction, initialICPs, isFirstStep,
                  initialTransferSupportTime, doubleSupportTime);
 
          double timePow3 = Math.pow(currentTime, 3.0);

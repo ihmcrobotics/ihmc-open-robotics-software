@@ -8,6 +8,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -224,8 +225,12 @@ public class SCSDoubleSupportICPTesterController5 implements RobotController
 
       if (supportState.getStepListUpdateRequestFlag() == true)
       {
-         dsICPcomputer.updateSubFootListForSmoothICPTrajectory(equivalentConstantCoPsVectors, footStepLocationsFramePoints, equivalentConstantCoPsFramePoints,
-                 consideredFootStepLocationsFramePoints, numberOfConsideredFootstepLocations, equivalentConstantCoPsVectors);
+         dsICPcomputer.updateSubFootListForSmoothICPTrajectory(equivalentConstantCoPsVectors, 
+               footStepLocationsFramePoints, 
+               equivalentConstantCoPsFramePoints,
+               consideredFootStepLocationsFramePoints, 
+                 numberOfConsideredFootstepLocations, 
+                 equivalentConstantCoPsVectors);
 
          supportState.setStepListUpdateRequestFlag(false);
       }
@@ -233,7 +238,7 @@ public class SCSDoubleSupportICPTesterController5 implements RobotController
 
       if (supportState.getIsSingleSupport())
       {
-         dsICPcomputer.computeDoubleSupportpolynomialParams(equivalentConstantCoPsVectors, dcmConst, steppingTime, doubleSupportFirstStepFraction,
+         dsICPcomputer.computeDoubleSupportPolynomialParams(equivalentConstantCoPsVectors, dcmConst, steppingTime, doubleSupportFirstStepFraction,
                  initialICPsVectors, supportState.getIsFirstStep(), supportState.getInitialTransferSupportTime(), supportState.getDoubleSupportTime());
       }
 
@@ -348,6 +353,18 @@ public class SCSDoubleSupportICPTesterController5 implements RobotController
       comVelocityLine.setFrameLineSegment2d(lineSegmentComVel);
    }
 
+   private ArrayList<FramePoint> getFramePoints(ArrayList<YoFramePoint> yoFramePoints)
+   {
+      ArrayList<FramePoint> ret = new ArrayList<FramePoint>();
+      
+      for (YoFramePoint yoFramePoint : yoFramePoints)
+      {
+         ret.add(yoFramePoint.getFramePointCopy());
+      }
+      
+      return ret;
+   }
+   
    public void initialize()
    {
       this.isSingleSupport.set(true);
