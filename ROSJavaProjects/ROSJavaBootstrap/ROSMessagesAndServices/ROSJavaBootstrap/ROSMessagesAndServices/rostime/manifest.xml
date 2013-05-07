@@ -1,0 +1,18 @@
+<package>
+  <description brief="rostime">
+
+Time and Duration implementations for C++ libraries, including roscpp.
+
+  </description>
+  <author>Josh Faust</author>
+  <license>BSD</license>
+  <review status="Doc reviewed" notes="2011-01-12"/>
+  <url>http://ros.org/wiki/rostime</url>
+
+  <export>
+    <cpp cflags="`PKG_CONFIG_PATH=${prefix}/../../lib/pkgconfig pkg-config --cflags rostime`"
+         lflags="`PKG_CONFIG_PATH=${prefix}/../../lib/pkgconfig pkg-config --libs rostime`"/>
+  </export>
+</package>
+
+

@@ -1,0 +1,24 @@
+<stack>
+  <description brief="Arm Navigation">
+   This stack contains packages that permit collision-free arm navigation
+  </description>
+  <author>E. Gil Jones gjones@willowgarage.com</author>
+  <license>BSD</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/arm_navigation</url>
+  <depend stack="actionlib" /> <!-- actionlib -->
+  <depend stack="bullet" /> <!-- bullet -->
+  <depend stack="common_msgs" /> <!-- geometry_msgs, actionlib_msgs, trajectory_msgs, sensor_msgs, visualization_msgs -->
+  <depend stack="control" /> <!-- control_msgs -->
+  <depend stack="filters" /> <!-- filters -->
+  <depend stack="geometry" /> <!-- tf, tf_conversions, angles -->
+  <depend stack="orocos_kinematics_dynamics" /> <!-- kdl -->
+  <depend stack="perception_pcl" /> <!-- pcl, pcl_ros -->
+  <depend stack="physics_ode" /> <!-- opende -->
+  <depend stack="pluginlib" /> <!-- pluginlib -->
+  <depend stack="robot_model" /> <!-- urdf, resource_retriever, kdl_parser -->
+  <depend stack="ros" />
+  <depend stack="ros_comm" /> <!-- rosconsole, std_srvs, roscpp, message_filters, std_msgs, rosbag -->
+  <depend stack="visualization" /> <!-- interactive_markers, rviz -->
+
+</stack>

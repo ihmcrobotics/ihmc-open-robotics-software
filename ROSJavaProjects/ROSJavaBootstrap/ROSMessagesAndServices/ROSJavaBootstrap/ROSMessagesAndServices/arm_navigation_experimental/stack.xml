@@ -1,0 +1,33 @@
+<stack>
+  <description brief="arm_navigation">
+    The arm navigation stack contains the action/behavior used to execute collision free motion planning and control for a robot arm manipulator. Included in this stack are the messages required for an action interface that can be used to specify and abort goals for the move_arm action. An implementation for arm navigation on the PR2 robot can be found in the pr2_arm_navigation stack. 
+  </description>
+  <author>Maintained by Sachin Chitta</author>
+  <license>BSD</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/arm_navigation_experimental</url>
+  <depend stack="actionlib" /> <!-- actionlib -->
+  <depend stack="arm_navigation" /> <!-- planning_environment, planning_models, spline_smoother, robot_self_filter, constraint_aware_spline_smoother, kinematics_msgs, collision_space, ompl_ros_interface, geometric_shapes, arm_navigation_msgs -->
+  <depend stack="bullet" /> <!-- bullet -->
+  <depend stack="common_msgs" /> <!-- geometry_msgs, actionlib_msgs, trajectory_msgs, sensor_msgs, visualization_msgs -->
+  <depend stack="common_rosdeps" /> <!-- common_rosdeps -->
+  <depend stack="control" /> <!-- control_msgs -->
+  <depend stack="filters" /> <!-- filters -->
+  <depend stack="geometry" /> <!-- tf, tf_conversions, angles -->
+  <depend stack="image_common" /> <!-- image_transport -->
+  <depend stack="octomap_mapping" /> <!-- octomap_mapping- -->
+  <depend stack="octomap_msgs" /> <!-- octomap_mapping- -->
+  <depend stack="octomap_ros" /> <!-- octomap_ros-->
+  <depend stack="orocos_kinematics_dynamics" /> <!-- kdl -->
+  <depend stack="perception_pcl" /> <!-- pcl_ros -->
+  <depend stack="pluginlib" /> <!-- pluginlib -->
+  <depend stack="pr2_controllers" /> <!-- pr2_controllers_msgs -->
+  <depend stack="pr2_mechanism" /> <!-- pr2_mechanism_msgs -->
+  <depend stack="robot_model" /> <!-- kdl_parser -->
+  <depend stack="ros" />
+  <depend stack="ros_comm" /> <!-- std_msgs, rosconsole, rospy, roscpp, std_srvs -->
+  <depend stack="vision_opencv" /> <!-- image_geometry -->
+  <depend stack="visualization" /> <!-- interactive_markers -->
+  <depend stack="warehouse_ros" />
+
+</stack>

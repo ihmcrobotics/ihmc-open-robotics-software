@@ -1,0 +1,10 @@
+<package>
+  <description brief="rosjava_geometry">
+     rosjava_geometry provides the classes for common geometry operations and representations (e.g. transformations).
+  </description>
+  <author>Lorenz Moesenlechner</author>
+  <license>Apache 2.0</license>
+  <review status="unreviewed" notes="" />
+  <url>http://ros.org/wiki/rosjava_geometry</url>
+</package>
+

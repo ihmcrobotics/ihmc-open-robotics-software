@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
+import org.ros.exception.ServiceNotFoundException;
 import org.ros.internal.message.Message;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
@@ -12,6 +13,7 @@ import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 import org.ros.node.NodeMainExecutor;
+import org.ros.node.service.ServiceClient;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
@@ -19,6 +21,7 @@ public class RosMainNode implements NodeMain
 {
    private final LinkedHashMap<String, RosTopicSubscriberInterface<? extends Message>> subscribers = new LinkedHashMap<String, RosTopicSubscriberInterface<? extends Message>>();
    private final LinkedHashMap<String, RosTopicPublisher<? extends Message>> publishers = new LinkedHashMap<String, RosTopicPublisher<? extends Message>>();
+   private final LinkedHashMap<String, RosServiceClient<? extends Message, ? extends Message>> clients = new LinkedHashMap<String, RosServiceClient<? extends Message, ? extends Message>>();
    
    private final URI masterURI;
    private boolean isStarted = false;
@@ -29,6 +32,13 @@ public class RosMainNode implements NodeMain
    {
       this.masterURI = masterURI;
       this.graphName = graphName;
+   }
+   
+   public void attachServiceClient(String topicName, RosServiceClient<? extends Message, ? extends Message> client)
+   {
+      checkNotStarted();
+      
+      clients.put(topicName, client);
    }
    
    public void attachPublisher(String topicName, RosTopicPublisher<? extends Message> publisher)
@@ -74,6 +84,20 @@ public class RosMainNode implements NodeMain
          Publisher<? extends Message> publisher = connectedNode.newPublisher(entry.getKey(), rosTopicPublisher.getMessageType());
          rosTopicPublisher.setPublisher(publisher);
          rosTopicPublisher.connected();
+      }
+      
+      for(Entry<String, RosServiceClient<? extends Message, ? extends Message>> entry : clients.entrySet())
+      {
+         final RosServiceClient<? extends Message,? extends Message> rosServiceClient = entry.getValue();
+         try
+         {
+            ServiceClient client = connectedNode.newServiceClient(entry.getKey(), rosServiceClient.getRequestType());
+            rosServiceClient.setServiceClient(client);
+         }
+         catch (ServiceNotFoundException e)
+         {
+            throw new RuntimeException(e);
+         }
       }
    }
 

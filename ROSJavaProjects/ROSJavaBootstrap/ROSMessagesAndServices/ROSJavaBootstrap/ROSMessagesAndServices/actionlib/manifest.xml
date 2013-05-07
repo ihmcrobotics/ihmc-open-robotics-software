@@ -1,0 +1,28 @@
+<package>
+  <description brief="Provides a standardized interface for a task">
+    The actionlib package provides a standardized interface for interfacing
+    with preemptible tasks. Examples of this include moving the base to a target
+    location, performing a laser scan and returning the resulting point cloud,
+    detecting the handle of a door, etc.
+  </description>
+  <author>Eitan Marder-Eppstein, Vijay Pradeep</author>
+  <license>BSD</license>
+  <review status="Doc reviewed" notes="2009/10/07"/>
+  <url>http://ros.org/wiki/actionlib</url>
+
+  <depend package="roscpp" />
+  <depend package="rospy" />
+  <depend package="rostest" />
+  <depend package="actionlib_msgs" />
+
+  <export>
+    <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lactionlib" />
+  </export>
+
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+
+</package>
+
+

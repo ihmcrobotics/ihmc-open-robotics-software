@@ -19,6 +19,7 @@ public class DRCRobotSDFLoader
       Class<DRCRobotSDFLoader> myClass = DRCRobotSDFLoader.class;
       DRCRobotModel selectedModel = jointMap.getSelectedModel();
       
+      resourceDirectories.add(myClass.getResource("models/GFE/gazebo").getFile());
       resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/atlas_description").getFile());
       resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/multisense_sl_description").getFile());
       

@@ -12,8 +12,6 @@ int32 STAND_PREP        =  3 # stand-prep (AtlasSimInterface documentation)
 int32 WALK              =  4 # multi-step walk
 int32 STEP              =  5 # single step walk
 int32 MANIPULATE        =  6 # stand and allows manipulation.
-int32 DEMO1             =  7 # walk in straight line
-int32 DEMO2             =  8 # figure 8
 
 int32 behavior                # can be one of
                               # USER, FREEZE, STAND_PREP

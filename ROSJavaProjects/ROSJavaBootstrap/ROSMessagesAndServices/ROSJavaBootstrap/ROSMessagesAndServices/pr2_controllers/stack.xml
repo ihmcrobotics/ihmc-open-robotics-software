@@ -1,0 +1,23 @@
+<stack>
+  <description brief="PR2 Controllers">
+    Contains the controllers that run in realtime on the PR2 and supporting packages.
+  </description>
+  <author>Stuart Glaser sglaser@willowgarage.com</author>
+  <license>BSD</license>  
+  <review status="Doc reviewed" notes="2010/01/21"/>
+  <url>http://ros.org/wiki/pr2_controllers</url>
+  <depend stack="actionlib" /> <!-- actionlib -->
+  <depend stack="common_msgs" /> <!-- nav_msgs, actionlib_msgs, trajectory_msgs, sensor_msgs, geometry_msgs, visualization_msgs, diagnostic_msgs -->
+  <depend stack="control" /> <!-- control_msgs -->
+  <depend stack="diagnostics" /> <!-- diagnostic_updater -->
+  <depend stack="filters" /> <!-- filters -->
+  <depend stack="geometry" /> <!-- tf, tf_conversions, angles, eigen_conversions -->
+  <depend stack="orocos_kinematics_dynamics" /> <!-- kdl -->
+  <depend stack="pluginlib" /> <!-- pluginlib -->
+  <depend stack="pr2_common" /> <!-- pr2_msgs -->
+  <depend stack="pr2_mechanism" /> <!-- pr2_mechanism_msgs, pr2_controller_manager, pr2_mechanism_model, realtime_tools, pr2_controller_interface -->
+  <depend stack="robot_model" /> <!-- kdl_parser -->
+  <depend stack="ros" />
+  <depend stack="ros_comm" /> <!-- rosconsole, std_srvs, roscpp, message_filters, std_msgs, rospy -->
+
+</stack>

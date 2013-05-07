@@ -419,7 +419,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
                {
                   Transform3D pose = SDFConversionsHelper.poseToTransform(sensor.getPose());
 
-                  IMUMount imuMount = new IMUMount(sensor.getName(), pose, this);
+                  IMUMount imuMount = new IMUMount(child.getName() + "_" + sensor.getName(), pose, this);
 
                   IMUNoise noise = imu.getNoise();
                   if (noise != null)
@@ -467,7 +467,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
       {
          for (SDFSensor sensor : child.getSensors())
          {
-            if ("ray".equals(sensor.getType()))
+            if ("ray".equals(sensor.getType()) || "gpu_ray".equals(sensor.getType()))
             {
                if (DEBUG)
                   System.out.println("SDFRobot has a lidar!");
