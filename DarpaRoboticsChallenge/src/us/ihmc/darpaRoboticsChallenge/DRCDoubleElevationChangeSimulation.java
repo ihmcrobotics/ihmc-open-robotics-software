@@ -22,7 +22,7 @@ public class DRCDoubleElevationChangeSimulation
       AutomaticSimulationRunner automaticSimulationRunner = null;
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
 
-      DRCRobotInterface robotInterface = new PlainDRCRobot(DRCRobotModel.getDefaultRobotModel());
+      DRCRobotInterface robotInterface = new PlainDRCRobot(DRCRobotModel.getDefaultRobotModel(), false);
       final double groundHeight = 0.0;
       double elevationChange = 0.0;
       if(stepUp) elevationChange = Math.abs(stepHeight);

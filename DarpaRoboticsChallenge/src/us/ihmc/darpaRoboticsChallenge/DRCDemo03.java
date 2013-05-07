@@ -36,7 +36,7 @@ public class DRCDemo03
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
 
       environment = new DRCDemoEnvironmentWithBoxAndSteeringWheel(dynamicGraphicObjectsListRegistry);
-      final PlainDRCRobot robotInterface = new PlainDRCRobot(DRCRobotModel.ATLAS_SANDIA_HANDS);
+      final PlainDRCRobot robotInterface = new PlainDRCRobot(DRCRobotModel.ATLAS_SANDIA_HANDS, true);
       scsInitialSetup = new DRCSCSInitialSetup(environment, robotInterface.getSimulateDT());
       scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
 
@@ -46,8 +46,6 @@ public class DRCDemo03
          recordFrequency = 1;
       scsInitialSetup.setRecordFrequency(recordFrequency);
 
-      DRCRobotJointMap jointMap = new DRCRobotJointMap(robotModel, true);
-
       //      SideDependentList<ContactablePlaneBody> thighs = new SideDependentList<ContactablePlaneBody>();
       //      InverseDynamicsJoint[] allJoints = ScrewTools.computeJointsInOrder(fullRobotModel.getElevator());
 
@@ -56,7 +54,7 @@ public class DRCDemo03
       SideDependentList<List<Point2d>> thighContactPoints = new SideDependentList<List<Point2d>>();
       for (RobotSide robotSide : RobotSide.values())
       {
-         namesOfJointsBeforeThighs.put(robotSide, jointMap.getNameOfJointBeforeThigh(robotSide));
+         namesOfJointsBeforeThighs.put(robotSide, robotInterface.getJointMap().getNameOfJointBeforeThigh(robotSide));
          thighContactPointTransforms.put(robotSide, DRCRobotParameters.thighContactPointTransforms.get(robotSide));
          thighContactPoints.put(robotSide, DRCRobotParameters.thighContactPoints.get(robotSide));
       }

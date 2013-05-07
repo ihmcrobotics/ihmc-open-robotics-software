@@ -146,7 +146,7 @@ public class DRCFlatGroundRewindabilityTest
       int simulationDataBufferSize = 16000;
 
       RobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(0.0);
-      DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel);
+      DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel, false);
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotInterface.getSimulateDT());
 
       DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(drcControlParameters, robotInterface, robotInitialSetup,
