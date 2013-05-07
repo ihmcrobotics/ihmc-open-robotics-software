@@ -20,7 +20,7 @@ public class AngleBuffer
       
       for(int i = 0; i < size; i++)
       {
-         timestamps[i] = Long.MAX_VALUE;
+         timestamps[i] = Long.MIN_VALUE;
       }
    }
    
@@ -37,7 +37,7 @@ public class AngleBuffer
          currentIndex = 0;
       }
 
-      if (timestamps[currentIndex] == Long.MAX_VALUE)
+      if (timestamps[currentIndex] == Long.MIN_VALUE)
       {
          oldestTimeStamp = newestTimestamp;
       }
