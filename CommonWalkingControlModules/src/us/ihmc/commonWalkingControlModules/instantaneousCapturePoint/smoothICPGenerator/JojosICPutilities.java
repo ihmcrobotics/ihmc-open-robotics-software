@@ -20,15 +20,16 @@ public class JojosICPutilities
       CommonOps.add(constCoPcurrentStep, tempVect, finalDoubleSupportICP);
    }
 
-   public static void extrapolateDCMposAndVel(DenseMatrix64F constCoPcurrentStep, double time, double dcmConst, DenseMatrix64F ficalICPcurrentFootStep,
-           DenseMatrix64F finalDoubleSupportICPpos, DenseMatrix64F finalDoubleSupportICPvel)
+   public static void extrapolateDCMposAndVel(DenseMatrix64F constCoPcurrentStep, double time, double dcmConst, 
+         DenseMatrix64F finalICPCurrentFootStep,
+         DenseMatrix64F finalDoubleSupportICPpos, DenseMatrix64F finalDoubleSupportICPvel)
    {
       double exponentialTerm = Math.exp(time / dcmConst);
       DenseMatrix64F tempVect = new DenseMatrix64F(3, 1);
-      CommonOps.sub(ficalICPcurrentFootStep, constCoPcurrentStep, tempVect);
+      CommonOps.sub(finalICPCurrentFootStep, constCoPcurrentStep, tempVect);
       CommonOps.scale(exponentialTerm, tempVect);
       CommonOps.add(constCoPcurrentStep, tempVect, finalDoubleSupportICPpos);
-      CommonOps.scale(1 / dcmConst, tempVect, finalDoubleSupportICPvel);
+      CommonOps.scale(1.0 / dcmConst, tempVect, finalDoubleSupportICPvel);
    }
 
 
