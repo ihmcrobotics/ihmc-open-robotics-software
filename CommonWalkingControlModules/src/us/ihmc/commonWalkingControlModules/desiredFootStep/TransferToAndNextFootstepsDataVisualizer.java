@@ -1,0 +1,108 @@
+package us.ihmc.commonWalkingControlModules.desiredFootStep;
+
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicYoFramePolygon;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameConvexPolygon2d;
+
+public class TransferToAndNextFootstepsDataVisualizer
+{
+   private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private final DynamicGraphicCoordinateSystem transferFromCoordinateSystem, transferToCoordinateSystem, nextStepCoordinateSystem,
+           nextNextStepCoordinateSystem;
+   private final YoFrameConvexPolygon2d transferFromPolygon, transferToPolygon, nextStepPolygon, nextNextStepPolygon;
+   private final DynamicGraphicYoFramePolygon transferFromPolygonViz, transferToPolygonViz, nextStepPolygonViz, nextNextStepPolygonViz;
+
+   public TransferToAndNextFootstepsDataVisualizer(YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   {
+      DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("TransferToAndNextFootstepsDataVisualizer");
+
+      int maxNumberOfVertices = 6;
+      transferFromPolygon = new YoFrameConvexPolygon2d("transferFromPolygon", "", worldFrame, maxNumberOfVertices, registry);
+      transferToPolygon = new YoFrameConvexPolygon2d("transferToPolygon", "", worldFrame, maxNumberOfVertices, registry);
+      nextStepPolygon = new YoFrameConvexPolygon2d("nextStepPolygon", "", worldFrame, maxNumberOfVertices, registry);
+      nextNextStepPolygon = new YoFrameConvexPolygon2d("nextNextStepPolygon", "", worldFrame, maxNumberOfVertices, registry);
+
+      double polygonVizScale = 1.0;
+
+      // ooh, colors!
+      AppearanceDefinition transferFromPolygonAppearance = YoAppearance.Gold();
+      YoAppearance.makeTransparent(transferFromPolygonAppearance, 0.5);
+      AppearanceDefinition transferToPolygonAppearance = YoAppearance.MidnightBlue();
+      YoAppearance.makeTransparent(transferToPolygonAppearance, 0.5);
+      AppearanceDefinition nextFootstepPolygonAppearance = YoAppearance.IndianRed();
+      YoAppearance.makeTransparent(nextFootstepPolygonAppearance, 0.5);
+      AppearanceDefinition nextNextFootstepPolygonAppearance = YoAppearance.Lavender();
+
+      transferFromPolygonViz = new DynamicGraphicYoFramePolygon("transferFromPolygon", transferFromPolygon, "transferFromPolygon", "", registry,
+              polygonVizScale, transferFromPolygonAppearance);
+      transferToPolygonViz = new DynamicGraphicYoFramePolygon("transferToPolygon", transferToPolygon, "transferToPolygon", "", registry, polygonVizScale,
+              transferToPolygonAppearance);
+      nextStepPolygonViz = new DynamicGraphicYoFramePolygon("nextStepPolygon", nextStepPolygon, "nextStepPolygon", "", registry, polygonVizScale,
+              nextFootstepPolygonAppearance);
+      nextNextStepPolygonViz = new DynamicGraphicYoFramePolygon("nextNextStepPolygon", nextNextStepPolygon, "nextNextStepPolygon", "", registry,
+              polygonVizScale, nextNextFootstepPolygonAppearance);
+
+      transferFromPolygonViz.setPosition(0.0, 0.0, 0.001);
+      transferToPolygonViz.setPosition(0.0, 0.0, 0.001);
+      nextStepPolygonViz.setPosition(0.0, 0.0, 0.001);
+      nextNextStepPolygonViz.setPosition(0.0, 0.0, 0.001);
+
+      dynamicGraphicObjectsList.add(transferFromPolygonViz);
+      dynamicGraphicObjectsList.add(transferToPolygonViz);
+      dynamicGraphicObjectsList.add(nextStepPolygonViz);
+      dynamicGraphicObjectsList.add(nextNextStepPolygonViz);
+
+      transferFromCoordinateSystem = new DynamicGraphicCoordinateSystem("transferFromPose", "", registry, 0.2);
+      transferToCoordinateSystem = new DynamicGraphicCoordinateSystem("transferToPose", "", registry, 0.2);
+      nextStepCoordinateSystem = new DynamicGraphicCoordinateSystem("nextStepPose", "", registry, 0.2);
+      nextNextStepCoordinateSystem = new DynamicGraphicCoordinateSystem("nextNextStepPose", "", registry, 0.2);
+
+      dynamicGraphicObjectsList.add(transferFromCoordinateSystem);
+      dynamicGraphicObjectsList.add(transferToCoordinateSystem);
+      dynamicGraphicObjectsList.add(nextStepCoordinateSystem);
+      dynamicGraphicObjectsList.add(nextNextStepCoordinateSystem);
+
+      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
+   }
+
+   public void visualizeFootsteps(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
+   {
+      Footstep transferFromFootstep = transferToAndNextFootstepsData.getTransferFromFootstep();
+      visualizeFootstep(transferFromFootstep, transferFromPolygon, transferFromPolygonViz, transferFromCoordinateSystem);
+
+      Footstep transferToFootstep = transferToAndNextFootstepsData.getTransferToFootstep();
+      visualizeFootstep(transferToFootstep, transferToPolygon, transferToPolygonViz, transferToCoordinateSystem);
+
+      Footstep nextFootstep = transferToAndNextFootstepsData.getNextFootstep();
+      visualizeFootstep(nextFootstep, nextStepPolygon, nextStepPolygonViz, nextStepCoordinateSystem);
+
+      Footstep nextNextFootstep = transferToAndNextFootstepsData.getNextNextFootstep();
+      visualizeFootstep(nextNextFootstep, nextNextStepPolygon, nextNextStepPolygonViz, nextNextStepCoordinateSystem);
+   }
+
+   private static void visualizeFootstep(Footstep footstep, YoFrameConvexPolygon2d footstepPolygon, DynamicGraphicYoFramePolygon footstepPolygonViz,
+           DynamicGraphicCoordinateSystem footstepCoordinateSystem)
+   {
+      if (footstep != null)
+      {
+         FrameConvexPolygon2d nextFootPolygon = FootstepUtils.getProjectedFootPolygonInFrame(footstep, footstep.getSoleReferenceFrame());
+         footstepPolygon.setConvexPolygon2d(nextFootPolygon.getConvexPolygon2d());
+
+         footstepPolygonViz.setToReferenceFrame(footstep.getSoleReferenceFrame());
+         footstepCoordinateSystem.setToReferenceFrame(footstep.getPoseReferenceFrame());
+      }
+      else
+      {
+         footstepPolygon.hide();
+         footstepCoordinateSystem.hide();
+      }
+   }
+}
