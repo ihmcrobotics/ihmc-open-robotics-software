@@ -216,7 +216,7 @@ public class MomentumBasedController implements RobotController
          contactStates.put(contactablePlaneBody, contactState);
       }
 
-      InverseDynamicsJoint[] joints = ScrewTools.computeJointsInOrder(elevator);
+      InverseDynamicsJoint[] joints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
       for (InverseDynamicsJoint joint : joints)
       {
          if (joint instanceof OneDoFJoint)
@@ -449,20 +449,33 @@ public class MomentumBasedController implements RobotController
    
    // TODO: Following has been added for big refactor. Need to be checked.
    
-   public LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> getContactStates() {
+   public LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> getContactStates()
+   {
       return contactStates;
    }
 
-   public List<ContactablePlaneBody> getContactablePlaneBodies() {
+   public List<ContactablePlaneBody> getContactablePlaneBodies()
+   {
       return contactablePlaneBodies;
    }
 
-   public ReferenceFrame getCenterOfMassFrame() {
+   public ReferenceFrame getCenterOfMassFrame()
+   {
       return centerOfMassFrame;
    }
 
-   public void setDesiredSpatialAcceleration(GeometricJacobian jacobian,
-         TaskspaceConstraintData taskspaceConstraintData) {
+   public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
+   {
       momentumControlModule.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
+   }
+
+   public void setDesiredJointAcceleration(OneDoFJoint joint, DenseMatrix64F jointAcceleration)
+   {
+      momentumControlModule.setDesiredJointAcceleration(joint, jointAcceleration);
+   }
+
+   public ReferenceFrame getPelvisZUpFrame()
+   {
+      return referenceFrames.getPelvisZUpFrame();
    }
 }

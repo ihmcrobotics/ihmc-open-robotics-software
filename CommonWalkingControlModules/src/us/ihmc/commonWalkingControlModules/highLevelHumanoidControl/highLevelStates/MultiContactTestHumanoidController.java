@@ -73,8 +73,8 @@ public class MultiContactTestHumanoidController extends State<HighLevelState>
       this.momentumBasedController = momentumBasedController;
       this.desiredCoMPositionPort = desiredCoMPositionPort;
       this.desiredPelvisOrientationPort = desiredPelvisOrientationPort;
-
-      InverseDynamicsJoint[] joints = ScrewTools.computeJointsInOrder(fullRobotModel.getElevator());
+      
+      InverseDynamicsJoint[] joints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
       OneDoFJoint[] positionControlJointArray = new OneDoFJoint[ScrewTools.computeNumberOfJointsOfType(OneDoFJoint.class, joints)];
       ScrewTools.filterJoints(joints, positionControlJointArray, OneDoFJoint.class);
       positionControlJoints = new ArrayList<OneDoFJoint>(Arrays.asList(positionControlJointArray));
