@@ -11,7 +11,7 @@ import java.io.IOException;
 public class CreateGaussianModelApp {
    public static void main( String args[] ) throws IOException {
       Gaussian3D_F64 model;
-      String roadName = "test_line.txt";
+      String roadName = "road.txt";
       String lineName = "line.txt";
 //      String coneBlack = "cone_black.txt";
 //      String coneOrange = "cone_orange.txt";
@@ -20,7 +20,7 @@ public class CreateGaussianModelApp {
       model = GaussianColorClassifier.train(new FileInputStream(roadName));
       model.print();
 
-      BoofMiscOps.saveXML(model,"test_line.xml");
+      BoofMiscOps.saveXML(model,"gaussian_road.xml");
 
 //      model = GaussianColorClassifier.train(new FileInputStream(lineName));
 //      model.print();

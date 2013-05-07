@@ -21,7 +21,6 @@ import georegression.struct.point.Point2D_I32;
 import jxl.format.RGB;
 import us.ihmc.imageProcessing.ImageFilters.ColorFilter;
 import us.ihmc.imageProcessing.driving.*;
-import us.ihmc.imageProcessing.driving.SteeringInputEstimator;
 import us.ihmc.imageProcessing.utilities.BoundsPainter;
 import us.ihmc.imageProcessing.utilities.LinePainter;
 import us.ihmc.imageProcessing.utilities.PaintableImageViewer;
@@ -545,7 +544,6 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
          slider.setOrientation(JSlider.VERTICAL);
          slider.addChangeListener(new ChangeListener()
          {
-            @Override
             public void stateChanged(ChangeEvent arg0)
             {
                coneColorFilter.setThreshold(new Double(slider.getValue()));
@@ -565,7 +563,6 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
          slider.setOrientation(JSlider.VERTICAL);
          slider.addChangeListener(new ChangeListener()
          {
-            @Override
             public void stateChanged(ChangeEvent arg0)
             {
                erodeCount = slider.getValue();
@@ -585,7 +582,6 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
          slider.setOrientation(JSlider.VERTICAL);
          slider.addChangeListener(new ChangeListener()
          {
-            @Override
             public void stateChanged(ChangeEvent arg0)
             {
                dilateCount = slider.getValue();
