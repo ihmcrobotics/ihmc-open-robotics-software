@@ -135,9 +135,7 @@ public class MultiContactTestHumanoidController extends State<HighLevelState>
       }
 
       FramePoint currentCoM = new FramePoint(momentumBasedController.getCenterOfMassFrame());
-      System.out.println(this.getClass().getSimpleName() + ": " + currentCoM);
       currentCoM.changeFrame(desiredCoMPosition.getReferenceFrame());
-      System.out.println(this.getClass().getSimpleName() + ": " + currentCoM);
       desiredCoMPosition.set(currentCoM);
 
       FrameOrientation currentPelvisOrientaton = new FrameOrientation(pelvisFrame);
