@@ -1105,7 +1105,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          double toeOffPointToFinalDesiredFactor = 0.2;    // TODO: magic number
          FramePoint2d desiredToeOffCoP = new FramePoint2d(worldFrame);
          desiredToeOffCoP.interpolate(toeOffPoint2d, finalDesiredICP, toeOffPointToFinalDesiredFactor);
-         icpWayPoint = EquivalentConstantCoPCalculator.computeICPMotionWithConstantCMP(finalDesiredICP, desiredToeOffCoP, -transferTimeProvider.getValue(),
+         icpWayPoint = EquivalentConstantCoPCalculator.computeICPPositionWithConstantCMP(finalDesiredICP, desiredToeOffCoP, -transferTimeProvider.getValue(),
                  getOmega0());
       }
       else
