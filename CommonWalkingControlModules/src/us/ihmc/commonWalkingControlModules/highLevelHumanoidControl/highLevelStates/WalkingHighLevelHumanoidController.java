@@ -253,7 +253,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
       this.bipedFeet = icpAndMomentumBasedController.getBipedFeet();
       this.referenceFrames = icpAndMomentumBasedController.getReferenceFrames();
       capturePoint = icpAndMomentumBasedController.getCapturePoint();
-      desiredICP = icpAndMomentumBasedController.desiredICP;
+      desiredICP = icpAndMomentumBasedController.getDesiredICP();
       desiredICPVelocity = icpAndMomentumBasedController.getDesiredICPVelocity();
       this.bipedSupportPolygons = icpAndMomentumBasedController.getBipedSupportPolygons();
       this.fullRobotModel = fullRobotModel;
@@ -580,6 +580,8 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
 
    public void initialize()
    {
+      icpAndMomentumBasedController.initialize();
+      
       FrameOrientation initialDesiredPelvisOrientation = new FrameOrientation(referenceFrames.getAnkleZUpFrame(getUpcomingSupportLeg()));
       initialDesiredPelvisOrientation.changeFrame(worldFrame);
       double yaw = initialDesiredPelvisOrientation.getYawPitchRoll()[0];
@@ -1287,6 +1289,8 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
 
    public void doMotionControl()
    {
+      icpAndMomentumBasedController.doPrioritaryControl();
+      
       for (ContactablePlaneBody contactablePlaneBody : endEffectorControlModules.keySet())
       {
          EndEffectorControlModule endEffectorControlModule = endEffectorControlModules.get(contactablePlaneBody);
@@ -1322,6 +1326,8 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
       {
          icpAndMomentumBasedController.setOneDoFJointAcceleration(lidarControllerInterface.getLidarJoint(), 0.0);
       }
+      
+      icpAndMomentumBasedController.doSecondaryControl();
    }
 
    private void setTorqueControlJointsToZeroDersiredAcceleration()

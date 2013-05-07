@@ -115,6 +115,8 @@ public class MultiContactTestHumanoidController extends State<HighLevelState>
 
    public void initialize()
    {
+      momentumBasedController.initialize();
+      
       for (OneDoFJoint oneDoFJoint : positionControlJoints)
       {
          desiredJointPositions.put(oneDoFJoint, oneDoFJoint.getQ());
@@ -138,11 +140,15 @@ public class MultiContactTestHumanoidController extends State<HighLevelState>
 
    public void doMotionControl()
    {
+      momentumBasedController.doPrioritaryControl();
+      
       doChestcontrol();
       doEndEffectorControl();
       doCoMControl();
       doPelvisControl();
       doJointPositionControl();
+      
+      momentumBasedController.doSecondaryControl();
    }
 
    private void doChestcontrol()
