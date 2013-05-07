@@ -5,7 +5,6 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
@@ -51,8 +50,8 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
    private final RobotSide[] handContactSides;
 
    public MultiContactTestHumanoidControllerFactory(SideDependentList<String> namesOfJointsBeforeHands,
-           SideDependentList<Transform3D> handContactPointTransforms, SideDependentList<List<Point2d>> handContactPoints, RobotSide[] footContactSides,
-           RobotSide[] handContactSides)
+         SideDependentList<Transform3D> handContactPointTransforms, SideDependentList<List<Point2d>> handContactPoints, RobotSide[] footContactSides,
+         RobotSide[] handContactSides)
    {
       this.namesOfJointsBeforeHands = namesOfJointsBeforeHands;
       this.handContactPointTransforms = handContactPointTransforms;
@@ -62,12 +61,12 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
    }
 
    public RobotController create(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
-           CommonWalkingReferenceFrames referenceFrames, FingerForceSensors fingerForceSensors, DoubleYoVariable yoTime, double gravityZ,
-           TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian, SideDependentList<ContactablePlaneBody> feet, double controlDT,
-           SideDependentList<FootSwitchInterface> footSwitches, SideDependentList<HandControllerInterface> handControllers,
-           LidarControllerInterface lidarControllerInterface, StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry, GUISetterUpperRegistry guiSetterUpperRegistry,
-           ProcessedOutputsInterface processedOutputs)
+         CommonWalkingReferenceFrames referenceFrames, FingerForceSensors fingerForceSensors, DoubleYoVariable yoTime, double gravityZ,
+         TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian, SideDependentList<ContactablePlaneBody> feet, double controlDT,
+         SideDependentList<FootSwitchInterface> footSwitches, SideDependentList<HandControllerInterface> handControllers,
+         LidarControllerInterface lidarControllerInterface, StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink,
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry, GUISetterUpperRegistry guiSetterUpperRegistry,
+         ProcessedOutputsInterface processedOutputs)
    {
       LinkedHashMap<ContactablePlaneBody, RigidBody> contactablePlaneBodiesAndBases = new LinkedHashMap<ContactablePlaneBody, RigidBody>();
 
@@ -84,7 +83,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
 
          ReferenceFrame afterHipFrame = handBody.getParentJoint().getFrameAfterJoint();
          ReferenceFrame handContactsFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(robotSide.getCamelCaseNameForStartOfExpression()
-                                               + "HandContact", afterHipFrame, handContactPointTransforms.get(robotSide));
+               + "HandContact", afterHipFrame, handContactPointTransforms.get(robotSide));
 
          ContactablePlaneBody hand = new ListOfPointsContactablePlaneBody(handBody, handContactsFrame, handContactPoints.get(robotSide));
          hands.put(robotSide, hand);
@@ -100,16 +99,13 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
          contactablePlaneBodiesAndBases.put(contactablePlaneBody, fullRobotModel.getChest());
       }
 
-      ContactPointGroundReactionWrenchDistributor groundReactionWrenchDistributor =
-         new ContactPointGroundReactionWrenchDistributor(referenceFrames.getCenterOfMassFrame(), registry);
-      double[] diagonalCWeights = new double[]
-      {
-         1.0, 1.0, 1.0, 1.0, 1.0, 1.0
-      };
+      ContactPointGroundReactionWrenchDistributor groundReactionWrenchDistributor = new ContactPointGroundReactionWrenchDistributor(
+            referenceFrames.getCenterOfMassFrame(), registry);
+      double[] diagonalCWeights = new double[] { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
       groundReactionWrenchDistributor.setWeights(diagonalCWeights, 1.0, 0.001);
 
-      CoMBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule =
-         new CoMBasedMomentumRateOfChangeControlModule(referenceFrames.getCenterOfMassFrame(), centerOfMassJacobian, registry);
+      CoMBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule = new CoMBasedMomentumRateOfChangeControlModule(
+            referenceFrames.getCenterOfMassFrame(), centerOfMassJacobian, registry);
 
       double comProportionalGain = 100.0;
       double dampingRatio = 1.0;
@@ -118,8 +114,8 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       momentumRateOfChangeControlModule.setProportionalGains(comProportionalGain, comProportionalGain, comProportionalGain);
       momentumRateOfChangeControlModule.setDerivativeGains(comDerivativeGain, comDerivativeGain, comDerivativeGain);
 
-      RootJointAngularAccelerationControlModule rootJointAccelerationControlModule =
-         new RootJointAngularAccelerationControlModule(fullRobotModel.getRootJoint(), twistCalculator, registry);
+      RootJointAngularAccelerationControlModule rootJointAccelerationControlModule = new RootJointAngularAccelerationControlModule(
+            fullRobotModel.getRootJoint(), twistCalculator, registry);
       rootJointAccelerationControlModule.setProportionalGains(100.0, 100.0, 100.0);
       rootJointAccelerationControlModule.setDerivativeGains(20.0, 20.0, 20.0);
 
@@ -127,24 +123,20 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       jacobianSolver.setAlpha(5e-2);
 
       OldMomentumControlModule momentumControlModule = new OldMomentumControlModule(fullRobotModel.getRootJoint(), contactablePlaneBodiesAndBases.keySet(),
-                                                          gravityZ, groundReactionWrenchDistributor, referenceFrames.getCenterOfMassFrame(), controlDT,
-                                                          twistCalculator, jacobianSolver, registry);
+            gravityZ, groundReactionWrenchDistributor, referenceFrames.getCenterOfMassFrame(), controlDT, twistCalculator, jacobianSolver, registry);
       double groundReactionWrenchBreakFrequencyHertz = 7.0;
       momentumControlModule.setGroundReactionWrenchBreakFrequencyHertz(groundReactionWrenchBreakFrequencyHertz);
 
       // The controllers do not extend the MomentumBasedController anymore. Instead, it is passed through the constructor.
-      MomentumBasedController momentumBasedController = new MomentumBasedController(
-            estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ,
-            twistCalculator, contactablePlaneBodiesAndBases.keySet(), controlDT, processedOutputs, momentumControlModule,
-            null, momentumRateOfChangeControlModule, rootJointAccelerationControlModule, stateEstimationDataFromControllerSink, dynamicGraphicObjectsListRegistry);
-      
-      MultiContactTestHumanoidController multiContactState = new MultiContactTestHumanoidController(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian,
-                                                  referenceFrames, yoTime, gravityZ, twistCalculator, contactablePlaneBodiesAndBases, controlDT,
-                                                  processedOutputs, momentumControlModule, null, momentumRateOfChangeControlModule,
-                                                  rootJointAccelerationControlModule, momentumRateOfChangeControlModule.getDesiredCoMPositionInputPort(),
-                                                  rootJointAccelerationControlModule.getDesiredPelvisOrientationTrajectoryInputPort(),
-                                                  stateEstimationDataFromControllerSink, dynamicGraphicObjectsListRegistry, momentumBasedController);
-      
+      MomentumBasedController momentumBasedController = new MomentumBasedController(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian,
+            referenceFrames, yoTime, gravityZ, twistCalculator, contactablePlaneBodiesAndBases.keySet(), controlDT, processedOutputs, momentumControlModule,
+            null, momentumRateOfChangeControlModule, rootJointAccelerationControlModule, stateEstimationDataFromControllerSink,
+            dynamicGraphicObjectsListRegistry);
+
+      MultiContactTestHumanoidController multiContactState = new MultiContactTestHumanoidController(fullRobotModel, yoTime, twistCalculator,
+            contactablePlaneBodiesAndBases, momentumRateOfChangeControlModule.getDesiredCoMPositionInputPort(),
+            rootJointAccelerationControlModule.getDesiredPelvisOrientationTrajectoryInputPort(), momentumBasedController);
+
       double coefficientOfFriction = 1.0;
 
       for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodiesAndBases.keySet())
@@ -163,22 +155,26 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       }
 
       // Creation of the "highest level" state machine.
-      StateMachine<HighLevelState> highLevelStateMachine = new StateMachine<HighLevelState>("highLevelStateMachine", "switchTimeName", HighLevelState.class, yoTime, registry);
+      StateMachine<HighLevelState> highLevelStateMachine = new StateMachine<HighLevelState>("highLevelStateMachine", "switchTimeName", HighLevelState.class,
+            yoTime, registry);
       // Creating a dummy StateTransition to remain in the multi-contact controller
-      StateTransition<HighLevelState> noStateTransition = new StateTransition<HighLevelState>(null, new StateTransitionCondition() {
-         public boolean checkCondition() {
+      StateTransition<HighLevelState> noStateTransition = new StateTransition<HighLevelState>(null, new StateTransitionCondition()
+      {
+         public boolean checkCondition()
+         {
             return false;
          }
       });
-      
+
       multiContactState.addStateTransition(noStateTransition);
       highLevelStateMachine.addState(multiContactState);
-      
-      ArrayList<YoVariableRegistry> multiContactStateRegistry = new ArrayList<>();
+
+      ArrayList<YoVariableRegistry> multiContactStateRegistry = new ArrayList<YoVariableRegistry>();
       multiContactStateRegistry.add(multiContactState.getYoVariableRegistry());
 
       // This is the "highest level" controller that enables switching between the different controllers (walking, multi-contact, driving)
-      HighLevelHumanoidControllerManager ret = new HighLevelHumanoidControllerManager(highLevelStateMachine, HighLevelState.MULTI_CONTACT, momentumBasedController, multiContactStateRegistry);
+      HighLevelHumanoidControllerManager ret = new HighLevelHumanoidControllerManager(highLevelStateMachine, HighLevelState.MULTI_CONTACT,
+            momentumBasedController, multiContactStateRegistry);
 
       return ret;
    }
