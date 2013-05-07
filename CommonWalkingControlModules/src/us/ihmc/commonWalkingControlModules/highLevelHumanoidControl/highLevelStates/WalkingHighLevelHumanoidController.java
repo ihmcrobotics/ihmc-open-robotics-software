@@ -349,8 +349,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          GeometricJacobian neckJacobian = new GeometricJacobian(headOrientationControlJoints, head.getBodyFixedFrame());
          ReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
          ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
-         ReferenceFrame[] availableHeadOrientationControlFrames = new ReferenceFrame[] {pelvisZUpFrame, pelvisFrame, ReferenceFrame.getWorldFrame()};
          ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
+         ReferenceFrame[] availableHeadOrientationControlFrames = new ReferenceFrame[] {pelvisZUpFrame, pelvisFrame, ReferenceFrame.getWorldFrame()};
          headOrientationControlModule = new HeadOrientationControlModule(neckJacobian, pelvis, elevator, twistCalculator,
                  availableHeadOrientationControlFrames, chestFrame, walkingControllerParameters, registry, dynamicGraphicObjectsListRegistry);
 
