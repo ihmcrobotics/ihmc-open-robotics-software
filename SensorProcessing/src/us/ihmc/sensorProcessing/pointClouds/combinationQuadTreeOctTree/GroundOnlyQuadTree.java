@@ -22,7 +22,7 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    private final double constantResolution;
    private final double heightThreshold;
    private int numberOfNodes = 0;
-   private int maxNodes=1000;
+   private int maxNodes=1;
    private LowPassTimingReporter clearingTimer = new LowPassTimingReporter(7);
 
    public GroundOnlyQuadTree(double minX, double minY, double maxX, double maxY, double resolution, double heightThreshold, int maxNodes)
@@ -41,7 +41,6 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
       numberOfNodes = 1;
 //      clearingTimer.setupRecording("GroundOnlyQuadTree", "perform the lidar beam search", 10000L, 20000L);
    }
-
 
    public double heightAtPoint(double x, double y)
    {
@@ -174,12 +173,17 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
       }
 
       boolean newLeafIsSignificantyAboveOldLeaf = (leaf.getValue().getHeight() - node.getLeaf().getValue().getHeight()) > heightThreshold;
-      boolean newLeafIsSignificantyBelowOldLeaf = (leaf.getValue().getHeight() - node.getLeaf().getValue().getHeight()) < heightThreshold;
+      boolean newLeafIsSignificantyBelowOldLeaf = (leaf.getValue().getHeight() - node.getLeaf().getValue().getHeight()) < -heightThreshold;
 
       if (node.getMetaData().getIsStuffAboveMe() && newLeafIsSignificantyAboveOldLeaf)
       {
          puntLeaf(leaf);
 
+         return false;
+      }
+
+      if(!newLeafIsSignificantyAboveOldLeaf && ! newLeafIsSignificantyBelowOldLeaf)
+      {
          return false;
       }
 
@@ -331,9 +335,9 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    @Override
    protected boolean canMergeLeaves(HyperCubeLeaf<GroundAirDescriptor> firstLeaf, HyperCubeLeaf<GroundAirDescriptor> secondLeaf)
    {
-      float diff = (firstLeaf.getValue().getHeight() - secondLeaf.getValue().getHeight());
+      float heightDifference = Math.abs(firstLeaf.getValue().getHeight() - secondLeaf.getValue().getHeight());
 
-      return (diff < heightThreshold) && (diff > -heightThreshold);
+      return heightDifference < heightThreshold;
    }
 
    public Float get(double xToTest, double yToTest)
