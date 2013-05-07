@@ -1574,14 +1574,15 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
    }
 
    private void checkForHighSteps(RobotSide transferToSide)
-   {
-      if (transferToSide != null && upcomingFootstepList.hasNextFootsteps())
+   {      
+      if(transferToSide != null && upcomingFootstepList.hasNextFootsteps())
       {
-         boolean ankleHeightIncreaseAboveThreshold;
-         boolean initialSoleBelowPlaneOfFinalSole; // to avoid high steps when on a ramp
-         
-         //TODO: Clean up the following horseshit!
+         boolean footstepZIncreaseAboveThresholdInFinalFrame;
+
+         double zIncreaseThreshold = 0.05;
+
          ReferenceFrame initialSoleFrame;
+         // NOTE: the foot may have moved so its ideal to get the previous footstep, rather than the current foot frame, if possible
          if (upcomingFootstepList.doesNextFootstepListHaveFewerThanTwoElements())
          {
             initialSoleFrame = bipedFeet.get(transferToSide.getOppositeSide()).getRigidBody().getParentJoint().getFrameAfterJoint();
@@ -1591,35 +1592,22 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
             initialSoleFrame = upcomingFootstepList.getFootstepTwoBackFromNextFootstepList().getSoleReferenceFrame();
          }
 
-         // NOTE: the foot may have moved so its ideal to get the previous footstep, rather than the current foot frame, if possible
-
-         Footstep nextFootstep = upcomingFootstepList.getNextFootstep();
+         Footstep nextFootstep = upcomingFootstepList.getNextFootstep(); 
          ReferenceFrame finalSoleFrame = nextFootstep.getSoleReferenceFrame();
          
-         Transform3D soleFrameTransform = initialSoleFrame.getTransformToDesiredFrame(finalSoleFrame);
-         Vector3d soleFrameTranslation = new Vector3d();
-         soleFrameTransform.get(soleFrameTranslation);
-         initialSoleBelowPlaneOfFinalSole = soleFrameTranslation.z < 0.0;
+         FramePoint initialSole = new FramePoint(initialSoleFrame);
+         initialSole.changeFrame(finalSoleFrame);
+         footstepZIncreaseAboveThresholdInFinalFrame = - initialSole.getZ() > zIncreaseThreshold;
          
-         double ankleHeightThreshold = 0.07; //0.04;
-         Vector3d initialPositionWorld = new Vector3d();
-         initialSoleFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame()).get(initialPositionWorld);
-         Vector3d finalPositionWorld = new Vector3d();
-         finalSoleFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame()).get(finalPositionWorld);
-         Vector3d translationWorld = new Vector3d(finalPositionWorld);
-         translationWorld.sub(initialPositionWorld);
-         ankleHeightIncreaseAboveThreshold = translationWorld.z > ankleHeightThreshold;
-         
-         boolean useHighSteps = ankleHeightIncreaseAboveThreshold && initialSoleBelowPlaneOfFinalSole;
+         boolean useHighSteps = footstepZIncreaseAboveThresholdInFinalFrame;
          
          if(useHighSteps)
          {
             TrajectoryParameters highStepTrajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(TrajectoryWaypointGenerationMethod.HIGH_STEP);
-            mapFromFootstepsToTrajectoryParameters.put(nextFootstep, highStepTrajectoryParameters);
-         }
+            mapFromFootstepsToTrajectoryParameters.put(nextFootstep, highStepTrajectoryParameters);                
+         }    
       }
-   }
-   
+   }   
    
    public static Footstep createFootstepFromFootAndContactablePlaneBody(ReferenceFrame footReferenceFrame, ContactablePlaneBody contactablePlaneBody)
    {
