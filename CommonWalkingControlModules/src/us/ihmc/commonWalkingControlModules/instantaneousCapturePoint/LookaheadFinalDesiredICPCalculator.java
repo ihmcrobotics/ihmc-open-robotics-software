@@ -72,13 +72,26 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
       desiredICPCalculatorMethod.set(method);
    }
 
-   public FramePoint2d getFinalDesiredICPForWalking(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
+   private FramePoint2d finalDesiredICP;
+   
+   public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
+   {
+      finalDesiredICP = getFinalDesiredICPForWalking(transferToAndNextFootstepsData);
+   }
+   
+   public FramePoint2d getFinalDesiredICP()
+   {
+      return finalDesiredICP;
+   }
+   
+   private FramePoint2d getFinalDesiredICPForWalking(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
    {
       switch (desiredICPCalculatorMethod.getEnumValue())
       {
          case SHIFT_INSIDE :
          {
-            return shiftInsideFinalDesiredICPCalculator.getFinalDesiredICPForWalking(transferToAndNextFootstepsData);
+            shiftInsideFinalDesiredICPCalculator.initialize(transferToAndNextFootstepsData);
+            return shiftInsideFinalDesiredICPCalculator.getFinalDesiredICP();
          }
 
          case CENTROID_TO_CENTROID :
