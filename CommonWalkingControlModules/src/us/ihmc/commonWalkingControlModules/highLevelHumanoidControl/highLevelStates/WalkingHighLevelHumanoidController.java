@@ -350,8 +350,9 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          ReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
          ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
          ReferenceFrame[] availableHeadOrientationControlFrames = new ReferenceFrame[] {pelvisZUpFrame, pelvisFrame, ReferenceFrame.getWorldFrame()};
+         ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
          headOrientationControlModule = new HeadOrientationControlModule(neckJacobian, pelvis, elevator, twistCalculator,
-                 availableHeadOrientationControlFrames, walkingControllerParameters, registry, dynamicGraphicObjectsListRegistry);
+                 availableHeadOrientationControlFrames, chestFrame, walkingControllerParameters, registry, dynamicGraphicObjectsListRegistry);
 
          // Setting initial head pitch
          // This magic number (0.67) is a good default head pitch for getting good LIDAR point coverage of ground by feet

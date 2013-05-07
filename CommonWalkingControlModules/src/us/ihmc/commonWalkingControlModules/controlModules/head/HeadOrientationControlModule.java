@@ -30,6 +30,7 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
    private final YoFrameOrientationInMultipleFrames orientationToTrack;
    private final YoFramePointInMultipleFrames pointToTrack;
    private final ReferenceFrame[] framesToTrackIn;
+   private final ReferenceFrame chestFrame;
    private final OriginAndPointFrame pointTrackingFrame;
    private final DynamicGraphicReferenceFrame pointTrackingFrameFiz;
 
@@ -42,7 +43,7 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
    private final DoubleYoVariable rollLimit = new DoubleYoVariable("rollLimit", registry);
    
    public HeadOrientationControlModule(GeometricJacobian neckJacobian, RigidBody pelvis, RigidBody elevator, TwistCalculator twistCalculator,
-         ReferenceFrame[] availableHeadOrientationControlFrames, HeadOrientationControllerParameters headOrientationControllerParameters, YoVariableRegistry parentRegistry,
+         ReferenceFrame[] availableHeadOrientationControlFrames, ReferenceFrame chestFrame, HeadOrientationControllerParameters headOrientationControllerParameters, YoVariableRegistry parentRegistry,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       super("head", new RigidBody[] {elevator, pelvis}, neckJacobian.getEndEffector(), neckJacobian, twistCalculator, parentRegistry);
@@ -50,6 +51,7 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
       pointTrackingFrame = new OriginAndPointFrame("headPointTrackingFrame", ReferenceFrame.getWorldFrame());
 
       this.framesToTrackIn = availableHeadOrientationControlFrames;
+      this.chestFrame = chestFrame;
 
       orientationToTrack = new YoFrameOrientationInMultipleFrames("headOrientationToTrack", framesToTrackIn, registry);
       pointToTrack = new YoFramePointInMultipleFrames("headPointToTrack", framesToTrackIn, registry);
@@ -110,16 +112,27 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
    private void enforceLimits(FrameOrientation orientation)
    {
       ReferenceFrame initialReferenceFrame = orientation.getReferenceFrame();
-      orientation.changeFrame(getJacobian().getBaseFrame());
 
-      double[] yawPitchRoll = orientation.getYawPitchRoll();
+      //Limit pitch with respect to the chest frame
+      {
+         orientation.changeFrame(chestFrame);
+         double[] yawPitchRoll = orientation.getYawPitchRoll();
+         yawPitchRoll[1] = MathTools.clipToMinMax(yawPitchRoll[1], pitchLowerLimit.getDoubleValue(), pitchUpperLimit.getDoubleValue());
 
-      yawPitchRoll[0] = MathTools.clipToMinMax(yawPitchRoll[0], -yawLimit.getDoubleValue(), yawLimit.getDoubleValue());
-      yawPitchRoll[1] = MathTools.clipToMinMax(yawPitchRoll[1], pitchLowerLimit.getDoubleValue(), pitchUpperLimit.getDoubleValue());
-      yawPitchRoll[2] = MathTools.clipToMinMax(yawPitchRoll[2], -rollLimit.getDoubleValue(), rollLimit.getDoubleValue());
+         orientation.setYawPitchRoll(yawPitchRoll);
+      }
 
-      orientation.setYawPitchRoll(yawPitchRoll);
-      orientation.changeFrame(initialReferenceFrame);
+      //Limit roll and yaw
+      {
+         orientation.changeFrame(getJacobian().getBaseFrame());
+
+         double[] yawPitchRoll = orientation.getYawPitchRoll();
+         yawPitchRoll[0] = MathTools.clipToMinMax(yawPitchRoll[0], -yawLimit.getDoubleValue(), yawLimit.getDoubleValue());
+         yawPitchRoll[2] = MathTools.clipToMinMax(yawPitchRoll[2], -rollLimit.getDoubleValue(), rollLimit.getDoubleValue());
+
+         orientation.setYawPitchRoll(yawPitchRoll);
+         orientation.changeFrame(initialReferenceFrame);
+      }
    }
 
    private void setHeadOrientationLimits(HeadOrientationControllerParameters headOrientationControllerParameters)
