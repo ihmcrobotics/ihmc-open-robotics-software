@@ -171,10 +171,11 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
 
       ArrayList<YoVariableRegistry> multiContactControllerRegistry = new ArrayList<YoVariableRegistry>();
       multiContactControllerRegistry.add(multiContactBehavior.getYoVariableRegistry());
+      multiContactControllerRegistry.add(momentumBasedController.getYoVariableRegistry()); //TODO: no sure if that should be done here or inside the multiContactBehavior controller...
 
       // This is the "highest level" controller that enables switching between the different controllers (walking, multi-contact, driving, etc.)
       HighLevelHumanoidControllerManager ret = new HighLevelHumanoidControllerManager(highLevelStateMachine, HighLevelState.MULTI_CONTACT,
-            momentumBasedController, multiContactControllerRegistry);
+            multiContactControllerRegistry);
 
       return ret;
    }

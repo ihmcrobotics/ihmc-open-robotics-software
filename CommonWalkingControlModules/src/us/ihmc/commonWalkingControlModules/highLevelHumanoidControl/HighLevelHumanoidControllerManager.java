@@ -16,18 +16,14 @@ public class HighLevelHumanoidControllerManager implements RobotController
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
    private final StateMachine<HighLevelState> stateMachine;
-   private final MomentumBasedController momentumBasedController;
 
    private HighLevelState activeHighLevelState;
 
    public HighLevelHumanoidControllerManager(StateMachine<HighLevelState> stateMachine, HighLevelState activeHighLevelState,
-         MomentumBasedController momentumBasedController, ArrayList<YoVariableRegistry> highLevelStateRegistries)
+         ArrayList<YoVariableRegistry> highLevelStateRegistries)
    {
       this.stateMachine = stateMachine;
       this.activeHighLevelState = activeHighLevelState;
-
-      this.momentumBasedController = momentumBasedController;
-      this.registry.addChild(momentumBasedController.getYoVariableRegistry());
 
       for (YoVariableRegistry highLevelStateRegistry : highLevelStateRegistries)
          this.registry.addChild(highLevelStateRegistry);
@@ -35,19 +31,13 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    public void initialize()
    {
-      momentumBasedController.initialize();
-
       stateMachine.setCurrentState(activeHighLevelState);
    }
 
    public void doControl()
    {
-      momentumBasedController.doPrioritaryControl();
-
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
-
-      momentumBasedController.doSecondaryControl();
    }
 
    public YoVariableRegistry getYoVariableRegistry()
