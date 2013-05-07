@@ -8,21 +8,19 @@ import java.util.Map;
 
 import javax.vecmath.Vector3d;
 
-import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import org.ejml.data.DenseMatrix64F;
-
 import org.ejml.ops.CommonOps;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
-import us.ihmc.commonWalkingControlModules.stateEstimation.DesiredCoMAndAngularAccelerationGrabber;
-import us.ihmc.commonWalkingControlModules.stateEstimation.PointPositionGrabber;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
+import us.ihmc.commonWalkingControlModules.stateEstimation.DesiredCoMAndAngularAccelerationGrabber;
+import us.ihmc.commonWalkingControlModules.stateEstimation.PointPositionGrabber;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
@@ -31,7 +29,20 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.*;
+import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
+import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.SixDoFJoint;
+import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.utilities.screwTheory.SpatialForceVector;
+import us.ihmc.utilities.screwTheory.TotalMassCalculator;
+import us.ihmc.utilities.screwTheory.TotalWrenchCalculator;
+import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
@@ -59,8 +70,7 @@ public class MomentumBasedController implements RobotController
    protected final List<ContactablePlaneBody> contactablePlaneBodies;
 
    private final LinkedHashMap<ContactablePlaneBody, DoubleYoVariable> normalTorques = new LinkedHashMap<ContactablePlaneBody, DoubleYoVariable>();
-   private final LinkedHashMap<ContactablePlaneBody, DoubleYoVariable> groundReactionForceMagnitudes = new LinkedHashMap<ContactablePlaneBody,
-                                                                                                          DoubleYoVariable>();
+   private final LinkedHashMap<ContactablePlaneBody, DoubleYoVariable> groundReactionForceMagnitudes = new LinkedHashMap<ContactablePlaneBody, DoubleYoVariable>();
    protected final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
    protected final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
    protected final DoubleYoVariable yoTime;
@@ -103,23 +113,21 @@ public class MomentumBasedController implements RobotController
    private final DenseMatrix64F rootJointNullspaceMultipliers = new DenseMatrix64F(0, 1);
    private final DenseMatrix64F rootJointSelectionMatrix = new DenseMatrix64F(1, 1);
 
-   private final StateMachine<HighLevelState> stateMachine;
-
    public MomentumBasedController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
                                   CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime,
                                   double gravityZ, TwistCalculator twistCalculator, Collection<? extends ContactablePlaneBody> contactablePlaneBodies,
                                   double controlDT, ProcessedOutputsInterface processedOutputs, MomentumControlModule momentumControlModule,
                                   ArrayList<Updatable> updatables, MomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
                                   RootJointAccelerationControlModule rootJointAccelerationControlModule,
-                                  StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink, StateMachine<HighLevelState> stateMachine,
+                                  StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
+
       this.momentumControlModule = momentumControlModule;
 
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
-      this.stateMachine = stateMachine;
       this.fullRobotModel = fullRobotModel;
       this.centerOfMassJacobian = centerOfMassJacobian;
       this.referenceFrames = referenceFrames;
@@ -237,19 +245,20 @@ public class MomentumBasedController implements RobotController
 
    public void doMotionControl()
    {
-      stateMachine.checkTransitionConditions();
-      stateMachine.doAction();
    }
-
-   public final void doControl()
+   
+   // TODO: Temporary method for a big refactor allowing switching between high level behaviors
+   public void doPrioritaryControl()
    {
       callUpdatables();
 
       inverseDynamicsCalculator.reset();
       momentumControlModule.reset();
-
-      doMotionControl();
-
+   }
+   
+   // TODO: Temporary method for a big refactor allowing switching between high level behaviors   
+   public void doSecondaryControl()
+   {
       rootJointAccelerationControlModule.startComputation();
       rootJointAccelerationControlModule.waitUntilComputationIsDone();
       RootJointAccelerationData rootJointAccelerationData = rootJointAccelerationControlModule.getRootJointAccelerationOutputPort().getData();
@@ -330,6 +339,13 @@ public class MomentumBasedController implements RobotController
          fullRobotModel.setTorques(processedOutputs);
       updateYoVariables();
    }
+   
+   public final void doControl()
+   {
+      doPrioritaryControl();
+      doMotionControl();
+      doSecondaryControl();
+   }
 
    protected void resetGroundReactionWrenchFilter()
    {
@@ -363,7 +379,8 @@ public class MomentumBasedController implements RobotController
       }
    }
 
-   protected void doPDControl(OneDoFJoint joint, double k, double d, double desiredPosition, double desiredVelocity)
+   // TODO: visibility changed for "public"
+   public void doPDControl(OneDoFJoint joint, double k, double d, double desiredPosition, double desiredVelocity)
    {
       double desiredAcceleration = computeDesiredAcceleration(k, d, desiredPosition, desiredVelocity, joint);
       setOneDoFJointAcceleration(joint, desiredAcceleration);
@@ -421,8 +438,29 @@ public class MomentumBasedController implements RobotController
       return getName();
    }
 
-   protected FramePoint2d getCoP(ContactablePlaneBody contactablePlaneBody)
+   // TODO: visibility changed for "public"
+   public FramePoint2d getCoP(ContactablePlaneBody contactablePlaneBody)
    {
       return centersOfPressure2d.get(contactablePlaneBody).getFramePoint2dCopy();
+   }
+
+   
+   // TODO: Following has been added for huge refactor. Need to be checked.
+   
+   public LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> getContactStates() {
+      return contactStates;
+   }
+
+   public List<ContactablePlaneBody> getContactablePlaneBodies() {
+      return contactablePlaneBodies;
+   }
+
+   public ReferenceFrame getCenterOfMassFrame() {
+      return centerOfMassFrame;
+   }
+
+   public void setDesiredSpatialAcceleration(GeometricJacobian jacobian,
+         TaskspaceConstraintData taskspaceConstraintData) {
+      momentumControlModule.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
    }
 }

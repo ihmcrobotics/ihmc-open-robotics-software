@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
@@ -28,6 +27,7 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
+import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
@@ -48,7 +48,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       this.useGazeboPhysics = useGazeboPhysics;
    }
 
-   public MomentumBasedController getController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
+   public RobotController getController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
            CommonWalkingReferenceFrames referenceFrames, double controlDT, DoubleYoVariable yoTime,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, GUISetterUpperRegistry guiSetterUpperRegistry, TwistCalculator twistCalculator,
            CenterOfMassJacobian centerOfMassJacobian, ForceSensorDataHolder forceSensorDataHolder, SideDependentList<HandControllerInterface> handControllers,
@@ -79,7 +79,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 
       double gravityZ = 9.81;
 
-      MomentumBasedController highLevelHumanoidController = highLevelHumanoidControllerFactory.create(estimationLink, estimationFrame, fullRobotModel,
+      RobotController highLevelHumanoidController = highLevelHumanoidControllerFactory.create(estimationLink, estimationFrame, fullRobotModel,
                                                                referenceFrames, null, yoTime, gravityZ, twistCalculator, centerOfMassJacobian, bipedFeet,
                                                                controlDT, footSwitches, handControllers, lidarControllerInterface,
                                                                stateEstimationDataFromControllerSink, dynamicGraphicObjectsListRegistry, specificRegistry,
