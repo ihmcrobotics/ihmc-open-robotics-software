@@ -35,7 +35,19 @@ public class ShiftInsideFinalDesiredICPCalculator implements FinalDesiredICPCalc
       this.extraY = extraY;
    }
 
-   public FramePoint2d getFinalDesiredICPForWalking(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
+   private FramePoint2d finalDesiredICP;
+
+   public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
+   {
+      finalDesiredICP = getFinalDesiredICPForWalking(transferToAndNextFootstepsData);
+   }
+
+   public FramePoint2d getFinalDesiredICP()
+   {
+      return finalDesiredICP;
+   }
+
+   private FramePoint2d getFinalDesiredICPForWalking(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
    {
       Footstep transferToFootstep = transferToAndNextFootstepsData.getTransferToFootstep();
 

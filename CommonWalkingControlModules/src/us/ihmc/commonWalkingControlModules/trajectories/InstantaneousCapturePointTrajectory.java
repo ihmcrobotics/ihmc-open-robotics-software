@@ -9,9 +9,9 @@ import com.yobotics.simulationconstructionset.util.trajectory.Finishable;
 public interface InstantaneousCapturePointTrajectory extends Finishable
 {
 
-   public abstract void initialize(FramePoint2d initialDesiredICP, FramePoint2d finalDesiredICP, double moveTime, double omega0, double amountToBeInside, RobotSide supportSide);
+   public abstract void initialize(FramePoint2d initialDesiredICP, FramePoint2d finalDesiredICP, double moveTime, double omega0, double amountToBeInside, RobotSide supportSide, double time);
 
-   public abstract void pack(FramePoint2d desiredPosition, FrameVector2d desiredVelocity, double omega0);
+   public abstract void getCurrentDesiredICPPositionAndVelocity(FramePoint2d desiredPosition, FrameVector2d desiredVelocity, double omega0, double currentTime);
 
    public abstract double getMoveTime();
 

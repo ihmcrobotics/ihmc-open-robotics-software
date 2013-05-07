@@ -20,8 +20,8 @@ public class ParabolicVelocityInstantaneousCapturePointTrajectory implements Ins
    private final ZeroToOneParabolicVelocityTrajectoryGenerator parameterGenerator;
    private final YoFramePoint2d initialDesiredICP;
    private final YoFramePoint2d finalDesiredICP;
-   private final DoubleYoVariable deltaT;
    private final DoubleYoVariable trajectoryTime;
+   private final DoubleYoVariable startTime;
    private final DoubleYoVariable currentTime;
    
    private final BipedSupportPolygons bipedSupportPolygons;
@@ -29,7 +29,7 @@ public class ParabolicVelocityInstantaneousCapturePointTrajectory implements Ins
    private FramePoint2d tempPointInitialDesired = new FramePoint2d(ReferenceFrame.getWorldFrame());
    private final FramePoint2d tempPointFinalDesired = new FramePoint2d(ReferenceFrame.getWorldFrame());
 
-   public ParabolicVelocityInstantaneousCapturePointTrajectory(String namePrefix, BipedSupportPolygons bipedSupportPolygons, double deltaT, YoVariableRegistry parentRegistry)
+   public ParabolicVelocityInstantaneousCapturePointTrajectory(String namePrefix, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.bipedSupportPolygons = bipedSupportPolygons;
@@ -40,12 +40,10 @@ public class ParabolicVelocityInstantaneousCapturePointTrajectory implements Ins
       this.finalDesiredICP = new YoFramePoint2d(namePrefix, "FinalDesiredICP", referenceFrame, registry);
       
       trajectoryTime = new DoubleYoVariable(namePrefix + "icpTrajectoryTime", registry);
+      startTime = new DoubleYoVariable(namePrefix + "icpStartTime", registry);
       currentTime = new DoubleYoVariable(namePrefix + "icpCurrentTime", registry);
-      
-      this.deltaT = new DoubleYoVariable(namePrefix + "DeltaT", registry);
-      this.deltaT.set(deltaT);
-      
-      parameterGenerator = new ZeroToOneParabolicVelocityTrajectoryGenerator(namePrefix, deltaT, registry); // Set a sensible value for the trajectoryTime during initialization.
+            
+      parameterGenerator = new ZeroToOneParabolicVelocityTrajectoryGenerator(namePrefix, Double.NaN, registry); // Set a sensible value for the trajectoryTime during initialization.
       
       parentRegistry.addChild(registry);   
    }
@@ -55,8 +53,10 @@ public class ParabolicVelocityInstantaneousCapturePointTrajectory implements Ins
       return parameterGenerator != null && parameterGenerator.isDone();
    }
 
-   public void initialize(FramePoint2d initialDesiredICP, FramePoint2d finalDesiredICP, double moveTime, double omega0, double amountToBeInside, RobotSide supportSide)
+   public void initialize(FramePoint2d initialDesiredICP, FramePoint2d finalDesiredICP, double moveTime, double omega0, double amountToBeInside, RobotSide supportSide, double time)
    {
+      startTime.set(time);
+      
       initialDesiredICP.changeFrame(this.initialDesiredICP.getReferenceFrame());
       finalDesiredICP.changeFrame(this.finalDesiredICP.getReferenceFrame());
       
@@ -81,7 +81,7 @@ public class ParabolicVelocityInstantaneousCapturePointTrajectory implements Ins
          if(breakCount >= MAX_LOOPS)
             throw new RuntimeException("Maximum amount of loops reached to determine trajectoryTime. Possible infinite loop.");
          
-         moveTime += deltaT.getDoubleValue();
+         moveTime += 0.001; //TODO: What the heck is this?
          
          packLowerExtremeCoPPoint(lowerExtremeCoP, moveTime, omega0);
          packHigherExtremeCoPPoint(higherExtremeCoP, moveTime, omega0); // TODO: take amountToBeInside into account.
@@ -133,9 +133,9 @@ public class ParabolicVelocityInstantaneousCapturePointTrajectory implements Ins
       packCoP(point2Pack, time, finalTime, omega0);
    }
 
-   public void pack(FramePoint2d desiredPosition, FrameVector2d desiredVelocity, double omega0)
+   public void getCurrentDesiredICPPositionAndVelocity(FramePoint2d desiredPosition, FrameVector2d desiredVelocity, double omega0, double time)
    {
-      currentTime.add(deltaT.getDoubleValue());
+      currentTime.set(time - startTime.getDoubleValue());
       parameterGenerator.compute(currentTime.getDoubleValue());
       
       double parameter = parameterGenerator.getValue();

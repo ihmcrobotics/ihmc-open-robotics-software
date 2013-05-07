@@ -236,7 +236,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       centerOfMassHeightController.setDerivativeGain(GainCalculator.computeDerivativeGain(centerOfMassHeightController.getProportionalGain(), zeta));
 
       String namePrefix = "walking";
-      icpTrajectoryGenerator = new ConstantCoPInstantaneousCapturePointTrajectory(namePrefix, bipedSupportPolygons, controlDT, registry);
+      icpTrajectoryGenerator = new ConstantCoPInstantaneousCapturePointTrajectory(namePrefix, bipedSupportPolygons, registry);
 
       this.stateMachine = new StateMachine<WalkingState>(namePrefix + "State", namePrefix + "SwitchTime", WalkingState.class, yoTime, registry);    // this is used by name, and it is ugly.
 
@@ -610,7 +610,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
                updateBipedSupportPolygons(bipedSupportPolygons);    // need to always update biped support polygons after a change to the contact states
 
                icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, trajectoryTime, getOmega0(),
-                                                 amountToBeInsideDoubleSupport.getDoubleValue(), getSupportLeg());
+                                                 amountToBeInsideDoubleSupport.getDoubleValue(), getSupportLeg(), yoTime.getDoubleValue());
 
                icpTrajectoryHasBeenInitialized.set(true);
             }
@@ -625,7 +625,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          {
             FramePoint2d desiredICPLocal = new FramePoint2d(desiredICP.getReferenceFrame());
             FrameVector2d desiredICPVelocityLocal = new FrameVector2d(desiredICPVelocity.getReferenceFrame());
-            icpTrajectoryGenerator.pack(desiredICPLocal, desiredICPVelocityLocal, getOmega0());
+            icpTrajectoryGenerator.getCurrentDesiredICPPositionAndVelocity(desiredICPLocal, desiredICPVelocityLocal, getOmega0(), yoTime.getDoubleValue());
             desiredICP.set(desiredICPLocal);
             desiredICPVelocity.set(desiredICPVelocityLocal);
          }
@@ -682,7 +682,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
             transferToAndNextFootstepsData.setEstimatedStepTime(swingTimeCalculationProvider.getValue() + transferTimeProvider.getValue());
             transferToAndNextFootstepsData.setW0(getOmega0());
 
-            FramePoint2d finalDesiredICP = finalDesiredICPCalculator.getFinalDesiredICPForWalking(transferToAndNextFootstepsData);
+            finalDesiredICPCalculator.initialize(transferToAndNextFootstepsData);
+            FramePoint2d finalDesiredICP = finalDesiredICPCalculator.getFinalDesiredICP();
             double trajectoryTime = transferTimeProvider.getValue();
 
             finalDesiredICPInWorld.set(finalDesiredICP.changeFrameCopy(worldFrame));
@@ -800,7 +801,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
          FramePoint2d desiredICPLocal = new FramePoint2d(desiredICP.getReferenceFrame());
          FrameVector2d desiredICPVelocityLocal = new FrameVector2d(desiredICPVelocity.getReferenceFrame());
-         icpTrajectoryGenerator.pack(desiredICPLocal, desiredICPVelocityLocal, getOmega0());
+         icpTrajectoryGenerator.getCurrentDesiredICPPositionAndVelocity(desiredICPLocal, desiredICPVelocityLocal, getOmega0(), yoTime.getDoubleValue());
          desiredICP.set(desiredICPLocal);
          desiredICPVelocity.set(desiredICPVelocityLocal);
 
@@ -1084,7 +1085,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       transferToAndNextFootstepsData.setEstimatedStepTime(swingTimeCalculationProvider.getValue() + transferTimeProvider.getValue());
       transferToAndNextFootstepsData.setW0(getOmega0());
 
-      FramePoint2d finalDesiredICP = finalDesiredICPCalculator.getFinalDesiredICPForWalking(transferToAndNextFootstepsData);
+      finalDesiredICPCalculator.initialize(transferToAndNextFootstepsData);
+      FramePoint2d finalDesiredICP = finalDesiredICPCalculator.getFinalDesiredICP();
       finalDesiredICP.changeFrame(referenceFrame);
 
       finalDesiredICPInWorld.set(finalDesiredICP);
@@ -1236,7 +1238,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       updateBipedSupportPolygons(bipedSupportPolygons);
 
       icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, swingTimeCalculationProvider.getValue(), omega0,
-                                        amountToBeInsideSingleSupport.getDoubleValue(), getSupportLeg());
+                                        amountToBeInsideSingleSupport.getDoubleValue(), getSupportLeg(), yoTime.getDoubleValue());
 
       centerOfMassHeightTrajectoryGenerator.initialize(getSupportLeg(), nextFootstep, getContactStatesList());
    }

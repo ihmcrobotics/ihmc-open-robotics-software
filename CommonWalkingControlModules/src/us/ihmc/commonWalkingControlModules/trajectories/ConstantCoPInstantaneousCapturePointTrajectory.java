@@ -17,22 +17,24 @@ public class ConstantCoPInstantaneousCapturePointTrajectory implements Instantan
 {
    private final YoVariableRegistry registry;
    private final BipedSupportPolygons bipedSupportPolygons;
-   private final double deltaT;
    private final YoFramePoint2d initialDesiredICP;
    private final YoFramePoint2d finalDesiredICP;
+   
+   private final DoubleYoVariable startTime;
+   
    private final DoubleYoVariable moveTime;
    private final DoubleYoVariable currentTime;
 
-   public ConstantCoPInstantaneousCapturePointTrajectory(String namePrefix, BipedSupportPolygons bipedSupportPolygons, double deltaT,
-           YoVariableRegistry parentRegistry)
+   public ConstantCoPInstantaneousCapturePointTrajectory(String namePrefix, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry)
    {
       this.bipedSupportPolygons = bipedSupportPolygons;
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-      this.deltaT = deltaT;
 
       ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
       initialDesiredICP = new YoFramePoint2d(namePrefix + "InitialDesiredICP", "", referenceFrame, registry);
       finalDesiredICP = new YoFramePoint2d(namePrefix + "FinalDesiredICP", "", referenceFrame, registry);
+
+      startTime = new DoubleYoVariable(namePrefix + "ICPTrajectoryStartTime", registry);
 
       moveTime = new DoubleYoVariable(namePrefix + "ICPTrajectoryMoveTime", registry);
       currentTime = new DoubleYoVariable(namePrefix + "ICPTrajectoryCurrentTime", registry);
@@ -41,13 +43,15 @@ public class ConstantCoPInstantaneousCapturePointTrajectory implements Instantan
       reset();
    }
 
-   public void initialize(FramePoint2d initialDesiredICP, FramePoint2d finalDesiredICP, double moveTime, double omega0, double amountToBeInside, RobotSide supportSide)
+   public void initialize(FramePoint2d initialDesiredICP, FramePoint2d finalDesiredICP, double moveTime, double omega0, double amountToBeInside, RobotSide supportSide, double clockTime)
    {
       initialDesiredICP.changeFrame(this.initialDesiredICP.getReferenceFrame());
       finalDesiredICP.changeFrame(this.finalDesiredICP.getReferenceFrame());
 
       this.initialDesiredICP.set(initialDesiredICP);
       this.finalDesiredICP.set(finalDesiredICP);
+      
+      startTime.set(clockTime);
       currentTime.set(0.0);
 
       double epsilon = 1e-12;
@@ -76,10 +80,11 @@ public class ConstantCoPInstantaneousCapturePointTrajectory implements Instantan
       this.moveTime.set(moveTime);
    }
 
-   public void pack(FramePoint2d desiredPosition, FrameVector2d desiredVelocity, double omega0)
+   public void getCurrentDesiredICPPositionAndVelocity(FramePoint2d desiredPosition, FrameVector2d desiredVelocity, double omega0, double clockTime)
    {
-      double currentTime = this.currentTime.getDoubleValue();
-
+      double currentTime = clockTime - this.startTime.getDoubleValue();
+      this.currentTime.set(currentTime);
+      
       double expT = Math.exp(omega0 * currentTime);
       double expTf = Math.exp(omega0 * moveTime.getDoubleValue());
       double parameter = (expT - 1.0) / (expTf - 1.0);
@@ -99,8 +104,6 @@ public class ConstantCoPInstantaneousCapturePointTrajectory implements Instantan
       desiredICPVelocityLocal.scale(parameterd);
       desiredICPVelocityLocal.changeFrame(desiredVelocity.getReferenceFrame());
       desiredVelocity.set(desiredICPVelocityLocal);
-
-      this.currentTime.add(deltaT);
    }
 
    public boolean isDone()
