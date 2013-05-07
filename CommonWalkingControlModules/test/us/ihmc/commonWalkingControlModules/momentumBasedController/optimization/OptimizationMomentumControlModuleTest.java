@@ -87,7 +87,7 @@ public class OptimizationMomentumControlModuleTest
    }
 
    @Test
-   public void testTaskSpaceConstraints()
+   public void testMomentumAndTaskSpaceConstraints()
    {
       Random random = new Random(1223525L);
       Vector3d[] jointAxes = new Vector3d[]
@@ -118,31 +118,31 @@ public class OptimizationMomentumControlModuleTest
       momentumRateOfChangeData.set(momentumRateOfChangeIn);
       momentumControlModule.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
 
-      GeometricJacobian jacobian = new GeometricJacobian(elevator, endEffector,
-                                      endEffector.getBodyFixedFrame());
+      RigidBody base = elevator; // rootJoint.getSuccessor();
+      GeometricJacobian jacobian = new GeometricJacobian(base, endEffector, endEffector.getBodyFixedFrame());
       jacobian.compute();
       TaskspaceConstraintData taskSpaceConstraintData = new TaskspaceConstraintData();
-      SpatialAccelerationVector endEffectorSpatialAcceleration = new SpatialAccelerationVector(endEffector.getBodyFixedFrame(), elevator.getBodyFixedFrame(), endEffector.getBodyFixedFrame());
+      SpatialAccelerationVector endEffectorSpatialAcceleration = new SpatialAccelerationVector(endEffector.getBodyFixedFrame(), base.getBodyFixedFrame(),
+                                                                    endEffector.getBodyFixedFrame());
       endEffectorSpatialAcceleration.setAngularPart(RandomTools.generateRandomVector(random));
       endEffectorSpatialAcceleration.setLinearPart(RandomTools.generateRandomVector(random));
       taskSpaceConstraintData.set(endEffectorSpatialAcceleration);
-      momentumControlModule.setDesiredSpatialAcceleration(jacobian, taskSpaceConstraintData, 10.0);
-
+      momentumControlModule.setDesiredSpatialAcceleration(jacobian, taskSpaceConstraintData); // , 10.0);
 
       momentumControlModule.compute(contactStates, null);
       SpatialForceVector momentumRateOfChangeOut = momentumControlModule.getDesiredCentroidalMomentumRate();
-
-      assertWrenchesSumUpToMomentumDot(momentumControlModule.getExternalWrenches(), momentumRateOfChangeOut, gravityZ, totalMass, centerOfMassFrame);
-      assertWrenchesInFrictionCones(momentumControlModule.getExternalWrenches(), contactStates, coefficientOfFriction);
-      JUnitTools.assertSpatialForceVectorEquals(momentumRateOfChangeIn, momentumRateOfChangeOut, 1e-1);
 
       TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), elevator);
       SpatialAccelerationCalculator spatialAccelerationCalculator = createSpatialAccelerationCalculator(twistCalculator, elevator);
       twistCalculator.compute();
       spatialAccelerationCalculator.compute();
       SpatialAccelerationVector endEffectorAccelerationBack = new SpatialAccelerationVector();
-      spatialAccelerationCalculator.packRelativeAcceleration(endEffectorAccelerationBack, elevator, endEffector);
+      spatialAccelerationCalculator.packRelativeAcceleration(endEffectorAccelerationBack, base, endEffector);
       JUnitTools.assertSpatialMotionVectorEquals(endEffectorSpatialAcceleration, endEffectorAccelerationBack, 1e-3);
+
+      assertWrenchesSumUpToMomentumDot(momentumControlModule.getExternalWrenches(), momentumRateOfChangeOut, gravityZ, totalMass, centerOfMassFrame);
+      JUnitTools.assertSpatialForceVectorEquals(momentumRateOfChangeIn, momentumRateOfChangeOut, 1e-1);
+      assertWrenchesInFrictionCones(momentumControlModule.getExternalWrenches(), contactStates, coefficientOfFriction);
    }
 
    private OptimizationMomentumControlModule createMomentumControlModule(InverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame,
@@ -160,7 +160,7 @@ public class OptimizationMomentumControlModuleTest
       ReferenceFrame rootFrame = elevator.getBodyFixedFrame();
       SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootFrame, rootFrame, rootFrame);
       SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, rootFrame, rootAcceleration, twistCalculator,
-            true, true);
+                                                                       true, true);
 
       return spatialAccelerationCalculator;
    }
@@ -185,7 +185,7 @@ public class OptimizationMomentumControlModuleTest
    private void addContactState(double coefficientOfFriction, RigidBody endEffector, LinkedHashMap<ContactablePlaneBody, PlaneContactState> contactStates)
    {
       ReferenceFrame soleFrame = endEffector.getBodyFixedFrame();
-      ContactablePlaneBody contactablePlaneBody = new RectangularContactableBody(endEffector, soleFrame, 1.0, -1.0, 1.0, -1.0);
+      ContactablePlaneBody contactablePlaneBody = new RectangularContactableBody(endEffector, soleFrame, 1.0, -2.0, 3.0, -4.0);
       YoPlaneContactState contactState = new YoPlaneContactState("testContactState", endEffector.getParentJoint().getFrameAfterJoint(), soleFrame,
                                             new YoVariableRegistry("bla"));
       contactState.set(contactablePlaneBody.getContactPoints2d(), coefficientOfFriction);
@@ -213,8 +213,8 @@ public class OptimizationMomentumControlModuleTest
    {
       MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(new YoVariableRegistry("test1"));
       momentumOptimizationSettings.setMomentumWeight(1.0, 1.0, 1.0, 1.0);
-      momentumOptimizationSettings.setDampedLeastSquaresFactor(1e-11);
-      momentumOptimizationSettings.setGroundReactionForceRegularization(1e-5);
+//      momentumOptimizationSettings.setDampedLeastSquaresFactor(1e-11);
+//      momentumOptimizationSettings.setGroundReactionForceRegularization(1e-5);
       momentumOptimizationSettings.setRhoMin(0.0);
 
       return momentumOptimizationSettings;

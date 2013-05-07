@@ -43,7 +43,6 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable("hasNotConvergedInPast", registry);
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final Map<ContactablePlaneBody, Wrench> wrenches = new LinkedHashMap<ContactablePlaneBody, Wrench>();
-   private final InverseDynamicsJoint rootJoint;    // TODO: make this not be special
    private final MomentumRateOfChangeData momentumRateOfChangeData;
 
    public OptimizationMomentumControlModule(InverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame, double controlDT,
@@ -62,7 +61,6 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
       this.jointsToOptimizeFor = jointsToOptimizeFor;
 
-      this.rootJoint = rootJoint;
       this.momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
 
       parentRegistry.addChild(registry);
@@ -86,11 +84,14 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       primaryMotionConstraintHandler.compute();
 
       hardMotionConstraintEnforcer.compute(centroidalMomentumHandler.getCentroidalMomentumMatrixPart(jointsToOptimizeFor),
-              centroidalMomentumHandler.getMomentumDotEquationRightHandSide(momentumRateOfChangeData), primaryMotionConstraintHandler.getJacobian(),
+            primaryMotionConstraintHandler.getJacobian(),
               primaryMotionConstraintHandler.getRightHandSide());
 
+      DenseMatrix64F momentumDotEquationRightHandSide = centroidalMomentumHandler.getMomentumDotEquationRightHandSide(momentumRateOfChangeData);
+      hardMotionConstraintEnforcer.constrainMomentumEquationRightHandSide(momentumDotEquationRightHandSide);
+
       momentumOptimizerNativeInput.setCentroidalMomentumMatrix(hardMotionConstraintEnforcer.getConstrainedCentroidalMomentumMatrix());
-      momentumOptimizerNativeInput.setMomentumDotEquationRightHandSide(hardMotionConstraintEnforcer.getConstrainedMomentumEquationRightHandSide());
+      momentumOptimizerNativeInput.setMomentumDotEquationRightHandSide(momentumDotEquationRightHandSide);
 
 
 //      momentumOptimizerNativeInput.setCentroidalMomentumMatrix(centroidalMomentumHandler.getCentroidalMomentumMatrixPart(jointsToOptimizeFor));
@@ -101,8 +102,10 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
       contactPointWrenchMatrixCalculator.computeMatrix(contactStates.values());
       momentumOptimizerNativeInput.setContactPointWrenchMatrix(contactPointWrenchMatrixCalculator.getMatrix());
+      DenseMatrix64F wrenchEquationRightHandSide = externalWrenchHandler.computeWrenchEquationRightHandSide(centroidalMomentumHandler.getCentroidalMomentumConvectiveTerm());
+      hardMotionConstraintEnforcer.constrainWrenchEquationRightHandSide(wrenchEquationRightHandSide);
       momentumOptimizerNativeInput.setWrenchEquationRightHandSide(
-          externalWrenchHandler.computeWrenchEquationRightHandSide(centroidalMomentumHandler.getCentroidalMomentumConvectiveTerm()));
+            wrenchEquationRightHandSide);
 
       momentumOptimizerNativeInput.setMomentumDotWeight(momentumOptimizationSettings.getMomentumDotWeight(momentumRateOfChangeData.getMomentumSubspace()));
       momentumOptimizerNativeInput.setJointAccelerationRegularization(
@@ -132,13 +135,12 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
          wrenches.put(contactablePlaneBody, wrench);
       }
 
-//      TODO: reenable
       DenseMatrix64F jointAccelerations = hardMotionConstraintEnforcer.computeConstrainedJointAccelerations(output.getJointAccelerations());
 
 //      DenseMatrix64F jointAccelerations = output.getJointAccelerations();
       ScrewTools.setDesiredAccelerations(jointsToOptimizeFor, jointAccelerations);
 
-      centroidalMomentumHandler.computeCentroidalMomentumRate(jointsToOptimizeFor, output.getJointAccelerations());
+      centroidalMomentumHandler.computeCentroidalMomentumRate(jointsToOptimizeFor, jointAccelerations);
    }
 
    private void optimize(MomentumOptimizerNativeInput momentumOptimizerNativeInput)
@@ -173,7 +175,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
    public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
    {
-      primaryMotionConstraintHandler.setDesiredSpatialAcceleration(jacobian.getJointsInOrder(), jacobian, taskspaceConstraintData, Double.POSITIVE_INFINITY); // weight is arbitrary, actually
+      primaryMotionConstraintHandler.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData, Double.POSITIVE_INFINITY); // weight is arbitrary, actually
    }
 
    public void setDesiredRateOfChangeOfMomentum(MomentumRateOfChangeData momentumRateOfChangeData)
@@ -188,7 +190,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
    public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData, double weight)
    {
-      secondaryMotionConstraintHandler.setDesiredSpatialAcceleration(jacobian.getJointsInOrder(), jacobian, taskspaceConstraintData, weight);
+      secondaryMotionConstraintHandler.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData, weight);
    }
 
    public SpatialForceVector getDesiredCentroidalMomentumRate()
