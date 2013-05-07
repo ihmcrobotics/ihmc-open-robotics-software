@@ -515,7 +515,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    }
 
    private List<FramePoint> getWaypointsForStepOnOrOff()
-   {
+   {     
       List<FramePoint> waypoints = new ArrayList<FramePoint>();
       waypoints.add(allPositions[endpointIndices[0]].getFramePointCopy());
       waypoints.add(allPositions[endpointIndices[1]].getFramePointCopy());
@@ -523,7 +523,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
       for (FramePoint waypoint : waypoints)
       {
-         waypoint.setZ(waypoints.get(indexOfMaxZ).getZ() + SimpleTwoWaypointTrajectoryParameters.getLowStepGroundClearance());
+         waypoint.setZ(waypoints.get(indexOfMaxZ).getZ() + SimpleTwoWaypointTrajectoryParameters.getDefaultGroundClearance());
       }
 
       FrameVector maxZPointOffset = allPositions[endpointIndices[1]].getFrameVectorCopy();
