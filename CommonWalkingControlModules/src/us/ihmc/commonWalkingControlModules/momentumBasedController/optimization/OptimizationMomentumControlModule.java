@@ -137,6 +137,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
       DenseMatrix64F jointAccelerations = hardMotionConstraintEnforcer.computeConstrainedJointAccelerations(output.getJointAccelerations());
 
+//      DenseMatrix64F jointAccelerations = output.getJointAccelerations();
       ScrewTools.setDesiredAccelerations(jointsToOptimizeFor, jointAccelerations);
 
 //      for (InverseDynamicsJoint inverseDynamicsJoint : jointsToOptimizeFor)
@@ -146,7 +147,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 //         inverseDynamicsJoint.packDesiredAccelerationMatrix(desiredAccelerationMatrix, 0);
 //         for (int i = 0; i < desiredAccelerationMatrix.getNumRows(); i++)
 //         {
-//            System.out.print(desiredAccelerationMatrix.get(i) + ", ");
+//            System.out.print(desiredAccelerationMatrix.get(i, 0) + ", ");
 //         }
 //         System.out.println();
 //      }
