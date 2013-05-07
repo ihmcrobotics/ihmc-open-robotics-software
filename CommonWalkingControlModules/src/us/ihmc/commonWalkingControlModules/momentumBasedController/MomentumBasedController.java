@@ -36,7 +36,6 @@ import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
@@ -237,7 +236,8 @@ public class MomentumBasedController implements RobotController
       return k * (qDesired - joint.getQ()) + d * (qdDesired - joint.getQd());
    }
 
-   protected void setExternalHandWrench(RobotSide robotSide, Wrench handWrench)
+   // TODO: visibility changed for "public"
+   public void setExternalHandWrench(RobotSide robotSide, Wrench handWrench)
    {
       inverseDynamicsCalculator.setExternalWrench(fullRobotModel.getHand(robotSide), handWrench);
    }
@@ -361,7 +361,8 @@ public class MomentumBasedController implements RobotController
       }
    }
 
-   protected ReferenceFrame getHandFrame(RobotSide robotSide)
+   // TODO: visibility changed for "public"
+   public ReferenceFrame getHandFrame(RobotSide robotSide)
    {
       return fullRobotModel.getHand(robotSide).getBodyFixedFrame();
    }
@@ -371,7 +372,8 @@ public class MomentumBasedController implements RobotController
       updatables.add(updatable);
    }
 
-   protected void doPDControl(OneDoFJoint[] joints, double k, double d)
+   // TODO: visibility changed for "public"
+   public void doPDControl(OneDoFJoint[] joints, double k, double d)
    {
       for (OneDoFJoint joint : joints)
       {
@@ -445,7 +447,7 @@ public class MomentumBasedController implements RobotController
    }
 
    
-   // TODO: Following has been added for huge refactor. Need to be checked.
+   // TODO: Following has been added for big refactor. Need to be checked.
    
    public LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> getContactStates() {
       return contactStates;

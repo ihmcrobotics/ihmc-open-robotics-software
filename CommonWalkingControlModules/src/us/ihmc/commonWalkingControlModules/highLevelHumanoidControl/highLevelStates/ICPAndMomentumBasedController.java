@@ -34,7 +34,7 @@ import us.ihmc.utilities.screwTheory.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class ICPAndMomentumBasedController extends MomentumBasedController
+public class ICPAndMomentumBasedController extends MomentumBasedController
 {
    protected final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
    protected final BipedSupportPolygons bipedSupportPolygons;
@@ -89,7 +89,8 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
       super.initialize();
    }
 
-   protected double getOmega0()
+   // TODO: visibility changed for "public"
+   public double getOmega0()
    {
       return omega0.getDoubleValue();
    }
@@ -179,4 +180,43 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
          computeCapturePoint();
       }
    }
+   
+   
+   // TODO: Following has been added for big refactor. Need to be checked.
+   
+   public EnumYoVariable<RobotSide> getYoSupportLeg()
+   {
+      return supportLeg;
+   }
+
+   public DoubleYoVariable getDesiredCoMHeightAcceleration()
+   {
+      return desiredCoMHeightAcceleration;
+   }
+   
+   public BipedSupportPolygons getBipedSupportPolygons()
+   {
+      return bipedSupportPolygons;
+   }
+   
+   public YoFramePoint getCapturePoint()
+   {
+      return capturePoint;
+   }
+
+   public YoFramePoint2d getDesiredICP()
+   {
+      return desiredICP;
+   }
+
+   public YoFrameVector2d getDesiredICPVelocity()
+   {
+      return desiredICPVelocity;
+   }
+
+   public SideDependentList<? extends ContactablePlaneBody> getBipedFeet()
+   {
+      return bipedFeet;
+   }
+
 }

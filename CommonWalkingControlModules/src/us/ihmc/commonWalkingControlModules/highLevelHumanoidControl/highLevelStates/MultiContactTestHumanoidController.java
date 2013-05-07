@@ -39,7 +39,7 @@ import com.yobotics.simulationconstructionset.util.statemachines.State;
 public class MultiContactTestHumanoidController extends State<HighLevelState>
 {
    private final String name = getClass().getSimpleName();
-   protected final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoVariableRegistry registry = new YoVariableRegistry(name);
    
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    
