@@ -37,7 +37,7 @@ public class EquivalentConstantCoPCalculator
    public static FramePoint2d computePredictedICP(FramePoint2d currentCapturePoint, FramePoint2d cop, double time, double comHeight, double gravity)
    {
       double omega0 = computeOmega0(comHeight, gravity);
-      return computeICPMotionWithConstantCMP(currentCapturePoint, cop, time, omega0);
+      return computeICPPositionWithConstantCMP(currentCapturePoint, cop, time, omega0);
    }
 
    /*
@@ -45,17 +45,28 @@ public class EquivalentConstantCoPCalculator
     * With a positive time, you're computing a future ICP.
     * With a negative time, you're computing a past ICP.
     */
-   public static FramePoint2d computeICPMotionWithConstantCMP(FramePoint2d icp, FramePoint2d cmp, double time, double omega0)
+   public static FramePoint2d computeICPPositionWithConstantCMP(FramePoint2d icp, FramePoint2d cmp, double time, double omega0)
    {
       icp.checkReferenceFrameMatch(cmp);
       if (Double.isNaN(omega0))
          throw new RuntimeException("omega0 is NaN");
-      double x = computeICPMotionWithConstantCMP(icp.getX(), cmp.getX(), time, omega0);
-      double y = computeICPMotionWithConstantCMP(icp.getY(), cmp.getY(), time, omega0);
+      double x = computeICPPositionWithConstantCMP(icp.getX(), cmp.getX(), time, omega0);
+      double y = computeICPPositionWithConstantCMP(icp.getY(), cmp.getY(), time, omega0);
 
       return new FramePoint2d(icp.getReferenceFrame(), x, y);
    }
 
+   public static FrameVector2d computeICPVelocityWithConstantCMP(FramePoint2d icp, FramePoint2d cmp, double time, double omega0)
+   {
+      icp.checkReferenceFrameMatch(cmp);
+      if (Double.isNaN(omega0))
+         throw new RuntimeException("omega0 is NaN");
+      double xVel = computeICPVelocityWithConstantCMP(icp.getX(), cmp.getX(), time, omega0);
+      double yVel = computeICPVelocityWithConstantCMP(icp.getY(), cmp.getY(), time, omega0);
+
+      return new FrameVector2d(icp.getReferenceFrame(), xVel, yVel);
+   }
+   
    public static FramePoint2d computeIntermediateICPWithConstantCMP(FramePoint2d icpInitial, FramePoint2d icpFinal, double totalTime, double intermediateTime, double omega0)
    {
       double expT = Math.exp(omega0 * intermediateTime);
@@ -71,11 +82,16 @@ public class EquivalentConstantCoPCalculator
       return ret;
    }
 
-   public static double computeICPMotionWithConstantCMP(double currentCapturePoint, double cop, double time, double omega0)
+   public static double computeICPPositionWithConstantCMP(double currentCapturePoint, double cop, double time, double omega0)
    {
       return (currentCapturePoint - cop) * Math.exp(omega0 * time) + cop;
    }
 
+   public static double computeICPVelocityWithConstantCMP(double currentCapturePoint, double cop, double time, double omega0)
+   {
+      return omega0 * (currentCapturePoint - cop) * Math.exp(omega0 * time);
+   }
+   
    private static double computeOmega0(double comHeight, double gravity)
    {
       return Math.sqrt(gravity / comHeight);
