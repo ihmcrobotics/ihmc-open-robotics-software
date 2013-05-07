@@ -11,26 +11,18 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModule;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OrientationTrajectoryData;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
-import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.trajectories.FixedOrientationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.FixedPositionTrajectoryGenerator;
 import us.ihmc.controlFlow.ControlFlowInputPort;
-import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -40,7 +32,6 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
@@ -49,7 +40,9 @@ public class MultiContactTestHumanoidController extends State<HighLevelState>
 {
    private final String name = getClass().getSimpleName();
    protected final YoVariableRegistry registry = new YoVariableRegistry(name);
+   
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   
    private final ControlFlowInputPort<FramePoint> desiredCoMPositionPort;
    private final YoFramePoint desiredCoMPosition = new YoFramePoint("desiredCoM", worldFrame, registry);
 
@@ -64,26 +57,19 @@ public class MultiContactTestHumanoidController extends State<HighLevelState>
 
    private final ReferenceFrame pelvisFrame;
 
-   private final LinkedHashMap<ContactablePlaneBody, EndEffectorControlModule> endEffectorControlModules = new LinkedHashMap<ContactablePlaneBody,
-                                                                                                              EndEffectorControlModule>();
+   private final LinkedHashMap<ContactablePlaneBody, EndEffectorControlModule> endEffectorControlModules = new LinkedHashMap<ContactablePlaneBody, EndEffectorControlModule>();
    private final LinkedHashMap<ContactablePlaneBody, GeometricJacobian> jacobians = new LinkedHashMap<ContactablePlaneBody, GeometricJacobian>();
-   private final LinkedHashMap<ContactablePlaneBody, FixedPositionTrajectoryGenerator> swingPositionTrajectoryGenerators =
-      new LinkedHashMap<ContactablePlaneBody, FixedPositionTrajectoryGenerator>();
-   private final LinkedHashMap<ContactablePlaneBody, FixedOrientationTrajectoryGenerator> swingOrientationTrajectoryGenerators =
-      new LinkedHashMap<ContactablePlaneBody, FixedOrientationTrajectoryGenerator>();
+   private final LinkedHashMap<ContactablePlaneBody, FixedPositionTrajectoryGenerator> swingPositionTrajectoryGenerators = new LinkedHashMap<ContactablePlaneBody, FixedPositionTrajectoryGenerator>();
+   private final LinkedHashMap<ContactablePlaneBody, FixedOrientationTrajectoryGenerator> swingOrientationTrajectoryGenerators = new LinkedHashMap<ContactablePlaneBody, FixedOrientationTrajectoryGenerator>();
 
    private final MomentumBasedController momentumBasedController;
 
-   public MultiContactTestHumanoidController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
-           CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime, double gravityZ,
-           TwistCalculator twistCalculator, HashMap<ContactablePlaneBody, RigidBody> contactablePlaneBodiesAndBases, double controlDT,
-           ProcessedOutputsInterface processedOutputs, MomentumControlModule momentumControlModule, ArrayList<Updatable> updatables,
-           MomentumRateOfChangeControlModule momentumRateOfChangeControlModule, RootJointAccelerationControlModule rootJointAccelerationControlModule,
-           ControlFlowInputPort<FramePoint> desiredCoMPositionPort, ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationPort, StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, MomentumBasedController momentumBasedController)
+   public MultiContactTestHumanoidController(FullRobotModel fullRobotModel, DoubleYoVariable yoTime, TwistCalculator twistCalculator,
+         HashMap<ContactablePlaneBody, RigidBody> contactablePlaneBodiesAndBases, ControlFlowInputPort<FramePoint> desiredCoMPositionPort,
+         ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationPort, MomentumBasedController momentumBasedController)
    {
       super(HighLevelState.MULTI_CONTACT);
-      
+
       this.momentumBasedController = momentumBasedController;
       this.desiredCoMPositionPort = desiredCoMPositionPort;
       this.desiredPelvisOrientationPort = desiredPelvisOrientationPort;
@@ -112,15 +98,15 @@ public class MultiContactTestHumanoidController extends State<HighLevelState>
 
          String bodyName = contactablePlaneBody.getRigidBody().getName();
          FixedPositionTrajectoryGenerator swingPositionTrajectoryGenerator = new FixedPositionTrajectoryGenerator(bodyName + "DesiredPosition", worldFrame,
-                                                                                registry);
+               registry);
          swingPositionTrajectoryGenerators.put(contactablePlaneBody, swingPositionTrajectoryGenerator);
 
          FixedOrientationTrajectoryGenerator swingOrientationTrajectoryGenerator = new FixedOrientationTrajectoryGenerator(bodyName + "DesiredOrientation",
-                                                                                      worldFrame, registry);
+               worldFrame, registry);
          swingOrientationTrajectoryGenerators.put(contactablePlaneBody, swingOrientationTrajectoryGenerator);
 
          EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(contactablePlaneBody, jacobian, swingPositionTrajectoryGenerator,
-                                                                null, swingOrientationTrajectoryGenerator, null, yoTime, twistCalculator, registry);
+               null, swingOrientationTrajectoryGenerator, null, yoTime, twistCalculator, registry);
          endEffectorControlModules.put(contactablePlaneBody, endEffectorControlModule);
 
          positionControlJoints.removeAll(Arrays.asList(jacobian.getJointsInOrder()));
@@ -158,7 +144,6 @@ public class MultiContactTestHumanoidController extends State<HighLevelState>
       doPelvisControl();
       doJointPositionControl();
    }
-
 
    private void doChestcontrol()
    {
@@ -216,18 +201,21 @@ public class MultiContactTestHumanoidController extends State<HighLevelState>
    }
 
    //TODO: New methods coming from extending State class
-   public void doAction() {
+   public void doAction()
+   {
       doMotionControl();
    }
 
-   public void doTransitionIntoAction() {
+   public void doTransitionIntoAction()
+   {
       initialize();
    }
 
    @Override
-   public void doTransitionOutOfAction() {
+   public void doTransitionOutOfAction()
+   {
       // TODO Auto-generated method stub
-      
+
    }
 
    public YoVariableRegistry getYoVariableRegistry()
