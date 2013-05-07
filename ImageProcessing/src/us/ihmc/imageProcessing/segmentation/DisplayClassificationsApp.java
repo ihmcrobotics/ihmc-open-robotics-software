@@ -27,7 +27,7 @@ public class DisplayClassificationsApp extends JPanel
       ConvertBufferedImage.convertFrom(image, colorRGB);
       ConvertBufferedImage.orderBandsIntoRGB(colorRGB, image);
 
-      GaussianColorClassifier.classify(colorRGB,model,12,binary);
+      GaussianColorClassifier.classify(colorRGB,model,9.6,binary);
 
       int color = 0xe394bb;
 
@@ -43,7 +43,8 @@ public class DisplayClassificationsApp extends JPanel
    }
 
    public static void main( String args[] ) {
-      BufferedImage input = UtilImageIO.loadImage("../ImageProcessing/media/drcsim_2_6/left000001.png");
+//      BufferedImage input = UtilImageIO.loadImage("../ImageProcessing/media/drcsim_2_6/left000001.png");
+      BufferedImage input = UtilImageIO.loadImage("../ImageProcessing/media/drcsim_2_6/turn_90_left_03.png");
 //      Gaussian3D_F64 model = BoofMiscOps.loadXML("../ImageProcessing/models/gaussian_line.xml");
       Gaussian3D_F64 model = BoofMiscOps.loadXML("test_line.xml");
 

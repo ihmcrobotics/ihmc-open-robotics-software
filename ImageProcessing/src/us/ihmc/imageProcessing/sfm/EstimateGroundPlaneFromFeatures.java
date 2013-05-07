@@ -4,12 +4,9 @@ import boofcv.alg.geo.MultiViewOps;
 import boofcv.alg.geo.PerspectiveOps;
 import boofcv.alg.geo.h.HomographyInducedStereo3Pts;
 import boofcv.alg.sfm.robust.DistanceHomographySq;
-import boofcv.alg.sfm.robust.GenerateHomographyLinear;
 import boofcv.struct.FastQueue;
-import boofcv.struct.Tuple2;
 import boofcv.struct.calib.StereoParameters;
 import boofcv.struct.geo.AssociatedPair;
-import georegression.geometry.RotationMatrixGenerator;
 import georegression.struct.homo.Homography2D_F64;
 import georegression.struct.homo.UtilHomography;
 import georegression.struct.point.Point2D_F64;
@@ -19,10 +16,6 @@ import org.ddogleg.fitting.modelset.ModelGenerator;
 import org.ddogleg.fitting.modelset.ModelMatcher;
 import org.ddogleg.fitting.modelset.ransac.Ransac;
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.SpecializedOps;
-import org.ejml.simple.SimpleMatrix;
-import org.ejml.simple.SimpleSVD;
 
 import java.util.List;
 
@@ -124,7 +117,8 @@ public class EstimateGroundPlaneFromFeatures
       System.out.println("Convert pixel to norm: "+(System.currentTimeMillis()-start));
 
       // Estimate the plane's normal and the distance from the plane
-      estimatePlane(matches.toList());
+      if( !estimatePlane(matches.toList()) )
+         return false;
 
       System.out.println("Distance from plane: "+selectBest.getDistanceFromPlane());
       selectBest.getNormal().print();
@@ -139,14 +133,16 @@ public class EstimateGroundPlaneFromFeatures
     * The decomposition generates several hypotheses, but only the one which is the best match to the known camera
     * baseline is used.
     */
-   private void estimatePlane(List<AssociatedPair> matches)
+   private boolean estimatePlane(List<AssociatedPair> matches)
    {
       // RANSAC to find best homography
       if( !robustH.process(matches) )
-         throw new IllegalArgumentException("Failed");
+         return false;
 
       DenseMatrix64F Hd = UtilHomography.convert(robustH.getModel(), (DenseMatrix64F) null);
       selectBest.process(Hd,true);
+
+      return true;
    }
 
    public void getInliers( List<Point2D_F64> left , List<Point2D_F64> right ,
