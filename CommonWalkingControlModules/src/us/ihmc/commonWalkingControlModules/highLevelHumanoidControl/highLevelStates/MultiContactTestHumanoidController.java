@@ -39,12 +39,17 @@ import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.statemachines.State;
 
-public class MultiContactTestHumanoidController extends MomentumBasedController
+public class MultiContactTestHumanoidController extends State<HighLevelState>
 {
+   private final String name = getClass().getSimpleName();
+   protected final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ControlFlowInputPort<FramePoint> desiredCoMPositionPort;
    private final YoFramePoint desiredCoMPosition = new YoFramePoint("desiredCoM", worldFrame, registry);
 
@@ -67,6 +72,7 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
    private final LinkedHashMap<ContactablePlaneBody, FixedOrientationTrajectoryGenerator> swingOrientationTrajectoryGenerators =
       new LinkedHashMap<ContactablePlaneBody, FixedOrientationTrajectoryGenerator>();
 
+   private final MomentumBasedController momentumBasedController;
 
    public MultiContactTestHumanoidController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
            CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime, double gravityZ,
@@ -74,11 +80,11 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
            ProcessedOutputsInterface processedOutputs, MomentumControlModule momentumControlModule, ArrayList<Updatable> updatables,
            MomentumRateOfChangeControlModule momentumRateOfChangeControlModule, RootJointAccelerationControlModule rootJointAccelerationControlModule,
            ControlFlowInputPort<FramePoint> desiredCoMPositionPort, ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationPort, StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, MomentumBasedController momentumBasedController)
    {
-      super(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator,
-            contactablePlaneBodiesAndBases.keySet(), controlDT, processedOutputs, momentumControlModule, updatables, momentumRateOfChangeControlModule,
-            rootJointAccelerationControlModule, stateEstimationDataFromControllerSink, null, dynamicGraphicObjectsListRegistry);
+      super(HighLevelState.MULTI_CONTACT);
+      
+      this.momentumBasedController = momentumBasedController;
       this.desiredCoMPositionPort = desiredCoMPositionPort;
       this.desiredPelvisOrientationPort = desiredPelvisOrientationPort;
 
@@ -121,25 +127,24 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
       }
    }
 
-   @Override
    public void initialize()
    {
-      super.initialize();
-
       for (OneDoFJoint oneDoFJoint : positionControlJoints)
       {
          desiredJointPositions.put(oneDoFJoint, oneDoFJoint.getQ());
       }
 
-      FramePoint currentCoM = new FramePoint(centerOfMassFrame);
+      FramePoint currentCoM = new FramePoint(momentumBasedController.getCenterOfMassFrame());
+      System.out.println(this.getClass().getSimpleName() + ": " + currentCoM);
       currentCoM.changeFrame(desiredCoMPosition.getReferenceFrame());
+      System.out.println(this.getClass().getSimpleName() + ": " + currentCoM);
       desiredCoMPosition.set(currentCoM);
 
       FrameOrientation currentPelvisOrientaton = new FrameOrientation(pelvisFrame);
       currentPelvisOrientaton.changeFrame(desiredPelvisOrientation.getReferenceFrame());
       desiredPelvisOrientation.set(currentPelvisOrientaton);
 
-      for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodies)
+      for (ContactablePlaneBody contactablePlaneBody : momentumBasedController.getContactablePlaneBodies())
       {
          ReferenceFrame endEffectorFrame = endEffectorControlModules.get(contactablePlaneBody).getEndEffectorFrame();
          swingPositionTrajectoryGenerators.get(contactablePlaneBody).setPosition(new FramePoint(endEffectorFrame));
@@ -147,7 +152,6 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
       }
    }
 
-   @Override
    public void doMotionControl()
    {
       doChestcontrol();
@@ -161,7 +165,7 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
    private void doChestcontrol()
    {
       chestOrientationControlModule.compute();
-      momentumControlModule.setDesiredSpatialAcceleration(spineJacobian, chestOrientationControlModule.getTaskspaceConstraintData());
+      momentumBasedController.setDesiredSpatialAcceleration(spineJacobian, chestOrientationControlModule.getTaskspaceConstraintData());
    }
 
    private void doEndEffectorControl()
@@ -169,15 +173,15 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
       for (ContactablePlaneBody contactablePlaneBody : endEffectorControlModules.keySet())
       {
          EndEffectorControlModule endEffectorControlModule = endEffectorControlModules.get(contactablePlaneBody);
-         List<FramePoint2d> contactPoints = contactStates.get(contactablePlaneBody).getContactPoints2d();
+         List<FramePoint2d> contactPoints = momentumBasedController.getContactStates().get(contactablePlaneBody).getContactPoints2d();
          ConstraintType constraintType = EndEffectorControlModule.getUnconstrainedForZeroAndFullyConstrainedForFourContactPoints(contactPoints.size());
          endEffectorControlModule.setContactPoints(contactPoints, constraintType);
-         endEffectorControlModule.setCenterOfPressure(getCoP(contactablePlaneBody));
+         endEffectorControlModule.setCenterOfPressure(momentumBasedController.getCoP(contactablePlaneBody));
          endEffectorControlModule.startComputation();
          endEffectorControlModule.waitUntilComputationIsDone();
          TaskspaceConstraintData taskspaceConstraintData = endEffectorControlModule.getTaskSpaceConstraintOutputPort().getData();
          GeometricJacobian jacobian = endEffectorControlModule.getJacobian();
-         momentumControlModule.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
+         momentumBasedController.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
       }
    }
 
@@ -198,19 +202,39 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
    {
       for (OneDoFJoint oneDoFJoint : positionControlJoints)
       {
-         doPDControl(oneDoFJoint, 100.0, 20.0, desiredJointPositions.get(oneDoFJoint), 0.0);
+         momentumBasedController.doPDControl(oneDoFJoint, 100.0, 20.0, desiredJointPositions.get(oneDoFJoint), 0.0);
       }
    }
 
    public void setContactablePlaneBodiesInContact(ContactablePlaneBody contactablePlaneBody, boolean inContact, double coefficientOfFriction)
    {
-      YoPlaneContactState contactState = contactStates.get(contactablePlaneBody);
+      YoPlaneContactState contactState = momentumBasedController.getContactStates().get(contactablePlaneBody);
       if (inContact)
       {
          contactState.set(contactablePlaneBody.getContactPoints2d(), coefficientOfFriction);
       }
       else
          contactState.set(new ArrayList<FramePoint2d>(), coefficientOfFriction);
+   }
+
+   //TODO: New methods coming from extending State class
+   public void doAction() {
+      doMotionControl();
+   }
+
+   public void doTransitionIntoAction() {
+      initialize();
+   }
+
+   @Override
+   public void doTransitionOutOfAction() {
+      // TODO Auto-generated method stub
+      
+   }
+
+   public YoVariableRegistry getYoVariableRegistry()
+   {
+      return registry;
    }
 
 }

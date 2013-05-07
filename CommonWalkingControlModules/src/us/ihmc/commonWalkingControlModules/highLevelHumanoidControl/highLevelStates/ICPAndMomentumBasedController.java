@@ -54,7 +54,7 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       super(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, bipedFeet.values(),
-            controlDT, processedOutputs, momentumControlModule, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule, stateEstimationFromControllerDataSink, null,
+            controlDT, processedOutputs, momentumControlModule, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule, stateEstimationFromControllerDataSink,
             dynamicGraphicObjectsListRegistry);
 
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
