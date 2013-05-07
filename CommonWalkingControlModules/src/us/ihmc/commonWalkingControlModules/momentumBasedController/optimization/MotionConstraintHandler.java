@@ -65,8 +65,8 @@ public class MotionConstraintHandler
       nullspaceIndex = 0;
    }
 
-   public void setDesiredSpatialAcceleration(InverseDynamicsJoint[] constrainedJoints, GeometricJacobian jacobian,
-           TaskspaceConstraintData taskspaceConstraintData, double weight)
+   public void setDesiredSpatialAcceleration(GeometricJacobian jacobian,
+                                             TaskspaceConstraintData taskspaceConstraintData, double weight)
    {
       // (S * J) * vdot = S * (Tdot - Jdot * v)
 
