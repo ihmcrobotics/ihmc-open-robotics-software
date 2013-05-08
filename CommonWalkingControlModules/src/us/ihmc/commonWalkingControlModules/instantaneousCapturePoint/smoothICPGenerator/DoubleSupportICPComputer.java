@@ -95,16 +95,16 @@ public class DoubleSupportICPComputer
    }
 
    private void updateDCMCornerPoints(ArrayList<DenseMatrix64F> constantEquivalentCoPs, double dcmConst, double steppingTime,
-                                      ArrayList<DenseMatrix64F> initialICPs)
+                                      ArrayList<DenseMatrix64F> initialICPsToPack)
    {
-      int initialICPsSize = initialICPs.size();
+      int initialICPsSize = initialICPsToPack.size();
 
       JojosICPutilities.extrapolateDCMpos(constantEquivalentCoPs.get(initialICPsSize - 1), -steppingTime, dcmConst,
-              constantEquivalentCoPs.get(initialICPsSize), initialICPs.get(initialICPsSize - 1));
+              constantEquivalentCoPs.get(initialICPsSize), initialICPsToPack.get(initialICPsSize - 1));
 
-      for (int i = initialICPs.size() - 1; i > 0; i--)
+      for (int i = initialICPsToPack.size() - 1; i > 0; i--)
       {
-         JojosICPutilities.extrapolateDCMpos(constantEquivalentCoPs.get(i - 1), -steppingTime, dcmConst, initialICPs.get(i), initialICPs.get(i - 1));
+         JojosICPutilities.extrapolateDCMpos(constantEquivalentCoPs.get(i - 1), -steppingTime, dcmConst, initialICPsToPack.get(i), initialICPsToPack.get(i - 1));
       }
    }
 
