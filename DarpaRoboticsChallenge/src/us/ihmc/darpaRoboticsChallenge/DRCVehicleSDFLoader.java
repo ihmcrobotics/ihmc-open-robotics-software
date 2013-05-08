@@ -1,9 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 
 import javax.xml.bind.JAXBException;
@@ -20,7 +19,7 @@ public class DRCVehicleSDFLoader
       ArrayList<String> resourceDirectories = new ArrayList<String>();
       Class<DRCVehicleSDFLoader> myClass = DRCVehicleSDFLoader.class;
       
-      URL fileURL = myClass.getResource("models/polaris_ranger_ev/model-1_3.sdf");
+      InputStream fileInputStream = myClass.getResourceAsStream("models/polaris_ranger_ev/model-1_3.sdf");
       resourceDirectories.add(myClass.getResource("models/").getFile());
       
       
@@ -28,7 +27,7 @@ public class DRCVehicleSDFLoader
       JaxbSDFLoader jaxbSDFLoader;
       try
       {
-         jaxbSDFLoader = new JaxbSDFLoader(new File(fileURL.getFile()), resourceDirectories);
+         jaxbSDFLoader = new JaxbSDFLoader(fileInputStream, resourceDirectories);
       }
       catch (FileNotFoundException e)
       {

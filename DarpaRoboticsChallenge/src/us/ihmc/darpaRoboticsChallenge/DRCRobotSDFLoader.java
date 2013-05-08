@@ -2,7 +2,7 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.net.URL;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import javax.xml.bind.JAXBException;
@@ -14,7 +14,7 @@ public class DRCRobotSDFLoader
 {
    public static JaxbSDFLoader loadDRCRobot(DRCRobotJointMap jointMap)
    {
-      URL fileURL;
+      InputStream fileInputStream;
       ArrayList<String> resourceDirectories = new ArrayList<String>();
       Class<DRCRobotSDFLoader> myClass = DRCRobotSDFLoader.class;
       DRCRobotModel selectedModel = jointMap.getSelectedModel();
@@ -27,17 +27,17 @@ public class DRCRobotSDFLoader
       {
          case ATLAS_NO_HANDS :
          case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS :
-            fileURL = myClass.getResource("models/GFE/atlas.sdf");
+            fileInputStream = myClass.getResourceAsStream("models/GFE/atlas.sdf");
             
             break;
 
          case ATLAS_IROBOT_HANDS :
-            fileURL = myClass.getResource("models/GFE/atlas_irobot_hands.sdf");
+            fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_irobot_hands.sdf");
             resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/irobot_hand_description").getFile());
             break;
 
          case ATLAS_SANDIA_HANDS :
-            fileURL = myClass.getResource("models/GFE/atlas_sandia_hands.sdf");
+            fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_sandia_hands.sdf");
 
             break;
          default:
@@ -47,7 +47,7 @@ public class DRCRobotSDFLoader
       JaxbSDFLoader jaxbSDFLoader;
       try
       {
-         jaxbSDFLoader = new JaxbSDFLoader(new File(fileURL.getFile()), resourceDirectories);
+         jaxbSDFLoader = new JaxbSDFLoader(fileInputStream, resourceDirectories);
       }
       catch (FileNotFoundException e)
       {
