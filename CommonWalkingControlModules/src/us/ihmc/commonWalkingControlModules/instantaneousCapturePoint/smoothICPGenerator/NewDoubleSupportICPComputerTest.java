@@ -3,8 +3,10 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPG
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.awt.Color;
 import java.util.ArrayList;
 
+import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -13,13 +15,20 @@ import org.junit.Test;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.geometry.GeometryTools;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.test.JUnitTools;
 
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameLineSegment2d;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public class NewDoubleSupportICPComputerTest
 {
+   private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+
    @Test
    public void testComputeICPCornerPoints()
    {
@@ -88,7 +97,7 @@ public class NewDoubleSupportICPComputerTest
    @Test
    public void testComputeSingleSupportICP()
    {
-      boolean visualize = false;
+      boolean visualize = true;
 
       NewDoubleSupportICPComputer newDoubleSupportICPComputer = new NewDoubleSupportICPComputer();
 
@@ -97,11 +106,14 @@ public class NewDoubleSupportICPComputerTest
 
       PointAndLinePlotter pointAndLinePlotter = null;
       SimulationConstructionSet scs = null;
+      YoVariableRegistry registry = null;
+      
       if (visualize)
       {
          Robot robot = new Robot(getClass().getSimpleName());
          scs = new SimulationConstructionSet(robot);
-         pointAndLinePlotter = new PointAndLinePlotter(robot.getRobotsYoVariableRegistry());
+         registry = robot.getRobotsYoVariableRegistry();
+         pointAndLinePlotter = new PointAndLinePlotter(registry);
          pointAndLinePlotter.createAndShowOverheadPlotterInSCS(scs);
 
          pointAndLinePlotter.plotPoint3d("supportFoot", supportFoot, YoAppearance.Black(), 0.01);
@@ -134,6 +146,19 @@ public class NewDoubleSupportICPComputerTest
       Point3d initialICPPosition = new Point3d(singleSupportStartICP);
       Point3d previousICPPosition = new Point3d(singleSupportStartICP);
 
+      YoFramePoint icpArrowTip = null;
+      YoFramePoint icpPositionYoFramePoint = null;
+      YoFrameLineSegment2d icpVelocityLineSegment = null;
+      if (visualize)
+      {
+         icpArrowTip = new YoFramePoint("icpVelocityTip", "", worldFrame, registry);
+         icpVelocityLineSegment = new YoFrameLineSegment2d("icpVelocity", "", worldFrame, registry);
+         icpPositionYoFramePoint = new YoFramePoint("icpPosition", "", worldFrame, registry);
+         
+         pointAndLinePlotter.plotYoFramePoint("icpPosition", icpPositionYoFramePoint, YoAppearance.OrangeRed(), 0.01);
+         pointAndLinePlotter.plotLineSegment("icpVelocity", icpVelocityLineSegment, Color.gray);
+      }
+      
       double deltaT = 0.001;
       for (double time = deltaT; time <= singleSupportDuration; time = time + deltaT)
       {
@@ -141,8 +166,13 @@ public class NewDoubleSupportICPComputerTest
 
          if (visualize)
          {
-            pointAndLinePlotter.plotPoint3d("singleSupportStartICP", singleSupportStartICP, YoAppearance.Cyan(), 0.01);
-            pointAndLinePlotter.plotPoint3d("singleSupportEndICP", singleSupportEndICP, YoAppearance.Cyan(), 0.01);
+            icpPositionYoFramePoint.set(icpPosition);
+            PointAndLinePlotter.setEndPointGivenStartAndAdditionalVector(icpArrowTip, icpPosition, icpVelocity, 0.5);
+            Point2d icpPosition2d = new Point2d(icpPosition.getX(), icpPosition.getY());
+            PointAndLinePlotter.setLineSegmentBasedOnStartAndEndFramePoints(icpVelocityLineSegment, icpPosition2d,
+                  icpArrowTip.getFramePoint2dCopy().getPointCopy());
+            
+            scs.tickAndUpdate();
          }
          
          assertTrue(GeometryTools.arePointsInOrderAndColinear(supportFoot, initialICPPosition, icpPosition, 1e-4));
@@ -156,6 +186,15 @@ public class NewDoubleSupportICPComputerTest
       }
 
       JUnitTools.assertTuple3dEquals(singleSupportEndICP, icpPosition, 1e-3);
+      
+      if (visualize)
+      {
+         pointAndLinePlotter.addPointsAndLinesToSCS(scs);
+
+         scs.startOnAThread();
+
+         ThreadTools.sleepForever();
+      }
    }
 
 
