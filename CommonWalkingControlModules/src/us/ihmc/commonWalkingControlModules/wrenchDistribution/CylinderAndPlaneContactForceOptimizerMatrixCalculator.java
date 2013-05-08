@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 
-public class CVXWithCylinderWrenchMatrixCalculator
+public class CylinderAndPlaneContactForceOptimizerMatrixCalculator
 {
 
 }

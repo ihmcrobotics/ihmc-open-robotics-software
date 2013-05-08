@@ -1,0 +1,45 @@
+# Produced by CVXGEN, 2013-05-08 14:35:33 -0400.
+# CVXGEN is Copyright (C) 2006-2012 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2012 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+dimensions
+  nSupportVectors = 3 # support vectors are the cone approximation vectors.
+  nPointsPerContact = 4 # points per foot/flat hand
+  nPlanes = 2 # number of plane feet
+  wrenchLength = 6 # universal constant for physical space
+  nCylinders = 2 # number of cylindrical hands
+  nCylinderVectors = 8
+  nCylinderBoundedVariables = 5
+end
+
+parameters
+
+  C (wrenchLength, wrenchLength) diagonal psd #MomentumDotWeight
+
+  Qrho (wrenchLength, nPlanes * nSupportVectors * nPointsPerContact + nCylinders*nCylinderVectors ) # ContactPointWrenchMatrix
+  Qphi (wrenchLength, nCylinders*nCylinderBoundedVariables) # ContactPointWrenchMatrixForFullyBoundedVariables
+  c (wrenchLength, 1) # WrenchEquationRightHandSide
+  rhoMin (nSupportVectors * nPointsPerContact * nPlanes + nCylinders*nCylinderVectors ) positive
+  wRho positive # GroundReactionForceRegularization
+  phiMin (nCylinders*nCylinderBoundedVariables) negative
+  phiMax (nCylinders*nCylinderBoundedVariables) positive
+  wPhi positive # CylinderBoundedVectorRegularization
+
+end
+
+variables
+  rho (nSupportVectors * nPointsPerContact * nPlanes + nCylinders*nCylinderVectors ) # magnitude of each ground reaction force component
+  phi (nCylinders*nCylinderBoundedVariables) # specific to cylinders. bounded above and below
+end
+
+minimize
+  quad(Qrho * rho + Qphi * phi -c, C) + wRho * quad(rho) + wPhi * quad(phi)
+subject to
+  rho >= rhoMin
+  phiMin<=phi<=phiMax # phi is fully bounded
+end
