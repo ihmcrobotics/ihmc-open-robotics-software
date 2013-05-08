@@ -18,7 +18,6 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter;
 
 public abstract class DegenerateOrientationControlModule
 {
@@ -43,7 +42,7 @@ public abstract class DegenerateOrientationControlModule
       {
          String baseName = FormattingTools.capitalizeFirstLetter(base.getName());
          RigidBodyOrientationControlModule rigidBodyOrientationControlModule = new RigidBodyOrientationControlModule(namePrefix + baseName, base, endEffector,
-                                                                                  twistCalculator, null, registry);
+                                                                                  twistCalculator, registry);
          rigidBodyOrientationControlModules[i++] = rigidBodyOrientationControlModule;
       }
 
