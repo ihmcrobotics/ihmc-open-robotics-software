@@ -94,8 +94,8 @@ public class DRCConfigParameters
    // LIDAR Processor
    public static final boolean LIDAR_PROCESSOR_TIMING_REPORTING_ON = false;
    public static final DRCLidarDataStoreType DRCLIDAR_DATA_STORE_TYPE = DRCLidarDataStoreType.GROUND_ONLY_QUAD_TREE_AND_OCTREE;
-   public static final double GRID_RESOLUTION = 0.05;    // in meters
-   public static final double OCTREE_RESOLUTION = 0.02;
+   public static final double GRID_RESOLUTION = 0.025;    // in meters
+   public static final double OCTREE_RESOLUTION = 0.025;
    public static final float QUADTREE_HEIGHT_THRESHOLD = 0.05f;
    public static final double LIDAR_BLINDNESS_CYLINDAR_SQUARED_RADIUS = 0.1;
    public static final boolean HIDE_THINGS_ABOVE_HEAD_FROM_LIDAR = true;
