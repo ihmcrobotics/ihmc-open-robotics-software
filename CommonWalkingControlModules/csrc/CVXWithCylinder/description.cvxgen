@@ -1,0 +1,58 @@
+# Produced by CVXGEN, 2013-05-07 16:39:31 -0400.
+# CVXGEN is Copyright (C) 2006-2012 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2012 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+dimensions
+  nSupportVectors = 3 # support vectors are the cone approximation vectors.
+  nPointsPerContact = 4 # points per foot/flat hand
+  nPlanes = 2 # number of plane feet
+  wrenchLength = 6 # universal constant for physical space
+  nDoF = 34 # size of the robot actuator torque space.
+  nNull = 4 # number of degrees removed by singularity which need to be specified seperately.
+  nCylinders = 2 # number of cylindrical hands
+  nCylinderVectors = 8
+  nCylinderBoundedVariables = 5
+end
+
+parameters
+  A (wrenchLength, nDoF) # CentroidalMomentumMatrix
+  b (wrenchLength, 1) # MomentumDotEquationRightHandSide DesiredChangeInMomentum
+  C (wrenchLength, wrenchLength) diagonal psd #MomentumDotWeight
+
+  Js (nDoF, nDoF) # SecondaryConstraintJacobian
+  ps (nDoF, 1) # SecondaryConstraintRightHandSide
+  Ws (nDoF, nDoF) diagonal psd # SecondaryConstraintWeight
+
+  Lambda (nDoF, nDoF) diagonal psd # JointAccelerationRegularization
+
+  Qrho (wrenchLength, nPlanes * nSupportVectors * nPointsPerContact + nCylinders*nCylinderVectors ) # ContactPointWrenchMatrix
+  Qphi (wrenchLength, nCylinders*nCylinderBoundedVariables) # ContactPointWrenchMatrixForFullyBoundedVariables
+  c (wrenchLength, 1) # WrenchEquationRightHandSide
+  rhoMin (nSupportVectors * nPointsPerContact * nPlanes + nCylinders*nCylinderVectors ) positive
+  wRho positive # GroundReactionForceRegularization
+  phiMin (nCylinders*nCylinderBoundedVariables) negative
+  phiMax (nCylinders*nCylinderBoundedVariables) positive
+
+  N (nDoF, nNull) # NullspaceMatrix null space of joint torques due to not only limb singularity but also multi-ground contact overconstraint.
+  z(nNull, 1) # NullspaceMultipliers
+end
+
+variables
+  rho (nSupportVectors * nPointsPerContact * nPlanes + nCylinders*nCylinderVectors ) # magnitude of each ground reaction force component
+  phi (nCylinders*nCylinderBoundedVariables) # specific to cylinders. bounded above and below
+  vd (nDoF) # JointAccelerations
+end
+
+minimize
+  quad(A * vd - b, C) + quad(Js * vd - ps, Ws) + wRho * quad(rho) + quad(vd, Lambda)
+subject to
+  Qrho * rho +Qphi*phi == A * vd + c # simple force ballance, net acceleration due to GRFs is equal to total acceleration due to joint accelerations
+  N' * vd == z # constrains the joint accelleration nullspace
+  rho >= rhoMin
+  phiMin<=phi<=phiMax # phi is fully bounded
+end
