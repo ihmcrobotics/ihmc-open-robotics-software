@@ -43,7 +43,7 @@ public abstract class DegenerateOrientationControlModule
       {
          String baseName = FormattingTools.capitalizeFirstLetter(base.getName());
          RigidBodyOrientationControlModule rigidBodyOrientationControlModule = new RigidBodyOrientationControlModule(namePrefix + baseName, base, endEffector,
-                                                                                  twistCalculator, new WalkingStatusReporter(), registry);
+                                                                                  twistCalculator, null, registry);
          rigidBodyOrientationControlModules[i++] = rigidBodyOrientationControlModule;
       }
 
