@@ -10,30 +10,54 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.geometry.GeometryTools;
 import us.ihmc.utilities.test.JUnitTools;
+
+import com.yobotics.simulationconstructionset.Robot;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 
 public class NewDoubleSupportICPComputerTest
 {
    @Test
    public void testComputeICPCornerPoints()
    {
+      boolean visualize = false;
+
       NewDoubleSupportICPComputer newDoubleSupportICPComputer = new NewDoubleSupportICPComputer();
 
       ArrayList<Point3d> footLocations = new ArrayList<Point3d>();
       footLocations.add(new Point3d(0.0, 0.0, 0.0));
-      footLocations.add(new Point3d(1.0, 1.0, 0.0));
-      footLocations.add(new Point3d(0.0, 2.0, 0.0));
-      footLocations.add(new Point3d(1.0, 3.0, 0.0));
+      footLocations.add(new Point3d(0.21, 0.22, 0.0));
+      footLocations.add(new Point3d(0.02, 0.42, 0.0));
+      footLocations.add(new Point3d(0.2, 0.63, 0.0));
 
-      double singleSupportDuration = 0.5;
+      PointAndLinePlotter pointAndLinePlotter = null;
+      SimulationConstructionSet scs = null;
+      if (visualize)
+      {
+         Robot robot = new Robot(getClass().getSimpleName());
+         scs = new SimulationConstructionSet(robot);
+         pointAndLinePlotter = new PointAndLinePlotter(robot.getRobotsYoVariableRegistry());
+         pointAndLinePlotter.createAndShowOverheadPlotterInSCS(scs);
+
+         pointAndLinePlotter.plotPoints("footLocations", footLocations, YoAppearance.Black(), 0.01);
+      }
+
+      double singleSupportDuration = 0.6;
       double doubleSupportDuration = 0.2;
 
-      double omega0 = 0.75;
+      double omega0 = 3.0;
 
       int numberOfCornerPoints = footLocations.size() - 1;
       Point3d[] icpCornerPoints = newDoubleSupportICPComputer.computeICPCornerPoints(numberOfCornerPoints, footLocations,
                                      singleSupportDuration + doubleSupportDuration, omega0);
+
+      if (visualize)
+      {
+         pointAndLinePlotter.plotPoint3ds("cornerPoints", icpCornerPoints, YoAppearance.Green(), 0.01);
+      }
 
       assertEquals(numberOfCornerPoints, icpCornerPoints.length);
 
@@ -50,17 +74,40 @@ public class NewDoubleSupportICPComputerTest
               footLocations.get(numberOfCornerPoints), 1e-4));
 
 
+      if (visualize)
+      {
+         pointAndLinePlotter.addPointsAndLinesToSCS(scs);
+
+         scs.startOnAThread();
+
+         ThreadTools.sleepForever();
+      }
    }
 
 
    @Test
    public void testComputeSingleSupportICP()
    {
+      boolean visualize = false;
+
       NewDoubleSupportICPComputer newDoubleSupportICPComputer = new NewDoubleSupportICPComputer();
 
       Point3d supportFoot = new Point3d(0.1, 0.2, 0.3);
       Point3d cornerPoint0 = new Point3d(0.3, 0.4, 0.5);
 
+      PointAndLinePlotter pointAndLinePlotter = null;
+      SimulationConstructionSet scs = null;
+      if (visualize)
+      {
+         Robot robot = new Robot(getClass().getSimpleName());
+         scs = new SimulationConstructionSet(robot);
+         pointAndLinePlotter = new PointAndLinePlotter(robot.getRobotsYoVariableRegistry());
+         pointAndLinePlotter.createAndShowOverheadPlotterInSCS(scs);
+
+         pointAndLinePlotter.plotPoint3d("supportFoot", supportFoot, YoAppearance.Black(), 0.01);
+         pointAndLinePlotter.plotPoint3d("cornerPoint0", cornerPoint0, YoAppearance.Green(), 0.01);
+      }
+      
       double omega0 = 0.7;
       double singleSupportDuration = 0.7;
       double doubleSupportDuration = 1.1;
@@ -75,6 +122,12 @@ public class NewDoubleSupportICPComputerTest
       Point3d singleSupportEndICP = newDoubleSupportICPComputer.computeSingleSupportEndICP(supportFoot, cornerPoint0, doubleSupportDuration,
                                        doubleSupportFirstStepFraction, singleSupportDuration, omega0);
 
+      if (visualize)
+      {
+         pointAndLinePlotter.plotPoint3d("singleSupportStartICP", singleSupportStartICP, YoAppearance.Cyan(), 0.01);
+         pointAndLinePlotter.plotPoint3d("singleSupportEndICP", singleSupportEndICP, YoAppearance.Cyan(), 0.01);
+      }
+      
       assertTrue(GeometryTools.arePointsInOrderAndColinear(supportFoot, cornerPoint0, singleSupportStartICP, 1e-4));
       assertTrue(GeometryTools.arePointsInOrderAndColinear(cornerPoint0, singleSupportStartICP, singleSupportEndICP, 1e-4));
 
@@ -86,6 +139,12 @@ public class NewDoubleSupportICPComputerTest
       {
          newDoubleSupportICPComputer.computeSingleSupportICPPositionAndVelocity(icpPosition, icpVelocity, supportFoot, singleSupportStartICP, omega0, time);
 
+         if (visualize)
+         {
+            pointAndLinePlotter.plotPoint3d("singleSupportStartICP", singleSupportStartICP, YoAppearance.Cyan(), 0.01);
+            pointAndLinePlotter.plotPoint3d("singleSupportEndICP", singleSupportEndICP, YoAppearance.Cyan(), 0.01);
+         }
+         
          assertTrue(GeometryTools.arePointsInOrderAndColinear(supportFoot, initialICPPosition, icpPosition, 1e-4));
 
          Vector3d approximateVelocity = new Vector3d(icpPosition);

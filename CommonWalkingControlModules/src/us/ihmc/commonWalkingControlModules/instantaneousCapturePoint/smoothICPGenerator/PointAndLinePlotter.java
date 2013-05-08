@@ -1,11 +1,24 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator;
 
 
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.plotting.Artifact;
 import java.awt.Color;
 import java.util.ArrayList;
+
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.vecmath.Point2d;
+import javax.vecmath.Point3d;
+
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
+import us.ihmc.plotting.Artifact;
+import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.plotting.DynamicGraphicPositionArtifact;
+import com.yobotics.simulationconstructionset.plotting.SimulationOverheadPlotter;
 import com.yobotics.simulationconstructionset.plotting.YoFrameLineSegment2dArtifact;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
@@ -15,7 +28,11 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public class PointAndLinePlotter
 {
-   private int numberOfPoints;
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+   private SimulationOverheadPlotter simulationOverheadPlotter;
+
+   private int numberOfRegisteredPoints;
    private int numberOfLines;
 
    private ArrayList<DynamicGraphicPosition> dynamicGraphicPositions = new ArrayList<DynamicGraphicPosition>();
@@ -23,64 +40,132 @@ public class PointAndLinePlotter
 
    private ArrayList<Artifact> lineSegmentArtifacts = new ArrayList<Artifact>();
 
-   public PointAndLinePlotter()
+   private ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+   public PointAndLinePlotter(YoVariableRegistry parentRegistry)
    {
-      numberOfPoints = 0;
+      numberOfRegisteredPoints = 0;
       numberOfLines = 0;
+
+      parentRegistry.addChild(registry);
    }
 
-   public void addSinglePointToDynamicGraphicsObjectsListRegistry(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, String name,
-           YoFramePoint point, AppearanceDefinition appearance, double size)
-   {
-      DynamicGraphicPosition dynamicGraphicPositionTemp = new DynamicGraphicPosition(name + numberOfPoints, point, size, appearance);
-      dynamicGraphicPositions.add(dynamicGraphicPositionTemp);
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("GraphicsObjects", dynamicGraphicPositions.get(numberOfPoints));
-      DynamicGraphicPositionArtifact tempArtifact = dynamicGraphicPositions.get(numberOfPoints).createArtifact();
-      dynamicGraphicPositionsArtifactList.add(tempArtifact);
-      dynamicGraphicObjectsListRegistry.registerArtifact(name + numberOfPoints, dynamicGraphicPositionsArtifactList.get(numberOfPoints));
 
-      numberOfPoints += 1;
+   public void createAndShowOverheadPlotterInSCS(SimulationConstructionSet scs)
+   {
+      simulationOverheadPlotter = new SimulationOverheadPlotter();
+      simulationOverheadPlotter.setDrawHistory(false);
+
+      scs.attachPlaybackListener(simulationOverheadPlotter);
+      JPanel simulationOverheadPlotterJPanel = simulationOverheadPlotter.getJPanel();
+      String plotterName = "Plotter";
+      scs.addExtraJpanel(simulationOverheadPlotterJPanel, plotterName);
+      JPanel plotterKeyJPanel = simulationOverheadPlotter.getJPanelKey();
+
+      JScrollPane scrollPane = new JScrollPane(plotterKeyJPanel);
+      scs.addExtraJpanel(scrollPane, "Plotter Legend");
+
+      scs.getStandardSimulationGUI().selectPanel(plotterName);
    }
 
-   public void addPointListToDynamicGraphicsObjectsListRegistry(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, String name,
-           ArrayList<YoFramePoint> pointList, AppearanceDefinition appearance, double size)
+
+   public void plotYoFramePoints(String name, ArrayList<YoFramePoint> pointList, AppearanceDefinition appearance, double size)
    {
-      for (int i = numberOfPoints; i < numberOfPoints + pointList.size(); i++)
+      for (YoFramePoint yoFramePoint : pointList)
       {
-         DynamicGraphicPosition dynamicGraphicPositionTemp = new DynamicGraphicPosition(name + (i - numberOfPoints), pointList.get(i - numberOfPoints), size,
-                                                                appearance);
-         dynamicGraphicPositions.add(dynamicGraphicPositionTemp);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("GraphicsObjects", dynamicGraphicPositions.get(i));
-         DynamicGraphicPositionArtifact tempArtifact = dynamicGraphicPositions.get(i).createArtifact();
-         dynamicGraphicPositionsArtifactList.add(tempArtifact);
-         dynamicGraphicObjectsListRegistry.registerArtifact(name + i, dynamicGraphicPositionsArtifactList.get(i));
+         plotYoFramePoint(name, yoFramePoint, appearance, size);
       }
-
-      numberOfPoints += pointList.size();
    }
 
 
-   public void addSingleLineToDynamicGraphicsObjectsListRegistry(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, String name,
-           YoFrameLineSegment2d lLineSegment, Color color)
+   public void plotPoints(String name, ArrayList<Point3d> pointList, AppearanceDefinition appearance, double size)
    {
-      Artifact lineSegmentArtifactTemp = new YoFrameLineSegment2dArtifact("line" + numberOfLines, lLineSegment, color);
-      dynamicGraphicObjectsListRegistry.registerArtifact("line" + numberOfLines, lineSegmentArtifactTemp);
+      for (Point3d point3d : pointList)
+      {
+         plotPoint3d(name, point3d, appearance, size);
+      }
+   }
+
+   public void plotPoint3ds(String name, Point3d[] pointList, AppearanceDefinition appearance, double size)
+   {
+      for (Point3d point3d : pointList)
+      {
+         plotPoint3d(name, point3d, appearance, size);
+      }
+   }
+
+
+   public void plotPoint3d(String name, Point3d point3d, AppearanceDefinition appearance, double size)
+   {
+      YoFramePoint yoFramePoint = new YoFramePoint(name + numberOfRegisteredPoints, worldFrame, registry);
+      yoFramePoint.set(point3d);
+      plotYoFramePoint(name, yoFramePoint, appearance, size);
+   }
+
+   public void plotYoFramePoint(String name, YoFramePoint point, AppearanceDefinition appearance, double size)
+   {
+      DynamicGraphicPosition dynamicGraphicPosition = new DynamicGraphicPosition(name + numberOfRegisteredPoints, point, size, appearance);
+      dynamicGraphicPositions.add(dynamicGraphicPosition);
+      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("GraphicsObjects", dynamicGraphicPositions.get(numberOfRegisteredPoints));
+      DynamicGraphicPositionArtifact artifact = dynamicGraphicPositions.get(numberOfRegisteredPoints).createArtifact();
+      dynamicGraphicPositionsArtifactList.add(artifact);
+      dynamicGraphicObjectsListRegistry.registerArtifact(name + numberOfRegisteredPoints, dynamicGraphicPositionsArtifactList.get(numberOfRegisteredPoints));
+
+      numberOfRegisteredPoints += 1;
+   }
+
+   public void plotLineSegment(String name, YoFrameLineSegment2d lineSegment, Color color)
+   {
+      Artifact lineSegmentArtifact = new YoFrameLineSegment2dArtifact("line" + numberOfLines, lineSegment, color);
+      lineSegmentArtifacts.add(lineSegmentArtifact);
+      dynamicGraphicObjectsListRegistry.registerArtifact("line" + numberOfLines, lineSegmentArtifact);
 
       numberOfLines += 1;
    }
 
-
-   public void addLineListToDynamicGraphicsObjectsListRegistry(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, String name,
-           ArrayList<YoFrameLineSegment2d> listOfLineSegments, Color color)
+   public void plotLineSegments(String name, ArrayList<YoFrameLineSegment2d> lineSegments, Color color)
    {
-      for (int i = numberOfLines; i < numberOfLines + listOfLineSegments.size(); i++)
+      for (YoFrameLineSegment2d lineSegment : lineSegments)
       {
-         Artifact lineSegmentArtifactTemp = new YoFrameLineSegment2dArtifact("line" + i, listOfLineSegments.get(i), color);
-         lineSegmentArtifacts.add(lineSegmentArtifactTemp);
-         dynamicGraphicObjectsListRegistry.registerArtifact("guideLine", lineSegmentArtifacts.get(i));
+         plotLineSegment(name, lineSegment, color);
       }
+   }
 
-      numberOfLines += listOfLineSegments.size();
+   public void addPointsAndLinesToSCS(SimulationConstructionSet scs)
+   {
+      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+      dynamicGraphicObjectsListRegistry.addArtifactListsToPlotter(simulationOverheadPlotter.getPlotter());
+   }
+
+   public void addGraphicObjectsAndArtifactsToSCS(SimulationConstructionSet scs)
+   {
+      dynamicGraphicObjectsListRegistry.addArtifactListsToPlotter(simulationOverheadPlotter.getPlotter());
+      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+   }
+
+
+   
+   public void setLineSegmentBasedOnStartAndEndPoints(YoFrameLineSegment2d lineSegmentToPack, Point2d startPoint, Point2d endPoint)
+   {
+      FramePoint2d startFramePoint = new FramePoint2d(ReferenceFrame.getWorldFrame(), startPoint.getX(), startPoint.getY());
+      FramePoint2d endFramePoint = new FramePoint2d(ReferenceFrame.getWorldFrame(), endPoint.getX(), endPoint.getY());
+
+      if (startFramePoint.distanceSquared(endFramePoint) < 1e-6)
+         startFramePoint.setX(startFramePoint.getX() + 1e-6);
+
+
+      FrameLineSegment2d lineSegment = new FrameLineSegment2d(startFramePoint, endFramePoint);
+      lineSegmentToPack.setFrameLineSegment2d(lineSegment);
+   }
+
+   public void setLineSegmentBasedOnStartAndEndFramePoints(YoFrameLineSegment2d lineSegmentToPack, FramePoint2d startPoint, FramePoint2d endPoint)
+   {
+      if (startPoint.distanceSquared(endPoint) < 1e-6)
+         startPoint.setX(startPoint.getX() + 1e-6);
+
+
+      FrameLineSegment2d lineSegment = new FrameLineSegment2d(startPoint, endPoint);
+      lineSegmentToPack.setFrameLineSegment2d(lineSegment);
    }
 
 }
