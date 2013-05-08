@@ -1,9 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.EnumMap;
+import java.util.*;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
@@ -11,7 +8,9 @@ import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.states.IndividualHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.states.IndividualManipulationState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.states.JointSpaceManipulationControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.commonWalkingControlModules.sensors.MassMatrixEstimatingToolRigidBody;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SE3ConfigurationProvider;
@@ -38,7 +37,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProv
 
 public class ManipulationStateMachine extends AbstractControlFlowElement
 {
-   private enum ManipulationState {MOVE_HAND_TO_POSITION_IN_CHESTFRAME, MOVE_HAND_TO_POSITION_IN_WORLDFRAME}
+   private enum ManipulationState {MOVE_HAND_TO_POSITION_IN_CHESTFRAME, JOINT_SPACE, MOVE_HAND_TO_POSITION_IN_WORLDFRAME}
 
    ;
 
@@ -61,14 +60,14 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
    private final MassMatrixEstimatingToolRigidBody toolBody;
    private final Wrench measuredWristWrench = new Wrench();
 
-
+   final DesiredHandPoseProvider handPoseProvider;
 
    public ManipulationStateMachine(final DoubleYoVariable simulationTime, final RobotSide robotSide, final FullRobotModel fullRobotModel,
                                    final TwistCalculator twistCalculator, InverseDynamicsCalculator inverseDynamicsCalculator,
                                    WalkingControllerParameters walkingControllerParameters, final DesiredHandPoseProvider handPoseProvider,
                                    final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, HandControllerInterface handController,
                                    double gravity, final double controlDT, MomentumBasedController momentumBasedController, GeometricJacobian jacobian,
-                                   final YoVariableRegistry parentRegistry)
+                                   Map<OneDoFJoint, Double> desiredPositions, final YoVariableRegistry parentRegistry)
    {
       RigidBody endEffector = jacobian.getEndEffector();
 
@@ -77,13 +76,15 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
       stateMachine = new StateMachine<ManipulationState>(name, name + "SwitchTime", ManipulationState.class, simulationTime, registry);
       this.robotSide = robotSide;
       this.inverseDynamicsCalculator = inverseDynamicsCalculator;
+      this.handPoseProvider = handPoseProvider;
 
       String frameName = endEffector.getName() + "PositionControlFrame";
       final ReferenceFrame frameAfterJoint = endEffector.getParentJoint().getFrameAfterJoint();
       ReferenceFrame endEffectorFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(frameName, frameAfterJoint,
                                            walkingControllerParameters.getHandControlFramesWithRespectToFrameAfterWrist().get(robotSide));
 
-      handSpatialAccelerationControlModule = new RigidBodySpatialAccelerationControlModule(endEffector.getName(), twistCalculator, endEffector, endEffectorFrame, registry);
+      handSpatialAccelerationControlModule = new RigidBodySpatialAccelerationControlModule(endEffector.getName(), twistCalculator, endEffector,
+              endEffectorFrame, registry);
 
       handSpatialAccelerationControlModule.setPositionProportionalGains(100.0, 100.0, 100.0);
       handSpatialAccelerationControlModule.setPositionDerivativeGains(20.0, 20.0, 20.0);
@@ -93,23 +94,28 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
       final ChangeableConfigurationProvider currentConfigurationProvider = new ChangeableConfigurationProvider(new FramePose(endEffectorFrame));
       final ChangeableConfigurationProvider desiredConfigurationProvider = new ChangeableConfigurationProvider(handPoseProvider.getDesiredHandPose(robotSide));
 
-      IndividualHandControlState<ManipulationState> moveRelativeToChestState = createIndividualHandControlState(1.0,
-            ManipulationState.MOVE_HAND_TO_POSITION_IN_CHESTFRAME,
-            currentConfigurationProvider, desiredConfigurationProvider,
-            momentumBasedController, jacobian, dynamicGraphicObjectsListRegistry);
+//    IndividualHandControlState<ManipulationState> moveRelativeToChestState = createIndividualHandControlState(1.0,
+//          ManipulationState.MOVE_HAND_TO_POSITION_IN_CHESTFRAME,
+//          currentConfigurationProvider, desiredConfigurationProvider,
+//          momentumBasedController, jacobian, dynamicGraphicObjectsListRegistry);
+
+
+      JointSpaceManipulationControlState<ManipulationState> moveInJointSpaceState =
+         new JointSpaceManipulationControlState<ManipulationState>(ManipulationState.JOINT_SPACE, simulationTime, robotSide, jacobian, momentumBasedController,
+            desiredPositions, registry);
 
       IndividualHandControlState<ManipulationState> moveRelativeToWorldState = createIndividualHandControlState(1.0,
                                                                                   ManipulationState.MOVE_HAND_TO_POSITION_IN_WORLDFRAME,
-            currentConfigurationProvider, desiredConfigurationProvider,
+                                                                                  currentConfigurationProvider, desiredConfigurationProvider,
                                                                                   momentumBasedController, jacobian, dynamicGraphicObjectsListRegistry);
 
-      StateTransitionCondition toNextChestPosition = new StateTransitionCondition()
-      {
-         public boolean checkCondition()
-         {
-            return handPoseProvider.checkForNewPose(robotSide) &&!handPoseProvider.isRelativeToWorld();
-         }
-      };
+//      StateTransitionCondition toNextChestPosition = new StateTransitionCondition()
+//      {
+//         public boolean checkCondition()
+//         {
+//            return handPoseProvider.checkForNewPose(robotSide) &&!handPoseProvider.isRelativeToWorld();
+//         }
+//      };
 
       StateTransitionCondition toNextWorldPosition = new StateTransitionCondition()
       {
@@ -139,30 +145,25 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
          }
       };
 
-      final StateTransition<ManipulationState> toRelativeToChestPositionTransition =
-         new StateTransition<ManipulationStateMachine.ManipulationState>(ManipulationState.MOVE_HAND_TO_POSITION_IN_CHESTFRAME, toNextChestPosition,
-                             Arrays.asList(setCurrentPoseBasedOnPreviousDesired, setDesiredPoseBasedOnProvider));
+//      final StateTransition<ManipulationState> toRelativeToChestPositionTransition =
+//         new StateTransition<ManipulationStateMachine.ManipulationState>(ManipulationState.MOVE_HAND_TO_POSITION_IN_CHESTFRAME, toNextChestPosition,
+//                             Arrays.asList(setCurrentPoseBasedOnPreviousDesired, setDesiredPoseBasedOnProvider));
       final StateTransition<ManipulationState> toRelativeToWorldPositionTransition =
          new StateTransition<ManipulationStateMachine.ManipulationState>(ManipulationState.MOVE_HAND_TO_POSITION_IN_WORLDFRAME, toNextWorldPosition,
                              Arrays.asList(setCurrentPoseBasedOnPreviousDesired, setDesiredPoseBasedOnProvider));
 
-      moveRelativeToChestState.addStateTransition(toRelativeToChestPositionTransition);
-      moveRelativeToChestState.addStateTransition(toRelativeToWorldPositionTransition);
+//      moveRelativeToChestState.addStateTransition(toRelativeToChestPositionTransition);
+//      moveRelativeToChestState.addStateTransition(toRelativeToWorldPositionTransition);
+      moveInJointSpaceState.addStateTransition(toRelativeToWorldPositionTransition);
 
-      moveRelativeToWorldState.addStateTransition(toRelativeToChestPositionTransition);
+//      moveRelativeToWorldState.addStateTransition(toRelativeToChestPositionTransition);
       moveRelativeToWorldState.addStateTransition(toRelativeToWorldPositionTransition);
 
-      addState(moveRelativeToChestState);
+//      addState(moveRelativeToChestState);
+      addState(moveInJointSpaceState);
       addState(moveRelativeToWorldState);
 
-      if (handPoseProvider.isRelativeToWorld())
-      {
-         stateMachine.setCurrentState(ManipulationState.MOVE_HAND_TO_POSITION_IN_WORLDFRAME);
-      }
-      else
-      {
-         stateMachine.setCurrentState(ManipulationState.MOVE_HAND_TO_POSITION_IN_CHESTFRAME);
-      }
+
 
 //    ControlFlowOutputPort<TaskspaceConstraintData> desiredAccelerationOutputPort = createOutputPort("desiredAccelerationOutputPort");
 //    desiredAccelerationOutputPort.setData(taskspaceConstraintData);
@@ -193,6 +194,19 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
       }
 
       parentRegistry.addChild(registry);
+   }
+
+   public void initialize()
+   {
+      if (handPoseProvider.isRelativeToWorld())
+      {
+         stateMachine.setCurrentState(ManipulationState.MOVE_HAND_TO_POSITION_IN_WORLDFRAME);
+      }
+      else
+      {
+//         stateMachine.setCurrentState(ManipulationState.MOVE_HAND_TO_POSITION_IN_CHESTFRAME);
+         stateMachine.setCurrentState(ManipulationState.JOINT_SPACE);
+      }
    }
 
    public void startComputation()
@@ -252,9 +266,8 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
    }
 
    private IndividualHandControlState<ManipulationState> createIndividualHandControlState(double trajectoryTime, ManipulationState manipulationState,
-                                                                                          SE3ConfigurationProvider initialConfigurationProvider,
-                                                                                          SE3ConfigurationProvider finalConfigurationProvider, MomentumBasedController momentumBasedController, GeometricJacobian jacobian,
-                                                                                          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           SE3ConfigurationProvider initialConfigurationProvider, SE3ConfigurationProvider finalConfigurationProvider,
+           MomentumBasedController momentumBasedController, GeometricJacobian jacobian, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       ConstantDoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(trajectoryTime);
 
@@ -270,7 +283,7 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
                                                                                       finalConfigurationProvider, registry);
 
       final IndividualHandControlState<ManipulationState> ret = new IndividualHandControlState<ManipulationState>(manipulationState, robotSide,
-            positionTrajectoryGenerator, orientationTrajectoryGenerator,
+                                                                   positionTrajectoryGenerator, orientationTrajectoryGenerator,
                                                                    handSpatialAccelerationControlModule, momentumBasedController, jacobian,
                                                                    dynamicGraphicObjectsListRegistry, registry);
 

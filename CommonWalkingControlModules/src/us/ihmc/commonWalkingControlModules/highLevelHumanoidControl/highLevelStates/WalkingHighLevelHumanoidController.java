@@ -1,12 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
@@ -233,17 +227,17 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
    private final DoubleYoVariable yoTime;
    
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian,
-         SideDependentList<FootSwitchInterface> footSwitches, double gravityZ, DoubleYoVariable yoTime, double controlDT,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, FootstepProvider footstepProvider, DesiredHandPoseProvider handPoseProvider,
-         HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters, DesiredHeadOrientationProvider desiredHeadOrientationProvider,
-         CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators,
-         SideDependentList<DoubleTrajectoryGenerator> heelPitchTrajectoryGenerators, HeelPitchTouchdownProvidersManager heelPitchTouchdownProvidersManager,
-         SwingTimeCalculationProvider swingTimeCalculationProvider, YoPositionProvider finalPositionProvider,
-         TrajectoryParametersProvider trajectoryParametersProvider, boolean stayOntoes, double desiredPelvisPitch, double trailingFootPitch,
-         WalkingControllerParameters walkingControllerParameters, ICPBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
-         ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort, LidarControllerInterface lidarControllerInterface,
-         FinalDesiredICPCalculator finalDesiredICPCalculator, SideDependentList<HandControllerInterface> handControllers,
-         ICPAndMomentumBasedController icpAndMomentumBasedController, WalkingStatusReporter walkingStatusReporter)
+                                             SideDependentList<FootSwitchInterface> footSwitches, double gravityZ, DoubleYoVariable yoTime, double controlDT,
+                                             DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, FootstepProvider footstepProvider, DesiredHandPoseProvider handPoseProvider,
+                                             HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters, DesiredHeadOrientationProvider desiredHeadOrientationProvider,
+                                             CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators,
+                                             SideDependentList<DoubleTrajectoryGenerator> heelPitchTrajectoryGenerators, HeelPitchTouchdownProvidersManager heelPitchTouchdownProvidersManager,
+                                             SwingTimeCalculationProvider swingTimeCalculationProvider, YoPositionProvider finalPositionProvider,
+                                             TrajectoryParametersProvider trajectoryParametersProvider, boolean stayOntoes, double desiredPelvisPitch, double trailingFootPitch,
+                                             WalkingControllerParameters walkingControllerParameters, ICPBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
+                                             ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort, LidarControllerInterface lidarControllerInterface,
+                                             FinalDesiredICPCalculator finalDesiredICPCalculator, SideDependentList<HandControllerInterface> handControllers,
+                                             ICPAndMomentumBasedController icpAndMomentumBasedController, WalkingStatusReporter walkingStatusReporter)
    {
       super(HighLevelState.WALKING);
       
@@ -376,11 +370,10 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
 
          GeometricJacobian jacobian = jacobians.get(robotSide).get(LimbName.ARM);
 
-
          manipulationStateMachines.put(robotSide,
                                        new ManipulationStateMachine(yoTime, robotSide, fullRobotModel, twistCalculator, icpAndMomentumBasedController.getInverseDynamicsCalculator(),
                                           walkingControllerParameters, handPoseProvider, dynamicGraphicObjectsListRegistry, handControllerInterface, gravityZ,
-                                          controlDT, icpAndMomentumBasedController, jacobian, registry));
+                                          controlDT, icpAndMomentumBasedController, jacobian, walkingControllerParameters.getDefaultArmJointPositions(fullRobotModel, robotSide), registry));
       }
 
       this.desiredHeadOrientationProvider = desiredHeadOrientationProvider;
@@ -601,6 +594,13 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
       desiredICP.set(capturePoint.getFramePoint2dCopy());
 
       stateMachine.setCurrentState(WalkingState.DOUBLE_SUPPORT);
+
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         manipulationStateMachines.get(robotSide).initialize();
+      }
+
+
    }
 
    private class DoubleSupportState extends State<WalkingState>
@@ -1398,6 +1398,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
 
    public void doArmControl()
    {
+
       for (RobotSide robotSide : RobotSide.values())
       {
          manipulationStateMachines.get(robotSide).startComputation();
