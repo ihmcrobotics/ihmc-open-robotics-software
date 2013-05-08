@@ -8,6 +8,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.screwTheory.*;
 
 import java.util.LinkedHashMap;
@@ -31,7 +32,7 @@ public class JointSpaceManipulationControlState<T extends Enum<T>> extends Indiv
    private final Map<OneDoFJoint, Double> desiredJointPositions = new LinkedHashMap<OneDoFJoint, Double>();
    private final SpatialAccelerationVector desiredHandAcceleration;
 
-   private double endMoveTime = Double.POSITIVE_INFINITY;
+   private final DoubleYoVariable endMoveTime;
 
    public JointSpaceManipulationControlState(T stateEnum, DoubleYoVariable yoTime, RobotSide robotSide, GeometricJacobian jacobian, MomentumBasedController momentumBasedController, Map<OneDoFJoint, Double> desiredJointPositions, YoVariableRegistry parentRegistry)
    {
@@ -41,6 +42,8 @@ public class JointSpaceManipulationControlState<T extends Enum<T>> extends Indiv
       registry = new YoVariableRegistry("ArmJointController" + robotSide.getCamelCaseNameForMiddleOfExpression());
 
       this.desiredJointPositions.putAll(desiredJointPositions);
+
+      endMoveTime = new DoubleYoVariable("endMoveTime", registry);
 
       moveTimeArmJoint = new DoubleYoVariable("moveTimeArmJoint", registry);
       moveTimeArmJoint.set(2.0);
@@ -87,14 +90,16 @@ public class JointSpaceManipulationControlState<T extends Enum<T>> extends Indiv
    public void initializeForMove()
    {
       double startTime = yoTime.getDoubleValue();
-      endMoveTime = startTime + moveTimeArmJoint.getDoubleValue();
+      endMoveTime.set(startTime + moveTimeArmJoint.getDoubleValue());
       for (OneDoFJoint joint : oneDoFJoints)
       {
          YoPolynomial yoPolynomial = polynomialLinkedHashMap.get(joint);
          double desiredEndPosition = desiredJointPositions.get(joint);
          double desiredEndVelocity = 0.0;
 
-         yoPolynomial.setCubic(startTime, endMoveTime, joint.getQ(), joint.getQd(), desiredEndPosition, desiredEndVelocity);
+         double currentJointPosition = joint.getQ();
+
+         yoPolynomial.setQuintic(startTime, endMoveTime.getDoubleValue(), currentJointPosition, joint.getQd(), 0.0, desiredEndPosition, desiredEndVelocity, 0.0);
       }
    }
 
@@ -106,7 +111,10 @@ public class JointSpaceManipulationControlState<T extends Enum<T>> extends Indiv
       for (OneDoFJoint joint : oneDoFJoints)
       {
          YoPolynomial yoPolynomial = polynomialLinkedHashMap.get(joint);
+         currentTime = MathTools.clipToMinMax(currentTime, Double.NEGATIVE_INFINITY, endMoveTime.getDoubleValue());
          yoPolynomial.compute(currentTime);
+
+
          double desiredPosition = yoPolynomial.getPosition();
          double desiredVelocity = yoPolynomial.getVelocity();
          double feedforwardAcceleration = yoPolynomial.getAcceleration();
@@ -141,7 +149,7 @@ public class JointSpaceManipulationControlState<T extends Enum<T>> extends Indiv
    @Override
    public boolean isDone()
    {
-      return (yoTime.getDoubleValue() >= endMoveTime);
+      return (yoTime.getDoubleValue() >= endMoveTime.getDoubleValue());
    }
 
    @Override
