@@ -2,17 +2,17 @@
 #include "LeeGoswamiCoPAndNormalTorqueOptimizerNative.h"
 #include "leeGoswamiCoPAndNormalTorqueOptimizer/solver.h"
 
-#define nFeet us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_LeeGoswamiCoPAndNormalTorqueOptimizerNative_nFeet
+#define nFeet us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_LeeGoswamiCoPAndNormalTorqueOptimizerNative_MAX_NUMBER_OF_CONTACTS
 #define vectorLength us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_LeeGoswamiCoPAndNormalTorqueOptimizerNative_vectorLength
 
-#define psiKSize	vectorLength * nFeet * vectorLength
+#define psiKSize	(vectorLength * nFeet * vectorLength)
 #define kappaKSize vectorLength
-#define etaMinSize nFeet * vectorLength
-#define etaMaxSize nFeet * vectorLength
-#define etaDSize nFeet * vectorLength
-#define epsilonSize nFeet * vectorLength
+#define etaMinSize (nFeet * vectorLength)
+#define etaMaxSize (nFeet * vectorLength)
+#define etaDSize (nFeet * vectorLength)
+#define epsilonSize (nFeet * vectorLength)
 
-#define etaSize nFeet * vectorLength
+#define etaSize (nFeet * vectorLength)
 
 
 

@@ -256,6 +256,7 @@ public class CVXWithCylinderNative
          cvxWithCylinderNativeOutput.setJointAccelerations(vd);
          cvxWithCylinderNativeOutput.setOptVal(getOptValNative());
          cvxWithCylinderNativeOutput.setRho(rho);
+         cvxWithCylinderNativeOutput.setPhi(phi);
          cvxWithCylinderNativeOutput.setNumberOfIterations(numberOfIterations);
       }
 
