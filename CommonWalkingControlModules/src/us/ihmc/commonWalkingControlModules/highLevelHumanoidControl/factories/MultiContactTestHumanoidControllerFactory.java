@@ -1,45 +1,52 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
-import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
-import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
-import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Point2d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerManager;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.MultiContactTestHumanoidController;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.OldMomentumControlModule;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointGroundReactionWrenchDistributor;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerManager;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.MultiContactTestHumanoidController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CoMBasedMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.OldMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAngularAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FingerForceSensors;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointGroundReactionWrenchDistributor;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
 import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.*;
+import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.SpatialMotionVector;
+import us.ihmc.utilities.screwTheory.TotalMassCalculator;
+import us.ihmc.utilities.screwTheory.TwistCalculator;
 
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Point2d;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
+import com.yobotics.simulationconstructionset.robotController.RobotController;
+import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
+import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
+import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 
 public class MultiContactTestHumanoidControllerFactory implements HighLevelHumanoidControllerFactory
 {
@@ -115,7 +122,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       momentumRateOfChangeControlModule.setDerivativeGains(comDerivativeGain, comDerivativeGain, comDerivativeGain);
 
       RootJointAngularAccelerationControlModule rootJointAccelerationControlModule = new RootJointAngularAccelerationControlModule(
-            fullRobotModel.getRootJoint(), twistCalculator, registry);
+            fullRobotModel.getRootJoint(), twistCalculator, new WalkingStatusReporter(), registry);
       rootJointAccelerationControlModule.setProportionalGains(100.0, 100.0, 100.0);
       rootJointAccelerationControlModule.setDerivativeGains(20.0, 20.0, 20.0);
 

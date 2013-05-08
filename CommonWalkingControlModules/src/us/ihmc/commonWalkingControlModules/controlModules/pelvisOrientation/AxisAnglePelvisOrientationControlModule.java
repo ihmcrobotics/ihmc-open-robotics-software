@@ -13,6 +13,7 @@ import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.AxisAngleOrientationController;
+import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class AxisAnglePelvisOrientationControlModule implements PelvisOrientationControlModule
@@ -46,7 +47,7 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
       this.tauPelvis = new YoFrameVector("tauPelvis", "", bodyFrame, registry);
       this.tauSwingLegCompensation = new YoFrameVector("tauSwingLegCompensation", "", bodyFrame, registry);
       this.useFeedforward = useFeedforward;
-      this.axisAngleOrientationController = new AxisAngleOrientationController("pelvis", bodyFrame, registry);
+      this.axisAngleOrientationController = new AxisAngleOrientationController("pelvis", bodyFrame, new WalkingStatusReporter(), registry);
 
 
       parentRegistry.addChild(registry);
