@@ -51,8 +51,11 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class ComposableOrientationAndCoMEstimatorCreator
 {
-   private static final double pointVelocityMeasurementStandardDeviation = 2.0; //6.0; //6.0; //3.0;  //1.0;
-   private static final double pointPositionMeasurementStandardDeviation = 0.3; //0.03;  //0.03; //0.3; //0.03;
+   private static final double pointVelocityXYMeasurementStandardDeviation = 4.0; //2.0; //6.0; //6.0; //3.0;  //1.0;
+   private static final double pointVelocityZMeasurementStandardDeviation = 4.0; //2.0; //6.0; //6.0; //3.0;  //1.0;
+
+   private static final double pointPositionXYMeasurementStandardDeviation = 0.3; //0.03;  //0.03; //0.3; //0.03;
+   private static final double pointPositionZMeasurementStandardDeviation = 0.3; //0.03;  //0.03; //0.3; //0.03;
    
    private static final boolean USE_DISCRETE_COM_PROCESS_MODEL_ELEMENTS = true;
 
@@ -128,6 +131,17 @@ public class ComposableOrientationAndCoMEstimatorCreator
       CommonOps.setIdentity(orientationCovarianceMatrix);
       CommonOps.scale(MathTools.square(standardDeviation), orientationCovarianceMatrix);
 
+      return orientationCovarianceMatrix;
+   }
+   
+   private static DenseMatrix64F createCovarianceMatrix(double standardDeviationXY, double standardDeviationZ, int size)
+   {
+      DenseMatrix64F orientationCovarianceMatrix = new DenseMatrix64F(size, size);
+      
+      orientationCovarianceMatrix.set(0, 0, standardDeviationXY * standardDeviationXY);
+      orientationCovarianceMatrix.set(1, 1, standardDeviationXY * standardDeviationXY);
+      orientationCovarianceMatrix.set(2, 2, standardDeviationZ * standardDeviationZ);
+      
       return orientationCovarianceMatrix;
    }
    
@@ -382,7 +396,9 @@ public class ComposableOrientationAndCoMEstimatorCreator
          AggregatePointPositionMeasurementModelElement element = new AggregatePointPositionMeasurementModelElement(pointPositionInputPort,
                                                                     centerOfMassPositionStatePort, orientationStatePort, estimationFrame);
          
-         DenseMatrix64F covariance = createDiagonalCovarianceMatrix(pointPositionMeasurementStandardDeviation, 3);
+//         DenseMatrix64F covariance = createDiagonalCovarianceMatrix(pointPositionMeasurementStandardDeviation, 3);
+         DenseMatrix64F covariance = createCovarianceMatrix(pointPositionXYMeasurementStandardDeviation, pointPositionZMeasurementStandardDeviation, 3);
+         
          element.setNoiseCovariance(covariance);
          addMeasurementModelElement(element);
       }
@@ -395,7 +411,9 @@ public class ComposableOrientationAndCoMEstimatorCreator
                orientationStatePort, angularVelocityStatePort, 
                inverseDynamicsStructureInputPort, estimationFrame);
 
-         DenseMatrix64F covariance = createDiagonalCovarianceMatrix(pointVelocityMeasurementStandardDeviation, 3);
+//         DenseMatrix64F covariance = createDiagonalCovarianceMatrix(pointVelocityMeasurementStandardDeviation, 3);
+         DenseMatrix64F covariance = createCovarianceMatrix(pointVelocityXYMeasurementStandardDeviation, pointVelocityZMeasurementStandardDeviation, 3);
+         
          element.setNoiseCovariance(covariance); 
          addMeasurementModelElement(element);
     }
