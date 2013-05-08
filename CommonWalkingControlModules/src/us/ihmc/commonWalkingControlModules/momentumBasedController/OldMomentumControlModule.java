@@ -44,7 +44,6 @@ public class OldMomentumControlModule implements MomentumControlModule
    private final SpatialForceVector gravitationalWrench;
 
 
-   private final List<ContactablePlaneBody> contactablePlaneBodies;
    private final Map<ContactablePlaneBody, Wrench> externalWrenches = new LinkedHashMap<ContactablePlaneBody, Wrench>();
 
    protected final DoubleYoVariable alphaGroundReactionWrench = new DoubleYoVariable("alphaGroundReactionWrench", registry);
@@ -56,7 +55,7 @@ public class OldMomentumControlModule implements MomentumControlModule
    private final SixDoFJoint rootJoint;
 
 
-   public OldMomentumControlModule(SixDoFJoint rootJoint, Collection<? extends ContactablePlaneBody> contactablePlaneBodies, double gravityZ,
+   public OldMomentumControlModule(SixDoFJoint rootJoint, double gravityZ,
                                    GroundReactionWrenchDistributor groundReactionWrenchDistributor, ReferenceFrame centerOfMassFrame, double controlDT,
                                    TwistCalculator twistCalculator, LinearSolver<DenseMatrix64F> jacobianSolver, YoVariableRegistry parentRegistry)
    {
@@ -66,7 +65,6 @@ public class OldMomentumControlModule implements MomentumControlModule
 
       double totalMass = TotalMassCalculator.computeMass(ScrewTools.computeSupportAndSubtreeSuccessors(rootJoint.getSuccessor()));
 
-      this.contactablePlaneBodies = new ArrayList<ContactablePlaneBody>(contactablePlaneBodies);
       this.groundReactionWrenchDistributor = groundReactionWrenchDistributor;
 
       this.unfilteredDesiredGroundReactionTorque = new YoFrameVector("unfilteredDesiredGroundReactionTorque", centerOfMassFrame, registry);
@@ -135,7 +133,7 @@ public class OldMomentumControlModule implements MomentumControlModule
       GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData = new GroundReactionWrenchDistributorInputData();
       groundReactionWrenchDistributorInputData.reset();
 
-      for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodies)
+      for (ContactablePlaneBody contactablePlaneBody : contactStates.keySet())
       {
          PlaneContactState contactState = contactStates.get(contactablePlaneBody);
          List<FramePoint> footContactPoints = contactState.getContactPoints();
@@ -151,7 +149,7 @@ public class OldMomentumControlModule implements MomentumControlModule
       GroundReactionWrenchDistributorOutputData distributedWrenches = new GroundReactionWrenchDistributorOutputData();
       groundReactionWrenchDistributor.solve(distributedWrenches, groundReactionWrenchDistributorInputData);
 
-      for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodies)
+      for (ContactablePlaneBody contactablePlaneBody : contactStates.keySet())
       {
          RigidBody rigidBody = contactablePlaneBody.getRigidBody();
          PlaneContactState contactState = contactStates.get(contactablePlaneBody);
