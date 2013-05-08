@@ -13,7 +13,6 @@ import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.AxisAngleOrientationController;
-import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class AxisAnglePelvisOrientationControlModule implements PelvisOrientationControlModule
