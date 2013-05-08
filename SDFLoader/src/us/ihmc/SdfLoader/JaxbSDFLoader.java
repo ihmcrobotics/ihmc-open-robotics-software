@@ -1,8 +1,9 @@
 package us.ihmc.SdfLoader;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -26,14 +27,14 @@ public class JaxbSDFLoader
    
    public JaxbSDFLoader(File file, String resourceDirectory) throws JAXBException, FileNotFoundException
    {
-      this(file, FileTools.createArrayListOfOneURL(resourceDirectory));
+      this(new FileInputStream(file), FileTools.createArrayListOfOneURL(resourceDirectory));
    }
    
-   public JaxbSDFLoader(File file, ArrayList<String> resourceDirectories) throws JAXBException, FileNotFoundException
+   public JaxbSDFLoader(InputStream inputStream, ArrayList<String> resourceDirectories) throws JAXBException, FileNotFoundException
    {
       JAXBContext context = JAXBContext.newInstance(SDFRoot.class);
       Unmarshaller um = context.createUnmarshaller();
-      SDFRoot sdfRoot = (SDFRoot) um.unmarshal(new FileReader(file));
+      SDFRoot sdfRoot = (SDFRoot) um.unmarshal(inputStream);
 
       List<SDFModel> models;
       if(sdfRoot.getWorld() != null)
@@ -57,6 +58,11 @@ public class JaxbSDFLoader
       }
    }
    
+   public JaxbSDFLoader(File file, ArrayList<String> resourceDirectories) throws FileNotFoundException, JAXBException
+   {
+      this(new FileInputStream(file), resourceDirectories);
+   }
+
    public Collection<GeneralizedSDFRobotModel> getGeneralizedSDFRobotModels()
    {
       return generalizedSDFRobotModels.values();
