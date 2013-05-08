@@ -499,6 +499,8 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
 
       this.desiredPelvisAngularVelocity = new YoFrameVector("desiredPelvisAngularVelocity", worldFrame, registry);
       this.desiredPelvisAngularAcceleration = new YoFrameVector("desiredPelvisAngularAcceleration", worldFrame, registry);
+      
+      updateWalkingStatusReporter();
    }
 
    private void setupLimbJacobians(FullRobotModel fullRobotModel)
@@ -1632,6 +1634,16 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
 
       Footstep footstep = new Footstep(contactablePlaneBody, poseReferenceFrame, soleReferenceFrame, expectedContactPoints, trustHeight);
       return footstep;
+   }
+   
+   private void updateWalkingStatusReporter()
+   {
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         DoubleYoVariable footPositionErrorMagnitude = (DoubleYoVariable) registry.getVariable(robotSide.getShortLowerCaseName() + "_footPositionErrorMagnitude");
+         Pair<Double, Double> footPositionErrorBounds = new Pair<Double, Double>(-0.1, 0.1);
+         walkingStatusReporter.setFootPositionVariablesAndBounds(robotSide, footPositionErrorMagnitude, footPositionErrorBounds);
+      }
    }
 
    //TODO: New methods coming from extending State class
