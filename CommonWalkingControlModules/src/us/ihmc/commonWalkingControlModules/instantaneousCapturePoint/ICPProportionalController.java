@@ -36,8 +36,13 @@ public class ICPProportionalController
    {
       this.controlDT = controlDT;
       icpVelocityDirectionFrame = new Vector2dZUpFrame("icpVelocityDirectionFrame", worldFrame);
-      walkingStatusReporter.addMapping(icpError.getYoX(), new Pair<Double, Double>(-1.0, 1.0));
       parentRegistry.addChild(registry);
+      
+      if(walkingStatusReporter != null)
+      {          
+         walkingStatusReporter.addMapping(icpError.getYoX(), new Pair<Double, Double>(-0.1, 0.1));
+         walkingStatusReporter.addMapping(icpError.getYoY(), new Pair<Double, Double>(-0.1, 0.1));        
+      }
    }
 
    public void reset()

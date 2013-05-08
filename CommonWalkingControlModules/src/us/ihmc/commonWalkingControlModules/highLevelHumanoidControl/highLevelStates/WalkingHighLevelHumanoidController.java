@@ -94,6 +94,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.PDController;
+import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
@@ -121,6 +122,8 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final WalkingControllerParameters walkingControllerParameters;
+   
+   private final WalkingStatusReporter walkingStatusReporter;
 
    private static enum WalkingState
    {
@@ -240,7 +243,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
          WalkingControllerParameters walkingControllerParameters, ICPBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
          ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort, LidarControllerInterface lidarControllerInterface,
          FinalDesiredICPCalculator finalDesiredICPCalculator, SideDependentList<HandControllerInterface> handControllers,
-         ICPAndMomentumBasedController icpAndMomentumBasedController)
+         ICPAndMomentumBasedController icpAndMomentumBasedController, WalkingStatusReporter walkingStatusReporter)
    {
       super(HighLevelState.WALKING);
       
@@ -349,6 +352,8 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
       onToesTriangleAreaLimit.set(0.01);
 
       this.walkingControllerParameters = walkingControllerParameters;
+      
+      this.walkingStatusReporter = walkingStatusReporter;
 
       double initialLeadingFootPitch = 0.05;
       upcomingSupportLeg.set(RobotSide.RIGHT); // TODO: stairs hack, so that the following lines use the correct leading leg
