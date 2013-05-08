@@ -58,7 +58,7 @@ public class SmoothICPComputerTest
       double initialTime = 1.1;
       double omega0 = 3.0;
       
-      smoothICPComputer.initializeSingleSupport(footLocations, singleSupportDuration, doubleSupportDuration, initialTime, omega0);
+      smoothICPComputer.initializeSingleSupport(footLocations, singleSupportDuration, doubleSupportDuration, omega0, initialTime);
       
       if (visualize)
       {
@@ -79,22 +79,22 @@ public class SmoothICPComputerTest
             transferFromFoot, icpPosition, icpVelocity);
             
       initialTime = initialTime + singleSupportDuration;
-      smoothICPComputer.initializeDoubleSupport(footLocations, singleSupportDuration, doubleSupportDuration, initialTime);
+      smoothICPComputer.initializeDoubleSupport(footLocations, singleSupportDuration, doubleSupportDuration, omega0, initialTime);
       smoothICPComputer.getICPPositionAndVelocity(initialICPPosition, initialICPVelocity, omega0, initialTime);
       
       
       
-//      
-//      JUnitTools.assertTuple3dEquals(icpPosition, initialICPPosition, 1e-4);
-//      JUnitTools.assertTuple3dEquals(icpVelocity, initialICPVelocity, 1e-4);
-//      
-//      simulateForwardAndCheckDoubleSupport(smoothICPComputer, doubleSupportDuration, initialTime, omega0, initialICPPosition,
-//            transferFromFoot, icpPosition, icpVelocity);
-//      
-//      initialTime = initialTime + doubleSupportDuration;
-//      footLocations.remove(0);
-//      footLocations.add(new Point3d(0.0, 4.0, 0.0));
-//      transferFromFoot = footLocations.get(0);
+      
+      JUnitTools.assertTuple3dEquals(icpPosition, initialICPPosition, 1e-4);
+      JUnitTools.assertTuple3dEquals(icpVelocity, initialICPVelocity, 1e-4);
+      
+      simulateForwardAndCheckDoubleSupport(smoothICPComputer, doubleSupportDuration, initialTime, omega0, initialICPPosition,
+            transferFromFoot, icpPosition, icpVelocity);
+      
+      initialTime = initialTime + doubleSupportDuration;
+      footLocations.remove(0);
+      footLocations.add(new Point3d(0.0, 4.0, 0.0));
+      transferFromFoot = footLocations.get(0);
 //
 //      smoothICPComputer.initializeSingleSupport(footLocations, singleSupportDuration, doubleSupportDuration, initialTime, omega0);
 //      smoothICPComputer.getICPPositionAndVelocity(initialICPPosition, initialICPVelocity, omega0, initialTime);
