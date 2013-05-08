@@ -1652,7 +1652,8 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
          Pair<Double, Double> footPositionErrorBounds = new Pair<Double, Double>(-0.1, 0.1);
          if (walkingStatusReporter != null)
          {
-//            walkingStatusReporter.setFootPositionVariablesAndBounds(robotSide, footPositionErrorMagnitude, footPositionErrorBounds);
+            System.out.println(walkingStatusReporter);
+            walkingStatusReporter.setFootPositionVariablesAndBounds(robotSide, footPositionErrorMagnitude, footPositionErrorBounds);
          }
       }
    }
