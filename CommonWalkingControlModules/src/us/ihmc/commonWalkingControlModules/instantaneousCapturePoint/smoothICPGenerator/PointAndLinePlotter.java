@@ -8,11 +8,14 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.plotting.Artifact;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -24,6 +27,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameLineSegment2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 
 public class PointAndLinePlotter
@@ -145,7 +149,7 @@ public class PointAndLinePlotter
 
 
    
-   public void setLineSegmentBasedOnStartAndEndPoints(YoFrameLineSegment2d lineSegmentToPack, Point2d startPoint, Point2d endPoint)
+   public static void setLineSegmentBasedOnStartAndEndPoints(YoFrameLineSegment2d lineSegmentToPack, Point2d startPoint, Point2d endPoint)
    {
       FramePoint2d startFramePoint = new FramePoint2d(ReferenceFrame.getWorldFrame(), startPoint.getX(), startPoint.getY());
       FramePoint2d endFramePoint = new FramePoint2d(ReferenceFrame.getWorldFrame(), endPoint.getX(), endPoint.getY());
@@ -158,14 +162,47 @@ public class PointAndLinePlotter
       lineSegmentToPack.setFrameLineSegment2d(lineSegment);
    }
 
-   public void setLineSegmentBasedOnStartAndEndFramePoints(YoFrameLineSegment2d lineSegmentToPack, FramePoint2d startPoint, FramePoint2d endPoint)
+   public static void setLineSegmentBasedOnStartAndEndFramePoints(YoFrameLineSegment2d lineSegmentToPack, FramePoint2d startPoint, FramePoint2d endPoint)
    {
       if (startPoint.distanceSquared(endPoint) < 1e-6)
          startPoint.setX(startPoint.getX() + 1e-6);
 
-
       FrameLineSegment2d lineSegment = new FrameLineSegment2d(startPoint, endPoint);
       lineSegmentToPack.setFrameLineSegment2d(lineSegment);
    }
+   
+
+
+   public static void setLineSegmentBasedOnStartAndEndFramePoints(YoFrameLineSegment2d lineSegmentToPack, Point2d startPoint, Point2d endPoint)
+   {
+      if (startPoint.distanceSquared(endPoint) < 1e-6)
+         startPoint.setX(startPoint.getX() + 1e-6);
+
+      FrameLineSegment2d lineSegment = new FrameLineSegment2d(ReferenceFrame.getWorldFrame(), startPoint, endPoint);
+      lineSegmentToPack.setFrameLineSegment2d(lineSegment);
+   }
+
+   public static void setEndPointGivenStartAndAdditionalVector(YoFramePoint endPointToSet, YoFramePoint startPoint, YoFrameVector additionalVector, double scaling)
+   {
+      endPointToSet.set(additionalVector);
+      endPointToSet.scale(scaling);
+      endPointToSet.add(startPoint);
+   }
+   
+   public static void setEndPointGivenStartAndAdditionalVector(YoFramePoint endPointToSet, FramePoint startPoint, FrameVector additionalVector, double scaling)
+   {
+      endPointToSet.set(additionalVector);
+      endPointToSet.scale(scaling);
+      endPointToSet.add(startPoint);
+   }
+
+
+   public static void setEndPointGivenStartAndAdditionalVector(YoFramePoint endPointToSet, Point3d startPoint, Vector3d additionalVector, double scaling)
+   {
+      endPointToSet.set(additionalVector);
+      endPointToSet.scale(scaling);
+      endPointToSet.add(startPoint);
+   }
+
 
 }

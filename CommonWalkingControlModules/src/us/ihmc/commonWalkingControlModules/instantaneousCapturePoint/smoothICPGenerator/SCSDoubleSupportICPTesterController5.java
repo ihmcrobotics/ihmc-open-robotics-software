@@ -239,28 +239,26 @@ public class SCSDoubleSupportICPTesterController5 implements RobotController
               + Math.pow(comVelocityFrameVector.getZ(), 2)));
 
 
-      equivalentCoPAndICPPlotter.setLineSegmentBasedOnStartAndEndFramePoints(listOfICPLineSegments.get(0),
+      PointAndLinePlotter.setLineSegmentBasedOnStartAndEndFramePoints(listOfICPLineSegments.get(0),
               equivalentConstantCoPsFramePoints.get(0).getFramePoint2dCopy(), initialICPsFramePoints.get(1).getFramePoint2dCopy());
 
 
-      equivalentCoPAndICPPlotter.setLineSegmentBasedOnStartAndEndFramePoints(listOfICPLineSegments.get(1),
+      PointAndLinePlotter.setLineSegmentBasedOnStartAndEndFramePoints(listOfICPLineSegments.get(1),
               equivalentConstantCoPsFramePoints.get(1).getFramePoint2dCopy(), initialICPsFramePoints.get(2).getFramePoint2dCopy());
 
-      equivalentCoPAndICPPlotter.setLineSegmentBasedOnStartAndEndFramePoints(listOfICPLineSegments.get(2),
+      PointAndLinePlotter.setLineSegmentBasedOnStartAndEndFramePoints(listOfICPLineSegments.get(2),
               equivalentConstantCoPsFramePoints.get(2).getFramePoint2dCopy(), equivalentConstantCoPsFramePoints.get(3).getFramePoint2dCopy());
 
 
-      icpVelocityArrowTip.set(desiredDCMposOfTimeFramePoint.getFramePointCopy());
-      icpVelocityArrowTip.add(desiredDCMvelOfTimeFrameVector.getFrameVectorCopy());
-      equivalentCoPAndICPPlotter.setLineSegmentBasedOnStartAndEndFramePoints(icpVelocityLine, desiredDCMposOfTimeFramePoint.getFramePoint2dCopy(),
+      
+      PointAndLinePlotter.setEndPointGivenStartAndAdditionalVector(icpVelocityArrowTip, desiredDCMposOfTimeFramePoint, desiredDCMvelOfTimeFrameVector, 0.5);
+      PointAndLinePlotter.setLineSegmentBasedOnStartAndEndFramePoints(icpVelocityLine, desiredDCMposOfTimeFramePoint.getFramePoint2dCopy(),
               icpVelocityArrowTip.getFramePoint2dCopy());
 
-      comVelocityArrowTip.set(comPositionFramePoint.getFramePointCopy());
-      comVelocityArrowTip.add(comVelocityFrameVector.getFrameVectorCopy());
-      equivalentCoPAndICPPlotter.setLineSegmentBasedOnStartAndEndFramePoints(comVelocityLine, comPositionFramePoint.getFramePoint2dCopy(),
+      PointAndLinePlotter.setEndPointGivenStartAndAdditionalVector(comVelocityArrowTip, comPositionFramePoint, comVelocityFrameVector, 0.5);
+      PointAndLinePlotter.setLineSegmentBasedOnStartAndEndFramePoints(comVelocityLine, comPositionFramePoint.getFramePoint2dCopy(),
               comVelocityArrowTip.getFramePoint2dCopy());
    }
-
 
    public void initialize()
    {
