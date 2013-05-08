@@ -97,7 +97,7 @@ public class NewDoubleSupportICPComputerTest
    @Test
    public void testComputeSingleSupportICP()
    {
-      boolean visualize = true;
+      boolean visualize = false;
 
       NewDoubleSupportICPComputer newDoubleSupportICPComputer = new NewDoubleSupportICPComputer();
 

@@ -58,6 +58,11 @@ public class SmoothICPComputer
             doubleSupportFirstStepFraction, omega0);
    }
    
+   public Point3d[] getICPCornerPoints()
+   {
+      return icpCornerPoints;
+   }
+   
    public void initializeDoubleSupport(ArrayList<Point3d> footLocations, double singleSupportDuration, 
          double doubleSupportDuration, double initialTime)
    {

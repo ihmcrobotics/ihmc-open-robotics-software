@@ -90,6 +90,14 @@ public class PointAndLinePlotter
       }
    }
 
+   public void plotPoint3ds(String name, ArrayList<Point3d> pointList, AppearanceDefinition appearance, double size)
+   {
+      for (Point3d point3d : pointList)
+      {
+         plotPoint3d(name, point3d, appearance, size);
+      }
+   }
+
    public void plotPoint3ds(String name, Point3d[] pointList, AppearanceDefinition appearance, double size)
    {
       for (Point3d point3d : pointList)
@@ -205,4 +213,5 @@ public class PointAndLinePlotter
    }
 
 
+  
 }
