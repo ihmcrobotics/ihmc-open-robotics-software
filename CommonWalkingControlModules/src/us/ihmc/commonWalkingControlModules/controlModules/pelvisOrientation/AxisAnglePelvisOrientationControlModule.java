@@ -47,7 +47,7 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
       this.tauPelvis = new YoFrameVector("tauPelvis", "", bodyFrame, registry);
       this.tauSwingLegCompensation = new YoFrameVector("tauSwingLegCompensation", "", bodyFrame, registry);
       this.useFeedforward = useFeedforward;
-      this.axisAngleOrientationController = new AxisAngleOrientationController("pelvis", bodyFrame, new WalkingStatusReporter(), registry);
+      this.axisAngleOrientationController = new AxisAngleOrientationController("pelvis", bodyFrame, null, registry);
 
 
       parentRegistry.addChild(registry);

@@ -122,7 +122,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       momentumRateOfChangeControlModule.setDerivativeGains(comDerivativeGain, comDerivativeGain, comDerivativeGain);
 
       RootJointAngularAccelerationControlModule rootJointAccelerationControlModule = new RootJointAngularAccelerationControlModule(
-            fullRobotModel.getRootJoint(), twistCalculator, new WalkingStatusReporter(), registry);
+            fullRobotModel.getRootJoint(), twistCalculator, null, registry);
       rootJointAccelerationControlModule.setProportionalGains(100.0, 100.0, 100.0);
       rootJointAccelerationControlModule.setDerivativeGains(20.0, 20.0, 20.0);
 
