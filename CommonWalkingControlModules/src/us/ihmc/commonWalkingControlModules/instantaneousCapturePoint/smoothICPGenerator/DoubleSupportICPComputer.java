@@ -109,7 +109,7 @@ public class DoubleSupportICPComputer
    }
 
 
-   public void computeDoubleSupportPolynomialParams(ArrayList<DenseMatrix64F> constantEquivalentCoPs, double dcmConst, double steppingTime,
+   public void computeDoubleSupportPolynomialParams(ArrayList<DenseMatrix64F> constantEquivalentCoPs, ArrayList<YoFramePoint> consideredFootStepLocationsFramePoints, double dcmConst, double steppingTime,
            double doubleSupportFirstStepFraction, ArrayList<DenseMatrix64F> initialICPs, boolean isFirstStep, double initialTransferSupportTime,
            double doubleSupportTime)
    {
@@ -136,13 +136,24 @@ public class DoubleSupportICPComputer
 
       if (isFirstStep)    // (false) //
       {
-         FramePoint tempFramePointI = new FramePoint(ReferenceFrame.getWorldFrame());
-         FramePoint tempFramePointIminus1 = new FramePoint(ReferenceFrame.getWorldFrame());
-
-
-         tempFramePointI.set(constantEquivalentCoPs.get(0).get(0), constantEquivalentCoPs.get(0).get(1), constantEquivalentCoPs.get(0).get(2));
-
-         tempFramePointIminus1.set(constantEquivalentCoPs.get(1).get(0), constantEquivalentCoPs.get(1).get(1), constantEquivalentCoPs.get(1).get(2));
+//         FramePoint tempFramePointI = new FramePoint(ReferenceFrame.getWorldFrame());
+//         FramePoint tempFramePointIminus1 = new FramePoint(ReferenceFrame.getWorldFrame());
+//
+//
+//         tempFramePointI.set(constantEquivalentCoPs.get(0).get(0), constantEquivalentCoPs.get(0).get(1), constantEquivalentCoPs.get(0).get(2));
+//
+//         tempFramePointIminus1.set(constantEquivalentCoPs.get(1).get(0), constantEquivalentCoPs.get(1).get(1), constantEquivalentCoPs.get(1).get(2));
+//         tempFramePointI.add(tempFramePointIminus1);
+//         tempFramePointI.scale(0.5);
+         
+         
+         FramePoint tempFramePointI =  new FramePoint(ReferenceFrame.getWorldFrame());
+         FramePoint tempFramePointIminus1 =  new FramePoint(ReferenceFrame.getWorldFrame());
+         
+         
+         tempFramePointI.set(consideredFootStepLocationsFramePoints.get(0).getX(), consideredFootStepLocationsFramePoints.get(0).getY(), consideredFootStepLocationsFramePoints.get(0).getZ());  
+         
+         tempFramePointIminus1.set(consideredFootStepLocationsFramePoints.get(1).getX(), consideredFootStepLocationsFramePoints.get(1).getY(), consideredFootStepLocationsFramePoints.get(1).getZ());
          tempFramePointI.add(tempFramePointIminus1);
          tempFramePointI.scale(0.5);
 
@@ -205,7 +216,7 @@ public class DoubleSupportICPComputer
       paramMatrix.set(tempParamMatrix);
    }
 
-   public void calcDCMandECMPofTime(ArrayList<DenseMatrix64F> constantEquivalentCoPs, double doubleSupportFirstStepFraction, double dcmConst,
+   public void calcDCMandECMPofTime(ArrayList<DenseMatrix64F> constantEquivalentCoPs, ArrayList<YoFramePoint> consideredFootStepLocationsFramePoints, double doubleSupportFirstStepFraction, double dcmConst,
                                     ArrayList<DenseMatrix64F> initialICPs, boolean isFirstStep, double initialTransferSupportTime, double doubleSupportTime,
                                     boolean isSingleSupport, double currentTime, double steppingTime)
    {
@@ -222,7 +233,7 @@ public class DoubleSupportICPComputer
       }
       else
       {
-         computeDoubleSupportPolynomialParams(constantEquivalentCoPs, dcmConst, steppingTime, doubleSupportFirstStepFraction, initialICPs, isFirstStep,
+         computeDoubleSupportPolynomialParams(constantEquivalentCoPs, consideredFootStepLocationsFramePoints, dcmConst, steppingTime, doubleSupportFirstStepFraction, initialICPs, isFirstStep,
                  initialTransferSupportTime, doubleSupportTime);
 
          double timePow3 = Math.pow(currentTime, 3.0);
@@ -241,7 +252,7 @@ public class DoubleSupportICPComputer
 
    public void updateSubFootListForSmoothICPTrajectory(ArrayList<DenseMatrix64F> constantEquivalentCoPs, ArrayList<YoFramePoint> footStepLocationsFramePoints,
            ArrayList<YoFramePoint> equivalentConstantCoPsFramePoints, ArrayList<YoFramePoint> consideredFootStepLocationsFramePoints,
-           int numberOfConsideredFootstepLocations, ArrayList<DenseMatrix64F> equivalentConstantCoPsVectors)
+           int numberOfConsideredFootstepLocations, ArrayList<DenseMatrix64F> equivalentConstantCoPsVectors, boolean isFirstStep)
    {
       int footListSize = footStepLocationsFramePoints.size();
 
@@ -277,7 +288,23 @@ public class DoubleSupportICPComputer
       }
       else
       {
-         equivalentConstantCoPsFramePoints.get(0).set(footStepLocationsFramePoints.get(0));
+//         equivalentConstantCoPsFramePoints.get(0).set(footStepLocationsFramePoints.get(0));
+         
+         if (isFirstStep)
+         {
+            tempFramePointI.set(footStepLocationsFramePoints.get(0).getFramePointCopy());  
+            
+            tempFramePointIminus1.set(footStepLocationsFramePoints.get(1).getFramePointCopy());
+            tempFramePointI.add(tempFramePointIminus1);
+            tempFramePointI.scale(0.5);
+            
+            
+            equivalentConstantCoPsFramePoints.get(0).set(tempFramePointI);
+         }
+         else
+         {
+            equivalentConstantCoPsFramePoints.get(0).set(footStepLocationsFramePoints.get(0));
+         }
 
          consideredFootStepLocationsFramePoints.get(0).set(footStepLocationsFramePoints.get(0));
       }

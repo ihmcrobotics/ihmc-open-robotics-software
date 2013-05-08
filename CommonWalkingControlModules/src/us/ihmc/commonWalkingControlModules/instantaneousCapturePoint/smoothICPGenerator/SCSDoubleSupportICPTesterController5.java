@@ -23,7 +23,7 @@ public class SCSDoubleSupportICPTesterController5 implements RobotController
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
    int numberOfConsideredFootstepLocations = 4;
-   int numberOfStepsInStepList = 5;
+   int numberOfStepsInStepList = 1;
    private final ArrayList<YoFramePoint> footStepLocationsFramePoints = new ArrayList<YoFramePoint>();
 
 
@@ -177,7 +177,7 @@ public class SCSDoubleSupportICPTesterController5 implements RobotController
       if (supportState.getStepListUpdateRequestFlag() == true)
       {
          dsICPcomputer.updateSubFootListForSmoothICPTrajectory(equivalentConstantCoPsVectors, footStepLocationsFramePoints, equivalentConstantCoPsFramePoints,
-                 consideredFootStepLocationsFramePoints, numberOfConsideredFootstepLocations, equivalentConstantCoPsVectors);
+                 consideredFootStepLocationsFramePoints, numberOfConsideredFootstepLocations, equivalentConstantCoPsVectors, supportState.getIsFirstStep());
 
          supportState.setStepListUpdateRequestFlag(false);
       }
@@ -185,12 +185,12 @@ public class SCSDoubleSupportICPTesterController5 implements RobotController
 
       if (supportState.getIsSingleSupport())
       {
-         dsICPcomputer.computeDoubleSupportPolynomialParams(equivalentConstantCoPsVectors, dcmConst, steppingTime, doubleSupportFirstStepFraction,
+         dsICPcomputer.computeDoubleSupportPolynomialParams(equivalentConstantCoPsVectors, consideredFootStepLocationsFramePoints, dcmConst, steppingTime, doubleSupportFirstStepFraction,
                  initialICPsVectors, supportState.getIsFirstStep(), supportState.getInitialTransferSupportTime(), supportState.getDoubleSupportTime());
       }
 
 
-      dsICPcomputer.calcDCMandECMPofTime(equivalentConstantCoPsVectors, doubleSupportFirstStepFraction, dcmConst, initialICPsVectors,
+      dsICPcomputer.calcDCMandECMPofTime(equivalentConstantCoPsVectors, consideredFootStepLocationsFramePoints, doubleSupportFirstStepFraction, dcmConst, initialICPsVectors,
                                          supportState.getIsFirstStep(), supportState.getInitialTransferSupportTime(), supportState.getDoubleSupportTime(),
                                          supportState.getIsSingleSupport(), supportState.getCurrentTime(), supportState.getSteppingTime());
 
