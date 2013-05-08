@@ -126,6 +126,8 @@ public class IndividualHandControlState<T extends Enum<T>> extends IndividualMan
 
       updateVisualizers();
 
+      taskspaceConstraintData.set(handAcceleration);
+
       momentumBasedController.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
    }
 
