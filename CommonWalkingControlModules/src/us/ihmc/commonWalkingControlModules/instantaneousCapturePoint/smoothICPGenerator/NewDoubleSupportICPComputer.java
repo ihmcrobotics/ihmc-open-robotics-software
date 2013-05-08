@@ -26,6 +26,29 @@ public class NewDoubleSupportICPComputer
       return icpCornerPoints;
    }
 
+   
+   public void computeSingleSupportStartICPAndVelocity(Point3d singleSupportICPToPack,  Vector3d singleSupportICPVelocityToPack, 
+         Point3d constantCenterOfPressure, Point3d cornerPoint0, double doubleSupportDuration, double doubleSupportFirstStepFraction,
+         double omega0)
+   {
+      double initialDoubleSupportDuration = doubleSupportDuration * (1.0 - doubleSupportFirstStepFraction);
+
+      JojosICPutilities.extrapolateDCMposAndVel(singleSupportICPToPack, singleSupportICPVelocityToPack, 
+            constantCenterOfPressure, initialDoubleSupportDuration, omega0, cornerPoint0);
+   }
+    
+   
+   public void computeSingleSupportEndICPAndVelocity(Point3d singleSupportICPToPack,  Vector3d singleSupportICPVelocityToPack, 
+         Point3d constantCenterOfPressure, Point3d cornerPoint0, double doubleSupportDuration, double doubleSupportFirstStepFraction,
+         double singleSupportDuration, double omega0)
+   {
+      double initialDoubleSupportDuration = doubleSupportDuration * (1.0 - doubleSupportFirstStepFraction);
+
+      JojosICPutilities.extrapolateDCMposAndVel(singleSupportICPToPack, singleSupportICPVelocityToPack, 
+            constantCenterOfPressure, initialDoubleSupportDuration + singleSupportDuration, omega0, cornerPoint0);
+   }
+   
+   
    public Point3d computeSingleSupportStartICP(Point3d constantCenterOfPressure, Point3d cornerPoint0, double doubleSupportDuration, double doubleSupportFirstStepFraction,
          double omega0)
    {

@@ -16,7 +16,7 @@ public class DoubleSupportICPComputer
    private FramePoint tempFramePointI = new FramePoint();
    private FramePoint tempFramePointIminus1 = new FramePoint();
 
-   private final DenseMatrix64F paramMatrix = new DenseMatrix64F(3, 4);
+   private final DenseMatrix64F doubleSupportParameterMatrix = new DenseMatrix64F(3, 4);
 
    private final DenseMatrix64F desiredDCMposOfTime = new DenseMatrix64F(3, 1);
    private final DenseMatrix64F desiredDCMvelOfTime = new DenseMatrix64F(3, 1);
@@ -127,8 +127,7 @@ public class DoubleSupportICPComputer
 
       double doubleSupportTimeCurrentStep = -doubleSupportFirstStepFraction * currentDoubleSupportTime;
       double doubleSupportTimeNextStep = (1 - doubleSupportFirstStepFraction) * doubleSupportTime;
-      double doubleSupportTimePow2 = Math.pow(currentDoubleSupportTime, 2);
-      double doubleSupportTimePow3 = Math.pow(currentDoubleSupportTime, 3);
+      
 
       updateDCMCornerPoints(constantEquivalentCoPs, dcmConst, steppingTime, initialICPs);
 
@@ -176,12 +175,22 @@ public class DoubleSupportICPComputer
       // Calculate DCM position and velocity at end of Double Support phase
 
       JojosICPutilities.extrapolateDCMposAndVel(constantEquivalentCoPs.get(1), doubleSupportTimeNextStep, dcmConst, initialICPs.get(1),
-              finalDoubleSupportICPpos, finalDoubleSupportICPvel);
+            finalDoubleSupportICPpos, finalDoubleSupportICPvel);
 
+      computeThirdOrderPolynomialParameterMatrix(doubleSupportParameterMatrix, currentDoubleSupportTime, initialDoubleSupportICPpos, initialDoubleSupportICPvel, finalDoubleSupportICPpos, finalDoubleSupportICPvel);
+   }
+   
+   
+   private static void computeThirdOrderPolynomialParameterMatrix(DenseMatrix64F parameterMatrixToPack, double doubleSupportTime, DenseMatrix64F initialDoubleSupportICPpos,
+   DenseMatrix64F initialDoubleSupportICPvel, DenseMatrix64F finalDoubleSupportICPpos, DenseMatrix64F finalDoubleSupportICPvel)
+   {
+      double doubleSupportTimePow2 = Math.pow(doubleSupportTime, 2);
+      double doubleSupportTimePow3 = Math.pow(doubleSupportTime, 3);
+      
       // Calculate time-dependency matrix for polynomial calculation (part of inversion problem)
-      DenseMatrix64F TimeBoundaryConditionMatrix = new DenseMatrix64F(4, 4, true, -2, 1, 2, 1, 3 * currentDoubleSupportTime, -2 * currentDoubleSupportTime,
-                                                      -3 * currentDoubleSupportTime, -currentDoubleSupportTime, 0, doubleSupportTimePow2, 0, 0,
-                                                      -doubleSupportTimePow3, 0, 0, 0);
+      DenseMatrix64F TimeBoundaryConditionMatrix = new DenseMatrix64F(4, 4, true, -2.0, 1.0, 2.0, 1.0, 3.0 * doubleSupportTime, -2.0 * doubleSupportTime,
+                                                      -3.0 * doubleSupportTime, -doubleSupportTime, 0.0, doubleSupportTimePow2, 0.0, 0.0,
+                                                      -doubleSupportTimePow3, 0.0, 0.0, 0.0);
 
       // TimeBoundaryConditionMatrix.print();
 
@@ -191,8 +200,8 @@ public class DoubleSupportICPComputer
       // -t2_3,      0,          0,       0];
 
       // Calculate DenominatorMatrix, so that T =  TimeBoundaryConditionMatrix*DenominatorMatrix, so that PolynomialParams = T*StateBoundaryConditionMatrix
-      double denominator1 = -1 / doubleSupportTimePow3;
-      double denominator2 = 1 / doubleSupportTimePow2;
+      double denominator1 = -1.0 / doubleSupportTimePow3;
+      double denominator2 = 1.0 / doubleSupportTimePow2;
       DenseMatrix64F DenominatorMatrix = CommonOps.diag(denominator1, denominator2, denominator1, denominator2);
 
       // System.out.println("DenominatorMatrix: ");
@@ -213,7 +222,7 @@ public class DoubleSupportICPComputer
       CommonOps.mult(DenominatorMatrix, StateBoundaryConditionMatrix, tempResultMatrix);
       CommonOps.mult(TimeBoundaryConditionMatrix, tempResultMatrix, tempParamMatrix);
       CommonOps.transpose(tempParamMatrix);
-      paramMatrix.set(tempParamMatrix);
+      parameterMatrixToPack.set(tempParamMatrix);
    }
 
    public void calcDCMandECMPofTime(ArrayList<DenseMatrix64F> constantEquivalentCoPs, ArrayList<YoFramePoint> consideredFootStepLocationsFramePoints, double doubleSupportFirstStepFraction, double dcmConst,
@@ -243,8 +252,8 @@ public class DoubleSupportICPComputer
          DenseMatrix64F dcmPositionTimeVector = new DenseMatrix64F(4, 1, true, timePow3, timePow2, currentTime, 1);
          DenseMatrix64F dcmVelocityTimeVector = new DenseMatrix64F(4, 1, true, 3 * timePow2, 2 * currentTime, 1, 0);
 
-         CommonOps.mult(paramMatrix, dcmPositionTimeVector, desiredDCMposOfTime);
-         CommonOps.mult(paramMatrix, dcmVelocityTimeVector, desiredDCMvelOfTime);
+         CommonOps.mult(doubleSupportParameterMatrix, dcmPositionTimeVector, desiredDCMposOfTime);
+         CommonOps.mult(doubleSupportParameterMatrix, dcmVelocityTimeVector, desiredDCMvelOfTime);
          CommonOps.scale(-dcmConst, desiredDCMvelOfTime, tempVector);
          CommonOps.add(desiredDCMposOfTime, tempVector, desiredECMPofTime);
       }

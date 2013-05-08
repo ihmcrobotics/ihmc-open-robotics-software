@@ -23,7 +23,7 @@ public class SCSDoubleSupportICPTesterController5 implements RobotController
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
    int numberOfConsideredFootstepLocations = 4;
-   int numberOfStepsInStepList = 1;
+   int numberOfStepsInStepList = 5;
    private final ArrayList<YoFramePoint> footStepLocationsFramePoints = new ArrayList<YoFramePoint>();
 
 
