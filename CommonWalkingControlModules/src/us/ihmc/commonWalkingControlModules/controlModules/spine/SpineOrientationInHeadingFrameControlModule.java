@@ -16,7 +16,6 @@ import us.ihmc.utilities.screwTheory.Wrench;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.AxisAngleOrientationController;
-import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class SpineOrientationInHeadingFrameControlModule implements SpineControlModule
@@ -49,7 +48,7 @@ public class SpineOrientationInHeadingFrameControlModule implements SpineControl
       this.tauChest = new YoFrameVector("tauChest", "", bodyFrame, registry);
       this.chestWrench = new Wrench(bodyFrame, bodyFrame);
 
-      this.axisAngleOrientationController = new AxisAngleOrientationController("chest", bodyFrame, null, parentRegistry);
+      this.axisAngleOrientationController = new AxisAngleOrientationController("chest", bodyFrame, parentRegistry);
       this.desiredHeadingControlModule = desiredHeadingControlModule;
       
       this.spineJacobian = spineJacobian;

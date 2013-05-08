@@ -9,7 +9,6 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.AxisAngleOrientationController;
-import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter;
 
 public class RigidBodyOrientationControlModule
 {
@@ -21,11 +20,11 @@ public class RigidBodyOrientationControlModule
    private final Twist endEffectorTwist = new Twist();
    private final FrameVector currentAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
 
-   public RigidBodyOrientationControlModule(String namePrefix, RigidBody base, RigidBody endEffector, TwistCalculator twistCalculator, WalkingStatusReporter walkingStatusReporter, YoVariableRegistry parentRegistry)
+   public RigidBodyOrientationControlModule(String namePrefix, RigidBody base, RigidBody endEffector, TwistCalculator twistCalculator, YoVariableRegistry parentRegistry)
    {
       this.base = base;
       this.endEffector = endEffector;
-      this.axisAngleOrientationController = new AxisAngleOrientationController(namePrefix, endEffector.getBodyFixedFrame(), walkingStatusReporter, parentRegistry);
+      this.axisAngleOrientationController = new AxisAngleOrientationController(namePrefix, endEffector.getBodyFixedFrame(), parentRegistry);
       this.twistCalculator = twistCalculator;
    }
    

@@ -12,7 +12,6 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFrameVector2d;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
@@ -32,17 +31,11 @@ public class ICPProportionalController
    private final DoubleYoVariable captureKpOrthogonalToMotion = new DoubleYoVariable("captureKpOrthogonal", registry);
    private final Vector2dZUpFrame icpVelocityDirectionFrame;
 
-   public ICPProportionalController(double controlDT, WalkingStatusReporter walkingStatusReporter, YoVariableRegistry parentRegistry)
+   public ICPProportionalController(double controlDT, YoVariableRegistry parentRegistry)
    {
       this.controlDT = controlDT;
       icpVelocityDirectionFrame = new Vector2dZUpFrame("icpVelocityDirectionFrame", worldFrame);
       parentRegistry.addChild(registry);
-      
-      if(walkingStatusReporter != null)
-      {          
-         walkingStatusReporter.addMapping(icpError.getYoX(), new Pair<Double, Double>(-0.1, 0.1));
-         walkingStatusReporter.addMapping(icpError.getYoY(), new Pair<Double, Double>(-0.1, 0.1));        
-      }
    }
 
    public void reset()

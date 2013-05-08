@@ -9,7 +9,6 @@ import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class RootJointAngularAccelerationControlModule extends AbstractControlFlowElement implements RootJointAccelerationControlModule
@@ -26,12 +25,12 @@ public class RootJointAngularAccelerationControlModule extends AbstractControlFl
 
    private final RootJointAccelerationData rootJointAccelerationData;
 
-   public RootJointAngularAccelerationControlModule(InverseDynamicsJoint rootJoint, TwistCalculator twistCalculator, WalkingStatusReporter walkingStatusReporter, YoVariableRegistry parentRegistry)
+   public RootJointAngularAccelerationControlModule(InverseDynamicsJoint rootJoint, TwistCalculator twistCalculator, YoVariableRegistry parentRegistry)
    {
       this.rootJoint = rootJoint;
       registry = new YoVariableRegistry(getClass().getSimpleName());
       rootJointOrientationControlModule = new RigidBodyOrientationControlModule(rootJoint.getName(), rootJoint.getPredecessor(), rootJoint.getSuccessor(),
-              twistCalculator, walkingStatusReporter, registry);
+              twistCalculator, registry);
       this.desiredPelvisAngularAcceleration = new YoFrameVector("desired" + rootJoint.getName() + "AngularAcceleration", rootJoint.getFrameAfterJoint(),
               registry);
       rootJointAccelerationData = new RootJointAccelerationData(rootJoint.getSuccessor().getBodyFixedFrame(), rootJoint.getPredecessor().getBodyFixedFrame(),
