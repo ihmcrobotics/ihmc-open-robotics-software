@@ -6,6 +6,8 @@ import java.util.Collection;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationTrajectoryGenerator;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.FormattingTools;
@@ -14,9 +16,8 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
-import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
@@ -31,7 +32,6 @@ public class IndividualHandControlState<T extends Enum<T>> extends IndividualMan
    private final RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule;
    private final PositionTrajectoryGenerator positionTrajectoryGenerator;
    private final OrientationTrajectoryGenerator orientationTrajectoryGenerator;
-   private final RigidBody base;
 
    private final SpatialAccelerationVector handAcceleration = new SpatialAccelerationVector();
 
@@ -51,9 +51,15 @@ public class IndividualHandControlState<T extends Enum<T>> extends IndividualMan
    private final FrameVector desiredAngularAcceleration = new FrameVector(worldFrame);
    private final Collection<Finishable> finishables = new ArrayList<Finishable>();
 
-   public IndividualHandControlState(T stateEnum, RobotSide robotSide, RigidBody base, PositionTrajectoryGenerator positionTrajectoryGenerator,
-         OrientationTrajectoryGenerator orientationTrajectoryGenerator, RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+   private final TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
+   private final MomentumBasedController momentumBasedController;
+   private final GeometricJacobian jacobian;
+
+   public IndividualHandControlState(T stateEnum, RobotSide robotSide, PositionTrajectoryGenerator positionTrajectoryGenerator,
+                                     OrientationTrajectoryGenerator orientationTrajectoryGenerator,
+                                     RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule,
+                                     MomentumBasedController momentumBasedController, GeometricJacobian jacobian,
+                                     DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
       super(stateEnum);
 
@@ -63,7 +69,8 @@ public class IndividualHandControlState<T extends Enum<T>> extends IndividualMan
       this.handSpatialAccelerationControlModule = handSpatialAccelerationControlModule;
       this.positionTrajectoryGenerator = positionTrajectoryGenerator;
       this.orientationTrajectoryGenerator = orientationTrajectoryGenerator;
-      this.base = base;
+      this.momentumBasedController = momentumBasedController;
+      this.jacobian = jacobian;
 
       finishables.add(positionTrajectoryGenerator);
       finishables.add(orientationTrajectoryGenerator);
@@ -92,21 +99,6 @@ public class IndividualHandControlState<T extends Enum<T>> extends IndividualMan
    }
 
    @Override
-   public Wrench getHandExternalWrench()
-   {
-      ReferenceFrame handFrame = handSpatialAccelerationControlModule.getEndEffector().getBodyFixedFrame();
-      Wrench ret = new Wrench(handFrame, handFrame); // TODO: garbage generation
-
-      return ret;
-   }
-
-   @Override
-   public DenseMatrix64F getNullspaceMultipliers()
-   {
-      return new DenseMatrix64F(0, 1); // TODO: pass on what the spatial acceleration control module does
-   }
-
-   @Override
    public void doAction()
    {
       positionTrajectoryGenerator.compute(getTimeInCurrentState());
@@ -121,7 +113,7 @@ public class IndividualHandControlState<T extends Enum<T>> extends IndividualMan
       orientationTrajectoryGenerator.packAngularAcceleration(desiredAngularAcceleration);
 
       handSpatialAccelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredVelocity, desiredAngularVelocity, desiredAcceleration,
-            desiredAngularAcceleration, base);
+              desiredAngularAcceleration, jacobian.getBase());
 
       handSpatialAccelerationControlModule.packAcceleration(handAcceleration);
 
@@ -133,6 +125,8 @@ public class IndividualHandControlState<T extends Enum<T>> extends IndividualMan
       desiredPositionFrame.update();
 
       updateVisualizers();
+
+      momentumBasedController.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
    }
 
    @Override

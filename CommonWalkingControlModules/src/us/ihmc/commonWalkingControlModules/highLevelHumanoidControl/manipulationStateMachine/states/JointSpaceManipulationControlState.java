@@ -4,15 +4,17 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.PDController;
 import com.yobotics.simulationconstructionset.util.trajectory.YoPolynomial;
+import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
-import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.*;
 
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 
-public class ArmInJointSpaceControlState
+public class JointSpaceManipulationControlState<T extends Enum<T>> extends IndividualManipulationState
 {
    private final DoubleYoVariable yoTime;
    private final OneDoFJoint[] oneDoFJoints;
@@ -24,12 +26,21 @@ public class ArmInJointSpaceControlState
    private final DoubleYoVariable moveTimeArmJoint;
 
    private final YoVariableRegistry registry;
+   private final MomentumBasedController momentumBasedController;
 
-   public ArmInJointSpaceControlState(DoubleYoVariable yoTime, RobotSide robotSide, FullRobotModel fullRobotModel, YoVariableRegistry parentRegistry)
+   private final Map<OneDoFJoint, Double> desiredJointPositions = new LinkedHashMap<OneDoFJoint, Double>();
+   private final SpatialAccelerationVector desiredHandAcceleration;
+
+   private double endMoveTime = Double.POSITIVE_INFINITY;
+
+   public JointSpaceManipulationControlState(T stateEnum, DoubleYoVariable yoTime, RobotSide robotSide, GeometricJacobian jacobian, MomentumBasedController momentumBasedController, Map<OneDoFJoint, Double> desiredJointPositions, YoVariableRegistry parentRegistry)
    {
+      super(stateEnum);
       this.yoTime = yoTime;
 
       registry = new YoVariableRegistry("ArmJointController" + robotSide.getCamelCaseNameForMiddleOfExpression());
+
+      this.desiredJointPositions.putAll(desiredJointPositions);
 
       moveTimeArmJoint = new DoubleYoVariable("moveTimeArmJoint", registry);
       moveTimeArmJoint.set(2.0);
@@ -46,11 +57,10 @@ public class ArmInJointSpaceControlState
       polynomialLinkedHashMap = new LinkedHashMap<OneDoFJoint, YoPolynomial>();
       pdControllerLinkedHashMap = new LinkedHashMap<OneDoFJoint, PDController>();
 
-      RigidBody chest = fullRobotModel.getChest();
-      RigidBody hand = fullRobotModel.getHand(robotSide);
-
-      InverseDynamicsJoint[] joints = ScrewTools.createJointPath(chest, hand);
+      InverseDynamicsJoint[] joints = ScrewTools.createJointPath(jacobian.getBase(), jacobian.getEndEffector());
       this.oneDoFJoints = ScrewTools.filterJoints(joints, RevoluteJoint.class);
+
+      this.desiredHandAcceleration = new SpatialAccelerationVector(jacobian.getEndEffectorFrame(), jacobian.getBaseFrame(), jacobian.getEndEffectorFrame());
 
       int orderOfPolynomial = 6;
       for (OneDoFJoint joint : oneDoFJoints)
@@ -62,6 +72,10 @@ public class ArmInJointSpaceControlState
                                         registry);
          pdControllerLinkedHashMap.put(joint, pdController);
       }
+
+      this.momentumBasedController = momentumBasedController;
+
+      parentRegistry.addChild(registry);
    }
 
    private void updateDerivativeGain()
@@ -70,27 +84,23 @@ public class ArmInJointSpaceControlState
    }
 
 
-   public void initializeForMove(LinkedHashMap<OneDoFJoint, Double> desiredJointPositions)
+   public void initializeForMove()
    {
-      checkIfJointsMatch(desiredJointPositions);
-
+      double startTime = yoTime.getDoubleValue();
+      endMoveTime = startTime + moveTimeArmJoint.getDoubleValue();
       for (OneDoFJoint joint : oneDoFJoints)
       {
          YoPolynomial yoPolynomial = polynomialLinkedHashMap.get(joint);
-         double startTime = yoTime.getDoubleValue();
-         double endTime = startTime + moveTimeArmJoint.getDoubleValue();
          double desiredEndPosition = desiredJointPositions.get(joint);
          double desiredEndVelocity = 0.0;
 
-         yoPolynomial.setCubic(startTime, endTime, joint.getQ(), joint.getQd(), desiredEndPosition, desiredEndVelocity);
+         yoPolynomial.setCubic(startTime, endMoveTime, joint.getQ(), joint.getQd(), desiredEndPosition, desiredEndVelocity);
       }
    }
 
-   private LinkedHashMap<OneDoFJoint, Double> getDesiredJointAccelerations()
+   private void setDesiredJointAccelerations()
    {
       updateDerivativeGain();
-
-      LinkedHashMap<OneDoFJoint, Double> desiredJointAccelerations = new LinkedHashMap<OneDoFJoint, Double>();
 
       double currentTime = yoTime.getDoubleValue();
       for (OneDoFJoint joint : oneDoFJoints)
@@ -107,10 +117,10 @@ public class ArmInJointSpaceControlState
          PDController pdController = pdControllerLinkedHashMap.get(joint);
          double desiredAccleration = feedforwardAcceleration + pdController.compute(currentPosition, desiredPosition, currentVelocity, desiredVelocity);
 
-         desiredJointAccelerations.put(joint, desiredAccleration);
+         DenseMatrix64F jointAccelerationMatrix = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
+         jointAccelerationMatrix.set(0, 0, desiredAccleration);
+         momentumBasedController.setDesiredJointAcceleration(joint, jointAccelerationMatrix);
       }
-
-      return desiredJointAccelerations;
    }
 
    private void checkIfJointsMatch(LinkedHashMap<OneDoFJoint, Double> desiredJointPositions)
@@ -120,5 +130,35 @@ public class ArmInJointSpaceControlState
          if (!desiredJointPositions.containsKey(joint))
             throw new RuntimeException(joint.getName() + " not found in desiredJointPositions");
       }
+   }
+
+   @Override
+   public SpatialAccelerationVector getDesiredHandAcceleration()
+   {
+      return desiredHandAcceleration;
+   }
+
+   @Override
+   public boolean isDone()
+   {
+      return (yoTime.getDoubleValue() >= endMoveTime);
+   }
+
+   @Override
+   public void doAction()
+   {
+      setDesiredJointAccelerations();
+   }
+
+   @Override
+   public void doTransitionIntoAction()
+   {
+      initializeForMove();
+   }
+
+   @Override
+   public void doTransitionOutOfAction()
+   {
+      // empty
    }
 }

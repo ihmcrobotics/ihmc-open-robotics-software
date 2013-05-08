@@ -374,10 +374,13 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
 
          }
 
+         GeometricJacobian jacobian = jacobians.get(robotSide).get(LimbName.ARM);
+
+
          manipulationStateMachines.put(robotSide,
                                        new ManipulationStateMachine(yoTime, robotSide, fullRobotModel, twistCalculator, icpAndMomentumBasedController.getInverseDynamicsCalculator(),
                                           walkingControllerParameters, handPoseProvider, dynamicGraphicObjectsListRegistry, handControllerInterface, gravityZ,
-                                          controlDT, registry));
+                                          controlDT, icpAndMomentumBasedController, jacobian, registry));
       }
 
       this.desiredHeadOrientationProvider = desiredHeadOrientationProvider;
@@ -1397,13 +1400,8 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
    {
       for (RobotSide robotSide : RobotSide.values())
       {
-         GeometricJacobian jacobian = jacobians.get(robotSide).get(LimbName.ARM);
-
          manipulationStateMachines.get(robotSide).startComputation();
          manipulationStateMachines.get(robotSide).waitUntilComputationIsDone();
-
-         TaskspaceConstraintData taskspaceConstraintData = manipulationStateMachines.get(robotSide).getTaskspaceConstraintData();
-         icpAndMomentumBasedController.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
       }
    }
 
