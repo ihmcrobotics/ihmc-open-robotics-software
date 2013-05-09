@@ -13,10 +13,10 @@ public class JojosICPutilities
    {
    }
 
-   public static void extrapolateDCMpos(DenseMatrix64F constCoPcurrentStep, double time, double dcmConst, DenseMatrix64F ficalICPcurrentFootStep,
+   public static void extrapolateDCMpos(DenseMatrix64F constCoPcurrentStep, double time, double omega0, DenseMatrix64F ficalICPcurrentFootStep,
            DenseMatrix64F finalDoubleSupportICP)
    {
-      double exponentialTerm = Math.exp(time / dcmConst);
+      double exponentialTerm = Math.exp(time * omega0);
       DenseMatrix64F tempVect = new DenseMatrix64F(3, 1);
       CommonOps.sub(ficalICPcurrentFootStep, constCoPcurrentStep, tempVect);
       CommonOps.scale(exponentialTerm, tempVect);
@@ -36,16 +36,16 @@ public class JojosICPutilities
       return finalDoubleSupportICP;
    }
 
-   public static void extrapolateDCMposAndVel(DenseMatrix64F constCoPcurrentStep, double time, double dcmConst, 
+   public static void extrapolateDCMposAndVel(DenseMatrix64F constCoPcurrentStep, double time, double omega0, 
          DenseMatrix64F finalICPCurrentFootStep,
          DenseMatrix64F finalDoubleSupportICPpos, DenseMatrix64F finalDoubleSupportICPvel)
    {
-      double exponentialTerm = Math.exp(time / dcmConst);
+      double exponentialTerm = Math.exp(time * omega0);
       DenseMatrix64F tempVect = new DenseMatrix64F(3, 1);
       CommonOps.sub(finalICPCurrentFootStep, constCoPcurrentStep, tempVect);
       CommonOps.scale(exponentialTerm, tempVect);
       CommonOps.add(constCoPcurrentStep, tempVect, finalDoubleSupportICPpos);
-      CommonOps.scale(1.0 / dcmConst, tempVect, finalDoubleSupportICPvel);
+      CommonOps.scale(omega0, tempVect, finalDoubleSupportICPvel);
    }
    
    
@@ -65,18 +65,20 @@ public class JojosICPutilities
    }
 
 
-   public static void discreteIntegrateCoMAndGetCoMVelocity(double sampleTime, double dcmConst, DenseMatrix64F icp, DenseMatrix64F comPosition,
-           DenseMatrix64F comVelocity)
+   public static void discreteIntegrateCoMAndGetCoMVelocity(double sampleTime, double omega0, Point3d icp, Point3d comPositionToPack,
+           Vector3d comVelocityToPack)
    {
-      double exponentialFactor = Math.exp(-sampleTime / dcmConst);
-      DenseMatrix64F tempMatrix = new DenseMatrix64F(3, 1);
-
-      CommonOps.sub(comPosition, icp, tempMatrix);
-      CommonOps.scale(exponentialFactor, tempMatrix);
-      CommonOps.add(icp, tempMatrix, comPosition);
-
-      CommonOps.sub(comPosition, icp, comVelocity);
-      CommonOps.scale(-1 / dcmConst, comVelocity);
-   }
+      double exponentialFactor = Math.exp(-sampleTime * omega0);
+      Vector3d tempVector = new Vector3d(comPositionToPack);
+      tempVector.sub(icp);
+      tempVector.scale(exponentialFactor);
+      
+      comPositionToPack.set(icp);
+      comPositionToPack.add(tempVector);
+      
+      comVelocityToPack.set(comPositionToPack);
+      comVelocityToPack.sub(icp);
+      comVelocityToPack.scale(-1.0 * omega0);
+   }  
 
 }
