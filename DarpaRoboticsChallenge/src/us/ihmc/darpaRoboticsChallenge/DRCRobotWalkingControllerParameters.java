@@ -92,6 +92,11 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
       return jointPositions;
    }
 
+   public boolean doToeOffIfPossible()
+   {
+      return true;
+   }
+
    public String[] getHeadOrientationControlJointNames()
    {
       // Get rid of back_ubx to prevent hip roll jumps.
