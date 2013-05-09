@@ -98,8 +98,8 @@ public class DoubleSupportICPComputer
 
    }
 
-   private void updateDCMCornerPoints(ArrayList<Point3d> constantEquivalentCoPs, double omega0, double steppingTime,
-                                      ArrayList<Point3d> initialICPsToPack)
+   private void updateDCMCornerPoints(ArrayList<Point3d> initialICPsToPack, ArrayList<Point3d> constantEquivalentCoPs, double omega0,
+                                      double steppingTime)
    {
       int initialICPsSize = initialICPsToPack.size();
 
@@ -117,23 +117,23 @@ public class DoubleSupportICPComputer
            double doubleSupportFirstStepFraction, ArrayList<Point3d> initialICPs, boolean isFirstStep, double initialTransferSupportTime,
            double doubleSupportTime)
    {
-      double currentDoubleSupportTime;
+      double doubleSupportDuration;
 
       if (isFirstStep)
       {
-         currentDoubleSupportTime = initialTransferSupportTime;
+         doubleSupportDuration = initialTransferSupportTime;
       }
       else
       {
-         currentDoubleSupportTime = doubleSupportTime;
+         doubleSupportDuration = doubleSupportTime;
       }
 
 
-      double doubleSupportTimeCurrentStep = -doubleSupportFirstStepFraction * currentDoubleSupportTime;
+      double doubleSupportTimeCurrentStep = -doubleSupportFirstStepFraction * doubleSupportDuration;
       double doubleSupportTimeNextStep = (1 - doubleSupportFirstStepFraction) * doubleSupportTime;
       
 
-      updateDCMCornerPoints(constantEquivalentCoPs, omega0, steppingTime, initialICPs);
+      updateDCMCornerPoints(initialICPs, constantEquivalentCoPs, omega0, steppingTime);
 
       // Calculate DCM position and velocity at beginning of Double Support phase
 
@@ -177,19 +177,19 @@ public class DoubleSupportICPComputer
       JojosICPutilities.extrapolateDCMposAndVel(finalDoubleSupportICPpos, finalDoubleSupportICPvel, 
             constantEquivalentCoPs.get(1), doubleSupportTimeNextStep, omega0, initialICPs.get(1));
       
-      computeThirdOrderPolynomialParameterMatrix(doubleSupportParameterMatrix, currentDoubleSupportTime, initialDoubleSupportICPpos, initialDoubleSupportICPvel, finalDoubleSupportICPpos, finalDoubleSupportICPvel);
+      computeThirdOrderPolynomialParameterMatrix(doubleSupportParameterMatrix, doubleSupportDuration, initialDoubleSupportICPpos, initialDoubleSupportICPvel, finalDoubleSupportICPpos, finalDoubleSupportICPvel);
    }
    
    
-   private static void computeThirdOrderPolynomialParameterMatrix(DenseMatrix64F parameterMatrixToPack, double doubleSupportTime, Point3d initialDoubleSupportICPpos,
+   public static void computeThirdOrderPolynomialParameterMatrix(DenseMatrix64F parameterMatrixToPack, double doubleSupportDuration, Point3d initialDoubleSupportICPpos,
    Vector3d initialDoubleSupportICPvel, Point3d finalDoubleSupportICPpos, Vector3d finalDoubleSupportICPvel)
    {
-      double doubleSupportTimePow2 = Math.pow(doubleSupportTime, 2);
-      double doubleSupportTimePow3 = Math.pow(doubleSupportTime, 3);
+      double doubleSupportTimePow2 = Math.pow(doubleSupportDuration, 2);
+      double doubleSupportTimePow3 = Math.pow(doubleSupportDuration, 3);
       
       // Calculate time-dependency matrix for polynomial calculation (part of inversion problem)
-      DenseMatrix64F TimeBoundaryConditionMatrix = new DenseMatrix64F(4, 4, true, -2.0, 1.0, 2.0, 1.0, 3.0 * doubleSupportTime, -2.0 * doubleSupportTime,
-                                                      -3.0 * doubleSupportTime, -doubleSupportTime, 0.0, doubleSupportTimePow2, 0.0, 0.0,
+      DenseMatrix64F TimeBoundaryConditionMatrix = new DenseMatrix64F(4, 4, true, -2.0, 1.0, 2.0, 1.0, 3.0 * doubleSupportDuration, -2.0 * doubleSupportDuration,
+                                                      -3.0 * doubleSupportDuration, -doubleSupportDuration, 0.0, doubleSupportTimePow2, 0.0, 0.0,
                                                       -doubleSupportTimePow3, 0.0, 0.0, 0.0);
 
       // TimeBoundaryConditionMatrix.print();
