@@ -7,7 +7,6 @@ import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.trajectory.YoPolynomial;
 import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.steeringController.states.ManipulationState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.MathTools;
@@ -21,8 +20,8 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
 {
    private final DoubleYoVariable yoTime;
    private final OneDoFJoint[] oneDoFJoints;
-   private final LinkedHashMap<OneDoFJoint, YoPolynomial> polynomialLinkedHashMap;
-   private final LinkedHashMap<OneDoFJoint, PDController> pdControllerLinkedHashMap;
+   private final LinkedHashMap<OneDoFJoint, YoPolynomial> trajectories;
+   private final LinkedHashMap<OneDoFJoint, PDController> pdControllers;
 
    private final DoubleYoVariable kpAllArmJoints, kdAllArmJoints, zetaAllArmJoints;
 
@@ -36,14 +35,12 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
    private final DoubleYoVariable endMoveTime;
 
    public JointSpaceHandControlControlState(DoubleYoVariable yoTime, RobotSide robotSide, GeometricJacobian jacobian,
-                                            MomentumBasedController momentumBasedController, Map<OneDoFJoint, Double> desiredJointPositions, YoVariableRegistry parentRegistry)
+                                            MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
    {
       super(IndividualHandControlState.JOINT_SPACE);
       this.yoTime = yoTime;
 
       registry = new YoVariableRegistry("ArmJointController" + robotSide.getCamelCaseNameForMiddleOfExpression());
-
-      this.desiredJointPositions.putAll(desiredJointPositions);
 
       endMoveTime = new DoubleYoVariable("endMoveTime", registry);
 
@@ -59,8 +56,8 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
       kdAllArmJoints = new DoubleYoVariable("kdAllArmJoints" + robotSide, registry);
       updateDerivativeGain();
 
-      polynomialLinkedHashMap = new LinkedHashMap<OneDoFJoint, YoPolynomial>();
-      pdControllerLinkedHashMap = new LinkedHashMap<OneDoFJoint, PDController>();
+      trajectories = new LinkedHashMap<OneDoFJoint, YoPolynomial>();
+      pdControllers = new LinkedHashMap<OneDoFJoint, PDController>();
 
       InverseDynamicsJoint[] joints = ScrewTools.createJointPath(jacobian.getBase(), jacobian.getEndEffector());
       this.oneDoFJoints = ScrewTools.filterJoints(joints, RevoluteJoint.class);
@@ -69,11 +66,11 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
       for (OneDoFJoint joint : oneDoFJoints)
       {
          YoPolynomial yoPolynomial = new YoPolynomial(joint.getName() + robotSide.getCamelCaseNameForMiddleOfExpression(), orderOfPolynomial, registry);
-         polynomialLinkedHashMap.put(joint, yoPolynomial);
+         trajectories.put(joint, yoPolynomial);
 
          PDController pdController = new PDController(kpAllArmJoints, kdAllArmJoints, joint.getName() + robotSide.getCamelCaseNameForMiddleOfExpression(),
                                         registry);
-         pdControllerLinkedHashMap.put(joint, pdController);
+         pdControllers.put(joint, pdController);
       }
 
       this.momentumBasedController = momentumBasedController;
@@ -81,11 +78,16 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
       parentRegistry.addChild(registry);
    }
 
+   public void setDesiredJointPositions(Map<OneDoFJoint, Double> desiredJointPositions)
+   {
+      this.desiredJointPositions.clear();
+      this.desiredJointPositions.putAll(desiredJointPositions);
+   }
+
    private void updateDerivativeGain()
    {
       kdAllArmJoints.set(GainCalculator.computeDerivativeGain(kpAllArmJoints.getDoubleValue(), zetaAllArmJoints.getDoubleValue()));
    }
-
 
    public void initializeForMove()
    {
@@ -93,7 +95,7 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
       endMoveTime.set(startTime + moveTimeArmJoint.getDoubleValue());
       for (OneDoFJoint joint : oneDoFJoints)
       {
-         YoPolynomial yoPolynomial = polynomialLinkedHashMap.get(joint);
+         YoPolynomial yoPolynomial = trajectories.get(joint);
          double desiredEndPosition = desiredJointPositions.get(joint);
          double desiredEndVelocity = 0.0;
 
@@ -110,7 +112,7 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
       double currentTime = yoTime.getDoubleValue();
       for (OneDoFJoint joint : oneDoFJoints)
       {
-         YoPolynomial yoPolynomial = polynomialLinkedHashMap.get(joint);
+         YoPolynomial yoPolynomial = trajectories.get(joint);
          currentTime = MathTools.clipToMinMax(currentTime, Double.NEGATIVE_INFINITY, endMoveTime.getDoubleValue());
          yoPolynomial.compute(currentTime);
 
@@ -122,7 +124,7 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
          double currentPosition = joint.getQ();
          double currentVelocity = joint.getQd();
 
-         PDController pdController = pdControllerLinkedHashMap.get(joint);
+         PDController pdController = pdControllers.get(joint);
          double desiredAccleration = feedforwardAcceleration + pdController.compute(currentPosition, desiredPosition, currentVelocity, desiredVelocity);
 
          DenseMatrix64F jointAccelerationMatrix = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);

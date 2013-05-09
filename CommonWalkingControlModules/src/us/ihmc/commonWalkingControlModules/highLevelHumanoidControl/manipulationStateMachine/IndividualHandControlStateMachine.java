@@ -81,7 +81,8 @@ public class IndividualHandControlStateMachine
 
       JointSpaceHandControlControlState moveInJointSpaceState =
          new JointSpaceHandControlControlState(simulationTime, robotSide, jacobian, momentumBasedController,
-            defaultJointPositions, registry);
+               registry);
+      moveInJointSpaceState.setDesiredJointPositions(defaultJointPositions);
 
       ConstantDoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(1.0);
 
