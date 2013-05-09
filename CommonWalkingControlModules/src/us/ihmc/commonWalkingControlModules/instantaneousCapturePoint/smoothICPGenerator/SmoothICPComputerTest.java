@@ -33,6 +33,8 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public class SmoothICPComputerTest
 {
+   private static final boolean USE_ASSERTS = false;
+   
    private boolean visualize = false;
 
    private PointAndLinePlotter pointAndLinePlotter = null;
@@ -102,7 +104,7 @@ public class SmoothICPComputerTest
       double stepLength = 0.3;
       double halfStepWidth = 0.1;
       boolean startSquaredUp = false;
-      boolean stopIfReachedEnd = false;
+      boolean stopIfReachedEnd = true;
       
       Random random = new Random(1776L);
       //      ArrayList<YoFramePoint> stepList = createABunchOfUniformWalkingSteps(stepSide, startSquaredUp, numberOfStepsInStepList, stepLength, halfStepWidth);
@@ -159,9 +161,12 @@ public class SmoothICPComputerTest
 
          if (!firstTimeLooping)
          {
-            JUnitTools.assertTuple3dEquals(icpPosition, initialICPPosition, 1e-3);
-            JUnitTools.assertTuple3dEquals(icpVelocity, initialICPVelocity, 1e-3);
-            JUnitTools.assertTuple3dEquals(ecmpPosition, initialECMPPosition, 1e-3);
+            if (USE_ASSERTS)
+            {
+               JUnitTools.assertTuple3dEquals(icpPosition, initialICPPosition, 1e-3);
+               JUnitTools.assertTuple3dEquals(icpVelocity, initialICPVelocity, 1e-3);
+               JUnitTools.assertTuple3dEquals(ecmpPosition, initialECMPPosition, 1e-3);
+            }
          }
          
          Point3d transferFromFoot = footLocations.get(0);
@@ -173,10 +178,13 @@ public class SmoothICPComputerTest
          smoothICPComputer.initializeDoubleSupport(footLocations, singleSupportDuration, doubleSupportDuration, omega0, initialTime, stopIfReachedEnd);
          smoothICPComputer.getICPPositionAndVelocity(initialICPPosition, initialICPVelocity, initialECMPPosition, omega0, initialTime);
 
-         JUnitTools.assertTuple3dEquals(icpPosition, initialICPPosition, 1e-4);
-         JUnitTools.assertTuple3dEquals(icpVelocity, initialICPVelocity, 1e-4);
-         JUnitTools.assertTuple3dEquals(ecmpPosition, initialECMPPosition, 1e-4);
-
+         if (USE_ASSERTS)
+         {
+            JUnitTools.assertTuple3dEquals(icpPosition, initialICPPosition, 1e-4);
+            JUnitTools.assertTuple3dEquals(icpVelocity, initialICPVelocity, 1e-4);
+            JUnitTools.assertTuple3dEquals(ecmpPosition, initialECMPPosition, 1e-4);
+         }
+         
          if (visualize)
          {
             doubleSupportStartICPYoFramePoint.set(smoothICPComputer.getDoubleSupportStartICP());
@@ -314,13 +322,17 @@ public class SmoothICPComputerTest
             visualizeICPAndECMP(icpPosition, icpVelocity, ecmpPosition, time);
          }
 
-         assertICPPointsAreAlongLineIncludingTransferFromFoot(transferFromFoot, initialICPPosition, icpPosition);
+         if (USE_ASSERTS)
+         {
+            assertICPPointsAreAlongLineIncludingTransferFromFoot(transferFromFoot, initialICPPosition, icpPosition);
 
-         Vector3d approximateVelocity = new Vector3d(icpPosition);
-         approximateVelocity.sub(previousICPPosition);
-         approximateVelocity.scale(1.0 / deltaT);
+            Vector3d approximateVelocity = new Vector3d(icpPosition);
+            approximateVelocity.sub(previousICPPosition);
+            approximateVelocity.scale(1.0 / deltaT);
 
-         JUnitTools.assertTuple3dEquals(approximateVelocity, icpVelocity, 3e-3);
+            JUnitTools.assertTuple3dEquals(approximateVelocity, icpVelocity, 3e-3);
+         }
+         
          previousICPPosition.set(icpPosition);
       }
    }
@@ -355,11 +367,15 @@ public class SmoothICPComputerTest
             visualizeICPAndECMP(icpPosition, icpVelocity, ecmpPosition, time);
          }
 
-         Vector3d approximateVelocity = new Vector3d(icpPosition);
-         approximateVelocity.sub(previousICPPosition);
-         approximateVelocity.scale(1.0 / deltaT);
+         if (USE_ASSERTS)
+         {
+            Vector3d approximateVelocity = new Vector3d(icpPosition);
+            approximateVelocity.sub(previousICPPosition);
+            approximateVelocity.scale(1.0 / deltaT);
 
-         JUnitTools.assertTuple3dEquals(approximateVelocity, icpVelocity, 3e-3);
+            JUnitTools.assertTuple3dEquals(approximateVelocity, icpVelocity, 3e-3);
+         }
+         
          previousICPPosition.set(icpPosition);
       }
    }
@@ -407,14 +423,20 @@ public class SmoothICPComputerTest
 
       averagePoint.scale(0.5);
 
+      if (USE_ASSERTS)
+      {
       JUnitTools.assertTuple3dEquals(averagePoint, icpPositionToPack, 1e-7);
       JUnitTools.assertTuple3dEquals(new Vector3d(), icpVelocityToPack, 1e-7);
-
+      }
+      
       time = initialTime + doubleSupportInitialTransferDuration;
       smoothICPComputer.getICPPositionAndVelocity(icpPositionToPack, icpVelocityToPack, ecmpPositionToPack, omega0, time);
 
+      if (USE_ASSERTS)
+      {
       JUnitTools.assertTuple3dEquals(averagePoint, icpPositionToPack, 1e-7);
       JUnitTools.assertTuple3dEquals(new Vector3d(), icpVelocityToPack, 1e-7);
+      }
    }
 
 

@@ -84,7 +84,7 @@ public class SmoothICPComputer
       return constantCentersOfPressure;
    }
    
-   private static void computeConstantCentersOfPressure(ArrayList<Point3d> constantCentersOfPressureToModify, ArrayList<Point3d> footLocations, int maxNumberOfConsideredFootsteps, boolean isInitialTransfer, boolean stopIfReachedEnd)
+   private static void computeConstantCentersOfPressureOld(ArrayList<Point3d> constantCentersOfPressureToModify, ArrayList<Point3d> footLocations, int maxNumberOfConsideredFootsteps, boolean isInitialTransfer, boolean stopIfReachedEnd)
    {      
       for (int i=0; i<maxNumberOfConsideredFootsteps; i++)
       {
@@ -93,53 +93,58 @@ public class SmoothICPComputer
       }
    }
    
-//   private static void computeConstantCentersOfPressure(ArrayList<Point3d> constantCentersOfPressureToModify, ArrayList<Point3d> footLocations, int maxNumberOfConsideredFootsteps, boolean isInitialTransfer, boolean stopIfReachedEnd)
-//   {      
-//      boolean putFirstCenterOfPressureInMiddle = isInitialTransfer;
-//      boolean willReachTheEnd = footLocations.size() <= maxNumberOfConsideredFootsteps;
-//      boolean putTheLastNCentersOfPressureInMiddle = stopIfReachedEnd && willReachTheEnd;
-//      
-//      int numberInFootlist = footLocations.size();
-//      Point3d positionToHoldAt = new Point3d();
-//      
-//      for (int i=0; i<maxNumberOfConsideredFootsteps; i++)
-//      {
-//         Point3d centerOfPressureLocation = constantCentersOfPressureToModify.get(i);
-//
-//         if (i ==0)
-//         {
-//            if (putFirstCenterOfPressureInMiddle)
-//            {
-//               centerOfPressureLocation.set(footLocations.get(0));
-//               centerOfPressureLocation.add(footLocations.get(1));
-//               centerOfPressureLocation.scale(0.5);
-//            }
-//         }
-//         else if (i < numberInFootlist-1)
-//         {
-//            centerOfPressureLocation.set(footLocations.get(i));
-//         }
-//         
-//         else
-//         {
-//            if (i == numberInFootlist-1)
-//            {
-//               if (putTheLastNCentersOfPressureInMiddle)
-//               {
-//                  positionToHoldAt.set(centerOfPressureLocation);
-//                  positionToHoldAt.add(constantCentersOfPressureToModify.get(i-1));
-//                  positionToHoldAt.scale(0.5);
-//               }
-//               else
-//               {
-//                  positionToHoldAt.set(centerOfPressureLocation);
-//               }
-//            }
-//            
-//            centerOfPressureLocation.set(positionToHoldAt);
-//         }
-//      }
-//   }
+   private static void computeConstantCentersOfPressure(ArrayList<Point3d> constantCentersOfPressureToModify, ArrayList<Point3d> footLocations, int maxNumberOfConsideredFootsteps, boolean isInitialTransfer, boolean stopIfReachedEnd)
+   {      
+      boolean putFirstCenterOfPressureInMiddle = isInitialTransfer;
+      boolean willReachTheEnd = footLocations.size() <= maxNumberOfConsideredFootsteps;
+      boolean putTheLastNCentersOfPressureInMiddle = stopIfReachedEnd && willReachTheEnd;
+      
+      int numberInFootlist = footLocations.size();
+      Point3d positionToHoldAt = new Point3d();
+      
+      for (int i=0; i<maxNumberOfConsideredFootsteps; i++)
+      {
+         Point3d centerOfPressureLocation = constantCentersOfPressureToModify.get(i);
+
+         if (i == 0)
+         {
+            if (putFirstCenterOfPressureInMiddle)
+            {
+               centerOfPressureLocation.set(footLocations.get(0));
+               centerOfPressureLocation.add(footLocations.get(1));
+               centerOfPressureLocation.scale(0.5);
+            }
+            else
+            {
+               centerOfPressureLocation.set(footLocations.get(0));
+            }
+         }
+         
+         else if (i < numberInFootlist-1)
+         {
+            centerOfPressureLocation.set(footLocations.get(i));
+         }
+
+         else
+         {
+            if (i == numberInFootlist-1)
+            {
+               if (putTheLastNCentersOfPressureInMiddle)
+               {
+                  positionToHoldAt.set(footLocations.get(i));
+                  positionToHoldAt.add(footLocations.get(i-1));
+                  positionToHoldAt.scale(0.5);
+               }
+               else
+               {
+                  positionToHoldAt.set(footLocations.get(i));
+               }
+            }
+            
+            centerOfPressureLocation.set(positionToHoldAt);
+         }
+      }
+   }
 
    public void initializeDoubleSupport(ArrayList<Point3d> footLocationList, double singleSupportDuration, double doubleSupportDuration, double omega0,
            double initialTime, boolean stopIfReachedEnd)
