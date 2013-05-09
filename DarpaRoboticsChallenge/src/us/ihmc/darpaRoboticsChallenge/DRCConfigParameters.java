@@ -10,6 +10,7 @@ public class DRCConfigParameters
 {
    public static boolean INITIALIZE_ESTIMATOR_TO_ACTUAL = false;
 
+
    public static final boolean USE_GAZEBO_PHYSICS = false;    // TODO: This one is needed just for FlatGroundWalkingTrack in Gazebo...
 
    public static final boolean USE_PERFECT_SENSORS = false;
@@ -38,9 +39,9 @@ public class DRCConfigParameters
    public static final String CLOUD_MINION1_IP = "10.4.42.2";
    public static final String CLOUD_MINION3_IP = "10.4.42.5";
    public static final String CLOUD_MONSTER_JR_IP = "10.4.42.3";
-   public static final String GAZEBO_HOST = LOCALHOST;
-   
-   
+   public static final String GAZEBO_HOST = CLOUD_MONSTER_JR_IP; //"192.168.100.2";//"10.4.42.3";
+
+
    public static final String ROS_MASTER_URI = "http://" + GAZEBO_HOST + ":11311";
    public static final String SCS_MACHINE_IP_ADDRESS = LOCALHOST; // "10.100.0.27"; //"10.4.42.1"; // "localhost";    // "10.100.0.37";
    public static final int CONTROLLER_TO_UI_TCP_PORT = 4893;

@@ -51,7 +51,7 @@ public class DRCNetworkProcessor
       rosMainNode.attachSubscriber("/clock", timeProvider);
 
       new GazeboCameraReceiver(robotPoseBuffer, DRCConfigParameters.VIDEOSETTINGS, rosMainNode, teamComputerServer, DRCSensorParameters.FIELD_OF_VIEW);
-      new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, teamComputerServer, fullRobotModel, jointMap);
+      new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, teamComputerServer, fullRobotModel, jointMap, rosCoreURI.toString());
       rosMainNode.execute();
       connect();
    }
@@ -97,6 +97,13 @@ public class DRCNetworkProcessor
    
    public static void main(String[] args) throws URISyntaxException
    {
-      new DRCNetworkProcessor(new URI(DRCConfigParameters.ROS_MASTER_URI));
+      if(args.length == 1)
+      {
+         new DRCNetworkProcessor(new URI(args[0]));
+      }
+      else
+      {
+         new DRCNetworkProcessor(new URI(DRCConfigParameters.ROS_MASTER_URI));
+      }
    }
 }
