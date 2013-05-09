@@ -15,7 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 
-public class JointSpaceManipulationControlState<T extends Enum<T>> extends IndividualManipulationState
+public class JointSpaceHandControlControlState<T extends Enum<T>> extends IndividualManipulationState
 {
    private final DoubleYoVariable yoTime;
    private final OneDoFJoint[] oneDoFJoints;
@@ -30,11 +30,11 @@ public class JointSpaceManipulationControlState<T extends Enum<T>> extends Indiv
    private final MomentumBasedController momentumBasedController;
 
    private final Map<OneDoFJoint, Double> desiredJointPositions = new LinkedHashMap<OneDoFJoint, Double>();
-   private final SpatialAccelerationVector desiredHandAcceleration;
 
    private final DoubleYoVariable endMoveTime;
 
-   public JointSpaceManipulationControlState(T stateEnum, DoubleYoVariable yoTime, RobotSide robotSide, GeometricJacobian jacobian, MomentumBasedController momentumBasedController, Map<OneDoFJoint, Double> desiredJointPositions, YoVariableRegistry parentRegistry)
+   public JointSpaceHandControlControlState(T stateEnum, DoubleYoVariable yoTime, RobotSide robotSide, GeometricJacobian jacobian,
+                                            MomentumBasedController momentumBasedController, Map<OneDoFJoint, Double> desiredJointPositions, YoVariableRegistry parentRegistry)
    {
       super(stateEnum);
       this.yoTime = yoTime;
@@ -52,7 +52,7 @@ public class JointSpaceManipulationControlState<T extends Enum<T>> extends Indiv
       kpAllArmJoints.set(120.0);
 
       zetaAllArmJoints = new DoubleYoVariable("zetaAllArmJoints" + robotSide, registry);
-      zetaAllArmJoints.set(0.707);
+      zetaAllArmJoints.set(1.0);
 
       kdAllArmJoints = new DoubleYoVariable("kdAllArmJoints" + robotSide, registry);
       updateDerivativeGain();
@@ -62,8 +62,6 @@ public class JointSpaceManipulationControlState<T extends Enum<T>> extends Indiv
 
       InverseDynamicsJoint[] joints = ScrewTools.createJointPath(jacobian.getBase(), jacobian.getEndEffector());
       this.oneDoFJoints = ScrewTools.filterJoints(joints, RevoluteJoint.class);
-
-      this.desiredHandAcceleration = new SpatialAccelerationVector(jacobian.getEndEffectorFrame(), jacobian.getBaseFrame(), jacobian.getEndEffectorFrame());
 
       int orderOfPolynomial = 6;
       for (OneDoFJoint joint : oneDoFJoints)
@@ -129,21 +127,6 @@ public class JointSpaceManipulationControlState<T extends Enum<T>> extends Indiv
          jointAccelerationMatrix.set(0, 0, desiredAccleration);
          momentumBasedController.setDesiredJointAcceleration(joint, jointAccelerationMatrix);
       }
-   }
-
-   private void checkIfJointsMatch(LinkedHashMap<OneDoFJoint, Double> desiredJointPositions)
-   {
-      for (OneDoFJoint joint : oneDoFJoints)
-      {
-         if (!desiredJointPositions.containsKey(joint))
-            throw new RuntimeException(joint.getName() + " not found in desiredJointPositions");
-      }
-   }
-
-   @Override
-   public SpatialAccelerationVector getDesiredHandAcceleration()
-   {
-      return desiredHandAcceleration;
    }
 
    @Override
