@@ -34,7 +34,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFoot
 import us.ihmc.commonWalkingControlModules.desiredFootStep.UpcomingFootstepList;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredHandPoseProvider;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.ManipulationStateMachine;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.IndividualHandControlStateMachine;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.FinalDesiredICPCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPBasedMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
@@ -132,7 +132,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
 
    private final static boolean DEBUG = false;
    private final StateMachine<WalkingState> stateMachine;
-   private final SideDependentList<ManipulationStateMachine> manipulationStateMachines = new SideDependentList<ManipulationStateMachine>();
+   private final SideDependentList<IndividualHandControlStateMachine> manipulationStateMachines = new SideDependentList<IndividualHandControlStateMachine>();
    private final CenterOfMassJacobian centerOfMassJacobian;
 
    private final CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator;
@@ -383,8 +383,8 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
          GeometricJacobian jacobian = jacobians.get(robotSide).get(LimbName.ARM);
 
          manipulationStateMachines.put(robotSide,
-                                       new ManipulationStateMachine(yoTime, robotSide, fullRobotModel, twistCalculator,
-                                          icpAndMomentumBasedController.getInverseDynamicsCalculator(), walkingControllerParameters, handPoseProvider,
+                                       new IndividualHandControlStateMachine(yoTime, robotSide, fullRobotModel, twistCalculator,
+                                             walkingControllerParameters, handPoseProvider,
                                           dynamicGraphicObjectsListRegistry, handControllerInterface, gravityZ, controlDT, icpAndMomentumBasedController,
                                           jacobian, walkingControllerParameters.getDefaultArmJointPositions(fullRobotModel, robotSide), registry));
       }
@@ -1392,8 +1392,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
    {
       for (RobotSide robotSide : RobotSide.values())
       {
-         manipulationStateMachines.get(robotSide).startComputation();
-         manipulationStateMachines.get(robotSide).waitUntilComputationIsDone();
+         manipulationStateMachines.get(robotSide).doControl();
       }
    }
 

@@ -10,12 +10,10 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.states.IndividualManipulationState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.states.JointSpaceManipulationControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.commonWalkingControlModules.sensors.MassMatrixEstimatingToolRigidBody;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SE3ConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
-import us.ihmc.controlFlow.AbstractControlFlowElement;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -35,7 +33,7 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateTransition
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
 
-public class ManipulationStateMachine extends AbstractControlFlowElement
+public class IndividualHandControlStateMachine
 {
    private enum ManipulationState {MOVE_HAND_TO_POSITION_IN_CHESTFRAME, JOINT_SPACE, MOVE_HAND_TO_POSITION_IN_WORLDFRAME};
 
@@ -58,12 +56,12 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
 
    final DesiredHandPoseProvider handPoseProvider;
 
-   public ManipulationStateMachine(final DoubleYoVariable simulationTime, final RobotSide robotSide, final FullRobotModel fullRobotModel,
-                                   final TwistCalculator twistCalculator, InverseDynamicsCalculator inverseDynamicsCalculator,
-                                   WalkingControllerParameters walkingControllerParameters, final DesiredHandPoseProvider handPoseProvider,
-                                   final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, HandControllerInterface handController,
-                                   double gravity, final double controlDT, MomentumBasedController momentumBasedController, GeometricJacobian jacobian,
-                                   Map<OneDoFJoint, Double> desiredPositions, final YoVariableRegistry parentRegistry)
+   public IndividualHandControlStateMachine(final DoubleYoVariable simulationTime, final RobotSide robotSide, final FullRobotModel fullRobotModel,
+                                            final TwistCalculator twistCalculator,
+                                            WalkingControllerParameters walkingControllerParameters, final DesiredHandPoseProvider handPoseProvider,
+                                            final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, HandControllerInterface handController,
+                                            double gravity, final double controlDT, MomentumBasedController momentumBasedController, GeometricJacobian jacobian,
+                                            Map<OneDoFJoint, Double> desiredPositions, final YoVariableRegistry parentRegistry)
    {
       RigidBody endEffector = jacobian.getEndEffector();
 
@@ -141,10 +139,10 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
       };
 
 //      final StateTransition<ManipulationState> toRelativeToChestPositionTransition =
-//         new StateTransition<ManipulationStateMachine.ManipulationState>(ManipulationState.MOVE_HAND_TO_POSITION_IN_CHESTFRAME, toNextChestPosition,
+//         new StateTransition<IndividualHandControlStateMachine.ManipulationState>(ManipulationState.MOVE_HAND_TO_POSITION_IN_CHESTFRAME, toNextChestPosition,
 //                             Arrays.asList(setCurrentPoseBasedOnPreviousDesired, setDesiredPoseBasedOnProvider));
       final StateTransition<ManipulationState> toRelativeToWorldPositionTransition =
-         new StateTransition<ManipulationStateMachine.ManipulationState>(ManipulationState.MOVE_HAND_TO_POSITION_IN_WORLDFRAME, toNextWorldPosition,
+         new StateTransition<IndividualHandControlStateMachine.ManipulationState>(ManipulationState.MOVE_HAND_TO_POSITION_IN_WORLDFRAME, toNextWorldPosition,
                              Arrays.asList(setCurrentPoseBasedOnPreviousDesired, setDesiredPoseBasedOnProvider));
 
 //      moveRelativeToChestState.addStateTransition(toRelativeToChestPositionTransition);
@@ -204,7 +202,7 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
       }
    }
 
-   public void startComputation()
+   public void doControl()
    {
       estimateObjectWrench();
 
@@ -242,12 +240,6 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
             toolBody.reset();
          }
       }
-   }
-
-   public void waitUntilComputationIsDone()
-   {
-      // TODO Auto-generated method stub
-
    }
 
    private void addState(IndividualManipulationState<ManipulationState> state)
