@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
@@ -9,16 +10,16 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-
 public class SmoothICPComputer
 {
-   private final ArrayList<Point3d> footLocations = new ArrayList<Point3d>();
+//   private final ArrayList<Point3d> footLocations = new ArrayList<Point3d>();
+   private final ArrayList<Point3d> constantCentersOfPressure = new ArrayList<Point3d>();
 
    private final int maxNumberOfConsideredFootsteps;
    private final double doubleSupportFirstStepFraction;
 
    private boolean isInitialTransfer;
+
    private boolean isDoubleSupport;
    private double initialTime;
 
@@ -28,6 +29,9 @@ public class SmoothICPComputer
 
    private final NewDoubleSupportICPComputer newDoubleSupportICPComputer;
    private Point3d[] icpCornerPoints;
+   
+   private Point3d constantCenterOfPressure;
+   
    private Point3d singleSupportStartICP;
    private final Point3d
       doubleSupportStartICP = new Point3d(), doubleSupportEndICP = new Point3d();
@@ -41,15 +45,19 @@ public class SmoothICPComputer
       this.doubleSupportFirstStepFraction = doubleSupportFirstStepFraction;
       this.maxNumberOfConsideredFootsteps = maxNumberOfConsideredFootsteps;
 
+      for (int i=0; i<maxNumberOfConsideredFootsteps; i++)
+      {
+         constantCentersOfPressure.add(new Point3d());
+      }
+      
       newDoubleSupportICPComputer = new NewDoubleSupportICPComputer();
    }
 
-   public void initializeSingleSupport(ArrayList<Point3d> footLocations, double singleSupportDuration, double doubleSupportDuration, double omega0,
-           double initialTime)
+   public void initializeSingleSupport(ArrayList<Point3d> footLocationList, double singleSupportDuration, double doubleSupportDuration, double omega0,
+           double initialTime, boolean stopIfReachedEnd)
    {
-      this.footLocations.clear();
-      this.footLocations.addAll(footLocations);
-
+      computeConstantCentersOfPressure(constantCentersOfPressure, footLocationList, maxNumberOfConsideredFootsteps, isInitialTransfer, stopIfReachedEnd);
+      
       this.singleSupportDuration = singleSupportDuration;
       this.doubleSupportDuration = doubleSupportDuration;
       this.doubleSupportInitialTransferDuration = Double.NaN;
@@ -59,23 +67,84 @@ public class SmoothICPComputer
 
       this.initialTime = initialTime;
 
-      int numberOfCornerPoints = Math.min(footLocations.size(), maxNumberOfConsideredFootsteps) - 1;
+      int numberOfCornerPoints = maxNumberOfConsideredFootsteps - 1;
       double steppingDuration = singleSupportDuration + doubleSupportDuration;
-      icpCornerPoints = newDoubleSupportICPComputer.computeICPCornerPoints(numberOfCornerPoints, footLocations, steppingDuration, omega0);
+      icpCornerPoints = newDoubleSupportICPComputer.computeICPCornerPoints(numberOfCornerPoints, constantCentersOfPressure, steppingDuration, omega0);
 
       Point3d cornerPoint0 = icpCornerPoints[0];
-      Point3d supportFoot = footLocations.get(0);
+      Point3d supportFoot = constantCentersOfPressure.get(0);
 
       singleSupportStartICP = newDoubleSupportICPComputer.computeSingleSupportStartICP(supportFoot, cornerPoint0, doubleSupportDuration,
               doubleSupportFirstStepFraction, omega0);
       
    }
-
-   public void initializeDoubleSupport(ArrayList<Point3d> footLocations, double singleSupportDuration, double doubleSupportDuration, double omega0,
-           double initialTime)
+   
+   public List<Point3d> getConstantCentersOfPressure()
    {
-      this.footLocations.clear();
-      this.footLocations.addAll(footLocations);
+      return constantCentersOfPressure;
+   }
+   
+   private static void computeConstantCentersOfPressure(ArrayList<Point3d> constantCentersOfPressureToModify, ArrayList<Point3d> footLocations, int maxNumberOfConsideredFootsteps, boolean isInitialTransfer, boolean stopIfReachedEnd)
+   {      
+      for (int i=0; i<maxNumberOfConsideredFootsteps; i++)
+      {
+         Point3d centerOfPressureLocation = constantCentersOfPressureToModify.get(i);
+         centerOfPressureLocation.set(footLocations.get(i));
+      }
+   }
+   
+//   private static void computeConstantCentersOfPressure(ArrayList<Point3d> constantCentersOfPressureToModify, ArrayList<Point3d> footLocations, int maxNumberOfConsideredFootsteps, boolean isInitialTransfer, boolean stopIfReachedEnd)
+//   {      
+//      boolean putFirstCenterOfPressureInMiddle = isInitialTransfer;
+//      boolean willReachTheEnd = footLocations.size() <= maxNumberOfConsideredFootsteps;
+//      boolean putTheLastNCentersOfPressureInMiddle = stopIfReachedEnd && willReachTheEnd;
+//      
+//      int numberInFootlist = footLocations.size();
+//      Point3d positionToHoldAt = new Point3d();
+//      
+//      for (int i=0; i<maxNumberOfConsideredFootsteps; i++)
+//      {
+//         Point3d centerOfPressureLocation = constantCentersOfPressureToModify.get(i);
+//
+//         if (i ==0)
+//         {
+//            if (putFirstCenterOfPressureInMiddle)
+//            {
+//               centerOfPressureLocation.set(footLocations.get(0));
+//               centerOfPressureLocation.add(footLocations.get(1));
+//               centerOfPressureLocation.scale(0.5);
+//            }
+//         }
+//         else if (i < numberInFootlist-1)
+//         {
+//            centerOfPressureLocation.set(footLocations.get(i));
+//         }
+//         
+//         else
+//         {
+//            if (i == numberInFootlist-1)
+//            {
+//               if (putTheLastNCentersOfPressureInMiddle)
+//               {
+//                  positionToHoldAt.set(centerOfPressureLocation);
+//                  positionToHoldAt.add(constantCentersOfPressureToModify.get(i-1));
+//                  positionToHoldAt.scale(0.5);
+//               }
+//               else
+//               {
+//                  positionToHoldAt.set(centerOfPressureLocation);
+//               }
+//            }
+//            
+//            centerOfPressureLocation.set(positionToHoldAt);
+//         }
+//      }
+//   }
+
+   public void initializeDoubleSupport(ArrayList<Point3d> footLocationList, double singleSupportDuration, double doubleSupportDuration, double omega0,
+           double initialTime, boolean stopIfReachedEnd)
+   {
+      computeConstantCentersOfPressure(constantCentersOfPressure, footLocationList, maxNumberOfConsideredFootsteps, isInitialTransfer, stopIfReachedEnd);
 
       this.singleSupportDuration = singleSupportDuration;
       this.doubleSupportDuration = doubleSupportDuration;
@@ -86,14 +155,14 @@ public class SmoothICPComputer
 
       this.initialTime = initialTime;
 
-      int numberOfCornerPoints = Math.min(footLocations.size(), maxNumberOfConsideredFootsteps) - 1;
+      int numberOfCornerPoints = maxNumberOfConsideredFootsteps - 1;
       double steppingDuration = singleSupportDuration + doubleSupportDuration;
-      icpCornerPoints = newDoubleSupportICPComputer.computeICPCornerPoints(numberOfCornerPoints, footLocations, steppingDuration, omega0);
+      icpCornerPoints = newDoubleSupportICPComputer.computeICPCornerPoints(numberOfCornerPoints, constantCentersOfPressure, steppingDuration, omega0);
 
       Point3d cornerPoint0 = icpCornerPoints[0];
       Point3d cornerPoint1 = icpCornerPoints[1];
-      Point3d transferFromFoot = footLocations.get(0);
-      Point3d transferToFoot = footLocations.get(1);
+      Point3d transferFromFoot = constantCentersOfPressure.get(0);
+      Point3d transferToFoot = constantCentersOfPressure.get(1);
 
       newDoubleSupportICPComputer.computeSingleSupportEndICPAndVelocity(doubleSupportStartICP, doubleSupportStartICPVelocity, transferFromFoot, cornerPoint0,
               doubleSupportDuration, doubleSupportFirstStepFraction, singleSupportDuration, omega0);
@@ -127,12 +196,9 @@ public class SmoothICPComputer
       return doubleSupportEndICPVelocity;
    }
    
-   public void initializeDoubleSupportInitialTransfer(ArrayList<Point3d> footLocations, double singleSupportDuration, double doubleSupportDuration,
+   public void initializeDoubleSupportInitialTransfer(ArrayList<Point3d> footLocationList, double singleSupportDuration, double doubleSupportDuration,
            double doubleSupportInitialTransferDuration, double initialTime)
    {
-      this.footLocations.clear();
-      this.footLocations.addAll(footLocations);
-
       this.singleSupportDuration = singleSupportDuration;
       this.doubleSupportDuration = doubleSupportDuration;
       this.doubleSupportInitialTransferDuration = doubleSupportInitialTransferDuration;
@@ -164,7 +230,7 @@ public class SmoothICPComputer
 
    private void getICPPositionAndVelocitySingleSupport(Point3d icpPositionToPack, Vector3d icpVelocityToPack, Point3d ecmpToPack, double omega0, double timeInState)
    {
-      Point3d constantCenterOfPressure = footLocations.get(0);
+      constantCenterOfPressure = constantCentersOfPressure.get(0);
       newDoubleSupportICPComputer.computeSingleSupportICPPositionAndVelocity(icpPositionToPack, icpVelocityToPack, constantCenterOfPressure,
               singleSupportStartICP, omega0, timeInState);
       
@@ -205,5 +271,7 @@ public class SmoothICPComputer
       tuple3dToPack.setY(tempMatrix.get(1, 0));
       tuple3dToPack.setZ(tempMatrix.get(2, 0));
    }
+
+  
 
 }

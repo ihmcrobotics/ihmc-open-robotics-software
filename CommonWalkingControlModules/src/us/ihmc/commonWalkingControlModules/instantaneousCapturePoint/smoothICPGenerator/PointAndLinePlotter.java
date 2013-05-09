@@ -106,12 +106,13 @@ public class PointAndLinePlotter
       }
    }
 
-
-   public void plotPoint3d(String name, Point3d point3d, AppearanceDefinition appearance, double size)
+   public YoFramePoint plotPoint3d(String name, Point3d point3d, AppearanceDefinition appearance, double size)
    {
       YoFramePoint yoFramePoint = new YoFramePoint(name + numberOfRegisteredPoints, worldFrame, registry);
       yoFramePoint.set(point3d);
       plotYoFramePoint(name, yoFramePoint, appearance, size);
+      
+      return yoFramePoint;
    }
 
    public void plotYoFramePoint(String name, YoFramePoint point, AppearanceDefinition appearance, double size)
