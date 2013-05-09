@@ -1,12 +1,9 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.math.geometry.AngleTools;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-
-import javax.media.j3d.Transform3D;
 
 /**
  * Created with IntelliJ IDEA.
@@ -22,19 +19,18 @@ public class FootstepToFootstepChecker
    private static FramePose startingFramePose = new FramePose(worldFrame);
    private static FramePose endingFramePose = new FramePose(worldFrame);
 
-   private static double MAXIMUM_DELTA_X = 1.0;
-   private static double MAXIMUM_DELTA_Y = 1.0;
+   private static double MAXIMUM_DELTA_X = 0.6;
+   private static double MAXIMUM_DELTA_Y = 0.6;
    private static double MAXIMUM_DELTA_Z = 0.3;
 
-   private static double MAXIMUM_ROLL = Math.toRadians(30.0);
-   private static double MAXIMUM_PITCH = Math.toRadians(30.0);
-   private static double MAXIMUM_YAW = Math.toRadians(60.0);
-
+   private static double MAXIMUM_ROLL = Math.toRadians(10.0);
+   private static double MAXIMUM_PITCH = Math.toRadians(10.0);
+   private static double MAXIMUM_YAW = Math.toRadians(90.0);
 
    public static boolean isFootstepToFootstepChangeLarge(Footstep startingFootstep, Footstep endingFootstep)
    {
-      setFramePose(startingFramePose, startingFootstep);
-      setFramePose(endingFramePose, endingFootstep);
+      startingFootstep.getPose(startingFramePose);
+      endingFootstep.getPose(endingFramePose);
 
       FrameVector startToEnd = new FrameVector(endingFramePose.getPositionCopy());
       startToEnd.sub(startingFramePose.getPositionCopy());
@@ -75,13 +71,10 @@ public class FootstepToFootstepChecker
       if (!DEBUG)
          return;
 
-      System.out.println("FootstepToFootstepChecker: " + ret + ", " + x + ", " + y + ", " + z + ", " + yaw + ", " + pitch + ", " + roll);
+      if (ret)
+         System.err.println("FootstepToFootstepChecker: " + ret + ", " + x + ", " + y + ", " + z + ", " + yaw + ", " + pitch + ", " + roll);
+      else
+         System.out.println("FootstepToFootstepChecker: " + ret + ", " + x + ", " + y + ", " + z + ", " + yaw + ", " + pitch + ", " + roll);
    }
 
-   private static void setFramePose(FramePose framePose, Footstep footstep)
-   {
-      ContactablePlaneBody endEffector = footstep.getBody();
-      Transform3D soleTransform = endEffector.getPlaneFrame().getTransformToDesiredFrame(worldFrame);
-      framePose.set(worldFrame, soleTransform);
-   }
 }
