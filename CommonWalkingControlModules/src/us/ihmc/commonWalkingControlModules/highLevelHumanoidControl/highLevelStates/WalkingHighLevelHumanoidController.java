@@ -1214,46 +1214,6 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
    {
       RobotSide supportSide = swingSide.getOppositeSide();
 
-//    ReferenceFrame trajectoryGeneratorFrame = ReferenceFrame.getWorldFrame();
-
-      // ReferenceFrame swingAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(swingSide);
-      // ReferenceFrame swingFootFrame = referenceFrames.getFootFrame(swingSide);
-      // FramePoint initialPosition = new FramePoint(swingAnkleZUpFrame);
-      // initialPosition.changeFrame(trajectoryGeneratorFrame);
-      //
-      // Twist footTwist = new Twist();
-      // twistCalculator.packTwistOfBody(footTwist, fullRobotModel.getFoot(swingSide));
-
-      // SpatialAccelerationVector taskSpaceAccelerationWithRespectToWorld = new SpatialAccelerationVector();
-      // spatialAccelerationCalculator.compute();
-      // spatialAccelerationCalculator.packAccelerationOfBody(taskSpaceAccelerationWithRespectToWorld, fullRobotModel.getPelvis());
-      //
-      // Twist pelvisTwist = new Twist();
-      // twistCalculator.packTwistOfBody(pelvisTwist, fullRobotModel.getPelvis());
-      // taskSpaceAccelerationWithRespectToWorld.changeFrame(taskSpaceAccelerationWithRespectToWorld.getBaseFrame(), pelvisTwist, pelvisTwist);
-      //
-      // Twist footPelvisTwist = new Twist();
-      // twistCalculator.packRelativeTwist(footPelvisTwist, fullRobotModel.getPelvis(), fullRobotModel.getFoot(swingSide));
-      //
-      // taskSpaceAcceleration.changeFrame(taskSpaceAccelerationWithRespectToWorld.getExpressedInFrame(), footTwist, footPelvisTwist);
-      // taskSpaceAccelerationWithRespectToWorld.add(taskSpaceAcceleration);
-      // FramePoint swingAnkle = new FramePoint(swingFootFrame);
-      // swingAnkle.changeFrame(taskSpaceAccelerationWithRespectToWorld.getBaseFrame());
-      // footTwist.changeFrame(taskSpaceAccelerationWithRespectToWorld.getExpressedInFrame());
-
-      // footTwist.changeFrame(swingFootFrame);
-      // FrameVector initialVelocity = new FrameVector(trajectoryGeneratorFrame);
-      // footTwist.packLinearPart(initialVelocity);
-      // initialVelocity.changeFrame(trajectoryGeneratorFrame);
-
-      // footTwist.changeFrame(taskSpaceAccelerationWithRespectToWorld.getExpressedInFrame());
-      // FrameVector initialAcceleration = new FrameVector(worldFrame);
-
-      // taskSpaceAccelerationWithRespectToWorld.packAccelerationOfPointFixedInBodyFrame(footTwist, swingAnkle, initialAcceleration);
-      // initialAcceleration.changeFrame(trajectoryGeneratorFrame);
-
-      // initialAcceleration.setToZero(trajectoryGeneratorFrame);    // TODO
-
       finalPositionProvider.set(nextFootstep.getPositionInFrame(worldFrame));
 
       SideDependentList<Transform3D> footToWorldTransform = new SideDependentList<Transform3D>();
