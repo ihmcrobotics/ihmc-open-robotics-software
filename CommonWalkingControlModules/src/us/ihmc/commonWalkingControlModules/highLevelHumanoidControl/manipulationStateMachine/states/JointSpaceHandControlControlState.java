@@ -3,9 +3,11 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.PDController;
+import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.trajectory.YoPolynomial;
 import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.steeringController.states.ManipulationState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.MathTools;
@@ -15,7 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 
-public class JointSpaceHandControlControlState<T extends Enum<T>> extends IndividualManipulationState
+public class JointSpaceHandControlControlState extends State<IndividualHandControlState>
 {
    private final DoubleYoVariable yoTime;
    private final OneDoFJoint[] oneDoFJoints;
@@ -33,10 +35,10 @@ public class JointSpaceHandControlControlState<T extends Enum<T>> extends Indivi
 
    private final DoubleYoVariable endMoveTime;
 
-   public JointSpaceHandControlControlState(T stateEnum, DoubleYoVariable yoTime, RobotSide robotSide, GeometricJacobian jacobian,
+   public JointSpaceHandControlControlState(DoubleYoVariable yoTime, RobotSide robotSide, GeometricJacobian jacobian,
                                             MomentumBasedController momentumBasedController, Map<OneDoFJoint, Double> desiredJointPositions, YoVariableRegistry parentRegistry)
    {
-      super(stateEnum);
+      super(IndividualHandControlState.JOINT_SPACE);
       this.yoTime = yoTime;
 
       registry = new YoVariableRegistry("ArmJointController" + robotSide.getCamelCaseNameForMiddleOfExpression());
@@ -127,12 +129,6 @@ public class JointSpaceHandControlControlState<T extends Enum<T>> extends Indivi
          jointAccelerationMatrix.set(0, 0, desiredAccleration);
          momentumBasedController.setDesiredJointAcceleration(joint, jointAccelerationMatrix);
       }
-   }
-
-   @Override
-   public boolean isDone()
-   {
-      return (yoTime.getDoubleValue() >= endMoveTime.getDoubleValue());
    }
 
    @Override
