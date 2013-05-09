@@ -6,8 +6,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolv
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.SpatialForceVector;
-import us.ihmc.utilities.screwTheory.Wrench;
+import us.ihmc.utilities.screwTheory.*;
 import us.ihmc.utilities.test.JUnitTools;
 
 import java.util.Collection;
@@ -65,7 +64,24 @@ public class MomentumControlTestTools
 
          FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(contactState.getContactPoints2d());
          assertTrue(supportPolygon.isPointInside(cop));
-
       }
+   }
+
+   public static void assertRootJointWrenchZero(Map<ContactablePlaneBody, Wrench> externalWrenches, SixDoFJoint rootJoint, double gravityZ, double epsilon)
+   {
+      TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), rootJoint.getSuccessor());
+      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
+      for (ContactablePlaneBody contactablePlaneBody : externalWrenches.keySet())
+      {
+         Wrench externalWrench = externalWrenches.get(contactablePlaneBody);
+         inverseDynamicsCalculator.setExternalWrench(contactablePlaneBody.getRigidBody(), externalWrench);
+      }
+      twistCalculator.compute();
+      inverseDynamicsCalculator.compute();
+      Wrench wrench = new Wrench();
+      rootJoint.packWrench(wrench);
+
+      SpatialForceVector zeroWrench = new SpatialForceVector(wrench.getExpressedInFrame());
+      JUnitTools.assertSpatialForceVectorEquals(wrench, zeroWrench, epsilon);
    }
 }

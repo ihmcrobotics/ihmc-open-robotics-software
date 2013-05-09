@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+import org.ejml.ops.MatrixFeatures;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.MomentumOptimizerNative;
@@ -136,23 +138,24 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       }
 
       DenseMatrix64F jointAccelerations = hardMotionConstraintEnforcer.computeConstrainedJointAccelerations(output.getJointAccelerations());
-
-//      DenseMatrix64F jointAccelerations = output.getJointAccelerations();
       ScrewTools.setDesiredAccelerations(jointsToOptimizeFor, jointAccelerations);
 
-//      for (InverseDynamicsJoint inverseDynamicsJoint : jointsToOptimizeFor)
-//      {
-//         System.out.print(inverseDynamicsJoint.getName() + ": ");
-//         DenseMatrix64F desiredAccelerationMatrix = new DenseMatrix64F(inverseDynamicsJoint.getDegreesOfFreedom(), 1);
-//         inverseDynamicsJoint.packDesiredAccelerationMatrix(desiredAccelerationMatrix, 0);
-//         for (int i = 0; i < desiredAccelerationMatrix.getNumRows(); i++)
-//         {
-//            System.out.print(desiredAccelerationMatrix.get(i, 0) + ", ");
-//         }
-//         System.out.println();
-//      }
+//      assert(arePrimaryConstraintsSatisfied(jointAccelerations));
+
+      if (!arePrimaryConstraintsSatisfied(jointAccelerations))
+         throw new RuntimeException("primary constraints not satisfied");
 
       centroidalMomentumHandler.computeCentroidalMomentumRate(jointsToOptimizeFor, jointAccelerations);
+   }
+
+   private boolean arePrimaryConstraintsSatisfied(DenseMatrix64F jointAccelerations)
+   {
+      DenseMatrix64F jacobian = primaryMotionConstraintHandler.getJacobian();
+      DenseMatrix64F residual = new DenseMatrix64F(jacobian.getNumRows(), 1);
+      CommonOps.mult(jacobian, jointAccelerations, residual);
+      CommonOps.subEquals(residual, primaryMotionConstraintHandler.getRightHandSide());
+
+      return MatrixFeatures.isConstantVal(residual, 0.0, 1e-9);
    }
 
    private void optimize(MomentumOptimizerNativeInput momentumOptimizerNativeInput)

@@ -72,6 +72,7 @@ public class SDFFullRobotModel implements FullRobotModel
    private final HashMap<String, ReferenceFrame> lidarBaseFrames = new HashMap<String, ReferenceFrame>();
    private final HashMap<String, Transform3D> lidarBaseToSensorTransform = new HashMap<String, Transform3D>();
    private final HashMap<String, FrameVector> lidarAxis = new HashMap<String, FrameVector>();
+   private final OneDoFJoint lidarJoint;
 
    public SDFFullRobotModel(SDFLinkHolder rootLink, SDFJointNameMap sdfJointNameMap)
    {
@@ -119,6 +120,8 @@ public class SDFFullRobotModel implements FullRobotModel
             throw new RuntimeException("Assuming that the leg or the spine are connected to the pelvis");
          }
       }
+
+      lidarJoint = getOneDoFJointByName(sdfJointNameMap.getLidarJointName());
 
       lowerBody = ScrewTools.computeRigidBodiesInOrder(elevator, excludeBodiesForLowerBody);
       upperBody = ScrewTools.computeRigidBodiesInOrder(pelvis, excludeBodiesForUpperBody);
@@ -472,5 +475,10 @@ public class SDFFullRobotModel implements FullRobotModel
    public FrameVector getLidarJointAxis(String name)
    {
       return lidarAxis.get(name);
+   }
+
+   public InverseDynamicsJoint getLidarJoint()
+   {
+      return lidarJoint;
    }
 }

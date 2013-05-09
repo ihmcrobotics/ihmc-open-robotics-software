@@ -17,11 +17,12 @@ public interface SDFJointNameMap extends RobotSpecificJointNames
 {
    public enum JointRole
       {
-         LEG, ARM, SPINE, NECK
+         LEG, ARM, SPINE, NECK;
       }
-   
    public String getModelName();
-   
+
+   public String getLidarJointName();
+
    public JointRole getJointRole(String jointName);
    public Pair<RobotSide, LegJointName> getLegJointName(String jointName);
    public Pair<RobotSide, ArmJointName> getArmJointName(String jointName);

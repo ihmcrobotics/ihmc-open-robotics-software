@@ -90,10 +90,12 @@ public class CentroidalMomentumHandler
       int partDegreesOfFreedom = ScrewTools.computeDegreesOfFreedom(joints);
       centroidalMomentumMatrixPart.reshape(Momentum.SIZE, partDegreesOfFreedom);
       centroidalMomentumMatrixPart.zero();
+      int startColumn = 0;
       for (InverseDynamicsJoint joint : joints)
       {
          int[] columnsForJoint = columnsForJoints.get(joint);
-         MatrixTools.extractColumns(centroidalMomentumMatrix.getMatrix(), centroidalMomentumMatrixPart, columnsForJoint);
+         MatrixTools.extractColumns(centroidalMomentumMatrix.getMatrix(), columnsForJoint, centroidalMomentumMatrixPart, startColumn);
+         startColumn += columnsForJoint.length;
       }
       return centroidalMomentumMatrixPart;
    }
