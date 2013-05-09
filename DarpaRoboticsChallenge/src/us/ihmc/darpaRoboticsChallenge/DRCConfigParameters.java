@@ -10,7 +10,7 @@ public class DRCConfigParameters
 {
    public static final boolean INITIALIZE_ESTIMATOR_TO_ACTUAL = false;
 
-   public static final boolean USE_GAZEBO_PHYSICS = true;    // TODO: This one is needed just for FlatGroundWalkingTrack in Gazebo...
+   public static final boolean USE_GAZEBO_PHYSICS = false;    // TODO: This one is needed just for FlatGroundWalkingTrack in Gazebo...
 
    public static final boolean USE_PERFECT_SENSORS = false;
 
@@ -42,7 +42,7 @@ public class DRCConfigParameters
    
    
    public static final String ROS_MASTER_URI = "http://" + GAZEBO_HOST + ":11311";
-   public static final String SCS_MACHINE_IP_ADDRESS = "10.100.0.27"; //"10.4.42.1"; // "localhost";    // "10.100.0.37";
+   public static final String SCS_MACHINE_IP_ADDRESS = LOCALHOST; // "10.100.0.27"; //"10.4.42.1"; // "localhost";    // "10.100.0.37";
    public static final int CONTROLLER_TO_UI_TCP_PORT = 4893;
    public static final int CONTROLLER_TO_UI_UDP_PORT = CONTROLLER_TO_UI_TCP_PORT + 1;
 
