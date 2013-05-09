@@ -37,15 +37,11 @@ import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProv
 
 public class ManipulationStateMachine extends AbstractControlFlowElement
 {
-   private enum ManipulationState {MOVE_HAND_TO_POSITION_IN_CHESTFRAME, JOINT_SPACE, MOVE_HAND_TO_POSITION_IN_WORLDFRAME}
-
-   ;
+   private enum ManipulationState {MOVE_HAND_TO_POSITION_IN_CHESTFRAME, JOINT_SPACE, MOVE_HAND_TO_POSITION_IN_WORLDFRAME};
 
    private final YoVariableRegistry registry;
 
    private final RobotSide robotSide;
-
-   private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
    private final Collection<DynamicGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<DynamicGraphicReferenceFrame>();
 
@@ -75,7 +71,6 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
       registry = new YoVariableRegistry(name);
       stateMachine = new StateMachine<ManipulationState>(name, name + "SwitchTime", ManipulationState.class, simulationTime, registry);
       this.robotSide = robotSide;
-      this.inverseDynamicsCalculator = inverseDynamicsCalculator;
       this.handPoseProvider = handPoseProvider;
 
       String frameName = endEffector.getName() + "PositionControlFrame";
@@ -217,8 +212,6 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
       stateMachine.doAction();
       IndividualManipulationState<ManipulationState> manipulationState = manipulationStateMap.get(stateMachine.getCurrentStateEnum());
 
-      // set indiv momentum in controller
-
       for (DynamicGraphicReferenceFrame frame : dynamicGraphicReferenceFrames)
       {
          frame.update();
@@ -231,8 +224,6 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
          {
             Wrench wrench = new Wrench();
             toolBody.control(manipulationState.getDesiredHandAcceleration(), wrench);
-
-//          inverseDynamicsCalculator.setExternalWrench(handController.getWristJoint().getSuccessor(), wrench);
          }
       }
    }
