@@ -1650,7 +1650,8 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
          DoubleYoVariable footPositionErrorMagnitude = (DoubleYoVariable) registry.getVariable(robotSide.getShortLowerCaseName()
                                                           + "_footPositionErrorMagnitude");
          Pair<Double, Double> footPositionErrorBounds = new Pair<Double, Double>(-0.1, 0.1);
-         walkingStatusReporter.setFootPositionVariablesAndBounds(robotSide, footPositionErrorMagnitude, footPositionErrorBounds);
+         if (walkingStatusReporter != null)
+            walkingStatusReporter.setFootPositionVariablesAndBounds(robotSide, footPositionErrorMagnitude, footPositionErrorBounds);
       }
    }
 
