@@ -86,6 +86,7 @@ import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -116,6 +117,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider
 
 public class WalkingHighLevelHumanoidController extends State<HighLevelState>
 {
+   private final double PELVIS_YAW_INITIALIZATION_TIME = 1.5;
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
@@ -124,6 +126,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
    private final WalkingControllerParameters walkingControllerParameters;
 
    private final WalkingStatusReporter walkingStatusReporter;
+   private BooleanYoVariable alreadyBeenInDoubleSupportOnce;
 
    private static enum WalkingState {LEFT_SUPPORT, RIGHT_SUPPORT, TRANSFER_TO_LEFT_SUPPORT, TRANSFER_TO_RIGHT_SUPPORT, DOUBLE_SUPPORT}
 
@@ -229,6 +232,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
    protected final double gravity;
    private final DoubleYoVariable desiredCoMHeightAcceleration;
    private final DoubleYoVariable yoTime;
+   private final DoubleYoVariable controllerInitializationTime;
 
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian,
            SideDependentList<FootSwitchInterface> footSwitches, double gravityZ, DoubleYoVariable yoTime, double controlDT,
@@ -510,6 +514,11 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
       this.desiredPelvisAngularVelocity = new YoFrameVector("desiredPelvisAngularVelocity", worldFrame, registry);
       this.desiredPelvisAngularAcceleration = new YoFrameVector("desiredPelvisAngularAcceleration", worldFrame, registry);
 
+
+      controllerInitializationTime = new DoubleYoVariable("controllerInitializationTime", registry);
+      alreadyBeenInDoubleSupportOnce = new BooleanYoVariable("alreadyBeenInDoubleSupportOnce", registry);
+
+
       updateWalkingStatusReporter();
    }
 
@@ -690,6 +699,14 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
             desiredICPVelocity.set(desiredICPVelocityLocal);
          }
 
+         // Only during the first few seconds, we will control the pelvis orientation based on midfeetZup
+         if (((yoTime.getDoubleValue() - controllerInitializationTime.getDoubleValue()) < PELVIS_YAW_INITIALIZATION_TIME)
+                 &&!alreadyBeenInDoubleSupportOnce.getBooleanValue())
+         {
+            setDesiredPelvisYawToMidfeetZupOnStartupOnly();
+         }
+
+
          // keep desired pelvis orientation as it is
          desiredPelvisAngularVelocity.set(0.0, 0.0, 0.0);
          desiredPelvisAngularAcceleration.set(0.0, 0.0, 0.0);
@@ -804,10 +821,23 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
       @Override
       public void doTransitionOutOfAction()
       {
+         alreadyBeenInDoubleSupportOnce.set(true);
+
          if (DEBUG)
             System.out.println("WalkingHighLevelHumanoidController: leavingDoubleSupportState");
          desiredICPVelocity.set(0.0, 0.0);
       }
+   }
+
+
+   private void setDesiredPelvisYawToMidfeetZupOnStartupOnly()
+   {
+      FrameOrientation frameOrientation = new FrameOrientation(referenceFrames.getMidFeetZUpFrame());
+      frameOrientation.changeFrame(worldFrame);
+      double[] yawPitchRoll = frameOrientation.getYawPitchRoll();
+
+      frameOrientation.setYawPitchRoll(yawPitchRoll[0], userDesiredPelvisPitch.getDoubleValue(), 0.0);
+      desiredPelvisOrientation.set(frameOrientation);
    }
 
 
@@ -948,10 +978,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
          trajectoryParametersProvider.set(mapFromFootstepsToTrajectoryParameters.get(nextFootstep));
          finalFootOrientationProviders.get(swingSide).setOrientation(nextFootstep.getOrientationInFrame(worldFrame));
 
-         FrameOrientation initialPelvisOrientation = new FrameOrientation(worldFrame);
-         finalPelvisOrientationProvider.get(initialPelvisOrientation);
-         initialPelvisOrientation.changeFrame(worldFrame);
-         initialPelvisOrientationProvider.setOrientation(initialPelvisOrientation);
+         initialPelvisOrientationProvider.setOrientation(desiredPelvisOrientation.getFrameOrientationCopy());
 
          FrameOrientation finalPelvisOrientation = nextFootstep.getOrientationInFrame(worldFrame);
          finalPelvisOrientation.setYawPitchRoll(finalPelvisOrientation.getYawPitchRoll()[0], userDesiredPelvisPitch.getDoubleValue(), 0.0);
