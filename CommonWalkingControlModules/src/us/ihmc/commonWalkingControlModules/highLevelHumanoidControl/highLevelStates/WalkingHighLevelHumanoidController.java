@@ -532,11 +532,6 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
       }
    }
 
-   public void setDoToeOffIfPossible(boolean doToeOffIfPossible)
-   {
-      this.doToeOffIfPossible.set(doToeOffIfPossible);
-   }
-
    private RobotSide getUpcomingSupportLeg()
    {
       return upcomingSupportLeg.getEnumValue();
