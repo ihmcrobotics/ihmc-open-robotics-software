@@ -6,11 +6,10 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.states.IndividualHandControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.states.JointSpaceHandControlControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.states.TaskspaceObjectManipulationState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.states.IndividualManipulationState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.states.JointSpaceManipulationControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.sensors.MassMatrixEstimatingToolRigidBody;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SE3ConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
@@ -49,11 +48,6 @@ public class IndividualHandControlStateMachine
 
    private final RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule;
 
-   private final HandControllerInterface handController;
-
-   private final MassMatrixEstimatingToolRigidBody toolBody;
-   private final Wrench measuredWristWrench = new Wrench();
-
    final DesiredHandPoseProvider handPoseProvider;
 
    public IndividualHandControlStateMachine(final DoubleYoVariable simulationTime, final RobotSide robotSide, final FullRobotModel fullRobotModel,
@@ -61,7 +55,7 @@ public class IndividualHandControlStateMachine
                                             WalkingControllerParameters walkingControllerParameters, final DesiredHandPoseProvider handPoseProvider,
                                             final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, HandControllerInterface handController,
                                             double gravity, final double controlDT, MomentumBasedController momentumBasedController, GeometricJacobian jacobian,
-                                            Map<OneDoFJoint, Double> desiredPositions, final YoVariableRegistry parentRegistry)
+                                            Map<OneDoFJoint, Double> defaultJointPositions, final YoVariableRegistry parentRegistry)
    {
       RigidBody endEffector = jacobian.getEndEffector();
 
@@ -87,20 +81,35 @@ public class IndividualHandControlStateMachine
       final ChangeableConfigurationProvider currentConfigurationProvider = new ChangeableConfigurationProvider(new FramePose(endEffectorFrame));
       final ChangeableConfigurationProvider desiredConfigurationProvider = new ChangeableConfigurationProvider(handPoseProvider.getDesiredHandPose(robotSide));
 
-//    IndividualHandControlState<ManipulationState> moveRelativeToChestState = createIndividualHandControlState(1.0,
+//    TaskspaceObjectManipulationState<ManipulationState> moveRelativeToChestState = createIndividualHandControlState(1.0,
 //          ManipulationState.MOVE_HAND_TO_POSITION_IN_CHESTFRAME,
 //          currentConfigurationProvider, desiredConfigurationProvider,
 //          momentumBasedController, jacobian, dynamicGraphicObjectsListRegistry);
 
 
-      JointSpaceManipulationControlState<ManipulationState> moveInJointSpaceState =
-         new JointSpaceManipulationControlState<ManipulationState>(ManipulationState.JOINT_SPACE, simulationTime, robotSide, jacobian, momentumBasedController,
-            desiredPositions, registry);
+      JointSpaceHandControlControlState<ManipulationState> moveInJointSpaceState =
+         new JointSpaceHandControlControlState<ManipulationState>(ManipulationState.JOINT_SPACE, simulationTime, robotSide, jacobian, momentumBasedController,
+            defaultJointPositions, registry);
 
-      IndividualHandControlState<ManipulationState> moveRelativeToWorldState = createIndividualHandControlState(1.0,
-                                                                                  ManipulationState.MOVE_HAND_TO_POSITION_IN_WORLDFRAME,
-                                                                                  currentConfigurationProvider, desiredConfigurationProvider,
-                                                                                  momentumBasedController, jacobian, dynamicGraphicObjectsListRegistry);
+      ConstantDoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(1.0);
+
+      ReferenceFrame referenceFrame = jacobian.getBase().getBodyFixedFrame();
+
+      String namePrefix = FormattingTools.underscoredToCamelCase(ManipulationState.MOVE_HAND_TO_POSITION_IN_WORLDFRAME.toString(), true);
+      StraightLinePositionTrajectoryGenerator positionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator(namePrefix, referenceFrame,
+            1.0, currentConfigurationProvider, desiredConfigurationProvider,
+                                                                               registry);
+
+      OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(namePrefix, referenceFrame,
+                                                                                      trajectoryTimeProvider, currentConfigurationProvider,
+            desiredConfigurationProvider, registry);
+
+      final TaskspaceObjectManipulationState<ManipulationState> ret = new TaskspaceObjectManipulationState<ManipulationState>(ManipulationState.MOVE_HAND_TO_POSITION_IN_WORLDFRAME, this.robotSide,
+                                                                   positionTrajectoryGenerator, orientationTrajectoryGenerator,
+                                                                   handSpatialAccelerationControlModule, momentumBasedController, jacobian, handController, fullRobotModel, gravity, controlDT,
+            dynamicGraphicObjectsListRegistry, registry);
+
+      TaskspaceObjectManipulationState<ManipulationState> moveRelativeToWorldState = ret;
 
 //      StateTransitionCondition toNextChestPosition = new StateTransitionCondition()
 //      {
@@ -173,19 +182,6 @@ public class IndividualHandControlStateMachine
          list.hideDynamicGraphicObjects();
       }
 
-
-      if (handController != null)
-      {
-         this.handController = handController;
-         this.toolBody = new MassMatrixEstimatingToolRigidBody(name + "Tool", handController.getWristJoint(), fullRobotModel, gravity, controlDT, registry,
-                 dynamicGraphicObjectsListRegistry);
-      }
-      else
-      {
-         this.handController = null;
-         this.toolBody = null;
-      }
-
       parentRegistry.addChild(registry);
    }
 
@@ -204,41 +200,12 @@ public class IndividualHandControlStateMachine
 
    public void doControl()
    {
-      estimateObjectWrench();
-
       stateMachine.checkTransitionConditionsThoroughly();
       stateMachine.doAction();
-      IndividualManipulationState<ManipulationState> manipulationState = manipulationStateMap.get(stateMachine.getCurrentStateEnum());
 
       for (DynamicGraphicReferenceFrame frame : dynamicGraphicReferenceFrames)
       {
          frame.update();
-      }
-
-
-      if (handController != null)
-      {
-         if (handController.isClosed())
-         {
-            Wrench wrench = new Wrench();
-            toolBody.control(manipulationState.getDesiredHandAcceleration(), wrench);
-         }
-      }
-   }
-
-   private void estimateObjectWrench()
-   {
-      if (handController != null)
-      {
-         if (handController.isClosed())
-         {
-            handController.packWristWrench(measuredWristWrench);
-            toolBody.update(measuredWristWrench);
-         }
-         else
-         {
-            toolBody.reset();
-         }
       }
    }
 
@@ -246,31 +213,6 @@ public class IndividualHandControlStateMachine
    {
       stateMachine.addState(state);
       manipulationStateMap.put(state.getStateEnum(), state);
-   }
-
-   private IndividualHandControlState<ManipulationState> createIndividualHandControlState(double trajectoryTime, ManipulationState manipulationState,
-           SE3ConfigurationProvider initialConfigurationProvider, SE3ConfigurationProvider finalConfigurationProvider,
-           MomentumBasedController momentumBasedController, GeometricJacobian jacobian, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
-   {
-      ConstantDoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(trajectoryTime);
-
-      ReferenceFrame referenceFrame = jacobian.getBase().getBodyFixedFrame();
-
-      String namePrefix = FormattingTools.underscoredToCamelCase(manipulationState.toString(), true);
-      StraightLinePositionTrajectoryGenerator positionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator(namePrefix, referenceFrame,
-                                                                               trajectoryTime, initialConfigurationProvider, finalConfigurationProvider,
-                                                                               registry);
-
-      OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(namePrefix, referenceFrame,
-                                                                                      trajectoryTimeProvider, initialConfigurationProvider,
-                                                                                      finalConfigurationProvider, registry);
-
-      final IndividualHandControlState<ManipulationState> ret = new IndividualHandControlState<ManipulationState>(manipulationState, robotSide,
-                                                                   positionTrajectoryGenerator, orientationTrajectoryGenerator,
-                                                                   handSpatialAccelerationControlModule, momentumBasedController, jacobian,
-                                                                   dynamicGraphicObjectsListRegistry, registry);
-
-      return ret;
    }
 
    private static class ChangeableConfigurationProvider implements SE3ConfigurationProvider
