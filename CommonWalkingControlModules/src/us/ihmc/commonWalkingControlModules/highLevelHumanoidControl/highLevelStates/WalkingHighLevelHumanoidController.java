@@ -314,7 +314,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
                                                                                  + "SwingFootOrientation", worldFrame, swingTimeCalculationProvider,
                                                                                     initialOrientationProvider, finalFootOrientationProvider, registry);
 
-         double finalPitchVelocity = 3.5;
+         double finalPitchVelocity = 2.5; // 3.5;
          YoVariableDoubleProvider onToesInitialPitchProvider = new YoVariableDoubleProvider(sideString + "OnToesInitialPitch", registry);
          YoVariableDoubleProvider onToesFinalPitchProvider = new YoVariableDoubleProvider(sideString + "OnToesFinalPitch", registry);
          DoubleProvider onToesInitialPitchVelocityProvider = new ConstantDoubleProvider(0.0);
@@ -324,6 +324,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
          DoubleTrajectoryGenerator onToesPitchTrajectoryGenerator = new QuinticPolynomialTrajectoryGenerator(sideString + "OnToesPitch",
                                                                         onToesInitialPitchProvider, onToesInitialPitchVelocityProvider, onToesFinalPitchProvider,
                                                                         onToesFinalPitchVelocityProvider, onToesTrajectoryTimeProvider, registry);
+         
          onToesInitialAngleProviders.put(robotSide, onToesInitialPitchProvider);
          onToesFinalAngleProviders.put(robotSide, onToesFinalPitchProvider);
 
