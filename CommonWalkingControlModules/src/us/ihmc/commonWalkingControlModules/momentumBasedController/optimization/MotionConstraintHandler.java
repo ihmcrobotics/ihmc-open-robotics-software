@@ -156,7 +156,7 @@ public class MotionConstraintHandler
 
       if (columnsForJoint != null) // don't do anything for joints that are not in the list
       {
-         DenseMatrix64F jBlock = getMatrixFromList(jList, motionConstraintIndex, joint.getDegreesOfFreedom(), nDegreesOfFreedom);
+         DenseMatrix64F jBlock = getMatrixFromList(jList, motionConstraintIndex, jointAcceleration.getNumRows(), nDegreesOfFreedom);
          jBlock.zero();
 
          for (int i = 0; i < jointAcceleration.getNumRows(); i++)
