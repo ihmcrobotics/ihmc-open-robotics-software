@@ -101,7 +101,7 @@ public class TaskSpaceConstraintResolver
       // aTaskSpace
       int[] columnIndices = ScrewTools.computeIndicesForJoint(jointsInOrder, constrainedJoints);
       aTaskSpace.reshape(aTaskSpace.getNumRows(), columnIndices.length);
-      MatrixTools.extractColumns(centroidalMomentumMatrix, aTaskSpace, columnIndices);
+      MatrixTools.extractColumns(centroidalMomentumMatrix, columnIndices, aTaskSpace, 0);
 
       // convectiveTerm
       GeometricJacobian baseToEndEffectorJacobian = new GeometricJacobian(base, endEffector, taskSpaceAcceleration.getExpressedInFrame());    // FIXME: garbage, repeated computation

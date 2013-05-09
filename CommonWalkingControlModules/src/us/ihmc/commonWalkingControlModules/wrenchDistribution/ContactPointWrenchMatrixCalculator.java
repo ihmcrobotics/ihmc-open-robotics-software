@@ -84,13 +84,11 @@ public class ContactPointWrenchMatrixCalculator
             for (FrameVector supportVector : normalizedSupportVectors)
             {
                supportVector.changeFrame(centerOfMassFrame);
-               int startRow = Wrench.SIZE / 2;
-               MatrixTools.setDenseMatrixFromTuple3d(q, supportVector.getVector(), startRow, column);
+               MatrixTools.setDenseMatrixFromTuple3d(q, supportVector.getVector(), Wrench.SIZE / 2, column);
 
                tempVector.setToZero(centerOfMassFrame);
                tempVector.cross(tempContactPoint, supportVector);
-               int startRow1 = 0;
-               MatrixTools.setDenseMatrixFromTuple3d(q, tempVector.getVector(), startRow1, column);
+               MatrixTools.setDenseMatrixFromTuple3d(q, tempVector.getVector(), 0, column);
                column++;
             }
          }

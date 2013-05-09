@@ -142,27 +142,37 @@ public class MotionConstraintHandler
 
    public void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration, double weight)
    {
-      CheckTools.checkEquals(joint.getDegreesOfFreedom(), jointAcceleration.getNumRows());
-      int[] columnsForJoint = this.columnsForJoints.get(joint);
+      int[] columnsForJoint;
+//      if (joint.getName().equals("pelvis"))
+//      {
+//         columnsForJoint = this.columnsForJoints.get(joint);
+//         columnsForJoint = new int[] {columnsForJoint[0], columnsForJoint[1], columnsForJoint[2]};
+//      }
+//      else
+      {
+         CheckTools.checkEquals(joint.getDegreesOfFreedom(), jointAcceleration.getNumRows());
+         columnsForJoint = this.columnsForJoints.get(joint);
+      }
 
       if (columnsForJoint != null) // don't do anything for joints that are not in the list
       {
          DenseMatrix64F jBlock = getMatrixFromList(jList, motionConstraintIndex, joint.getDegreesOfFreedom(), nDegreesOfFreedom);
          jBlock.zero();
 
-         for (int i = 0; i < joint.getDegreesOfFreedom(); i++)
+         for (int i = 0; i < jointAcceleration.getNumRows(); i++)
          {
             jBlock.set(i, columnsForJoint[i], 1.0);
          }
 
-         DenseMatrix64F ppBlock = getMatrixFromList(pList, motionConstraintIndex, joint.getDegreesOfFreedom(), 1);
-         ppBlock.set(jointAcceleration);
+         DenseMatrix64F pBlock = getMatrixFromList(pList, motionConstraintIndex, jointAcceleration.getNumRows(), 1);
+         pBlock.set(jointAcceleration);
 
          MutableDouble weightBlock = getMutableDoubleFromList(weightList, motionConstraintIndex);
          weightBlock.setValue(weight);
 
          motionConstraintIndex++;
       }
+
 
    }
 

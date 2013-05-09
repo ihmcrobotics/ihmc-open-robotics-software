@@ -284,7 +284,7 @@ public class MomentumSolver implements MomentumSolverInterface
    {
       for (InverseDynamicsJoint joint : jointsInOrder)
       {
-         MatrixTools.extractColumns(centroidalMomentumMatrix, aHats.get(joint), columnsForJoints.get(joint));
+         MatrixTools.extractColumns(centroidalMomentumMatrix, columnsForJoints.get(joint), aHats.get(joint), 0);
       }
    }
 
