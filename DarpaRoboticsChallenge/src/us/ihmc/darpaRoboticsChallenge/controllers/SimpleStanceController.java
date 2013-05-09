@@ -70,6 +70,7 @@ public class SimpleStanceController implements RobotController
    private final YoFrameVector desiredPelvisForce;
    private final OneDoFJoint[] oneDoFJoints;
    private final SixDoFJoint rootJoint;
+   private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
    public SimpleStanceController(SDFRobot robot, SDFFullRobotModel fullRobotModel, ReferenceFrames referenceFrames, double controlDT, InverseDynamicsJoint[] jointsToOptimize, double gravityZ, double footForward, double footBack, double footWidth)
    {
@@ -120,6 +121,8 @@ public class SimpleStanceController implements RobotController
 
       desiredPelvisTorque = new YoFrameVector("desiredPelvisTorque", rootJoint.getSuccessor().getBodyFixedFrame(), registry);
       desiredPelvisForce = new YoFrameVector("desiredPelvisForce", rootJoint.getSuccessor().getBodyFixedFrame(), registry);
+
+      spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootJoint.getPredecessor(), twistCalculator, gravityZ, true);
    }
 
    private static MomentumOptimizationSettings createOptimizationSettings(double momentumWeight, double lambda, double wRho, double rhoMin)
@@ -147,7 +150,7 @@ public class SimpleStanceController implements RobotController
 
       constrainFeet();
 
-//      FrameVector desiredPelvisAngularAcceleration = constrainPelvis();
+      FrameVector desiredPelvisAngularAcceleration = constrainPelvis();
 
       controlLinearMomentum();
 
@@ -157,11 +160,14 @@ public class SimpleStanceController implements RobotController
 
       outputWriter.write();
 
-//      SpatialAccelerationVector pelvisAcceleration = new SpatialAccelerationVector();
-//      fullRobotModel.getRootJoint().packDesiredJointAcceleration(pelvisAcceleration);
-//      FrameVector angularAccelerationBack = new FrameVector();
-//      pelvisAcceleration.packAngularPart(angularAccelerationBack);
-//
+      SpatialAccelerationVector pelvisAcceleration = new SpatialAccelerationVector();
+
+      spatialAccelerationCalculator.compute();
+      spatialAccelerationCalculator.packAccelerationOfBody(pelvisAcceleration, fullRobotModel.getPelvis());
+      FrameVector angularAccelerationBack = new FrameVector(pelvisAcceleration.getExpressedInFrame());
+
+      pelvisAcceleration.packAngularPart(angularAccelerationBack);
+
 //      angularAccelerationBack.changeFrame(desiredPelvisAngularAcceleration.getReferenceFrame());
 //      if (!desiredPelvisAngularAcceleration.epsilonEquals(angularAccelerationBack, 1e-12))
 //         throw new RuntimeException();
@@ -237,12 +243,12 @@ public class SimpleStanceController implements RobotController
 
       taskspaceConstraintData.set(pelvisFrame, pelvisJacobian.getBaseFrame(), output, nullspaceMultipliers);
 
-//      momentumControlModule.setDesiredSpatialAcceleration(pelvisJacobian, taskspaceConstraintData, 1.0);
+      momentumControlModule.setDesiredSpatialAcceleration(pelvisJacobian, taskspaceConstraintData, 1.0);
 
 
-      DenseMatrix64F jointAcceleration = new DenseMatrix64F(3, 1);
-      MatrixTools.setDenseMatrixFromTuple3d(jointAcceleration, output.getVector(), 0, 0);
-      momentumControlModule.setDesiredJointAcceleration(fullRobotModel.getRootJoint(), jointAcceleration);
+//      DenseMatrix64F jointAcceleration = new DenseMatrix64F(3, 1);
+//      MatrixTools.setDenseMatrixFromTuple3d(jointAcceleration, output.getVector(), 0, 0);
+//      momentumControlModule.setDesiredJointAcceleration(fullRobotModel.getRootJoint(), jointAcceleration);
 
       return output;
    }
@@ -355,7 +361,7 @@ public class SimpleStanceController implements RobotController
       drcscsInitialSetup.initializeRobot(robot, dynamicGraphicObjectsListsRegistry);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
-      scs.setDT(simDT, 1);
+      scs.setDT(simDT, 50);
       dynamicGraphicObjectsListsRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
 
       scs.startOnAThread();
