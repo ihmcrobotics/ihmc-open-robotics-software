@@ -119,6 +119,12 @@ public class YoPlaneContactState implements PlaneContactState
 
    public int getNumberOfContactPoints()
    {
-      return contactPoints.size();
+      int ret = 0;
+      for (YoFramePoint2d contactPoint : contactPoints)
+      {
+         if (!contactPoint.containsNaN())
+            ret++;
+      }
+      return ret;
    }
 }
