@@ -316,11 +316,10 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
                                                                                  + "SwingFootOrientation", worldFrame, swingTimeCalculationProvider,
                                                                                     initialOrientationProvider, finalFootOrientationProvider, registry);
 
-         double finalPitchVelocity = 2.5; // 3.5;
          YoVariableDoubleProvider onToesInitialPitchProvider = new YoVariableDoubleProvider(sideString + "OnToesInitialPitch", registry);
          YoVariableDoubleProvider onToesFinalPitchProvider = new YoVariableDoubleProvider(sideString + "OnToesFinalPitch", registry);
          DoubleProvider onToesInitialPitchVelocityProvider = new ConstantDoubleProvider(0.0);
-         DoubleProvider onToesFinalPitchVelocityProvider = new ConstantDoubleProvider(finalPitchVelocity);
+         DoubleProvider onToesFinalPitchVelocityProvider = new ConstantDoubleProvider(walkingControllerParameters.getFinalToeOffPitchAngularVelocity());
          DoubleProvider onToesTrajectoryTimeProvider = transferTimeProvider;
          
          DoubleTrajectoryGenerator onToesPitchTrajectoryGenerator = new QuinticPolynomialTrajectoryGenerator(sideString + "OnToesPitch",
@@ -337,7 +336,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
          endEffectorControlModule.setParameters(3e-2, 500.0);
          endEffectorControlModules.put(bipedFoot, endEffectorControlModule);
       }
-
+      
       initialPelvisOrientationProvider = new SettableOrientationProvider("initialPelvis", worldFrame, registry);
       finalPelvisOrientationProvider = new SettableOrientationProvider("finalPelvis", worldFrame, registry);
       this.pelvisOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("pelvis", worldFrame, swingTimeCalculationProvider,
@@ -828,7 +827,6 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
          desiredICPVelocity.set(0.0, 0.0);
       }
    }
-
 
    private void setDesiredPelvisYawToMidfeetZupOnStartupOnly()
    {
