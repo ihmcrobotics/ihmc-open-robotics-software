@@ -41,7 +41,7 @@ public class OptimizationMomentumControlModuleTest
    private static final Vector3d Y = new Vector3d(0.0, 1.0, 0.0);
    private static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
 
-   private final double controlDT = 5e-3;
+   private final double controlDT = 1e-5; // 5e-3;
    private final double gravityZ = 9.81;
 
    @Test
@@ -53,7 +53,7 @@ public class OptimizationMomentumControlModuleTest
          X // , Y, Z, Z, X, Y, X, Y
       };
       ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
-//      randomFloatingChain.setRandomPositionsAndVelocities(random);
+      randomFloatingChain.setRandomPositionsAndVelocities(random);
       randomFloatingChain.getElevator().updateFramesRecursively();
 
       SixDoFJoint rootJoint = randomFloatingChain.getRootJoint();
