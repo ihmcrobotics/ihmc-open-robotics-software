@@ -113,7 +113,10 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
 
    private FramePoint2d getFinalDesiredICPCentroidToCentroid(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
    {
-      transferToAndNextFootstepsDataVisualizer.visualizeFootsteps(transferToAndNextFootstepsData);
+      if(transferToAndNextFootstepsDataVisualizer != null)
+      {
+         transferToAndNextFootstepsDataVisualizer.visualizeFootsteps(transferToAndNextFootstepsData);
+      }
 
       Footstep transferToFootstep = transferToAndNextFootstepsData.getTransferToFootstep();
       Footstep nextFootstep = transferToAndNextFootstepsData.getNextFootstep();
@@ -147,7 +150,10 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
 
    private FramePoint2d getFinalDesiredICPCentroidToCentroidWithCalculatedScalar(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
    {
-      transferToAndNextFootstepsDataVisualizer.visualizeFootsteps(transferToAndNextFootstepsData);
+      if(transferToAndNextFootstepsDataVisualizer != null)
+      {
+         transferToAndNextFootstepsDataVisualizer.visualizeFootsteps(transferToAndNextFootstepsData);
+      }
 
       Footstep transferToFootstep = transferToAndNextFootstepsData.getTransferToFootstep();
       Footstep nextFootstep = transferToAndNextFootstepsData.getNextFootstep();
