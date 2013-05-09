@@ -57,4 +57,10 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
       super.setFullRobotModel(fullRobotModel);
    }
 
+   public void setEstimatorModel(SDFFullRobotModel estimatorModel)
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
 }

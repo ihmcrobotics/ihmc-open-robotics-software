@@ -25,11 +25,11 @@ public class RosAtlasSettingsSetter
    private final RosServiceClient<atlas_msgs.SetJointDampingRequest, atlas_msgs.SetJointDampingResponse> sandiaHandDampingClient = new RosServiceClient<SetJointDampingRequest, SetJointDampingResponse>(
          SetJointDamping._TYPE);
 
-   public RosAtlasSettingsSetter()
+   public RosAtlasSettingsSetter(String rosMasterURI)
    {
       try
       {
-         rosMainNode = new RosMainNode(new URI(DRCConfigParameters.ROS_MASTER_URI), "RosAtlasSettingsSetter");
+         rosMainNode = new RosMainNode(new URI(rosMasterURI), "RosAtlasSettingsSetter");
       }
       catch (URISyntaxException e)
       {
@@ -104,7 +104,7 @@ public class RosAtlasSettingsSetter
 
    public static void main(String[] args)
    {
-      RosAtlasSettingsSetter rosAtlasSettingsSetter = new RosAtlasSettingsSetter();
+      RosAtlasSettingsSetter rosAtlasSettingsSetter = new RosAtlasSettingsSetter(DRCConfigParameters.ROS_MASTER_URI);
       rosAtlasSettingsSetter.setAtlasDampingParameters();
       System.exit(0);
    }
