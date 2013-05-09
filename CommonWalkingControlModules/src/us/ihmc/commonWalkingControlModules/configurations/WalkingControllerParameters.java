@@ -36,4 +36,6 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract Map<OneDoFJoint, Double> getDefaultArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide);
 
    public abstract boolean doToeOffIfPossible();
+
+   public abstract double getFinalToeOffPitchAngularVelocity();
 }

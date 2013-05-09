@@ -190,4 +190,9 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    {
       return DRCRobotParameters.DRC_ROBOT_ANKLE_HEIGHT;
    }
+
+   public double getFinalToeOffPitchAngularVelocity()
+   {
+      return 3.5;
+   }
 }
