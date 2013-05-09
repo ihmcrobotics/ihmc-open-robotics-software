@@ -1,6 +1,12 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
@@ -56,6 +62,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.InstantaneousCapturePoin
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.QuinticPolynomialTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SettableOrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.SimpleTwoWaypointTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
@@ -100,6 +107,7 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionAction;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
+import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
@@ -306,12 +314,16 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
                                                                                  + "SwingFootOrientation", worldFrame, swingTimeCalculationProvider,
                                                                                     initialOrientationProvider, finalFootOrientationProvider, registry);
 
+         double finalPitchVelocity = 3.5;
          YoVariableDoubleProvider onToesInitialPitchProvider = new YoVariableDoubleProvider(sideString + "OnToesInitialPitch", registry);
          YoVariableDoubleProvider onToesFinalPitchProvider = new YoVariableDoubleProvider(sideString + "OnToesFinalPitch", registry);
+         DoubleProvider onToesInitialPitchVelocityProvider = new ConstantDoubleProvider(0.0);
+         DoubleProvider onToesFinalPitchVelocityProvider = new ConstantDoubleProvider(finalPitchVelocity);
          DoubleProvider onToesTrajectoryTimeProvider = transferTimeProvider;
-         DoubleTrajectoryGenerator onToesPitchTrajectoryGenerator = new CubicPolynomialTrajectoryGenerator(sideString + "OnToesPitch",
-                                                                       onToesInitialPitchProvider, onToesFinalPitchProvider, onToesTrajectoryTimeProvider,
-                                                                       registry);
+         
+         DoubleTrajectoryGenerator onToesPitchTrajectoryGenerator = new QuinticPolynomialTrajectoryGenerator(sideString + "OnToesPitch",
+                                                                        onToesInitialPitchProvider, onToesInitialPitchVelocityProvider, onToesFinalPitchProvider,
+                                                                        onToesFinalPitchVelocityProvider, onToesTrajectoryTimeProvider, registry);
          onToesInitialAngleProviders.put(robotSide, onToesInitialPitchProvider);
          onToesFinalAngleProviders.put(robotSide, onToesFinalPitchProvider);
 
