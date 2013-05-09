@@ -49,11 +49,10 @@ public class IndividualHandControlStateMachine
    final DesiredHandPoseProvider handPoseProvider;
 
    public IndividualHandControlStateMachine(final DoubleYoVariable simulationTime, final RobotSide robotSide, final FullRobotModel fullRobotModel,
-                                            final TwistCalculator twistCalculator,
-                                            WalkingControllerParameters walkingControllerParameters, final DesiredHandPoseProvider handPoseProvider,
-                                            final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, HandControllerInterface handController,
-                                            double gravity, final double controlDT, MomentumBasedController momentumBasedController, GeometricJacobian jacobian,
-                                            Map<OneDoFJoint, Double> defaultJointPositions, final YoVariableRegistry parentRegistry)
+           final TwistCalculator twistCalculator, WalkingControllerParameters walkingControllerParameters, final DesiredHandPoseProvider handPoseProvider,
+           final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, HandControllerInterface handController, double gravity,
+           final double controlDT, MomentumBasedController momentumBasedController, GeometricJacobian jacobian, Map<OneDoFJoint, Double> defaultJointPositions,
+           final YoVariableRegistry parentRegistry)
    {
       RigidBody endEffector = jacobian.getEndEffector();
 
@@ -79,9 +78,8 @@ public class IndividualHandControlStateMachine
       final ChangeableConfigurationProvider currentConfigurationProvider = new ChangeableConfigurationProvider(new FramePose(endEffectorFrame));
       final ChangeableConfigurationProvider desiredConfigurationProvider = new ChangeableConfigurationProvider(handPoseProvider.getDesiredHandPose(robotSide));
 
-      JointSpaceHandControlControlState moveInJointSpaceState =
-         new JointSpaceHandControlControlState(simulationTime, robotSide, jacobian, momentumBasedController,
-               registry);
+      JointSpaceHandControlControlState moveInJointSpaceState = new JointSpaceHandControlControlState(simulationTime, robotSide, jacobian,
+                                                                   momentumBasedController, registry);
       moveInJointSpaceState.setDesiredJointPositions(defaultJointPositions);
 
       ConstantDoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(1.0);
@@ -89,18 +87,17 @@ public class IndividualHandControlStateMachine
       ReferenceFrame referenceFrame = jacobian.getBase().getBodyFixedFrame();
 
       String namePrefix = FormattingTools.underscoredToCamelCase(IndividualHandControlState.MOVE_HAND_TO_POSITION_IN_WORLDFRAME.toString(), true);
-      StraightLinePositionTrajectoryGenerator positionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator(namePrefix, referenceFrame,
-            1.0, currentConfigurationProvider, desiredConfigurationProvider,
-                                                                               registry);
+      StraightLinePositionTrajectoryGenerator positionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator(namePrefix, referenceFrame, 1.0,
+                                                                               currentConfigurationProvider, desiredConfigurationProvider, registry);
 
       OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(namePrefix, referenceFrame,
                                                                                       trajectoryTimeProvider, currentConfigurationProvider,
-            desiredConfigurationProvider, registry);
+                                                                                      desiredConfigurationProvider, registry);
 
-      final TaskspaceObjectManipulationState moveRelativeToWorldState = new TaskspaceObjectManipulationState(this.robotSide,
-                                                                   positionTrajectoryGenerator, orientationTrajectoryGenerator,
-                                                                   handSpatialAccelerationControlModule, momentumBasedController, jacobian, handController, fullRobotModel, gravity, controlDT,
-            dynamicGraphicObjectsListRegistry, registry);
+      final TaskspaceObjectManipulationState moveRelativeToWorldState = new TaskspaceObjectManipulationState(this.robotSide, positionTrajectoryGenerator,
+                                                                           orientationTrajectoryGenerator, handSpatialAccelerationControlModule,
+                                                                           momentumBasedController, jacobian, handController, fullRobotModel, gravity,
+                                                                           controlDT, dynamicGraphicObjectsListRegistry, registry);
 
       StateTransitionCondition toNextWorldPosition = new StateTransitionCondition()
       {
