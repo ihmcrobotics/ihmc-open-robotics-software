@@ -13,7 +13,6 @@ import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
-import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -91,11 +90,6 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
 //      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_ROLL), robotSide.negateIfRightSide(0.0));
 
       return jointPositions;
-   }
-
-   public boolean doStrictPelvisControl()
-   {
-      return true;
    }
 
    public String[] getHeadOrientationControlJointNames()

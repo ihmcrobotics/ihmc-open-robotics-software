@@ -13,8 +13,6 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 {
    public abstract SideDependentList<Transform3D> getDesiredHandPosesWithRespectToChestFrame();
 
-   public abstract boolean doStrictPelvisControl();
-      
    public abstract String[] getChestOrientationControlJointNames();
 
    public abstract boolean checkOrbitalEnergyCondition();
