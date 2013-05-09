@@ -46,7 +46,7 @@ public class JointSpaceManipulationControlState<T extends Enum<T>> extends Indiv
       endMoveTime = new DoubleYoVariable("endMoveTime", registry);
 
       moveTimeArmJoint = new DoubleYoVariable("moveTimeArmJoint", registry);
-      moveTimeArmJoint.set(2.0);
+      moveTimeArmJoint.set(1.0);
 
       kpAllArmJoints = new DoubleYoVariable("kpAllArmJoints" + robotSide, registry);
       kpAllArmJoints.set(120.0);

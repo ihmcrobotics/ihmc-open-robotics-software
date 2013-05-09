@@ -74,6 +74,8 @@ public class DRCFlatGroundWalkingTest
    {
       BambooTools.reportTestStartedMessage();
 
+      DRCConfigParameters.INITIALIZE_ESTIMATOR_TO_ACTUAL = true;
+
       double standingTimeDuration = 1.0;
       double maximumWalkTime = 30.0;
       double desiredVelocityValue = 1.0;
