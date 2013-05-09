@@ -90,6 +90,11 @@ public class SmoothICPComputer
               doubleSupportDuration, doubleSupportFirstStepFraction, singleSupportDuration, omega0);
       newDoubleSupportICPComputer.computeSingleSupportStartICPAndVelocity(doubleSupportEndICP, doubleSupportEndICPVelocity, transferToFoot, cornerPoint1,
               doubleSupportDuration, doubleSupportFirstStepFraction, omega0);
+    
+      
+      
+      
+      
       
    }
 
