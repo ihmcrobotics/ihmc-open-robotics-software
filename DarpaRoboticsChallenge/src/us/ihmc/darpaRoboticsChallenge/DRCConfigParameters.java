@@ -8,7 +8,7 @@ import us.ihmc.graphics3DAdapter.camera.VideoSettingsH264LowLatency;
 
 public class DRCConfigParameters
 {
-   public static final boolean INITIALIZE_ESTIMATOR_TO_ACTUAL = false;
+   public static boolean INITIALIZE_ESTIMATOR_TO_ACTUAL = false;
 
    public static final boolean USE_GAZEBO_PHYSICS = false;    // TODO: This one is needed just for FlatGroundWalkingTrack in Gazebo...
 
