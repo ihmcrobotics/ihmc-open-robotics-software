@@ -54,7 +54,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTrajectoryGener
 import us.ihmc.commonWalkingControlModules.trajectories.CoMXYTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantCoPInstantaneousCapturePointTrajectory;
 import us.ihmc.commonWalkingControlModules.trajectories.ContactStatesAndUpcomingFootstepData;
-import us.ihmc.commonWalkingControlModules.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.CurrentOrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.FlatThenPolynomialCoMHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.HeelPitchTouchdownProvidersManager;
@@ -87,7 +86,6 @@ import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
-import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -930,7 +928,66 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
             setFlatFootContactState(bipedFeet.get(supportSide));
          }
 
-         initializeTrajectory(nextFootstep, swingSide, null);
+         finalPositionProvider.set(nextFootstep.getPositionInFrame(worldFrame));
+
+         SideDependentList<Transform3D> footToWorldTransform = new SideDependentList<Transform3D>();
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            Transform3D transform = bipedFeet.get(robotSide).getBodyFrame().getTransformToDesiredFrame(worldFrame);
+            footToWorldTransform.set(robotSide, transform);
+         }
+
+         Vector3d initialVectorPosition = new Vector3d();
+         footToWorldTransform.get(supportSide.getOppositeSide()).get(initialVectorPosition);
+         FramePoint initialFramePosition = new FramePoint(worldFrame, initialVectorPosition);
+         FramePoint finalPosition = new FramePoint(worldFrame);
+         finalPositionProvider.get(finalPosition);
+         double stepDistance = initialFramePosition.distance(finalPosition);
+         swingTimeCalculationProvider.setSwingTime(stepDistance);
+
+         trajectoryParametersProvider.set(mapFromFootstepsToTrajectoryParameters.get(nextFootstep));
+         finalFootOrientationProviders.get(swingSide).setOrientation(nextFootstep.getOrientationInFrame(worldFrame));
+
+         FrameOrientation initialPelvisOrientation = new FrameOrientation(worldFrame);
+         finalPelvisOrientationProvider.get(initialPelvisOrientation);
+         initialPelvisOrientation.changeFrame(worldFrame);
+         initialPelvisOrientationProvider.setOrientation(initialPelvisOrientation);
+
+         FrameOrientation finalPelvisOrientation = nextFootstep.getOrientationInFrame(worldFrame);
+         finalPelvisOrientation.setYawPitchRoll(finalPelvisOrientation.getYawPitchRoll()[0], userDesiredPelvisPitch.getDoubleValue(), 0.0);
+         finalPelvisOrientationProvider.setOrientation(finalPelvisOrientation);
+         pelvisOrientationTrajectoryGenerator.initialize();
+
+         double stepPitch = nextFootstep.getOrientationInFrame(worldFrame).getYawPitchRoll()[1];
+         onToesInitialAngleProviders.get(swingSide).set(stepPitch);
+         onToesFinalAngleProviders.get(swingSide).set(stepPitch);
+
+         FramePoint centerOfMass = new FramePoint(referenceFrames.getCenterOfMassFrame());
+         centerOfMass.changeFrame(worldFrame);
+         ContactablePlaneBody supportFoot = bipedFeet.get(supportSide);
+         Transform3D supportFootToWorldTransform = footToWorldTransform.get(supportSide);
+         double footHeight = DesiredFootstepCalculatorTools.computeMinZPointInFrame(supportFootToWorldTransform, supportFoot, worldFrame).getZ();
+         double comHeight = centerOfMass.getZ() - footHeight;
+         double omega0 = CapturePointCalculator.computeOmega0ConstantHeight(gravity, comHeight);
+         icpAndMomentumBasedController.setOmega0(omega0);
+         icpAndMomentumBasedController.computeCapturePoint();
+
+         if (walkingControllerParameters.resetDesiredICPToCurrentAtStartOfSwing())
+         {
+            desiredICP.set(capturePoint.getFramePoint2dCopy());    // TODO: currently necessary for stairs because of the omega0 jump, but should get rid of this
+         }
+
+         FramePoint2d finalDesiredICP = getSingleSupportFinalDesiredICPForWalking(nextFootstep, swingSide);
+
+         ContactablePlaneBody swingFoot = bipedFeet.get(swingSide);
+         setContactStateForSwing(swingFoot);
+         setSupportLeg(supportSide);
+         icpAndMomentumBasedController.updateBipedSupportPolygons(bipedSupportPolygons);
+
+         icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, swingTimeCalculationProvider.getValue(), omega0,
+                                           amountToBeInsideSingleSupport.getDoubleValue(), getSupportLeg(), yoTime.getDoubleValue());
+
+         centerOfMassHeightTrajectoryGenerator.initialize(getSupportLeg(), nextFootstep, getContactStatesList());
          if (DEBUG)
             System.out.println("WalkingHighLevelHumanoidController: nextFootstep will change now!");
          readyToGrabNextFootstep.set(true);
@@ -1203,72 +1260,6 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
    private void setSupportLeg(RobotSide supportLeg)
    {
       this.supportLeg.set(supportLeg);
-   }
-
-   public void initializeTrajectory(Footstep nextFootstep, RobotSide swingSide, SpatialAccelerationVector taskSpaceAcceleration)
-   {
-      RobotSide supportSide = swingSide.getOppositeSide();
-
-      finalPositionProvider.set(nextFootstep.getPositionInFrame(worldFrame));
-
-      SideDependentList<Transform3D> footToWorldTransform = new SideDependentList<Transform3D>();
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         Transform3D transform = bipedFeet.get(robotSide).getBodyFrame().getTransformToDesiredFrame(worldFrame);
-         footToWorldTransform.set(robotSide, transform);
-      }
-
-      Vector3d initialVectorPosition = new Vector3d();
-      footToWorldTransform.get(supportSide.getOppositeSide()).get(initialVectorPosition);
-      FramePoint initialFramePosition = new FramePoint(worldFrame, initialVectorPosition);
-      FramePoint finalPosition = new FramePoint(worldFrame);
-      finalPositionProvider.get(finalPosition);
-      double stepDistance = initialFramePosition.distance(finalPosition);
-      swingTimeCalculationProvider.setSwingTime(stepDistance);
-
-      trajectoryParametersProvider.set(mapFromFootstepsToTrajectoryParameters.get(nextFootstep));
-      finalFootOrientationProviders.get(swingSide).setOrientation(nextFootstep.getOrientationInFrame(worldFrame));
-
-      FrameOrientation initialPelvisOrientation = new FrameOrientation(worldFrame);
-      finalPelvisOrientationProvider.get(initialPelvisOrientation);
-      initialPelvisOrientation.changeFrame(worldFrame);
-      initialPelvisOrientationProvider.setOrientation(initialPelvisOrientation);
-
-      FrameOrientation finalPelvisOrientation = nextFootstep.getOrientationInFrame(worldFrame);
-      finalPelvisOrientation.setYawPitchRoll(finalPelvisOrientation.getYawPitchRoll()[0], userDesiredPelvisPitch.getDoubleValue(), 0.0);
-      finalPelvisOrientationProvider.setOrientation(finalPelvisOrientation);
-      pelvisOrientationTrajectoryGenerator.initialize();
-
-      double stepPitch = nextFootstep.getOrientationInFrame(worldFrame).getYawPitchRoll()[1];
-      onToesInitialAngleProviders.get(swingSide).set(stepPitch);
-      onToesFinalAngleProviders.get(swingSide).set(stepPitch);
-
-      FramePoint centerOfMass = new FramePoint(referenceFrames.getCenterOfMassFrame());
-      centerOfMass.changeFrame(worldFrame);
-      ContactablePlaneBody supportFoot = bipedFeet.get(supportSide);
-      Transform3D supportFootToWorldTransform = footToWorldTransform.get(supportSide);
-      double footHeight = DesiredFootstepCalculatorTools.computeMinZPointInFrame(supportFootToWorldTransform, supportFoot, worldFrame).getZ();
-      double comHeight = centerOfMass.getZ() - footHeight;
-      double omega0 = CapturePointCalculator.computeOmega0ConstantHeight(gravity, comHeight);
-      icpAndMomentumBasedController.setOmega0(omega0);
-      icpAndMomentumBasedController.computeCapturePoint();
-
-      if (walkingControllerParameters.resetDesiredICPToCurrentAtStartOfSwing())
-      {
-         desiredICP.set(capturePoint.getFramePoint2dCopy());    // TODO: currently necessary for stairs because of the omega0 jump, but should get rid of this
-      }
-
-      FramePoint2d finalDesiredICP = getSingleSupportFinalDesiredICPForWalking(nextFootstep, swingSide);
-
-      ContactablePlaneBody swingFoot = bipedFeet.get(swingSide);
-      setContactStateForSwing(swingFoot);
-      setSupportLeg(supportSide);
-      icpAndMomentumBasedController.updateBipedSupportPolygons(bipedSupportPolygons);
-
-      icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, swingTimeCalculationProvider.getValue(), omega0,
-                                        amountToBeInsideSingleSupport.getDoubleValue(), getSupportLeg(), yoTime.getDoubleValue());
-
-      centerOfMassHeightTrajectoryGenerator.initialize(getSupportLeg(), nextFootstep, getContactStatesList());
    }
 
    public void doMotionControl()
@@ -1595,7 +1586,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
       }
    }
 
-   public static Footstep createFootstepFromFootAndContactablePlaneBody(ReferenceFrame footReferenceFrame, ContactablePlaneBody contactablePlaneBody)
+   private static Footstep createFootstepFromFootAndContactablePlaneBody(ReferenceFrame footReferenceFrame, ContactablePlaneBody contactablePlaneBody)
    {
       FramePose framePose = new FramePose(footReferenceFrame);
       framePose.changeFrame(ReferenceFrame.getWorldFrame());
