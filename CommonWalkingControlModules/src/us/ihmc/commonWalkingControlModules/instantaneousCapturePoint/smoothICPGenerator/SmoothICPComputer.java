@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPG
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
@@ -11,7 +12,6 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.InstantaneousCapturePointPlanner;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -21,7 +21,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
-public class SmoothICPComputer implements InstantaneousCapturePointPlanner
+public class SmoothICPComputer
 {
    private final int maxNumberOfConsideredFootsteps;
    private final double doubleSupportFirstStepFraction;
@@ -373,6 +373,7 @@ public class SmoothICPComputer implements InstantaneousCapturePointPlanner
       tuple3dToPack.setY(tempMatrix.get(1, 0));
       tuple3dToPack.setZ(tempMatrix.get(2, 0));
    }
+  
 
    private final ArrayList<FramePoint> footLocationList = new ArrayList<FramePoint>();
 
@@ -389,7 +390,16 @@ public class SmoothICPComputer implements InstantaneousCapturePointPlanner
       initializeSingleSupport(footLocationList, singleSupportDuration, doubleSupportDuration, omega0, initialTime, stopIfReachedEnd);
    }
 
-   public void initializeDoubleSupportInitialTransfer(TransferToAndNextFootstepsData transferToAndNextFootstepsData, Point3d initialICPPosition,
+   private final Point3d initialICPPositionTemp = new Point3d();
+   public void initializeDoubleSupportInitialTransfer(TransferToAndNextFootstepsData transferToAndNextFootstepsData, Point2d initialICPPosition,
+         double initialTime)
+   {
+      initialICPPositionTemp.set(initialICPPosition.getX(), initialICPPosition.getY(), 0.0);
+      initializeDoubleSupportInitialTransfer(transferToAndNextFootstepsData, initialICPPositionTemp,
+            initialTime);
+   }
+   
+   private void initializeDoubleSupportInitialTransfer(TransferToAndNextFootstepsData transferToAndNextFootstepsData, Point3d initialICPPosition,
            double initialTime)
    {
       footLocationList.clear();
