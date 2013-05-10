@@ -32,9 +32,4 @@ public class DRCDashboardTypes
    {
       return taskPath.get(drcTask);
    }
-
-   public enum RobotModel
-   {
-      ATLAS_NO_HANDS, ATLAS_SANDIA_HANDS;
-   }
 }
