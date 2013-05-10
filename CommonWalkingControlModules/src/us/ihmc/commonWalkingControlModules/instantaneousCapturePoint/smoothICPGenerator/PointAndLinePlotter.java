@@ -54,6 +54,10 @@ public class PointAndLinePlotter
       parentRegistry.addChild(registry);
    }
 
+public DynamicGraphicObjectsListRegistry getDynamicGraphicObjectsListRegistry()
+{
+   return dynamicGraphicObjectsListRegistry;
+}
 
    public void createAndShowOverheadPlotterInSCS(SimulationConstructionSet scs)
    {
@@ -212,7 +216,6 @@ public class PointAndLinePlotter
       endPointToSet.scale(scaling);
       endPointToSet.add(startPoint);
    }
-
 
   
 }
