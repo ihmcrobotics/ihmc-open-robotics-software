@@ -124,4 +124,9 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
    {
       return dataIdentifier;
    }
+
+   public int getNumberOfFootstepsToProvide()
+   {
+      return footstepQueue.size();
+   }
 }

@@ -11,4 +11,6 @@ public interface FootstepProvider
    public abstract boolean isEmpty();
 
    public void notifyComplete();
+   
+   public int getNumberOfFootstepsToProvide();
 }
