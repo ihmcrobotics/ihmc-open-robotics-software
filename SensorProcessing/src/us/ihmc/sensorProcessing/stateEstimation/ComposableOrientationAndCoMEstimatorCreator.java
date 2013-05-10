@@ -10,7 +10,6 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowInputPort;
@@ -19,6 +18,7 @@ import us.ihmc.sensorProcessing.controlFlowPorts.YoFramePointControlFlowOutputPo
 import us.ihmc.sensorProcessing.controlFlowPorts.YoFrameQuaternionControlFlowOutputPort;
 import us.ihmc.sensorProcessing.controlFlowPorts.YoFrameVectorControlFlowOutputPort;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.RigidBodyToIndexMap;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.AggregatePointPositionMeasurementModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.AggregatePointVelocityMeasurementModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.AngularVelocityMeasurementModelElement;
@@ -40,11 +40,11 @@ import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.LinearAccele
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.OrientationSensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
-import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.utilities.screwTheory.RigidBody;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -118,21 +118,21 @@ public class ComposableOrientationAndCoMEstimatorCreator
       this.linearAccelerationSensorConfigurations.add(linearAccelerationSensorConfiguration);
    }
 
-   public ComposableOrientationAndCoMEstimator createOrientationEstimator(ControlFlowGraph controlFlowGraph, double controlDT,
-                                                                          ReferenceFrame estimationFrame, YoVariableRegistry registry)
+   public ComposableOrientationAndCoMEstimator createOrientationEstimator(ControlFlowGraph controlFlowGraph, double controlDT, ReferenceFrame estimationFrame,
+         AfterJointReferenceFrameNameMap estimatorFrameMap, RigidBodyToIndexMap estimatorRigidBodyToIndexMap, YoVariableRegistry registry)
    {
-      return new ComposableOrientationAndCoMEstimator("orientationEstimator", controlDT, estimationFrame, controlFlowGraph,
+      return new ComposableOrientationAndCoMEstimator("orientationEstimator", controlDT, estimationFrame, estimatorFrameMap, estimatorRigidBodyToIndexMap, controlFlowGraph,
               inverseDynamicsStructureOutputPort, registry);
    }
 
-   private static DenseMatrix64F createDiagonalCovarianceMatrix(double standardDeviation, int size)
-   {
-      DenseMatrix64F orientationCovarianceMatrix = new DenseMatrix64F(size, size);
-      CommonOps.setIdentity(orientationCovarianceMatrix);
-      CommonOps.scale(MathTools.square(standardDeviation), orientationCovarianceMatrix);
-
-      return orientationCovarianceMatrix;
-   }
+//   private static DenseMatrix64F createDiagonalCovarianceMatrix(double standardDeviation, int size)
+//   {
+//      DenseMatrix64F orientationCovarianceMatrix = new DenseMatrix64F(size, size);
+//      CommonOps.setIdentity(orientationCovarianceMatrix);
+//      CommonOps.scale(MathTools.square(standardDeviation), orientationCovarianceMatrix);
+//
+//      return orientationCovarianceMatrix;
+//   }
    
    private static DenseMatrix64F createCovarianceMatrix(double standardDeviationXY, double standardDeviationZ, int size)
    {
@@ -165,9 +165,9 @@ public class ComposableOrientationAndCoMEstimatorCreator
       private final ControlFlowOutputPort<FullInverseDynamicsStructure> updatedInverseDynamicsStructureOutputPort;
       private final CenterOfMassBasedFullRobotModelUpdater centerOfMassBasedFullRobotModelUpdater;
 
-      public ComposableOrientationAndCoMEstimator(String name, double controlDT,
-                                                  ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph,
-                                                  ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort, YoVariableRegistry parentRegistry)
+      public ComposableOrientationAndCoMEstimator(String name, double controlDT, ReferenceFrame estimationFrame,
+            AfterJointReferenceFrameNameMap estimatorFrameMap, RigidBodyToIndexMap estimatorRigidBodyToIndexMap, ControlFlowGraph controlFlowGraph,
+            ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort, YoVariableRegistry parentRegistry)
       {
          super(name, controlDT, parentRegistry);
 
@@ -218,8 +218,8 @@ public class ComposableOrientationAndCoMEstimatorCreator
             addLinearAccelerationSensor(estimationFrame, controlFlowGraph, linearAccelerationSensorConfiguration);
          }
 
-         addAggregatedPointPositionMeasurementModelElement(pointPositionInputPort, estimationFrame);
-         addAggregatedPointVelocityMeasurementModelElement(pointVelocityInputPort, estimationFrame);
+         addAggregatedPointPositionMeasurementModelElement(pointPositionInputPort, estimationFrame, estimatorFrameMap);
+         addAggregatedPointVelocityMeasurementModelElement(pointVelocityInputPort, estimationFrame, estimatorFrameMap, estimatorRigidBodyToIndexMap);
 
          this.centerOfMassBasedFullRobotModelUpdater = new CenterOfMassBasedFullRobotModelUpdater(inverseDynamicsStructureInputPort,
                  centerOfMassPositionStatePort, centerOfMassVelocityStatePort, centerOfMassAccelerationStatePort, orientationStatePort,
@@ -391,10 +391,10 @@ public class ComposableOrientationAndCoMEstimatorCreator
 
 
       private void addAggregatedPointPositionMeasurementModelElement(ControlFlowInputPort<Set<PointPositionDataObject>> pointPositionInputPort,
-              ReferenceFrame estimationFrame)
+              ReferenceFrame estimationFrame, AfterJointReferenceFrameNameMap estimatorFrameMap)
       {
          AggregatePointPositionMeasurementModelElement element = new AggregatePointPositionMeasurementModelElement(pointPositionInputPort,
-                                                                    centerOfMassPositionStatePort, orientationStatePort, estimationFrame);
+                                                                    centerOfMassPositionStatePort, orientationStatePort, estimationFrame, estimatorFrameMap);
          
 //         DenseMatrix64F covariance = createDiagonalCovarianceMatrix(pointPositionMeasurementStandardDeviation, 3);
          DenseMatrix64F covariance = createCovarianceMatrix(pointPositionXYMeasurementStandardDeviation, pointPositionZMeasurementStandardDeviation, 3);
@@ -404,12 +404,12 @@ public class ComposableOrientationAndCoMEstimatorCreator
       }
    
       private void addAggregatedPointVelocityMeasurementModelElement(ControlFlowInputPort<Set<PointVelocityDataObject>> pointVelocityInputPort,
-            ReferenceFrame estimationFrame)
+            ReferenceFrame estimationFrame, AfterJointReferenceFrameNameMap estimatorFrameMap, RigidBodyToIndexMap rigidBodyToIndexMap)
     {
          AggregatePointVelocityMeasurementModelElement element = new AggregatePointVelocityMeasurementModelElement(pointVelocityInputPort, 
                centerOfMassPositionStatePort, centerOfMassVelocityStatePort, 
                orientationStatePort, angularVelocityStatePort, 
-               inverseDynamicsStructureInputPort, estimationFrame);
+               inverseDynamicsStructureInputPort, estimatorFrameMap, rigidBodyToIndexMap, estimationFrame);
 
 //         DenseMatrix64F covariance = createDiagonalCovarianceMatrix(pointVelocityMeasurementStandardDeviation, 3);
          DenseMatrix64F covariance = createCovarianceMatrix(pointVelocityXYMeasurementStandardDeviation, pointVelocityZMeasurementStandardDeviation, 3);

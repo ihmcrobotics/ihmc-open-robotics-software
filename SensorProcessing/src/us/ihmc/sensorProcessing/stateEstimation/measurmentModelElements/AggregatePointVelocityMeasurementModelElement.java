@@ -13,11 +13,13 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.RigidBodyToIndexMap;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.AfterJointReferenceFrameNameMap;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
@@ -37,6 +39,8 @@ public class AggregatePointVelocityMeasurementModelElement implements Measuremen
 
 
    private final ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort;
+   private final AfterJointReferenceFrameNameMap referenceFrameNameMap;
+   private final RigidBodyToIndexMap rigidBodyToIndexMap;
 
    private final ReferenceFrame estimationFrame;
    private final Set<ControlFlowOutputPort<?>> statePorts = new LinkedHashSet<ControlFlowOutputPort<?>>();
@@ -51,9 +55,10 @@ public class AggregatePointVelocityMeasurementModelElement implements Measuremen
 
 
    public AggregatePointVelocityMeasurementModelElement(ControlFlowInputPort<Set<PointVelocityDataObject>> inputPort,
-           ControlFlowOutputPort<FramePoint> centerOfMassPositionPort, ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort,
-           ControlFlowOutputPort<FrameOrientation> orientationPort, ControlFlowOutputPort<FrameVector> angularVelocityPort,
-           ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort, ReferenceFrame estimationFrame)
+         ControlFlowOutputPort<FramePoint> centerOfMassPositionPort, ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort,
+         ControlFlowOutputPort<FrameOrientation> orientationPort, ControlFlowOutputPort<FrameVector> angularVelocityPort,
+         ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort, AfterJointReferenceFrameNameMap referenceFrameNameMap,
+         RigidBodyToIndexMap rigidBodyToIndexMap, ReferenceFrame estimationFrame)
    {
       this.inputPort = inputPort;
       this.centerOfMassPositionPort = centerOfMassPositionPort;
@@ -61,6 +66,8 @@ public class AggregatePointVelocityMeasurementModelElement implements Measuremen
       this.orientationPort = orientationPort;
       this.angularVelocityPort = angularVelocityPort;
       this.inverseDynamicsStructureInputPort = inverseDynamicsStructureInputPort;
+      this.referenceFrameNameMap = referenceFrameNameMap;
+      this.rigidBodyToIndexMap = rigidBodyToIndexMap;
       this.estimationFrame = estimationFrame;
 
       statePorts.add(centerOfMassPositionPort);
@@ -86,7 +93,7 @@ public class AggregatePointVelocityMeasurementModelElement implements Measuremen
 
          PointVelocityMeasurementModelElement element = new PointVelocityMeasurementModelElement(name, pointVelocityMeasurementInputPort,
                                                            centerOfMassPositionPort, centerOfMassVelocityPort, orientationPort, angularVelocityPort,
-                                                           estimationFrame, inverseDynamicsStructureInputPort, registry);
+                                                           estimationFrame, inverseDynamicsStructureInputPort, referenceFrameNameMap, rigidBodyToIndexMap, registry);
 
          element.setNoiseCovariance(singlePointCovariance);
          elementPool.add(element);

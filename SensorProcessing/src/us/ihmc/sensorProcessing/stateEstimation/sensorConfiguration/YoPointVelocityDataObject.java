@@ -1,5 +1,8 @@
 package us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration;
 
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.RigidBodyToIndexMap;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -17,18 +20,17 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
  */
 public class YoPointVelocityDataObject extends PointVelocityDataObject
 {
-   private final RigidBodyToIndexMap rigidBodyToIndexMapOne;
-   private final RigidBodyToIndexMap rigidBodyToIndexMapTwo;
+   private final RigidBodyToIndexMap estimatorRigidBodyToIndexMap;
    
    private final IntegerYoVariable yoRigidBodyIndex;
    private final YoFramePoint yoMeasurementPointInBodyFrame;
    private final YoFrameVector yoVelocityOfMeasurementPointInWorldFrame;
 
-   public YoPointVelocityDataObject(RigidBodyToIndexMap rigidBodyToIndexMapOne, RigidBodyToIndexMap rigidBodyToIndexMapTwo, 
+   public YoPointVelocityDataObject(RigidBodyToIndexMap estimatorRigidBodyToIndexMap, 
          String namePrefix, ReferenceFrame frame, YoVariableRegistry registry)
    {
-      this.rigidBodyToIndexMapOne = rigidBodyToIndexMapOne;
-      this.rigidBodyToIndexMapTwo = rigidBodyToIndexMapTwo;
+      this.estimatorRigidBodyToIndexMap = estimatorRigidBodyToIndexMap;
+      bodyFixedReferenceFrameName = frame.getName();
       yoRigidBodyIndex = new IntegerYoVariable(namePrefix + "RigidBodyIndex", registry);
       yoMeasurementPointInBodyFrame = new YoFramePoint(namePrefix + "PointBody", frame, registry);
       yoVelocityOfMeasurementPointInWorldFrame = new YoFrameVector(namePrefix + "PointVelocityWorld", ReferenceFrame.getWorldFrame(), registry);
@@ -37,32 +39,47 @@ public class YoPointVelocityDataObject extends PointVelocityDataObject
    @Override
    public void set(RigidBody rigidBody, FramePoint measurementPointInBodyFrame, FrameVector velocityOfMeasurementPointInWorldFrame)
    {
-      yoRigidBodyIndex.set(rigidBodyToIndexMapTwo.lookupIndexOfRigidBody(rigidBody));
-
-      this.yoMeasurementPointInBodyFrame.set(measurementPointInBodyFrame);
-      this.yoVelocityOfMeasurementPointInWorldFrame.set(velocityOfMeasurementPointInWorldFrame);
+     throw new RuntimeException("Should not get here");
    }
 
    @Override
-   public RigidBody getRigidBody()
+   public String getRigidBodyName()
    {
-      rigidBody = rigidBodyToIndexMapOne.lookupRigidBody(yoRigidBodyIndex.getIntegerValue());
-      return rigidBody;
+      rigidBodyName = estimatorRigidBodyToIndexMap.getNameByIndex(yoRigidBodyIndex.getIntegerValue());
+      return rigidBodyName; 
    }
 
    @Override
-   public FrameVector getVelocityOfMeasurementPointInWorldFrame()
+   public Vector3d getVelocityOfMeasurementPointInWorldFrame()
    {
-      yoVelocityOfMeasurementPointInWorldFrame.getFrameVectorAndChangeFrameOfPackedVector(velocityOfMeasurementPointInWorldFrame);
+      yoVelocityOfMeasurementPointInWorldFrame.getVector(velocityOfMeasurementPointInWorldFrame);
 
       return velocityOfMeasurementPointInWorldFrame;
    }
 
    @Override
-   public FramePoint getMeasurementPointInBodyFrame()
+   public Point3d getMeasurementPointInBodyFrame()
    {
-      yoMeasurementPointInBodyFrame.getFramePointAndChangeFrameOfPackedPoint(measurementPointInBodyFrame);
+      yoMeasurementPointInBodyFrame.getPoint(measurementPointInBodyFrame);
 
       return measurementPointInBodyFrame;
+   }
+   
+   public ReferenceFrame getReferenceFrame()
+   {
+      return yoMeasurementPointInBodyFrame.getReferenceFrame();
+   }
+   
+   @Override
+   public void set(PointVelocityDataObject other)
+   {
+      if(!other.bodyFixedReferenceFrameName.equals(bodyFixedReferenceFrameName))
+      {
+         throw new RuntimeException("Frame name does not match, desired: " + bodyFixedReferenceFrameName + ", expected: "
+               + other.bodyFixedReferenceFrameName);  
+      }
+      yoMeasurementPointInBodyFrame.set(other.measurementPointInBodyFrame);
+      yoVelocityOfMeasurementPointInWorldFrame.set(other.velocityOfMeasurementPointInWorldFrame);
+      yoRigidBodyIndex.set(estimatorRigidBodyToIndexMap.getIndexByName(other.rigidBodyName));
    }
 }

@@ -13,6 +13,7 @@ import us.ihmc.sensorProcessing.stateEstimation.evaluation.RigidBodyToIndexMap;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.YoPointVelocityDataObject;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.AfterJointReferenceFrameNameMap;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -23,20 +24,21 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
  */
 public class YoPointVelocityDataObjectListOutputPort extends ControlFlowOutputPort<Set<PointVelocityDataObject>>
 {
-   private final RigidBodyToIndexMap rigidBodyToIndexMapOne, rigidBodyToIndexMapTwo;
+   private final RigidBodyToIndexMap estimatorRigidBodyToIndexMap;
+   private final AfterJointReferenceFrameNameMap referenceFrameNameMap;
    
    private final YoVariableRegistry registry;
    private final List<YoPointVelocityDataObject> yoPointVelocityDataObjects = new ArrayList<YoPointVelocityDataObject>();
    private final Map<YoPointVelocityDataObject, BooleanYoVariable> validMap = new LinkedHashMap<YoPointVelocityDataObject, BooleanYoVariable>();
    private final String namePrefix;
 
-   public YoPointVelocityDataObjectListOutputPort(RigidBodyToIndexMap rigidBodyToIndexMapOne, 
-         RigidBodyToIndexMap rigidBodyToIndexMapTwo, ControlFlowElement controlFlowElement, String namePrefix, YoVariableRegistry registry)
+   public YoPointVelocityDataObjectListOutputPort(RigidBodyToIndexMap estimatorRigidBodyToIndexMap, AfterJointReferenceFrameNameMap referenceFrameNameMap,
+         ControlFlowElement controlFlowElement, String namePrefix, YoVariableRegistry registry)
    {
       super(namePrefix, controlFlowElement);
       
-      this.rigidBodyToIndexMapOne = rigidBodyToIndexMapOne;
-      this.rigidBodyToIndexMapTwo = rigidBodyToIndexMapTwo;
+      this.estimatorRigidBodyToIndexMap = estimatorRigidBodyToIndexMap;
+      this.referenceFrameNameMap = referenceFrameNameMap;
       super.setData(new LinkedHashSet<PointVelocityDataObject>());
       this.namePrefix = namePrefix;
       this.registry = registry;
@@ -65,13 +67,13 @@ public class YoPointVelocityDataObjectListOutputPort extends ControlFlowOutputPo
 
       for (PointVelocityDataObject pointVelocityDataObject : data)
       {
-         ReferenceFrame referenceFrame = pointVelocityDataObject.getMeasurementPointInBodyFrame().getReferenceFrame();
+         ReferenceFrame referenceFrame = referenceFrameNameMap.getFrameByName(pointVelocityDataObject.getBodyFixedReferenceFrameName());
 
          YoPointVelocityDataObject yoPointVelocityDataObjectToUse = null;
 
          for (YoPointVelocityDataObject yoPointVelocityDataObject : yoPointVelocityDataObjects)
          {
-            boolean frameOK = yoPointVelocityDataObject.getMeasurementPointInBodyFrame().getReferenceFrame() == referenceFrame;
+            boolean frameOK = yoPointVelocityDataObject.getReferenceFrame() == referenceFrame;
             boolean isAvailable = !validMap.get(yoPointVelocityDataObject).getBooleanValue();
             if (frameOK && isAvailable)
             {
@@ -84,7 +86,7 @@ public class YoPointVelocityDataObjectListOutputPort extends ControlFlowOutputPo
          if (yoPointVelocityDataObjectToUse == null)
          {
             int index = yoPointVelocityDataObjects.size();
-            yoPointVelocityDataObjectToUse = new YoPointVelocityDataObject(rigidBodyToIndexMapOne, rigidBodyToIndexMapTwo, namePrefix + index, referenceFrame, registry);
+            yoPointVelocityDataObjectToUse = new YoPointVelocityDataObject(estimatorRigidBodyToIndexMap, namePrefix + index, referenceFrame, registry);
             yoPointVelocityDataObjects.add(yoPointVelocityDataObjectToUse);
             validMap.put(yoPointVelocityDataObjectToUse, new BooleanYoVariable(namePrefix + "Valid" + index, registry));
          }

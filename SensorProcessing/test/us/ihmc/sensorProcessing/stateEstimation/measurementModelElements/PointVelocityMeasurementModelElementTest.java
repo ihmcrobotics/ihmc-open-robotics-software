@@ -17,6 +17,7 @@ import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.controlFlow.NullControlFlowElement;
 import us.ihmc.sensorProcessing.stateEstimation.CenterOfMassBasedFullRobotModelUpdater;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.RigidBodyToIndexMap;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.PointVelocityMeasurementModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
 import us.ihmc.utilities.RandomTools;
@@ -26,6 +27,7 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTestTools.RandomFloatingChain;
+import us.ihmc.utilities.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.Twist;
@@ -51,7 +53,7 @@ public class PointVelocityMeasurementModelElementTest
       RigidBody estimationLink = randomFloatingChain.getRootJoint().getSuccessor();
       ReferenceFrame estimationFrame = randomFloatingChain.getRootJoint().getFrameAfterJoint();
       RigidBody measurementLink = randomFloatingChain.getRevoluteJoints().get(jointAxes.length - 1).getSuccessor();
-      ReferenceFrame measurementFrame = measurementLink.getBodyFixedFrame();
+      ReferenceFrame measurementFrame = measurementLink.getParentJoint().getFrameAfterJoint();
 
       ControlFlowElement controlFlowElement = new NullControlFlowElement();
 
@@ -78,10 +80,12 @@ public class PointVelocityMeasurementModelElementTest
 
       RigidBody stationaryPointLink = measurementLink;
       FramePoint stationaryPoint = new FramePoint(measurementFrame, RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0));
+      AfterJointReferenceFrameNameMap referenceFrameMap = new AfterJointReferenceFrameNameMap(elevator);
+      RigidBodyToIndexMap rigidBodyToIndexMap = new RigidBodyToIndexMap(elevator);
       PointVelocityMeasurementModelElement modelElement = new PointVelocityMeasurementModelElement(name, pointVelocityMeasurementInputPort,
                                                              centerOfMassPositionPort, centerOfMassVelocityPort, orientationPort, angularVelocityPort,
                                                              estimationFrame, inverseDynamicsStructureInputPort,
-                                                             registry);
+                                                             referenceFrameMap, rigidBodyToIndexMap, registry);
 
       randomFloatingChain.setRandomPositionsAndVelocities(random);
       twistCalculator.compute();
