@@ -12,12 +12,10 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
-import java.util.Iterator;
 
 import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;
 
 import org.ros.address.InetAddressFactory;
 import org.ros.node.NodeConfiguration;
@@ -59,12 +57,12 @@ public class RosTools
       return ret;
    }
 
-   public static NodeConfiguration createNodeConfiguration(URI master)
+   public static InetAddress getMyIP(URI master)
    {
-      InetAddress listenAddress = null;
       try
       {
          InetAddress inetAddress = InetAddress.getByName(master.getHost());
+         InetAddress listenAddress;
          if (inetAddress.isLoopbackAddress())
          {
             listenAddress = InetAddressFactory.newLoopback();
@@ -103,6 +101,7 @@ public class RosTools
             //             }
 
          }
+         return listenAddress;
       }
       catch (UnknownHostException e)
       {
@@ -112,11 +111,30 @@ public class RosTools
       {
          throw new RuntimeException("Cannot connect to ROS\n" + e.getMessage());
       }
+      
+   }
+   
+   public static NodeConfiguration createNodeConfiguration(URI master)
+   {
+      InetAddress listenAddress = getMyIP(master);
+      
 
       NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(listenAddress.getHostAddress(), master);
       nodeConfiguration.setMasterUri(master);
 
       return nodeConfiguration;
+   }
+
+   public static InetAddress getMyIP(String rosMasterURI)
+   {
+      try
+      {
+         return getMyIP(new URI(rosMasterURI));
+      }
+      catch (URISyntaxException e)
+      {
+         throw new RuntimeException(e);
+      }
    }
 
 }
