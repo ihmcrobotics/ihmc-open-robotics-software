@@ -76,7 +76,7 @@ public class DRCNetworkProcessor
       robotPoseBuffer = new RobotPoseBuffer(fieldComputerClient, 1000);
       
       jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_SANDIA_HANDS, false);  
-      JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
+      JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap, true);
       fullRobotModel = loader.createFullRobotModel(jointMap);
    }
 
