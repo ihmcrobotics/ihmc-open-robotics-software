@@ -117,7 +117,10 @@ import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider
 
 public class WalkingHighLevelHumanoidController extends State<HighLevelState>
 {
+   public final static HighLevelState controllerState = HighLevelState.WALKING;
+   
    private final double PELVIS_YAW_INITIALIZATION_TIME = 1.5;
+   
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
@@ -154,7 +157,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
    private final BooleanYoVariable rememberFinalICPFromSingleSupport = new BooleanYoVariable("rememberFinalICPFromSingleSupport", registry);
    private final YoFramePoint2d finalDesiredICPInWorld = new YoFramePoint2d("finalDesiredICPInWorld", "", worldFrame, registry);
 
-   protected final SideDependentList<FootSwitchInterface> footSwitches;
+   private final SideDependentList<FootSwitchInterface> footSwitches;
 
    private final DoubleYoVariable minOrbitalEnergyForSingleSupport = new DoubleYoVariable("minOrbitalEnergyForSingleSupport", registry);
    private final DoubleYoVariable amountToBeInsideSingleSupport = new DoubleYoVariable("amountToBeInsideSingleSupport", registry);
@@ -224,57 +227,61 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
    private final EnumYoVariable<RobotSide> supportLeg;
    private final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
    private final BipedSupportPolygons bipedSupportPolygons;
-   protected final CommonWalkingReferenceFrames referenceFrames;
+   private final CommonWalkingReferenceFrames referenceFrames;
    private final YoFramePoint capturePoint;
    private final YoFramePoint2d desiredICP;
    private final YoFrameVector2d desiredICPVelocity;
    private final FullRobotModel fullRobotModel;
-   protected final double gravity;
+   private final double gravity;
+   private final double controlDT;
+   private final TwistCalculator twistCalculator;
    private final DoubleYoVariable desiredCoMHeightAcceleration;
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable controllerInitializationTime;
 
-   public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian,
-           SideDependentList<FootSwitchInterface> footSwitches, double gravityZ, DoubleYoVariable yoTime, double controlDT,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, FootstepProvider footstepProvider, DesiredHandPoseProvider handPoseProvider,
-           HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters, DesiredHeadOrientationProvider desiredHeadOrientationProvider,
-           CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators,
-           SideDependentList<DoubleTrajectoryGenerator> heelPitchTrajectoryGenerators, HeelPitchTouchdownProvidersManager heelPitchTouchdownProvidersManager,
-           SwingTimeCalculationProvider swingTimeCalculationProvider, YoPositionProvider finalPositionProvider,
-           TrajectoryParametersProvider trajectoryParametersProvider, boolean stayOntoes, double desiredPelvisPitch, double trailingFootPitch,
-           WalkingControllerParameters walkingControllerParameters, ICPBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
-           ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort, LidarControllerInterface lidarControllerInterface,
-           FinalDesiredICPCalculator finalDesiredICPCalculator, SideDependentList<HandControllerInterface> handControllers,
-           ICPAndMomentumBasedController icpAndMomentumBasedController, WalkingStatusReporter walkingStatusReporter)
+   public WalkingHighLevelHumanoidController(SideDependentList<FootSwitchInterface> footSwitches,
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, FootstepProvider footstepProvider, DesiredHandPoseProvider handPoseProvider,
+         HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters, DesiredHeadOrientationProvider desiredHeadOrientationProvider,
+         CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators,
+         SideDependentList<DoubleTrajectoryGenerator> heelPitchTrajectoryGenerators, HeelPitchTouchdownProvidersManager heelPitchTouchdownProvidersManager,
+         SwingTimeCalculationProvider swingTimeCalculationProvider, YoPositionProvider finalPositionProvider,
+         TrajectoryParametersProvider trajectoryParametersProvider, boolean stayOntoes, double desiredPelvisPitch, double trailingFootPitch,
+         WalkingControllerParameters walkingControllerParameters, ICPBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
+         ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationPort, LidarControllerInterface lidarControllerInterface,
+         FinalDesiredICPCalculator finalDesiredICPCalculator, SideDependentList<HandControllerInterface> handControllers,
+         ICPAndMomentumBasedController icpAndMomentumBasedController, WalkingStatusReporter walkingStatusReporter)
    {
-      super(HighLevelState.WALKING);
+      super(controllerState);
 
-      this.yoTime = yoTime;
-      coMHeightTimeDerivativesSmoother = new CoMHeightTimeDerivativesSmoother(controlDT, registry);
+      // Getting parameters from the icpAndMomentumBasedController
       this.icpAndMomentumBasedController = icpAndMomentumBasedController;
+      yoTime = icpAndMomentumBasedController.getYoTime();
+      gravity = icpAndMomentumBasedController.getGravityZ();
+      controlDT = icpAndMomentumBasedController.getControlDT();
       contactStates = icpAndMomentumBasedController.getContactStates();
       upcomingSupportLeg = icpAndMomentumBasedController.getUpcomingSupportLeg();
       supportLeg = icpAndMomentumBasedController.getYoSupportLeg();
-      this.bipedFeet = icpAndMomentumBasedController.getBipedFeet();
-      this.referenceFrames = icpAndMomentumBasedController.getReferenceFrames();
+      bipedFeet = icpAndMomentumBasedController.getBipedFeet();
+      referenceFrames = icpAndMomentumBasedController.getReferenceFrames();
       capturePoint = icpAndMomentumBasedController.getCapturePoint();
       desiredICP = icpAndMomentumBasedController.getDesiredICP();
       desiredICPVelocity = icpAndMomentumBasedController.getDesiredICPVelocity();
-      this.bipedSupportPolygons = icpAndMomentumBasedController.getBipedSupportPolygons();
-      this.fullRobotModel = fullRobotModel;
-      this.gravity = gravityZ;
+      bipedSupportPolygons = icpAndMomentumBasedController.getBipedSupportPolygons();
+      fullRobotModel = icpAndMomentumBasedController.getFullRobotModel();
       desiredCoMHeightAcceleration = icpAndMomentumBasedController.getDesiredCoMHeightAcceleration();
+      twistCalculator = icpAndMomentumBasedController.getTwistCalculator();
+      centerOfMassJacobian = icpAndMomentumBasedController.getCenterOfMassJacobian();
 
+      desiredPelvisOrientationTrajectoryInputPort = desiredPelvisOrientationPort;
+      coMHeightTimeDerivativesSmoother = new CoMHeightTimeDerivativesSmoother(controlDT, registry);
       this.finalDesiredICPCalculator = finalDesiredICPCalculator;
-      this.icpBasedMomentumRateOfChangeControlModule = momentumRateOfChangeControlModule;
-      this.desiredPelvisOrientationTrajectoryInputPort = desiredPelvisOrientationTrajectoryInputPort;
-      this.centerOfMassJacobian = centerOfMassJacobian;
       this.centerOfMassHeightTrajectoryGenerator = centerOfMassHeightTrajectoryGenerator;
       this.swingTimeCalculationProvider = swingTimeCalculationProvider;
       this.trajectoryParametersProvider = trajectoryParametersProvider;
       this.mapFromFootstepsToTrajectoryParameters = mapFromFootstepsToTrajectoryParameters;
       this.footSwitches = footSwitches;
       this.heelPitchTouchdownProvidersManager = heelPitchTouchdownProvidersManager;
+      this.icpBasedMomentumRateOfChangeControlModule = momentumRateOfChangeControlModule;
 
       this.upcomingFootstepList = new UpcomingFootstepList(footstepProvider);
 
@@ -385,7 +392,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
          manipulationStateMachines.put(robotSide,
                                        new IndividualHandControlStateMachine(yoTime, robotSide, fullRobotModel, twistCalculator,
                                              walkingControllerParameters, handPoseProvider,
-                                          dynamicGraphicObjectsListRegistry, handControllerInterface, gravityZ, controlDT, icpAndMomentumBasedController,
+                                          dynamicGraphicObjectsListRegistry, handControllerInterface, gravity, controlDT, icpAndMomentumBasedController,
                                           jacobian, walkingControllerParameters.getDefaultArmJointPositions(fullRobotModel, robotSide), registry));
       }
 

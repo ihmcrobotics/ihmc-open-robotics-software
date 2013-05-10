@@ -500,4 +500,33 @@ public class MomentumBasedController implements RobotController
       return pointPositionGrabber;
    }
 
+   public DoubleYoVariable getYoTime()
+   {
+      return yoTime;
+   }
+
+   public double getGravityZ()
+   {
+      return gravity;
+   }
+
+   public double getControlDT()
+   {
+      return controlDT;
+   }
+
+   public FullRobotModel getFullRobotModel()
+   {
+      return fullRobotModel;
+   }
+
+   public TwistCalculator getTwistCalculator()
+   {
+      return twistCalculator;
+   }
+
+   public CenterOfMassJacobian getCenterOfMassJacobian()
+   {
+      return centerOfMassJacobian;
+   }
 }

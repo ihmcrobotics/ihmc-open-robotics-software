@@ -18,6 +18,8 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceCons
 import us.ihmc.commonWalkingControlModules.trajectories.FixedOrientationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.FixedPositionTrajectoryGenerator;
 import us.ihmc.controlFlow.ControlFlowInputPort;
+import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -38,6 +40,8 @@ import com.yobotics.simulationconstructionset.util.statemachines.State;
 
 public class MultiContactTestHumanoidController extends State<HighLevelState>
 {
+   public final static HighLevelState controllerState = HighLevelState.MULTI_CONTACT;
+   
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    
@@ -57,22 +61,38 @@ public class MultiContactTestHumanoidController extends State<HighLevelState>
 
    private final ReferenceFrame pelvisFrame;
 
-   private final LinkedHashMap<ContactablePlaneBody, EndEffectorControlModule> endEffectorControlModules = new LinkedHashMap<ContactablePlaneBody, EndEffectorControlModule>();
+   private final LinkedHashMap<ContactablePlaneBody, EndEffectorControlModule> footEndEffectorControlModules = new LinkedHashMap<ContactablePlaneBody, EndEffectorControlModule>();
+   private final LinkedHashMap<ContactablePlaneBody, EndEffectorControlModule> handEndEffectorControlModules = new LinkedHashMap<ContactablePlaneBody, EndEffectorControlModule>();
+   
    private final LinkedHashMap<ContactablePlaneBody, GeometricJacobian> jacobians = new LinkedHashMap<ContactablePlaneBody, GeometricJacobian>();
    private final LinkedHashMap<ContactablePlaneBody, FixedPositionTrajectoryGenerator> swingPositionTrajectoryGenerators = new LinkedHashMap<ContactablePlaneBody, FixedPositionTrajectoryGenerator>();
    private final LinkedHashMap<ContactablePlaneBody, FixedOrientationTrajectoryGenerator> swingOrientationTrajectoryGenerators = new LinkedHashMap<ContactablePlaneBody, FixedOrientationTrajectoryGenerator>();
 
    private final MomentumBasedController momentumBasedController;
+   private final FullRobotModel fullRobotModel;
+   private final DoubleYoVariable yoTime;
+   private final TwistCalculator twistCalculator;
+   
+   private final SideDependentList<? extends ContactablePlaneBody> feet, hands;
 
-   public MultiContactTestHumanoidController(FullRobotModel fullRobotModel, DoubleYoVariable yoTime, TwistCalculator twistCalculator,
-         HashMap<ContactablePlaneBody, RigidBody> contactablePlaneBodiesAndBases, ControlFlowInputPort<FramePoint> desiredCoMPositionPort,
-         ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationPort, MomentumBasedController momentumBasedController)
+   public MultiContactTestHumanoidController(SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<? extends ContactablePlaneBody> hands,
+                                             HashMap<ContactablePlaneBody, RigidBody> contactablePlaneBodiesAndBases, ControlFlowInputPort<FramePoint> desiredCoMPositionPort,
+                                             ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationPort, MomentumBasedController momentumBasedController)
    {
-      super(HighLevelState.MULTI_CONTACT);
+      super(controllerState);
 
+      // Getting parameters from the momentumBasedController
       this.momentumBasedController = momentumBasedController;
+      fullRobotModel = momentumBasedController.getFullRobotModel();
+      yoTime = momentumBasedController.getYoTime();
+      twistCalculator = momentumBasedController.getTwistCalculator();
+      
+      
       this.desiredCoMPositionPort = desiredCoMPositionPort;
       this.desiredPelvisOrientationPort = desiredPelvisOrientationPort;
+      
+      this.hands = hands;
+      this.feet = feet;
       
       InverseDynamicsJoint[] joints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
       OneDoFJoint[] positionControlJointArray = new OneDoFJoint[ScrewTools.computeNumberOfJointsOfType(OneDoFJoint.class, joints)];
@@ -90,24 +110,45 @@ public class MultiContactTestHumanoidController extends State<HighLevelState>
 
       pelvisFrame = pelvis.getBodyFixedFrame();
 
-      for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodiesAndBases.keySet())
+      for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody base = contactablePlaneBodiesAndBases.get(contactablePlaneBody);
-         GeometricJacobian jacobian = new GeometricJacobian(base, contactablePlaneBody.getRigidBody(), contactablePlaneBody.getBodyFrame());
-         jacobians.put(contactablePlaneBody, jacobian);
+         // Creating foot trajectory generators and end-effector control modules:
+         ContactablePlaneBody foot = feet.get(robotSide);
+         GeometricJacobian jacobian = new GeometricJacobian(pelvis, foot.getRigidBody(), foot.getBodyFrame());
+         jacobians.put(feet.get(robotSide), jacobian);
 
-         String bodyName = contactablePlaneBody.getRigidBody().getName();
-         FixedPositionTrajectoryGenerator swingPositionTrajectoryGenerator = new FixedPositionTrajectoryGenerator(bodyName + "DesiredPosition", worldFrame,
-               registry);
-         swingPositionTrajectoryGenerators.put(contactablePlaneBody, swingPositionTrajectoryGenerator);
+         String bodyName = foot.getRigidBody().getName();
+         FixedPositionTrajectoryGenerator swingPositionTrajectoryGenerator =
+               new FixedPositionTrajectoryGenerator(bodyName + "DesiredPosition", worldFrame, registry);
+         swingPositionTrajectoryGenerators.put(foot, swingPositionTrajectoryGenerator);
 
-         FixedOrientationTrajectoryGenerator swingOrientationTrajectoryGenerator = new FixedOrientationTrajectoryGenerator(bodyName + "DesiredOrientation",
-               worldFrame, registry);
-         swingOrientationTrajectoryGenerators.put(contactablePlaneBody, swingOrientationTrajectoryGenerator);
+         FixedOrientationTrajectoryGenerator swingOrientationTrajectoryGenerator =
+               new FixedOrientationTrajectoryGenerator(bodyName + "DesiredOrientation", worldFrame, registry);
+         swingOrientationTrajectoryGenerators.put(foot, swingOrientationTrajectoryGenerator);
 
-         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(contactablePlaneBody, jacobian, swingPositionTrajectoryGenerator,
+         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(foot, jacobian, swingPositionTrajectoryGenerator,
                null, swingOrientationTrajectoryGenerator, null, yoTime, twistCalculator, registry);
-         endEffectorControlModules.put(contactablePlaneBody, endEffectorControlModule);
+         footEndEffectorControlModules.put(foot, endEffectorControlModule);
+
+         positionControlJoints.removeAll(Arrays.asList(jacobian.getJointsInOrder()));
+
+         // Creating hand trajectory generators and end-effector control modules:
+         ContactablePlaneBody hand = hands.get(robotSide);
+         jacobian = new GeometricJacobian(chest, hand.getRigidBody(), hand.getBodyFrame());
+         jacobians.put(hand, jacobian);
+
+         bodyName = hand.getRigidBody().getName();
+         swingPositionTrajectoryGenerator =
+               new FixedPositionTrajectoryGenerator(bodyName + "DesiredPosition", worldFrame, registry);
+         swingPositionTrajectoryGenerators.put(hand, swingPositionTrajectoryGenerator);
+
+         swingOrientationTrajectoryGenerator =
+               new FixedOrientationTrajectoryGenerator(bodyName + "DesiredOrientation", worldFrame, registry);
+         swingOrientationTrajectoryGenerators.put(hand, swingOrientationTrajectoryGenerator);
+
+         endEffectorControlModule = new EndEffectorControlModule(hand, jacobian, swingPositionTrajectoryGenerator,
+               null, swingOrientationTrajectoryGenerator, null, yoTime, twistCalculator, registry);
+         handEndEffectorControlModules.put(hand, endEffectorControlModule);
 
          positionControlJoints.removeAll(Arrays.asList(jacobian.getJointsInOrder()));
       }
@@ -130,9 +171,16 @@ public class MultiContactTestHumanoidController extends State<HighLevelState>
       currentPelvisOrientaton.changeFrame(desiredPelvisOrientation.getReferenceFrame());
       desiredPelvisOrientation.set(currentPelvisOrientaton);
 
-      for (ContactablePlaneBody contactablePlaneBody : momentumBasedController.getContactablePlaneBodies())
+      for (ContactablePlaneBody contactablePlaneBody : footEndEffectorControlModules.keySet())
       {
-         ReferenceFrame endEffectorFrame = endEffectorControlModules.get(contactablePlaneBody).getEndEffectorFrame();
+         ReferenceFrame endEffectorFrame = footEndEffectorControlModules.get(contactablePlaneBody).getEndEffectorFrame();
+         swingPositionTrajectoryGenerators.get(contactablePlaneBody).setPosition(new FramePoint(endEffectorFrame));
+         swingOrientationTrajectoryGenerators.get(contactablePlaneBody).setOrientation(new FrameOrientation(endEffectorFrame));
+      }
+      
+      for (ContactablePlaneBody contactablePlaneBody : handEndEffectorControlModules.keySet())
+      {
+         ReferenceFrame endEffectorFrame = handEndEffectorControlModules.get(contactablePlaneBody).getEndEffectorFrame();
          swingPositionTrajectoryGenerators.get(contactablePlaneBody).setPosition(new FramePoint(endEffectorFrame));
          swingOrientationTrajectoryGenerators.get(contactablePlaneBody).setOrientation(new FrameOrientation(endEffectorFrame));
       }
@@ -142,8 +190,9 @@ public class MultiContactTestHumanoidController extends State<HighLevelState>
    {
       momentumBasedController.doPrioritaryControl();
       
+      doLegControl();
+      doArmControl();
       doChestcontrol();
-      doEndEffectorControl();
       doCoMControl();
       doPelvisControl();
       doJointPositionControl();
@@ -157,11 +206,28 @@ public class MultiContactTestHumanoidController extends State<HighLevelState>
       momentumBasedController.setDesiredSpatialAcceleration(spineJacobian, chestOrientationControlModule.getTaskspaceConstraintData());
    }
 
-   private void doEndEffectorControl()
+   private void doLegControl()
    {
-      for (ContactablePlaneBody contactablePlaneBody : endEffectorControlModules.keySet())
+      for (ContactablePlaneBody contactablePlaneBody : footEndEffectorControlModules.keySet())
       {
-         EndEffectorControlModule endEffectorControlModule = endEffectorControlModules.get(contactablePlaneBody);
+         EndEffectorControlModule endEffectorControlModule = footEndEffectorControlModules.get(contactablePlaneBody);
+         List<FramePoint2d> contactPoints = momentumBasedController.getContactStates().get(contactablePlaneBody).getContactPoints2d();
+         ConstraintType constraintType = EndEffectorControlModule.getUnconstrainedForZeroAndFullyConstrainedForFourContactPoints(contactPoints.size());
+         endEffectorControlModule.setContactPoints(contactPoints, constraintType);
+         endEffectorControlModule.setCenterOfPressure(momentumBasedController.getCoP(contactablePlaneBody));
+         endEffectorControlModule.startComputation();
+         endEffectorControlModule.waitUntilComputationIsDone();
+         TaskspaceConstraintData taskspaceConstraintData = endEffectorControlModule.getTaskSpaceConstraintOutputPort().getData();
+         GeometricJacobian jacobian = endEffectorControlModule.getJacobian();
+         momentumBasedController.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
+      }
+   }
+   
+   private void doArmControl()
+   {
+      for (ContactablePlaneBody contactablePlaneBody : handEndEffectorControlModules.keySet())
+      {
+         EndEffectorControlModule endEffectorControlModule = handEndEffectorControlModules.get(contactablePlaneBody);
          List<FramePoint2d> contactPoints = momentumBasedController.getContactStates().get(contactablePlaneBody).getContactPoints2d();
          ConstraintType constraintType = EndEffectorControlModule.getUnconstrainedForZeroAndFullyConstrainedForFourContactPoints(contactPoints.size());
          endEffectorControlModule.setContactPoints(contactPoints, constraintType);

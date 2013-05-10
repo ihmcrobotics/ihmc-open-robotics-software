@@ -19,12 +19,14 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CoMBasedMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OldMomentumControlModule;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.OrientationTrajectoryData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAngularAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FingerForceSensors;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointGroundReactionWrenchDistributor;
+import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
@@ -42,7 +44,6 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
@@ -126,6 +127,9 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       rootJointAccelerationControlModule.setProportionalGains(100.0, 100.0, 100.0);
       rootJointAccelerationControlModule.setDerivativeGains(20.0, 20.0, 20.0);
 
+      ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort = 
+            rootJointAccelerationControlModule.getDesiredPelvisOrientationTrajectoryInputPort();
+      
       DampedLeastSquaresSolver jacobianSolver = new DampedLeastSquaresSolver(SpatialMotionVector.SIZE);
       jacobianSolver.setAlpha(5e-2);
 
@@ -140,9 +144,8 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
             null, momentumRateOfChangeControlModule, rootJointAccelerationControlModule, stateEstimationDataFromControllerSink,
             dynamicGraphicObjectsListRegistry);
 
-      MultiContactTestHumanoidController multiContactBehavior = new MultiContactTestHumanoidController(fullRobotModel, yoTime, twistCalculator,
-            contactablePlaneBodiesAndBases, momentumRateOfChangeControlModule.getDesiredCoMPositionInputPort(),
-            rootJointAccelerationControlModule.getDesiredPelvisOrientationTrajectoryInputPort(), momentumBasedController);
+      MultiContactTestHumanoidController multiContactBehavior = new MultiContactTestHumanoidController(feet, hands, contactablePlaneBodiesAndBases,
+            momentumRateOfChangeControlModule.getDesiredCoMPositionInputPort(), desiredPelvisOrientationTrajectoryInputPort, momentumBasedController);
 
       double coefficientOfFriction = 1.0;
 
