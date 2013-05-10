@@ -66,4 +66,16 @@ public class DesiredFootstepCalculatorFootstepProviderWrapper implements Footste
    {
       this.walk.set(walk);
    }
+
+   public int getNumberOfFootstepsToProvide()
+   {
+      if (walk.getBooleanValue())
+      {
+         return Integer.MAX_VALUE;
+      }
+      else
+      {
+         return 0;
+      }
+   }
 }

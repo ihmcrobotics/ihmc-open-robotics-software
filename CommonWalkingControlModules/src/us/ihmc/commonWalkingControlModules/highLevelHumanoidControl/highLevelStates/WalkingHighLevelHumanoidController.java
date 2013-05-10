@@ -1248,7 +1248,14 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
       transferToAndNextFootstepsData.setNextNextFootstep(upcomingFootstepList.getNextNextNextFootstep());
       transferToAndNextFootstepsData.setEstimatedStepTime(swingTimeCalculationProvider.getValue() + transferTimeProvider.getValue());
       transferToAndNextFootstepsData.setW0(icpAndMomentumBasedController.getOmega0());
-
+      transferToAndNextFootstepsData.setDoubleSupportDuration(transferTimeProvider.getValue());
+      transferToAndNextFootstepsData.setSingleSupportDuration(swingTimeCalculationProvider.getValue());
+      double doubleSupportInitialTransferDuration = 0.4; //TODO: Magic Number
+      transferToAndNextFootstepsData.setDoubleSupportInitialTransferDuration(doubleSupportInitialTransferDuration );
+      boolean stopIfReachedEnd = (upcomingFootstepList.getNumberOfFootstepsToProvide() <= 3); //TODO: Magic Number
+      transferToAndNextFootstepsData.setStopIfReachedEnd(stopIfReachedEnd);
+      
+      
       finalDesiredICPCalculator.initialize(transferToAndNextFootstepsData);
       FramePoint2d finalDesiredICP = finalDesiredICPCalculator.getFinalDesiredICP();
       finalDesiredICP.changeFrame(referenceFrame);

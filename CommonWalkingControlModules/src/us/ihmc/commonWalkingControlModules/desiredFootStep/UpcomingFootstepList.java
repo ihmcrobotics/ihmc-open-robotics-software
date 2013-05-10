@@ -149,6 +149,11 @@ public class UpcomingFootstepList
    {
       return footstepProvider.isEmpty();
    }
+   
+   public int getNumberOfFootstepsToProvide()
+   {
+      return footstepProvider.getNumberOfFootstepsToProvide();
+   }
 
    public boolean doesNextFootstepListHaveFewerThanTwoElements()
    {

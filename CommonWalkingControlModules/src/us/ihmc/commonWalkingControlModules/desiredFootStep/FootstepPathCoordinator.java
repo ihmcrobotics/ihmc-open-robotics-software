@@ -158,4 +158,9 @@ public class FootstepPathCoordinator implements FootstepProvider
    public void close()
    {
    }
+
+   public int getNumberOfFootstepsToProvide()
+   {
+      return footstepQueue.size();
+   }
 }
