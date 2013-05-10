@@ -1,6 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -12,16 +11,25 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 
 public class DRCRobotSDFLoader
 {
+   
    public static JaxbSDFLoader loadDRCRobot(DRCRobotJointMap jointMap)
+   {
+      return loadDRCRobot(jointMap ,false);
+   }
+   
+   public static JaxbSDFLoader loadDRCRobot(DRCRobotJointMap jointMap, boolean headless)
    {
       InputStream fileInputStream;
       ArrayList<String> resourceDirectories = new ArrayList<String>();
       Class<DRCRobotSDFLoader> myClass = DRCRobotSDFLoader.class;
       DRCRobotModel selectedModel = jointMap.getSelectedModel();
       
-      resourceDirectories.add(myClass.getResource("models/GFE/gazebo").getFile());
-      resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/atlas_description").getFile());
-      resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/multisense_sl_description").getFile());
+      if(!headless)
+      {
+         resourceDirectories.add(myClass.getResource("models/GFE/gazebo").getFile());
+         resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/atlas_description").getFile());
+         resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/multisense_sl_description").getFile());
+      }
       
       switch (selectedModel)
       {
@@ -33,7 +41,10 @@ public class DRCRobotSDFLoader
 
          case ATLAS_IROBOT_HANDS :
             fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_irobot_hands.sdf");
-            resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/irobot_hand_description").getFile());
+            if(!headless)
+            {
+               resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/irobot_hand_description").getFile());
+            }
             break;
 
          case ATLAS_SANDIA_HANDS :
