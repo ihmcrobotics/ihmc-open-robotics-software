@@ -13,7 +13,8 @@ import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.states.IndividualHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.states.JointSpaceHandControlControlState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.states.TaskspaceObjectManipulationState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.states.ObjectManipulationState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.states.TaskspaceHandControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SE3ConfigurationProvider;
@@ -94,10 +95,10 @@ public class IndividualHandControlStateMachine
                                                                                       trajectoryTimeProvider, currentConfigurationProvider,
                                                                                       desiredConfigurationProvider, registry);
 
-      final TaskspaceObjectManipulationState moveRelativeToWorldState = new TaskspaceObjectManipulationState(this.robotSide, positionTrajectoryGenerator,
-                                                                           orientationTrajectoryGenerator, handSpatialAccelerationControlModule,
-                                                                           momentumBasedController, jacobian, handController, fullRobotModel, gravity,
-                                                                           controlDT, dynamicGraphicObjectsListRegistry, registry);
+      final TaskspaceHandControlState moveRelativeToWorldState = new ObjectManipulationState(robotSide, positionTrajectoryGenerator,
+                                                                    orientationTrajectoryGenerator, handSpatialAccelerationControlModule,
+                                                                    momentumBasedController, jacobian, handController, fullRobotModel, gravity, controlDT,
+                                                                    dynamicGraphicObjectsListRegistry, parentRegistry);
 
       StateTransitionCondition toNextWorldPosition = new StateTransitionCondition()
       {
