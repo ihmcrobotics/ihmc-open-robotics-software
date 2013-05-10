@@ -16,7 +16,7 @@ public abstract class TaskspaceHandControlState extends State<IndividualHandCont
    protected final GeometricJacobian jacobian;
 
    private final TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
-   private final MomentumBasedController momentumBasedController;
+   protected final MomentumBasedController momentumBasedController;
 
 
    public TaskspaceHandControlState(MomentumBasedController momentumBasedController, GeometricJacobian jacobian,
