@@ -772,10 +772,14 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
       @Override
       public void doTransitionIntoAction()
       {
-         if(walkingStatusReporter.isPelvisOrientationOutOfBounds())
-            walkingStatusReporter.notifyConsumerOfWalkingStatus(WalkingStatus.UNSTABLE);
-         else           
-            walkingStatusReporter.notifyConsumerOfWalkingStatus(WalkingStatus.STABLE);
+         if(walkingStatusReporter != null)
+         {
+            if(walkingStatusReporter.isPelvisOrientationOutOfBounds())
+               walkingStatusReporter.notifyConsumerOfWalkingStatus(WalkingStatus.UNSTABLE);
+            else           
+               walkingStatusReporter.notifyConsumerOfWalkingStatus(WalkingStatus.STABLE);            
+         }
+         
          icpTrajectoryHasBeenInitialized.set(false);
          if (DEBUG)
             System.out.println("WalkingHighLevelHumanoidController: enteringDoubleSupportState");
