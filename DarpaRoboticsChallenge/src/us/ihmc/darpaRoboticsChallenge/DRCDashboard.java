@@ -49,15 +49,15 @@ public class DRCDashboard
    private JPanel mainContentPanel;
 
    private JPanel leftPanel;
-   private JPanel cloudMachineSelectionPanel;
-   private JLabel cloudMachineSelectionLabel;
-   private JComboBox cloudMachineSelectionCombo;
+   private JPanel gazeboMachineSelectionPanel;
+   private JLabel gazeboMachineSelectionLabel;
+   private JComboBox gazeboMachineSelectionCombo;
    private JPanel cloudMachineInfoPanel;
    private JLabel cloudMachineIPAddressLabel;
    private JLabel cloudMachineHostnameLabel;
-   private JPanel robotModelSelectionPanel;
-   private JLabel robotModelSelectionLabel;
-   private JComboBox robotModelSelectionCombo;
+   private JPanel controllerMachineSelectionPanel;
+   private JLabel controllerMachineSelectionLabel;
+   private JComboBox controllerMachineSelectionCombo;
 
    private JPanel rightPanel;
    private JLabel gazeboProcessListLabel;
@@ -215,14 +215,14 @@ public class DRCDashboard
 
    private void setupLeftContentPanel()
    {
-      setupSelectRobotModel();
+      setupSelectControllerMachine();
 
-      setupSelectCloudMachine();
+      setupSelectGazeboMachine();
 
       setupCloudMachineInfoPanel();
    }
 
-   private void setupSelectRobotModel()
+   private void setupSelectControllerMachine()
    {
       c.gridx = 0;
       c.gridy = 0;
@@ -230,25 +230,25 @@ public class DRCDashboard
       c.gridheight = 2;
       c.weighty = 0.0;
 
-      robotModelSelectionPanel = new JPanel(new GridLayout(2, 1));
-      leftPanel.add(robotModelSelectionPanel, c);
-      robotModelSelectionLabel = new JLabel("Select Robot Model: ", JLabel.LEFT);
-      robotModelSelectionCombo = new JComboBox(DRCDashboardTypes.RobotModel.values());
-      robotModelSelectionPanel.add(robotModelSelectionLabel);
-      robotModelSelectionPanel.add(robotModelSelectionCombo);
+      controllerMachineSelectionPanel = new JPanel(new GridLayout(2, 1));
+      leftPanel.add(controllerMachineSelectionPanel, c);
+      controllerMachineSelectionLabel = new JLabel("Select Controller Machine: ", JLabel.LEFT);
+      controllerMachineSelectionCombo = new JComboBox(LocalCloudMachines.values());
+      controllerMachineSelectionPanel.add(controllerMachineSelectionLabel);
+      controllerMachineSelectionPanel.add(controllerMachineSelectionCombo);
    }
 
-   private void setupSelectCloudMachine()
+   private void setupSelectGazeboMachine()
    {
       c.gridy = 2;
-      cloudMachineSelectionPanel = new JPanel(new GridLayout(2, 1));
-      leftPanel.add(cloudMachineSelectionPanel, c);
-      cloudMachineSelectionLabel = new JLabel("Select Cloud Machine: ", JLabel.LEFT);
-      cloudMachineSelectionPanel.add(cloudMachineSelectionLabel);
-      cloudMachineSelectionCombo = new JComboBox(LocalCloudMachines.values());
-      cloudMachineSelectionPanel.add(cloudMachineSelectionCombo);
+      gazeboMachineSelectionPanel = new JPanel(new GridLayout(2, 1));
+      leftPanel.add(gazeboMachineSelectionPanel, c);
+      gazeboMachineSelectionLabel = new JLabel("Select Gazebo Machine: ", JLabel.LEFT);
+      gazeboMachineSelectionPanel.add(gazeboMachineSelectionLabel);
+      gazeboMachineSelectionCombo = new JComboBox(LocalCloudMachines.values());
+      gazeboMachineSelectionPanel.add(gazeboMachineSelectionCombo);
 
-      cloudMachineSelectionCombo.addActionListener(new ActionListener()
+      gazeboMachineSelectionCombo.addActionListener(new ActionListener()
       {
          public void actionPerformed(ActionEvent e)
          {
@@ -404,14 +404,14 @@ public class DRCDashboard
       c.gridx = 0;
       c.gridwidth = 1;
       c.anchor = GridBagConstraints.LAST_LINE_START;
-      launchGazeboSimButton = new JButton("Launch Gazebo Sim");
+      launchGazeboSimButton = new JButton("Launch Gazebo");
       networkInfoPanel.add(launchGazeboSimButton, c);
 
       launchGazeboSimButton.addActionListener(new ActionListener()
       {
          public void actionPerformed(ActionEvent e)
          {
-            sshSimLauncher.launchSim((DRCDashboardTypes.DRCTask) taskCombo.getSelectedItem(), (LocalCloudMachines) cloudMachineSelectionCombo.getSelectedItem());
+            sshSimLauncher.launchSim((DRCDashboardTypes.DRCTask) taskCombo.getSelectedItem(), (LocalCloudMachines) gazeboMachineSelectionCombo.getSelectedItem());
          }
       });
    }
@@ -422,14 +422,14 @@ public class DRCDashboard
       c.gridx = 3;
       c.gridwidth = 1;
       c.anchor = GridBagConstraints.LAST_LINE_END;
-      killSimButton = new JButton("Kill Gazebo Sim");
+      killSimButton = new JButton("Kill Gazebo");
       networkInfoPanel.add(killSimButton, c);
 
       killSimButton.addActionListener(new ActionListener()
       {
          public void actionPerformed(ActionEvent e)
          {
-            sshSimLauncher.killSim((LocalCloudMachines) cloudMachineSelectionCombo.getSelectedItem());
+            sshSimLauncher.killSim((LocalCloudMachines) gazeboMachineSelectionCombo.getSelectedItem());
          }
       });
    }
@@ -454,18 +454,18 @@ public class DRCDashboard
    private String updatedCloudHostnameString()
    {
       return "<html><body style=\"padding-left:8px;\"><br>Cloud Machine Hostname: <br><br><div style=\"padding-left:15px;font-size:1.1em;color:blue;font-weight:bold;\">"
-            + DRCLocalCloudConfig.getHostName((LocalCloudMachines) cloudMachineSelectionCombo.getSelectedItem()) + "</div></body></html>";
+            + DRCLocalCloudConfig.getHostName((LocalCloudMachines) gazeboMachineSelectionCombo.getSelectedItem()) + "</div></body></html>";
    }
 
    private String updatedCloudIpAddressString()
    {
       return "<html><body style=\"padding-left:8px;\"><br>Cloud Machine IP Address: <br><br><div style=\"padding-left:15px;font-size:1.1em;color:blue;font-weight:bold\">"
-            + DRCLocalCloudConfig.getIPAddress((LocalCloudMachines) cloudMachineSelectionCombo.getSelectedItem()) + "</div></body></html>";
+            + DRCLocalCloudConfig.getIPAddress((LocalCloudMachines) gazeboMachineSelectionCombo.getSelectedItem()) + "</div></body></html>";
    }
 
    private void updateRosMasterURI()
    {
-      ROS_MASTER_URI = "http://" + DRCLocalCloudConfig.getIPAddress((LocalCloudMachines) cloudMachineSelectionCombo.getSelectedItem());
+      ROS_MASTER_URI = "http://" + DRCLocalCloudConfig.getIPAddress((LocalCloudMachines) gazeboMachineSelectionCombo.getSelectedItem());
       if (rosCorePortField != null)
          ROS_MASTER_URI += ":" + rosCorePortField.getText();
       else
