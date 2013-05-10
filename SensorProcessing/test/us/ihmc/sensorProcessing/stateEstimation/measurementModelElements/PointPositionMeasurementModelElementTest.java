@@ -26,6 +26,7 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTestTools.RandomFloatingChain;
+import us.ihmc.utilities.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
@@ -50,7 +51,7 @@ public class PointPositionMeasurementModelElementTest
       RigidBody estimationLink = randomFloatingChain.getRootJoint().getSuccessor();
       ReferenceFrame estimationFrame = randomFloatingChain.getRootJoint().getFrameAfterJoint();
       RigidBody measurementLink = randomFloatingChain.getRevoluteJoints().get(jointAxes.length - 1).getSuccessor();
-      ReferenceFrame measurementFrame = measurementLink.getBodyFixedFrame();
+      ReferenceFrame measurementFrame = measurementLink.getParentJoint().getFrameAfterJoint();
 
       ControlFlowElement controlFlowElement = new NullControlFlowElement();
 
@@ -65,6 +66,7 @@ public class PointPositionMeasurementModelElementTest
       String name = "test";
       YoVariableRegistry registry = new YoVariableRegistry(name);
 
+      AfterJointReferenceFrameNameMap referenceFrameMap = new AfterJointReferenceFrameNameMap(elevator);
       ControlFlowInputPort<PointPositionDataObject> pointPositionMeasurementInputPort = new ControlFlowInputPort<PointPositionDataObject>(controlFlowElement);
 
       ControlFlowOutputPort<FramePoint> centerOfMassPositionPort = new ControlFlowOutputPort<FramePoint>("centerOfMassPositionPort", controlFlowElement);
@@ -77,8 +79,7 @@ public class PointPositionMeasurementModelElementTest
 
       FramePoint stationaryPoint = new FramePoint(measurementFrame, RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0));
       PointPositionMeasurementModelElement modelElement = new PointPositionMeasurementModelElement(name, pointPositionMeasurementInputPort,
-                                                             centerOfMassPositionPort, orientationPort, estimationFrame,
-            registry);
+            centerOfMassPositionPort, orientationPort, estimationFrame, referenceFrameMap, registry);
 
       randomFloatingChain.setRandomPositionsAndVelocities(random);
       twistCalculator.compute();

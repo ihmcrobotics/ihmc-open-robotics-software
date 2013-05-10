@@ -23,6 +23,7 @@ import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.OrientationS
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.SensorConfigurationFactory;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.utilities.screwTheory.RigidBody;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -37,10 +38,10 @@ public class SensorAndEstimatorAssembler
    private final JointAndIMUSensorDataSource jointSensorDataSource;
    
   
-   public SensorAndEstimatorAssembler(StateEstimationDataFromControllerSource stateEstimatorDataFromControllerSource, StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions,
-         SensorNoiseParameters sensorNoiseParametersForEstimator, Vector3d gravitationalAcceleration, 
-         FullInverseDynamicsStructure inverseDynamicsStructure, double controlDT,
-         YoVariableRegistry parentRegistry)
+   public SensorAndEstimatorAssembler(StateEstimationDataFromControllerSource stateEstimatorDataFromControllerSource,
+         StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorNoiseParameters sensorNoiseParametersForEstimator,
+         Vector3d gravitationalAcceleration, FullInverseDynamicsStructure inverseDynamicsStructure, AfterJointReferenceFrameNameMap estimatorReferenceFrameMap,
+         RigidBodyToIndexMap estimatorRigidBodyToIndexMap, double controlDT, YoVariableRegistry parentRegistry)
    {
       SensorConfigurationFactory SensorConfigurationFactory = new SensorConfigurationFactory(sensorNoiseParametersForEstimator, gravitationalAcceleration);
 
@@ -85,7 +86,7 @@ public class SensorAndEstimatorAssembler
       inverseDynamicsStructure.updateInternalState();
 
       estimator = orientationEstimatorCreator.createOrientationEstimator(controlFlowGraph, controlDT,
-            estimationFrame, registry);
+            estimationFrame, estimatorReferenceFrameMap, estimatorRigidBodyToIndexMap, registry);
 
       stateEstimatorDataFromControllerSource.connectDesiredAccelerationPorts(controlFlowGraph, estimator);
 

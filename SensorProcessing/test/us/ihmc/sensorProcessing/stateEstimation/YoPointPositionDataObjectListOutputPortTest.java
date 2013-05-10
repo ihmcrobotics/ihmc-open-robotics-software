@@ -8,6 +8,7 @@ import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositio
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.AfterJointReferenceFrameNameMap;
 
 import javax.media.j3d.Transform3D;
 import java.util.*;
@@ -27,7 +28,6 @@ public class YoPointPositionDataObjectListOutputPortTest
       Random random  = new Random(1235561L);
       ControlFlowElement controlFlowElement = new NullControlFlowElement();
       YoVariableRegistry registry = new YoVariableRegistry("test");
-      YoPointPositionDataObjectListOutputPort outputPort = new YoPointPositionDataObjectListOutputPort(controlFlowElement, "test", registry);
 
       List<ReferenceFrame> frames = new ArrayList<ReferenceFrame>();
       int nFrames = 10;
@@ -39,7 +39,8 @@ public class YoPointPositionDataObjectListOutputPortTest
          frames.add(frame);
       }
 
-
+      AfterJointReferenceFrameNameMap referenceFrameMap = new AfterJointReferenceFrameNameMap(frames);
+      YoPointPositionDataObjectListOutputPort outputPort = new YoPointPositionDataObjectListOutputPort(controlFlowElement, "test", referenceFrameMap, registry);
       int nTests = 100000;
       int nDataMax = 10;
 

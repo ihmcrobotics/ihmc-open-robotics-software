@@ -1,67 +1,64 @@
 package us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration;
 
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 
 public class PointVelocityDataObject
 {
-   protected RigidBody rigidBody;
-   protected final FramePoint measurementPointInBodyFrame = new FramePoint();
-//   protected final FramePoint positionOfMeasurementPointInWorldFrame = new FramePoint(ReferenceFrame.getWorldFrame());
-   protected final FrameVector velocityOfMeasurementPointInWorldFrame = new FrameVector(ReferenceFrame.getWorldFrame());
+   protected String rigidBodyName;
+   protected String bodyFixedReferenceFrameName;
+   protected final Point3d measurementPointInBodyFrame = new Point3d();
+   protected final Vector3d velocityOfMeasurementPointInWorldFrame = new Vector3d();
 
-   public void set(RigidBody rigidBody, FramePoint measurementPointInBodyFrame, 
-//         FramePoint positionOfMeasurementPointInWorldFrame, 
-         FrameVector velocityOfMeasurementPointInWorldFrame)
+   public void set(RigidBody rigidBody, FramePoint measurementPointInBodyFrame, FrameVector velocityOfMeasurementPointInWorldFrame)
    {
-      this.rigidBody = rigidBody;
-      this.measurementPointInBodyFrame.setAndChangeFrame(measurementPointInBodyFrame);
-//      this.positionOfMeasurementPointInWorldFrame.set(positionOfMeasurementPointInWorldFrame);
-      this.velocityOfMeasurementPointInWorldFrame.set(velocityOfMeasurementPointInWorldFrame);
+      this.rigidBodyName = rigidBody.getName();
+      this.bodyFixedReferenceFrameName = measurementPointInBodyFrame.getReferenceFrame().getName();
+      measurementPointInBodyFrame.getPoint(this.measurementPointInBodyFrame);
+      velocityOfMeasurementPointInWorldFrame.getVector(this.velocityOfMeasurementPointInWorldFrame);
    }
 
-   public RigidBody getRigidBody()
+   public String getRigidBodyName()
    {
-      return rigidBody;
+      return rigidBodyName;
    }
-   
-//   public FramePoint getMeasurementPointInWorldFrame()
-//   {
-//      return positionOfMeasurementPointInWorldFrame;
-//   }
-   
-   public FrameVector getVelocityOfMeasurementPointInWorldFrame()
+
+   public Vector3d getVelocityOfMeasurementPointInWorldFrame()
    {
       return velocityOfMeasurementPointInWorldFrame;
    }
 
-   public FramePoint getMeasurementPointInBodyFrame()
+   public Point3d getMeasurementPointInBodyFrame()
    {
       return measurementPointInBodyFrame;
    }
 
    public void set(PointVelocityDataObject other)
    {
-      set(other.getRigidBody(), other.getMeasurementPointInBodyFrame(), 
-//            other.getMeasurementPointInWorldFrame(), 
-            other.getVelocityOfMeasurementPointInWorldFrame());
+      this.rigidBodyName = other.rigidBodyName;
+      this.bodyFixedReferenceFrameName = other.bodyFixedReferenceFrameName;
+      this.measurementPointInBodyFrame.set(other.measurementPointInBodyFrame);
+      this.velocityOfMeasurementPointInWorldFrame.set(other.velocityOfMeasurementPointInWorldFrame);
    }
 
    public boolean epsilonEquals(PointVelocityDataObject other, double epsilon)
    {
-      if (getMeasurementPointInBodyFrame().getReferenceFrame() != other.getMeasurementPointInBodyFrame().getReferenceFrame())
+      if (this.bodyFixedReferenceFrameName != other.bodyFixedReferenceFrameName)
          return false;
 
-      boolean rigidBodyEqual = getRigidBody().getName().equals(other.getRigidBody().getName());
+      boolean rigidBodyEqual = other.rigidBodyName == this.rigidBodyName;
       boolean bodyPointsEqual = getMeasurementPointInBodyFrame().epsilonEquals(other.getMeasurementPointInBodyFrame(), epsilon);
-//      boolean worldPointsEqual = getMeasurementPointInWorldFrame().epsilonEquals(other.getMeasurementPointInWorldFrame(), epsilon);
       boolean worldVelocitiesEqual = getVelocityOfMeasurementPointInWorldFrame().epsilonEquals(other.getVelocityOfMeasurementPointInWorldFrame(), epsilon);
-      return rigidBodyEqual && bodyPointsEqual 
-            //&& worldPointsEqual 
-            && worldVelocitiesEqual;
+      return rigidBodyEqual && bodyPointsEqual && worldVelocitiesEqual;
    }
 
+   public String getBodyFixedReferenceFrameName()
+   {
+      return bodyFixedReferenceFrameName;
+   }
 
 }

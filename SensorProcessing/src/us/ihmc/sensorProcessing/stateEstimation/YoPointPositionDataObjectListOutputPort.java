@@ -1,15 +1,21 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import org.apache.commons.lang.mutable.MutableBoolean;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.YoPointPositionDataObject;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.AfterJointReferenceFrameNameMap;
 
-import java.util.*;
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 /**
  * @author twan
@@ -21,13 +27,15 @@ public class YoPointPositionDataObjectListOutputPort extends ControlFlowOutputPo
    private final List<YoPointPositionDataObject> yoPointPositionDataObjects = new ArrayList<YoPointPositionDataObject>();
    private final Map<YoPointPositionDataObject, BooleanYoVariable> validMap = new LinkedHashMap<YoPointPositionDataObject, BooleanYoVariable>();
    private final String namePrefix;
+   private final AfterJointReferenceFrameNameMap referenceFrameMap;  
 
-   public YoPointPositionDataObjectListOutputPort(ControlFlowElement controlFlowElement, String namePrefix, YoVariableRegistry registry)
+   public YoPointPositionDataObjectListOutputPort(ControlFlowElement controlFlowElement, String namePrefix, AfterJointReferenceFrameNameMap referenceFrameMap, YoVariableRegistry registry)
    {
       super(namePrefix, controlFlowElement);
       super.setData(new LinkedHashSet<PointPositionDataObject>());
       this.namePrefix = namePrefix;
       this.registry = registry;
+      this.referenceFrameMap = referenceFrameMap;
    }
 
    public Set<PointPositionDataObject> getData()
@@ -53,13 +61,13 @@ public class YoPointPositionDataObjectListOutputPort extends ControlFlowOutputPo
 
       for (PointPositionDataObject pointPositionDataObject : data)
       {
-         ReferenceFrame referenceFrame = pointPositionDataObject.getMeasurementPointInBodyFrame().getReferenceFrame();
+         String referenceFrameName = pointPositionDataObject.getBodyFixedReferenceFrameName();
 
          YoPointPositionDataObject yoPointPositionDataObjectToUse = null;
 
          for (YoPointPositionDataObject yoPointPositionDataObject : yoPointPositionDataObjects)
          {
-            boolean frameOK = yoPointPositionDataObject.getMeasurementPointInBodyFrame().getReferenceFrame() == referenceFrame;
+            boolean frameOK = yoPointPositionDataObject.getBodyFixedReferenceFrameName() == referenceFrameName;
             boolean isAvailable = !validMap.get(yoPointPositionDataObject).getBooleanValue();
             if (frameOK && isAvailable)
             {
@@ -72,7 +80,8 @@ public class YoPointPositionDataObjectListOutputPort extends ControlFlowOutputPo
          if (yoPointPositionDataObjectToUse == null)
          {
             int index = yoPointPositionDataObjects.size();
-            yoPointPositionDataObjectToUse = new YoPointPositionDataObject(namePrefix + index, referenceFrame, registry);
+            ReferenceFrame frame = referenceFrameMap.getFrameByName(referenceFrameName);
+            yoPointPositionDataObjectToUse = new YoPointPositionDataObject(namePrefix + index, frame, registry);
             yoPointPositionDataObjects.add(yoPointPositionDataObjectToUse);
             validMap.put(yoPointPositionDataObjectToUse, new BooleanYoVariable(namePrefix + "Valid" + index, registry));
          }

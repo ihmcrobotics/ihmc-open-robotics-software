@@ -9,6 +9,7 @@ import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositio
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.AfterJointReferenceFrameNameMap;
 
 import java.util.*;
 
@@ -24,6 +25,7 @@ public class AggregatePointPositionMeasurementModelElement implements Measuremen
    private final ControlFlowOutputPort<FramePoint> centerOfMassPositionPort;
    private final ControlFlowOutputPort<FrameOrientation> orientationPort;
    private final ReferenceFrame estimationFrame;
+   private final AfterJointReferenceFrameNameMap referenceFrameMap;
    private final Set<ControlFlowOutputPort<?>> statePorts = new LinkedHashSet<ControlFlowOutputPort<?>>();
 
    private final Map<ControlFlowOutputPort<?>, DenseMatrix64F> outputMatrixBlocks = new LinkedHashMap<ControlFlowOutputPort<?>, DenseMatrix64F>();
@@ -35,12 +37,14 @@ public class AggregatePointPositionMeasurementModelElement implements Measuremen
 
 
    public AggregatePointPositionMeasurementModelElement(ControlFlowInputPort<Set<PointPositionDataObject>> inputPort,
-           ControlFlowOutputPort<FramePoint> centerOfMassPositionPort, ControlFlowOutputPort<FrameOrientation> orientationPort, ReferenceFrame estimationFrame)
+         ControlFlowOutputPort<FramePoint> centerOfMassPositionPort, ControlFlowOutputPort<FrameOrientation> orientationPort, ReferenceFrame estimationFrame,
+         AfterJointReferenceFrameNameMap referenceFrameMap)
    {
       this.inputPort = inputPort;
       this.centerOfMassPositionPort = centerOfMassPositionPort;
       this.orientationPort = orientationPort;
       this.estimationFrame = estimationFrame;
+      this.referenceFrameMap = referenceFrameMap;
 
       statePorts.add(centerOfMassPositionPort);
       statePorts.add(orientationPort);
@@ -61,7 +65,7 @@ public class AggregatePointPositionMeasurementModelElement implements Measuremen
          String name = "pointPosition" + i;
          ControlFlowInputPort<PointPositionDataObject> pointPositionMeasurementInputPort = new ControlFlowInputPort<PointPositionDataObject>("pointPositionMeasurementInputPort", null);
          PointPositionMeasurementModelElement element = new PointPositionMeasurementModelElement(name, pointPositionMeasurementInputPort,
-                                                           centerOfMassPositionPort, orientationPort, estimationFrame, registry);
+                                                           centerOfMassPositionPort, orientationPort, estimationFrame, referenceFrameMap, registry);
          element.setNoiseCovariance(singlePointCovariance);
          elementPool.add(element);
       }

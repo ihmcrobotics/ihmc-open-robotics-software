@@ -14,6 +14,7 @@ import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.AfterJointReferenceFrameNameMap;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
@@ -36,11 +37,11 @@ public class PointPositionMeasurementModelElement extends AbstractMeasurementMod
    private final FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
    private final Vector3d residualVector = new Vector3d();
 
+   private final AfterJointReferenceFrameNameMap referenceFrameMap;
 
    public PointPositionMeasurementModelElement(String name, ControlFlowInputPort<PointPositionDataObject> pointPositionMeasurementInputPort,
-                                               ControlFlowOutputPort<FramePoint> centerOfMassPositionPort,
-                                               ControlFlowOutputPort<FrameOrientation> orientationPort, ReferenceFrame estimationFrame,
-                                               YoVariableRegistry registry)
+         ControlFlowOutputPort<FramePoint> centerOfMassPositionPort, ControlFlowOutputPort<FrameOrientation> orientationPort, ReferenceFrame estimationFrame,
+         AfterJointReferenceFrameNameMap referenceFrameMap, YoVariableRegistry registry)
    {
       super(SIZE, name, registry);
 
@@ -50,6 +51,7 @@ public class PointPositionMeasurementModelElement extends AbstractMeasurementMod
       this.pointPositionMeasurementInputPort = pointPositionMeasurementInputPort;
 
       this.estimationFrame = estimationFrame;
+      this.referenceFrameMap = referenceFrameMap;
 
       outputMatrixBlocks.put(centerOfMassPositionPort, new DenseMatrix64F(SIZE, SIZE));
       outputMatrixBlocks.put(orientationPort, new DenseMatrix64F(SIZE, SIZE));
@@ -76,7 +78,9 @@ public class PointPositionMeasurementModelElement extends AbstractMeasurementMod
       FramePoint centerOfMassPosition = new FramePoint(centerOfMassPositionPort.getData());
       centerOfMassPosition.changeFrame(estimationFrame);
 
-      tempFramePoint.setAndChangeFrame(pointPositionMeasurementInputPort.getData().getMeasurementPointInBodyFrame());
+      ReferenceFrame referenceFrame = referenceFrameMap.getFrameByName(pointPositionMeasurementInputPort.getData().getBodyFixedReferenceFrameName());
+      tempFramePoint.setAndChangeFrame(referenceFrame, pointPositionMeasurementInputPort.getData().getMeasurementPointInBodyFrame());
+
       tempFramePoint.changeFrame(estimationFrame);
       tempFramePoint.sub(centerOfMassPosition);
       tempFramePoint.scale(-1.0);
@@ -89,11 +93,11 @@ public class PointPositionMeasurementModelElement extends AbstractMeasurementMod
    public DenseMatrix64F computeResidual()
    {
       PointPositionDataObject data = pointPositionMeasurementInputPort.getData();
-      tempFramePoint.setAndChangeFrame(data.getMeasurementPointInBodyFrame());
+      ReferenceFrame referenceFrame = referenceFrameMap.getFrameByName(pointPositionMeasurementInputPort.getData().getBodyFixedReferenceFrameName());
+      tempFramePoint.setAndChangeFrame(referenceFrame, data.getMeasurementPointInBodyFrame());
       tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
 
-      data.getMeasurementPointInWorldFrame().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      data.getMeasurementPointInWorldFrame().getVector(residualVector);
+      residualVector.set(data.getMeasurementPointInWorldFrame());
       residualVector.sub(tempFramePoint.getPoint());
 
       MatrixTools.insertTuple3dIntoEJMLVector(residualVector, residual, 0);
