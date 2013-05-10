@@ -1,9 +1,12 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import java.util.ArrayList;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class TransferToAndNextFootstepsData
 {
@@ -18,6 +21,12 @@ public class TransferToAndNextFootstepsData
 
    private double w0;
    private double estimatedStepTime;
+   
+   private double singleSupportDuration;
+   private double doubleSupportDuration;
+   private double doubleSupportInitialTransferDuration;
+   
+   private boolean stopIfReachedEnd;
    
    public ContactablePlaneBody getTransferToFootContactablePlaneBody()
    {
@@ -102,5 +111,83 @@ public class TransferToAndNextFootstepsData
    public void setEstimatedStepTime(double estimatedStepTime)
    {
       this.estimatedStepTime = estimatedStepTime;
+   }
+
+   public void getFootLocationList(ArrayList<FramePoint> footLocationListToPack)
+   {
+      if (transferFromFootstep != null)
+      {
+         getFootLocationFromFootstepInWorldFrame(footLocationListToPack, transferFromFootstep);
+      }
+      else return;
+      
+      if (transferToFootstep != null)
+      {
+         getFootLocationFromFootstepInWorldFrame(footLocationListToPack, transferToFootstep);
+      }
+      else return;
+
+      if (nextFootstep != null)
+      {
+         getFootLocationFromFootstepInWorldFrame(footLocationListToPack, nextFootstep);
+      }
+      else return;
+
+      if (nextNextFootstep != null)
+      {
+         getFootLocationFromFootstepInWorldFrame(footLocationListToPack, nextNextFootstep);
+      }
+      else return;
+
+      
+   }
+
+   private void getFootLocationFromFootstepInWorldFrame(ArrayList<FramePoint> footLocationListToPack, Footstep footstep)
+   {
+      ReferenceFrame soleReferenceFrame = transferFromFootstep.getSoleReferenceFrame();
+      FramePoint framePoint = new FramePoint(soleReferenceFrame);
+      framePoint.changeFrame(ReferenceFrame.getWorldFrame());
+      
+      footLocationListToPack.add(framePoint);
+   }
+
+   public double getSingleSupportDuration()
+   {
+      return singleSupportDuration;
+   }
+
+   public double getDoubleSupportDuration()
+   {
+      return doubleSupportDuration;
+   }
+
+   public boolean getStopIfReachedEnd()
+   {
+      return stopIfReachedEnd;
+   }
+
+   public double getDoubleSupportInitialTransferDuration()
+   {
+      return doubleSupportInitialTransferDuration;
+   }
+   
+   public void setSingleSupportDuration(double singleSupportDuration)
+   {
+      this.singleSupportDuration = singleSupportDuration;
+   }
+
+   public void setDoubleSupportDuration(double doubleSupportDuration)
+   {
+      this.doubleSupportDuration = doubleSupportDuration;
+   }
+
+   public void setStopIfReachedEnd(boolean stopIfReachedEnd)
+   {
+      this.stopIfReachedEnd = stopIfReachedEnd;
+   }
+
+   public void setDoubleSupportInitialTransferDuration(double doubleSupportInitialTransferDuration)
+   {
+      this.doubleSupportInitialTransferDuration = doubleSupportInitialTransferDuration;
    }
 }

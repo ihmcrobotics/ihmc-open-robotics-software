@@ -20,6 +20,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.GeometryTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.test.JUnitTools;
@@ -28,6 +29,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameLineSegment2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
@@ -38,6 +40,7 @@ public class SmoothICPComputerTest
    private boolean visualize = false;
 
    private PointAndLinePlotter pointAndLinePlotter = null;
+   private DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = null;
    private SimulationConstructionSet scs = null;
    private DoubleYoVariable timeYoVariable = null;
    private YoVariableRegistry registry = null;
@@ -47,7 +50,7 @@ public class SmoothICPComputerTest
    private YoFramePoint icpVelocityYoFramePoint = null;
    private YoFramePoint ecmpPositionYoFramePoint = null;
 
-   private ArrayList<YoFramePoint> constantCentersOfPressureYoFramePoints = null;
+   private ArrayList<YoFramePoint> footstepYoFramePoints = null;
 
    private YoFramePoint doubleSupportStartICPYoFramePoint = null;
    private YoFramePoint doubleSupportEndICPYoFramePoint = null;
@@ -72,6 +75,7 @@ public class SmoothICPComputerTest
       visualize = false;
 
       pointAndLinePlotter = null;
+      dynamicGraphicObjectsListRegistry = null;
       scs = null;
       timeYoVariable = null;
       registry = null;
@@ -80,7 +84,7 @@ public class SmoothICPComputerTest
       icpPositionYoFramePoint = null;
       icpVelocityYoFramePoint = null;
 
-      constantCentersOfPressureYoFramePoints = null;
+      footstepYoFramePoints = null;
 
       doubleSupportStartICPYoFramePoint = null;
       doubleSupportEndICPYoFramePoint = null;
@@ -97,7 +101,8 @@ public class SmoothICPComputerTest
       createVisualizers(maxNumberOfConsideredFootsteps);
 
       double doubleSupportFirstStepFraction = 0.5;
-      SmoothICPComputer smoothICPComputer = new SmoothICPComputer(doubleSupportFirstStepFraction, maxNumberOfConsideredFootsteps);
+      
+      SmoothICPComputer smoothICPComputer = new SmoothICPComputer(doubleSupportFirstStepFraction, maxNumberOfConsideredFootsteps, registry, dynamicGraphicObjectsListRegistry);
 
       RobotSide stepSide = RobotSide.LEFT;
       int numberOfStepsInStepList = 7;
@@ -126,20 +131,23 @@ public class SmoothICPComputerTest
       Point3d ecmpPosition = new Point3d();
 
       double initialTime = 1.1;
-      ArrayList<Point3d> footLocations = getFirstSteps(stepList, 4);
+      ArrayList<FramePoint> footLocations = getFirstSteps(stepList, 4);
       if (visualize)
       {
-         pointAndLinePlotter.plotPoint3ds("footLocations", footLocations, YoAppearance.Black(), 0.01);
+         for (int i=0; i<Math.min(footLocations.size(), footstepYoFramePoints.size()); i++)
+         {
+            footstepYoFramePoints.get(i).set(footLocations.get(i));
+         }
       }
       
-      initialICPPosition.set(footLocations.get(0));
-      initialICPPosition.add(footLocations.get(1));
+      initialICPPosition.set(footLocations.get(0).getPoint());
+      initialICPPosition.add(footLocations.get(1).getPoint());
       initialICPPosition.scale(0.5);
       
       boolean stopIfReachedEnd = false;
       smoothICPComputer.initializeDoubleSupportInitialTransfer(footLocations, initialICPPosition, singleSupportDuration, doubleSupportDuration,
               doubleSupportInitialTransferDuration, omega0, initialTime, stopIfReachedEnd);
-      smoothICPComputer.getICPPositionAndVelocity(initialICPPosition, initialICPVelocity, initialECMPPosition, omega0, initialTime);
+      smoothICPComputer.getICPPositionAndVelocity(initialICPPosition, initialICPVelocity, initialECMPPosition, initialTime);
 
       if (visualize)
       {
@@ -147,7 +155,7 @@ public class SmoothICPComputerTest
          doubleSupportEndICPYoFramePoint.set(smoothICPComputer.getDoubleSupportEndICP());
       }
       
-      Point3d transferFromFoot = footLocations.get(0);
+      Point3d transferFromFoot = footLocations.get(0).getPoint();
       simulateForwardAndCheckDoubleSupport(icpPosition, icpVelocity, ecmpPosition, smoothICPComputer, doubleSupportInitialTransferDuration, initialTime,
             omega0, initialICPPosition);
       
@@ -166,7 +174,10 @@ public class SmoothICPComputerTest
 
          if (visualize)
          {
-            pointAndLinePlotter.plotPoint3ds("footLocations", footLocations, YoAppearance.Black(), 0.01);
+            for (int i=0; i<Math.min(footLocations.size(), footstepYoFramePoints.size()); i++)
+            {
+               footstepYoFramePoints.get(i).set(footLocations.get(i));
+            }
          }
 
          stopIfReachedEnd = (stepList.size() <= maxNumberOfConsideredFootsteps);
@@ -174,20 +185,11 @@ public class SmoothICPComputerTest
 
          if (visualize)
          {
-            List<Point3d> constantCentersOfPressure = smoothICPComputer.getConstantCentersOfPressure();
-            for (int i = 0; i < constantCentersOfPressure.size(); i++)
-            {
-               constantCentersOfPressureYoFramePoints.get(i).set(constantCentersOfPressure.get(i));
-            }
-
-            Point3d[] icpCornerPoints = smoothICPComputer.getICPCornerPoints();
-            pointAndLinePlotter.plotPoint3ds("icpCornerPoints", icpCornerPoints, YoAppearance.Green(), 0.01);
-
             doubleSupportStartICPYoFramePoint.set(smoothICPComputer.getDoubleSupportStartICP());
             doubleSupportEndICPYoFramePoint.set(smoothICPComputer.getDoubleSupportEndICP());
          }
 
-         smoothICPComputer.getICPPositionAndVelocity(initialICPPosition, initialICPVelocity, initialECMPPosition, omega0, initialTime);
+         smoothICPComputer.getICPPositionAndVelocity(initialICPPosition, initialICPVelocity, initialECMPPosition, initialTime);
 
          
          if (USE_ASSERTS)
@@ -197,14 +199,14 @@ public class SmoothICPComputerTest
             JUnitTools.assertTuple3dEquals(ecmpPosition, initialECMPPosition, 3e-3);
          }
 
-         transferFromFoot = footLocations.get(0);
+         transferFromFoot = footLocations.get(0).getPoint();
 
          simulateForwardAndCheckSingleSupport(icpPosition, icpVelocity, ecmpPosition, smoothICPComputer, singleSupportDuration, initialTime, omega0,
                  initialICPPosition, transferFromFoot);
 
          initialTime = initialTime + singleSupportDuration;
          smoothICPComputer.initializeDoubleSupport(footLocations, singleSupportDuration, doubleSupportDuration, omega0, initialTime, stopIfReachedEnd);
-         smoothICPComputer.getICPPositionAndVelocity(initialICPPosition, initialICPVelocity, initialECMPPosition, omega0, initialTime);
+         smoothICPComputer.getICPPositionAndVelocity(initialICPPosition, initialICPVelocity, initialECMPPosition, initialTime);
 
          if (USE_ASSERTS)
          {
@@ -241,14 +243,14 @@ public class SmoothICPComputerTest
       }
    }
 
-   private ArrayList<Point3d> getFirstSteps(ArrayList<YoFramePoint> stepList, int maximumNumberOfStepsToReturn)
+   private ArrayList<FramePoint> getFirstSteps(ArrayList<YoFramePoint> stepList, int maximumNumberOfStepsToReturn)
    {
-      ArrayList<Point3d> ret = new ArrayList<Point3d>();
+      ArrayList<FramePoint> ret = new ArrayList<FramePoint>();
 
       int numberOfStepsToReturn = Math.min(stepList.size(), maximumNumberOfStepsToReturn);
       for (int i = 0; i < numberOfStepsToReturn; i++)
       {
-         ret.add(stepList.get(i).getFramePointCopy().getPointCopy());
+         ret.add(stepList.get(i).getFramePointCopy());
       }
 
       return ret;
@@ -345,7 +347,7 @@ public class SmoothICPComputerTest
       Point3d previousICPPosition = new Point3d(initialICPPosition);
       for (double time = initialTime + deltaT; time <= initialTime + singleSupportDuration; time = time + deltaT)
       {
-         smoothICPComputer.getICPPositionAndVelocity(icpPositionToPack, icpVelocityToPack, ecmpPositionToPack, omega0, time);
+         smoothICPComputer.getICPPositionAndVelocity(icpPositionToPack, icpVelocityToPack, ecmpPositionToPack, time);
 
          if (visualize)
          {
@@ -374,7 +376,7 @@ public class SmoothICPComputerTest
       Point3d previousICPPosition = new Point3d(initialICPPosition);
       for (double time = initialTime + deltaT; time <= initialTime + doubleSupportDuration; time = time + deltaT)
       {
-         smoothICPComputer.getICPPositionAndVelocity(icpPositionToPack, icpVelocityToPack, ecmpPositionToPack, omega0, time);
+         smoothICPComputer.getICPPositionAndVelocity(icpPositionToPack, icpVelocityToPack, ecmpPositionToPack, time);
 
          if (visualize)
          {
@@ -426,11 +428,11 @@ public class SmoothICPComputerTest
    {
       int maxNumberOfConsideredFootsteps = 4;
       double doubleSupportFirstStepFraction = 0.55;
-      SmoothICPComputer smoothICPComputer = new SmoothICPComputer(doubleSupportFirstStepFraction, maxNumberOfConsideredFootsteps);
+      SmoothICPComputer smoothICPComputer = new SmoothICPComputer(doubleSupportFirstStepFraction, maxNumberOfConsideredFootsteps, registry, dynamicGraphicObjectsListRegistry);
 
-      ArrayList<Point3d> footLocations = new ArrayList<Point3d>();
-      footLocations.add(new Point3d(0.0, 0.0, 0.0));
-      footLocations.add(new Point3d(1.0, 1.0, 0.0));
+      ArrayList<FramePoint> footLocations = new ArrayList<FramePoint>();
+      footLocations.add(new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0));
+      footLocations.add(new FramePoint(ReferenceFrame.getWorldFrame(), 1.0, 1.0, 0.0));
 
       double singleSupportDuration = 0.5;
       double doubleSupportDuration = 0.2;
@@ -443,8 +445,8 @@ public class SmoothICPComputerTest
       
       Point3d initialICPPosition = new Point3d();
       
-      initialICPPosition.set(footLocations.get(0));
-      initialICPPosition.add(footLocations.get(1));
+      initialICPPosition.set(footLocations.get(0).getPoint());
+      initialICPPosition.add(footLocations.get(1).getPoint());
       initialICPPosition.scale(0.5);
       
       smoothICPComputer.initializeDoubleSupportInitialTransfer(footLocations, initialICPPosition, singleSupportDuration, doubleSupportDuration,
@@ -455,10 +457,10 @@ public class SmoothICPComputerTest
       Point3d ecmpPositionToPack = new Point3d();
 
       double time = initialTime;
-      smoothICPComputer.getICPPositionAndVelocity(icpPositionToPack, icpVelocityToPack, ecmpPositionToPack, omega0, time);
+      smoothICPComputer.getICPPositionAndVelocity(icpPositionToPack, icpVelocityToPack, ecmpPositionToPack, time);
 
-      Point3d averagePoint = new Point3d(footLocations.get(0));
-      averagePoint.add(footLocations.get(1));
+      Point3d averagePoint = new Point3d(footLocations.get(0).getPoint());
+      averagePoint.add(footLocations.get(1).getPoint());
 
       averagePoint.scale(0.5);
 
@@ -469,7 +471,7 @@ public class SmoothICPComputerTest
       }
 
       time = initialTime + doubleSupportInitialTransferDuration;
-      smoothICPComputer.getICPPositionAndVelocity(icpPositionToPack, icpVelocityToPack, ecmpPositionToPack, omega0, time);
+      smoothICPComputer.getICPPositionAndVelocity(icpPositionToPack, icpVelocityToPack, ecmpPositionToPack, time);
 
       if (USE_ASSERTS)
       {
@@ -508,12 +510,12 @@ public class SmoothICPComputerTest
       doubleSupportEndICPYoFramePoint = new YoFramePoint("doubleSupportICPEnd", "", worldFrame, registry);
 
 
-      constantCentersOfPressureYoFramePoints = new ArrayList<YoFramePoint>();
+      footstepYoFramePoints = new ArrayList<YoFramePoint>();
 
       for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
       {
-         YoFramePoint constantCenterOfPressureYoFramePoint = pointAndLinePlotter.plotPoint3d("constantCoP" + i, new Point3d(), YoAppearance.Red(), 0.005);
-         constantCentersOfPressureYoFramePoints.add(constantCenterOfPressureYoFramePoint);
+         YoFramePoint footstepYoFramePoint = pointAndLinePlotter.plotPoint3d("footstep" + i, new Point3d(), YoAppearance.Black(), 0.01);
+         footstepYoFramePoints.add(footstepYoFramePoint);
       }
 
       pointAndLinePlotter.plotYoFramePoint("icpPosition", icpPositionYoFramePoint, YoAppearance.OrangeRed(), 0.01);
@@ -522,7 +524,8 @@ public class SmoothICPComputerTest
 
       pointAndLinePlotter.plotYoFramePoint("doubleSupportICPStart", doubleSupportStartICPYoFramePoint, YoAppearance.Cyan(), 0.01);
       pointAndLinePlotter.plotYoFramePoint("doubleSupportICPEnd", doubleSupportEndICPYoFramePoint, YoAppearance.Cyan(), 0.01);
-
+      
+      dynamicGraphicObjectsListRegistry = pointAndLinePlotter.getDynamicGraphicObjectsListRegistry();
    }
 
 
