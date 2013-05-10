@@ -1,9 +1,10 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FrameVector2d;
 
 public interface InstantaneousCapturePointPlanner
 {
@@ -14,6 +15,6 @@ public interface InstantaneousCapturePointPlanner
 
    public void initializeDoubleSupport(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double initialTime);
 
-   public void getICPPositionAndVelocity(Point2d icpPostionToPack, Vector2d icpVelocityToPack, Point2d ecmpToPack, double time);
+   public void getICPPositionAndVelocity(FramePoint2d icpPostionToPack, FrameVector2d icpVelocityToPack, FramePoint2d ecmpToPack, double time);
 
 }
