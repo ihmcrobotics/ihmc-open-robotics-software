@@ -524,8 +524,8 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
       controllerInitializationTime = new DoubleYoVariable("controllerInitializationTime", registry);
       alreadyBeenInDoubleSupportOnce = new BooleanYoVariable("alreadyBeenInDoubleSupportOnce", registry);
 
-
-      updateWalkingStatusReporter();
+      if(walkingStatusReporter != null)
+         updateWalkingStatusReporter();
    }
 
    private void setupLimbJacobians(FullRobotModel fullRobotModel)
@@ -638,6 +638,14 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
       @Override
       public void doAction()
       {
+         if(walkingStatusReporter != null)
+         {
+            if(walkingStatusReporter.isPelvisOrientationOutOfBounds())
+               walkingStatusReporter.notifyConsumerOfWalkingStatus(WalkingStatus.UNSTABLE_DOUBLE_SUPPORT);
+            else           
+               walkingStatusReporter.notifyConsumerOfWalkingStatus(WalkingStatus.STABLE);            
+         }
+         
          ContactablePlaneBody transferFoot = bipedFeet.get(transferToSide);
 
          if ((endEffectorControlModules.get(transferFoot) != null) && endEffectorControlModules.get(transferFoot).onHeel()
@@ -649,7 +657,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
          // note: this has to be done before the ICP trajectory generator is initialized, since it is using nextFootstep
          upcomingFootstepList.checkForFootsteps(icpAndMomentumBasedController.getPointPositionGrabber(), readyToGrabNextFootstep, upcomingSupportLeg,
                  bipedFeet);
-         checkForHighSteps(transferToSide);
+         checkForSteppingOnOrOff(transferToSide);
 
          if (icpTrajectoryGenerator.isDone())
          {
@@ -779,14 +787,6 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
       @Override
       public void doTransitionIntoAction()
       {
-         if(walkingStatusReporter != null)
-         {
-            if(walkingStatusReporter.isPelvisOrientationOutOfBounds())
-               walkingStatusReporter.notifyConsumerOfWalkingStatus(WalkingStatus.UNSTABLE);
-            else           
-               walkingStatusReporter.notifyConsumerOfWalkingStatus(WalkingStatus.STABLE);            
-         }
-         
          icpTrajectoryHasBeenInitialized.set(false);
          if (DEBUG)
             System.out.println("WalkingHighLevelHumanoidController: enteringDoubleSupportState");
@@ -1595,14 +1595,10 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
       return (heelPitchTouchdownProvidersManager != null) && (heelPitchTouchdownProvidersManager.getInitialAngle() != 0.0);
    }
 
-   private void checkForHighSteps(RobotSide transferToSide)
+   private void checkForSteppingOnOrOff(RobotSide transferToSide)
    {
       if ((transferToSide != null) && upcomingFootstepList.hasNextFootsteps())
       {
-         boolean footstepZIncreaseAboveThresholdInFinalFrame;
-
-         double zIncreaseThreshold = 0.05;
-
          ReferenceFrame initialSoleFrame;
 
          // NOTE: the foot may have moved so its ideal to get the previous footstep, rather than the current foot frame, if possible
@@ -1618,16 +1614,10 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
          Footstep nextFootstep = upcomingFootstepList.getNextFootstep();
          ReferenceFrame finalSoleFrame = nextFootstep.getSoleReferenceFrame();
 
-         FramePoint initialSole = new FramePoint(initialSoleFrame);
-         initialSole.changeFrame(finalSoleFrame);
-         footstepZIncreaseAboveThresholdInFinalFrame = -initialSole.getZ() > zIncreaseThreshold;
-
-         boolean useHighSteps = footstepZIncreaseAboveThresholdInFinalFrame;
-
-         if (useHighSteps)
+         if(SimpleTwoWaypointTrajectoryParameters.stepOnOrOff(initialSoleFrame, finalSoleFrame))
          {
-            TrajectoryParameters highStepTrajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(TrajectoryWaypointGenerationMethod.HIGH_STEP);
-            mapFromFootstepsToTrajectoryParameters.put(nextFootstep, highStepTrajectoryParameters);
+            TrajectoryParameters trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(TrajectoryWaypointGenerationMethod.STEP_ON_OR_OFF);
+            mapFromFootstepsToTrajectoryParameters.put(nextFootstep, trajectoryParameters);
          }
       }
    }
@@ -1655,9 +1645,10 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
          DoubleYoVariable footPositionErrorMagnitude = (DoubleYoVariable) registry.getVariable(robotSide.getShortLowerCaseName()
                                                           + "_footPositionErrorMagnitude");
          Pair<Double, Double> footPositionErrorBounds = new Pair<Double, Double>(-0.1, 0.1);
-         if (walkingStatusReporter != null)
-            walkingStatusReporter.setFootPositionVariablesAndBounds(robotSide, footPositionErrorMagnitude, footPositionErrorBounds);
+         walkingStatusReporter.setFootPositionVariablesAndBounds(robotSide, footPositionErrorMagnitude, footPositionErrorBounds);
       }
+      
+      // TODO add com height error
    }
 
    // TODO: New methods coming from extending State class

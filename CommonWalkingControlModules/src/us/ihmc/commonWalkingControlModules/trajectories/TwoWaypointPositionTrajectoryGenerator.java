@@ -449,13 +449,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
             break;
 
-         case STEP_ON :
+         case STEP_ON_OR_OFF :
             waypoints = getWaypointsForStepOnOrOff();
-
-            break;
-
-         case HIGH_STEP :
-            waypoints = getWaypointForHighStep();
 
             break;
 
@@ -501,29 +496,18 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       }
    }
 
-   private List<FramePoint> getWaypointForHighStep()
-   {
-      boolean meetsCriteriaForStepOn = Math.abs(allPositions[endpointIndices[1]].getZ() - allPositions[endpointIndices[0]].getZ())
-                                       > SimpleTwoWaypointTrajectoryParameters.getMinimumAnkleHeightDifferenceForStepOn();
-      if (meetsCriteriaForStepOn)
-      {
-         return getWaypointsForStepOnOrOff();
-      }
-
-      return getWaypointsAtGroundClearance(SimpleTwoWaypointTrajectoryParameters.getHighStepGroundClearance(),
-              SimpleTwoWaypointTrajectoryParameters.getHighStepProportionsThroughTrajectoryForGroundClearance());
-   }
-
    private List<FramePoint> getWaypointsForStepOnOrOff()
    {     
+      System.out.println("getting waypoints for stepping on/off");
       List<FramePoint> waypoints = new ArrayList<FramePoint>();
       waypoints.add(allPositions[endpointIndices[0]].getFramePointCopy());
       waypoints.add(allPositions[endpointIndices[1]].getFramePointCopy());
       int indexOfMaxZ = (waypoints.get(0).getZ() > waypoints.get(1).getZ()) ? 0 : 1;
+      double maxZ = waypoints.get(indexOfMaxZ).getZ();
 
       for (FramePoint waypoint : waypoints)
       {
-         waypoint.setZ(waypoints.get(indexOfMaxZ).getZ() + SimpleTwoWaypointTrajectoryParameters.getDefaultGroundClearance());
+         waypoint.setZ(maxZ + SimpleTwoWaypointTrajectoryParameters.getDefaultGroundClearance());
       }
 
       FrameVector maxZPointOffset = allPositions[endpointIndices[1]].getFrameVectorCopy();
