@@ -1,12 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
@@ -363,6 +357,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
       kUpperBody.set(100.0);
       zetaUpperBody.set(1.0);
       onToesTriangleAreaLimit.set(0.01);
+      doToeOffIfPossible.set(walkingControllerParameters.doToeOffIfPossible());
 
       this.walkingControllerParameters = walkingControllerParameters;
 
@@ -389,11 +384,15 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
 
          GeometricJacobian jacobian = jacobians.get(robotSide).get(LimbName.ARM);
 
+         Map<OneDoFJoint,Double> defaultArmJointPositions = walkingControllerParameters.getDefaultArmJointPositions(fullRobotModel, robotSide);
+         Map<OneDoFJoint, Double> minTaskSpacePositions = walkingControllerParameters.getMinTaskspaceArmJointPositions(fullRobotModel, robotSide);
+         Map<OneDoFJoint, Double> maxTaskSpacePositions = walkingControllerParameters.getMaxTaskspaceArmJointPositions(fullRobotModel, robotSide);
+
          manipulationStateMachines.put(robotSide,
                                        new IndividualHandControlStateMachine(yoTime, robotSide, fullRobotModel, twistCalculator,
                                              walkingControllerParameters, handPoseProvider,
                                           dynamicGraphicObjectsListRegistry, handControllerInterface, gravity, controlDT, icpAndMomentumBasedController,
-                                          jacobian, walkingControllerParameters.getDefaultArmJointPositions(fullRobotModel, robotSide), registry));
+                                          jacobian, defaultArmJointPositions, minTaskSpacePositions, maxTaskSpacePositions, registry));
       }
 
       this.desiredHeadOrientationProvider = desiredHeadOrientationProvider;

@@ -9,6 +9,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.screwTheory.*;
 
@@ -19,7 +20,7 @@ import java.util.Map;
 public class JointSpaceHandControlControlState extends State<IndividualHandControlState>
 {
    private final DoubleYoVariable yoTime;
-   private final OneDoFJoint[] oneDoFJoints;
+   protected final OneDoFJoint[] oneDoFJoints;
    private final LinkedHashMap<OneDoFJoint, YoPolynomial> trajectories;
    private final LinkedHashMap<OneDoFJoint, PDController> pdControllers;
 
@@ -34,18 +35,19 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
 
    private final DoubleYoVariable endMoveTime;
 
-   public JointSpaceHandControlControlState(DoubleYoVariable yoTime, RobotSide robotSide, GeometricJacobian jacobian,
-                                            MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
+   public JointSpaceHandControlControlState(IndividualHandControlState stateEnum, DoubleYoVariable yoTime, RobotSide robotSide, GeometricJacobian jacobian,
+                                            MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry, double moveTime)
    {
-      super(IndividualHandControlState.JOINT_SPACE);
+      super(stateEnum);
       this.yoTime = yoTime;
 
-      registry = new YoVariableRegistry("ArmJointController" + robotSide.getCamelCaseNameForMiddleOfExpression());
+      RigidBody endEffector = jacobian.getEndEffector();
+      registry = new YoVariableRegistry(endEffector.getName() + FormattingTools.underscoredToCamelCase(this.stateEnum.toString(), true) + "State");
 
       endMoveTime = new DoubleYoVariable("endMoveTime", registry);
 
       moveTimeArmJoint = new DoubleYoVariable("moveTimeArmJoint", registry);
-      moveTimeArmJoint.set(1.0);
+      moveTimeArmJoint.set(moveTime);
 
       kpAllArmJoints = new DoubleYoVariable("kpAllArmJoints" + robotSide, registry);
       kpAllArmJoints.set(120.0);
@@ -149,5 +151,11 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
    public void doTransitionOutOfAction()
    {
       // empty
+   }
+
+   public boolean isDone()
+   {
+      double currentTime = yoTime.getDoubleValue();
+      return currentTime > endMoveTime.getDoubleValue();
    }
 }

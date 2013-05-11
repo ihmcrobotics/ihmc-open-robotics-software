@@ -95,4 +95,9 @@ public class MomentumOptimizationSettings
    {
       return rhoMin;
    }
+
+   public double getDampedLeastSquaresFactor()
+   {
+      return lambda;
+   }
 }
