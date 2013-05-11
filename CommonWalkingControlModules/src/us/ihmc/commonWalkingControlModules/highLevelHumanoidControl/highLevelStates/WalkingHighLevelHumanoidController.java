@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import java.util.*;
 
 import javax.media.j3d.Transform3D;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
@@ -64,6 +65,8 @@ import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.kinematics.AverageOrientationCalculator;
+import us.ihmc.utilities.kinematics.OrientationInterpolationCalculator;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -213,6 +216,8 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
    private final HeelPitchTouchdownProvidersManager heelPitchTouchdownProvidersManager;
 
    private final UpcomingFootstepList upcomingFootstepList;
+
+   private final AverageOrientationCalculator averageOrientationCalculator = new AverageOrientationCalculator();
 
    // TODO: New variables
    private final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> contactStates;
@@ -716,7 +721,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
          if (((yoTime.getDoubleValue() - controllerInitializationTime.getDoubleValue()) < PELVIS_YAW_INITIALIZATION_TIME)
                  &&!alreadyBeenInDoubleSupportOnce.getBooleanValue())
          {
-            setDesiredPelvisYawToMidfeetZupOnStartupOnly();
+            setDesiredPelvisYawToAverageOfFeetOnStartupOnly();
          }
 
 
@@ -842,14 +847,16 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
       }
    }
 
-   private void setDesiredPelvisYawToMidfeetZupOnStartupOnly()
+   private void setDesiredPelvisYawToAverageOfFeetOnStartupOnly()
    {
-      FrameOrientation frameOrientation = new FrameOrientation(referenceFrames.getMidFeetZUpFrame());
-      frameOrientation.changeFrame(worldFrame);
-      double[] yawPitchRoll = frameOrientation.getYawPitchRoll();
+      FrameOrientation averageOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
+      averageOrientationCalculator.computeAverageOrientation(averageOrientation, bipedFeet.get(RobotSide.LEFT).getPlaneFrame(),
+            bipedFeet.get(RobotSide.RIGHT).getPlaneFrame(), ReferenceFrame.getWorldFrame());
 
-      frameOrientation.setYawPitchRoll(yawPitchRoll[0], userDesiredPelvisPitch.getDoubleValue(), 0.0);
-      desiredPelvisOrientation.set(frameOrientation);
+      double[] yawPitchRoll = averageOrientation.getYawPitchRoll();
+
+      averageOrientation.setYawPitchRoll(yawPitchRoll[0], userDesiredPelvisPitch.getDoubleValue(), 0.0);
+      desiredPelvisOrientation.set(averageOrientation);
    }
 
 
