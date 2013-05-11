@@ -52,7 +52,7 @@ public class DRCSimulationFactory
    
    public static HumanoidRobotSimulation<SDFRobot> createSimulation(ControllerFactory controllerFactory,
          CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCRobotInterface robotInterface, RobotInitialSetup<SDFRobot> robotInitialSetup,
-         ScsInitialSetup scsInitialSetup, GuiInitialSetup guiInitialSetup, ObjectCommunicator teamComputerServer, ObjectCommunicator networkProccesorCommunicator)
+         ScsInitialSetup scsInitialSetup, GuiInitialSetup guiInitialSetup, ObjectCommunicator networkProccesorCommunicator)
    {
       GUISetterUpperRegistry guiSetterUpperRegistry = new GUISetterUpperRegistry();
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
@@ -190,7 +190,7 @@ public class DRCSimulationFactory
 
       DRCController robotController = new DRCController(initialCoMPositionAndEstimationLinkOrientation, robotInterface.getFullRobotModelFactory(),
             controllerFactory, sensorReaderFactory, drcOutputWriter, handControllerDispatcher, jointMap, lidarControllerInterface, gravity, estimateDT, controlDT,
-            networkProccesorCommunicator, teamComputerServer, robotInterface.getTimeStampProvider(), dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry,
+            networkProccesorCommunicator, robotInterface.getTimeStampProvider(), dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry,
             registry);
 
       final HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, robotController,

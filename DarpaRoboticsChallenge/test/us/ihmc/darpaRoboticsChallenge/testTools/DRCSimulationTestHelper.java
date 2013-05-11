@@ -28,7 +28,7 @@ import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChan
 public class DRCSimulationTestHelper
 {
    private final DRCObstacleCourseSimulation drcSimulation;
-   private final ScriptedFootstepDataListObjectCommunicator teamObjectCommunicator;
+   private final ScriptedFootstepDataListObjectCommunicator networkObjectCommunicator;
    
    private final boolean checkNothingChanged;
    private final NothingChangedVerifier nothingChangedVerifier;
@@ -38,8 +38,7 @@ public class DRCSimulationTestHelper
 
    public DRCSimulationTestHelper(String name, DRCDemo01StartingLocation selectedLocation, DRCEnvironmentModel selectedEnvironment, boolean checkNothingChanged, boolean createMovie)
    {
-      teamObjectCommunicator = new ScriptedFootstepDataListObjectCommunicator("Team");
-      ScriptedFootstepDataListObjectCommunicator drcNetworkObjectCommunicator = new ScriptedFootstepDataListObjectCommunicator("DRCNetwork");
+      networkObjectCommunicator = new ScriptedFootstepDataListObjectCommunicator("Team");
 
       this.checkNothingChanged = checkNothingChanged;
       this.createMovie = createMovie;
@@ -49,7 +48,7 @@ public class DRCSimulationTestHelper
       boolean automaticallyStartSimulation = false;
       boolean startDRCNetworkProcessor = false;
 
-      drcSimulation = DRCDemo01.startDRCSim(teamObjectCommunicator, drcNetworkObjectCommunicator, selectedLocation, selectedEnvironment, startOutsidePen,
+      drcSimulation = DRCDemo01.startDRCSim(networkObjectCommunicator, selectedLocation, selectedEnvironment, startOutsidePen,
               useGazebo, automaticallyStartSimulation, startDRCNetworkProcessor);
 
       blockingSimulationRunner = new BlockingSimulationRunner(drcSimulation.getSimulationConstructionSet(), 60.0 * 10.0);
@@ -107,7 +106,7 @@ public class DRCSimulationTestHelper
 
    public void sendFootstepListToListeners(FootstepDataList footstepDataList)
    {
-      teamObjectCommunicator.sendFootstepListToListeners(footstepDataList);
+      networkObjectCommunicator.sendFootstepListToListeners(footstepDataList);
    }
 
    public DRCObstacleCourseSimulation getDRCSimulation()

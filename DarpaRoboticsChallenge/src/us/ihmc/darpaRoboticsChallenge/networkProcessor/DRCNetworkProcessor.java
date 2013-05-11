@@ -19,15 +19,15 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.SCSLidarDataReceive
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosClockSubscriber;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosMainNode;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
+import us.ihmc.darpaRoboticsChallenge.networking.bandwidthControl.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.utilities.net.KryoObjectClient;
-import us.ihmc.utilities.net.KryoObjectServer;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
 
 public class DRCNetworkProcessor
 {
 
    private final KryoObjectClient fieldComputerClient;
-   private final KryoObjectServer teamComputerServer;
+   private final DRCNetworkProcessorNetworkingManager networkingManager;
    private final RobotPoseBuffer robotPoseBuffer;
 
    
@@ -50,8 +50,8 @@ public class DRCNetworkProcessor
       RosClockSubscriber timeProvider = new RosClockSubscriber();
       rosMainNode.attachSubscriber("/clock", timeProvider);
 
-      new GazeboCameraReceiver(robotPoseBuffer, DRCConfigParameters.VIDEOSETTINGS, rosMainNode, teamComputerServer, DRCSensorParameters.FIELD_OF_VIEW);
-      new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, teamComputerServer, fullRobotModel, jointMap, rosCoreURI.toString());
+      new GazeboCameraReceiver(robotPoseBuffer, DRCConfigParameters.VIDEOSETTINGS, rosMainNode, networkingManager, DRCSensorParameters.FIELD_OF_VIEW);
+      new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, fullRobotModel, jointMap, rosCoreURI.toString());
       rosMainNode.execute();
       connect();
    }
@@ -59,8 +59,8 @@ public class DRCNetworkProcessor
    public DRCNetworkProcessor(LocalObjectCommunicator scsCommunicator)
    {
       this();
-      new SCSCameraDataReceiver(robotPoseBuffer, DRCConfigParameters.VIDEOSETTINGS, scsCommunicator, teamComputerServer);
-      new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, teamComputerServer, fullRobotModel, jointMap);
+      new SCSCameraDataReceiver(robotPoseBuffer, DRCConfigParameters.VIDEOSETTINGS, scsCommunicator, networkingManager);
+      new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, fullRobotModel, jointMap);
       connect();
    }
 
@@ -70,8 +70,7 @@ public class DRCNetworkProcessor
             DRCConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_UDP_PORT, new DRCNetClassList());
       fieldComputerClient.setReconnectAutomatically(true);
 
-      teamComputerServer = new KryoObjectServer(DRCConfigParameters.NETWORK_PROCESSOR_TO_UI_TCP_PORT, DRCConfigParameters.NETWORK_PROCESSOR_TO_UI_UDP_PORT,
-            new DRCNetClassList());
+      networkingManager = new DRCNetworkProcessorNetworkingManager(fieldComputerClient);
 
       robotPoseBuffer = new RobotPoseBuffer(fieldComputerClient, 1000);
       
@@ -86,7 +85,7 @@ public class DRCNetworkProcessor
       try
       {
          fieldComputerClient.connect();
-         teamComputerServer.connect();
+         networkingManager.connect();
       }
       catch (IOException e)
       {
