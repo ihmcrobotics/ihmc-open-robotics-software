@@ -8,9 +8,13 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.messages.controller.RobotPoseData;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
+import us.ihmc.darpaRoboticsChallenge.networking.bandwidthControl.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.graphics3DAdapter.camera.CompressedVideoDataServer;
+import us.ihmc.graphics3DAdapter.camera.VideoPacket;
 import us.ihmc.graphics3DAdapter.camera.VideoSettings;
-import us.ihmc.utilities.net.KryoObjectServer;
+import us.ihmc.utilities.net.NetStateListener;
+import us.ihmc.utilities.net.ObjectCommunicator;
+import us.ihmc.utilities.net.ObjectConsumer;
 
 public abstract class CameraDataReceiver
 {
@@ -22,10 +26,41 @@ public abstract class CameraDataReceiver
    private final Quat4d cameraOrientation = new Quat4d();
    private final Vector3d tempVector = new Vector3d();
    
-   public CameraDataReceiver(RobotPoseBuffer robotPoseBuffer, VideoSettings videoSettings, KryoObjectServer uiServer)
+   public CameraDataReceiver(RobotPoseBuffer robotPoseBuffer, VideoSettings videoSettings, final DRCNetworkProcessorNetworkingManager networkingManager)
    {
       this.robotPoseBuffer = robotPoseBuffer;
-      compressedVideoDataServer = new CompressedVideoDataServer(videoSettings, uiServer);
+      ObjectCommunicator videoConsumer = new ObjectCommunicator()
+      {
+         
+         public void consumeObject(Object object)
+         {
+            if(object instanceof VideoPacket)
+            {
+               networkingManager.sendVideoPacket((VideoPacket) object);
+            }
+         }
+         
+         public boolean isConnected()
+         {
+            return networkingManager.isConnected();
+         }
+         
+         public void close()
+         {
+            networkingManager.close();
+         }
+         
+         public void attachStateListener(NetStateListener stateListener)
+         {
+            networkingManager.attachStateListener(stateListener);
+         }
+         
+         public <T> void attachListener(Class<T> clazz, ObjectConsumer<T> listener)
+         {
+            
+         }
+      };
+      compressedVideoDataServer = new CompressedVideoDataServer(videoSettings, videoConsumer);
       
    }
 
