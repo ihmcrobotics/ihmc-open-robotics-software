@@ -33,7 +33,6 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -365,9 +364,5 @@ public class SimpleStanceController implements RobotController
       dynamicGraphicObjectsListsRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
 
       scs.startOnAThread();
-
-
-      System.out.println(fullRobotModel.getRootJoint().getSuccessor().getBodyFixedFrame().getTransformToDesiredFrame(fullRobotModel.getRootJoint().getFrameAfterJoint()));
-
    }
 }
