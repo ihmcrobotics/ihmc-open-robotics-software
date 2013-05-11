@@ -281,7 +281,16 @@ public class MomentumBasedController implements RobotController
 
       SpatialForceVector desiredCentroidalMomentumRate = momentumControlModule.getDesiredCentroidalMomentumRate();
 
-      Map<? extends ContactablePlaneBody, Wrench> externalWrenches = momentumControlModule.getExternalWrenches();
+      Map<RigidBody, Wrench> externalWrenches = momentumControlModule.getExternalWrenches();
+
+
+      for (RigidBody rigidBody : externalWrenches.keySet())
+      {
+         inverseDynamicsCalculator.setExternalWrench(rigidBody, externalWrenches.get(rigidBody));
+      }
+
+      // TODO: extract into its own class:
+      // for contactable plane bodies only: compute and set CoPs
       cops.clear();
       for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodies)
       {
@@ -290,8 +299,7 @@ public class MomentumBasedController implements RobotController
 
          if (footContactPoints.size() > 0)
          {
-            Wrench wrench = externalWrenches.get(contactablePlaneBody);
-            inverseDynamicsCalculator.setExternalWrench(contactablePlaneBody.getRigidBody(), wrench);
+            Wrench wrench = externalWrenches.get(contactablePlaneBody.getRigidBody());
 
             FrameVector force = wrench.getLinearPartAsFrameVectorCopy();
 
@@ -455,11 +463,6 @@ public class MomentumBasedController implements RobotController
       return contactStates;
    }
 
-   public List<ContactablePlaneBody> getContactablePlaneBodies()
-   {
-      return contactablePlaneBodies;
-   }
-
    public ReferenceFrame getCenterOfMassFrame()
    {
       return centerOfMassFrame;
@@ -483,11 +486,6 @@ public class MomentumBasedController implements RobotController
    public EnumYoVariable<RobotSide> getUpcomingSupportLeg()
    {
       return upcomingSupportLeg;
-   }
-
-   public InverseDynamicsCalculator getInverseDynamicsCalculator()
-   {
-      return inverseDynamicsCalculator;
    }
 
    public CommonWalkingReferenceFrames getReferenceFrames()

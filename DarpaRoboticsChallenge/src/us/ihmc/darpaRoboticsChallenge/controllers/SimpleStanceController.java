@@ -71,19 +71,23 @@ public class SimpleStanceController implements RobotController
    private final SixDoFJoint rootJoint;
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
-   public SimpleStanceController(SDFRobot robot, SDFFullRobotModel fullRobotModel, ReferenceFrames referenceFrames, double controlDT, InverseDynamicsJoint[] jointsToOptimize, double gravityZ, double footForward, double footBack, double footWidth)
+   public SimpleStanceController(SDFRobot robot, SDFFullRobotModel fullRobotModel, ReferenceFrames referenceFrames, double controlDT,
+                                 InverseDynamicsJoint[] jointsToOptimize, double gravityZ, double footForward, double footBack, double footWidth)
    {
       this.sensorReader = new SDFPerfectSimulatedSensorReader(robot, fullRobotModel, referenceFrames);
       this.outputWriter = new SDFPerfectSimulatedOutputWriter(robot, fullRobotModel);
       MomentumOptimizationSettings momentumOptimizationSettings = createOptimizationSettings(1.0, 5e-2, 1e-5, 0.0);
       rootJoint = fullRobotModel.getRootJoint();
-      this.momentumControlModule = new OptimizationMomentumControlModule(rootJoint, referenceFrames.getCenterOfMassFrame(), controlDT, registry, jointsToOptimize, momentumOptimizationSettings, gravityZ);
+      this.momentumControlModule = new OptimizationMomentumControlModule(rootJoint, referenceFrames.getCenterOfMassFrame(), controlDT, registry,
+              jointsToOptimize, momentumOptimizationSettings, gravityZ);
+
       for (RobotSide robotSide : RobotSide.values())
       {
          RigidBody foot = fullRobotModel.getFoot(robotSide);
          GeometricJacobian jacobian = new GeometricJacobian(fullRobotModel.getElevator(), foot, foot.getBodyFixedFrame());
          footJacobians.put(robotSide, jacobian);
       }
+
       RigidBody pelvis = fullRobotModel.getPelvis();
       pelvisJacobian = new GeometricJacobian(fullRobotModel.getElevator(), pelvis, pelvis.getBodyFixedFrame());
 
@@ -112,6 +116,7 @@ public class SimpleStanceController implements RobotController
 
       InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(rootJoint.getSuccessor());
       oneDoFJoints = ScrewTools.filterJoints(allJoints, OneDoFJoint.class);
+
       for (OneDoFJoint oneDoFJoint : oneDoFJoints)
       {
          DoubleYoVariable yoVariable = new DoubleYoVariable("qdd_d_" + oneDoFJoint.getName(), registry);
@@ -167,9 +172,9 @@ public class SimpleStanceController implements RobotController
 
       pelvisAcceleration.packAngularPart(angularAccelerationBack);
 
-//      angularAccelerationBack.changeFrame(desiredPelvisAngularAcceleration.getReferenceFrame());
-//      if (!desiredPelvisAngularAcceleration.epsilonEquals(angularAccelerationBack, 1e-12))
-//         throw new RuntimeException();
+//    angularAccelerationBack.changeFrame(desiredPelvisAngularAcceleration.getReferenceFrame());
+//    if (!desiredPelvisAngularAcceleration.epsilonEquals(angularAccelerationBack, 1e-12))
+//       throw new RuntimeException();
 
       this.desiredPelvisAngularAcceleration.set(desiredPelvisAngularAcceleration);
 
@@ -202,11 +207,11 @@ public class SimpleStanceController implements RobotController
    {
       momentumControlModule.compute(contactStates, null);
 
-      Map<ContactablePlaneBody,Wrench> externalWrenches = momentumControlModule.getExternalWrenches();
+      Map<RigidBody, Wrench> externalWrenches = momentumControlModule.getExternalWrenches();
 
-      for (ContactablePlaneBody contactablePlaneBody : externalWrenches.keySet())
+      for (RigidBody rigidBody : externalWrenches.keySet())
       {
-         inverseDynamicsCalculator.setExternalWrench(contactablePlaneBody.getRigidBody(), externalWrenches.get(contactablePlaneBody));
+         inverseDynamicsCalculator.setExternalWrench(rigidBody, externalWrenches.get(rigidBody));
       }
    }
 
@@ -245,9 +250,9 @@ public class SimpleStanceController implements RobotController
       momentumControlModule.setDesiredSpatialAcceleration(pelvisJacobian, taskspaceConstraintData, 1.0);
 
 
-//      DenseMatrix64F jointAcceleration = new DenseMatrix64F(3, 1);
-//      MatrixTools.setDenseMatrixFromTuple3d(jointAcceleration, output.getVector(), 0, 0);
-//      momentumControlModule.setDesiredJointAcceleration(fullRobotModel.getRootJoint(), jointAcceleration);
+//    DenseMatrix64F jointAcceleration = new DenseMatrix64F(3, 1);
+//    MatrixTools.setDenseMatrixFromTuple3d(jointAcceleration, output.getVector(), 0, 0);
+//    momentumControlModule.setDesiredJointAcceleration(fullRobotModel.getRootJoint(), jointAcceleration);
 
       return output;
    }
@@ -282,7 +287,8 @@ public class SimpleStanceController implements RobotController
       return getName();
    }
 
-   private SideDependentList<ContactablePlaneBody> createFeet(SDFFullRobotModel fullRobotModel, ReferenceFrames referenceFrames, double footForward, double footBack, double footWidth)
+   private SideDependentList<ContactablePlaneBody> createFeet(SDFFullRobotModel fullRobotModel, ReferenceFrames referenceFrames, double footForward,
+           double footBack, double footWidth)
    {
       SideDependentList<ContactablePlaneBody> bipedFeet = new SideDependentList<ContactablePlaneBody>();
       for (RobotSide robotSide : RobotSide.values)
@@ -295,19 +301,22 @@ public class SimpleStanceController implements RobotController
          ContactablePlaneBody foot = new RectangularContactableBody(footBody, soleFrame, footForward, -footBack, left, right);
          bipedFeet.put(robotSide, foot);
       }
+
       return bipedFeet;
    }
 
-   private LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> createContactStates(SideDependentList<ContactablePlaneBody> feet, YoVariableRegistry
-         registry, double coefficientOfFriction)
+   private LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> createContactStates(SideDependentList<ContactablePlaneBody> feet,
+           YoVariableRegistry registry, double coefficientOfFriction)
    {
       LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
       for (ContactablePlaneBody contactablePlaneBody : feet)
       {
-         YoPlaneContactState contactState = new YoPlaneContactState(contactablePlaneBody.getName() + "ContactState", contactablePlaneBody.getBodyFrame(), contactablePlaneBody.getPlaneFrame(), registry);
+         YoPlaneContactState contactState = new YoPlaneContactState(contactablePlaneBody.getName() + "ContactState", contactablePlaneBody.getBodyFrame(),
+                                               contactablePlaneBody.getPlaneFrame(), registry);
          contactState.set(contactablePlaneBody.getContactPoints2d(), coefficientOfFriction);
          contactStates.put(contactablePlaneBody, contactState);
       }
+
       return contactStates;
    }
 
@@ -322,7 +331,9 @@ public class SimpleStanceController implements RobotController
          List<InverseDynamicsJoint> fingerJoints = Arrays.asList(ScrewTools.computeSubtreeJoints(fullRobotModel.getHand(robotSide)));
          joints.removeAll(fingerJoints);
       }
+
       joints.remove(fullRobotModel.getLidarJoint());
+
       return joints.toArray(new InverseDynamicsJoint[joints.size()]);
    }
 
@@ -344,7 +355,8 @@ public class SimpleStanceController implements RobotController
       double controlDT = 0.005;
       InverseDynamicsJoint[] jointsToOptimize = createJointsToOptimize(fullRobotModel);
       double gravityZ = -robot.getGravityZ();
-      SimpleStanceController controller = new SimpleStanceController(robot, fullRobotModel, referenceFrames, controlDT, jointsToOptimize, gravityZ, footForward, footBack, footWidth);
+      SimpleStanceController controller = new SimpleStanceController(robot, fullRobotModel, referenceFrames, controlDT, jointsToOptimize, gravityZ,
+                                             footForward, footBack, footWidth);
       controller.initialize();
 
 

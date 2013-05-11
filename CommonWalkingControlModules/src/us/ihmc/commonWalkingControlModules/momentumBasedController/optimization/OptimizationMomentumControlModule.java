@@ -44,7 +44,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    private final BooleanYoVariable converged = new BooleanYoVariable("converged", registry);
    private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable("hasNotConvergedInPast", registry);
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
-   private final Map<ContactablePlaneBody, Wrench> wrenches = new LinkedHashMap<ContactablePlaneBody, Wrench>();
+   private final Map<RigidBody, Wrench> wrenches = new LinkedHashMap<RigidBody, Wrench>();
    private final MomentumRateOfChangeData momentumRateOfChangeData;
 
    public OptimizationMomentumControlModule(InverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame, double controlDT,
@@ -80,7 +80,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       secondaryMotionConstraintHandler.reset();
    }
 
-   public void compute(LinkedHashMap<ContactablePlaneBody, ? extends PlaneContactState> contactStates, RobotSide upcomingSupportLeg)
+   public void compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, RobotSide upcomingSupportLeg)
    {
       centroidalMomentumHandler.compute();
       primaryMotionConstraintHandler.compute();
@@ -132,11 +132,12 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
       for (ContactablePlaneBody contactablePlaneBody : contactStates.keySet())
       {
-         Wrench wrench = contactPointWrenchMatrixCalculator.getWrench(contactStates.get(contactablePlaneBody));
-         ReferenceFrame bodyFixedFrame = contactablePlaneBody.getRigidBody().getBodyFixedFrame();
+         RigidBody rigidBody = contactablePlaneBody.getRigidBody();
+         Wrench wrench = contactPointWrenchMatrixCalculator.getWrench(contactStates.get(rigidBody));
+         ReferenceFrame bodyFixedFrame = rigidBody.getBodyFixedFrame();
          wrench.changeBodyFrameAttachedToSameBody(bodyFixedFrame);
          wrench.changeFrame(bodyFixedFrame);
-         wrenches.put(contactablePlaneBody, wrench);
+         wrenches.put(rigidBody, wrench);
       }
 
       DenseMatrix64F jointAccelerations = hardMotionConstraintEnforcer.computeConstrainedJointAccelerations(output.getJointAccelerations());
@@ -216,7 +217,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       return centroidalMomentumHandler.getCentroidalMomentumRate();
    }
 
-   public Map<ContactablePlaneBody, Wrench> getExternalWrenches()
+   public Map<RigidBody, Wrench> getExternalWrenches()
    {
       return wrenches;
    }
