@@ -40,14 +40,14 @@ public class MomentumControlTestTools
       JUnitTools.assertSpatialForceVectorEquals(desiredCentroidalMomentumRate, totalWrench, epsilon);
    }
 
-   public static void assertWrenchesInFrictionCones(Map<ContactablePlaneBody, Wrench> externalWrenches,
+   public static void assertWrenchesInFrictionCones(Map<RigidBody, Wrench> externalWrenches,
                                                     Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, double coefficientOfFriction)
    {
       CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
 
-      for (ContactablePlaneBody contactablePlaneBody : externalWrenches.keySet())
+      for (ContactablePlaneBody contactablePlaneBody : contactStates.keySet())
       {
-         Wrench wrench = externalWrenches.get(contactablePlaneBody);
+         Wrench wrench = externalWrenches.get(contactablePlaneBody.getRigidBody());
          PlaneContactState contactState = contactStates.get(contactablePlaneBody);
          ReferenceFrame planeFrame = contactState.getPlaneFrame();
 
@@ -67,14 +67,14 @@ public class MomentumControlTestTools
       }
    }
 
-   public static void assertRootJointWrenchZero(Map<ContactablePlaneBody, Wrench> externalWrenches, SixDoFJoint rootJoint, double gravityZ, double epsilon)
+   public static void assertRootJointWrenchZero(Map<RigidBody, Wrench> externalWrenches, SixDoFJoint rootJoint, double gravityZ, double epsilon)
    {
       TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), rootJoint.getSuccessor());
       InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
-      for (ContactablePlaneBody contactablePlaneBody : externalWrenches.keySet())
+      for (RigidBody rigidBody : externalWrenches.keySet())
       {
-         Wrench externalWrench = externalWrenches.get(contactablePlaneBody);
-         inverseDynamicsCalculator.setExternalWrench(contactablePlaneBody.getRigidBody(), externalWrench);
+         Wrench externalWrench = externalWrenches.get(rigidBody);
+         inverseDynamicsCalculator.setExternalWrench(rigidBody, externalWrench);
       }
       twistCalculator.compute();
       inverseDynamicsCalculator.compute();

@@ -8,10 +8,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAcce
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.SpatialForceVector;
-import us.ihmc.utilities.screwTheory.Wrench;
+import us.ihmc.utilities.screwTheory.*;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -26,7 +23,7 @@ public interface MomentumControlModule
 
    void reset();
 
-   void compute(LinkedHashMap<ContactablePlaneBody, ? extends PlaneContactState> contactStates, RobotSide upcomingSupportSide);
+   void compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, RobotSide upcomingSupportSide);
 
    void resetGroundReactionWrenchFilter();
 
@@ -38,5 +35,5 @@ public interface MomentumControlModule
 
    SpatialForceVector getDesiredCentroidalMomentumRate();
 
-   Map<ContactablePlaneBody, Wrench> getExternalWrenches();
+   Map<RigidBody, Wrench> getExternalWrenches();
 }
