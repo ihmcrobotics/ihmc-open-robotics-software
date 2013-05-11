@@ -299,7 +299,7 @@ public class MomentumBasedController implements RobotController
       }
    }
 
-   // TODO: visibility changed for "public"
+   // TODO: visibility changed to public
    public ReferenceFrame getHandFrame(RobotSide robotSide)
    {
       return fullRobotModel.getHand(robotSide).getBodyFixedFrame();
@@ -310,7 +310,7 @@ public class MomentumBasedController implements RobotController
       updatables.add(updatable);
    }
 
-   // TODO: visibility changed for "public"
+   // TODO: visibility changed to public
    public void doPDControl(OneDoFJoint[] joints, double k, double d)
    {
       for (OneDoFJoint joint : joints)
@@ -319,14 +319,14 @@ public class MomentumBasedController implements RobotController
       }
    }
 
-   // TODO: visibility changed for "public"
+   // TODO: visibility changed to public
    public void doPDControl(OneDoFJoint joint, double k, double d, double desiredPosition, double desiredVelocity)
    {
       double desiredAcceleration = computeDesiredAcceleration(k, d, desiredPosition, desiredVelocity, joint);
       setOneDoFJointAcceleration(joint, desiredAcceleration);
    }
 
-   // TODO: visibility changed for "public"
+   // TODO: visibility changed to public
    public void setOneDoFJointAcceleration(OneDoFJoint joint, double desiredAcceleration)
    {
       DenseMatrix64F jointAcceleration = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
@@ -380,7 +380,7 @@ public class MomentumBasedController implements RobotController
       return getName();
    }
 
-   // TODO: visibility changed for "public"
+   // TODO: visibility changed to public
    public FramePoint2d getCoP(ContactablePlaneBody contactablePlaneBody)
    {
       return planeContactWrenchProcessor.getCops().get(contactablePlaneBody);
