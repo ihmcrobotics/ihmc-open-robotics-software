@@ -19,13 +19,13 @@ public abstract class TaskspaceHandControlState extends State<IndividualHandCont
    protected final MomentumBasedController momentumBasedController;
 
 
-   public TaskspaceHandControlState(MomentumBasedController momentumBasedController, GeometricJacobian jacobian,
+   public TaskspaceHandControlState(IndividualHandControlState stateEnum, MomentumBasedController momentumBasedController, GeometricJacobian jacobian,
                                     YoVariableRegistry parentRegistry)
    {
-      super(IndividualHandControlState.MOVE_HAND_TO_POSITION_IN_WORLDFRAME);
+      super(stateEnum);
 
       RigidBody endEffector = jacobian.getEndEffector();
-      name = endEffector.getName() + FormattingTools.underscoredToCamelCase(stateEnum.toString(), true) + "State";
+      name = endEffector.getName() + FormattingTools.underscoredToCamelCase(this.stateEnum.toString(), true) + "State";
       registry = new YoVariableRegistry(name);
 
       this.momentumBasedController = momentumBasedController;

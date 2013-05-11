@@ -85,6 +85,8 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       centroidalMomentumHandler.compute();
       primaryMotionConstraintHandler.compute();
 
+      hardMotionConstraintEnforcer.setDampedLeastSquaresAlpha(momentumOptimizationSettings.getDampedLeastSquaresFactor());
+
       hardMotionConstraintEnforcer.compute(centroidalMomentumHandler.getCentroidalMomentumMatrixPart(jointsToOptimizeFor),
             primaryMotionConstraintHandler.getJacobian(),
               primaryMotionConstraintHandler.getRightHandSide());
@@ -142,8 +144,8 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
 //      assert(arePrimaryConstraintsSatisfied(jointAccelerations));
 
-      if (!arePrimaryConstraintsSatisfied(jointAccelerations))
-         throw new RuntimeException("primary constraints not satisfied");
+//      if (!arePrimaryConstraintsSatisfied(jointAccelerations))
+//         throw new RuntimeException("primary constraints not satisfied");
 
       centroidalMomentumHandler.computeCentroidalMomentumRate(jointsToOptimizeFor, jointAccelerations);
    }

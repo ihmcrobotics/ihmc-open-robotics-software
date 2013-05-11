@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.OrientationTrajectoryGen
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.*;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 
 import java.util.ArrayList;
@@ -24,8 +25,8 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
 {
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule;
+   private final RigidBody base;
    private final PositionTrajectoryGenerator positionTrajectoryGenerator;
-
    private final OrientationTrajectoryGenerator orientationTrajectoryGenerator;
 
    private final SpatialAccelerationVector handAcceleration = new SpatialAccelerationVector();
@@ -43,14 +44,15 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
    private final FrameVector desiredAngularVelocity = new FrameVector(worldFrame);
    private final FrameVector desiredAngularAcceleration = new FrameVector(worldFrame);
 
-   public TaskspaceHandPositionControlState(RobotSide robotSide, PositionTrajectoryGenerator positionTrajectoryGenerator,
-           OrientationTrajectoryGenerator orientationTrajectoryGenerator, RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule,
-           MomentumBasedController momentumBasedController, GeometricJacobian jacobian, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-           YoVariableRegistry parentRegistry)
+   public TaskspaceHandPositionControlState(IndividualHandControlState stateEnum, RobotSide robotSide,
+           PositionTrajectoryGenerator positionTrajectoryGenerator, OrientationTrajectoryGenerator orientationTrajectoryGenerator,
+           RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule, MomentumBasedController momentumBasedController,
+           GeometricJacobian jacobian, RigidBody base, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
-      super(momentumBasedController, jacobian, parentRegistry);
+      super(stateEnum, momentumBasedController, jacobian, parentRegistry);
 
       this.handSpatialAccelerationControlModule = handSpatialAccelerationControlModule;
+      this.base = base;
       this.positionTrajectoryGenerator = positionTrajectoryGenerator;
       this.orientationTrajectoryGenerator = orientationTrajectoryGenerator;
       desiredPositionFrame = new PoseReferenceFrame(robotSide.getCamelCaseNameForStartOfExpression() + name + "DesiredFrame", worldFrame);
@@ -82,7 +84,7 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
       orientationTrajectoryGenerator.packAngularAcceleration(desiredAngularAcceleration);
 
       handSpatialAccelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredVelocity, desiredAngularVelocity, desiredAcceleration,
-              desiredAngularAcceleration, jacobian.getBase());
+              desiredAngularAcceleration, base);
 
       handSpatialAccelerationControlModule.packAcceleration(handAcceleration);
 

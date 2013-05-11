@@ -20,6 +20,8 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
 {
    private final SideDependentList<Transform3D> handControlFramesWithRespectToFrameAfterWrist = new SideDependentList<Transform3D>();
    private final SideDependentList<Transform3D> handPosesWithRespectToChestFrame = new SideDependentList<Transform3D>();
+   private final double minElbowRollAngle = 0.5;
+
    public DRCRobotWalkingControllerParameters()
    {
       for(RobotSide robotSide : RobotSide.values)
@@ -90,6 +92,27 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
 //      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_ROLL), robotSide.negateIfRightSide(0.0));
 
       return jointPositions;
+   }
+
+
+   public Map<OneDoFJoint, Double> getMinTaskspaceArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
+   {
+      Map<OneDoFJoint, Double> ret = new LinkedHashMap<OneDoFJoint, Double>();
+      if (robotSide == RobotSide.LEFT)
+      {
+         ret.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_ROLL), minElbowRollAngle);
+      }
+      return ret;
+   }
+
+   public Map<OneDoFJoint, Double> getMaxTaskspaceArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
+   {
+      Map<OneDoFJoint, Double> ret = new LinkedHashMap<OneDoFJoint, Double>();
+      if (robotSide == RobotSide.RIGHT)
+      {
+         ret.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_ROLL), -minElbowRollAngle);
+      }
+      return ret;
    }
 
    public boolean doToeOffIfPossible()

@@ -6,5 +6,5 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
  */
 public enum IndividualHandControlState
 {
-   MOVE_HAND_TO_POSITION_IN_CHESTFRAME, JOINT_SPACE, MOVE_HAND_TO_POSITION_IN_WORLDFRAME;
+   DEFAULT, SINGULARITY_ESCAPE, OBJECT_MANIPULATION;
 }
