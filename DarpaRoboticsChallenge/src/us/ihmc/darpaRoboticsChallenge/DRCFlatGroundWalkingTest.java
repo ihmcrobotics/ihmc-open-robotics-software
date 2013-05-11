@@ -74,7 +74,6 @@ public class DRCFlatGroundWalkingTest
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCConfigParameters.INITIALIZE_ESTIMATOR_TO_ACTUAL = true;
 
       double standingTimeDuration = 1.0;
       double maximumWalkTime = 30.0;
@@ -267,9 +266,14 @@ public class DRCFlatGroundWalkingTest
       DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel, false);
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotInterface.getSimulateDT());
 
+      boolean originalInitializeEstimatorToActual = DRCConfigParameters.INITIALIZE_ESTIMATOR_TO_ACTUAL;
+      if (cheatWithGroundHeightAtForFootstep)
+         DRCConfigParameters.INITIALIZE_ESTIMATOR_TO_ACTUAL = true;
+
       DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(drcControlParameters, robotInterface, robotInitialSetup, guiInitialSetup,
                                                                scsInitialSetup, useVelocityAndHeadingScript, automaticSimulationRunner, timePerRecordTick,
                                                                simulationDataBufferSize, cheatWithGroundHeightAtForFootstep);
+      DRCConfigParameters.INITIALIZE_ESTIMATOR_TO_ACTUAL = originalInitializeEstimatorToActual;
 
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
 
