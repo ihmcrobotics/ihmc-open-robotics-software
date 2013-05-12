@@ -6,6 +6,9 @@ import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.*;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /**
  * @author twan
  *         Date: 5/2/13
@@ -14,6 +17,9 @@ public class ExternalWrenchHandler
 {
    private final SpatialForceVector gravitationalWrench;
    private final DenseMatrix64F wrenchEquationRightHandSide = new DenseMatrix64F(Wrench.SIZE, 1);
+   private final Map<RigidBody, Wrench> externalWrenchesToCompensateFor = new LinkedHashMap<RigidBody, Wrench>();
+   private final SpatialForceVector totalWrenchAlreadyApplied; // gravity plus external wrenches to compensate for
+   private final SpatialForceVector tempWrench = new SpatialForceVector();
 
    public ExternalWrenchHandler(double gravityZ, ReferenceFrame centerOfMassFrame, InverseDynamicsJoint rootJoint)
    {
@@ -22,6 +28,12 @@ public class ExternalWrenchHandler
       gravitationalWrench = new SpatialForceVector(centerOfMassFrame);
       double totalMass = TotalMassCalculator.computeMass(ScrewTools.computeSupportAndSubtreeSuccessors(rootJoint.getSuccessor()));
       gravitationalWrench.setLinearPartZ(-gravityZ * totalMass);
+      totalWrenchAlreadyApplied = new SpatialForceVector(centerOfMassFrame);
+   }
+
+   public void reset()
+   {
+      externalWrenchesToCompensateFor.clear();
    }
 
    /**
@@ -31,9 +43,27 @@ public class ExternalWrenchHandler
     */
    public final DenseMatrix64F computeWrenchEquationRightHandSide(DenseMatrix64F momentumEquationConvectiveTerm)
    {
-      gravitationalWrench.packMatrix(wrenchEquationRightHandSide);
+      totalWrenchAlreadyApplied.set(gravitationalWrench);
+      for (Wrench externalWrenchToCompensateFor : externalWrenchesToCompensateFor.values())
+      {
+         tempWrench.set(externalWrenchToCompensateFor);
+         tempWrench.changeFrame(gravitationalWrench.getExpressedInFrame());
+         totalWrenchAlreadyApplied.add(tempWrench);
+      }
+
+      totalWrenchAlreadyApplied.packMatrix(wrenchEquationRightHandSide);
       CommonOps.changeSign(wrenchEquationRightHandSide);
       CommonOps.addEquals(wrenchEquationRightHandSide, momentumEquationConvectiveTerm);
       return wrenchEquationRightHandSide;
+   }
+
+   public void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench)
+   {
+      externalWrenchesToCompensateFor.put(rigidBody, wrench);
+   }
+
+   public Map<RigidBody, Wrench> getExternalWrenchesToCompensateFor()
+   {
+      return externalWrenchesToCompensateFor;
    }
 }

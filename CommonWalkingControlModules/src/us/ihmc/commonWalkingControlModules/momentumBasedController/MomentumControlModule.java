@@ -33,6 +33,8 @@ public interface MomentumControlModule
 
    void setDesiredRateOfChangeOfMomentum(MomentumRateOfChangeData momentumRateOfChangeData);
 
+   void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench);
+
    SpatialForceVector getDesiredCentroidalMomentumRate();
 
    Map<RigidBody, Wrench> getExternalWrenches();

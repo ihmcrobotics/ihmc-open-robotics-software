@@ -42,10 +42,11 @@ public class OldMomentumControlModule implements MomentumControlModule
    private final AlphaFilteredYoFrameVector desiredGroundReactionForce;
 
    private final SpatialForceVector gravitationalWrench;
+   private final ReferenceFrame centerOfMassFrame;
 
+   private final Map<RigidBody, Wrench> externalWrenchesToCompensateFor = new LinkedHashMap<RigidBody, Wrench>();
 
    private final Map<RigidBody, Wrench> externalWrenches = new LinkedHashMap<RigidBody, Wrench>();
-
    protected final DoubleYoVariable alphaGroundReactionWrench = new DoubleYoVariable("alphaGroundReactionWrench", registry);
    private final BooleanYoVariable groundReactionWrenchFilterResetRequest = new BooleanYoVariable("groundReactionWrenchFilterResetRequest", registry);
    private final double controlDT;
@@ -77,11 +78,12 @@ public class OldMomentumControlModule implements MomentumControlModule
       this.desiredGroundReactionForce = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("desiredGroundReactionForce", "", registry,
               alphaGroundReactionWrench, unfilteredDesiredGroundReactionForce);
 
-      this.gravitationalWrench = new SpatialForceVector(centerOfMassFrame, new Vector3d(0.0, 0.0, totalMass * gravityZ), new Vector3d());
+      this.gravitationalWrench = new SpatialForceVector(centerOfMassFrame, new Vector3d(0.0, 0.0, -totalMass * gravityZ), new Vector3d());
 
       this.rootJointAccelerationData = new RootJointAccelerationData(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint());
       this.momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
       this.rootJoint = rootJoint;
+      this.centerOfMassFrame = centerOfMassFrame;
 
       parentRegistry.addChild(registry);
    }
@@ -101,6 +103,7 @@ public class OldMomentumControlModule implements MomentumControlModule
    {
       solver.reset();
       externalWrenches.clear();
+      externalWrenchesToCompensateFor.clear();
    }
 
    public void compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, RobotSide upcomingSupportLeg)
@@ -111,7 +114,11 @@ public class OldMomentumControlModule implements MomentumControlModule
 
       SpatialForceVector totalGroundReactionWrench = new SpatialForceVector();
       solver.getRateOfChangeOfMomentum(totalGroundReactionWrench);
-      totalGroundReactionWrench.add(gravitationalWrench);
+      totalGroundReactionWrench.sub(gravitationalWrench);
+      for (Wrench externalWrenchToCompensateFor : externalWrenchesToCompensateFor.values())
+      {
+         totalGroundReactionWrench.sub(externalWrenchToCompensateFor);
+      }
 
       unfilteredDesiredGroundReactionTorque.set(totalGroundReactionWrench.getAngularPartCopy());
       unfilteredDesiredGroundReactionForce.set(totalGroundReactionWrench.getLinearPartCopy());
@@ -171,7 +178,17 @@ public class OldMomentumControlModule implements MomentumControlModule
       Wrench admissibleGroundReactionWrench = TotalWrenchCalculator.computeTotalWrench(externalWrenches.values(),
                                                  totalGroundReactionWrench.getExpressedInFrame());
       desiredCentroidalMomentumRate.set(admissibleGroundReactionWrench);
-      desiredCentroidalMomentumRate.sub(gravitationalWrench);
+      desiredCentroidalMomentumRate.add(gravitationalWrench);
+      for (RigidBody rigidBody : externalWrenchesToCompensateFor.keySet())
+      {
+         Wrench externalWrenchToCompensateFor = externalWrenchesToCompensateFor.get(rigidBody);
+         totalGroundReactionWrench.add(externalWrenchToCompensateFor);
+         Wrench wrench = externalWrenches.get(rigidBody);
+         if (wrench == null)
+            externalWrenches.put(rigidBody, externalWrenchToCompensateFor);
+         else
+            wrench.add(externalWrenchToCompensateFor);
+      }
 
       solver.solve(desiredCentroidalMomentumRate);
    }
@@ -200,6 +217,13 @@ public class OldMomentumControlModule implements MomentumControlModule
       {
          solver.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
       }
+   }
+
+   public void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench)
+   {
+      Wrench copy = new Wrench(wrench);
+      copy.changeFrame(centerOfMassFrame);
+      externalWrenchesToCompensateFor.put(rigidBody, copy);
    }
 
    public void setDesiredRateOfChangeOfMomentum(MomentumRateOfChangeData momentumRateOfChangeData)
