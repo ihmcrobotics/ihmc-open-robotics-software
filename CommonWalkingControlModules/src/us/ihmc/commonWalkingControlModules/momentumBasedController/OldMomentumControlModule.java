@@ -184,6 +184,9 @@ public class OldMomentumControlModule implements MomentumControlModule
          Wrench externalWrenchToCompensateFor = externalWrenchesToCompensateFor.get(rigidBody);
          totalGroundReactionWrench.add(externalWrenchToCompensateFor);
          Wrench wrench = externalWrenches.get(rigidBody);
+         ReferenceFrame bodyFixedFrame = rigidBody.getBodyFixedFrame();
+         externalWrenchToCompensateFor.changeBodyFrameAttachedToSameBody(bodyFixedFrame);
+         externalWrenchToCompensateFor.changeFrame(bodyFixedFrame);
          if (wrench == null)
             externalWrenches.put(rigidBody, externalWrenchToCompensateFor);
          else
