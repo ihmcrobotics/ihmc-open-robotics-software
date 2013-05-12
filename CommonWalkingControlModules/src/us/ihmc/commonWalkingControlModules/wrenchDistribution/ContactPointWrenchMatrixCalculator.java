@@ -11,6 +11,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Wrench;
 
 import java.util.*;
@@ -24,7 +25,7 @@ public class ContactPointWrenchMatrixCalculator
    private final ReferenceFrame centerOfMassFrame;
 
    private final DenseMatrix64F q;
-   private final Map<PlaneContactState, Wrench> wrenches = new LinkedHashMap<PlaneContactState, Wrench>();
+   private final Map<RigidBody, Wrench> wrenches = new LinkedHashMap<RigidBody, Wrench>();
 
    // intermediate result storage:
    private final ArrayList<FrameVector> normalizedSupportVectors = new ArrayList<FrameVector>(ContactPointWrenchOptimizerNative.NUMBER_OF_SUPPORT_VECTORS);
@@ -100,45 +101,32 @@ public class ContactPointWrenchMatrixCalculator
       return q;
    }
 
-   public void computeWrenches(Collection<? extends PlaneContactState> contactStates, DenseMatrix64F rho)
+   public Map<RigidBody, Wrench> computeWrenches(LinkedHashMap<RigidBody, ? extends PlaneContactState> contactStates, DenseMatrix64F rho)
    {
+      wrenches.clear();
       int columnNumber = 0;
-      for (PlaneContactState contactState : contactStates)
+      for (RigidBody rigidBody : contactStates.keySet())
       {
+         PlaneContactState contactState = contactStates.get(rigidBody);
+
          int nColumns = contactState.getNumberOfContactPoints() * normalizedSupportVectors.size();
-         qBlock.reshape(Wrench.SIZE, nColumns);
-         CommonOps.extract(q, 0, Wrench.SIZE, columnNumber, columnNumber + nColumns, qBlock, 0, 0);
+         if (nColumns > 0)
+         {
+            qBlock.reshape(Wrench.SIZE, nColumns);
+            CommonOps.extract(q, 0, Wrench.SIZE, columnNumber, columnNumber + nColumns, qBlock, 0, 0);
 
-         rhoBlock.reshape(nColumns, 1);
-         CommonOps.extract(rho, columnNumber, columnNumber + nColumns, 0, 1, rhoBlock, 0, 0);
+            rhoBlock.reshape(nColumns, 1);
+            CommonOps.extract(rho, columnNumber, columnNumber + nColumns, 0, 1, rhoBlock, 0, 0);
 
-         CommonOps.mult(qBlock, rhoBlock, wrenchMatrix);
+            CommonOps.mult(qBlock, rhoBlock, wrenchMatrix);
 
-         Wrench wrench = getOrCreateWrench(contactState);
-         wrench.set(centerOfMassFrame, wrenchMatrix);
-
-         columnNumber += nColumns;
+            Wrench wrench = new Wrench(rigidBody.getBodyFixedFrame(), centerOfMassFrame);
+            wrench.set(centerOfMassFrame, wrenchMatrix);
+            wrench.changeFrame(rigidBody.getBodyFixedFrame());
+            wrenches.put(rigidBody, wrench);
+            columnNumber += nColumns;
+         }
       }
-   }
-
-   public Wrench getWrench(PlaneContactState contactState)
-   {
-      return wrenches.get(contactState);
-   }
-
-   private Wrench getOrCreateWrench(PlaneContactState contactState)
-   {
-      Wrench wrench = wrenches.get(contactState);
-      if (wrench == null)
-      {
-         wrench = new Wrench(contactState.getBodyFrame(), centerOfMassFrame);
-         wrenches.put(contactState, wrench);
-      }
-      return wrench;
-   }
-
-   public Map<PlaneContactState, Wrench> getWrenches()
-   {
       return wrenches;
    }
 }
