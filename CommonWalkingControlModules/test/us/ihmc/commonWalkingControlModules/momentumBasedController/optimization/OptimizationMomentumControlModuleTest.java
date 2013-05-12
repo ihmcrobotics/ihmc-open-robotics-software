@@ -22,10 +22,7 @@ import us.ihmc.utilities.test.JUnitTools;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import static us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlTestTools.assertRootJointWrenchZero;
 import static us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlTestTools.assertWrenchesInFrictionCones;
@@ -275,9 +272,20 @@ public class OptimizationMomentumControlModuleTest
       DenseMatrix64F rho = new DenseMatrix64F(MomentumOptimizerNative.rhoSize, 1);
       RandomMatrices.setRandom(rho, random);
       CommonOps.add(rho, rhoMin);
-      contactPointWrenchMatrixCalculator.computeWrenches(contactStates.values(), rho);
-      Wrench ret = TotalWrenchCalculator.computeTotalWrench(contactPointWrenchMatrixCalculator.getWrenches().values(), centerOfMassFrame);
+      Map<RigidBody,Wrench> rigidBodyWrenchMap = contactPointWrenchMatrixCalculator.computeWrenches(convertContactStates(contactStates), rho);
+      Wrench ret = TotalWrenchCalculator.computeTotalWrench(rigidBodyWrenchMap.values(), centerOfMassFrame);
       ret.setLinearPartZ(ret.getLinearPartZ() - totalMass * gravityZ);
+
+      return ret;
+   }
+
+   private static LinkedHashMap<RigidBody, PlaneContactState> convertContactStates(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates)
+   {
+      LinkedHashMap<RigidBody, PlaneContactState> ret = new LinkedHashMap<RigidBody, PlaneContactState>();
+      for (ContactablePlaneBody contactablePlaneBody : contactStates.keySet())
+      {
+         ret.put(contactablePlaneBody.getRigidBody(), contactStates.get(contactablePlaneBody));
+      }
 
       return ret;
    }

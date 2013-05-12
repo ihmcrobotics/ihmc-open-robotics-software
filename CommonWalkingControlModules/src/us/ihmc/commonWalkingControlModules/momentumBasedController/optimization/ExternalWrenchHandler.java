@@ -19,6 +19,7 @@ public class ExternalWrenchHandler
    private final DenseMatrix64F wrenchEquationRightHandSide = new DenseMatrix64F(Wrench.SIZE, 1);
    private final Map<RigidBody, Wrench> externalWrenchesToCompensateFor = new LinkedHashMap<RigidBody, Wrench>();
    private final SpatialForceVector totalWrenchAlreadyApplied; // gravity plus external wrenches to compensate for
+   private final Map<RigidBody, Wrench> externalWrenches = new LinkedHashMap<RigidBody, Wrench>();
    private final SpatialForceVector tempWrench = new SpatialForceVector();
 
    public ExternalWrenchHandler(double gravityZ, ReferenceFrame centerOfMassFrame, InverseDynamicsJoint rootJoint)
@@ -59,11 +60,35 @@ public class ExternalWrenchHandler
 
    public void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench)
    {
+      ReferenceFrame bodyFixedFrame = rigidBody.getBodyFixedFrame();
+      wrench.getBodyFrame().checkReferenceFrameMatch(bodyFixedFrame);
+      wrench.getExpressedInFrame().checkReferenceFrameMatch(bodyFixedFrame);
       externalWrenchesToCompensateFor.put(rigidBody, wrench);
    }
 
-   public Map<RigidBody, Wrench> getExternalWrenchesToCompensateFor()
+   public void computeExternalWrenches(Map<RigidBody, Wrench> groundReactionWrenches)
    {
-      return externalWrenchesToCompensateFor;
+      externalWrenches.clear();
+      externalWrenches.putAll(groundReactionWrenches);
+
+      for (RigidBody rigidBody : externalWrenchesToCompensateFor.keySet())
+      {
+         Wrench externalWrenchToCompensateFor = externalWrenchesToCompensateFor.get(rigidBody);
+
+         Wrench externalWrench = externalWrenches.get(rigidBody);
+         if (externalWrench == null)
+         {
+            externalWrenches.put(rigidBody, externalWrenchToCompensateFor);
+         }
+         else
+         {
+            externalWrench.add(externalWrenchToCompensateFor);
+         }
+      }
+   }
+
+   public Map<RigidBody, Wrench> getExternalWrenches()
+   {
+      return externalWrenches;
    }
 }

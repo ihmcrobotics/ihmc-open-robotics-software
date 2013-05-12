@@ -19,9 +19,7 @@ import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.Wrench;
 
 import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import static junit.framework.Assert.assertTrue;
 
@@ -57,7 +55,7 @@ public class ContactPointWrenchMatrixCalculatorTest
          bodies.add(randomFloatingChain.getRevoluteJoints().get(4).getSuccessor());
 
 
-         List<PlaneContactState> contactStates = new ArrayList<PlaneContactState>();
+         LinkedHashMap<RigidBody, PlaneContactState> contactStates = new LinkedHashMap<RigidBody, PlaneContactState>();
          YoVariableRegistry registry = new YoVariableRegistry("test");
 
          double coefficientOfFriction = random.nextDouble();
@@ -70,7 +68,7 @@ public class ContactPointWrenchMatrixCalculatorTest
             ReferenceFrame frameAfterJoint = body.getParentJoint().getFrameAfterJoint();
             ReferenceFrame planeFrame = body.getBodyFixedFrame();
             YoPlaneContactState contactState = new YoPlaneContactState("contactState" + contactNumber++, frameAfterJoint, planeFrame, registry);
-            contactStates.add(contactState);
+            contactStates.put(body, contactState);
 
             List<FramePoint2d> contactPoints = new ArrayList<FramePoint2d>();
             for (int i = 0; i < nContactPoints; i++)
@@ -86,29 +84,30 @@ public class ContactPointWrenchMatrixCalculatorTest
          int nColumns = nContactPoints * contactStates.size() * nSupportVectorsPerContactPoint + 5;
          ContactPointWrenchMatrixCalculator calculator = new ContactPointWrenchMatrixCalculator(centerOfMassFrame, nSupportVectorsPerContactPoint, nColumns);
 
-         calculator.computeMatrix(contactStates);
+         calculator.computeMatrix(contactStates.values());
          DenseMatrix64F q = calculator.getMatrix();
 
          DenseMatrix64F rho = new DenseMatrix64F(nColumns, 1);
          RandomMatrices.setRandom(rho, random);
 
-         assertTotalWrenchIsSumOfIndividualWrenches(centerOfMassFrame, contactStates, calculator, q, rho);
+         Map<RigidBody, Wrench> rigidBodyWrenchMap = calculator.computeWrenches(contactStates, rho);
 
-         assertWrenchesOK(contactStates, calculator, rho, coefficientOfFriction);
+         assertTotalWrenchIsSumOfIndividualWrenches(centerOfMassFrame, rigidBodyWrenchMap.values(), q, rho);
+
+         assertWrenchesOK(contactStates, rigidBodyWrenchMap, coefficientOfFriction);
       }
 
    }
 
-   private void assertTotalWrenchIsSumOfIndividualWrenches(CenterOfMassReferenceFrame centerOfMassFrame, List<PlaneContactState> contactStates, ContactPointWrenchMatrixCalculator calculator, DenseMatrix64F q, DenseMatrix64F rho)
+   private void assertTotalWrenchIsSumOfIndividualWrenches(CenterOfMassReferenceFrame centerOfMassFrame, Collection<Wrench> rigidBodyWrenchMap, DenseMatrix64F q, DenseMatrix64F rho)
    {
       DenseMatrix64F totalWrenchFromQ = new DenseMatrix64F(Wrench.SIZE, 1);
       CommonOps.mult(q, rho, totalWrenchFromQ);
 
-      calculator.computeWrenches(contactStates, rho);
       SpatialForceVector totalWrench = new Wrench(centerOfMassFrame, centerOfMassFrame);
-      for (PlaneContactState contactState : contactStates)
+      for (Wrench wrench : rigidBodyWrenchMap)
       {
-         Wrench wrench = calculator.getWrench(contactState);
+         wrench.changeFrame(centerOfMassFrame);
          totalWrench.add(wrench);
       }
 
@@ -118,14 +117,14 @@ public class ContactPointWrenchMatrixCalculatorTest
       EjmlUnitTests.assertEquals(totalWrenchFromQ, totalWrenchMatrix, 1e-12);
    }
 
-   private void assertWrenchesOK(List<PlaneContactState> contactStates, ContactPointWrenchMatrixCalculator calculator, DenseMatrix64F rho,
-                                 double coefficientOfFriction)
+   private void assertWrenchesOK(Map<RigidBody, PlaneContactState> contactStates,
+                                 Map<RigidBody, Wrench> rigidBodyWrenchMap, double coefficientOfFriction)
    {
       CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
-      calculator.computeWrenches(contactStates, rho);
-      for (PlaneContactState contactState : contactStates)
+      for (RigidBody rigidBody : rigidBodyWrenchMap.keySet())
       {
-         Wrench wrench = calculator.getWrench(contactState);
+         Wrench wrench = rigidBodyWrenchMap.get(rigidBody);
+         PlaneContactState contactState = contactStates.get(rigidBody);
          ReferenceFrame planeFrame = contactState.getPlaneFrame();
 
          wrench.changeFrame(planeFrame);
