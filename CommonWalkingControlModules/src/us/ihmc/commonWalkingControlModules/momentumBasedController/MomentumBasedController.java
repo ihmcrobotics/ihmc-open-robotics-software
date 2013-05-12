@@ -200,10 +200,9 @@ public class MomentumBasedController implements RobotController
       return k * (qDesired - joint.getQ()) + d * (qdDesired - joint.getQd());
    }
 
-   // TODO: visibility changed to "public"
-   public void setExternalHandWrench(RobotSide robotSide, Wrench handWrench)
+   public void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench)
    {
-      inverseDynamicsCalculator.setExternalWrench(fullRobotModel.getHand(robotSide), handWrench);
+      momentumControlModule.setExternalWrenchToCompensateFor(rigidBody, wrench);
    }
 
    public void doMotionControl()
