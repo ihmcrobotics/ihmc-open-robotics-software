@@ -22,11 +22,12 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.networking.bandwidthControl.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.utilities.net.KryoObjectClient;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
+import us.ihmc.utilities.net.ObjectCommunicator;
 
 public class DRCNetworkProcessor
 {
 
-   private final KryoObjectClient fieldComputerClient;
+   private final ObjectCommunicator fieldComputerClient;
    private final DRCNetworkProcessorNetworkingManager networkingManager;
    private final RobotPoseBuffer robotPoseBuffer;
 
@@ -41,7 +42,7 @@ public class DRCNetworkProcessor
    
    public DRCNetworkProcessor(URI rosCoreURI)
    {
-      this();
+      this((ObjectCommunicator)null);
 
       System.out.println("Connecting to ROS");
       RosMainNode rosMainNode;
@@ -56,19 +57,26 @@ public class DRCNetworkProcessor
       connect();
    }
    
-   public DRCNetworkProcessor(LocalObjectCommunicator scsCommunicator)
+   public DRCNetworkProcessor(LocalObjectCommunicator scsCommunicator, ObjectCommunicator drcNetworkObjectCommunicator)
    {
-      this();
+      this(drcNetworkObjectCommunicator);
       new SCSCameraDataReceiver(robotPoseBuffer, DRCConfigParameters.VIDEOSETTINGS, scsCommunicator, networkingManager);
       new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, fullRobotModel, jointMap);
       connect();
    }
 
-   private DRCNetworkProcessor()
+   private DRCNetworkProcessor(ObjectCommunicator fieldComputerClient)
    {
-      fieldComputerClient = new KryoObjectClient(DRCConfigParameters.SCS_MACHINE_IP_ADDRESS, DRCConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
-            DRCConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_UDP_PORT, new DRCNetClassList());
-      fieldComputerClient.setReconnectAutomatically(true);
+      if(fieldComputerClient == null)
+      {
+         this.fieldComputerClient = new KryoObjectClient(DRCConfigParameters.SCS_MACHINE_IP_ADDRESS, DRCConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
+               DRCConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_UDP_PORT, new DRCNetClassList());
+         ((KryoObjectClient)this.fieldComputerClient).setReconnectAutomatically(true);
+      }
+      else
+      {
+         this.fieldComputerClient = fieldComputerClient;
+      }
 
       networkingManager = new DRCNetworkProcessorNetworkingManager(fieldComputerClient);
 

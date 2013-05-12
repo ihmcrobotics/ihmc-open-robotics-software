@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.camera;
 
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -58,6 +59,10 @@ public abstract class CameraDataReceiver
          public <T> void attachListener(Class<T> clazz, ObjectConsumer<T> listener)
          {
             
+         }
+
+         public void connect() throws IOException
+         {
          }
       };
       compressedVideoDataServer = new CompressedVideoDataServer(videoSettings, videoConsumer);
