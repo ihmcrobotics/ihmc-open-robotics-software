@@ -5,6 +5,8 @@ import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.Box3d;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -29,22 +31,30 @@ import static org.junit.Assert.assertTrue;
  */
 public class FootstepDataTansformerTest
 {
+   private static Random random = new Random(100L);
+
    @Test
    public void test()
    {
-      Transform3D transform3D = new Transform3D();
+      Transform3D transform3D;
+      FootstepData originalFootstepData;
+      FootstepData transformedFootstepData;
 
-      FootstepData originalFootstepData = getTestFootstepData();
+      int numberOfTests = 10;
 
+      for (int i = 0; i < numberOfTests; i++)
+      {
+         originalFootstepData = getTestFootstepData();
+         transform3D = RandomTools.generateRandomTransform(random);
+         transformedFootstepData = FootstepDataTansformer.transformFootstepData(originalFootstepData, transform3D);
 
-
+         performEqualsTestsWithTransform(originalFootstepData, transform3D, transformedFootstepData);
+      }
    }
 
 
    private static FootstepData getTestFootstepData()
    {
-      Random random = new Random(100L);
-
       FootstepData ret = new FootstepData();
       ret.id = "name";
       ret.rigidBodyName = "rigidBodyNameHere";
@@ -76,8 +86,8 @@ public class FootstepDataTansformerTest
 
       ret.trajectoryWaypointGroundClearance = random.nextDouble();
 
-      //Ignore this for now
-      ret.trajectoryBoxData = new FlatHorizontalBoxData();
+      // Ignore this for now
+      ret.trajectoryBoxData = new FlatHorizontalBoxData(new Box3d());
 
       int index = (int) Math.floor(random.nextDouble() * TrajectoryWaypointGenerationMethod.values().length);
       ret.trajectoryWaypointGenerationMethod = TrajectoryWaypointGenerationMethod.values()[index];
@@ -91,49 +101,54 @@ public class FootstepDataTansformerTest
       List<Point3d> originalList;
       List<Point3d> transformedList;
 
-      //public String id;
+      // public String id;
       assertTrue(footstepData.getId().equals(transformedFootstepData.getId()));
 
-      //public String rigidBodyName;
+      // public String rigidBodyName;
       assertTrue(footstepData.getRigidBodyName().equals(transformedFootstepData.getRigidBodyName()));
 
-      //public Point3d location;
+      // public Point3d location;
       distance = getDistanceBetweenPoints(footstepData.getLocation(), transform3D, transformedFootstepData.getLocation());
       assertEquals("not equal", 0.0, distance, 1e-6);
 
-      //public Quat4d orientation;
+      // public Quat4d orientation;
+      Quat4d startQuat = footstepData.getOrientation();
+      Quat4d endQuat = transformedFootstepData.getOrientation();
+      assertTrue(areOrientationsEqualWithTransform(startQuat, transform3D, endQuat));
 
-
-      //public List<Point3d> expectedContactPoints;
+      // public List<Point3d> expectedContactPoints;
       originalList = footstepData.getExpectedContactPoints();
       transformedList = transformedFootstepData.getExpectedContactPoints();
       assertEquals("", originalList.size(), transformedList.size());
-      for (int i = 0; i <originalList.size() ; i++)
+
+      for (int i = 0; i < originalList.size(); i++)
       {
          distance = getDistanceBetweenPoints(originalList.get(i), transform3D, transformedList.get(i));
          assertEquals("not equal", 0.0, distance, 1e-6);
       }
 
 
-      //public boolean trustHeight;
+      // public boolean trustHeight;
       assertEquals("", footstepData.getTrustHeight(), transformedFootstepData.getTrustHeight());
 
-      //public List<Point3d> trajectoryWaypoints;
+      // public List<Point3d> trajectoryWaypoints;
       originalList = footstepData.getTrajectoryWaypoints();
       transformedList = transformedFootstepData.getTrajectoryWaypoints();
       assertEquals("", originalList.size(), transformedList.size());
-      for (int i = 0; i <originalList.size() ; i++)
+
+      for (int i = 0; i < originalList.size(); i++)
       {
          distance = getDistanceBetweenPoints(originalList.get(i), transform3D, transformedList.get(i));
          assertEquals("not equal", 0.0, distance, 1e-6);
       }
 
-      //public double trajectoryWaypointGroundClearance;
+      // public double trajectoryWaypointGroundClearance;
       assertEquals("", footstepData.getTrajectoryWaypointGroundClearance(), transformedFootstepData.getTrajectoryWaypointGroundClearance(), 1e-6);
 
-      //public FlatHorizontalBoxData trajectoryBoxData;
+      // public FlatHorizontalBoxData trajectoryBoxData;
+      // TODO: Not sure how to check if two are equal with a tranform
 
-      //public TrajectoryWaypointGenerationMethod trajectoryWaypointGenerationMethod;
+      // public TrajectoryWaypointGenerationMethod trajectoryWaypointGenerationMethod;
       assertTrue("", footstepData.getTrajectoryWaypointGenerationMethod().equals(transformedFootstepData.getTrajectoryWaypointGenerationMethod()));
    }
 
@@ -152,6 +167,19 @@ public class FootstepDataTansformerTest
       assertEquals("not equal", 0.0, distance, 1e-6);
    }
 
+   private static boolean areOrientationsEqualWithTransform(Quat4d orientationStart, Transform3D transform3D, Quat4d orientationEnd)
+   {
+      ReferenceFrame ending = ReferenceFrame.constructARootFrame("ending", false, true, true);
+      ReferenceFrame starting = ReferenceFrame.constructFrameWithUnchangingTransformToParent("starting", ending, transform3D, false, true, true);
+
+      FrameOrientation start = new FrameOrientation(starting, orientationStart);
+      FrameOrientation end = new FrameOrientation(ending, orientationEnd);
+
+      end.changeFrame(starting);
+
+      return equalsFrameOrientation(start, end);
+   }
+
    private static double getDistanceBetweenPoints(Point3d startingPoint, Transform3D transform3D, Point3d endPoint)
    {
       ReferenceFrame ending = ReferenceFrame.constructARootFrame("ending", false, true, true);
@@ -163,6 +191,23 @@ public class FootstepDataTansformerTest
       end.changeFrame(starting);
 
       return end.distance(start);
+   }
 
+   private static boolean equalsFrameOrientation(FrameOrientation frameOrientation1, FrameOrientation frameOrientation2)
+   {
+      // Check reference frame first
+      if (frameOrientation1.getReferenceFrame() != frameOrientation2.getReferenceFrame())
+         return false;
+
+      double[] rpyThis = frameOrientation1.getYawPitchRoll();
+      double[] rpyThat = frameOrientation2.getYawPitchRoll();
+
+      for (int i = 0; i < rpyThat.length; i++)
+      {
+         if (Math.abs(rpyThis[i] - rpyThat[i]) > 1e-6)
+            return false;
+      }
+
+      return true;
    }
 }
