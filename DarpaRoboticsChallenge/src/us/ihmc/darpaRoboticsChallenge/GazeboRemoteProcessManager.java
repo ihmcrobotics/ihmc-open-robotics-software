@@ -44,15 +44,15 @@ public class GazeboRemoteProcessManager
       config = new Properties();
       config.put("StrictHostKeyChecking", "no");
 
-      scanForPreExistingSims();
+      scanForSims();
    }
-
-   public void sendShellCommandToMachine(LocalCloudMachines machine, String command)
+   
+   public void sendCommandThroughShellChannel(LocalCloudMachines machine, String command)
    {
       shellCommandStreamForMachine(machine).println(command);
    }
-
-   public void sendExecCommandToMachine(LocalCloudMachines machine, String command, boolean shouldWait, boolean shouldPrint)
+   
+   public void sendCommandThroughExecChannel(LocalCloudMachines machine, String command)
    {
       try
       {
@@ -209,7 +209,7 @@ public class GazeboRemoteProcessManager
       }
    }
 
-   private void scanForPreExistingSims()
+   private void scanForSims()
    {
       try
       {
