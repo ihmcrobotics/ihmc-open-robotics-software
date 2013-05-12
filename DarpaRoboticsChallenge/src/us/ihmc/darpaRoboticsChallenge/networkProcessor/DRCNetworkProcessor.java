@@ -78,9 +78,9 @@ public class DRCNetworkProcessor
          this.fieldComputerClient = fieldComputerClient;
       }
 
-      networkingManager = new DRCNetworkProcessorNetworkingManager(fieldComputerClient);
+      networkingManager = new DRCNetworkProcessorNetworkingManager(this.fieldComputerClient);
 
-      robotPoseBuffer = new RobotPoseBuffer(fieldComputerClient, 1000);
+      robotPoseBuffer = new RobotPoseBuffer(this.fieldComputerClient, 1000);
       
       jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_SANDIA_HANDS, false);  
       JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap, true);
