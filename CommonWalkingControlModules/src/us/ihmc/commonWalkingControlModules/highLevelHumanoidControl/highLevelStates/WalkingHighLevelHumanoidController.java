@@ -36,7 +36,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointC
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointTrajectoryData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OrientationTrajectoryData;
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.HeelSwitch;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightPartialDerivativesData;
@@ -255,7 +254,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       coefficientOfFriction.set(0.6);    // TODO: tune?
 
-      setupLimbJacobians(fullRobotModel);
+      setupLegJacobians(fullRobotModel);
 
       setupFootControlModules(footPositionTrajectoryGenerators, heelPitchTrajectoryGenerators);
       
@@ -332,7 +331,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          onToesInitialAngleProviders.put(robotSide, onToesInitialPitchProvider);
          onToesFinalAngleProviders.put(robotSide, onToesFinalPitchProvider);
          
-         GeometricJacobian jacobian = jacobians.get(robotSide).get(LimbName.LEG);
+         GeometricJacobian jacobian = legJacobians.get(robotSide);
          EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(bipedFoot, jacobian, swingPositionTrajectoryGenerator,
                heelPitchTrajectoryGenerator, swingOrientationTrajectoryGenerator,
                onToesPitchTrajectoryGenerator, yoTime, twistCalculator, registry);
