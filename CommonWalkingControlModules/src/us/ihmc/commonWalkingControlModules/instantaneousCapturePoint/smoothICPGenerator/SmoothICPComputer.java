@@ -32,6 +32,7 @@ public class SmoothICPComputer
    private final ArrayList<YoFramePoint> constantCentersOfPressure = new ArrayList<YoFramePoint>();
 
    private final BooleanYoVariable isDoubleSupport = new BooleanYoVariable("icpPlannerIsDoubleSupport", registry);
+   private final DoubleYoVariable timeInState = new DoubleYoVariable("timeInState", registry);
    private final DoubleYoVariable initialTime = new DoubleYoVariable("initialTime", registry);
    private final BooleanYoVariable comeToStop = new BooleanYoVariable("icpPlannerComeToStop", registry);
    private final BooleanYoVariable atAStop = new BooleanYoVariable("icpPlannerAtAStop", registry);
@@ -362,12 +363,12 @@ public class SmoothICPComputer
 
    public void getICPPositionAndVelocity(Point3d icpPostionToPack, Vector3d icpVelocityToPack, Point3d ecmpToPack, double time)
    {
-      double timeInState = time - initialTime.getDoubleValue();
+      timeInState.set(time - initialTime.getDoubleValue());
 
       if (isDoubleSupport.getBooleanValue())
-         getICPPositionAndVelocityDoubleSupport(icpPostionToPack, icpVelocityToPack, ecmpToPack, timeInState);
+         getICPPositionAndVelocityDoubleSupport(icpPostionToPack, icpVelocityToPack, ecmpToPack, timeInState.getDoubleValue());
       else
-         getICPPositionAndVelocitySingleSupport(icpPostionToPack, icpVelocityToPack, ecmpToPack, timeInState);
+         getICPPositionAndVelocitySingleSupport(icpPostionToPack, icpVelocityToPack, ecmpToPack, timeInState.getDoubleValue());
    }
 
    private void getICPPositionAndVelocitySingleSupport(Point3d icpPositionToPack, Vector3d icpVelocityToPack, Point3d ecmpToPack, double timeInState)
@@ -482,21 +483,21 @@ public class SmoothICPComputer
 
    public boolean isDone(double time)
    {
-      double timeInState = time - initialTime.getDoubleValue();
+      timeInState.set(time - initialTime.getDoubleValue());
       if (isDoubleSupport.getBooleanValue())
       {
          if (isInitialTransfer.getBooleanValue())
          {
-            return timeInState > doubleSupportInitialTransferDuration.getDoubleValue();
+            return timeInState.getDoubleValue() > doubleSupportInitialTransferDuration.getDoubleValue();
          }
 
          else 
          {
-            return timeInState > doubleSupportDuration.getDoubleValue();
+            return timeInState.getDoubleValue() > doubleSupportDuration.getDoubleValue();
          }
       }
 
-      else return timeInState > singleSupportDuration.getDoubleValue();
+      else return timeInState.getDoubleValue() > singleSupportDuration.getDoubleValue();
    }
 
    public Point3d getUpcomingCornerPoint()
