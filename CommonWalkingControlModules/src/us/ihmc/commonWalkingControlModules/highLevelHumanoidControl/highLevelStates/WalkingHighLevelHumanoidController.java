@@ -1,9 +1,15 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.media.j3d.Transform3D;
-import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
@@ -32,6 +38,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.IndividualHandControlStateMachine;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.FinalDesiredICPCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPBasedMomentumRateOfChangeControlModule;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.InstantaneousCapturePointPlanner;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothICPComputer2D;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointTrajectoryData;
@@ -47,12 +55,10 @@ import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivatives
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesSmoother;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMXYTimeDerivativesData;
-import us.ihmc.commonWalkingControlModules.trajectories.ConstantCoPInstantaneousCapturePointTrajectory;
 import us.ihmc.commonWalkingControlModules.trajectories.ContactStatesAndUpcomingFootstepData;
 import us.ihmc.commonWalkingControlModules.trajectories.CurrentOrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.FlatThenPolynomialCoMHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.HeelPitchTouchdownProvidersManager;
-import us.ihmc.commonWalkingControlModules.trajectories.InstantaneousCapturePointTrajectory;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationTrajectoryGenerator;
@@ -66,7 +72,6 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.kinematics.AverageOrientationCalculator;
-import us.ihmc.utilities.kinematics.OrientationInterpolationCalculator;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -149,7 +154,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
    private final YoVariableDoubleProvider transferTimeProvider = new YoVariableDoubleProvider("transferTime", registry);
    private final DoubleYoVariable stopInDoubleSupporTrajectoryTime = new DoubleYoVariable("stopInDoubleSupporTrajectoryTime", registry);
 
-   private final FinalDesiredICPCalculator finalDesiredICPCalculator;
+//   private final FinalDesiredICPCalculator finalDesiredICPCalculator;
 
    private final BooleanYoVariable rememberFinalICPFromSingleSupport = new BooleanYoVariable("rememberFinalICPFromSingleSupport", registry);
    private final YoFramePoint2d finalDesiredICPInWorld = new YoFramePoint2d("finalDesiredICPInWorld", "", worldFrame, registry);
@@ -186,7 +191,9 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
    private final BooleanYoVariable readyToGrabNextFootstep = new BooleanYoVariable("readyToGrabNextFootstep", registry);
 
    private final HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters;
-   private final InstantaneousCapturePointTrajectory icpTrajectoryGenerator;
+//   private final InstantaneousCapturePointTrajectory icpTrajectoryGenerator;
+   private final InstantaneousCapturePointPlanner instantaneousCapturePointPlanner;
+   
    private final SideDependentList<SettableOrientationProvider> finalFootOrientationProviders = new SideDependentList<SettableOrientationProvider>();
 
    private final OneDoFJoint[] positionControlJoints;
@@ -230,6 +237,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
    private final YoFramePoint capturePoint;
    private final YoFramePoint2d desiredICP;
    private final YoFrameVector2d desiredICPVelocity;
+
    private final FullRobotModel fullRobotModel;
    private final double gravity;
    private final double controlDT;
@@ -273,7 +281,8 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
 
       desiredPelvisOrientationTrajectoryInputPort = desiredPelvisOrientationPort;
       coMHeightTimeDerivativesSmoother = new CoMHeightTimeDerivativesSmoother(controlDT, registry);
-      this.finalDesiredICPCalculator = finalDesiredICPCalculator;
+      
+//      this.finalDesiredICPCalculator = finalDesiredICPCalculator;
       this.centerOfMassHeightTrajectoryGenerator = centerOfMassHeightTrajectoryGenerator;
       this.swingTimeCalculationProvider = swingTimeCalculationProvider;
       this.trajectoryParametersProvider = trajectoryParametersProvider;
@@ -290,15 +299,22 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
       centerOfMassHeightController.setDerivativeGain(GainCalculator.computeDerivativeGain(centerOfMassHeightController.getProportionalGain(), zeta));
 
       String namePrefix = "walking";
-      icpTrajectoryGenerator = new ConstantCoPInstantaneousCapturePointTrajectory(namePrefix, bipedSupportPolygons, registry);
+      
+//      ConstantCoPInstantaneousCapturePointTrajectory icpTrajectoryGenerator = new ConstantCoPInstantaneousCapturePointTrajectory(namePrefix, bipedSupportPolygons, registry);
+//      this.instantaneousCapturePointPlanner = new InstantaneousCapturePointPlannerConverter(finalDesiredICPCalculator, icpTrajectoryGenerator);
 
+      double doubleSupportFirstStepFraction = 0.5;
+      int maxNumberOfConsideredFootsteps = 4;
+      this.instantaneousCapturePointPlanner = new SmoothICPComputer2D(doubleSupportFirstStepFraction, maxNumberOfConsideredFootsteps, registry, dynamicGraphicObjectsListRegistry);
+
+      
       this.stateMachine = new StateMachine<WalkingState>(namePrefix + "State", namePrefix + "SwitchTime", WalkingState.class, yoTime, registry);    // this is used by name, and it is ugly.
 
       this.finalPositionProvider = finalPositionProvider;
 
       this.icpTrajectoryHasBeenInitialized = new BooleanYoVariable("icpTrajectoryHasBeenInitialized", registry);
 
-      rememberFinalICPFromSingleSupport.set(true);
+      rememberFinalICPFromSingleSupport.set(false);//true);
       finalDesiredICPInWorld.set(Double.NaN, Double.NaN);
 
       coefficientOfFriction.set(0.6);    // TODO: tune?
@@ -663,7 +679,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
                  bipedFeet);
          checkForSteppingOnOrOff(transferToSide);
 
-         if (icpTrajectoryGenerator.isDone())
+         if (instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue()))
          {
             if (!icpTrajectoryHasBeenInitialized.getBooleanValue())
             {
@@ -695,15 +711,11 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
                }
 
                icpAndMomentumBasedController.updateBipedSupportPolygons(bipedSupportPolygons);    // need to always update biped support polygons after a change to the contact states
-
-               icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, trajectoryTime, icpAndMomentumBasedController.getOmega0(),
-                                                 amountToBeInsideDoubleSupport.getDoubleValue(), getSupportLeg(), yoTime.getDoubleValue());
-
                icpTrajectoryHasBeenInitialized.set(true);
             }
          }
 
-         if (icpTrajectoryGenerator.isDone() && (transferToSide == null))
+         if (instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue()) && (transferToSide == null))
          {
             desiredICPVelocity.set(0.0, 0.0);
          }
@@ -711,8 +723,9 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
          {
             FramePoint2d desiredICPLocal = new FramePoint2d(desiredICP.getReferenceFrame());
             FrameVector2d desiredICPVelocityLocal = new FrameVector2d(desiredICPVelocity.getReferenceFrame());
-            icpTrajectoryGenerator.getCurrentDesiredICPPositionAndVelocity(desiredICPLocal, desiredICPVelocityLocal, icpAndMomentumBasedController.getOmega0(),
-                    yoTime.getDoubleValue());
+            FramePoint2d ecmpLocal = new FramePoint2d(ReferenceFrame.getWorldFrame());
+            
+            instantaneousCapturePointPlanner.getICPPositionAndVelocity(desiredICPLocal, desiredICPVelocityLocal, ecmpLocal, yoTime.getDoubleValue());
             desiredICP.set(desiredICPLocal);
             desiredICPVelocity.set(desiredICPVelocityLocal);
          }
@@ -756,29 +769,12 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
 
          else
          {
-            Footstep transferFromFootstep = createFootstepFromFootAndContactablePlaneBody(referenceFrames.getFootFrame(transferToSide.getOppositeSide()),
-                                               bipedFeet.get(transferToSide.getOppositeSide()));
-            Footstep transferToFootstep = createFootstepFromFootAndContactablePlaneBody(referenceFrames.getFootFrame(transferToSide),
-                                             bipedFeet.get(transferToSide));
-
-
-            FrameConvexPolygon2d transferToFootPolygon = computeFootPolygon(transferToSide, referenceFrames.getSoleFrame(transferToSide));
-
-            Footstep nextFootstep = upcomingFootstepList.getNextFootstep();
-            Footstep nextNextFootstep = upcomingFootstepList.getNextNextFootstep();
-
-            TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
-            transferToAndNextFootstepsData.setTransferFromFootstep(transferFromFootstep);
-            transferToAndNextFootstepsData.setTransferToFootstep(transferToFootstep);
-            transferToAndNextFootstepsData.setTransferToFootPolygonInSoleFrame(transferToFootPolygon);
-            transferToAndNextFootstepsData.setTransferToSide(transferToSide);
-            transferToAndNextFootstepsData.setNextFootstep(nextFootstep);
-            transferToAndNextFootstepsData.setNextNextFootstep(nextNextFootstep);
-            transferToAndNextFootstepsData.setEstimatedStepTime(swingTimeCalculationProvider.getValue() + transferTimeProvider.getValue());
-            transferToAndNextFootstepsData.setW0(icpAndMomentumBasedController.getOmega0());
-
-            finalDesiredICPCalculator.initialize(transferToAndNextFootstepsData);
-            FramePoint2d finalDesiredICP = finalDesiredICPCalculator.getFinalDesiredICP();
+            TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepData();
+            
+            instantaneousCapturePointPlanner.initializeDoubleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue());
+            
+//            finalDesiredICPCalculator.initialize(transferToAndNextFootstepsData);
+            FramePoint2d finalDesiredICP = instantaneousCapturePointPlanner.getFinalDesiredICP();
             double trajectoryTime = transferTimeProvider.getValue();
 
             finalDesiredICPInWorld.set(finalDesiredICP.changeFrameCopy(worldFrame));
@@ -786,6 +782,37 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
          }
 
          return finalDesiredICPAndTrajectoryTime;
+      }
+
+      public TransferToAndNextFootstepsData createTransferToAndNextFootstepData()
+      {
+         Footstep transferFromFootstep = createFootstepFromFootAndContactablePlaneBody(referenceFrames.getFootFrame(transferToSide.getOppositeSide()),
+                                            bipedFeet.get(transferToSide.getOppositeSide()));
+         Footstep transferToFootstep = createFootstepFromFootAndContactablePlaneBody(referenceFrames.getFootFrame(transferToSide),
+                                          bipedFeet.get(transferToSide));
+
+
+         FrameConvexPolygon2d transferToFootPolygon = computeFootPolygon(transferToSide, referenceFrames.getSoleFrame(transferToSide));
+
+         Footstep nextFootstep = upcomingFootstepList.getNextFootstep();
+         Footstep nextNextFootstep = upcomingFootstepList.getNextNextFootstep();
+
+         TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
+         transferToAndNextFootstepsData.setTransferFromFootstep(transferFromFootstep);
+         transferToAndNextFootstepsData.setTransferToFootstep(transferToFootstep);
+         transferToAndNextFootstepsData.setTransferToFootPolygonInSoleFrame(transferToFootPolygon);
+         transferToAndNextFootstepsData.setTransferToSide(transferToSide);
+         transferToAndNextFootstepsData.setNextFootstep(nextFootstep);
+         transferToAndNextFootstepsData.setNextNextFootstep(nextNextFootstep);
+         transferToAndNextFootstepsData.setEstimatedStepTime(swingTimeCalculationProvider.getValue() + transferTimeProvider.getValue());
+         transferToAndNextFootstepsData.setW0(icpAndMomentumBasedController.getOmega0());
+         transferToAndNextFootstepsData.setDoubleSupportDuration(transferTimeProvider.getValue());
+         transferToAndNextFootstepsData.setSingleSupportDuration(swingTimeCalculationProvider.getValue());
+         double doubleSupportInitialTransferDuration = 0.4; //TODO: Magic Number
+         transferToAndNextFootstepsData.setDoubleSupportInitialTransferDuration(doubleSupportInitialTransferDuration );
+         boolean stopIfReachedEnd = (upcomingFootstepList.getNumberOfFootstepsToProvide() <= 3); //TODO: Magic Number
+         transferToAndNextFootstepsData.setStopIfReachedEnd(stopIfReachedEnd);
+         return transferToAndNextFootstepsData;
       }
 
       @Override
@@ -910,7 +937,9 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
 
          FramePoint2d desiredICPLocal = new FramePoint2d(desiredICP.getReferenceFrame());
          FrameVector2d desiredICPVelocityLocal = new FrameVector2d(desiredICPVelocity.getReferenceFrame());
-         icpTrajectoryGenerator.getCurrentDesiredICPPositionAndVelocity(desiredICPLocal, desiredICPVelocityLocal, icpAndMomentumBasedController.getOmega0(),
+         FramePoint2d ecmpLocal = new FramePoint2d(ReferenceFrame.getWorldFrame());
+
+         instantaneousCapturePointPlanner.getICPPositionAndVelocity(desiredICPLocal, desiredICPVelocityLocal, ecmpLocal, 
                  yoTime.getDoubleValue());
          desiredICP.set(desiredICPLocal);
          desiredICPVelocity.set(desiredICPVelocityLocal);
@@ -1030,8 +1059,9 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
          setSupportLeg(supportSide);
          icpAndMomentumBasedController.updateBipedSupportPolygons(bipedSupportPolygons);
 
-         icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, swingTimeCalculationProvider.getValue(), omega0,
-                                           amountToBeInsideSingleSupport.getDoubleValue(), getSupportLeg(), yoTime.getDoubleValue());
+         // Shouldn't have to do this init anymore since it's done above...
+//         icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, swingTimeCalculationProvider.getValue(), omega0,
+//                                           amountToBeInsideSingleSupport.getDoubleValue(), getSupportLeg(), yoTime.getDoubleValue());
 
          centerOfMassHeightTrajectoryGenerator.initialize(getSupportLeg(), nextFootstep, getContactStatesList());
          if (DEBUG)
@@ -1101,7 +1131,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
          }
          else
          {
-            return icpTrajectoryHasBeenInitialized.getBooleanValue() && icpTrajectoryGenerator.isDone();
+            return icpTrajectoryHasBeenInitialized.getBooleanValue() && instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue());
          }
       }
    }
@@ -1139,7 +1169,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
 
          if (walkingControllerParameters.finishSwingWhenTrajectoryDone())
          {
-            boolean trajectoryDone = icpTrajectoryGenerator.isDone();    // endEffectorControlModule.isTrajectoryDone();
+            boolean trajectoryDone = instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue());    // endEffectorControlModule.isTrajectoryDone();
 
             return hasMinimumTimePassed && (trajectoryDone || footSwitchActivated);
          }
@@ -1197,7 +1227,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
    {
       public void doTransitionAction()
       {
-         icpTrajectoryGenerator.reset();
+         instantaneousCapturePointPlanner.reset(yoTime.getDoubleValue());
       }
    }
 
@@ -1243,27 +1273,13 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
          footPolygon = new FrameConvexPolygon2d(contactableBody.getContactPoints2d());
       }
 
-      TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
-
-      transferToAndNextFootstepsData.setTransferFromFootstep(transferFromFootstep);
-      transferToAndNextFootstepsData.setTransferToFootstep(transferToFootstep);
-
-      transferToAndNextFootstepsData.setTransferToFootPolygonInSoleFrame(footPolygon);
-      transferToAndNextFootstepsData.setTransferToSide(swingSide);
-      transferToAndNextFootstepsData.setNextFootstep(upcomingFootstepList.getNextNextFootstep());
-      transferToAndNextFootstepsData.setNextNextFootstep(upcomingFootstepList.getNextNextNextFootstep());
-      transferToAndNextFootstepsData.setEstimatedStepTime(swingTimeCalculationProvider.getValue() + transferTimeProvider.getValue());
-      transferToAndNextFootstepsData.setW0(icpAndMomentumBasedController.getOmega0());
-      transferToAndNextFootstepsData.setDoubleSupportDuration(transferTimeProvider.getValue());
-      transferToAndNextFootstepsData.setSingleSupportDuration(swingTimeCalculationProvider.getValue());
-      double doubleSupportInitialTransferDuration = 0.4; //TODO: Magic Number
-      transferToAndNextFootstepsData.setDoubleSupportInitialTransferDuration(doubleSupportInitialTransferDuration );
-      boolean stopIfReachedEnd = (upcomingFootstepList.getNumberOfFootstepsToProvide() <= 3); //TODO: Magic Number
-      transferToAndNextFootstepsData.setStopIfReachedEnd(stopIfReachedEnd);
+      TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(transferToFootstep, swingSide,
+            transferFromFootstep, footPolygon);
       
       
-      finalDesiredICPCalculator.initialize(transferToAndNextFootstepsData);
-      FramePoint2d finalDesiredICP = finalDesiredICPCalculator.getFinalDesiredICP();
+      instantaneousCapturePointPlanner.initializeSingleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue());
+      
+      FramePoint2d finalDesiredICP = instantaneousCapturePointPlanner.getFinalDesiredICP();
       finalDesiredICP.changeFrame(referenceFrame);
 
       finalDesiredICPInWorld.set(finalDesiredICP);
@@ -1295,6 +1311,29 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
       }
 
       return icpWayPoint;
+   }
+
+   public TransferToAndNextFootstepsData createTransferToAndNextFootstepDataForSingleSupport(Footstep transferToFootstep, RobotSide swingSide,
+         Footstep transferFromFootstep, FrameConvexPolygon2d footPolygon)
+   {
+      TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
+
+      transferToAndNextFootstepsData.setTransferFromFootstep(transferFromFootstep);
+      transferToAndNextFootstepsData.setTransferToFootstep(transferToFootstep);
+
+      transferToAndNextFootstepsData.setTransferToFootPolygonInSoleFrame(footPolygon);
+      transferToAndNextFootstepsData.setTransferToSide(swingSide);
+      transferToAndNextFootstepsData.setNextFootstep(upcomingFootstepList.getNextNextFootstep());
+      transferToAndNextFootstepsData.setNextNextFootstep(upcomingFootstepList.getNextNextNextFootstep());
+      transferToAndNextFootstepsData.setEstimatedStepTime(swingTimeCalculationProvider.getValue() + transferTimeProvider.getValue());
+      transferToAndNextFootstepsData.setW0(icpAndMomentumBasedController.getOmega0());
+      transferToAndNextFootstepsData.setDoubleSupportDuration(transferTimeProvider.getValue());
+      transferToAndNextFootstepsData.setSingleSupportDuration(swingTimeCalculationProvider.getValue());
+      double doubleSupportInitialTransferDuration = 0.4; //TODO: Magic Number
+      transferToAndNextFootstepsData.setDoubleSupportInitialTransferDuration(doubleSupportInitialTransferDuration );
+      boolean stopIfReachedEnd = (upcomingFootstepList.getNumberOfFootstepsToProvide() <= 3); //TODO: Magic Number
+      transferToAndNextFootstepsData.setStopIfReachedEnd(stopIfReachedEnd);
+      return transferToAndNextFootstepsData;
    }
 
    private List<FramePoint> getToePoints(ContactablePlaneBody supportFoot)

@@ -13,8 +13,6 @@ public interface InstantaneousCapturePointTrajectory extends Finishable
 
    public abstract void getCurrentDesiredICPPositionAndVelocity(FramePoint2d desiredPosition, FrameVector2d desiredVelocity, double omega0, double currentTime);
 
-   public abstract double getMoveTime();
-
    public abstract void reset();
 
 }
