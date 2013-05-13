@@ -26,6 +26,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepUtils;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsDataVisualizer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.UpcomingFootstepList;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredHandPoseProvider;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.FinalDesiredICPCalculator;
@@ -100,7 +101,9 @@ import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider
 
 public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoidControlPattern
 {
-   public final static HighLevelState controllerState = HighLevelState.WALKING;
+   private boolean VISUALIZE = true;
+   
+   private final static HighLevelState controllerState = HighLevelState.WALKING;
    
    private final double PELVIS_YAW_INITIALIZATION_TIME = 1.5;
    
@@ -157,7 +160,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final BooleanYoVariable readyToGrabNextFootstep = new BooleanYoVariable("readyToGrabNextFootstep", registry);
 
    private final HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters;
-//   private final InstantaneousCapturePointTrajectory icpTrajectoryGenerator;
    private final InstantaneousCapturePointPlanner instantaneousCapturePointPlanner;
    
    private final SideDependentList<SettableOrientationProvider> finalFootOrientationProviders = new SideDependentList<SettableOrientationProvider>();
@@ -188,6 +190,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable desiredCoMHeightAcceleration;
    private final DoubleYoVariable controllerInitializationTime;
 
+   private final TransferToAndNextFootstepsDataVisualizer transferToAndNextFootstepsDataVisualizer;
+   
    public WalkingHighLevelHumanoidController(SideDependentList<FootSwitchInterface> footSwitches,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, FootstepProvider footstepProvider, DesiredHandPoseProvider handPoseProvider,
          HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters, DesiredHeadOrientationProvider desiredHeadOrientationProvider,
@@ -197,11 +201,25 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          TrajectoryParametersProvider trajectoryParametersProvider, boolean stayOntoes, double desiredPelvisPitch, double trailingFootPitch,
          WalkingControllerParameters walkingControllerParameters, ICPBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
          ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationPort, LidarControllerInterface lidarControllerInterface,
-         FinalDesiredICPCalculator finalDesiredICPCalculator, SideDependentList<HandControllerInterface> handControllers,
+         InstantaneousCapturePointPlanner instantaneousCapturePointPlanner, SideDependentList<HandControllerInterface> handControllers,
          ICPAndMomentumBasedController icpAndMomentumBasedController, WalkingStatusReporter walkingStatusReporter)
    {
       super(icpAndMomentumBasedController.getBipedFeet(), null, desiredPelvisOrientationPort, desiredHeadOrientationProvider, icpAndMomentumBasedController, walkingControllerParameters,
             handPoseProvider, handControllers, lidarControllerInterface, dynamicGraphicObjectsListRegistry, controllerState);
+      
+      if (dynamicGraphicObjectsListRegistry == null)
+      {
+         VISUALIZE = false;
+      }
+    
+      if (VISUALIZE)
+      {
+         transferToAndNextFootstepsDataVisualizer = new TransferToAndNextFootstepsDataVisualizer(registry, dynamicGraphicObjectsListRegistry);
+      }
+      else
+      {
+         transferToAndNextFootstepsDataVisualizer = null;
+      }
       
       // Getting parameters from the icpAndMomentumBasedController
       this.icpAndMomentumBasedController = icpAndMomentumBasedController;
@@ -226,6 +244,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       this.heelPitchTouchdownProvidersManager = heelPitchTouchdownProvidersManager;
       this.icpBasedMomentumRateOfChangeControlModule = momentumRateOfChangeControlModule;
 
+      this.instantaneousCapturePointPlanner = instantaneousCapturePointPlanner;
+      
       this.upcomingFootstepList = new UpcomingFootstepList(footstepProvider);
 
       this.centerOfMassHeightController = new PDController("comHeight", registry);
@@ -235,13 +255,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       String namePrefix = "walking";
       
-//      ConstantCoPInstantaneousCapturePointTrajectory icpTrajectoryGenerator = new ConstantCoPInstantaneousCapturePointTrajectory(namePrefix, bipedSupportPolygons, registry);
-//      this.instantaneousCapturePointPlanner = new InstantaneousCapturePointPlannerConverter(finalDesiredICPCalculator, icpTrajectoryGenerator);
-
-      double doubleSupportFirstStepFraction = 0.5;
-      int maxNumberOfConsideredFootsteps = 4;
-      this.instantaneousCapturePointPlanner = new SmoothICPComputer2D(doubleSupportFirstStepFraction, maxNumberOfConsideredFootsteps, registry, dynamicGraphicObjectsListRegistry);
-
       
       this.stateMachine = new StateMachine<WalkingState>(namePrefix + "State", namePrefix + "SwitchTime", WalkingState.class, yoTime, registry);    // this is used by name, and it is ugly.
 
@@ -537,7 +550,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          else
          {
-            TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepData();
+            TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForDoubleSupport();
             
             instantaneousCapturePointPlanner.initializeDoubleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue());
             
@@ -552,7 +565,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          return finalDesiredICPAndTrajectoryTime;
       }
 
-      public TransferToAndNextFootstepsData createTransferToAndNextFootstepData()
+      public TransferToAndNextFootstepsData createTransferToAndNextFootstepDataForDoubleSupport()
       {
          Footstep transferFromFootstep = createFootstepFromFootAndContactablePlaneBody(referenceFrames.getFootFrame(transferToSide.getOppositeSide()),
                                             bipedFeet.get(transferToSide.getOppositeSide()));
@@ -580,6 +593,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          transferToAndNextFootstepsData.setDoubleSupportInitialTransferDuration(doubleSupportInitialTransferDuration );
          boolean stopIfReachedEnd = (upcomingFootstepList.getNumberOfFootstepsToProvide() <= 3); //TODO: Magic Number
          transferToAndNextFootstepsData.setStopIfReachedEnd(stopIfReachedEnd);
+         
+         if (VISUALIZE)
+         {
+            transferToAndNextFootstepsDataVisualizer.visualizeFootsteps(transferToAndNextFootstepsData); 
+         }
+         
          return transferToAndNextFootstepsData;
       }
 
@@ -1098,6 +1117,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       transferToAndNextFootstepsData.setDoubleSupportInitialTransferDuration(doubleSupportInitialTransferDuration );
       boolean stopIfReachedEnd = (upcomingFootstepList.getNumberOfFootstepsToProvide() <= 3); //TODO: Magic Number
       transferToAndNextFootstepsData.setStopIfReachedEnd(stopIfReachedEnd);
+      
+      if (VISUALIZE)
+      {
+         transferToAndNextFootstepsDataVisualizer.visualizeFootsteps(transferToAndNextFootstepsData); 
+      }
+      
       return transferToAndNextFootstepsData;
    }
 
