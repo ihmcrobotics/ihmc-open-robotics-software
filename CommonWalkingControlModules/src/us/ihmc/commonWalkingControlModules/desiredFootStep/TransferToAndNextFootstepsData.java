@@ -138,17 +138,12 @@ public class TransferToAndNextFootstepsData
          getFootLocationFromFootstepInWorldFrame(footLocationListToPack, nextNextFootstep);
       }
       else return;
-
-      
    }
 
-   private void getFootLocationFromFootstepInWorldFrame(ArrayList<FramePoint> footLocationListToPack, Footstep footstep)
+   private static void getFootLocationFromFootstepInWorldFrame(ArrayList<FramePoint> footLocationListToPack, Footstep footstep)
    {
-      ReferenceFrame soleReferenceFrame = transferFromFootstep.getSoleReferenceFrame();
-      FramePoint framePoint = new FramePoint(soleReferenceFrame);
-      framePoint.changeFrame(ReferenceFrame.getWorldFrame());
-      
-      footLocationListToPack.add(framePoint);
+      FramePoint centerOfFootstep = FootstepUtils.getCenterOfFootstep(footstep);
+      footLocationListToPack.add(centerOfFootstep);
    }
 
    public double getSingleSupportDuration()
