@@ -14,7 +14,6 @@ import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredHandPoseProvider;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OrientationTrajectoryData;
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.commonWalkingControlModules.trajectories.FixedOrientationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.FixedPositionTrajectoryGenerator;
 import us.ihmc.controlFlow.ControlFlowInputPort;
@@ -54,7 +53,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactablePlaneBody foot = bipedFeet.get(robotSide);
-         GeometricJacobian jacobian = jacobians.get(robotSide).get(LimbName.LEG);
+         GeometricJacobian jacobian = legJacobians.get(robotSide);
          
          String bodyName = foot.getRigidBody().getName();
          FixedPositionTrajectoryGenerator swingPositionTrajectoryGenerator = new FixedPositionTrajectoryGenerator(bodyName + "DesiredPosition", worldFrame, registry);
