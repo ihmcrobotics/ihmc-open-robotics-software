@@ -1,13 +1,10 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
@@ -19,12 +16,9 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.calculators.EquivalentConstantCoPCalculator;
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.DegenerateOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.head.DesiredHeadOrientationProvider;
-import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
@@ -33,9 +27,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepUtils;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.UpcomingFootstepList;
-import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredHandPoseProvider;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.IndividualHandControlStateMachine;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.FinalDesiredICPCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPBasedMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.InstantaneousCapturePointPlanner;
@@ -44,9 +36,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointC
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointTrajectoryData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OrientationTrajectoryData;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.HeelSwitch;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightPartialDerivativesData;
@@ -84,24 +74,16 @@ import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.ScrewTools;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.PDController;
 import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatus;
 import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
@@ -117,19 +99,12 @@ import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParamete
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypointGenerationMethod;
 import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider;
 
-public class WalkingHighLevelHumanoidController extends State<HighLevelState>
+public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoidControlPattern
 {
    public final static HighLevelState controllerState = HighLevelState.WALKING;
    
    private final double PELVIS_YAW_INITIALIZATION_TIME = 1.5;
    
-   private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
-
-   private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
-   private final WalkingControllerParameters walkingControllerParameters;
-
    private final WalkingStatusReporter walkingStatusReporter;
    private BooleanYoVariable alreadyBeenInDoubleSupportOnce;
 
@@ -137,7 +112,6 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
 
    private final static boolean DEBUG = false;
    private final StateMachine<WalkingState> stateMachine;
-   private final SideDependentList<IndividualHandControlStateMachine> manipulationStateMachines = new SideDependentList<IndividualHandControlStateMachine>();
    private final CenterOfMassJacobian centerOfMassJacobian;
 
    private final CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator;
@@ -165,15 +139,10 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
    private final DoubleYoVariable amountToBeInsideSingleSupport = new DoubleYoVariable("amountToBeInsideSingleSupport", registry);
    private final DoubleYoVariable amountToBeInsideDoubleSupport = new DoubleYoVariable("amountToBeInsideDoubleSupport", registry);
 
-   private final DegenerateOrientationControlModule chestOrientationControlModule;
-
    private final DoubleYoVariable userDesiredPelvisPitch = new DoubleYoVariable("userDesiredPelvisPitch", registry);
    private final SettableOrientationProvider initialPelvisOrientationProvider;
    private final SettableOrientationProvider finalPelvisOrientationProvider;
    private final OrientationTrajectoryGenerator pelvisOrientationTrajectoryGenerator;
-
-   private final LinkedHashMap<ContactablePlaneBody, EndEffectorControlModule> endEffectorControlModules = new LinkedHashMap<ContactablePlaneBody,
-                                                                                                              EndEffectorControlModule>();
 
    private final SwingTimeCalculationProvider swingTimeCalculationProvider;
    private final TrajectoryParametersProvider trajectoryParametersProvider;
@@ -183,8 +152,6 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
    private final BooleanYoVariable stayOnToes = new BooleanYoVariable("stayOnToes", registry);
    private final DoubleYoVariable trailingFootPitch = new DoubleYoVariable("trailingFootPitch", registry);
 
-   private final DoubleYoVariable kUpperBody = new DoubleYoVariable("kUpperBody", registry);
-   private final DoubleYoVariable zetaUpperBody = new DoubleYoVariable("zetaUpperBody", registry);
    private final YoPositionProvider finalPositionProvider;
 
    private final DoubleYoVariable swingAboveSupportAnkle = new DoubleYoVariable("swingAboveSupportAnkle", registry);
@@ -196,25 +163,8 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
    
    private final SideDependentList<SettableOrientationProvider> finalFootOrientationProviders = new SideDependentList<SettableOrientationProvider>();
 
-   private final OneDoFJoint[] positionControlJoints;
-
-   private final OneDoFJoint jointForExtendedNeckPitchRange;
-   private final HeadOrientationControlModule headOrientationControlModule;
-   private final DesiredHeadOrientationProvider desiredHeadOrientationProvider;
-
-   private final SideDependentList<EnumMap<LimbName, GeometricJacobian>> jacobians = SideDependentList.createListOfEnumMaps(LimbName.class);
-   private final ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort;
    private final ICPBasedMomentumRateOfChangeControlModule icpBasedMomentumRateOfChangeControlModule;
-   private final YoFrameOrientation desiredPelvisOrientation = new YoFrameOrientation("desiredPelvis", worldFrame, registry);
-   private final YoFrameVector desiredPelvisAngularVelocity;
-   private final YoFrameVector desiredPelvisAngularAcceleration;
 
-
-   private final DoubleYoVariable coefficientOfFriction = new DoubleYoVariable("coefficientOfFriction", registry);
-
-// private final OneDoFJoint lidarJoint;
-   private final LidarControllerInterface lidarControllerInterface;
-   private final List<OneDoFJoint> torqueControlJoints = new ArrayList<OneDoFJoint>();
    private final BooleanYoVariable toeOff = new BooleanYoVariable("toeOff", registry);
    private final BooleanYoVariable icpTrajectoryHasBeenInitialized;
    private final BooleanYoVariable doToeOffIfPossible = new BooleanYoVariable("doToeOffIfPossible", registry);
@@ -231,19 +181,12 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
    private final ICPAndMomentumBasedController icpAndMomentumBasedController;
    private final EnumYoVariable<RobotSide> upcomingSupportLeg;
    private final EnumYoVariable<RobotSide> supportLeg;
-   private final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
    private final BipedSupportPolygons bipedSupportPolygons;
-   private final CommonWalkingReferenceFrames referenceFrames;
    private final YoFramePoint capturePoint;
    private final YoFramePoint2d desiredICP;
    private final YoFrameVector2d desiredICPVelocity;
 
-   private final FullRobotModel fullRobotModel;
-   private final double gravity;
-   private final double controlDT;
-   private final TwistCalculator twistCalculator;
    private final DoubleYoVariable desiredCoMHeightAcceleration;
-   private final DoubleYoVariable yoTime;
    private final DoubleYoVariable controllerInitializationTime;
 
    public WalkingHighLevelHumanoidController(SideDependentList<FootSwitchInterface> footSwitches,
@@ -258,28 +201,21 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
          FinalDesiredICPCalculator finalDesiredICPCalculator, SideDependentList<HandControllerInterface> handControllers,
          ICPAndMomentumBasedController icpAndMomentumBasedController, WalkingStatusReporter walkingStatusReporter)
    {
-      super(controllerState);
-
+      super(icpAndMomentumBasedController.getBipedFeet(), null, desiredPelvisOrientationPort, desiredHeadOrientationProvider, icpAndMomentumBasedController, walkingControllerParameters,
+            handPoseProvider, handControllers, lidarControllerInterface, dynamicGraphicObjectsListRegistry, controllerState);
+      
       // Getting parameters from the icpAndMomentumBasedController
       this.icpAndMomentumBasedController = icpAndMomentumBasedController;
-      yoTime = icpAndMomentumBasedController.getYoTime();
-      gravity = icpAndMomentumBasedController.getGravityZ();
-      controlDT = icpAndMomentumBasedController.getControlDT();
       contactStates = icpAndMomentumBasedController.getContactStates();
       upcomingSupportLeg = icpAndMomentumBasedController.getUpcomingSupportLeg();
       supportLeg = icpAndMomentumBasedController.getYoSupportLeg();
-      bipedFeet = icpAndMomentumBasedController.getBipedFeet();
-      referenceFrames = icpAndMomentumBasedController.getReferenceFrames();
       capturePoint = icpAndMomentumBasedController.getCapturePoint();
       desiredICP = icpAndMomentumBasedController.getDesiredICP();
       desiredICPVelocity = icpAndMomentumBasedController.getDesiredICPVelocity();
       bipedSupportPolygons = icpAndMomentumBasedController.getBipedSupportPolygons();
-      fullRobotModel = icpAndMomentumBasedController.getFullRobotModel();
       desiredCoMHeightAcceleration = icpAndMomentumBasedController.getDesiredCoMHeightAcceleration();
-      twistCalculator = icpAndMomentumBasedController.getTwistCalculator();
       centerOfMassJacobian = icpAndMomentumBasedController.getCenterOfMassJacobian();
 
-      desiredPelvisOrientationTrajectoryInputPort = desiredPelvisOrientationPort;
       coMHeightTimeDerivativesSmoother = new CoMHeightTimeDerivativesSmoother(controlDT, registry);
       
 //      this.finalDesiredICPCalculator = finalDesiredICPCalculator;
@@ -321,43 +257,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
 
       setupLimbJacobians(fullRobotModel);
 
-      for (RobotSide robotSide : RobotSide.values())
-      {
-         ContactablePlaneBody bipedFoot = bipedFeet.get(robotSide);
-         contactStates.get(bipedFoot).set(bipedFoot.getContactPoints2d(), coefficientOfFriction.getDoubleValue());    // flat feet
-         String sideString = robotSide.getCamelCaseNameForStartOfExpression();
-
-         PositionTrajectoryGenerator swingPositionTrajectoryGenerator = footPositionTrajectoryGenerators.get(robotSide);
-         DoubleTrajectoryGenerator heelPitchTrajectoryGenerator = (heelPitchTrajectoryGenerators == null) ? null : heelPitchTrajectoryGenerators.get(robotSide);
-
-         OrientationProvider initialOrientationProvider = new CurrentOrientationProvider(worldFrame, bipedFoot.getBodyFrame());
-         SettableOrientationProvider finalFootOrientationProvider = new SettableOrientationProvider(sideString + "FinalFootOrientation", worldFrame, registry);
-         finalFootOrientationProviders.put(robotSide, finalFootOrientationProvider);
-
-         OrientationTrajectoryGenerator swingOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(sideString
-                                                                                 + "SwingFootOrientation", worldFrame, swingTimeCalculationProvider,
-                                                                                    initialOrientationProvider, finalFootOrientationProvider, registry);
-
-         YoVariableDoubleProvider onToesInitialPitchProvider = new YoVariableDoubleProvider(sideString + "OnToesInitialPitch", registry);
-         YoVariableDoubleProvider onToesFinalPitchProvider = new YoVariableDoubleProvider(sideString + "OnToesFinalPitch", registry);
-         DoubleProvider onToesInitialPitchVelocityProvider = new ConstantDoubleProvider(0.0);
-         DoubleProvider onToesFinalPitchVelocityProvider = new ConstantDoubleProvider(walkingControllerParameters.getFinalToeOffPitchAngularVelocity());
-         DoubleProvider onToesTrajectoryTimeProvider = transferTimeProvider;
-         
-         DoubleTrajectoryGenerator onToesPitchTrajectoryGenerator = new QuinticPolynomialTrajectoryGenerator(sideString + "OnToesPitch",
-                                                                        onToesInitialPitchProvider, onToesInitialPitchVelocityProvider, onToesFinalPitchProvider,
-                                                                        onToesFinalPitchVelocityProvider, onToesTrajectoryTimeProvider, registry);
-         
-         onToesInitialAngleProviders.put(robotSide, onToesInitialPitchProvider);
-         onToesFinalAngleProviders.put(robotSide, onToesFinalPitchProvider);
-
-         GeometricJacobian jacobian = jacobians.get(robotSide).get(LimbName.LEG);
-         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(bipedFoot, jacobian, swingPositionTrajectoryGenerator,
-                                                                heelPitchTrajectoryGenerator, swingOrientationTrajectoryGenerator,
-                                                                onToesPitchTrajectoryGenerator, yoTime, twistCalculator, registry);
-         endEffectorControlModule.setParameters(3e-2, 500.0);
-         endEffectorControlModules.put(bipedFoot, endEffectorControlModule);
-      }
+      setupFootControlModules(footPositionTrajectoryGenerators, heelPitchTrajectoryGenerators);
       
       initialPelvisOrientationProvider = new SettableOrientationProvider("initialPelvis", worldFrame, registry);
       finalPelvisOrientationProvider = new SettableOrientationProvider("finalPelvis", worldFrame, registry);
@@ -380,8 +280,6 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
       onToesTriangleAreaLimit.set(0.01);
       doToeOffIfPossible.set(walkingControllerParameters.doToeOffIfPossible());
 
-      this.walkingControllerParameters = walkingControllerParameters;
-
       this.walkingStatusReporter = walkingStatusReporter;
 
       double initialLeadingFootPitch = 0.05;
@@ -394,153 +292,6 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
       onToesInitialAngleProviders.get(trailingLeg).set(this.trailingFootPitch.getDoubleValue());
 
 
-      for (RobotSide robotSide : RobotSide.values())
-      {
-         HandControllerInterface handControllerInterface = null;
-         if (handControllers != null)
-         {
-            handControllerInterface = handControllers.get(robotSide);
-
-         }
-
-         GeometricJacobian jacobian = jacobians.get(robotSide).get(LimbName.ARM);
-
-         Map<OneDoFJoint,Double> defaultArmJointPositions = walkingControllerParameters.getDefaultArmJointPositions(fullRobotModel, robotSide);
-         Map<OneDoFJoint, Double> minTaskSpacePositions = walkingControllerParameters.getMinTaskspaceArmJointPositions(fullRobotModel, robotSide);
-         Map<OneDoFJoint, Double> maxTaskSpacePositions = walkingControllerParameters.getMaxTaskspaceArmJointPositions(fullRobotModel, robotSide);
-
-         manipulationStateMachines.put(robotSide,
-                                       new IndividualHandControlStateMachine(yoTime, robotSide, fullRobotModel, twistCalculator,
-                                             walkingControllerParameters, handPoseProvider,
-                                          dynamicGraphicObjectsListRegistry, handControllerInterface, gravity, controlDT, icpAndMomentumBasedController,
-                                          jacobian, defaultArmJointPositions, minTaskSpacePositions, maxTaskSpacePositions, registry));
-      }
-
-      this.desiredHeadOrientationProvider = desiredHeadOrientationProvider;
-
-      String[] headOrientationControlJointNames = walkingControllerParameters.getHeadOrientationControlJointNames();
-      String[] chestOrientationControlJointNames = walkingControllerParameters.getChestOrientationControlJointNames();
-
-      RigidBody elevator = fullRobotModel.getElevator();
-      RigidBody pelvis = fullRobotModel.getPelvis();
-      InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
-      InverseDynamicsJoint[] headOrientationControlJoints = ScrewTools.findJointsWithNames(allJoints, headOrientationControlJointNames);
-      InverseDynamicsJoint[] chestOrientationControlJoints = ScrewTools.findJointsWithNames(allJoints, chestOrientationControlJointNames);
-
-      if (headOrientationControlJoints.length > 0)
-      {
-         final RigidBody head = fullRobotModel.getHead();
-         GeometricJacobian neckJacobian = new GeometricJacobian(headOrientationControlJoints, head.getBodyFixedFrame());
-         ReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
-         ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
-         ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
-         ReferenceFrame[] availableHeadOrientationControlFrames = new ReferenceFrame[] {pelvisZUpFrame, pelvisFrame, ReferenceFrame.getWorldFrame()};
-         headOrientationControlModule = new HeadOrientationControlModule(neckJacobian, pelvis, elevator, twistCalculator,
-                 availableHeadOrientationControlFrames, chestFrame, walkingControllerParameters, registry, dynamicGraphicObjectsListRegistry);
-
-         // Setting initial head pitch
-         // This magic number (0.67) is a good default head pitch for getting good LIDAR point coverage of ground by feet
-         // it would be in DRC config parameters, but the would require updating several nested constructors with an additional parameter
-         FrameOrientation orientation = new FrameOrientation(pelvisZUpFrame, 0.0, 0.67, 0.0);
-         headOrientationControlModule.setOrientationToTrack(new FrameOrientation(orientation), pelvis);
-         double headKp = 40.0;
-         double headZeta = 1.0;
-         double headKd = GainCalculator.computeDerivativeGain(headKp, headZeta);
-         headOrientationControlModule.setProportionalGains(headKp, headKp, headKp);
-         headOrientationControlModule.setDerivativeGains(headKd, headKd, headKd);
-
-         if (desiredHeadOrientationProvider != null)
-         {
-            desiredHeadOrientationProvider.setHeadOrientationControlModule(headOrientationControlModule);
-         }
-      }
-      else
-      {
-         headOrientationControlModule = null;
-      }
-
-      if (walkingControllerParameters.getJointNameForExtendedPitchRange() != null)
-      {
-         InverseDynamicsJoint[] inverseDynamicsJointForExtendedNeckPitchControl = ScrewTools.findJointsWithNames(allJoints,
-                                                                                     walkingControllerParameters.getJointNameForExtendedPitchRange());
-         OneDoFJoint[] jointForExtendedNeckPitchControl = ScrewTools.filterJoints(inverseDynamicsJointForExtendedNeckPitchControl, OneDoFJoint.class);
-         if (jointForExtendedNeckPitchControl.length == 1)
-         {
-            this.jointForExtendedNeckPitchRange = jointForExtendedNeckPitchControl[0];
-         }
-         else
-         {
-            this.jointForExtendedNeckPitchRange = null;
-         }
-      }
-      else
-      {
-         this.jointForExtendedNeckPitchRange = null;
-      }
-
-      if (chestOrientationControlJoints.length > 0)
-      {
-         RigidBody chest = fullRobotModel.getChest();
-         GeometricJacobian spineJacobian = new GeometricJacobian(chestOrientationControlJoints, chest.getBodyFixedFrame());
-         chestOrientationControlModule = new ChestOrientationControlModule(pelvis, fullRobotModel.getChest(), spineJacobian, twistCalculator, registry);
-         chestOrientationControlModule.setProportionalGains(100.0, 100.0, 100.0);
-         chestOrientationControlModule.setDerivativeGains(20.0, 20.0, 20.0);
-      }
-      else
-      {
-         chestOrientationControlModule = null;
-      }
-
-      List<InverseDynamicsJoint> unconstrainedJoints = new ArrayList<InverseDynamicsJoint>(Arrays.asList(allJoints));
-      for (RobotSide robotSide : RobotSide.values())
-      {
-         RigidBody hand = fullRobotModel.getHand(robotSide);
-         InverseDynamicsJoint[] armJoints = ScrewTools.createJointPath(fullRobotModel.getChest(), hand);
-         unconstrainedJoints.removeAll(Arrays.asList(armJoints));
-
-         RigidBody foot = fullRobotModel.getFoot(robotSide);
-         InverseDynamicsJoint[] legJoints = ScrewTools.createJointPath(pelvis, foot);
-         unconstrainedJoints.removeAll(Arrays.asList(legJoints));
-
-         InverseDynamicsJoint[] handJoints = ScrewTools.computeSubtreeJoints(hand);
-         OneDoFJoint[] handJointsArray = new OneDoFJoint[ScrewTools.computeNumberOfJointsOfType(OneDoFJoint.class, handJoints)];
-         ScrewTools.filterJoints(handJoints, handJointsArray, OneDoFJoint.class);
-
-         List<OneDoFJoint> handJointsList = Arrays.asList(handJointsArray);
-
-         unconstrainedJoints.removeAll(handJointsList);
-         torqueControlJoints.addAll(handJointsList);
-      }
-
-      this.lidarControllerInterface = lidarControllerInterface;
-
-      if (lidarControllerInterface != null)
-      {
-         unconstrainedJoints.remove(lidarControllerInterface.getLidarJoint());
-      }
-
-      unconstrainedJoints.removeAll(Arrays.asList(headOrientationControlJoints));
-      unconstrainedJoints.removeAll(Arrays.asList(chestOrientationControlJoints));
-
-      if (jointForExtendedNeckPitchRange != null)
-      {
-         unconstrainedJoints.remove(jointForExtendedNeckPitchRange);
-      }
-
-      unconstrainedJoints.remove(fullRobotModel.getRootJoint());
-      InverseDynamicsJoint[] unconstrainedJointsArray = new InverseDynamicsJoint[unconstrainedJoints.size()];
-      unconstrainedJoints.toArray(unconstrainedJointsArray);
-      positionControlJoints = new OneDoFJoint[unconstrainedJointsArray.length];
-      ScrewTools.filterJoints(unconstrainedJointsArray, positionControlJoints, OneDoFJoint.class);
-
-      unconstrainedJoints.removeAll(Arrays.asList(positionControlJoints));
-      if (unconstrainedJoints.size() > 0)
-         throw new RuntimeException("Joints unconstrained: " + unconstrainedJoints);
-
-      this.desiredPelvisAngularVelocity = new YoFrameVector("desiredPelvisAngularVelocity", worldFrame, registry);
-      this.desiredPelvisAngularAcceleration = new YoFrameVector("desiredPelvisAngularAcceleration", worldFrame, registry);
-
-
       controllerInitializationTime = new DoubleYoVariable("controllerInitializationTime", registry);
       alreadyBeenInDoubleSupportOnce = new BooleanYoVariable("alreadyBeenInDoubleSupportOnce", registry);
 
@@ -548,20 +299,45 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
          updateWalkingStatusReporter();
    }
 
-   private void setupLimbJacobians(FullRobotModel fullRobotModel)
+   protected void setupFootControlModules(SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators,
+         SideDependentList<DoubleTrajectoryGenerator> heelPitchTrajectoryGenerators)
    {
-      EnumMap<LimbName, RigidBody> bases = new EnumMap<LimbName, RigidBody>(LimbName.class);
-      bases.put(LimbName.LEG, fullRobotModel.getPelvis());
-      bases.put(LimbName.ARM, fullRobotModel.getChest());
-
       for (RobotSide robotSide : RobotSide.values())
       {
-         for (LimbName limbName : LimbName.values())
-         {
-            RigidBody endEffector = fullRobotModel.getEndEffector(robotSide, limbName);
-            GeometricJacobian jacobian = new GeometricJacobian(bases.get(limbName), endEffector, endEffector.getBodyFixedFrame());
-            jacobians.get(robotSide).put(limbName, jacobian);
-         }
+         ContactablePlaneBody bipedFoot = bipedFeet.get(robotSide);
+         contactStates.get(bipedFoot).set(bipedFoot.getContactPoints2d(), coefficientOfFriction.getDoubleValue());    // flat feet
+         String sideString = robotSide.getCamelCaseNameForStartOfExpression();
+         
+         PositionTrajectoryGenerator swingPositionTrajectoryGenerator = footPositionTrajectoryGenerators.get(robotSide);
+         DoubleTrajectoryGenerator heelPitchTrajectoryGenerator = (heelPitchTrajectoryGenerators == null) ? null : heelPitchTrajectoryGenerators.get(robotSide);
+         
+         OrientationProvider initialOrientationProvider = new CurrentOrientationProvider(worldFrame, bipedFoot.getBodyFrame());
+         SettableOrientationProvider finalFootOrientationProvider = new SettableOrientationProvider(sideString + "FinalFootOrientation", worldFrame, registry);
+         finalFootOrientationProviders.put(robotSide, finalFootOrientationProvider);
+         
+         OrientationTrajectoryGenerator swingOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(sideString
+               + "SwingFootOrientation", worldFrame, swingTimeCalculationProvider,
+               initialOrientationProvider, finalFootOrientationProvider, registry);
+         
+         YoVariableDoubleProvider onToesInitialPitchProvider = new YoVariableDoubleProvider(sideString + "OnToesInitialPitch", registry);
+         YoVariableDoubleProvider onToesFinalPitchProvider = new YoVariableDoubleProvider(sideString + "OnToesFinalPitch", registry);
+         DoubleProvider onToesInitialPitchVelocityProvider = new ConstantDoubleProvider(0.0);
+         DoubleProvider onToesFinalPitchVelocityProvider = new ConstantDoubleProvider(walkingControllerParameters.getFinalToeOffPitchAngularVelocity());
+         DoubleProvider onToesTrajectoryTimeProvider = transferTimeProvider;
+         
+         DoubleTrajectoryGenerator onToesPitchTrajectoryGenerator = new QuinticPolynomialTrajectoryGenerator(sideString + "OnToesPitch",
+               onToesInitialPitchProvider, onToesInitialPitchVelocityProvider, onToesFinalPitchProvider,
+               onToesFinalPitchVelocityProvider, onToesTrajectoryTimeProvider, registry);
+         
+         onToesInitialAngleProviders.put(robotSide, onToesInitialPitchProvider);
+         onToesFinalAngleProviders.put(robotSide, onToesFinalPitchProvider);
+         
+         GeometricJacobian jacobian = jacobians.get(robotSide).get(LimbName.LEG);
+         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(bipedFoot, jacobian, swingPositionTrajectoryGenerator,
+               heelPitchTrajectoryGenerator, swingOrientationTrajectoryGenerator,
+               onToesPitchTrajectoryGenerator, yoTime, twistCalculator, registry);
+         endEffectorControlModule.setParameters(3e-2, 500.0);
+         footEndEffectorControlModules.put(bipedFoot, endEffectorControlModule);
       }
    }
 
@@ -584,7 +360,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
       ResetICPTrajectoryAction resetICPTrajectoryAction = new ResetICPTrajectoryAction();
       for (RobotSide robotSide : RobotSide.values())
       {
-         EndEffectorControlModule swingEndEffectorControlModule = endEffectorControlModules.get(bipedFeet.get(robotSide.getOppositeSide()));
+         EndEffectorControlModule swingEndEffectorControlModule = footEndEffectorControlModules.get(bipedFeet.get(robotSide.getOppositeSide()));
          StopWalkingCondition stopWalkingCondition = new StopWalkingCondition(swingEndEffectorControlModule);
          ResetSwingTrajectoryDoneAction resetSwingTrajectoryDoneAction = new ResetSwingTrajectoryDoneAction(swingEndEffectorControlModule);
 
@@ -623,7 +399,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
 
    public void initialize()
    {
-      icpAndMomentumBasedController.initialize();
+      super.initialize();
 
       FrameOrientation initialDesiredPelvisOrientation = new FrameOrientation(referenceFrames.getAnkleZUpFrame(getUpcomingSupportLeg()));
       initialDesiredPelvisOrientation.changeFrame(worldFrame);
@@ -636,12 +412,6 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
       desiredICP.set(capturePoint.getFramePoint2dCopy());
 
       stateMachine.setCurrentState(WalkingState.DOUBLE_SUPPORT);
-
-      for (RobotSide robotSide : RobotSide.values())
-      {
-         manipulationStateMachines.get(robotSide).initialize();
-      }
-
 
    }
 
@@ -668,7 +438,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
          
          ContactablePlaneBody transferFoot = bipedFeet.get(transferToSide);
 
-         if ((endEffectorControlModules.get(transferFoot) != null) && endEffectorControlModules.get(transferFoot).onHeel()
+         if ((footEndEffectorControlModules.get(transferFoot) != null) && footEndEffectorControlModules.get(transferFoot).onHeel()
                  && footSwitches.get(transferToSide).hasFootHitGround())
          {
             setFlatFootContactState(transferFoot);
@@ -742,7 +512,6 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
          desiredPelvisAngularVelocity.set(0.0, 0.0, 0.0);
          desiredPelvisAngularAcceleration.set(0.0, 0.0, 0.0);
 
-         doFootcontrol();
       }
 
       private Pair<FramePoint2d, Double> computeFinalDesiredICPAndTrajectoryTime()
@@ -886,7 +655,6 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
       desiredPelvisOrientation.set(averageOrientation);
    }
 
-
    private FrameConvexPolygon2d getOnToesTriangle(FramePoint2d finalDesiredICP, ContactablePlaneBody supportFoot)
    {
       List<FramePoint> toePoints = getToePoints(supportFoot);
@@ -900,7 +668,6 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
 
       return new FrameConvexPolygon2d(points);
    }
-
 
    private class SingleSupportState extends State<WalkingState>
    {
@@ -952,7 +719,6 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
          desiredPelvisAngularVelocity.set(desiredPelvisAngularVelocityToPack);
          desiredPelvisAngularAcceleration.set(desiredPelvisAngularAccelerationToPack);
 
-         doFootcontrol();
       }
 
       @Override
@@ -1358,9 +1124,9 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
    {
       icpAndMomentumBasedController.doPrioritaryControl();
 
-      for (ContactablePlaneBody contactablePlaneBody : endEffectorControlModules.keySet())
+      for (ContactablePlaneBody contactablePlaneBody : footEndEffectorControlModules.keySet())
       {
-         EndEffectorControlModule endEffectorControlModule = endEffectorControlModules.get(contactablePlaneBody);
+         EndEffectorControlModule endEffectorControlModule = footEndEffectorControlModules.get(contactablePlaneBody);
          FramePoint2d cop = icpAndMomentumBasedController.getCoP(contactablePlaneBody);
          endEffectorControlModule.setCenterOfPressure(cop);
       }
@@ -1368,20 +1134,16 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
       icpAndMomentumBasedController.computeCapturePoint();
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
+      
+      doFootControl();
+      
       desiredCoMHeightAcceleration.set(computeDesiredCoMHeightAcceleration(desiredICPVelocity.getFrameVector2dCopy()));
 
-      double kUpperBody = this.kUpperBody.getDoubleValue();
-      double dUpperBody = GainCalculator.computeDerivativeGain(kUpperBody, zetaUpperBody.getDoubleValue());
-      for (OneDoFJoint joint : positionControlJoints)
-      {
-         icpAndMomentumBasedController.doPDControl(joint, kUpperBody, dUpperBody, 0.0, 0.0);
-      }
-
-      if (chestOrientationControlModule != null)
-         doChestControl();
-
-      if (headOrientationControlModule != null)
-         doHeadControl();
+      doJointPositionControl();
+      
+      doChestControl();
+      
+      doHeadControl();
 
       doArmControl();
 
@@ -1389,20 +1151,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
 
       setTorqueControlJointsToZeroDersiredAcceleration();
 
-      if (lidarControllerInterface != null)
-      {
-         icpAndMomentumBasedController.setOneDoFJointAcceleration(lidarControllerInterface.getLidarJoint(), 0.0);
-      }
-
       icpAndMomentumBasedController.doSecondaryControl();
-   }
-
-   private void setTorqueControlJointsToZeroDersiredAcceleration()
-   {
-      for (OneDoFJoint joint : torqueControlJoints)
-      {
-         icpAndMomentumBasedController.setOneDoFJointAcceleration(joint, 0.0);
-      }
    }
 
    // TODO: connect ports instead
@@ -1426,41 +1175,6 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
       desiredPelvisOrientationTrajectoryData.set(desiredPelvisOrientation.getFrameOrientationCopy(), desiredPelvisAngularVelocity.getFrameVectorCopy(),
               desiredPelvisAngularAcceleration.getFrameVectorCopy());
       desiredPelvisOrientationTrajectoryInputPort.setData(desiredPelvisOrientationTrajectoryData);
-   }
-
-   private void doChestControl()
-   {
-      chestOrientationControlModule.compute();
-      icpAndMomentumBasedController.setDesiredSpatialAcceleration(chestOrientationControlModule.getJacobian(),
-              chestOrientationControlModule.getTaskspaceConstraintData());
-   }
-
-   public void doHeadControl()
-   {
-      headOrientationControlModule.compute();
-      icpAndMomentumBasedController.setDesiredSpatialAcceleration(headOrientationControlModule.getJacobian(),
-              headOrientationControlModule.getTaskspaceConstraintData());
-
-      if (jointForExtendedNeckPitchRange != null)
-      {
-         double kUpperBody = this.kUpperBody.getDoubleValue();
-         double dUpperBody = GainCalculator.computeDerivativeGain(kUpperBody, zetaUpperBody.getDoubleValue());
-         double angle = 0.0;
-         if (desiredHeadOrientationProvider != null)
-         {
-            angle = desiredHeadOrientationProvider.getDesiredExtendedNeckPitchJointAngle();
-         }
-
-         icpAndMomentumBasedController.doPDControl(jointForExtendedNeckPitchRange, kUpperBody, dUpperBody, angle, 0.0);
-      }
-   }
-
-   public void doArmControl()
-   {
-      for (RobotSide robotSide : RobotSide.values())
-      {
-         manipulationStateMachines.get(robotSide).doControl();
-      }
    }
 
    // Temporary objects to reduce garbage collection.
@@ -1543,20 +1257,6 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
       return contactStatesList;
    }
 
-   private void doFootcontrol()
-   {
-      for (RobotSide robotSide : RobotSide.values())
-      {
-         ContactablePlaneBody contactablePlaneBody = bipedFeet.get(robotSide);
-         EndEffectorControlModule endEffectorControlModule = endEffectorControlModules.get(contactablePlaneBody);
-         endEffectorControlModule.startComputation();
-         endEffectorControlModule.waitUntilComputationIsDone();
-         TaskspaceConstraintData taskspaceConstraintData = endEffectorControlModule.getTaskSpaceConstraintOutputPort().getData();
-         GeometricJacobian jacobian = endEffectorControlModule.getJacobian();
-         icpAndMomentumBasedController.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
-      }
-   }
-
    private void setOnToesContactState(ContactablePlaneBody contactableBody)
    {
       List<FramePoint> contactPoints = getContactPointsForWalkingOnEdge(contactableBody, ConstraintType.TOES);
@@ -1585,7 +1285,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
    {
       if (contactPoints.size() == 0)
       {
-         endEffectorControlModules.get(contactableBody).doSingularityEscapeBeforeTransitionToNextState();
+         footEndEffectorControlModules.get(contactableBody).doSingularityEscapeBeforeTransitionToNextState();
       }
 
       YoPlaneContactState contactState = contactStates.get(contactableBody);
@@ -1623,7 +1323,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
    private void updateEndEffectorControlModule(ContactablePlaneBody contactablePlaneBody, PlaneContactState contactState, ConstraintType constraintType)
    {
       List<FramePoint2d> contactPoints = contactState.getContactPoints2d();
-      endEffectorControlModules.get(contactablePlaneBody).setContactPoints(contactPoints, constraintType);
+      footEndEffectorControlModules.get(contactablePlaneBody).setContactPoints(contactPoints, constraintType);
    }
 
    // TODO: should probably precompute this somewhere else
@@ -1696,23 +1396,4 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
       // TODO add com height error
    }
 
-   // TODO: New methods coming from extending State class
-   public void doAction()
-   {
-      doMotionControl();
-   }
-
-   public void doTransitionIntoAction()
-   {
-      initialize();
-   }
-
-   public void doTransitionOutOfAction()
-   {
-   }
-
-   public YoVariableRegistry getYoVariableRegistry()
-   {
-      return registry;
-   }
 }
