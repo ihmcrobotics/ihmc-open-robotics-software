@@ -10,6 +10,8 @@ public interface InstantaneousCapturePointPlanner
 {
    public abstract void initializeSingleSupport(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double initialTime);
 
+   public abstract void reInitializeSingleSupport(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double currentTime);
+
    public abstract void initializeDoubleSupportInitialTransfer(TransferToAndNextFootstepsData transferToAndNextFootstepsData, Point2d initialICPPosition,
            double initialTime);
 
@@ -22,5 +24,6 @@ public interface InstantaneousCapturePointPlanner
    public abstract boolean isDone(double time);
 
    public abstract FramePoint2d getFinalDesiredICP();
+
 
 }
