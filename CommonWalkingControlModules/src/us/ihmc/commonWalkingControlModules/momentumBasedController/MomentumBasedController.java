@@ -12,6 +12,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoCylindricalContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
@@ -19,6 +20,7 @@ import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.stateEstimation.DesiredCoMAndAngularAccelerationGrabber;
 import us.ihmc.commonWalkingControlModules.stateEstimation.PointPositionGrabber;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylindricalContactState;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
 import us.ihmc.utilities.math.MathTools;
@@ -61,6 +63,7 @@ public class MomentumBasedController implements RobotController
    protected final List<ContactablePlaneBody> contactablePlaneBodies;
 
    protected final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
+   protected final Map<RigidBody, ? extends CylindricalContactState> cylindricalContactStates = new LinkedHashMap<RigidBody, YoCylindricalContactState>();
    protected final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
    protected final DoubleYoVariable yoTime;
    protected final double controlDT;
@@ -134,7 +137,7 @@ public class MomentumBasedController implements RobotController
       {
          this.desiredCoMAndAngularAccelerationGrabber = new DesiredCoMAndAngularAccelerationGrabber(stateEstimationDataFromControllerSink, estimationLink,
                  estimationFrame, totalMass);
-         
+
          this.pointPositionGrabber = new PointPositionGrabber(stateEstimationDataFromControllerSink, registry, controlDT, 0.0, 0.01);
       }
       else
@@ -202,13 +205,15 @@ public class MomentumBasedController implements RobotController
 
    public void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench)
    {
-      momentumControlModule.setExternalWrenchToCompensateFor(rigidBody, wrench);
+      inverseDynamicsCalculator.setExternalWrench(rigidBody, wrench);
+
+//    momentumControlModule.setExternalWrenchToCompensateFor(rigidBody, wrench); This method doesn't exist Twan. Am I missing something?
    }
 
    public void doMotionControl()
    {
    }
-   
+
    // TODO: Temporary method for a big refactor allowing switching between high level behaviors
    public void doPrioritaryControl()
    {
@@ -217,8 +222,8 @@ public class MomentumBasedController implements RobotController
       inverseDynamicsCalculator.reset();
       momentumControlModule.reset();
    }
-   
-   // TODO: Temporary method for a big refactor allowing switching between high level behaviors   
+
+   // TODO: Temporary method for a big refactor allowing switching between high level behaviors
    public void doSecondaryControl()
    {
       rootJointAccelerationControlModule.startComputation();
@@ -231,7 +236,8 @@ public class MomentumBasedController implements RobotController
 
 
       CommonOps.mult(rootJointAccelerationData.getAccelerationSubspace(), rootJointAccelerationData.getAccelerationMultipliers(), rootJointAccelerationMatrix);
-      rootJointAcceleration.set(rootJointAccelerationData.getBodyFrame(), rootJointAccelerationData.getBaseFrame(), rootJointAccelerationData.getExpressedInFrame(), rootJointAccelerationMatrix, 0);
+      rootJointAcceleration.set(rootJointAccelerationData.getBodyFrame(), rootJointAccelerationData.getBaseFrame(),
+                                rootJointAccelerationData.getExpressedInFrame(), rootJointAccelerationMatrix, 0);
       rootJointAcceleration.changeFrameNoRelativeMotion(rootJointAccelerationData.getBodyFrame());
 
       DenseMatrix64F accelerationSubspace = rootJointAccelerationData.getAccelerationSubspace();
@@ -240,7 +246,7 @@ public class MomentumBasedController implements RobotController
       rootJointTaskSpaceConstraintData.set(rootJointAcceleration, rootJointNullspaceMultipliers, rootJointSelectionMatrix);
       momentumControlModule.setDesiredSpatialAcceleration(fullRobotModel.getRootJoint().getMotionSubspace(), rootJointTaskSpaceConstraintData);
       momentumControlModule.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
-      momentumControlModule.compute(this.contactStates, upcomingSupportLeg.getEnumValue());
+      momentumControlModule.compute(this.contactStates, upcomingSupportLeg.getEnumValue(), null);
 
       SpatialForceVector desiredCentroidalMomentumRate = momentumControlModule.getDesiredCentroidalMomentumRate();
 
@@ -276,7 +282,7 @@ public class MomentumBasedController implements RobotController
          fullRobotModel.setTorques(processedOutputs);
       updateYoVariables();
    }
-   
+
    public final void doControl()
    {
       doPrioritaryControl();
@@ -386,7 +392,7 @@ public class MomentumBasedController implements RobotController
    }
 
    // TODO: Following has been added for big refactor. Need to be checked.
-   
+
    public LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> getContactStates()
    {
       return contactStates;

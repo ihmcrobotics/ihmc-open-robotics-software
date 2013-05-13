@@ -205,7 +205,7 @@ public class SimpleStanceController implements RobotController
 
    private void setJointAccelerationsAndWrenches()
    {
-      momentumControlModule.compute(contactStates, null);
+      momentumControlModule.compute(contactStates, null, null);
 
       Map<RigidBody, Wrench> externalWrenches = momentumControlModule.getExternalWrenches();
 

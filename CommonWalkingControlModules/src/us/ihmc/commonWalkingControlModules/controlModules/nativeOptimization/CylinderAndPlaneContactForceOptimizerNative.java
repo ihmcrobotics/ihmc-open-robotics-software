@@ -90,11 +90,9 @@ public class CylinderAndPlaneContactForceOptimizerNative
    private final double[] phi = new double[phiSize];
    private final CylinderAndPlaneContactForceOptimizerNativeOutput nativeOutput;
 
-   public CylinderAndPlaneContactForceOptimizerNative(int rhoSize, int phiSize)
+   public CylinderAndPlaneContactForceOptimizerNative()
    {
-      CheckTools.checkRange(rhoSize, 0, CylinderAndPlaneContactForceOptimizerNative.rhoSize);
-      CheckTools.checkRange(phiSize, 0, CylinderAndPlaneContactForceOptimizerNative.phiSize);
-      nativeOutput = new CylinderAndPlaneContactForceOptimizerNativeOutput(rhoSize, phiSize);
+      nativeOutput = new CylinderAndPlaneContactForceOptimizerNativeOutput();
    }
 
    /**
@@ -206,7 +204,7 @@ public class CylinderAndPlaneContactForceOptimizerNative
       double[] wPhi = new double[1];
       load_default_data(C, Qrho, Qphi, c, rhoMin, phiMin, phiMax, wRho, wPhi);
 
-      CylinderAndPlaneContactForceOptimizerNative momentumOptimizerNative = new CylinderAndPlaneContactForceOptimizerNative( rhoSize, phiSize);
+      CylinderAndPlaneContactForceOptimizerNative momentumOptimizerNative = new CylinderAndPlaneContactForceOptimizerNative();
 
       long time = System.nanoTime();
       int nSolves = 10000;

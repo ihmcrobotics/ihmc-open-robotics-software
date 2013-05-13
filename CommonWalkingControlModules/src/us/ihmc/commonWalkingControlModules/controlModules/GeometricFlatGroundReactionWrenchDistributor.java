@@ -61,7 +61,7 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
    {
       reset();
       
-      ArrayList<PlaneContactState> contactStates = groundReactionWrenchDistributorInputData.getContactStates();
+      List<PlaneContactState> contactStates = groundReactionWrenchDistributorInputData.getContactStates();
    
       for (PlaneContactState contactState : contactStates)
       {

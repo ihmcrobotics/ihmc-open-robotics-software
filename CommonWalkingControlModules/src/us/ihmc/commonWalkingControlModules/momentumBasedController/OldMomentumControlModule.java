@@ -10,6 +10,7 @@ import org.ejml.factory.LinearSolver;
 import us.ihmc.commonWalkingControlModules.WrenchDistributorTools;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylindricalContactState;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributor;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributorInputData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributorOutputData;
@@ -55,10 +56,12 @@ public class OldMomentumControlModule implements MomentumControlModule
    private final MomentumRateOfChangeData momentumRateOfChangeData;
    private final SixDoFJoint rootJoint;
 
+   private GroundReactionWrenchDistributorInputData wrenchDistributorInput = new GroundReactionWrenchDistributorInputData();
 
-   public OldMomentumControlModule(SixDoFJoint rootJoint, double gravityZ,
-                                   GroundReactionWrenchDistributor groundReactionWrenchDistributor, ReferenceFrame centerOfMassFrame, double controlDT,
-                                   TwistCalculator twistCalculator, LinearSolver<DenseMatrix64F> jacobianSolver, YoVariableRegistry parentRegistry)
+
+   public OldMomentumControlModule(SixDoFJoint rootJoint, double gravityZ, GroundReactionWrenchDistributor groundReactionWrenchDistributor,
+                                   ReferenceFrame centerOfMassFrame, double controlDT, TwistCalculator twistCalculator,
+                                   LinearSolver<DenseMatrix64F> jacobianSolver, YoVariableRegistry parentRegistry)
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
@@ -80,7 +83,8 @@ public class OldMomentumControlModule implements MomentumControlModule
 
       this.gravitationalWrench = new SpatialForceVector(centerOfMassFrame, new Vector3d(0.0, 0.0, -totalMass * gravityZ), new Vector3d());
 
-      this.rootJointAccelerationData = new RootJointAccelerationData(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint());
+      this.rootJointAccelerationData = new RootJointAccelerationData(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(),
+              rootJoint.getFrameAfterJoint());
       this.momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
       this.rootJoint = rootJoint;
       this.centerOfMassFrame = centerOfMassFrame;
@@ -106,15 +110,17 @@ public class OldMomentumControlModule implements MomentumControlModule
       externalWrenchesToCompensateFor.clear();
    }
 
-   public void compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, RobotSide upcomingSupportLeg)
+   public void compute(Map<ContactablePlaneBody, ? extends PlaneContactState> planeContactStates, RobotSide upcomingSupportLeg,
+                       Map<RigidBody, ? extends CylindricalContactState> cylinderContactStates)
    {
-      solver.compute();
+      solver.compute();    // no input?
       solver.solve(rootJointAccelerationData.getAccelerationSubspace(), rootJointAccelerationData.getAccelerationMultipliers(),
                    momentumRateOfChangeData.getMomentumSubspace(), momentumRateOfChangeData.getMomentumMultipliers());
 
       SpatialForceVector totalGroundReactionWrench = new SpatialForceVector();
       solver.getRateOfChangeOfMomentum(totalGroundReactionWrench);
       totalGroundReactionWrench.sub(gravitationalWrench);
+
       for (Wrench externalWrenchToCompensateFor : externalWrenchesToCompensateFor.values())
       {
          totalGroundReactionWrench.sub(externalWrenchToCompensateFor);
@@ -137,29 +143,38 @@ public class OldMomentumControlModule implements MomentumControlModule
       totalGroundReactionWrench.setAngularPart(desiredGroundReactionTorque.getFrameVectorCopy().getVector());
       totalGroundReactionWrench.setLinearPart(desiredGroundReactionForce.getFrameVectorCopy().getVector());
 
-      GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData = new GroundReactionWrenchDistributorInputData();
-      groundReactionWrenchDistributorInputData.reset();
 
-      for (PlaneContactState contactState : contactStates.values())
+      wrenchDistributorInput.reset();
+
+      for (PlaneContactState contactState : planeContactStates.values())
       {
          List<FramePoint> footContactPoints = contactState.getContactPoints();
 
          if (footContactPoints.size() > 0)
          {
-            groundReactionWrenchDistributorInputData.addContact(contactState);
+            wrenchDistributorInput.addPlaneContact(contactState);
          }
       }
 
-      groundReactionWrenchDistributorInputData.setSpatialForceVectorAndUpcomingSupportSide(totalGroundReactionWrench, upcomingSupportLeg);
+      if (null != cylinderContactStates)
+      {
+         for (RigidBody body : cylinderContactStates.keySet())
+         {
+            CylindricalContactState cylinderContact = cylinderContactStates.get(body);
+            wrenchDistributorInput.addCylinderContact(cylinderContact);
+         }
+      }
+
+      wrenchDistributorInput.setSpatialForceVectorAndUpcomingSupportSide(totalGroundReactionWrench, upcomingSupportLeg);
 
       GroundReactionWrenchDistributorOutputData distributedWrenches = new GroundReactionWrenchDistributorOutputData();
-      groundReactionWrenchDistributor.solve(distributedWrenches, groundReactionWrenchDistributorInputData);
+      groundReactionWrenchDistributor.solve(distributedWrenches, wrenchDistributorInput);
 
-      for (ContactablePlaneBody contactablePlaneBody : contactStates.keySet())
+      for (ContactablePlaneBody contactablePlaneBody : planeContactStates.keySet())
       {
          RigidBody rigidBody = contactablePlaneBody.getRigidBody();
 
-         PlaneContactState contactState = contactStates.get(contactablePlaneBody);
+         PlaneContactState contactState = planeContactStates.get(contactablePlaneBody);
          List<FramePoint> footContactPoints = contactState.getContactPoints();
 
          if (footContactPoints.size() > 0)
@@ -175,10 +190,20 @@ public class OldMomentumControlModule implements MomentumControlModule
          }
       }
 
+      if (null != cylinderContactStates)
+      {
+         for (RigidBody body : cylinderContactStates.keySet())
+         {
+            Wrench bodyWrench = distributedWrenches.getWrenchOfNonPlaneContact(body);
+            externalWrenches.put(body, bodyWrench);
+         }
+      }
+
       Wrench admissibleGroundReactionWrench = TotalWrenchCalculator.computeTotalWrench(externalWrenches.values(),
                                                  totalGroundReactionWrench.getExpressedInFrame());
       desiredCentroidalMomentumRate.set(admissibleGroundReactionWrench);
       desiredCentroidalMomentumRate.add(gravitationalWrench);
+
       for (RigidBody rigidBody : externalWrenchesToCompensateFor.keySet())
       {
          Wrench externalWrenchToCompensateFor = externalWrenchesToCompensateFor.get(rigidBody);

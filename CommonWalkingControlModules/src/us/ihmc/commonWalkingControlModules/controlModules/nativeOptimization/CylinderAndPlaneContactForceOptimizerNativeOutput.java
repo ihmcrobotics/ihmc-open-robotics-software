@@ -9,10 +9,10 @@ public class CylinderAndPlaneContactForceOptimizerNativeOutput
    private double optVal;
    private int numberOfIterations;
 
-   public CylinderAndPlaneContactForceOptimizerNativeOutput(int rhoSize, int phiSize)
+   public CylinderAndPlaneContactForceOptimizerNativeOutput()
    {
-      rho = new DenseMatrix64F(rhoSize, 1);
-      phi = new DenseMatrix64F(phiSize, 1);
+      rho = new DenseMatrix64F(CylinderAndPlaneContactForceOptimizerNative.rhoSize, 1);
+      phi = new DenseMatrix64F(CylinderAndPlaneContactForceOptimizerNative.phiSize, 1);
    }
 
    public void setRho(double[] rho)
@@ -56,4 +56,31 @@ public class CylinderAndPlaneContactForceOptimizerNativeOutput
    {
       return numberOfIterations;
    }
+   
+   public String toString()
+   {
+      StringBuilder ret = new StringBuilder(1000);
+      ret.append("CylinderAndPlaneContactForceOptimizerNativeOutput with \n");
+      appendMatrix(ret,"rho",rho);
+      appendMatrix(ret,"phi",phi);
+      
+      return ret.toString();
+      
+   }
+
+   private void appendMatrix(StringBuilder ret, String string, DenseMatrix64F matrix)
+   {
+      ret.append("\t"+string+" = \n");
+      for (int r=0;r<matrix.numRows;r++)
+      {
+         ret.append("\t\t[");
+         for (int c=0;c<matrix.numCols;c++)
+         {
+            ret.append(String.format("%+.7e ", matrix.get(r, c)));
+            
+         }
+         ret.append("]\n");
+      }
+   }
+
 }
