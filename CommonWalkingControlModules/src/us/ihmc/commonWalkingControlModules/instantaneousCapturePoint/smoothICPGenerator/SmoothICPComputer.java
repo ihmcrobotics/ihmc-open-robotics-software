@@ -32,6 +32,7 @@ public class SmoothICPComputer
    private boolean isDoubleSupport;
    private double initialTime;
    private boolean comeToStop;
+   private boolean atAStop = true;
 
    private boolean isInitialTransfer;
    
@@ -108,7 +109,8 @@ public class SmoothICPComputer
       this.omega0 = omega0;
       isInitialTransfer = false;
       comeToStop = false;
-
+      atAStop = false;
+      
       computeConstantCentersOfPressure(constantCentersOfPressure, footLocationList, maxNumberOfConsideredFootsteps, isInitialTransfer, stopIfReachedEnd);
 
       this.doubleSupportDuration = doubleSupportDuration;
@@ -240,7 +242,7 @@ public class SmoothICPComputer
       Point3d cornerPoint1 = icpCornerPoints[1];
       YoFramePoint transferToFoot = constantCentersOfPressure.get(1);
 
-      doubleSupportStartICP.set(constantCentersOfPressure.get(0).getPoint3dCopy());
+      doubleSupportStartICP.set(initialICPPosition);
       doubleSupportStartICPVelocity.set(0.0, 0.0, 0.0);
 
       newDoubleSupportICPComputer.computeSingleSupportStartICPAndVelocity(doubleSupportEndICP, doubleSupportEndICPVelocity, transferToFoot.getPoint3dCopy(),
@@ -251,13 +253,39 @@ public class SmoothICPComputer
    }
 
 
+   private final Point3d icpPostionTempOne = new Point3d();
+//   private final Vector3d icpVelocityTempOne = new Vector3d();
+//   private final Point3d ecmpTempOne = new Point3d();
+   
    public void initializeDoubleSupport(ArrayList<FramePoint> footLocationList, double singleSupportDuration, double doubleSupportDuration, double omega0,
            double initialTime, boolean stopIfReachedEnd)
+   {
+      if (atAStop)
+      {
+         double doubleSupportInitialTransferDuration = 1.0;
+//         this.getICPPositionAndVelocity(icpPostionTempOne, icpVelocityTempOne, ecmpTempOne, initialTime);
+         
+         icpPostionTempOne.set(footLocationList.get(0).getPointCopy());
+         icpPostionTempOne.add(footLocationList.get(1).getPointCopy());
+         icpPostionTempOne.scale(0.5);
+         
+         initializeDoubleSupportInitialTransfer(footLocationList, icpPostionTempOne, singleSupportDuration, doubleSupportDuration, doubleSupportInitialTransferDuration, omega0, initialTime, stopIfReachedEnd);
+      }
+      else
+      {
+         initializeDoubleSupportLocal(footLocationList, singleSupportDuration, doubleSupportDuration, omega0,
+               initialTime, stopIfReachedEnd);
+      }
+   }
+
+   private void initializeDoubleSupportLocal(ArrayList<FramePoint> footLocationList, double singleSupportDuration, double doubleSupportDuration, double omega0,
+         double initialTime, boolean stopIfReachedEnd)
    {
       this.omega0 = omega0;
 
       isInitialTransfer = false;
       comeToStop = footLocationList.size() < 3;
+      atAStop = footLocationList.size() < 3;
 
       computeConstantCentersOfPressure(constantCentersOfPressure, footLocationList, maxNumberOfConsideredFootsteps, isInitialTransfer, stopIfReachedEnd);
 
@@ -265,7 +293,7 @@ public class SmoothICPComputer
       this.doubleSupportDuration = doubleSupportDuration;
       this.singleSupportDuration = singleSupportDuration;
       this.doubleSupportInitialTransferDuration = Double.NaN;
-      
+
       this.isDoubleSupport = true;
 
       this.initialTime = initialTime;
@@ -276,7 +304,7 @@ public class SmoothICPComputer
       ArrayList<Point3d> constantCentersOfPressurePoint3ds = convertToListOfPoint3ds(constantCentersOfPressure);
 
       Point3d[] icpCornerPoints = newDoubleSupportICPComputer.computeICPCornerPoints(numberOfCornerPoints, constantCentersOfPressurePoint3ds, steppingDuration,
-                                     omega0);
+            omega0);
       upcomingCornerPoint = icpCornerPoints[1];
 
       visualizeICPCornerPoints(icpCornerPoints, icpCornerPointsViz);
@@ -466,6 +494,7 @@ public class SmoothICPComputer
    {
       boolean stopIfReachedEnd = true;
       doubleSupportInitialTransferDuration = 0.6;
+      atAStop = true;
       
       footLocationList.clear();
       footLocationList.add(constantCentersOfPressure.get(0).getFramePointCopy());
