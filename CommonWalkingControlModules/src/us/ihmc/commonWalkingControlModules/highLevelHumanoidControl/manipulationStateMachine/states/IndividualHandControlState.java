@@ -6,5 +6,5 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
  */
 public enum IndividualHandControlState
 {
-   DEFAULT, SINGULARITY_ESCAPE, OBJECT_MANIPULATION, LOAD_BEARING;
+   DEFAULT, SINGULARITY_ESCAPE, OBJECT_MANIPULATION, LOAD_BEARING, TOROID_MANIPULATION
 }

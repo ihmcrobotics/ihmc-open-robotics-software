@@ -325,6 +325,11 @@ public class IndividualHandControlStateMachine
       stateMachine.addState(state);
    }
 
+   public boolean inToroidManipulationState()
+   {
+      return stateMachine.getCurrentStateEnum() == IndividualHandControlState.TOROID_MANIPULATION;
+   }
+
    private static class ChangeableConfigurationProvider implements SE3ConfigurationProvider
    {
       private final FramePose configuration;

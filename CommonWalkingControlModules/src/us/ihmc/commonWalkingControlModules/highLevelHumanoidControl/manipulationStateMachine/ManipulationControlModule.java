@@ -4,7 +4,6 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import us.ihmc.commonWalkingControlModules.configurations.ManipulationControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -55,7 +54,7 @@ public class ManipulationControlModule
          String frameName = endEffector.getName() + "PositionControlFrame";
          final ReferenceFrame frameAfterJoint = endEffector.getParentJoint().getFrameAfterJoint();
          ReferenceFrame handPositionControlFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(frameName, frameAfterJoint,
-               parameters.getHandControlFramesWithRespectToFrameAfterWrist().get(robotSide));
+                                                      parameters.getHandControlFramesWithRespectToFrameAfterWrist().get(robotSide));
          handPositionControlFrames.put(robotSide, handPositionControlFrame);
 
          // TODO: create manipulationControlParameters, have current walking parameters class implement it
@@ -73,9 +72,9 @@ public class ManipulationControlModule
                     defaultArmJointPositions, minTaskSpacePositions, maxTaskSpacePositions, registry));
       }
 
-      RigidBody toroidBase = fullRobotModel.getElevator(); // TODO: make this be modifiable when the time comes
+      RigidBody toroidBase = fullRobotModel.getElevator();    // TODO: make this be modifiable when the time comes
       this.manipulableToroidUpdater = new ManipulableToroidUpdater(toroidBase, handPositionControlFrames, yoTime, controlDT, dynamicGraphicObjectsListRegistry,
-            registry);
+              registry);
 
       parentRegistry.addChild(registry);
    }
@@ -90,11 +89,31 @@ public class ManipulationControlModule
 
    public void doControl()
    {
-      manipulableToroidUpdater.update();
+      if (inToroidManipulationState())
+         manipulableToroidUpdater.update();
+
       for (RobotSide robotSide : RobotSide.values())
       {
          jacobians.get(robotSide).compute();
          individualHandControlStateMachines.get(robotSide).doControl();
       }
+   }
+
+   private boolean inToroidManipulationState()
+   {
+      int numberOfStateMachinesInManipulationState = 0;
+      for (IndividualHandControlStateMachine stateMachine : individualHandControlStateMachines)
+      {
+         if (stateMachine.inToroidManipulationState())
+            numberOfStateMachinesInManipulationState++;
+      }
+
+      if (numberOfStateMachinesInManipulationState == 0)
+         return false;
+      else if (numberOfStateMachinesInManipulationState == individualHandControlStateMachines.size())
+         return true;
+      else
+         throw new RuntimeException("Some " + IndividualHandControlStateMachine.class.getSimpleName()
+                                    + "s are in toroid manipulation state, others aren't. This should not be possible.");
    }
 }
