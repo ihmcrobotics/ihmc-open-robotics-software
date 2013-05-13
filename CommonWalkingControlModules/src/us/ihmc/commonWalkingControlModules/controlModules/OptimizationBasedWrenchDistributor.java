@@ -8,6 +8,8 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CylinderAndPlaneContactForceOptimizerNative;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CylinderAndPlaneContactForceOptimizerNativeInput;
@@ -39,7 +41,7 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
    Map<PlaneContactState, EndEffector> previouslyUsedPlaneEndEffectors = new LinkedHashMap<PlaneContactState, EndEffector>();
    Map<CylindricalContactState, EndEffector> previouslyUsedCylinderEndEffectors = new LinkedHashMap<CylindricalContactState, EndEffector>();
    List<EndEffector> endEffectors = new ArrayList<EndEffector>();
-   List<EndEffectorOutput> endEffectorOutputs;
+   List<EndEffectorOutput> endEffectorOutputs = new ArrayList<EndEffectorOutput>();
    DenseMatrix64F desiredNetEnvironmentReactionWrench = new DenseMatrix64F(6, 1);
    List<Wrench> wrenches = new ArrayList<Wrench>();
    private CenterOfPressureResolver copResolver = new CenterOfPressureResolver();
@@ -47,13 +49,13 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
 
    DenseMatrix64F Cmatrix = CommonOps.diag(new double[]
    {
-      1, 1, 1, 1.0, 1.0, 1.0
+      1, 1, 1, 10.0, 10.0, 10.0
    });
    double wPhi = 0.000001;
    double wRho = 0.000001;
 
 
-   public OptimizationBasedWrenchDistributor(ReferenceFrame centerOfMassFrame)
+   public OptimizationBasedWrenchDistributor(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
       optimizerInputPopulator = new CylinderAndPlaneContactForceOptimizerMatrixCalculator(centerOfMassFrame);
@@ -84,18 +86,24 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
    }
 
    public void solveAndPackOutput(GroundReactionWrenchDistributorOutputData output, List<PlaneContactState> planes, List<CylindricalContactState> cylinders,
-                                  List<EndEffector> endEffectorsLocal, CylinderAndPlaneContactForceOptimizerNativeInput optimizerInputLocal)
+                                  List<EndEffector> endEffectors, CylinderAndPlaneContactForceOptimizerNativeInput optimizerInputLocal)
            throws NoConvergenceException
    {
-      optimizeWrenchesIntoEndEffectorOutputs(endEffectorsLocal, optimizerInputLocal, endEffectorOutputs);
+      List<EndEffectorOutput> endEffectorOutputs = this.endEffectorOutputs;
+      makeSureEndEffectorOutputsSizeMatchesThatOfEndEffectors(endEffectors, endEffectorOutputs);
+      
+      optimizeWrenchesIntoEndEffectorOutputs(endEffectors, optimizerInputLocal, endEffectorOutputs);
 
+      List<Wrench> wrenches = this.wrenches;
+      expandWrenchesArrayToFitAllEndEffectors(endEffectors, wrenches);
+      
       int j = 0;
       for (PlaneContactState plane : planes)
       {
          endEffectorOutputs.get(j).packExternallyActingSpatialForceVector(wrenches.get(j));
-         FramePoint2d centerOfPressure = new FramePoint2d(ReferenceFrame.getWorldFrame());    // frame will be overwritten
+         FramePoint2d centerOfPressure = new FramePoint2d(centerOfMassFrame);    // frame will be overwritten
          double normalTorque = copResolver.resolveCenterOfPressureAndNormalTorque(centerOfPressure, wrenches.get(j), plane.getPlaneFrame());
-         FrameVector force = new FrameVector();
+         FrameVector force = new FrameVector(centerOfMassFrame);
          wrenches.get(j).packLinearPart(force);
          output.set(plane, force, centerOfPressure, normalTorque);
          j++;
@@ -110,6 +118,29 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
       }
    }
 
+   public void makeSureEndEffectorOutputsSizeMatchesThatOfEndEffectors(List<EndEffector> endEffectorsLocal,
+         List<EndEffectorOutput> endEffectorOutputs)
+   {
+      if (endEffectorsLocal.size()!=endEffectorOutputs.size())
+      {
+         endEffectorOutputs.clear();
+         for (int i=0;i<endEffectorsLocal.size();i++)
+         {
+            endEffectorOutputs.add(new EndEffectorOutput(centerOfMassFrame));
+         }
+      }
+   }
+
+   public void expandWrenchesArrayToFitAllEndEffectors(List<EndEffector> endEffectorsLocal, List<Wrench> wrenchesLocal)
+   {
+      for (int i=0;i<endEffectorsLocal.size();i++){
+         if (wrenchesLocal.size()<i+1)
+         {
+            wrenchesLocal.add(new Wrench(endEffectorsLocal.get(i).getFrame(), centerOfMassFrame));
+         }
+      }
+   }
+
    public void optimizeWrenchesIntoEndEffectorOutputs(List<EndEffector> endEffectorsLocal,
          CylinderAndPlaneContactForceOptimizerNativeInput optimizerInputLocal,
          List<EndEffectorOutput> endEffectorOutputsLocal) throws NoConvergenceException
@@ -118,6 +149,7 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
       optimizerOutput = nativeOptimizer.getOutput();
       optimizerOutputExtractor.computeAllWrenchesBasedOnNativeOutputAndInput(endEffectorsLocal, optimizerInputLocal, optimizerOutput);
 
+      
       for (int i = 0; i < endEffectorsLocal.size(); i++)
       {
          endEffectorOutputsLocal.get(i).setExternallyActingSpatialForceVector(optimizerOutputExtractor.getSpatialForceVector(endEffectorsLocal.get(i)));
