@@ -79,6 +79,11 @@ public class ConstantCoPInstantaneousCapturePointTrajectory implements Instantan
 
       this.moveTime.set(moveTime);
    }
+   
+   public double getStartTime()
+   {
+      return startTime.getDoubleValue();
+   }
 
    public void getCurrentDesiredICPPositionAndVelocity(FramePoint2d desiredPosition, FrameVector2d desiredVelocity, double omega0, double clockTime)
    {
