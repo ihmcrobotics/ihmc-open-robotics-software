@@ -8,7 +8,6 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 import com.yobotics.simulationconstructionset.util.statemachines.*;
 import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
@@ -18,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.ConstantConfigurationPro
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SE3ConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylindricalContactState;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -95,17 +93,17 @@ public class IndividualHandControlStateMachine
                                                                                    desiredConfigurationProvider, taskSpaceState);
       defaultState.addStateTransition(defaultToTaskspaceCondition);
 
-      
-      
+
+
       StateTransition<IndividualHandControlState> taskspaceToTaskspaceCondition = createNewHandPoseAvailableTransition(robotSide, handPoseProvider,
-            desiredConfigurationProvider, taskSpaceState);
+                                                                                     desiredConfigurationProvider, taskSpaceState);
       taskSpaceState.addStateTransition(taskspaceToTaskspaceCondition);    // must be added after taskspaceToSingularityEscapeTransition
-      
-      
+
+
       StateTransition<IndividualHandControlState> taskSpaceToLoadBearingTransition = createTaskSpaceToLoadBearingTransition(isReadyToBearLoad);
       taskSpaceState.addStateTransition(taskSpaceToLoadBearingTransition);
 
-      
+
       StateTransition<IndividualHandControlState> taskSpaceToDefaultTransition = createTaskspaceToDefaultTransition(robotSide, defaultState);
       taskSpaceState.addStateTransition(taskSpaceToDefaultTransition);
 
@@ -327,7 +325,7 @@ public class IndividualHandControlStateMachine
 
    public boolean inToroidManipulationState()
    {
-      return stateMachine.getCurrentStateEnum() == IndividualHandControlState.TOROID_MANIPULATION;
+      return stateMachine.getCurrentStateEnum() == IndividualHandControlState.TWO_HANDED_TOROID_MANIPULATION;
    }
 
    private static class ChangeableConfigurationProvider implements SE3ConfigurationProvider
