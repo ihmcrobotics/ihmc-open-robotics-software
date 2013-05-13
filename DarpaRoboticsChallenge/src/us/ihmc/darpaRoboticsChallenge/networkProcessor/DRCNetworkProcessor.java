@@ -40,10 +40,14 @@ public class DRCNetworkProcessor
     * This will become a stand-alone application in the final competition. Do
     * NOT pass in objects shared with the DRC simulation!
     */
-   
    public DRCNetworkProcessor(URI rosCoreURI)
    {
-      this((ObjectCommunicator)null);
+      this(rosCoreURI, null);
+   }
+   
+   public DRCNetworkProcessor(URI rosCoreURI, ObjectCommunicator drcNetworkObjectCommunicator)
+   {
+      this(drcNetworkObjectCommunicator);
 
       System.out.println("Connecting to ROS");
       RosMainNode rosMainNode;

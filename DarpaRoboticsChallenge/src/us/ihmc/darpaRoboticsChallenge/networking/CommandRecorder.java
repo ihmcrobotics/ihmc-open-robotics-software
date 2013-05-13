@@ -15,7 +15,7 @@ public class CommandRecorder
 {
    final static String directory = "scripts";
    
-   private final KryoStreamSerializer serializer = new KryoStreamSerializer(1048576, 1048576);
+   private final KryoStreamSerializer serializer = new KryoStreamSerializer(1048576);
    
    private final TimestampProvider timestampProvider;
    

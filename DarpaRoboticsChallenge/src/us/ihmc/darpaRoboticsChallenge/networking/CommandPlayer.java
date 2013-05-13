@@ -11,7 +11,7 @@ import javax.media.j3d.Transform3D;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCNetClassList;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
-import us.ihmc.utilities.net.KryoStreamSerializer;
+import us.ihmc.utilities.net.KryoStreamDeSerializer;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.TimestampListener;
 import us.ihmc.utilities.net.TimestampProvider;
@@ -19,7 +19,7 @@ import us.ihmc.utilities.net.TransformableDataObject;
 
 public class CommandPlayer implements TimestampListener
 {
-   private final KryoStreamSerializer serializer = new KryoStreamSerializer(1048576, 1048576);
+   private final KryoStreamDeSerializer deSerializer = new KryoStreamDeSerializer(1048576);
    private final ExecutorService threadPool = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory("CommandPlaybackThread"));
    private final TimestampProvider timestampProvider;
    private final ObjectCommunicator fieldComputerClient;
@@ -38,8 +38,8 @@ public class CommandPlayer implements TimestampListener
       this.fieldComputerClient = fieldComputerClient;
       timestampProvider.attachListener(this);
       
-      serializer.registerClasses(drcNetClassList);
-      serializer.registerClass(TimestampPacket.class);
+      deSerializer.registerClasses(drcNetClassList);
+      deSerializer.registerClass(TimestampPacket.class);
    }
    
    public void startPlayback(String filename, Transform3D playbackTransform)
@@ -81,7 +81,7 @@ public class CommandPlayer implements TimestampListener
 
    private void getNextCommandTimestamp() throws IOException
    {
-      Object timestampPacket = serializer.read(inputStream);
+      Object timestampPacket = deSerializer.read(inputStream);
       if(timestampPacket instanceof TimestampPacket)
       {
          synchronized (syncObject)
@@ -120,7 +120,7 @@ public class CommandPlayer implements TimestampListener
    {
       try
       {
-         Object object = serializer.read(inputStream);
+         Object object = deSerializer.read(inputStream);
          
          Object objectToSend;
          if(object instanceof TransformableDataObject)
