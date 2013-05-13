@@ -9,7 +9,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.messages.controller.RobotPoseData;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
-import us.ihmc.darpaRoboticsChallenge.networking.bandwidthControl.DRCNetworkProcessorNetworkingManager;
+import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.graphics3DAdapter.camera.CompressedVideoDataServer;
 import us.ihmc.graphics3DAdapter.camera.VideoPacket;
 import us.ihmc.graphics3DAdapter.camera.VideoSettings;

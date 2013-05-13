@@ -1,7 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.camera;
 
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
-import us.ihmc.darpaRoboticsChallenge.networking.bandwidthControl.DRCNetworkProcessorNetworkingManager;
+import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.graphics3DAdapter.camera.LocalVideoPacket;
 import us.ihmc.graphics3DAdapter.camera.VideoSettings;
 import us.ihmc.utilities.net.ObjectCommunicator;
