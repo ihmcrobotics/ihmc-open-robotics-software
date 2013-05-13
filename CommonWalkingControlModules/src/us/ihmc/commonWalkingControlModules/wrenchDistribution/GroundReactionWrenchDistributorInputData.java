@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.robotSide.RobotSide;
@@ -8,17 +9,18 @@ import us.ihmc.utilities.screwTheory.SpatialForceVector;
 
 public class GroundReactionWrenchDistributorInputData
 {
-   private final ArrayList<PlaneContactState> contactStates = new ArrayList<PlaneContactState>();
-   
+   private final List<PlaneContactState> contactStates = new ArrayList<PlaneContactState>();
+   private final List<CylindricalContactState> cylinderContacts = new ArrayList<CylindricalContactState>();
    private SpatialForceVector desiredNetSpatialForceVector;
    private RobotSide upcomingSupportSide;
    
    public void reset()
    {
       contactStates.clear();
+      cylinderContacts.clear();
    }
 
-   public void addContact(PlaneContactState contactState)
+   public void addPlaneContact(PlaneContactState contactState)
    {
       contactStates.add(contactState);
    }
@@ -29,9 +31,14 @@ public class GroundReactionWrenchDistributorInputData
       this.upcomingSupportSide = upcomingSupportSide;
    }
    
-   public ArrayList<PlaneContactState> getContactStates()
+   public List<PlaneContactState> getContactStates()
    {
       return contactStates;
+   }
+   
+   public List<CylindricalContactState> getCylindricalContactStates()
+   {
+      return cylinderContacts;
    }
 
    public SpatialForceVector getDesiredNetSpatialForceVector()
@@ -42,6 +49,11 @@ public class GroundReactionWrenchDistributorInputData
    public RobotSide getUpcomingSupportSide()
    {
       return upcomingSupportSide;
+   }
+
+   public void addCylinderContact(CylindricalContactState cylinderContact)
+   {
+      cylinderContacts.add(cylinderContact);      
    }
    
 }

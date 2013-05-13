@@ -1,17 +1,18 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
+import java.util.Map;
+
 import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeData;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAccelerationData;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylindricalContactState;
 import us.ihmc.robotSide.RobotSide;
-import us.ihmc.utilities.math.geometry.FramePoint2d;
-import us.ihmc.utilities.screwTheory.*;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
+import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.SpatialForceVector;
+import us.ihmc.utilities.screwTheory.Wrench;
 
 /**
  * @author twan
@@ -23,7 +24,7 @@ public interface MomentumControlModule
 
    void reset();
 
-   void compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, RobotSide upcomingSupportSide);
+   void compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, RobotSide upcomingSupportSide, Map<RigidBody, ? extends CylindricalContactState> cylinderContactStates);
 
    void resetGroundReactionWrenchFilter();
 
@@ -32,8 +33,6 @@ public interface MomentumControlModule
    void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData);
 
    void setDesiredRateOfChangeOfMomentum(MomentumRateOfChangeData momentumRateOfChangeData);
-
-   void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench);
 
    SpatialForceVector getDesiredCentroidalMomentumRate();
 

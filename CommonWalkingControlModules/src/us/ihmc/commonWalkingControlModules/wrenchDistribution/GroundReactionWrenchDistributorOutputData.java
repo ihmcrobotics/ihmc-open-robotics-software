@@ -5,13 +5,15 @@ import java.util.LinkedHashMap;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.Wrench;
 
 public class GroundReactionWrenchDistributorOutputData
 {
    private final LinkedHashMap<PlaneContactState, FrameVector> forces = new LinkedHashMap<PlaneContactState, FrameVector>();
    private final LinkedHashMap<PlaneContactState, FramePoint2d> centersOfPressure = new LinkedHashMap<PlaneContactState, FramePoint2d>();
    private final LinkedHashMap<PlaneContactState, Double> normalTorques = new LinkedHashMap<PlaneContactState, Double>();
-
+   private final LinkedHashMap<CylindricalContactState, Wrench> wrenchesOfCylinderContacts = new LinkedHashMap<CylindricalContactState,Wrench>();
    public FrameVector getForce(PlaneContactState planeContactState)
    {
       return forces.get(planeContactState);
@@ -27,6 +29,16 @@ public class GroundReactionWrenchDistributorOutputData
       return normalTorques.get(contactState);
    }
    
+   public Wrench getWrenchOfNonPlaneContact(RigidBody rigidBody)
+   {
+      return wrenchesOfCylinderContacts.get(rigidBody);
+   }
+   
+   public void setWrench(CylindricalContactState cylinder, Wrench wrench)
+   {
+      wrenchesOfCylinderContacts.put(cylinder, wrench);
+   }
+   
    public void set(PlaneContactState planeContactState, FrameVector force, FramePoint2d centerOfPressure, double normalTorque)
    {
       forces.put(planeContactState, force);
@@ -39,7 +51,6 @@ public class GroundReactionWrenchDistributorOutputData
       forces.clear();
       centersOfPressure.clear();
       normalTorques.clear();
-   }
-
-   
+      wrenchesOfCylinderContacts.clear();
+   }   
 }

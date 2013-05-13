@@ -76,7 +76,7 @@ public class OptimizationMomentumControlModuleTest
       InverseDynamicsJoint[] revoluteJointsArray = revoluteJoints.toArray(new InverseDynamicsJoint[revoluteJoints.size()]);
       DenseMatrix64F desiredJointAccelerations = setRandomJointAccelerations(random, momentumControlModule, revoluteJoints);
 
-      momentumControlModule.compute(contactStates, null);
+      momentumControlModule.compute(contactStates, null, null);
 
       SpatialForceVector momentumRateOfChangeOut = momentumControlModule.getDesiredCentroidalMomentumRate();
       DenseMatrix64F jointAccelerationsBack = new DenseMatrix64F(desiredJointAccelerations.getNumRows(), 1);
@@ -133,7 +133,7 @@ public class OptimizationMomentumControlModuleTest
       taskSpaceConstraintData.set(endEffectorSpatialAcceleration);
       momentumControlModule.setDesiredSpatialAcceleration(jacobian, taskSpaceConstraintData); // , 10.0);
 
-      momentumControlModule.compute(contactStates, null);
+      momentumControlModule.compute(contactStates, null, null);
       SpatialForceVector momentumRateOfChangeOut = momentumControlModule.getDesiredCentroidalMomentumRate();
 
       TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), elevator);
@@ -194,7 +194,7 @@ public class OptimizationMomentumControlModuleTest
          momentumRateOfChangeData.set(desiredRateOfChangeOfMomentum);
          momentumControlModule.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
 
-         momentumControlModule.compute(contactStates, null);
+         momentumControlModule.compute(contactStates, null, null);
 
 
          SpatialForceVector momentumRateOfChangeOut = momentumControlModule.getDesiredCentroidalMomentumRate();

@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributor;
@@ -53,7 +54,7 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
    {
       reset();
 
-      ArrayList<PlaneContactState> contactStates = groundReactionWrenchDistributorInputData.getContactStates();
+      List<PlaneContactState> contactStates = groundReactionWrenchDistributorInputData.getContactStates();
 
       for (PlaneContactState contactState : contactStates)
       {

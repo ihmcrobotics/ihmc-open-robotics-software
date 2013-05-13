@@ -98,7 +98,7 @@ public class DRCOptimizationMomentumControlModuleTest
             momentumControlModule.setDesiredJointAcceleration(inverseDynamicsJoint, vdDesired);
          }
 
-         momentumControlModule.compute(contactStates, null);
+         momentumControlModule.compute(contactStates, null, null);
 
          for (InverseDynamicsJoint inverseDynamicsJoint : jointsToOptimizeFor)
          {
@@ -166,7 +166,7 @@ public class DRCOptimizationMomentumControlModuleTest
          constrainFeet(elevator, feet, momentumControlModule, taskspaceConstraintDataMap);
          constrainPelvis(random, fullRobotModel, momentumControlModule, taskspaceConstraintDataMap);
 
-         momentumControlModule.compute(contactStates, null);
+         momentumControlModule.compute(contactStates, null, null);
 
          assertWrenchesSumUpToMomentumDot(momentumControlModule.getExternalWrenches().values(), momentumControlModule.getDesiredCentroidalMomentumRate(), gravityZ, mass, centerOfMassFrame, 1e-3);
          assertWrenchesInFrictionCones(momentumControlModule.getExternalWrenches(), contactStates, coefficientOfFriction);

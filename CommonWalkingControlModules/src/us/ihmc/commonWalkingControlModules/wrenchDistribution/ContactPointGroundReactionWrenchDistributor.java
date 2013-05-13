@@ -105,7 +105,7 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
       normalForceSelectorBMatrix.zero();
       Arrays.fill(rhoMinArray, 0.0);
 
-      ArrayList<PlaneContactState> contactStates = inputData.getContactStates();
+      List<PlaneContactState> contactStates = inputData.getContactStates();
 
       int contactNumber = 0;
       int basisVectorNumber = 0;

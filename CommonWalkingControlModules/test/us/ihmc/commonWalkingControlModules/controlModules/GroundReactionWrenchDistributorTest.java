@@ -332,8 +332,8 @@ public class GroundReactionWrenchDistributorTest
 
       GroundReactionWrenchDistributorInputData inputData = new GroundReactionWrenchDistributorInputData();
 
-      inputData.addContact(contactStateOne);
-      inputData.addContact(contactStateTwo);
+      inputData.addPlaneContact(contactStateOne);
+      inputData.addPlaneContact(contactStateTwo);
 
 
       GroundReactionWrenchDistributorVisualizer visualizer = null;
@@ -420,8 +420,8 @@ public class GroundReactionWrenchDistributorTest
 
          GroundReactionWrenchDistributorInputData inputData = new GroundReactionWrenchDistributorInputData();
 
-         inputData.addContact(leftFootContactState);
-         inputData.addContact(rightFootContactState);
+         inputData.addPlaneContact(leftFootContactState);
+         inputData.addPlaneContact(rightFootContactState);
 
          SpatialForceVector desiredNetSpatialForceVector;
 
@@ -525,7 +525,7 @@ public class GroundReactionWrenchDistributorTest
 
       for (int i = 0; i < feetContactStates.length; i++)
       {
-         inputData.addContact(feetContactStates[i]);
+         inputData.addPlaneContact(feetContactStates[i]);
          contactStates.add(feetContactStates[i]);
       }
 

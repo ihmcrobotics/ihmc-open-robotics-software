@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumContr
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointWrenchMatrixCalculator;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylindricalContactState;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -80,7 +81,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       externalWrenchHandler.reset();
    }
 
-   public void compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, RobotSide upcomingSupportLeg)
+   public void compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, RobotSide upcomingSupportLeg, Map<RigidBody, ? extends CylindricalContactState> cylinderContactStates)
    {
       LinkedHashMap<RigidBody, PlaneContactState> planeContactStates = convertContactStates(contactStates);
 
