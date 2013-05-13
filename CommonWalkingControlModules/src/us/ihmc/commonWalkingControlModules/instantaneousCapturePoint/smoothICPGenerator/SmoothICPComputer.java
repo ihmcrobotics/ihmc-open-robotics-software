@@ -164,8 +164,8 @@ public class SmoothICPComputer
            int maxNumberOfConsideredFootsteps, boolean isInitialTransfer, boolean stopIfReachedEnd)
    {
       boolean putFirstCenterOfPressureInMiddle = isInitialTransfer;
-      boolean willReachTheEnd = footLocations.size() <= maxNumberOfConsideredFootsteps;
-      boolean putTheLastNCentersOfPressureInMiddle = stopIfReachedEnd && willReachTheEnd;
+//      boolean willReachTheEnd = footLocations.size() <= maxNumberOfConsideredFootsteps;
+//      boolean putTheLastNCentersOfPressureInMiddle = stopIfReachedEnd && willReachTheEnd;
 
       int numberInFootlist = footLocations.size();
       Point3d positionToHoldAt = new Point3d();
@@ -197,16 +197,16 @@ public class SmoothICPComputer
          {
             if (i == numberInFootlist - 1)
             {
-               if (putTheLastNCentersOfPressureInMiddle)
-               {
+//               if (putTheLastNCentersOfPressureInMiddle)
+//               {
                   positionToHoldAt.set(footLocations.get(i).getPoint());
                   positionToHoldAt.add(footLocations.get(i - 1).getPoint());
                   positionToHoldAt.scale(0.5);
-               }
-               else
-               {
-                  positionToHoldAt.set(footLocations.get(i).getPoint());
-               }
+//               }
+//               else
+//               {
+//                  positionToHoldAt.set(footLocations.get(i).getPoint());
+//               }
             }
 
             centerOfPressureLocation.set(positionToHoldAt);
