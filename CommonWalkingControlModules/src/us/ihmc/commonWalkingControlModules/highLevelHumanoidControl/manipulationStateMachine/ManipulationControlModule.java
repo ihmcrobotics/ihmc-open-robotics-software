@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import us.ihmc.commonWalkingControlModules.configurations.ManipulationControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
@@ -32,7 +33,7 @@ public class ManipulationControlModule
    private final ManipulableToroidUpdater manipulableToroidUpdater;
 
    public ManipulationControlModule(DoubleYoVariable yoTime, FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
-                                    WalkingControllerParameters walkingControllerParameters, DesiredHandPoseProvider handPoseProvider,
+                                    ManipulationControllerParameters parameters, DesiredHandPoseProvider handPoseProvider,
                                     DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
                                     SideDependentList<HandControllerInterface> handControllers, MomentumBasedController momentumBasedController,
                                     YoVariableRegistry parentRegistry)
@@ -54,7 +55,7 @@ public class ManipulationControlModule
          String frameName = endEffector.getName() + "PositionControlFrame";
          final ReferenceFrame frameAfterJoint = endEffector.getParentJoint().getFrameAfterJoint();
          ReferenceFrame handPositionControlFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(frameName, frameAfterJoint,
-               walkingControllerParameters.getHandControlFramesWithRespectToFrameAfterWrist().get(robotSide));
+               parameters.getHandControlFramesWithRespectToFrameAfterWrist().get(robotSide));
          handPositionControlFrames.put(robotSide, handPositionControlFrame);
 
          // TODO: create manipulationControlParameters, have current walking parameters class implement it
@@ -62,9 +63,9 @@ public class ManipulationControlModule
          GeometricJacobian jacobian = new GeometricJacobian(fullRobotModel.getChest(), endEffector, endEffector.getBodyFixedFrame());
          jacobians.put(robotSide, jacobian);
 
-         Map<OneDoFJoint, Double> defaultArmJointPositions = walkingControllerParameters.getDefaultArmJointPositions(fullRobotModel, robotSide);
-         Map<OneDoFJoint, Double> minTaskSpacePositions = walkingControllerParameters.getMinTaskspaceArmJointPositions(fullRobotModel, robotSide);
-         Map<OneDoFJoint, Double> maxTaskSpacePositions = walkingControllerParameters.getMaxTaskspaceArmJointPositions(fullRobotModel, robotSide);
+         Map<OneDoFJoint, Double> defaultArmJointPositions = parameters.getDefaultArmJointPositions(fullRobotModel, robotSide);
+         Map<OneDoFJoint, Double> minTaskSpacePositions = parameters.getMinTaskspaceArmJointPositions(fullRobotModel, robotSide);
+         Map<OneDoFJoint, Double> maxTaskSpacePositions = parameters.getMaxTaskspaceArmJointPositions(fullRobotModel, robotSide);
 
          individualHandControlStateMachines.put(robotSide,
                  new IndividualHandControlStateMachine(yoTime, robotSide, fullRobotModel, twistCalculator, handPositionControlFrame, handPoseProvider,
@@ -72,7 +73,7 @@ public class ManipulationControlModule
                     defaultArmJointPositions, minTaskSpacePositions, maxTaskSpacePositions, registry));
       }
 
-      RigidBody toroidBase = fullRobotModel.getElevator(); // TODO: make this be the car when the time comes
+      RigidBody toroidBase = fullRobotModel.getElevator(); // TODO: make this be modifiable when the time comes
       this.manipulableToroidUpdater = new ManipulableToroidUpdater(toroidBase, handPositionControlFrames, yoTime, controlDT, dynamicGraphicObjectsListRegistry,
             registry);
 
