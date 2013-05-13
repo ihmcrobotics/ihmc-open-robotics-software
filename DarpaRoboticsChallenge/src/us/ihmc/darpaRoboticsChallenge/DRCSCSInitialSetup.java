@@ -25,6 +25,9 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
 
    private int simulationDataBufferSize = 16000;
    private double gravity = -9.81;
+   
+   private boolean initializeEstimatorToActual = false;
+   
    private final CommonTerrain commonTerrain;
 
    private DynamicIntegrationMethod dynamicIntegrationMethod = DynamicIntegrationMethod.EULER_DOUBLE_STEPS;
@@ -148,6 +151,16 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
       return gravity;
    }
 
+   public boolean getInitializeEstimatorToActual()
+   {
+      return initializeEstimatorToActual;
+   }
+   
+   public void setInitializeEstimatorToActual(boolean initializeEstimatorToActual)
+   {
+      this.initializeEstimatorToActual = initializeEstimatorToActual;
+   }
+   
    public GroundProfile getGroundProfile()
    {
       return commonTerrain.getGroundProfile();

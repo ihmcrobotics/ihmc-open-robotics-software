@@ -182,7 +182,7 @@ public class DRCSimulationFactory
       
       //TODO: Can only do this if we have a simulation...
       Pair<Point3d, Quat4d> initialCoMPositionAndEstimationLinkOrientation = null;
-      if (DRCConfigParameters.INITIALIZE_ESTIMATOR_TO_ACTUAL)
+      if (scsInitialSetup.getInitializeEstimatorToActual())
       {
          System.err.println("Warning! Initializing Estimator to Actual!");
          initialCoMPositionAndEstimationLinkOrientation = getInitialCoMPositionAndEstimationLinkOrientation(robotInitialSetup, simulatedRobot);

@@ -48,7 +48,10 @@ public class DRCSimulationTestHelper
       boolean automaticallyStartSimulation = false;
       boolean startDRCNetworkProcessor = false;
 
-      drcSimulation = DRCDemo01.startDRCSim(networkObjectCommunicator, selectedLocation, selectedEnvironment, startOutsidePen,
+      boolean initializeEstimatorToActual = true;
+      
+      drcSimulation = DRCDemo01.startDRCSim(networkObjectCommunicator, selectedLocation, selectedEnvironment, initializeEstimatorToActual,
+            startOutsidePen,
               useGazebo, automaticallyStartSimulation, startDRCNetworkProcessor);
 
       blockingSimulationRunner = new BlockingSimulationRunner(drcSimulation.getSimulationConstructionSet(), 60.0 * 10.0);
