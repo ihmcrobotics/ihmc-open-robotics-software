@@ -45,7 +45,7 @@ public class IndividualHandControlStateMachine
    final DesiredHandPoseProvider handPoseProvider;
 
    public IndividualHandControlStateMachine(final DoubleYoVariable simulationTime, final RobotSide robotSide, final FullRobotModel fullRobotModel,
-           final TwistCalculator twistCalculator, WalkingControllerParameters walkingControllerParameters, final DesiredHandPoseProvider handPoseProvider,
+           final TwistCalculator twistCalculator, ReferenceFrame handPositionControlFrame, final DesiredHandPoseProvider handPoseProvider,
            final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, HandControllerInterface handController, double gravity,
            final double controlDT, MomentumBasedController momentumBasedController, GeometricJacobian jacobian, Map<OneDoFJoint, Double> defaultJointPositions,
            Map<OneDoFJoint, Double> minTaskSpacePositions, Map<OneDoFJoint, Double> maxTaskSpacePositions, final YoVariableRegistry parentRegistry)
@@ -57,13 +57,8 @@ public class IndividualHandControlStateMachine
       stateMachine = new StateMachine<IndividualHandControlState>(name, name + "SwitchTime", IndividualHandControlState.class, simulationTime, registry);
       this.handPoseProvider = handPoseProvider;
 
-      String frameName = endEffector.getName() + "PositionControlFrame";
-      final ReferenceFrame frameAfterJoint = endEffector.getParentJoint().getFrameAfterJoint();
-      ReferenceFrame endEffectorFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(frameName, frameAfterJoint,
-                                           walkingControllerParameters.getHandControlFramesWithRespectToFrameAfterWrist().get(robotSide));
-
       handSpatialAccelerationControlModule = new RigidBodySpatialAccelerationControlModule(endEffector.getName(), twistCalculator, endEffector,
-              endEffectorFrame, registry);
+              handPositionControlFrame, registry);
 
       handSpatialAccelerationControlModule.setPositionProportionalGains(100.0, 100.0, 100.0);
       handSpatialAccelerationControlModule.setPositionDerivativeGains(20.0, 20.0, 20.0);
@@ -76,7 +71,7 @@ public class IndividualHandControlStateMachine
                                                           jacobian, momentumBasedController, registry, 1.0);
       defaultState.setDesiredJointPositions(defaultJointPositions);
 
-      final ConstantConfigurationProvider currentConfigurationProvider = new ConstantConfigurationProvider(new FramePose(endEffectorFrame));
+      final ConstantConfigurationProvider currentConfigurationProvider = new ConstantConfigurationProvider(new FramePose(handPositionControlFrame));
       final ChangeableConfigurationProvider desiredConfigurationProvider = new ChangeableConfigurationProvider(handPoseProvider.getDesiredHandPose(robotSide));
       final TaskspaceHandControlState taskSpaceState = createTaskspaceHandControlState(IndividualHandControlState.OBJECT_MANIPULATION, robotSide,
                                                           fullRobotModel, dynamicGraphicObjectsListRegistry, handController, gravity, controlDT,
@@ -115,7 +110,7 @@ public class IndividualHandControlStateMachine
       {
          DynamicGraphicObjectsList list = new DynamicGraphicObjectsList(name);
 
-         DynamicGraphicReferenceFrame dynamicGraphicReferenceFrame = new DynamicGraphicReferenceFrame(endEffectorFrame, registry, 0.3);
+         DynamicGraphicReferenceFrame dynamicGraphicReferenceFrame = new DynamicGraphicReferenceFrame(handPositionControlFrame, registry, 0.3);
          dynamicGraphicReferenceFrames.add(dynamicGraphicReferenceFrame);
          list.add(dynamicGraphicReferenceFrame);
 
