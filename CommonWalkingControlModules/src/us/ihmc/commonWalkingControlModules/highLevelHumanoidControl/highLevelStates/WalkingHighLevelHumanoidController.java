@@ -1641,7 +1641,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
    }
 
    private void checkForSteppingOnOrOff(RobotSide transferToSide)
-   {
+   {      
       if ((transferToSide != null) && upcomingFootstepList.hasNextFootsteps())
       {
          ReferenceFrame initialSoleFrame;
@@ -1649,7 +1649,7 @@ public class WalkingHighLevelHumanoidController extends State<HighLevelState>
          // NOTE: the foot may have moved so its ideal to get the previous footstep, rather than the current foot frame, if possible
          if (upcomingFootstepList.doesNextFootstepListHaveFewerThanTwoElements())
          {
-            initialSoleFrame = bipedFeet.get(transferToSide.getOppositeSide()).getRigidBody().getParentJoint().getFrameAfterJoint();
+            initialSoleFrame = bipedFeet.get(transferToSide.getOppositeSide()).getPlaneFrame();
          }
          else
          {
