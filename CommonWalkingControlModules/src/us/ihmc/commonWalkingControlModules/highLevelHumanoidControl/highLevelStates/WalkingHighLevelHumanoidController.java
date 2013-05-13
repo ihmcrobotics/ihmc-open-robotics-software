@@ -204,7 +204,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          InstantaneousCapturePointPlanner instantaneousCapturePointPlanner, SideDependentList<HandControllerInterface> handControllers,
          ICPAndMomentumBasedController icpAndMomentumBasedController, WalkingStatusReporter walkingStatusReporter)
    {
-      super(icpAndMomentumBasedController.getBipedFeet(), null, desiredPelvisOrientationPort, desiredHeadOrientationProvider, icpAndMomentumBasedController, walkingControllerParameters,
+      super(icpAndMomentumBasedController.getBipedFeet(), desiredPelvisOrientationPort, desiredHeadOrientationProvider, icpAndMomentumBasedController, walkingControllerParameters,
             handPoseProvider, handControllers, lidarControllerInterface, dynamicGraphicObjectsListRegistry, controllerState);
       
       if (dynamicGraphicObjectsListRegistry == null)
