@@ -63,7 +63,7 @@ public class MomentumBasedController implements RobotController
    protected final List<ContactablePlaneBody> contactablePlaneBodies;
 
    protected final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
-   protected final Map<RigidBody, ? extends CylindricalContactState> cylindricalContactStates = new LinkedHashMap<RigidBody, YoCylindricalContactState>();
+   protected final Map<RigidBody, CylindricalContactState> cylindricalContactStates = new LinkedHashMap<RigidBody, CylindricalContactState>();
    protected final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
    protected final DoubleYoVariable yoTime;
    protected final double controlDT;
@@ -459,5 +459,10 @@ public class MomentumBasedController implements RobotController
    public CenterOfMassJacobian getCenterOfMassJacobian()
    {
       return centerOfMassJacobian;
+   }
+
+   public Map<RigidBody, CylindricalContactState> getCylindricalContactStates()
+   {
+      return cylindricalContactStates;
    }
 }
