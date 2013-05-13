@@ -299,9 +299,12 @@ public class SmoothICPComputer
 
    private void visualizeICPCornerPoints(Point3d[] icpCornerPoints, DynamicGraphicPosition[] icpCornerPointsViz2)
    {
-      for (int i = 0; i < icpCornerPoints.length; i++)
+      if (VISUALIZE)
       {
-         icpCornerPointsViz[i].setPosition(icpCornerPoints[i]);
+         for (int i = 0; i < icpCornerPoints.length; i++)
+         {
+            icpCornerPointsViz[i].setPosition(icpCornerPoints[i]);
+         }
       }
 
    }
