@@ -38,19 +38,22 @@ public class DRCConfigParameters
    public static final String CLOUD_MINION3_IP = "10.4.42.5";
    public static final String CLOUD_MONSTER_JR_IP = "10.4.42.3";
    public static final String CLOUD_MONSTER_IP = "10.4.42.1";
-   public static final String GAZEBO_HOST = CLOUD_MINION3_IP; //"192.168.100.2";//"10.4.42.3";
 
 
+   public static final String GAZEBO_HOST = LOCALHOST;
+   public static final String SCS_MACHINE_IP_ADDRESS = LOCALHOST;
+   public static final String OPERATOR_INTERFACE_IP_ADDRESS = LOCALHOST;
+   
    public static final String ROS_MASTER_URI = "http://" + GAZEBO_HOST + ":11311";
-   public static final String SCS_MACHINE_IP_ADDRESS = LOCALHOST; // "10.100.0.27"; //"10.4.42.1"; // "localhost";    // "10.100.0.37";
    public static final int CONTROLLER_TO_UI_TCP_PORT = 4893;
    public static final int CONTROLLER_TO_UI_UDP_PORT = CONTROLLER_TO_UI_TCP_PORT + 1;
 
    public static final int NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT = 4895;
+   public static final int NETWORK_PROCESSOR_TO_CONTROLLER_UDP_PORT = NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT + 1;
 
    public static final int NETWORK_PROCESSOR_TO_UI_TCP_PORT = 4897;
+   public static final int NETWORK_PROCESSOR_TO_UI_UDP_PORT = NETWORK_PROCESSOR_TO_UI_TCP_PORT + 1;
 
-   public static final String OPERATOR_INTERFACE_IP_ADDRESS = "localhost";    // "10.4.8.1";
 
    public static final long ROBOT_JOINT_SERVER_UPDATE_MILLIS = 100;
 
