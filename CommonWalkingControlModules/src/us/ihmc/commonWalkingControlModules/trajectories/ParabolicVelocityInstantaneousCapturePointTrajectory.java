@@ -164,4 +164,9 @@ public class ParabolicVelocityInstantaneousCapturePointTrajectory implements Ins
       this.currentTime.set(0.0);
    }
 
+   public double getStartTime()
+   {
+      return startTime.getDoubleValue();
+   }
+
 }
