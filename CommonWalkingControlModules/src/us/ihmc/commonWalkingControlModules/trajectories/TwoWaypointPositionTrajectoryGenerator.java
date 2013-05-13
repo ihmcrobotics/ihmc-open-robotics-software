@@ -17,6 +17,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
@@ -27,6 +28,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParametersProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypointGenerationMethod;
 import com.yobotics.simulationconstructionset.util.trajectory.VectorProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.YoConcatenatedSplines;
 
@@ -44,6 +46,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private final YoVariableRegistry registry;
    private final int numberOfVisualizationMarkers = 50;
    private final BooleanYoVariable visualize;
+   
+   private final EnumYoVariable<TrajectoryWaypointGenerationMethod> waypointGenerationMethod;
 
    private final BagOfBalls trajectoryBagOfBalls;
    private final BagOfBalls fixedPointBagOfBalls;
@@ -103,6 +107,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          trajectoryBagOfBalls = null;
          fixedPointBagOfBalls = null;
       }
+      
+      this.waypointGenerationMethod = new EnumYoVariable<TrajectoryWaypointGenerationMethod>(namePrefix + "WaypointGenerationMethod", registry, TrajectoryWaypointGenerationMethod.class);
 
       this.walkingControllerParameters = walkingControllerParameters;
 
@@ -431,8 +437,9 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private void setWaypointPositions()
    {
       List<FramePoint> waypoints = null;
+      waypointGenerationMethod.set(trajectoryParameters.getWaypointGenerationMethod());
 
-      switch (trajectoryParameters.getWaypointGenerationMethod())
+      switch (waypointGenerationMethod.getEnumValue())
       {
          case BY_POINTS :
             waypoints = new ArrayList<FramePoint>();
@@ -498,11 +505,11 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    private List<FramePoint> getWaypointsForStepOnOrOff()
    {     
-      System.out.println("getting waypoints for stepping on/off");
       List<FramePoint> waypoints = new ArrayList<FramePoint>();
       waypoints.add(allPositions[endpointIndices[0]].getFramePointCopy());
       waypoints.add(allPositions[endpointIndices[1]].getFramePointCopy());
       int indexOfMaxZ = (waypoints.get(0).getZ() > waypoints.get(1).getZ()) ? 0 : 1;
+      
       double maxZ = waypoints.get(indexOfMaxZ).getZ();
 
       for (FramePoint waypoint : waypoints)
@@ -510,15 +517,21 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          waypoint.setZ(maxZ + SimpleTwoWaypointTrajectoryParameters.getDefaultGroundClearance());
       }
 
-      FrameVector maxZPointOffset = allPositions[endpointIndices[1]].getFrameVectorCopy();
-      maxZPointOffset.sub(allPositions[endpointIndices[0]].getFrameVectorCopy());
-      maxZPointOffset.setZ(0.0);
-
-      double fractionOfStepDistanceToMoveWaypointForStepOnOrOff = SimpleTwoWaypointTrajectoryParameters.getFractionOfStepDistanceToMoveWaypointForStepOnOrOff();
-      maxZPointOffset.scale(fractionOfStepDistanceToMoveWaypointForStepOnOrOff);
-      if (indexOfMaxZ == 1)
-         maxZPointOffset.scale(-1.0);
-      waypoints.get(indexOfMaxZ).add(maxZPointOffset);
+      FrameVector planarEndpointOffset = allPositions[endpointIndices[1]].getFrameVectorCopy();
+      planarEndpointOffset.sub(allPositions[endpointIndices[0]].getFrameVectorCopy());
+      planarEndpointOffset.setZ(0.0);
+      
+      double[] fractionsOfStepDistanceToMoveWaypointForStepOnOrOff = SimpleTwoWaypointTrajectoryParameters.getStepOnOrOffProportionsThroughTrajectoryForGroundClearance();
+      
+      for(int i = 0; i < 2; i++)
+      {
+         FramePoint waypoint = waypoints.get(i);
+         FrameVector planarWaypointOffset = new FrameVector(planarEndpointOffset);
+         double scaleFactor = fractionsOfStepDistanceToMoveWaypointForStepOnOrOff[i];
+         if(i == 1) scaleFactor = scaleFactor - 1.0;
+         planarWaypointOffset.scale(scaleFactor);
+         waypoint.add(planarWaypointOffset);
+      }
 
       return waypoints;
    }
@@ -537,13 +550,13 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       initialPosition.changeFrame(referenceFrame);
       finalPosition.changeFrame(referenceFrame);
 
-      List<FramePoint> waypoints = getWaypointsAtGroundClearance(initialPosition, finalPosition, groundClearance,
+      List<FramePoint> waypoints = getWaypointsAtSpecifiedGroundClearance(initialPosition, finalPosition, groundClearance,
                                       proportionsThroughTrajectoryForGroundClearance);
 
       return waypoints;
    }
 
-   public static List<FramePoint> getWaypointsAtGroundClearance(FramePoint initialPosition, FramePoint finalPosition, double groundClearance,
+   public static List<FramePoint> getWaypointsAtSpecifiedGroundClearance(FramePoint initialPosition, FramePoint finalPosition, double groundClearance,
            double[] proportionsThroughTrajectoryForGroundClearance)
    {
       List<FramePoint> waypoints = new ArrayList<FramePoint>();
