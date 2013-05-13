@@ -1,14 +1,20 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Point2d;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
+import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MultiContactTestHumanoidControllerFactory;
+import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
@@ -17,6 +23,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.MultiContactDRCRobotInitialSe
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 import com.martiansoftware.jsap.JSAPException;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -69,9 +76,25 @@ public class DRCMultiContact
          handContactPoints.put(robotSide, DRCRobotParameters.invisibleContactablePlaneHandContactPoints.get(robotSide));
       }
 
+      WalkingControllerParameters controllerParameters = new DRCRobotMultiContactControllerParameters(){
+         public Map<OneDoFJoint, Double> getDefaultArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
+         {
+            Map<OneDoFJoint, Double> jointPositions = new LinkedHashMap<OneDoFJoint, Double>();
+            EnumMap<ArmJointName, Double> defaultArmPosition = MultiContactDRCRobotInitialSetup.getDefaultArmPositionForMultiContactSimulation().get(robotSide);
+
+            for (ArmJointName armJointName : defaultArmPosition.keySet())
+            {
+               double position = defaultArmPosition.get(armJointName);
+               OneDoFJoint joint = fullRobotModel.getArmJoint(robotSide, armJointName);
+               jointPositions.put(joint, position);
+            }
+
+            return jointPositions;
+         }
+      };
 
       MultiContactTestHumanoidControllerFactory highLevelHumanoidControllerFactory = new MultiContactTestHumanoidControllerFactory(namesOfJointsBeforeHands,
-                                                                                        handContactPointTransforms, handContactPoints, footContactSides, handContactSides);
+            handContactPointTransforms, handContactPoints, footContactSides, handContactSides, controllerParameters);
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory);
 
       drcSimulation = DRCSimulationFactory.createSimulation(controllerFactory, environment, robotInterface, robotInitialSetup, scsInitialSetup, guiInitialSetup, null);
@@ -82,7 +105,7 @@ public class DRCMultiContact
       MidiSliderBoard sliderBoard = new MidiSliderBoard(simulationConstructionSet);
       sliderBoard.setSlider(1, "desiredCoMX", simulationConstructionSet, -0.2, 0.2);
       sliderBoard.setSlider(2, "desiredCoMY", simulationConstructionSet, -0.2, 0.2);
-      sliderBoard.setSlider(3, "desiredCoMZ", simulationConstructionSet, 0.8, 1.2);
+      sliderBoard.setSlider(3, "desiredCoMZ", simulationConstructionSet, -0.5, 1.2);
       sliderBoard.setSlider(4, "desiredPelvisYaw", simulationConstructionSet, -Math.PI / 8.0, Math.PI / 8.0);
       sliderBoard.setSlider(5, "desiredPelvisPitch", simulationConstructionSet, -Math.PI, Math.PI);
       sliderBoard.setSlider(6, "desiredPelvisRoll", simulationConstructionSet, -Math.PI / 8.0, Math.PI / 8.0);

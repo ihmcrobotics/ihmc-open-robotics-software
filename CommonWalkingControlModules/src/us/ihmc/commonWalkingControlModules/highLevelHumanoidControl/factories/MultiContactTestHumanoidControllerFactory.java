@@ -10,12 +10,14 @@ import javax.vecmath.Point2d;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.MultiContactTestHumanoidController;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredHandPoseProvider;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CoMBasedMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OldMomentumControlModule;
@@ -56,16 +58,18 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
    private final SideDependentList<List<Point2d>> handContactPoints;
    private final RobotSide[] footContactSides;
    private final RobotSide[] handContactSides;
+   private final WalkingControllerParameters walkingControllerParameters;
 
    public MultiContactTestHumanoidControllerFactory(SideDependentList<String> namesOfJointsBeforeHands,
          SideDependentList<Transform3D> handContactPointTransforms, SideDependentList<List<Point2d>> handContactPoints, RobotSide[] footContactSides,
-         RobotSide[] handContactSides)
+         RobotSide[] handContactSides, WalkingControllerParameters walkingControllerParameters)
    {
       this.namesOfJointsBeforeHands = namesOfJointsBeforeHands;
       this.handContactPointTransforms = handContactPointTransforms;
       this.handContactPoints = handContactPoints;
       this.footContactSides = footContactSides;
       this.handContactSides = handContactSides;
+      this.walkingControllerParameters = walkingControllerParameters;
    }
 
    public RobotController create(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
@@ -144,8 +148,11 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
             null, momentumRateOfChangeControlModule, rootJointAccelerationControlModule, stateEstimationDataFromControllerSink,
             dynamicGraphicObjectsListRegistry);
 
-      MultiContactTestHumanoidController multiContactBehavior = new MultiContactTestHumanoidController(feet, hands, contactablePlaneBodiesAndBases,
-            momentumRateOfChangeControlModule.getDesiredCoMPositionInputPort(), desiredPelvisOrientationTrajectoryInputPort, momentumBasedController);
+      DesiredHandPoseProvider desiredHandPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters);
+      
+      MultiContactTestHumanoidController multiContactBehavior = new MultiContactTestHumanoidController(feet, hands,
+            momentumRateOfChangeControlModule.getDesiredCoMPositionInputPort(), desiredPelvisOrientationTrajectoryInputPort, null, momentumBasedController,
+            walkingControllerParameters, desiredHandPoseProvider, null, null, dynamicGraphicObjectsListRegistry);
 
       double coefficientOfFriction = 1.0;
 
