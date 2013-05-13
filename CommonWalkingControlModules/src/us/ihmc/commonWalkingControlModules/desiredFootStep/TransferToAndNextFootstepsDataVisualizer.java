@@ -41,13 +41,13 @@ public class TransferToAndNextFootstepsDataVisualizer
       YoAppearance.makeTransparent(nextFootstepPolygonAppearance, 0.5);
       AppearanceDefinition nextNextFootstepPolygonAppearance = YoAppearance.Lavender();
 
-      transferFromPolygonViz = new DynamicGraphicYoFramePolygon("transferFromPolygon", transferFromPolygon, "transferFromPolygon", "", registry,
+      transferFromPolygonViz = new DynamicGraphicYoFramePolygon("transferFromPolygon2", transferFromPolygon, "transferFromPolygon2", "", registry,
               polygonVizScale, transferFromPolygonAppearance);
-      transferToPolygonViz = new DynamicGraphicYoFramePolygon("transferToPolygon", transferToPolygon, "transferToPolygon", "", registry, polygonVizScale,
+      transferToPolygonViz = new DynamicGraphicYoFramePolygon("transferToPolygon2", transferToPolygon, "transferToPolygon2", "", registry, polygonVizScale,
               transferToPolygonAppearance);
-      nextStepPolygonViz = new DynamicGraphicYoFramePolygon("nextStepPolygon", nextStepPolygon, "nextStepPolygon", "", registry, polygonVizScale,
+      nextStepPolygonViz = new DynamicGraphicYoFramePolygon("nextStepPolygon2", nextStepPolygon, "nextStepPolygon2", "", registry, polygonVizScale,
               nextFootstepPolygonAppearance);
-      nextNextStepPolygonViz = new DynamicGraphicYoFramePolygon("nextNextStepPolygon", nextNextStepPolygon, "nextNextStepPolygon", "", registry,
+      nextNextStepPolygonViz = new DynamicGraphicYoFramePolygon("nextNextStepPolygon2", nextNextStepPolygon, "nextNextStepPolygon2", "", registry,
               polygonVizScale, nextNextFootstepPolygonAppearance);
 
       transferFromPolygonViz.setPosition(0.0, 0.0, 0.001);
