@@ -9,7 +9,7 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 import java.util.Map;
 
-public interface WalkingControllerParameters extends HeadOrientationControllerParameters
+public interface WalkingControllerParameters extends HeadOrientationControllerParameters, ManipulationControllerParameters
 {
    public abstract SideDependentList<Transform3D> getDesiredHandPosesWithRespectToChestFrame();
 
@@ -29,15 +29,7 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    
    public abstract double nominalHeightAboveAnkle();
    
-   public abstract SideDependentList<Transform3D> getHandControlFramesWithRespectToFrameAfterWrist();
-
    public abstract boolean finishSwingWhenTrajectoryDone();
-
-   public abstract Map<OneDoFJoint, Double> getDefaultArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide);
-
-   public abstract Map<OneDoFJoint,Double> getMinTaskspaceArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide);
-
-   public abstract Map<OneDoFJoint,Double> getMaxTaskspaceArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide);
 
    public abstract boolean doToeOffIfPossible();
 
