@@ -194,8 +194,12 @@ public class OldMomentumControlModule implements MomentumControlModule
       {
          for (RigidBody body : cylinderContactStates.keySet())
          {
-            Wrench bodyWrench = distributedWrenches.getWrenchOfNonPlaneContact(body);
-            externalWrenches.put(body, bodyWrench);
+            if (cylinderContactStates.get(body).isInContact())
+            {
+               Wrench bodyWrench = distributedWrenches.getWrenchOfNonPlaneContact(body);
+               System.out.println("OldMomentumControlModule: We have a cylinder wrench!");
+               externalWrenches.put(body, bodyWrench);
+            }
          }
       }
 

@@ -1,17 +1,18 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
-import com.yobotics.simulationconstructionset.util.statemachines.*;
-import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.states.*;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.states.IndividualHandControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.states.JointSpaceHandControlControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.states.LoadBearingHandControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.states.MoveJointsInRangeState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.states.ObjectManipulationState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.states.TaskspaceHandControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
@@ -28,9 +29,18 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
+import com.yobotics.simulationconstructionset.util.statemachines.State;
+import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
+import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
+import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionAction;
+import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
+import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
 
 public class IndividualHandControlStateMachine
 {
@@ -85,7 +95,7 @@ public class IndividualHandControlStateMachine
                                                                0.3);
 
       final LoadBearingHandControlState loadBearingState = new LoadBearingHandControlState(IndividualHandControlState.LOAD_BEARING, momentumBasedController,
-                                                              endEffector, parentRegistry, isReadyToBearLoad);
+                                                              jacobian, parentRegistry, isReadyToBearLoad);
 
 
 
@@ -100,7 +110,7 @@ public class IndividualHandControlStateMachine
       taskSpaceState.addStateTransition(taskspaceToTaskspaceCondition);    // must be added after taskspaceToSingularityEscapeTransition
 
 
-      StateTransition<IndividualHandControlState> taskSpaceToLoadBearingTransition = createTaskSpaceToLoadBearingTransition(isReadyToBearLoad);
+      StateTransition<IndividualHandControlState> taskSpaceToLoadBearingTransition = createTaskSpaceToLoadBearingTransition(robotSide, isReadyToBearLoad);
       taskSpaceState.addStateTransition(taskSpaceToLoadBearingTransition);
 
 
@@ -118,7 +128,7 @@ public class IndividualHandControlStateMachine
       singularityEscapeState.addStateTransition(singularityEscapeToTaskspaceTransition);
 
 
-      StateTransition<IndividualHandControlState> loadBearingToTaskSpaceTransition = createLoadBearingToTaskSpaceTransition(isReadyToBearLoad);
+      StateTransition<IndividualHandControlState> loadBearingToTaskSpaceTransition = createLoadBearingToTaskSpaceTransition(robotSide, isReadyToBearLoad);
       loadBearingState.addStateTransition(loadBearingToTaskSpaceTransition);
 
 
@@ -142,38 +152,42 @@ public class IndividualHandControlStateMachine
       parentRegistry.addChild(registry);
    }
 
-   private StateTransition<IndividualHandControlState> createTaskSpaceToLoadBearingTransition(final BooleanYoVariable isReadyToSwitchToLoadBearing2)
+   private StateTransition<IndividualHandControlState> createTaskSpaceToLoadBearingTransition(final RobotSide robotSide,
+           final BooleanYoVariable isReadyToSwitchToLoadBearing)
    {
       StateTransitionCondition stateTransitionCondition = new StateTransitionCondition()
       {
          public boolean checkCondition()
          {
-            return isReadyToSwitchToLoadBearing2.getBooleanValue();
+            return isReadyToSwitchToLoadBearing.getBooleanValue() || handPoseProvider.isInContact(robotSide);
          }
       };
       StateTransitionAction stateTransitionAction = new StateTransitionAction()
       {
          public void doTransitionAction()
          {
+            isReadyToSwitchToLoadBearing.set(true);
          }
       };
 
       return new StateTransition<IndividualHandControlState>(IndividualHandControlState.LOAD_BEARING, stateTransitionCondition, stateTransitionAction);
    }
 
-   private StateTransition<IndividualHandControlState> createLoadBearingToTaskSpaceTransition(final BooleanYoVariable isReadyToSwitchToLoadBearing2)
+   private StateTransition<IndividualHandControlState> createLoadBearingToTaskSpaceTransition(final RobotSide robotSide,
+           final BooleanYoVariable isReadyToSwitchToLoadBearing)
    {
       StateTransitionCondition stateTransitionCondition = new StateTransitionCondition()
       {
          public boolean checkCondition()
          {
-            return !isReadyToSwitchToLoadBearing2.getBooleanValue();
+            return !isReadyToSwitchToLoadBearing.getBooleanValue() ||!handPoseProvider.isInContact(robotSide);
          }
       };
       StateTransitionAction stateTransitionAction = new StateTransitionAction()
       {
          public void doTransitionAction()
          {
+            isReadyToSwitchToLoadBearing.set(false);
          }
       };
 
