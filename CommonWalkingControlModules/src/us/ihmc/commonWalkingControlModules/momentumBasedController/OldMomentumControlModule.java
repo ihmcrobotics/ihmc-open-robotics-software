@@ -113,7 +113,7 @@ public class OldMomentumControlModule implements MomentumControlModule
    public void compute(Map<ContactablePlaneBody, ? extends PlaneContactState> planeContactStates, RobotSide upcomingSupportLeg,
                        Map<RigidBody, ? extends CylindricalContactState> cylinderContactStates)
    {
-      solver.compute();    // no input?
+      solver.compute();
       solver.solve(rootJointAccelerationData.getAccelerationSubspace(), rootJointAccelerationData.getAccelerationMultipliers(),
                    momentumRateOfChangeData.getMomentumSubspace(), momentumRateOfChangeData.getMomentumMultipliers());
 
@@ -190,7 +190,7 @@ public class OldMomentumControlModule implements MomentumControlModule
          }
       }
 
-      if (null != cylinderContactStates)
+      if (cylinderContactStates != null)
       {
          for (RigidBody body : cylinderContactStates.keySet())
          {

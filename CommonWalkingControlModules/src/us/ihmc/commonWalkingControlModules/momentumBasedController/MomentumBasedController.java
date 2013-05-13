@@ -205,9 +205,7 @@ public class MomentumBasedController implements RobotController
 
    public void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench)
    {
-      inverseDynamicsCalculator.setExternalWrench(rigidBody, wrench);
-
-//    momentumControlModule.setExternalWrenchToCompensateFor(rigidBody, wrench); This method doesn't exist Twan. Am I missing something?
+      momentumControlModule.setExternalWrenchToCompensateFor(rigidBody, wrench);
    }
 
    public void doMotionControl()
