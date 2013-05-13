@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge;
+package us.ihmc.darpaRoboticsChallenge.processManagement;
 
 import java.io.BufferedReader;
 import java.io.IOException;

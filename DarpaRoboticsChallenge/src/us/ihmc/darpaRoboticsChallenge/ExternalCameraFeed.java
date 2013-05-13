@@ -28,7 +28,7 @@ import org.ros.node.topic.Subscriber;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosTools;
 import us.ihmc.utilities.keyboardAndMouse.RepeatingReleasedEventsFixer;
 
-class ExternalCameraFeed extends AbstractNodeMain
+public class ExternalCameraFeed extends AbstractNodeMain
 {
 	public static final boolean COLOR_IMAGE = true;
 	

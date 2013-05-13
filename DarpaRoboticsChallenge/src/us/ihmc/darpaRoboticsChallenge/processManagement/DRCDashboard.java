@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge;
+package us.ihmc.darpaRoboticsChallenge.processManagement;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -26,8 +26,11 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
 
+import us.ihmc.darpaRoboticsChallenge.ExternalCameraFeed;
+import us.ihmc.darpaRoboticsChallenge.DRCGazeboDrivingInterface;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig.LocalCloudMachines;
+import us.ihmc.utilities.processManagement.SimpleProcessSpawner;
 
 public class DRCDashboard
 {
