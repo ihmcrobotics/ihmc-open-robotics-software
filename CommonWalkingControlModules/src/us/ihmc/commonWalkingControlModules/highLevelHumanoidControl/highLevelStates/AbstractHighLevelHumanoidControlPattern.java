@@ -44,7 +44,7 @@ import com.yobotics.simulationconstructionset.util.statemachines.State;
 
 public abstract class AbstractHighLevelHumanoidControlPattern extends State<HighLevelState>
 {
-   protected final String name = getClass().getSimpleName();
+   private final String name = getClass().getSimpleName();
    protected final YoVariableRegistry registry = new YoVariableRegistry(name);
 
    protected final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -56,24 +56,25 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
    protected final TwistCalculator twistCalculator;
 
-   protected final ChestOrientationControlModule chestOrientationControlModule;
+   private final ChestOrientationControlModule chestOrientationControlModule;
 
-   protected final HeadOrientationControlModule headOrientationControlModule;
-   protected final DesiredHeadOrientationProvider desiredHeadOrientationProvider;
-   protected final OneDoFJoint jointForExtendedNeckPitchRange;
+   private final HeadOrientationControlModule headOrientationControlModule;
+   private final DesiredHeadOrientationProvider desiredHeadOrientationProvider;
+   private final ManipulationControlModule manipulationControlModule;
 
-   protected final LidarControllerInterface lidarControllerInterface;
+   private final LidarControllerInterface lidarControllerInterface;
+
+   private final OneDoFJoint jointForExtendedNeckPitchRange;
+   private final List<OneDoFJoint> torqueControlJoints = new ArrayList<OneDoFJoint>();
+   private final OneDoFJoint[] positionControlJoints;
 
    protected final ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort;
+
    protected final YoFrameOrientation desiredPelvisOrientation = new YoFrameOrientation("desiredPelvis", worldFrame, registry);
    protected final YoFrameVector desiredPelvisAngularVelocity = new YoFrameVector("desiredPelvisAngularVelocity", worldFrame, registry);
+
    protected final YoFrameVector desiredPelvisAngularAcceleration = new YoFrameVector("desiredPelvisAngularAcceleration", worldFrame, registry);
-
-   protected final OneDoFJoint[] positionControlJoints;
-   protected final List<OneDoFJoint> torqueControlJoints = new ArrayList<OneDoFJoint>();
-
    protected final SideDependentList<GeometricJacobian> legJacobians = new SideDependentList<GeometricJacobian>();
-   protected final ManipulationControlModule manipulationControlModule;
    protected final LinkedHashMap<ContactablePlaneBody, EndEffectorControlModule> footEndEffectorControlModules = new LinkedHashMap<ContactablePlaneBody,
                                                                                                                     EndEffectorControlModule>();
 
@@ -89,14 +90,13 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
    protected final DoubleYoVariable kUpperBody = new DoubleYoVariable("kUpperBody", registry);
    protected final DoubleYoVariable zetaUpperBody = new DoubleYoVariable("zetaUpperBody", registry);
 
-   protected final SideDependentList<? extends ContactablePlaneBody> bipedFeet, hands;
+   protected final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
 
    protected final DoubleYoVariable coefficientOfFriction = new DoubleYoVariable("coefficientOfFriction", registry);
 
    public AbstractHighLevelHumanoidControlPattern(SideDependentList<? extends ContactablePlaneBody> feet,
-           SideDependentList<? extends ContactablePlaneBody> hands, ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationPort,
-           DesiredHeadOrientationProvider desiredHeadOrientationProvider, MomentumBasedController momentumBasedController,
-           WalkingControllerParameters walkingControllerParameters, DesiredHandPoseProvider handPoseProvider,
+           ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationPort, DesiredHeadOrientationProvider desiredHeadOrientationProvider,
+           MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters, DesiredHandPoseProvider handPoseProvider,
            SideDependentList<HandControllerInterface> handControllers, LidarControllerInterface lidarControllerInterface,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, HighLevelState controllerState)
    {
@@ -117,7 +117,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       this.lidarControllerInterface = lidarControllerInterface;
       this.walkingControllerParameters = walkingControllerParameters;
 
-      this.hands = hands;
       this.bipedFeet = feet;
 
       kUpperBody.set(100.0);

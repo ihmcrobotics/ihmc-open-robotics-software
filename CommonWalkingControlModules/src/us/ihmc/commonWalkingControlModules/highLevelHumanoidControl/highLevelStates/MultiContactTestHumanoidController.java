@@ -42,7 +42,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
          SideDependentList<HandControllerInterface> handControllers, LidarControllerInterface lidarControllerInterface,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      super(feet, hands, desiredPelvisOrientationPort, desiredHeadOrientationProvider,
+      super(feet, desiredPelvisOrientationPort, desiredHeadOrientationProvider,
             momentumBasedController, walkingControllerParameters, handPoseProvider, handControllers, lidarControllerInterface, dynamicGraphicObjectsListRegistry, controllerState);
 
       this.desiredCoMPositionPort = desiredCoMPositionPort;
