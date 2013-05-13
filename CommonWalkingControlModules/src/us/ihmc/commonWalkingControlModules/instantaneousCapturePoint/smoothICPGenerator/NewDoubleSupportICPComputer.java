@@ -7,7 +7,7 @@ import javax.vecmath.Vector3d;
 
 public class NewDoubleSupportICPComputer
 {
-   public Point3d[] computeICPCornerPoints(int numberOfCornerPoints, ArrayList<Point3d> constantEquivalentCoPs, double steppingTime, double omega0)
+   public static Point3d[] computeICPCornerPoints(int numberOfCornerPoints, ArrayList<Point3d> constantEquivalentCoPs, double steppingTime, double omega0)
    {
       Point3d[] icpCornerPoints = new Point3d[numberOfCornerPoints];
 
@@ -27,7 +27,7 @@ public class NewDoubleSupportICPComputer
    }
 
    
-   public void computeSingleSupportStartICPAndVelocity(Point3d singleSupportICPToPack,  Vector3d singleSupportICPVelocityToPack, 
+   public static void computeSingleSupportStartICPAndVelocity(Point3d singleSupportICPToPack,  Vector3d singleSupportICPVelocityToPack, 
          Point3d constantCenterOfPressure, Point3d cornerPoint0, double doubleSupportDuration, double doubleSupportFirstStepFraction,
          double omega0)
    {
@@ -38,7 +38,7 @@ public class NewDoubleSupportICPComputer
    }
     
    
-   public void computeSingleSupportEndICPAndVelocity(Point3d singleSupportICPToPack,  Vector3d singleSupportICPVelocityToPack, 
+   public static void computeSingleSupportEndICPAndVelocity(Point3d singleSupportICPToPack,  Vector3d singleSupportICPVelocityToPack, 
          Point3d constantCenterOfPressure, Point3d cornerPoint0, double doubleSupportDuration, double doubleSupportFirstStepFraction,
          double singleSupportDuration, double omega0)
    {
@@ -49,7 +49,7 @@ public class NewDoubleSupportICPComputer
    }
    
    
-   public Point3d computeSingleSupportStartICP(Point3d constantCenterOfPressure, Point3d cornerPoint0, double doubleSupportDuration, double doubleSupportFirstStepFraction,
+   public static Point3d computeSingleSupportStartICP(Point3d constantCenterOfPressure, Point3d cornerPoint0, double doubleSupportDuration, double doubleSupportFirstStepFraction,
          double omega0)
    {
       Point3d singleSupportStateICP = new Point3d();
@@ -63,7 +63,7 @@ public class NewDoubleSupportICPComputer
       return singleSupportStateICP;
    }
 
-   public Point3d computeSingleSupportEndICP(Point3d constantCenterOfPressure, Point3d cornerPoint0, double doubleSupportDuration, double doubleSupportFirstStepFraction,
+   public static Point3d computeSingleSupportEndICP(Point3d constantCenterOfPressure, Point3d cornerPoint0, double doubleSupportDuration, double doubleSupportFirstStepFraction,
          double singleSupportDuration, double omega0)
    {
       Point3d singleSupportStateICP = new Point3d();
@@ -77,7 +77,7 @@ public class NewDoubleSupportICPComputer
       return singleSupportStateICP;
    }
 
-   public void computeSingleSupportICPPositionAndVelocity(Point3d icpPositionToPack, Vector3d icpVelocityToPack, Point3d constantCenterOfPressure, Point3d singleSupportStartICP, double omega0,
+   public static void computeSingleSupportICPPositionAndVelocity(Point3d icpPositionToPack, Vector3d icpVelocityToPack, Point3d constantCenterOfPressure, Point3d singleSupportStartICP, double omega0,
          double time)
    {
       JojosICPutilities.extrapolateDCMposAndVel(icpPositionToPack, icpVelocityToPack, constantCenterOfPressure, time, omega0, singleSupportStartICP);
