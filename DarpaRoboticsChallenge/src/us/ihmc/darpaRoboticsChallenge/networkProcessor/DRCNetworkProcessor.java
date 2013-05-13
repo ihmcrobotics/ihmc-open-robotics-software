@@ -16,7 +16,6 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.GazeboCameraReceiv
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.SCSCameraDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.GazeboLidarDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.SCSLidarDataReceiver;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosClockSubscriber;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosMainNode;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
@@ -69,7 +68,7 @@ public class DRCNetworkProcessor
       if(fieldComputerClient == null)
       {
          this.fieldComputerClient = new KryoObjectClient(DRCConfigParameters.SCS_MACHINE_IP_ADDRESS, DRCConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
-               DRCConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_UDP_PORT, new DRCNetClassList());
+               new DRCNetClassList());
          ((KryoObjectClient)this.fieldComputerClient).setReconnectAutomatically(true);
       }
       else

@@ -16,8 +16,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypointGenerationMethod;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData;
@@ -33,13 +31,14 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.KryoObjectClient;
 import us.ihmc.utilities.net.KryoObjectServer;
 import us.ihmc.utilities.net.NetClassList;
-import us.ihmc.utilities.net.NetProtocol;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.test.JUnitTools;
+
+import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypointGenerationMethod;
 
 /**
  * User: Matt
@@ -275,10 +274,10 @@ public class FootstepDataTest
    private NetClassList getNetClassList()
    {
       NetClassList netClassList = new NetClassList();
-      netClassList.addClass(NetProtocol.TCP, FootstepData.class);
-      netClassList.addClass(NetProtocol.TCP, FootstepDataList.class);
-      netClassList.addClass(NetProtocol.TCP, PauseCommand.class);
-      netClassList.addClass(NetProtocol.TCP, FootstepStatus.class);
+      netClassList.addClass(FootstepData.class);
+      netClassList.addClass(FootstepDataList.class);
+      netClassList.addClass(PauseCommand.class);
+      netClassList.addClass(FootstepStatus.class);
       
       netClassList.addType(ArrayList.class);
       netClassList.addType(Point3d.class);
@@ -292,7 +291,7 @@ public class FootstepDataTest
    private ObjectCommunicator createAndStartStreamingDataTCPServer(QueueBasedStreamingDataProducer<?> queueBasedStreamingDataProducer, int port) throws IOException
    {
       
-      KryoObjectServer server = new KryoObjectServer(port, port+1, getNetClassList());
+      KryoObjectServer server = new KryoObjectServer(port, getNetClassList());
       server.connect();
       queueBasedStreamingDataProducer.addConsumer(server);
       return server;
@@ -300,7 +299,7 @@ public class FootstepDataTest
 
    private <T> ObjectCommunicator createStreamingDataConsumer(Class<T> clazz, ObjectConsumer<T> consumer, int port) throws IOException
    {
-      KryoObjectClient client = new KryoObjectClient("localhost", port, port+1, getNetClassList());
+      KryoObjectClient client = new KryoObjectClient("localhost", port, getNetClassList());
       client.connect();
       client.attachListener(clazz, consumer);
       return client;
