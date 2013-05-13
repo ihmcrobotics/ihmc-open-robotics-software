@@ -81,4 +81,9 @@ public class YoCylindricalContactState implements CylindricalContactState
       return endEffectorFrame;
    }
 
+   public void setInContact(boolean inContact)
+   {
+      this.inContact.set(inContact);
+   }
+
 }
