@@ -47,10 +47,8 @@ public class DRCConfigParameters
    public static final int CONTROLLER_TO_UI_UDP_PORT = CONTROLLER_TO_UI_TCP_PORT + 1;
 
    public static final int NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT = 4895;
-   public static final int NETWORK_PROCESSOR_TO_CONTROLLER_UDP_PORT = NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT + 1;
 
    public static final int NETWORK_PROCESSOR_TO_UI_TCP_PORT = 4897;
-   public static final int NETWORK_PROCESSOR_TO_UI_UDP_PORT = NETWORK_PROCESSOR_TO_UI_TCP_PORT + 1;
 
    public static final String OPERATOR_INTERFACE_IP_ADDRESS = "localhost";    // "10.4.8.1";
 
