@@ -72,8 +72,9 @@ public class ManipulationControlModule
                     defaultArmJointPositions, minTaskSpacePositions, maxTaskSpacePositions, registry));
       }
 
-      this.manipulableToroidUpdater = new ManipulableToroidUpdater(fullRobotModel, handPositionControlFrames, dynamicGraphicObjectsListRegistry, yoTime,
-              controlDT, registry);
+      RigidBody toroidBase = fullRobotModel.getElevator(); // TODO: make this be the car when the time comes
+      this.manipulableToroidUpdater = new ManipulableToroidUpdater(toroidBase, handPositionControlFrames, yoTime, controlDT, dynamicGraphicObjectsListRegistry,
+            registry);
 
       parentRegistry.addChild(registry);
    }
@@ -88,11 +89,11 @@ public class ManipulationControlModule
 
    public void doControl()
    {
+      manipulableToroidUpdater.update();
       for (RobotSide robotSide : RobotSide.values())
       {
          jacobians.get(robotSide).compute();
          individualHandControlStateMachines.get(robotSide).doControl();
       }
-      manipulableToroidUpdater.update();
    }
 }
