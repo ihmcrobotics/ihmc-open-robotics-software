@@ -19,7 +19,8 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.SCSLidarDataReceive
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosClockSubscriber;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosMainNode;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
-import us.ihmc.darpaRoboticsChallenge.networking.bandwidthControl.DRCNetworkProcessorNetworkingManager;
+import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
+import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
 import us.ihmc.utilities.net.KryoObjectClient;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
 import us.ihmc.utilities.net.ObjectCommunicator;
@@ -28,6 +29,7 @@ public class DRCNetworkProcessor
 {
 
    private final ObjectCommunicator fieldComputerClient;
+   private final AtomicSettableTimestampProvider timestampProvider = new AtomicSettableTimestampProvider();
    private final DRCNetworkProcessorNetworkingManager networkingManager;
    private final RobotPoseBuffer robotPoseBuffer;
 
@@ -47,9 +49,6 @@ public class DRCNetworkProcessor
       System.out.println("Connecting to ROS");
       RosMainNode rosMainNode;
       rosMainNode = new RosMainNode(rosCoreURI, "darpaRoboticsChallange/networkProcessor");
-
-      RosClockSubscriber timeProvider = new RosClockSubscriber();
-      rosMainNode.attachSubscriber("/clock", timeProvider);
 
       new GazeboCameraReceiver(robotPoseBuffer, DRCConfigParameters.VIDEOSETTINGS, rosMainNode, networkingManager, DRCSensorParameters.FIELD_OF_VIEW);
       new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, fullRobotModel, jointMap, rosCoreURI.toString());
@@ -77,10 +76,9 @@ public class DRCNetworkProcessor
       {
          this.fieldComputerClient = fieldComputerClient;
       }
-
-      networkingManager = new DRCNetworkProcessorNetworkingManager(this.fieldComputerClient);
-
-      robotPoseBuffer = new RobotPoseBuffer(this.fieldComputerClient, 1000);
+      
+      robotPoseBuffer = new RobotPoseBuffer(this.fieldComputerClient, 1000, timestampProvider);
+      networkingManager = new DRCNetworkProcessorNetworkingManager(this.fieldComputerClient, timestampProvider);
       
       jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_SANDIA_HANDS, false);  
       JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap, true);
