@@ -37,4 +37,6 @@ public interface MomentumControlModule
    SpatialForceVector getDesiredCentroidalMomentumRate();
 
    Map<RigidBody, Wrench> getExternalWrenches();
+
+   void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench);
 }
