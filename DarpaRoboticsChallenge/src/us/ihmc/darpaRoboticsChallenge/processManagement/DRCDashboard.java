@@ -30,7 +30,7 @@ import us.ihmc.darpaRoboticsChallenge.ExternalCameraFeed;
 import us.ihmc.darpaRoboticsChallenge.DRCGazeboDrivingInterface;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig.LocalCloudMachines;
-import us.ihmc.utilities.processManagement.SimpleProcessSpawner;
+import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 
 public class DRCDashboard
 {
@@ -77,7 +77,7 @@ public class DRCDashboard
    private JButton killSimButton;
    private JButton launchGazeboSimButton;
 
-   private SimpleProcessSpawner spawner = new SimpleProcessSpawner(true);
+   private JavaProcessSpawner spawner = new JavaProcessSpawner(true);
    private GazeboSimLauncher sshSimLauncher = new GazeboSimLauncher();
 
    public DRCDashboard()
