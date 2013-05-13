@@ -81,6 +81,7 @@ import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.util.PDController;
 import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatus;
 import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter;
+import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter.ErrorType;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
@@ -439,15 +440,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       @Override
       public void doAction()
-      {
-         if(walkingStatusReporter != null)
-         {
-            if(walkingStatusReporter.isPelvisOrientationOutOfBounds())
-               walkingStatusReporter.notifyConsumerOfWalkingStatus(WalkingStatus.UNSTABLE_DOUBLE_SUPPORT);
-            else           
-               walkingStatusReporter.notifyConsumerOfWalkingStatus(WalkingStatus.STABLE);            
-         }
-         
+      {         
          ContactablePlaneBody transferFoot = bipedFeet.get(transferToSide);
 
          if ((footEndEffectorControlModules.get(transferFoot) != null) && footEndEffectorControlModules.get(transferFoot).onHeel()
@@ -693,6 +686,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       private final FrameOrientation desiredPelvisOrientationToPack;
       private final FrameVector desiredPelvisAngularVelocityToPack;
       private final FrameVector desiredPelvisAngularAccelerationToPack;
+      private final ErrorType[] singleSupportErrorToMonitor = new ErrorType[]{ErrorType.COM_Z, ErrorType.ICP_X, ErrorType.ICP_Y, ErrorType.PELVIS_ORIENTATION};
 
       public SingleSupportState(RobotSide robotSide)
       {
@@ -719,6 +713,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 //          // don't change desiredICP
 //          desiredICPVelocity.set(0.0, 0.0);
 //       }
+         
+         if(walkingStatusReporter != null)
+         {
+            if(walkingStatusReporter.areAnyErrorsOutOfBounds(singleSupportErrorToMonitor))
+               walkingStatusReporter.notifyConsumerOfWalkingStatus(WalkingStatus.UNSTABLE_SINGLE_SUPPORT);
+            else
+               walkingStatusReporter.notifyConsumerOfWalkingStatus(WalkingStatus.STABLE);            
+         }
 
          FramePoint2d desiredICPLocal = new FramePoint2d(desiredICP.getReferenceFrame());
          FrameVector2d desiredICPVelocityLocal = new FrameVector2d(desiredICPVelocity.getReferenceFrame());
@@ -1413,11 +1415,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       {
          DoubleYoVariable footPositionErrorMagnitude = (DoubleYoVariable) registry.getVariable(robotSide.getShortLowerCaseName()
                                                           + "_footPositionErrorMagnitude");
-         Pair<Double, Double> footPositionErrorBounds = new Pair<Double, Double>(-0.1, 0.1);
-         walkingStatusReporter.setFootPositionVariablesAndBounds(robotSide, footPositionErrorMagnitude, footPositionErrorBounds);
+         Pair<Double, Double> footPositionErrorBounds = new Pair<Double, Double>(-0.025, 0.025);
+         ErrorType errorType = robotSide == RobotSide.LEFT ? ErrorType.L_FOOT_POSITION : ErrorType.R_FOOT_POSITION;
+         walkingStatusReporter.setErrorAndBounds(errorType, footPositionErrorMagnitude, footPositionErrorBounds);
       }
       
-      // TODO add com height error
+      DoubleYoVariable comPositionError = (DoubleYoVariable) registry.getVariable("positionError_comHeight");
+      Pair<Double, Double> comPositionErrorBounds = new Pair<Double, Double>(-0.015, 0.015);
+      walkingStatusReporter.setErrorAndBounds(ErrorType.COM_Z, comPositionError, comPositionErrorBounds);
    }
 
 }
