@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.head.DesiredHeadOrient
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredHandPoseProvider;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.TorusPoseProvider;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OrientationTrajectoryData;
 import us.ihmc.commonWalkingControlModules.trajectories.FixedOrientationTrajectoryGenerator;
@@ -36,14 +37,14 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
    protected final YoFramePoint desiredCoMPosition = new YoFramePoint("desiredCoM", worldFrame, registry);
 
    public MultiContactTestHumanoidController(SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<? extends ContactablePlaneBody> hands,
-         ControlFlowInputPort<FramePoint> desiredCoMPositionPort, ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationPort,
-         DesiredHeadOrientationProvider desiredHeadOrientationProvider, MomentumBasedController momentumBasedController,
-         WalkingControllerParameters walkingControllerParameters, DesiredHandPoseProvider handPoseProvider,
-         SideDependentList<HandControllerInterface> handControllers, LidarControllerInterface lidarControllerInterface,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           ControlFlowInputPort<FramePoint> desiredCoMPositionPort, ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationPort,
+           DesiredHeadOrientationProvider desiredHeadOrientationProvider, MomentumBasedController momentumBasedController,
+           WalkingControllerParameters walkingControllerParameters, DesiredHandPoseProvider handPoseProvider, TorusPoseProvider torusPoseProvider,
+           SideDependentList<HandControllerInterface> handControllers, LidarControllerInterface lidarControllerInterface,
+           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      super(feet, desiredPelvisOrientationPort, desiredHeadOrientationProvider,
-            momentumBasedController, walkingControllerParameters, handPoseProvider, handControllers, lidarControllerInterface, dynamicGraphicObjectsListRegistry, controllerState);
+      super(feet, desiredPelvisOrientationPort, desiredHeadOrientationProvider, momentumBasedController, walkingControllerParameters, handPoseProvider,
+            torusPoseProvider, handControllers, lidarControllerInterface, dynamicGraphicObjectsListRegistry, controllerState);
 
       this.desiredCoMPositionPort = desiredCoMPositionPort;
    }
@@ -54,21 +55,23 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       {
          ContactablePlaneBody foot = bipedFeet.get(robotSide);
          GeometricJacobian jacobian = legJacobians.get(robotSide);
-         
+
          String bodyName = foot.getRigidBody().getName();
-         FixedPositionTrajectoryGenerator swingPositionTrajectoryGenerator = new FixedPositionTrajectoryGenerator(bodyName + "DesiredPosition", worldFrame, registry);
+         FixedPositionTrajectoryGenerator swingPositionTrajectoryGenerator = new FixedPositionTrajectoryGenerator(bodyName + "DesiredPosition", worldFrame,
+                                                                                registry);
          swingPositionTrajectoryGenerators.put(foot, swingPositionTrajectoryGenerator);
-         
-         FixedOrientationTrajectoryGenerator swingOrientationTrajectoryGenerator = new FixedOrientationTrajectoryGenerator(bodyName + "DesiredOrientation", worldFrame, registry);
+
+         FixedOrientationTrajectoryGenerator swingOrientationTrajectoryGenerator = new FixedOrientationTrajectoryGenerator(bodyName + "DesiredOrientation",
+                                                                                      worldFrame, registry);
          swingOrientationTrajectoryGenerators.put(foot, swingOrientationTrajectoryGenerator);
-         
+
          EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(foot, jacobian, swingPositionTrajectoryGenerator, null,
-               swingOrientationTrajectoryGenerator, null, yoTime, twistCalculator, registry);
+                                                                swingOrientationTrajectoryGenerator, null, yoTime, twistCalculator, registry);
          footEndEffectorControlModules.put(foot, endEffectorControlModule);
-         
+
       }
    }
-   
+
    public void initialize()
    {
       super.initialize();
@@ -80,6 +83,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       FrameOrientation currentPelvisOrientaton = new FrameOrientation(referenceFrames.getPelvisFrame());
       currentPelvisOrientaton.changeFrame(desiredPelvisOrientation.getReferenceFrame());
       desiredPelvisOrientation.set(currentPelvisOrientaton);
+
       // keep desired pelvis orientation as it is
       desiredPelvisAngularVelocity.set(0.0, 0.0, 0.0);
       desiredPelvisAngularAcceleration.set(0.0, 0.0, 0.0);
@@ -90,7 +94,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
          swingPositionTrajectoryGenerators.get(contactablePlaneBody).setPosition(new FramePoint(endEffectorFrame));
          swingOrientationTrajectoryGenerators.get(contactablePlaneBody).setOrientation(new FrameOrientation(endEffectorFrame));
       }
-      
+
    }
 
    protected void doCoMControl()
@@ -108,9 +112,10 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
          endEffectorControlModule.setContactPoints(contactPoints, constraintType);
          endEffectorControlModule.setCenterOfPressure(momentumBasedController.getCoP(contactablePlaneBody));
       }
+
       super.doFootControl();
    }
-   
+
    public void setContactablePlaneBodiesInContact(ContactablePlaneBody contactablePlaneBody, boolean inContact, double coefficientOfFriction)
    {
       YoPlaneContactState contactState = momentumBasedController.getContactStates().get(contactablePlaneBody);

@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHum
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.MultiContactTestHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredHandPoseProvider;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.TorusPoseProvider;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CoMBasedMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OldMomentumControlModule;
@@ -149,10 +150,11 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
             dynamicGraphicObjectsListRegistry);
 
       DesiredHandPoseProvider desiredHandPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters);
-      
+      TorusPoseProvider torusPoseProvider = new TorusPoseProvider();
+
       MultiContactTestHumanoidController multiContactBehavior = new MultiContactTestHumanoidController(feet, hands,
             momentumRateOfChangeControlModule.getDesiredCoMPositionInputPort(), desiredPelvisOrientationTrajectoryInputPort, null, momentumBasedController,
-            walkingControllerParameters, desiredHandPoseProvider, null, null, dynamicGraphicObjectsListRegistry);
+            walkingControllerParameters, desiredHandPoseProvider, torusPoseProvider, null, null, dynamicGraphicObjectsListRegistry);
 
       double coefficientOfFriction = 1.0;
 
