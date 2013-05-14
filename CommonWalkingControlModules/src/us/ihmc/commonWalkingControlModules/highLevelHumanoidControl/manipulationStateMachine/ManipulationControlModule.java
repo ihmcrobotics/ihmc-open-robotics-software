@@ -63,7 +63,7 @@ public class ManipulationControlModule
       stateMachine.addState(directControlManipulationState);
 
       toroidManipulationState = new HighLevelToroidManipulationState(yoTime, fullRobotModel, twistCalculator, handPositionControlFrames, handControllers,
-              jacobians, momentumBasedController, dynamicGraphicObjectsListRegistry, parentRegistry);
+              jacobians, torusPoseProvider, momentumBasedController, dynamicGraphicObjectsListRegistry, parentRegistry);
       stateMachine.addState(toroidManipulationState);
 
 
