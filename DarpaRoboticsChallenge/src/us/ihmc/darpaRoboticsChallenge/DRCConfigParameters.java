@@ -1,5 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig;
+import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig.LocalCloudMachines;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCLIDARDataStore.DRCLidarDataStoreType;
 import us.ihmc.graphics3DAdapter.camera.VideoSettings;
@@ -33,11 +35,12 @@ public class DRCConfigParameters
 
    // Networking
    public static final String LOCALHOST = "localhost";
-   public static final String CLOUD_MINION1_IP = "10.4.42.2";
-   public static final String CLOUD_MINION2_IP = "10.4.42.4";
-   public static final String CLOUD_MINION3_IP = "10.4.42.5";
-   public static final String CLOUD_MONSTER_JR_IP = "10.4.42.3";
-   public static final String CLOUD_MONSTER_IP = "10.4.42.1";
+   public static final String CLOUD_MINION1_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMINION_1);
+   public static final String CLOUD_MINION2_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMINION_2);
+   public static final String CLOUD_MINION3_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMINION_3);
+   public static final String CLOUD_MINION4_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMINION_4);
+   public static final String CLOUD_MONSTER_JR_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMONSTER_JR);
+   public static final String CLOUD_MONSTER_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMONSTER);
 
 
    public static final String GAZEBO_HOST = CLOUD_MINION3_IP;
