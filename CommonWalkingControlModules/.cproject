@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?fileVersion 4.0.0?>
-
-<cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="cdt.managedbuild.config.macosx.exe.release.356019108">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.macosx.exe.release.356019108" moduleId="org.eclipse.cdt.core.settings" name="Dist">
@@ -20,7 +18,7 @@
 					<folderInfo id="cdt.managedbuild.config.macosx.exe.release.356019108." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.base.2088990351" name="Linux GCC" nonInternalBuilderId="cdt.managedbuild.target.gnu.builder.base" superClass="cdt.managedbuild.toolchain.gnu.base">
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.target.gnu.platform.base.1820770600" name="Debug Platform" osList="linux,hpux,aix,qnx" superClass="cdt.managedbuild.target.gnu.platform.base"/>
-							<builder arguments="" autoBuildTarget="all" cleanBuildTarget="clean" command="make" enableAutoBuild="false" enableCleanBuild="true" enabledIncrementalBuild="true" id="cdt.managedbuild.target.gnu.builder.base.1908574271" incrementalBuildTarget="install" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" parallelBuildOn="false" parallelizationNumber="1" stopOnErr="true" superClass="cdt.managedbuild.target.gnu.builder.base"/>
+							<builder arguments="-E chdir ${ProjDirPath}/build cmake --build . --config MinSizeRel --target" autoBuildTarget="all" cleanBuildTarget="clean" command="cmake" enableAutoBuild="false" enableCleanBuild="false" enabledIncrementalBuild="true" id="cdt.managedbuild.target.gnu.builder.base.1908574271" incrementalBuildTarget="install" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" parallelBuildOn="false" stopOnErr="true" superClass="cdt.managedbuild.target.gnu.builder.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.archiver.base.801373723" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.1162429965" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
 								<option id="gnu.cpp.compiler.option.optimization.level.588366526" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
@@ -62,8 +60,10 @@
 		<project id="CommonWalkingControlModules.cdt.managedbuild.target.macosx.exe.945582556" name="Executable" projectType="cdt.managedbuild.target.macosx.exe"/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
-	<storageModule moduleId="refreshScope" versionNumber="1">
-		<resource resourceType="PROJECT" workspacePath="/CommonWalkingControlModules"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Dist">
+			<resource resourceType="PROJECT" workspacePath="/CommonWalkingControlModules"/>
+		</configuration>
 	</storageModule>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
