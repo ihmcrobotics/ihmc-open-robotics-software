@@ -645,7 +645,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             }
          }
          
-         if (!instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue()))
+         if (!instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue()) && (transferToSide != null))
          {
             Footstep transferToFootstep = createFootstepFromFootAndContactablePlaneBody(referenceFrames.getFootFrame(transferToSide),
                   bipedFeet.get(transferToSide));
