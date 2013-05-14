@@ -171,7 +171,7 @@ public class DRCSimulationFactory
          sensorReaderFactory = simulatedSensorHolderAndReaderFromRobotFactory;
       }
       
-      SimulatedHandControllerDispatcher handControllerDispatcher = new SimulatedHandControllerDispatcher(simulatedRobot, estimationTicksPerControlTick);
+      SimulatedHandControllerDispatcher handControllerDispatcher = new SimulatedHandControllerDispatcher(simulatedRobot, robotInterface.getTimeStampProvider(), estimationTicksPerControlTick);
       controller.addRobotController(handControllerDispatcher);
 
       controller.addRobotController(lidarControllerInterface);
