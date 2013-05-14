@@ -38,6 +38,7 @@ public class DRCDemo03
       final PlainDRCRobot robotInterface = new PlainDRCRobot(DRCRobotModel.ATLAS_SANDIA_HANDS, true);
       scsInitialSetup = new DRCSCSInitialSetup(environment, robotInterface.getSimulateDT());
       scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
+      scsInitialSetup.setInitializeEstimatorToActual(true);
 
       double dt = scsInitialSetup.getDT();
       int recordFrequency = (int) Math.round(timePerRecordTick / dt);
