@@ -9,7 +9,6 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 import us.ihmc.darpaRoboticsChallenge.sensors.WrenchBasedFootSwitch;
 import us.ihmc.robotSide.RobotSide;
@@ -18,8 +17,6 @@ import us.ihmc.sensorProcessing.sensors.ForceSensorData;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.net.ObjectCommunicator;
-import us.ihmc.utilities.remote.serialization.JointConfigurationDataSender;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
@@ -33,18 +30,16 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 {
    private final HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory;
-   private final ObjectCommunicator server;
    private final boolean useGazeboPhysics;
 
    public DRCRobotMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory)
    {
-      this(highLevelHumanoidControllerFactory, null, false);
+      this(highLevelHumanoidControllerFactory, false);
    }
 
-   public DRCRobotMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory, ObjectCommunicator server, boolean useGazeboPhysics)
+   public DRCRobotMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory, boolean useGazeboPhysics)
    {
       this.highLevelHumanoidControllerFactory = highLevelHumanoidControllerFactory;
-      this.server = server;
       this.useGazeboPhysics = useGazeboPhysics;
    }
 
@@ -60,8 +55,6 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 
       YoVariableRegistry specificRegistry = new YoVariableRegistry("specific");
 
-      if (server != null)
-         createJointPositionServer(fullRobotModel);
 
       SideDependentList<ContactablePlaneBody> bipedFeet = new SideDependentList<ContactablePlaneBody>();
       for (RobotSide robotSide : RobotSide.values)
@@ -88,14 +81,6 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 
 
       return highLevelHumanoidController;
-   }
-
-   private void createJointPositionServer(FullRobotModel fullRobotModel)
-   {
-      long updatePeriodInMilliseconds = DRCConfigParameters.ROBOT_JOINT_SERVER_UPDATE_MILLIS;
-      JointConfigurationDataSender jointConfigurationDataSender = new JointConfigurationDataSender(fullRobotModel.getElevator());
-      jointConfigurationDataSender.addConsumer(server);
-      jointConfigurationDataSender.startUpdateThread(updatePeriodInMilliseconds);
    }
 
    private SideDependentList<FootSwitchInterface> createFootSwitches(SideDependentList<ContactablePlaneBody> bipedFeet,

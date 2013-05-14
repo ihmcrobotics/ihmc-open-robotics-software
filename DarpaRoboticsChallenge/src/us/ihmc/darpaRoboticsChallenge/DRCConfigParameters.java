@@ -103,4 +103,6 @@ public class DRCConfigParameters
       * Math.sqrt(DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD * DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD
                   + 0.25 * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH);
 
+   public static final int JOINT_CONFIGURATION_RATE_IN_MS = 50;
+
 }

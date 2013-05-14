@@ -1,18 +1,23 @@
 package us.ihmc.darpaRoboticsChallenge.drcRobot;
 
+import us.ihmc.utilities.math.TimeTools;
+import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
+
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 
-import us.ihmc.utilities.net.TimestampProvider;
-
-public class SimulatedDRCRobotTimeProvider implements TimestampProvider, RobotController
+public class SimulatedDRCRobotTimeProvider extends AtomicSettableTimestampProvider implements RobotController
 {
+   private final long nanoSecondsPerTick;
    
-   private long timeStamp = 0;
+   public SimulatedDRCRobotTimeProvider(double controlDT)
+   {
+      nanoSecondsPerTick = TimeTools.secondsToNanoSeconds(controlDT);
+   }
 
    public void initialize()
    {
-      timeStamp = 0;
+      set(0);
    }
 
    public YoVariableRegistry getYoVariableRegistry()
@@ -32,12 +37,7 @@ public class SimulatedDRCRobotTimeProvider implements TimestampProvider, RobotCo
 
    public void doControl()
    {
-      timeStamp++;
-   }
-
-   public long getTimestamp()
-   {
-      return timeStamp;
+      increment(nanoSecondsPerTick);
    }
 
 }
