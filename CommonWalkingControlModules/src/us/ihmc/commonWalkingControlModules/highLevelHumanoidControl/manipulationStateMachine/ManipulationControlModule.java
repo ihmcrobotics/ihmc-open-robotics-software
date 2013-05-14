@@ -1,9 +1,10 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
+import com.yobotics.simulationconstructionset.util.statemachines.*;
 import us.ihmc.commonWalkingControlModules.configurations.ManipulationControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
@@ -25,9 +26,9 @@ public class ManipulationControlModule
 
    private final StateMachine<ManipulationState> stateMachine;
 
-   private final SideDependentList<IndividualHandControlStateMachine> individualHandControlStateMachines =
-      new SideDependentList<IndividualHandControlStateMachine>();
-   private final DirectControlManipulationState directManipulationControlState;
+   private final HighLevelDirectControlManipulationState directControlManipulationState;
+   private final State<ManipulationState> toroidManipulationState;
+   private final BooleanYoVariable goToToroidManipulationState;
 
    public ManipulationControlModule(DoubleYoVariable yoTime, FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
                                     ManipulationControllerParameters parameters, DesiredHandPoseProvider handPoseProvider,
@@ -54,18 +55,40 @@ public class ManipulationControlModule
          handPositionControlFrames.put(robotSide, handPositionControlFrame);
       }
 
-      directManipulationControlState = new DirectControlManipulationState(yoTime, fullRobotModel, twistCalculator, parameters,
-                                                                         handPoseProvider, dynamicGraphicObjectsListRegistry, handControllers,
-                                                                         handPositionControlFrames, jacobians, momentumBasedController, registry);
-      stateMachine.addState(directManipulationControlState);
-      stateMachine.setCurrentState(directManipulationControlState.getStateEnum());
+      directControlManipulationState = new HighLevelDirectControlManipulationState(yoTime, fullRobotModel, twistCalculator, parameters, handPoseProvider,
+              dynamicGraphicObjectsListRegistry, handControllers, handPositionControlFrames, jacobians, momentumBasedController, registry);
+      stateMachine.addState(directControlManipulationState);
+
+      toroidManipulationState = new HighLevelToroidManipulationState(yoTime, fullRobotModel, twistCalculator, handPositionControlFrames,
+                                                            handControllers, jacobians, momentumBasedController, dynamicGraphicObjectsListRegistry,
+                                                            parentRegistry);
+      stateMachine.addState(toroidManipulationState);
+
+
+      goToToroidManipulationState = new BooleanYoVariable("goToToroidManipulationState", registry);
+      StateTransitionCondition stateTransitionCondition = new StateTransitionCondition()
+      {
+         public boolean checkCondition()
+         {
+            return goToToroidManipulationState.getBooleanValue();
+         }
+      };
+      StateTransitionAction stateTransitionAction = new StateTransitionAction()
+      {
+         public void doTransitionAction()
+         {
+            goToToroidManipulationState.set(false);
+         }
+      };
+      StateTransition<ManipulationState> directControlToToroidManipulation = new StateTransition<ManipulationState>(toroidManipulationState.getStateEnum(), stateTransitionCondition, stateTransitionAction);
+      directControlManipulationState.addStateTransition(directControlToToroidManipulation);
 
       parentRegistry.addChild(registry);
    }
 
    public void initialize()
    {
-      // empty for now
+      stateMachine.setCurrentState(directControlManipulationState.getStateEnum());
    }
 
    public void doControl()
