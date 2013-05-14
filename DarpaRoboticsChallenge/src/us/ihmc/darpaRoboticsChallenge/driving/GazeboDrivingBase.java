@@ -9,6 +9,7 @@ import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 import sensor_msgs.CompressedImage;
 import std_msgs.Int8;
+import std_msgs.Time;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.keyboardAndMouse.RepeatingReleasedEventsFixer;
@@ -48,6 +49,8 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 	private Publisher<geometry_msgs.Pose> teleportInToCarPublisher, teleportOutOfCarPublisher;
 	private geometry_msgs.Pose teleportInToCarPose, teleportOutOfCarPose;
 
+   private Subscriber<Time> timeSubscriber;
+   protected org.ros.message.Time simulationTime = new org.ros.message.Time();
 
 	private ColorSpace colorSpace;
 	private ColorModel colorModel;
@@ -81,9 +84,8 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 
 //      placeAtlasInCar();
 
-		setUpCameraSubscriberListeners();
+		setUpListeners();
 
-		setUpVehicleStateSubscriberListeners();
 	}
 
 	protected abstract void handleStateSteeringWheel( std_msgs.Float64 message );
@@ -94,7 +96,7 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 	protected abstract void handleImageLeft( CompressedImage message );
 	protected abstract void handleImageRight( CompressedImage message );
 
-	private void setUpVehicleStateSubscriberListeners()
+	private void setUpListeners()
 	{
 		steeringWheelStateSubscriber.addMessageListener(new MessageListener<std_msgs.Float64>()
 		{
@@ -128,11 +130,7 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 				handleStateBreakPedal(message);
 			}
 		});
-	}
 
-
-	private void setUpCameraSubscriberListeners()
-	{
 		leftEyeImageSubscriber.addMessageListener(new MessageListener<CompressedImage>()
 		{
 			public void onNewMessage(CompressedImage message)
@@ -148,6 +146,15 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 				handleImageRight(message);
 			}
 		});
+
+      timeSubscriber.addMessageListener(new MessageListener<Time>()
+      {
+         public void onNewMessage(Time message)
+         {
+            simulationTime.secs = message.getData().secs;
+            simulationTime.nsecs = message.getData().nsecs;
+         }
+      });
 	}
 
 	private void setupPublishers(ConnectedNode connectedNode)
@@ -172,6 +179,8 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 		handBrakeStateSubscriber = connectedNode.newSubscriber("/drc_vehicle/hand_brake/state", std_msgs.Float64._TYPE);
 		gasPedalStateSubscriber = connectedNode.newSubscriber("/drc_vehicle/gas_pedal/state", std_msgs.Float64._TYPE);
 		brakePedalStateSubscriber = connectedNode.newSubscriber("/drc_vehicle/brake_pedal/state", std_msgs.Float64._TYPE);
+
+      timeSubscriber = connectedNode.newSubscriber("/rosgraph_msgs/Clock",Time._TYPE);
 	}
 
 	private void setupMessages()
