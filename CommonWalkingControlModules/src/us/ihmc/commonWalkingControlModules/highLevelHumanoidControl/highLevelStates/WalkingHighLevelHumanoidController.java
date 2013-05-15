@@ -297,7 +297,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       onToesTriangleAreaLimit.set(0.01);
       doToeOffIfPossible.set(walkingControllerParameters.doToeOffIfPossible());
 
-      additionalSwingTimeForICP.set(0.15);
+      additionalSwingTimeForICP.set(0.1);
 
       this.walkingStatusReporter = walkingStatusReporter;
 

@@ -10,7 +10,7 @@ import us.ihmc.utilities.math.geometry.OriginAndPointFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 
-public class Omega0Calculator
+public class Omega0Calculator implements Omega0CalculatorInterface
 {
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();

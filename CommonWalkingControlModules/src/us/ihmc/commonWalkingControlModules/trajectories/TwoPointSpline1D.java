@@ -2,8 +2,6 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import javax.vecmath.Point2d;
 
-import us.ihmc.utilities.math.MathTools;
-
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.trajectory.YoPolynomial;
 

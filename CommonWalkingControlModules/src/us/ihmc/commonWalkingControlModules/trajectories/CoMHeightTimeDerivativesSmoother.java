@@ -62,8 +62,8 @@ public class CoMHeightTimeDerivativesSmoother
 //      comHeightVelocityGain.set(80.0); // * 0.001/dt); // 80.0;
 //      comHeightAccelerationGain.set(10.0); // * 0.001/dt); // 10.0
 
-      double w0 = 15.0;
-      double w1 = 15.0;
+      double w0 = 12.0; //15.0;
+      double w1 = 12.0; //15.0;
       double zeta1 = 0.7;
       
       computeGainsByPolePlacement(w0, w1, zeta1);

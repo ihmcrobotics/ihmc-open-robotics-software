@@ -84,7 +84,7 @@ public class DRCFlatGroundWalkingTest
       boolean cheatWithGroundHeightAtForFootstep = true;
 
       DRCRobotWalkingControllerParameters drcControlParameters = new DRCRobotWalkingControllerParameters();
-      drcControlParameters.setNominalHeightAboveAnkle(drcControlParameters.nominalHeightAboveAnkle() - 0.03);    // Need to do this or the leg goes straight and the robot falls.
+//      drcControlParameters.setNominalHeightAboveAnkle(drcControlParameters.nominalHeightAboveAnkle() - 0.03);    // Need to do this or the leg goes straight and the robot falls.
 
       Pair<CombinedTerrainObject, Double> combinedTerrainObjectAndRampEndX = createRamp();
       CombinedTerrainObject combinedTerrainObject = combinedTerrainObjectAndRampEndX.first();
