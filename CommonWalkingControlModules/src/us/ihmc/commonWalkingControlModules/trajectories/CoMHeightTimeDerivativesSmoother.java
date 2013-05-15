@@ -49,9 +49,9 @@ public class CoMHeightTimeDerivativesSmoother
    private final DoubleYoVariable eigenValueThreeReal = new DoubleYoVariable("eigenValueThreeReal", registry);
    private final DoubleYoVariable eigenValueThreeImag = new DoubleYoVariable("eigenValueThreeImag", registry);
 
-   private double maximumAcceleration = 3.0 * 9.81;
-   private double minimumAcceleration = 9.81;
-   private double maximumJerk = maximumAcceleration/0.1;
+   private double maximumAcceleration = 0.5 * 9.81; //3.0 * 9.81;
+   private double minimumAcceleration = 0.5 * 9.81;
+   private double maximumJerk = maximumAcceleration/0.10;
 
    
    public CoMHeightTimeDerivativesSmoother(double dt, YoVariableRegistry parentRegistry)
@@ -154,11 +154,11 @@ public class CoMHeightTimeDerivativesSmoother
       
       if (smoothComHeightAcceleration.getDoubleValue() > maximumAcceleration)
       {
-         smoothComHeightAcceleration.set(10.0);
+         smoothComHeightAcceleration.set(maximumAcceleration);
       }
       if (smoothComHeightAcceleration.getDoubleValue() < -minimumAcceleration)
       {
-         smoothComHeightAcceleration.set(-10.0);
+         smoothComHeightAcceleration.set(-minimumAcceleration);
       }
       
       smoothComHeightVelocity.add(smoothComHeightAcceleration.getDoubleValue() * dt);

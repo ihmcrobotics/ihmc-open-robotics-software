@@ -8,7 +8,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.YoPolynomial;
 public class FourPointSpline1D
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private static final int numberOfCoefficients = 10;
+   private static final int numberOfCoefficients = 4; //10;
 
    private final Point2d[] points = new Point2d[4];
    private double[] endpointSlopes = new double[2];
@@ -41,9 +41,12 @@ public class FourPointSpline1D
          this.endpointSlopes[i] = endpointSlopes[i];
          this.intermediateSlopes[i] = intermediateSlopes[i];
       }
-      
-    spline.setNonic(points[0].x, points[1].x, points[2].x, points[3].x, points[0].y, endpointSlopes[0],
-    points[1].y, intermediateSlopes[0], points[2].y, intermediateSlopes[1], points[3].y, endpointSlopes[1]);
+
+      spline.setCubicUsingIntermediatePoints(points[0].x, points[1].x, points[2].x, points[3].x,  
+            points[0].y, points[1].y, points[2].y, points[3].y);
+
+//    spline.setNonic(points[0].x, points[1].x, points[2].x, points[3].x, points[0].y, endpointSlopes[0],
+//    points[1].y, intermediateSlopes[0], points[2].y, intermediateSlopes[1], points[3].y, endpointSlopes[1]);
 
 //      spline.setSeptic(points[0].x, points[1].x, points[2].x, points[3].x, points[0].y, endpointSlopes[0],
 //            points[1].y, intermediateSlopes[0], points[2].y, intermediateSlopes[1], points[3].y, endpointSlopes[1]);

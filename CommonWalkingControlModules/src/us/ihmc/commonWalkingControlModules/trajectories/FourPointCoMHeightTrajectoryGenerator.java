@@ -47,7 +47,7 @@ public class FourPointCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       setNominalHeightAboveGround(nominalHeightAboveGround);
       this.doubleSupportPercentageIn.set(doubleSupportPercentageIn);
       
-      this.maximumHeightDeltaBetweenWaypoints.set(0.02); //0.04);
+      this.maximumHeightDeltaBetweenWaypoints.set(0.2); //0.04);
 
       parentRegistry.addChild(registry);
       
