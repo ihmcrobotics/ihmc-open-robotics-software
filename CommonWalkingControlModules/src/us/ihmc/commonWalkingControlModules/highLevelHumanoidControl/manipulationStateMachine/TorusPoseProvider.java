@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine;
 
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectConsumer;
 
@@ -13,15 +15,16 @@ import javax.vecmath.Quat4d;
  */
 public class TorusPoseProvider implements ObjectConsumer<TorusPosePacket>
 {
-   private FramePose torusPose;
+   private final FrameVector normal = new FrameVector(ReferenceFrame.getWorldFrame());
+   private final FramePoint origin = new FramePoint(ReferenceFrame.getWorldFrame());
+   private double radius;
    private boolean hasNewPose;
 
    public void consumeObject(TorusPosePacket object)
    {
-      Quat4d orientation = object.getOrientation();
-      Point3d position = object.getPosition();
-
-      torusPose = new FramePose(ReferenceFrame.getWorldFrame(), position, orientation);
+      normal.set(object.getNormal());
+      origin.set(object.getPosition());
+      radius = object.getRadius();
       hasNewPose = true;
    }
 
@@ -30,9 +33,18 @@ public class TorusPoseProvider implements ObjectConsumer<TorusPosePacket>
       return hasNewPose;
    }
 
-   public synchronized FramePose getTorusPose()
+   public synchronized double getRadius()
    {
-      hasNewPose = false;
-      return torusPose;
+      return radius;
+   }
+
+   public FrameVector getNormal()
+   {
+      return normal;
+   }
+
+   public FramePoint getOrigin()
+   {
+      return origin;
    }
 }

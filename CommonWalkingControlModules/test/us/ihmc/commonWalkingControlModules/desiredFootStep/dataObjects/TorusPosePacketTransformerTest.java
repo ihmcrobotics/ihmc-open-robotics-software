@@ -13,6 +13,7 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
@@ -37,13 +38,10 @@ public class TorusPosePacketTransformerTest
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         AxisAngle4d axisAngle = RandomTools.generateRandomRotation(random);
-         Quat4d quat = new Quat4d();
-         quat.set(axisAngle);
-
          Point3d point3d = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
+         Vector3d normal = RandomTools.generateRandomVector(random, 1.0);
 
-         TorusPosePacket starting = new TorusPosePacket(point3d, quat, radius);
+         TorusPosePacket starting = new TorusPosePacket(point3d, normal, radius);
 
          transform3D = RandomTools.generateRandomTransform(random);
 
@@ -60,9 +58,11 @@ public class TorusPosePacketTransformerTest
       assertEquals("not equal", 0.0, distance, 1e-6);
 
       // Quat4d orientation;
-      Quat4d startQuat = starting.getOrientation();
-      Quat4d endQuat = ending.getOrientation();
-      assertTrue(areOrientationsEqualWithTransform(startQuat, transform3D, endQuat));
+      Vector3d startingNormalCopy = new Vector3d(starting.getNormal());
+      transform3D.transform(startingNormalCopy);
+
+      boolean normalsEqual = startingNormalCopy.epsilonEquals(ending.normal, 1e-6);
+      assertTrue(normalsEqual);
    }
 
    private static double getDistanceBetweenPoints(Point3d startingPoint, Transform3D transform3D, Point3d endPoint)
