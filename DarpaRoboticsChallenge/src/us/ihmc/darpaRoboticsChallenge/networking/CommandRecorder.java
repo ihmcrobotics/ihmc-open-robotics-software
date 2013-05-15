@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.networking;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.media.j3d.Transform3D;
 
@@ -23,20 +24,26 @@ public class CommandRecorder
    private FileOutputStream outputStream;
    private long startTime = Long.MIN_VALUE;;
    private Transform3D recordTransform = new Transform3D();
-   
+
+   private ArrayList<ScriptObject> scriptObjects = new ArrayList<ScriptObject>();
+   private File file;
+
+
    public CommandRecorder(TimestampProvider timestampProvider, NetClassList netClassList)
    {
       this.timestampProvider = timestampProvider;
       serializer.registerClasses(netClassList);
       serializer.registerClass(TimestampPacket.class);
    }
-   
+
    public synchronized void startRecording(String filename, Transform3D recordTransform)
    {
+      scriptObjects.clear();
+
       try
       {
-         File file = new File(directory + "/" + filename + ".script");
-         
+         file = new File(directory + "/" + filename + ".script");
+
          if(!file.exists())
          {
             file.createNewFile();
@@ -45,7 +52,7 @@ public class CommandRecorder
          {
             throw new RuntimeException("Script " + filename + " already exists");
          }
-         
+
          outputStream = new FileOutputStream(file, true);
          startTime = timestampProvider.getTimestamp();
          this.recordTransform.set(recordTransform);
@@ -57,9 +64,31 @@ public class CommandRecorder
          throw new RuntimeException(e);
       }
    }
+
+   
+   private synchronized void writeToFile()
+   {
+      for(ScriptObject scriptObject : scriptObjects)
+      {
+         TimestampPacket timestampPacket = new TimestampPacket((long)scriptObject.getTimeStamp());
+
+         try
+         {
+            serializer.write(outputStream, timestampPacket);
+            serializer.write(outputStream, scriptObject.getScriptObject());
+            outputStream.flush();
+         }
+         catch (IOException e)
+         {
+            throw new RuntimeException(e);
+         }
+      }
+   }
    
    public synchronized void stopRecording()
    {
+      writeToFile();
+
       isRecording = false;
       try
       {
@@ -78,31 +107,20 @@ public class CommandRecorder
    {
       if(isRecording)
       {
-         long timestamp = timestampProvider.getTimestamp() - startTime;
-         TimestampPacket timestampPacket = new TimestampPacket(timestamp);
-       
-         
+         double timestamp = timestampProvider.getTimestamp() - startTime;
+
          Object objectToWrite;
          if(object instanceof TransformableDataObject)
          {
-            objectToWrite = ObjectTransformationHelper.transform(recordTransform, (TransformableDataObject) object);         
+            objectToWrite = ObjectTransformationHelper.transform(recordTransform, (TransformableDataObject) object);
          }
          else
          {
             objectToWrite = object;
          }
-         
-         try
-         {
-            serializer.write(outputStream, timestampPacket);
-            serializer.write(outputStream, objectToWrite);
-            outputStream.flush();
-         }
-         catch (IOException e)
-         {
-            throw new RuntimeException(e);
-         }
+
+         ScriptObject scriptObject = new ScriptObject(timestamp, objectToWrite);
+         scriptObjects.add(scriptObject);
       }
    }
-   
 }
