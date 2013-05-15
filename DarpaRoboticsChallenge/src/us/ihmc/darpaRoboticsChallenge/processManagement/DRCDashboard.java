@@ -12,6 +12,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -19,6 +20,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
@@ -26,8 +28,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
 
-import us.ihmc.darpaRoboticsChallenge.ExternalCameraFeed;
 import us.ihmc.darpaRoboticsChallenge.DRCGazeboDrivingInterface;
+import us.ihmc.darpaRoboticsChallenge.ExternalCameraFeed;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig.LocalCloudMachines;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
@@ -48,6 +50,9 @@ public class DRCDashboard
    private JPanel taskPanel;
    private JLabel taskLabel;
    private JComboBox taskCombo;
+   private ButtonGroup radioGroup;
+   private JRadioButton usePluginButton;
+   private JRadioButton useDefaultButton;
 
    private JPanel mainContentPanel;
 
@@ -201,19 +206,34 @@ public class DRCDashboard
          {
             gazeboProcessListModel.clear();
             
-            if (taskCombo.getSelectedItem().toString().contains("DRIVING"))
-            {
-               gazeboProcessListModel.addElement("DRC Driving Interface");
-               
-               if (taskCombo.getSelectedItem().toString().contains("_WITH_EXTERNAL_CAMS"))
-               {
-                  gazeboProcessListModel.addElement("Topview Camera");
-                  gazeboProcessListModel.addElement("Rearview Camera");
-               }
-            }
+//            if (taskCombo.getSelectedItem().toString().contains("DRIVING"))
+//            {
+//               gazeboProcessListModel.addElement("DRC Driving Interface");
+//               
+//               if (taskCombo.getSelectedItem().toString().contains("_WITH_EXTERNAL_CAMS"))
+//               {
+//                  gazeboProcessListModel.addElement("Topview Camera");
+//                  gazeboProcessListModel.addElement("Rearview Camera");
+//               }
+//            }
          }
       });
       taskPanel.add(taskCombo, c);
+      
+      radioGroup = new ButtonGroup();
+      useDefaultButton = new JRadioButton("Use default", true);
+      usePluginButton = new JRadioButton("Use plugin");
+      
+      radioGroup.add(useDefaultButton);
+      radioGroup.add(usePluginButton);
+      
+      c.weightx = 0;
+      c.gridx = 1;
+      c.gridy = 0;
+      taskPanel.add(useDefaultButton, c);
+      
+      c.gridy = 1;
+      taskPanel.add(usePluginButton, c);
    }
 
    private void setupLeftContentPanel()
@@ -407,14 +427,19 @@ public class DRCDashboard
       c.gridx = 0;
       c.gridwidth = 1;
       c.anchor = GridBagConstraints.LAST_LINE_START;
-      launchGazeboSimButton = new JButton("Launch Gazebo");
+      launchGazeboSimButton = new JButton("Launch Sim");
       networkInfoPanel.add(launchGazeboSimButton, c);
 
       launchGazeboSimButton.addActionListener(new ActionListener()
       {
          public void actionPerformed(ActionEvent e)
          {
-            sshSimLauncher.launchSim((DRCDashboardTypes.DRCTask) taskCombo.getSelectedItem(), (LocalCloudMachines) gazeboMachineSelectionCombo.getSelectedItem());
+            LocalCloudMachines gazeboMachine = (LocalCloudMachines) gazeboMachineSelectionCombo.getSelectedItem();
+            LocalCloudMachines controllerMachine = (LocalCloudMachines) controllerMachineSelectionCombo.getSelectedItem();
+            sshSimLauncher.launchSim((DRCDashboardTypes.DRCTask) taskCombo.getSelectedItem(),
+                                     (LocalCloudMachines) gazeboMachineSelectionCombo.getSelectedItem(),
+                                     (LocalCloudMachines) controllerMachineSelectionCombo.getSelectedItem(),
+                                     radioGroup.getSelection().toString());
          }
       });
    }
@@ -425,14 +450,14 @@ public class DRCDashboard
       c.gridx = 3;
       c.gridwidth = 1;
       c.anchor = GridBagConstraints.LAST_LINE_END;
-      killSimButton = new JButton("Kill Gazebo");
+      killSimButton = new JButton("Kill Sim");
       networkInfoPanel.add(killSimButton, c);
 
       killSimButton.addActionListener(new ActionListener()
       {
          public void actionPerformed(ActionEvent e)
          {
-            sshSimLauncher.killSim((LocalCloudMachines) gazeboMachineSelectionCombo.getSelectedItem());
+            sshSimLauncher.killSim((LocalCloudMachines) gazeboMachineSelectionCombo.getSelectedItem(), (LocalCloudMachines) controllerMachineSelectionCombo.getSelectedItem());
          }
       });
    }
