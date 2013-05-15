@@ -48,7 +48,7 @@ public class SwingParameters
    {
       this.legJointNames = legJointNames;
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          desiredJointPositionsAtEndOfStep.put(robotSide, new EnumMap<LegJointName, DoubleYoVariable>(LegJointName.class));
          desiredJointVelocitiesAtEndOfStep.put(robotSide, new EnumMap<LegJointName, DoubleYoVariable>(LegJointName.class));

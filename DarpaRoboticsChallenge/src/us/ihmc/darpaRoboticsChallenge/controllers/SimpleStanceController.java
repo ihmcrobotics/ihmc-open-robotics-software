@@ -81,7 +81,7 @@ public class SimpleStanceController implements RobotController
       this.momentumControlModule = new OptimizationMomentumControlModule(rootJoint, referenceFrames.getCenterOfMassFrame(), controlDT, registry,
               jointsToOptimize, momentumOptimizationSettings, gravityZ);
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          RigidBody foot = fullRobotModel.getFoot(robotSide);
          GeometricJacobian jacobian = new GeometricJacobian(fullRobotModel.getElevator(), foot, foot.getBodyFixedFrame());
@@ -217,7 +217,7 @@ public class SimpleStanceController implements RobotController
 
    private void constrainFeet()
    {
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          GeometricJacobian jacobian = footJacobians.get(robotSide);
          TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();

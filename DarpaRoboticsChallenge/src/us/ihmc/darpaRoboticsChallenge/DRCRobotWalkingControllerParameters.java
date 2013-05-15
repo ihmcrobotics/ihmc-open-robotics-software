@@ -48,7 +48,7 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
       }
       
       
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          Transform3D transform = new Transform3D();
 

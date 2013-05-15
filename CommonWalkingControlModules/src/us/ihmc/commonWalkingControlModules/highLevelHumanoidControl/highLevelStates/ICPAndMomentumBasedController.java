@@ -147,7 +147,7 @@ public class ICPAndMomentumBasedController extends MomentumBasedController
    protected void updateBipedSupportPolygons(BipedSupportPolygons bipedSupportPolygons)
    {
       SideDependentList<List<FramePoint>> footContactPoints = new SideDependentList<List<FramePoint>>();
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          footContactPoints.put(robotSide, contactStates.get(bipedFeet.get(robotSide)).getContactPoints());
       }

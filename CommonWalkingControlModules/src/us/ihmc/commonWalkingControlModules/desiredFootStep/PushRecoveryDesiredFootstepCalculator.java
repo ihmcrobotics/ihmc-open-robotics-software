@@ -38,7 +38,7 @@ public class PushRecoveryDesiredFootstepCalculator implements DesiredFootstepCal
       this.referenceFrames = referenceFrames;
       this.couplingRegistry = couplingRegistry;
 
-      for (RobotSide swingSide : RobotSide.values())
+      for (RobotSide swingSide : RobotSide.values)
       {
          RobotSide supportSide = swingSide.getOppositeSide();
          ReferenceFrame ankleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);

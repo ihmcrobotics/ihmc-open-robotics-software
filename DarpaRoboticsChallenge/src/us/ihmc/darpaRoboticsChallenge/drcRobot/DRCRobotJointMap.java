@@ -203,7 +203,7 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
          jointRoles.put(neckJoint, JointRole.NECK);
       }
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          jointNameGroundContactPointMap.addAll(footGroundContactPoints.get(robotSide));
          jointNameGroundContactPointMap.addAll(handGroundContactPoints.get(robotSide));

@@ -101,7 +101,7 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
       this.desiredJointAccelerationCalculators = desiredJointAccelerationCalculators;
       this.inverseDynamicsCalculators = inverseDynamicsCalculators;
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          this.desiredLegJointPositions.put(robotSide, new LegJointPositions(robotSide));
          this.desiredLegJointVelocities.put(robotSide, new LegJointVelocities(legJointNames, robotSide));
@@ -372,7 +372,7 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
 
             String[] entryBoxGroupStrings = new String[2 * numberOfLegJointNames];    // times two, because we want both kp and kd
 
-            for (RobotSide robotSide : RobotSide.values())
+            for (RobotSide robotSide : RobotSide.values)
             {
                for (int jointNameIndex = 0; jointNameIndex < numberOfLegJointNames; jointNameIndex++)
                {

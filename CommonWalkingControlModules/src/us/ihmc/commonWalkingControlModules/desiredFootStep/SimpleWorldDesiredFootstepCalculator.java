@@ -44,7 +44,7 @@ public class SimpleWorldDesiredFootstepCalculator extends AbstractAdjustableDesi
       this.referenceFrames = referenceFrames;
       this.bipedFeet = bipedFeet;
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          ReferenceFrame footFrame = referenceFrames.getFootFrame(robotSide);
 

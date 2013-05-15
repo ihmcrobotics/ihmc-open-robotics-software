@@ -15,7 +15,7 @@ public class MultiContactDRCRobotInitialSetup implements RobotInitialSetup<SDFRo
       SideDependentList<EnumMap<ArmJointName, Double>> defaultArmPosition = getDefaultArmPositionForMultiContactSimulation();
 
       // arms
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          String sideFirstLetterLowerCase = robotSide.getSideNameFirstLetter().toLowerCase();
 

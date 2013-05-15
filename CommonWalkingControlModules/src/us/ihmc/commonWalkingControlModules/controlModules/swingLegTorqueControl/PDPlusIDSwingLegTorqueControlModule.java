@@ -80,7 +80,7 @@ public class PDPlusIDSwingLegTorqueControlModule implements SwingLegTorqueContro
       this.legJointPositionControlModules = legJointPositionControlModules;
       this.inverseDynamicsCalculators = inverseDynamicsCalculators;
       
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          this.desiredLegJointPositions.put(robotSide, new LegJointPositions(robotSide));
          this.desiredLegJointVelocities.put(robotSide, new LegJointVelocities(legJointNames, robotSide));

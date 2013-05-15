@@ -4,11 +4,11 @@ import us.ihmc.robotSide.RobotSide;
 
 public class LowerBodyTorques
 {
-   private LegTorques[] legTorquesArray = new LegTorques[RobotSide.values().length];
+   private LegTorques[] legTorquesArray = new LegTorques[RobotSide.values.length];
 
    public LowerBodyTorques(RobotSpecificJointNames robotJointNames)
    {
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          legTorquesArray[robotSide.ordinal()] = new LegTorques(robotJointNames, robotSide);
       }
@@ -16,7 +16,7 @@ public class LowerBodyTorques
 
 // private LowerBodyTorques(LowerBodyTorques lowerBodyTorques)
 // {
-//    for (RobotSide robotSide : RobotSide.values())
+//    for (RobotSide robotSide : RobotSide.values)
 //    {
 //       legTorquesArray[robotSide.ordinal()] = lowerBodyTorques.getLegTorquesCopy(robotSide);
 //    }

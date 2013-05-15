@@ -145,7 +145,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       this.preSwingControlModule = preSwingControlModule;
       this.controlDT = controlDT;
       
-      for(RobotSide side : RobotSide.values())
+      for(RobotSide side : RobotSide.values)
       {
          ReferenceFrame orientationReferenceFrame = referenceFrames.getAnkleZUpFrame(side.getOppositeSide());
          YoFrameOrientation startSwingOrientation = new YoFrameOrientation(side.getCamelCaseNameForStartOfExpression() + "startSwing", "", orientationReferenceFrame, registry);

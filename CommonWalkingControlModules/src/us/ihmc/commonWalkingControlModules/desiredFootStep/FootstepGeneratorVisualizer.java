@@ -157,7 +157,7 @@ public class FootstepGeneratorVisualizer
       RigidBody rootBody = new RigidBody("Root", ReferenceFrame.getWorldFrame());
       Random random = new Random(1776L);
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          PoseReferenceFrame soleFrame = new PoseReferenceFrame(robotSide.getCamelCaseNameForStartOfExpression() + "Frame", worldFrame);
          soleFrames.set(robotSide, soleFrame);

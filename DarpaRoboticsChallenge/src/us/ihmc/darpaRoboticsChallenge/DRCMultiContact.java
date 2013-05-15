@@ -43,12 +43,12 @@ public class DRCMultiContact
       DRCSCSInitialSetup scsInitialSetup;
 
 
-      RobotSide[] footContactSides = RobotSide.values();
+      RobotSide[] footContactSides = RobotSide.values;
       RobotSide[] handContactSides = new RobotSide[]{RobotSide.LEFT};
       RobotInitialSetup<SDFRobot> robotInitialSetup = new MultiContactDRCRobotInitialSetup();
 
-//      RobotSide[] footContactSides = RobotSide.values();
-//      RobotSide[] handContactSides = RobotSide.values();
+//      RobotSide[] footContactSides = RobotSide.values;
+//      RobotSide[] handContactSides = RobotSide.values;
 //      RobotInitialSetup<SDFRobot> robotInitialSetup = new PushUpDRCRobotInitialSetup();
 
       DRCRobotJointMap jointMap = new DRCRobotJointMap(robotModel, true);
@@ -69,7 +69,7 @@ public class DRCMultiContact
       SideDependentList<String> namesOfJointsBeforeHands = new SideDependentList<String>();
       SideDependentList<Transform3D> handContactPointTransforms = new SideDependentList<Transform3D>();
       SideDependentList<List<Point2d>> handContactPoints = new SideDependentList<List<Point2d>>();
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          namesOfJointsBeforeHands.put(robotSide, jointMap.getNameOfJointBeforeHand(robotSide));
          handContactPointTransforms.put(robotSide, DRCRobotParameters.invisibleContactablePlaneHandContactPointTransforms.get(robotSide));

@@ -215,7 +215,7 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
       MorphMethod morphMethod = MorphMethod.INTERSECTION;
       FrameLine2d lineToUseForIntersections = determineLineToUseForIntersection(coPDesiredInZUp, connectingEdge1, connectingEdge2, morphMethod);
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          // 4. Find the line segments that have the intersection points of the lineToUseForIntersections and the foot polygons as their end points:
          final FrameConvexPolygon2d footPolygon = footPolygonsInMidFeetZUp.get(robotSide);
@@ -290,7 +290,7 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
 
       plotOutputs(virtualToePoints);
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          virtualToePoints.get(robotSide).changeFrame(individualFootFramesForReturn.get(robotSide));
       }
@@ -358,7 +358,7 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
          vtpToVTPLineSegment = new FrameLineSegment2d(virtualToePoints.get(RobotSide.LEFT), virtualToePoints.get(RobotSide.RIGHT));
          plotter.addFrameLineSegment2d(vtpToVTPLineSegment, Color.orange);
 
-         for (RobotSide robotSide : RobotSide.values())
+         for (RobotSide robotSide : RobotSide.values)
          {
             plotter.addFramePoint2d(virtualToePoints.get(robotSide), Color.CYAN);
          }
@@ -413,7 +413,7 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
             plotter.removeAllObjectsToDraw();
          plotter.addFramePoint2d(coPDesiredInZUp, Color.MAGENTA);
 
-         for (RobotSide robotSide : RobotSide.values())
+         for (RobotSide robotSide : RobotSide.values)
          {
             plotter.addPolygon(footPolygonsInMidFeetZUp.get(robotSide));
          }
@@ -426,7 +426,7 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
    private RobotSide determineWhatSideCoPIsIn(SideDependentList<FrameConvexPolygon2d> footPolygonsInMidFeetZUp, FramePoint2d feasibleCoPDesired)
    {
       RobotSide ret = null;
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          if (footPolygonsInMidFeetZUp.get(robotSide).isPointInside(feasibleCoPDesired))
          {
@@ -443,7 +443,7 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
    {
       RobotSide ret = null;
       double closestDistanceToSide = Double.POSITIVE_INFINITY;
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          final double distanceToSide = footPolygonsInMidFeetZUp.get(robotSide).distance(feasibleCoPDesired);
          if (distanceToSide < closestDistanceToSide)

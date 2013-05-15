@@ -70,7 +70,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
       this.centerOfPressure2d = new FramePoint2d(centerOfPressurePlaneFrame);
       this.feet = bipedFeet;
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          kValues.put(robotSide, new DoubleYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "KValue", registry));
       }
@@ -169,7 +169,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
 
       SideDependentList<FramePoint> centersOfPressureOnSole3d = projectOntoSole(centersOfPressureInZUp);
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          FramePoint footCoP = centersOfPressureOnSole3d.get(robotSide);
          if (footCoP != null)
@@ -190,7 +190,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
 
       // compute k values
       double k1PlusK2 = MathTools.square(omega0) * totalMass;
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          double k = lambdas.get(robotSide) * k1PlusK2;
          kValues.get(robotSide).set(k);
@@ -198,7 +198,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
 
       // compute moment weightings
       SideDependentList<Double> momentWeightings = new SideDependentList<Double>();
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          PlaneContactState contactState = contactStates.get(robotSide);
          double momentWeighting;
@@ -223,7 +223,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
       FramePoint groundReactionForceTerminalPoint = new FramePoint(centerOfMassFrame);
       groundReactionForceTerminalPoint.sub(deltaCMP);
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          PlaneContactState contactState = contactStates.get(robotSide);
 
@@ -270,7 +270,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
 
    private double computeOmega0(FramePoint centerOfMass, double fZ, SideDependentList<FramePoint> virtualToePointsOnSole)
    {
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          virtualToePointsOnSole.get(robotSide).changeFrame(worldFrame);
       }
@@ -309,7 +309,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
    {
       boolean inDoubleSupport = true;
       RobotSide supportSide = null;
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          PlaneContactState contactState = contactStates.get(robotSide);
          if (contactState == null || !contactState.inContact())
@@ -331,7 +331,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
    private SideDependentList<FramePoint> projectOntoSole(SideDependentList<FramePoint2d> centersOfPressureInZUp)
    {
       SideDependentList<FramePoint> virtualToePointsOnSole = new SideDependentList<FramePoint>();
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          FramePoint2d centerOfPressure = centersOfPressureInZUp.get(robotSide);
          if (centerOfPressure != null)
@@ -362,7 +362,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
    private static RobotSide getRobotSide(PlaneContactState contactState, SideDependentList<? extends ContactablePlaneBody> feet)
    {
       RobotSide ret = null;
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          ContactablePlaneBody foot = feet.get(robotSide);
          if (foot.getPlaneFrame() == contactState.getPlaneFrame())

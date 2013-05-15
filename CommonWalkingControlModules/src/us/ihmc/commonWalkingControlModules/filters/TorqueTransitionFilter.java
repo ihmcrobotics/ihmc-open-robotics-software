@@ -33,7 +33,7 @@ public class TorqueTransitionFilter
 
       this.processedOutputs = processedOutputs;
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          for (LegJointName legJointName : legJointNames)
          {
@@ -57,7 +57,7 @@ public class TorqueTransitionFilter
    public void rememberPreviousTorques()
    {
       // Remember previous torques:
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          for (LegJointName legJointName : legJointNames)
          {
@@ -74,7 +74,7 @@ public class TorqueTransitionFilter
       if (alphaTauFilter.getDoubleValue() < 0.0)
          alphaTauFilter.set(0.0);
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          for (LegJointName legJointName : robotJointNames.getLegJointNames())
          {

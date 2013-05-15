@@ -128,7 +128,7 @@ public class JointSpaceSwingSubController implements SwingSubController
       timeSpentInMidSwing = new DoubleYoVariable("timeSpentInMidSwing", "This is the time spend in mid swing.", registry);
       timeSpentInTerminalSwing = new DoubleYoVariable("timeSpentInTerminalSwing", "This is the time spent in terminal swing.", registry);
 
-      for (RobotSide side : RobotSide.values())
+      for (RobotSide side : RobotSide.values)
       {
          jointPositions.set(side, new LegJointPositions(side));
          jointVelocities.set(side, new LegJointVelocities(legJointNames, side));

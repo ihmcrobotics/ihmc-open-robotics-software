@@ -106,7 +106,7 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
       this.desiredTotalForceVector.set(desiredGroundReactionWrench);
       footConvexPolygons.clear();
       
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          PlaneContactState contactState = contactStates.get(robotSide);
          

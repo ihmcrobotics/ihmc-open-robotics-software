@@ -130,12 +130,12 @@ public class EquivalentConstantCoPControlModule implements DesiredCapturePointTo
    private double computeCoMHeightUsingBothFeet()
    {
       double sum = 0.0;
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          sum += computeCoMHeightUsingOneFoot(robotSide);
       }
 
-      return sum / RobotSide.values().length;
+      return sum / RobotSide.values.length;
    }
    
    private void doOrthogonalControl(FramePoint2d desiredCoPToChange, FramePoint2d capturePoint, FrameLineSegment2d guideLine)

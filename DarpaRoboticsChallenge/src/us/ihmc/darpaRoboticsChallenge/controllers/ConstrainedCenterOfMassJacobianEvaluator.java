@@ -82,7 +82,7 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
       constrainedCentroidalMomentumMatrixCalculator = new ConstrainedCentroidalMomentumMatrixCalculator(fullRobotModel.getRootJoint(), centerOfMassFrame,
             momentumSelectionMatrix);
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          RigidBody foot = fullRobotModel.getFoot(robotSide);
          DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
@@ -103,7 +103,7 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
 
       actuatedJoints = new ArrayList<InverseDynamicsJoint>();
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          InverseDynamicsJoint[] jointPath = ScrewTools.createJointPath(fullRobotModel.getPelvis(), fullRobotModel.getFoot(robotSide));
          actuatedJoints.addAll(Arrays.asList(jointPath));

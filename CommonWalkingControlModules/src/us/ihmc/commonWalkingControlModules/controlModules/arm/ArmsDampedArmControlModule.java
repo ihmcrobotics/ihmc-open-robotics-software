@@ -20,7 +20,7 @@ public class ArmsDampedArmControlModule extends PDArmControlModule
 
    protected void setGains()
    {
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          armControllers.get(robotSide).get(ArmJointName.SHOULDER_PITCH).setProportionalGain(0.0);
          

@@ -84,7 +84,7 @@ public class DesiredFootstepVisualizer
       double footForward = 0.25;
       double footBackward = 0.05;
       double footHeight = 0.05;
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          String robotSideName = robotSide.getCamelCaseNameForStartOfExpression();
 
@@ -107,7 +107,7 @@ public class DesiredFootstepVisualizer
 
       elevator.updateFramesRecursively();
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          ankleZUpFrames.get(robotSide).update();
       }
@@ -115,7 +115,7 @@ public class DesiredFootstepVisualizer
       DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("FeetPolygons");
       ArtifactList artifactList = new ArtifactList("FeetPolygons");
       SideDependentList<Color> footColors = new SideDependentList<Color>(Color.pink, Color.blue);
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          int maxNumberOfVertices = bipedFeet.get(robotSide).getContactPoints().size();
          String footName = robotSide.getCamelCaseNameForStartOfExpression() + "Foot";
@@ -228,7 +228,7 @@ public class DesiredFootstepVisualizer
 
    private void setFeetPolygonsInWorld()
    {
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          FrameConvexPolygon2d footPolygonInWorld = FrameConvexPolygon2d.constructByProjectionOntoXYPlane(bipedFeet.get(robotSide).getContactPoints(),
                                                       ReferenceFrame.getWorldFrame());
@@ -247,7 +247,7 @@ public class DesiredFootstepVisualizer
 
    private void updateFrames()
    {
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          sixDoFJoints.get(robotSide).updateFramesRecursively();
          soleFrames.get(robotSide).update();

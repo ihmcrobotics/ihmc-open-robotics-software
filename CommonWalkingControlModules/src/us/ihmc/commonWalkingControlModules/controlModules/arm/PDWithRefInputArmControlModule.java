@@ -42,7 +42,7 @@ public abstract class PDWithRefInputArmControlModule implements RefInputArmContr
    {
       computeDesireds();
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          ArmTorques armTorques = armTorquesToPack[robotSide.ordinal()];
          EnumMap<ArmJointName, PIDController> armController = armControllers.get(robotSide);
@@ -61,7 +61,7 @@ public abstract class PDWithRefInputArmControlModule implements RefInputArmContr
 
    private void populateYoVariables()
    {
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          for (ArmJointName armJointName : ArmJointName.values())
          {
@@ -78,7 +78,7 @@ public abstract class PDWithRefInputArmControlModule implements RefInputArmContr
 
    private void populateControllers()
    {
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          for (ArmJointName armJointName : ArmJointName.values())
          {
@@ -90,7 +90,7 @@ public abstract class PDWithRefInputArmControlModule implements RefInputArmContr
 
    public void setDesireds(SideDependentList<EnumMap<ArmJointName, Double>> desiredJointPositions)
    {
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          for (ArmJointName armJointName : ArmJointName.values())
          {

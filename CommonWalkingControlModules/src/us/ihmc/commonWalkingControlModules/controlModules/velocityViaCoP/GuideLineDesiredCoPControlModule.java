@@ -77,7 +77,7 @@ public class GuideLineDesiredCoPControlModule implements DesiredCoPControlModule
       this.guideLineCalculator = guideLineCalculator;
       this.filteredDesiredCoPDoubleSupport = AlphaFilteredYoFramePoint2d.createAlphaFilteredYoFramePoint2d("filteredDesCoPDoubleSupport", "", registry, alphaDesiredCoP,
               referenceFrames.getMidFeetZUpFrame());
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          String namePrefix = "filteredDesiredCoP" + robotSide.getCamelCaseNameForMiddleOfExpression();
          ReferenceFrame ankleZUpFrame = referenceFrames.getAnkleZUpFrame(robotSide);
@@ -247,7 +247,7 @@ public class GuideLineDesiredCoPControlModule implements DesiredCoPControlModule
    private void resetCoPFilter()
    {
       filteredDesiredCoPDoubleSupport.reset();
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          filteredDesiredCoPsSingleSupport.get(robotSide).reset();
       }

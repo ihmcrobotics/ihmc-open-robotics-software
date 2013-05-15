@@ -52,7 +52,7 @@ public class DRCDemo03
       SideDependentList<String> namesOfJointsBeforeThighs = new SideDependentList<String>();
       SideDependentList<Transform3D> thighContactPointTransforms = new SideDependentList<Transform3D>();
       SideDependentList<List<Point2d>> thighContactPoints = new SideDependentList<List<Point2d>>();
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          namesOfJointsBeforeThighs.put(robotSide, robotInterface.getJointMap().getNameOfJointBeforeThigh(robotSide));
          thighContactPointTransforms.put(robotSide, DRCRobotParameters.thighContactPointTransforms.get(robotSide));

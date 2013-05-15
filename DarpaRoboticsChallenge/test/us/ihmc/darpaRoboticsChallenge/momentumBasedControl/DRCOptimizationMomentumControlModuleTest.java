@@ -229,7 +229,7 @@ public class DRCOptimizationMomentumControlModuleTest
 
    private void constrainFeet(RigidBody elevator, SideDependentList<ContactablePlaneBody> feet, OptimizationMomentumControlModule momentumControlModule, Map<GeometricJacobian, TaskspaceConstraintData> taskspaceConstraintDataMap)
    {
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          RigidBody foot = feet.get(robotSide).getRigidBody();
          GeometricJacobian jacobian = new GeometricJacobian(elevator, foot, foot.getBodyFixedFrame());
