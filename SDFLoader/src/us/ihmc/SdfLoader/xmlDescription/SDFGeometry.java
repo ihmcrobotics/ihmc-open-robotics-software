@@ -155,13 +155,14 @@ public class SDFGeometry
    {
       private String uri;
       private String scale;
+      private SubMesh submesh;
 
       public String getUri()
       {
          return uri;
       }
 
-      @XmlElement(name="uri")
+      @XmlElement(name = "uri")
       public void setUri(String uri)
       {
          this.uri = uri;
@@ -172,10 +173,50 @@ public class SDFGeometry
          return scale;
       }
 
-      @XmlElement(name="scale")
+      @XmlElement(name = "scale")
       public void setScale(String scale)
       {
          this.scale = scale;
+      }
+
+      public SubMesh getSubmesh()
+      {
+         return submesh;
+      }
+
+      @XmlElement(name = "submesh")
+      public void setSubmesh(SubMesh submesh)
+      {
+         this.submesh = submesh;
+      }
+
+      public static class SubMesh
+      {
+         private String name;
+         private String center;
+
+         public String getName()
+         {
+            return name;
+         }
+
+         public String getCenter()
+         {
+            return center;
+         }
+
+         @XmlElement(name = "name")
+         public void setName(String name)
+         {
+            this.name = name;
+         }
+
+         @XmlElement(name = "center")
+         public void setCenter(String center)
+         {
+            this.center = center;
+         }
+
       }
 
    }
@@ -190,7 +231,7 @@ public class SDFGeometry
          return normal;
       }
 
-      @XmlElement(name="normal")
+      @XmlElement(name = "normal")
       public void setNormal(String normal)
       {
          this.normal = normal;
@@ -201,7 +242,7 @@ public class SDFGeometry
          return size;
       }
 
-      @XmlElement(name="size")
+      @XmlElement(name = "size")
       public void setSize(String size)
       {
          this.size = size;
@@ -221,7 +262,7 @@ public class SDFGeometry
          return uri;
       }
 
-      @XmlElement(name="uri")
+      @XmlElement(name = "uri")
       public void setUri(String uri)
       {
          this.uri = uri;
@@ -232,7 +273,7 @@ public class SDFGeometry
          return scale;
       }
 
-      @XmlElement(name="scale")
+      @XmlElement(name = "scale")
       public void setScale(String scale)
       {
          this.scale = scale;
@@ -243,7 +284,7 @@ public class SDFGeometry
          return threshold;
       }
 
-      @XmlElement(name="threshold")
+      @XmlElement(name = "threshold")
       public void setThreshold(String threshold)
       {
          this.threshold = threshold;
@@ -254,7 +295,7 @@ public class SDFGeometry
          return height;
       }
 
-      @XmlElement(name="height")
+      @XmlElement(name = "height")
       public void setHeight(String height)
       {
          this.height = height;
@@ -265,7 +306,7 @@ public class SDFGeometry
          return granularity;
       }
 
-      @XmlElement(name="granularity")
+      @XmlElement(name = "granularity")
       public void setGranularity(String granularity)
       {
          this.granularity = granularity;
@@ -287,7 +328,7 @@ public class SDFGeometry
          return uri;
       }
 
-      @XmlElement(name="uri")
+      @XmlElement(name = "uri")
       public void setUri(String uri)
       {
          this.uri = uri;
@@ -298,7 +339,7 @@ public class SDFGeometry
          return size;
       }
 
-      @XmlElement(name="size")
+      @XmlElement(name = "size")
       public void setSize(String size)
       {
          this.size = size;
@@ -309,7 +350,7 @@ public class SDFGeometry
          return pos;
       }
 
-      @XmlElement(name="pos")
+      @XmlElement(name = "pos")
       public void setPos(String pos)
       {
          this.pos = pos;
@@ -320,7 +361,7 @@ public class SDFGeometry
          return textures;
       }
 
-      @XmlElement(name="texture")
+      @XmlElement(name = "texture")
       public void setTextures(List<Texture> textures)
       {
          this.textures = textures;
@@ -331,7 +372,7 @@ public class SDFGeometry
          return blends;
       }
 
-      @XmlElement(name="blend")
+      @XmlElement(name = "blend")
       public void setBlends(List<Blend> blends)
       {
          this.blends = blends;
@@ -348,7 +389,7 @@ public class SDFGeometry
             return size;
          }
 
-         @XmlElement(name="size")
+         @XmlElement(name = "size")
          public void setSize(String size)
          {
             this.size = size;
@@ -359,7 +400,7 @@ public class SDFGeometry
             return diffuse;
          }
 
-         @XmlElement(name="diffuse")
+         @XmlElement(name = "diffuse")
          public void setDiffuse(String diffuse)
          {
             this.diffuse = diffuse;
@@ -370,7 +411,7 @@ public class SDFGeometry
             return normal;
          }
 
-         @XmlElement(name="normal")
+         @XmlElement(name = "normal")
          public void setNormal(String normal)
          {
             this.normal = normal;
@@ -388,7 +429,7 @@ public class SDFGeometry
             return minHeight;
          }
 
-         @XmlElement(name="min_height")
+         @XmlElement(name = "min_height")
          public void setMinHeight(String minHeight)
          {
             this.minHeight = minHeight;
@@ -399,7 +440,7 @@ public class SDFGeometry
             return fadeDist;
          }
 
-         @XmlElement(name="fade_dist")
+         @XmlElement(name = "fade_dist")
          public void setFadeDist(String fadeDist)
          {
             this.fadeDist = fadeDist;
