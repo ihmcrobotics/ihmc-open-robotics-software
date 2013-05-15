@@ -89,7 +89,14 @@ public class SDFGraphics3DObject extends Graphics3DObject
                Vector3d scale = SDFConversionsHelper.stringToVector3d(sdfVisual.getGeometry().getMesh().getScale());
                scale(scale);
             }
-            addMesh(uri, visualPose, appearance, resourceDirectories);
+            String submesh = null;
+            boolean centerSubmesh = false;
+            if(sdfVisual.getGeometry().getMesh().getSubmesh() != null)
+            {
+               submesh = sdfVisual.getGeometry().getMesh().getSubmesh().getName().trim();
+               centerSubmesh = sdfVisual.getGeometry().getMesh().getSubmesh().getCenter().trim().equals("1");
+            }
+            addMesh(uri, submesh, centerSubmesh, visualPose, appearance, resourceDirectories);
          }
          else if(sdfVisual.getGeometry().getCylinder() != null)
          {
@@ -173,7 +180,7 @@ public class SDFGraphics3DObject extends Graphics3DObject
       }
    }
    
-   private void addMesh(String mesh, Transform3D visualPose, AppearanceDefinition appearance, ArrayList<String> resourceDirectories)
+   private void addMesh(String mesh, String submesh, boolean centerSubmesh, Transform3D visualPose, AppearanceDefinition appearance, ArrayList<String> resourceDirectories)
    {
 
       // STL files do not have appearances
@@ -183,7 +190,7 @@ public class SDFGraphics3DObject extends Graphics3DObject
       }
       
 
-      addModelFile(mesh, resourceDirectories, appearance);
+      addModelFile(mesh, submesh, centerSubmesh, resourceDirectories, appearance);
 
    }
 

@@ -295,12 +295,17 @@ public class Graphics3DObject
       return graphics3dAddModelFileInstruction;
    }
    
-   public Graphics3DAddModelFileInstruction addModelFile(String fileName, ArrayList<String> resourceDirectories, AppearanceDefinition app)
+   public Graphics3DAddModelFileInstruction addModelFile(String fileName, String submesh, boolean centerSubmesh, ArrayList<String> resourceDirectories, AppearanceDefinition app)
    {
-      
-      Graphics3DAddModelFileInstruction graphics3dAddModelFileInstruction = new Graphics3DAddModelFileInstruction(fileName, app, resourceDirectories);
+      Graphics3DAddModelFileInstruction graphics3dAddModelFileInstruction = new Graphics3DAddModelFileInstruction(fileName, submesh, centerSubmesh, app, resourceDirectories);
       graphics3DInstructions.add(graphics3dAddModelFileInstruction);
       return graphics3dAddModelFileInstruction;
+      
+   }
+   
+   public Graphics3DAddModelFileInstruction addModelFile(String fileName, ArrayList<String> resourceDirectories, AppearanceDefinition app)
+   {
+      return addModelFile(fileName, null, false, resourceDirectories, app);
    }
 
    public void addCoordinateSystem(double length)
