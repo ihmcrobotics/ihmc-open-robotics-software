@@ -4,15 +4,17 @@ import georegression.struct.point.Point2D_F64;
 import georegression.struct.point.Point2D_I32;
 
 /**
+ * Occupancy grid map in 2D.  Indicates the probability of there build an obstacle.
+ *
  * @author Peter Abeles
  */
 public class OccupancyGrid
 {
    public double map[];
-   int width;
-   int height;
-   double cellSize;
-   Point2D_F64 offset = new Point2D_F64();
+   public int width;
+   public int height;
+   public double cellSize;
+   public Point2D_F64 offset = new Point2D_F64();
 
    public OccupancyGrid(int width, int height, double cellSize)
    {
@@ -30,6 +32,11 @@ public class OccupancyGrid
    public void worldToCell( double x , double y , Point2D_I32 grid ) {
       grid.x = (int)Math.floor((x + offset.x)/ cellSize);
       grid.y = (int)Math.floor((y + offset.y)/ cellSize);
+   }
+
+   public void setAll( double value ) {
+      for( int i = 0; i < map.length; i++ )
+         map[i] = value;
    }
 
    public double get( int x , int y ) {
@@ -50,6 +57,14 @@ public class OccupancyGrid
 
    public void unsafe_set( int x , int y , double value ) {
       map[ y*width + x ] = value;
+   }
+
+   public void setTo( OccupancyGrid grid ) {
+      if( grid.width != width || grid.height != height )
+         throw new IllegalArgumentException("Both grids must have the same width and height");
+
+      System.arraycopy(grid.map,0,map,0,width*height);
+      this.cellSize = grid.cellSize;
    }
 
    private void checkBounds(int x, int y)
@@ -78,6 +93,15 @@ public class OccupancyGrid
    public void setCellSize(double cellsize)
    {
       this.cellSize = cellsize;
+   }
+
+   public void resize( int width , int height ) {
+      this.width = width;
+      this.height = height;
+
+      if( width*height > map.length ) {
+         map = new double[ width*height ];
+      }
    }
 
    public boolean isInBounds( int x , int y ) {
