@@ -292,7 +292,8 @@ public class IndividualHandControlStateMachine
    {
       ConstantDoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(1.0);
 
-      ReferenceFrame referenceFrame = jacobian.getBase().getBodyFixedFrame();
+      RigidBody base = jacobian.getBase();    // fullRobotModel.getElevator(); //  TODO: would actually like to have this be elevator, but not currently handled in
+      ReferenceFrame referenceFrame = fullRobotModel.getElevator().getBodyFixedFrame(); // jacobian.getBase().getBodyFixedFrame();
 
       String namePrefix = FormattingTools.underscoredToCamelCase(stateEnum.toString(), true);
       StraightLinePositionTrajectoryGenerator positionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator(namePrefix, referenceFrame, 1.0,
@@ -302,7 +303,6 @@ public class IndividualHandControlStateMachine
                                                                                       trajectoryTimeProvider, currentConfigurationProvider,
                                                                                       desiredConfigurationProvider, registry);
 
-      RigidBody base = jacobian.getBase();    // TODO: would actually like to have this be elevator, but not currently handled in
 
       return new ObjectManipulationState(stateEnum, robotSide, positionTrajectoryGenerator, orientationTrajectoryGenerator,
                                          handSpatialAccelerationControlModule, momentumBasedController, jacobian, base, handController, fullRobotModel,
