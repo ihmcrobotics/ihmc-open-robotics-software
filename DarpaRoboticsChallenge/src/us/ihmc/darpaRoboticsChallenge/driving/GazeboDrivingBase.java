@@ -7,6 +7,8 @@ import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
+
+import rosgraph_msgs.Clock;
 import sensor_msgs.CompressedImage;
 import std_msgs.Int8;
 import std_msgs.Time;
@@ -49,7 +51,7 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 	private Publisher<geometry_msgs.Pose> teleportInToCarPublisher, teleportOutOfCarPublisher;
 	private geometry_msgs.Pose teleportInToCarPose, teleportOutOfCarPose;
 
-   protected Subscriber<Time> timeSubscriber;
+   protected Subscriber<Clock> timeSubscriber;
    protected final org.ros.message.Time simulationTime = new org.ros.message.Time();
 
 	private ColorSpace colorSpace;
@@ -173,20 +175,20 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 		gasPedalStateSubscriber = connectedNode.newSubscriber("/drc_vehicle/gas_pedal/state", std_msgs.Float64._TYPE);
 		brakePedalStateSubscriber = connectedNode.newSubscriber("/drc_vehicle/brake_pedal/state", std_msgs.Float64._TYPE);
 
-      timeSubscriber = connectedNode.newSubscriber("/rosgraph_msgs/Clock",Time._TYPE);
+      timeSubscriber = connectedNode.newSubscriber("/clock",rosgraph_msgs.Clock._TYPE);
 	}
 
    /**
     * Adds a listener for simulation time
     */
    public void startSimulationTime() {
-      timeSubscriber.addMessageListener(new MessageListener<Time>()
+      timeSubscriber.addMessageListener(new MessageListener<Clock>()
       {
-         public void onNewMessage(Time message)
+         public void onNewMessage(Clock message)
          {
             synchronized ( simulationTime ) {
-               simulationTime.secs = message.getData().secs;
-               simulationTime.nsecs = message.getData().nsecs;
+               simulationTime.secs = message.getClock().secs;
+               simulationTime.nsecs = message.getClock().nsecs;
             }
          }
       });
