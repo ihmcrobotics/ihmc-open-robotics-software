@@ -31,6 +31,8 @@ public class SmoothICPComputer
 
    private final ArrayList<YoFramePoint> constantCentersOfPressure = new ArrayList<YoFramePoint>();
 
+   private final DoubleYoVariable icpForwardFromCenter = new DoubleYoVariable("icpForwardFromCenter", registry);
+
    private final BooleanYoVariable isDoubleSupport = new BooleanYoVariable("icpPlannerIsDoubleSupport", registry);
    private final DoubleYoVariable timeInState = new DoubleYoVariable("timeInState", registry);
    private final DoubleYoVariable initialTime = new DoubleYoVariable("initialTime", registry);
@@ -429,7 +431,7 @@ public class SmoothICPComputer
    {
       footLocationList.clear();
 
-      transferToAndNextFootstepsData.getFootLocationList(footLocationList);
+      transferToAndNextFootstepsData.getFootLocationList(footLocationList, icpForwardFromCenter.getDoubleValue());
       double singleSupportDuration = transferToAndNextFootstepsData.getSingleSupportDuration();
       double doubleSupportDuration = transferToAndNextFootstepsData.getDoubleSupportDuration();
       double omega0 = transferToAndNextFootstepsData.getW0();
@@ -442,7 +444,7 @@ public class SmoothICPComputer
    {
       footLocationList.clear();
 
-      transferToAndNextFootstepsData.getFootLocationList(footLocationList);
+      transferToAndNextFootstepsData.getFootLocationList(footLocationList, icpForwardFromCenter.getDoubleValue());
       double singleSupportDuration = transferToAndNextFootstepsData.getSingleSupportDuration();
       double doubleSupportDuration = transferToAndNextFootstepsData.getDoubleSupportDuration();
       double omega0 = transferToAndNextFootstepsData.getW0();
@@ -456,7 +458,7 @@ public class SmoothICPComputer
    {
       footLocationList.clear();
 
-      transferToAndNextFootstepsData.getFootLocationList(footLocationList);
+      transferToAndNextFootstepsData.getFootLocationList(footLocationList, icpForwardFromCenter.getDoubleValue());
       double singleSupportDuration = transferToAndNextFootstepsData.getSingleSupportDuration();
       double doubleSupportDuration = transferToAndNextFootstepsData.getDoubleSupportDuration();
       double doubleSupportInitialTransferDuration = transferToAndNextFootstepsData.getDoubleSupportInitialTransferDuration();
@@ -471,14 +473,13 @@ public class SmoothICPComputer
    {
       footLocationList.clear();
 
-      transferToAndNextFootstepsData.getFootLocationList(footLocationList);
+      transferToAndNextFootstepsData.getFootLocationList(footLocationList, icpForwardFromCenter.getDoubleValue());
       double singleSupportDuration = transferToAndNextFootstepsData.getSingleSupportDuration();
       double doubleSupportDuration = transferToAndNextFootstepsData.getDoubleSupportDuration();
       double omega0 = transferToAndNextFootstepsData.getW0();
       boolean stopIfReachedEnd = transferToAndNextFootstepsData.getStopIfReachedEnd();
 
       initializeDoubleSupport(footLocationList, singleSupportDuration, doubleSupportDuration, omega0, initialTime, stopIfReachedEnd);
-
    }
 
    public boolean isDone(double time)
