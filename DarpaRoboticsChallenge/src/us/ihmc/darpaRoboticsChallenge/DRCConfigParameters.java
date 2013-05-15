@@ -3,7 +3,6 @@ package us.ihmc.darpaRoboticsChallenge;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig.LocalCloudMachines;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
-import us.ihmc.darpaRoboticsChallenge.sensors.DRCLIDARDataStore.DRCLidarDataStoreType;
 import us.ihmc.graphics3DAdapter.camera.VideoSettings;
 import us.ihmc.graphics3DAdapter.camera.VideoSettings.Quality;
 import us.ihmc.graphics3DAdapter.camera.VideoSettingsH264LowLatency;
@@ -81,6 +80,8 @@ public class DRCConfigParameters
    static final boolean OVERRIDE_DRC_LIDAR_CONFIG = true;
    public static final float LIDAR_MIN_DISTANCE = 0.2f;
    public static final float LIDAR_MAX_DISTANCE = 10.0f;
+   public static final float LIDAR_NEAR_SCAN_MAX_DISTANCE = 3.0f;
+
    public static final float LIDAR_SWEEP_MAX_YAW = 0.8f;
    public static final float LIDAR_SWEEP_MIN_YAW = -0.8f;
    public static final float LIDAR_SCAN_MAX_ROLL = 0.0f;    // rolls the LIDAR to simulate a faster update rate.
@@ -93,7 +94,6 @@ public class DRCConfigParameters
 
    // LIDAR Processor
    public static final boolean LIDAR_PROCESSOR_TIMING_REPORTING_ON = false;
-   public static final DRCLidarDataStoreType DRCLIDAR_DATA_STORE_TYPE = DRCLidarDataStoreType.GROUND_ONLY_QUAD_TREE_AND_OCTREE;
    public static final double GRID_RESOLUTION = 0.025;    // in meters
    public static final double OCTREE_RESOLUTION = 0.025;
    public static final float QUADTREE_HEIGHT_THRESHOLD = 0.05f;
