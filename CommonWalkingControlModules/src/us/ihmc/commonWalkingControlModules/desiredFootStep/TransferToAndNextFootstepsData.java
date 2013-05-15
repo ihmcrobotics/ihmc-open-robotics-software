@@ -113,36 +113,36 @@ public class TransferToAndNextFootstepsData
       this.estimatedStepTime = estimatedStepTime;
    }
 
-   public void getFootLocationList(ArrayList<FramePoint> footLocationListToPack)
+   public void getFootLocationList(ArrayList<FramePoint> footLocationListToPack, double centimetersForwardFromCenter)
    {
       if (transferFromFootstep != null)
       {
-         getFootLocationFromFootstepInWorldFrame(footLocationListToPack, transferFromFootstep);
+         getFootLocationFromFootstepInWorldFrame(footLocationListToPack, transferFromFootstep, centimetersForwardFromCenter);
       }
       else return;
       
       if (transferToFootstep != null)
       {
-         getFootLocationFromFootstepInWorldFrame(footLocationListToPack, transferToFootstep);
+         getFootLocationFromFootstepInWorldFrame(footLocationListToPack, transferToFootstep, centimetersForwardFromCenter);
       }
       else return;
 
       if (nextFootstep != null)
       {
-         getFootLocationFromFootstepInWorldFrame(footLocationListToPack, nextFootstep);
+         getFootLocationFromFootstepInWorldFrame(footLocationListToPack, nextFootstep, centimetersForwardFromCenter);
       }
       else return;
 
       if (nextNextFootstep != null)
       {
-         getFootLocationFromFootstepInWorldFrame(footLocationListToPack, nextNextFootstep);
+         getFootLocationFromFootstepInWorldFrame(footLocationListToPack, nextNextFootstep, centimetersForwardFromCenter);
       }
       else return;
    }
 
-   private static void getFootLocationFromFootstepInWorldFrame(ArrayList<FramePoint> footLocationListToPack, Footstep footstep)
+   private static void getFootLocationFromFootstepInWorldFrame(ArrayList<FramePoint> footLocationListToPack, Footstep footstep, double centimetersForwardFromCenter)
    {
-      FramePoint centerOfFootstep = FootstepUtils.getCenterOfFootstep(footstep);
+      FramePoint centerOfFootstep = FootstepUtils.getCenterOfFootstep(footstep, centimetersForwardFromCenter);
       footLocationListToPack.add(centerOfFootstep);
    }
 
