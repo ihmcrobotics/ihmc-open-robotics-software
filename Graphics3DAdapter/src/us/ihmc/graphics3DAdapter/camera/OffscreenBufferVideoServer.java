@@ -7,6 +7,7 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.graphics3DAdapter.CameraAdapter;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
+import us.ihmc.utilities.net.TimestampProvider;
 
 public class OffscreenBufferVideoServer
 {
@@ -15,9 +16,10 @@ public class OffscreenBufferVideoServer
 
    private final CameraAdapter camera;
 
+   private final TimestampProvider timestampProvider;
 
    public OffscreenBufferVideoServer(Graphics3DAdapter adapter, CameraMountList mountList, CameraConfiguration cameraConfiguration,
-         CameraTrackingAndDollyPositionHolder cameraTrackingAndDollyPositionHolder, VideoSettings settings, VideoDataServer videoDataServer)
+         CameraTrackingAndDollyPositionHolder cameraTrackingAndDollyPositionHolder, VideoSettings settings, VideoDataServer videoDataServer, TimestampProvider timestampProvider)
    {
       ViewportAdapter viewport = adapter.createNewViewport(null, false, true);
       camera = viewport.getCamera();
@@ -29,7 +31,7 @@ public class OffscreenBufferVideoServer
 
       CameraUpdater cameraUpdater = new CameraUpdater();
       this.videoDataServer = videoDataServer;
-      
+      this.timestampProvider = timestampProvider;
 
       viewport.getCaptureDevice().streamTo(cameraUpdater, 25);
 
@@ -70,7 +72,7 @@ public class OffscreenBufferVideoServer
 
       public long getTimeStamp()
       {
-         return System.nanoTime();
+         return timestampProvider.getTimestamp();
       }
       
       
