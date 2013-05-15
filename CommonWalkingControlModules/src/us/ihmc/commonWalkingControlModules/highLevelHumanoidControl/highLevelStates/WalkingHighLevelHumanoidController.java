@@ -59,6 +59,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.SimpleTwoWaypointTraject
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.YoVariableDoubleProvider;
 import us.ihmc.controlFlow.ControlFlowInputPort;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
@@ -84,6 +85,7 @@ import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatus;
 import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter;
 import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter.ErrorType;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
@@ -195,6 +197,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final TransferToAndNextFootstepsDataVisualizer transferToAndNextFootstepsDataVisualizer;
 
+
+
+
+   private final BooleanYoVariable ecmpBasedToeOffHasBeenInitialized = new BooleanYoVariable("ecmpBasedToeOffHasBeenInitialized", registry);
+   private final boolean useECMPinToeSupportPolygonInsteadICPTriangle = false;
+   private final YoFramePoint2d desiredECMP = new YoFramePoint2d("desiredECMP", "", worldFrame, registry);
+   private final BooleanYoVariable desiredECMPinSupportPolygon = new BooleanYoVariable("desiredECMPinSupportPolygon", registry);
+   private YoFramePoint ecmpViz = new YoFramePoint("ecmpViz", ReferenceFrame.getWorldFrame(), registry);
+
+
    public WalkingHighLevelHumanoidController(SideDependentList<FootSwitchInterface> footSwitches,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, FootstepProvider footstepProvider, DesiredHandPoseProvider handPoseProvider,
            TorusPoseProvider torusPoseProvider, HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters,
@@ -225,6 +237,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       {
          transferToAndNextFootstepsDataVisualizer = null;
       }
+
+
+      if (VISUALIZE)
+      {
+         DynamicGraphicPosition dynamicGraphicPositionECMP = new DynamicGraphicPosition("ecmpviz", ecmpViz, 0.007, YoAppearance.BlueViolet());
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("ecmpviz", dynamicGraphicPositionECMP);
+         dynamicGraphicObjectsListRegistry.registerArtifact("ecmpviz", dynamicGraphicPositionECMP.createArtifact());
+      }
+
+
 
       // Getting parameters from the icpAndMomentumBasedController
       this.icpAndMomentumBasedController = icpAndMomentumBasedController;
@@ -463,6 +485,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          initializeICPPlannerIfNecessary();
 
+         initializeECMPbasedToeOffIfNotInitializedYet();
+
+
          if (instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue()) && (transferToSide == null))
          {
             desiredICPVelocity.set(0.0, 0.0);
@@ -476,6 +501,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             instantaneousCapturePointPlanner.getICPPositionAndVelocity(desiredICPLocal, desiredICPVelocityLocal, ecmpLocal, yoTime.getDoubleValue());
             desiredICP.set(desiredICPLocal);
             desiredICPVelocity.set(desiredICPVelocityLocal);
+
+            desiredECMP.set(ecmpLocal);
+
+            if (VISUALIZE)
+            {
+               ecmpViz.set(desiredECMP.getX(), desiredECMP.getY(), 0.0);
+            }
          }
 
          // Only during the first few seconds, we will control the pelvis orientation based on midfeetZup
@@ -503,23 +535,26 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
             finalDesiredICP.changeFrame(desiredICP.getReferenceFrame());
 
-            if (!stayOnToes.getBooleanValue() && (transferToSide != null))    // the only case left for determining the contact state of the trailing foot
+            if (!useECMPinToeSupportPolygonInsteadICPTriangle)
             {
-               RobotSide trailingLeg = transferToSide.getOppositeSide();
-               ContactablePlaneBody supportFoot = bipedFeet.get(trailingLeg);
-               FrameConvexPolygon2d onToesTriangle = getOnToesTriangle(finalDesiredICP, supportFoot);
-
-               boolean desiredICPOK = onToesTriangle.isPointInside(desiredICP.getFramePoint2dCopy())
-                                      && (onToesTriangle.getArea() > onToesTriangleAreaLimit.getDoubleValue());
-               toeOff.set(desiredICPOK && doToeOffIfPossible.getBooleanValue());
-
-               if (toeOff.getBooleanValue())
+               if (!stayOnToes.getBooleanValue() && (transferToSide != null))    // the only case left for determining the contact state of the trailing foot
                {
-                  setOnToesContactState(supportFoot);
-               }
-               else
-               {
-                  setFlatFootContactState(supportFoot);
+                  RobotSide trailingLeg = transferToSide.getOppositeSide();
+                  ContactablePlaneBody supportFoot = bipedFeet.get(trailingLeg);
+                  FrameConvexPolygon2d onToesTriangle = getOnToesTriangle(finalDesiredICP, supportFoot);
+
+                  boolean desiredICPOK = onToesTriangle.isPointInside(desiredICP.getFramePoint2dCopy())
+                                         && (onToesTriangle.getArea() > onToesTriangleAreaLimit.getDoubleValue());
+                  toeOff.set(desiredICPOK && doToeOffIfPossible.getBooleanValue());
+
+                  if (toeOff.getBooleanValue())
+                  {
+                     setOnToesContactState(supportFoot);
+                  }
+                  else
+                  {
+                     setFlatFootContactState(supportFoot);
+                  }
                }
             }
 
@@ -527,6 +562,45 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             icpTrajectoryHasBeenInitialized.set(true);
          }
       }
+      
+      
+      
+      public void initializeECMPbasedToeOffIfNotInitializedYet()
+      {
+         if (!ecmpBasedToeOffHasBeenInitialized.getBooleanValue())
+         {
+            if (!stayOnToes.getBooleanValue() && (transferToSide != null))    // the only case left for determining the contact state of the trailing foot
+            {
+               if (useECMPinToeSupportPolygonInsteadICPTriangle)
+               {
+                  RobotSide trailingLeg = transferToSide.getOppositeSide();
+
+                  ContactablePlaneBody supportFoot = bipedFeet.get(trailingLeg);
+
+                  ContactablePlaneBody trailingFoot = bipedFeet.get(trailingLeg);
+                  ContactablePlaneBody leadingFoot = bipedFeet.get(transferToSide);
+                  FrameConvexPolygon2d OnToesSupportPolygon = getOnToesSupportPolygon(trailingFoot, leadingFoot);
+                  boolean desiredECMPOK = OnToesSupportPolygon.isPointInside(desiredECMP.getFramePoint2dCopy());
+                  desiredECMPinSupportPolygon.set(desiredECMPOK);
+                  toeOff.set(desiredECMPOK && doToeOffIfPossible.getBooleanValue());
+
+                  if (toeOff.getBooleanValue())
+                  {
+                     setOnToesContactState(supportFoot);
+                     ecmpBasedToeOffHasBeenInitialized.set(true);
+                  }
+                  else
+                  {
+                     setFlatFootContactState(supportFoot);
+                  }
+               }
+            }
+
+            icpAndMomentumBasedController.updateBipedSupportPolygons(bipedSupportPolygons);    // need to always update biped support polygons after a change to the contact states
+         }
+      }
+      
+      
 
       private Pair<FramePoint2d, Double> computeFinalDesiredICPAndTrajectoryTime()
       {
@@ -566,6 +640,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          return finalDesiredICPAndTrajectoryTime;
       }
+
+
+
 
       public TransferToAndNextFootstepsData createTransferToAndNextFootstepDataForDoubleSupport()
       {
@@ -609,6 +686,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       @Override
       public void doTransitionIntoAction()
       {
+         desiredECMPinSupportPolygon.set(false);
+         ecmpBasedToeOffHasBeenInitialized.set(false);
+
+         icpTrajectoryHasBeenInitialized.set(false);
          icpTrajectoryHasBeenInitialized.set(false);
          if (DEBUG)
             System.out.println("WalkingHighLevelHumanoidController: enteringDoubleSupportState");
@@ -667,6 +748,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       @Override
       public void doTransitionOutOfAction()
       {
+         desiredECMPinSupportPolygon.set(false);
+         ecmpBasedToeOffHasBeenInitialized.set(false);
+
          alreadyBeenInDoubleSupportOnce.set(true);
 
          if (DEBUG)
@@ -701,6 +785,29 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       return new FrameConvexPolygon2d(points);
    }
+
+
+   private FrameConvexPolygon2d getOnToesSupportPolygon(ContactablePlaneBody trailingFoot, ContactablePlaneBody leadingFoot)
+   {
+      List<FramePoint> toePoints = getToePoints(trailingFoot);
+      List<FramePoint> leadingFootPoints = leadingFoot.getContactPoints();
+
+      List<FramePoint2d> allPoints = new ArrayList<FramePoint2d>();
+      for (FramePoint framePoint : toePoints)
+      {
+         framePoint.changeFrame(ReferenceFrame.getWorldFrame());
+         allPoints.add(framePoint.toFramePoint2d());
+      }
+
+      for (FramePoint framePoint : leadingFootPoints)
+      {
+         framePoint.changeFrame(ReferenceFrame.getWorldFrame());
+         allPoints.add(framePoint.toFramePoint2d());
+      }
+
+      return new FrameConvexPolygon2d(allPoints);
+   }
+
 
    private class SingleSupportState extends State<WalkingState>
    {
@@ -751,6 +858,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          instantaneousCapturePointPlanner.getICPPositionAndVelocity(desiredICPLocal, desiredICPVelocityLocal, ecmpLocal, yoTime.getDoubleValue());
          desiredICP.set(desiredICPLocal);
          desiredICPVelocity.set(desiredICPVelocityLocal);
+
+         desiredECMP.set(ecmpLocal);
+
+         if (VISUALIZE)
+         {
+            ecmpViz.set(desiredECMP.getX(), desiredECMP.getY(), 0.0);
+         }
 
          pelvisOrientationTrajectoryGenerator.compute(stateMachine.timeInCurrentState());
          pelvisOrientationTrajectoryGenerator.get(desiredPelvisOrientationToPack);
