@@ -17,7 +17,7 @@ public class LegJointAccelerations
 
    public static void validateLegJointAccelerationsArray(LegJointAccelerations[] legJointAccelerationsArray)
    {
-      if (legJointAccelerationsArray.length != RobotSide.values().length)
+      if (legJointAccelerationsArray.length != RobotSide.values.length)
          throw new RuntimeException("LegJointAccelerations lengths do not match.");
       if (legJointAccelerationsArray[RobotSide.LEFT.ordinal()].getRobotSide() != RobotSide.LEFT)
          throw new RuntimeException("LegJointAccelerations sides are incorrect.");

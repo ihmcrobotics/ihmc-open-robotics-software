@@ -15,7 +15,7 @@ public class ArmsSidewaysArmControlModule extends PDArmControlModule
 
    protected void computeDesireds()
    {
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          desiredArmJointPositions.get(robotSide).get(ArmJointName.SHOULDER_ROLL).set(robotSide.negateIfRightSide(Math.PI / 2.1));
          desiredArmJointPositions.get(robotSide).get(ArmJointName.SHOULDER_YAW).set(robotSide.negateIfRightSide(0.7));
@@ -28,7 +28,7 @@ public class ArmsSidewaysArmControlModule extends PDArmControlModule
 
    protected void setGains()
    {
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          armControllers.get(robotSide).get(ArmJointName.SHOULDER_PITCH).setProportionalGain(100.0);
          armControllers.get(robotSide).get(ArmJointName.SHOULDER_ROLL).setProportionalGain(200.0);

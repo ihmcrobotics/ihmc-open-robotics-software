@@ -35,7 +35,7 @@ public class GroundReactionTorqueCalculator
       this.contactPointList = new SideDependentList<ArrayList<GroundContactPoint>>(contactPointList);
       this.commonWalkingReferenceFrames = commonWalkingReferenceFrames;
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          YoFramePoint groundTauStartPoint = new YoFramePoint("groundTauStart" + robotSide.getCamelCaseNameForMiddleOfExpression(), "",
                                                ReferenceFrame.getWorldFrame(), registry);
@@ -60,7 +60,7 @@ public class GroundReactionTorqueCalculator
       double scaleFactor = 0.01;
       AppearanceDefinition appearance = YoAppearance.Purple();    // BlackMetalMaterial();
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          DynamicGraphicVector dynamicGraphicVector = new DynamicGraphicVector("GroundTau" + robotSide.getCamelCaseNameForMiddleOfExpression(),
                                                         groundTauStart.get(robotSide), groundTau.get(robotSide), scaleFactor, appearance);
@@ -86,8 +86,10 @@ public class GroundReactionTorqueCalculator
       groundTauStart.get(robotSide).set(ankleOriginShifted.changeFrameCopy(worldFrame));
       
 //      for (ContactPointName contactPointName : ContactPointName.values())
-      for(GroundContactPoint groundContactPoint : contactPointList.get(robotSide))
+      final ArrayList<GroundContactPoint> contactPoints = contactPointList.get(robotSide);
+      for(int i = 0; i < contactPoints.size(); i++)
       {
+         GroundContactPoint groundContactPoint = contactPoints.get(i);
          // Compute r X f for each contact point. Use the ankle origin to calculate total moments about it
          FramePoint contactPointLocation = new FramePoint(worldFrame, groundContactPoint.x.getDoubleValue(), groundContactPoint.y.getDoubleValue(),
                                               groundContactPoint.z.getDoubleValue());

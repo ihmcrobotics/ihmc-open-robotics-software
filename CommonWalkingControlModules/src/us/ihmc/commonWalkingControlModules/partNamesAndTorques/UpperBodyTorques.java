@@ -5,12 +5,12 @@ import us.ihmc.robotSide.RobotSide;
 public class UpperBodyTorques
 {
    private SpineTorques spineTorques = new SpineTorques();
-   private ArmTorques[] armTorquesArray = new ArmTorques[RobotSide.values().length];
+   private ArmTorques[] armTorquesArray = new ArmTorques[RobotSide.values.length];
    private NeckTorques neckTorques = new NeckTorques();
 
    public UpperBodyTorques()
    {
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          armTorquesArray[robotSide.ordinal()] = new ArmTorques(robotSide);
       }

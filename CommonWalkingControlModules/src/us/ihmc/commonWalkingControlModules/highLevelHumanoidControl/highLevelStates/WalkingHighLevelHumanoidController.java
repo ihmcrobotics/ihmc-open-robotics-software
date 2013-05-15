@@ -321,7 +321,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    protected void setupFootControlModules(SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators,
            SideDependentList<DoubleTrajectoryGenerator> heelPitchTrajectoryGenerators)
    {
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          ContactablePlaneBody bipedFoot = bipedFeet.get(robotSide);
          contactStates.get(bipedFoot).set(bipedFoot.getContactPoints2d(), coefficientOfFriction.getDoubleValue());    // flat feet
@@ -378,7 +378,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       stateMachine.addState(doubleSupportState);
 
       ResetICPTrajectoryAction resetICPTrajectoryAction = new ResetICPTrajectoryAction();
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          EndEffectorControlModule swingEndEffectorControlModule = footEndEffectorControlModules.get(bipedFeet.get(robotSide.getOppositeSide()));
          StopWalkingCondition stopWalkingCondition = new StopWalkingCondition(swingEndEffectorControlModule);
@@ -409,7 +409,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          stateMachine.addState(singleSupportState);
       }
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          StateTransition<WalkingState> toTransfer = new StateTransition<WalkingState>(transferStateEnums.get(robotSide),
                                                        new DoneWithDoubleSupportCondition(robotSide));
@@ -623,7 +623,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (stayOnToes.getBooleanValue())
          {
-            for (RobotSide robotSide : RobotSide.values())
+            for (RobotSide robotSide : RobotSide.values)
             {
                setOnToesContactState(bipedFeet.get(robotSide));
             }
@@ -632,7 +632,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             if (transferToSide == null)
             {
-               for (RobotSide robotSide : RobotSide.values())
+               for (RobotSide robotSide : RobotSide.values)
                {
                   setFlatFootContactState(bipedFeet.get(robotSide));
                }
@@ -1043,7 +1043,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       FramePoint2d ret = new FramePoint2d(worldFrame);
       double trailingFootToLeadingFootFactor = 0.5;    // 0.25;
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          FramePoint2d centroid = new FramePoint2d(ret.getReferenceFrame());
          FrameConvexPolygon2d footPolygon = computeFootPolygon(robotSide, referenceFrames.getAnkleZUpFrame(robotSide));

@@ -30,7 +30,7 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
    {
       this.contactableBodies = contactableBodies;
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          String namePrefix = robotSide.getCamelCaseNameForMiddleOfExpression() + "Footstep";
 

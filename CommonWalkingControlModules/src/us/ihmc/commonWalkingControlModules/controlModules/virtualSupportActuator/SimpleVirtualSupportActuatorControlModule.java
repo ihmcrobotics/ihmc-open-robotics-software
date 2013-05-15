@@ -45,7 +45,7 @@ public class SimpleVirtualSupportActuatorControlModule implements VirtualSupport
             referenceFrames.getFootFrame(RobotSide.RIGHT));
       footZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
       
-      for(RobotSide robotSide : RobotSide.values())
+      for(RobotSide robotSide : RobotSide.values)
       {
          smoothenedLegStrenghts.put(robotSide, new DoubleYoVariable("smoothened" + robotSide.getCamelCaseNameForMiddleOfExpression() + "LegStrenght", parentRegistry));
       }
@@ -82,7 +82,7 @@ public class SimpleVirtualSupportActuatorControlModule implements VirtualSupport
       SideDependentList<FrameVector> torques = new SideDependentList<FrameVector>();
       doubleSupportForceDistributor.packForcesAndTorques(fZs, torques, fZOnPelvisInPelvisFrame, torqueOnPelvis, legStrengths, virtualToePoints);
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          LegTorques supportLegTorquesToPack = lowerBodyTorquesToPack.getLegTorques(robotSide);
          FramePoint2d vtp = new FramePoint2d(virtualToePoints.get(robotSide));
@@ -117,7 +117,7 @@ public class SimpleVirtualSupportActuatorControlModule implements VirtualSupport
       legStrengths.put(stanceSide, transferToSingleSupportTrajectory.getPosition());
       legStrengths.put(stanceSide.getOppositeSide(), 1.0 - legStrengths.get(stanceSide));
       
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          smoothenedLegStrenghts.get(robotSide).set(legStrengths.get(robotSide));
       }

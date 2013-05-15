@@ -20,7 +20,7 @@ public class ArmsAtZeroUsingIDArmControlModule extends IDArmControlModule
 
    protected void setDesiredJointPositionsAndVelocities()
    {
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
 //         desiredArmJointPositions.get(robotSide).get(ArmJointName.SHOULDER_ROLL).set(robotSide.negateIfRightSide(Math.PI / 2.0));
 //         desiredArmJointPositions.get(robotSide).get(ArmJointName.SHOULDER_YAW).set(robotSide.negateIfRightSide(0.7));
@@ -31,7 +31,7 @@ public class ArmsAtZeroUsingIDArmControlModule extends IDArmControlModule
    {
       
       double gainScaling = 1.0;
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          armDesiredQddControllers.get(robotSide).get(ArmJointName.SHOULDER_PITCH).setProportionalGain(gainScaling * 100.0);
          armDesiredQddControllers.get(robotSide).get(ArmJointName.SHOULDER_ROLL).setProportionalGain(gainScaling * 200.0);

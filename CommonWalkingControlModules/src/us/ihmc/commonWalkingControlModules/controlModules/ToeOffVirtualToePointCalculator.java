@@ -94,7 +94,7 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
          DynamicGraphicYoPolygonArtifact vtpConvexPolygonArtifact = new DynamicGraphicYoPolygonArtifact("vtpConvexPolygon", vtpConvexPolygon, Color.cyan, false);
          artifactList.add(vtpConvexPolygonArtifact);
 
-         for (RobotSide robotSide : RobotSide.values())
+         for (RobotSide robotSide : RobotSide.values)
          {
             final YoFramePoint virtualToePointWorld = virtualToePointsWorld.get(robotSide);
             DynamicGraphicPosition virtualToePointViz = new DynamicGraphicPosition(robotSide.getCamelCaseNameForStartOfExpression() + "VTP",
@@ -366,7 +366,7 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
       virtualToePoints.set(upcomingSupportLeg, upcomingSupportFootVTP);
       virtualToePoints.set(upcomingSwingLeg, toePoint2d);
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          FramePoint vtp3D = virtualToePoints.get(robotSide).toFramePoint();
          vtp3D.changeFrame(worldFrame);

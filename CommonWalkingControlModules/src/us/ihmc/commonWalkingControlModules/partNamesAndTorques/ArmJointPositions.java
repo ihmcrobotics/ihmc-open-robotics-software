@@ -9,7 +9,7 @@ public class ArmJointPositions
 
    public static void validateArmJointpositionsArray(ArmJointPositions[] armJointPositionsArray)
    {
-      if (armJointPositionsArray.length != RobotSide.values().length)
+      if (armJointPositionsArray.length != RobotSide.values.length)
          throw new RuntimeException("ArmJointPositions lengths do not match.");
       if (armJointPositionsArray[RobotSide.LEFT.ordinal()].getRobotSide() != RobotSide.LEFT)
          throw new RuntimeException("ArmJointPositions sides are incorrect.");

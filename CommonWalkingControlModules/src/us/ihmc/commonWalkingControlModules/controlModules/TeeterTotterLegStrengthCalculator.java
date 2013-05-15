@@ -19,7 +19,7 @@ public class TeeterTotterLegStrengthCalculator implements LegStrengthCalculator
    
    public TeeterTotterLegStrengthCalculator(YoVariableRegistry parentRegistry)
    {
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          legStrengths.put(robotSide, new DoubleYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "LegStrength", registry));
       }
@@ -28,7 +28,7 @@ public class TeeterTotterLegStrengthCalculator implements LegStrengthCalculator
 
    public void packLegStrengths(SideDependentList<Double> legStrengths, SideDependentList<FramePoint2d> virtualToePoints, FramePoint2d coPDesired)
    {
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          virtualToePoints.get(robotSide).changeFrame(coPDesired.getReferenceFrame());
       }
@@ -37,7 +37,7 @@ public class TeeterTotterLegStrengthCalculator implements LegStrengthCalculator
       if (vtpToVtpSegment.isBetweenEndpoints(coPDesired, epsilonBetweenEndPoints))
       {
          double vtpToVtp = vtpToVtpSegment.length();
-         for (RobotSide robotSide : RobotSide.values())
+         for (RobotSide robotSide : RobotSide.values)
          {
             double otherVtpToCoP = virtualToePoints.get(robotSide.getOppositeSide()).distance(coPDesired);
             double legStrength = otherVtpToCoP / vtpToVtp;
@@ -59,7 +59,7 @@ public class TeeterTotterLegStrengthCalculator implements LegStrengthCalculator
 
       LegStrengthCalculatorTools.clip(legStrengths);
       LegStrengthCalculatorTools.normalize(legStrengths);
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          this.legStrengths.get(robotSide).set(legStrengths.get(robotSide));
       }
@@ -69,7 +69,7 @@ public class TeeterTotterLegStrengthCalculator implements LegStrengthCalculator
    {
       RobotSide ret = null;
       double minDistanceSquared = Double.POSITIVE_INFINITY;
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          double distanceSquared = virtualToePoints.get(robotSide).distanceSquared(coPDesired);
          if (distanceSquared < minDistanceSquared)

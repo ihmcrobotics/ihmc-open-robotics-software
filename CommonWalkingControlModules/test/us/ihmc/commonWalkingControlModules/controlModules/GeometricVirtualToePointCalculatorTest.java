@@ -460,7 +460,7 @@ public class GeometricVirtualToePointCalculatorTest
    {
       boolean ret = true;
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          FramePoint2d virtualToePoint = virtualToePoints.get(robotSide);
          FramePoint2d newVirtualToePoint = newVirtualToePoints.get(robotSide);

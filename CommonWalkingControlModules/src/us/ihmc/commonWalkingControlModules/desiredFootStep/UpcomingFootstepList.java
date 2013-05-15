@@ -167,7 +167,7 @@ public class UpcomingFootstepList
 
    private static RobotSide getRobotSide(ContactablePlaneBody body, SideDependentList<? extends ContactablePlaneBody> bipedFeet)
    {
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          if (body == bipedFeet.get(robotSide))
             return robotSide;

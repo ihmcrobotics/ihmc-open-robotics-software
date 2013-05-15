@@ -71,7 +71,7 @@ public abstract class IDArmControlModule implements ArmControlModule
 
    private void setDesiredQdd()
    {
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          for (ArmJointName armJointName : ArmJointName.values())
          {
@@ -97,7 +97,7 @@ public abstract class IDArmControlModule implements ArmControlModule
 
    private void setArmTorques(ArmTorques[] armTorquesToPack)
    {
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          ArmTorques armTorques = armTorquesToPack[robotSide.ordinal()];
          for (ArmJointName armJointName : ArmJointName.values())
@@ -110,7 +110,7 @@ public abstract class IDArmControlModule implements ArmControlModule
 
    private void populateYoVariables()
    {
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          for (ArmJointName armJointName : ArmJointName.values())
          {
@@ -130,7 +130,7 @@ public abstract class IDArmControlModule implements ArmControlModule
 
    private void populateDesiredAccelerationControllers()
    {
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          for (ArmJointName armJointName : ArmJointName.values())
          {

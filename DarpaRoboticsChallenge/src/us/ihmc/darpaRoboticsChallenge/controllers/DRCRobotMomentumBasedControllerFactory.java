@@ -87,7 +87,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
                                                                             ForceSensorDataHolder forceSensorDataHolder, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry)
    {
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<FootSwitchInterface>();
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          ForceSensorData footForceSensor = forceSensorDataHolder.getByName(robotSide.getShortLowerCaseName() + "_leg_lax");
          WrenchBasedFootSwitch wrenchBasedFootSwitch = new WrenchBasedFootSwitch(footForceSensor, 0.02, bipedFeet.get(robotSide),

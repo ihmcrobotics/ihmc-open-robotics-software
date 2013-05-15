@@ -55,7 +55,7 @@ public class TeeterTotterLegStrengthCalculatorTest
 
       legStrengthCalculator.packLegStrengths(legStrengths, virtualToePoints, coPDesired);
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          assertEquals(legStrengths.get(robotSide), 0.5, 1e-10);
       }
@@ -85,7 +85,7 @@ public class TeeterTotterLegStrengthCalculatorTest
       virtualToePoints.put(RobotSide.LEFT, new FramePoint2d(world, 0.0, 0.0));
       virtualToePoints.put(RobotSide.RIGHT, new FramePoint2d(world, 1.0, 1.0));
 
-      for (RobotSide supportSide : RobotSide.values())
+      for (RobotSide supportSide : RobotSide.values)
       {
          coPDesired = new FramePoint2d(virtualToePoints.get(supportSide));
 

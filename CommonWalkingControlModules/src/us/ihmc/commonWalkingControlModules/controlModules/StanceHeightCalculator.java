@@ -18,7 +18,7 @@ public class StanceHeightCalculator
 
    public StanceHeightCalculator(SideDependentList<ReferenceFrame> footFrames, ReferenceFrame upperBodyFrame, YoVariableRegistry parentRegistry)
    {
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          DoubleYoVariable doubleYoVariable = new DoubleYoVariable("stanceHeight" + robotSide.getCamelCaseNameForMiddleOfExpression(), registry);
          stanceHeight.put(robotSide, doubleYoVariable);
@@ -52,11 +52,11 @@ public class StanceHeightCalculator
    public double getStanceHeightUsingBothFeet()
    {
       double sum = 0.0;
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          sum += getStanceHeightUsingOneFoot(robotSide);
       }
 
-      return sum / RobotSide.values().length;
+      return sum / RobotSide.values.length;
    }
 }

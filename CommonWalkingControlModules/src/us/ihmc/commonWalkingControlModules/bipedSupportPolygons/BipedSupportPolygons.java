@@ -135,7 +135,7 @@ public class BipedSupportPolygons
       boolean inDoubleSupport = true;
       boolean neitherFootIsSupportingFoot = true;
       RobotSide supportSide = null;
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          List<FramePoint> contactPointsForSide = contactPoints.get(robotSide);
          boolean isSupportFoot = contactPointsForSide.size() > 0;
@@ -165,7 +165,7 @@ public class BipedSupportPolygons
       if (inDoubleSupport)
       {
 //       ArrayList<FramePoint2d> allPoints = new ArrayList<FramePoint2d>();
-//       for (RobotSide robotSide : RobotSide.values())
+//       for (RobotSide robotSide : RobotSide.values)
 //       {
 //          allPoints.addAll(footPolygonsInMidFeetZUp.get(robotSide).getClockwiseOrderedListOfFramePoints());
 //       }

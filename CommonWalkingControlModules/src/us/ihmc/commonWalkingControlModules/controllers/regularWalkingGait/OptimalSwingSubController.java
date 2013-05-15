@@ -151,7 +151,7 @@ public class OptimalSwingSubController implements SwingSubController
 
       this.footSwitches = footSwitches;
 
-      for (RobotSide side : RobotSide.values())
+      for (RobotSide side : RobotSide.values)
       {
          ReferenceFrame groundFrame = referenceFrames.getAnkleZUpFrame(side.getOppositeSide());
          desiredPositions.set(side, new YoFramePoint("finalDesiredPosition", side.getCamelCaseNameForMiddleOfExpression(), groundFrame, registry));

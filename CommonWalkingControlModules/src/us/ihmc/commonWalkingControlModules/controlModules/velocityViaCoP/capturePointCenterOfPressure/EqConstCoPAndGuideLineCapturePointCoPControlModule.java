@@ -225,12 +225,12 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
    private double computeCoMHeightUsingBothFeet()
    {
       double sum = 0.0;
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          sum += computeCoMHeightUsingOneFoot(robotSide);
       }
 
-      return sum / RobotSide.values().length;
+      return sum / RobotSide.values.length;
    }
 
    private double computeFinalTimeSingleSupport()

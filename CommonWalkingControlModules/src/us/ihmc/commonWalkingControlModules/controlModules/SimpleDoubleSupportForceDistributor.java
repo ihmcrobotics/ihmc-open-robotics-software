@@ -21,7 +21,7 @@ public class SimpleDoubleSupportForceDistributor implements DoubleSupportForceDi
                                     double zForceInPelvisFrameTotal, FrameVector torqueOnPelvisTotal,
                                     SideDependentList<Double> legStrengths, SideDependentList<FramePoint2d> virtualToePoints)
    {
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          double legStrength = legStrengths.get(robotSide);
 

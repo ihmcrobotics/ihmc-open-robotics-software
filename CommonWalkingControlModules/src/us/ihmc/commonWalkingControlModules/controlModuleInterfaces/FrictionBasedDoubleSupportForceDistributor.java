@@ -86,7 +86,7 @@ public class FrictionBasedDoubleSupportForceDistributor implements DoubleSupport
    {
       calculateYawStrengths(virtualToePoints, legStrengths);
       
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          double legStrength = legStrengths.get(robotSide);
 

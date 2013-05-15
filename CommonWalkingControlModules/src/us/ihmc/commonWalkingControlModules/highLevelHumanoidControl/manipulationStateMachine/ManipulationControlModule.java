@@ -44,7 +44,7 @@ public class ManipulationControlModule
       SideDependentList<ReferenceFrame> handPositionControlFrames = new SideDependentList<ReferenceFrame>();
       SideDependentList<GeometricJacobian> jacobians = new SideDependentList<GeometricJacobian>();
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          RigidBody endEffector = fullRobotModel.getHand(robotSide);
 

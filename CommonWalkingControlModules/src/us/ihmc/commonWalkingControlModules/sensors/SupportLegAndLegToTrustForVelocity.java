@@ -18,7 +18,7 @@ public class SupportLegAndLegToTrustForVelocity implements LegToTrustForVelocity
 
    public SupportLegAndLegToTrustForVelocity(YoVariableRegistry parentRegistry)
    {
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          legsToTrustForVelocity.put(robotSide, new BooleanYoVariable("trust" + robotSide.getCamelCaseNameForMiddleOfExpression() + "LegForVelocity", registry));
       }

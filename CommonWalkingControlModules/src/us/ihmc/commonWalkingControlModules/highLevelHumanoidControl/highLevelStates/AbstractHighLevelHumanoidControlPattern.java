@@ -145,7 +145,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
    protected void setupLegJacobians(FullRobotModel fullRobotModel)
    {
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          RigidBody endEffector = fullRobotModel.getFoot(robotSide);
          GeometricJacobian jacobian = new GeometricJacobian(fullRobotModel.getPelvis(), endEffector, endEffector.getBodyFixedFrame());
@@ -250,7 +250,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
       List<InverseDynamicsJoint> unconstrainedJoints = new ArrayList<InverseDynamicsJoint>(Arrays.asList(allJoints));
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          // Leg joints
          RigidBody foot = fullRobotModel.getFoot(robotSide);

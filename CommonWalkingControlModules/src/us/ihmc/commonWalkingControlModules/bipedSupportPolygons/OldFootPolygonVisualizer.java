@@ -27,7 +27,7 @@ public class OldFootPolygonVisualizer implements Updatable
 
       if (dynamicGraphicObjectsListRegistry != null)
       {       
-        for (RobotSide robotSide : RobotSide.values())
+        for (RobotSide robotSide : RobotSide.values)
         {
            YoFrameConvexPolygon2d yoFootPolygon = new YoFrameConvexPolygon2d(robotSide + "foot", "", ReferenceFrame.getWorldFrame(), 30, registry);
            yoFootPolygons.put(robotSide, yoFootPolygon);
@@ -50,7 +50,7 @@ public class OldFootPolygonVisualizer implements Updatable
    
    public void update()
    {
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          YoFrameConvexPolygon2d yoFootPolygon = yoFootPolygons.get(robotSide);
          if (yoFootPolygon != null)

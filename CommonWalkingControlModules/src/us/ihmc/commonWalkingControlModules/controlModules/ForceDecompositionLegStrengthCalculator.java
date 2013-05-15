@@ -49,7 +49,7 @@ public class ForceDecompositionLegStrengthCalculator implements LegStrengthCalcu
       this.endEffectorFrame = endEffectorFrame;
       this.vtpAndEndEffectorXYPlaneFrame = new XYPlaneFrom3PointsFrame(midFeetZUpFrame, "vtpAndEndEffectorXYPlaneFrame");
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          vtps.put(robotSide, new FramePoint(midFeetZUpFrame));
       }
@@ -59,7 +59,7 @@ public class ForceDecompositionLegStrengthCalculator implements LegStrengthCalcu
 
       zUnitVector = new FrameVector(vtpAndEndEffectorXYPlaneFrame);
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          vtpToEndEffectorUnitVectors.put(robotSide, new FrameVector(vtpAndEndEffectorXYPlaneFrame));
       }
@@ -67,7 +67,7 @@ public class ForceDecompositionLegStrengthCalculator implements LegStrengthCalcu
       copToEndEffectorUnitVector = new FrameVector(vtpAndEndEffectorXYPlaneFrame);
       fBar3D = new FrameVector(vtpAndEndEffectorXYPlaneFrame);
       
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          legStrengths.put(robotSide, new DoubleYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "LegStrength", registry));
       }
@@ -82,7 +82,7 @@ public class ForceDecompositionLegStrengthCalculator implements LegStrengthCalcu
 
       updateVectors();
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          int column = robotSide.ordinal();
          
@@ -95,7 +95,7 @@ public class ForceDecompositionLegStrengthCalculator implements LegStrengthCalcu
       fBar.set(1, 0, fBar3D.getY());
 
       Matrix c = E.solve(fBar);
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          int row = robotSide.ordinal();
          double legStrength = c.get(row, 0) * vtpToEndEffectorUnitVectors.get(robotSide).dot(zUnitVector);
@@ -103,7 +103,7 @@ public class ForceDecompositionLegStrengthCalculator implements LegStrengthCalcu
       }
 
       doChecks(legStrengths);
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          this.legStrengths.get(robotSide).set(legStrengths.get(robotSide));
       }
@@ -122,7 +122,7 @@ public class ForceDecompositionLegStrengthCalculator implements LegStrengthCalcu
 
    private void updatePoints(SideDependentList<FramePoint2d> virtualToePoints, FramePoint2d coPDesired)
    {
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          FramePoint2d vtp2d = virtualToePoints.get(robotSide);
          vtp2d.changeFrame(midFeetZUpFrame);
@@ -147,7 +147,7 @@ public class ForceDecompositionLegStrengthCalculator implements LegStrengthCalcu
       zUnitVector.set(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
       zUnitVector.changeFrame(vtpAndEndEffectorXYPlaneFrame);
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          FramePoint vtp = vtps.get(robotSide);
          vtp.changeFrame(vtpAndEndEffectorXYPlaneFrame);
@@ -159,7 +159,7 @@ public class ForceDecompositionLegStrengthCalculator implements LegStrengthCalcu
       endEffector.changeFrame(vtpAndEndEffectorXYPlaneFrame);
       MathTools.checkIfInRange(endEffector.getZ(), -epsilonInPlane, epsilonInPlane);
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          FrameVector vtpToEndEffectorUnitVector = vtpToEndEffectorUnitVectors.get(robotSide);
          vtpToEndEffectorUnitVector.sub(endEffector, vtps.get(robotSide));

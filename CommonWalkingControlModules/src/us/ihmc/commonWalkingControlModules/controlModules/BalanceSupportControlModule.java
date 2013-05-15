@@ -71,7 +71,7 @@ public class BalanceSupportControlModule
       this.ankleOverRotationControlModule = ankleOverRotationControlModule;
       this.couplingRegistry = couplingRegistry;
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          String copName = robotSide.getCamelCaseNameForStartOfExpression() + "VTP";
          String listName = "VTPs";
@@ -142,7 +142,7 @@ public class BalanceSupportControlModule
       // compute VTPs and leg strengths
       virtualToePointCalculator.packVirtualToePoints(virtualToePoints, bipedSupportPolygons, desiredCoP, couplingRegistry.getUpcomingSupportLeg());
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          FramePoint virtualToePoint = virtualToePoints.get(robotSide).toFramePoint();
          virtualToePoint.changeFrame(ReferenceFrame.getWorldFrame());

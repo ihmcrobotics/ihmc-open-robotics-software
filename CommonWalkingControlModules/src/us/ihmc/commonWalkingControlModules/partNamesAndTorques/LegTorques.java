@@ -13,7 +13,7 @@ public class LegTorques implements LegTorquesInterface
 
    public static void validateLegTorquesArray(LegTorques[] legTorques)
    {
-      if (legTorques.length != RobotSide.values().length)
+      if (legTorques.length != RobotSide.values.length)
          throw new RuntimeException("LegTorquesArray lengths do not match.");
       if (legTorques[RobotSide.LEFT.ordinal()].getRobotSide() != RobotSide.LEFT)
          throw new RuntimeException("LegTorquesArray sides are incorrect.");

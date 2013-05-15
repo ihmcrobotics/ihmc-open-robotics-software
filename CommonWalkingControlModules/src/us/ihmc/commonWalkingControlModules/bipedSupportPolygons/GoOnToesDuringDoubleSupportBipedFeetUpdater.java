@@ -76,7 +76,7 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
       leftFootZUpFrame = referenceFrames.getAnkleZUpReferenceFrames().get(RobotSide.LEFT);
       rightFootZUpFrame = referenceFrames.getAnkleZUpReferenceFrames().get(RobotSide.RIGHT);
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          int windowSize = 100;
          toeScoreHighEnoughVars.put(robotSide,
@@ -230,7 +230,7 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
 
       double onToeSaturationDistance = onToeSaturationPercent.getDoubleValue() * footForward;
       double onHeelSaturationDistance = footBack;
-      for (RobotSide side : RobotSide.values())
+      for (RobotSide side : RobotSide.values)
       {
 //       FrameLine2d onToeLine = supportPolygons.getOnToeLineCopy(side);
          FrameLine2d onToeLine = new FrameLine2d(onToesLines.get(side));
@@ -262,7 +262,7 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
       }
 
       // Make a decision:
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          if (forceHindOnToes && (footInRear == robotSide))
          {
@@ -302,7 +302,7 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
          {
             SideDependentList<Color> colors = new SideDependentList<Color>(Color.red, Color.blue);
 
-            for (RobotSide side : RobotSide.values())
+            for (RobotSide side : RobotSide.values)
             {
                decisionPlotter.addPolygon(feet.get(side).getFlatFootPolygonInAnkleZUp().changeFrameCopy(worldFrame), colors.get(side));
                decisionPlotter.addFrameLine2d(onToesLines.get(side).changeFrameCopy(worldFrame), colors.get(side));
@@ -396,7 +396,7 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
 
       // TODO: case feet crossed
       SideDependentList<FrameLine2d> onToesLines = new SideDependentList<FrameLine2d>();
-      for (RobotSide side : RobotSide.values())
+      for (RobotSide side : RobotSide.values)
       {
          // First point on onToesLine is the (oppositeSide)most line of sight vertex, seen from any toe point:
          FramePoint2d firstToePoint = onToesPointsLists.get(side)[0].toFramePoint2d();
@@ -479,7 +479,7 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
 
       // TODO: case feet crossed
       SideDependentList<FrameLine2d> onHeelLines = new SideDependentList<FrameLine2d>();
-      for (RobotSide side : RobotSide.values())
+      for (RobotSide side : RobotSide.values)
       {
          // First point on onToesLine is the (oppositeSide)most line of sight vertex, seen from any toe point:
          FramePoint2d firstHeelPoint = onHeelPointsLists.get(side)[0].toFramePoint2d();

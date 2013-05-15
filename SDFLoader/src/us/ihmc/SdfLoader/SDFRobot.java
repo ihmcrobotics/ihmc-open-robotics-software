@@ -102,7 +102,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
          addJointsRecursively(child, rootJoint, MatrixTools.IDENTITY, enableTorqueVelocityLimits, enableDamping);
       }
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          footGroundContactPoints.put(robotSide, new ArrayList<GroundContactPoint>());
       }
@@ -144,7 +144,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
                graphics.addSphere(radius, YoAppearance.Orange());
             }
 
-            for (RobotSide robotSide : RobotSide.values())
+            for (RobotSide robotSide : RobotSide.values)
             {
                if (jointName.equals(sdfJointNameMap.getJointBeforeFootName(robotSide)))
                   footGroundContactPoints.get(robotSide).add(groundContactPoint);

@@ -147,7 +147,7 @@ public class JointSpaceTrajectoryGenerator
 
       intermediateOrientation = new FrameOrientation(referenceFrames.getPelvisFrame());
       intermediatePositions = new SideDependentList<LegJointPositions>();
-      for (RobotSide side : RobotSide.values())
+      for (RobotSide side : RobotSide.values)
       {
          intermediatePositions.set(side, new LegJointPositions(side));
          initialPositionInAnkleZUpFrame.put(side, new YoFramePoint("initialPositionInOppositeAnkleZUpFrame", side.getCamelCaseNameForMiddleOfExpression(), referenceFrames.getAnkleZUpFrame(side.getOppositeSide()), registry));

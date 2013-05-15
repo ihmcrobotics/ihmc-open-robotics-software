@@ -9,7 +9,7 @@ public class LegJointPositions
 
    public static void validateLegJointpositionsArray(LegJointPositions[] legJointPositionsArray)
    {
-      if (legJointPositionsArray.length != RobotSide.values().length)
+      if (legJointPositionsArray.length != RobotSide.values.length)
          throw new RuntimeException("LegJointPositions lengths do not match.");
       if (legJointPositionsArray[RobotSide.LEFT.ordinal()].getRobotSide() != RobotSide.LEFT)
          throw new RuntimeException("LegJointPositions sides are incorrect.");

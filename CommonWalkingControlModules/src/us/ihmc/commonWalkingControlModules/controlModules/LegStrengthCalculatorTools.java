@@ -12,7 +12,7 @@ public class LegStrengthCalculatorTools
     */
    public static void clip(SideDependentList<Double> legStrengths)
    {
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          legStrengths.put(robotSide, MathTools.clipToMinMax(legStrengths.get(robotSide), 0.0, 1.0));
       }
@@ -28,7 +28,7 @@ public class LegStrengthCalculatorTools
       if (sum != 0.0)
       {
          double scaling = 1.0 / sum;
-         for (RobotSide robotSide : RobotSide.values())
+         for (RobotSide robotSide : RobotSide.values)
          {
             legStrengths.put(robotSide, legStrengths.get(robotSide) * scaling);
          }         

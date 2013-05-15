@@ -86,7 +86,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       // TODO: code duplication from driving controller
       InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
       SideDependentList<ContactablePlaneBody> hands = new SideDependentList<ContactablePlaneBody>();
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          InverseDynamicsJoint[] jointBeforeHandArray = ScrewTools.findJointsWithNames(allJoints, namesOfJointsBeforeHands.get(robotSide));
          if (jointBeforeHandArray.length != 1)

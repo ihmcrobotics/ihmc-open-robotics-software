@@ -42,7 +42,7 @@ public class SimpleDesiredCenterOfPressureFilter implements DesiredCenterOfPress
       filteredDesiredCoPDoubleSupport = AlphaFilteredYoFramePoint2d.createAlphaFilteredYoFramePoint2d("filteredDesCoPDoubleSupport", "", registry,
               alphaDesiredCoP, referenceFrames.getMidFeetZUpFrame());
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          String namePrefix = "filteredDesiredCoP" + robotSide.getCamelCaseNameForMiddleOfExpression();
          ReferenceFrame ankleZUpFrame = referenceFrames.getAnkleZUpFrame(robotSide);
@@ -139,7 +139,7 @@ public class SimpleDesiredCenterOfPressureFilter implements DesiredCenterOfPress
    {
       filteredDesiredCoPDoubleSupport.reset();
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          filteredDesiredCoPsSingleSupport.get(robotSide).reset();
       }
