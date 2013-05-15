@@ -1,0 +1,17 @@
+package us.ihmc.darpaRoboticsChallenge.obstacleCourseTests;
+
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+
+@RunWith(Suite.class)
+@Suite.SuiteClasses(
+{
+   us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseFlatTest.class,
+   us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCoursePlatformTest.class,
+   us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseRampsTest.class,
+   us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseRocksTest.class,
+   us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseSteppingStonesTest.class
+})
+public class DRCObstacleCourseBambooTestSuiteNightly
+{
+}
