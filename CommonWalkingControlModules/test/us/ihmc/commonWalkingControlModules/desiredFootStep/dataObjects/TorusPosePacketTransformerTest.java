@@ -31,6 +31,7 @@ public class TorusPosePacketTransformerTest
    public void testTransformTorusPosePacket()
    {
       int numberOfTests = 10;
+      double radius = 1.0;
       Random random = new Random(100L);
       Transform3D transform3D;
 
@@ -42,7 +43,7 @@ public class TorusPosePacketTransformerTest
 
          Point3d point3d = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
 
-         TorusPosePacket starting = new TorusPosePacket(point3d, quat);
+         TorusPosePacket starting = new TorusPosePacket(point3d, quat, radius);
 
          transform3D = RandomTools.generateRandomTransform(random);
 
