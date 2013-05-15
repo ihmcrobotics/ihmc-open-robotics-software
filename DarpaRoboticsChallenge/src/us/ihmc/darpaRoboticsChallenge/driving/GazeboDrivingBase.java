@@ -49,8 +49,8 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 	private Publisher<geometry_msgs.Pose> teleportInToCarPublisher, teleportOutOfCarPublisher;
 	private geometry_msgs.Pose teleportInToCarPose, teleportOutOfCarPose;
 
-   private Subscriber<Time> timeSubscriber;
-   protected org.ros.message.Time simulationTime = new org.ros.message.Time();
+   protected Subscriber<Time> timeSubscriber;
+   protected final org.ros.message.Time simulationTime = new org.ros.message.Time();
 
 	private ColorSpace colorSpace;
 	private ColorModel colorModel;
@@ -147,14 +147,7 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 			}
 		});
 
-      timeSubscriber.addMessageListener(new MessageListener<Time>()
-      {
-         public void onNewMessage(Time message)
-         {
-            simulationTime.secs = message.getData().secs;
-            simulationTime.nsecs = message.getData().nsecs;
-         }
-      });
+
 	}
 
 	private void setupPublishers(ConnectedNode connectedNode)
@@ -182,6 +175,22 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 
       timeSubscriber = connectedNode.newSubscriber("/rosgraph_msgs/Clock",Time._TYPE);
 	}
+
+   /**
+    * Adds a listener for simulation time
+    */
+   public void startSimulationTime() {
+      timeSubscriber.addMessageListener(new MessageListener<Time>()
+      {
+         public void onNewMessage(Time message)
+         {
+            synchronized ( simulationTime ) {
+               simulationTime.secs = message.getData().secs;
+               simulationTime.nsecs = message.getData().nsecs;
+            }
+         }
+      });
+   }
 
 	private void setupMessages()
 	{
