@@ -1341,7 +1341,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       if (contactPoints.size() == 0)
       {
-         footEndEffectorControlModules.get(contactableBody).doSingularityEscapeBeforeTransitionToNextState();
+//         footEndEffectorControlModules.get(contactableBody).doSingularityEscapeBeforeTransitionToNextState();
       }
 
       YoPlaneContactState contactState = contactStates.get(contactableBody);
