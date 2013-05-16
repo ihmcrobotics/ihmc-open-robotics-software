@@ -40,7 +40,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
    private static final boolean DEBUG = false;
    private static final boolean SHOW_CONTACT_POINTS = false;
    private static final boolean USE_POLAR_LIDAR_MODEL = true;
-   private static final boolean SHOW_COM_REFERENCE_FRAMES = false;
+   private static final boolean SHOW_COM_REFERENCE_FRAMES = true;
 
    private static final long serialVersionUID = 5864358637898048080L;
 
