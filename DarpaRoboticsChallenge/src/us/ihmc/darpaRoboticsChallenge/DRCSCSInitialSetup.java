@@ -20,7 +20,7 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
 {
    private static final boolean SHOW_WORLD_COORDINATE_FRAME = false;
    private final double simulateDT;// = 0.0001;    // 0.00005; //
-   private int recordFrequency = 1;    // 10;
+   private int recordFrequency = 50;    // 10;
 
 
    private int simulationDataBufferSize = 16000;
