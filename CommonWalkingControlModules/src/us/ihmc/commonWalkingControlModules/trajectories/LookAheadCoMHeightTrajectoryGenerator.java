@@ -42,9 +42,10 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final YoFramePoint contactFrameZeroPosition = new YoFramePoint("contactFrameZeroPosition", worldFrame, registry);
    private final YoFramePoint contactFrameOnePosition = new YoFramePoint("contactFrameOnePosition", worldFrame, registry);
    
-   private final DynamicGraphicPosition pointS0Viz, pointSFViz, pointD0Viz, pointDFViz;
-   private final DynamicGraphicPosition pointS0MinViz, pointSFMinViz, pointD0MinViz, pointDFMinViz;
-   private final DynamicGraphicPosition pointS0MaxViz, pointSFMaxViz, pointD0MaxViz, pointDFMaxViz;
+   private final DynamicGraphicPosition pointS0Viz, pointSFViz, pointD0Viz, pointDFViz, pointSNextViz;
+   private final DynamicGraphicPosition pointS0MinViz, pointSFMinViz, pointD0MinViz, pointDFMinViz, pointSNextMinViz;
+   private final DynamicGraphicPosition pointS0MaxViz, pointSFMaxViz, pointD0MaxViz, pointDFMaxViz, pointSNextMaxViz;
+   
    private final BagOfBalls bagOfBalls;
    
    public LookAheadCoMHeightTrajectoryGenerator(double minimumHeightAboveGround, double maximumHeightAboveGround, double doubleSupportPercentageIn, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
@@ -76,16 +77,19 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          pointSFViz = new DynamicGraphicPosition("pointSF", "", registry, pointSize, YoAppearance.Chartreuse());
          pointD0Viz = new DynamicGraphicPosition("pointD0", "", registry, pointSize, YoAppearance.BlueViolet());
          pointDFViz = new DynamicGraphicPosition("pointDF", "", registry, pointSize, YoAppearance.Azure());
+         pointSNextViz = new DynamicGraphicPosition("pointSNext", "", registry, pointSize, YoAppearance.Azure());
          
          pointS0MinViz = new DynamicGraphicPosition("pointS0Min", "", registry, 0.8*pointSize, YoAppearance.CadetBlue());
          pointSFMinViz = new DynamicGraphicPosition("pointSFMin", "", registry, 0.8*pointSize, YoAppearance.Chartreuse());
          pointD0MinViz = new DynamicGraphicPosition("pointD0Min", "", registry, 0.8*pointSize, YoAppearance.BlueViolet());
          pointDFMinViz = new DynamicGraphicPosition("pointDFMin", "", registry, 0.8*pointSize, YoAppearance.Azure());
+         pointSNextMinViz = new DynamicGraphicPosition("pointSNextMin", "", registry, 0.8*pointSize, YoAppearance.Azure());
          
          pointS0MaxViz = new DynamicGraphicPosition("pointS0Max", "", registry, 0.9*pointSize, YoAppearance.CadetBlue());
          pointSFMaxViz = new DynamicGraphicPosition("pointSFMax", "", registry, 0.9*pointSize, YoAppearance.Chartreuse());
          pointD0MaxViz = new DynamicGraphicPosition("pointD0Max", "", registry, 0.9*pointSize, YoAppearance.BlueViolet());
          pointDFMaxViz = new DynamicGraphicPosition("pointDFMax", "", registry, 0.9*pointSize, YoAppearance.Azure());
+         pointSNextMaxViz = new DynamicGraphicPosition("pointSNextMax", "", registry, 0.9*pointSize, YoAppearance.Azure());
          
          bagOfBalls = new BagOfBalls(registry, dynamicGraphicObjectsListRegistry);
          
@@ -93,16 +97,19 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointSFViz);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointD0Viz);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointDFViz);
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointSNextViz);
          
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointS0MinViz);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointSFMinViz);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointD0MinViz);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointDFMinViz);
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointSNextMinViz);
          
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointS0MaxViz);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointSFMaxViz);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointD0MaxViz);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointDFMaxViz);
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointSNextMaxViz);
       }
       else
       {
@@ -110,16 +117,19 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          pointSFViz = null;
          pointD0Viz = null;
          pointDFViz = null;
+         pointSNextViz = null;
          
          pointS0MinViz = null;
          pointSFMinViz = null;
          pointD0MinViz = null;
          pointDFMinViz = null;
+         pointSNextMinViz = null;
          
          pointS0MaxViz = null;
          pointSFMaxViz = null;
          pointD0MaxViz = null;
          pointDFMaxViz = null;
+         pointSNextMaxViz = null;
          
          bagOfBalls = null;
       }
@@ -139,13 +149,22 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    {
       Footstep transferFromFootstep = transferToAndNextFootstepsData.getTransferFromFootstep();
       Footstep transferToFootstep = transferToAndNextFootstepsData.getTransferToFootstep();
+      Footstep nextFootstep = transferToAndNextFootstepsData.getNextFootstep();
       
 //      FramePoint[] contactFramePositions = getContactStateCenters(contactStates, nextFootstep);
       
       FramePoint transferFromContactFramePosition = new FramePoint(transferFromFootstep.getPoseReferenceFrame());
       FramePoint transferToContactFramePosition = new FramePoint(transferToFootstep.getPoseReferenceFrame());
+      
       transferFromContactFramePosition.changeFrame(worldFrame);
       transferToContactFramePosition.changeFrame(worldFrame);
+      
+      FramePoint nextContactFramePosition = null;
+      if (nextFootstep != null)
+      {
+         nextContactFramePosition = new FramePoint(nextFootstep.getPoseReferenceFrame());
+         nextContactFramePosition.changeFrame(worldFrame);
+      }
       
       contactFrameZeroPosition.set(transferFromContactFramePosition);
       contactFrameOnePosition.set(transferToContactFramePosition);
@@ -160,22 +179,32 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       double footHeight0 = transferFromContactFramePosition.getZ();
       double footHeight1 = transferToContactFramePosition.getZ();
       
-      double z0Min = footHeight0 + minimumHeightAboveGround.getDoubleValue();
-      double zFMin = footHeight1 + minimumHeightAboveGround.getDoubleValue();
+      double nextFootHeight = Double.NaN;
+      if (nextContactFramePosition != null)
+      {
+         nextFootHeight = nextContactFramePosition.getZ();
+      }
       
+      double z0Min = footHeight0 + minimumHeightAboveGround.getDoubleValue();
       double z0Max = footHeight0 + maximumHeightAboveGround.getDoubleValue();
+
+      double zFMin = footHeight1 + minimumHeightAboveGround.getDoubleValue();
       double zFMax = footHeight1 + maximumHeightAboveGround.getDoubleValue();
       
-      double z_d0Min = findMinimumDoubleSupportHeight(s0, sF, s_d0, footHeight0, footHeight1);
-      double z_dFMin = findMinimumDoubleSupportHeight(s0, sF, s_df, footHeight0, footHeight1);
-      
+      double z_d0Min = findMinimumDoubleSupportHeight(s0, sF, s_d0, footHeight0, footHeight1);      
       double z_d0Max = findMaximumDoubleSupportHeight(s0, sF, s_d0, footHeight0, footHeight1);
+      
+      double z_dFMin = findMinimumDoubleSupportHeight(s0, sF, s_df, footHeight0, footHeight1);
       double z_dFMax = findMaximumDoubleSupportHeight(s0, sF, s_df, footHeight0, footHeight1);
+      
+      double zNextMin = nextFootHeight + minimumHeightAboveGround.getDoubleValue();
+      double zNextMax = nextFootHeight + maximumHeightAboveGround.getDoubleValue();
   
       double z0 = z0Max;
       double z_d0 = z_d0Max;
       double z_dF = z_dFMax;
       double zF = zFMax;
+      double zNext = zNextMax;
 
       z_d0 = clipToMaximum(z_d0, z_dF + maximumHeightDeltaBetweenWaypoints.getDoubleValue());
       z_dF = clipToMaximum(z_dF, z_d0 + maximumHeightDeltaBetweenWaypoints.getDoubleValue());
@@ -199,6 +228,16 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       
       if (VISUALIZE)
       {
+         FramePoint framePointS0 = new FramePoint(transferFromContactFramePosition);
+         framePointS0.setZ(z0);
+         pointS0Viz.setPosition(framePointS0);
+         
+         framePointS0.setZ(z0Min);
+         pointS0MinViz.setPosition(framePointS0);
+         
+         framePointS0.setZ(z0Max);
+         pointS0MaxViz.setPosition(framePointS0);
+         
          FramePoint framePointD0 = FramePoint.morph(transferFromContactFramePosition, transferToContactFramePosition, s_d0/sF);
          framePointD0.setZ(z_d0);
          pointD0Viz.setPosition(framePointD0);
@@ -219,16 +258,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          framePointDF.setZ(z_dFMax);
          pointDFMaxViz.setPosition(framePointDF);
          
-         FramePoint framePointS0 = new FramePoint(transferFromContactFramePosition);
-         framePointS0.setZ(z0);
-         pointS0Viz.setPosition(framePointS0);
-         
-         framePointS0.setZ(z0Min);
-         pointS0MinViz.setPosition(framePointS0);
-         
-         framePointS0.setZ(z0Max);
-         pointS0MaxViz.setPosition(framePointS0);
-         
          FramePoint framePointSF = new FramePoint(transferToContactFramePosition);
          framePointSF.setZ(zF);
          pointSFViz.setPosition(framePointSF);     
@@ -238,6 +267,25 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          
          framePointSF.setZ(zFMax);
          pointSFMaxViz.setPosition(framePointSF);     
+         
+         if (nextContactFramePosition != null)
+         {
+            FramePoint framePointSNext = new FramePoint(nextContactFramePosition);
+            framePointSNext.setZ(zNext);
+            pointSNextViz.setPosition(framePointSNext);     
+
+            framePointSNext.setZ(zNextMin);
+            pointSNextMinViz.setPosition(framePointSNext);     
+
+            framePointSNext.setZ(zNextMax);
+            pointSNextMaxViz.setPosition(framePointSNext);     
+         }
+         else
+         {
+            pointSNextViz.setPositionToNaN();
+            pointSNextMinViz.setPositionToNaN();
+            pointSNextMaxViz.setPositionToNaN();
+         }
          
          bagOfBalls.reset();
          int numberOfPoints = 30;
