@@ -83,7 +83,7 @@ public class HandPosePacketTransformerTest
       Quat4d endQuat = ending.getOrientation();
       assertTrue(areOrientationsEqualWithTransform(startQuat, transform3D, endQuat));
 
-      // boolean isLoadBearing;
+      // boolean handLoadBearing;
       assertTrue(starting.isLoadBearing() == ending.isLoadBearing());
    }
 
