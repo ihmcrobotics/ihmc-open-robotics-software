@@ -68,7 +68,8 @@ public class MomentumBasedController implements RobotController
    // Creating a Map that will contain all of the YoPlaneContactState and YoRollingContactState to pass to the MomentumControlModule compute method
    protected final Map<ContactablePlaneBody, PlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, PlaneContactState>();
    protected final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> planeContactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
-   protected final LinkedHashMap<ContactableCylinderBody, YoRollingContactState> rollingContactStates = new LinkedHashMap<ContactableCylinderBody, YoRollingContactState>();
+   protected final LinkedHashMap<ContactableCylinderBody, YoRollingContactState> rollingContactStates = new LinkedHashMap<ContactableCylinderBody,
+                                                                                                           YoRollingContactState>();
    protected final Map<RigidBody, CylindricalContactState> cylindricalContactStates = new LinkedHashMap<RigidBody, CylindricalContactState>();
    protected final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
    protected final DoubleYoVariable yoTime;
@@ -118,16 +119,16 @@ public class MomentumBasedController implements RobotController
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, contactablePlaneBodies,
-            null, controlDT, processedOutputs, momentumControlModule, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
-            stateEstimationDataFromControllerSink, dynamicGraphicObjectsListRegistry);
+           null, controlDT, processedOutputs, momentumControlModule, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
+           stateEstimationDataFromControllerSink, dynamicGraphicObjectsListRegistry);
    }
-   
+
    public MomentumBasedController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
                                   CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime,
                                   double gravityZ, TwistCalculator twistCalculator, Collection<? extends ContactablePlaneBody> contactablePlaneBodies,
-                                  Collection<? extends ContactableCylinderBody> contactableCylinderBodies,
-                                  double controlDT, ProcessedOutputsInterface processedOutputs, MomentumControlModule momentumControlModule,
-                                  ArrayList<Updatable> updatables, MomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
+                                  Collection<? extends ContactableCylinderBody> contactableCylinderBodies, double controlDT,
+                                  ProcessedOutputsInterface processedOutputs, MomentumControlModule momentumControlModule, ArrayList<Updatable> updatables,
+                                  MomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
                                   RootJointAccelerationControlModule rootJointAccelerationControlModule,
                                   StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
@@ -147,11 +148,12 @@ public class MomentumBasedController implements RobotController
       this.yoTime = yoTime;
 
       this.contactablePlaneBodies = new ArrayList<ContactablePlaneBody>();
+
       if (contactablePlaneBodies != null)
       {
          this.contactablePlaneBodies.addAll(contactablePlaneBodies);
       }
-      
+
       RigidBody elevator = fullRobotModel.getElevator();
 
       this.processedOutputs = processedOutputs;
@@ -166,7 +168,7 @@ public class MomentumBasedController implements RobotController
 
          double touchdownTime = 0.05;
          double minCoPDistance = 0.01;
-         
+
          this.pointPositionGrabber = new PointPositionGrabber(stateEstimationDataFromControllerSink, registry, controlDT, touchdownTime, minCoPDistance);
       }
       else
@@ -201,7 +203,7 @@ public class MomentumBasedController implements RobotController
       elevatorFrame = fullRobotModel.getElevatorFrame();
 
       double coefficientOfFriction = 1.0;    // TODO: magic number...
-      
+
       for (ContactablePlaneBody contactablePlaneBody : this.contactablePlaneBodies)
       {
          RigidBody rigidBody = contactablePlaneBody.getRigidBody();
@@ -222,19 +224,21 @@ public class MomentumBasedController implements RobotController
 
       // Add contactableCylinderBodies to the contactablePlaneBodies List, so it is passed to the PlaneContactWrenchProcessor
       this.contactableCylinderBodies = new ArrayList<ContactableCylinderBody>();
+
       if (contactableCylinderBodies != null)
       {
          this.contactableCylinderBodies.addAll(contactableCylinderBodies);
          this.contactablePlaneBodies.addAll(contactableCylinderBodies);
       }
-      
+
       for (ContactableCylinderBody contactableCylinderBody : this.contactableCylinderBodies)
       {
          RigidBody rigidBody = contactableCylinderBody.getRigidBody();
+
          // YoRollingContactState: similar to YoPlaneContactState but enables updating the contact points as the contactable cylindrical body rolls onto the ground
          // The contact points can be displayed with the dynamicGraphicObjectsListRegistry
          YoRollingContactState rollingContactState = new YoRollingContactState(rigidBody.getName(), contactableCylinderBody, registry,
-               dynamicGraphicObjectsListRegistry);
+                                                        dynamicGraphicObjectsListRegistry);
          rollingContactState.setCoefficientOfFriction(coefficientOfFriction);
          rollingContactStates.put(contactableCylinderBody, rollingContactState);
       }
@@ -243,6 +247,7 @@ public class MomentumBasedController implements RobotController
       {
          contactStates.put(contactablePlaneBody, planeContactStates.get(contactablePlaneBody));
       }
+
       for (ContactableCylinderBody contactableCylinderBody : rollingContactStates.keySet())
       {
          contactStates.put(contactableCylinderBody, rollingContactStates.get(contactableCylinderBody));
@@ -273,13 +278,12 @@ public class MomentumBasedController implements RobotController
    // TODO: Temporary method for a big refactor allowing switching between high level behaviors
    public void doPrioritaryControl()
    {
-      
       for (ContactableCylinderBody contactableCylinderBody : contactableCylinderBodies)
       {
          // Update the contact points, so they remain underneath the cylindrical body
          rollingContactStates.get(contactableCylinderBody).updateContactPoints();
       }
-      
+
       callUpdatables();
 
       inverseDynamicsCalculator.reset();
