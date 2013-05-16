@@ -47,9 +47,9 @@ public class RunnableRunnerController implements RobotController
 
    public void doControl()
    {
-      for (Runnable runnable : runnables)
+      for(int i = 0; i <  runnables.size(); i++)
       {
-         runnable.run();
+         runnables.get(i).run();
       }
    }
 }

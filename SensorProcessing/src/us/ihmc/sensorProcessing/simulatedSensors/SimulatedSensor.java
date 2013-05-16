@@ -1,7 +1,6 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import us.ihmc.controlFlow.AbstractControlFlowElement;
 import us.ihmc.sensorProcessing.signalCorruption.SignalCorruptionTools;
@@ -9,7 +8,7 @@ import us.ihmc.sensorProcessing.signalCorruption.SignalCorruptor;
 
 public abstract class SimulatedSensor<T> extends AbstractControlFlowElement
 {
-   private final List<SignalCorruptor<T>> signalCorruptors = new ArrayList<SignalCorruptor<T>>();
+   private final ArrayList<SignalCorruptor<T>> signalCorruptors = new ArrayList<SignalCorruptor<T>>();
    
    public final void addSignalCorruptor(SignalCorruptor<T> signalCorruptor)
    {

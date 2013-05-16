@@ -12,10 +12,13 @@ public class SandiaHandModel
 {
    public enum SandiaFingerName
    {
+      
       THUMB,
       INDEX,
       MIDDLE,
-      PINKY
+      PINKY;
+      
+      public final static SandiaFingerName[] values = values();
    }
    
    public enum SandiaFingerJointName

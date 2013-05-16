@@ -24,7 +24,7 @@ import us.ihmc.utilities.math.MatrixTools;
 public class ProcessModelElementGroup
 {
    private final Map<ControlFlowOutputPort<?>, ProcessModelElement> stateToProcessModelElementMap = new LinkedHashMap<ControlFlowOutputPort<?>, ProcessModelElement>();
-   private final List<ControlFlowInputPort<?>> allInputs;
+   private final ArrayList<ControlFlowInputPort<?>> allInputs;
    private final Map<ControlFlowInputPort<?>, Integer> processInputStartIndices = new LinkedHashMap<ControlFlowInputPort<?>, Integer>();
 
    private final List<ControlFlowOutputPort<?>> allStates = new ArrayList<ControlFlowOutputPort<?>>();
@@ -35,8 +35,8 @@ public class ProcessModelElementGroup
    private final int stateMatrixSize;
 
    // continuous time process model (requires discretization)
-   private final List<ProcessModelElement> continuousTimeProcessModelElements = new ArrayList<ProcessModelElement>();
-   private final List<ControlFlowOutputPort<?>> continuousTimeStates;
+   private final ArrayList<ProcessModelElement> continuousTimeProcessModelElements = new ArrayList<ProcessModelElement>();
+   private final ArrayList<ControlFlowOutputPort<?>> continuousTimeStates;
    private final Map<ControlFlowOutputPort<?>, Integer> continuousStateStartIndices = new LinkedHashMap<ControlFlowOutputPort<?>, Integer>();
    private final boolean isContinuousTimeModelTimeVariant;
    private final StateSpaceSystemDiscretizer discretizer;
@@ -46,7 +46,7 @@ public class ProcessModelElementGroup
 
    // discrete time process model (does not require discretization)
    private final List<ProcessModelElement> discreteTimeProcessModelElements = new ArrayList<ProcessModelElement>();
-   private final List<ControlFlowOutputPort<?>> discreteTimeStates;
+   private final ArrayList<ControlFlowOutputPort<?>> discreteTimeStates;
    private final Map<ControlFlowOutputPort<?>, Integer> discreteStateStartIndices = new LinkedHashMap<ControlFlowOutputPort<?>, Integer>();
    private final boolean isDiscreteTimeModelTimeVariant;
    private final DenseMatrix64F FDiscrete;
@@ -141,14 +141,14 @@ public class ProcessModelElementGroup
 
    public void propagateState()
    {
-      for (ProcessModelElement processModelElement : continuousTimeProcessModelElements)
+      for(int i = 0; i <  continuousTimeProcessModelElements.size(); i++)
       {
-         processModelElement.propagateState(controlDT);
+         continuousTimeProcessModelElements.get(i).propagateState(controlDT);
       }
    
-      for (ProcessModelElement processModelElement : discreteTimeProcessModelElements)
+      for(int i = 0; i <  discreteTimeProcessModelElements.size(); i++)
       {
-         processModelElement.propagateState(controlDT);
+         discreteTimeProcessModelElements.get(i).propagateState(controlDT);
       }
    }
 
@@ -206,23 +206,26 @@ public class ProcessModelElementGroup
    }
 
    private void updateProcessModelBlock(DenseMatrix64F F, DenseMatrix64F G, DenseMatrix64F Q, Map<ControlFlowOutputPort<?>, Integer> stateStartIndices,
-         List<ControlFlowOutputPort<?>> statePorts)
+         ArrayList<ControlFlowOutputPort<?>> statePorts)
    {
       F.zero();
       G.zero();
       Q.zero();
 
-      for (ControlFlowOutputPort<?> rowPort : statePorts)
+      for(int i = 0; i <  statePorts.size(); i++)
       {
+         ControlFlowOutputPort<?> rowPort = statePorts.get(i);
          ProcessModelElement processModelElement = stateToProcessModelElementMap.get(rowPort);
-         for (ControlFlowOutputPort<?> columnPort : statePorts)
+         for(int j = 0; j <  statePorts.size(); j++)
          {
+            ControlFlowOutputPort<?> columnPort = statePorts.get(j);
             DenseMatrix64F stateMatrixBlock = processModelElement.getStateMatrixBlock(columnPort);
             MatrixTools.insertMatrixBlock(F, stateMatrixBlock, rowPort, stateStartIndices, columnPort, stateStartIndices);
          }
 
-         for (ControlFlowInputPort<?> inputPort : allInputs)
+         for(int j = 0; j <  allInputs.size(); j++)
          {
+            ControlFlowInputPort<?> inputPort = allInputs.get(j);
             DenseMatrix64F inputMatrixBlock = processModelElement.getInputMatrixBlock(inputPort);
             MatrixTools.insertMatrixBlock(G, inputMatrixBlock, rowPort, stateStartIndices, inputPort, processInputStartIndices);
          }
@@ -313,7 +316,7 @@ public class ProcessModelElementGroup
       }
    }
 
-   private static List<ControlFlowOutputPort<?>> determineStateList(List<ProcessModelElement> processModelElements)
+   private static ArrayList<ControlFlowOutputPort<?>> determineStateList(List<ProcessModelElement> processModelElements)
    {
       Set<ControlFlowOutputPort<?>> stateSet = new LinkedHashSet<ControlFlowOutputPort<?>>();
 
@@ -326,7 +329,7 @@ public class ProcessModelElementGroup
       return new ArrayList<ControlFlowOutputPort<?>>(stateSet);
    }
 
-   private static List<ControlFlowInputPort<?>> determineInputList(Collection<ProcessModelElement> processModelElements)
+   private static ArrayList<ControlFlowInputPort<?>> determineInputList(Collection<ProcessModelElement> processModelElements)
    {
       Set<ControlFlowInputPort<?>> inputSet = new LinkedHashSet<ControlFlowInputPort<?>>();
 

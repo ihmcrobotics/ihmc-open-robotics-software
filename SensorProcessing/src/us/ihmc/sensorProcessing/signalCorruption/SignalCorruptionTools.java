@@ -1,14 +1,14 @@
 package us.ihmc.sensorProcessing.signalCorruption;
 
-import java.util.Collection;
+import java.util.ArrayList;
 
 public class SignalCorruptionTools
 {
-   public static <T> void corrupt(T signal, Collection<SignalCorruptor<T>> corruptors)
+   public static <T> void corrupt(T signal, ArrayList<SignalCorruptor<T>> corruptors)
    {
-      for (SignalCorruptor<T> signalCorruptor : corruptors)
+      for(int i = 0; i <  corruptors.size(); i++)
       {
-         signalCorruptor.corrupt(signal);
+         corruptors.get(i).corrupt(signal);
       }
    }
 }

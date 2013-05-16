@@ -13,10 +13,10 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 public class JointAndIMUSensorMap
 {
-   private final LinkedHashMap<OneDoFJoint, ControlFlowOutputPort<Double>> jointPositionSensors = new LinkedHashMap<OneDoFJoint,
-                                                                                                     ControlFlowOutputPort<Double>>();
-   private final LinkedHashMap<OneDoFJoint, ControlFlowOutputPort<Double>> jointVelocitySensors = new LinkedHashMap<OneDoFJoint,
-                                                                                                     ControlFlowOutputPort<Double>>();
+   private final LinkedHashMap<OneDoFJoint, ControlFlowOutputPort<double[]>> jointPositionSensors = new LinkedHashMap<OneDoFJoint,
+                                                                                                     ControlFlowOutputPort<double[]>>();
+   private final LinkedHashMap<OneDoFJoint, ControlFlowOutputPort<double[]>> jointVelocitySensors = new LinkedHashMap<OneDoFJoint,
+                                                                                                     ControlFlowOutputPort<double[]>>();
 
    private final LinkedHashMap<IMUDefinition, ControlFlowOutputPort<Matrix3d>> orientationSensors = new LinkedHashMap<IMUDefinition,
                                                                                                        ControlFlowOutputPort<Matrix3d>>();
@@ -29,12 +29,12 @@ public class JointAndIMUSensorMap
    {
    }
 
-   public Map<OneDoFJoint, ControlFlowOutputPort<Double>> getJointPositionSensors()
+   public Map<OneDoFJoint, ControlFlowOutputPort<double[]>> getJointPositionSensors()
    {
       return jointPositionSensors;
    }
 
-   public Map<OneDoFJoint, ControlFlowOutputPort<Double>> getJointVelocitySensors()
+   public Map<OneDoFJoint, ControlFlowOutputPort<double[]>> getJointVelocitySensors()
    {
       return jointVelocitySensors;
    }
@@ -54,12 +54,12 @@ public class JointAndIMUSensorMap
       return linearAccelerationSensors;
    }
 
-   public ControlFlowOutputPort<Double> getJointPositionSensorPort(OneDoFJoint oneDoFJoint)
+   public ControlFlowOutputPort<double[]> getJointPositionSensorPort(OneDoFJoint oneDoFJoint)
    {
       return jointPositionSensors.get(oneDoFJoint);
    }
 
-   public ControlFlowOutputPort<Double> getJointVelocitySensorPort(OneDoFJoint oneDoFJoint)
+   public ControlFlowOutputPort<double[]> getJointVelocitySensorPort(OneDoFJoint oneDoFJoint)
    {
       return jointVelocitySensors.get(oneDoFJoint);
    }
@@ -79,12 +79,12 @@ public class JointAndIMUSensorMap
       return linearAccelerationSensors.get(imuDefinition);
    }
 
-   public void addJointPositionSensorPort(OneDoFJoint oneDoFJoint, ControlFlowOutputPort<Double> jointPositionSensorPort)
+   public void addJointPositionSensorPort(OneDoFJoint oneDoFJoint, ControlFlowOutputPort<double[]> jointPositionSensorPort)
    {
       jointPositionSensors.put(oneDoFJoint, jointPositionSensorPort);
    }
 
-   public void addJointVelocitySensorPort(OneDoFJoint oneDoFJoint, ControlFlowOutputPort<Double> jointVelocitySensorPort)
+   public void addJointVelocitySensorPort(OneDoFJoint oneDoFJoint, ControlFlowOutputPort<double[]> jointVelocitySensorPort)
    {
       jointVelocitySensors.put(oneDoFJoint, jointVelocitySensorPort);
    }
