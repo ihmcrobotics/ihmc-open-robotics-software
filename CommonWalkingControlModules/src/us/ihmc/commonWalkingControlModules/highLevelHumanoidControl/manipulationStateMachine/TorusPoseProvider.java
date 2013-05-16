@@ -35,16 +35,19 @@ public class TorusPoseProvider implements ObjectConsumer<TorusPosePacket>
 
    public synchronized double getRadius()
    {
+      hasNewPose = false;
       return radius;
    }
 
    public FrameVector getNormal()
    {
+      hasNewPose = false;
       return normal;
    }
 
    public FramePoint getOrigin()
    {
+      hasNewPose = false;
       return origin;
    }
 }
