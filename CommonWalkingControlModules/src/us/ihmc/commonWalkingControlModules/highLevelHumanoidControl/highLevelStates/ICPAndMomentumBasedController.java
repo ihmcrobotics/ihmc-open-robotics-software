@@ -44,7 +44,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
 public class ICPAndMomentumBasedController extends MomentumBasedController
 {
    private static final boolean USE_CONSTANT_OMEGA0 = true;
-   
+
    protected final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
    protected final BipedSupportPolygons bipedSupportPolygons;
    protected final YoFramePoint2d desiredICP;
@@ -59,15 +59,15 @@ public class ICPAndMomentumBasedController extends MomentumBasedController
            CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime, double gravityZ,
            TwistCalculator twistCalculator, SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
            double controlDT, ProcessedOutputsInterface processedOutputs, MomentumControlModule momentumControlModule, ArrayList<Updatable> updatables,
-           MomentumRateOfChangeControlModule momentumRateOfChangeControlModule, RootJointAccelerationControlModule rootJointAccelerationControlModule, StateEstimationDataFromControllerSink stateEstimationFromControllerDataSink,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           MomentumRateOfChangeControlModule momentumRateOfChangeControlModule, RootJointAccelerationControlModule rootJointAccelerationControlModule,
+           StateEstimationDataFromControllerSink stateEstimationFromControllerDataSink, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       super(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, bipedFeet.values(),
-            controlDT, processedOutputs, momentumControlModule, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule, stateEstimationFromControllerDataSink,
-            dynamicGraphicObjectsListRegistry);
+            controlDT, processedOutputs, momentumControlModule, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
+            stateEstimationFromControllerDataSink, dynamicGraphicObjectsListRegistry);
 
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
-      
+
       if (USE_CONSTANT_OMEGA0)
       {
          double constantOmega0 = 3.4;
@@ -77,7 +77,7 @@ public class ICPAndMomentumBasedController extends MomentumBasedController
       {
          this.omega0Calculator = new Omega0Calculator(centerOfMassFrame, totalMass);
       }
-      
+
       omega0 = new DoubleYoVariable("omega0", registry);
       capturePoint = new YoFramePoint("capturePoint", worldFrame, registry);
       this.desiredCoMHeightAcceleration = new DoubleYoVariable("desiredCoMHeightAcceleration", registry);
@@ -94,9 +94,10 @@ public class ICPAndMomentumBasedController extends MomentumBasedController
       this.updatables.add(new CapturePointUpdater());
       this.updatables.add(new FootPolygonVisualizer(planeContactStates.values(), dynamicGraphicObjectsListRegistry, registry));
 
-      if(dynamicGraphicObjectsListRegistry != null)
+      if (dynamicGraphicObjectsListRegistry != null)
       {
-         DynamicGraphicPosition capturePointViz = capturePoint.createDynamicGraphicPosition("Capture Point", 0.01, YoAppearance.Blue(), GraphicType.ROTATED_CROSS);
+         DynamicGraphicPosition capturePointViz = capturePoint.createDynamicGraphicPosition("Capture Point", 0.01, YoAppearance.Blue(),
+                                                     GraphicType.ROTATED_CROSS);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("Capture Point", capturePointViz);
          dynamicGraphicObjectsListRegistry.registerArtifact("Capture Point", capturePointViz.createArtifact());
       }
@@ -201,10 +202,10 @@ public class ICPAndMomentumBasedController extends MomentumBasedController
          computeCapturePoint();
       }
    }
-   
-   
+
+
    // TODO: Following has been added for big refactor. Need to be checked.
-   
+
    public EnumYoVariable<RobotSide> getYoSupportLeg()
    {
       return supportLeg;
@@ -214,12 +215,12 @@ public class ICPAndMomentumBasedController extends MomentumBasedController
    {
       return desiredCoMHeightAcceleration;
    }
-   
+
    public BipedSupportPolygons getBipedSupportPolygons()
    {
       return bipedSupportPolygons;
    }
-   
+
    public YoFramePoint getCapturePoint()
    {
       return capturePoint;
