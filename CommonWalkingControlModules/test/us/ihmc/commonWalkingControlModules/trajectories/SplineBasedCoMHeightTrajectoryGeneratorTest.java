@@ -187,7 +187,7 @@ public class SplineBasedCoMHeightTrajectoryGeneratorTest
       centerOfMassHeightInputData.set(null, null, nextFootstep, contactStates);
 
       CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator = new SplineBasedHeightTrajectoryGenerator(nominalCoMHeight, null, registry);
-      centerOfMassHeightTrajectoryGenerator.initialize(null, nextFootstep, contactStates);
+      centerOfMassHeightTrajectoryGenerator.initialize(null, null, nextFootstep, contactStates);
 
       FramePoint centerOfMassHeightPoint = new FramePoint(ReferenceFrame.getWorldFrame());
 
