@@ -626,7 +626,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          else
          {
-            TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForDoubleSupport();
+            TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForDoubleSupport(transferToSide);
 
             instantaneousCapturePointPlanner.initializeDoubleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue());
 
@@ -644,7 +644,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
 
 
-      public TransferToAndNextFootstepsData createTransferToAndNextFootstepDataForDoubleSupport()
+      public TransferToAndNextFootstepsData createTransferToAndNextFootstepDataForDoubleSupport(RobotSide transferToSide)
       {
          Footstep transferFromFootstep = createFootstepFromFootAndContactablePlaneBody(referenceFrames.getFootFrame(transferToSide.getOppositeSide()),
                                             bipedFeet.get(transferToSide.getOppositeSide()));
@@ -742,7 +742,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          icpAndMomentumBasedController.updateBipedSupportPolygons(bipedSupportPolygons);    // need to always update biped support polygons after a change to the contact states
 
-         centerOfMassHeightTrajectoryGenerator.initialize(getSupportLeg(), null, getContactStatesList());
+         RobotSide transferToSideToUseInFootstepData = transferToSide;
+         if (transferToSideToUseInFootstepData == null) transferToSideToUseInFootstepData = RobotSide.LEFT; //Arbitrary here.
+         TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = createTransferToAndNextFootstepDataForDoubleSupport(transferToSideToUseInFootstepData);
+         centerOfMassHeightTrajectoryGenerator.initialize(transferToAndNextFootstepsDataForDoubleSupport, transferToAndNextFootstepsDataForDoubleSupport.getTransferToSide(), null, getContactStatesList());
       }
 
       @Override
@@ -973,8 +976,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             desiredICP.set(capturePoint.getFramePoint2dCopy());    // TODO: currently necessary for stairs because of the omega0 jump, but should get rid of this
          }
 
-         FramePoint2d finalDesiredICP = getSingleSupportFinalDesiredICPForWalking(nextFootstep, swingSide);
-
+         TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
+         FramePoint2d finalDesiredICP =  getSingleSupportFinalDesiredICPForWalking(transferToAndNextFootstepsData, swingSide);
+         
          ContactablePlaneBody swingFoot = bipedFeet.get(swingSide);
          setContactStateForSwing(swingFoot);
          setSupportLeg(supportSide);
@@ -984,7 +988,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 //       icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, swingTimeCalculationProvider.getValue(), omega0,
 //                                         amountToBeInsideSingleSupport.getDoubleValue(), getSupportLeg(), yoTime.getDoubleValue());
 
-         centerOfMassHeightTrajectoryGenerator.initialize(getSupportLeg(), nextFootstep, getContactStatesList());
+         centerOfMassHeightTrajectoryGenerator.initialize(transferToAndNextFootstepsData, getSupportLeg(), nextFootstep, getContactStatesList());
+
          if (DEBUG)
             System.out.println("WalkingHighLevelHumanoidController: nextFootstep will change now!");
          readyToGrabNextFootstep.set(true);
@@ -1173,14 +1178,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       return ret;
    }
 
-   private FramePoint2d getSingleSupportFinalDesiredICPForWalking(Footstep transferToFootstep, RobotSide swingSide)
+
+   private FramePoint2d getSingleSupportFinalDesiredICPForWalking(TransferToAndNextFootstepsData transferToAndNextFootstepsData, RobotSide swingSide)
    {
       ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
 
 //    FramePoint2d initialDesiredICP = desiredICP.getFramePoint2dCopy();
 //    initialDesiredICP.changeFrame(referenceFrame);
 
-      TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(transferToFootstep, swingSide);
 
       instantaneousCapturePointPlanner.initializeSingleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue());
 

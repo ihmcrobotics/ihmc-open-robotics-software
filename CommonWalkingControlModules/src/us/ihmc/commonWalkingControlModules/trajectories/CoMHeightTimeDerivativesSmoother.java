@@ -51,7 +51,7 @@ public class CoMHeightTimeDerivativesSmoother
 
    private double maximumAcceleration = 0.5 * 9.81; //3.0 * 9.81;
    private double minimumAcceleration = 0.5 * 9.81;
-   private double maximumJerk = maximumAcceleration/0.10;
+   private double maximumJerk = maximumAcceleration/0.05;
 
    
    public CoMHeightTimeDerivativesSmoother(double dt, YoVariableRegistry parentRegistry)
@@ -64,7 +64,7 @@ public class CoMHeightTimeDerivativesSmoother
 
       double w0 = 12.0; //15.0;
       double w1 = 12.0; //15.0;
-      double zeta1 = 0.7;
+      double zeta1 = 0.9; //0.7;
       
       computeGainsByPolePlacement(w0, w1, zeta1);
       parentRegistry.addChild(registry);

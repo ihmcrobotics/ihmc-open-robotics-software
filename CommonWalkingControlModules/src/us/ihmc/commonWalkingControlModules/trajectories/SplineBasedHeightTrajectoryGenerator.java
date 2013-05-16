@@ -6,6 +6,7 @@ import javax.vecmath.Point2d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -58,7 +59,7 @@ public class SplineBasedHeightTrajectoryGenerator implements CoMHeightTrajectory
       this.nominalHeightAboveGround.set(nominalHeightAboveGround);
    }
 
-   public void initialize(RobotSide supportLeg, Footstep nextFootstep, List<PlaneContactState> contactStates)
+   public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, RobotSide supportLeg, Footstep nextFootstep, List<PlaneContactState> contactStates)
    {
       FramePoint[] contactFramePositions = getContactStateCenters(contactStates, nextFootstep);
       
@@ -164,4 +165,5 @@ public class SplineBasedHeightTrajectoryGenerator implements CoMHeightTrajectory
 
       return getPoint2d(coM);
    }
+
 }
