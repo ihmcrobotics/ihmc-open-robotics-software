@@ -181,7 +181,7 @@ public class DRCFlatGroundWalkingTest
       double walkingTimeDuration = 90.0;
 
       boolean useVelocityAndHeadingScript = true;
-      boolean cheatWithGroundHeightAtForFootstep = true;
+      boolean cheatWithGroundHeightAtForFootstep = false;
 
       GroundProfile groundProfile = new FlatGroundProfile();
 
