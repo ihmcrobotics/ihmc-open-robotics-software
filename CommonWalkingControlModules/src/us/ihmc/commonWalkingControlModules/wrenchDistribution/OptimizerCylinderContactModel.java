@@ -14,6 +14,11 @@ public class OptimizerCylinderContactModel implements OptimizerContactModel
    private final DenseMatrix64F[] qPhi = new DenseMatrix64F[PHI_SIZE];
    private final DenseMatrix64F[] qRho = new DenseMatrix64F[RHO_SIZE];
    private static final int[] phiVectorDirections = new int[] {3, 4, 5, 0, 1};
+   private ReferenceFrame grippedCylinderFrame;
+
+   // Expects hand to be strongest pushing in positive y, and basically open in positive z, so pulling(negative z) is extremely weak. 
+   // This weakness is described by the gripWeaknessFactor which goes from 0, a fully useless grip to 1, for a grip which is just as 
+   // strong as the tensile max load)
 
    public int getSizeInRho()
    {
@@ -27,7 +32,7 @@ public class OptimizerCylinderContactModel implements OptimizerContactModel
 
    public double getRhoMin(int i)
    {
-      return 0;
+      return 0.0;
    }
 
    public double getPhiMin(int i)
@@ -42,18 +47,23 @@ public class OptimizerCylinderContactModel implements OptimizerContactModel
 
    public void packQRhoBodyFrame(int i, SpatialForceVector spatialForceVector, ReferenceFrame referenceFrame)
    {
-      spatialForceVector.set(referenceFrame, qRho[i]);
+      spatialForceVector.set(grippedCylinderFrame, qRho[i]);
+      spatialForceVector.changeFrame(referenceFrame);
    }
 
    public void packQPhiBodyFrame(int i, SpatialForceVector spatialForceVector, ReferenceFrame referenceFrame)
    {
-      spatialForceVector.set(referenceFrame, qPhi[i]);
+      spatialForceVector.set(grippedCylinderFrame, qPhi[i]);
+      spatialForceVector.changeFrame(referenceFrame);
 
    }
 
-   public void setup(double mu, double cylinderRadius, double cylinderHalfHandWidth, double cylinderTensileGripStrength)
+   public void setup(double mu, double cylinderRadius, double cylinderHalfHandWidth, double cylinderTensileGripStrength, double gripWeaknessFactor,
+                     ReferenceFrame grippedCylinderFrame)
    {
+      this.grippedCylinderFrame = grippedCylinderFrame;
       initializePhiLimitsToHandStrength(cylinderTensileGripStrength);
+      accountForWeakGripDirection(gripWeaknessFactor);
       accountForFrictionalContact(mu);
       accountForMomentArms(cylinderRadius, cylinderHalfHandWidth);
       setQPhiToFirstFiveColumnsOfIdentity();
@@ -69,7 +79,7 @@ public class OptimizerCylinderContactModel implements OptimizerContactModel
          {
             for (int zz = -1; zz <= 1; zz += 2)
             {
-               qRho[qRhoLocation] = new DenseMatrix64F(6, 1, false, xx * mu * cylinderRadius, 0.0, zz * cylinderHalfHandWidth, x * mu, 1.0, 0.0);
+               qRho[qRhoLocation] = new DenseMatrix64F(6, 1, false, xx * mu * cylinderRadius, 0.0, zz * cylinderHalfHandWidth, x * mu, -1.0, 0.0);
                qRhoLocation++;
             }
          }
@@ -92,6 +102,13 @@ public class OptimizerCylinderContactModel implements OptimizerContactModel
          phiMin[i] = -cylinderTensileGripStrength;
          phiMax[i] = cylinderTensileGripStrength;
       }
+   }
+
+   private void accountForWeakGripDirection(double gripWeaknessFactor)
+   {
+      phiMin[2] *= gripWeaknessFactor;
+      phiMin[4] *= gripWeaknessFactor;
+      phiMax[4] *= gripWeaknessFactor;
    }
 
    private void accountForFrictionalContact(double mu)

@@ -25,6 +25,7 @@ import us.ihmc.utilities.screwTheory.*;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFrameVector;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
@@ -55,16 +56,17 @@ public class OldMomentumControlModule implements MomentumControlModule
    private final RootJointAccelerationData rootJointAccelerationData;
    private final MomentumRateOfChangeData momentumRateOfChangeData;
    private final SixDoFJoint rootJoint;
+   private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
 
    private GroundReactionWrenchDistributorInputData wrenchDistributorInput = new GroundReactionWrenchDistributorInputData();
 
 
    public OldMomentumControlModule(SixDoFJoint rootJoint, double gravityZ, GroundReactionWrenchDistributor groundReactionWrenchDistributor,
                                    ReferenceFrame centerOfMassFrame, double controlDT, TwistCalculator twistCalculator,
-                                   LinearSolver<DenseMatrix64F> jacobianSolver, YoVariableRegistry parentRegistry)
+                                   LinearSolver<DenseMatrix64F> jacobianSolver, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
-
+      this.dynamicGraphicObjectsListRegistry=dynamicGraphicObjectsListRegistry;
       this.solver = new MomentumSolver(rootJoint, rootJoint.getPredecessor(), centerOfMassFrame, twistCalculator, jacobianSolver, controlDT, registry);
 
       double totalMass = TotalMassCalculator.computeMass(ScrewTools.computeSupportAndSubtreeSuccessors(rootJoint.getSuccessor()));
@@ -190,15 +192,41 @@ public class OldMomentumControlModule implements MomentumControlModule
          }
       }
 
+      
       if (cylinderContactStates != null)
       {
          for (RigidBody body : cylinderContactStates.keySet())
          {
             if (cylinderContactStates.get(body).isInContact())
             {
-               Wrench bodyWrench = distributedWrenches.getWrenchOfNonPlaneContact(body);
-               System.out.println("OldMomentumControlModule: We have a cylinder wrench!");
-               externalWrenches.put(body, bodyWrench);
+               Wrench bodyWrench = distributedWrenches.getWrenchOfNonPlaneContact(cylinderContactStates.get(body));
+               if (bodyWrench == null)
+               {
+                  System.err.println("Wrench from cylinder not found! Crashing!");
+                  throw new RuntimeException("Wrench not found. OptimizationBasedForceDistributor failed to provide it");
+               }
+               else
+               {
+                  //GrayTODO hack!
+                  if (cylinderContactStates.get(body).isInContact())
+                  {
+//                     bodyWrench.changeFrame(body.getBodyFixedFrame());
+                     bodyWrench.changeFrame(this.centerOfMassFrame);
+                     bodyWrench.setAngularPartX(0);
+                     bodyWrench.setAngularPartY(0);
+                     bodyWrench.setAngularPartZ(-5);
+                     bodyWrench.setLinearPartX(-10);
+                     bodyWrench.setLinearPartY(0);
+                     bodyWrench.setLinearPartZ(0);
+                     bodyWrench.changeFrame(body.getBodyFixedFrame());
+                     externalWrenches.put(body, bodyWrench);
+                  }
+                  else
+                  {
+                     bodyWrench.changeFrame(body.getBodyFixedFrame());
+                     externalWrenches.put(body, bodyWrench);
+                  }
+               }
             }
          }
       }

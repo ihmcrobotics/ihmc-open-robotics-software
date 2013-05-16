@@ -21,6 +21,7 @@ import us.ihmc.commonWalkingControlModules.WrenchDistributorTools;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.FlatGroundPlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointGroundReactionWrenchDistributor;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylindricalContactState;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributor;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributorInputData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributorOutputData;
@@ -53,13 +54,13 @@ public class GroundReactionWrenchDistributorTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
-   
+
    @After
    public void showMemoryUsageAfterTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
+
    @Test
    public void testSimpleWrenchDistributionWithGeometricFlatGroundDistributor()
    {
@@ -69,7 +70,7 @@ public class GroundReactionWrenchDistributorTest
       Point3d centerOfMassPoint3d = new Point3d(0.0, 0.0, 1.0);
       PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
 
-      testSimpleWrenchDistribution(centerOfMassFrame, distributor, parentRegistry);
+      testSimpleWrenchDistribution(centerOfMassFrame, distributor, parentRegistry, 1e-7);
    }
 
    @Test
@@ -81,7 +82,19 @@ public class GroundReactionWrenchDistributorTest
       PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
 
       GroundReactionWrenchDistributor distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, parentRegistry, 1.0);
-      testSimpleWrenchDistribution(centerOfMassFrame, distributor, parentRegistry);
+      testSimpleWrenchDistribution(centerOfMassFrame, distributor, parentRegistry, 1e-7);
+   }
+
+   @Test
+   public void testSimpleWrenchDistributionWithOptimizationBasedDistributor()
+   {
+      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
+
+      Point3d centerOfMassPoint3d = new Point3d(0.0, 0.0, 1.0);
+      PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
+
+      GroundReactionWrenchDistributor distributor = new OptimizationBasedWrenchDistributor(centerOfMassFrame, parentRegistry, null);
+      testSimpleWrenchDistribution(centerOfMassFrame, distributor, parentRegistry, 1e-4);
    }
 
    @Test
@@ -93,7 +106,7 @@ public class GroundReactionWrenchDistributorTest
       PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
 
       GroundReactionWrenchDistributor distributor = createContactPointDistributor(parentRegistry, centerOfMassFrame);
-      testSimpleWrenchDistribution(centerOfMassFrame, distributor, parentRegistry);
+      testSimpleWrenchDistribution(centerOfMassFrame, distributor, parentRegistry, 1e-7);
    }
 
    private ContactPointGroundReactionWrenchDistributor createContactPointDistributor(YoVariableRegistry parentRegistry, PoseReferenceFrame centerOfMassFrame)
@@ -263,7 +276,8 @@ public class GroundReactionWrenchDistributorTest
 //    testFourFeetExample(centerOfMassFrame, distributor, parentRegistry);
 // }
 
-   private void testSimpleWrenchDistribution(ReferenceFrame centerOfMassFrame, GroundReactionWrenchDistributor distributor, YoVariableRegistry parentRegistry)
+   private void testSimpleWrenchDistribution(ReferenceFrame centerOfMassFrame, GroundReactionWrenchDistributor distributor, YoVariableRegistry parentRegistry,
+           double epsilon)
    {
       double coefficientOfFriction = 1.0;
       double footLength = 0.3;
@@ -274,7 +288,25 @@ public class GroundReactionWrenchDistributorTest
       Point3d rightMidfootLocation = new Point3d(0.0, -0.5, 0.0);
       FlatGroundPlaneContactState rightFootContactState = new FlatGroundPlaneContactState(footLength, footWidth, rightMidfootLocation, coefficientOfFriction);
 
-      simpleTwoFootTest(centerOfMassFrame, distributor, parentRegistry, leftFootContactState, rightFootContactState, coefficientOfFriction);
+      simpleTwoFootTest(centerOfMassFrame, distributor, parentRegistry, leftFootContactState, rightFootContactState, coefficientOfFriction, epsilon);
+   }
+
+   private void testSimpleWrenchDistributionWithCylinders(ReferenceFrame centerOfMassFrame, GroundReactionWrenchDistributor distributor,
+           YoVariableRegistry parentRegistry, double epsilon)
+   {
+      double coefficientOfFriction = 1.0;
+      double footLength = 0.3;
+      double footWidth = 0.15;
+      Point3d leftMidfootLocation = new Point3d(0.0, 0.5, 0.0);
+      FlatGroundPlaneContactState leftFootContactState = new FlatGroundPlaneContactState(footLength, footWidth, leftMidfootLocation, coefficientOfFriction);
+
+      Point3d rightMidfootLocation = new Point3d(0.0, -0.5, 0.0);
+      FlatGroundPlaneContactState rightFootContactState = new FlatGroundPlaneContactState(footLength, footWidth, rightMidfootLocation, coefficientOfFriction);
+
+
+
+      simpleNFootTest(centerOfMassFrame, distributor, parentRegistry, new PlaneContactState[] {leftFootContactState, rightFootContactState},
+                      coefficientOfFriction, epsilon);
    }
 
    private void testTroublesomeExampleOne(ReferenceFrame centerOfMassFrame, GroundReactionWrenchDistributor distributor, YoVariableRegistry parentRegistry)
@@ -348,7 +380,7 @@ public class GroundReactionWrenchDistributorTest
 
          int maxNumberOfFeet = 2;    // 6;
          int maxNumberOfVertices = 10;
-         visualizer = new GroundReactionWrenchDistributorVisualizer(maxNumberOfFeet, maxNumberOfVertices, scs.getRootRegistry(),
+         visualizer = new GroundReactionWrenchDistributorVisualizer(maxNumberOfFeet, maxNumberOfVertices, 0, scs.getRootRegistry(),
                  dynamicGraphicObjectsListRegistry);
 
          dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
@@ -369,7 +401,7 @@ public class GroundReactionWrenchDistributorTest
 
       if (VISUALIZE)
       {
-         visualizer.update(scs, distributedWrench, centerOfMassFrame, contactStates, desiredNetSpatialForceVector);
+         visualizer.update(scs, distributedWrench, centerOfMassFrame, contactStates, desiredNetSpatialForceVector, new ArrayList<CylindricalContactState>());
 
 //       deleteFirstDataPointAndCropData(scs);
          ThreadTools.sleepForever();
@@ -397,7 +429,7 @@ public class GroundReactionWrenchDistributorTest
 
          int maxNumberOfFeet = 2;    // 6;
          int maxNumberOfVertices = 10;
-         visualizer = new GroundReactionWrenchDistributorVisualizer(maxNumberOfFeet, maxNumberOfVertices, scs.getRootRegistry(),
+         visualizer = new GroundReactionWrenchDistributorVisualizer(maxNumberOfFeet, maxNumberOfVertices, 0, scs.getRootRegistry(),
                  dynamicGraphicObjectsListRegistry);
 
          dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
@@ -413,7 +445,8 @@ public class GroundReactionWrenchDistributorTest
          contactStates.clear();
 
          FlatGroundPlaneContactState leftFootContactState = FlatGroundPlaneContactState.createRandomFlatGroundContactState(random, true, coefficientOfFriction);
-         FlatGroundPlaneContactState rightFootContactState = FlatGroundPlaneContactState.createRandomFlatGroundContactState(random, false, coefficientOfFriction);
+         FlatGroundPlaneContactState rightFootContactState = FlatGroundPlaneContactState.createRandomFlatGroundContactState(random, false,
+                                                                coefficientOfFriction);
 
          contactStates.add(leftFootContactState);
          contactStates.add(rightFootContactState);
@@ -456,7 +489,7 @@ public class GroundReactionWrenchDistributorTest
 
          if (VISUALIZE)
          {
-            visualizer.update(scs, distributedWrench, centerOfMassFrame, contactStates, desiredNetSpatialForceVector);
+            visualizer.update(scs, distributedWrench, centerOfMassFrame, contactStates, desiredNetSpatialForceVector, new ArrayList<CylindricalContactState>());
          }
       }
 
@@ -485,7 +518,7 @@ public class GroundReactionWrenchDistributorTest
       NonFlatGroundPlaneContactState rightFootContactState = new NonFlatGroundPlaneContactState(footLength, footWidth, rightMidfootLocation,
                                                                 rightNormalToContactPlane, coefficientOfFriction);
 
-      simpleTwoFootTest(centerOfMassFrame, distributor, parentRegistry, leftFootContactState, rightFootContactState, coefficientOfFriction);
+      simpleTwoFootTest(centerOfMassFrame, distributor, parentRegistry, leftFootContactState, rightFootContactState, coefficientOfFriction, 1e-7);
    }
 
 // private void testFourFeetExample(ReferenceFrame centerOfMassFrame, GroundReactionWrenchDistributorInterface distributor, YoVariableRegistry parentRegistry)
@@ -510,13 +543,14 @@ public class GroundReactionWrenchDistributorTest
 // }
 
    private void simpleTwoFootTest(ReferenceFrame centerOfMassFrame, GroundReactionWrenchDistributor distributor, YoVariableRegistry parentRegistry,
-                                  PlaneContactState leftFootContactState, PlaneContactState rightFootContactState, double coefficientOfFriction)
+                                  PlaneContactState leftFootContactState, PlaneContactState rightFootContactState, double coefficientOfFriction, double epsilon)
    {
-      simpleNFootTest(centerOfMassFrame, distributor, parentRegistry, new PlaneContactState[] {leftFootContactState, rightFootContactState}, coefficientOfFriction);
+      simpleNFootTest(centerOfMassFrame, distributor, parentRegistry, new PlaneContactState[] {leftFootContactState, rightFootContactState},
+                      coefficientOfFriction, epsilon);
    }
 
    private void simpleNFootTest(ReferenceFrame centerOfMassFrame, GroundReactionWrenchDistributor distributor, YoVariableRegistry parentRegistry,
-                                PlaneContactState[] feetContactStates, double coefficientOfFriction)
+                                PlaneContactState[] feetContactStates, double coefficientOfFriction, double epsilon)
    {
       ArrayList<PlaneContactState> contactStates = new ArrayList<PlaneContactState>();
 
@@ -547,9 +581,6 @@ public class GroundReactionWrenchDistributorTest
          printIfDebug("leftCenterOfPressure" + i + " = " + distributedWrench.getCenterOfPressure(feetContactStates[i]));
       }
 
-      verifyForcesAreInsideFrictionCones(distributedWrench, contactStates, coefficientOfFriction);
-      verifyCentersOfPressureAreInsideContactPolygons(distributedWrench, contactStates);
-      verifyWrenchesSumToExpectedTotal(centerOfMassFrame, desiredNetSpatialForceVector, contactStates, distributedWrench, 1e-7, false);
 
       if (VISUALIZE)
       {
@@ -560,7 +591,7 @@ public class GroundReactionWrenchDistributorTest
 
          int maxNumberOfFeet = 2;
          int maxNumberOfVertices = 10;
-         GroundReactionWrenchDistributorVisualizer visualizer = new GroundReactionWrenchDistributorVisualizer(maxNumberOfFeet, maxNumberOfVertices,
+         GroundReactionWrenchDistributorVisualizer visualizer = new GroundReactionWrenchDistributorVisualizer(maxNumberOfFeet, maxNumberOfVertices, 0,
                                                                    scs.getRootRegistry(), dynamicGraphicObjectsListRegistry);
 
          dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
@@ -568,10 +599,86 @@ public class GroundReactionWrenchDistributorTest
 
          scs.startOnAThread();
 
-         visualizer.update(scs, distributedWrench, centerOfMassFrame, contactStates, desiredNetSpatialForceVector);
+         visualizer.update(scs, distributedWrench, centerOfMassFrame, contactStates, desiredNetSpatialForceVector, new ArrayList<CylindricalContactState>());
 
          ThreadTools.sleepForever();
       }
+
+      verifyForcesAreInsideFrictionCones(distributedWrench, contactStates, coefficientOfFriction);
+      verifyCentersOfPressureAreInsideContactPolygons(distributedWrench, contactStates);
+      verifyWrenchesSumToExpectedTotal(centerOfMassFrame, desiredNetSpatialForceVector, contactStates, distributedWrench, epsilon, false);
+   }
+
+   private void simpleNFootMCylinderTest(ReferenceFrame centerOfMassFrame, GroundReactionWrenchDistributor distributor, YoVariableRegistry parentRegistry,
+           PlaneContactState[] feetContactStates, CylindricalContactState[] handContactStates, double coefficientOfFriction, double epsilon)
+   {
+      ArrayList<PlaneContactState> contactStates = new ArrayList<PlaneContactState>();
+      ArrayList<CylindricalContactState> handContactStatesList = new ArrayList<CylindricalContactState>();
+
+      GroundReactionWrenchDistributorInputData inputData = new GroundReactionWrenchDistributorInputData();
+
+      for (int i = 0; i < feetContactStates.length; i++)
+      {
+         inputData.addPlaneContact(feetContactStates[i]);
+         contactStates.add(feetContactStates[i]);
+      }
+
+      for (int i = 0; i < handContactStates.length; i++)
+      {
+         inputData.addCylinderContact(handContactStates[i]);
+         handContactStatesList.add(handContactStates[i]);
+      }
+
+      Vector3d linearPart = new Vector3d(0.0, 0.0, 1000.0);    // 50.0, 60.0, 1000.0);
+      Vector3d angularPart = new Vector3d();    // 10.0, 12.0, 13.0);
+
+      SpatialForceVector desiredNetSpatialForceVector = new SpatialForceVector(centerOfMassFrame, linearPart, angularPart);
+
+      inputData.setSpatialForceVectorAndUpcomingSupportSide(desiredNetSpatialForceVector, null);
+
+      GroundReactionWrenchDistributorOutputData distributedWrench = new GroundReactionWrenchDistributorOutputData();
+      distributor.solve(distributedWrench, inputData);
+
+
+      for (int i = 0; i < feetContactStates.length; i++)
+      {
+         printIfDebug("force" + i + " = " + distributedWrench.getForce(feetContactStates[i]));
+         printIfDebug("leftNormalTorque" + i + " = " + distributedWrench.getNormalTorque(feetContactStates[i]));
+         printIfDebug("leftCenterOfPressure" + i + " = " + distributedWrench.getCenterOfPressure(feetContactStates[i]));
+      }
+
+      for (int i = 0; i < handContactStates.length; i++)
+      {
+         printIfDebug("cylinder Wrench" + i + " = " + distributedWrench.getWrenchOfNonPlaneContact(handContactStates[i]));
+      }
+
+
+      if (VISUALIZE)
+      {
+         Robot robot = new Robot("null");
+
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+         SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+
+         int maxNumberOfFeet = 2;
+         int maxNumberOfVertices = 10;
+         int maxNumberOfCylinders = 2;
+         GroundReactionWrenchDistributorVisualizer visualizer = new GroundReactionWrenchDistributorVisualizer(maxNumberOfFeet, maxNumberOfVertices,
+                                                                   maxNumberOfCylinders, scs.getRootRegistry(), dynamicGraphicObjectsListRegistry);
+
+         dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+         addCoordinateSystem(scs);
+
+         scs.startOnAThread();
+
+         visualizer.update(scs, distributedWrench, centerOfMassFrame, contactStates, desiredNetSpatialForceVector, new ArrayList<CylindricalContactState>());
+
+         ThreadTools.sleepForever();
+      }
+
+      verifyForcesAreInsideFrictionCones(distributedWrench, contactStates, coefficientOfFriction);
+      verifyCentersOfPressureAreInsideContactPolygons(distributedWrench, contactStates);
+      verifyWrenchesSumToExpectedTotal(centerOfMassFrame, desiredNetSpatialForceVector, contactStates, distributedWrench, epsilon, false);
    }
 
    private void deleteFirstDataPointAndCropData(SimulationConstructionSet scs)

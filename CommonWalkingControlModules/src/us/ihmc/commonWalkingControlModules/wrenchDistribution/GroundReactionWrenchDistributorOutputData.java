@@ -29,7 +29,7 @@ public class GroundReactionWrenchDistributorOutputData
       return normalTorques.get(contactState);
    }
    
-   public Wrench getWrenchOfNonPlaneContact(RigidBody rigidBody)
+   public Wrench getWrenchOfNonPlaneContact(CylindricalContactState rigidBody)
    {
       return wrenchesOfCylinderContacts.get(rigidBody);
    }
