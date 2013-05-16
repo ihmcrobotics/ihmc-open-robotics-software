@@ -196,7 +196,7 @@ public class MomentumOptimizerNativeInput
       MatrixTools.denseMatrixToArrayColumnMajor(this.rhoMinMatrix, this.rhoMin);
    }
 
-   public void setNullspaceMatrix(DenseMatrix64F N)
+   public void setNullspaceMatrixTranspose(DenseMatrix64F N)
    {
       CommonOps.insert(N, this.NMatrix, 0, 0);
       MatrixTools.denseMatrixToArrayColumnMajor(this.NMatrix, this.N);

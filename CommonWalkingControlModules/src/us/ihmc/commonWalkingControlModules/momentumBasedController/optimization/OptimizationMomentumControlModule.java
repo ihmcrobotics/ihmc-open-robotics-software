@@ -3,8 +3,6 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.MatrixFeatures;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.MomentumOptimizerNative;
@@ -81,7 +79,8 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       externalWrenchHandler.reset();
    }
 
-   public void compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, RobotSide upcomingSupportLeg, Map<RigidBody, ? extends CylindricalContactState> cylinderContactStates)
+   public void compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, RobotSide upcomingSupportLeg,
+                       Map<RigidBody, ? extends CylindricalContactState> cylinderContactStates)
    {
       LinkedHashMap<RigidBody, PlaneContactState> planeContactStates = convertContactStates(contactStates);
 
@@ -116,7 +115,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       secondaryMotionConstraintHandler.compute();
       momentumOptimizerNativeInput.setSecondaryConstraintJacobian(secondaryMotionConstraintHandler.getJacobian());
       momentumOptimizerNativeInput.setSecondaryConstraintRightHandSide(secondaryMotionConstraintHandler.getRightHandSide());
-      momentumOptimizerNativeInput.setNullspaceMatrix(secondaryMotionConstraintHandler.getNullspaceMatrix());
+      momentumOptimizerNativeInput.setNullspaceMatrixTranspose(secondaryMotionConstraintHandler.getNullspaceMatrix());
       momentumOptimizerNativeInput.setNullspaceMultipliers(secondaryMotionConstraintHandler.getNullspaceMultipliers());
       momentumOptimizerNativeInput.setSecondaryConstraintWeight(secondaryMotionConstraintHandler.getWeightMatrix());
 

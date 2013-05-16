@@ -180,7 +180,7 @@ public class MotionConstraintHandler
    {
       assembleEquation(jList, pList, motionConstraintIndex, j, p);
       assembleEquation(nList, zList, nullspaceIndex, nTranspose, z);
-      nTranspose.reshape(n.getNumCols(), n.getNumRows());
+      n.reshape(nTranspose.getNumCols(), nTranspose.getNumRows());
       CommonOps.transpose(nTranspose, n);
 
       assembleWeightMatrix(weightList, jList, motionConstraintIndex, ws);
@@ -251,6 +251,11 @@ public class MotionConstraintHandler
    public DenseMatrix64F getNullspaceMatrix()
    {
       return n;
+   }
+
+   public DenseMatrix64F getNullspaceMatrixTranspose()
+   {
+      return nTranspose;
    }
 
    public DenseMatrix64F getNullspaceMultipliers()
