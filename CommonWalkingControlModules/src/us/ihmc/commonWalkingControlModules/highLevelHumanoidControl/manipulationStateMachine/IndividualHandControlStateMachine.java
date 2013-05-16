@@ -137,18 +137,6 @@ public class IndividualHandControlStateMachine
       addState(singularityEscapeState);
       addState(loadBearingState);
 
-      if (dynamicGraphicObjectsListRegistry != null)
-      {
-         DynamicGraphicObjectsList list = new DynamicGraphicObjectsList(name);
-
-         DynamicGraphicReferenceFrame dynamicGraphicReferenceFrame = new DynamicGraphicReferenceFrame(handPositionControlFrame, registry, 0.3);
-         dynamicGraphicReferenceFrames.add(dynamicGraphicReferenceFrame);
-         list.add(dynamicGraphicReferenceFrame);
-
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(list);
-         list.hideDynamicGraphicObjects();
-      }
-
       parentRegistry.addChild(registry);
    }
 
