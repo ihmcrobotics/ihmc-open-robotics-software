@@ -11,9 +11,11 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableCylinderBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoCylindricalContactState;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoRollingContactState;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
@@ -61,8 +63,10 @@ public class MomentumBasedController implements RobotController
    protected final CommonWalkingReferenceFrames referenceFrames;
    protected final TwistCalculator twistCalculator;
    protected final List<ContactablePlaneBody> contactablePlaneBodies;
+   protected final List<ContactableCylinderBody> contactableCylinderBodies;
 
-   protected final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
+   protected final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> planeContactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
+   protected final LinkedHashMap<ContactableCylinderBody, YoRollingContactState> rollingContactStates = new LinkedHashMap<ContactableCylinderBody, YoRollingContactState>();
    protected final Map<RigidBody, CylindricalContactState> cylindricalContactStates = new LinkedHashMap<RigidBody, CylindricalContactState>();
    protected final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
    protected final DoubleYoVariable yoTime;
@@ -111,6 +115,21 @@ public class MomentumBasedController implements RobotController
                                   StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
+      this(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, contactablePlaneBodies,
+            null, controlDT, processedOutputs, momentumControlModule, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
+            stateEstimationDataFromControllerSink, dynamicGraphicObjectsListRegistry);
+   }
+   
+   public MomentumBasedController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
+                                  CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime,
+                                  double gravityZ, TwistCalculator twistCalculator, Collection<? extends ContactablePlaneBody> contactablePlaneBodies,
+                                  Collection<? extends ContactableCylinderBody> contactableCylinderBodies,
+                                  double controlDT, ProcessedOutputsInterface processedOutputs, MomentumControlModule momentumControlModule,
+                                  ArrayList<Updatable> updatables, MomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
+                                  RootJointAccelerationControlModule rootJointAccelerationControlModule,
+                                  StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink,
+                                  DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   {
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
       this.momentumControlModule = momentumControlModule;
@@ -121,11 +140,16 @@ public class MomentumBasedController implements RobotController
       this.centerOfMassJacobian = centerOfMassJacobian;
       this.referenceFrames = referenceFrames;
       this.twistCalculator = twistCalculator;
-      this.contactablePlaneBodies = new ArrayList<ContactablePlaneBody>(contactablePlaneBodies);
       this.controlDT = controlDT;
       this.gravity = gravityZ;
       this.yoTime = yoTime;
 
+      this.contactablePlaneBodies = new ArrayList<ContactablePlaneBody>();
+      if (contactablePlaneBodies != null)
+      {
+         this.contactablePlaneBodies.addAll(contactablePlaneBodies);
+      }
+      
       RigidBody elevator = fullRobotModel.getElevator();
 
       this.processedOutputs = processedOutputs;
@@ -174,14 +198,15 @@ public class MomentumBasedController implements RobotController
 
       elevatorFrame = fullRobotModel.getElevatorFrame();
 
-      for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodies)
+      double coefficientOfFriction = 1.0;    // TODO: magic number...
+      
+      for (ContactablePlaneBody contactablePlaneBody : this.contactablePlaneBodies)
       {
          RigidBody rigidBody = contactablePlaneBody.getRigidBody();
          YoPlaneContactState contactState = new YoPlaneContactState(rigidBody.getName(), contactablePlaneBody.getBodyFrame(),
                                                contactablePlaneBody.getPlaneFrame(), registry);
-         double coefficientOfFriction = 1.0;    // TODO: magic number...
          contactState.set(contactablePlaneBody.getContactPoints2d(), coefficientOfFriction);    // initialize with flat 'feet'
-         contactStates.put(contactablePlaneBody, contactState);
+         planeContactStates.put(contactablePlaneBody, contactState);
       }
 
       InverseDynamicsJoint[] joints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
@@ -192,6 +217,26 @@ public class MomentumBasedController implements RobotController
             desiredAccelerationYoVariables.put((OneDoFJoint) joint, new DoubleYoVariable(joint.getName() + "qdd_d", registry));
          }
       }
+
+      // Add contactableCylinderBodies to the contactablePlaneBodies List, so it is passed to the PlaneContactWrenchProcessor
+      this.contactableCylinderBodies = new ArrayList<ContactableCylinderBody>();
+      if (contactableCylinderBodies != null)
+      {
+         this.contactableCylinderBodies.addAll(contactableCylinderBodies);
+         this.contactablePlaneBodies.addAll(contactableCylinderBodies);
+      }
+      
+      for (ContactableCylinderBody contactableCylinderBody : this.contactableCylinderBodies)
+      {
+         RigidBody rigidBody = contactableCylinderBody.getRigidBody();
+         // YoRollingContactState: similar to YoPlaneContactState but enables updating the contact points as the contactable cylindrical body rolls onto the ground
+         // The contact points can be displayed with the dynamicGraphicObjectsListRegistry
+         YoRollingContactState rollingContactState = new YoRollingContactState(rigidBody.getName(), contactableCylinderBody, registry,
+               dynamicGraphicObjectsListRegistry);
+         rollingContactState.setCoefficientOfFriction(coefficientOfFriction);
+         rollingContactStates.put(contactableCylinderBody, rollingContactState);
+      }
+      
 
       this.momentumRateOfChangeControlModule = momentumRateOfChangeControlModule;
       this.rootJointAccelerationControlModule = rootJointAccelerationControlModule;
@@ -218,6 +263,13 @@ public class MomentumBasedController implements RobotController
    // TODO: Temporary method for a big refactor allowing switching between high level behaviors
    public void doPrioritaryControl()
    {
+      
+      for (ContactableCylinderBody contactableCylinderBody : contactableCylinderBodies)
+      {
+         // Update the contact points, so they remain underneath the cylindrical body
+         rollingContactStates.get(contactableCylinderBody).updateContactPoints();
+      }
+      
       callUpdatables();
 
       inverseDynamicsCalculator.reset();
@@ -247,7 +299,18 @@ public class MomentumBasedController implements RobotController
       rootJointTaskSpaceConstraintData.set(rootJointAcceleration, rootJointNullspaceMultipliers, rootJointSelectionMatrix);
       momentumControlModule.setDesiredSpatialAcceleration(fullRobotModel.getRootJoint().getMotionSubspace(), rootJointTaskSpaceConstraintData);
       momentumControlModule.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
-      momentumControlModule.compute(this.contactStates, upcomingSupportLeg.getEnumValue(), null);
+      
+      // Creating a Map that contains all of the YoPlaneContactState and YoRollingContactState to pass to the MomentumControlModule
+      Map<ContactablePlaneBody, PlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, PlaneContactState>();
+      for (ContactablePlaneBody contactablePlaneBody : planeContactStates.keySet())
+      {
+         contactStates.put(contactablePlaneBody, planeContactStates.get(contactablePlaneBody));
+      }
+      for (ContactableCylinderBody contactableCylinderBody : rollingContactStates.keySet())
+      {
+         contactStates.put(contactableCylinderBody, rollingContactStates.get(contactableCylinderBody));
+      }
+      momentumControlModule.compute(contactStates, upcomingSupportLeg.getEnumValue(), null);
 
       SpatialForceVector desiredCentroidalMomentumRate = momentumControlModule.getDesiredCentroidalMomentumRate();
 
@@ -396,7 +459,7 @@ public class MomentumBasedController implements RobotController
 
    public LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> getContactStates()
    {
-      return contactStates;
+      return planeContactStates;
    }
 
    public ReferenceFrame getCenterOfMassFrame()

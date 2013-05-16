@@ -92,7 +92,7 @@ public class ICPAndMomentumBasedController extends MomentumBasedController
       this.updatables.add(new Omega0Updater());
       this.updatables.add(new BipedSupportPolygonsUpdater());
       this.updatables.add(new CapturePointUpdater());
-      this.updatables.add(new FootPolygonVisualizer(contactStates.values(), dynamicGraphicObjectsListRegistry, registry));
+      this.updatables.add(new FootPolygonVisualizer(planeContactStates.values(), dynamicGraphicObjectsListRegistry, registry));
 
       if(dynamicGraphicObjectsListRegistry != null)
       {
@@ -149,7 +149,7 @@ public class ICPAndMomentumBasedController extends MomentumBasedController
       SideDependentList<List<FramePoint>> footContactPoints = new SideDependentList<List<FramePoint>>();
       for (RobotSide robotSide : RobotSide.values)
       {
-         footContactPoints.put(robotSide, contactStates.get(bipedFeet.get(robotSide)).getContactPoints());
+         footContactPoints.put(robotSide, planeContactStates.get(bipedFeet.get(robotSide)).getContactPoints());
       }
 
       bipedSupportPolygons.update(footContactPoints);
