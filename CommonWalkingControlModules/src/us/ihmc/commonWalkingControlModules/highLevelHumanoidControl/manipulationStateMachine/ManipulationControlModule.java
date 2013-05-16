@@ -3,7 +3,9 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 import com.yobotics.simulationconstructionset.util.statemachines.*;
 import us.ihmc.commonWalkingControlModules.configurations.ManipulationControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
@@ -15,6 +17,9 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author twan
@@ -28,8 +33,7 @@ public class ManipulationControlModule
 
    private final HighLevelDirectControlManipulationState directControlManipulationState;
    private final State<ManipulationState> toroidManipulationState;
-   private final DesiredHandPoseProvider handPoseProvider;
-   private final TorusPoseProvider torusPoseProvider;
+   private final List<DynamicGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<DynamicGraphicReferenceFrame>();
 
    public ManipulationControlModule(DoubleYoVariable yoTime, FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
                                     ManipulationControllerParameters parameters, DesiredHandPoseProvider handPoseProvider, final TorusPoseProvider torusPoseProvider,
@@ -38,8 +42,6 @@ public class ManipulationControlModule
                                     YoVariableRegistry parentRegistry)
    {
       stateMachine = new StateMachine<ManipulationState>("manipulationState", "manipulationStateSwitchTime", ManipulationState.class, yoTime, registry);
-      this.handPoseProvider = handPoseProvider;
-      this.torusPoseProvider = torusPoseProvider;
 
       SideDependentList<ReferenceFrame> handPositionControlFrames = new SideDependentList<ReferenceFrame>();
       SideDependentList<GeometricJacobian> jacobians = new SideDependentList<GeometricJacobian>();
@@ -56,6 +58,18 @@ public class ManipulationControlModule
          ReferenceFrame handPositionControlFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(frameName, frameAfterJoint,
                                                       parameters.getHandControlFramesWithRespectToFrameAfterWrist().get(robotSide));
          handPositionControlFrames.put(robotSide, handPositionControlFrame);
+
+         if (dynamicGraphicObjectsListRegistry != null)
+         {
+            DynamicGraphicObjectsList list = new DynamicGraphicObjectsList("handPositionControlFrames");
+
+            DynamicGraphicReferenceFrame dynamicGraphicReferenceFrame = new DynamicGraphicReferenceFrame(handPositionControlFrame, registry, 0.3);
+            dynamicGraphicReferenceFrames.add(dynamicGraphicReferenceFrame);
+            list.add(dynamicGraphicReferenceFrame);
+
+            dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(list);
+            list.hideDynamicGraphicObjects();
+         }
       }
 
       directControlManipulationState = new HighLevelDirectControlManipulationState(yoTime, fullRobotModel, twistCalculator, parameters, handPoseProvider,
@@ -91,7 +105,16 @@ public class ManipulationControlModule
 
    public void doControl()
    {
+      updateGraphics();
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
+   }
+
+   private void updateGraphics()
+   {
+      for (int i = 0; i < dynamicGraphicReferenceFrames.size(); i++)
+      {
+         dynamicGraphicReferenceFrames.get(i).update();
+      }
    }
 }
