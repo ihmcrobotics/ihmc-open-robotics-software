@@ -75,9 +75,11 @@ public class ManipulationControlModule
          }
       };
 
-      StateTransition<ManipulationState> directControlToToroidManipulation = new StateTransition<ManipulationState>(toroidManipulationState.getStateEnum(),
+      StateTransition<ManipulationState> toToroidManipulation = new StateTransition<ManipulationState>(toroidManipulationState.getStateEnum(),
                                                                                 stateTransitionCondition);
-      directControlManipulationState.addStateTransition(directControlToToroidManipulation);
+      directControlManipulationState.addStateTransition(toToroidManipulation);
+
+//      toroidManipulationState.addStateTransition(toToroidManipulation);
 
       parentRegistry.addChild(registry);
    }
