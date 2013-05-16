@@ -36,7 +36,7 @@ public class ManipulationControlModule
    private final List<DynamicGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<DynamicGraphicReferenceFrame>();
 
    public ManipulationControlModule(DoubleYoVariable yoTime, FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
-                                    ManipulationControllerParameters parameters, DesiredHandPoseProvider handPoseProvider, final TorusPoseProvider torusPoseProvider,
+                                    ManipulationControllerParameters parameters, final DesiredHandPoseProvider handPoseProvider, final TorusPoseProvider torusPoseProvider,
                                     DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
                                     SideDependentList<HandControllerInterface> handControllers, MomentumBasedController momentumBasedController,
                                     YoVariableRegistry parentRegistry)
@@ -92,6 +92,18 @@ public class ManipulationControlModule
       StateTransition<ManipulationState> toToroidManipulation = new StateTransition<ManipulationState>(toroidManipulationState.getStateEnum(),
                                                                                 stateTransitionCondition);
       directControlManipulationState.addStateTransition(toToroidManipulation);
+
+      StateTransitionCondition toDirectManipulationCondition = new StateTransitionCondition()
+      {
+         public boolean checkCondition()
+         {
+            // TODO: hack
+            boolean defaultRequested = handPoseProvider.checkForNewPose(RobotSide.LEFT) && !handPoseProvider.isRelativeToWorld();
+            return defaultRequested;
+         }
+      };
+      StateTransition<ManipulationState> toDirectManipulation = new StateTransition<ManipulationState>(directControlManipulationState.getStateEnum(), toDirectManipulationCondition);
+      toroidManipulationState.addStateTransition(toDirectManipulation);
 
 //      toroidManipulationState.addStateTransition(toToroidManipulation);
 
