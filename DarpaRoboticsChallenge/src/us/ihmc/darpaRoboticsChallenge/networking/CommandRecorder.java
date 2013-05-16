@@ -7,6 +7,10 @@ import java.util.ArrayList;
 
 import javax.media.j3d.Transform3D;
 
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.HandPosePacket;
+import us.ihmc.utilities.ArrayTools;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.KryoStreamSerializer;
 import us.ihmc.utilities.net.NetClassList;
 import us.ihmc.utilities.net.TimestampProvider;
@@ -113,6 +117,25 @@ public class CommandRecorder
          if(object instanceof TransformableDataObject)
          {
             objectToWrite = ObjectTransformationHelper.transform(recordTransform, (TransformableDataObject) object);
+
+            if (object instanceof HandPosePacket)
+            {
+               System.out.println("\n*****");
+               System.out.println("CommandRecorder:transform ");
+               System.out.println(recordTransform.toString());
+
+               System.out.println("CommandRecorder: hand position before= " + ((HandPosePacket) object).position);
+               FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), ((HandPosePacket) object).orientation);
+               System.out.println("orienetaiton before: ");
+               ArrayTools.printArray(frameOrientation.getYawPitchRoll(), System.out);
+
+
+               System.out.println("CommandRecorder: hand position after= " + ((HandPosePacket) objectToWrite).position);
+               frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), ((HandPosePacket) objectToWrite).orientation);
+               System.out.println("orienetaiton after: ");
+               ArrayTools.printArray(frameOrientation.getYawPitchRoll(), System.out);
+               System.out.println("\n*****");
+            }
          }
          else
          {
