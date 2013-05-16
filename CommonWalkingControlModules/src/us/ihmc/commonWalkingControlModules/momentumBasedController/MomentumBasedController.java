@@ -65,6 +65,8 @@ public class MomentumBasedController implements RobotController
    protected final List<ContactablePlaneBody> contactablePlaneBodies;
    protected final List<ContactableCylinderBody> contactableCylinderBodies;
 
+   // Creating a Map that will contain all of the YoPlaneContactState and YoRollingContactState to pass to the MomentumControlModule compute method
+   protected final Map<ContactablePlaneBody, PlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, PlaneContactState>();
    protected final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> planeContactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
    protected final LinkedHashMap<ContactableCylinderBody, YoRollingContactState> rollingContactStates = new LinkedHashMap<ContactableCylinderBody, YoRollingContactState>();
    protected final Map<RigidBody, CylindricalContactState> cylindricalContactStates = new LinkedHashMap<RigidBody, CylindricalContactState>();
@@ -236,7 +238,15 @@ public class MomentumBasedController implements RobotController
          rollingContactState.setCoefficientOfFriction(coefficientOfFriction);
          rollingContactStates.put(contactableCylinderBody, rollingContactState);
       }
-      
+
+      for (ContactablePlaneBody contactablePlaneBody : planeContactStates.keySet())
+      {
+         contactStates.put(contactablePlaneBody, planeContactStates.get(contactablePlaneBody));
+      }
+      for (ContactableCylinderBody contactableCylinderBody : rollingContactStates.keySet())
+      {
+         contactStates.put(contactableCylinderBody, rollingContactStates.get(contactableCylinderBody));
+      }
 
       this.momentumRateOfChangeControlModule = momentumRateOfChangeControlModule;
       this.rootJointAccelerationControlModule = rootJointAccelerationControlModule;
@@ -300,16 +310,6 @@ public class MomentumBasedController implements RobotController
       momentumControlModule.setDesiredSpatialAcceleration(fullRobotModel.getRootJoint().getMotionSubspace(), rootJointTaskSpaceConstraintData);
       momentumControlModule.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
       
-      // Creating a Map that contains all of the YoPlaneContactState and YoRollingContactState to pass to the MomentumControlModule
-      Map<ContactablePlaneBody, PlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, PlaneContactState>();
-      for (ContactablePlaneBody contactablePlaneBody : planeContactStates.keySet())
-      {
-         contactStates.put(contactablePlaneBody, planeContactStates.get(contactablePlaneBody));
-      }
-      for (ContactableCylinderBody contactableCylinderBody : rollingContactStates.keySet())
-      {
-         contactStates.put(contactableCylinderBody, rollingContactStates.get(contactableCylinderBody));
-      }
       momentumControlModule.compute(contactStates, upcomingSupportLeg.getEnumValue(), null);
 
       SpatialForceVector desiredCentroidalMomentumRate = momentumControlModule.getDesiredCentroidalMomentumRate();
