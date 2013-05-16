@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import javax.media.j3d.Transform3D;
 
+import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.EndOfScriptCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.HandPosePacket;
 import us.ihmc.utilities.ArrayTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -69,6 +70,15 @@ public class CommandRecorder
       }
    }
 
+   private synchronized void  addEndOfScriptOjectToList()
+   {
+      double timestamp = timestampProvider.getTimestamp() - startTime;
+      EndOfScriptCommand scriptCommand = new EndOfScriptCommand();
+
+      ScriptObject scriptObject = new ScriptObject(timestamp, scriptCommand);
+      scriptObjects.add(scriptObject);
+   }
+
    
    private synchronized void writeToFile()
    {
@@ -91,6 +101,7 @@ public class CommandRecorder
    
    public synchronized void stopRecording()
    {
+      addEndOfScriptOjectToList();
       writeToFile();
 
       isRecording = false;

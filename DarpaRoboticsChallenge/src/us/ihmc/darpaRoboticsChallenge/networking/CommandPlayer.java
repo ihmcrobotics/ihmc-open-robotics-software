@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 
 import javax.media.j3d.Transform3D;
 
+import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.EndOfScriptCommand;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCNetClassList;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
@@ -127,12 +128,18 @@ public class CommandPlayer implements TimestampListener
          {
             objectToSend = ObjectTransformationHelper.transform(playbackTransform, (TransformableDataObject) object);         
          }
+         else if(object instanceof EndOfScriptCommand)
+         {
+            //Do not do anything.
+            objectToSend = null;
+         }
          else
          {
             objectToSend = object;
          }
-         
-         fieldComputerClient.consumeObject(objectToSend);
+
+         if (objectToSend != null)
+            fieldComputerClient.consumeObject(objectToSend);
          
          if(inputStream.available() > 0)
          {
