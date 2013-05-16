@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
+import us.ihmc.commonWalkingControlModules.configurations.ManipulationControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
@@ -32,7 +33,6 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
@@ -56,12 +56,15 @@ public class IndividualHandControlStateMachine
    final DesiredHandPoseProvider handPoseProvider;
 
    public IndividualHandControlStateMachine(final DoubleYoVariable simulationTime, final RobotSide robotSide, final FullRobotModel fullRobotModel,
-           final TwistCalculator twistCalculator, ReferenceFrame handPositionControlFrame, final DesiredHandPoseProvider handPoseProvider,
-           final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, HandControllerInterface handController, double gravity,
-           final double controlDT, MomentumBasedController momentumBasedController, GeometricJacobian jacobian, Map<OneDoFJoint, Double> defaultJointPositions,
-           Map<OneDoFJoint, Double> minTaskSpacePositions, Map<OneDoFJoint, Double> maxTaskSpacePositions, final YoVariableRegistry parentRegistry)
+           final ManipulationControllerParameters parameters, final TwistCalculator twistCalculator, ReferenceFrame handPositionControlFrame,
+           final DesiredHandPoseProvider handPoseProvider, final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+           HandControllerInterface handController, double gravity, final double controlDT, MomentumBasedController momentumBasedController,
+           GeometricJacobian jacobian, final YoVariableRegistry parentRegistry)
    {
       RigidBody endEffector = jacobian.getEndEffector();
+      Map<OneDoFJoint, Double> defaultJointPositions = parameters.getDefaultArmJointPositions(fullRobotModel, robotSide);
+      Map<OneDoFJoint, Double> minTaskSpacePositions = parameters.getMinTaskspaceArmJointPositions(fullRobotModel, robotSide);
+      Map<OneDoFJoint, Double> maxTaskSpacePositions = parameters.getMaxTaskspaceArmJointPositions(fullRobotModel, robotSide);
 
       String name = endEffector.getName() + getClass().getSimpleName();
       registry = new YoVariableRegistry(name);
@@ -95,7 +98,8 @@ public class IndividualHandControlStateMachine
                                                                0.3);
 
       final LoadBearingHandControlState loadBearingState = new LoadBearingHandControlState(IndividualHandControlState.LOAD_BEARING, momentumBasedController,
-                                                              jacobian, parentRegistry, isReadyToBearLoad);
+                                                              jacobian, parentRegistry, isReadyToBearLoad, dynamicGraphicObjectsListRegistry, robotSide,
+                                                              parameters);
 
 
 
@@ -147,7 +151,7 @@ public class IndividualHandControlStateMachine
       {
          public boolean checkCondition()
          {
-            return isReadyToSwitchToLoadBearing.getBooleanValue() || handPoseProvider.isInContact(robotSide);
+            return isReadyToSwitchToLoadBearing.getBooleanValue();    // || handPoseProvider.isInContact(robotSide);
          }
       };
       StateTransitionAction stateTransitionAction = new StateTransitionAction()
@@ -168,7 +172,7 @@ public class IndividualHandControlStateMachine
       {
          public boolean checkCondition()
          {
-            return !isReadyToSwitchToLoadBearing.getBooleanValue() ||!handPoseProvider.isInContact(robotSide);
+            return !isReadyToSwitchToLoadBearing.getBooleanValue();    // ||!handPoseProvider.isInContact(robotSide);
          }
       };
       StateTransitionAction stateTransitionAction = new StateTransitionAction()
@@ -281,7 +285,7 @@ public class IndividualHandControlStateMachine
       ConstantDoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(1.0);
 
       RigidBody base = jacobian.getBase();    // fullRobotModel.getElevator(); //  TODO: would actually like to have this be elevator, but not currently handled in
-      ReferenceFrame referenceFrame = fullRobotModel.getElevator().getBodyFixedFrame(); // jacobian.getBase().getBodyFixedFrame();
+      ReferenceFrame referenceFrame = fullRobotModel.getElevator().getBodyFixedFrame();    // jacobian.getBase().getBodyFixedFrame();
 
       String namePrefix = FormattingTools.underscoredToCamelCase(stateEnum.toString(), true);
       StraightLinePositionTrajectoryGenerator positionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator(namePrefix, referenceFrame, 1.0,
@@ -291,10 +295,12 @@ public class IndividualHandControlStateMachine
                                                                                       trajectoryTimeProvider, currentConfigurationProvider,
                                                                                       desiredConfigurationProvider, registry);
 
+      TaskspaceHandControlState taskspaceHandControlState = new ObjectManipulationState(stateEnum, robotSide, positionTrajectoryGenerator,
+                                                               orientationTrajectoryGenerator, handSpatialAccelerationControlModule, momentumBasedController,
+                                                               jacobian, base, handController, fullRobotModel, gravity, controlDT,
+                                                               dynamicGraphicObjectsListRegistry, parentRegistry);
 
-      return new ObjectManipulationState(stateEnum, robotSide, positionTrajectoryGenerator, orientationTrajectoryGenerator,
-                                         handSpatialAccelerationControlModule, momentumBasedController, jacobian, base, handController, fullRobotModel,
-                                         gravity, controlDT, dynamicGraphicObjectsListRegistry, parentRegistry);
+      return taskspaceHandControlState;
    }
 
    public void initialize()

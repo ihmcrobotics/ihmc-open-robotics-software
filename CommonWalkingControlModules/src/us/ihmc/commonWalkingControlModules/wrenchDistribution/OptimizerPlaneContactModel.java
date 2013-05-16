@@ -20,7 +20,6 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
    private static final double ANGLE_INCRMENT = 2 * Math.PI / ((double) VECTORS);
    private double mu = 0.3;
    private final DenseMatrix64F[] rhoQ = new DenseMatrix64F[RHO_SIZE];
-   private List<FramePoint> contactPointsInPlaneFrame;
    private SpatialForceVector tempForceVector= new SpatialForceVector();
    private Vector3d tempLinearPart = new Vector3d();
    private Vector3d tempArm = new Vector3d();
@@ -41,6 +40,19 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
    public void setup(double coefficientOfFriction, List<FramePoint> contactPointsInPlaneFrame, ReferenceFrame endEffectorFrame)
    {
       this.mu = coefficientOfFriction;
+      int numPoints = contactPointsInPlaneFrame.size();
+      if (numPoints !=4)
+      {
+         if (numPoints == 2)
+         {
+            contactPointsInPlaneFrame.add(contactPointsInPlaneFrame.get(0));
+            contactPointsInPlaneFrame.add(contactPointsInPlaneFrame.get(1));
+         }
+         else
+         {
+            throw new RuntimeException("Unhandled number of contact points.");
+         }
+      }
       for (int i = 0; i < POINTS; i++)
       {
          for (int j = 0; j < VECTORS; j++)

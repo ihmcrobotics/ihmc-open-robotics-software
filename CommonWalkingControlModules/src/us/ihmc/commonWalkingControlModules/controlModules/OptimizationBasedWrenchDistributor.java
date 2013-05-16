@@ -8,8 +8,6 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CylinderAndPlaneContactForceOptimizerNative;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CylinderAndPlaneContactForceOptimizerNativeInput;
@@ -30,20 +28,24 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.Wrench;
 
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
+
 public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchDistributor
 {
-   CylinderAndPlaneContactForceOptimizerNative nativeOptimizer = new CylinderAndPlaneContactForceOptimizerNative();
-   CylinderAndPlaneContactForceOptimizerNativeInput optimizerInput = new CylinderAndPlaneContactForceOptimizerNativeInput();
-   CylinderAndPlaneContactForceOptimizerNativeOutput optimizerOutput;
-   CylinderAndPlaneContactForceOptimizerMatrixCalculator optimizerInputPopulator;
-   CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator optimizerOutputExtractor;
+   private CylinderAndPlaneContactForceOptimizerNative nativeOptimizer = new CylinderAndPlaneContactForceOptimizerNative();
+   private CylinderAndPlaneContactForceOptimizerNativeInput optimizerInput = new CylinderAndPlaneContactForceOptimizerNativeInput();
+   private CylinderAndPlaneContactForceOptimizerNativeOutput optimizerOutput;
+   private CylinderAndPlaneContactForceOptimizerMatrixCalculator optimizerInputPopulator;
+   private CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator optimizerOutputExtractor;
 
-   Map<PlaneContactState, EndEffector> previouslyUsedPlaneEndEffectors = new LinkedHashMap<PlaneContactState, EndEffector>();
-   Map<CylindricalContactState, EndEffector> previouslyUsedCylinderEndEffectors = new LinkedHashMap<CylindricalContactState, EndEffector>();
-   List<EndEffector> endEffectors = new ArrayList<EndEffector>();
-   List<EndEffectorOutput> endEffectorOutputs = new ArrayList<EndEffectorOutput>();
-   DenseMatrix64F desiredNetEnvironmentReactionWrench = new DenseMatrix64F(6, 1);
-   List<Wrench> wrenches = new ArrayList<Wrench>();
+   private Map<PlaneContactState, EndEffector> previouslyUsedPlaneEndEffectors = new LinkedHashMap<PlaneContactState, EndEffector>();
+   private Map<CylindricalContactState, EndEffector> previouslyUsedCylinderEndEffectors = new LinkedHashMap<CylindricalContactState, EndEffector>();
+   private List<EndEffector> endEffectors = new ArrayList<EndEffector>();
+   private List<EndEffectorOutput> endEffectorOutputs = new ArrayList<EndEffectorOutput>();
+   private DenseMatrix64F desiredNetEnvironmentReactionWrench = new DenseMatrix64F(6, 1);
+   private List<Wrench> wrenches = new ArrayList<Wrench>();
    private CenterOfPressureResolver copResolver = new CenterOfPressureResolver();
    private final ReferenceFrame centerOfMassFrame;
 
@@ -55,7 +57,7 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
    double wRho = 0.000001;
 
 
-   public OptimizationBasedWrenchDistributor(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry)
+   public OptimizationBasedWrenchDistributor(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
       optimizerInputPopulator = new CylinderAndPlaneContactForceOptimizerMatrixCalculator(centerOfMassFrame);
@@ -66,6 +68,7 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
    {
       List<PlaneContactState> planes = input.getContactStates();
       List<CylindricalContactState> cylinders = input.getCylindricalContactStates();
+      
       input.getDesiredNetSpatialForceVector().packMatrix(desiredNetEnvironmentReactionWrench);
 
       setupOptimizerInput(planes, cylinders, desiredNetEnvironmentReactionWrench, endEffectors, optimizerInput, wPhi, wRho, Cmatrix);
@@ -213,7 +216,7 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
       }
 
       EndEffector endEffector = new EndEffector();
-      endEffector.setContactModel(new OptimizerPlaneContactModel());
+      endEffector.setContactModel(new OptimizerCylinderContactModel());
 
       setEndEffectorFromCylindricalContactState(cylinder, endEffector);
       previouslyUsedCylinderEndEffectors.put(cylinder, endEffector);
@@ -224,7 +227,7 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
    private void setEndEffectorFromCylindricalContactState(CylindricalContactState cylinder, EndEffector endEffector)
    {
       OptimizerCylinderContactModel optimizerModel = (OptimizerCylinderContactModel) endEffector.getContactModel();
-      optimizerModel.setup(cylinder.getCoefficientOfFriction(), cylinder.getCylinderRadius(), cylinder.getHalfHandWidth(), cylinder.getTensileGripForce());
+      optimizerModel.setup(cylinder.getCoefficientOfFriction(), cylinder.getCylinderRadius(), cylinder.getHalfHandWidth(), cylinder.getTensileGripForce(), cylinder.getGripWeaknessFactor(), cylinder.getCylinderFrame());
       endEffector.setLoadBearing(cylinder.isInContact());
       endEffector.setReferenceFrame(cylinder.getEndEffectorFrame());
    }

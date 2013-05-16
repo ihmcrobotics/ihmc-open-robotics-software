@@ -11,4 +11,6 @@ public interface CylindricalContactState
    public double getCoefficientOfFriction();
    public double getTensileGripForce();
    public ReferenceFrame getEndEffectorFrame();
+   public ReferenceFrame getCylinderFrame();
+   public double getGripWeaknessFactor();
 }

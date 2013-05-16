@@ -1,22 +1,28 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylindricalContactState;
+import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 
 
 public class YoCylindricalContactState implements CylindricalContactState
 {
    private final YoVariableRegistry registry;
    private final ReferenceFrame endEffectorFrame;
+   private final PoseReferenceFrame cylinderFrame;
    private final BooleanYoVariable inContact;
    private final DoubleYoVariable coefficientOfFriction;
    private final DoubleYoVariable tensileGripForce;
    private final DoubleYoVariable cylinderRadius;
    private final DoubleYoVariable halfHandWidth;
+   private final DoubleYoVariable gripWeaknessFactor;
+   private final DynamicGraphicReferenceFrame cylinderRefererenceFrameGraphic;
 
    public YoCylindricalContactState(String namePrefix, ReferenceFrame frameAfterJoint, YoVariableRegistry parentRegistry)
    {
@@ -25,12 +31,19 @@ public class YoCylindricalContactState implements CylindricalContactState
       this.coefficientOfFriction = new DoubleYoVariable(namePrefix + "CoefficientOfFriction", registry);
       this.tensileGripForce = new DoubleYoVariable(namePrefix + "TensileGripForce", registry);
       this.cylinderRadius = new DoubleYoVariable(namePrefix + "CylinderRadius", registry);
-      this.halfHandWidth = new DoubleYoVariable(namePrefix, registry);
+      this.halfHandWidth = new DoubleYoVariable(namePrefix + "halfHandWidth", registry);
+      this.gripWeaknessFactor = new DoubleYoVariable(namePrefix + "gripWeaknessFactor", registry);
       this.endEffectorFrame = frameAfterJoint;
+      this.cylinderFrame = new PoseReferenceFrame(endEffectorFrame.getName()+"GrippedCylinderFrame",new FramePose(endEffectorFrame));
       parentRegistry.addChild(registry);
+      this.cylinderRefererenceFrameGraphic = new DynamicGraphicReferenceFrame(cylinderFrame, registry, 0.1);
    }
 
-   public void set(double coefficientOfFriction, double gripStrength, double cylinderRadius, double halfHandWidth, boolean inContact)
+   public DynamicGraphicReferenceFrame getCylinderFrameGraphic()
+   {
+      return this.cylinderRefererenceFrameGraphic;
+   }
+   public void set(double coefficientOfFriction, double gripStrength, double cylinderRadius, double halfHandWidth, double gripWeaknessFactor, boolean inContact)
    {
       this.inContact.set(inContact);
 
@@ -49,10 +62,21 @@ public class YoCylindricalContactState implements CylindricalContactState
       if (halfHandWidth < 0.0)
          throw new RuntimeException("halfHandWidth is negative: " + halfHandWidth);
       this.halfHandWidth.set(halfHandWidth);
+      
+      if (gripWeaknessFactor < 0.0)
+         throw new RuntimeException("gripWeaknessFactor is negative: " + gripWeaknessFactor);
+      if (gripWeaknessFactor > 1.0)
+         throw new RuntimeException("gripWeaknessFactor is over 1, : " + gripWeaknessFactor);
+      this.gripWeaknessFactor.set(gripWeaknessFactor);
    }
-
+   public void setFramePoseOfCylinder(FramePose cylinderPose)
+   {
+      this.cylinderFrame.updatePose(cylinderPose);
+   }
    public boolean isInContact()
    {
+      this.cylinderFrame.update();
+      cylinderRefererenceFrameGraphic.update();
       return inContact.getBooleanValue();
    }
 
@@ -75,6 +99,11 @@ public class YoCylindricalContactState implements CylindricalContactState
    {
       return this.tensileGripForce.getDoubleValue();
    }
+   
+   public double getGripWeaknessFactor()
+   {
+      return this.gripWeaknessFactor.getDoubleValue();
+   }
 
    public ReferenceFrame getEndEffectorFrame()
    {
@@ -84,6 +113,11 @@ public class YoCylindricalContactState implements CylindricalContactState
    public void setInContact(boolean inContact)
    {
       this.inContact.set(inContact);
+   }
+
+   public ReferenceFrame getCylinderFrame()
+   {
+      return this.cylinderFrame;
    }
 
 }
