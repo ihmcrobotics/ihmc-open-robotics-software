@@ -19,8 +19,8 @@ public class JointStateFullRobotModelUpdater extends AbstractControlFlowElement
 {
    private final OneDoFJoint[] oneDoFJoints;
 
-   private final Map<OneDoFJoint, ControlFlowInputPort<Double>> positionSensorInputPorts = new LinkedHashMap<OneDoFJoint, ControlFlowInputPort<Double>>();
-   private final Map<OneDoFJoint, ControlFlowInputPort<Double>> velocitySensorInputPorts = new LinkedHashMap<OneDoFJoint, ControlFlowInputPort<Double>>();
+   private final Map<OneDoFJoint, ControlFlowInputPort<double[]>> positionSensorInputPorts = new LinkedHashMap<OneDoFJoint, ControlFlowInputPort<double[]>>();
+   private final Map<OneDoFJoint, ControlFlowInputPort<double[]>> velocitySensorInputPorts = new LinkedHashMap<OneDoFJoint, ControlFlowInputPort<double[]>>();
 
    private final ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort;
 
@@ -29,8 +29,8 @@ public class JointStateFullRobotModelUpdater extends AbstractControlFlowElement
       this(controlFlowGraph, sensorMap.getJointPositionSensors(), sensorMap.getJointVelocitySensors(), inverseDynamicsStructure);
    }
 
-   public JointStateFullRobotModelUpdater(ControlFlowGraph controlFlowGraph, Map<OneDoFJoint, ControlFlowOutputPort<Double>> positionSensorPorts,
-           Map<OneDoFJoint, ControlFlowOutputPort<Double>> velocitySensorPorts, FullInverseDynamicsStructure inverseDynamicsStructure)
+   public JointStateFullRobotModelUpdater(ControlFlowGraph controlFlowGraph, Map<OneDoFJoint, ControlFlowOutputPort<double[]>> jointPositionSensors,
+           Map<OneDoFJoint, ControlFlowOutputPort<double[]>> jointVelocitySensors, FullInverseDynamicsStructure inverseDynamicsStructure)
    {
       InverseDynamicsJoint[] joints = ScrewTools.computeJointsInOrder(inverseDynamicsStructure.getTwistCalculator().getRootBody());
       this.oneDoFJoints = ScrewTools.filterJoints(joints, OneDoFJoint.class);
@@ -40,7 +40,7 @@ public class JointStateFullRobotModelUpdater extends AbstractControlFlowElement
 
       for (OneDoFJoint oneDoFJoint : oneDoFJoints)
       {
-         if (positionSensorPorts.get(oneDoFJoint) == null)
+         if (jointPositionSensors.get(oneDoFJoint) == null)
          {
             throw new RuntimeException("positionSensorPorts.get(oneDoFJoint) == null. oneDoFJoint = " + oneDoFJoint);
          }
@@ -48,14 +48,14 @@ public class JointStateFullRobotModelUpdater extends AbstractControlFlowElement
 
       for (OneDoFJoint oneDoFJoint : oneDoFJoints)
       {
-         ControlFlowOutputPort<Double> positionSensorOutputPort = positionSensorPorts.get(oneDoFJoint);
-         ControlFlowInputPort<Double> positionSensorInputPort = createInputPort("positionSensorInputPort");
+         ControlFlowOutputPort<double[]> positionSensorOutputPort = jointPositionSensors.get(oneDoFJoint);
+         ControlFlowInputPort<double[]> positionSensorInputPort = createInputPort("positionSensorInputPort");
 
          positionSensorInputPorts.put(oneDoFJoint, positionSensorInputPort);
          controlFlowGraph.connectElements(positionSensorOutputPort, positionSensorInputPort);
 
-         ControlFlowOutputPort<Double> velocitySensorOutputPort = velocitySensorPorts.get(oneDoFJoint);
-         ControlFlowInputPort<Double> velocitySensorInputPort = createInputPort("velocitySensorInputPort");
+         ControlFlowOutputPort<double[]> velocitySensorOutputPort = jointVelocitySensors.get(oneDoFJoint);
+         ControlFlowInputPort<double[]> velocitySensorInputPort = createInputPort("velocitySensorInputPort");
 
          velocitySensorInputPorts.put(oneDoFJoint, velocitySensorInputPort);
          controlFlowGraph.connectElements(velocitySensorOutputPort, velocitySensorInputPort);
@@ -71,11 +71,11 @@ public class JointStateFullRobotModelUpdater extends AbstractControlFlowElement
          if (joint == null)
             throw new RuntimeException();
 
-         ControlFlowInputPort<Double> positionSensorPort = positionSensorInputPorts.get(joint);
-         Double positionSensorData = positionSensorPort.getData();
+         ControlFlowInputPort<double[]> positionSensorPort = positionSensorInputPorts.get(joint);
+         double[] positionSensorData = positionSensorPort.getData();
 
-         joint.setQ(positionSensorData);
-         joint.setQd(velocitySensorInputPorts.get(joint).getData());
+         joint.setQ(positionSensorData[0]);
+         joint.setQd(velocitySensorInputPorts.get(joint).getData()[0]);
          joint.setQdd(joint.getQddDesired());
       }
 

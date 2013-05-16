@@ -1,8 +1,5 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
-import java.util.LinkedHashMap;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -15,6 +12,7 @@ import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.maps.ObjectObjectMap;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
@@ -32,20 +30,20 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
    private ControllerDispatcher controllerDispatcher;
    
    
-   private final LinkedHashMap<OneDoFJoint, SimulatedOneDoFJointPositionSensor> jointPositionSensors = new LinkedHashMap<OneDoFJoint,
+   private final ObjectObjectMap<OneDoFJoint, SimulatedOneDoFJointPositionSensor> jointPositionSensors = new ObjectObjectMap<OneDoFJoint,
                                                                                                           SimulatedOneDoFJointPositionSensor>();
-   private final LinkedHashMap<OneDoFJoint, SimulatedOneDoFJointVelocitySensor> jointVelocitySensors = new LinkedHashMap<OneDoFJoint,
+   private final ObjectObjectMap<OneDoFJoint, SimulatedOneDoFJointVelocitySensor> jointVelocitySensors = new ObjectObjectMap<OneDoFJoint,
                                                                                                           SimulatedOneDoFJointVelocitySensor>();
 
-   private final LinkedHashMap<IMUDefinition, SimulatedOrientationSensorFromRobot> orientationSensors = new LinkedHashMap<IMUDefinition,
+   private final ObjectObjectMap<IMUDefinition, SimulatedOrientationSensorFromRobot> orientationSensors = new ObjectObjectMap<IMUDefinition,
                                                                                                            SimulatedOrientationSensorFromRobot>();
 
-   private final LinkedHashMap<IMUDefinition, SimulatedAngularVelocitySensorFromRobot> angularVelocitySensors = new LinkedHashMap<IMUDefinition,
+   private final ObjectObjectMap<IMUDefinition, SimulatedAngularVelocitySensorFromRobot> angularVelocitySensors = new ObjectObjectMap<IMUDefinition,
                                                                                                                    SimulatedAngularVelocitySensorFromRobot>();
-   private final LinkedHashMap<IMUDefinition, SimulatedLinearAccelerationSensorFromRobot> linearAccelerationSensors =
-      new LinkedHashMap<IMUDefinition, SimulatedLinearAccelerationSensorFromRobot>();
+   private final ObjectObjectMap<IMUDefinition, SimulatedLinearAccelerationSensorFromRobot> linearAccelerationSensors =
+      new ObjectObjectMap<IMUDefinition, SimulatedLinearAccelerationSensorFromRobot>();
 
-   private final LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensors = new LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface>();
+   private final ObjectObjectMap<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensors = new ObjectObjectMap<ForceSensorDefinition, WrenchCalculatorInterface>();
    
 
    private JointAndIMUSensorDataSource jointAndIMUSensorDataSource;
@@ -74,32 +72,32 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
 
    public void addJointPositionSensorPort(OneDoFJoint oneDoFJoint, SimulatedOneDoFJointPositionSensor jointPositionSensor)
    {
-      jointPositionSensors.put(oneDoFJoint, jointPositionSensor);
+      jointPositionSensors.add(oneDoFJoint, jointPositionSensor);
    }
 
    public void addJointVelocitySensorPort(OneDoFJoint oneDoFJoint, SimulatedOneDoFJointVelocitySensor jointVelocitySensor)
    {
-      jointVelocitySensors.put(oneDoFJoint, jointVelocitySensor);
+      jointVelocitySensors.add(oneDoFJoint, jointVelocitySensor);
    }
 
    public void addOrientationSensorPort(IMUDefinition imuDefinition, SimulatedOrientationSensorFromRobot orientationSensor)
    {
-      orientationSensors.put(imuDefinition, orientationSensor);
+      orientationSensors.add(imuDefinition, orientationSensor);
    }
 
    public void addAngularVelocitySensorPort(IMUDefinition imuDefinition, SimulatedAngularVelocitySensorFromRobot angularVelocitySensor)
    {
-      angularVelocitySensors.put(imuDefinition, angularVelocitySensor);
+      angularVelocitySensors.add(imuDefinition, angularVelocitySensor);
    }
 
    public void addLinearAccelerationSensorPort(IMUDefinition imuDefinition, SimulatedLinearAccelerationSensorFromRobot linearAccelerationSensor)
    {
-      linearAccelerationSensors.put(imuDefinition, linearAccelerationSensor);
+      linearAccelerationSensors.add(imuDefinition, linearAccelerationSensor);
    }
    
    public void addForceTorqueSensorPort(ForceSensorDefinition forceSensorDefinition, WrenchCalculatorInterface groundContactPointBasedWrenchCalculator)
    {
-      forceTorqueSensors.put(forceSensorDefinition, groundContactPointBasedWrenchCalculator);
+      forceTorqueSensors.add(forceSensorDefinition, groundContactPointBasedWrenchCalculator);
    }
 
 
@@ -135,66 +133,61 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
       step.increment();
       
       
-      Set<OneDoFJoint> jointsForPositionSensors = jointPositionSensors.keySet();
-      for (OneDoFJoint oneDoFJoint : jointsForPositionSensors)
+      for(int i = 0; i < jointPositionSensors.getLength(); i++)
       {
-         SimulatedOneDoFJointPositionSensor simulatedOneDoFJointPositionSensor = jointPositionSensors.get(oneDoFJoint);
+         SimulatedOneDoFJointPositionSensor simulatedOneDoFJointPositionSensor = jointPositionSensors.getSecond(i);
          simulatedOneDoFJointPositionSensor.startComputation();
          simulatedOneDoFJointPositionSensor.waitUntilComputationIsDone();
          Double value = simulatedOneDoFJointPositionSensor.getJointPositionOutputPort().getData();
-         jointAndIMUSensorDataSource.setJointPositionSensorValue(oneDoFJoint, value);
+         jointAndIMUSensorDataSource.setJointPositionSensorValue(jointPositionSensors.getFirst(i), value);
       }
 
-      Set<OneDoFJoint> jointsForVelocitySensors = jointVelocitySensors.keySet();
-      for (OneDoFJoint oneDoFJoint : jointsForVelocitySensors)
+      for(int i = 0; i < jointVelocitySensors.getLength(); i++)
       {
-         SimulatedOneDoFJointVelocitySensor simulatedOneDoFJointVelocitySensor = jointVelocitySensors.get(oneDoFJoint);
+         SimulatedOneDoFJointVelocitySensor simulatedOneDoFJointVelocitySensor = jointVelocitySensors.getSecond(i);
          simulatedOneDoFJointVelocitySensor.startComputation();
          simulatedOneDoFJointVelocitySensor.waitUntilComputationIsDone();
          Double value = simulatedOneDoFJointVelocitySensor.getJointVelocityOutputPort().getData();
-         jointAndIMUSensorDataSource.setJointVelocitySensorValue(oneDoFJoint, value);
+         jointAndIMUSensorDataSource.setJointVelocitySensorValue(jointVelocitySensors.getFirst(i), value);
       }
 
-      Set<IMUDefinition> orientationSensorDefinitions = orientationSensors.keySet();
-      for (IMUDefinition imuDefinition : orientationSensorDefinitions)
+      for(int i = 0; i < orientationSensors.getLength(); i++)
       {
-         SimulatedOrientationSensorFromRobot orientationSensor = orientationSensors.get(imuDefinition);
+         SimulatedOrientationSensorFromRobot orientationSensor = orientationSensors.getSecond(i);
          orientationSensor.startComputation();
          orientationSensor.waitUntilComputationIsDone();
          Matrix3d value = orientationSensor.getOrientationOutputPort().getData();
-         jointAndIMUSensorDataSource.setOrientationSensorValue(imuDefinition, value);
+         jointAndIMUSensorDataSource.setOrientationSensorValue(orientationSensors.getFirst(i), value);
       }
 
-      Set<IMUDefinition> angularVelocitySensorDefinitions = angularVelocitySensors.keySet();
-      for (IMUDefinition imuDefinition : angularVelocitySensorDefinitions)
+      for(int i = 0; i < angularVelocitySensors.getLength(); i++)
       {
-         SimulatedAngularVelocitySensorFromRobot angularVelocitySensor = angularVelocitySensors.get(imuDefinition);
+         SimulatedAngularVelocitySensorFromRobot angularVelocitySensor = angularVelocitySensors.getSecond(i);
          angularVelocitySensor.startComputation();
          angularVelocitySensor.waitUntilComputationIsDone();
          Vector3d value = angularVelocitySensor.getAngularVelocityOutputPort().getData();
-         jointAndIMUSensorDataSource.setAngularVelocitySensorValue(imuDefinition, value);
+         jointAndIMUSensorDataSource.setAngularVelocitySensorValue(angularVelocitySensors.getFirst(i), value);
       }
 
-      Set<IMUDefinition> linearAccelerationSensorDefinitions = linearAccelerationSensors.keySet();
-      for (IMUDefinition imuDefinition : linearAccelerationSensorDefinitions)
+      for(int i = 0; i < linearAccelerationSensors.getLength(); i++)
       {
 
-         SimulatedLinearAccelerationSensorFromRobot linearAccelerationSensor = linearAccelerationSensors.get(imuDefinition);
+         SimulatedLinearAccelerationSensorFromRobot linearAccelerationSensor = linearAccelerationSensors.getSecond(i);
          linearAccelerationSensor.startComputation();
          linearAccelerationSensor.waitUntilComputationIsDone();
          Vector3d value = linearAccelerationSensor.getLinearAccelerationOutputPort().getData();
-         jointAndIMUSensorDataSource.setLinearAccelerationSensorValue(imuDefinition, value);
+         jointAndIMUSensorDataSource.setLinearAccelerationSensorValue(linearAccelerationSensors.getFirst(i), value);
       }
       
       
       if(forceSensorDataHolder != null)
       {
-         for(Entry<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensorEntry : forceTorqueSensors.entrySet())
+         for(int i = 0; i < forceTorqueSensors.getLength(); i++)
          {
-            final WrenchCalculatorInterface forceTorqueSensor = forceTorqueSensorEntry.getValue();
+            final WrenchCalculatorInterface forceTorqueSensor = forceTorqueSensors.getSecond(i);
             forceTorqueSensor.startComputation();
             forceTorqueSensor.waitUntilComputationIsDone();  
-            forceSensorDataHolder.setForceSensorValue(forceTorqueSensorEntry.getKey(), forceTorqueSensor.getForceSensorOutputPort().getData());
+            forceSensorDataHolder.setForceSensorValue(forceTorqueSensors.getFirst(i), forceTorqueSensor.getForceSensorOutputPort().getData());
          }
       }
       

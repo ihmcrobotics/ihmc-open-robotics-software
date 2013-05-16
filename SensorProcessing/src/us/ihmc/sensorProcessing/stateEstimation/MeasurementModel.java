@@ -1,7 +1,7 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,7 +14,7 @@ import us.ihmc.utilities.math.MatrixTools;
 
 public class MeasurementModel
 {
-   private final List<MeasurementModelElement> measurementModelElements;
+   private final ArrayList<MeasurementModelElement> measurementModelElements;
 
    private final Map<MeasurementModelElement, Integer> measurementStartIndices = new LinkedHashMap<MeasurementModelElement, Integer>();
    private final Map<ControlFlowOutputPort<?>, Integer> stateStartIndices;
@@ -27,7 +27,7 @@ public class MeasurementModel
    private final int stateMatrixSize;
    private int measurementOutputMatrixSize;
 
-   public MeasurementModel(List<MeasurementModelElement> measurementModelElements, Map<ControlFlowOutputPort<?>, Integer> stateStartIndices, int stateMatrixSize)
+   public MeasurementModel(ArrayList<MeasurementModelElement> measurementModelElements, Map<ControlFlowOutputPort<?>, Integer> stateStartIndices, int stateMatrixSize)
    {
       this.measurementModelElements = measurementModelElements;
       this.stateStartIndices = stateStartIndices;
@@ -37,9 +37,9 @@ public class MeasurementModel
 
    public void updateMatrices()
    {
-      for (MeasurementModelElement measurementModelElement : measurementModelElements)
+      for(int i = 0; i <  measurementModelElements.size(); i++)
       {
-         measurementModelElement.computeMatrixBlocks();
+         measurementModelElements.get(i).computeMatrixBlocks();
       }
 
       reshapeMatrices();
@@ -48,8 +48,9 @@ public class MeasurementModel
       H.zero();
       R.zero();
 
-      for (MeasurementModelElement measurementModelElement : measurementModelElements)
+      for(int i = 0; i <  measurementModelElements.size(); i++)
       {
+         MeasurementModelElement measurementModelElement = measurementModelElements.get(i);
          int measurementStartIndex = measurementStartIndices.get(measurementModelElement);
 
          for (ControlFlowOutputPort<?> statePort : measurementModelElement.getStatePorts())
@@ -65,10 +66,10 @@ public class MeasurementModel
 
    public DenseMatrix64F computeResidual()
    {
-      for (MeasurementModelElement measurementModelElement : measurementModelElements)
+      for(int i = 0; i <  measurementModelElements.size(); i++)
       {
-         DenseMatrix64F residualBlock = measurementModelElement.computeResidual();
-         int measurementStartIndex = measurementStartIndices.get(measurementModelElement);
+         DenseMatrix64F residualBlock = measurementModelElements.get(i).computeResidual();
+         int measurementStartIndex = measurementStartIndices.get(measurementModelElements.get(i));
          CommonOps.insert(residualBlock, residual, measurementStartIndex, 0);
       }
       return residual;
@@ -94,10 +95,11 @@ public class MeasurementModel
       return ret;
    }
 
-   private static void computeMeasurementSizes(List<MeasurementModelElement> measurementModelElements, Map<MeasurementModelElement, Integer> measurementSizes)
+   private static void computeMeasurementSizes(ArrayList<MeasurementModelElement> measurementModelElements, Map<MeasurementModelElement, Integer> measurementSizes)
    {
-      for (MeasurementModelElement measurementModelElement : measurementModelElements)
+      for(int i = 0; i <  measurementModelElements.size(); i++)
       {
+         MeasurementModelElement measurementModelElement = measurementModelElements.get(i);
          Set<ControlFlowOutputPort<?>> measurementModelElementStates = measurementModelElement.getStatePorts();
          for (ControlFlowOutputPort<?> statePort : measurementModelElementStates)
          {

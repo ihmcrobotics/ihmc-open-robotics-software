@@ -49,14 +49,14 @@ public class ControlFlowGraphExecutorController implements RobotController
 
    public void doControl()
    {
-      for (ControlFlowGraph controlFlowGraph : controlFlowGraphs)
+      for(int i = 0; i <  controlFlowGraphs.size(); i++)
       {
-         controlFlowGraph.startComputation();
+         controlFlowGraphs.get(i).startComputation();
       }
 
-      for (ControlFlowGraph controlFlowGraph : controlFlowGraphs)
+      for(int i = 0; i <  controlFlowGraphs.size(); i++)
       {
-         controlFlowGraph.waitUntilComputationIsDone();
+         controlFlowGraphs.get(i).waitUntilComputationIsDone();
       }
    }
 }

@@ -3,7 +3,6 @@ package us.ihmc.sensorProcessing.stateEstimation;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,7 +27,7 @@ public class YoPointVelocityDataObjectListOutputPort extends ControlFlowOutputPo
    private final AfterJointReferenceFrameNameMap referenceFrameNameMap;
    
    private final YoVariableRegistry registry;
-   private final List<YoPointVelocityDataObject> yoPointVelocityDataObjects = new ArrayList<YoPointVelocityDataObject>();
+   private final ArrayList<YoPointVelocityDataObject> yoPointVelocityDataObjects = new ArrayList<YoPointVelocityDataObject>();
    private final Map<YoPointVelocityDataObject, BooleanYoVariable> validMap = new LinkedHashMap<YoPointVelocityDataObject, BooleanYoVariable>();
    private final String namePrefix;
 
@@ -71,8 +70,10 @@ public class YoPointVelocityDataObjectListOutputPort extends ControlFlowOutputPo
 
          YoPointVelocityDataObject yoPointVelocityDataObjectToUse = null;
 
-         for (YoPointVelocityDataObject yoPointVelocityDataObject : yoPointVelocityDataObjects)
+         for(int i = 0; i <  yoPointVelocityDataObjects.size(); i++)
          {
+            
+            YoPointVelocityDataObject yoPointVelocityDataObject = yoPointVelocityDataObjects.get(i);
             boolean frameOK = yoPointVelocityDataObject.getReferenceFrame() == referenceFrame;
             boolean isAvailable = !validMap.get(yoPointVelocityDataObject).getBooleanValue();
             if (frameOK && isAvailable)

@@ -3,7 +3,6 @@ package us.ihmc.sensorProcessing.stateEstimation;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,7 +23,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 public class YoPointPositionDataObjectListOutputPort extends ControlFlowOutputPort<Set<PointPositionDataObject>>
 {
    private final YoVariableRegistry registry;
-   private final List<YoPointPositionDataObject> yoPointPositionDataObjects = new ArrayList<YoPointPositionDataObject>();
+   private final ArrayList<YoPointPositionDataObject> yoPointPositionDataObjects = new ArrayList<YoPointPositionDataObject>();
    private final Map<YoPointPositionDataObject, BooleanYoVariable> validMap = new LinkedHashMap<YoPointPositionDataObject, BooleanYoVariable>();
    private final String namePrefix;
    private final AfterJointReferenceFrameNameMap referenceFrameMap;  
@@ -43,8 +42,9 @@ public class YoPointPositionDataObjectListOutputPort extends ControlFlowOutputPo
       Set<PointPositionDataObject> data = super.getData();
       data.clear();
 
-      for (YoPointPositionDataObject yoPointPositionDataObject : yoPointPositionDataObjects)
+      for(int i = 0; i <  yoPointPositionDataObjects.size(); i++)
       {
+         final YoPointPositionDataObject yoPointPositionDataObject = yoPointPositionDataObjects.get(i);
          if (validMap.get(yoPointPositionDataObject).getBooleanValue())
             data.add(yoPointPositionDataObject);
       }
@@ -65,8 +65,9 @@ public class YoPointPositionDataObjectListOutputPort extends ControlFlowOutputPo
 
          YoPointPositionDataObject yoPointPositionDataObjectToUse = null;
 
-         for (YoPointPositionDataObject yoPointPositionDataObject : yoPointPositionDataObjects)
+         for(int i = 0; i <  yoPointPositionDataObjects.size(); i++)
          {
+            YoPointPositionDataObject yoPointPositionDataObject = yoPointPositionDataObjects.get(i);
             boolean frameOK = yoPointPositionDataObject.getBodyFixedReferenceFrameName() == referenceFrameName;
             boolean isAvailable = !validMap.get(yoPointPositionDataObject).getBooleanValue();
             if (frameOK && isAvailable)

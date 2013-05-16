@@ -1,7 +1,6 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.ejml.alg.dense.mult.MatrixVectorMult;
@@ -9,7 +8,6 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.AbstractControlFlowElement;
-import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.kalman.YoKalmanFilter;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.MeasurementModelElement;
@@ -23,12 +21,12 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
    
    protected final YoVariableRegistry registry;
    protected ComposableStateEstimatorKalmanFilter kalmanFilter;
-   private final List<Runnable> postStateChangeRunnables = new ArrayList<Runnable>();
+   private final ArrayList<Runnable> postStateChangeRunnables = new ArrayList<Runnable>();
    private final ProcessModelAssembler processModelAssembler;
    private final SummaryStatistics statistics = new SummaryStatistics();
 
    // model elements
-   private final List<MeasurementModelElement> measurementModelElements = new ArrayList<MeasurementModelElement>();
+   private final ArrayList<MeasurementModelElement> measurementModelElements = new ArrayList<MeasurementModelElement>();
 
    public ComposableStateEstimator(String name, double controlDT, YoVariableRegistry parentRegistry)
    {
@@ -136,9 +134,9 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
    
    private void runPostStateChangeRunnables()
    {
-      for (Runnable runnable : postStateChangeRunnables)
+      for(int i = 0; i <  postStateChangeRunnables.size(); i++)
       {
-         runnable.run();
+         postStateChangeRunnables.get(i).run();
       }
    }
    

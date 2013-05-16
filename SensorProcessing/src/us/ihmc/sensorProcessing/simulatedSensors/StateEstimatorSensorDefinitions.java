@@ -1,7 +1,6 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -26,27 +25,27 @@ public class StateEstimatorSensorDefinitions
    {
    }
 
-   public List<OneDoFJoint> getJointPositionSensorDefinitions()
+   public ArrayList<OneDoFJoint> getJointPositionSensorDefinitions()
    {
       return oneDoFJointsForPositionSensors;
    }
 
-   public List<OneDoFJoint> getJointVelocitySensorDefinitions()
+   public ArrayList<OneDoFJoint> getJointVelocitySensorDefinitions()
    {
       return oneDoFJointsForVelocitySensors;
    }
 
-   public List<IMUDefinition> getOrientationSensorDefinitions()
+   public ArrayList<IMUDefinition> getOrientationSensorDefinitions()
    {
       return imuDefinitionsForOrientationSensors;
    }
 
-   public List<IMUDefinition> getAngularVelocitySensorDefinitions()
+   public ArrayList<IMUDefinition> getAngularVelocitySensorDefinitions()
    {
       return imuDefinitionsForAngularVelocitySensors;
    }
 
-   public List<IMUDefinition> getLinearAccelerationSensorDefinitions()
+   public ArrayList<IMUDefinition> getLinearAccelerationSensorDefinitions()
    {
       return imuDefinitionsForLinearAccelerationSensors;
    }

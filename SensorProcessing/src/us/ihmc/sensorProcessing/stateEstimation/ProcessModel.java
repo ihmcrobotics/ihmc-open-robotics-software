@@ -68,22 +68,22 @@ public class ProcessModel
 
    public void propagateState()
    {
-      for (ProcessModelElementGroup processModelElementGroup : processModelElementGroups)
+      for(int i = 0; i <  processModelElementGroups.size(); i++)
       {
-         processModelElementGroup.propagateState();
+         processModelElementGroups.get(i).propagateState();
       }
    }
 
    public void correctState(DenseMatrix64F correction)
    {
       int startIndex = 0;
-      for (ProcessModelElementGroup processModelElementGroup : processModelElementGroups)
+      for(int i = 0; i <  processModelElementGroups.size(); i++)
       {
-         int stateMatrixSize = processModelElementGroup.getStateMatrixSize();
+         int stateMatrixSize = processModelElementGroups.get(i).getStateMatrixSize();
          correctionBlock.reshape(stateMatrixSize, 1);
          CommonOps.extract(correction, startIndex, startIndex + stateMatrixSize, 0, 1, correctionBlock, 0, 0);
 
-         processModelElementGroup.correctState(correctionBlock);
+         processModelElementGroups.get(i).correctState(correctionBlock);
          startIndex += stateMatrixSize;
       }
    }
