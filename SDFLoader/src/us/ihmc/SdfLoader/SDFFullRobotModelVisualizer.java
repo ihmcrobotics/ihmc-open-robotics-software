@@ -30,13 +30,16 @@ public class SDFFullRobotModelVisualizer implements RawOutputWriter
    private SixDoFJoint rootJoint;
    private final ArrayList<Pair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<Pair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
 
-   private final SCSUpdateRunner scsUpdateRunner = new SCSUpdateRunner();
+   private final SCSUpdateRunner scsUpdateRunner;
    private final Executor scsUpdaterExecutor = Executors.newSingleThreadExecutor();
    private final AtomicBoolean updaterIsRunning = new AtomicBoolean(false); 
    
-   public SDFFullRobotModelVisualizer(SDFRobot robot, double estimatorDT)
+   public SDFFullRobotModelVisualizer(SDFRobot robot, int estimatorTicksPerSCSTickAndUpdate, double estimatorDT)
    {
+	  scsUpdateRunner = new SCSUpdateRunner(estimatorTicksPerSCSTickAndUpdate);
+	   
       this.name = robot.getName() + "SimulatedSensorReader";
+      
       this.robot = robot;
       this.estimatorDT = estimatorDT;
    }
@@ -115,15 +118,28 @@ public class SDFFullRobotModelVisualizer implements RawOutputWriter
 
    private class SCSUpdateRunner implements Runnable
    {
-
-      public void run()
+	   private final int ticksPerRecord;
+	   private int counts = 0;
+	   
+	   public SCSUpdateRunner(int ticksPerRecord)
+	   {
+		   this.ticksPerRecord = ticksPerRecord;
+	   }
+	   
+	   public void run()
       {
-         if(scs != null)
+         counts++;
+         if (counts >= ticksPerRecord)
          {
-            scs.tickAndUpdate();
+            if (scs != null)
+            {
+               scs.tickAndUpdate();
+            }
+
+            counts = 0;
          }
+
          updaterIsRunning.set(false);
       }
-      
    }
 }
