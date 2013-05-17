@@ -22,6 +22,10 @@ public interface InstantaneousCapturePointPlanner
    public abstract void reset(double time);
 
    public abstract boolean isDone(double time);
+   
+   public abstract double getEstimatedTimeRemainingForState(double time);
+   
+   public abstract boolean isPerformingICPDoubleSupport();
 
    public abstract FramePoint2d getFinalDesiredICP();
 

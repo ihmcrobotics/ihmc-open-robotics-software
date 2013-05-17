@@ -34,8 +34,10 @@ public class SmoothICPComputer
    private final DoubleYoVariable icpForwardFromCenter = new DoubleYoVariable("icpForwardFromCenter", registry);
 
    private final BooleanYoVariable isDoubleSupport = new BooleanYoVariable("icpPlannerIsDoubleSupport", registry);
-   private final DoubleYoVariable timeInState = new DoubleYoVariable("timeInState", registry);
-   private final DoubleYoVariable initialTime = new DoubleYoVariable("initialTime", registry);
+   private final DoubleYoVariable timeInState = new DoubleYoVariable("icpPlannerTimeInState", registry);
+   private final DoubleYoVariable estimatedTimeRemainingForState = new DoubleYoVariable("icpPlannerEstiTimeRemaining", registry);
+   
+   private final DoubleYoVariable initialTime = new DoubleYoVariable("icpPlannerInitialTime", registry);
    private final BooleanYoVariable comeToStop = new BooleanYoVariable("icpPlannerComeToStop", registry);
    private final BooleanYoVariable atAStop = new BooleanYoVariable("icpPlannerAtAStop", registry);
 
@@ -365,7 +367,7 @@ public class SmoothICPComputer
 
    public void getICPPositionAndVelocity(Point3d icpPostionToPack, Vector3d icpVelocityToPack, Point3d ecmpToPack, double time)
    {
-      timeInState.set(time - initialTime.getDoubleValue());
+      computeTimeInStateAndEstimatedTimeRemaining(time);
 
       if (isDoubleSupport.getBooleanValue())
          getICPPositionAndVelocityDoubleSupport(icpPostionToPack, icpVelocityToPack, ecmpToPack, timeInState.getDoubleValue());
@@ -482,28 +484,46 @@ public class SmoothICPComputer
       initializeDoubleSupport(footLocationList, singleSupportDuration, doubleSupportDuration, omega0, initialTime, stopIfReachedEnd);
    }
 
-   public boolean isDone(double time)
+   private void computeTimeInStateAndEstimatedTimeRemaining(double time)
    {
       timeInState.set(time - initialTime.getDoubleValue());
+
       if (isDoubleSupport.getBooleanValue())
       {
          if (isInitialTransfer.getBooleanValue())
          {
-            return timeInState.getDoubleValue() > doubleSupportInitialTransferDuration.getDoubleValue();
+            estimatedTimeRemainingForState.set(doubleSupportInitialTransferDuration.getDoubleValue() - timeInState.getDoubleValue());
          }
 
          else 
          {
-            return timeInState.getDoubleValue() > doubleSupportDuration.getDoubleValue();
+            estimatedTimeRemainingForState.set(doubleSupportDuration.getDoubleValue()  - timeInState.getDoubleValue());
          }
       }
+      else estimatedTimeRemainingForState.set(singleSupportDuration.getDoubleValue() - timeInState.getDoubleValue());
+   }
+   
+   public boolean isDone(double time)
+   {
+      computeTimeInStateAndEstimatedTimeRemaining(time);
 
-      else return timeInState.getDoubleValue() > singleSupportDuration.getDoubleValue();
+      return (estimatedTimeRemainingForState.getDoubleValue() <= 0.0);
    }
 
    public Point3d getUpcomingCornerPoint()
    {
       return upcomingCornerPoint;
+   } 
+   
+   public double getEstimatedTimeRemainingForState(double time)
+   {
+      return estimatedTimeRemainingForState.getDoubleValue();
+   }
+
+
+   public boolean isPerformingICPDoubleSupport()
+   {
+       return isDoubleSupport.getBooleanValue();
    }
    
    

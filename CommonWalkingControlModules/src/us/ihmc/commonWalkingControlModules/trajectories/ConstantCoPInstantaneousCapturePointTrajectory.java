@@ -134,4 +134,10 @@ public class ConstantCoPInstantaneousCapturePointTrajectory implements Instantan
          super("Move time negative. moveTime = " + moveTime);
       }
    }
+
+
+   public double getEstimatedTimeRemainingForState(double time)
+   {
+      return currentTime.getDoubleValue() - moveTime.getDoubleValue();
+   }
 }
