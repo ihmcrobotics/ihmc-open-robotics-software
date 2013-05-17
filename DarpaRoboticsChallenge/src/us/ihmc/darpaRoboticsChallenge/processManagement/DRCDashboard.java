@@ -1,7 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.processManagement;
 
 import java.awt.Color;
-import java.awt.FocusTraversalPolicy;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -114,7 +113,15 @@ public class DRCDashboard
 
    public DRCDashboard()
    {
-      
+      setNativeLookAndFeel();
+
+      instance = this;
+
+      initConfig();
+   }
+
+   private void setNativeLookAndFeel()
+   {
       try
       {
          UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -139,10 +146,6 @@ public class DRCDashboard
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
-      
-      instance = this;
-
-      initConfig();
    }
 
    private void initConfig()
@@ -200,7 +203,6 @@ public class DRCDashboard
                   taskCombo.setSelectedItem(DRCPluginTasks.valueOf(taskOption));
                else
                   taskCombo.setSelectedItem(DRCROSTasks.valueOf(taskOption));
-
             }
          }
          reader.close();
@@ -266,7 +268,7 @@ public class DRCDashboard
       if (shouldLoadConfig)
          loadConfig();
 
-      startTimers();     
+      startTimers();
 
       //            frame.setSize(760, 510);
       //      frame.setResizable(true);
@@ -555,7 +557,7 @@ public class DRCDashboard
                         JOptionPane.showMessageDialog(frame, "Machine is offline!", "ROS/Gazebo Sim Launch Error", JOptionPane.ERROR_MESSAGE);
                      }
                   }
-                  
+
                }
             });
       }
@@ -614,7 +616,7 @@ public class DRCDashboard
       radioGroup = new ButtonGroup();
       useDefaultButton = new JRadioButton("Use ROS Synchronization Layer", true);
       useDefaultButton.setActionCommand("default");
-      usePluginButton = new JRadioButton("Use Jesper Plügin Synchronization");
+      usePluginButton = new JRadioButton("Use Jesper Pl\u00FCgin Synchronization");
       usePluginButton.setActionCommand("plugin");
 
       radioGroup.add(useDefaultButton);
@@ -802,8 +804,8 @@ public class DRCDashboard
       frame.setSize(1000, 520);
       frame.setResizable(false);
       frame.setVisible(true);
-      
-      taskCombo.requestFocus();  
+
+      taskCombo.requestFocus();
    }
 
    public void reinitGui()
