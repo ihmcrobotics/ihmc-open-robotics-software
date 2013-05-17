@@ -11,6 +11,7 @@ import javax.vecmath.Quat4d;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.input.ModifierKeyInterface;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
+import us.ihmc.utilities.math.geometry.RotationFunctions;
 
 public class Graphics3DNode
 {
@@ -37,6 +38,7 @@ public class Graphics3DNode
 
    public synchronized void setTransform(Transform3D transform)
    {
+      assert(!RotationFunctions.isNaNorInf(transform));
       this.transform.set(transform);
    }
 
