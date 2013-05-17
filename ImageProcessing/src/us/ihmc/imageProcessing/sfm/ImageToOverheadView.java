@@ -10,8 +10,6 @@ import georegression.struct.se.Se3_F64;
 import georegression.transform.se.SePointOps_F64;
 import org.ejml.data.DenseMatrix64F;
 
-import javax.swing.*;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 
 /**
@@ -26,6 +24,7 @@ public class ImageToOverheadView
    IntrinsicParameters paramLeft;
    DenseMatrix64F K = new DenseMatrix64F(3,3);
 
+   // meters per pixel
    double cellSize = 0.05;
    int gridWidth = 400;
    int gridHeight = 700;
