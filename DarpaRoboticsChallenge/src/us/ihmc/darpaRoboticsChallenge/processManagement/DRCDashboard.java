@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.processManagement;
 
 import java.awt.Color;
+import java.awt.FocusTraversalPolicy;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -39,6 +40,8 @@ import javax.swing.JTree;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.BevelBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -111,6 +114,32 @@ public class DRCDashboard
 
    public DRCDashboard()
    {
+      
+      try
+      {
+         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+      }
+      catch (ClassNotFoundException e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+      catch (InstantiationException e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+      catch (IllegalAccessException e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+      catch (UnsupportedLookAndFeelException e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+      
       instance = this;
 
       initConfig();
@@ -237,7 +266,7 @@ public class DRCDashboard
       if (shouldLoadConfig)
          loadConfig();
 
-      startTimers();
+      startTimers();     
 
       //            frame.setSize(760, 510);
       //      frame.setResizable(true);
@@ -773,6 +802,8 @@ public class DRCDashboard
       frame.setSize(1000, 520);
       frame.setResizable(false);
       frame.setVisible(true);
+      
+      taskCombo.requestFocus();  
    }
 
    public void reinitGui()
