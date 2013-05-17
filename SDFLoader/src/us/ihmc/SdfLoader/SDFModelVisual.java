@@ -15,7 +15,7 @@ public class SDFModelVisual extends Graphics3DObject
       resourceDirectories = generalizedSDFRobotModel.getResourceDirectories();
       ArrayList<SDFLinkHolder> rootLinks = generalizedSDFRobotModel.getRootLinks();
       
-      Transform3D modelTransform = new Transform3D(generalizedSDFRobotModel.getTransformToRoot());
+      Transform3D modelTransform = generalizedSDFRobotModel.getTransformToRoot();
       for(SDFLinkHolder link : rootLinks)
       {  
          recursivelyAddLinks(link, modelTransform);
@@ -26,13 +26,6 @@ public class SDFModelVisual extends Graphics3DObject
    {
       if(link.getVisuals() != null)
       {
-
-//         Vector3d translation = new Vector3d();
-//         modelTransform.get(translation);
-//         translation.setX(translation.getX() + 0.25);
-//         translation.setZ(1.0);
-//         modelTransform.setTranslation(translation);
-         
          
          Transform3D transformToModel = new Transform3D(modelTransform);
          transformToModel.mul(link.getTransformFromModelReferenceFrame());
