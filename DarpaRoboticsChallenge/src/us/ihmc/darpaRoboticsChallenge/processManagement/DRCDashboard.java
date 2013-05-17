@@ -713,7 +713,7 @@ public class DRCDashboard
          }
       });
       taskPanel.add(taskCombo, c);
-
+      
       radioGroup = new ButtonGroup();
       useDefaultButton = new JRadioButton("Use ROS Synchronization Layer", true);
       usePluginButton = new JRadioButton("Use Jesper Plügin Synchronization");
@@ -751,6 +751,7 @@ public class DRCDashboard
       machineSelectionPanel.add(controllerMachineSelectionPanel, c);
       controllerMachineSelectionLabel = new JLabel("Select Controller Machine: ", JLabel.LEFT);
       controllerMachineSelectionCombo = new JComboBox(LocalCloudMachines.values());
+      controllerMachineSelectionCombo.setEnabled(false);
       controllerMachineSelectionPanel.add(controllerMachineSelectionLabel);
       controllerMachineSelectionPanel.add(controllerMachineSelectionCombo);
    }
@@ -763,6 +764,7 @@ public class DRCDashboard
       gazeboMachineSelectionLabel = new JLabel("Select Gazebo Machine: ", JLabel.LEFT);
       gazeboMachineSelectionPanel.add(gazeboMachineSelectionLabel);
       gazeboMachineSelectionCombo = new JComboBox(LocalCloudMachines.values());
+      gazeboMachineSelectionCombo.setEnabled(false);
       gazeboMachineSelectionPanel.add(gazeboMachineSelectionCombo);
 
       gazeboMachineSelectionCombo.addActionListener(new ActionListener()
@@ -790,8 +792,8 @@ public class DRCDashboard
       machineSelectionPanel.add(cloudMachineInfoPanel, c);
       cloudMachineHostnameLabel = new JLabel(updatedCloudHostnameString());
       cloudMachineIPAddressLabel = new JLabel(updatedCloudIpAddressString());
-      cloudMachineInfoPanel.add(cloudMachineHostnameLabel);
-      cloudMachineInfoPanel.add(cloudMachineIPAddressLabel);
+//      cloudMachineInfoPanel.add(cloudMachineHostnameLabel);
+//      cloudMachineInfoPanel.add(cloudMachineIPAddressLabel);
       c.insets = new Insets(5, 5, 5, 5);
    }
 
