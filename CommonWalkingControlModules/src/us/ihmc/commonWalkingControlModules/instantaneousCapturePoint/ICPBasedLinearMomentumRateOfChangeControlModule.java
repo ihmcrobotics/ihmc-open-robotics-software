@@ -25,6 +25,8 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 
 public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractControlFlowElement implements ICPBasedMomentumRateOfChangeControlModule
 {
+   private static final boolean KEEP_CMP_INSIDE_SUPPORT_POLYGON = false;
+   
    private final ControlFlowInputPort<Double> desiredCenterOfMassHeightAccelerationInputPort = createInputPort("desiredCenterOfMassHeightAccelerationInputPort");
    private final ControlFlowInputPort<BipedSupportPolygons> bipedSupportPolygonsInputPort = createInputPort("bipedSupportPolygonsInputPort");
    private final ControlFlowInputPort<RobotSide> supportLegInputPort = createInputPort("supportLegInputPort");
@@ -82,16 +84,19 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
       FrameConvexPolygon2d supportPolygon = bipedSupportPolygonsInputPort.getData().getSupportPolygonInMidFeetZUp();
       desiredCMP.changeFrame(supportPolygon.getReferenceFrame());
 
-      if (supportPolygon.isPointInside(desiredCMP))
+      if (KEEP_CMP_INSIDE_SUPPORT_POLYGON)
       {
-         cmpProjected.set(false);
+    	  if (supportPolygon.isPointInside(desiredCMP))
+    	  {
+    		  cmpProjected.set(false);
+    	  }
+    	  else
+    	  {
+    		  supportPolygon.orthogonalProjection(desiredCMP);
+    		  cmpProjected.set(true);
+    	  }
       }
-      else
-      {
-         supportPolygon.orthogonalProjection(desiredCMP);
-         cmpProjected.set(true);
-      }
-
+      
       desiredCMP.changeFrame(this.desiredCMP.getReferenceFrame());
       this.desiredCMP.set(desiredCMP);
 
