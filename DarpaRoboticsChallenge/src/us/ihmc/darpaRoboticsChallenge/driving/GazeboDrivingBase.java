@@ -1,17 +1,14 @@
 package us.ihmc.darpaRoboticsChallenge.driving;
 
-import org.ros.RosRun;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
-
 import rosgraph_msgs.Clock;
 import sensor_msgs.CompressedImage;
 import std_msgs.Int8;
-import std_msgs.Time;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.keyboardAndMouse.RepeatingReleasedEventsFixer;
@@ -22,7 +19,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
-import java.net.URISyntaxException;
 
 /**
  * Modified from {@link us.ihmc.darpaRoboticsChallenge.DRCGazeboDrivingInterface}.
@@ -40,7 +36,7 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 	private Subscriber<CompressedImage> leftEyeImageSubscriber, rightEyeImageSubscriber;
 	private BufferedImage leftEyeImage, rightEyeImage;
 
-	private Subscriber<std_msgs.Float64> steeringWheelStateSubscriber, handBrakeStateSubscriber, gasPedalStateSubscriber, brakePedalStateSubscriber;
+   protected Subscriber<std_msgs.Float64> steeringWheelStateSubscriber, handBrakeStateSubscriber, gasPedalStateSubscriber, brakePedalStateSubscriber;
 
    protected Publisher<Int8> directionPublisher;
    Int8 directionCommand;
