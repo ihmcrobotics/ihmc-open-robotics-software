@@ -9,6 +9,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -96,11 +105,104 @@ public class DRCDashboard
 
    private ArrayList<LocalCloudMachines> userOwnedSims = new ArrayList<DRCLocalCloudConfig.LocalCloudMachines>();
 
+   private File configFileHandle;
+   private boolean shouldLoadConfig = false;
+
    public DRCDashboard()
    {
       instance = this;
 
+      initConfig();
+
       startTimedSignalers();
+   }
+
+   private void initConfig()
+   {
+      String fileName = "dashboard.prefs";
+
+      File configFile = new File(fileName);
+
+      if (configFile.exists() && configFile.length() > 0)
+      {
+         configFileHandle = configFile;
+         shouldLoadConfig = true;
+      }
+      else
+      {
+         try
+         {
+            configFile.createNewFile();
+            configFileHandle = configFile;
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
+         }
+      }
+   }
+
+   private void loadConfig()
+   {
+      try
+      {
+         BufferedReader reader = new BufferedReader(new FileReader(configFileHandle));
+         String line;
+         while (!(line = reader.readLine()).equals("END"))
+         {            
+            if (line != null && line.startsWith("PLUGIN:"))
+            {
+               String pluginOption = line.substring(line.indexOf(":") + 1, line.length());
+               if (pluginOption.contains("plugin"))
+               {
+                  radioGroup.setSelected(usePluginButton.getModel(), true);                  
+               }
+               else
+               {
+                  radioGroup.setSelected(useDefaultButton.getModel(), true);                  
+               }
+            }
+            if (line != null && line.startsWith("TASK:"))
+            {
+               String taskOption = line.substring(line.indexOf(":") + 1, line.length());
+
+               taskCombo.setSelectedItem(DRCTask.valueOf(taskOption));
+            }
+         }
+         reader.close();
+      }
+      catch (FileNotFoundException e)
+      {
+         e.printStackTrace();
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+   }
+
+   private void writeConfigFile()
+   {
+      System.out.println("Writing config...");
+      String taskOption = taskCombo.getSelectedItem().toString();
+      String pluginOption = radioGroup.getSelection().getActionCommand();      
+
+      try
+      {
+         BufferedWriter fileWriter = new BufferedWriter(new FileWriter(configFileHandle));
+         fileWriter.write("PLUGIN:" + pluginOption);
+         fileWriter.newLine();
+         fileWriter.write("TASK:" + taskOption);
+         fileWriter.newLine();
+         fileWriter.write("END");
+         fileWriter.flush();
+         fileWriter.close();
+      }
+      catch (IOException e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
    }
 
    private void setupJFrame()
@@ -125,11 +227,64 @@ public class DRCDashboard
 
       updateNetworkStatus();
 
+      setupFrameCloseListener();
+      
+      if (shouldLoadConfig)
+         loadConfig();
+
       //            frame.setSize(760, 510);
       //      frame.setResizable(true);
 
       //      System.out.println(frame.getWidth());
       //      System.out.println(frame.getHeight());
+   }
+
+   private void setupFrameCloseListener()
+   {
+      frame.addWindowListener(new WindowListener()
+      {
+
+         public void windowOpened(WindowEvent arg0)
+         {
+            // TODO Auto-generated method stub
+
+         }
+
+         public void windowIconified(WindowEvent arg0)
+         {
+            // TODO Auto-generated method stub
+
+         }
+
+         public void windowDeiconified(WindowEvent arg0)
+         {
+            // TODO Auto-generated method stub
+
+         }
+
+         public void windowDeactivated(WindowEvent arg0)
+         {
+            // TODO Auto-generated method stub
+
+         }
+
+         public void windowClosing(WindowEvent arg0)
+         {
+            writeConfigFile();
+         }
+
+         public void windowClosed(WindowEvent arg0)
+         {
+            // TODO Auto-generated method stub
+
+         }
+
+         public void windowActivated(WindowEvent arg0)
+         {
+            // TODO Auto-generated method stub
+
+         }
+      });
    }
 
    private void initializeLayout()
@@ -323,7 +478,7 @@ public class DRCDashboard
                         String[] options = new String[] { "Yes", "No" };
                         int n = JOptionPane.showOptionDialog(frame, "Do you want to kill your sim running on " + gazeboMachine.toString() + "?",
                               "Confirm Kill ROS/Gazebo Sim", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]);
-                        
+
                         if (n == 0)
                         {
                            sshSimLauncher.killSim(gazeboMachine, controllerMachine);
