@@ -799,7 +799,7 @@ public class DRCDashboard
       java.util.Timer updateNetStatusTimer = new java.util.Timer();
 
       redrawTimer.start();
-      updateNetStatusTimer.scheduleAtFixedRate(new TimerTask()
+      updateNetStatusTimer.schedule(new TimerTask()
       {
          @Override
          public void run()
