@@ -55,7 +55,7 @@ public class DRCSimulationFactory
          ScsInitialSetup scsInitialSetup, GuiInitialSetup guiInitialSetup, ObjectCommunicator networkProccesorCommunicator)
    {
       GUISetterUpperRegistry guiSetterUpperRegistry = new GUISetterUpperRegistry();
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry(false);
 
       DRCRobotJointMap jointMap = robotInterface.getJointMap();
 
@@ -69,7 +69,7 @@ public class DRCSimulationFactory
       YoVariableRegistry registry = simulatedRobot.getRobotsYoVariableRegistry();
       simulatedRobot.setDynamicIntegrationMethod(scsInitialSetup.getDynamicIntegrationMethod());
 
-      DRCOutputWriter drcOutputWriter = new DRCSimulationOutputWriter(simulatedRobot, controlDT);
+      DRCOutputWriter drcOutputWriter = new DRCSimulationOutputWriter(simulatedRobot, dynamicGraphicObjectsListRegistry);
 
       // TODO: Build LIDAR here
       LidarControllerInterface lidarControllerInterface;
