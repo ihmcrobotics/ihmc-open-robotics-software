@@ -20,6 +20,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.TimerTask;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -112,9 +113,7 @@ public class DRCDashboard
    {
       instance = this;
 
-      initConfig();
-
-      startTimedSignalers();
+      initConfig();      
    }
 
    private void initConfig()
@@ -149,17 +148,17 @@ public class DRCDashboard
          BufferedReader reader = new BufferedReader(new FileReader(configFileHandle));
          String line;
          while (!(line = reader.readLine()).equals("END"))
-         {            
+         {
             if (line != null && line.startsWith("PLUGIN:"))
             {
                String pluginOption = line.substring(line.indexOf(":") + 1, line.length());
                if (pluginOption.contains("plugin"))
                {
-                  radioGroup.setSelected(usePluginButton.getModel(), true);                  
+                  radioGroup.setSelected(usePluginButton.getModel(), true);
                }
                else
                {
-                  radioGroup.setSelected(useDefaultButton.getModel(), true);                  
+                  radioGroup.setSelected(useDefaultButton.getModel(), true);
                }
             }
             if (line != null && line.startsWith("TASK:"))
@@ -185,7 +184,7 @@ public class DRCDashboard
    {
       System.out.println("Writing config...");
       String taskOption = taskCombo.getSelectedItem().toString();
-      String pluginOption = radioGroup.getSelection().getActionCommand();      
+      String pluginOption = radioGroup.getSelection().getActionCommand();
 
       try
       {
@@ -228,9 +227,11 @@ public class DRCDashboard
       updateNetworkStatus();
 
       setupFrameCloseListener();
-      
+
       if (shouldLoadConfig)
          loadConfig();
+      
+      startTimedSignalers();
 
       //            frame.setSize(760, 510);
       //      frame.setResizable(true);
@@ -795,28 +796,28 @@ public class DRCDashboard
          }
       });
 
-      Timer netStatTimer = new Timer(10000, new ActionListener()
+      java.util.Timer updateNetStatusTimer = new java.util.Timer();
+
+      redrawTimer.start();
+      updateNetStatusTimer.scheduleAtFixedRate(new TimerTask()
       {
-         public void actionPerformed(ActionEvent e)
+         @Override
+         public void run()
          {
             updateNetworkStatus();
          }
-      });
-
-      redrawTimer.start();
-      netStatTimer.start();
+      }, 0l, 5000l);
    }
 
    private void updateNetworkStatus()
    {
+      updateStatusIndicators();
+      updateRemoteProcessListings();
+
       SwingUtilities.invokeLater(new Runnable()
       {
          public void run()
          {
-            updateStatusIndicators();
-
-            updateRemoteProcessListings();
-
             ((JPanel) networkStatusScrollPane.getViewport().getView()).repaint();
          }
       });
