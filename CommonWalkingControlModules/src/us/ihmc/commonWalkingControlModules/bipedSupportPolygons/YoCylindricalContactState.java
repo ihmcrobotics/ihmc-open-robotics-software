@@ -76,7 +76,7 @@ public class YoCylindricalContactState implements CylindricalContactState
    public boolean isInContact()
    {
       this.cylinderFrame.update();
-      cylinderRefererenceFrameGraphic.update();
+//      cylinderRefererenceFrameGraphic.update();
       return inContact.getBooleanValue();
    }
 
