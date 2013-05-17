@@ -24,6 +24,7 @@ import java.util.TimerTask;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
@@ -50,7 +51,8 @@ import us.ihmc.darpaRoboticsChallenge.DRCGazeboDrivingInterface;
 import us.ihmc.darpaRoboticsChallenge.ExternalCameraFeed;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig.LocalCloudMachines;
-import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCTask;
+import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCPluginTasks;
+import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCROSTasks;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 
@@ -113,7 +115,7 @@ public class DRCDashboard
    {
       instance = this;
 
-      initConfig();      
+      initConfig();
    }
 
    private void initConfig()
@@ -146,12 +148,12 @@ public class DRCDashboard
       try
       {
          BufferedReader reader = new BufferedReader(new FileReader(configFileHandle));
-         String line;
+         String line, pluginOption = "default";
          while (!(line = reader.readLine()).equals("END"))
          {
             if (line != null && line.startsWith("PLUGIN:"))
             {
-               String pluginOption = line.substring(line.indexOf(":") + 1, line.length());
+               pluginOption = line.substring(line.indexOf(":") + 1, line.length());
                if (pluginOption.contains("plugin"))
                {
                   radioGroup.setSelected(usePluginButton.getModel(), true);
@@ -164,8 +166,14 @@ public class DRCDashboard
             if (line != null && line.startsWith("TASK:"))
             {
                String taskOption = line.substring(line.indexOf(":") + 1, line.length());
+               
+               forceTaskComboUpdate();
+               
+               if (pluginOption.contains("plugin"))
+                  taskCombo.setSelectedItem(DRCPluginTasks.valueOf(taskOption));
+               else
+                  taskCombo.setSelectedItem(DRCROSTasks.valueOf(taskOption));
 
-               taskCombo.setSelectedItem(DRCTask.valueOf(taskOption));
             }
          }
          reader.close();
@@ -230,7 +238,7 @@ public class DRCDashboard
 
       if (shouldLoadConfig)
          loadConfig();
-      
+
       startTimers();
 
       //            frame.setSize(760, 510);
@@ -238,6 +246,28 @@ public class DRCDashboard
 
       //      System.out.println(frame.getWidth());
       //      System.out.println(frame.getHeight());
+   }
+   
+   private void forceTaskComboUpdate()
+   {
+      DefaultComboBoxModel model = (DefaultComboBoxModel) taskCombo.getModel();
+      
+      model.removeAllElements();
+      
+      if (radioGroup.getSelection().getActionCommand().contains("plugin"))
+      {
+         for (DRCPluginTasks task : DRCPluginTasks.values())
+         {
+            model.addElement(task);
+         }
+      }
+      else
+      {
+         for (DRCROSTasks task : DRCROSTasks.values())
+         {
+            model.addElement(task);
+         }
+      }  
    }
 
    private void setupFrameCloseListener()
@@ -459,7 +489,7 @@ public class DRCDashboard
                   {
                      LocalCloudMachines gazeboMachine = machine;
                      LocalCloudMachines controllerMachine = (LocalCloudMachines) controllerMachineSelectionCombo.getSelectedItem();
-                     DRCTask task = (DRCTask) taskCombo.getSelectedItem();
+                     String task = taskCombo.getSelectedItem().toString();
                      String pluginOption = radioGroup.getSelection().getActionCommand();
 
                      if (!sshSimLauncher.isMachineRunningSim(gazeboMachine))
@@ -545,27 +575,9 @@ public class DRCDashboard
       taskPanel.add(taskLabel, c);
 
       c.gridy = 1;
-      taskCombo = new JComboBox(DRCDashboardTypes.DRCTask.values());
-      taskCombo.addActionListener(new ActionListener()
-      {
-         public void actionPerformed(ActionEvent e)
-         {
-            gazeboProcessListModel.clear();
 
-            //            if (taskCombo.getSelectedItem().toString().contains("DRIVING"))
-            //            {
-            //               gazeboProcessListModel.addElement("DRC Driving Interface");
-            //               
-            //               if (taskCombo.getSelectedItem().toString().contains("_WITH_EXTERNAL_CAMS"))
-            //               {
-            //                  gazeboProcessListModel.addElement("Topview Camera");
-            //                  gazeboProcessListModel.addElement("Rearview Camera");
-            //               }
-            //            }
-         }
-      });
-      taskPanel.add(taskCombo, c);
-
+      DefaultComboBoxModel model = new DefaultComboBoxModel();
+      
       radioGroup = new ButtonGroup();
       useDefaultButton = new JRadioButton("Use ROS Synchronization Layer", true);
       useDefaultButton.setActionCommand("default");
@@ -575,6 +587,48 @@ public class DRCDashboard
       radioGroup.add(useDefaultButton);
       radioGroup.add(usePluginButton);
 
+      useDefaultButton.addActionListener(new ActionListener()
+      {
+         public void actionPerformed(ActionEvent e)
+         {
+            ((DefaultComboBoxModel) taskCombo.getModel()).removeAllElements();
+            for (DRCROSTasks task : DRCROSTasks.values())
+            {
+               ((DefaultComboBoxModel) taskCombo.getModel()).addElement(task);
+            }
+         }
+      });
+
+      usePluginButton.addActionListener(new ActionListener()
+      {
+         public void actionPerformed(ActionEvent e)
+         {
+            ((DefaultComboBoxModel) taskCombo.getModel()).removeAllElements();
+            for (DRCPluginTasks task : DRCPluginTasks.values())
+            {
+               ((DefaultComboBoxModel) taskCombo.getModel()).addElement(task);
+            }
+         }
+      });
+
+      if (radioGroup.getSelection().getActionCommand().contains("plugin"))
+      {
+         for (DRCPluginTasks task : DRCPluginTasks.values())
+         {
+            model.addElement(task);
+         }
+      }
+      else
+      {
+         for (DRCROSTasks task : DRCROSTasks.values())
+         {
+            model.addElement(task);
+         }
+      }
+
+      taskCombo = new JComboBox(model);
+      taskPanel.add(taskCombo, c);
+      
       c.weightx = 0;
       c.gridx = 1;
       c.gridy = 0;

@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -48,10 +47,9 @@ public class DRCRemoteProcessManager extends Thread
    private static volatile ConcurrentHashMap<LocalCloudMachines, MutableBoolean> availability = new ConcurrentHashMap<LocalCloudMachines, MutableBoolean>();
    private static volatile ConcurrentHashMap<LocalCloudMachines, MutableBoolean> isRunningRos = new ConcurrentHashMap<DRCLocalCloudConfig.LocalCloudMachines, MutableBoolean>();
    private static volatile ConcurrentHashMap<LocalCloudMachines, MutableBoolean> isRunningController = new ConcurrentHashMap<DRCLocalCloudConfig.LocalCloudMachines, MutableBoolean>();
-
-   // You get permission to issue kill commands to these guys.  Can't kill other people's sims, cuz that's a dick move.
-   private ArrayList<LocalCloudMachines> userOwnedSims = new ArrayList<LocalCloudMachines>();
-   private ArrayList<LocalCloudMachines> userOwnedControllers = new ArrayList<LocalCloudMachines>();
+   
+   private static final int REACHABLE_TIMEOUT = 3000;
+   private static final int CONNECTION_TIMEOUT = 3000;
 
    public void run()
    {
@@ -168,7 +166,7 @@ public class DRCRemoteProcessManager extends Thread
          channel.setOutputStream(System.out);
          channel.setInputStream(null);
 
-         channel.connect(30000);
+         channel.connect(CONNECTION_TIMEOUT);
 
          shellChannels.put(session, channel);
       }
@@ -187,7 +185,7 @@ public class DRCRemoteProcessManager extends Thread
             if (machine != LocalCloudMachines.LOCALHOST)
             {
                initCredentials(machine);
-               if (InetAddress.getByName(ip).isReachable(500))
+               if (InetAddress.getByName(ip).isReachable(REACHABLE_TIMEOUT))
                {
                   availability.put(machine, new MutableBoolean(true));
                   setupSession(machine);
@@ -245,7 +243,7 @@ public class DRCRemoteProcessManager extends Thread
          {
             try
             {
-               if (InetAddress.getByName(ip).isReachable(500))
+               if (InetAddress.getByName(ip).isReachable(REACHABLE_TIMEOUT))
                {
                   availability.get(machine).setValue(true);
 
@@ -310,7 +308,7 @@ public class DRCRemoteProcessManager extends Thread
 
          BufferedReader reader = new BufferedReader(new InputStreamReader(channel.getInputStream()));
 
-         channel.connect();
+         channel.connect(CONNECTION_TIMEOUT);
 
          String tmp = reader.readLine();
 
@@ -348,7 +346,7 @@ public class DRCRemoteProcessManager extends Thread
 
          BufferedReader reader = new BufferedReader(new InputStreamReader(channel.getInputStream()));
 
-         channel.connect();
+         channel.connect(CONNECTION_TIMEOUT);
 
          String tmp = reader.readLine();
 
@@ -386,7 +384,7 @@ public class DRCRemoteProcessManager extends Thread
 
          BufferedReader reader = new BufferedReader(new InputStreamReader(channel.getInputStream()));
 
-         channel.connect();
+         channel.connect(CONNECTION_TIMEOUT);
 
          taskName = reader.readLine();
 
