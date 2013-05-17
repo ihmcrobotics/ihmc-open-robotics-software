@@ -110,4 +110,10 @@ public class ImageToOverheadView
    {
       this.gridOffsetY = gridOffsetY;
    }
+   
+   public double getCellSize()
+   {
+      return cellSize;
+   }
+
 }
