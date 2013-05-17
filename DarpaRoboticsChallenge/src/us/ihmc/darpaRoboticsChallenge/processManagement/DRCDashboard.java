@@ -521,11 +521,12 @@ public class DRCDashboard
                                  JOptionPane.ERROR_MESSAGE);
                         }
                      }
+                     else
+                     {
+                        JOptionPane.showMessageDialog(frame, "Machine is offline!", "ROS/Gazebo Sim Launch Error", JOptionPane.ERROR_MESSAGE);
+                     }
                   }
-                  else
-                  {
-                     JOptionPane.showMessageDialog(frame, "Machine is offline!", "ROS/Gazebo Sim Launch Error", JOptionPane.ERROR_MESSAGE);
-                  }
+                  
                }
             });
       }
