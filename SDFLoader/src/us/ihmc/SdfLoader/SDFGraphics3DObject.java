@@ -87,8 +87,7 @@ public class SDFGraphics3DObject extends Graphics3DObject
             if(sdfVisual.getGeometry().getMesh().getScale() != null)
             {
                Vector3d scale = SDFConversionsHelper.stringToVector3d(sdfVisual.getGeometry().getMesh().getScale());
-               System.out.println("Not applying scale: " + scale);
-//               scale(scale);
+               scale(scale);
             }
             String submesh = null;
             boolean centerSubmesh = false;
