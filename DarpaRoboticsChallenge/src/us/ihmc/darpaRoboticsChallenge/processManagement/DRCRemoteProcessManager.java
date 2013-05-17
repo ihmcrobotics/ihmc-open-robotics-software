@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -24,7 +25,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 
-public class GazeboRemoteProcessManager
+public class DRCRemoteProcessManager extends Thread
 {
    private static final boolean DEBUG = true;
 
@@ -37,8 +38,8 @@ public class GazeboRemoteProcessManager
    private JSch jsch;
    private Properties config;
 
-   private static volatile ConcurrentHashMap<LocalCloudMachines, String> runningSimTaskNames = new ConcurrentHashMap<LocalCloudMachines, String>();
-   private static volatile ConcurrentHashMap<LocalCloudMachines, Integer> runningSimPIDs = new ConcurrentHashMap<LocalCloudMachines, Integer>();
+   private static volatile ConcurrentHashMap<LocalCloudMachines, String> runningRosTaskNames = new ConcurrentHashMap<LocalCloudMachines, String>();
+   private static volatile ConcurrentHashMap<LocalCloudMachines, Integer> runningRosPIDs = new ConcurrentHashMap<LocalCloudMachines, Integer>();
    private static volatile ConcurrentHashMap<LocalCloudMachines, Integer> runningControllerPIDs = new ConcurrentHashMap<LocalCloudMachines, Integer>();
 
    private static volatile ConcurrentHashMap<LocalCloudMachines, Session> sessions = new ConcurrentHashMap<LocalCloudMachines, Session>();
@@ -48,8 +49,12 @@ public class GazeboRemoteProcessManager
    private static volatile ConcurrentHashMap<LocalCloudMachines, MutableBoolean> availability = new ConcurrentHashMap<LocalCloudMachines, MutableBoolean>();
    private static volatile ConcurrentHashMap<LocalCloudMachines, MutableBoolean> isRunningRos = new ConcurrentHashMap<DRCLocalCloudConfig.LocalCloudMachines, MutableBoolean>();
    private static volatile ConcurrentHashMap<LocalCloudMachines, MutableBoolean> isRunningController = new ConcurrentHashMap<DRCLocalCloudConfig.LocalCloudMachines, MutableBoolean>();
-
-   public GazeboRemoteProcessManager()
+   
+   // You get permission to issue kill commands to these guys.  Can't kill other people's sims, cuz that's a dick move.
+   private ArrayList<LocalCloudMachines> userOwnedSims = new ArrayList<LocalCloudMachines>();
+   private ArrayList<LocalCloudMachines> userOwnedControllers = new ArrayList<LocalCloudMachines>();
+   
+   public void run()
    {
       jsch = new JSch();
 
@@ -98,12 +103,12 @@ public class GazeboRemoteProcessManager
 
    public String getRunningRosSimTaskName(LocalCloudMachines machine)
    {
-      return runningSimTaskNames.get(machine);
+      return runningRosTaskNames.get(machine);
    }
 
    public int getRosSimPID(LocalCloudMachines machine)
    {
-      return runningSimPIDs.get(machine);
+      return runningRosPIDs.get(machine);
    }
 
    public int getControllerPID(LocalCloudMachines machine)
@@ -191,7 +196,7 @@ public class GazeboRemoteProcessManager
                   if (getRosSimPID(machine) > 0)
                   {
                      updateRosSimTaskname(machine);
-                     runningSimTaskNames.put(machine, runningSimTaskNames.get(machine));
+                     runningRosTaskNames.put(machine, runningRosTaskNames.get(machine));
                      isRunningRos.put(machine, new MutableBoolean(true));
                   }
                   else
@@ -265,11 +270,11 @@ public class GazeboRemoteProcessManager
                   runningControllerPIDs.remove(machine);
                   runningControllerPIDs.put(machine, -1);
 
-                  runningSimPIDs.remove(machine);
-                  runningSimPIDs.put(machine, -1);
+                  runningRosPIDs.remove(machine);
+                  runningRosPIDs.put(machine, -1);
 
-                  runningSimTaskNames.remove(machine);
-                  runningSimTaskNames.put(machine, null);
+                  runningRosTaskNames.remove(machine);
+                  runningRosTaskNames.put(machine, null);
                }
             }
             catch (Exception e)
@@ -281,11 +286,11 @@ public class GazeboRemoteProcessManager
                runningControllerPIDs.remove(machine);
                runningControllerPIDs.put(machine, -1);
 
-               runningSimPIDs.remove(machine);
-               runningSimPIDs.put(machine, -1);
+               runningRosPIDs.remove(machine);
+               runningRosPIDs.put(machine, -1);
 
-               runningSimTaskNames.remove(machine);
-               runningSimTaskNames.put(machine, null);
+               runningRosTaskNames.remove(machine);
+               runningRosTaskNames.put(machine, null);
             }
          }
       }
@@ -324,8 +329,8 @@ public class GazeboRemoteProcessManager
          e.printStackTrace();
       }
 
-      runningSimPIDs.remove(machine);
-      runningSimPIDs.put(machine, pid);
+      runningRosPIDs.remove(machine);
+      runningRosPIDs.put(machine, pid);
    }
 
    private void updateControllerPID(LocalCloudMachines machine)
@@ -397,7 +402,7 @@ public class GazeboRemoteProcessManager
          e.printStackTrace();
       }
 
-      runningSimTaskNames.remove(machine);
-      runningSimTaskNames.put(machine, taskName);
+      runningRosTaskNames.remove(machine);
+      runningRosTaskNames.put(machine, taskName);
    }
 }
