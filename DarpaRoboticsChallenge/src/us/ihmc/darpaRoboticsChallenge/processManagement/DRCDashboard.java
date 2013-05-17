@@ -47,8 +47,6 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 
 import org.apache.commons.lang.WordUtils;
 
-import us.ihmc.darpaRoboticsChallenge.DRCGazeboDrivingInterface;
-import us.ihmc.darpaRoboticsChallenge.ExternalCameraFeed;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig.LocalCloudMachines;
 import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCPluginTasks;
@@ -61,7 +59,7 @@ public class DRCDashboard
    private static DRCDashboard instance;
    //   private String ROS_HOSTNAME;
    //   private String ROS_IP_ADDRESS;
-   private String ROS_MASTER_URI;
+   //   private String ROS_MASTER_URI;
 
    private GridBagConstraints c;
 
@@ -166,9 +164,9 @@ public class DRCDashboard
             if (line != null && line.startsWith("TASK:"))
             {
                String taskOption = line.substring(line.indexOf(":") + 1, line.length());
-               
+
                forceTaskComboUpdate();
-               
+
                if (pluginOption.contains("plugin"))
                   taskCombo.setSelectedItem(DRCPluginTasks.valueOf(taskOption));
                else
@@ -247,13 +245,13 @@ public class DRCDashboard
       //      System.out.println(frame.getWidth());
       //      System.out.println(frame.getHeight());
    }
-   
+
    private void forceTaskComboUpdate()
    {
       DefaultComboBoxModel model = (DefaultComboBoxModel) taskCombo.getModel();
-      
+
       model.removeAllElements();
-      
+
       if (radioGroup.getSelection().getActionCommand().contains("plugin"))
       {
          for (DRCPluginTasks task : DRCPluginTasks.values())
@@ -267,7 +265,7 @@ public class DRCDashboard
          {
             model.addElement(task);
          }
-      }  
+      }
    }
 
    private void setupFrameCloseListener()
@@ -491,38 +489,43 @@ public class DRCDashboard
                      LocalCloudMachines controllerMachine = (LocalCloudMachines) controllerMachineSelectionCombo.getSelectedItem();
                      String task = taskCombo.getSelectedItem().toString();
                      String pluginOption = radioGroup.getSelection().getActionCommand();
-
-                     if (!sshSimLauncher.isMachineRunningSim(gazeboMachine))
+                     if (sshSimLauncher.isMachineReachable(machine))
                      {
-                        String[] options = new String[] { "Yes", "No" };
-                        int n = JOptionPane.showOptionDialog(frame, "Do you want to launch " + task.toString() + " on " + gazeboMachine.toString() + "?",
-                              "Confirm Launch ROS/Gazebo Sim", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-
-                        if (n == 0)
+                        if (!sshSimLauncher.isMachineRunningSim(gazeboMachine))
                         {
-                           sshSimLauncher.launchSim(task, gazeboMachine, controllerMachine, pluginOption);
-                           userOwnedSims.add(gazeboMachine);
-                        }
-                     }
-                     else if (userOwnedSims.contains(gazeboMachine))
-                     {
-                        String[] options = new String[] { "Yes", "No" };
-                        int n = JOptionPane.showOptionDialog(frame, "Do you want to kill your sim running on " + gazeboMachine.toString() + "?",
-                              "Confirm Kill ROS/Gazebo Sim", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]);
+                           String[] options = new String[] { "Yes", "No" };
+                           int n = JOptionPane.showOptionDialog(frame, "Do you want to launch " + task.toString() + " on " + gazeboMachine.toString() + "?",
+                                 "Confirm Launch ROS/Gazebo Sim", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 
-                        if (n == 0)
-                        {
-                           sshSimLauncher.killSim(gazeboMachine, controllerMachine);
-                           userOwnedSims.remove(gazeboMachine);
+                           if (n == 0)
+                           {
+                              sshSimLauncher.launchSim(task, gazeboMachine, controllerMachine, pluginOption);
+                              userOwnedSims.add(gazeboMachine);
+                           }
                         }
-                     }
-                     else
-                     {
-                        JOptionPane.showMessageDialog(frame, "Machine is running somebody else's sim!", "ROS/Gazebo Sim Launch Error",
-                              JOptionPane.ERROR_MESSAGE);
+                        else if (userOwnedSims.contains(gazeboMachine))
+                        {
+                           String[] options = new String[] { "Yes", "No" };
+                           int n = JOptionPane.showOptionDialog(frame, "Do you want to kill your sim running on " + gazeboMachine.toString() + "?",
+                                 "Confirm Kill ROS/Gazebo Sim", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]);
+
+                           if (n == 0)
+                           {
+                              sshSimLauncher.killSim(gazeboMachine, controllerMachine);
+                              userOwnedSims.remove(gazeboMachine);
+                           }
+                        }
+                        else
+                        {
+                           JOptionPane.showMessageDialog(frame, "Machine is running somebody else's sim!", "ROS/Gazebo Sim Launch Error",
+                                 JOptionPane.ERROR_MESSAGE);
+                        }
                      }
                   }
-
+                  else
+                  {
+                     JOptionPane.showMessageDialog(frame, "Machine is offline!", "ROS/Gazebo Sim Launch Error", JOptionPane.ERROR_MESSAGE);
+                  }
                }
             });
       }
@@ -577,7 +580,7 @@ public class DRCDashboard
       c.gridy = 1;
 
       DefaultComboBoxModel model = new DefaultComboBoxModel();
-      
+
       radioGroup = new ButtonGroup();
       useDefaultButton = new JRadioButton("Use ROS Synchronization Layer", true);
       useDefaultButton.setActionCommand("default");
@@ -628,7 +631,7 @@ public class DRCDashboard
 
       taskCombo = new JComboBox(model);
       taskPanel.add(taskCombo, c);
-      
+
       c.weightx = 0;
       c.gridx = 1;
       c.gridy = 0;
@@ -737,51 +740,6 @@ public class DRCDashboard
       //      c.insets = new Insets(10, 35, 10, 35);
       gazeboProcessListModel = new DefaultListModel();
       gazeboProcessList = new JList(gazeboProcessListModel);
-      gazeboProcessList.addMouseListener(new MouseListener()
-      {
-
-         public void mouseClicked(MouseEvent e)
-         {
-            if (e.getClickCount() == 2 && !gazeboProcessListModel.isEmpty())
-            {
-
-               if (gazeboProcessList.getSelectedValue().toString() == "Topview Camera")
-               {
-                  String[] arguments = new String[] { ROS_MASTER_URI, "topviewCam", "/topview/compressed" };
-                  spawner.spawn(ExternalCameraFeed.class, arguments);
-               }
-
-               if (gazeboProcessList.getSelectedValue().toString() == "Rearview Camera")
-               {
-                  String[] arguments = new String[] { ROS_MASTER_URI, "rearviewCam", "/rearview/compressed" };
-                  spawner.spawn(ExternalCameraFeed.class, arguments);
-               }
-
-               if (gazeboProcessList.getSelectedValue().toString() == "DRC Driving Interface")
-               {
-                  String[] arguments = new String[] { ROS_MASTER_URI };
-                  spawner.spawn(DRCGazeboDrivingInterface.class, arguments);
-               }
-            }
-         }
-
-         public void mousePressed(MouseEvent e)
-         {
-         }
-
-         public void mouseReleased(MouseEvent e)
-         {
-         }
-
-         public void mouseEntered(MouseEvent e)
-         {
-         }
-
-         public void mouseExited(MouseEvent e)
-         {
-         }
-
-      });
       gazeboProcessList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
       gazeboProcessList.setLayoutOrientation(JList.VERTICAL);
       gazeboProcessListScroller = new JScrollPane(gazeboProcessList);
