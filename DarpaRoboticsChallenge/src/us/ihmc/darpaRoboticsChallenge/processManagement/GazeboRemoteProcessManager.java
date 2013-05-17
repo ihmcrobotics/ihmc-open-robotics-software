@@ -66,16 +66,21 @@ public class GazeboRemoteProcessManager
          e.printStackTrace();
       }
    }
+   
+   public void startRosSim()
+   {
+      
+   }
 
    public boolean isMachineRunningSim(LocalCloudMachines machine)
    {
-      if (getSimPID(machine) < 0)
+      if (getRosSimPID(machine) < 0)
          return false;
       else
          return true;
    }
 
-   public int getSimPID(LocalCloudMachines machine)
+   public int getRosSimPID(LocalCloudMachines machine)
    {
       int pid = -1;
 
@@ -83,7 +88,7 @@ public class GazeboRemoteProcessManager
       {
          ChannelExec channel = (ChannelExec) sessions.get(machine).openChannel("exec");
          //         channel.setCommand("/home/unknownid/workspace/GazeboStateCommunicator/util/getRoslaunchPID.sh");
-         channel.setCommand("ps aux | grep roslaunch | grep -v grep | awk '{ print $2 }'");
+         channel.setCommand(GazeboProcessManagementCommandStrings.GET_ROSLAUNCH_PID);
          channel.setInputStream(null);
          channel.setOutputStream(System.out);
 
@@ -112,7 +117,7 @@ public class GazeboRemoteProcessManager
       return pid;
    }
 
-   public String getSimTaskname(LocalCloudMachines machine)
+   public String getRosSimTaskname(LocalCloudMachines machine)
    {
       String taskName = "";
 
@@ -120,7 +125,7 @@ public class GazeboRemoteProcessManager
       {
          ChannelExec channel = (ChannelExec) sessions.get(machine).openChannel("exec");
          //         channel.setCommand("/home/unknownid/workspace/GazeboStateCommunicator/util/getRoslaunchTask.sh");
-         channel.setCommand("ps aux | grep roslaunch | grep -v grep | awk ' { print $(NF-0) } ' | cut -d '/' -f2 | cut -d '.' -f1");
+         channel.setCommand(GazeboProcessManagementCommandStrings.GET_ROSLAUNCH_TASK);
          channel.setInputStream(null);
          channel.setOutputStream(System.out);
 
@@ -225,7 +230,7 @@ public class GazeboRemoteProcessManager
                   if (isMachineRunningSim(machine))
                   {
                      //                     System.out.println(machine + " is running " + task);
-                     runningSims.put(machine, getSimTaskname(machine));
+                     runningSims.put(machine, getRosSimTaskname(machine));
                   }
                   else
                   {
