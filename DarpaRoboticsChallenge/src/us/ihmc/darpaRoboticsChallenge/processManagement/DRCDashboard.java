@@ -231,7 +231,7 @@ public class DRCDashboard
       if (shouldLoadConfig)
          loadConfig();
       
-      startTimedSignalers();
+      startTimers();
 
       //            frame.setSize(760, 510);
       //      frame.setResizable(true);
@@ -787,7 +787,7 @@ public class DRCDashboard
       return instance;
    }
 
-   private void startTimedSignalers()
+   private void startTimers()
    {
       Timer redrawTimer = new Timer(10, new ActionListener()
       {

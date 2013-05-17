@@ -1,7 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge.processManagement;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,10 +7,11 @@ import java.io.PrintStream;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Properties;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.JOptionPane;
-import javax.swing.Timer;
 
 import org.apache.commons.lang.mutable.MutableBoolean;
 
@@ -49,11 +48,11 @@ public class DRCRemoteProcessManager extends Thread
    private static volatile ConcurrentHashMap<LocalCloudMachines, MutableBoolean> availability = new ConcurrentHashMap<LocalCloudMachines, MutableBoolean>();
    private static volatile ConcurrentHashMap<LocalCloudMachines, MutableBoolean> isRunningRos = new ConcurrentHashMap<DRCLocalCloudConfig.LocalCloudMachines, MutableBoolean>();
    private static volatile ConcurrentHashMap<LocalCloudMachines, MutableBoolean> isRunningController = new ConcurrentHashMap<DRCLocalCloudConfig.LocalCloudMachines, MutableBoolean>();
-   
+
    // You get permission to issue kill commands to these guys.  Can't kill other people's sims, cuz that's a dick move.
    private ArrayList<LocalCloudMachines> userOwnedSims = new ArrayList<LocalCloudMachines>();
    private ArrayList<LocalCloudMachines> userOwnedControllers = new ArrayList<LocalCloudMachines>();
-   
+
    public void run()
    {
       jsch = new JSch();
@@ -224,15 +223,18 @@ public class DRCRemoteProcessManager extends Thread
 
    private void setupNetworkPollingTimer()
    {
-      Timer networkPollingTimer = new Timer(5000, new ActionListener()
+      Timer networkPollingTimer = new Timer();
+
+      networkPollingTimer.scheduleAtFixedRate(new TimerTask()
       {
-         public void actionPerformed(ActionEvent e)
+
+         @Override
+         public void run()
          {
             updateNetworkStatus();
 
          }
-      });
-      networkPollingTimer.start();
+      }, 0l, 5000l);
    }
 
    private void updateNetworkStatus()
