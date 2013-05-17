@@ -11,7 +11,7 @@ public class DRCDashboardTypes
    
    public enum DRCPluginTasks
    {
-      QUAL1, QUAL2, QUAL3, QUAL4, VRC1, VRC2, VRC3, ATLAS, ATLAS_VEHICLE, PARKING_LOT
+      QUAL1, QUAL2, QUAL3, QUAL4, VRC1, VRC2, VRC3, ATLAS, ATLAS_VEHICLE, PARKING_LOT, HAND
    }
 
    private static final LinkedHashMap<DRCPluginTasks, String> pluginTaskPath = new LinkedHashMap<DRCPluginTasks, String>()
@@ -29,6 +29,7 @@ public class DRCDashboardTypes
          put(DRCPluginTasks.ATLAS, "cd ~/workspace/GazeboStateCommunicator/launch/; ./atlas.sh\n");
          put(DRCPluginTasks.ATLAS_VEHICLE, "cd ~/workspace/GazeboStateCommunicator/launch/; ./atlasVehicle.sh\n");
          put(DRCPluginTasks.PARKING_LOT, "cd ~/workspace/GazeboStateCommunicator/launch/; ./parkingLot.sh\n");
+         put(DRCPluginTasks.HAND, "cd ~/workspace/GazeboStateCommunicator/launch/; ./hand.sh\n");
       }
    };
 
