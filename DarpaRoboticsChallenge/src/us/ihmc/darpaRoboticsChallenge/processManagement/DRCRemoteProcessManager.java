@@ -225,7 +225,7 @@ public class DRCRemoteProcessManager extends Thread
    {
       Timer networkPollingTimer = new Timer();
 
-      networkPollingTimer.scheduleAtFixedRate(new TimerTask()
+      networkPollingTimer.schedule(new TimerTask()
       {
 
          @Override
