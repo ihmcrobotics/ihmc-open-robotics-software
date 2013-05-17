@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.swing.BorderFactory;
@@ -93,19 +94,10 @@ public class DRCDashboard
 
    private HashMap<LocalCloudMachines, Pair<JTree, DefaultMutableTreeNode>> cloudMachineTrees = new HashMap<LocalCloudMachines, Pair<JTree, DefaultMutableTreeNode>>();
 
+   private ArrayList<LocalCloudMachines> userOwnedSims = new ArrayList<DRCLocalCloudConfig.LocalCloudMachines>();
+
    public DRCDashboard()
    {
-      //      try
-      //      {
-      //         ROS_HOSTNAME = InetAddress.getLocalHost().getHostName().replace(" ", "-");
-      //         ROS_IP_ADDRESS = InetAddress.getLocalHost().getHostAddress();
-      //                  ROS_MASTER_URI = "http://";
-      //      }
-      //      catch (UnknownHostException e)
-      //      {
-      //         e.printStackTrace();
-      //      }
-
       instance = this;
 
       startTimedSignalers();
@@ -270,6 +262,11 @@ public class DRCDashboard
    {
       blockLeafSelection();
 
+      setupDoubleClickListener();
+   }
+
+   private void setupDoubleClickListener()
+   {
       for (final LocalCloudMachines machine : LocalCloudMachines.values())
       {
          if (!machine.equals(LocalCloudMachines.LOCALHOST))
@@ -316,11 +313,27 @@ public class DRCDashboard
                               "Confirm Launch ROS/Gazebo Sim", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 
                         if (n == 0)
+                        {
                            sshSimLauncher.launchSim(task, gazeboMachine, controllerMachine, pluginOption);
+                           userOwnedSims.add(gazeboMachine);
+                        }
+                     }
+                     else if (userOwnedSims.contains(gazeboMachine))
+                     {
+                        String[] options = new String[] { "Yes", "No" };
+                        int n = JOptionPane.showOptionDialog(frame, "Do you want to kill your sim running on " + gazeboMachine.toString() + "?",
+                              "Confirm Kill ROS/Gazebo Sim", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]);
+                        
+                        if (n == 0)
+                        {
+                           sshSimLauncher.killSim(gazeboMachine, controllerMachine);
+                           userOwnedSims.remove(gazeboMachine);
+                        }
                      }
                      else
                      {
-                        JOptionPane.showMessageDialog(frame, "Machine is already running a ROS Sim!", "ROS/Gazebo Sim Launch Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(frame, "Machine is running somebody else's sim!", "ROS/Gazebo Sim Launch Error",
+                              JOptionPane.ERROR_MESSAGE);
                      }
                   }
 
