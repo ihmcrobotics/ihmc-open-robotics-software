@@ -168,5 +168,10 @@ public class ParabolicVelocityInstantaneousCapturePointTrajectory implements Ins
    {
       return startTime.getDoubleValue();
    }
+   
+   public double getEstimatedTimeRemainingForState(double time)
+   {
+      return currentTime.getDoubleValue() - trajectoryTime.getDoubleValue();
+   }
 
 }

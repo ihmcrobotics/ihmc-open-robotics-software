@@ -626,7 +626,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          else
          {
-            TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForDoubleSupport(transferToSide);
+            boolean inInitialize = false;
+            TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForDoubleSupport(transferToSide, inInitialize );
 
             instantaneousCapturePointPlanner.initializeDoubleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue());
 
@@ -644,7 +645,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
 
 
-      public TransferToAndNextFootstepsData createTransferToAndNextFootstepDataForDoubleSupport(RobotSide transferToSide)
+      public TransferToAndNextFootstepsData createTransferToAndNextFootstepDataForDoubleSupport(RobotSide transferToSide, boolean inInitialize)
       {
          Footstep transferFromFootstep = createFootstepFromFootAndContactablePlaneBody(referenceFrames.getFootFrame(transferToSide.getOppositeSide()),
                                             bipedFeet.get(transferToSide.getOppositeSide()));
@@ -654,9 +655,20 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          FrameConvexPolygon2d transferToFootPolygon = computeFootPolygon(transferToSide, referenceFrames.getSoleFrame(transferToSide));
 
-         Footstep nextFootstep = upcomingFootstepList.getNextFootstep();
-         Footstep nextNextFootstep = upcomingFootstepList.getNextNextFootstep();
-
+         Footstep nextFootstep, nextNextFootstep;
+         
+         if (inInitialize)
+         {
+            // Haven't popped the footstep off yet...
+            nextFootstep = upcomingFootstepList.getNextNextFootstep();
+            nextNextFootstep = upcomingFootstepList.getNextNextNextFootstep();
+         }
+         else
+         {
+            nextFootstep = upcomingFootstepList.getNextFootstep();
+            nextNextFootstep = upcomingFootstepList.getNextNextFootstep();
+         }
+         
          double timeAllottedForSingleSupportForICP = swingTimeCalculationProvider.getValue() + additionalSwingTimeForICP.getDoubleValue();
 
          TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
@@ -744,7 +756,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          RobotSide transferToSideToUseInFootstepData = transferToSide;
          if (transferToSideToUseInFootstepData == null) transferToSideToUseInFootstepData = RobotSide.LEFT; //Arbitrary here.
-         TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = createTransferToAndNextFootstepDataForDoubleSupport(transferToSideToUseInFootstepData);
+         
+         boolean inInitialize = true;
+         TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = createTransferToAndNextFootstepDataForDoubleSupport(transferToSideToUseInFootstepData, inInitialize);
          centerOfMassHeightTrajectoryGenerator.initialize(transferToAndNextFootstepsDataForDoubleSupport, transferToAndNextFootstepsDataForDoubleSupport.getTransferToSide(), null, getContactStatesList());
       }
 

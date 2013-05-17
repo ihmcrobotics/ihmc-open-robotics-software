@@ -27,7 +27,9 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    
    public abstract double getAnkleHeight();
    
+   public abstract double minimumHeightAboveAnkle();
    public abstract double nominalHeightAboveAnkle();
+   public abstract double maximumHeightAboveAnkle();
    
    public abstract boolean finishSwingWhenTrajectoryDone();
 
