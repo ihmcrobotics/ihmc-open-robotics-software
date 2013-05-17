@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.HashMap;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -32,11 +33,14 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
+import org.apache.commons.lang.WordUtils;
+
 import us.ihmc.darpaRoboticsChallenge.DRCGazeboDrivingInterface;
 import us.ihmc.darpaRoboticsChallenge.ExternalCameraFeed;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig.LocalCloudMachines;
 import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCTask;
+import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 
 public class DRCDashboard
@@ -83,21 +87,11 @@ public class DRCDashboard
    private JScrollPane networkStatusScrollPane;
    private ImageIcon goodConnectionIcon;
    private ImageIcon badConnectionIcon;
-   private DefaultMutableTreeNode cloudMonsterNode;
-   private DefaultMutableTreeNode cloudMonsterJuniorNode;
-   private DefaultMutableTreeNode cloudMinion1Node;
-   private DefaultMutableTreeNode cloudMinion2Node;
-   private DefaultMutableTreeNode cloudMinion3Node;
-   private DefaultMutableTreeNode cloudMinion4Node;
 
    private JavaProcessSpawner spawner = new JavaProcessSpawner(true);
    private GazeboSimLauncher sshSimLauncher = new GazeboSimLauncher();
-   private JTree cloudMonsterTree;
-   private JTree cloudMonsterJuniorTree;
-   private JTree cloudMinion1Tree;
-   private JTree cloudMinion2Tree;
-   private JTree cloudMinion3Tree;
-   private JTree cloudMinion4Tree;
+
+   private HashMap<LocalCloudMachines, Pair<JTree, DefaultMutableTreeNode>> cloudMachineTrees = new HashMap<LocalCloudMachines, Pair<JTree, DefaultMutableTreeNode>>();
 
    public DRCDashboard()
    {
@@ -244,77 +238,27 @@ public class DRCDashboard
       view.setLayout(new GridLayout(6, 1));
       view.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-      cloudMonsterNode = new DefaultMutableTreeNode("<html><body style=\"font-weight:bold; font-size:1.1em;\">Cloudmonster</body></html>");
-      cloudMonsterNode.add(new DefaultMutableTreeNode("Running ROS/GZ Sims:"));
-      cloudMonsterNode.add(new DefaultMutableTreeNode("Running SCS Controllers?"));
-      cloudMonsterTree = new JTree(cloudMonsterNode);
-      cloudMonsterTree.setLargeModel(true);
-      cloudMonsterTree.setBorder(BorderFactory.createEmptyBorder(0, 0, 25, 0));
-      if (sshSimLauncher.isMachineReachable(LocalCloudMachines.CLOUDMONSTER))
-         setCloudStatusItemIcon(cloudMonsterTree, goodConnectionIcon);
-      else
-         setCloudStatusItemIcon(cloudMonsterTree, badConnectionIcon);
-      view.add(cloudMonsterTree);
+      for (LocalCloudMachines machine : LocalCloudMachines.values())
+      {
+         if (!machine.equals(LocalCloudMachines.LOCALHOST))
+         {
+            DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("<html><body style=\"font-weight:bold; font-size:1.1em;\">"
+                  + WordUtils.capitalize(machine.toString().toLowerCase().replace("_", " ")) + "</body></html>");
+            rootNode.add(new DefaultMutableTreeNode("Running ROS/GZ Sims:"));
+            rootNode.add(new DefaultMutableTreeNode("Running SCS Controllers?"));
 
-      cloudMonsterJuniorNode = new DefaultMutableTreeNode("<html><body style=\"font-weight:bold; font-size:1.1em;\">Cloudmonster Jr.</body></html>");
-      cloudMonsterJuniorNode.add(new DefaultMutableTreeNode("Running ROS/GZ Sims:"));
-      cloudMonsterJuniorNode.add(new DefaultMutableTreeNode("Running SCS Controllers?"));
-      cloudMonsterJuniorTree = new JTree(cloudMonsterJuniorNode);
-      cloudMonsterJuniorTree.setLargeModel(true);
-      cloudMonsterJuniorTree.setBorder(BorderFactory.createEmptyBorder(0, 0, 25, 0));
-      if (sshSimLauncher.isMachineReachable(LocalCloudMachines.CLOUDMONSTER_JR))
-         setCloudStatusItemIcon(cloudMonsterJuniorTree, goodConnectionIcon);
-      else
-         setCloudStatusItemIcon(cloudMonsterJuniorTree, badConnectionIcon);
-      view.add(cloudMonsterJuniorTree);
+            JTree tree = new JTree(rootNode);
+            tree.setLargeModel(true);
+            tree.setBorder(BorderFactory.createEmptyBorder(0, 0, 25, 0));
+            if (sshSimLauncher.isMachineReachable(machine))
+               setCloudStatusItemIcon(tree, goodConnectionIcon);
+            else
+               setCloudStatusItemIcon(tree, badConnectionIcon);
 
-      cloudMinion1Node = new DefaultMutableTreeNode("<html><body style=\"font-weight:bold; font-size:1.1em;\">Cloudminion 1</body></html>");
-      cloudMinion1Node.add(new DefaultMutableTreeNode("Running ROS/GZ Sims:"));
-      cloudMinion1Node.add(new DefaultMutableTreeNode("Running SCS Controllers?"));
-      cloudMinion1Tree = new JTree(cloudMinion1Node);
-      cloudMinion1Tree.setLargeModel(true);
-      cloudMinion1Tree.setBorder(BorderFactory.createEmptyBorder(0, 0, 25, 0));
-      if (sshSimLauncher.isMachineReachable(LocalCloudMachines.CLOUDMINION_1))
-         setCloudStatusItemIcon(cloudMinion1Tree, goodConnectionIcon);
-      else
-         setCloudStatusItemIcon(cloudMinion1Tree, badConnectionIcon);
-      view.add(cloudMinion1Tree);
-
-      cloudMinion2Node = new DefaultMutableTreeNode("<html><body style=\"font-weight:bold; font-size:1.1em;\">Cloudminion 2</body></html>");
-      cloudMinion2Node.add(new DefaultMutableTreeNode("Running ROS/GZ Sims:"));
-      cloudMinion2Node.add(new DefaultMutableTreeNode("Running SCS Controllers?"));
-      cloudMinion2Tree = new JTree(cloudMinion2Node);
-      cloudMinion2Tree.setLargeModel(true);
-      cloudMinion2Tree.setBorder(BorderFactory.createEmptyBorder(0, 0, 25, 0));
-      if (sshSimLauncher.isMachineReachable(LocalCloudMachines.CLOUDMINION_2))
-         setCloudStatusItemIcon(cloudMinion2Tree, goodConnectionIcon);
-      else
-         setCloudStatusItemIcon(cloudMinion2Tree, badConnectionIcon);
-      view.add(cloudMinion2Tree);
-
-      cloudMinion3Node = new DefaultMutableTreeNode("<html><body style=\"font-weight:bold; font-size:1.1em;\">Cloudminion 3</body></html>");
-      cloudMinion3Node.add(new DefaultMutableTreeNode("Running ROS/GZ Sims:"));
-      cloudMinion3Node.add(new DefaultMutableTreeNode("Running SCS Controllers?"));
-      cloudMinion3Tree = new JTree(cloudMinion3Node);
-      cloudMinion3Tree.setLargeModel(true);
-      cloudMinion3Tree.setBorder(BorderFactory.createEmptyBorder(0, 0, 25, 0));
-      if (sshSimLauncher.isMachineReachable(LocalCloudMachines.CLOUDMINION_3))
-         setCloudStatusItemIcon(cloudMinion3Tree, goodConnectionIcon);
-      else
-         setCloudStatusItemIcon(cloudMinion3Tree, badConnectionIcon);
-      view.add(cloudMinion3Tree);
-
-      cloudMinion4Node = new DefaultMutableTreeNode("<html><body style=\"font-weight:bold; font-size:1.1em;\">Cloudminion 4</body></html>");
-      cloudMinion4Node.add(new DefaultMutableTreeNode("Running ROS/GZ Sims:"));
-      cloudMinion4Node.add(new DefaultMutableTreeNode("Running SCS Controllers?"));
-      cloudMinion4Tree = new JTree(cloudMinion4Node);
-      cloudMinion4Tree.setLargeModel(true);
-      cloudMinion4Tree.setBorder(BorderFactory.createEmptyBorder(0, 0, 25, 0));
-      if (sshSimLauncher.isMachineReachable(LocalCloudMachines.CLOUDMINION_4))
-         setCloudStatusItemIcon(cloudMinion4Tree, goodConnectionIcon);
-      else
-         setCloudStatusItemIcon(cloudMinion4Tree, badConnectionIcon);
-      view.add(cloudMinion4Tree);
+            view.add(tree);
+            cloudMachineTrees.put(machine, new Pair<JTree, DefaultMutableTreeNode>(tree, rootNode));
+         }
+      }
 
       disableNodeCollapse();
 
@@ -325,324 +269,64 @@ public class DRCDashboard
    private void setupStatusPanelMouseListeners()
    {
       blockLeafSelection();
-      
-      cloudMonsterTree.addMouseListener(new MouseListener()
+
+      for (final LocalCloudMachines machine : LocalCloudMachines.values())
       {
-         
-         public void mouseReleased(MouseEvent arg0)
-         {
-            // TODO Auto-generated method stub
-            
-         }
-         
-         public void mousePressed(MouseEvent arg0)
-         {
-            // TODO Auto-generated method stub
-            
-         }
-         
-         public void mouseExited(MouseEvent arg0)
-         {
-            // TODO Auto-generated method stub
-            
-         }
-         
-         public void mouseEntered(MouseEvent arg0)
-         {
-            // TODO Auto-generated method stub
-            
-         }
-         
-         public void mouseClicked(MouseEvent e)
-         {
-            if (e.getClickCount() > 1)
+         if (!machine.equals(LocalCloudMachines.LOCALHOST))
+            cloudMachineTrees.get(machine).first().addMouseListener(new MouseListener()
             {
-               LocalCloudMachines gazeboMachine = LocalCloudMachines.CLOUDMONSTER;
-               LocalCloudMachines controllerMachine = (LocalCloudMachines) controllerMachineSelectionCombo.getSelectedItem();
-               DRCTask task = (DRCTask) taskCombo.getSelectedItem();                  
-               String pluginOption = radioGroup.getSelection().getActionCommand();
-                              
-               if (!sshSimLauncher.isMachineRunningSim(LocalCloudMachines.CLOUDMONSTER))
+
+               public void mouseReleased(MouseEvent e)
                {
-                  String[] options = new String[] { "Yes", "No" };
-                  int n = JOptionPane.showOptionDialog(frame, "Do you want to launch " + task.toString() + " on " + gazeboMachine.toString() + "?",
-                        "Confirm Launch ROS/Gazebo Sim", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+                  // TODO Auto-generated method stub
 
-                  if (n == 0)
-                     sshSimLauncher.launchSim(task, gazeboMachine, controllerMachine, pluginOption);
                }
-               else
+
+               public void mousePressed(MouseEvent e)
                {
-                  JOptionPane.showMessageDialog(frame, "Machine is already running a ROS Sim!", "ROS/Gazebo Sim Launch Error", JOptionPane.ERROR_MESSAGE);
-               }
-            }            
-         }
-      });
-      
-      cloudMonsterJuniorTree.addMouseListener(new MouseListener()
-      {
-         
-         public void mouseReleased(MouseEvent arg0)
-         {
-            // TODO Auto-generated method stub
-            
-         }
-         
-         public void mousePressed(MouseEvent arg0)
-         {
-            // TODO Auto-generated method stub
-            
-         }
-         
-         public void mouseExited(MouseEvent arg0)
-         {
-            // TODO Auto-generated method stub
-            
-         }
-         
-         public void mouseEntered(MouseEvent arg0)
-         {
-            // TODO Auto-generated method stub
-            
-         }
-         
-         public void mouseClicked(MouseEvent e)
-         {
-            if (e.getClickCount() > 1)
-            {
-               LocalCloudMachines gazeboMachine = LocalCloudMachines.CLOUDMONSTER_JR;
-               LocalCloudMachines controllerMachine = (LocalCloudMachines) controllerMachineSelectionCombo.getSelectedItem();
-               DRCTask task = (DRCTask) taskCombo.getSelectedItem();
-               String pluginOption = radioGroup.getSelection().getActionCommand();
+                  // TODO Auto-generated method stub
 
-               if (!sshSimLauncher.isMachineRunningSim(LocalCloudMachines.CLOUDMONSTER_JR))
+               }
+
+               public void mouseExited(MouseEvent e)
                {
-                  String[] options = new String[] { "Yes", "No" };
-                  int n = JOptionPane.showOptionDialog(frame, "Do you want to launch " + task.toString() + " on " + gazeboMachine.toString() + "?",
-                        "Confirm Launch ROS/Gazebo Sim", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+                  // TODO Auto-generated method stub
 
-                  if (n == 0)
-                     sshSimLauncher.launchSim(task, gazeboMachine, controllerMachine, pluginOption);
                }
-               else
+
+               public void mouseEntered(MouseEvent e)
                {
-                  JOptionPane.showMessageDialog(frame, "Machine is already running a ROS Sim!", "ROS/Gazebo Sim Launch Error", JOptionPane.ERROR_MESSAGE);
-               }
-            }            
-         }
-      });
-      
-      cloudMinion1Tree.addMouseListener(new MouseListener()
-      {
-         
-         public void mouseReleased(MouseEvent arg0)
-         {
-            // TODO Auto-generated method stub
-            
-         }
-         
-         public void mousePressed(MouseEvent arg0)
-         {
-            // TODO Auto-generated method stub
-            
-         }
-         
-         public void mouseExited(MouseEvent arg0)
-         {
-            // TODO Auto-generated method stub
-            
-         }
-         
-         public void mouseEntered(MouseEvent arg0)
-         {
-            // TODO Auto-generated method stub
-            
-         }
-         
-         public void mouseClicked(MouseEvent e)
-         {
-            if (e.getClickCount() > 1)
-            {
-               LocalCloudMachines gazeboMachine = LocalCloudMachines.CLOUDMINION_1;
-               LocalCloudMachines controllerMachine = (LocalCloudMachines) controllerMachineSelectionCombo.getSelectedItem();
-               DRCTask task = (DRCTask) taskCombo.getSelectedItem();
-               String pluginOption = radioGroup.getSelection().getActionCommand();
+                  // TODO Auto-generated method stub
 
-               if (!sshSimLauncher.isMachineRunningSim(LocalCloudMachines.CLOUDMINION_1))
+               }
+
+               public void mouseClicked(MouseEvent e)
                {
-                  String[] options = new String[] { "Yes", "No" };
-                  int n = JOptionPane.showOptionDialog(frame, "Do you want to launch " + task.toString() + " on " + gazeboMachine.toString() + "?",
-                        "Confirm Launch ROS/Gazebo Sim", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+                  if (e.getClickCount() > 1)
+                  {
+                     LocalCloudMachines gazeboMachine = machine;
+                     LocalCloudMachines controllerMachine = (LocalCloudMachines) controllerMachineSelectionCombo.getSelectedItem();
+                     DRCTask task = (DRCTask) taskCombo.getSelectedItem();
+                     String pluginOption = radioGroup.getSelection().getActionCommand();
 
-                  if (n == 0)
-                     sshSimLauncher.launchSim(task, gazeboMachine, controllerMachine, pluginOption);
+                     if (!sshSimLauncher.isMachineRunningSim(gazeboMachine))
+                     {
+                        String[] options = new String[] { "Yes", "No" };
+                        int n = JOptionPane.showOptionDialog(frame, "Do you want to launch " + task.toString() + " on " + gazeboMachine.toString() + "?",
+                              "Confirm Launch ROS/Gazebo Sim", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+
+                        if (n == 0)
+                           sshSimLauncher.launchSim(task, gazeboMachine, controllerMachine, pluginOption);
+                     }
+                     else
+                     {
+                        JOptionPane.showMessageDialog(frame, "Machine is already running a ROS Sim!", "ROS/Gazebo Sim Launch Error", JOptionPane.ERROR_MESSAGE);
+                     }
+                  }
+
                }
-               else
-               {
-                  JOptionPane.showMessageDialog(frame, "Machine is already running a ROS Sim!", "ROS/Gazebo Sim Launch Error", JOptionPane.ERROR_MESSAGE);
-               }
-            }            
-         }
-      });
-      
-      cloudMinion2Tree.addMouseListener(new MouseListener()
-      {
-         
-         public void mouseReleased(MouseEvent arg0)
-         {
-            // TODO Auto-generated method stub
-            
-         }
-         
-         public void mousePressed(MouseEvent arg0)
-         {
-            // TODO Auto-generated method stub
-            
-         }
-         
-         public void mouseExited(MouseEvent arg0)
-         {
-            // TODO Auto-generated method stub
-            
-         }
-         
-         public void mouseEntered(MouseEvent arg0)
-         {
-            // TODO Auto-generated method stub
-            
-         }
-         
-         public void mouseClicked(MouseEvent e)
-         {
-            if (e.getClickCount() > 1)
-            {
-               LocalCloudMachines gazeboMachine = LocalCloudMachines.CLOUDMINION_2;
-               LocalCloudMachines controllerMachine = (LocalCloudMachines) controllerMachineSelectionCombo.getSelectedItem();
-               DRCTask task = (DRCTask) taskCombo.getSelectedItem();
-               String pluginOption = radioGroup.getSelection().getActionCommand();
-
-               if (!sshSimLauncher.isMachineRunningSim(LocalCloudMachines.CLOUDMINION_2))
-               {
-                  String[] options = new String[] { "Yes", "No" };
-                  int n = JOptionPane.showOptionDialog(frame, "Do you want to launch " + task.toString() + " on " + gazeboMachine.toString() + "?",
-                        "Confirm Launch ROS/Gazebo Sim", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-
-                  if (n == 0)
-                     sshSimLauncher.launchSim(task, gazeboMachine, controllerMachine, pluginOption);
-               }
-               else
-               {
-                  JOptionPane.showMessageDialog(frame, "Machine is already running a ROS Sim!", "ROS/Gazebo Sim Launch Error", JOptionPane.ERROR_MESSAGE);
-               }
-            }            
-         }
-      });
-      
-      cloudMinion3Tree.addMouseListener(new MouseListener()
-      {
-         
-         public void mouseReleased(MouseEvent arg0)
-         {
-            // TODO Auto-generated method stub
-            
-         }
-         
-         public void mousePressed(MouseEvent arg0)
-         {
-            // TODO Auto-generated method stub
-            
-         }
-         
-         public void mouseExited(MouseEvent arg0)
-         {
-            // TODO Auto-generated method stub
-            
-         }
-         
-         public void mouseEntered(MouseEvent arg0)
-         {
-            // TODO Auto-generated method stub
-            
-         }
-         
-         public void mouseClicked(MouseEvent e)
-         {
-            if (e.getClickCount() > 1)
-            {
-               LocalCloudMachines gazeboMachine = LocalCloudMachines.CLOUDMINION_3;
-               LocalCloudMachines controllerMachine = (LocalCloudMachines) controllerMachineSelectionCombo.getSelectedItem();
-               DRCTask task = (DRCTask) taskCombo.getSelectedItem();
-               String pluginOption = radioGroup.getSelection().getActionCommand();
-
-               if (!sshSimLauncher.isMachineRunningSim(LocalCloudMachines.CLOUDMINION_3))
-               {
-                  String[] options = new String[] { "Yes", "No" };
-                  int n = JOptionPane.showOptionDialog(frame, "Do you want to launch " + task.toString() + " on " + gazeboMachine.toString() + "?",
-                        "Confirm Launch ROS/Gazebo Sim", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-
-                  if (n == 0)
-                     sshSimLauncher.launchSim(task, gazeboMachine, controllerMachine, pluginOption);
-               }
-               else
-               {
-                  JOptionPane.showMessageDialog(frame, "Machine is already running a ROS Sim!", "ROS/Gazebo Sim Launch Error", JOptionPane.ERROR_MESSAGE);
-               }
-            }            
-         }
-      });
-
-      cloudMinion4Tree.addMouseListener(new MouseListener()
-      {
-         public void mouseReleased(MouseEvent e)
-         {
-            // TODO Auto-generated method stub
-
-         }
-
-         public void mousePressed(MouseEvent e)
-         {
-            // TODO Auto-generated method stub
-
-         }
-
-         public void mouseExited(MouseEvent e)
-         {
-            // TODO Auto-generated method stub
-
-         }
-
-         public void mouseEntered(MouseEvent e)
-         {
-            // TODO Auto-generated method stub
-
-         }
-
-         public void mouseClicked(MouseEvent e)
-         {
-            if (e.getClickCount() > 1)
-            {
-               LocalCloudMachines gazeboMachine = LocalCloudMachines.CLOUDMINION_4;
-               LocalCloudMachines controllerMachine = (LocalCloudMachines) controllerMachineSelectionCombo.getSelectedItem();
-               DRCTask task = (DRCTask) taskCombo.getSelectedItem();
-               String pluginOption = radioGroup.getSelection().getActionCommand();
-
-               if (!sshSimLauncher.isMachineRunningSim(LocalCloudMachines.CLOUDMINION_4))
-               {
-                  String[] options = new String[] { "Yes", "No" };
-                  int n = JOptionPane.showOptionDialog(frame, "Do you want to launch " + task.toString() + " on " + gazeboMachine.toString() + "?",
-                        "Confirm Launch ROS/Gazebo Sim", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-
-                  if (n == 0)
-                     sshSimLauncher.launchSim(task, gazeboMachine, controllerMachine, pluginOption);
-               }
-               else
-               {
-                  JOptionPane.showMessageDialog(frame, "Machine is already running a ROS Sim!", "ROS/Gazebo Sim Launch Error", JOptionPane.ERROR_MESSAGE);
-               }
-            }
-         }
-      });
-
+            });
+      }
    }
 
    private void blockLeafSelection()
@@ -661,22 +345,21 @@ public class DRCDashboard
          }
       };
 
-      cloudMonsterTree.addTreeSelectionListener(blockLeafSelectionListener);
-      cloudMonsterJuniorTree.addTreeSelectionListener(blockLeafSelectionListener);
-      cloudMinion1Tree.addTreeSelectionListener(blockLeafSelectionListener);
-      cloudMinion2Tree.addTreeSelectionListener(blockLeafSelectionListener);
-      cloudMinion3Tree.addTreeSelectionListener(blockLeafSelectionListener);
-      cloudMinion4Tree.addTreeSelectionListener(blockLeafSelectionListener);
+      for (LocalCloudMachines machine : LocalCloudMachines.values())
+      {
+         if (!machine.equals(LocalCloudMachines.LOCALHOST))
+            cloudMachineTrees.get(machine).first().addTreeSelectionListener(blockLeafSelectionListener);
+      }
    }
 
    private void disableNodeCollapse()
    {
-      cloudMonsterTree.setToggleClickCount(0);
-      cloudMonsterJuniorTree.setToggleClickCount(0);
-      cloudMinion1Tree.setToggleClickCount(0);
-      cloudMinion2Tree.setToggleClickCount(0);
-      cloudMinion3Tree.setToggleClickCount(0);
-      cloudMinion4Tree.setToggleClickCount(0);
+
+      for (LocalCloudMachines machine : LocalCloudMachines.values())
+      {
+         if (!machine.equals(LocalCloudMachines.LOCALHOST))
+            cloudMachineTrees.get(machine).first().setToggleClickCount(0);
+      }
    }
 
    private void setupSelectTaskPanel()
@@ -713,7 +396,7 @@ public class DRCDashboard
          }
       });
       taskPanel.add(taskCombo, c);
-      
+
       radioGroup = new ButtonGroup();
       useDefaultButton = new JRadioButton("Use ROS Synchronization Layer", true);
       useDefaultButton.setActionCommand("default");
@@ -794,8 +477,8 @@ public class DRCDashboard
       machineSelectionPanel.add(cloudMachineInfoPanel, c);
       cloudMachineHostnameLabel = new JLabel(updatedCloudHostnameString());
       cloudMachineIPAddressLabel = new JLabel(updatedCloudIpAddressString());
-//      cloudMachineInfoPanel.add(cloudMachineHostnameLabel);
-//      cloudMachineInfoPanel.add(cloudMachineIPAddressLabel);
+      //      cloudMachineInfoPanel.add(cloudMachineHostnameLabel);
+      //      cloudMachineInfoPanel.add(cloudMachineIPAddressLabel);
       c.insets = new Insets(5, 5, 5, 5);
    }
 
@@ -805,7 +488,7 @@ public class DRCDashboard
 
       setupNetworkInfoPanel();
 
-      normalizeGridBagConstraints();      
+      normalizeGridBagConstraints();
    }
 
    private void setupGazeboLauncherList()
@@ -965,7 +648,7 @@ public class DRCDashboard
             updateStatusIndicators();
 
             updateRemoteProcessListings();
-            
+
             ((JPanel) networkStatusScrollPane.getViewport().getView()).repaint();
          }
       });
@@ -980,131 +663,57 @@ public class DRCDashboard
 
    private void updateRosSimStatuses()
    {
-      if (sshSimLauncher.isMachineRunningSim(LocalCloudMachines.CLOUDMONSTER))
-         ((DefaultMutableTreeNode) cloudMonsterNode.getChildAt(0))
-               .setUserObject("<html><body>Running ROS/GZ Sim: <span style=\"color:red;font-style:italic;\">"
-                     + sshSimLauncher.getSimTaskname(LocalCloudMachines.CLOUDMONSTER) + "</span></body></html>");
-      else
-         ((DefaultMutableTreeNode) cloudMonsterNode.getChildAt(0))
-               .setUserObject("<html><body>Running ROS/GZ Sim: <span style=\"color:green;font-style:italic;\">No</span></body></html>");
+      for (LocalCloudMachines machine : LocalCloudMachines.values())
+      {
+         if (!machine.equals(LocalCloudMachines.LOCALHOST))
+         {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) cloudMachineTrees.get(machine).second().getChildAt(0);
 
-      if (sshSimLauncher.isMachineRunningSim(LocalCloudMachines.CLOUDMONSTER_JR))
-         ((DefaultMutableTreeNode) cloudMonsterJuniorNode.getChildAt(0))
-               .setUserObject("<html><body>Running ROS/GZ Sim: <span style=\"color:red;font-style:italic;\">"
-                     + sshSimLauncher.getSimTaskname(LocalCloudMachines.CLOUDMONSTER_JR) + "</span></body></html>");
-      else
-         ((DefaultMutableTreeNode) cloudMonsterJuniorNode.getChildAt(0))
-               .setUserObject("<html><body>Running ROS/GZ Sim: <span style=\"color:green;font-style:italic;\">No</span></body></html>");
-
-      if (sshSimLauncher.isMachineRunningSim(LocalCloudMachines.CLOUDMINION_1))
-         ((DefaultMutableTreeNode) cloudMinion1Node.getChildAt(0))
-               .setUserObject("<html><body>Running ROS/GZ Sim: <span style=\"color:red;font-style:italic;\">"
-                     + sshSimLauncher.getSimTaskname(LocalCloudMachines.CLOUDMINION_1) + "</span></body></html>");
-      else
-         ((DefaultMutableTreeNode) cloudMinion1Node.getChildAt(0))
-               .setUserObject("<html><body>Running ROS/GZ Sim: <span style=\"color:green;font-style:italic;\">No</span></body></html>");
-
-      if (sshSimLauncher.isMachineRunningSim(LocalCloudMachines.CLOUDMINION_2))
-         ((DefaultMutableTreeNode) cloudMinion2Node.getChildAt(0))
-               .setUserObject("<html><body>Running ROS/GZ Sim: <span style=\"color:red;font-style:italic;\">"
-                     + sshSimLauncher.getSimTaskname(LocalCloudMachines.CLOUDMINION_2) + "</span></body></html>");
-      else
-         ((DefaultMutableTreeNode) cloudMinion2Node.getChildAt(0))
-               .setUserObject("<html><body>Running ROS/GZ Sim: <span style=\"color:green;font-style:italic;\">No</span></body></html>");
-
-      if (sshSimLauncher.isMachineRunningSim(LocalCloudMachines.CLOUDMINION_3))
-         ((DefaultMutableTreeNode) cloudMinion3Node.getChildAt(0))
-               .setUserObject("<html><body>Running ROS/GZ Sim: <span style=\"color:red;font-style:italic;\">"
-                     + sshSimLauncher.getSimTaskname(LocalCloudMachines.CLOUDMINION_3) + "</span></body></html>");
-      else
-         ((DefaultMutableTreeNode) cloudMinion3Node.getChildAt(0))
-               .setUserObject("<html><body>Running ROS/GZ Sim: <span style=\"color:green;font-style:italic;\">No</span></body></html>");
-
-      if (sshSimLauncher.isMachineRunningSim(LocalCloudMachines.CLOUDMINION_4))
-         ((DefaultMutableTreeNode) cloudMinion4Node.getChildAt(0))
-               .setUserObject("<html><body>Running ROS/GZ Sim: <span style=\"color:red;font-style:italic;\">"
-                     + sshSimLauncher.getSimTaskname(LocalCloudMachines.CLOUDMINION_4) + "</span></body></html>");
-      else
-         ((DefaultMutableTreeNode) cloudMinion4Node.getChildAt(0))
-               .setUserObject("<html><body>Running ROS/GZ Sim: <span style=\"color:green;font-style:italic;\">No</span></body></html>");
+            if (sshSimLauncher.isMachineRunningSim(machine))
+            {
+               node.setUserObject("<html><body>Running ROS/GZ Sim: <span style=\"color:red;font-style:italic;\">" + sshSimLauncher.getSimTaskname(machine)
+                     + "</span></body></html>");
+            }
+            else
+            {
+               node.setUserObject("<html><body>Running ROS/GZ Sim: <span style=\"color:green;font-style:italic;\">No</span></body></html>");
+            }
+         }
+      }
    }
 
    private void updateSCSStatuses()
    {
-      if (sshSimLauncher.isMachineRunningController(LocalCloudMachines.CLOUDMONSTER))
-         ((DefaultMutableTreeNode) cloudMonsterNode.getChildAt(1))
-               .setUserObject("<html><body>Running SCS Controller? <span style=\"color:red;font-style:italic;\">Yes</span></body></html>");
-      else
-         ((DefaultMutableTreeNode) cloudMonsterNode.getChildAt(1))
-               .setUserObject("<html><body>Running SCS Controller? <span style=\"color:green;font-style:italic;\">No</span></body></html>");
+      for (LocalCloudMachines machine : LocalCloudMachines.values())
+      {
+         if (!machine.equals(LocalCloudMachines.LOCALHOST))
+         {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) cloudMachineTrees.get(machine).second().getChildAt(1);
 
-      if (sshSimLauncher.isMachineRunningController(LocalCloudMachines.CLOUDMONSTER_JR))
-         ((DefaultMutableTreeNode) cloudMonsterJuniorNode.getChildAt(1))
-               .setUserObject("<html><body>Running SCS Controller? <span style=\"color:red;font-style:italic;\">Yes</span></body></html>");
-      else
-         ((DefaultMutableTreeNode) cloudMonsterJuniorNode.getChildAt(1))
-               .setUserObject("<html><body>Running SCS Controller? <span style=\"color:green;font-style:italic;\">No</span></body></html>");
-
-      if (sshSimLauncher.isMachineRunningController(LocalCloudMachines.CLOUDMINION_1))
-         ((DefaultMutableTreeNode) cloudMinion1Node.getChildAt(1))
-               .setUserObject("<html><body>Running SCS Controller? <span style=\"color:red;font-style:italic;\">Yes</span></body></html>");
-      else
-         ((DefaultMutableTreeNode) cloudMinion1Node.getChildAt(1))
-               .setUserObject("<html><body>Running SCS Controller? <span style=\"color:green;font-style:italic;\">No</span></body></html>");
-
-      if (sshSimLauncher.isMachineRunningController(LocalCloudMachines.CLOUDMINION_2))
-         ((DefaultMutableTreeNode) cloudMinion2Node.getChildAt(1))
-               .setUserObject("<html><body>Running SCS Controller? <span style=\"color:red;font-style:italic;\">Yes</span></body></html>");
-      else
-         ((DefaultMutableTreeNode) cloudMinion2Node.getChildAt(1))
-               .setUserObject("<html><body>Running SCS Controller? <span style=\"color:green;font-style:italic;\">No</span></body></html>");
-
-      if (sshSimLauncher.isMachineRunningController(LocalCloudMachines.CLOUDMINION_3))
-         ((DefaultMutableTreeNode) cloudMinion3Node.getChildAt(1))
-               .setUserObject("<html><body>Running SCS Controller? <span style=\"color:red;font-style:italic;\">Yes</span></body></html>");
-      else
-         ((DefaultMutableTreeNode) cloudMinion3Node.getChildAt(1))
-               .setUserObject("<html><body>Running SCS Controller? <span style=\"color:green;font-style:italic;\">No</span></body></html>");
-
-      if (sshSimLauncher.isMachineRunningController(LocalCloudMachines.CLOUDMINION_4))
-         ((DefaultMutableTreeNode) cloudMinion4Node.getChildAt(1))
-               .setUserObject("<html><body>Running SCS Controller? <span style=\"color:red;font-style:italic;\">Yes</span></body></html>");
-      else
-         ((DefaultMutableTreeNode) cloudMinion4Node.getChildAt(1))
-               .setUserObject("<html><body>Running SCS Controller? <span style=\"color:green;font-style:italic;\">No</span></body></html>");
+            if (sshSimLauncher.isMachineRunningController(machine))
+            {
+               node.setUserObject("<html><body>Running SCS Controller? <span style=\"color:red;font-style:italic;\">Yes</span></body></html>");
+            }
+            else
+            {
+               node.setUserObject("<html><body>Running SCS Controller? <span style=\"color:green;font-style:italic;\">No</span></body></html>");
+            }
+         }
+      }
    }
 
    private void updateStatusIndicators()
    {
-      if (sshSimLauncher.isMachineReachable(LocalCloudMachines.CLOUDMONSTER))
-         setCloudStatusItemIcon(cloudMonsterTree, goodConnectionIcon);
-      else
-         setCloudStatusItemIcon(cloudMonsterTree, badConnectionIcon);
-
-      if (sshSimLauncher.isMachineReachable(LocalCloudMachines.CLOUDMONSTER_JR))
-         setCloudStatusItemIcon(cloudMonsterJuniorTree, goodConnectionIcon);
-      else
-         setCloudStatusItemIcon(cloudMonsterJuniorTree, badConnectionIcon);
-
-      if (sshSimLauncher.isMachineReachable(LocalCloudMachines.CLOUDMINION_1))
-         setCloudStatusItemIcon(cloudMinion1Tree, goodConnectionIcon);
-      else
-         setCloudStatusItemIcon(cloudMinion1Tree, badConnectionIcon);
-
-      if (sshSimLauncher.isMachineReachable(LocalCloudMachines.CLOUDMINION_2))
-         setCloudStatusItemIcon(cloudMinion2Tree, goodConnectionIcon);
-      else
-         setCloudStatusItemIcon(cloudMinion2Tree, badConnectionIcon);
-
-      if (sshSimLauncher.isMachineReachable(LocalCloudMachines.CLOUDMINION_3))
-         setCloudStatusItemIcon(cloudMinion3Tree, goodConnectionIcon);
-      else
-         setCloudStatusItemIcon(cloudMinion3Tree, badConnectionIcon);
-
-      if (sshSimLauncher.isMachineReachable(LocalCloudMachines.CLOUDMINION_4))
-         setCloudStatusItemIcon(cloudMinion4Tree, goodConnectionIcon);
-      else
-         setCloudStatusItemIcon(cloudMinion4Tree, badConnectionIcon);
+      for (LocalCloudMachines machine : LocalCloudMachines.values())
+      {
+         if (!machine.equals(LocalCloudMachines.LOCALHOST))
+         {
+            if (sshSimLauncher.isMachineReachable(machine))
+               setCloudStatusItemIcon(cloudMachineTrees.get(machine).first(), goodConnectionIcon);
+            else
+               setCloudStatusItemIcon(cloudMachineTrees.get(machine).first(), badConnectionIcon);
+         }
+      }
    }
 
    private void setCloudStatusItemIcon(JTree cloudStatusSubtree, ImageIcon icon)
