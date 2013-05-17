@@ -359,9 +359,9 @@ public class DRCDashboard
             {
                LocalCloudMachines gazeboMachine = LocalCloudMachines.CLOUDMONSTER;
                LocalCloudMachines controllerMachine = (LocalCloudMachines) controllerMachineSelectionCombo.getSelectedItem();
-               DRCTask task = (DRCTask) taskCombo.getSelectedItem();
-               String pluginOption = radioGroup.getSelection().toString();
-
+               DRCTask task = (DRCTask) taskCombo.getSelectedItem();                  
+               String pluginOption = radioGroup.getSelection().getActionCommand();
+                              
                if (!sshSimLauncher.isMachineRunningSim(LocalCloudMachines.CLOUDMONSTER))
                {
                   String[] options = new String[] { "Yes", "No" };
@@ -413,7 +413,7 @@ public class DRCDashboard
                LocalCloudMachines gazeboMachine = LocalCloudMachines.CLOUDMONSTER_JR;
                LocalCloudMachines controllerMachine = (LocalCloudMachines) controllerMachineSelectionCombo.getSelectedItem();
                DRCTask task = (DRCTask) taskCombo.getSelectedItem();
-               String pluginOption = radioGroup.getSelection().toString();
+               String pluginOption = radioGroup.getSelection().getActionCommand();
 
                if (!sshSimLauncher.isMachineRunningSim(LocalCloudMachines.CLOUDMONSTER_JR))
                {
@@ -466,7 +466,7 @@ public class DRCDashboard
                LocalCloudMachines gazeboMachine = LocalCloudMachines.CLOUDMINION_1;
                LocalCloudMachines controllerMachine = (LocalCloudMachines) controllerMachineSelectionCombo.getSelectedItem();
                DRCTask task = (DRCTask) taskCombo.getSelectedItem();
-               String pluginOption = radioGroup.getSelection().toString();
+               String pluginOption = radioGroup.getSelection().getActionCommand();
 
                if (!sshSimLauncher.isMachineRunningSim(LocalCloudMachines.CLOUDMINION_1))
                {
@@ -519,7 +519,7 @@ public class DRCDashboard
                LocalCloudMachines gazeboMachine = LocalCloudMachines.CLOUDMINION_2;
                LocalCloudMachines controllerMachine = (LocalCloudMachines) controllerMachineSelectionCombo.getSelectedItem();
                DRCTask task = (DRCTask) taskCombo.getSelectedItem();
-               String pluginOption = radioGroup.getSelection().toString();
+               String pluginOption = radioGroup.getSelection().getActionCommand();
 
                if (!sshSimLauncher.isMachineRunningSim(LocalCloudMachines.CLOUDMINION_2))
                {
@@ -572,7 +572,7 @@ public class DRCDashboard
                LocalCloudMachines gazeboMachine = LocalCloudMachines.CLOUDMINION_3;
                LocalCloudMachines controllerMachine = (LocalCloudMachines) controllerMachineSelectionCombo.getSelectedItem();
                DRCTask task = (DRCTask) taskCombo.getSelectedItem();
-               String pluginOption = radioGroup.getSelection().toString();
+               String pluginOption = radioGroup.getSelection().getActionCommand();
 
                if (!sshSimLauncher.isMachineRunningSim(LocalCloudMachines.CLOUDMINION_3))
                {
@@ -624,7 +624,7 @@ public class DRCDashboard
                LocalCloudMachines gazeboMachine = LocalCloudMachines.CLOUDMINION_4;
                LocalCloudMachines controllerMachine = (LocalCloudMachines) controllerMachineSelectionCombo.getSelectedItem();
                DRCTask task = (DRCTask) taskCombo.getSelectedItem();
-               String pluginOption = radioGroup.getSelection().toString();
+               String pluginOption = radioGroup.getSelection().getActionCommand();
 
                if (!sshSimLauncher.isMachineRunningSim(LocalCloudMachines.CLOUDMINION_4))
                {
@@ -716,7 +716,9 @@ public class DRCDashboard
       
       radioGroup = new ButtonGroup();
       useDefaultButton = new JRadioButton("Use ROS Synchronization Layer", true);
+      useDefaultButton.setActionCommand("default");
       usePluginButton = new JRadioButton("Use Jesper Plügin Synchronization");
+      usePluginButton.setActionCommand("plugin");
 
       radioGroup.add(useDefaultButton);
       radioGroup.add(usePluginButton);
