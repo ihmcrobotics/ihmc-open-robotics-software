@@ -302,6 +302,12 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       momentumBasedController.initialize();
       manipulationControlModule.initialize();
    }
+   
+   public double getDeterminantOfHipToAnkleJacobian(RobotSide robotSide)
+   {
+         legJacobians.get(robotSide).compute();
+         return legJacobians.get(robotSide).det();
+   }
 
    public void doMotionControl()
    {
