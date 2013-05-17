@@ -1,15 +1,19 @@
 package us.ihmc.darpaRoboticsChallenge.processManagement;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.JOptionPane;
+import javax.swing.Timer;
+
+import org.apache.commons.lang.mutable.MutableBoolean;
 
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig.LocalCloudMachines;
@@ -22,6 +26,8 @@ import com.jcraft.jsch.Session;
 
 public class GazeboRemoteProcessManager
 {
+   private static final boolean DEBUG = true;
+
    public static final char KILL_CHAR = 0x03;
    private String username = System.getProperty("user.name");
    private String ip = "localhost";
@@ -31,11 +37,17 @@ public class GazeboRemoteProcessManager
    private JSch jsch;
    private Properties config;
 
-   private static volatile ConcurrentHashMap<LocalCloudMachines, String> runningSims = new ConcurrentHashMap<LocalCloudMachines, String>();
+   private static volatile ConcurrentHashMap<LocalCloudMachines, String> runningSimTaskNames = new ConcurrentHashMap<LocalCloudMachines, String>();
+   private static volatile ConcurrentHashMap<LocalCloudMachines, Integer> runningSimPIDs = new ConcurrentHashMap<LocalCloudMachines, Integer>();
+   private static volatile ConcurrentHashMap<LocalCloudMachines, Integer> runningControllerPIDs = new ConcurrentHashMap<LocalCloudMachines, Integer>();
 
    private static volatile ConcurrentHashMap<LocalCloudMachines, Session> sessions = new ConcurrentHashMap<LocalCloudMachines, Session>();
    private static volatile ConcurrentHashMap<Session, ChannelShell> shellChannels = new ConcurrentHashMap<Session, ChannelShell>();
    private static volatile ConcurrentHashMap<ChannelShell, PrintStream> shellPrintStreams = new ConcurrentHashMap<ChannelShell, PrintStream>();
+
+   private static volatile ConcurrentHashMap<LocalCloudMachines, MutableBoolean> availability = new ConcurrentHashMap<LocalCloudMachines, MutableBoolean>();
+   private static volatile ConcurrentHashMap<LocalCloudMachines, MutableBoolean> isRunningRos = new ConcurrentHashMap<DRCLocalCloudConfig.LocalCloudMachines, MutableBoolean>();
+   private static volatile ConcurrentHashMap<LocalCloudMachines, MutableBoolean> isRunningController = new ConcurrentHashMap<DRCLocalCloudConfig.LocalCloudMachines, MutableBoolean>();
 
    public GazeboRemoteProcessManager()
    {
@@ -44,14 +56,16 @@ public class GazeboRemoteProcessManager
       config = new Properties();
       config.put("StrictHostKeyChecking", "no");
 
-      scanForSims();
+      initializeNetworkStatus();
+
+      setupNetworkPollingTimer();
    }
-   
+
    public void sendCommandThroughShellChannel(LocalCloudMachines machine, String command)
    {
       shellCommandStreamForMachine(machine).println(command);
    }
-   
+
    public void sendCommandThroughExecChannel(LocalCloudMachines machine, String command)
    {
       try
@@ -66,89 +80,35 @@ public class GazeboRemoteProcessManager
          e.printStackTrace();
       }
    }
-   
-   public void startRosSim()
+
+   public boolean isMachineAvailable(LocalCloudMachines machine)
    {
-      
+      return availability.get(machine).booleanValue();
    }
 
    public boolean isMachineRunningSim(LocalCloudMachines machine)
    {
-      if (getRosSimPID(machine) < 0)
-         return false;
-      else
-         return true;
+      return isRunningRos.get(machine).booleanValue();
+   }
+
+   public boolean isMachineRunningController(LocalCloudMachines machine)
+   {
+      return isRunningController.get(machine).booleanValue();
+   }
+
+   public String getRunningRosSimTaskName(LocalCloudMachines machine)
+   {
+      return runningSimTaskNames.get(machine);
    }
 
    public int getRosSimPID(LocalCloudMachines machine)
    {
-      int pid = -1;
-
-      try
-      {
-         ChannelExec channel = (ChannelExec) sessions.get(machine).openChannel("exec");
-         //         channel.setCommand("/home/unknownid/workspace/GazeboStateCommunicator/util/getRoslaunchPID.sh");
-         channel.setCommand(GazeboProcessManagementCommandStrings.GET_ROSLAUNCH_PID);
-         channel.setInputStream(null);
-         channel.setOutputStream(System.out);
-
-         BufferedReader reader = new BufferedReader(new InputStreamReader(channel.getInputStream()));
-
-         channel.connect();
-
-         String tmp = reader.readLine();
-
-         if (tmp != null)
-            pid = Integer.parseInt(tmp);
-
-         //         System.out.println(pid);
-
-         channel.disconnect();
-      }
-      catch (JSchException e)
-      {
-         e.printStackTrace();
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
-
-      return pid;
+      return runningSimPIDs.get(machine);
    }
 
-   public String getRosSimTaskname(LocalCloudMachines machine)
+   public int getControllerPID(LocalCloudMachines machine)
    {
-      String taskName = "";
-
-      try
-      {
-         ChannelExec channel = (ChannelExec) sessions.get(machine).openChannel("exec");
-         //         channel.setCommand("/home/unknownid/workspace/GazeboStateCommunicator/util/getRoslaunchTask.sh");
-         channel.setCommand(GazeboProcessManagementCommandStrings.GET_ROSLAUNCH_TASK);
-         channel.setInputStream(null);
-         channel.setOutputStream(System.out);
-
-         BufferedReader reader = new BufferedReader(new InputStreamReader(channel.getInputStream()));
-
-         channel.connect();
-
-         taskName = reader.readLine();
-
-         //         System.out.println(taskName);
-
-         channel.disconnect();
-      }
-      catch (JSchException e)
-      {
-         e.printStackTrace();
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
-
-      return taskName;
+      return runningControllerPIDs.get(machine);
    }
 
    private Session sessionForMachine(LocalCloudMachines machine)
@@ -214,33 +174,148 @@ public class GazeboRemoteProcessManager
       }
    }
 
-   private void scanForSims()
+   private void initializeNetworkStatus()
    {
-      try
+      for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
-         for (LocalCloudMachines machine : LocalCloudMachines.values())
+         try
          {
             if (machine != LocalCloudMachines.LOCALHOST)
             {
-               //               System.out.println("Checking " + machine);
                initCredentials(machine);
                if (InetAddress.getByName(ip).isReachable(500))
                {
+                  availability.put(machine, new MutableBoolean(true));
                   setupSession(machine);
-                  if (isMachineRunningSim(machine))
+                  updateRosSimPID(machine);
+                  if (getRosSimPID(machine) > 0)
                   {
-                     //                     System.out.println(machine + " is running " + task);
-                     runningSims.put(machine, getRosSimTaskname(machine));
+                     updateRosSimTaskname(machine);
+                     runningSimTaskNames.put(machine, runningSimTaskNames.get(machine));
+                     isRunningRos.put(machine, new MutableBoolean(true));
                   }
                   else
                   {
-                     shutdownSession(machine);
+                     isRunningRos.put(machine, new MutableBoolean(false));
+                  }
+
+                  updateControllerPID(machine);
+                  if (runningControllerPIDs.get(machine) > 0)
+                  {
+                     isRunningController.put(machine, new MutableBoolean(false));
+                     runningControllerPIDs.put(machine, runningControllerPIDs.get(machine));
                   }
                }
             }
          }
+         catch (Exception e)
+         {
+            availability.put(machine, new MutableBoolean(false));
+            isRunningController.put(machine, new MutableBoolean(false));
+            isRunningRos.put(machine, new MutableBoolean(false));
+         }
       }
-      catch (UnknownHostException e)
+   }
+
+   private void setupNetworkPollingTimer()
+   {
+      Timer networkPollingTimer = new Timer(5000, new ActionListener()
+      {
+         public void actionPerformed(ActionEvent e)
+         {
+            updateNetworkStatus();
+
+         }
+      });
+      networkPollingTimer.start();
+   }
+
+   private void updateNetworkStatus()
+   {
+      for (LocalCloudMachines machine : LocalCloudMachines.values())
+      {
+         if (!machine.equals(LocalCloudMachines.LOCALHOST))
+         {
+            try
+            {
+               if (InetAddress.getByName(ip).isReachable(500))
+               {
+                  availability.get(machine).setValue(true);
+
+                  updateControllerPID(machine);
+                  if (getControllerPID(machine) > 0)
+                     isRunningController.get(machine).setValue(true);
+                  else
+                     isRunningController.get(machine).setValue(false);
+
+                  updateRosSimPID(machine);
+                  if (getRosSimPID(machine) > 0)
+                     isRunningRos.get(machine).setValue(true);
+                  else
+                     isRunningRos.get(machine).setValue(false);
+
+                  updateRosSimTaskname(machine);
+               }
+               else
+               {
+                  availability.get(machine).setValue(false);
+                  isRunningRos.get(machine).setValue(false);
+                  isRunningController.get(machine).setValue(false);
+
+                  runningControllerPIDs.remove(machine);
+                  runningControllerPIDs.put(machine, -1);
+
+                  runningSimPIDs.remove(machine);
+                  runningSimPIDs.put(machine, -1);
+
+                  runningSimTaskNames.remove(machine);
+                  runningSimTaskNames.put(machine, null);
+               }
+            }
+            catch (Exception e)
+            {
+               availability.get(machine).setValue(false);
+               isRunningRos.get(machine).setValue(false);
+               isRunningController.get(machine).setValue(false);
+
+               runningControllerPIDs.remove(machine);
+               runningControllerPIDs.put(machine, -1);
+
+               runningSimPIDs.remove(machine);
+               runningSimPIDs.put(machine, -1);
+
+               runningSimTaskNames.remove(machine);
+               runningSimTaskNames.put(machine, null);
+            }
+         }
+      }
+   }
+
+   private void updateRosSimPID(LocalCloudMachines machine)
+   {
+      int pid = -1;
+      try
+      {
+         ChannelExec channel = (ChannelExec) sessions.get(machine).openChannel("exec");
+         channel.setCommand(GazeboProcessManagementCommandStrings.GET_ROSLAUNCH_PID);
+         channel.setInputStream(null);
+         channel.setOutputStream(System.out);
+
+         BufferedReader reader = new BufferedReader(new InputStreamReader(channel.getInputStream()));
+
+         channel.connect();
+
+         String tmp = reader.readLine();
+
+         if (tmp != null)
+            pid = Integer.parseInt(tmp);
+
+         if (DEBUG)
+            System.out.println(pid);
+
+         channel.disconnect();
+      }
+      catch (JSchException e)
       {
          e.printStackTrace();
       }
@@ -248,23 +323,81 @@ public class GazeboRemoteProcessManager
       {
          e.printStackTrace();
       }
+
+      runningSimPIDs.remove(machine);
+      runningSimPIDs.put(machine, pid);
+   }
+
+   private void updateControllerPID(LocalCloudMachines machine)
+   {
+      int pid = -1;
+
+      try
+      {
+         ChannelExec channel = (ChannelExec) sessions.get(machine).openChannel("exec");
+         channel.setCommand(GazeboProcessManagementCommandStrings.GET_SCS_PID);
+         channel.setInputStream(null);
+         channel.setOutputStream(System.out);
+
+         BufferedReader reader = new BufferedReader(new InputStreamReader(channel.getInputStream()));
+
+         channel.connect();
+
+         String tmp = reader.readLine();
+
+         if (tmp != null)
+            pid = Integer.parseInt(tmp);
+
+         if (DEBUG)
+            System.out.println(pid);
+
+         channel.disconnect();
+      }
       catch (JSchException e)
       {
          e.printStackTrace();
       }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+
+      runningControllerPIDs.remove(machine);
+      runningControllerPIDs.put(machine, pid);
    }
 
-   private void shutdownSession(LocalCloudMachines machine)
+   private void updateRosSimTaskname(LocalCloudMachines machine)
    {
-      Session session = sessions.get(machine);
-      ChannelShell channel = shellChannels.get(session);
+      String taskName = null;
 
-      sessions.remove(machine);
-      shellChannels.remove(session);
-      shellPrintStreams.remove(channel);
+      try
+      {
+         ChannelExec channel = (ChannelExec) sessions.get(machine).openChannel("exec");
+         channel.setCommand(GazeboProcessManagementCommandStrings.GET_ROSLAUNCH_TASK);
+         channel.setInputStream(null);
+         channel.setOutputStream(System.out);
 
-      session.disconnect();
-      channel.disconnect();
+         BufferedReader reader = new BufferedReader(new InputStreamReader(channel.getInputStream()));
 
+         channel.connect();
+
+         taskName = reader.readLine();
+
+         if (DEBUG)
+            System.out.println(taskName);
+
+         channel.disconnect();
+      }
+      catch (JSchException e)
+      {
+         e.printStackTrace();
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+
+      runningSimTaskNames.remove(machine);
+      runningSimTaskNames.put(machine, taskName);
    }
 }
