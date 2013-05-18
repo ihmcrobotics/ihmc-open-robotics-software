@@ -22,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.stateEstimation.DesiredCoMAndAngularAccelerationGrabber;
 import us.ihmc.commonWalkingControlModules.stateEstimation.PointPositionGrabber;
+import us.ihmc.commonWalkingControlModules.stateEstimation.PointPositionGrabberInterface;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylindricalContactState;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
@@ -94,7 +95,7 @@ public class MomentumBasedController implements RobotController
    protected final InverseDynamicsCalculator inverseDynamicsCalculator;
 
    private final DesiredCoMAndAngularAccelerationGrabber desiredCoMAndAngularAccelerationGrabber;
-   protected final PointPositionGrabber pointPositionGrabber;
+   protected final PointPositionGrabberInterface pointPositionGrabber;
 
    protected final MomentumControlModule momentumControlModule;
 
@@ -166,9 +167,10 @@ public class MomentumBasedController implements RobotController
          this.desiredCoMAndAngularAccelerationGrabber = new DesiredCoMAndAngularAccelerationGrabber(stateEstimationDataFromControllerSink, estimationLink,
                  estimationFrame, totalMass);
 
-         double touchdownTime = 0.05;
+         double touchdownTime = 0.12;
          double minCoPDistance = 0.01;
 
+//         this.pointPositionGrabber = new SingleReferenceFramePointPositionGrabber(stateEstimationDataFromControllerSink, registry, controlDT, touchdownTime, minCoPDistance);
          this.pointPositionGrabber = new PointPositionGrabber(stateEstimationDataFromControllerSink, registry, controlDT, touchdownTime, minCoPDistance);
       }
       else
@@ -495,7 +497,7 @@ public class MomentumBasedController implements RobotController
       return referenceFrames;
    }
 
-   public PointPositionGrabber getPointPositionGrabber()
+   public PointPositionGrabberInterface getPointPositionGrabber()
    {
       return pointPositionGrabber;
    }

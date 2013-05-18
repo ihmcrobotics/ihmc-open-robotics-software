@@ -263,4 +263,9 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CoMHeight
 
       return maxX;
    }
+   
+   public boolean hasBeenInitializedWithNextStep()
+   {
+      return false;
+   }
 }

@@ -11,9 +11,12 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.Line2d;
 import us.ihmc.utilities.math.geometry.LineSegment2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.stringStretcher2d.StringStretcher2d;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
@@ -30,6 +33,8 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final FourPointSpline1D spline = new FourPointSpline1D(registry);
    
+   private final BooleanYoVariable hasBeenInitializedWithNextStep = new BooleanYoVariable("hasBeenInitializedWithNextStep", registry);
+   
    private final DoubleYoVariable minimumHeightAboveGround = new DoubleYoVariable("minimumHeightAboveGround", registry);
    private final DoubleYoVariable nominalHeightAboveGround = new DoubleYoVariable("nominalHeightAboveGround", registry);
    private final DoubleYoVariable maximumHeightAboveGround = new DoubleYoVariable("maximumHeightAboveGround", registry);
@@ -37,7 +42,11 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final DoubleYoVariable maximumHeightDeltaBetweenWaypoints = new DoubleYoVariable("maximumHeightDeltaBetweenWaypoints", registry);
    private final DoubleYoVariable doubleSupportPercentageIn = new DoubleYoVariable("doubleSupportPercentageIn", registry);
    
+   private final DoubleYoVariable previousZFinal = new DoubleYoVariable("previousZFinal", registry);
    private final DoubleYoVariable desiredCoMHeight = new DoubleYoVariable("desiredCoMHeight", registry);
+   private final YoFramePoint desiredCoMPosition = new  YoFramePoint("desiredCoMPosition", ReferenceFrame.getWorldFrame(), registry);
+//   private final YoFrameVector desiredCoMVelocity = new YoFrameVector("desiredCoMVelocity", ReferenceFrame.getWorldFrame(), registry);
+   
    private LineSegment2d projectionSegment;
 
    private final YoFramePoint contactFrameZeroPosition = new YoFramePoint("contactFrameZeroPosition", worldFrame, registry);
@@ -54,7 +63,10 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       setMinimumHeightAboveGround(minimumHeightAboveGround);
       setNominalHeightAboveGround(nominalHeightAboveGround);
       setMaximumHeightAboveGround(maximumHeightAboveGround);
-
+      previousZFinal.set(nominalHeightAboveGround);
+      
+      hasBeenInitializedWithNextStep.set(false);
+      
       this.doubleSupportPercentageIn.set(doubleSupportPercentageIn);
       
       this.maximumHeightDeltaBetweenWaypoints.set(0.2); //0.04);
@@ -112,6 +124,10 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointD0MaxViz);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointDFMaxViz);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointSNextMaxViz);
+               
+         DynamicGraphicPosition desiredCoMPositionViz = new DynamicGraphicPosition("desiredCoMPosition", desiredCoMPosition, 1.1*pointSize, YoAppearance.Gold());
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", desiredCoMPositionViz);
+
       }
       else
       {
@@ -157,11 +173,41 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       initialize(transferToAndNextFootstepsData);
    }
    
+   private final Point2d tempPoint2dA = new Point2d();
+   private final Point2d tempPoint2dB = new Point2d();
+   
+   private final Point2d s0Min = new Point2d();
+   private final Point2d d0Min = new Point2d();
+   private final Point2d dFMin = new Point2d();
+   private final Point2d sFMin = new Point2d();
+   private final Point2d sNextMin = new Point2d();
+   
+   private final Point2d s0Nom = new Point2d();
+   private final Point2d d0Nom = new Point2d();
+   private final Point2d dFNom = new Point2d();
+   private final Point2d sFNom = new Point2d();
+   private final Point2d sNextNom = new Point2d();
+
+   private final Point2d s0Max = new Point2d();
+   private final Point2d d0Max = new Point2d();
+   private final Point2d dFMax = new Point2d();
+   private final Point2d sFMax = new Point2d();
+   private final Point2d sNextMax = new Point2d();
+
+   private final Point2d s0 = new Point2d();
+   private final Point2d d0 = new Point2d();
+   private final Point2d dF = new Point2d();
+   private final Point2d sF = new Point2d();
+   private final Point2d sNext = new Point2d();
+   
    private void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
    {
       Footstep transferFromFootstep = transferToAndNextFootstepsData.getTransferFromFootstep();
       Footstep transferToFootstep = transferToAndNextFootstepsData.getTransferToFootstep();
       Footstep nextFootstep = transferToAndNextFootstepsData.getNextFootstep();
+      
+      if (nextFootstep != null) hasBeenInitializedWithNextStep.set(true);
+      else hasBeenInitializedWithNextStep.set(false);
       
 //      FramePoint[] contactFramePositions = getContactStateCenters(contactStates, nextFootstep);
       
@@ -181,12 +227,11 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       contactFrameZeroPosition.set(transferFromContactFramePosition);
       contactFrameOnePosition.set(transferToContactFramePosition);
       
-      projectionSegment = new LineSegment2d(getPoint2d(transferFromContactFramePosition), getPoint2d(transferToContactFramePosition));
-      double s0 = 0.0;
-      double sF = projectionSegment.length();
+      getPoint2d(tempPoint2dA, transferFromContactFramePosition);
+      getPoint2d(tempPoint2dB, transferToContactFramePosition);
       
-      double s_d0 = doubleSupportPercentageIn.getDoubleValue() * sF;
-      double s_df = (1.0 - doubleSupportPercentageIn.getDoubleValue()) * sF;
+      projectionSegment = new LineSegment2d(tempPoint2dA, tempPoint2dB);
+      setPointXValues(nextContactFramePosition);
 
       double footHeight0 = transferFromContactFramePosition.getZ();
       double footHeight1 = transferToContactFramePosition.getZ();
@@ -197,44 +242,31 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          nextFootHeight = nextContactFramePosition.getZ();
       }
       
-      double z0Min = footHeight0 + minimumHeightAboveGround.getDoubleValue();
-      double z0Nom = footHeight0 + nominalHeightAboveGround.getDoubleValue();
-      double z0Max = footHeight0 + maximumHeightAboveGround.getDoubleValue();
+      s0Min.setY(footHeight0 + minimumHeightAboveGround.getDoubleValue());
+      s0Nom.setY(footHeight0 + nominalHeightAboveGround.getDoubleValue());
+      s0Max.setY(footHeight0 + maximumHeightAboveGround.getDoubleValue());
 
-      double zFMin = footHeight1 + minimumHeightAboveGround.getDoubleValue();
-      double zFNom = footHeight1 + nominalHeightAboveGround.getDoubleValue();
-      double zFMax = footHeight1 + maximumHeightAboveGround.getDoubleValue();
+      sFMin.setY(footHeight1 + minimumHeightAboveGround.getDoubleValue());
+      sFNom.setY(footHeight1 + nominalHeightAboveGround.getDoubleValue());
+      sFMax.setY(footHeight1 + maximumHeightAboveGround.getDoubleValue());
       
-      double z_d0Min = findMinimumDoubleSupportHeight(s0, sF, s_d0, footHeight0, footHeight1);      
-      double z_d0Nom = findNominalDoubleSupportHeight(s0, sF, s_d0, footHeight0, footHeight1);      
-      double z_d0Max = findMaximumDoubleSupportHeight(s0, sF, s_d0, footHeight0, footHeight1);
+      d0Min.setY(findMinimumDoubleSupportHeight(s0.getX(), sF.getX(), d0.getX(), footHeight0, footHeight1));      
+      d0Nom.setY(findNominalDoubleSupportHeight(s0.getX(), sF.getX(), d0.getX(), footHeight0, footHeight1));      
+      d0Max.setY(findMaximumDoubleSupportHeight(s0.getX(), sF.getX(), d0.getX(), footHeight0, footHeight1));
       
-      double z_dFMin = findMinimumDoubleSupportHeight(s0, sF, s_df, footHeight0, footHeight1);
-      double z_dFNom = findNominalDoubleSupportHeight(s0, sF, s_df, footHeight0, footHeight1);
-      double z_dFMax = findMaximumDoubleSupportHeight(s0, sF, s_df, footHeight0, footHeight1);
+      dFMin.setY(findMinimumDoubleSupportHeight(s0.getX(), sF.getX(), dF.getX(), footHeight0, footHeight1));
+      dFNom.setY(findNominalDoubleSupportHeight(s0.getX(), sF.getX(), dF.getX(), footHeight0, footHeight1));
+      dFMax.setY(findMaximumDoubleSupportHeight(s0.getX(), sF.getX(), dF.getX(), footHeight0, footHeight1));
       
-      double zNextMin = nextFootHeight + minimumHeightAboveGround.getDoubleValue();
-      double zNextNom = nextFootHeight + nominalHeightAboveGround.getDoubleValue();
-      double zNextMax = nextFootHeight + maximumHeightAboveGround.getDoubleValue();
+      sNextMin.setY(nextFootHeight + minimumHeightAboveGround.getDoubleValue());
+      sNextNom.setY(nextFootHeight + nominalHeightAboveGround.getDoubleValue());
+      sNextMax.setY(nextFootHeight + maximumHeightAboveGround.getDoubleValue());
   
-      double z0 = z0Nom;
-      double z_d0 = z_d0Nom;
-      double z_dF = z_dFNom;
-      double zF = zFNom;
-      double zNext = zNextNom;
-
-      z_d0 = clipToMaximum(z_d0, z_dF + maximumHeightDeltaBetweenWaypoints.getDoubleValue());
-      z_dF = clipToMaximum(z_dF, z_d0 + maximumHeightDeltaBetweenWaypoints.getDoubleValue());
+//      computeHeightsToUseOne();
+      computeHeightsToUseByStretchingString();
+      previousZFinal.set(sF.getY());
       
-      z0 = clipToMaximum(z0, z_d0 + maximumHeightDeltaBetweenWaypoints.getDoubleValue());
-      zF = clipToMaximum(zF, z_dF + maximumHeightDeltaBetweenWaypoints.getDoubleValue());
-
-      Point2d pointS0 = new Point2d(s0, z0);
-      Point2d pointSF = new Point2d(sF, zF);
-      Point2d pointD0 = new Point2d(s_d0, z_d0);
-      Point2d pointDF = new Point2d(s_df, z_dF);
-      
-      Point2d[] points = new Point2d[] {pointS0, pointD0, pointDF, pointSF};
+      Point2d[] points = new Point2d[] {s0, d0, dF, sF};
       double[] endpointSlopes = new double[] {0.0, 0.0};
       
       double[] waypointSlopes = new double[2];
@@ -246,55 +278,55 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       if (VISUALIZE)
       {
          FramePoint framePointS0 = new FramePoint(transferFromContactFramePosition);
-         framePointS0.setZ(z0);
+         framePointS0.setZ(s0.getY());
          pointS0Viz.setPosition(framePointS0);
          
-         framePointS0.setZ(z0Min);
+         framePointS0.setZ(s0Min.getY());
          pointS0MinViz.setPosition(framePointS0);
          
-         framePointS0.setZ(z0Max);
+         framePointS0.setZ(s0Max.getY());
          pointS0MaxViz.setPosition(framePointS0);
          
-         FramePoint framePointD0 = FramePoint.morph(transferFromContactFramePosition, transferToContactFramePosition, s_d0/sF);
-         framePointD0.setZ(z_d0);
+         FramePoint framePointD0 = FramePoint.morph(transferFromContactFramePosition, transferToContactFramePosition, d0.getX()/sF.getX());
+         framePointD0.setZ(d0.getY());
          pointD0Viz.setPosition(framePointD0);
          
-         framePointD0.setZ(z_d0Min);
+         framePointD0.setZ(d0Min.getY());
          pointD0MinViz.setPosition(framePointD0);
          
-         framePointD0.setZ(z_d0Max);
+         framePointD0.setZ(d0Max.getY());
          pointD0MaxViz.setPosition(framePointD0);
          
-         FramePoint framePointDF = FramePoint.morph(transferFromContactFramePosition, transferToContactFramePosition, (s_df)/sF);
-         framePointDF.setZ(z_dF);
+         FramePoint framePointDF = FramePoint.morph(transferFromContactFramePosition, transferToContactFramePosition, dF.getX()/sF.getX());
+         framePointDF.setZ(dF.getY());
          pointDFViz.setPosition(framePointDF);
          
-         framePointDF.setZ(z_dFMin);
+         framePointDF.setZ(dFMin.getY());
          pointDFMinViz.setPosition(framePointDF);
          
-         framePointDF.setZ(z_dFMax);
+         framePointDF.setZ(dFMax.getY());
          pointDFMaxViz.setPosition(framePointDF);
          
          FramePoint framePointSF = new FramePoint(transferToContactFramePosition);
-         framePointSF.setZ(zF);
+         framePointSF.setZ(sF.getY());
          pointSFViz.setPosition(framePointSF);     
          
-         framePointSF.setZ(zFMin);
+         framePointSF.setZ(sFMin.getY());
          pointSFMinViz.setPosition(framePointSF);     
          
-         framePointSF.setZ(zFMax);
+         framePointSF.setZ(sFMax.getY());
          pointSFMaxViz.setPosition(framePointSF);     
          
          if (nextContactFramePosition != null)
          {
             FramePoint framePointSNext = new FramePoint(nextContactFramePosition);
-            framePointSNext.setZ(zNext);
+            framePointSNext.setZ(sNext.getY());
             pointSNextViz.setPosition(framePointSNext);     
 
-            framePointSNext.setZ(zNextMin);
+            framePointSNext.setZ(sNextMin.getY());
             pointSNextMinViz.setPosition(framePointSNext);     
 
-            framePointSNext.setZ(zNextMax);
+            framePointSNext.setZ(sNextMax.getY());
             pointSNextMaxViz.setPosition(framePointSNext);     
          }
          else
@@ -321,6 +353,128 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          }
       }
    }
+
+   private void computeHeightsToUseOne()
+   {
+      double z0 = previousZFinal.getDoubleValue();
+
+      if (z0 > s0Max.getY()) z0 = s0Max.getY();
+      else if (z0 < s0Min.getY()) z0 = s0Min.getY();
+      
+      double z_d0 = d0Nom.getY();
+      double z_dF = dFNom.getY();
+      double zF = sFNom.getY();
+      double zNext = sNextNom.getY();
+
+      z_d0 = clipToMaximum(z_d0, z_dF + maximumHeightDeltaBetweenWaypoints.getDoubleValue());
+      z_dF = clipToMaximum(z_dF, z_d0 + maximumHeightDeltaBetweenWaypoints.getDoubleValue());
+      
+      z0 = clipToMaximum(z0, z_d0 + maximumHeightDeltaBetweenWaypoints.getDoubleValue());
+      zF = clipToMaximum(zF, z_dF + maximumHeightDeltaBetweenWaypoints.getDoubleValue());
+
+      s0.setY(z0);
+      d0.setY(z_d0);
+      dF.setY(z_dF);
+      sF.setY(zF);
+      sNext.setY(zNext);  
+   }
+   
+   private void computeHeightsToUseByStretchingString()
+   {
+      // s0 is at previous
+      double z0 = previousZFinal.getDoubleValue();
+      if (z0 > s0Max.getY()) z0 = s0Max.getY();
+      else if (z0 < s0Min.getY()) z0 = s0Min.getY();
+      s0.setY(z0);
+      
+      StringStretcher2d stringStretcher2d = new StringStretcher2d();
+      stringStretcher2d.setStartPoint(s0);
+      
+      if (!Double.isNaN(sNext.getX()))
+      {         
+         if (sNext.getX() < sF.getX() + 0.01)
+         {
+            sNext.setX(sF.getX() + 0.01);
+         }
+         
+         double zNext;
+         if (sNextMin.getY() > sFNom.getY())
+         {
+            zNext = sNextMin.getY();
+         }
+         else if (sNextMax.getY() < sFNom.getY())
+         {
+            zNext = sNextMax.getY();
+         }
+         else
+         {
+            zNext = sFNom.getY();
+         }
+         sNext.setY(zNext);
+
+         stringStretcher2d.setEndPoint(sNext);
+         
+         stringStretcher2d.addMinMaxPoints(d0Min, d0Max);
+         stringStretcher2d.addMinMaxPoints(dFMin, dFMax);
+         stringStretcher2d.addMinMaxPoints(sFMin, sFMax);
+      }
+      else
+      {
+         stringStretcher2d.setEndPoint(sFNom);
+
+         stringStretcher2d.addMinMaxPoints(d0Min, d0Max);
+         stringStretcher2d.addMinMaxPoints(dFMin, dFMax);
+      }
+      
+      List<Point2d> stretchedString = stringStretcher2d.stretchString();
+      
+      d0.set(stretchedString.get(1));
+      dF.set(stretchedString.get(2));
+      sF.set(stretchedString.get(3));
+   }
+
+   private void setPointXValues(FramePoint nextContactFramePosition)
+   {
+      double length = projectionSegment.length();
+      
+      double xS0 = 0.0;
+      double xD0 = doubleSupportPercentageIn.getDoubleValue() * length;
+      double xDF = (1.0 - doubleSupportPercentageIn.getDoubleValue()) * length;
+      double xSF = length;
+      
+      double xSNext = Double.NaN;
+      if(nextContactFramePosition != null)
+      {
+         Line2d line2d = new Line2d(projectionSegment.getFirstEndPointCopy(), projectionSegment.getSecondEndPointCopy());
+         Point2d nextPoint2d = new Point2d(nextContactFramePosition.getX(), nextContactFramePosition.getY());
+         line2d.orthogonalProjectionCopy(nextPoint2d);
+         xSNext = projectionSegment.percentageAlongLineSegment(nextPoint2d) * projectionSegment.length();
+      }
+      
+      s0.setX(xS0);
+      d0.setX(xD0);
+      dF.setX(xDF);
+      sF.setX(xSF);
+      sNext.setX(xSNext);
+      
+      s0Min.setX(xS0);
+      d0Min.setX(xD0);
+      dFMin.setX(xDF);
+      sFMin.setX(xSF);
+      sNextMin.setX(xSNext);
+      
+      s0Nom.setX(xS0);
+      d0Nom.setX(xD0);
+      dFNom.setX(xDF);
+      sFNom.setX(xSF);
+      sNextNom.setX(xSNext);
+
+      s0Max.setX(xS0);
+      d0Max.setX(xD0);
+      dFMax.setX(xDF);
+      sFMax.setX(xSF);
+      sNextMax.setX(xSNext);
+  }
    
 
    private double clipToMaximum(double value, double maxValue)
@@ -353,19 +507,38 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       return z_d0;
    }
 
-   private Point2d getPoint2d(FramePoint point)
+   private void getPoint2d(Point2d point2dToPack, FramePoint point)
    {
-      return new Point2d(point.getX(), point.getY());
+      point2dToPack.set(point.getX(), point.getY());
    }
 
+   private final FramePoint tempFramePoint = new FramePoint();
+   private final Point2d queryPoint = new Point2d();
+   private final Point2d solutionPoint = new Point2d();
+   
    public void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, ContactStatesAndUpcomingFootstepData centerOfMassHeightInputData)
    {
-      Point2d queryPoint = getCenterOfMass2d(centerOfMassHeightInputData.getCenterOfMassFrame());
-      solve(coMHeightPartialDerivativesDataToPack, queryPoint);
+      getCenterOfMass2d(queryPoint, centerOfMassHeightInputData.getCenterOfMassFrame());
+      solutionPoint.set(queryPoint);
+      solve(coMHeightPartialDerivativesDataToPack, solutionPoint);
+      
+      coMHeightPartialDerivativesDataToPack.getCoMHeight(tempFramePoint);
+      desiredCoMPosition.set(queryPoint.getX(), queryPoint.getY(), tempFramePoint.getZ());
+      
+//      double dzDx = coMHeightPartialDerivativesDataToPack.getPartialDzDx();
+//      double dzDy = coMHeightPartialDerivativesDataToPack.getPartialDzDy();
+      
+//      desiredCoMVelocity.set(queryPoint.getX(), queryPoint.getY(), tempFramePoint.getZ());
    }
 
    private void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, Point2d queryPoint)
    {
+//      if (projectionSegment == null)
+//      {
+//         coMHeightPartialDerivativesDataToPack.setCoMHeight(worldFrame, nominalHeightAboveGround.getDoubleValue());
+//         return;
+//      }
+      
       projectionSegment.orthogonalProjection(queryPoint);
       double splineQuery = projectionSegment.percentageAlongLineSegment(queryPoint) * projectionSegment.length();
 
@@ -436,12 +609,18 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       return new FramePoint[]{contactFramePosition0, contactFramePosition1};
    }
 
-   private Point2d getCenterOfMass2d(ReferenceFrame centerOfMassFrame)
+   private final FramePoint coM = new FramePoint();
+   private void getCenterOfMass2d(Point2d point2dToPack, ReferenceFrame centerOfMassFrame)
    {
-      FramePoint coM = new FramePoint(centerOfMassFrame);
+      coM.setToZero(centerOfMassFrame);
       coM.changeFrame(worldFrame);
 
-      return getPoint2d(coM);
+      getPoint2d(point2dToPack, coM);
+   }
+   
+   public boolean hasBeenInitializedWithNextStep()
+   {
+      return hasBeenInitializedWithNextStep.getBooleanValue();
    }
 }
 

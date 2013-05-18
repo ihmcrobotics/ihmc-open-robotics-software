@@ -40,4 +40,9 @@ public class ConstantCenterOfMassHeightTrajectoryGenerator implements CoMHeightT
       coMHeightPartialDerivativesDataToPack.setPartialDzDx(0.0);
       coMHeightPartialDerivativesDataToPack.setPartialDzDy(0.0);
    }
+
+   public boolean hasBeenInitializedWithNextStep()
+   {
+      return false;
+   }
 }

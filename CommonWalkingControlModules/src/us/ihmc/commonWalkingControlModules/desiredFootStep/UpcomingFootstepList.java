@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
-import us.ihmc.commonWalkingControlModules.stateEstimation.PointPositionGrabber;
+import us.ihmc.commonWalkingControlModules.stateEstimation.PointPositionGrabberInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -40,7 +38,7 @@ public class UpcomingFootstepList
       this.footstepProvider = footstepProvider;
    }
 
-   public void checkForFootsteps(PointPositionGrabber pointPositionGrabber, BooleanYoVariable readyToGrabNextFootstep,
+   public void checkForFootsteps(PointPositionGrabberInterface pointPositionGrabber, BooleanYoVariable readyToGrabNextFootstep,
                                  EnumYoVariable<RobotSide> upcomingSupportLeg, SideDependentList<? extends ContactablePlaneBody> bipedFeet)
    {
       if (readyToGrabNextFootstep.getBooleanValue())
