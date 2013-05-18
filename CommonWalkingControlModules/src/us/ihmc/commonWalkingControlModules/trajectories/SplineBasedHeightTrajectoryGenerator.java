@@ -165,5 +165,10 @@ public class SplineBasedHeightTrajectoryGenerator implements CoMHeightTrajectory
 
       return getPoint2d(coM);
    }
+   
+   public boolean hasBeenInitializedWithNextStep()
+   {
+      return false;
+   }
 
 }

@@ -278,5 +278,10 @@ public class FourPointCoMHeightTrajectoryGenerator implements CoMHeightTrajector
 
       return getPoint2d(coM);
    }
+   
+   public boolean hasBeenInitializedWithNextStep()
+   {
+      return false;
+   }
 }
 
