@@ -1,14 +1,18 @@
 package us.ihmc.darpaRoboticsChallenge.processManagement;
 
+import java.awt.AWTEvent;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.awt.event.AWTEventListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.BufferedReader;
@@ -36,6 +40,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
+import javax.swing.JWindow;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -58,6 +63,15 @@ import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 
 public class DRCDashboard
 {
+   private static final int SLIDING_WINDOW_OFFSET_X_MAX = 830;
+   private static final int SLIDING_WINDOW_OFFSET_Y_MAX = 50;
+
+   private int slidingWindowXOffset = SLIDING_WINDOW_OFFSET_X_MAX;
+   private int slidingWindowYOffset = SLIDING_WINDOW_OFFSET_Y_MAX;
+
+   int posX;
+   int posY;
+
    private static DRCDashboard instance;
    //   private String ROS_HOSTNAME;
    //   private String ROS_IP_ADDRESS;
@@ -110,6 +124,7 @@ public class DRCDashboard
 
    private File configFileHandle;
    private boolean shouldLoadConfig = false;
+   private JWindow window;
 
    public DRCDashboard()
    {
@@ -449,7 +464,7 @@ public class DRCDashboard
       {
          if (!machine.equals(LocalCloudMachines.LOCALHOST))
          {
-            DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("<html><body style=\"font-weight:bold; font-size:1.1em;\">"
+            DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("<html><body style=\"font-weight:bold;\">"
                   + WordUtils.capitalize(machine.toString().toLowerCase().replace("_", " ")) + "</body></html>");
             rootNode.add(new DefaultMutableTreeNode("Running ROS/GZ Sims:"));
             rootNode.add(new DefaultMutableTreeNode("Running SCS Controllers?"));
@@ -582,7 +597,8 @@ public class DRCDashboard
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
          if (!machine.equals(LocalCloudMachines.LOCALHOST))
-            cloudMachineTrees.get(machine).first().addTreeSelectionListener(blockLeafSelectionListener);
+            cloudMachineTrees.get(machine).first().setSelectionModel(null);
+         //            cloudMachineTrees.get(machine).first().addTreeSelectionListener(blockLeafSelectionListener);
       }
    }
 
@@ -799,13 +815,113 @@ public class DRCDashboard
 
    private void showFrame()
    {
+      //      final JFrame secondFrame = new JFrame();
+      //      secondFrame.setUndecorated(true);
+      //      secondFrame.setSize(300, 300);
+      //      secondFrame.setLocation(-10, -10);
+      //      secondFrame.setLocationRelativeTo(frame);
+      //      secondFrame.setEnabled(false);
+      //      secondFrame.setVisible(true);
+
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      frame.setLocationRelativeTo(null);
+      frame.setLocation((int) frame.getLocation().getX() - 500, (int) frame.getLocation().getY() - 260);
       frame.setSize(1000, 520);
       frame.setResizable(false);
       frame.setVisible(true);
 
+      window = new JWindow();
+      window.setAlwaysOnTop(false);
+      window.setSize(500, 450);
+      window.setLocation((int) frame.getLocation().getX() + slidingWindowXOffset, (int) frame.getLocation().getY() + slidingWindowYOffset);
+            window.setVisible(true);
+
+      frame.toFront();
+
+      frame.getToolkit().addAWTEventListener(new AWTEventListener()
+      {
+         public void eventDispatched(AWTEvent arg0)
+         {
+            MouseEvent e = null;
+            if (arg0 instanceof MouseEvent)
+            {
+               e = (MouseEvent) arg0;
+               e.consume();
+            }
+
+            if (e != null && e.getClickCount() > 0)
+            {
+               if (e.getComponent().equals(window))
+               {
+                  frame.toFront();
+               }
+            }
+         }
+      }, AWTEvent.MOUSE_EVENT_MASK);
+
+      final JWindow testWindow = new JWindow();
+      //      testWindow.setUndecorated(true);
+      testWindow.setSize(frame.getContentPane().getWidth() - 200, frame.getHeight() - frame.getContentPane().getHeight());
+      testWindow.setLocation((int) frame.getLocation().getX() + 100, (int) frame.getLocation().getY());      
+      testWindow.setVisible(true);
+
+      SuperMouseListener listener = new SuperMouseListener();
+
+      testWindow.addMouseListener(listener);
+      testWindow.addMouseMotionListener(listener);
+
       taskCombo.requestFocus();
+   }
+
+   private class SuperMouseListener implements MouseMotionListener, MouseListener
+   {
+      int posX;
+      int posY;
+
+      public void mouseClicked(MouseEvent e)
+      {
+         // TODO Auto-generated method stub
+
+      }
+
+      public void mouseEntered(MouseEvent e)
+      {
+         // TODO Auto-generated method stub
+
+      }
+
+      public void mouseExited(MouseEvent e)
+      {
+         // TODO Auto-generated method stub
+
+      }
+
+      public void mousePressed(MouseEvent e)
+      {
+         posX = e.getX();
+         posY = e.getY();
+      }
+
+      public void mouseReleased(MouseEvent e)
+      {
+         // TODO Auto-generated method stub
+
+      }
+
+      public void mouseDragged(MouseEvent e)
+      {
+         ((Component) e.getSource()).setLocation(e.getXOnScreen() - posX + 100, e.getYOnScreen() - posY);
+         frame.setLocation(e.getXOnScreen() - posX, e.getYOnScreen() - posY);
+         window.setLocation(e.getXOnScreen() - posX + slidingWindowXOffset, e.getYOnScreen() - posY + slidingWindowYOffset);
+         System.out.println("" + posX + " " + posY);
+
+      }
+
+      public void mouseMoved(MouseEvent e)
+      {
+         // TODO Auto-generated method stub
+
+      }
+
    }
 
    public void reinitGui()
@@ -839,6 +955,7 @@ public class DRCDashboard
       {
          public void actionPerformed(ActionEvent e)
          {
+
          }
       });
 
@@ -950,6 +1067,48 @@ public class DRCDashboard
          {
             dash.setupJFrame();
             dash.showFrame();
+         }
+
+         public void mouseClicked(MouseEvent e)
+         {
+            // TODO Auto-generated method stub
+
+         }
+
+         public void mouseEntered(MouseEvent e)
+         {
+            // TODO Auto-generated method stub
+
+         }
+
+         public void mouseExited(MouseEvent e)
+         {
+            // TODO Auto-generated method stub
+
+         }
+
+         public void mousePressed(MouseEvent e)
+         {
+            // TODO Auto-generated method stub
+
+         }
+
+         public void mouseReleased(MouseEvent e)
+         {
+            // TODO Auto-generated method stub
+
+         }
+
+         public void mouseDragged(MouseEvent e)
+         {
+            // TODO Auto-generated method stub
+
+         }
+
+         public void mouseMoved(MouseEvent e)
+         {
+            // TODO Auto-generated method stub
+
          }
       });
    }
