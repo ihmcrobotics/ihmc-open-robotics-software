@@ -39,10 +39,10 @@ public class ExternalWrenchHandler
 
    /**
     * Computes \dot{A} * v - external wrenches already applied (e.g. gravity, hand wrenches due to manipulation)
-    * @param momentumEquationConvectiveTerm
+    *
     * @return
     */
-   public final DenseMatrix64F computeWrenchEquationRightHandSide(DenseMatrix64F momentumEquationConvectiveTerm)
+   public final DenseMatrix64F computeWrenchEquationRightHandSide(DenseMatrix64F momentumConvectiveTerm, DenseMatrix64F b, DenseMatrix64F bHat)
    {
       totalWrenchAlreadyApplied.set(gravitationalWrench);
       for (Wrench externalWrenchToCompensateFor : externalWrenchesToCompensateFor.values())
@@ -54,7 +54,9 @@ public class ExternalWrenchHandler
 
       totalWrenchAlreadyApplied.packMatrix(wrenchEquationRightHandSide);
       CommonOps.changeSign(wrenchEquationRightHandSide);
-      CommonOps.addEquals(wrenchEquationRightHandSide, momentumEquationConvectiveTerm);
+      CommonOps.addEquals(wrenchEquationRightHandSide, momentumConvectiveTerm);
+      CommonOps.addEquals(wrenchEquationRightHandSide, b);
+      CommonOps.subEquals(wrenchEquationRightHandSide, bHat);
       return wrenchEquationRightHandSide;
    }
 
