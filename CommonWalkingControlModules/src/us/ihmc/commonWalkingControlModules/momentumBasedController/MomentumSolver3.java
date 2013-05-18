@@ -4,8 +4,11 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools;
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.RowD1Matrix64F;
+import org.ejml.factory.DecompositionFactory;
 import org.ejml.factory.LinearSolver;
 import org.ejml.factory.LinearSolverFactory;
+import org.ejml.factory.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.HardMotionConstraintEnforcer;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionConstraintHandler;
@@ -42,7 +45,8 @@ public class MomentumSolver3 implements MomentumSolverInterface
 
    private final LinearSolver<DenseMatrix64F> solver;
    private final MotionConstraintHandler motionConstraintHandler;
-   private final HardMotionConstraintEnforcer hardMotionConstraintEnforcer = new HardMotionConstraintEnforcer();
+   private final HardMotionConstraintEnforcer nullspaceMotionConstraintEnforcer;
+   private final HardMotionConstraintEnforcer hardMotionConstraintEnforcer;
 
    public MomentumSolver3(SixDoFJoint rootJoint, RigidBody elevator, ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator,
                           LinearSolver<DenseMatrix64F> jacobianSolver, double controlDT, YoVariableRegistry parentRegistry)
@@ -67,6 +71,9 @@ public class MomentumSolver3 implements MomentumSolverInterface
       this.b = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
 
       this.v = new DenseMatrix64F(nDegreesOfFreedom, 1);
+
+      nullspaceMotionConstraintEnforcer = new HardMotionConstraintEnforcer(LinearSolverFactory.pseudoInverse(true));
+      hardMotionConstraintEnforcer = new HardMotionConstraintEnforcer(LinearSolverFactory.pseudoInverse(true));
 
       solver = LinearSolverFactory.pseudoInverse(true);
 
@@ -136,7 +143,7 @@ public class MomentumSolver3 implements MomentumSolverInterface
    private final DenseMatrix64F sTranspose = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F sTransposeA = new DenseMatrix64F(1, 1);
 
-   private final DenseMatrix64F APPlusbMinusAJpPluspp = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F vdotUnconstrained = new DenseMatrix64F(1, 1);
 
 
    public void solve(DenseMatrix64F accelerationSubspace, DenseMatrix64F accelerationMultipliers, DenseMatrix64F momentumSubspace,
@@ -175,16 +182,24 @@ public class MomentumSolver3 implements MomentumSolverInterface
       DenseMatrix64F Jp = motionConstraintHandler.getJacobian();
       DenseMatrix64F pp = motionConstraintHandler.getRightHandSide();
 
-      hardMotionConstraintEnforcer.compute(sTransposeA, Jp, pp);
-      DenseMatrix64F AP = hardMotionConstraintEnforcer.getConstrainedCentroidalMomentumMatrix();
-      hardMotionConstraintEnforcer.constrainMomentumEquationRightHandSide(b);
+      DenseMatrix64F n = motionConstraintHandler.getNullspaceMatrixTranspose();
+      DenseMatrix64F z = motionConstraintHandler.getNullspaceMultipliers();
+
+      // TODO: nullspace stuff not working properly yet
+      nullspaceMotionConstraintEnforcer.set(n, z);
+      nullspaceMotionConstraintEnforcer.constrainEquation(Jp, pp);
+
+      hardMotionConstraintEnforcer.set(Jp, pp);
+      nullspaceMotionConstraintEnforcer.constrainEquation(sTransposeA, b);
+      hardMotionConstraintEnforcer.constrainEquation(sTransposeA, b);
+
 
       // APPlusbMinusAJpPluspp
-      APPlusbMinusAJpPluspp.reshape(AP.getNumCols(), b.getNumCols());
-      solver.setA(AP);
-      solver.solve(b, APPlusbMinusAJpPluspp);
+      vdotUnconstrained.reshape(nDegreesOfFreedom, 1);
+      solver.setA(sTransposeA);
+      solver.solve(b, vdotUnconstrained);
 
-      DenseMatrix64F vdot = hardMotionConstraintEnforcer.computeConstrainedJointAccelerations(APPlusbMinusAJpPluspp);
+      DenseMatrix64F vdot = nullspaceMotionConstraintEnforcer.constrainResult(hardMotionConstraintEnforcer.constrainResult(vdotUnconstrained));
 
       ScrewTools.setDesiredAccelerations(jointsInOrder, vdot);
 
