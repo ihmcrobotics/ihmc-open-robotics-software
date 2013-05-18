@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.processManagement;
 import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -10,6 +11,8 @@ import java.awt.Insets;
 import java.awt.event.AWTEventListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -32,6 +35,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -68,9 +72,6 @@ public class DRCDashboard
 
    private int slidingWindowXOffset = SLIDING_WINDOW_OFFSET_X_MAX;
    private int slidingWindowYOffset = SLIDING_WINDOW_OFFSET_Y_MAX;
-
-   int posX;
-   int posY;
 
    private static DRCDashboard instance;
    //   private String ROS_HOSTNAME;
@@ -833,9 +834,34 @@ public class DRCDashboard
       window.setAlwaysOnTop(false);
       window.setSize(500, 450);
       window.setLocation((int) frame.getLocation().getX() + slidingWindowXOffset, (int) frame.getLocation().getY() + slidingWindowYOffset);
-            window.setVisible(true);
+      window.setVisible(true);
 
-      frame.toFront();
+      frame.addComponentListener(new ComponentListener()
+      {         
+         public void componentShown(ComponentEvent e)
+         {
+            // TODO Auto-generated method stub
+            
+         }
+         
+         public void componentResized(ComponentEvent e)
+         {
+            // TODO Auto-generated method stub
+            
+         }
+         
+         public void componentMoved(ComponentEvent e)
+         {
+            window.setBounds(((Component) e.getSource()).getLocation().x + slidingWindowXOffset, ((Component) e.getSource()).getLocation().y + slidingWindowYOffset, window.getWidth(), window.getHeight());
+            
+         }
+         
+         public void componentHidden(ComponentEvent e)
+         {
+            // TODO Auto-generated method stub
+            
+         }
+      });
 
       frame.getToolkit().addAWTEventListener(new AWTEventListener()
       {
@@ -845,84 +871,30 @@ public class DRCDashboard
             if (arg0 instanceof MouseEvent)
             {
                e = (MouseEvent) arg0;
-               e.consume();
+               //               e.consume();
             }
 
-            if (e != null && e.getClickCount() > 0)
+            if (e != null && e.getComponent().equals(window) && e.getClickCount() > 0)
             {
-               if (e.getComponent().equals(window))
-               {
-                  frame.toFront();
-               }
+               frame.toFront();
             }
          }
       }, AWTEvent.MOUSE_EVENT_MASK);
 
-      final JWindow testWindow = new JWindow();
-      //      testWindow.setUndecorated(true);
-      testWindow.setSize(frame.getContentPane().getWidth() - 200, frame.getHeight() - frame.getContentPane().getHeight());
-      testWindow.setLocation((int) frame.getLocation().getX() + 100, (int) frame.getLocation().getY());      
-      testWindow.setVisible(true);
+//      final JWindow testWindow = new JWindow(frame);
+//      //      testWindow.setUndecorated(true);
+//      testWindow.setSize(frame.getContentPane().getWidth() - 200, frame.getHeight() - frame.getContentPane().getHeight());
+//      testWindow.setLocation((int) frame.getLocation().getX() + 100, (int) frame.getLocation().getY());
+//      testWindow.setVisible(true);
+//
+//      SuperMouseListener listener = new SuperMouseListener();
+//
+//      testWindow.addMouseListener(listener);
+//      testWindow.addMouseMotionListener(listener);
 
-      SuperMouseListener listener = new SuperMouseListener();
-
-      testWindow.addMouseListener(listener);
-      testWindow.addMouseMotionListener(listener);
-
+      frame.toFront();
       taskCombo.requestFocus();
-   }
-
-   private class SuperMouseListener implements MouseMotionListener, MouseListener
-   {
-      int posX;
-      int posY;
-
-      public void mouseClicked(MouseEvent e)
-      {
-         // TODO Auto-generated method stub
-
-      }
-
-      public void mouseEntered(MouseEvent e)
-      {
-         // TODO Auto-generated method stub
-
-      }
-
-      public void mouseExited(MouseEvent e)
-      {
-         // TODO Auto-generated method stub
-
-      }
-
-      public void mousePressed(MouseEvent e)
-      {
-         posX = e.getX();
-         posY = e.getY();
-      }
-
-      public void mouseReleased(MouseEvent e)
-      {
-         // TODO Auto-generated method stub
-
-      }
-
-      public void mouseDragged(MouseEvent e)
-      {
-         ((Component) e.getSource()).setLocation(e.getXOnScreen() - posX + 100, e.getYOnScreen() - posY);
-         frame.setLocation(e.getXOnScreen() - posX, e.getYOnScreen() - posY);
-         window.setLocation(e.getXOnScreen() - posX + slidingWindowXOffset, e.getYOnScreen() - posY + slidingWindowYOffset);
-         System.out.println("" + posX + " " + posY);
-
-      }
-
-      public void mouseMoved(MouseEvent e)
-      {
-         // TODO Auto-generated method stub
-
-      }
-
-   }
+   }  
 
    public void reinitGui()
    {
