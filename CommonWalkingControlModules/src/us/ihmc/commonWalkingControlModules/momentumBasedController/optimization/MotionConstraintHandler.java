@@ -45,6 +45,8 @@ public class MotionConstraintHandler
    private final DenseMatrix64F nCompactBlock = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F nTranspose = new DenseMatrix64F(1, 1);
 
+   private final ConvectiveTermCalculator convectiveTermCalculator = new ConvectiveTermCalculator();
+
    private int motionConstraintIndex = 0;
    private int nullspaceIndex = 0;
 
@@ -84,8 +86,7 @@ public class MotionConstraintHandler
          baseToEndEffectorJacobian.compute();
 
          // TODO: inefficient
-         DesiredJointAccelerationCalculator desiredJointAccelerationCalculator = new DesiredJointAccelerationCalculator(baseToEndEffectorJacobian, null);    // TODO: garbage
-         desiredJointAccelerationCalculator.computeJacobianDerivativeTerm(convectiveTerm);
+         convectiveTermCalculator.computeJacobianDerivativeTerm(baseToEndEffectorJacobian, convectiveTerm);
          convectiveTerm.getBodyFrame().checkReferenceFrameMatch(taskSpaceAcceleration.getBodyFrame());
          convectiveTerm.getExpressedInFrame().checkReferenceFrameMatch(taskSpaceAcceleration.getExpressedInFrame());
          convectiveTerm.packMatrix(convectiveTermMatrix, 0);
