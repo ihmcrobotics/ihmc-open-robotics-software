@@ -217,7 +217,7 @@ public class OptimizationMomentumControlModuleTest
       JUnitTools.assertSpatialForceVectorEquals(momentumRateOfChangeIn, momentumRateOfChangeOut, 1e-1);
       assertWrenchesInFrictionCones(momentumControlModule.getExternalWrenches(), contactStates, coefficientOfFriction);
       assertRootJointWrenchZero(momentumControlModule.getExternalWrenches(), rootJoint, gravityZ, 1e-2);
-      JUnitTools.assertFrameVectorEquals(desiredPointAccelerationBack, desiredPointAcceleration, 1e-3);
+      JUnitTools.assertFrameVectorEquals(desiredPointAccelerationBack, desiredPointAcceleration, 1e-9);
    }
 
    @Test
@@ -283,7 +283,6 @@ public class OptimizationMomentumControlModuleTest
       InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(rootJoint.getSuccessor());
 
       TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), rootJoint.getPredecessor());
-      twistCalculator.compute();
       OptimizationMomentumControlModule momentumControlModule = new OptimizationMomentumControlModule(rootJoint, centerOfMassFrame, controlDT, registry,
             jointsToOptimizeFor, momentumOptimizationSettings,
             gravityZ, twistCalculator);
@@ -291,6 +290,7 @@ public class OptimizationMomentumControlModuleTest
 
       ScrewTestTools.integrateVelocities(rootJoint, dt);
       ScrewTestTools.integrateVelocities(revoluteJoints, dt);
+      twistCalculator.compute();
 
       rootJoint.getPredecessor().updateFramesRecursively();
 
