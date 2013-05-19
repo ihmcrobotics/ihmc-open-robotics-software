@@ -30,10 +30,8 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFoot
 import us.ihmc.commonWalkingControlModules.desiredFootStep.UpcomingFootstepList;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredHandPoseProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.TorusPoseProvider;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.FinalDesiredICPCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPBasedMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.InstantaneousCapturePointPlanner;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothICPComputer2D;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointTrajectoryData;
@@ -377,7 +375,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          GeometricJacobian jacobian = legJacobians.get(robotSide);
          EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(bipedFoot, jacobian, swingPositionTrajectoryGenerator,
                                                                 heelPitchTrajectoryGenerator, swingOrientationTrajectoryGenerator,
-                                                                onToesPitchTrajectoryGenerator, yoTime, twistCalculator, registry);
+                                                                onToesPitchTrajectoryGenerator, momentumBasedController, registry);
          endEffectorControlModule.setParameters(3e-2, 500.0);
          footEndEffectorControlModules.put(bipedFoot, endEffectorControlModule);
       }

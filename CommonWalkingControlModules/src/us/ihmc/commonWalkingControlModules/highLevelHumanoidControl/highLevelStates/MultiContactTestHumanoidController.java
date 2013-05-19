@@ -66,7 +66,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
          swingOrientationTrajectoryGenerators.put(foot, swingOrientationTrajectoryGenerator);
 
          EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(foot, jacobian, swingPositionTrajectoryGenerator, null,
-                                                                swingOrientationTrajectoryGenerator, null, yoTime, twistCalculator, registry);
+                                                                swingOrientationTrajectoryGenerator, null, momentumBasedController, registry);
          footEndEffectorControlModules.put(foot, endEffectorControlModule);
 
       }
