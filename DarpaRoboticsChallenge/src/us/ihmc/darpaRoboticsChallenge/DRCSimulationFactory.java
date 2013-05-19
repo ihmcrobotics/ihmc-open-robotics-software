@@ -55,7 +55,12 @@ public class DRCSimulationFactory
          ScsInitialSetup scsInitialSetup, GuiInitialSetup guiInitialSetup, ObjectCommunicator networkProccesorCommunicator)
    {
       GUISetterUpperRegistry guiSetterUpperRegistry = new GUISetterUpperRegistry();
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry(false);
+
+      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
+      if (guiInitialSetup.isGuiShown())
+         dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry(false);
+      else
+         dynamicGraphicObjectsListRegistry = null;
 
       DRCRobotJointMap jointMap = robotInterface.getJointMap();
 

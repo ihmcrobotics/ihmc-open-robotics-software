@@ -33,7 +33,11 @@ public class DRCFlatGroundWalkingTrack
          recordFrequency = 1;
       scsInitialSetup.setRecordFrequency(recordFrequency);
 
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
+      if (guiInitialSetup.isGuiShown())
+         dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      else
+         dynamicGraphicObjectsListRegistry = null;
       YoVariableRegistry registry = new YoVariableRegistry("adjustableParabolicTrajectoryDemoSimRegistry");
 
       double inPlaceWidth = 0.25;
@@ -56,7 +60,8 @@ public class DRCFlatGroundWalkingTrack
       drcSimulation = DRCSimulationFactory.createSimulation(controllerFactory, null, robotInterface, robotInitialSetup, scsInitialSetup, guiInitialSetup, null);
 
       // add other registries
-      drcSimulation.addAdditionalDynamicGraphicObjectsListRegistries(dynamicGraphicObjectsListRegistry);
+      if (dynamicGraphicObjectsListRegistry != null)
+         drcSimulation.addAdditionalDynamicGraphicObjectsListRegistries(dynamicGraphicObjectsListRegistry);
       drcSimulation.addAdditionalYoVariableRegistriesToSCS(registry);
 
       if (automaticSimulationRunner != null)
