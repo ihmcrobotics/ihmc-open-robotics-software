@@ -366,11 +366,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       for (ContactablePlaneBody contactablePlaneBody : footEndEffectorControlModules.keySet())
       {
          EndEffectorControlModule endEffectorControlModule = footEndEffectorControlModules.get(contactablePlaneBody);
-         endEffectorControlModule.startComputation();
-         endEffectorControlModule.waitUntilComputationIsDone();
-         TaskspaceConstraintData taskspaceConstraintData = endEffectorControlModule.getTaskSpaceConstraintOutputPort().getData();
-         GeometricJacobian jacobian = endEffectorControlModule.getJacobian();
-         momentumBasedController.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
+         endEffectorControlModule.doControl();
       }
    }
 
