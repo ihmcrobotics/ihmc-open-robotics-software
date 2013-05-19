@@ -99,7 +99,49 @@ public class MotionConstraintHandler
          convectiveTerm.packMatrix(convectiveTermMatrix, 0);
 
          jBlockCompact.reshape(selectionMatrix.getNumRows(), baseToEndEffectorJacobian.getNumberOfColumns());
-         CommonOps.mult(selectionMatrix, baseToEndEffectorJacobian.getJacobianMatrix(), jBlockCompact);
+
+
+
+
+
+         int nullity = nullspaceMultipliers.getNumRows();
+         if (nullity > 0)
+         {
+            sJ.reshape(selectionMatrix.getNumRows(), jacobian.getJacobianMatrix().getNumCols());
+            CommonOps.mult(selectionMatrix, jacobian.getJacobianMatrix(), sJ);
+            nullspaceCalculator.setMatrix(sJ, nullity);
+            DenseMatrix64F nullspace = nullspaceCalculator.getNullspace();
+
+
+            DenseMatrix64F iMinusNNT = new DenseMatrix64F(1, 1); // TODO: make field
+            iMinusNNT.reshape(nullspace.getNumRows(), nullspace.getNumRows());
+            CommonOps.multOuter(nullspace, iMinusNNT);
+            CommonOps.scale(-1.0, iMinusNNT);
+            MatrixTools.addDiagonal(iMinusNNT, 1.0);
+
+
+            CommonOps.mult(iMinusNNT, baseToEndEffectorJacobian.getJacobianMatrix(), jBlockCompact);
+
+
+            nCompactBlock.reshape(nullspace.getNumCols(), nullspace.getNumRows());
+            CommonOps.transpose(nullspace, nCompactBlock);
+            DenseMatrix64F nFullBLock = getMatrixFromList(jList, motionConstraintIndex, nullity, nDegreesOfFreedom);
+            compactBlockToFullBlock(jacobian.getJointsInOrder(), nCompactBlock, nFullBLock);
+
+            DenseMatrix64F zBlock = getMatrixFromList(pList, motionConstraintIndex, nullity, 1);
+            zBlock.set(nullspaceMultipliers);
+
+            motionConstraintIndex++;
+         }
+         else
+         {
+            CommonOps.mult(selectionMatrix, baseToEndEffectorJacobian.getJacobianMatrix(), jBlockCompact);
+         }
+
+
+
+
+
 
          DenseMatrix64F jFullBlock = getMatrixFromList(jList, motionConstraintIndex, jBlockCompact.getNumRows(), nDegreesOfFreedom);
          compactBlockToFullBlock(baseToEndEffectorJacobian.getJointsInOrder(), jBlockCompact, jFullBlock);
@@ -113,24 +155,6 @@ public class MotionConstraintHandler
          weightBlock.setValue(weight);
 
          motionConstraintIndex++;
-
-         int nullity = nullspaceMultipliers.getNumRows();
-         if (nullity > 0)
-         {
-            sJ.reshape(selectionMatrix.getNumRows(), jacobian.getJacobianMatrix().getNumCols());
-            CommonOps.mult(selectionMatrix, jacobian.getJacobianMatrix(), sJ);
-            nullspaceCalculator.setMatrix(sJ, nullity);
-            DenseMatrix64F nullspace = nullspaceCalculator.getNullspace();
-            nCompactBlock.reshape(nullspace.getNumCols(), nullspace.getNumRows());
-            CommonOps.transpose(nullspace, nCompactBlock);
-            DenseMatrix64F nFullBLock = getMatrixFromList(nList, nullspaceIndex, nullity, nDegreesOfFreedom);
-            compactBlockToFullBlock(jacobian.getJointsInOrder(), nCompactBlock, nFullBLock);
-
-            DenseMatrix64F zBlock = getMatrixFromList(zList, nullspaceIndex, nullity, 1);
-            zBlock.set(nullspaceMultipliers);
-
-            nullspaceIndex++;
-         }
       }
    }
 
@@ -201,7 +225,7 @@ public class MotionConstraintHandler
    public void compute()
    {
       assembleEquation(jList, pList, motionConstraintIndex, j, p);
-      assembleEquation(nList, zList, nullspaceIndex, nTranspose, z);
+//      assembleEquation(nList, zList, nullspaceIndex, nTranspose, z);
       n.reshape(nTranspose.getNumCols(), nTranspose.getNumRows());
       CommonOps.transpose(nTranspose, n);
 
@@ -272,17 +296,20 @@ public class MotionConstraintHandler
 
    public DenseMatrix64F getNullspaceMatrix()
    {
-      return n;
+      throw new RuntimeException();
+//      return n;
    }
 
    public DenseMatrix64F getNullspaceMatrixTranspose()
    {
-      return nTranspose;
+      throw new RuntimeException();
+//      return nTranspose;
    }
 
    public DenseMatrix64F getNullspaceMultipliers()
    {
-      return z;
+      throw new RuntimeException();
+//      return z;
    }
 
    public DenseMatrix64F getWeightMatrix()

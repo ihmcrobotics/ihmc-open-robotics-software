@@ -104,8 +104,8 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       DenseMatrix64F j = primaryMotionConstraintHandler.getJacobian();
       DenseMatrix64F p = primaryMotionConstraintHandler.getRightHandSide();
 
-      DenseMatrix64F n = primaryMotionConstraintHandler.getNullspaceMatrixTranspose();
-      DenseMatrix64F z = primaryMotionConstraintHandler.getNullspaceMultipliers();
+//      DenseMatrix64F n = primaryMotionConstraintHandler.getNullspaceMatrixTranspose();
+//      DenseMatrix64F z = primaryMotionConstraintHandler.getNullspaceMultipliers();
 
       DenseMatrix64F a = centroidalMomentumHandler.getCentroidalMomentumMatrixPart(jointsToOptimizeFor);
       DenseMatrix64F b = centroidalMomentumHandler.getMomentumDotEquationRightHandSide(momentumRateOfChangeData);
@@ -138,8 +138,8 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       secondaryMotionConstraintHandler.compute();
       momentumOptimizerNativeInput.setSecondaryConstraintJacobian(secondaryMotionConstraintHandler.getJacobian());
       momentumOptimizerNativeInput.setSecondaryConstraintRightHandSide(secondaryMotionConstraintHandler.getRightHandSide());
-      momentumOptimizerNativeInput.setNullspaceMatrixTranspose(secondaryMotionConstraintHandler.getNullspaceMatrix());
-      momentumOptimizerNativeInput.setNullspaceMultipliers(secondaryMotionConstraintHandler.getNullspaceMultipliers());
+//      momentumOptimizerNativeInput.setNullspaceMatrixTranspose(secondaryMotionConstraintHandler.getNullspaceMatrix());
+//      momentumOptimizerNativeInput.setNullspaceMultipliers(secondaryMotionConstraintHandler.getNullspaceMultipliers());
       momentumOptimizerNativeInput.setSecondaryConstraintWeight(secondaryMotionConstraintHandler.getWeightMatrix());
 
       momentumOptimizerNativeInput.setGroundReactionForceRegularization(momentumOptimizationSettings.getGroundReactionForceRegularization());
