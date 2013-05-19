@@ -536,4 +536,9 @@ public class MomentumBasedController implements RobotController
    {
       return cylindricalContactStates;
    }
+
+   public MomentumControlModule getMomentumControlModule()
+   {
+      return momentumControlModule;
+   }
 }

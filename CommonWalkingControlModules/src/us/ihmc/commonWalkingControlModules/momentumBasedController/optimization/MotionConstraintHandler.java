@@ -49,12 +49,11 @@ public class MotionConstraintHandler
 
    private final ConvectiveTermCalculator convectiveTermCalculator = new ConvectiveTermCalculator();
    private final PointJacobian pointJacobian = new PointJacobian();
-   private final TwistCalculator twistCalculator;
-   private final Twist twist = new Twist();
 
    private int motionConstraintIndex = 0;
    private int nullspaceIndex = 0;
    private final FrameVector pPointVelocity = new FrameVector();
+   private final PointVelocityConvectiveTermCalculator pointJacobianConvectiveTermCalculator;
 
    public MotionConstraintHandler(InverseDynamicsJoint[] jointsInOrder, TwistCalculator twistCalculator)
    {
@@ -66,7 +65,7 @@ public class MotionConstraintHandler
          columnsForJoints.put(joint, ScrewTools.computeIndicesForJoint(jointsInOrder, joint));
       }
 
-      this.twistCalculator = twistCalculator;
+      pointJacobianConvectiveTermCalculator = new PointVelocityConvectiveTermCalculator(twistCalculator);
    }
 
    public void reset()
@@ -177,6 +176,7 @@ public class MotionConstraintHandler
       }
    }
 
+   // FIXME: pd term, move to its own class
    public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase, double weight)
    {
       pointJacobian.set(jacobian, bodyFixedPoint);
@@ -186,13 +186,7 @@ public class MotionConstraintHandler
       DenseMatrix64F jFullBlock = getMatrixFromList(jList, motionConstraintIndex, pointJacobianMatrix.getNumRows(), nDegreesOfFreedom);
       compactBlockToFullBlock(jacobian.getJointsInOrder(), pointJacobianMatrix, jFullBlock);
 
-      twistCalculator.packRelativeTwist(twist, jacobian.getBase(), jacobian.getEndEffector()); // TODO: test
-      convectiveTermCalculator.computeJacobianDerivativeTerm(jacobian, convectiveTerm);
-      convectiveTerm.changeFrame(jacobian.getBaseFrame(), twist, twist);
-
-      bodyFixedPoint.changeFrame(jacobian.getBaseFrame());
-      twist.changeFrame(jacobian.getBaseFrame());
-      convectiveTerm.packAccelerationOfPointFixedInBodyFrame(twist, bodyFixedPoint, pPointVelocity);
+      pointJacobianConvectiveTermCalculator.compute(pointJacobian, pPointVelocity);
       pPointVelocity.scale(-1.0);
       pPointVelocity.add(desiredAccelerationWithRespectToBase);
       DenseMatrix64F pBlock = getMatrixFromList(pList, motionConstraintIndex, pointJacobianMatrix.getNumRows(), 1);
