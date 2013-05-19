@@ -53,7 +53,7 @@ public class MotionConstraintHandler
    private int motionConstraintIndex = 0;
    private int nullspaceIndex = 0;
    private final FrameVector pPointVelocity = new FrameVector();
-   private final PointVelocityConvectiveTermCalculator pointJacobianConvectiveTermCalculator;
+   private final PointJacobianConvectiveTermCalculator pointJacobianConvectiveTermCalculator;
 
    public MotionConstraintHandler(InverseDynamicsJoint[] jointsInOrder, TwistCalculator twistCalculator)
    {
@@ -65,7 +65,7 @@ public class MotionConstraintHandler
          columnsForJoints.put(joint, ScrewTools.computeIndicesForJoint(jointsInOrder, joint));
       }
 
-      pointJacobianConvectiveTermCalculator = new PointVelocityConvectiveTermCalculator(twistCalculator);
+      pointJacobianConvectiveTermCalculator = new PointJacobianConvectiveTermCalculator(twistCalculator);
    }
 
    public void reset()
