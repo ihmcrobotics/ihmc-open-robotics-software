@@ -2,11 +2,13 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 
 import org.apache.commons.lang.mutable.MutableDouble;
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.data.RowD1Matrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.utilities.CheckTools;
+import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.NullspaceCalculator;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.screwTheory.*;
 
 import java.util.ArrayList;
@@ -38,7 +40,7 @@ public class MotionConstraintHandler
    private final DenseMatrix64F p = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F z = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F n = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F ws = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F w = new DenseMatrix64F(1, 1);
 
    private final DenseMatrix64F jBlockCompact = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F sJ = new DenseMatrix64F(1, 1);
@@ -46,11 +48,15 @@ public class MotionConstraintHandler
    private final DenseMatrix64F nTranspose = new DenseMatrix64F(1, 1);
 
    private final ConvectiveTermCalculator convectiveTermCalculator = new ConvectiveTermCalculator();
+   private final PointJacobian pointJacobian = new PointJacobian();
+   private final TwistCalculator twistCalculator;
+   private final Twist twist = new Twist();
 
    private int motionConstraintIndex = 0;
    private int nullspaceIndex = 0;
+   private final FrameVector pPointVelocity = new FrameVector();
 
-   public MotionConstraintHandler(InverseDynamicsJoint[] jointsInOrder)
+   public MotionConstraintHandler(InverseDynamicsJoint[] jointsInOrder, TwistCalculator twistCalculator)
    {
       this.jointsInOrder = jointsInOrder;
       this.nDegreesOfFreedom = ScrewTools.computeDegreesOfFreedom(jointsInOrder);
@@ -59,6 +65,8 @@ public class MotionConstraintHandler
       {
          columnsForJoints.put(joint, ScrewTools.computeIndicesForJoint(jointsInOrder, joint));
       }
+
+      this.twistCalculator = twistCalculator;
    }
 
    public void reset()
@@ -146,17 +154,8 @@ public class MotionConstraintHandler
 
    public void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration, double weight)
    {
-      int[] columnsForJoint;
-//      if (joint.getName().equals("pelvis"))
-//      {
-//         columnsForJoint = this.columnsForJoints.get(joint);
-//         columnsForJoint = new int[] {columnsForJoint[0], columnsForJoint[1], columnsForJoint[2]};
-//      }
-//      else
-      {
-         CheckTools.checkEquals(joint.getDegreesOfFreedom(), jointAcceleration.getNumRows());
-         columnsForJoint = this.columnsForJoints.get(joint);
-      }
+      CheckTools.checkEquals(joint.getDegreesOfFreedom(), jointAcceleration.getNumRows());
+      int[] columnsForJoint = this.columnsForJoints.get(joint);
 
       if (columnsForJoint != null) // don't do anything for joints that are not in the list
       {
@@ -176,8 +175,33 @@ public class MotionConstraintHandler
 
          motionConstraintIndex++;
       }
+   }
 
+   public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase, double weight)
+   {
+      pointJacobian.set(jacobian, bodyFixedPoint);
+      pointJacobian.compute();
 
+      DenseMatrix64F pointJacobianMatrix = pointJacobian.getJacobianMatrix();
+      DenseMatrix64F jFullBlock = getMatrixFromList(jList, motionConstraintIndex, pointJacobianMatrix.getNumRows(), nDegreesOfFreedom);
+      compactBlockToFullBlock(jacobian.getJointsInOrder(), pointJacobianMatrix, jFullBlock);
+
+      twistCalculator.packRelativeTwist(twist, jacobian.getBase(), jacobian.getEndEffector()); // TODO: test
+      convectiveTermCalculator.computeJacobianDerivativeTerm(jacobian, convectiveTerm);
+      convectiveTerm.changeFrame(jacobian.getBaseFrame(), twist, twist);
+
+      bodyFixedPoint.changeFrame(jacobian.getBaseFrame());
+      twist.changeFrame(jacobian.getBaseFrame());
+      convectiveTerm.packAccelerationOfPointFixedInBodyFrame(twist, bodyFixedPoint, pPointVelocity);
+      pPointVelocity.scale(-1.0);
+      pPointVelocity.add(desiredAccelerationWithRespectToBase);
+      DenseMatrix64F pBlock = getMatrixFromList(pList, motionConstraintIndex, pointJacobianMatrix.getNumRows(), 1);
+      MatrixTools.setDenseMatrixFromTuple3d(pBlock, pPointVelocity.getVector(), 0, 0);
+
+      MutableDouble weightBlock = getMutableDoubleFromList(weightList, motionConstraintIndex);
+      weightBlock.setValue(weight);
+
+      motionConstraintIndex++;
    }
 
    public void compute()
@@ -187,7 +211,7 @@ public class MotionConstraintHandler
       n.reshape(nTranspose.getNumCols(), nTranspose.getNumRows());
       CommonOps.transpose(nTranspose, n);
 
-      assembleWeightMatrix(weightList, jList, motionConstraintIndex, ws);
+      assembleWeightMatrix(weightList, jList, motionConstraintIndex, w);
    }
 
    private void assembleEquation(List<DenseMatrix64F> matrixList, List<DenseMatrix64F> vectorList, int size, DenseMatrix64F matrix, DenseMatrix64F vector)
@@ -269,7 +293,7 @@ public class MotionConstraintHandler
 
    public DenseMatrix64F getWeightMatrix()
    {
-      return ws;
+      return w;
    }
 
    private static DenseMatrix64F getMatrixFromList(List<DenseMatrix64F> matrixList, int index, int nRows, int nColumns)

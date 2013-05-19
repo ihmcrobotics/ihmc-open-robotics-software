@@ -54,7 +54,7 @@ public class MomentumSolver3 implements MomentumSolverInterface
       this.rootJoint = rootJoint;
       this.jointsInOrder = ScrewTools.computeSupportAndSubtreeJoints(rootJoint.getSuccessor());
 
-      this.motionConstraintHandler = new MotionConstraintHandler(jointsInOrder);
+      this.motionConstraintHandler = new MotionConstraintHandler(jointsInOrder, twistCalculator);
 
       this.centroidalMomentumMatrix = new CentroidalMomentumMatrix(elevator, centerOfMassFrame);
       this.previousCentroidalMomentumMatrix = new DenseMatrix64F(centroidalMomentumMatrix.getMatrix().getNumRows(),

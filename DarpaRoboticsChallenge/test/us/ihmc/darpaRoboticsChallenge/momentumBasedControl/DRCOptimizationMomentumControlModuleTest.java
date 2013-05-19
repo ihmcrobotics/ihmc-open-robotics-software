@@ -80,7 +80,10 @@ public class DRCOptimizationMomentumControlModuleTest
       double controlDT = 1e-4;
       MomentumOptimizationSettings optimizationSettings = createOptimizationSettings(0.0, 1e-3, 1e-9, 0.0);
       double gravityZ = 9.81;
-      OptimizationMomentumControlModule momentumControlModule = new OptimizationMomentumControlModule(rootJoint, centerOfMassFrame, controlDT, registry, jointsToOptimizeFor, optimizationSettings, gravityZ);
+      TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), rootJoint.getSuccessor());
+      twistCalculator.compute();
+      OptimizationMomentumControlModule momentumControlModule = new OptimizationMomentumControlModule(rootJoint, centerOfMassFrame, controlDT, registry,
+                                                                   jointsToOptimizeFor, optimizationSettings, gravityZ, twistCalculator);
       momentumControlModule.initialize();
 
       double mass = TotalMassCalculator.computeMass(ScrewTools.computeSupportAndSubtreeSuccessors(rootJoint.getSuccessor()));
@@ -92,6 +95,7 @@ public class DRCOptimizationMomentumControlModuleTest
          centerOfMassFrame.update();
 
          momentumControlModule.reset();
+
          for (InverseDynamicsJoint inverseDynamicsJoint : jointsToOptimizeFor)
          {
             DenseMatrix64F vdDesired = new DenseMatrix64F(inverseDynamicsJoint.getDegreesOfFreedom(), 1);
@@ -108,7 +112,7 @@ public class DRCOptimizationMomentumControlModuleTest
          }
 
          assertWrenchesSumUpToMomentumDot(momentumControlModule.getExternalWrenches().values(), momentumControlModule.getDesiredCentroidalMomentumRate(),
-               gravityZ, mass, centerOfMassFrame, 1e-3);
+                                          gravityZ, mass, centerOfMassFrame, 1e-3);
          assertWrenchesInFrictionCones(momentumControlModule.getExternalWrenches(), contactStates, coefficientOfFriction);
       }
    }
@@ -131,7 +135,8 @@ public class DRCOptimizationMomentumControlModuleTest
       RigidBody elevator = fullRobotModel.getElevator();
 
       InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(rootJoint.getSuccessor());
-//      ScrewTestTools.setRandomVelocities(allJoints, random);
+
+//    ScrewTestTools.setRandomVelocities(allJoints, random);
       OneDoFJoint[] oneDoFJoints = ScrewTools.filterJoints(allJoints, OneDoFJoint.class);
 
       SideDependentList<ContactablePlaneBody> feet = createFeet(fullRobotModel, referenceFrames);
@@ -145,9 +150,12 @@ public class DRCOptimizationMomentumControlModuleTest
       InverseDynamicsJoint[] jointsToOptimizeFor = computeJointsToOptimizeFor(fullRobotModel, lidarJoint);
 
       double controlDT = 0.005;
-      MomentumOptimizationSettings optimizationSettings = createOptimizationSettings(0.0, 1.0, 1e-5, 0.0);
+      MomentumOptimizationSettings optimizationSettings = createOptimizationSettings(0.0, 0.0, 1e-5, 0.0);
       double gravityZ = 9.81;
-      OptimizationMomentumControlModule momentumControlModule = new OptimizationMomentumControlModule(rootJoint, centerOfMassFrame, controlDT, registry, jointsToOptimizeFor, optimizationSettings, gravityZ);
+      TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), rootJoint.getSuccessor());
+      twistCalculator.compute();
+      OptimizationMomentumControlModule momentumControlModule = new OptimizationMomentumControlModule(rootJoint, centerOfMassFrame, controlDT, registry,
+                                                                   jointsToOptimizeFor, optimizationSettings, gravityZ, twistCalculator);
       momentumControlModule.initialize();
 
       double mass = TotalMassCalculator.computeMass(ScrewTools.computeSupportAndSubtreeSuccessors(rootJoint.getSuccessor()));
@@ -168,8 +176,10 @@ public class DRCOptimizationMomentumControlModuleTest
 
          momentumControlModule.compute(contactStates, null, null);
 
-         assertWrenchesSumUpToMomentumDot(momentumControlModule.getExternalWrenches().values(), momentumControlModule.getDesiredCentroidalMomentumRate(), gravityZ, mass, centerOfMassFrame, 1e-3);
+         assertWrenchesSumUpToMomentumDot(momentumControlModule.getExternalWrenches().values(), momentumControlModule.getDesiredCentroidalMomentumRate(),
+                                          gravityZ, mass, centerOfMassFrame, 1e-3);
          assertWrenchesInFrictionCones(momentumControlModule.getExternalWrenches(), contactStates, coefficientOfFriction);
+
          for (GeometricJacobian jacobian : taskspaceConstraintDataMap.keySet())
          {
             assertSpatialAccelerationCorrect(jacobian.getBase(), jacobian.getEndEffector(), taskspaceConstraintDataMap.get(jacobian));
@@ -187,7 +197,7 @@ public class DRCOptimizationMomentumControlModuleTest
       ReferenceFrame rootFrame = elevator.getBodyFixedFrame();
       SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootFrame, rootFrame, rootFrame);
       SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, rootFrame, rootAcceleration, twistCalculator,
-            true, true);
+                                                                       true, true);
       twistCalculator.compute();
       spatialAccelerationCalculator.compute();
       SpatialAccelerationVector accelerationBack = new SpatialAccelerationVector();
@@ -207,18 +217,22 @@ public class DRCOptimizationMomentumControlModuleTest
 
       DenseMatrix64F accelerationSelection = new DenseMatrix64F(selectionMatrix.getNumRows(), 1);
       CommonOps.mult(selectionMatrix, accelerationBackMatrix, accelerationSelection);
+
       return accelerationSelection;
    }
 
-   private void constrainPelvis(Random random, SDFFullRobotModel fullRobotModel, OptimizationMomentumControlModule momentumControlModule, Map<GeometricJacobian, TaskspaceConstraintData> taskspaceConstraintDataMap)
+   private void constrainPelvis(Random random, SDFFullRobotModel fullRobotModel, OptimizationMomentumControlModule momentumControlModule,
+                                Map<GeometricJacobian, TaskspaceConstraintData> taskspaceConstraintDataMap)
    {
       RigidBody pelvis = fullRobotModel.getRootJoint().getSuccessor();
       RigidBody elevator = fullRobotModel.getElevator();
       GeometricJacobian rootJointJacobian = new GeometricJacobian(pelvis, elevator, pelvis.getBodyFixedFrame());
       TaskspaceConstraintData pelvisTaskspaceConstraintData = new TaskspaceConstraintData();
-      SpatialAccelerationVector pelvisSpatialAcceleration = new SpatialAccelerationVector(rootJointJacobian.getEndEffectorFrame(), rootJointJacobian.getBaseFrame(), rootJointJacobian.getJacobianFrame());
+      SpatialAccelerationVector pelvisSpatialAcceleration = new SpatialAccelerationVector(rootJointJacobian.getEndEffectorFrame(),
+                                                               rootJointJacobian.getBaseFrame(), rootJointJacobian.getJacobianFrame());
       pelvisSpatialAcceleration.setAngularPart(RandomTools.generateRandomVector(random));
-//      pelvisSpatialAcceleration.setAngularPart(new Vector3d());
+
+//    pelvisSpatialAcceleration.setAngularPart(new Vector3d());
       DenseMatrix64F pelvisNullspaceMultipliers = new DenseMatrix64F(0, 1);
       DenseMatrix64F orientationSelectionMatrix = new DenseMatrix64F(3, Momentum.SIZE);
       CommonOps.setIdentity(orientationSelectionMatrix);
@@ -227,14 +241,16 @@ public class DRCOptimizationMomentumControlModuleTest
       taskspaceConstraintDataMap.put(rootJointJacobian, pelvisTaskspaceConstraintData);
    }
 
-   private void constrainFeet(RigidBody elevator, SideDependentList<ContactablePlaneBody> feet, OptimizationMomentumControlModule momentumControlModule, Map<GeometricJacobian, TaskspaceConstraintData> taskspaceConstraintDataMap)
+   private void constrainFeet(RigidBody elevator, SideDependentList<ContactablePlaneBody> feet, OptimizationMomentumControlModule momentumControlModule,
+                              Map<GeometricJacobian, TaskspaceConstraintData> taskspaceConstraintDataMap)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBody foot = feet.get(robotSide).getRigidBody();
          GeometricJacobian jacobian = new GeometricJacobian(elevator, foot, foot.getBodyFixedFrame());
          TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
-         SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector(foot.getBodyFixedFrame(), elevator.getBodyFixedFrame(), foot.getBodyFixedFrame());
+         SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector(foot.getBodyFixedFrame(), elevator.getBodyFixedFrame(),
+                                                            foot.getBodyFixedFrame());
          taskspaceConstraintData.set(spatialAcceleration);
          momentumControlModule.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
          taskspaceConstraintDataMap.put(jacobian, taskspaceConstraintData);
@@ -248,16 +264,18 @@ public class DRCOptimizationMomentumControlModuleTest
       sensorReader.read();
    }
 
-   private LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> createContactStates(SideDependentList<ContactablePlaneBody> feet, YoVariableRegistry
-         registry, double coefficientOfFriction)
+   private LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> createContactStates(SideDependentList<ContactablePlaneBody> feet,
+           YoVariableRegistry registry, double coefficientOfFriction)
    {
       LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
       for (ContactablePlaneBody contactablePlaneBody : feet)
       {
-         YoPlaneContactState contactState = new YoPlaneContactState(contactablePlaneBody.getName() + "ContactState", contactablePlaneBody.getBodyFrame(), contactablePlaneBody.getPlaneFrame(), registry);
+         YoPlaneContactState contactState = new YoPlaneContactState(contactablePlaneBody.getName() + "ContactState", contactablePlaneBody.getBodyFrame(),
+                                               contactablePlaneBody.getPlaneFrame(), registry);
          contactState.set(contactablePlaneBody.getContactPoints2d(), coefficientOfFriction);
          contactStates.put(contactablePlaneBody, contactState);
       }
+
       return contactStates;
    }
 
@@ -278,6 +296,7 @@ public class DRCOptimizationMomentumControlModuleTest
          ContactablePlaneBody foot = new RectangularContactableBody(footBody, soleFrame, footForward, -footBack, left, right);
          bipedFeet.put(robotSide, foot);
       }
+
       return bipedFeet;
    }
 
@@ -292,7 +311,9 @@ public class DRCOptimizationMomentumControlModuleTest
          List<InverseDynamicsJoint> fingerJoints = Arrays.asList(ScrewTools.computeSubtreeJoints(fullRobotModel.getHand(robotSide)));
          joints.removeAll(fingerJoints);
       }
+
       joints.remove(lidarJoint);
+
       return joints.toArray(new InverseDynamicsJoint[joints.size()]);
    }
 

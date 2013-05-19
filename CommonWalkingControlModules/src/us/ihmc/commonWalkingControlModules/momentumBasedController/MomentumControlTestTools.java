@@ -74,6 +74,7 @@ public class MomentumControlTestTools
       for (RigidBody rigidBody : externalWrenches.keySet())
       {
          Wrench externalWrench = externalWrenches.get(rigidBody);
+         externalWrench.changeFrame(rigidBody.getBodyFixedFrame());
          inverseDynamicsCalculator.setExternalWrench(rigidBody, externalWrench);
       }
       twistCalculator.compute();
