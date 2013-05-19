@@ -110,6 +110,7 @@ public class SDFFullRobotModelVisualizer implements RawOutputWriter
    
             pinJoint.setQ(revoluteJoint.getQ());
             pinJoint.setQd(revoluteJoint.getQd());
+            pinJoint.setTau(revoluteJoint.getTau());
          }
          robot.setTime(robot.getTime() + estimatorDT);
          scsUpdaterExecutor.execute(scsUpdateRunner);
