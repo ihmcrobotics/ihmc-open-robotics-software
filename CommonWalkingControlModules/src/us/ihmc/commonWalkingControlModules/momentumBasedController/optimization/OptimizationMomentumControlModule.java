@@ -37,7 +37,6 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    private final CentroidalMomentumHandler centroidalMomentumHandler;
    private final ExternalWrenchHandler externalWrenchHandler;
 
-//   private final HardMotionConstraintEnforcer nullspaceMotionConstraintEnforcer;
    private final HardMotionConstraintEnforcer hardMotionConstraintEnforcer;
    private final MotionConstraintHandler primaryMotionConstraintHandler;
    private final MotionConstraintHandler secondaryMotionConstraintHandler;
@@ -71,7 +70,6 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
       this.momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
 
-//      this.nullspaceMotionConstraintEnforcer = new HardMotionConstraintEnforcer(LinearSolverFactory.pseudoInverse(true));
       this.hardMotionConstraintSolver = new DampedLeastSquaresSolver(1);
       this.hardMotionConstraintEnforcer = new HardMotionConstraintEnforcer(hardMotionConstraintSolver);
 
@@ -101,22 +99,15 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
       centroidalMomentumHandler.compute();
 
-      DenseMatrix64F j = primaryMotionConstraintHandler.getJacobian();
-      DenseMatrix64F p = primaryMotionConstraintHandler.getRightHandSide();
-
-//      DenseMatrix64F n = primaryMotionConstraintHandler.getNullspaceMatrixTranspose();
-//      DenseMatrix64F z = primaryMotionConstraintHandler.getNullspaceMultipliers();
+      DenseMatrix64F jPrimary = primaryMotionConstraintHandler.getJacobian();
+      DenseMatrix64F pPrimary = primaryMotionConstraintHandler.getRightHandSide();
 
       DenseMatrix64F a = centroidalMomentumHandler.getCentroidalMomentumMatrixPart(jointsToOptimizeFor);
       DenseMatrix64F b = centroidalMomentumHandler.getMomentumDotEquationRightHandSide(momentumRateOfChangeData);
 
       DenseMatrix64F bOriginal = new DenseMatrix64F(b);
 
-//      nullspaceMotionConstraintEnforcer.set(n, z);
-//      nullspaceMotionConstraintEnforcer.constrainEquation(j, p);
-
-      hardMotionConstraintEnforcer.set(j, p);
-//      nullspaceMotionConstraintEnforcer.constrainEquation(a, b);
+      hardMotionConstraintEnforcer.set(jPrimary, pPrimary);
       hardMotionConstraintEnforcer.constrainEquation(a, b);
 
       momentumOptimizerNativeInput.setCentroidalMomentumMatrix(a);
@@ -136,10 +127,13 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
             momentumOptimizationSettings.getDampedLeastSquaresFactorMatrix(ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor)));
 
       secondaryMotionConstraintHandler.compute();
-      momentumOptimizerNativeInput.setSecondaryConstraintJacobian(secondaryMotionConstraintHandler.getJacobian());
-      momentumOptimizerNativeInput.setSecondaryConstraintRightHandSide(secondaryMotionConstraintHandler.getRightHandSide());
-//      momentumOptimizerNativeInput.setNullspaceMatrixTranspose(secondaryMotionConstraintHandler.getNullspaceMatrix());
-//      momentumOptimizerNativeInput.setNullspaceMultipliers(secondaryMotionConstraintHandler.getNullspaceMultipliers());
+      DenseMatrix64F jSecondary = secondaryMotionConstraintHandler.getJacobian();
+      DenseMatrix64F pSecondary = secondaryMotionConstraintHandler.getRightHandSide();
+
+      hardMotionConstraintEnforcer.constrainEquation(jSecondary, pSecondary);
+
+      momentumOptimizerNativeInput.setSecondaryConstraintJacobian(jSecondary);
+      momentumOptimizerNativeInput.setSecondaryConstraintRightHandSide(pSecondary);
       momentumOptimizerNativeInput.setSecondaryConstraintWeight(secondaryMotionConstraintHandler.getWeightMatrix());
 
       momentumOptimizerNativeInput.setGroundReactionForceRegularization(momentumOptimizationSettings.getGroundReactionForceRegularization());
@@ -152,17 +146,10 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
       externalWrenchHandler.computeExternalWrenches(groundReactionWrenches);
 
-//      DenseMatrix64F jointAccelerations =
-//            nullspaceMotionConstraintEnforcer.constrainResult(hardMotionConstraintEnforcer.constrainResult(output.getJointAccelerations()));
 
       DenseMatrix64F jointAccelerations =
             hardMotionConstraintEnforcer.constrainResult(output.getJointAccelerations());
       ScrewTools.setDesiredAccelerations(jointsToOptimizeFor, jointAccelerations);
-
-//    assert(arePrimaryConstraintsSatisfied(jointAccelerations));
-
-//    if (!arePrimaryConstraintsSatisfied(jointAccelerations))
-//       throw new RuntimeException("primary constraints not satisfied");
 
       centroidalMomentumHandler.computeCentroidalMomentumRate(jointsToOptimizeFor, jointAccelerations);
    }
@@ -177,16 +164,6 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
       return ret;
    }
-
-// private boolean arePrimaryConstraintsSatisfied(DenseMatrix64F jointAccelerations)
-// {
-//    DenseMatrix64F jacobian = primaryMotionConstraintHandler.getJacobian();
-//    DenseMatrix64F residual = new DenseMatrix64F(jacobian.getNumRows(), 1);
-//    CommonOps.mult(jacobian, jointAccelerations, residual);
-//    CommonOps.subEquals(residual, primaryMotionConstraintHandler.getRightHandSide());
-//
-//    return MatrixFeatures.isConstantVal(residual, 0.0, 1e-9);
-// }
 
    private void optimize(MomentumOptimizerNativeInput momentumOptimizerNativeInput)
    {
