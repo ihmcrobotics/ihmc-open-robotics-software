@@ -507,7 +507,7 @@ public class SmoothICPComputer
    {
       computeTimeInStateAndEstimatedTimeRemaining(time);
 
-      return (estimatedTimeRemainingForState.getDoubleValue() <= 0.0);
+      return (estimatedTimeRemainingForState.getDoubleValue() <= -1e-4);
    }
 
    public Point3d getUpcomingCornerPoint()
