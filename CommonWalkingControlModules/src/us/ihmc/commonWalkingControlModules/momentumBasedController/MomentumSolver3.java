@@ -45,7 +45,7 @@ public class MomentumSolver3 implements MomentumSolverInterface
 
    private final LinearSolver<DenseMatrix64F> solver;
    private final MotionConstraintHandler motionConstraintHandler;
-   private final HardMotionConstraintEnforcer nullspaceMotionConstraintEnforcer;
+//   private final HardMotionConstraintEnforcer nullspaceMotionConstraintEnforcer;
    private final HardMotionConstraintEnforcer hardMotionConstraintEnforcer;
 
    public MomentumSolver3(SixDoFJoint rootJoint, RigidBody elevator, ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator,
@@ -69,10 +69,9 @@ public class MomentumSolver3 implements MomentumSolverInterface
 
       nDegreesOfFreedom = ScrewTools.computeDegreesOfFreedom(jointsInOrder);
       this.b = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
-
       this.v = new DenseMatrix64F(nDegreesOfFreedom, 1);
 
-      nullspaceMotionConstraintEnforcer = new HardMotionConstraintEnforcer(LinearSolverFactory.pseudoInverse(true));
+//      nullspaceMotionConstraintEnforcer = new HardMotionConstraintEnforcer(LinearSolverFactory.pseudoInverse(true));
       hardMotionConstraintEnforcer = new HardMotionConstraintEnforcer(LinearSolverFactory.pseudoInverse(true));
 
       solver = LinearSolverFactory.pseudoInverse(true);
@@ -182,15 +181,14 @@ public class MomentumSolver3 implements MomentumSolverInterface
       DenseMatrix64F Jp = motionConstraintHandler.getJacobian();
       DenseMatrix64F pp = motionConstraintHandler.getRightHandSide();
 
-      DenseMatrix64F n = motionConstraintHandler.getNullspaceMatrixTranspose();
-      DenseMatrix64F z = motionConstraintHandler.getNullspaceMultipliers();
+//      DenseMatrix64F n = motionConstraintHandler.getNullspaceMatrixTranspose();
+//      DenseMatrix64F z = motionConstraintHandler.getNullspaceMultipliers();
 
-      // TODO: nullspace stuff not working properly yet
-      nullspaceMotionConstraintEnforcer.set(n, z);
-      nullspaceMotionConstraintEnforcer.constrainEquation(Jp, pp);
+//      nullspaceMotionConstraintEnforcer.set(n, z);
+//      nullspaceMotionConstraintEnforcer.constrainEquation(Jp, pp);
 
       hardMotionConstraintEnforcer.set(Jp, pp);
-      nullspaceMotionConstraintEnforcer.constrainEquation(sTransposeA, b);
+//      nullspaceMotionConstraintEnforcer.constrainEquation(sTransposeA, b);
       hardMotionConstraintEnforcer.constrainEquation(sTransposeA, b);
 
 
@@ -199,7 +197,8 @@ public class MomentumSolver3 implements MomentumSolverInterface
       solver.setA(sTransposeA);
       solver.solve(b, vdotUnconstrained);
 
-      DenseMatrix64F vdot = nullspaceMotionConstraintEnforcer.constrainResult(hardMotionConstraintEnforcer.constrainResult(vdotUnconstrained));
+      DenseMatrix64F vdot = hardMotionConstraintEnforcer.constrainResult(vdotUnconstrained);
+//      DenseMatrix64F vdot = nullspaceMotionConstraintEnforcer.constrainResult(vdot);
 
       ScrewTools.setDesiredAccelerations(jointsInOrder, vdot);
 
