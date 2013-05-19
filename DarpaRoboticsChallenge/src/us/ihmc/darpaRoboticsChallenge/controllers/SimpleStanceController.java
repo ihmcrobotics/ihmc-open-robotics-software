@@ -78,8 +78,9 @@ public class SimpleStanceController implements RobotController
       this.outputWriter = new SDFPerfectSimulatedOutputWriter(robot, fullRobotModel);
       MomentumOptimizationSettings momentumOptimizationSettings = createOptimizationSettings(1.0, 5e-2, 1e-5, 0.0);
       rootJoint = fullRobotModel.getRootJoint();
+      twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), fullRobotModel.getPelvis());
       this.momentumControlModule = new OptimizationMomentumControlModule(rootJoint, referenceFrames.getCenterOfMassFrame(), controlDT, registry,
-              jointsToOptimize, momentumOptimizationSettings, gravityZ);
+              jointsToOptimize, momentumOptimizationSettings, gravityZ, twistCalculator);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -97,7 +98,6 @@ public class SimpleStanceController implements RobotController
       SideDependentList<ContactablePlaneBody> feet = createFeet(fullRobotModel, referenceFrames, footForward, footBack, footWidth);
       double coefficientOfFriction = 1.0;
       contactStates = createContactStates(feet, registry, coefficientOfFriction);
-      twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), fullRobotModel.getPelvis());
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
 
       this.pelvisOrientationController = new AxisAngleOrientationController("pelvis", pelvis.getBodyFixedFrame(), registry);
