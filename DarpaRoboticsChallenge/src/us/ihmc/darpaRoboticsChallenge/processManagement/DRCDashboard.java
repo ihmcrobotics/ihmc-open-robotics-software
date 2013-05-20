@@ -581,6 +581,9 @@ public class DRCDashboard
    {
       TreeSelectionListener blockLeafSelectionListener = new TreeSelectionListener()
       {
+         private Color white = Color.white;
+         private Color selectionColor = new Color(232, 236, 241);
+
          public void valueChanged(TreeSelectionEvent e)
          {
             JTree tree = (JTree) e.getSource();
@@ -588,12 +591,13 @@ public class DRCDashboard
 
             if (currentSelection != null)
             {
-               currentSelection.setBackground(Color.white);
-
+               currentSelection.setBackground(white);
+               ((DefaultTreeCellRenderer) currentSelection.getCellRenderer()).setBackgroundNonSelectionColor(white);
             }
-            
+
             currentSelection = tree;
-            currentSelection.setBackground(Color.lightGray);
+            currentSelection.setBackground(selectionColor);
+            ((DefaultTreeCellRenderer) currentSelection.getCellRenderer()).setBackgroundNonSelectionColor(selectionColor);
          }
       };
 
@@ -826,63 +830,63 @@ public class DRCDashboard
       //      secondFrame.setVisible(true);
 
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//      frame.setLocation((int) frame.getLocation().getX() - 500, (int) frame.getLocation().getY() - 260);
+      //      frame.setLocation((int) frame.getLocation().getX() - 500, (int) frame.getLocation().getY() - 260);
       frame.setLocationRelativeTo(null);
       frame.setSize(1000, 520);
       frame.setResizable(false);
       frame.setVisible(true);
 
-//      window = new JWindow();
-//      window.setAlwaysOnTop(false);
-//      window.setSize(500, 450);
-//      window.setLocation((int) frame.getLocation().getX() + slidingWindowXOffset, (int) frame.getLocation().getY() + slidingWindowYOffset);
-//      window.setVisible(true);
-//
-//      frame.addComponentListener(new ComponentListener()
-//      {
-//         public void componentShown(ComponentEvent e)
-//         {
-//            // TODO Auto-generated method stub
-//
-//         }
-//
-//         public void componentResized(ComponentEvent e)
-//         {
-//            // TODO Auto-generated method stub
-//
-//         }
-//
-//         public void componentMoved(ComponentEvent e)
-//         {
-//            window.setBounds(((Component) e.getSource()).getLocation().x + slidingWindowXOffset, ((Component) e.getSource()).getLocation().y
-//                  + slidingWindowYOffset, window.getWidth(), window.getHeight());
-//
-//         }
-//
-//         public void componentHidden(ComponentEvent e)
-//         {
-//            // TODO Auto-generated method stub
-//
-//         }
-//      });
-//
-//      frame.getToolkit().addAWTEventListener(new AWTEventListener()
-//      {
-//         public void eventDispatched(AWTEvent arg0)
-//         {
-//            MouseEvent e = null;
-//            if (arg0 instanceof MouseEvent)
-//            {
-//               e = (MouseEvent) arg0;
-//               //               e.consume();
-//            }
-//
-//            if (e != null && e.getComponent().equals(window) && e.getClickCount() > 0)
-//            {
-//               frame.toFront();
-//            }
-//         }
-//      }, AWTEvent.MOUSE_EVENT_MASK);
+      //      window = new JWindow();
+      //      window.setAlwaysOnTop(false);
+      //      window.setSize(500, 450);
+      //      window.setLocation((int) frame.getLocation().getX() + slidingWindowXOffset, (int) frame.getLocation().getY() + slidingWindowYOffset);
+      //      window.setVisible(true);
+      //
+      //      frame.addComponentListener(new ComponentListener()
+      //      {
+      //         public void componentShown(ComponentEvent e)
+      //         {
+      //            // TODO Auto-generated method stub
+      //
+      //         }
+      //
+      //         public void componentResized(ComponentEvent e)
+      //         {
+      //            // TODO Auto-generated method stub
+      //
+      //         }
+      //
+      //         public void componentMoved(ComponentEvent e)
+      //         {
+      //            window.setBounds(((Component) e.getSource()).getLocation().x + slidingWindowXOffset, ((Component) e.getSource()).getLocation().y
+      //                  + slidingWindowYOffset, window.getWidth(), window.getHeight());
+      //
+      //         }
+      //
+      //         public void componentHidden(ComponentEvent e)
+      //         {
+      //            // TODO Auto-generated method stub
+      //
+      //         }
+      //      });
+      //
+      //      frame.getToolkit().addAWTEventListener(new AWTEventListener()
+      //      {
+      //         public void eventDispatched(AWTEvent arg0)
+      //         {
+      //            MouseEvent e = null;
+      //            if (arg0 instanceof MouseEvent)
+      //            {
+      //               e = (MouseEvent) arg0;
+      //               //               e.consume();
+      //            }
+      //
+      //            if (e != null && e.getComponent().equals(window) && e.getClickCount() > 0)
+      //            {
+      //               frame.toFront();
+      //            }
+      //         }
+      //      }, AWTEvent.MOUSE_EVENT_MASK);
 
       frame.toFront();
       taskCombo.requestFocus();
