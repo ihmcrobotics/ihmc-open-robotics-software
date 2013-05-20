@@ -24,11 +24,9 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoCylindricalContactState;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointGroundReactionWrenchDistributor;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylindricalContactState;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.EndEffector;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributor;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributorInputData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributorOutputData;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.OptimizerCylinderContactModel;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.utilities.MemoryTools;
@@ -51,8 +49,8 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 
 public class GroundReactionWrenchDistributorTest
 {
-   private static final boolean VISUALIZE = true;
-   private static boolean DEBUG = true;
+   private static final boolean VISUALIZE = false;
+   private static boolean DEBUG = false;
 
    @Before
    public void showMemoryUsageBeforeTest()
