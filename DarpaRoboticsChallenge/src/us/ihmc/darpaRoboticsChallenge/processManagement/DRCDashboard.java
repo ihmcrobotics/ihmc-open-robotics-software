@@ -178,30 +178,39 @@ public class DRCDashboard
       {
          BufferedReader reader = new BufferedReader(new FileReader(configFileHandle));
          String line, pluginOption = "default";
-         while (!(line = reader.readLine()).equals("END"))
+         boolean done = false;
+         while (!done)
          {
-            if (line != null && line.startsWith("PLUGIN:"))
+            line = reader.readLine();
+            if (line.contains("END") || line == null)
             {
-               pluginOption = line.substring(line.indexOf(":") + 1, line.length());
-               if (pluginOption.contains("plugin"))
-               {
-                  radioGroup.setSelected(usePluginButton.getModel(), true);
-               }
-               else
-               {
-                  radioGroup.setSelected(useDefaultButton.getModel(), true);
-               }
+               done = true;
             }
-            if (line != null && line.startsWith("TASK:"))
+            else
             {
-               String taskOption = line.substring(line.indexOf(":") + 1, line.length());
+               if (line != null && line.startsWith("PLUGIN:"))
+               {
+                  pluginOption = line.substring(line.indexOf(":") + 1, line.length());
+                  if (pluginOption.contains("plugin"))
+                  {
+                     radioGroup.setSelected(usePluginButton.getModel(), true);
+                  }
+                  else
+                  {
+                     radioGroup.setSelected(useDefaultButton.getModel(), true);
+                  }
+               }
+               else if (line != null && line.startsWith("TASK:"))
+               {
+                  String taskOption = line.substring(line.indexOf(":") + 1, line.length());
 
-               forceTaskComboUpdate();
+                  forceTaskComboUpdate();
 
-               if (pluginOption.contains("plugin"))
-                  taskCombo.setSelectedItem(DRCPluginTasks.valueOf(taskOption));
-               else
-                  taskCombo.setSelectedItem(DRCROSTasks.valueOf(taskOption));
+                  if (pluginOption.contains("plugin"))
+                     taskCombo.setSelectedItem(DRCPluginTasks.valueOf(taskOption));
+                  else
+                     taskCombo.setSelectedItem(DRCROSTasks.valueOf(taskOption));
+               }
             }
          }
          reader.close();
@@ -456,7 +465,6 @@ public class DRCDashboard
       disableNodeCollapse();
 
       setupStatusPanelMouseListeners();
-
    }
 
    private void setupStatusPanelMouseListeners()
