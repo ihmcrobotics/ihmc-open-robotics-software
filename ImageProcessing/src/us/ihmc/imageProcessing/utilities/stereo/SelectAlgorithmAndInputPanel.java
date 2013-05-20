@@ -106,7 +106,7 @@ public abstract class SelectAlgorithmAndInputPanel extends JPanel
 	 *
 	 * @param fileName path to config file
 	 */
-	@Override
+	
 	public void loadInputData(String fileName) {
 		Reader r = media.openFile(fileName);
 
@@ -264,7 +264,7 @@ public abstract class SelectAlgorithmAndInputPanel extends JPanel
 		return (T)algCookies[indexFamily].get( algBoxes[indexFamily].getSelectedIndex() );
 	}
 
-	@Override
+	
 	public void actionPerformed(ActionEvent e) {
 		for( int i = 0; i < algBoxes.length; i++ ) {
 			if( algBoxes[i] == e.getSource() ) {
@@ -321,7 +321,7 @@ public abstract class SelectAlgorithmAndInputPanel extends JPanel
 		setActiveGUI(true);
 	}
 
-	@Override
+	
 	public void setMediaManager( MediaManager manager) {
 		this.media = manager;
 	}
