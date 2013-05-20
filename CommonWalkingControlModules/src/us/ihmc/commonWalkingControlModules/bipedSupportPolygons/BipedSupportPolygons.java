@@ -65,11 +65,16 @@ public class BipedSupportPolygons
    // Line segment from one sweet spot to the other:
    private FrameLineSegment2d footToFootLineSegmentInMidFeetZUp;
 
+   // In order to deal with intersecting polygons, it is much harder to calculate the connecting edges
+   // So let's not use the connecting edges unles we need
+   private boolean useConnectingEdges;
+
    public BipedSupportPolygons(SideDependentList<ReferenceFrame> ankleZUpFrames, ReferenceFrame midFeetZUpFrame, YoVariableRegistry parentRegistry,
-                               DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+                               DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, boolean useConnectingEdges)
    {
       this.ankleZUpFrames = ankleZUpFrames;
       this.midFeetZUp = midFeetZUpFrame;
+      this.useConnectingEdges = useConnectingEdges;
 
       supportPolygonViz = new YoFrameConvexPolygon2d("combinedPolygon", "", ReferenceFrame.getWorldFrame(), 30, registry);
       footToFootSegmentViz = new YoFrameLineSegment2d("footToFoot", "", ReferenceFrame.getWorldFrame(), registry);
@@ -171,17 +176,27 @@ public class BipedSupportPolygons
 //       }
 //       supportPolygonInMidFeetZUp = new FrameConvexPolygon2d(allPoints);
 
-         FrameConvexPolygon2dAndConnectingEdges supportPolygonAndEdgesInMidFeetZUp =
-            FrameConvexPolygon2d.combineDisjointPolygons(footPolygonsInMidFeetZUp.get(RobotSide.LEFT), footPolygonsInMidFeetZUp.get(RobotSide.RIGHT));
 
-         if (supportPolygonAndEdgesInMidFeetZUp == null)
-            System.err.println("Feet polygons overlap. Crashing!!!");
+         if (useConnectingEdges)
+         {
+            FrameConvexPolygon2dAndConnectingEdges supportPolygonAndEdgesInMidFeetZUp =
+                  FrameConvexPolygon2d.combineDisjointPolygons(footPolygonsInMidFeetZUp.get(RobotSide.LEFT), footPolygonsInMidFeetZUp.get(RobotSide.RIGHT));
 
-         // If feet are overlapping, then supportPolygonAndEdgesInMidFeetZUp = null...
-         supportPolygonInMidFeetZUp = supportPolygonAndEdgesInMidFeetZUp.getFrameConvexPolygon2d();
+            if (supportPolygonAndEdgesInMidFeetZUp == null)
+               System.err.println("Feet polygons overlap. Crashing!!!");
 
-         connectingEdge1 = supportPolygonAndEdgesInMidFeetZUp.getConnectingEdge1();
-         connectingEdge2 = supportPolygonAndEdgesInMidFeetZUp.getConnectingEdge2();
+            // If feet are overlapping, then supportPolygonAndEdgesInMidFeetZUp = null...
+            supportPolygonInMidFeetZUp = supportPolygonAndEdgesInMidFeetZUp.getFrameConvexPolygon2d();
+
+            connectingEdge1 = supportPolygonAndEdgesInMidFeetZUp.getConnectingEdge1();
+            connectingEdge2 = supportPolygonAndEdgesInMidFeetZUp.getConnectingEdge2();
+         }
+         else
+         {
+            supportPolygonInMidFeetZUp = footPolygonsInMidFeetZUp.get(RobotSide.LEFT).combineWith(footPolygonsInMidFeetZUp.get(RobotSide.RIGHT));
+         }
+
+
       }
       else
       {

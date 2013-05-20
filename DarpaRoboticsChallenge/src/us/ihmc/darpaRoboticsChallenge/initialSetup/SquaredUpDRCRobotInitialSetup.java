@@ -42,6 +42,10 @@ public class SquaredUpDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot
 
    protected void setLegJointPositions(SDFRobot robot)
    {
+
+      robot.getOneDoFJoint("l_leg_uhz").setQ(-0.4);
+      robot.getOneDoFJoint("r_leg_uhz").setQ(0.4);
+
       robot.getOneDoFJoint("l_leg_lhy").setQ(-0.4);
       robot.getOneDoFJoint("r_leg_lhy").setQ(-0.4);
 
