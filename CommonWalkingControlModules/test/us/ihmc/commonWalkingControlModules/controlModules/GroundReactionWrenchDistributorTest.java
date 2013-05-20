@@ -38,6 +38,7 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
+import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -820,6 +821,17 @@ public class GroundReactionWrenchDistributorTest
       }
    }
 
+   private void verifyWrenchesAreFeasible(GroundReactionWrenchDistributorOutputData distributedWrench,
+         ArrayList<CylindricalContactState> cylindricalContactStates, double coefficientOfFriction)
+   {
+      for (CylindricalContactState contactState : cylindricalContactStates)
+      {
+         Wrench wrench = distributedWrench.getWrenchOfNonPlaneContact(contactState);
+
+         verifyWrenchIsFeasible(wrench, contactState, coefficientOfFriction);
+      }
+   }
+
 // private boolean centersOfPressureAreInsideContactPolygons(GroundReactionWrenchDistributorInterface distributor, ArrayList<PlaneContactState> contactStates)
 // {
 //    for (PlaneContactState contactState : contactStates)
@@ -869,6 +881,48 @@ public class GroundReactionWrenchDistributorTest
 
       if (parallelForce > coefficientOfFriction * normalForce)
          fail("Outside of Friction Cone! forceVector = " + forceVector + ", planeContactState = " + planeContactState);
+   }
+
+   private void verifyWrenchIsFeasible(Wrench wrench, CylindricalContactState cylindricalContactState, double coefficientOfFriction)
+   {
+      Wrench wrenchCopy = new Wrench(wrench);
+      wrenchCopy.changeFrame(cylindricalContactState.getCylinderFrame());
+
+      FrameVector forceVector = wrench.getLinearPartAsFrameVectorCopy();
+      FrameVector torqueVector = wrench.getAngularPartAsFrameVectorCopy();
+      
+      double gripForce = cylindricalContactState.getTensileGripForce();
+      double weaknessFactor = cylindricalContactState.getGripWeaknessFactor();
+      double cylinderRadius = cylindricalContactState.getCylinderRadius();
+      double halfHandWidth = cylindricalContactState.getHalfHandWidth();
+      
+      double normalForce = Math.max(0.0, -forceVector.getY());
+      double xForce = Math.abs(forceVector.getX());
+      double yForce = forceVector.getY();
+      double zForce = forceVector.getZ();
+
+      if (yForce > gripForce)
+         fail("Too much (positive) force along the y-axis! forceVector = " + forceVector + ", cylindricalContactState = " + cylindricalContactState);
+      
+      if (xForce > coefficientOfFriction * (gripForce + normalForce))
+         fail("Outside of Friction Cone along the x-axis! forceVector = " + forceVector + ", cylindricalContactState = " + cylindricalContactState);
+      
+      if (zForce < -gripForce
+            || zForce > weaknessFactor * gripForce)
+         fail("Outside of Friction Cone along the z-axis! forceVector = " + forceVector + ", cylindricalContactState = " + cylindricalContactState);
+
+      double xTorque = Math.abs(torqueVector.getX());
+      double yTorque = Math.abs(torqueVector.getY());
+      double zTorque = Math.abs(torqueVector.getZ());
+      
+      if (xTorque > coefficientOfFriction * cylinderRadius * (gripForce + normalForce))
+         fail("Too much torque around the x-axis! torqueVector = " + torqueVector + ", cylindricalContactState = " + cylindricalContactState);
+      
+      if (yTorque > halfHandWidth * weaknessFactor * gripForce)
+         fail("Too much torque around the y-axis! torqueVector = " + torqueVector + ", cylindricalContactState = " + cylindricalContactState);
+      
+      if (zTorque > halfHandWidth * normalForce)
+         fail("Too much torque around the z-axis! torqueVector = " + torqueVector + ", cylindricalContactState = " + cylindricalContactState);
    }
 
    private void verifyForceInsideNormalTorqueCone(FrameVector forceVector, double normalTorque, double rotationalCoefficientOfFriction)
