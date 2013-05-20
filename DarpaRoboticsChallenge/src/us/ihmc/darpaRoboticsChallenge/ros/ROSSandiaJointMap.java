@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import us.ihmc.darpaRoboticsChallenge.handControl.FingerJoint;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotSide.SideDependentList;
 
 public class ROSSandiaJointMap
 {
@@ -22,32 +23,50 @@ public class ROSSandiaJointMap
    public final static int f3_j2 = 11;
 
    public final static int numberOfJointsPerHand = f3_j2 + 1;
+
    
+   public static final SideDependentList<String[]> handNames = new SideDependentList<String[]>();
+
+   static
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         String prefix = robotSide.getLowerCaseName() + "_";
+         String[] handNamesForSide = new String[numberOfJointsPerHand];
+         handNamesForSide[f0_j0] = prefix + "f0_j0";
+         handNamesForSide[f0_j1] = prefix + "f0_j1";
+         handNamesForSide[f0_j2] = prefix + "f0_j2";
+         handNamesForSide[f1_j0] = prefix + "f1_j0";
+         handNamesForSide[f1_j1] = prefix + "f1_j1";
+         handNamesForSide[f1_j2] = prefix + "f1_j2";
+         handNamesForSide[f2_j0] = prefix + "f2_j0";
+         handNamesForSide[f2_j1] = prefix + "f2_j1";
+         handNamesForSide[f2_j2] = prefix + "f2_j2";
+         handNamesForSide[f3_j0] = prefix + "f3_j0";
+         handNamesForSide[f3_j1] = prefix + "f3_j1";
+         handNamesForSide[f3_j2] = prefix + "f3_j2";
+         
+         handNames.put(robotSide, handNamesForSide);
+      }
+   }
+
    public static FingerJoint[] getFingerMap(RobotSide robotSide, ArrayList<FingerJoint> handJoints)
    {
-      String prefix = robotSide.getLowerCaseName() + "_";
-      
+
       HashMap<String, FingerJoint> jointsByName = new HashMap<String, FingerJoint>();
-      for(FingerJoint fingerJoint : handJoints)
+      for (FingerJoint fingerJoint : handJoints)
       {
          jointsByName.put(fingerJoint.getName(), fingerJoint);
       }
-      
+
       FingerJoint[] joints = new FingerJoint[numberOfJointsPerHand];
-      joints[f0_j0] = jointsByName.get(prefix + "f0_j0");
-      joints[f0_j1] = jointsByName.get(prefix + "f0_j1");
-      joints[f0_j2] = jointsByName.get(prefix + "f0_j2");
-      joints[f1_j0] = jointsByName.get(prefix + "f1_j0");
-      joints[f1_j1] = jointsByName.get(prefix + "f1_j1");
-      joints[f1_j2] = jointsByName.get(prefix + "f1_j2");
-      joints[f2_j0] = jointsByName.get(prefix + "f2_j0");
-      joints[f2_j1] = jointsByName.get(prefix + "f2_j1");
-      joints[f2_j2] = jointsByName.get(prefix + "f2_j2");
-      joints[f3_j0] = jointsByName.get(prefix + "f3_j0");
-      joints[f3_j1] = jointsByName.get(prefix + "f3_j1");
-      joints[f3_j2] = jointsByName.get(prefix + "f3_j2");
       
+      for(int i = 0; i < numberOfJointsPerHand; i++)
+      {
+         joints[i] = jointsByName.get(handNames.get(robotSide)[i]);
+      }
+
       return joints;
    }
-   
+
 }

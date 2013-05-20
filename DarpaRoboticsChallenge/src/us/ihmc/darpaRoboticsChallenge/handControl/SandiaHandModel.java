@@ -16,9 +16,11 @@ public class SandiaHandModel
       THUMB,
       INDEX,
       MIDDLE,
-      PINKY;
+      RING;
       
       public final static SandiaFingerName[] values = values();
+      
+      public final static SandiaFingerName[] fingers = { INDEX, MIDDLE, RING };
    }
    
    public enum SandiaFingerJointName
@@ -44,7 +46,7 @@ public class SandiaHandModel
       addFingerJoints(prefix + "f3", SandiaFingerName.THUMB);
       addFingerJoints(prefix + "f0", SandiaFingerName.INDEX);
       addFingerJoints(prefix + "f1", SandiaFingerName.MIDDLE);
-      addFingerJoints(prefix + "f2", SandiaFingerName.PINKY);
+      addFingerJoints(prefix + "f2", SandiaFingerName.RING);
       
       this.wristForceSensor = forceSensorDataForController;
       wristJoint = fullRobotModel.getOneDoFJointByName(robotSide.getShortLowerCaseName() + "_arm_mwx");

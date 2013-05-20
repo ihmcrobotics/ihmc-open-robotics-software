@@ -46,39 +46,49 @@ public class ROSAtlasJointMap
    public final static int numberOfJoints = r_arm_mwx + 1; 
    
    
+
+   public static String[] jointNames = new String[numberOfJoints];
+   static
+   {
+      jointNames[back_lbz] = "back_lbz";
+      jointNames[back_mby] = "back_mby";
+      jointNames[back_ubx] = "back_ubx";
+      jointNames[neck_ay] = "neck_ay";
+      jointNames[l_leg_uhz] = "l_leg_uhz";
+      jointNames[l_leg_mhx] = "l_leg_mhx";
+      jointNames[l_leg_lhy] = "l_leg_lhy";
+      jointNames[l_leg_kny] = "l_leg_kny";
+      jointNames[l_leg_uay] = "l_leg_uay";
+      jointNames[l_leg_lax] = "l_leg_lax";
+      jointNames[r_leg_uhz] = "r_leg_uhz";
+      jointNames[r_leg_mhx] = "r_leg_mhx";
+      jointNames[r_leg_lhy] = "r_leg_lhy";
+      jointNames[r_leg_kny] = "r_leg_kny";
+      jointNames[r_leg_uay] = "r_leg_uay";
+      jointNames[r_leg_lax] = "r_leg_lax";
+      jointNames[l_arm_usy] = "l_arm_usy";
+      jointNames[l_arm_shx] = "l_arm_shx";
+      jointNames[l_arm_ely] = "l_arm_ely";
+      jointNames[l_arm_elx] = "l_arm_elx";
+      jointNames[l_arm_uwy] = "l_arm_uwy";
+      jointNames[l_arm_mwx] = "l_arm_mwx";
+      jointNames[r_arm_usy] = "r_arm_usy";
+      jointNames[r_arm_shx] = "r_arm_shx";
+      jointNames[r_arm_ely] = "r_arm_ely";
+      jointNames[r_arm_elx] = "r_arm_elx";
+      jointNames[r_arm_uwy] = "r_arm_uwy";
+      jointNames[r_arm_mwx] = "r_arm_mwx";
+   }
+   
    
    public static OneDoFJoint[] getJointMap(Map<String, OneDoFJoint> jointsByName)
    {
-      OneDoFJoint[] joints = new OneDoFJoint[atlas_msgs.AtlasState.r_arm_mwx + 1];
-      joints[back_lbz]  = jointsByName.get("back_lbz");
-      joints[back_mby]  = jointsByName.get("back_mby");
-      joints[back_ubx]  = jointsByName.get("back_ubx");
-      joints[neck_ay]   = jointsByName.get("neck_ay");
-      joints[l_leg_uhz] = jointsByName.get("l_leg_uhz");
-      joints[l_leg_mhx] = jointsByName.get("l_leg_mhx");
-      joints[l_leg_lhy] = jointsByName.get("l_leg_lhy");
-      joints[l_leg_kny] = jointsByName.get("l_leg_kny");
-      joints[l_leg_uay] = jointsByName.get("l_leg_uay");
-      joints[l_leg_lax] = jointsByName.get("l_leg_lax");
-      joints[r_leg_uhz] = jointsByName.get("r_leg_uhz");
-      joints[r_leg_mhx] = jointsByName.get("r_leg_mhx");
-      joints[r_leg_lhy] = jointsByName.get("r_leg_lhy");
-      joints[r_leg_kny] = jointsByName.get("r_leg_kny");
-      joints[r_leg_uay] = jointsByName.get("r_leg_uay");
-      joints[r_leg_lax] = jointsByName.get("r_leg_lax");
-      joints[l_arm_usy] = jointsByName.get("l_arm_usy");
-      joints[l_arm_shx] = jointsByName.get("l_arm_shx");
-      joints[l_arm_ely] = jointsByName.get("l_arm_ely");
-      joints[l_arm_elx] = jointsByName.get("l_arm_elx");
-      joints[l_arm_uwy] = jointsByName.get("l_arm_uwy");
-      joints[l_arm_mwx] = jointsByName.get("l_arm_mwx");
-      joints[r_arm_usy] = jointsByName.get("r_arm_usy");
-      joints[r_arm_shx] = jointsByName.get("r_arm_shx");
-      joints[r_arm_ely] = jointsByName.get("r_arm_ely");
-      joints[r_arm_elx] = jointsByName.get("r_arm_elx");
-      joints[r_arm_uwy] = jointsByName.get("r_arm_uwy");
-      joints[r_arm_mwx] = jointsByName.get("r_arm_mwx");
-
+      OneDoFJoint[] joints = new OneDoFJoint[numberOfJoints];
+      for(int i = 0; i < numberOfJoints; i++)
+      {
+         joints[i] = jointsByName.get(jointNames[i]);
+      }
+      
       return joints;
    }
 

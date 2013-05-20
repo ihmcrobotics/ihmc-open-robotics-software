@@ -14,15 +14,19 @@ import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.NullLidarController;
 import us.ihmc.commonWalkingControlModules.controllers.PIDLidarTorqueController;
 import us.ihmc.darpaRoboticsChallenge.controllers.EstimationLinkHolder;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotDampingParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.handControl.SimulatedHandControllerDispatcher;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCSimulationOutputWriter;
+import us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap;
+import us.ihmc.darpaRoboticsChallenge.ros.ROSSandiaJointMap;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.darpaRoboticsChallenge.sensors.GazeboForceSensor;
 import us.ihmc.projectM.R2Sim02.initialSetup.GuiInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.ScsInitialSetup;
+import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.simulatedSensors.GroundContactPointBasedWrenchCalculator;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
@@ -73,6 +77,9 @@ public class DRCSimulationFactory
       SDFRobot simulatedRobot = robotInterface.getRobot();
       YoVariableRegistry registry = simulatedRobot.getRobotsYoVariableRegistry();
       simulatedRobot.setDynamicIntegrationMethod(scsInitialSetup.getDynamicIntegrationMethod());
+      
+      setupJointDamping(simulatedRobot);
+      
 
       DRCOutputWriter drcOutputWriter = new DRCSimulationOutputWriter(simulatedRobot, dynamicGraphicObjectsListRegistry);
 
@@ -229,6 +236,22 @@ public class DRCSimulationFactory
 
 
       return humanoidRobotSimulation;
+   }
+
+   private static void setupJointDamping(SDFRobot simulatedRobot)
+   {
+      for(int i = 0; i < ROSAtlasJointMap.numberOfJoints; i++)
+      {
+         simulatedRobot.getOneDoFJoint(ROSAtlasJointMap.jointNames[i]).setDamping(DRCRobotDampingParameters.getAtlasDamping(i));
+      }
+      
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         for(int i = 0; i < ROSSandiaJointMap.numberOfJointsPerHand; i++)
+         {
+            simulatedRobot.getOneDoFJoint(ROSSandiaJointMap.handNames.get(robotSide)[i]).setDamping(DRCRobotDampingParameters.getSandiaHandDamping(robotSide, i));
+         }
+      }
    }
 
    private static Pair<Point3d, Quat4d> getInitialCoMPositionAndEstimationLinkOrientation(RobotInitialSetup<SDFRobot> robotInitialSetup, SDFRobot simulatedRobot)
