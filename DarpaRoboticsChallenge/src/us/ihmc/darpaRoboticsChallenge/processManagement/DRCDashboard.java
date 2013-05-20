@@ -528,6 +528,7 @@ public class DRCDashboard
 
                public void mouseClicked(MouseEvent e)
                {
+                  ((JTree) e.getSource()).setSelectionRow(0);
                   if (e.getClickCount() > 1)
                   {
                      LocalCloudMachines gazeboMachine = machine;
