@@ -175,9 +175,9 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
          {
             ReferenceFrame frame = endEffectorsLocal.get(i).getReferenceFrame();
             wrenchesLocal.add(new Wrench(frame, centerOfMassFrame));
-            wrenchLinearComponents.add(new YoFrameVector(frame.getName() + "DistributedWrenchLinear", frame, this.registry));
-            wrenchRotaryComponents.add(new YoFrameVector(frame.getName() + "DistributedWrenchRotary", frame, this.registry));
-            wrenchOrigins.add(new YoFramePoint(frame.getName() + "DistributedWrenchOrigin", frame, this.registry));
+            wrenchLinearComponents.add(new YoFrameVector(frame.getName() + i + "DistributedWrenchLinear", frame, this.registry));
+            wrenchRotaryComponents.add(new YoFrameVector(frame.getName() + i + "DistributedWrenchRotary", frame, this.registry));
+            wrenchOrigins.add(new YoFramePoint(frame.getName() + i + "DistributedWrenchOrigin", frame, this.registry));
          }
       }
    }
@@ -204,9 +204,10 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
    {
       endEffectorsLocal.clear();
 
-      for (PlaneContactState plane : planes)
+      for (int i=0; i<planes.size(); i++)
       {
-         endEffectorsLocal.add(getOrCreate(plane));
+         PlaneContactState plane = planes.get(i);
+         endEffectorsLocal.add(getOrCreate("" + i, plane));
       }
 
       for (CylindricalContactState cylinder : cylinders)
@@ -224,7 +225,7 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
       optimizerInputPopulator.computeAllMatriciesAndPopulateNativeInput(endEffectorsLocal, optimizerInputLocal);
    }
 
-   private EndEffector getOrCreate(PlaneContactState plane)
+   private EndEffector getOrCreate(String nameSuffix, PlaneContactState plane)
    {
       if (previouslyUsedPlaneEndEffectors.containsKey(plane))
       {
@@ -234,7 +235,7 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
          return endEffector;
       }
 
-      EndEffector endEffector = EndEffector.fromPlane(centerOfMassFrame, plane, registry);
+      EndEffector endEffector = EndEffector.fromPlane(nameSuffix, centerOfMassFrame, plane, registry);
       previouslyUsedPlaneEndEffectors.put(plane, endEffector);
 
       return endEffector;
