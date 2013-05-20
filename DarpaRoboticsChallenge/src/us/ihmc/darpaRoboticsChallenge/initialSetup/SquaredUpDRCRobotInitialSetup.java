@@ -24,13 +24,24 @@ public class SquaredUpDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot
 
    public void initializeRobot(SDFRobot robot)
    {
+      setArmJointPositions(robot);
+      setLegJointPositions(robot);
+      setPositionInWorld(robot);
+   }
+
+   protected void setArmJointPositions(SDFRobot robot)
+   {
       // Avoid singularities at startup
-//      robot.getOneDoFJoint("l_arm_ely").setQ(1.57);
+
+      //      robot.getOneDoFJoint("l_arm_ely").setQ(1.57);
 //      robot.getOneDoFJoint("l_arm_elx").setQ(1.57);
 //
 //      robot.getOneDoFJoint("r_arm_ely").setQ(1.57);
 //      robot.getOneDoFJoint("r_arm_elx").setQ(-1.57);
+   }
 
+   protected void setLegJointPositions(SDFRobot robot)
+   {
       robot.getOneDoFJoint("l_leg_lhy").setQ(-0.4);
       robot.getOneDoFJoint("r_leg_lhy").setQ(-0.4);
 
@@ -39,8 +50,10 @@ public class SquaredUpDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot
 
       robot.getOneDoFJoint("l_leg_uay").setQ(-0.4);
       robot.getOneDoFJoint("r_leg_uay").setQ(-0.4);
+   }
 
-
+   protected void setPositionInWorld(SDFRobot robot)
+   {
       robot.update();
       robot.getRootJointToWorldTransform(rootToWorld);
       rootToWorld.get(offset);
