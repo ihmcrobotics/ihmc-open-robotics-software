@@ -3,7 +3,6 @@ package us.ihmc.darpaRoboticsChallenge.processManagement;
 import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -15,7 +14,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.BufferedReader;
@@ -35,7 +33,6 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -120,6 +117,7 @@ public class DRCDashboard
    private GazeboSimLauncher sshSimLauncher = new GazeboSimLauncher();
 
    private HashMap<LocalCloudMachines, Pair<JTree, DefaultMutableTreeNode>> cloudMachineTrees = new HashMap<LocalCloudMachines, Pair<JTree, DefaultMutableTreeNode>>();
+   JTree currentSelection = null;
 
    private ArrayList<LocalCloudMachines> userOwnedSims = new ArrayList<DRCLocalCloudConfig.LocalCloudMachines>();
 
@@ -472,7 +470,7 @@ public class DRCDashboard
 
             JTree tree = new JTree(rootNode);
             tree.setLargeModel(true);
-            tree.setBorder(BorderFactory.createEmptyBorder(0, 0, 25, 0));
+            tree.setBorder(BorderFactory.createEmptyBorder(15, 10, 15, 0));
             if (sshSimLauncher.isMachineReachable(machine))
                setCloudStatusItemIcon(tree, goodConnectionIcon);
             else
@@ -586,20 +584,23 @@ public class DRCDashboard
          public void valueChanged(TreeSelectionEvent e)
          {
             JTree tree = (JTree) e.getSource();
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+            tree.getSelectionModel().clearSelection();
 
-            if (node != null && node.isLeaf())
+            if (currentSelection != null)
             {
-               tree.getSelectionModel().clearSelection();
+               currentSelection.setBackground(Color.white);
+
             }
+            
+            currentSelection = tree;
+            currentSelection.setBackground(Color.lightGray);
          }
       };
 
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
          if (!machine.equals(LocalCloudMachines.LOCALHOST))
-            cloudMachineTrees.get(machine).first().setSelectionModel(null);
-         //            cloudMachineTrees.get(machine).first().addTreeSelectionListener(blockLeafSelectionListener);
+            cloudMachineTrees.get(machine).first().addTreeSelectionListener(blockLeafSelectionListener);
       }
    }
 
@@ -825,76 +826,67 @@ public class DRCDashboard
       //      secondFrame.setVisible(true);
 
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      frame.setLocation((int) frame.getLocation().getX() - 500, (int) frame.getLocation().getY() - 260);
+//      frame.setLocation((int) frame.getLocation().getX() - 500, (int) frame.getLocation().getY() - 260);
+      frame.setLocationRelativeTo(null);
       frame.setSize(1000, 520);
       frame.setResizable(false);
       frame.setVisible(true);
 
-      window = new JWindow();
-      window.setAlwaysOnTop(false);
-      window.setSize(500, 450);
-      window.setLocation((int) frame.getLocation().getX() + slidingWindowXOffset, (int) frame.getLocation().getY() + slidingWindowYOffset);
-      window.setVisible(true);
-
-      frame.addComponentListener(new ComponentListener()
-      {         
-         public void componentShown(ComponentEvent e)
-         {
-            // TODO Auto-generated method stub
-            
-         }
-         
-         public void componentResized(ComponentEvent e)
-         {
-            // TODO Auto-generated method stub
-            
-         }
-         
-         public void componentMoved(ComponentEvent e)
-         {
-            window.setBounds(((Component) e.getSource()).getLocation().x + slidingWindowXOffset, ((Component) e.getSource()).getLocation().y + slidingWindowYOffset, window.getWidth(), window.getHeight());
-            
-         }
-         
-         public void componentHidden(ComponentEvent e)
-         {
-            // TODO Auto-generated method stub
-            
-         }
-      });
-
-      frame.getToolkit().addAWTEventListener(new AWTEventListener()
-      {
-         public void eventDispatched(AWTEvent arg0)
-         {
-            MouseEvent e = null;
-            if (arg0 instanceof MouseEvent)
-            {
-               e = (MouseEvent) arg0;
-               //               e.consume();
-            }
-
-            if (e != null && e.getComponent().equals(window) && e.getClickCount() > 0)
-            {
-               frame.toFront();
-            }
-         }
-      }, AWTEvent.MOUSE_EVENT_MASK);
-
-//      final JWindow testWindow = new JWindow(frame);
-//      //      testWindow.setUndecorated(true);
-//      testWindow.setSize(frame.getContentPane().getWidth() - 200, frame.getHeight() - frame.getContentPane().getHeight());
-//      testWindow.setLocation((int) frame.getLocation().getX() + 100, (int) frame.getLocation().getY());
-//      testWindow.setVisible(true);
+//      window = new JWindow();
+//      window.setAlwaysOnTop(false);
+//      window.setSize(500, 450);
+//      window.setLocation((int) frame.getLocation().getX() + slidingWindowXOffset, (int) frame.getLocation().getY() + slidingWindowYOffset);
+//      window.setVisible(true);
 //
-//      SuperMouseListener listener = new SuperMouseListener();
+//      frame.addComponentListener(new ComponentListener()
+//      {
+//         public void componentShown(ComponentEvent e)
+//         {
+//            // TODO Auto-generated method stub
 //
-//      testWindow.addMouseListener(listener);
-//      testWindow.addMouseMotionListener(listener);
+//         }
+//
+//         public void componentResized(ComponentEvent e)
+//         {
+//            // TODO Auto-generated method stub
+//
+//         }
+//
+//         public void componentMoved(ComponentEvent e)
+//         {
+//            window.setBounds(((Component) e.getSource()).getLocation().x + slidingWindowXOffset, ((Component) e.getSource()).getLocation().y
+//                  + slidingWindowYOffset, window.getWidth(), window.getHeight());
+//
+//         }
+//
+//         public void componentHidden(ComponentEvent e)
+//         {
+//            // TODO Auto-generated method stub
+//
+//         }
+//      });
+//
+//      frame.getToolkit().addAWTEventListener(new AWTEventListener()
+//      {
+//         public void eventDispatched(AWTEvent arg0)
+//         {
+//            MouseEvent e = null;
+//            if (arg0 instanceof MouseEvent)
+//            {
+//               e = (MouseEvent) arg0;
+//               //               e.consume();
+//            }
+//
+//            if (e != null && e.getComponent().equals(window) && e.getClickCount() > 0)
+//            {
+//               frame.toFront();
+//            }
+//         }
+//      }, AWTEvent.MOUSE_EVENT_MASK);
 
       frame.toFront();
       taskCombo.requestFocus();
-   }  
+   }
 
    public void reinitGui()
    {
@@ -1013,9 +1005,15 @@ public class DRCDashboard
          if (!machine.equals(LocalCloudMachines.LOCALHOST))
          {
             if (sshSimLauncher.isMachineReachable(machine))
+            {
                setCloudStatusItemIcon(cloudMachineTrees.get(machine).first(), goodConnectionIcon);
+               cloudMachineTrees.get(machine).first().expandRow(0);
+            }
             else
+            {
                setCloudStatusItemIcon(cloudMachineTrees.get(machine).first(), badConnectionIcon);
+               cloudMachineTrees.get(machine).first().collapseRow(0);
+            }
          }
       }
    }
