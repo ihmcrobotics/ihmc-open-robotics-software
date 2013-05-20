@@ -36,6 +36,7 @@ public class CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator
    private final DoubleYoVariable[][][] graphicYoDoubles = new DoubleYoVariable[2][][];
    private final FramePoint tempPoint;
    private final FrameVector tempVector ;
+   private final SpatialForceVector tempSpatialVector;
    private static final int X = 0;
    private static final int Y = 1;
    private static final int Z = 2;
@@ -56,14 +57,14 @@ public class CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator
       this.centerOfMassFrame = centerOfMassFrame;
       this.tempPoint = new FramePoint(centerOfMassFrame);
       this.tempVector = new FrameVector(centerOfMassFrame);
-      
+      this.tempSpatialVector = new SpatialForceVector(centerOfMassFrame);
       
       graphicWrenches[0] = new DynamicGraphicVector[RHOSIZE][2];
       graphicYoDoubles[0] = new DoubleYoVariable[RHOSIZE][9];
 
       graphicWrenches[1] = new DynamicGraphicVector[PHISIZE][2];
       graphicYoDoubles[1] = new DoubleYoVariable[PHISIZE][9];
-      double scaleFactor = 0.25;
+      double scaleFactor = 0.01;
 
       ArrayList<DynamicGraphicObject> dynamicGraphicVectorsRhoLinear = new ArrayList<DynamicGraphicObject>();
       ArrayList<DynamicGraphicObject> dynamicGraphicVectorsRhoAngular = new ArrayList<DynamicGraphicObject>();
@@ -77,7 +78,7 @@ public class CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator
 
          for (int j = 0; j < 9; j++)
          {
-            graphicYoDoubles[q][i][j] = new DoubleYoVariable(name + "rhoGraphicVectorElement" + q + i + j, registry);
+            graphicYoDoubles[q][i][j] = new DoubleYoVariable(name + "rhoOptimizerOutputVectorsElement" + q + i + j, registry);
          }
 
          double greenLevel = 0.25 * i / (double) RHOSIZE;
@@ -99,7 +100,7 @@ public class CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator
          double greenLevel = 0.25 * i / (double) PHISIZE;
          for (int j = 0; j < 9; j++)
          {
-            graphicYoDoubles[q][i][j] = new DoubleYoVariable(name + "rhoGraphicVectorElement" + q + i + j, registry);
+            graphicYoDoubles[q][i][j] = new DoubleYoVariable(name + "rhoOptimizerOutputVectorsElement" + q + i + j, registry);
          }
 
          graphicWrenches[q][i][LINEAR] = new DynamicGraphicVector(name + "PhiGraphicVector" + q + i + "Linear", graphicYoDoubles[q][i][X],
@@ -120,44 +121,71 @@ public class CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator
       
       
    }
-
+   
    public void computeAllWrenchesBasedOnNativeOutputAndInput(Collection<? extends EndEffector> endEffectors,
            CylinderAndPlaneContactForceOptimizerNativeInput nativeInput, CylinderAndPlaneContactForceOptimizerNativeOutput nativeOutput)
    {
-      int rhoLocation = 0;
+      int iRho = 0;
       int phiLocation = 0;
       DenseMatrix64F rho = nativeOutput.getRho();
       DenseMatrix64F phi = nativeOutput.getPhi();
 
-      int iRho = 0;
-      int iPhi = 0;
+
       int q = 0;
       
       for (EndEffector endEffector : endEffectors)
       {
          if (endEffector.isLoadBearing())
          {
+            
+            ReferenceFrame frameOfInterest = endEffector.getReferenceFrame();
+            OptimizerContactModel contactModel = endEffector.getContactModel();
+            if (contactModel instanceof OptimizerCylinderContactModel)
+            {
+               frameOfInterest=((OptimizerCylinderContactModel)contactModel).getCylinderFrame();
+            }
+            
+            
+            tempPoint.setToZero(frameOfInterest);
+            tempPoint.changeFrame(endEffector.getReferenceFrame().getRootFrame());
+            q = 0;
+            
             tempSum.zero();
             OptimizerContactModel model = endEffector.getContactModel();
-            for (int i = 0; i < model.getSizeInRho(); i++)
+            for (int iRhoModel = 0; iRhoModel < model.getSizeInRho(); iRhoModel++)
             {
-               nativeInput.packQrho(rhoLocation, tempVectorMatrix);
-               double rhoOfI = rho.get(rhoLocation);
-
+               nativeInput.packQrho(iRho, tempVectorMatrix);
+               double rhoOfI = rho.get(iRho);
+               tempSpatialVector.set(centerOfMassFrame,tempVectorMatrix);
+               
+               tempSpatialVector.scale(rhoOfI);
+               tempSpatialVector.changeFrame(frameOfInterest);
+               packYoDoubles(iRho,q,tempSpatialVector, tempPoint);
+               
+               
                for (int j = 0; j < SpatialForceVector.SIZE; j++)
                {
                   tempVectorMatrix.times(j, rhoOfI);
                   tempSum.add(j, 0, tempVectorMatrix.get(j));
                }
 
-               rhoLocation++;
+               iRho++;
             }
+            
+            q = 1;
 
-            for (int i = 0; i < model.getSizeInPhi(); i++)
+            for (int iPhiModel = 0; iPhiModel < model.getSizeInPhi(); iPhiModel++)
             {
                nativeInput.packQphi(phiLocation, tempVectorMatrix);
                double phiOfI = phi.get(phiLocation);
 
+               
+               tempSpatialVector.set(centerOfMassFrame,tempVectorMatrix);
+               
+               tempSpatialVector.scale(phiOfI);
+               tempSpatialVector.changeFrame(frameOfInterest);
+               packYoDoubles(phiLocation,q,tempSpatialVector, tempPoint);
+               
                for (int j = 0; j < SpatialForceVector.SIZE; j++)
                {
                   tempVectorMatrix.times(j, phiOfI);
@@ -179,6 +207,26 @@ public class CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator
       }
    }
 
+   private void packYoDoubles(int i, int q, SpatialForceVector currentBasisVector, FramePoint localPoint)
+   {
+      graphicYoDoubles[q][i][X].set(localPoint.getX());
+      graphicYoDoubles[q][i][Y].set(localPoint.getY());
+      graphicYoDoubles[q][i][Z].set(localPoint.getZ());
+      tempVector.changeFrame(currentBasisVector.getExpressedInFrame());
+      currentBasisVector.packAngularPart(tempVector);
+      tempVector.changeFrame(currentBasisVector.getExpressedInFrame().getRootFrame());
+      graphicYoDoubles[q][i][xx].set(tempVector.getX());
+      graphicYoDoubles[q][i][yy].set(tempVector.getY());
+      graphicYoDoubles[q][i][zz].set(tempVector.getZ());
+      tempVector.changeFrame(currentBasisVector.getExpressedInFrame());
+      currentBasisVector.packLinearPart(tempVector);
+      tempVector.changeFrame(currentBasisVector.getExpressedInFrame().getRootFrame());
+      graphicYoDoubles[q][i][x].set(tempVector.getX());
+      graphicYoDoubles[q][i][y].set(tempVector.getY());
+      graphicYoDoubles[q][i][z].set(tempVector.getZ());
+   }
+   
+   
    public SpatialForceVector getSpatialForceVector(EndEffector endEffector)
    {
       return spatialForceVectors.get(endEffector);
