@@ -1,21 +1,9 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypointGenerationMethod;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData;
@@ -28,17 +16,22 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.net.KryoObjectClient;
-import us.ihmc.utilities.net.KryoObjectServer;
-import us.ihmc.utilities.net.NetClassList;
-import us.ihmc.utilities.net.ObjectCommunicator;
-import us.ihmc.utilities.net.ObjectConsumer;
+import us.ihmc.utilities.net.*;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.test.JUnitTools;
 
-import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypointGenerationMethod;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * User: Matt
