@@ -46,6 +46,7 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.DefaultTreeModel;
 
 import org.apache.commons.lang.WordUtils;
 
@@ -59,7 +60,7 @@ import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 public class DRCDashboard
 {
    private static DRCDashboard instance;
-   
+
    private GridBagConstraints c;
 
    private JFrame frame = new JFrame("IHMC DRC Dashboard");
@@ -107,7 +108,7 @@ public class DRCDashboard
    private ArrayList<LocalCloudMachines> userOwnedSims = new ArrayList<DRCLocalCloudConfig.LocalCloudMachines>();
 
    private File configFileHandle;
-   private boolean shouldLoadConfig = false;   
+   private boolean shouldLoadConfig = false;
 
    public DRCDashboard()
    {
@@ -867,6 +868,22 @@ public class DRCDashboard
       updateRosSimStatuses();
 
       updateSCSStatuses();
+
+      recalculateNodeSizes();
+   }
+
+   private void recalculateNodeSizes()
+   {
+      for (LocalCloudMachines machine : LocalCloudMachines.values())
+      {
+         if (!machine.equals(LocalCloudMachines.LOCALHOST))
+         {
+            DefaultMutableTreeNode root = cloudMachineTrees.get(machine).second();
+            ((DefaultTreeModel) cloudMachineTrees.get(machine).first().getModel()).nodeChanged(root);
+            ((DefaultTreeModel) cloudMachineTrees.get(machine).first().getModel()).nodeChanged(root.getChildAt(0));
+            ((DefaultTreeModel) cloudMachineTrees.get(machine).first().getModel()).nodeChanged(root.getChildAt(1));
+         }
+      }
    }
 
    private void updateRosSimStatuses()
