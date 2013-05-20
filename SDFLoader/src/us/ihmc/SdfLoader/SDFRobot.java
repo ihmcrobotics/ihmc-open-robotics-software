@@ -246,19 +246,24 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
                   if (isFinger(joint))
                   {
                      pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 10.0, 2.5);
-                     if (enableDamping)
-                        pinJoint.setDamping(0.1);
                   }
                   else
                   {
                      pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 100.0, 20.0);
-                     if (enableDamping)
-                        pinJoint.setDamping(joint.getDamping());
                   }
                }
                else
                {
                   pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 0.0001 * joint.getContactKp(), joint.getContactKd());
+               }
+               
+               if(enableDamping)
+               {
+                  pinJoint.setDamping(joint.getDamping());                  
+               }
+               else
+               {
+                  pinJoint.setDampingParameterOnly(joint.getDamping());
                }
 
                if (enableTorqueVelocityLimits)
@@ -302,12 +307,18 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
                   sliderJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 0.0001 * joint.getContactKp(), joint.getContactKd());
                }
             }
+            
 
-            if (enableDamping)
+            if(enableDamping)
             {
-               sliderJoint.setDamping(joint.getDamping());
-               oneDoFJoints.put(joint.getName(), sliderJoint);
+               sliderJoint.setDamping(joint.getDamping());                  
             }
+            else
+            {
+               sliderJoint.setDampingParameterOnly(joint.getDamping());
+            }
+
+            oneDoFJoints.put(joint.getName(), sliderJoint);
 
             scsJoint = sliderJoint;
 

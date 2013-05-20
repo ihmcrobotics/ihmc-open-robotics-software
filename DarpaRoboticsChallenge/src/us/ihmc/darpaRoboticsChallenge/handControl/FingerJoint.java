@@ -14,6 +14,8 @@ public class FingerJoint
    private double kp;
    private double kd;
    
+   private double damping = Double.NaN;
+   
    public FingerJoint(String name)
    {
       super();
@@ -93,6 +95,16 @@ public class FingerJoint
    public void setKd(double kd)
    {
       this.kd = kd;
+   }
+   
+   public double getDamping()
+   {
+      return damping;
+   }
+
+   public void setDamping(double damping)
+   {
+      this.damping = damping;
    }
 
 }
