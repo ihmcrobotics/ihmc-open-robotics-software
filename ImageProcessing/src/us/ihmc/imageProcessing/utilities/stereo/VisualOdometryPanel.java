@@ -138,7 +138,7 @@ public class VisualOdometryPanel
 		return comp;
 	}
 
-	@Override
+	
 	public void itemStateChanged(ItemEvent e) {
 		if( e.getItem() == showInliers) {
 			setShowInliers = e.getStateChange() != ItemEvent.DESELECTED;
@@ -208,7 +208,7 @@ public class VisualOdometryPanel
 		this.listener = listener;
 	}
 
-	@Override
+	
 	public void actionPerformed(ActionEvent e) {
 		if( e.getSource() == selectView ) {
 			if( listener != null )
