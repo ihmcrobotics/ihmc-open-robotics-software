@@ -17,7 +17,8 @@ public interface InstantaneousCapturePointPlanner
 
    public abstract void initializeDoubleSupport(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double initialTime);
 
-   public abstract void getICPPositionAndVelocity(FramePoint2d icpPostionToPack, FrameVector2d icpVelocityToPack, FramePoint2d ecmpToPack, double time);
+   public abstract void getICPPositionAndVelocity(FramePoint2d icpPostionToPack, FrameVector2d icpVelocityToPack, FramePoint2d ecmpToPack, 
+         FramePoint2d actualICP, double time);
 
    public abstract void reset(double time);
 
@@ -28,6 +29,8 @@ public interface InstantaneousCapturePointPlanner
    public abstract boolean isPerformingICPDoubleSupport();
 
    public abstract FramePoint2d getFinalDesiredICP();
+
+   public abstract double getTimeInState(double time);
 
 
 }
