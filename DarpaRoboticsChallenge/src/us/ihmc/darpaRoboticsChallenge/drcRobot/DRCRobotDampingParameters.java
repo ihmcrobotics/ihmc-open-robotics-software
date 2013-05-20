@@ -74,4 +74,19 @@ public class DRCRobotDampingParameters
    {
       return sandiaDampingParameters.get(robotSide)[i];
    }
+
+   public static double getSandiaHandDamping(String name)
+   {
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         for(int i = 0;  i < ROSSandiaJointMap.handNames.get(robotSide).length; i++)
+         {
+            if(ROSSandiaJointMap.handNames.get(robotSide)[i].equals(name))
+            {
+               return sandiaDampingParameters.get(robotSide)[i];
+            }
+         }
+      }
+      throw new RuntimeException("Joint not found: " + name);
+   }
 }
