@@ -1,7 +1,7 @@
 #!/bin/sh
 
-drcsimPath=/usr/share/drcsim-2.5
-gazeboPath=/usr/share/gazebo-1.7
+drcsimPath=/usr/share/drcsim-2.6
+gazeboPath=/usr/share/gazebo-1.8
 
 modelPath=src/us/ihmc/darpaRoboticsChallenge/models/GFE/
 cp -r $drcsimPath/gazebo_models/ $modelPath
