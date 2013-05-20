@@ -114,6 +114,9 @@ public class IndividualHandControlStateMachine
       taskSpaceState.addStateTransition(taskspaceToTaskspaceCondition);    // must be added after taskspaceToSingularityEscapeTransition
 
 
+      StateTransition<IndividualHandControlState> defaultToLoadBearingTransition = createTaskSpaceToLoadBearingTransition(robotSide, isReadyToBearLoad);
+      defaultState.addStateTransition(defaultToLoadBearingTransition);
+
       StateTransition<IndividualHandControlState> taskSpaceToLoadBearingTransition = createTaskSpaceToLoadBearingTransition(robotSide, isReadyToBearLoad);
       taskSpaceState.addStateTransition(taskSpaceToLoadBearingTransition);
 
