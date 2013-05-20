@@ -15,8 +15,13 @@ public class EndEffector
 
    public EndEffector(ReferenceFrame centerOfMassFrame, ReferenceFrame endEffectorFrame, YoVariableRegistry registry)
    {
+      this("", centerOfMassFrame, endEffectorFrame, registry);
+   }
+   
+   public EndEffector(String nameSuffix, ReferenceFrame centerOfMassFrame, ReferenceFrame endEffectorFrame, YoVariableRegistry registry)
+   {
       this.referenceFrame = endEffectorFrame;
-      this.output = new EndEffectorOutput(centerOfMassFrame, endEffectorFrame, registry);
+      this.output = new EndEffectorOutput(nameSuffix, centerOfMassFrame, endEffectorFrame, registry);
    }
 
    public OptimizerContactModel getContactModel()
@@ -61,9 +66,9 @@ public class EndEffector
       return ret;
    }
    
-   public static EndEffector fromPlane(ReferenceFrame centerOfMassFrame, PlaneContactState plane, YoVariableRegistry registry )
+   public static EndEffector fromPlane(String nameSuffix, ReferenceFrame centerOfMassFrame, PlaneContactState plane, YoVariableRegistry registry )
    {
-      EndEffector ret = new EndEffector(centerOfMassFrame, plane.getBodyFrame(), registry);
+      EndEffector ret = new EndEffector(nameSuffix, centerOfMassFrame, plane.getBodyFrame(), registry);
       OptimizerPlaneContactModel model = new OptimizerPlaneContactModel();
       model.setup(plane.getCoefficientOfFriction(), plane.getContactPoints(), plane.getBodyFrame());
       ret.setContactModel(model);

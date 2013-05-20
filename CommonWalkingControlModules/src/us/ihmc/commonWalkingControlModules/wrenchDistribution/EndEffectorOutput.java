@@ -23,14 +23,15 @@ public class EndEffectorOutput
    private final FrameVector tempFrameVector;
    private final FramePoint tempFramePoint;
    
-   public EndEffectorOutput(ReferenceFrame centerOfMassFrame, ReferenceFrame endEffectorFrame, YoVariableRegistry registry)
+   
+   public EndEffectorOutput(String nameSuffix, ReferenceFrame centerOfMassFrame, ReferenceFrame endEffectorFrame, YoVariableRegistry registry)
    {
       this.registry = registry;
       this.endEffectorFrame=endEffectorFrame;
       this.centerOfMassFrame=centerOfMassFrame;
       this.resultingExternalForceVector = new SpatialForceVector(centerOfMassFrame);
       this.resultingWrench = new Wrench(endEffectorFrame, centerOfMassFrame); 
-      String name = endEffectorFrame.getName();
+      String name = endEffectorFrame.getName() + nameSuffix;
       this.wrenchLinear = new YoFrameVector(name+"EndEffectorOutputWrenchLinear",endEffectorFrame,this.registry);
       this.wrenchRotary = new YoFrameVector(name+"EndEffectorOutputWrenchRotary",endEffectorFrame,this.registry);
       this.wrenchOrigin = new YoFramePoint(name+"EndEffectorOutputWrenchOrigin",endEffectorFrame,this.registry);
