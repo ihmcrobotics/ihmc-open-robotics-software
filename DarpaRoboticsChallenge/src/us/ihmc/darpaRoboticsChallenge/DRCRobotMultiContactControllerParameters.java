@@ -6,7 +6,7 @@ public class DRCRobotMultiContactControllerParameters extends DRCRobotWalkingCon
    @Override
    public String[] getHeadOrientationControlJointNames()
    {
-      return new String[] {}; 
+      return new String[] {"neck_ay"}; 
    }
 
    @Override
