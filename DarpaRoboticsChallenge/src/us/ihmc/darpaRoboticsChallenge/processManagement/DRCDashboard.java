@@ -435,7 +435,7 @@ public class DRCDashboard
       {
          if (!machine.equals(LocalCloudMachines.LOCALHOST))
          {
-            DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("<html><body style=\"font-weight:bold;\">"
+            DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("<html><body style=\"font-weight:bold;font-size:1.1em;\">"
                   + WordUtils.capitalize(machine.toString().toLowerCase().replace("_", " ")) + "</body></html>");
             rootNode.add(new DefaultMutableTreeNode("Running ROS/GZ Sims:"));
             rootNode.add(new DefaultMutableTreeNode("Running SCS Controllers?"));
