@@ -291,23 +291,29 @@ public class GroundReactionWrenchDistributorTest
       simpleTwoFootTest(centerOfMassFrame, distributor, parentRegistry, leftFootContactState, rightFootContactState, coefficientOfFriction, epsilon);
    }
 
-   private void testSimpleWrenchDistributionWithCylinders(ReferenceFrame centerOfMassFrame, GroundReactionWrenchDistributor distributor,
+  /* private void testSimpleWrenchDistributionWithCylinders(ReferenceFrame centerOfMassFrame, GroundReactionWrenchDistributor distributor,
            YoVariableRegistry parentRegistry, double epsilon)
    {
       double coefficientOfFriction = 1.0;
       double footLength = 0.3;
       double footWidth = 0.15;
       Point3d leftMidfootLocation = new Point3d(0.0, 0.5, 0.0);
-      FlatGroundPlaneContactState leftFootContactState = new FlatGroundPlaneContactState(footLength, footWidth, leftMidfootLocation, coefficientOfFriction);
+      Transform3D leftFootFrameAfterJointInWorld = new Transform3D();
+      Transform3D leftFootPlaneFrameInWorld = new Transform3D();
+      PoseReferenceFrame comFrame = new PoseReferenceFrame("COMFrame",ReferenceFrame.getWorldFrame());
+      PoseReferenceFrame leftFootAfterJointFrame = new PoseReferenceFrame("leftFootAfterJointFrame", comFrame);
+      FramePose leftFootAfterJointPose = new FramePose(comFrame,leftFootFrame);
+      
+      YoPlaneContactState leftFootContactState = new YoPlaneContactState("LeftFoot",frameAfterJoint,planeFrame,parentRegistry);
 
       Point3d rightMidfootLocation = new Point3d(0.0, -0.5, 0.0);
-      FlatGroundPlaneContactState rightFootContactState = new FlatGroundPlaneContactState(footLength, footWidth, rightMidfootLocation, coefficientOfFriction);
+      YoPlaneContactState rightFootContactState = new YoPlaneContactState(footLength, footWidth, rightMidfootLocation, coefficientOfFriction);
 
 
 
       simpleNFootTest(centerOfMassFrame, distributor, parentRegistry, new PlaneContactState[] {leftFootContactState, rightFootContactState},
                       coefficientOfFriction, epsilon);
-   }
+   }*/
 
    private void testTroublesomeExampleOne(ReferenceFrame centerOfMassFrame, GroundReactionWrenchDistributor distributor, YoVariableRegistry parentRegistry)
    {
