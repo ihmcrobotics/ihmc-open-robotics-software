@@ -53,6 +53,7 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
    private final List<YoFrameVector> wrenchLinearComponents = new ArrayList<YoFrameVector>();
    private final List<YoFrameVector> wrenchRotaryComponents = new ArrayList<YoFrameVector>();
    private final List<YoFramePoint> wrenchOrigins = new ArrayList<YoFramePoint>();
+   private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
 
    DenseMatrix64F Cmatrix = CommonOps.diag(new double[]
    {
@@ -66,12 +67,26 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       nativeOptimizer = new CylinderAndPlaneContactForceOptimizerNative(parentRegistry);
+      this.dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistry;
       this.registry = parentRegistry;
       this.debug = new BooleanYoVariable(this.getClass().getSimpleName() + "Debug", parentRegistry);
       this.debug.set(false);
       this.centerOfMassFrame = centerOfMassFrame;
-      optimizerInputPopulator = new CylinderAndPlaneContactForceOptimizerMatrixCalculator(centerOfMassFrame, parentRegistry);
-      optimizerOutputExtractor = new CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator(centerOfMassFrame);
+      optimizerInputPopulator = new CylinderAndPlaneContactForceOptimizerMatrixCalculator("optimizerInputPopulator", centerOfMassFrame, parentRegistry,
+              dynamicGraphicObjectsListRegistry);
+      optimizerOutputExtractor = new CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator("optimizerOutputExtractor", centerOfMassFrame, parentRegistry,
+            dynamicGraphicObjectsListRegistry);
+   }
+
+   public void setWeights(double[] diagonalCWeights, double phiWeight, double rhoWeight)
+   {
+      for (int i = 0; i < diagonalCWeights.length; i++)
+      {
+         this.Cmatrix.set(i, i, diagonalCWeights[i]);
+      }
+
+      this.wPhi = phiWeight;
+      this.wRho = rhoWeight;
    }
 
    public void solve(GroundReactionWrenchDistributorOutputData output, GroundReactionWrenchDistributorInputData input)
@@ -198,13 +213,13 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
    }
 
    private void setupOptimizerInput(List<PlaneContactState> planes, List<CylindricalContactState> cylinders,
-                                   DenseMatrix64F desiredNetEnvironmentReactionWrenchLocal, List<EndEffector> endEffectorsLocal,
-                                   CylinderAndPlaneContactForceOptimizerNativeInput optimizerInputLocal, double wPhiLocal, double wRhoLocal,
-                                   DenseMatrix64F cmatrixLocal)
+                                    DenseMatrix64F desiredNetEnvironmentReactionWrenchLocal, List<EndEffector> endEffectorsLocal,
+                                    CylinderAndPlaneContactForceOptimizerNativeInput optimizerInputLocal, double wPhiLocal, double wRhoLocal,
+                                    DenseMatrix64F cmatrixLocal)
    {
       endEffectorsLocal.clear();
 
-      for (int i=0; i<planes.size(); i++)
+      for (int i = 0; i < planes.size(); i++)
       {
          PlaneContactState plane = planes.get(i);
          endEffectorsLocal.add(getOrCreate("" + i, plane));

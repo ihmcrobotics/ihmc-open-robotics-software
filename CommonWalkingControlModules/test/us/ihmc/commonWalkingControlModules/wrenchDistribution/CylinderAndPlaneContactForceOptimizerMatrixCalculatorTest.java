@@ -23,6 +23,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
 {
@@ -228,10 +229,11 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
    public void runSolver(List<EndEffector> endEffectorsWithDefinedContactModels, List<EndEffectorOutput> endEffectorsWithAssignedForces,
                          double[] desiredCOMForces)
    {
-      CylinderAndPlaneContactForceOptimizerMatrixCalculator calc = new CylinderAndPlaneContactForceOptimizerMatrixCalculator(comFrame,
-                                                                      new YoVariableRegistry("rootRegistry"));
+      CylinderAndPlaneContactForceOptimizerMatrixCalculator calc = new CylinderAndPlaneContactForceOptimizerMatrixCalculator("calc",comFrame,
+                                                                      new YoVariableRegistry("rootRegistry"), new DynamicGraphicObjectsListRegistry());
       CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator vectorCalc =
-         new CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator(comFrame);
+         new CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator("vectorCalc",comFrame,
+               new YoVariableRegistry("rootRegistry"), new DynamicGraphicObjectsListRegistry());
       CylinderAndPlaneContactForceOptimizerNativeInput nativeSolverInput = new CylinderAndPlaneContactForceOptimizerNativeInput();
       CylinderAndPlaneContactForceOptimizerNativeOutput nativeSolverOutput;
       CylinderAndPlaneContactForceOptimizerNative nativeSolver = new CylinderAndPlaneContactForceOptimizerNative(new YoVariableRegistry("rootRegistry"));

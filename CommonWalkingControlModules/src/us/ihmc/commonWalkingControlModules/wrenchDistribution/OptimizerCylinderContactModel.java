@@ -29,6 +29,10 @@ public class OptimizerCylinderContactModel implements OptimizerContactModel
    {
       return PHI_SIZE;
    }
+   public ReferenceFrame getCylinderFrame()
+   {
+      return this.grippedCylinderFrame;
+   }
 
    public double getRhoMin(int i)
    {
