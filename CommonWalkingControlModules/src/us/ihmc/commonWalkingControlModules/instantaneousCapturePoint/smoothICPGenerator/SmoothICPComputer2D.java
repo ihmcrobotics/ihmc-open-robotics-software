@@ -25,7 +25,7 @@ public class SmoothICPComputer2D extends SmoothICPComputer implements Instantane
    private Vector3d icpVelocityToPackTemp = new Vector3d();
    private Point3d ecmpToPackTemp = new Point3d();
 
-   public void getICPPositionAndVelocity(FramePoint2d icpPostionToPack, FrameVector2d icpVelocityToPack, FramePoint2d ecmpToPack, double time)
+   public void getICPPositionAndVelocity(FramePoint2d icpPostionToPack, FrameVector2d icpVelocityToPack, FramePoint2d ecmpToPack, FramePoint2d actualICP, double time)
    {
       super.getICPPositionAndVelocity(icpPostionToPackTemp, icpVelocityToPackTemp, ecmpToPackTemp, time);
 

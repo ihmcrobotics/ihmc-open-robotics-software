@@ -572,7 +572,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             FrameVector2d desiredICPVelocityLocal = new FrameVector2d(desiredICPVelocity.getReferenceFrame());
             FramePoint2d ecmpLocal = new FramePoint2d(ReferenceFrame.getWorldFrame());
 
-            instantaneousCapturePointPlanner.getICPPositionAndVelocity(desiredICPLocal, desiredICPVelocityLocal, ecmpLocal, yoTime.getDoubleValue());
+            FramePoint2d capturePoint2d = capturePoint.getFramePoint2dCopy();
+            
+            instantaneousCapturePointPlanner.getICPPositionAndVelocity(
+                  desiredICPLocal, desiredICPVelocityLocal, ecmpLocal, 
+                  capturePoint2d, yoTime.getDoubleValue());
             desiredICP.set(desiredICPLocal);
             desiredICPVelocity.set(desiredICPVelocityLocal);
 
@@ -972,7 +976,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          FrameVector2d desiredICPVelocityLocal = new FrameVector2d(desiredICPVelocity.getReferenceFrame());
          FramePoint2d ecmpLocal = new FramePoint2d(ReferenceFrame.getWorldFrame());
 
-         instantaneousCapturePointPlanner.getICPPositionAndVelocity(desiredICPLocal, desiredICPVelocityLocal, ecmpLocal, yoTime.getDoubleValue());
+         FramePoint2d capturePoint2d = capturePoint.getFramePoint2dCopy();
+
+         instantaneousCapturePointPlanner.getICPPositionAndVelocity(
+               desiredICPLocal, desiredICPVelocityLocal, ecmpLocal, 
+               capturePoint2d, yoTime.getDoubleValue());
          desiredICP.set(desiredICPLocal);
          desiredICPVelocity.set(desiredICPVelocityLocal);
 
