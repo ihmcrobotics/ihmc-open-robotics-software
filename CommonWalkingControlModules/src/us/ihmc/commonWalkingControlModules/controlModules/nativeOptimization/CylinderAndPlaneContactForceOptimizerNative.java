@@ -5,8 +5,10 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 
-import us.ihmc.utilities.CheckTools;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
+
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class CylinderAndPlaneContactForceOptimizerNative
 {
@@ -55,6 +57,8 @@ public class CylinderAndPlaneContactForceOptimizerNative
    private static final DoubleBuffer phiDoubleBuffer;
    private static final DoubleBuffer phiMinDoubleBuffer;
    private static final DoubleBuffer phiMaxDoubleBuffer;
+   
+   private final BooleanYoVariable debug;
 
    public static DoubleBuffer setupBuffer(ByteBuffer buffer)
    {
@@ -90,9 +94,11 @@ public class CylinderAndPlaneContactForceOptimizerNative
    private final double[] phi = new double[phiSize];
    private final CylinderAndPlaneContactForceOptimizerNativeOutput nativeOutput;
 
-   public CylinderAndPlaneContactForceOptimizerNative()
+   public CylinderAndPlaneContactForceOptimizerNative(YoVariableRegistry registry)
    {
       nativeOutput = new CylinderAndPlaneContactForceOptimizerNativeOutput();
+      this.debug  = new BooleanYoVariable(this.getClass().getSimpleName()+"DebugFlag",registry);
+      debug.set(false);
    }
 
    /**
@@ -134,20 +140,27 @@ public class CylinderAndPlaneContactForceOptimizerNative
     * end
     */
    
-   public void solve(CylinderAndPlaneContactForceOptimizerNativeInput cvxWithCylinderNativeInput)
+   public void solve(CylinderAndPlaneContactForceOptimizerNativeInput input)
            throws NoConvergenceException
    {
-      double[] C = cvxWithCylinderNativeInput.getC();
-      double[] Qrho = cvxWithCylinderNativeInput.getQrho();
-      double[] Qphi = cvxWithCylinderNativeInput.getQphi();
-      double[] c = cvxWithCylinderNativeInput.getc();
-      double[] rhoMin = cvxWithCylinderNativeInput.getRhoMin();
-      double[] phiMin = cvxWithCylinderNativeInput.getPhiMin();
-      double[] phiMax = cvxWithCylinderNativeInput.getPhiMax();
-      double wRho = cvxWithCylinderNativeInput.getwRho();
-      double wPhi = cvxWithCylinderNativeInput.getwPhi();
+      double[] C = input.getC();
+      double[] Qrho = input.getQrho();
+      double[] Qphi = input.getQphi();
+      double[] c = input.getc();
+      double[] rhoMin = input.getRhoMin();
+      double[] phiMin = input.getPhiMin();
+      double[] phiMax = input.getPhiMax();
+      double wRho = input.getwRho();
+      double wPhi = input.getwPhi();
 
       solve(C, Qrho, Qphi, c, rhoMin, phiMin, phiMax, wRho, wPhi);
+      
+
+      if (this.debug.getBooleanValue())
+      {
+         System.out.println(input.toString());
+         System.out.println(this.nativeOutput.toString());
+      }
 
    }
 
@@ -204,7 +217,7 @@ public class CylinderAndPlaneContactForceOptimizerNative
       double[] wPhi = new double[1];
       load_default_data(C, Qrho, Qphi, c, rhoMin, phiMin, phiMax, wRho, wPhi);
 
-      CylinderAndPlaneContactForceOptimizerNative momentumOptimizerNative = new CylinderAndPlaneContactForceOptimizerNative();
+      CylinderAndPlaneContactForceOptimizerNative momentumOptimizerNative = new CylinderAndPlaneContactForceOptimizerNative(new YoVariableRegistry("rootRegistry"));
 
       long time = System.nanoTime();
       int nSolves = 10000;

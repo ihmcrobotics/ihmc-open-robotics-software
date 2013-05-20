@@ -14,7 +14,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicRefere
 public class YoCylindricalContactState implements CylindricalContactState
 {
    private final YoVariableRegistry registry;
-   private final ReferenceFrame endEffectorFrame;
+   private final ReferenceFrame frameAfterJoint;
    private final PoseReferenceFrame cylinderFrame;
    private final BooleanYoVariable inContact;
    private final DoubleYoVariable coefficientOfFriction;
@@ -33,8 +33,8 @@ public class YoCylindricalContactState implements CylindricalContactState
       this.cylinderRadius = new DoubleYoVariable(namePrefix + "CylinderRadius", registry);
       this.halfHandWidth = new DoubleYoVariable(namePrefix + "halfHandWidth", registry);
       this.gripWeaknessFactor = new DoubleYoVariable(namePrefix + "gripWeaknessFactor", registry);
-      this.endEffectorFrame = frameAfterJoint;
-      this.cylinderFrame = new PoseReferenceFrame(endEffectorFrame.getName()+"GrippedCylinderFrame",new FramePose(endEffectorFrame));
+      this.frameAfterJoint = frameAfterJoint;
+      this.cylinderFrame = new PoseReferenceFrame(frameAfterJoint.getName()+"GrippedCylinderFrame",new FramePose(frameAfterJoint));
       parentRegistry.addChild(registry);
       this.cylinderRefererenceFrameGraphic = new DynamicGraphicReferenceFrame(cylinderFrame, registry, 0.1);
    }
@@ -107,7 +107,7 @@ public class YoCylindricalContactState implements CylindricalContactState
 
    public ReferenceFrame getEndEffectorFrame()
    {
-      return endEffectorFrame;
+      return frameAfterJoint;
    }
 
    public void setInContact(boolean inContact)

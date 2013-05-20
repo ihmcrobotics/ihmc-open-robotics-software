@@ -1,6 +1,9 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.vecmath.Vector3d;
 
@@ -20,7 +23,17 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.*;
+import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.SixDoFJoint;
+import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.utilities.screwTheory.SpatialForceVector;
+import us.ihmc.utilities.screwTheory.TotalMassCalculator;
+import us.ihmc.utilities.screwTheory.TotalWrenchCalculator;
+import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -207,21 +220,6 @@ public class OldMomentumControlModule implements MomentumControlModule
                }
                else
                {
-                  //GrayTODO hack!
-                  if (cylinderContactStates.get(body).isInContact())
-                  {
-//                     bodyWrench.changeFrame(body.getBodyFixedFrame());
-                     bodyWrench.changeFrame(this.centerOfMassFrame);
-                     bodyWrench.setAngularPartX(0);
-                     bodyWrench.setAngularPartY(0);
-                     bodyWrench.setAngularPartZ(-5);
-                     bodyWrench.setLinearPartX(-10);
-                     bodyWrench.setLinearPartY(0);
-                     bodyWrench.setLinearPartZ(0);
-                     bodyWrench.changeFrame(body.getBodyFixedFrame());
-                     externalWrenches.put(body, bodyWrench);
-                  }
-                  else
                   {
                      bodyWrench.changeFrame(body.getBodyFixedFrame());
                      externalWrenches.put(body, bodyWrench);
