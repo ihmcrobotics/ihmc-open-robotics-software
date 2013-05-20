@@ -1,17 +1,12 @@
 package us.ihmc.darpaRoboticsChallenge.processManagement;
 
-import java.awt.AWTEvent;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
-import java.awt.event.AWTEventListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
@@ -41,7 +36,6 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
-import javax.swing.JWindow;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -64,17 +58,8 @@ import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 
 public class DRCDashboard
 {
-   private static final int SLIDING_WINDOW_OFFSET_X_MAX = 830;
-   private static final int SLIDING_WINDOW_OFFSET_Y_MAX = 50;
-
-   private int slidingWindowXOffset = SLIDING_WINDOW_OFFSET_X_MAX;
-   private int slidingWindowYOffset = SLIDING_WINDOW_OFFSET_Y_MAX;
-
    private static DRCDashboard instance;
-   //   private String ROS_HOSTNAME;
-   //   private String ROS_IP_ADDRESS;
-   //   private String ROS_MASTER_URI;
-
+   
    private GridBagConstraints c;
 
    private JFrame frame = new JFrame("IHMC DRC Dashboard");
@@ -122,8 +107,7 @@ public class DRCDashboard
    private ArrayList<LocalCloudMachines> userOwnedSims = new ArrayList<DRCLocalCloudConfig.LocalCloudMachines>();
 
    private File configFileHandle;
-   private boolean shouldLoadConfig = false;
-   private JWindow window;
+   private boolean shouldLoadConfig = false;   
 
    public DRCDashboard()
    {
@@ -142,22 +126,22 @@ public class DRCDashboard
       }
       catch (ClassNotFoundException e)
       {
-         // TODO Auto-generated catch block
+
          e.printStackTrace();
       }
       catch (InstantiationException e)
       {
-         // TODO Auto-generated catch block
+
          e.printStackTrace();
       }
       catch (IllegalAccessException e)
       {
-         // TODO Auto-generated catch block
+
          e.printStackTrace();
       }
       catch (UnsupportedLookAndFeelException e)
       {
-         // TODO Auto-generated catch block
+
          e.printStackTrace();
       }
    }
@@ -250,7 +234,6 @@ public class DRCDashboard
       }
       catch (IOException e)
       {
-         // TODO Auto-generated catch block
          e.printStackTrace();
       }
    }
@@ -283,12 +266,6 @@ public class DRCDashboard
          loadConfig();
 
       startTimers();
-
-      //            frame.setSize(760, 510);
-      //      frame.setResizable(true);
-
-      //      System.out.println(frame.getWidth());
-      //      System.out.println(frame.getHeight());
    }
 
    private void forceTaskComboUpdate()
@@ -320,25 +297,21 @@ public class DRCDashboard
 
          public void windowOpened(WindowEvent arg0)
          {
-            // TODO Auto-generated method stub
 
          }
 
          public void windowIconified(WindowEvent arg0)
          {
-            // TODO Auto-generated method stub
 
          }
 
          public void windowDeiconified(WindowEvent arg0)
          {
-            // TODO Auto-generated method stub
 
          }
 
          public void windowDeactivated(WindowEvent arg0)
          {
-            // TODO Auto-generated method stub
 
          }
 
@@ -349,13 +322,11 @@ public class DRCDashboard
 
          public void windowClosed(WindowEvent arg0)
          {
-            // TODO Auto-generated method stub
 
          }
 
          public void windowActivated(WindowEvent arg0)
          {
-            // TODO Auto-generated method stub
 
          }
       });
@@ -489,7 +460,7 @@ public class DRCDashboard
 
    private void setupStatusPanelMouseListeners()
    {
-      blockLeafSelection();
+      setupTreeSelection();
 
       setupDoubleClickListener();
    }
@@ -504,25 +475,21 @@ public class DRCDashboard
 
                public void mouseReleased(MouseEvent e)
                {
-                  // TODO Auto-generated method stub
 
                }
 
                public void mousePressed(MouseEvent e)
                {
-                  // TODO Auto-generated method stub
 
                }
 
                public void mouseExited(MouseEvent e)
                {
-                  // TODO Auto-generated method stub
 
                }
 
                public void mouseEntered(MouseEvent e)
                {
-                  // TODO Auto-generated method stub
 
                }
 
@@ -578,9 +545,9 @@ public class DRCDashboard
       }
    }
 
-   private void blockLeafSelection()
+   private void setupTreeSelection()
    {
-      TreeSelectionListener blockLeafSelectionListener = new TreeSelectionListener()
+      TreeSelectionListener customTreeSelectionListener = new TreeSelectionListener()
       {
          private Color white = Color.white;
          private Color selectionColor = new Color(232, 236, 241);
@@ -605,7 +572,7 @@ public class DRCDashboard
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
          if (!machine.equals(LocalCloudMachines.LOCALHOST))
-            cloudMachineTrees.get(machine).first().addTreeSelectionListener(blockLeafSelectionListener);
+            cloudMachineTrees.get(machine).first().addTreeSelectionListener(customTreeSelectionListener);
       }
    }
 
@@ -822,72 +789,12 @@ public class DRCDashboard
 
    private void showFrame()
    {
-      //      final JFrame secondFrame = new JFrame();
-      //      secondFrame.setUndecorated(true);
-      //      secondFrame.setSize(300, 300);
-      //      secondFrame.setLocation(-10, -10);
-      //      secondFrame.setLocationRelativeTo(frame);
-      //      secondFrame.setEnabled(false);
-      //      secondFrame.setVisible(true);
-
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      //      frame.setLocation((int) frame.getLocation().getX() - 500, (int) frame.getLocation().getY() - 260);
+
       frame.setLocationRelativeTo(null);
       frame.setSize(1000, 520);
       frame.setResizable(false);
       frame.setVisible(true);
-
-      //      window = new JWindow();
-      //      window.setAlwaysOnTop(false);
-      //      window.setSize(500, 450);
-      //      window.setLocation((int) frame.getLocation().getX() + slidingWindowXOffset, (int) frame.getLocation().getY() + slidingWindowYOffset);
-      //      window.setVisible(true);
-      //
-      //      frame.addComponentListener(new ComponentListener()
-      //      {
-      //         public void componentShown(ComponentEvent e)
-      //         {
-      //            // TODO Auto-generated method stub
-      //
-      //         }
-      //
-      //         public void componentResized(ComponentEvent e)
-      //         {
-      //            // TODO Auto-generated method stub
-      //
-      //         }
-      //
-      //         public void componentMoved(ComponentEvent e)
-      //         {
-      //            window.setBounds(((Component) e.getSource()).getLocation().x + slidingWindowXOffset, ((Component) e.getSource()).getLocation().y
-      //                  + slidingWindowYOffset, window.getWidth(), window.getHeight());
-      //
-      //         }
-      //
-      //         public void componentHidden(ComponentEvent e)
-      //         {
-      //            // TODO Auto-generated method stub
-      //
-      //         }
-      //      });
-      //
-      //      frame.getToolkit().addAWTEventListener(new AWTEventListener()
-      //      {
-      //         public void eventDispatched(AWTEvent arg0)
-      //         {
-      //            MouseEvent e = null;
-      //            if (arg0 instanceof MouseEvent)
-      //            {
-      //               e = (MouseEvent) arg0;
-      //               //               e.consume();
-      //            }
-      //
-      //            if (e != null && e.getComponent().equals(window) && e.getClickCount() > 0)
-      //            {
-      //               frame.toFront();
-      //            }
-      //         }
-      //      }, AWTEvent.MOUSE_EVENT_MASK);
 
       frame.toFront();
       taskCombo.requestFocus();
@@ -1042,48 +949,6 @@ public class DRCDashboard
          {
             dash.setupJFrame();
             dash.showFrame();
-         }
-
-         public void mouseClicked(MouseEvent e)
-         {
-            // TODO Auto-generated method stub
-
-         }
-
-         public void mouseEntered(MouseEvent e)
-         {
-            // TODO Auto-generated method stub
-
-         }
-
-         public void mouseExited(MouseEvent e)
-         {
-            // TODO Auto-generated method stub
-
-         }
-
-         public void mousePressed(MouseEvent e)
-         {
-            // TODO Auto-generated method stub
-
-         }
-
-         public void mouseReleased(MouseEvent e)
-         {
-            // TODO Auto-generated method stub
-
-         }
-
-         public void mouseDragged(MouseEvent e)
-         {
-            // TODO Auto-generated method stub
-
-         }
-
-         public void mouseMoved(MouseEvent e)
-         {
-            // TODO Auto-generated method stub
-
          }
       });
    }
