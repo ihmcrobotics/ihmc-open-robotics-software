@@ -313,7 +313,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       initialPelvisOrientationProvider = new SettableOrientationProvider("initialPelvis", worldFrame, registry);
       finalPelvisOrientationProvider = new SettableOrientationProvider("finalPelvis", worldFrame, registry);
       this.pelvisOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("pelvis", worldFrame, swingTimeCalculationProvider,
-              initialPelvisOrientationProvider, finalPelvisOrientationProvider, registry);
+              initialPelvisOrientationProvider, finalPelvisOrientationProvider, registry, false);
 
       setUpStateMachine();
       readyToGrabNextFootstep.set(true);
@@ -372,7 +372,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          OrientationTrajectoryGenerator swingOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(sideString
                                                                                  + "SwingFootOrientation", worldFrame, swingTimeCalculationProvider,
-                                                                                    initialOrientationProvider, finalFootOrientationProvider, registry);
+                                                                                    initialOrientationProvider, finalFootOrientationProvider, registry, false);
 
          YoVariableDoubleProvider onToesInitialPitchProvider = new YoVariableDoubleProvider(sideString + "OnToesInitialPitch", registry);
          

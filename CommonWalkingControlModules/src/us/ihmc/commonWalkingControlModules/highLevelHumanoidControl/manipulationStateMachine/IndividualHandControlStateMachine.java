@@ -292,11 +292,11 @@ public class IndividualHandControlStateMachine
 
       String namePrefix = FormattingTools.underscoredToCamelCase(stateEnum.toString(), true);
       StraightLinePositionTrajectoryGenerator positionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator(namePrefix, referenceFrame, 1.0,
-                                                                               currentConfigurationProvider, desiredConfigurationProvider, registry);
+                                                                               currentConfigurationProvider, desiredConfigurationProvider, registry, false);
 
       OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(namePrefix, referenceFrame,
                                                                                       trajectoryTimeProvider, currentConfigurationProvider,
-                                                                                      desiredConfigurationProvider, registry);
+                                                                                      desiredConfigurationProvider, registry, false);
 
       TaskspaceHandControlState taskspaceHandControlState = new ObjectManipulationState(stateEnum, robotSide, positionTrajectoryGenerator,
                                                                orientationTrajectoryGenerator, handSpatialAccelerationControlModule, momentumBasedController,
