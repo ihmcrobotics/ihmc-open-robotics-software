@@ -27,6 +27,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -54,6 +55,7 @@ import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig.LocalCloudMachines;
 import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCPluginTasks;
 import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCROSTasks;
+import us.ihmc.darpaRoboticsChallenge.userInterface.DRCOperatorUserInterface;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 
@@ -93,13 +95,15 @@ public class DRCDashboard
    private JScrollPane gazeboProcessListScroller;
 
    private JPanel networkInfoPanel;
+   
+   JCheckBox operatorUICheckBox;
 
    private JPanel processPanel;
    private JScrollPane networkStatusScrollPane;
    private ImageIcon goodConnectionIcon;
    private ImageIcon badConnectionIcon;
 
-   private JavaProcessSpawner spawner = new JavaProcessSpawner(true);
+   private JavaProcessSpawner uiSpawner = new JavaProcessSpawner(false);
    private GazeboSimLauncher sshSimLauncher = new GazeboSimLauncher();
 
    private HashMap<LocalCloudMachines, Pair<JTree, DefaultMutableTreeNode>> cloudMachineTrees = new HashMap<LocalCloudMachines, Pair<JTree, DefaultMutableTreeNode>>();
@@ -211,6 +215,17 @@ public class DRCDashboard
                   else
                      taskCombo.setSelectedItem(DRCROSTasks.valueOf(taskOption));
                }
+               else if (line != null && line.startsWith("UI:"))
+               {
+                  String uiOption = line.substring(line.indexOf(":") + 1, line.length());
+
+                  forceTaskComboUpdate();
+
+                  if (uiOption.contains("true"))
+                     operatorUICheckBox.setSelected(true);
+                  else
+                     operatorUICheckBox.setSelected(false);
+               }
             }
          }
          reader.close();
@@ -237,6 +252,8 @@ public class DRCDashboard
          fileWriter.write("PLUGIN:" + pluginOption);
          fileWriter.newLine();
          fileWriter.write("TASK:" + taskOption);
+         fileWriter.newLine();
+         fileWriter.write("UI:" + (operatorUICheckBox.isSelected() ? "true" : "false"));
          fileWriter.newLine();
          fileWriter.write("END");
          fileWriter.flush();
@@ -523,6 +540,10 @@ public class DRCDashboard
                            {
                               sshSimLauncher.launchSim(task, gazeboMachine, controllerMachine, pluginOption);
                               userOwnedSims.add(gazeboMachine);
+                              if(operatorUICheckBox.isSelected() && !uiSpawner.hasRunningProcesses())
+                              {
+                                 uiSpawner.spawn(DRCOperatorUserInterface.class, new String[]{"-Xms1024m","-Xmx2048m"}, null);
+                              }
                            }
                         }
                         else if (userOwnedSims.contains(gazeboMachine))
@@ -674,6 +695,10 @@ public class DRCDashboard
 
    private void setupLeftContentPanel()
    {
+      operatorUICheckBox = new JCheckBox("Launch Operator UI With Gazebo");
+      
+      machineSelectionPanel.add(operatorUICheckBox);
+      
       setupSelectControllerMachine();
 
       setupSelectGazeboMachine();
@@ -684,7 +709,7 @@ public class DRCDashboard
    private void setupSelectControllerMachine()
    {
       c.gridx = 0;
-      c.gridy = 0;
+      c.gridy = 1;
       c.gridwidth = 1;
       c.gridheight = 2;
       c.weighty = 0.0;
@@ -700,7 +725,7 @@ public class DRCDashboard
 
    private void setupSelectGazeboMachine()
    {
-      c.gridy = 2;
+      c.gridy = 3;
       gazeboMachineSelectionPanel = new JPanel(new GridLayout(2, 1));
       machineSelectionPanel.add(gazeboMachineSelectionPanel, c);
       gazeboMachineSelectionLabel = new JLabel("Select Gazebo Machine: ", JLabel.LEFT);
@@ -722,7 +747,7 @@ public class DRCDashboard
    private void setupCloudMachineInfoPanel()
    {
       c.gridheight = 4;
-      c.gridy = 4;
+      c.gridy = 5;
       c.ipady = 70;
       //      c.ipadx = 150;
       c.weighty = 1.0;
