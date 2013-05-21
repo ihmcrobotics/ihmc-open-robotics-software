@@ -416,7 +416,7 @@ public class GroundReactionWrenchDistributorTest
       leftHandCylinderFrameTransformInWorld.setTranslation(new Vector3d(0.5, 0.75, 1.4));
 
       Transform3D rightHandFrameAfterJointTransformInWorld = new Transform3D();
-      rightHandFrameAfterJointTransformInWorld.setEuler(new Vector3d(0.0,0.0,Math.PI/2));
+      rightHandFrameAfterJointTransformInWorld.setEuler(new Vector3d(0.0, 0.0, Math.PI / 2));
 
 
       Transform3D rightHandCylinderFrameTransformInWorld = new Transform3D();
@@ -448,7 +448,7 @@ public class GroundReactionWrenchDistributorTest
 
       FramePose cylinderPose = new FramePose(ReferenceFrame.getWorldFrame(), cylinderInWorld);
       cylinderPose.changeFrame(afterJointFrame);
-      printIfDebug("getCylinderContactState: cylinderPose = "+cylinderPose);
+      printIfDebug("getCylinderContactState: cylinderPose = " + cylinderPose);
 
 
       YoCylindricalContactState contactState = new YoCylindricalContactState(name, afterJointFrame, registry);
@@ -753,13 +753,14 @@ public class GroundReactionWrenchDistributorTest
 
          scs.startOnAThread();
 
-         visualizer.update(scs, distributedWrench, centerOfMassFrame, planeContactStates, desiredNetSpatialForceVector, new ArrayList<CylindricalContactState>());
+         visualizer.update(scs, distributedWrench, centerOfMassFrame, planeContactStates, desiredNetSpatialForceVector,
+                           new ArrayList<CylindricalContactState>());
 
          ThreadTools.sleepForever();
       }
-      
-      
-      
+
+
+
       verifyForcesAreInsideFrictionCones(distributedWrench, planeContactStates, coefficientOfFriction);
       verifyCentersOfPressureAreInsideContactPolygons(distributedWrench, planeContactStates);
       verifyWrenchesSumToExpectedTotal(centerOfMassFrame, desiredNetSpatialForceVector, planeContactStates, distributedWrench, epsilon, false,
@@ -834,6 +835,7 @@ public class GroundReactionWrenchDistributorTest
          ThreadTools.sleepForever();
       }
 
+      verifyWrenchesAreFeasible(distributedWrench, handContactStatesList, coefficientOfFriction);
       verifyForcesAreInsideFrictionCones(distributedWrench, planeContactState, coefficientOfFriction);
       verifyCentersOfPressureAreInsideContactPolygons(distributedWrench, planeContactState);
       verifyWrenchesSumToExpectedTotal(centerOfMassFrame, desiredNetSpatialForceVector, planeContactState, distributedWrench, epsilon, false,
@@ -910,7 +912,7 @@ public class GroundReactionWrenchDistributorTest
    }
 
    private void verifyWrenchesAreFeasible(GroundReactionWrenchDistributorOutputData distributedWrench,
-         ArrayList<CylindricalContactState> cylindricalContactStates, double coefficientOfFriction)
+           ArrayList<CylindricalContactState> cylindricalContactStates, double coefficientOfFriction)
    {
       for (CylindricalContactState contactState : cylindricalContactStates)
       {
@@ -957,7 +959,8 @@ public class GroundReactionWrenchDistributorTest
       List<FramePoint2d> contactPoints = planeContactState.getContactPoints2d();
       FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d(contactPoints);
 
-      assertTrue(footPolygon.distance(centerOfPressure) < 1e-7);
+      assertTrue("footPolygon.distance(centerOfPressure) should be negative " + footPolygon.distance(centerOfPressure),
+                 footPolygon.distance(centerOfPressure) < 1e-7);
    }
 
    private void verifyForceIsInsideFrictionCone(FrameVector forceVector, PlaneContactState planeContactState, double coefficientOfFriction)
@@ -978,12 +981,12 @@ public class GroundReactionWrenchDistributorTest
 
       FrameVector forceVector = wrench.getLinearPartAsFrameVectorCopy();
       FrameVector torqueVector = wrench.getAngularPartAsFrameVectorCopy();
-      
+
       double gripForce = cylindricalContactState.getTensileGripForce();
       double weaknessFactor = cylindricalContactState.getGripWeaknessFactor();
       double cylinderRadius = cylindricalContactState.getCylinderRadius();
       double halfHandWidth = cylindricalContactState.getHalfHandWidth();
-      
+
       double normalForce = Math.max(0.0, -forceVector.getY());
       double xForce = Math.abs(forceVector.getX());
       double yForce = forceVector.getY();
@@ -991,24 +994,23 @@ public class GroundReactionWrenchDistributorTest
 
       if (yForce > gripForce)
          fail("Too much (positive) force along the y-axis! forceVector = " + forceVector + ", cylindricalContactState = " + cylindricalContactState);
-      
+
       if (xForce > coefficientOfFriction * (gripForce + normalForce))
          fail("Outside of Friction Cone along the x-axis! forceVector = " + forceVector + ", cylindricalContactState = " + cylindricalContactState);
-      
-      if (zForce < -gripForce
-            || zForce > weaknessFactor * gripForce)
+
+      if ((zForce < -gripForce) || (zForce > weaknessFactor * gripForce))
          fail("Outside of Friction Cone along the z-axis! forceVector = " + forceVector + ", cylindricalContactState = " + cylindricalContactState);
 
       double xTorque = Math.abs(torqueVector.getX());
       double yTorque = Math.abs(torqueVector.getY());
       double zTorque = Math.abs(torqueVector.getZ());
-      
+
       if (xTorque > coefficientOfFriction * cylinderRadius * (gripForce + normalForce))
          fail("Too much torque around the x-axis! torqueVector = " + torqueVector + ", cylindricalContactState = " + cylindricalContactState);
-      
+
       if (yTorque > halfHandWidth * weaknessFactor * gripForce)
          fail("Too much torque around the y-axis! torqueVector = " + torqueVector + ", cylindricalContactState = " + cylindricalContactState);
-      
+
       if (zTorque > halfHandWidth * normalForce)
          fail("Too much torque around the z-axis! torqueVector = " + torqueVector + ", cylindricalContactState = " + cylindricalContactState);
    }
