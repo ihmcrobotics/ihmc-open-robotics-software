@@ -15,8 +15,13 @@ public class OptimizerCylinderContactModel implements OptimizerContactModel
    private final DenseMatrix64F[] qRho = new DenseMatrix64F[RHO_SIZE];
    private static final int[] phiVectorDirections = new int[] {3, 4, 5, 0, 1};
    private ReferenceFrame grippedCylinderFrame;
+   private static int PHI_X = 0;
+   private static int PHI_Y = 1; 
+   private static int PHI_Z = 2;
+   private static int PHI_XX = 3;
+   private static int PHI_YY = 4;
 
-   // Expects hand to be strongest pushing in positive y, and basically open in positive z, so pulling(negative z) is extremely weak. 
+   // Expects hand to be strongest pushing in positive y, and basically open in positive z, so pulling(positive z) is extremely weak. 
    // This weakness is described by the gripWeaknessFactor which goes from 0, a fully useless grip to 1, for a grip which is just as 
    // strong as the tensile max load)
 
@@ -110,26 +115,25 @@ public class OptimizerCylinderContactModel implements OptimizerContactModel
 
    private void accountForWeakGripDirection(double gripWeaknessFactor)
    {
-      phiMin[2] *= gripWeaknessFactor;
-      phiMin[4] *= gripWeaknessFactor;
-      phiMax[4] *= gripWeaknessFactor;
+      phiMax[PHI_Z] *= gripWeaknessFactor;
+      phiMin[PHI_YY] *= gripWeaknessFactor;
+      phiMax[PHI_YY] *= gripWeaknessFactor;
    }
 
    private void accountForFrictionalContact(double mu)
    {
-      for (int i = 0; i < 2; i++)
-      {
-         phiMin[i * 3] *= mu;
-         phiMax[i * 3] *= mu;
-      }
+      phiMin[PHI_X] *= mu;
+      phiMax[PHI_X] *= mu;
+      phiMin[PHI_XX] *= mu;
+      phiMax[PHI_XX] *= mu;
    }
 
    private void accountForMomentArms(double cylinderRadius, double cylinderHalfHandWidth)
    {
-      phiMin[0] *= cylinderRadius;
-      phiMax[0] *= cylinderRadius;
-      phiMin[1] *= cylinderHalfHandWidth;
-      phiMax[1] *= cylinderHalfHandWidth;
+      phiMin[PHI_XX] *= cylinderRadius;
+      phiMax[PHI_XX] *= cylinderRadius;
+      phiMin[PHI_YY] *= cylinderHalfHandWidth;
+      phiMax[PHI_YY] *= cylinderHalfHandWidth;
    }
 
 }

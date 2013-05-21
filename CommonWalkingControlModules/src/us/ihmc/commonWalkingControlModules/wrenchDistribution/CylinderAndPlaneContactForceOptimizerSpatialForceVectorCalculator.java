@@ -51,10 +51,12 @@ public class CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator
 
 
 
-   public CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator(String name, ReferenceFrame centerOfMassFrame, YoVariableRegistry registry,
+   public CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator(String name, ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       visualize = null != dynamicGraphicObjectsListRegistry;
+      YoVariableRegistry registry = new YoVariableRegistry(name);
+      parentRegistry.addChild(registry);
       this.centerOfMassFrame = centerOfMassFrame;
       this.tempPoint = new FramePoint(centerOfMassFrame);
       this.tempVector = new FrameVector(centerOfMassFrame);
@@ -83,11 +85,11 @@ public class CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator
             }
 
             double greenLevel = 0.25 * i / (double) RHOSIZE;
-            graphicWrenches[q][i][LINEAR] = new DynamicGraphicVector(name + "RhoGraphicVector" + q + i + "Linear", graphicYoDoubles[q][i][X],
+            graphicWrenches[q][i][LINEAR] = new DynamicGraphicVector( "RhoGraphicOutput" + q + i + "Linear", graphicYoDoubles[q][i][X],
                     graphicYoDoubles[q][i][Y], graphicYoDoubles[q][i][Z], graphicYoDoubles[q][i][x], graphicYoDoubles[q][i][y], graphicYoDoubles[q][i][z],
                     scaleFactor, new YoAppearanceRGBColor(0.5, greenLevel, 0.0, 0.7));
             dynamicGraphicVectorsRhoLinear.add(graphicWrenches[q][i][LINEAR]);
-            graphicWrenches[q][i][ANGULAR] = new DynamicGraphicVector(name + "RhoGraphicVector" + q + i + "Angular", graphicYoDoubles[q][i][X],
+            graphicWrenches[q][i][ANGULAR] = new DynamicGraphicVector( "RhoGraphicOutput" + q + i + "Angular", graphicYoDoubles[q][i][X],
                     graphicYoDoubles[q][i][Y], graphicYoDoubles[q][i][Z], graphicYoDoubles[q][i][xx], graphicYoDoubles[q][i][yy], graphicYoDoubles[q][i][zz],
                     scaleFactor, new YoAppearanceRGBColor(0.5, greenLevel, 0.6, 0.7));
             dynamicGraphicVectorsRhoAngular.add(graphicWrenches[q][i][ANGULAR]);
@@ -100,24 +102,24 @@ public class CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator
             double greenLevel = 0.25 * i / (double) PHISIZE;
             for (int j = 0; j < 9; j++)
             {
-               graphicYoDoubles[q][i][j] = new DoubleYoVariable(name + "rhoOptimizerOutputVectorsElement" + q + i + j, registry);
+               graphicYoDoubles[q][i][j] = new DoubleYoVariable( "rhoOptimizerOutputVectorsElement" + q + i + j, registry);
             }
 
-            graphicWrenches[q][i][LINEAR] = new DynamicGraphicVector(name + "PhiGraphicVector" + q + i + "Linear", graphicYoDoubles[q][i][X],
+            graphicWrenches[q][i][LINEAR] = new DynamicGraphicVector( "PhiGraphicOutput" + q + i + "Linear", graphicYoDoubles[q][i][X],
                     graphicYoDoubles[q][i][Y], graphicYoDoubles[q][i][Z], graphicYoDoubles[q][i][x], graphicYoDoubles[q][i][y], graphicYoDoubles[q][i][z],
                     scaleFactor, new YoAppearanceRGBColor(1.0, greenLevel, 0.0, 0.7));
             dynamicGraphicVectorsPhiLinear.add(graphicWrenches[q][i][LINEAR]);
-            graphicWrenches[q][i][ANGULAR] = new DynamicGraphicVector(name + "PhiGraphicVector" + q + i + "Angular", graphicYoDoubles[q][i][X],
+            graphicWrenches[q][i][ANGULAR] = new DynamicGraphicVector( "PhiGraphicOutput" + q + i + "Angular", graphicYoDoubles[q][i][X],
                     graphicYoDoubles[q][i][Y], graphicYoDoubles[q][i][Z], graphicYoDoubles[q][i][xx], graphicYoDoubles[q][i][yy], graphicYoDoubles[q][i][zz],
                     scaleFactor, new YoAppearanceRGBColor(1.0, greenLevel, 0.6, 0.7));
             dynamicGraphicVectorsPhiAngular.add(graphicWrenches[q][i][ANGULAR]);
 
          }
 
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects(name + "OptimizerOutputVectorsRhoLinear ", dynamicGraphicVectorsRhoLinear);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects(name + "OptimizerOutputVectorsRhoAngular", dynamicGraphicVectorsRhoAngular);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects(name + "OptimizerOutputVectorsPhiLinear ", dynamicGraphicVectorsPhiLinear);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects(name + "OptimizerOutputVectorsPhiAngular", dynamicGraphicVectorsPhiAngular);
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("OptimizerOutputVectorsRhoLinear ", dynamicGraphicVectorsRhoLinear);
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("OptimizerOutputVectorsRhoAngular", dynamicGraphicVectorsRhoAngular);
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("OptimizerOutputVectorsPhiLinear ", dynamicGraphicVectorsPhiLinear);
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects( "OptimizerOutputVectorsPhiAngular", dynamicGraphicVectorsPhiAngular);
       }
 
    }
