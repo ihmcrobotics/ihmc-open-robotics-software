@@ -62,6 +62,10 @@ public class UpcomingFootstepList
 
          if (nextFootstep != null)
          {
+//            System.out.println("Grabbed next footstep. upcomingSupportLeg = " + upcomingSupportLeg.getEnumValue());
+//            System.out.println("Grabbed next footstep. nextFootstepList.size() = " + nextFootstepList.size());
+//            System.out.println("Grabbed next footstep. nextFootstepIndex.getIntegerValue() = " + nextFootstepIndex.getIntegerValue());
+
             if (pointPositionGrabber != null)
             {
                pointPositionGrabber.setExpectedFootstep(nextFootstep);
