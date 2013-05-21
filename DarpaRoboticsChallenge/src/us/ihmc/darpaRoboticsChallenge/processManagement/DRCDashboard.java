@@ -567,9 +567,16 @@ public class DRCDashboard
                                     {
                                        public void run()
                                        {
+                                          String newTask = "";
+                                          
+                                          if (task.contains("vehicle"))
+                                             newTask = "ONLY_VEHICLE";
+                                          else
+                                             newTask = task;
+                                          
                                           ThreadTools.sleep(3000);
-                                          scsSpawner.spawn(DRCDemo01.class, new String[] { "-Xms1024m", "-Xmx2048m" }, new String[] { "--sim", "--env", task,
-                                                "--gazebo", "--gazeboHost", DRCConfigParameters.GAZEBO_HOST });
+                                          scsSpawner.spawn(DRCDemo01.class, new String[] { "-Xms1024m", "-Xmx2048m" }, new String[] { "--sim", "--env",
+                                                newTask, "--gazebo", "--gazeboHost", DRCConfigParameters.GAZEBO_HOST });
                                        }
                                     }).start();
 
