@@ -626,6 +626,8 @@ public class DRCDashboard
                            {
                               sshSimLauncher.killSim(gazeboMachine, controllerMachine);
                               userOwnedSims.remove(gazeboMachine);
+                              uiSpawner.killAll();
+                              scsSpawner.killAll();
                            }
                         }
                         else
