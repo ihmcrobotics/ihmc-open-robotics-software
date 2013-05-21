@@ -56,8 +56,7 @@ public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
             expectedContactPoints.add(framePoint);
          }
 
-         Footstep footstep = new Footstep(footstepData.getId(), contactableBody, footstepPoseFrame, soleReferenceFrame, expectedContactPoints,
-                                          footstepData.getTrustHeight());
+         Footstep footstep = new Footstep(footstepData.getId(), contactableBody, footstepPoseFrame, soleReferenceFrame, expectedContactPoints, true);
          TrajectoryParameters trajectoryParameters = null;
 
          if (footstepData.getTrajectoryWaypointGenerationMethod() != null)
