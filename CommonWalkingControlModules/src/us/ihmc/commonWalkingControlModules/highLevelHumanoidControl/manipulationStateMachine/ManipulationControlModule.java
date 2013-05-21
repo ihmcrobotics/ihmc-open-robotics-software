@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
@@ -36,8 +35,8 @@ public class ManipulationControlModule
    private final List<DynamicGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<DynamicGraphicReferenceFrame>();
 
    public ManipulationControlModule(DoubleYoVariable yoTime, FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
-                                    ManipulationControllerParameters parameters, final DesiredHandPoseProvider handPoseProvider, final TorusPoseProvider torusPoseProvider,
-                                    DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+                                    ManipulationControllerParameters parameters, final DesiredHandPoseProvider handPoseProvider,
+                                    final TorusPoseProvider torusPoseProvider, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
                                     SideDependentList<HandControllerInterface> handControllers, MomentumBasedController momentumBasedController,
                                     YoVariableRegistry parentRegistry)
    {
@@ -80,6 +79,9 @@ public class ManipulationControlModule
               jacobians, torusPoseProvider, momentumBasedController, dynamicGraphicObjectsListRegistry, parentRegistry);
       stateMachine.addState(toroidManipulationState);
 
+      State<ManipulationState> fingerToroidManipulationState = new FingerToroidManipulationState(twistCalculator, handPositionControlFrames, jacobians,
+                                                                  momentumBasedController, fullRobotModel.getElevator(), torusPoseProvider, registry, dynamicGraphicObjectsListRegistry);
+      stateMachine.addState(fingerToroidManipulationState);
 
       StateTransitionCondition stateTransitionCondition = new StateTransitionCondition()
       {
@@ -89,8 +91,11 @@ public class ManipulationControlModule
          }
       };
 
-      StateTransition<ManipulationState> toToroidManipulation = new StateTransition<ManipulationState>(toroidManipulationState.getStateEnum(),
-                                                                                stateTransitionCondition);
+//    StateTransition<ManipulationState> toToroidManipulation = new StateTransition<ManipulationState>(toroidManipulationState.getStateEnum(),
+//          stateTransitionCondition);
+
+      StateTransition<ManipulationState> toToroidManipulation = new StateTransition<ManipulationState>(fingerToroidManipulationState.getStateEnum(),
+                                                                   stateTransitionCondition);
       directControlManipulationState.addStateTransition(toToroidManipulation);
 
       StateTransitionCondition toDirectManipulationCondition = new StateTransitionCondition()
@@ -98,14 +103,17 @@ public class ManipulationControlModule
          public boolean checkCondition()
          {
             // TODO: hack
-            boolean defaultRequested = handPoseProvider.checkForNewPose(RobotSide.LEFT) && !handPoseProvider.isRelativeToWorld();
+            boolean defaultRequested = handPoseProvider.checkForNewPose(RobotSide.LEFT) &&!handPoseProvider.isRelativeToWorld();
+
             return defaultRequested;
          }
       };
-      StateTransition<ManipulationState> toDirectManipulation = new StateTransition<ManipulationState>(directControlManipulationState.getStateEnum(), toDirectManipulationCondition);
+      StateTransition<ManipulationState> toDirectManipulation = new StateTransition<ManipulationState>(directControlManipulationState.getStateEnum(),
+                                                                   toDirectManipulationCondition);
       toroidManipulationState.addStateTransition(toDirectManipulation);
 
-//      toroidManipulationState.addStateTransition(toToroidManipulation);
+
+//    toroidManipulationState.addStateTransition(toToroidManipulation);
 
       parentRegistry.addChild(registry);
    }
