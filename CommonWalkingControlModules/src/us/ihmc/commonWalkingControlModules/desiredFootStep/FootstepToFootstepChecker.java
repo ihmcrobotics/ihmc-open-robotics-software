@@ -66,6 +66,27 @@ public class FootstepToFootstepChecker
       return ret;
    }
 
+   public static double getFootstepPitchSlope(Footstep footstep)
+   {
+      FrameVector frameVector = new FrameVector(footstep.getPoseReferenceFrame(), 1.0, 0.0, 0.0);
+      frameVector.changeFrame(ReferenceFrame.getWorldFrame());
+      printIfDebug("frameVector = " + frameVector);
+
+      double pitchSlope = frameVector.getZ();
+      
+      System.out.println("pitchSlope = " + pitchSlope);
+
+      return pitchSlope;
+   }
+   
+   private static void printIfDebug(String message)
+   {
+      if (DEBUG)
+      {
+         System.out.println(message);
+      }
+   }
+   
    private static void printIfDebug(boolean ret, double x, double y, double z, double yaw, double pitch, double roll)
    {
       if (!DEBUG)
@@ -76,5 +97,7 @@ public class FootstepToFootstepChecker
       else
          System.out.println("FootstepToFootstepChecker: " + ret + ", " + x + ", " + y + ", " + z + ", " + yaw + ", " + pitch + ", " + roll);
    }
+
+   
 
 }
