@@ -47,7 +47,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private final int numberOfVisualizationMarkers = 50;
    private final BooleanYoVariable visualize;
    
-   private final EnumYoVariable<TrajectoryWaypointGenerationMethod> waypointGenerationMethod;
+   protected final EnumYoVariable<TrajectoryWaypointGenerationMethod> waypointGenerationMethod;
 
    private final BagOfBalls trajectoryBagOfBalls;
    private final BagOfBalls fixedPointBagOfBalls;
@@ -65,11 +65,11 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private final ReferenceFrame referenceFrame;
 
    private final DoubleYoVariable[] allTimes = new DoubleYoVariable[6];
-   private final YoFramePoint[] allPositions = new YoFramePoint[6];
+   protected final YoFramePoint[] allPositions = new YoFramePoint[6];
    private final YoFrameVector[] allVelocities = new YoFrameVector[6];
 
    private final TrajectoryParametersProvider trajectoryParametersProvider;
-   private TwoWaypointTrajectoryParameters trajectoryParameters;
+   protected TwoWaypointTrajectoryParameters trajectoryParameters;
 
    private static final int[] endpointIndices = new int[] {0, 5};
    private static final int[] waypointIndices = new int[] {2, 3};
@@ -434,28 +434,13 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       allTimes[endpointIndices[1]].set(stepTime.getDoubleValue());
    }
 
-   private void setWaypointPositions()
+   protected void setWaypointPositions()
    {
       List<FramePoint> waypoints = null;
       waypointGenerationMethod.set(trajectoryParameters.getWaypointGenerationMethod());
 
       switch (waypointGenerationMethod.getEnumValue())
       {
-         case BY_POINTS :
-            waypoints = new ArrayList<FramePoint>();
-
-            for (int i = 0; i < 2; i++)
-            {
-               waypoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), trajectoryParameters.getWaypoints().get(i)));
-            }
-
-            break;
-
-         case BY_GROUND_CLEARANCE :
-            waypoints = getWaypointsAtGroundClearance(trajectoryParameters.getWaypointGroundClearance());
-
-            break;
-
          case STEP_ON_OR_OFF :
             waypoints = getWaypointsForStepOnOrOff();
 
@@ -481,7 +466,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       checkForCloseWaypoints();
    }
 
-   private void checkForCloseWaypoints()
+   protected void checkForCloseWaypoints()
    {
       if (waypointsAreCloseTogether())
       {

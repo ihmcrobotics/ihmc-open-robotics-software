@@ -64,14 +64,8 @@ public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
          {
             switch (footstepData.getTrajectoryWaypointGenerationMethod())
             {
-               case BY_GROUND_CLEARANCE :
-                  trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(footstepData.getTrajectoryWaypointGroundClearance());
-                  break;
                case BY_BOX :
                   trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(footstepData.getTrajectoryBox());
-                  break;
-               case BY_POINTS :
-                  trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(footstepData.getTrajectoryWaypoints());
                   break;
                 default:
                   trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(footstepData.getTrajectoryWaypointGenerationMethod());

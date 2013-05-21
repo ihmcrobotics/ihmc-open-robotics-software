@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -22,7 +23,10 @@ import com.yobotics.simulationconstructionset.util.inputdevices.SliderBoardConfi
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParametersProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.VectorProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.YoVelocityProvider;
 
@@ -173,14 +177,52 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
       YoVelocityProvider initialVelocityProvider = new YoVelocityProvider(initialVelocity);
       YoVelocityProvider finalDesiredVelocityProvider = new YoVelocityProvider(finalVelocity);
 
-      YoTwoWaypointTrajectoryParameters trajectoryParameters = new YoTwoWaypointTrajectoryParameters(waypoints);
+      YoTwoWaypointTrajectoryParameters trajectoryParameters = null;
       TrajectoryParametersProvider trajectoryParametersProvider = new TrajectoryParametersProvider(trajectoryParameters);
 
       int arcLengthCalculatorDivisionsPerPolynomial = 20;
 
-      return new TwoWaypointPositionTrajectoryGenerator(namePrefix + "Generator", worldFrame, stepTimeProvider, initialPositionProvider,
+      return new TwoWaypointPositionTrajectorySpecifiedByPoints(namePrefix + "Generator", worldFrame, stepTimeProvider, initialPositionProvider,
               initialVelocityProvider, finalPositionProvider, finalDesiredVelocityProvider, trajectoryParametersProvider, registry,
               arcLengthCalculatorDivisionsPerPolynomial, dynamicGraphicObjectsListRegistry, null, false);
+   }
+   
+   public static class TwoWaypointPositionTrajectorySpecifiedByPoints extends TwoWaypointPositionTrajectoryGenerator
+   {
+      private final ReferenceFrame referenceFrame;
+      
+      public TwoWaypointPositionTrajectorySpecifiedByPoints(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
+            PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider finalPositionProvider,
+            VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider, YoVariableRegistry parentRegistry,
+            int arcLengthCalculatorDivisionsPerPolynomial, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+            WalkingControllerParameters walkingControllerParameters, boolean visualize)
+      {
+         super(namePrefix, referenceFrame, stepTimeProvider, initialPositionProvider, initialVelocityProvider, finalPositionProvider, finalDesiredVelocityProvider,
+               trajectoryParametersProvider, parentRegistry, arcLengthCalculatorDivisionsPerPolynomial, dynamicGraphicObjectsListRegistry, walkingControllerParameters,
+               visualize);
+         
+         this.referenceFrame = referenceFrame;
+      }
+      
+      @Override
+      protected void setWaypointPositions()
+      {
+         int[] waypointIndices = new int[] {2, 3};
+         
+         List<FramePoint> waypoints = new ArrayList<FramePoint>();
+
+         for (int i = 0; i < 2; i++)
+         {
+            waypoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), trajectoryParameters.getWaypoints().get(i)));
+         }
+         
+         for (int i = 0; i < 2; i++)
+         {
+            waypoints.get(i).changeFrame(referenceFrame);
+            allPositions[waypointIndices[i]].set(waypoints.get(i));
+         }
+         checkForCloseWaypoints();
+      }
    }
 
    public static void main(String[] args) throws SimulationExceededMaximumTimeException
