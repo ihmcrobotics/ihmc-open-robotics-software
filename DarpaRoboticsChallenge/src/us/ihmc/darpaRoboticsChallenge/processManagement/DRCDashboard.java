@@ -569,10 +569,16 @@ public class DRCDashboard
                                        {
                                           String newTask = "";
                                           
-                                          if (task.contains("vehicle"))
+                                          if (task.toLowerCase().contains("vehicle"))
                                              newTask = "ONLY_VEHICLE";
                                           else
                                              newTask = task;
+                                          
+                                          if(newTask.toLowerCase().contains("parking") || newTask.toLowerCase().contains("hand") || newTask.toLowerCase().equals("atlas"))
+                                          {
+                                             System.err.println("Can't launch SCS; no environment for selected task");
+                                             return;
+                                          }
                                           
                                           ThreadTools.sleep(3000);
                                           scsSpawner.spawn(DRCDemo01.class, new String[] { "-Xms1024m", "-Xmx2048m" }, new String[] { "--sim", "--env",
@@ -738,7 +744,7 @@ public class DRCDashboard
    private void setupLeftContentPanel()
    {
       operatorUICheckBox = new JCheckBox("Launch Operator UI With Gazebo");
-      scsCheckBox = new JCheckBox("Launch SCS With Gazebo");
+      scsCheckBox = new JCheckBox("Launch SCS (Demo01) With Gazebo");
       c.gridx = 0;
       c.gridy = 0;
       machineSelectionPanel.add(operatorUICheckBox, c);
