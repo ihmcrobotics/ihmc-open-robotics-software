@@ -44,9 +44,9 @@ public class DisplayClassificationsApp extends JPanel
 
    public static void main( String args[] ) {
 //      BufferedImage input = UtilImageIO.loadImage("../ImageProcessing/media/drcsim_2_6/left000001.png");
-      BufferedImage input = UtilImageIO.loadImage("../ImageProcessing/media/drcsim_2_6/turn_90_left_03.png");
-//      Gaussian3D_F64 model = BoofMiscOps.loadXML("../ImageProcessing/models/gaussian_line.xml");
-      Gaussian3D_F64 model = BoofMiscOps.loadXML("test_line.xml");
+      BufferedImage input = UtilImageIO.loadImage("../ImageProcessing/media/drcsim_2_6/left01.png");
+      Gaussian3D_F64 model = BoofMiscOps.loadXML("../ImageProcessing/models/drcsim_2_6/gaussian_line.xml");
+//      Gaussian3D_F64 model = BoofMiscOps.loadXML("../ImageProcessing/models/drcsim_2_6/gaussian_road.xml");
 
       if( model == null )
          throw new RuntimeException("Couldn't load the line");

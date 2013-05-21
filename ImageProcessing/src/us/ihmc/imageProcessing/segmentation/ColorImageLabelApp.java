@@ -15,7 +15,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -255,7 +254,7 @@ public class ColorImageLabelApp extends JPanel implements ActionListener {
    }
 
    public static void main( String args[] ) {
-      BufferedImage input = UtilImageIO.loadImage("../ImageProcessing/media/drcsim_2_6/left000001.png");
+      BufferedImage input = UtilImageIO.loadImage("../ImageProcessing/media/drcsim_2_6/left01.png");
 
       ColorImageLabelApp app = new ColorImageLabelApp(input);
       ShowImages.showWindow(app,"Train HSV Classifier");
