@@ -46,8 +46,8 @@ public class DRCConfigParameters
 
 
 
-   public static final String GAZEBO_HOST = CLOUD_MONSTER_JR_IP;
-   public static final String SCS_MACHINE_IP_ADDRESS = CLOUD_MONSTER_IP;
+   public static final String GAZEBO_HOST = LOCALHOST;
+   public static final String SCS_MACHINE_IP_ADDRESS = LOCALHOST;
 
    public static final String OPERATOR_INTERFACE_IP_ADDRESS = LOCALHOST;
    
