@@ -103,7 +103,7 @@ public class DRCDashboard
    private ImageIcon goodConnectionIcon;
    private ImageIcon badConnectionIcon;
 
-   private JavaProcessSpawner uiSpawner = new JavaProcessSpawner(false);
+   private JavaProcessSpawner uiSpawner = new JavaProcessSpawner(true);
    private GazeboSimLauncher sshSimLauncher = new GazeboSimLauncher();
 
    private HashMap<LocalCloudMachines, Pair<JTree, DefaultMutableTreeNode>> cloudMachineTrees = new HashMap<LocalCloudMachines, Pair<JTree, DefaultMutableTreeNode>>();
