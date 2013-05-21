@@ -9,17 +9,17 @@ import java.awt.*;
 public class OccupancyGridPanel extends JPanel
 {
 
-   OccupancyGrid map = new OccupancyGrid(1,1,1);
+   protected OccupancyGrid map = new OccupancyGrid(1,1,1);
 
-   double cellToPixel = 1.0;
+   protected double cellToPixel = 1.0;
 
-   boolean flipY;
+   protected boolean adjustView;
 
    Color gray[];
 
-   public OccupancyGridPanel(boolean flipY)
+   public OccupancyGridPanel(boolean adjustView)
    {
-      this.flipY = flipY;
+      this.adjustView = adjustView;
 
       gray = new Color[256];
 
@@ -29,7 +29,10 @@ public class OccupancyGridPanel extends JPanel
    }
 
    public void autoPreferredSize() {
-      setPreferredSize(new Dimension((int)(map.width*cellToPixel),(int)(map.height*cellToPixel)));
+      if(adjustView)
+         setPreferredSize(new Dimension((int)(map.height*cellToPixel),(int)(map.width*cellToPixel)));
+      else
+         setPreferredSize(new Dimension((int)(map.width*cellToPixel),(int)(map.height*cellToPixel)));
    }
 
    public synchronized void setMap( OccupancyGrid map , boolean copy ) {
@@ -44,18 +47,11 @@ public class OccupancyGridPanel extends JPanel
    public synchronized void paint(Graphics g)
    {
       int h = getHeight();
+      int w = getWidth();
 
       for( int y = 0; y < map.height; y++ ) {
          int y0 = (int)(y*cellToPixel);
          int y1 = (int)((y+1)*cellToPixel);
-
-         if( flipY ) {
-            y1 = h - y1 - 1;
-            y0 = h - y0 - 1;
-            int tmp = y1;
-            y1 = y0;
-            y0 = tmp;
-         }
 
          for( int x = 0; x < map.width; x++ ) {
             int x0 = (int)(x*cellToPixel);
@@ -64,8 +60,13 @@ public class OccupancyGridPanel extends JPanel
             int value = (int)(255.0*map.unsafe_get(x,y));
 
             g.setColor(gray[value]);
-
-            g.fillRect(x0,y0,x1-x0,y1-y0);
+            if(adjustView) {
+               x0 = h - x0 - 1;
+               x1 = h - x1 - 1;
+               g.fillRect(w-y0-1,x1,y1-y0,x0-x1);
+            } else {
+               g.fillRect(x0,y0,x1-x0,y1-y0);
+            }
          }
       }
    }
