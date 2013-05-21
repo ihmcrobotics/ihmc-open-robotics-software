@@ -554,44 +554,45 @@ public class DRCDashboard
                            {
                               sshSimLauncher.launchSim(task, gazeboMachine, controllerMachine, pluginOption);
                               userOwnedSims.add(gazeboMachine);
+                              
                               if (operatorUICheckBox.isSelected() && !uiSpawner.hasRunningProcesses())
                               {
                                  uiSpawner.spawn(DRCOperatorUserInterface.class, new String[] { "-Xms1024m", "-Xmx2048m" }, null);
                               }
-                              if (scsCheckBox.isSelected() && !scsSpawner.hasRunningProcesses())
+
+                              new Thread(new Runnable()
                               {
-                                 System.out.println(pluginOption);
-                                 if (pluginOption.contains("plugin"))
-                                 {
-                                    new Thread(new Runnable()
+                                 public void run()
+                                 {                                    
+                                    if (scsCheckBox.isSelected() && !scsSpawner.hasRunningProcesses())
                                     {
-                                       public void run()
+                                       if (pluginOption.contains("plugin"))
                                        {
                                           String newTask = "";
-                                          
+
                                           if (task.toLowerCase().contains("vehicle"))
                                              newTask = "ONLY_VEHICLE";
                                           else
                                              newTask = task;
-                                          
-                                          if(newTask.toLowerCase().contains("parking") || newTask.toLowerCase().contains("hand") || newTask.toLowerCase().equals("atlas"))
+
+                                          if (newTask.toLowerCase().contains("parking") || newTask.toLowerCase().contains("hand")
+                                                || newTask.toLowerCase().equals("atlas"))
                                           {
                                              System.err.println("Can't launch SCS; no environment for selected task");
                                              return;
                                           }
-                                          
-                                          ThreadTools.sleep(3000);
+                                          ThreadTools.sleep(5000);
                                           scsSpawner.spawn(DRCDemo01.class, new String[] { "-Xms1024m", "-Xmx2048m" }, new String[] { "--sim", "--env",
                                                 newTask, "--gazebo", "--gazeboHost", DRCConfigParameters.GAZEBO_HOST });
-                                       }
-                                    }).start();
 
+                                       }
+                                       else
+                                       {
+                                          System.err.println("Launching SCS without Jesper plugin not yet implemented");
+                                       }
+                                    }
                                  }
-                                 else
-                                 {
-                                    System.err.println("Launching SCS without Jesper plugin not yet implemented");
-                                 }
-                              }
+                              }).start();       
                            }
                         }
                         else if (userOwnedSims.contains(gazeboMachine))
