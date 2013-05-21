@@ -554,7 +554,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
 
          // note: this has to be done before the ICP trajectory generator is initialized, since it is using nextFootstep
-         if (getTimeInCurrentState() > 0.15)
+         // TODO: Make a LOADING state and clean all of these timing hacks up.
+         boolean doneFinishingSingleSupportTransfer = instantaneousCapturePointPlanner.isPerformingICPDoubleSupport();
+         double estimatedTimeRemainingForState = instantaneousCapturePointPlanner.getEstimatedTimeRemainingForState(yoTime.getDoubleValue()); 
+         
+         if (doneFinishingSingleSupportTransfer || estimatedTimeRemainingForState < 0.02)
          {
             upcomingFootstepList.checkForFootsteps(icpAndMomentumBasedController.getPointPositionGrabber(), readyToGrabNextFootstep, upcomingSupportLeg,
                   bipedFeet);
@@ -610,6 +614,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       {
          if (!icpTrajectoryHasBeenInitialized.getBooleanValue() && instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue()))
          {
+//            System.out.println("Initializing ICP planner. transferToSide = " + transferToSide);
+
             Pair<FramePoint2d, Double> finalDesiredICPAndTrajectoryTime = computeFinalDesiredICPAndTrajectoryTime();
 
             FramePoint2d finalDesiredICP = finalDesiredICPAndTrajectoryTime.first();
@@ -851,6 +857,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          
          if (!centerOfMassHeightTrajectoryGenerator.hasBeenInitializedWithNextStep())
          {
+//            System.out.println("Initializing centerOfMassHeightTrajectoryGenerator. transferToSide = " + transferToSide);
+
             boolean inInitialize = true;
             TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = createTransferToAndNextFootstepDataForDoubleSupport(transferToSideToUseInFootstepData, inInitialize);
 
