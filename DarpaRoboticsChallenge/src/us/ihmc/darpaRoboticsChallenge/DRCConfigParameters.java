@@ -12,7 +12,7 @@ public class DRCConfigParameters
    // TODO: Temporary static variable for testing the grasping control.
    public static final boolean START_GRASPING_CAR_FRONT_BAR = false;
    
-   public static final boolean USE_GAZEBO_PHYSICS = true;    // TODO: This one is needed just for FlatGroundWalkingTrack in Gazebo...
+   public static final boolean USE_GAZEBO_PHYSICS = false;    // TODO: This one is needed just for FlatGroundWalkingTrack in Gazebo...
 
    public static final boolean USE_PERFECT_SENSORS = false;
 
@@ -48,6 +48,7 @@ public class DRCConfigParameters
 
    public static final String GAZEBO_HOST = LOCALHOST;
    public static final String SCS_MACHINE_IP_ADDRESS = LOCALHOST;
+
    public static final String OPERATOR_INTERFACE_IP_ADDRESS = LOCALHOST;
    
    public static final String ROS_MASTER_URI = "http://" + GAZEBO_HOST + ":11311";
