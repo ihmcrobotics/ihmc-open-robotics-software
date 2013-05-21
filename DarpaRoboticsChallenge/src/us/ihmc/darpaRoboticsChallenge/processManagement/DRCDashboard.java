@@ -101,6 +101,7 @@ public class DRCDashboard
 
    JCheckBox operatorUICheckBox;
    JCheckBox scsCheckBox;
+   JCheckBox estimatorCheckBox;
 
    private JPanel processPanel;
    private JScrollPane networkStatusScrollPane;
@@ -238,6 +239,15 @@ public class DRCDashboard
                   else
                      scsCheckBox.setSelected(false);
                }
+               else if (line != null && line.startsWith("ESTIMATOR:"))
+               {
+                  String estimatorOption = line.substring(line.indexOf(":") + 1, line.length());
+
+                  if (estimatorOption.contains("true"))
+                     estimatorCheckBox.setSelected(true);
+                  else
+                     estimatorCheckBox.setSelected(false);
+               }
             }
          }
          reader.close();
@@ -268,6 +278,8 @@ public class DRCDashboard
          fileWriter.write("UI:" + (operatorUICheckBox.isSelected() ? "true" : "false"));
          fileWriter.newLine();
          fileWriter.write("SCS:" + (scsCheckBox.isSelected() ? "true" : "false"));
+         fileWriter.newLine();
+         fileWriter.write("ESTIMATOR:" + (estimatorCheckBox.isSelected() ? "true" : "false"));
          fileWriter.newLine();
          fileWriter.write("END");
          fileWriter.flush();
@@ -554,7 +566,7 @@ public class DRCDashboard
                            {
                               sshSimLauncher.launchSim(task, gazeboMachine, controllerMachine, pluginOption);
                               userOwnedSims.add(gazeboMachine);
-                              
+
                               if (operatorUICheckBox.isSelected() && !uiSpawner.hasRunningProcesses())
                               {
                                  uiSpawner.spawn(DRCOperatorUserInterface.class, new String[] { "-Xms1024m", "-Xmx2048m" }, null);
@@ -563,7 +575,7 @@ public class DRCDashboard
                               new Thread(new Runnable()
                               {
                                  public void run()
-                                 {                                    
+                                 {
                                     if (scsCheckBox.isSelected() && !scsSpawner.hasRunningProcesses())
                                     {
                                        if (pluginOption.contains("plugin"))
@@ -581,10 +593,19 @@ public class DRCDashboard
                                              System.err.println("Can't launch SCS; no environment for selected task");
                                              return;
                                           }
-                                          ThreadTools.sleep(5000);
-                                          scsSpawner.spawn(DRCDemo01.class, new String[] { "-Xms1024m", "-Xmx2048m" }, new String[] { "--sim", "--env",
-                                                newTask, "--gazebo", "--gazeboHost", DRCConfigParameters.GAZEBO_HOST });
-
+                                          
+                                          if (estimatorCheckBox.isEnabled() && estimatorCheckBox.isSelected())
+                                          {
+                                             ThreadTools.sleep(5000);
+                                             scsSpawner.spawn(DRCDemo01.class, new String[] { "-Xms1024m", "-Xmx2048m" }, new String[] { "--sim", "--env",
+                                                   newTask, "--gazebo", "--gazeboHost", DRCConfigParameters.GAZEBO_HOST, "--initialize-estimator" });
+                                          }
+                                          else
+                                          {
+                                             ThreadTools.sleep(5000);
+                                             scsSpawner.spawn(DRCDemo01.class, new String[] { "-Xms1024m", "-Xmx2048m" }, new String[] { "--sim", "--env",
+                                                   newTask, "--gazebo", "--gazeboHost", DRCConfigParameters.GAZEBO_HOST });
+                                          }
                                        }
                                        else
                                        {
@@ -592,7 +613,7 @@ public class DRCDashboard
                                        }
                                     }
                                  }
-                              }).start();       
+                              }).start();
                            }
                         }
                         else if (userOwnedSims.contains(gazeboMachine))
@@ -746,11 +767,21 @@ public class DRCDashboard
    {
       operatorUICheckBox = new JCheckBox("Launch Operator UI With Gazebo");
       scsCheckBox = new JCheckBox("Launch SCS (Demo01) With Gazebo");
+      estimatorCheckBox = new JCheckBox("Initialize Estimator to Actual");
+      scsCheckBox.addActionListener(new ActionListener()
+      {
+         public void actionPerformed(ActionEvent arg0)
+         {
+            estimatorCheckBox.setEnabled(scsCheckBox.isSelected());
+         }
+      });
       c.gridx = 0;
       c.gridy = 0;
       machineSelectionPanel.add(operatorUICheckBox, c);
       c.gridy++;
       machineSelectionPanel.add(scsCheckBox, c);
+      c.gridy++;
+      machineSelectionPanel.add(estimatorCheckBox, c);
 
       setupSelectControllerMachine();
 
@@ -762,7 +793,7 @@ public class DRCDashboard
    private void setupSelectControllerMachine()
    {
       c.gridx = 0;
-      c.gridy = 2;
+      c.gridy = 3;
       c.gridwidth = 1;
       c.gridheight = 2;
       c.weighty = 0.0;
@@ -778,7 +809,7 @@ public class DRCDashboard
 
    private void setupSelectGazeboMachine()
    {
-      c.gridy = 4;
+      c.gridy = 5;
       gazeboMachineSelectionPanel = new JPanel(new GridLayout(2, 1));
       machineSelectionPanel.add(gazeboMachineSelectionPanel, c);
       gazeboMachineSelectionLabel = new JLabel("Select Gazebo Machine: ", JLabel.LEFT);
@@ -800,7 +831,7 @@ public class DRCDashboard
    private void setupCloudMachineInfoPanel()
    {
       c.gridheight = 4;
-      c.gridy = 6;
+      c.gridy = 7;
       c.ipady = 70;
       //      c.ipadx = 150;
       c.weighty = 1.0;
@@ -1043,7 +1074,7 @@ public class DRCDashboard
    }
 
    public static void main(String[] args)
-   {      
+   {
       final DRCDashboard dash = new DRCDashboard();
 
       SwingUtilities.invokeLater(new Runnable()
