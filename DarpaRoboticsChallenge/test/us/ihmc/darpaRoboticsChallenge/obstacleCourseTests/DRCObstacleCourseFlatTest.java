@@ -59,7 +59,7 @@ public class DRCObstacleCourseFlatTest
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.CENTER;
+      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie);
 
@@ -99,7 +99,7 @@ public class DRCObstacleCourseFlatTest
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.CENTER;
+      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingUpToRampShortStepsTest", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie);
 
@@ -129,7 +129,7 @@ public class DRCObstacleCourseFlatTest
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.CENTER;
+      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingUpToRampLongStepsTest", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie);
 
