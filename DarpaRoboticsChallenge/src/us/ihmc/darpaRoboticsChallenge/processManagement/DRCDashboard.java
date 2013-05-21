@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.processManagement;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -27,6 +28,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -38,8 +40,8 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.ListSelectionModel;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.BevelBorder;
@@ -107,6 +109,8 @@ public class DRCDashboard
    private JScrollPane networkStatusScrollPane;
    private ImageIcon goodConnectionIcon;
    private ImageIcon badConnectionIcon;
+   private ImageIcon startSimIcon = new ImageIcon(DRCDashboard.class.getResource("start_sim.png"));
+   private ImageIcon killSimIcon = new ImageIcon(DRCDashboard.class.getResource("kill_sim.png"));
 
    private JavaProcessSpawner uiSpawner = new JavaProcessSpawner(true);
    private JavaProcessSpawner scsSpawner = new JavaProcessSpawner(true);
@@ -116,6 +120,7 @@ public class DRCDashboard
    JTree currentSelection = null;
 
    private ArrayList<LocalCloudMachines> userOwnedSims = new ArrayList<DRCLocalCloudConfig.LocalCloudMachines>();
+   private HashMap<JTree, JButton> launchButtons = new HashMap<JTree, JButton>();
 
    private File configFileHandle;
    private boolean shouldLoadConfig = false;
@@ -422,8 +427,8 @@ public class DRCDashboard
       c.gridheight = 10;
       c.gridx = 5;
       c.gridy = 0;
-      c.weightx = 0;
-      c.ipadx = 80;
+      c.weightx = 1.0;
+      c.ipadx = 40;
       machineSelectionPanel = new JPanel(new GridBagLayout());
       machineSelectionPanel.setBorder(BorderFactory.createEtchedBorder());
       mainContentPanel.add(machineSelectionPanel, c);
@@ -449,7 +454,7 @@ public class DRCDashboard
       c.gridy = 0;
       c.weighty = 1.0;
       c.weightx = 1.0;
-      c.ipadx = 180;
+      c.ipadx = 140;
       c.ipady = 388;
       mainContentPanel.add(processPanel, c);
 
@@ -463,7 +468,7 @@ public class DRCDashboard
 
       c.gridy += 2;
       c.gridheight = 10;
-      c.ipady = 320;
+      c.ipady = 319;
       c.weighty = 0;
       Insets oldInsets = c.insets;
 
@@ -478,30 +483,88 @@ public class DRCDashboard
 
       c.insets = oldInsets;
 
+      //      networkStatusScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
       JPanel view = (JPanel) networkStatusScrollPane.getViewport().getView();
-      view.setBackground(Color.white);
-      view.setLayout(new GridLayout(6, 1));
-      view.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+      GridBagConstraints c2 = new GridBagConstraints();
 
-      for (LocalCloudMachines machine : LocalCloudMachines.values())
+      view.setBackground(Color.white);
+      view.setLayout(new GridBagLayout());
+      view.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+      
+      c2.gridy = 0;
+      c2.weighty = 0;
+      c2.ipady = 5;
+      c2.anchor = GridBagConstraints.LINE_START;
+      c2.fill = GridBagConstraints.BOTH;
+      
+      for (final LocalCloudMachines machine : LocalCloudMachines.values())
       {
          if (!machine.equals(LocalCloudMachines.LOCALHOST))
-         {
+         {            
             DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("<html><body style=\"font-weight:bold;font-size:1.1em;\">"
                   + WordUtils.capitalize(machine.toString().toLowerCase().replace("_", " ")) + "</body></html>");
-            rootNode.add(new DefaultMutableTreeNode("Running ROS/GZ Sims:"));
-            rootNode.add(new DefaultMutableTreeNode("Running SCS Controllers?"));
+            rootNode.add(new DefaultMutableTreeNode("ROS/GZ Sim:"));
+            rootNode.add(new DefaultMutableTreeNode("SCS Controller?"));
 
             JTree tree = new JTree(rootNode);
-            tree.setLargeModel(true);
+//            tree.setLargeModel(true);
             tree.setBorder(BorderFactory.createEmptyBorder(15, 10, 15, 0));
             if (sshSimLauncher.isMachineReachable(machine))
                setCloudStatusItemIcon(tree, goodConnectionIcon);
             else
                setCloudStatusItemIcon(tree, badConnectionIcon);
 
-            view.add(tree);
+            c2.gridx = 0;
+            c2.gridwidth = 5;
+            c2.ipadx = 50;
+            c2.weightx = 0.3;
+            view.add(tree, c2);
+
+            final JButton launchButton = new JButton();
+            launchButton.setPreferredSize(new Dimension(32, 32));
+            launchButton.setBorder(BorderFactory.createEmptyBorder());
+            launchButton.setContentAreaFilled(false);
+            launchButton.setIcon(startSimIcon);
+
+            launchButton.addActionListener(new ActionListener()
+            {
+               public boolean launchMode = true;
+
+               public void actionPerformed(ActionEvent arg0)
+               {
+                  final LocalCloudMachines controllerMachine = (LocalCloudMachines) controllerMachineSelectionCombo.getSelectedItem();
+                  final String task = taskCombo.getSelectedItem().toString();
+                  final String pluginOption = radioGroup.getSelection().getActionCommand();
+
+                  if (launchMode)
+                  {
+                     startLaunchProcess(machine, controllerMachine, task, pluginOption);
+
+                     launchMode = false;
+                  }
+                  else
+                  {
+                     nukeAllProcesses(machine, controllerMachine);
+
+                     launchMode = true;
+                  }
+               }
+            });
+
+            JPanel buttonPanel = new JPanel();
+            buttonPanel.setBorder(BorderFactory.createEmptyBorder(30,-20,0,0));
+            buttonPanel.add(launchButton);
+            buttonPanel.setBackground(Color.white);
+
+            c2.gridx = 5;
+            c2.gridwidth = 1;
+            c2.ipadx = 10;
+            c2.weightx = 0.7;
+            view.add(buttonPanel, c2);
             cloudMachineTrees.put(machine, new Pair<JTree, DefaultMutableTreeNode>(tree, rootNode));
+            launchButtons.put(tree, launchButton);
+            
+            c2.gridy++;
          }
       }
 
@@ -564,76 +627,23 @@ public class DRCDashboard
 
                            if (n == 0)
                            {
-                              sshSimLauncher.launchSim(task, gazeboMachine, controllerMachine, pluginOption);
-                              userOwnedSims.add(gazeboMachine);
-
-                              if (operatorUICheckBox.isSelected() && !uiSpawner.hasRunningProcesses())
-                              {
-                                 uiSpawner.spawn(DRCOperatorUserInterface.class, new String[] { "-Xms1024m", "-Xmx2048m" }, null);
-                              }
-
-                              new Thread(new Runnable()
-                              {
-                                 public void run()
-                                 {
-                                    if (scsCheckBox.isSelected() && !scsSpawner.hasRunningProcesses())
-                                    {
-                                       if (pluginOption.contains("plugin"))
-                                       {
-                                          String newTask = "";
-
-                                          if (task.toLowerCase().contains("vehicle"))
-                                             newTask = "ONLY_VEHICLE";
-                                          else
-                                             newTask = task;
-
-                                          if (newTask.toLowerCase().contains("parking") || newTask.toLowerCase().contains("hand")
-                                                || newTask.toLowerCase().equals("atlas"))
-                                          {
-                                             System.err.println("Can't launch SCS; no environment for selected task");
-                                             return;
-                                          }
-                                          
-                                          if (estimatorCheckBox.isEnabled() && estimatorCheckBox.isSelected())
-                                          {
-                                             ThreadTools.sleep(5000);
-                                             scsSpawner.spawn(DRCDemo01.class, new String[] { "-Xms1024m", "-Xmx2048m" }, new String[] { "--sim", "--env",
-                                                   newTask, "--gazebo", "--gazeboHost", DRCConfigParameters.GAZEBO_HOST, "--initialize-estimator" });
-                                          }
-                                          else
-                                          {
-                                             ThreadTools.sleep(5000);
-                                             scsSpawner.spawn(DRCDemo01.class, new String[] { "-Xms1024m", "-Xmx2048m" }, new String[] { "--sim", "--env",
-                                                   newTask, "--gazebo", "--gazeboHost", DRCConfigParameters.GAZEBO_HOST });
-                                          }
-                                       }
-                                       else
-                                       {
-                                          System.err.println("Launching SCS without Jesper plugin not yet implemented");
-                                       }
-                                    }
-                                 }
-                              }).start();
+                              startLaunchProcess(gazeboMachine, controllerMachine, task, pluginOption);
                            }
                         }
                         else if (userOwnedSims.contains(gazeboMachine))
                         {
                            String[] options = new String[] { "Yes", "No" };
-                           int n = JOptionPane.showOptionDialog(frame, "Do you want to kill your sim running on " + gazeboMachine.toString() + "?",
+                           int n = JOptionPane.showOptionDialog(frame, "Do you want to kill your sim on " + gazeboMachine.toString() + "?",
                                  "Confirm Kill ROS/Gazebo Sim", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]);
 
                            if (n == 0)
                            {
-                              sshSimLauncher.killSim(gazeboMachine, controllerMachine);
-                              userOwnedSims.remove(gazeboMachine);
-                              uiSpawner.killAll();
-                              scsSpawner.killAll();
+                              nukeAllProcesses(gazeboMachine, controllerMachine);
                            }
                         }
                         else
                         {
-                           JOptionPane.showMessageDialog(frame, "Machine is running somebody else's sim!", "ROS/Gazebo Sim Launch Error",
-                                 JOptionPane.ERROR_MESSAGE);
+                           JOptionPane.showMessageDialog(frame, "Machine is somebody else's sim!", "ROS/Gazebo Sim Launch Error", JOptionPane.ERROR_MESSAGE);
                         }
                      }
                      else
@@ -662,11 +672,13 @@ public class DRCDashboard
             if (currentSelection != null)
             {
                currentSelection.setBackground(white);
+               launchButtons.get(currentSelection).getParent().setBackground(white);
                ((DefaultTreeCellRenderer) currentSelection.getCellRenderer()).setBackgroundNonSelectionColor(white);
             }
 
             currentSelection = tree;
             currentSelection.setBackground(selectionColor);
+            launchButtons.get(currentSelection).getParent().setBackground(selectionColor);
             ((DefaultTreeCellRenderer) currentSelection.getCellRenderer()).setBackgroundNonSelectionColor(selectionColor);
          }
       };
@@ -947,17 +959,17 @@ public class DRCDashboard
 
    private void startTimers()
    {
-      Timer redrawTimer = new Timer(10, new ActionListener()
-      {
-         public void actionPerformed(ActionEvent e)
-         {
-
-         }
-      });
+      //      Timer redrawTimer = new Timer(10, new ActionListener()
+      //      {
+      //         public void actionPerformed(ActionEvent e)
+      //         {
+      //
+      //         }
+      //      });
 
       java.util.Timer updateNetStatusTimer = new java.util.Timer();
 
-      redrawTimer.start();
+      //      redrawTimer.start();
       updateNetStatusTimer.schedule(new TimerTask()
       {
          @Override
@@ -978,6 +990,8 @@ public class DRCDashboard
          public void run()
          {
             ((JPanel) networkStatusScrollPane.getViewport().getView()).repaint();
+            
+            recalculateNodeSizes();
          }
       });
    }
@@ -986,9 +1000,7 @@ public class DRCDashboard
    {
       updateRosSimStatuses();
 
-      updateSCSStatuses();
-
-      recalculateNodeSizes();
+      updateSCSStatuses();      
    }
 
    private void recalculateNodeSizes()
@@ -1015,12 +1027,17 @@ public class DRCDashboard
 
             if (sshSimLauncher.isMachineRunningSim(machine))
             {
-               node.setUserObject("<html><body>Running ROS/GZ Sim: <span style=\"color:red;font-style:italic;\">" + sshSimLauncher.getSimTaskname(machine)
+               node.setUserObject("<html><body>GZ Sim: <span style=\"color:red;font-style:italic;\">" + sshSimLauncher.getSimTaskname(machine)
                      + "</span></body></html>");
+               if (!userOwnedSims.contains(machine))
+               {
+                  launchButtons.get(cloudMachineTrees.get(machine).first()).setEnabled(false);
+               }
             }
             else
             {
-               node.setUserObject("<html><body>Running ROS/GZ Sim: <span style=\"color:green;font-style:italic;\">No</span></body></html>");
+               node.setUserObject("<html><body>GZ Sim: <span style=\"color:green;font-style:italic;\">No</span></body></html>");
+               launchButtons.get(cloudMachineTrees.get(machine).first()).setEnabled(true);
             }
          }
       }
@@ -1036,11 +1053,11 @@ public class DRCDashboard
 
             if (sshSimLauncher.isMachineRunningController(machine))
             {
-               node.setUserObject("<html><body>Running SCS Controller? <span style=\"color:red;font-style:italic;\">Yes</span></body></html>");
+               node.setUserObject("<html><body>SCS Controller? <span style=\"color:red;font-style:italic;\">Yes</span></body></html>");
             }
             else
             {
-               node.setUserObject("<html><body>Running SCS Controller? <span style=\"color:green;font-style:italic;\">No</span></body></html>");
+               node.setUserObject("<html><body>SCS Controller? <span style=\"color:green;font-style:italic;\">No</span></body></html>");
             }
          }
       }
@@ -1073,6 +1090,89 @@ public class DRCDashboard
       renderer.setOpenIcon(icon);
       renderer.setClosedIcon(icon);
       renderer.setLeafIcon(null);
+   }
+
+   private void nukeAllProcesses(final LocalCloudMachines gazeboMachine, final LocalCloudMachines controllerMachine)
+   {
+      sshSimLauncher.killSim(gazeboMachine, controllerMachine);
+      userOwnedSims.remove(gazeboMachine);
+      uiSpawner.killAll();
+      scsSpawner.killAll();
+
+      launchButtons.get(cloudMachineTrees.get(gazeboMachine).first()).setIcon(startSimIcon);
+      launchButtons.get(cloudMachineTrees.get(gazeboMachine).first()).getParent().repaint();
+   }
+
+   private void startLaunchProcess(final LocalCloudMachines gazeboMachine, final LocalCloudMachines controllerMachine, final String task,
+         final String pluginOption)
+   {
+      startGazebo(gazeboMachine, controllerMachine, task, pluginOption);
+
+      startOperatorUI();
+
+      startSCS(task, pluginOption);
+
+      launchButtons.get(cloudMachineTrees.get(gazeboMachine).first()).setIcon(killSimIcon);
+      launchButtons.get(cloudMachineTrees.get(gazeboMachine).first()).getParent().repaint();
+   }
+
+   private void startSCS(final String task, final String pluginOption)
+   {
+      new Thread(new Runnable()
+      {
+         public void run()
+         {
+            if (scsCheckBox.isSelected() && !scsSpawner.hasRunningProcesses())
+            {
+               if (pluginOption.contains("plugin"))
+               {
+                  String newTask = "";
+
+                  if (task.toLowerCase().contains("vehicle"))
+                     newTask = "ONLY_VEHICLE";
+                  else
+                     newTask = task;
+
+                  if (newTask.toLowerCase().contains("parking") || newTask.toLowerCase().contains("hand") || newTask.toLowerCase().equals("atlas"))
+                  {
+                     System.err.println("Can't launch SCS; no environment for selected task");
+                     return;
+                  }
+
+                  if (estimatorCheckBox.isEnabled() && estimatorCheckBox.isSelected())
+                  {
+                     ThreadTools.sleep(5000);
+                     scsSpawner.spawn(DRCDemo01.class, new String[] { "-Xms1024m", "-Xmx2048m" }, new String[] { "--sim", "--env", newTask, "--gazebo",
+                           "--gazeboHost", DRCConfigParameters.GAZEBO_HOST, "--initialize-estimator" });
+                  }
+                  else
+                  {
+                     ThreadTools.sleep(5000);
+                     scsSpawner.spawn(DRCDemo01.class, new String[] { "-Xms1024m", "-Xmx2048m" }, new String[] { "--sim", "--env", newTask, "--gazebo",
+                           "--gazeboHost", DRCConfigParameters.GAZEBO_HOST });
+                  }
+               }
+               else
+               {
+                  System.err.println("Launching SCS without Jesper plugin not yet implemented");
+               }
+            }
+         }
+      }).start();
+   }
+
+   private void startOperatorUI()
+   {
+      if (operatorUICheckBox.isSelected() && !uiSpawner.hasRunningProcesses())
+      {
+         uiSpawner.spawn(DRCOperatorUserInterface.class, new String[] { "-Xms1024m", "-Xmx2048m" }, null);
+      }
+   }
+
+   private void startGazebo(final LocalCloudMachines gazeboMachine, final LocalCloudMachines controllerMachine, final String task, final String pluginOption)
+   {
+      sshSimLauncher.launchSim(task, gazeboMachine, controllerMachine, pluginOption);
+      userOwnedSims.add(gazeboMachine);
    }
 
    public static void main(String[] args)
