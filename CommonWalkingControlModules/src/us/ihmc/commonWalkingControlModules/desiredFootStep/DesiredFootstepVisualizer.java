@@ -60,6 +60,7 @@ public class DesiredFootstepVisualizer
    private final SideDependentList<SixDoFJoint> sixDoFJoints;
    private final SideDependentList<ReferenceFrame> soleFrames;
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
+   private final SideDependentList<ReferenceFrame> footFrames;
    private final ArrayList<ReferenceFrame> framesToVisualize;
 
    private final SideDependentList<ContactablePlaneBody> bipedFeet;
@@ -77,6 +78,7 @@ public class DesiredFootstepVisualizer
       RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
       this.sixDoFJoints = new SideDependentList<SixDoFJoint>();
       this.soleFrames = new SideDependentList<ReferenceFrame>();
+      this.footFrames = new SideDependentList<ReferenceFrame>();
       this.ankleZUpFrames = new SideDependentList<ReferenceFrame>();
       this.bipedFeet = new SideDependentList<ContactablePlaneBody>();
 
@@ -97,6 +99,8 @@ public class DesiredFootstepVisualizer
                                        new Vector3d(0.0, 0.0, -footHeight));
          soleFrames.put(robotSide, soleFrame);
 
+         footFrames.put(robotSide, footFrame);
+
          ZUpFrame ankleZUpFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(), footFrame, robotSideName + "AnkleZUp");
          ankleZUpFrames.put(robotSide, ankleZUpFrame);
 
@@ -109,6 +113,7 @@ public class DesiredFootstepVisualizer
 
       for (RobotSide robotSide : RobotSide.values)
       {
+         footFrames.get(robotSide).update();
          ankleZUpFrames.get(robotSide).update();
       }
 
@@ -136,6 +141,11 @@ public class DesiredFootstepVisualizer
    private SideDependentList<ReferenceFrame> getAnkleZUpFrames()
    {
       return ankleZUpFrames;
+   }
+   
+   private SideDependentList<ReferenceFrame> getFootFrames()
+   {
+      return footFrames;
    }
 
    private SideDependentList<? extends ContactablePlaneBody> getBipedFeet()
@@ -251,6 +261,7 @@ public class DesiredFootstepVisualizer
       {
          sixDoFJoints.get(robotSide).updateFramesRecursively();
          soleFrames.get(robotSide).update();
+         footFrames.get(robotSide).update();
          ankleZUpFrames.get(robotSide).update();
       }
    }
@@ -362,7 +373,8 @@ public class DesiredFootstepVisualizer
 //                                                                                    parentRegistry);
 
       ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator =
-         new ComponentBasedDesiredFootstepCalculator(desiredFootstepVisualizer.getAnkleZUpFrames(), desiredFootstepVisualizer.getBipedFeet(),
+         new ComponentBasedDesiredFootstepCalculator(desiredFootstepVisualizer.getAnkleZUpFrames(), desiredFootstepVisualizer.getFootFrames(),
+               desiredFootstepVisualizer.getBipedFeet(),
             desiredHeadingControlModule, desiredVelocityControlModule, parentRegistry);
       desiredFootstepCalculator.setInPlaceWidth(0.4);
       desiredFootstepCalculator.setMaxStepLength(0.6);

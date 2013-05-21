@@ -554,9 +554,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
 
          // note: this has to be done before the ICP trajectory generator is initialized, since it is using nextFootstep
-         upcomingFootstepList.checkForFootsteps(icpAndMomentumBasedController.getPointPositionGrabber(), readyToGrabNextFootstep, upcomingSupportLeg,
-                 bipedFeet);
-         checkForSteppingOnOrOff(transferToSide);
+         if (getTimeInCurrentState() > 0.15)
+         {
+            upcomingFootstepList.checkForFootsteps(icpAndMomentumBasedController.getPointPositionGrabber(), readyToGrabNextFootstep, upcomingSupportLeg,
+                  bipedFeet);
+            checkForSteppingOnOrOff(transferToSide);
+         }
 
          initializeICPPlannerIfNecessary();
 

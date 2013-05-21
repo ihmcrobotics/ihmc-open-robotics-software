@@ -22,11 +22,14 @@ import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableDesiredFootstepCalculator
 {
+   private final BooleanYoVariable matchSupportFootPlane = new BooleanYoVariable("matchSupportFootPlane", registry);
+
    private final DoubleYoVariable inPlaceWidth = new DoubleYoVariable("inPlaceWidth", registry);
    private final DoubleYoVariable maxStepLength = new DoubleYoVariable("maxStepLength", registry);
 
@@ -39,6 +42,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
    private final DoubleYoVariable velocityMagnitudeToLeftOfHeading = new DoubleYoVariable("velocityMagnitudeToLeftOfHeading", registry);
 
    private SideDependentList<? extends ReferenceFrame> ankleZUpFrames;
+   private SideDependentList<? extends ReferenceFrame> ankleFrames;
 
    private final DesiredHeadingControlModule desiredHeadingControlModule;
    private final DesiredVelocityControlModule desiredVelocityControlModule;
@@ -46,15 +50,19 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
    private GroundProfile groundProfile;
 
    public ComponentBasedDesiredFootstepCalculator(SideDependentList<? extends ReferenceFrame> ankleZUpFrames,
-           SideDependentList<? extends ContactablePlaneBody> bipedFeet, DesiredHeadingControlModule desiredHeadingControlModule,
-           DesiredVelocityControlModule desiredVelocityControlModule, YoVariableRegistry parentRegistry)
+           SideDependentList<? extends ReferenceFrame> ankleFrames, SideDependentList<? extends ContactablePlaneBody> bipedFeet,
+           DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
+           YoVariableRegistry parentRegistry)
    {
       super(bipedFeet, getFramesToStoreFootstepsIn(), parentRegistry);
 
       this.ankleZUpFrames = ankleZUpFrames;
+      this.ankleFrames = ankleFrames;
 
       this.desiredHeadingControlModule = desiredHeadingControlModule;
       this.desiredVelocityControlModule = desiredVelocityControlModule;
+
+      matchSupportFootPlane.set(false);
    }
 
    public void setGroundProfile(GroundProfile groundProfile)
@@ -66,23 +74,27 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
    {
       RobotSide swingLegSide = supportLegSide.getOppositeSide();
       ReferenceFrame supportAnkleZUpFrame = ankleZUpFrames.get(supportLegSide);
-      ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
-      Matrix3d footToWorldRotation = computeDesiredFootRotation(desiredHeadingFrame);
+      ReferenceFrame supportAnkleFrame = ankleFrames.get(supportLegSide);
 
-      FramePoint footstepPosition = getDesiredFootstepPosition(supportAnkleZUpFrame, swingLegSide, desiredHeadingFrame, footToWorldRotation);
-      
+      ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
+      Matrix3d footToWorldRotation = computeDesiredFootRotation(desiredHeadingFrame, supportAnkleFrame);
+
+      FramePoint footstepPosition = getDesiredFootstepPosition(supportAnkleZUpFrame, supportAnkleFrame, swingLegSide, desiredHeadingFrame, footToWorldRotation);
+
       setYoVariables(swingLegSide, footToWorldRotation, footstepPosition.getVectorCopy());
    }
-   
+
    @Override
    public Footstep predictFootstepAfterDesiredFootstep(RobotSide supportLegSide, Footstep desiredFootstep)
    {
       RobotSide futureSwingLegSide = supportLegSide;
       ReferenceFrame futureSupportAnkleZUpFrame = desiredFootstep.getPoseReferenceFrame();
+      ReferenceFrame futureSupportAnkleFrame = desiredFootstep.getPoseReferenceFrame();
+
       ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
-      Matrix3d footToWorldRotation = computeDesiredFootRotation(desiredHeadingFrame);
-      
-      FramePoint footstepPosition = getDesiredFootstepPosition(futureSupportAnkleZUpFrame, futureSwingLegSide, desiredHeadingFrame, footToWorldRotation);
+      Matrix3d footToWorldRotation = computeDesiredFootRotation(desiredHeadingFrame, futureSupportAnkleFrame);
+
+      FramePoint footstepPosition = getDesiredFootstepPosition(futureSupportAnkleZUpFrame, futureSupportAnkleFrame, futureSwingLegSide, desiredHeadingFrame, footToWorldRotation);
       FrameOrientation footstepOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
       double[] yawPitchRoll = new double[3];
       RotationFunctions.getYawPitchRoll(yawPitchRoll, footToWorldRotation);
@@ -91,24 +103,25 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
       FramePose footstepPose = new FramePose(footstepPosition, footstepOrientation);
       footstepPose.changeFrame(ReferenceFrame.getWorldFrame());
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("poseReferenceFrame", footstepPose);
-      
+
       ContactablePlaneBody foot = contactableBodies.get(futureSwingLegSide);
       boolean trustHeight = true;
       ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, foot);
       List<FramePoint> contactPoints = FootstepUtils.getContactPointsInFrame(getContactPoints(futureSwingLegSide), soleFrame);
-      
+
       return new Footstep(foot, poseReferenceFrame, soleFrame, contactPoints, trustHeight);
    }
-   
-   private FramePoint getDesiredFootstepPosition(ReferenceFrame supportAnkleZUpFrame, RobotSide swingLegSide, ReferenceFrame desiredHeadingFrame,
-         Matrix3d footToWorldRotation)
+
+   private FramePoint getDesiredFootstepPosition(ReferenceFrame supportAnkleZUpFrame, ReferenceFrame supportAnkleFrame, RobotSide swingLegSide, ReferenceFrame desiredHeadingFrame,
+           Matrix3d footToWorldRotation)
    {
       FrameVector2d desiredOffsetFromAnkle = computeDesiredOffsetFromSupportAnkle(swingLegSide, desiredHeadingFrame);
-      FramePoint footstepPosition = computeDesiredFootPosition(swingLegSide, supportAnkleZUpFrame, desiredOffsetFromAnkle, footToWorldRotation);
+      FramePoint footstepPosition = computeDesiredFootPosition(swingLegSide, supportAnkleZUpFrame, supportAnkleFrame, desiredOffsetFromAnkle, footToWorldRotation);
       footstepPosition.changeFrame(ReferenceFrame.getWorldFrame());
+
       return footstepPosition;
    }
-   
+
    // TODO: clean up
    private FrameVector2d computeDesiredOffsetFromSupportAnkle(RobotSide swingLegSide, ReferenceFrame desiredHeadingFrame)
    {
@@ -148,7 +161,40 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
       return desiredOffsetFromAnkle;
    }
 
-   private Matrix3d computeDesiredFootRotation(ReferenceFrame desiredHeadingFrame)
+   private Matrix3d computeDesiredFootRotation(ReferenceFrame desiredHeadingFrame, ReferenceFrame supportFootFrame)
+   {
+      if (matchSupportFootPlane.getBooleanValue())
+      {
+         return computeDesiredFootRotationMatchSupportFootPlane(desiredHeadingFrame, supportFootFrame);
+      }
+      else
+      {
+         return computeDesiredFootRotationJustMatchSupportFootYaw(desiredHeadingFrame);
+      }
+   }
+
+   private Matrix3d computeDesiredFootRotationMatchSupportFootPlane(ReferenceFrame desiredHeadingFrame, ReferenceFrame supportFootFrame)
+   {
+//      Transform3D desiredHeadingToWorldTransform = desiredHeadingFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+//      Matrix3d desiredHeadingToWorldRotation = new Matrix3d();
+//      desiredHeadingToWorldTransform.get(desiredHeadingToWorldRotation);
+//      double yaw = RotationFunctions.getYaw(desiredHeadingToWorldRotation);
+      
+      Transform3D supportFootToWorldTransform = supportFootFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+      Matrix3d supportFootToWorldRotation = new Matrix3d();
+      supportFootToWorldTransform.get(supportFootToWorldRotation);
+//      double yaw = RotationFunctions.getYaw(footToSupportRotation);
+//      
+//      
+//      
+//      double pitch = stepPitch.getDoubleValue();
+//      double roll = 0.0;
+//      RotationFunctions.setYawPitchRoll(footToSupportRotation, yaw, pitch, roll);
+
+      return supportFootToWorldRotation;
+   }
+
+   private Matrix3d computeDesiredFootRotationJustMatchSupportFootYaw(ReferenceFrame desiredHeadingFrame)
    {
       Transform3D footToSupportTransform = desiredHeadingFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
       Matrix3d footToSupportRotation = new Matrix3d();
@@ -161,8 +207,33 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
       return footToSupportRotation;
    }
 
+   private FramePoint computeDesiredFootPosition(RobotSide upcomingSwingLegSide, ReferenceFrame upcomingSupportAnkleZUpFrame, ReferenceFrame upcomingSupportAnkleFrame,
+           FrameVector2d desiredOffsetFromAnkle, Matrix3d swingFootToWorldRotation)
+   {
+      if (matchSupportFootPlane.getBooleanValue())
+      {
+         return computeDesiredFootPositionMatchSupportFootPlane(upcomingSwingLegSide, upcomingSupportAnkleFrame, desiredOffsetFromAnkle,
+                 swingFootToWorldRotation);
+      }
+      else
+      {
+         return computeDesiredFootPositionMatchMinimumZ(upcomingSwingLegSide, upcomingSupportAnkleZUpFrame, desiredOffsetFromAnkle, swingFootToWorldRotation);
+      }
+   }
 
-   private FramePoint computeDesiredFootPosition(RobotSide upcomingSwingLegSide, ReferenceFrame upcomingSupportAnkleZUpFrame,
+   private FramePoint computeDesiredFootPositionMatchSupportFootPlane(RobotSide upcomingSwingLegSide, ReferenceFrame upcomingSupportAnkleFrame,
+           FrameVector2d desiredOffsetFromAnkle, Matrix3d swingFootToWorldRotation)
+   {
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+      desiredOffsetFromAnkle.changeFrame(upcomingSupportAnkleFrame);
+      FramePoint footstepPosition = new FramePoint(upcomingSupportAnkleFrame, desiredOffsetFromAnkle.getX(), desiredOffsetFromAnkle.getY(), 0.0);
+      footstepPosition.changeFrame(worldFrame);
+
+      return footstepPosition;
+   }
+
+   private FramePoint computeDesiredFootPositionMatchMinimumZ(RobotSide upcomingSwingLegSide, ReferenceFrame upcomingSupportAnkleZUpFrame,
            FrameVector2d desiredOffsetFromAnkle, Matrix3d swingFootToWorldRotation)
    {
       ContactablePlaneBody upcomingSwingFoot = contactableBodies.get(upcomingSwingLegSide);
