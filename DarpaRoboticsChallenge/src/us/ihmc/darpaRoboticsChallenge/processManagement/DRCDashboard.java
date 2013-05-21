@@ -1043,7 +1043,7 @@ public class DRCDashboard
    }
 
    public static void main(String[] args)
-   {
+   {      
       final DRCDashboard dash = new DRCDashboard();
 
       SwingUtilities.invokeLater(new Runnable()
