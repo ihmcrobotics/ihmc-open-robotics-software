@@ -11,6 +11,7 @@ import javax.vecmath.Point3d;
 
 import org.junit.Test;
 
+import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointPositionTrajectoryGeneratorVisualizer.TwoWaypointPositionTrajectorySpecifiedByPoints;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -53,10 +54,10 @@ public class TwoWaypointPositionTrajectoryGeneratorTest {
 		YoPositionProvider finalPositionProvider = new YoPositionProvider(finalPosition);
 		VectorProvider finalVelocityProvider = new ConstantVectorProvider(new FrameVector(worldFrame, new double[]{0.1, 0.01, -0.02}));
 		
-		TrajectoryParameters trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(waypoints);
+		TrajectoryParameters trajectoryParameters = null;
 		TrajectoryParametersProvider trajectoryParametersProvider = new TrajectoryParametersProvider(trajectoryParameters);
 		
-		TwoWaypointPositionTrajectoryGenerator trajectory = new TwoWaypointPositionTrajectoryGenerator("", worldFrame, stepTimeProvider,
+		TwoWaypointPositionTrajectorySpecifiedByPoints trajectory = new TwoWaypointPositionTrajectorySpecifiedByPoints("", worldFrame, stepTimeProvider,
 				initialPositionProvider, initialVelocityProvider, finalPositionProvider, finalVelocityProvider, trajectoryParametersProvider, new YoVariableRegistry(""), 20,
 				null, null, false);
 		
@@ -95,12 +96,5 @@ public class TwoWaypointPositionTrajectoryGeneratorTest {
 		assertEquals(actualVel.getY(), expectedVel.getY(), 1e-7);
 		assertEquals(actualVel.getZ(), expectedVel.getZ(), 1e-7);
 		assertTrue(trajectory.isDone());
-	}
-	
-	// make a test where you can know the arc lengths of the various portions in order to test intermediate points
-	
-	// take a look at other trajectory generator tests
-	
-	// incorporate tests of the two public voids
-	
+	}	
 }
