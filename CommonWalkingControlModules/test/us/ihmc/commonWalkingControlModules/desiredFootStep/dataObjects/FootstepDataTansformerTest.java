@@ -1,20 +1,28 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects;
 
-import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypointGenerationMethod;
-import org.junit.Test;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
-import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.geometry.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import javax.media.j3d.Transform3D;
-import javax.vecmath.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import javax.media.j3d.Transform3D;
+import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+
+import org.junit.Test;
+
+import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.math.geometry.Box3d;
+import us.ihmc.utilities.math.geometry.Direction;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+
+import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypointGenerationMethod;
 
 /**
  * Created with IntelliJ IDEA.
@@ -66,8 +74,6 @@ public class FootstepDataTansformerTest
       }
       ret.expectedContactPoints = new ArrayList<Point3d>(listOfPoints);
 
-      ret.trustHeight = false;
-
       listOfPoints = new ArrayList<Point3d>();
       {
          for (int i = 0; i < 30; i++)
@@ -75,10 +81,6 @@ public class FootstepDataTansformerTest
             listOfPoints.add(RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0));
          }
       }
-
-      ret.trajectoryWaypoints = new ArrayList<Point3d>(listOfPoints);
-
-      ret.trajectoryWaypointGroundClearance = random.nextDouble();
 
       Point3d point = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
       ret.trajectoryBoxData = new Box3d(RandomTools.generateRandomTransform(random), Math.abs(point.getX()), Math.abs(point.getY()), Math.abs(point.getZ()));
@@ -121,23 +123,11 @@ public class FootstepDataTansformerTest
          assertEquals("not equal", 0.0, distance, 1e-6);
       }
 
-
-      // public boolean trustHeight;
-      assertEquals("", footstepData.getTrustHeight(), transformedFootstepData.getTrustHeight());
-
-      // public List<Point3d> trajectoryWaypoints;
-      originalList = footstepData.getTrajectoryWaypoints();
-      transformedList = transformedFootstepData.getTrajectoryWaypoints();
-      assertEquals("", originalList.size(), transformedList.size());
-
       for (int i = 0; i < originalList.size(); i++)
       {
          distance = getDistanceBetweenPoints(originalList.get(i), transform3D, transformedList.get(i));
          assertEquals("not equal", 0.0, distance, 1e-6);
       }
-
-      // public double trajectoryWaypointGroundClearance;
-      assertEquals("", footstepData.getTrajectoryWaypointGroundClearance(), transformedFootstepData.getTrajectoryWaypointGroundClearance(), 1e-6);
 
       // public FlatHorizontalBoxData trajectoryBoxData;
       assertTrue(areBoxesEqual(footstepData.getTrajectoryBox(), transform3D, transformedFootstepData.getTrajectoryBox()));

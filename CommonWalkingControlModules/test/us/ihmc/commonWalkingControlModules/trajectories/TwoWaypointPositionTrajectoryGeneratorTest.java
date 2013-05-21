@@ -11,7 +11,6 @@ import javax.vecmath.Point3d;
 
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointPositionTrajectoryGeneratorVisualizer.TwoWaypointPositionTrajectorySpecifiedByPoints;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -57,9 +56,9 @@ public class TwoWaypointPositionTrajectoryGeneratorTest {
 		TrajectoryParameters trajectoryParameters = null;
 		TrajectoryParametersProvider trajectoryParametersProvider = new TrajectoryParametersProvider(trajectoryParameters);
 		
-		TwoWaypointPositionTrajectorySpecifiedByPoints trajectory = new TwoWaypointPositionTrajectorySpecifiedByPoints("", worldFrame, stepTimeProvider,
+		TwoWaypointPositionTrajectoryGenerator trajectory = new TwoWaypointPositionTrajectoryGenerator("", worldFrame, stepTimeProvider,
 				initialPositionProvider, initialVelocityProvider, finalPositionProvider, finalVelocityProvider, trajectoryParametersProvider, new YoVariableRegistry(""), 20,
-				null, null, false, waypoints);
+				null, null, false);
 		
 		List<Point3d> points = new ArrayList<Point3d>();
 		points.add(firstIntermediatePosition);

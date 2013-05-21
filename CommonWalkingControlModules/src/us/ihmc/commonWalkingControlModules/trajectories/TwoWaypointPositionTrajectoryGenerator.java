@@ -51,6 +51,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    private final BagOfBalls trajectoryBagOfBalls;
    private final BagOfBalls fixedPointBagOfBalls;
+   
+   private final BagOfBalls boxBag;
 
    private final DoubleProvider stepTimeProvider;
    private final PositionProvider[] positionSources = new PositionProvider[2];
@@ -101,12 +103,14 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
                  dynamicGraphicObjectsListRegistry);
          fixedPointBagOfBalls = new BagOfBalls(6, 0.02, namePrefix + "WaypointBagOfBalls", registry, dynamicGraphicObjectsListRegistry);
       }
-
+      
       else
       {
          trajectoryBagOfBalls = null;
          fixedPointBagOfBalls = null;
       }
+      
+      boxBag = new BagOfBalls(4, 0.04, namePrefix + "BoxBag", registry, dynamicGraphicObjectsListRegistry);
       
       this.waypointGenerationMethod = new EnumYoVariable<TrajectoryWaypointGenerationMethod>(namePrefix + "WaypointGenerationMethod", registry, TrajectoryWaypointGenerationMethod.class);
 
@@ -611,7 +615,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    }
 
    private List<FramePoint> getWaypointsFromABox(Box3d box)
-   {
+   {      
       Transform3D boxTransform = box.getTransformCopy();
       Transform3D inverseBoxTransform = new Transform3D();
       inverseBoxTransform.invert(boxTransform);
@@ -622,6 +626,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       Point3d boxFrameFinalPosition = finalPosition.getPointCopy();
       inverseBoxTransform.transform(boxFrameInitialPosition);
       inverseBoxTransform.transform(boxFrameFinalPosition);
+      
+      ReferenceFrame boxFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("boxFrame", referenceFrame, boxTransform);
 
       Point3d[] xyPlaneBoxIntersections = new Point3d[2];
       int index = 0;

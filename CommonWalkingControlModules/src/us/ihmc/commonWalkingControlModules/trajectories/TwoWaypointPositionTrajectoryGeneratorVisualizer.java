@@ -3,8 +3,6 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point3d;
-
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -192,13 +190,13 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
    public static class TwoWaypointPositionTrajectorySpecifiedByPoints extends TwoWaypointPositionTrajectoryGenerator
    {
       private final ReferenceFrame referenceFrame;
-      private final List<Point3d> waypoints;
+      private final List<FramePoint> waypoints;
       
       public TwoWaypointPositionTrajectorySpecifiedByPoints(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
             PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider finalPositionProvider,
             VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider, YoVariableRegistry parentRegistry,
             int arcLengthCalculatorDivisionsPerPolynomial, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-            WalkingControllerParameters walkingControllerParameters, boolean visualize, List<Point3d> waypoints)
+            WalkingControllerParameters walkingControllerParameters, boolean visualize, List<FramePoint> waypoints)
       {
          super(namePrefix, referenceFrame, stepTimeProvider, initialPositionProvider, initialVelocityProvider, finalPositionProvider, finalDesiredVelocityProvider,
                trajectoryParametersProvider, parentRegistry, arcLengthCalculatorDivisionsPerPolynomial, dynamicGraphicObjectsListRegistry, walkingControllerParameters,
@@ -216,7 +214,7 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
          
          for (int i = 0; i < 2; i++)
          {
-            wayFramePoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), waypoints.get(i)));
+            wayFramePoints.add(waypoints.get(i));
          }
          
          for (int i = 0; i < 2; i++)

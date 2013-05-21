@@ -44,7 +44,7 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
       FootstepData footstepData = (FootstepData) object;
       ContactablePlaneBody contactableBody = findContactableBodyByName(footstepData.getRigidBodyName());
 
-      boolean trustHeight = footstepData.getTrustHeight();
+      boolean trustHeight = true;
       String id = footstepData.getId();
       FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("poseReferenceFrame", framePose);
