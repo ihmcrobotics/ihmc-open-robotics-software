@@ -49,7 +49,7 @@ public class FootPosePacketTransformerTest
 
          Point3d point3d = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
 
-         FootPosePacket starting = new FootPosePacket(robotSide, point3d, quat, i % 2 == 0, i % 2 == 1);
+         FootPosePacket starting = new FootPosePacket(robotSide, point3d, quat, i % 2 == 0);
 
          transform3D = RandomTools.generateRandomTransform(random);
 
@@ -63,9 +63,6 @@ public class FootPosePacketTransformerTest
    {
       // RobotSide robotSide;
       assertTrue(starting.getRobotSide().equals(ending.getRobotSide()));
-
-      // boolean toHomePosition;
-      assertTrue(starting.isToHomePosition() == ending.isToHomePosition());
 
       // Point3d position;
       double distance = getDistanceBetweenPoints(starting.getPosition(), transform3D, ending.getPosition());
