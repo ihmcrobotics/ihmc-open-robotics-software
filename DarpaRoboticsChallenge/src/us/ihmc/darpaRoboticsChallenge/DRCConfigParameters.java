@@ -45,8 +45,10 @@ public class DRCConfigParameters
    public static final String CLOUD_MONSTER_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMONSTER);
 
 
-   public static final String GAZEBO_HOST = CLOUD_MINION2_IP;
-   public static final String SCS_MACHINE_IP_ADDRESS = LOCALHOST;
+
+   public static final String GAZEBO_HOST = CLOUD_MONSTER_JR_IP;
+   public static final String SCS_MACHINE_IP_ADDRESS = CLOUD_MONSTER_IP;
+
    public static final String OPERATOR_INTERFACE_IP_ADDRESS = LOCALHOST;
    
    public static final String ROS_MASTER_URI = "http://" + GAZEBO_HOST + ":11311";
