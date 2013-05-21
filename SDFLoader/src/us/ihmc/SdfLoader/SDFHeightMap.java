@@ -62,6 +62,10 @@ public class SDFHeightMap implements us.ihmc.graphics3DAdapter.HeightMap
       int yPoint = (int) Math.round(yFactor * ((double)height));
       
       int index = xPoint + yPoint * width;
+      if(index >= data.length)
+      {
+         return 0.0;
+      }
       return ((double) (data[index] & 0xFF)) * scale;
       
    }
