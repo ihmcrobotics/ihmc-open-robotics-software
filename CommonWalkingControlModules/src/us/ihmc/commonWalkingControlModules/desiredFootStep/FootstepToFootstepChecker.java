@@ -74,7 +74,7 @@ public class FootstepToFootstepChecker
 
       double pitchSlope = frameVector.getZ();
       
-      System.out.println("pitchSlope = " + pitchSlope);
+      printIfDebug("pitchSlope = " + pitchSlope);
 
       return pitchSlope;
    }
