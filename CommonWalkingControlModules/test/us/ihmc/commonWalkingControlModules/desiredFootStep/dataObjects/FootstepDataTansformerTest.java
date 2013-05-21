@@ -40,7 +40,7 @@ public class FootstepDataTansformerTest
       {
          originalFootstepData = getTestFootstepData();
          transform3D = RandomTools.generateRandomTransform(random);
-         transformedFootstepData = FootstepDataTansformer.transformFootstepData(originalFootstepData, transform3D);
+         transformedFootstepData = FootstepDataTransformer.transformFootstepData(originalFootstepData, transform3D);
 
          performEqualsTestsWithTransform(originalFootstepData, transform3D, transformedFootstepData);
       }

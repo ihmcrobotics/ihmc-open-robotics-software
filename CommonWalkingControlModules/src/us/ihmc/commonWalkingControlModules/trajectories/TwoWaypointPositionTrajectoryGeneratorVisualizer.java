@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.vecmath.Point3d;
+
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -179,47 +181,48 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
 
       YoTwoWaypointTrajectoryParameters trajectoryParameters = null;
       TrajectoryParametersProvider trajectoryParametersProvider = new TrajectoryParametersProvider(trajectoryParameters);
-
+      
       int arcLengthCalculatorDivisionsPerPolynomial = 20;
 
       return new TwoWaypointPositionTrajectorySpecifiedByPoints(namePrefix + "Generator", worldFrame, stepTimeProvider, initialPositionProvider,
               initialVelocityProvider, finalPositionProvider, finalDesiredVelocityProvider, trajectoryParametersProvider, registry,
-              arcLengthCalculatorDivisionsPerPolynomial, dynamicGraphicObjectsListRegistry, null, false);
+              arcLengthCalculatorDivisionsPerPolynomial, dynamicGraphicObjectsListRegistry, null, false, null);
    }
    
    public static class TwoWaypointPositionTrajectorySpecifiedByPoints extends TwoWaypointPositionTrajectoryGenerator
    {
       private final ReferenceFrame referenceFrame;
+      private final List<Point3d> waypoints;
       
       public TwoWaypointPositionTrajectorySpecifiedByPoints(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
             PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider finalPositionProvider,
             VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider, YoVariableRegistry parentRegistry,
             int arcLengthCalculatorDivisionsPerPolynomial, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-            WalkingControllerParameters walkingControllerParameters, boolean visualize)
+            WalkingControllerParameters walkingControllerParameters, boolean visualize, List<Point3d> waypoints)
       {
          super(namePrefix, referenceFrame, stepTimeProvider, initialPositionProvider, initialVelocityProvider, finalPositionProvider, finalDesiredVelocityProvider,
                trajectoryParametersProvider, parentRegistry, arcLengthCalculatorDivisionsPerPolynomial, dynamicGraphicObjectsListRegistry, walkingControllerParameters,
                visualize);
          
          this.referenceFrame = referenceFrame;
+         this.waypoints = waypoints;
       }
       
       @Override
       protected void setWaypointPositions()
       {
          int[] waypointIndices = new int[] {2, 3};
+         List<FramePoint> wayFramePoints = new ArrayList<FramePoint>();
          
-         List<FramePoint> waypoints = new ArrayList<FramePoint>();
-
          for (int i = 0; i < 2; i++)
          {
-            waypoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), trajectoryParameters.getWaypoints().get(i)));
+            wayFramePoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), waypoints.get(i)));
          }
          
          for (int i = 0; i < 2; i++)
          {
-            waypoints.get(i).changeFrame(referenceFrame);
-            allPositions[waypointIndices[i]].set(waypoints.get(i));
+            wayFramePoints.get(i).changeFrame(referenceFrame);
+            allPositions[waypointIndices[i]].set(wayFramePoints.get(i));
          }
          checkForCloseWaypoints();
       }
