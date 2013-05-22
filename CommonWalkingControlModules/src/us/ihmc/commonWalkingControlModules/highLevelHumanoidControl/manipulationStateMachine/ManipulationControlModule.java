@@ -95,9 +95,9 @@ public class ManipulationControlModule
                                                                     momentumBasedController, dynamicGraphicObjectsListRegistry, parentRegistry);
       stateMachine.addState(toroidManipulationState);
 
-      State<ManipulationState> fingerToroidManipulationState = new HighLevelFingerToroidManipulationState(twistCalculator, jacobians, momentumBasedController,
-                                                                  fullRobotModel.getElevator(), torusPoseProvider, handControllers, registry,
-                                                                  dynamicGraphicObjectsListRegistry);
+      final State<ManipulationState> fingerToroidManipulationState = new HighLevelFingerToroidManipulationState(twistCalculator, jacobians,
+                                                                        momentumBasedController, fullRobotModel.getElevator(), torusPoseProvider,
+                                                                        handControllers, registry, dynamicGraphicObjectsListRegistry);
       stateMachine.addState(fingerToroidManipulationState);
 
       StateTransitionCondition stateTransitionCondition = new StateTransitionCondition()
@@ -127,8 +127,18 @@ public class ManipulationControlModule
       };
       StateTransition<ManipulationState> toDirectManipulation = new StateTransition<ManipulationState>(directControlManipulationState.getStateEnum(),
                                                                    toDirectManipulationCondition);
-      toroidManipulationState.addStateTransition(toDirectManipulation);
+      fingerToroidManipulationState.addStateTransition(toDirectManipulation);
 
+      StateTransitionCondition doneWithFingerToroidManipulationCondition = new StateTransitionCondition()
+      {
+         public boolean checkCondition()
+         {
+            return fingerToroidManipulationState.isDone();
+         }
+      };
+      StateTransition<ManipulationState> fingerToroidManipulationDoneToDirectManipulation =
+         new StateTransition<ManipulationState>(directControlManipulationState.getStateEnum(), doneWithFingerToroidManipulationCondition);
+      fingerToroidManipulationState.addStateTransition(fingerToroidManipulationDoneToDirectManipulation);
 
 //    toroidManipulationState.addStateTransition(toToroidManipulation);
    }
