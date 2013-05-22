@@ -32,6 +32,16 @@ public class CreateGaussianModelApp {
 
       BoofMiscOps.saveXML(model,"gaussian_line_far.xml");
 
+      model = GaussianColorClassifier.train(new FileInputStream("car_color.txt"));
+      model.print();
+
+      BoofMiscOps.saveXML(model,"gaussian_car_color.xml");
+
+      model = GaussianColorClassifier.train(new FileInputStream("car_color2.txt"));
+      model.print();
+
+      BoofMiscOps.saveXML(model,"gaussian_car_color2.xml");
+
 //      model = GaussianColorClassifier.train(new FileInputStream(coneBlack));
 //      model.print();
 //
