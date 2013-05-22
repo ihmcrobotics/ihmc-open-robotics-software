@@ -633,7 +633,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       double a = (boxFrameFinalPosition.getY() - boxFrameInitialPosition.getY()) / (boxFrameFinalPosition.getX() - boxFrameInitialPosition.getX());
       double b = boxFrameInitialPosition.getY() - a * boxFrameInitialPosition.getX();
       Vector3d halfSideLengthsXY = new Vector3d(0.5 * box.getDimension(Direction.X), 0.5 * box.getDimension(Direction.Y), 0.0);
-      double zVal = walkingControllerParameters.getAnkleHeight() + SimpleTwoWaypointTrajectoryParameters.getDefaultGroundClearance();
+      double zVal = walkingControllerParameters.getAnkleHeight() + SimpleTwoWaypointTrajectoryParameters.getLowStepGroundClearance();
       
       FramePoint f0 = new FramePoint(boxFrame, new Point3d(halfSideLengthsXY.x, halfSideLengthsXY.y, 1.5));
       FramePoint f1 = new FramePoint(boxFrame, new Point3d(halfSideLengthsXY.x, - halfSideLengthsXY.y, 1.5));
@@ -675,6 +675,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          }
       }
 
+      // return default waypoints at height of box if there are no intersections
       if (index != 2)
       {
          Vector3d translation = new Vector3d();
@@ -683,6 +684,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          return getWaypointsAtGroundClearance(translation.z + zVal);
       }
 
+      // reorder intersections so closer one to initial position is first
       if (xyPlaneBoxIntersections[0].distance(boxFrameInitialPosition) > xyPlaneBoxIntersections[1].distance(boxFrameInitialPosition))
       {
          FramePoint tempPoint = xyPlaneBoxIntersections[1];
@@ -702,7 +704,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       directionOfFootstep.sub(boxFrameFinalPosition, boxFrameInitialPosition);
       directionOfFootstep.changeFrame(referenceFrame);
       directionOfFootstep.normalize();
-      double[] waypointShiftsToAvoidFootCollision = new double[] {-walkingControllerParameters.getFootForwardOffset(),
+      double[] waypointShiftsToAvoidFootCollision = new double[] {- walkingControllerParameters.getFootForwardOffset(),
               walkingControllerParameters.getFootBackwardOffset()};
       for (int i = 0; i < 2; i++)
       {
