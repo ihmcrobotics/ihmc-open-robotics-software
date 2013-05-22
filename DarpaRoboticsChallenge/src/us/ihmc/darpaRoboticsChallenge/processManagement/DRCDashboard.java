@@ -55,6 +55,8 @@ import org.apache.commons.lang.WordUtils;
 
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01;
+import us.ihmc.darpaRoboticsChallenge.DRCDemo01Types;
+import us.ihmc.darpaRoboticsChallenge.DRCEnvironmentModel;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig.LocalCloudMachines;
 import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCPluginTasks;
@@ -92,12 +94,12 @@ public class DRCDashboard
    private JLabel controllerMachineSelectionLabel;
    private JComboBox controllerMachineSelectionCombo;
 
-   private JPanel gazeboUtilitiesPanel;
-   private JLabel gazeboProcessListLabel;
-   private JList gazeboProcessList;
-   private DefaultListModel gazeboProcessListModel;
+   private JPanel startingLocationsPanel;
+   private JLabel startingLocationsListLabel;
+   private JList startingLocationsList;
+   private DefaultListModel startingLocationsListModel;
 
-   private JScrollPane gazeboProcessListScroller;
+   private JScrollPane startingLocationsListScroller;
 
    private JPanel networkInfoPanel;
 
@@ -440,9 +442,9 @@ public class DRCDashboard
       c.gridx = 0;
       c.weightx = 0.3;
       c.ipadx = 30;
-      gazeboUtilitiesPanel = new JPanel(new GridBagLayout());
-      gazeboUtilitiesPanel.setBorder(BorderFactory.createEtchedBorder());
-      mainContentPanel.add(gazeboUtilitiesPanel, c);
+      startingLocationsPanel = new JPanel(new GridBagLayout());
+      startingLocationsPanel.setBorder(BorderFactory.createEtchedBorder());
+      mainContentPanel.add(startingLocationsPanel, c);
    }
 
    private void setupProcessStatusPanel()
@@ -880,9 +882,9 @@ public class DRCDashboard
       c.ipady = 0;
       c.fill = GridBagConstraints.NONE;
 
-      c.ipadx = gazeboUtilitiesPanel.getWidth();
-      gazeboProcessListLabel = new JLabel("Gazebo Utilities:", JLabel.CENTER);
-      gazeboUtilitiesPanel.add(gazeboProcessListLabel, c);
+      c.ipadx = startingLocationsPanel.getWidth();
+      startingLocationsListLabel = new JLabel("Starting Locations:", JLabel.CENTER);
+      startingLocationsPanel.add(startingLocationsListLabel, c);
 
       c.gridy = 1;
       c.gridheight = 5;
@@ -892,12 +894,29 @@ public class DRCDashboard
       c.anchor = GridBagConstraints.PAGE_START;
       c.fill = GridBagConstraints.BOTH;
       //      c.insets = new Insets(10, 35, 10, 35);
-      gazeboProcessListModel = new DefaultListModel();
-      gazeboProcessList = new JList(gazeboProcessListModel);
-      gazeboProcessList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-      gazeboProcessList.setLayoutOrientation(JList.VERTICAL);
-      gazeboProcessListScroller = new JScrollPane(gazeboProcessList);
-      gazeboUtilitiesPanel.add(gazeboProcessListScroller, c);
+      startingLocationsListModel = new DefaultListModel();
+      startingLocationsList = new JList(startingLocationsListModel);
+      startingLocationsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+      startingLocationsList.setLayoutOrientation(JList.VERTICAL);
+      startingLocationsListScroller = new JScrollPane(startingLocationsList);
+      startingLocationsPanel.add(startingLocationsListScroller, c);
+      
+      taskCombo.addActionListener(new ActionListener()
+      {
+         public void actionPerformed(ActionEvent e)
+         {
+            startingLocationsListModel.clear();
+            if(taskCombo.getSelectedItem() != null && taskCombo.getSelectedItem() != DRCPluginTasks.ATLAS && taskCombo.getSelectedItem() != DRCPluginTasks.HAND && taskCombo.getSelectedItem() != DRCPluginTasks.PARKING_LOT)
+            {
+               Object[] startingLocations = DRCDemo01Types.environmentModelMap.get(DRCEnvironmentModel.valueOf(taskCombo.getSelectedItem().toString().toUpperCase())).keySet().toArray();
+               for(int i = startingLocations.length-1; i >= 0; --i)
+               {
+                  startingLocationsListModel.addElement(startingLocations[i].toString());
+               }
+               startingLocationsList.setSelectedIndex(0);
+            }
+         }
+      });
    }
 
    private void setupNetworkInfoPanel()
@@ -908,7 +927,7 @@ public class DRCDashboard
       c.ipady = 0;
       c.insets = new Insets(5, 5, 5, 5);
       networkInfoPanel = new JPanel(new GridBagLayout());
-      gazeboUtilitiesPanel.add(networkInfoPanel, c);
+      startingLocationsPanel.add(networkInfoPanel, c);
 
    }
 
@@ -1143,13 +1162,13 @@ public class DRCDashboard
                   {
                      ThreadTools.sleep(5000);
                      scsSpawner.spawn(DRCDemo01.class, new String[] { "-Xms1024m", "-Xmx2048m" }, new String[] { "--sim", "--env", newTask, "--gazebo",
-                           "--gazeboHost", DRCConfigParameters.GAZEBO_HOST, "--initialize-estimator" });
+                           "--gazeboHost", DRCConfigParameters.GAZEBO_HOST, "--initialize-estimator", "--start", startingLocationsList.getSelectedValue().toString() });
                   }
                   else
                   {
                      ThreadTools.sleep(5000);
                      scsSpawner.spawn(DRCDemo01.class, new String[] { "-Xms1024m", "-Xmx2048m" }, new String[] { "--sim", "--env", newTask, "--gazebo",
-                           "--gazeboHost", DRCConfigParameters.GAZEBO_HOST });
+                           "--gazeboHost", DRCConfigParameters.GAZEBO_HOST, "--start", startingLocationsList.getSelectedValue().toString() });
                   }
                }
                else
