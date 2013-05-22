@@ -601,16 +601,12 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          double tf = concatenatedSplinesWithArcLengthCalculatedIteratively.getTf();
          double t = t0 + (double) i / (double) (numberOfVisualizationMarkers) * (tf - t0);
          compute(t);
-         FramePoint f = desiredPosition.getFramePointCopy();
-         f.setZ(f.getZ() + 1.5);
-         trajectoryBagOfBalls.setBall(f, i);
+         trajectoryBagOfBalls.setBall(desiredPosition.getFramePointCopy(), i);
       }
 
       for (int i = 0; i < nonAccelerationEndpointIndices.length; i++)
       {
-         FramePoint f = allPositions[nonAccelerationEndpointIndices[i]].getFramePointCopy();
-         f.setZ(f.getZ() + 1.5);
-         fixedPointBagOfBalls.setBall(f, YoAppearance.AliceBlue(), i);
+         fixedPointBagOfBalls.setBall(allPositions[nonAccelerationEndpointIndices[i]].getFramePointCopy(), YoAppearance.AliceBlue(), i);
       }
    }
 
@@ -634,26 +630,6 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       double b = boxFrameInitialPosition.getY() - a * boxFrameInitialPosition.getX();
       Vector3d halfSideLengthsXY = new Vector3d(0.5 * box.getDimension(Direction.X), 0.5 * box.getDimension(Direction.Y), 0.0);
       double zVal = walkingControllerParameters.getAnkleHeight() + SimpleTwoWaypointTrajectoryParameters.getLowStepGroundClearance();
-      
-      FramePoint f0 = new FramePoint(boxFrame, new Point3d(halfSideLengthsXY.x, halfSideLengthsXY.y, 1.5));
-      FramePoint f1 = new FramePoint(boxFrame, new Point3d(halfSideLengthsXY.x, - halfSideLengthsXY.y, 1.5));
-      FramePoint f2 = new FramePoint(boxFrame, new Point3d(- halfSideLengthsXY.x, halfSideLengthsXY.y, 1.5));
-      FramePoint f3 = new FramePoint(boxFrame, new Point3d(- halfSideLengthsXY.x, - halfSideLengthsXY.y, 1.5));
-      FramePoint fc = new FramePoint(boxFrame, new Point3d(0.0, 0.0, 1.5));
-      
-      f0.changeFrame(referenceFrame);
-      f1.changeFrame(referenceFrame);
-      f2.changeFrame(referenceFrame);
-      f3.changeFrame(referenceFrame);
-      fc.changeFrame(referenceFrame);
-      
-      System.out.println("box height " + (fc.getZ() - 1.5));
-      
-      boxBag.setBall(f0, YoAppearance.AliceBlue(), 0);
-      boxBag.setBall(f1, YoAppearance.AliceBlue(), 1);
-      boxBag.setBall(f2, YoAppearance.AliceBlue(), 2);
-      boxBag.setBall(f3, YoAppearance.AliceBlue(), 3);
-      boxBag.setBall(fc, YoAppearance.BurlyWood(), 4);
 
       for (double sign : new double[] {-1.0, 1.0})
       {
