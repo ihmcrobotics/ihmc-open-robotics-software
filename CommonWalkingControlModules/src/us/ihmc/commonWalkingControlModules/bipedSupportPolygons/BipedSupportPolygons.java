@@ -2,7 +2,9 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
 import java.awt.Color;
 import java.util.List;
+import java.util.Timer;
 
+import com.yobotics.simulationconstructionset.time.GlobalTimer;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
@@ -68,6 +70,8 @@ public class BipedSupportPolygons
    // In order to deal with intersecting polygons, it is much harder to calculate the connecting edges
    // So let's not use the connecting edges unles we need
    private boolean useConnectingEdges;
+
+   private final GlobalTimer timer = new GlobalTimer(getClass().getSimpleName() + "Timer", registry);
 
    public BipedSupportPolygons(SideDependentList<ReferenceFrame> ankleZUpFrames, ReferenceFrame midFeetZUpFrame, YoVariableRegistry parentRegistry,
                                DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, boolean useConnectingEdges)
@@ -137,6 +141,7 @@ public class BipedSupportPolygons
 
    public void update(SideDependentList<List<FramePoint>> contactPoints)
    {
+      timer.startTimer();
       boolean inDoubleSupport = true;
       boolean neitherFootIsSupportingFoot = true;
       RobotSide supportSide = null;
@@ -214,6 +219,7 @@ public class BipedSupportPolygons
       this.footToFootLineSegmentInMidFeetZUp = new FrameLineSegment2d(sweetSpots.get(RobotSide.LEFT).changeFrameAndProjectToXYPlaneCopy(midFeetZUp),
               sweetSpots.get(RobotSide.RIGHT).changeFrameAndProjectToXYPlaneCopy(midFeetZUp));
 
+      timer.stopTimer();
 
       if (VISUALIZE)
       {
