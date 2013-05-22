@@ -18,7 +18,7 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
    private final ConcurrentLinkedQueue<Footstep> footstepQueue = new ConcurrentLinkedQueue<Footstep>();
    private final long dataIdentifier;
    private final Collection<? extends ContactablePlaneBody> rigidBodyList;
-   int j = 0;
+   private int currentIndex = 0;
 
    public FootstepConsumer(long dataIdentifier, Collection<? extends ContactablePlaneBody> rigidBodyList)
    {
@@ -37,13 +37,13 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
       {
          throw new RuntimeException("Wrong data identifier: " + dataIdentifier + ". Expected: " + this.dataIdentifier);
       }
-
-      System.out.println("FootstepConsumer: consume: " + (++j) + " footsteps received, Ah Ah Ah!");
+      
+//      System.out.println("FootstepConsumer: consume: " + (++j) + " footsteps received, Ah Ah Ah!");
       FootstepData footstepData = (FootstepData) object;
       ContactablePlaneBody contactableBody = findContactableBodyByName(footstepData.getRigidBodyName());
 
       boolean trustHeight = true;
-      String id = footstepData.getId();
+      String id = "footstep_" + currentIndex;
       FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("poseReferenceFrame", framePose);
       ReferenceFrame soleReferenceFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, contactableBody);
@@ -55,6 +55,8 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
 
 //    System.out.println("footstep = " + footstep);
       footstepQueue.add(footstep);
+      
+      currentIndex++;
    }
 
    private ContactablePlaneBody findContactableBodyByName(String rigidBodyName)
