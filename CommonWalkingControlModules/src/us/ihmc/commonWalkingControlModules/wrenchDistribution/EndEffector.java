@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -17,7 +18,7 @@ public class EndEffector
    {
       this("", centerOfMassFrame, endEffectorFrame, registry);
    }
-   
+
    public EndEffector(String nameSuffix, ReferenceFrame centerOfMassFrame, ReferenceFrame endEffectorFrame, YoVariableRegistry registry)
    {
       this.referenceFrame = endEffectorFrame;
@@ -65,25 +66,27 @@ public class EndEffector
 
       return ret;
    }
-   
-   public static EndEffector fromPlane(String nameSuffix, ReferenceFrame centerOfMassFrame, PlaneContactState plane, YoVariableRegistry registry )
+
+   public static EndEffector fromPlane(String nameSuffix, ReferenceFrame centerOfMassFrame, PlaneContactState plane, YoVariableRegistry registry)
    {
       EndEffector ret = new EndEffector(nameSuffix, centerOfMassFrame, plane.getBodyFrame(), registry);
       OptimizerPlaneContactModel model = new OptimizerPlaneContactModel();
       model.setup(plane.getCoefficientOfFriction(), plane.getContactPoints(), plane.getBodyFrame());
       ret.setContactModel(model);
       ret.setLoadBearing(plane.inContact());
+
       return ret;
    }
-   
+
    public void updateFromCylinder(CylindricalContactState cylinder)
    {
       referenceFrame.checkReferenceFrameMatch(cylinder.getEndEffectorFrame());
       OptimizerCylinderContactModel optimizerModel = (OptimizerCylinderContactModel) this.getContactModel();
-      optimizerModel.setup(cylinder.getCoefficientOfFriction(), cylinder.getCylinderRadius(), cylinder.getHalfHandWidth(), cylinder.getTensileGripForce(), cylinder.getGripWeaknessFactor(), cylinder.getCylinderFrame());
+      optimizerModel.setup(cylinder.getCoefficientOfFriction(), cylinder.getCylinderRadius(), cylinder.getHalfHandWidth(), cylinder.getTensileGripForce(),
+                           cylinder.getGripWeaknessFactor(), cylinder.getCylinderFrame());
       this.setLoadBearing(cylinder.isInContact());
    }
-   
+
    public void updateFromPlane(PlaneContactState plane)
    {
       referenceFrame.checkReferenceFrameMatch(plane.getBodyFrame());

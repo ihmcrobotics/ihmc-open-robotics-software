@@ -12,7 +12,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class CylinderAndPlaneContactForceOptimizerNative
 {
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
    public static final int nSupportVectors = 3;
    public static final int nPointsPerPlane = 4;
    public static final int nPlanes = 2;

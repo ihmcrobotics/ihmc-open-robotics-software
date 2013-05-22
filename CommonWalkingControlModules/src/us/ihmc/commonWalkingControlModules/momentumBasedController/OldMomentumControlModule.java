@@ -125,6 +125,7 @@ public class OldMomentumControlModule implements MomentumControlModule
       externalWrenchesToCompensateFor.clear();
    }
 
+   private GroundReactionWrenchDistributorOutputData distributedWrenches = new GroundReactionWrenchDistributorOutputData();
    public void compute(Map<ContactablePlaneBody, ? extends PlaneContactState> planeContactStates, RobotSide upcomingSupportLeg,
                        Map<RigidBody, ? extends CylindricalContactState> cylinderContactStates)
    {
@@ -182,7 +183,7 @@ public class OldMomentumControlModule implements MomentumControlModule
 
       wrenchDistributorInput.setSpatialForceVectorAndUpcomingSupportSide(totalGroundReactionWrench, upcomingSupportLeg);
 
-      GroundReactionWrenchDistributorOutputData distributedWrenches = new GroundReactionWrenchDistributorOutputData();
+      
       groundReactionWrenchDistributor.solve(distributedWrenches, wrenchDistributorInput);
 
       for (ContactablePlaneBody contactablePlaneBody : planeContactStates.keySet())

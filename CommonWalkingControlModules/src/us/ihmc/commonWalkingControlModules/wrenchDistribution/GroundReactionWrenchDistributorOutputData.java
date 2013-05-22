@@ -26,7 +26,14 @@ public class GroundReactionWrenchDistributorOutputData
 
    public double getNormalTorque(PlaneContactState contactState)
    {
+      try
+      {
       return normalTorques.get(contactState);
+      } catch (NullPointerException e)
+      {
+         e.printStackTrace();
+         return 0;
+      }
    }
    
    public Wrench getWrenchOfNonPlaneContact(CylindricalContactState rigidBody)
