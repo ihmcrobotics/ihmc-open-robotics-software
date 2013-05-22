@@ -72,16 +72,7 @@ public class FootstepDataTansformerTest
             listOfPoints.add(RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0));
          }
       }
-      ret.expectedContactPoints = new ArrayList<Point3d>(listOfPoints);
-
-      listOfPoints = new ArrayList<Point3d>();
-      {
-         for (int i = 0; i < 30; i++)
-         {
-            listOfPoints.add(RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0));
-         }
-      }
-
+      
       Point3d point = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
       ret.trajectoryBoxData = new Box3d(RandomTools.generateRandomTransform(random), Math.abs(point.getX()), Math.abs(point.getY()), Math.abs(point.getZ()));
 
@@ -94,8 +85,6 @@ public class FootstepDataTansformerTest
    private static void performEqualsTestsWithTransform(FootstepData footstepData, Transform3D transform3D, FootstepData transformedFootstepData)
    {
       double distance;
-      List<Point3d> originalList;
-      List<Point3d> transformedList;
 
       // public String id;
       assertTrue(footstepData.getId().equals(transformedFootstepData.getId()));
@@ -111,23 +100,6 @@ public class FootstepDataTansformerTest
       Quat4d startQuat = footstepData.getOrientation();
       Quat4d endQuat = transformedFootstepData.getOrientation();
       assertTrue(areOrientationsEqualWithTransform(startQuat, transform3D, endQuat));
-
-      // public List<Point3d> expectedContactPoints;
-      originalList = footstepData.getExpectedContactPoints();
-      transformedList = transformedFootstepData.getExpectedContactPoints();
-      assertEquals("", originalList.size(), transformedList.size());
-
-      for (int i = 0; i < originalList.size(); i++)
-      {
-         distance = getDistanceBetweenPoints(originalList.get(i), transform3D, transformedList.get(i));
-         assertEquals("not equal", 0.0, distance, 1e-6);
-      }
-
-      for (int i = 0; i < originalList.size(); i++)
-      {
-         distance = getDistanceBetweenPoints(originalList.get(i), transform3D, transformedList.get(i));
-         assertEquals("not equal", 0.0, distance, 1e-6);
-      }
 
       // public FlatHorizontalBoxData trajectoryBoxData;
       assertTrue(areBoxesEqual(footstepData.getTrajectoryBox(), transform3D, transformedFootstepData.getTrajectoryBox()));

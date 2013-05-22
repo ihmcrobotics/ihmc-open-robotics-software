@@ -3,8 +3,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-
-import javax.vecmath.Point3d;
+import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData;
@@ -48,13 +47,10 @@ public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
          PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
          ReferenceFrame soleReferenceFrame = FootstepUtils.createSoleFrame(footstepPoseFrame, contactableBody);
 
-         ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();
-         for (int i = 0; i < footstepData.getExpectedContactPoints().size(); i++)
-         {
-            Point3d point3d = footstepData.getExpectedContactPoints().get(i);
-            FramePoint framePoint = new FramePoint(soleReferenceFrame, point3d);
-            expectedContactPoints.add(framePoint);
-         }
+         
+         FootstepUtils.getContactPointsInFrame(contactableBody, soleReferenceFrame);
+         List<FramePoint> expectedContactPoints = FootstepUtils.getContactPointsInFrame(contactableBody, soleReferenceFrame);
+         
 
          Footstep footstep = new Footstep(footstepData.getId(), contactableBody, footstepPoseFrame, soleReferenceFrame, expectedContactPoints, true);
          TrajectoryParameters trajectoryParameters = null;
