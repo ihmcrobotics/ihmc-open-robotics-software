@@ -10,7 +10,7 @@ import us.ihmc.graphics3DAdapter.camera.VideoSettingsH264LowLatency;
 public class DRCConfigParameters
 {
    // TODO: Temporary static variable for testing the grasping control.
-   public static final boolean START_GRASPING_CAR_FRONT_BAR = false;
+   public static final boolean START_READY_GET_INTO_CAR = false;
    
    public static final boolean USE_GAZEBO_PHYSICS = false;    // TODO: This one is needed just for FlatGroundWalkingTrack in Gazebo...
 
