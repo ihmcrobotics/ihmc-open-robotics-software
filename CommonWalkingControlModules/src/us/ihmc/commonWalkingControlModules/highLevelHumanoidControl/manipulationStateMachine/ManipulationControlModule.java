@@ -62,7 +62,7 @@ public class ManipulationControlModule
          {
             DynamicGraphicObjectsList list = new DynamicGraphicObjectsList("handPositionControlFrames");
 
-            DynamicGraphicReferenceFrame dynamicGraphicReferenceFrame = new DynamicGraphicReferenceFrame(handPositionControlFrame, registry, 0.3);
+            DynamicGraphicReferenceFrame dynamicGraphicReferenceFrame = new DynamicGraphicReferenceFrame(handPositionControlFrame, registry, 0.5);
             dynamicGraphicReferenceFrames.add(dynamicGraphicReferenceFrame);
             list.add(dynamicGraphicReferenceFrame);
 
@@ -72,23 +72,32 @@ public class ManipulationControlModule
       }
 
       setUpStateMachine(yoTime, fullRobotModel, twistCalculator, parameters, handPoseProvider, torusPoseProvider, dynamicGraphicObjectsListRegistry,
-            handControllers, momentumBasedController, parentRegistry, handPositionControlFrames, jacobians);
+                        handControllers, momentumBasedController, parentRegistry, handPositionControlFrames, jacobians);
 
       parentRegistry.addChild(registry);
    }
 
-   private void setUpStateMachine(DoubleYoVariable yoTime, FullRobotModel fullRobotModel, TwistCalculator twistCalculator, ManipulationControllerParameters parameters, final DesiredHandPoseProvider handPoseProvider, final TorusPoseProvider torusPoseProvider, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, SideDependentList<HandControllerInterface> handControllers, MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry, SideDependentList<ReferenceFrame> handPositionControlFrames, SideDependentList<GeometricJacobian> jacobians)
+   private void setUpStateMachine(DoubleYoVariable yoTime, FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
+                                  ManipulationControllerParameters parameters, final DesiredHandPoseProvider handPoseProvider,
+                                  final TorusPoseProvider torusPoseProvider, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+                                  SideDependentList<HandControllerInterface> handControllers, MomentumBasedController momentumBasedController,
+                                  YoVariableRegistry parentRegistry, SideDependentList<ReferenceFrame> handPositionControlFrames,
+                                  SideDependentList<GeometricJacobian> jacobians)
    {
-      HighLevelDirectControlManipulationState directControlManipulationState = new HighLevelDirectControlManipulationState(yoTime, fullRobotModel, twistCalculator, parameters, handPoseProvider,
-              dynamicGraphicObjectsListRegistry, handControllers, handPositionControlFrames, jacobians, momentumBasedController, registry);
+      HighLevelDirectControlManipulationState directControlManipulationState = new HighLevelDirectControlManipulationState(yoTime, fullRobotModel,
+                                                                                  twistCalculator, parameters, handPoseProvider,
+                                                                                  dynamicGraphicObjectsListRegistry, handControllers,
+                                                                                  handPositionControlFrames, jacobians, momentumBasedController, registry);
       stateMachine.addState(directControlManipulationState);
 
-      HighLevelToroidManipulationState toroidManipulationState = new HighLevelToroidManipulationState(yoTime, fullRobotModel, twistCalculator, handPositionControlFrames, handControllers,
-              jacobians, torusPoseProvider, momentumBasedController, dynamicGraphicObjectsListRegistry, parentRegistry);
+      HighLevelToroidManipulationState toroidManipulationState = new HighLevelToroidManipulationState(yoTime, fullRobotModel, twistCalculator,
+                                                                    handPositionControlFrames, handControllers, jacobians, torusPoseProvider,
+                                                                    momentumBasedController, dynamicGraphicObjectsListRegistry, parentRegistry);
       stateMachine.addState(toroidManipulationState);
 
-      State<ManipulationState> fingerToroidManipulationState = new HighLevelFingerToroidManipulationState(twistCalculator, handPositionControlFrames, jacobians,
-                                                                        momentumBasedController, fullRobotModel.getElevator(), torusPoseProvider, handControllers, registry, dynamicGraphicObjectsListRegistry);
+      State<ManipulationState> fingerToroidManipulationState = new HighLevelFingerToroidManipulationState(twistCalculator, jacobians, momentumBasedController,
+                                                                  fullRobotModel.getElevator(), torusPoseProvider, handControllers, registry,
+                                                                  dynamicGraphicObjectsListRegistry);
       stateMachine.addState(fingerToroidManipulationState);
 
       StateTransitionCondition stateTransitionCondition = new StateTransitionCondition()
