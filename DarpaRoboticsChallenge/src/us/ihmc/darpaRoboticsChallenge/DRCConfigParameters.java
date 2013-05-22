@@ -41,6 +41,8 @@ public class DRCConfigParameters
    public static final String CLOUD_MINION2_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMINION_2);
    public static final String CLOUD_MINION3_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMINION_3);
    public static final String CLOUD_MINION4_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMINION_4);
+   public static final String CLOUD_MINION5_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMINION_5);
+   public static final String CLOUD_MINION6_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMINION_6);
    public static final String CLOUD_MONSTER_JR_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMONSTER_JR);
    public static final String CLOUD_MONSTER_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMONSTER);
 
