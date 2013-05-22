@@ -1,0 +1,59 @@
+package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine;
+
+import org.apache.commons.lang.mutable.MutableBoolean;
+import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.net.ObjectConsumer;
+
+/**
+ * Created with IntelliJ IDEA.
+ * User: pneuhaus
+ * Date: 5/22/13
+ * Time: 11:45 AM
+ * To change this template use File | Settings | File Templates.
+ */
+
+public class DesiredFootPoseProvider implements ObjectConsumer<FootPosePacket>
+{
+   private final SideDependentList<FramePose> desiredFootPoses = new SideDependentList<FramePose>();
+   private final SideDependentList<MutableBoolean> contactStates = new SideDependentList<MutableBoolean>();
+   private SideDependentList<Boolean> hasNewPose = new SideDependentList<Boolean>();
+
+   public DesiredFootPoseProvider()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         contactStates.put(robotSide, new MutableBoolean(false));
+         hasNewPose.put(robotSide, false);
+      }
+   }
+
+   public synchronized boolean checkForNewPose(RobotSide robotSide)
+   {
+      return hasNewPose.get(robotSide);
+   }
+
+   public synchronized FramePose getDesiredFootPose(RobotSide robotSide)
+   {
+      hasNewPose.put(robotSide, false);
+
+      return desiredFootPoses.get(robotSide);
+   }
+
+   public synchronized boolean isInContact(RobotSide robotSide)
+   {
+      return contactStates.get(robotSide).booleanValue();
+   }
+
+   public void consumeObject(FootPosePacket object)
+   {
+      RobotSide robotSide = object.getRobotSide();
+      hasNewPose.put(robotSide, true);
+      contactStates.get(robotSide).setValue(object.isLoadBearing);
+
+      FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), object.getPosition(), object.getOrientation());
+      desiredFootPoses.put(robotSide, pose);
+   }
+}
