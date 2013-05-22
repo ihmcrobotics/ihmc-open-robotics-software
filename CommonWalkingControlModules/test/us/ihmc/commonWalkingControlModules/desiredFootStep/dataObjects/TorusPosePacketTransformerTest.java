@@ -1,23 +1,22 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Random;
+
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+
 import org.junit.Test;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.HandPosePacket;
+
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.TorusPosePacket;
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-
-import javax.media.j3d.Transform3D;
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-import java.util.Random;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Created with IntelliJ IDEA.
@@ -33,6 +32,8 @@ public class TorusPosePacketTransformerTest
    {
       int numberOfTests = 10;
       double radius = 1.0;
+      double angle = 0;
+
       Random random = new Random(100L);
       Transform3D transform3D;
 
@@ -41,7 +42,7 @@ public class TorusPosePacketTransformerTest
          Point3d point3d = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
          Vector3d normal = RandomTools.generateRandomVector(random, 1.0);
 
-         TorusPosePacket starting = new TorusPosePacket(point3d, normal, radius);
+         TorusPosePacket starting = new TorusPosePacket(point3d, normal, radius, angle);
 
          transform3D = RandomTools.generateRandomTransform(random);
 
