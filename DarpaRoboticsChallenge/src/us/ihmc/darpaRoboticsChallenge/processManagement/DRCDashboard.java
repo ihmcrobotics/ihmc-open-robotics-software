@@ -1155,11 +1155,11 @@ public class DRCDashboard
                   String newTask = "";
 
                   if (task.toLowerCase().contains("vehicle"))
-                     newTask = "ONLY_VEHICLE";
+                     newTask = "ATLAS_VEHICLE";
                   else
                      newTask = task;
 
-                  if (newTask.toLowerCase().contains("parking") || newTask.toLowerCase().contains("hand") || newTask.toLowerCase().equals("atlas"))
+                  if (newTask.toLowerCase().contains("parking") || newTask.toLowerCase().contains("hand") || (newTask.toLowerCase().equals("atlas") && !(newTask.toLowerCase().contains("vehicle"))))
                   {
                      System.err.println("Can't launch SCS; no environment for selected task");
                      return;
