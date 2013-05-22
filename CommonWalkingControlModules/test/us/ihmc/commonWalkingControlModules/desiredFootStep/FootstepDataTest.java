@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PauseCommand;
+import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.io.streamingData.QueueBasedStreamingDataProducer;
@@ -39,6 +40,8 @@ import static org.junit.Assert.assertTrue;
  */
 public class FootstepDataTest
 {
+   private static final RobotSide robotSide = RobotSide.LEFT;
+   
    @Before
    public void showMemoryUsageBeforeTest()
    {
@@ -71,7 +74,8 @@ public class FootstepDataTest
       ArrayList<Footstep> sentFootsteps = createRandomFootsteps(50);
       for (Footstep footstep : sentFootsteps)
       {
-         FootstepData footstepData = new FootstepData(footstep);
+         
+         FootstepData footstepData = new FootstepData(robotSide, footstep);
          queueBasedStreamingDataProducer.queueDataToSend(footstepData);
       }
 
@@ -228,7 +232,7 @@ public class FootstepDataTest
    {
       // setup comms
       int port = 8833;
-      QueueBasedStreamingDataProducer<FootstepData> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepData>();
+      QueueBasedStreamingDataProducer<FootstepStatus> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepStatus>();
       ObjectCommunicator tcpServer = createAndStartStreamingDataTCPServer(queueBasedStreamingDataProducer, port);
 
       FootstepStatusConsumer footstepStatusConsumer = new FootstepStatusConsumer();
@@ -238,9 +242,8 @@ public class FootstepDataTest
 
       // create test footsteps
       Random random = new Random(777);
-      ArrayList<Footstep> sentFootsteps = createRandomFootsteps(50);
       ArrayList<FootstepStatus> sentFootstepStatus = new ArrayList<FootstepStatus>();
-      for (Footstep footstep : sentFootsteps)
+      for (int i = 0; i < 50; i++)
       {
          FootstepStatus.Status status = FootstepStatus.Status.STARTED;
          boolean isComplete = random.nextBoolean();
@@ -249,7 +252,7 @@ public class FootstepDataTest
             status = FootstepStatus.Status.COMPLETED;
          }
 
-         FootstepStatus footstepStatus = new FootstepStatus(footstep, status);
+         FootstepStatus footstepStatus = new FootstepStatus(status);
          sentFootstepStatus.add(footstepStatus);
          queueBasedStreamingDataProducer.queueDataToSend(footstepStatus);
       }
@@ -277,6 +280,7 @@ public class FootstepDataTest
       netClassList.addType(Quat4d.class);
       netClassList.addType(FootstepStatus.Status.class);
       netClassList.addType(TrajectoryWaypointGenerationMethod.class);
+      netClassList.addType(RobotSide.class);
       
       return netClassList;
    }
@@ -306,7 +310,7 @@ public class FootstepDataTest
 
       for (int footstepNumber = 0; footstepNumber < number; footstepNumber++)
       {
-         RigidBody endEffector = createRigidBody("rigid_" + footstepNumber);
+         RigidBody endEffector = createRigidBody(robotSide);
          ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createRandomContactablePlaneBodyForTests(random, endEffector);
 
          FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(footstepNumber, 0.0, 0.0),
@@ -347,8 +351,6 @@ public class FootstepDataTest
          FramePose sentPose = sentFootstep.getPoseCopy();
          FramePose receivedPose = receivedFootstep.getPoseCopy();
          
-         System.out.println("sentPose = " + sentPose);
-         System.out.println("receivedPose = " + receivedPose);
          assertTrue(sentPose.epsilonEquals(receivedPose, 0.0001));
 
          for (int j = 0; j < sentFootstep.getExpectedContactPoints().size(); j++)
@@ -369,7 +371,6 @@ public class FootstepDataTest
          FootstepStatus footstepStatus = sentFootstepStatus.get(i);
          FootstepStatus reconstructedFootstepStatus = receivedFootsteps.get(i);
          assertTrue(footstepStatus.getStatus() == reconstructedFootstepStatus.getStatus());
-         assertTrue(footstepStatus.getLocation().epsilonEquals(reconstructedFootstepStatus.getLocation(), 0.0001));
       }
    }
 
@@ -379,7 +380,7 @@ public class FootstepDataTest
 
       for (Footstep footstep : footsteps)
       {
-         FootstepData footstepData = new FootstepData(footstep);
+         FootstepData footstepData = new FootstepData(robotSide, footstep);
          footstepsData.add(footstepData);
       }
 
@@ -393,7 +394,7 @@ public class FootstepDataTest
 
       public void consumeObject(FootstepData packet)
       {
-         RigidBody endEffector = createRigidBody(packet.getRigidBodyName());
+         RigidBody endEffector = createRigidBody(packet.getRobotSide());
          ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector, ReferenceFrame
                .getWorldFrame());
 
@@ -426,8 +427,7 @@ public class FootstepDataTest
       {
          for (FootstepData footstepData : packet)
          {
-            String name = footstepData.getRigidBodyName();
-            RigidBody endEffector = createRigidBody(name);
+            RigidBody endEffector = createRigidBody(footstepData.getRobotSide());
 
             ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector, ReferenceFrame.getWorldFrame());
 
@@ -451,6 +451,11 @@ public class FootstepDataTest
       }
    }
 
+   
+   private RigidBody createRigidBody(RobotSide robotSide)
+   {
+      return createRigidBody(robotSide.getCamelCaseNameForStartOfExpression() + "Foot");
+   }
    private RigidBody createRigidBody(String name)
    {
       RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());

@@ -1,12 +1,12 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData;
+import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.io.streamingData.StreamingDataConsumer;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -17,13 +17,13 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
 {
    private final ConcurrentLinkedQueue<Footstep> footstepQueue = new ConcurrentLinkedQueue<Footstep>();
    private final long dataIdentifier;
-   private final Collection<? extends ContactablePlaneBody> rigidBodyList;
+   private final SideDependentList<? extends ContactablePlaneBody> rigidBodyList;
    private int currentIndex = 0;
 
-   public FootstepConsumer(long dataIdentifier, Collection<? extends ContactablePlaneBody> rigidBodyList)
+   public FootstepConsumer(long dataIdentifier, SideDependentList<? extends ContactablePlaneBody> bipedFeet)
    {
       this.dataIdentifier = dataIdentifier;
-      this.rigidBodyList = rigidBodyList;
+      this.rigidBodyList = bipedFeet;
    }
 
    public boolean canHandle(Object object)
@@ -40,7 +40,7 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
       
 //      System.out.println("FootstepConsumer: consume: " + (++j) + " footsteps received, Ah Ah Ah!");
       FootstepData footstepData = (FootstepData) object;
-      ContactablePlaneBody contactableBody = findContactableBodyByName(footstepData.getRigidBodyName());
+      ContactablePlaneBody contactableBody = rigidBodyList.get(footstepData.getRobotSide());
 
       boolean trustHeight = true;
       String id = "footstep_" + currentIndex;
@@ -57,19 +57,6 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
       footstepQueue.add(footstep);
       
       currentIndex++;
-   }
-
-   private ContactablePlaneBody findContactableBodyByName(String rigidBodyName)
-   {
-      for (ContactablePlaneBody contactableBody : rigidBodyList)
-      {
-         if (contactableBody.getRigidBody().getName().equals(rigidBodyName))
-         {
-            return contactableBody;
-         }
-      }
-
-      throw new RuntimeException("Rigid body not found: " + rigidBodyName);
    }
 
    public Footstep poll()

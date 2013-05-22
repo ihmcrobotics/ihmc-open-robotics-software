@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -9,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.commonWalkingControlModules.trajectories.SimpleTwoWaypointTrajectoryParameters;
+import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
@@ -25,14 +25,14 @@ public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
 {
    private boolean DEBUG = false;
    private FootstepPathCoordinator footstepPathCoordinator;
-   private final Collection<? extends ContactablePlaneBody> rigidBodyList;
+   private final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
    private final HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters;
 
-   public FootstepPathConsumer(Collection<? extends ContactablePlaneBody> rigidBodyList, FootstepPathCoordinator footstepPathCoordinator,
+   public FootstepPathConsumer(SideDependentList<? extends ContactablePlaneBody> bipedFeet, FootstepPathCoordinator footstepPathCoordinator,
                                HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters)
    {
       this.footstepPathCoordinator = footstepPathCoordinator;
-      this.rigidBodyList = rigidBodyList;
+      this.bipedFeet = bipedFeet;
       this.mapFromFootstepsToTrajectoryParameters = mapFromFootstepsToTrajectoryParameters;
    }
 
@@ -44,7 +44,7 @@ public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
          FootstepData footstepData = footstepList.get(i);
          String id = "footstep_" + i;
          
-         ContactablePlaneBody contactableBody = findContactableBodyByName(footstepData.getRigidBodyName());
+         ContactablePlaneBody contactableBody = bipedFeet.get(footstepData.getRobotSide());
 
          FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
          PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
@@ -83,17 +83,5 @@ public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
       footstepPathCoordinator.updatePath(footsteps);
    }
 
-   private ContactablePlaneBody findContactableBodyByName(String rigidBodyName)
-   {
-      for (ContactablePlaneBody contactableBody : rigidBodyList)
-      {
-         if (contactableBody.getRigidBody().getName().equals(rigidBodyName))
-         {
-            return contactableBody;
-         }
-      }
-
-      throw new RuntimeException("Rigid body not found: " + rigidBodyName);
-   }
 
 }

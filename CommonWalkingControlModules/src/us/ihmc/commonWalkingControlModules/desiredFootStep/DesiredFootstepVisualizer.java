@@ -313,7 +313,7 @@ public class DesiredFootstepVisualizer
       List<Footstep> footsteps = footstepGenerator.generateDesiredFootstepList();
 
       long dataIdentifier = 1776L;
-      FootstepConsumer footstepConsumer = new FootstepConsumer(dataIdentifier, bipedFeet.values());
+      FootstepConsumer footstepConsumer = new FootstepConsumer(dataIdentifier, bipedFeet);
 
       for (Footstep footstep : footsteps)
       {

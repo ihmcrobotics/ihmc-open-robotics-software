@@ -49,7 +49,7 @@ public class ScriptedFootstepGenerator
          RobotSide robotSide = robotSides[i];
          double[][] footstepLocationAndOrientation = footstepLocationsAndOrientations[i];
          Footstep footstep = generateFootstepFromLocationAndOrientation(robotSide, footstepLocationAndOrientation);
-         FootstepData footstepData = new FootstepData(footstep);
+         FootstepData footstepData = new FootstepData(robotSide, footstep);
          footstepDataList.add(footstepData);
       }
 
