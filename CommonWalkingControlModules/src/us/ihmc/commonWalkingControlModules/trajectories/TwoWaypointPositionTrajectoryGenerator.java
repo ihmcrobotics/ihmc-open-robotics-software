@@ -10,7 +10,8 @@ import javax.vecmath.Vector3d;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.geometry.Box3d;
+import us.ihmc.utilities.math.geometry.Direction;
+import us.ihmc.utilities.math.geometry.FrameBox3d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -110,7 +111,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          fixedPointBagOfBalls = null;
       }
       
-      boxBag = new BagOfBalls(4, 0.04, namePrefix + "BoxBag", registry, dynamicGraphicObjectsListRegistry);
+      boxBag = new BagOfBalls(5, 0.06, namePrefix + "BoxBag", registry, dynamicGraphicObjectsListRegistry);
       
       this.waypointGenerationMethod = new EnumYoVariable<TrajectoryWaypointGenerationMethod>(namePrefix + "WaypointGenerationMethod", registry, TrajectoryWaypointGenerationMethod.class);
 
@@ -600,12 +601,16 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          double tf = concatenatedSplinesWithArcLengthCalculatedIteratively.getTf();
          double t = t0 + (double) i / (double) (numberOfVisualizationMarkers) * (tf - t0);
          compute(t);
-         trajectoryBagOfBalls.setBall(desiredPosition.getFramePointCopy(), i);
+         FramePoint f = desiredPosition.getFramePointCopy();
+         f.setZ(f.getZ() + 1.5);
+         trajectoryBagOfBalls.setBall(f, i);
       }
 
       for (int i = 0; i < nonAccelerationEndpointIndices.length; i++)
       {
-         fixedPointBagOfBalls.setBall(allPositions[nonAccelerationEndpointIndices[i]].getFramePointCopy(), YoAppearance.AliceBlue(), i);
+         FramePoint f = allPositions[nonAccelerationEndpointIndices[i]].getFramePointCopy();
+         f.setZ(f.getZ() + 1.5);
+         fixedPointBagOfBalls.setBall(f, YoAppearance.AliceBlue(), i);
       }
    }
 
@@ -614,27 +619,41 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       return timeIntoStep.getDoubleValue() >= stepTime.getDoubleValue();
    }
 
-   private List<FramePoint> getWaypointsFromABox(Box3d box)
-   {      
-      Transform3D boxTransform = box.getTransformCopy();
-      Transform3D inverseBoxTransform = new Transform3D();
-      inverseBoxTransform.invert(boxTransform);
+   private List<FramePoint> getWaypointsFromABox(FrameBox3d box)
+   {
+      ReferenceFrame boxFrame = box.getReferenceFrame();
 
-      FramePoint initialPosition = allPositions[endpointIndices[0]].getFramePointCopy();
-      FramePoint finalPosition = allPositions[endpointIndices[1]].getFramePointCopy();
-      Point3d boxFrameInitialPosition = initialPosition.getPointCopy();
-      Point3d boxFrameFinalPosition = finalPosition.getPointCopy();
-      inverseBoxTransform.transform(boxFrameInitialPosition);
-      inverseBoxTransform.transform(boxFrameFinalPosition);
+      FramePoint boxFrameInitialPosition = allPositions[endpointIndices[0]].getFramePointCopy();
+      FramePoint boxFrameFinalPosition = allPositions[endpointIndices[1]].getFramePointCopy();
+      boxFrameInitialPosition.changeFrame(boxFrame);
+      boxFrameFinalPosition.changeFrame(boxFrame);
       
-      ReferenceFrame boxFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("boxFrame", referenceFrame, boxTransform);
-
-      Point3d[] xyPlaneBoxIntersections = new Point3d[2];
+      FramePoint[] xyPlaneBoxIntersections = new FramePoint[2];
       int index = 0;
-      double a = (boxFrameFinalPosition.y - boxFrameInitialPosition.y) / (boxFrameFinalPosition.x - boxFrameInitialPosition.x);
-      double b = boxFrameInitialPosition.y - a * boxFrameInitialPosition.x;
-      Vector3d halfSideLengthsXY = new Vector3d(0.5 * box.getLength(), 0.5 * box.getWidth(), 0.0);
-      double zVal = walkingControllerParameters.getAnkleHeight() + SimpleTwoWaypointTrajectoryParameters.getLowStepGroundClearance();
+      double a = (boxFrameFinalPosition.getY() - boxFrameInitialPosition.getY()) / (boxFrameFinalPosition.getX() - boxFrameInitialPosition.getX());
+      double b = boxFrameInitialPosition.getY() - a * boxFrameInitialPosition.getX();
+      Vector3d halfSideLengthsXY = new Vector3d(0.5 * box.getDimension(Direction.X), 0.5 * box.getDimension(Direction.Y), 0.0);
+      double zVal = walkingControllerParameters.getAnkleHeight() + SimpleTwoWaypointTrajectoryParameters.getDefaultGroundClearance();
+      
+      FramePoint f0 = new FramePoint(boxFrame, new Point3d(halfSideLengthsXY.x, halfSideLengthsXY.y, 1.5));
+      FramePoint f1 = new FramePoint(boxFrame, new Point3d(halfSideLengthsXY.x, - halfSideLengthsXY.y, 1.5));
+      FramePoint f2 = new FramePoint(boxFrame, new Point3d(- halfSideLengthsXY.x, halfSideLengthsXY.y, 1.5));
+      FramePoint f3 = new FramePoint(boxFrame, new Point3d(- halfSideLengthsXY.x, - halfSideLengthsXY.y, 1.5));
+      FramePoint fc = new FramePoint(boxFrame, new Point3d(0.0, 0.0, 1.5));
+      
+      f0.changeFrame(referenceFrame);
+      f1.changeFrame(referenceFrame);
+      f2.changeFrame(referenceFrame);
+      f3.changeFrame(referenceFrame);
+      fc.changeFrame(referenceFrame);
+      
+      System.out.println("box height " + (fc.getZ() - 1.5));
+      
+      boxBag.setBall(f0, YoAppearance.AliceBlue(), 0);
+      boxBag.setBall(f1, YoAppearance.AliceBlue(), 1);
+      boxBag.setBall(f2, YoAppearance.AliceBlue(), 2);
+      boxBag.setBall(f3, YoAppearance.AliceBlue(), 3);
+      boxBag.setBall(fc, YoAppearance.BurlyWood(), 4);
 
       for (double sign : new double[] {-1.0, 1.0})
       {
@@ -645,13 +664,13 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
          if ((Math.abs(yGuess) <= halfSideLengthsXY.y) && (index < 2))
          {
-            xyPlaneBoxIntersections[index] = new Point3d(xEdge, yGuess, zVal);
+            xyPlaneBoxIntersections[index] = new FramePoint(boxFrame, xEdge, yGuess, zVal);
             index++;
          }
 
          if ((Math.abs(xGuess) <= halfSideLengthsXY.x) && (index < 2))
          {
-            xyPlaneBoxIntersections[index] = new Point3d(xGuess, yEdge, zVal);
+            xyPlaneBoxIntersections[index] = new FramePoint(boxFrame, xGuess, yEdge, zVal);
             index++;
          }
       }
@@ -666,27 +685,28 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
       if (xyPlaneBoxIntersections[0].distance(boxFrameInitialPosition) > xyPlaneBoxIntersections[1].distance(boxFrameInitialPosition))
       {
-         Point3d tempVec = xyPlaneBoxIntersections[1];
+         FramePoint tempPoint = xyPlaneBoxIntersections[1];
          xyPlaneBoxIntersections[1] = xyPlaneBoxIntersections[0];
-         xyPlaneBoxIntersections[0] = tempVec;
+         xyPlaneBoxIntersections[0] = tempPoint;
       }
 
       List<FramePoint> waypoints = new ArrayList<FramePoint>();
-      for (Point3d intersectionPoint : xyPlaneBoxIntersections)
+      for (FramePoint intersectionPoint : xyPlaneBoxIntersections)
       {
-         Point3d tempPoint = new Point3d(intersectionPoint);
-         boxTransform.transform(tempPoint);
-         waypoints.add(new FramePoint(referenceFrame, tempPoint));
+         intersectionPoint.changeFrame(referenceFrame);
+         waypoints.add(intersectionPoint);
       }
 
-      Vector3d directionOfFootstep = new Vector3d();
-      directionOfFootstep.sub(finalPosition.getVectorCopy(), initialPosition.getVectorCopy());
+      // shift waypoints away from box by ankle to toe/heel distance
+      FrameVector directionOfFootstep = new FrameVector(boxFrame);
+      directionOfFootstep.sub(boxFrameFinalPosition, boxFrameInitialPosition);
+      directionOfFootstep.changeFrame(referenceFrame);
       directionOfFootstep.normalize();
       double[] waypointShiftsToAvoidFootCollision = new double[] {-walkingControllerParameters.getFootForwardOffset(),
               walkingControllerParameters.getFootBackwardOffset()};
       for (int i = 0; i < 2; i++)
       {
-         FramePoint waypointShift = new FramePoint(referenceFrame, directionOfFootstep);
+         FrameVector waypointShift = new FrameVector(directionOfFootstep);
          waypointShift.scale(waypointShiftsToAvoidFootCollision[i]);
          waypoints.get(i).add(waypointShift);
       }
