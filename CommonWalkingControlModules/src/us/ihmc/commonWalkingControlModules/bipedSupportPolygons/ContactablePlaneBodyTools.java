@@ -38,10 +38,10 @@ public class ContactablePlaneBodyTools
       
       ReferenceFrame soleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(rigidBody.getName() + "SoleFrame", endEffectorFrame, transform3D);
       
-      double forward = RandomTools.generateRandomDouble(random, 0.1, 0.2);
-      double back = -RandomTools.generateRandomDouble(random, 0.1, 0.2);
-      double left = RandomTools.generateRandomDouble(random, 0.1, 0.2);
-      double right = - RandomTools.generateRandomDouble(random, 0.1, 0.2);
+      double forward = 0.2;
+      double back = -0.1;
+      double left = 0.1;
+      double right = -0.15;
       RectangularContactableBody rectangularContactableBody = new RectangularContactableBody(rigidBody, soleFrame, forward, back, left, right);
    
       return rectangularContactableBody;

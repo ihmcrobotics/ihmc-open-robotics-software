@@ -314,6 +314,7 @@ public class FootstepDataTest
          
          
          PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", pose);
+         
 
          boolean trustHeight = true;
          ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, contactablePlaneBody); 
@@ -403,12 +404,7 @@ public class FootstepDataTest
          boolean trustHeight = true;
          ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, contactablePlaneBody); 
          
-         ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();
-         for (Point3d point : packet.getExpectedContactPoints())
-         {
-            FramePoint framePoint = new FramePoint(soleFrame, point);
-            expectedContactPoints.add(framePoint);
-         }
+         List<FramePoint> expectedContactPoints = FootstepUtils.getContactPointsInFrame(contactablePlaneBody, soleFrame);
          
          Footstep footstep = new Footstep(contactablePlaneBody, poseReferenceFrame, soleFrame, expectedContactPoints, trustHeight);
          reconstructedFootsteps.add(footstep);
@@ -440,13 +436,9 @@ public class FootstepDataTest
 
             boolean trustHeight = true;
             ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, contactablePlaneBody);
+            List<FramePoint> expectedContactPoints = FootstepUtils.getContactPointsInFrame(contactablePlaneBody, soleFrame);
 
-            ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();
-            for (Point3d point : footstepData.getExpectedContactPoints())
-            {
-               FramePoint framePoint = new FramePoint(soleFrame, point);
-               expectedContactPoints.add(framePoint);
-            }
+
             
             Footstep footstep = new Footstep(contactablePlaneBody, poseReferenceFrame, soleFrame, expectedContactPoints, trustHeight);
             reconstructedFootstepPath.add(footstep);
