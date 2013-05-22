@@ -15,6 +15,7 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
+import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.Box3d;
 import us.ihmc.utilities.math.geometry.Direction;
@@ -58,7 +59,7 @@ public class FootstepDataTansformerTest
    private static FootstepData getTestFootstepData()
    {
       FootstepData ret = new FootstepData();
-      ret.rigidBodyName = "rigidBodyNameHere";
+      ret.robotSide = RobotSide.LEFT;
       ret.location = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
       AxisAngle4d axisAngle = RandomTools.generateRandomRotation(random);
       ret.orientation = new Quat4d();
@@ -86,7 +87,7 @@ public class FootstepDataTansformerTest
       double distance;
 
       // public String rigidBodyName;
-      assertTrue(footstepData.getRigidBodyName().equals(transformedFootstepData.getRigidBodyName()));
+      assertTrue(footstepData.getRobotSide()== transformedFootstepData.getRobotSide());
 
       // public Point3d location;
       distance = getDistanceBetweenPoints(footstepData.getLocation(), transform3D, transformedFootstepData.getLocation());

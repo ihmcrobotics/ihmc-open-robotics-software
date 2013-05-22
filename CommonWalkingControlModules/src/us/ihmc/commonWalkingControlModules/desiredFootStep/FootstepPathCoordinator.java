@@ -65,7 +65,7 @@ public class FootstepPathCoordinator implements FootstepProvider
             System.out.println("stepInProgress= " + stepInProgress);
          }
 
-         notifyConsumersOfStatus(stepInProgress, FootstepStatus.Status.STARTED);
+         notifyConsumersOfStatus(FootstepStatus.Status.STARTED);
       }
 
       return stepInProgress;
@@ -98,9 +98,9 @@ public class FootstepPathCoordinator implements FootstepProvider
       }
    }
 
-   private void notifyConsumersOfStatus(Footstep footstep, FootstepStatus.Status status)
+   private void notifyConsumersOfStatus(FootstepStatus.Status status)
    {
-      FootstepStatus footstepStatus = new FootstepStatus(footstep, status);
+      FootstepStatus footstepStatus = new FootstepStatus(status);
       footstepStatusDataProducer.queueDataToSend(footstepStatus);
    }
 
@@ -113,7 +113,7 @@ public class FootstepPathCoordinator implements FootstepProvider
    {
       if (stepInProgress != null)
       {
-         notifyConsumersOfStatus(stepInProgress, FootstepStatus.Status.COMPLETED);
+         notifyConsumersOfStatus(FootstepStatus.Status.COMPLETED);
       }
    }
 
