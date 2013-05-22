@@ -40,7 +40,6 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.ListSelectionModel;
-import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -53,7 +52,6 @@ import javax.swing.tree.DefaultTreeModel;
 
 import org.apache.commons.lang.WordUtils;
 
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01Types;
 import us.ihmc.darpaRoboticsChallenge.DRCEnvironmentModel;
@@ -251,9 +249,15 @@ public class DRCDashboard
                   String estimatorOption = line.substring(line.indexOf(":") + 1, line.length());
 
                   if (estimatorOption.contains("true"))
+                  {
                      estimatorCheckBox.setSelected(true);
+                  }
                   else
+                  {
                      estimatorCheckBox.setSelected(false);
+                  }
+                  
+                  estimatorCheckBox.setEnabled(scsCheckBox.isSelected());
                }
             }
          }
@@ -492,24 +496,24 @@ public class DRCDashboard
       view.setBackground(Color.white);
       view.setLayout(new GridBagLayout());
       view.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-      
+
       c2.gridy = 0;
       c2.weighty = 0;
       c2.ipady = 5;
       c2.anchor = GridBagConstraints.LINE_START;
       c2.fill = GridBagConstraints.BOTH;
-      
+
       for (final LocalCloudMachines machine : LocalCloudMachines.values())
       {
          if (!machine.equals(LocalCloudMachines.LOCALHOST))
-         {            
+         {
             DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("<html><body style=\"font-weight:bold;font-size:1.1em;\">"
                   + WordUtils.capitalize(machine.toString().toLowerCase().replace("_", " ")) + "</body></html>");
             rootNode.add(new DefaultMutableTreeNode("ROS/GZ Sim:"));
             rootNode.add(new DefaultMutableTreeNode("SCS Controller?"));
 
             JTree tree = new JTree(rootNode);
-//            tree.setLargeModel(true);
+            //            tree.setLargeModel(true);
             tree.setBorder(BorderFactory.createEmptyBorder(15, 10, 15, 0));
             if (sshSimLauncher.isMachineReachable(machine))
                setCloudStatusItemIcon(tree, goodConnectionIcon);
@@ -554,7 +558,7 @@ public class DRCDashboard
             });
 
             JPanel buttonPanel = new JPanel();
-            buttonPanel.setBorder(BorderFactory.createEmptyBorder(30,-20,0,0));
+            buttonPanel.setBorder(BorderFactory.createEmptyBorder(30, -20, 0, 0));
             buttonPanel.add(launchButton);
             buttonPanel.setBackground(Color.white);
 
@@ -565,7 +569,7 @@ public class DRCDashboard
             view.add(buttonPanel, c2);
             cloudMachineTrees.put(machine, new Pair<JTree, DefaultMutableTreeNode>(tree, rootNode));
             launchButtons.put(tree, launchButton);
-            
+
             c2.gridy++;
          }
       }
@@ -784,6 +788,7 @@ public class DRCDashboard
       operatorUICheckBox = new JCheckBox("Launch Operator UI With Gazebo");
       scsCheckBox = new JCheckBox("Launch SCS (Demo01) With Gazebo");
       estimatorCheckBox = new JCheckBox("Initialize Estimator to Actual");
+      estimatorCheckBox.setEnabled(false);
       scsCheckBox.addActionListener(new ActionListener()
       {
          public void actionPerformed(ActionEvent arg0)
@@ -900,16 +905,18 @@ public class DRCDashboard
       startingLocationsList.setLayoutOrientation(JList.VERTICAL);
       startingLocationsListScroller = new JScrollPane(startingLocationsList);
       startingLocationsPanel.add(startingLocationsListScroller, c);
-      
+
       taskCombo.addActionListener(new ActionListener()
       {
          public void actionPerformed(ActionEvent e)
          {
             startingLocationsListModel.clear();
-            if(taskCombo.getSelectedItem() != null && taskCombo.getSelectedItem() != DRCPluginTasks.ATLAS && taskCombo.getSelectedItem() != DRCPluginTasks.HAND && taskCombo.getSelectedItem() != DRCPluginTasks.PARKING_LOT)
+            if (taskCombo.getSelectedItem() != null && taskCombo.getSelectedItem() != DRCPluginTasks.ATLAS
+                  && taskCombo.getSelectedItem() != DRCPluginTasks.HAND && taskCombo.getSelectedItem() != DRCPluginTasks.PARKING_LOT)
             {
-               Object[] startingLocations = DRCDemo01Types.environmentModelMap.get(DRCEnvironmentModel.valueOf(taskCombo.getSelectedItem().toString().toUpperCase())).keySet().toArray();
-               for(int i = startingLocations.length-1; i >= 0; --i)
+               Object[] startingLocations = DRCDemo01Types.environmentModelMap
+                     .get(DRCEnvironmentModel.valueOf(taskCombo.getSelectedItem().toString().toUpperCase())).keySet().toArray();
+               for (int i = startingLocations.length - 1; i >= 0; --i)
                {
                   startingLocationsListModel.addElement(startingLocations[i].toString());
                }
@@ -1009,7 +1016,7 @@ public class DRCDashboard
          public void run()
          {
             ((JPanel) networkStatusScrollPane.getViewport().getView()).repaint();
-            
+
             recalculateNodeSizes();
          }
       });
@@ -1019,7 +1026,7 @@ public class DRCDashboard
    {
       updateRosSimStatuses();
 
-      updateSCSStatuses();      
+      updateSCSStatuses();
    }
 
    private void recalculateNodeSizes()
@@ -1162,7 +1169,8 @@ public class DRCDashboard
                   {
                      ThreadTools.sleep(5000);
                      scsSpawner.spawn(DRCDemo01.class, new String[] { "-Xms1024m", "-Xmx2048m" }, new String[] { "--sim", "--env", newTask, "--gazebo",
-                           "--gazeboHost", DRCLocalCloudConfig.getIPAddress(gazeboMachine), "--initialize-estimator", "--start", startingLocationsList.getSelectedValue().toString() });
+                           "--gazeboHost", DRCLocalCloudConfig.getIPAddress(gazeboMachine), "--initialize-estimator", "--start",
+                           startingLocationsList.getSelectedValue().toString() });
                   }
                   else
                   {
