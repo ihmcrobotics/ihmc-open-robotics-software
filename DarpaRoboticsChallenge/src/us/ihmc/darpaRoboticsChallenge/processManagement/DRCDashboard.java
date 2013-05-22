@@ -1129,13 +1129,13 @@ public class DRCDashboard
 
       startOperatorUI();
 
-      startSCS(task, pluginOption);
+      startSCS(gazeboMachine, task, pluginOption);
 
       launchButtons.get(cloudMachineTrees.get(gazeboMachine).first()).setIcon(killSimIcon);
       launchButtons.get(cloudMachineTrees.get(gazeboMachine).first()).getParent().repaint();
    }
 
-   private void startSCS(final String task, final String pluginOption)
+   private void startSCS(final LocalCloudMachines gazeboMachine, final String task, final String pluginOption)
    {
       new Thread(new Runnable()
       {
@@ -1162,13 +1162,13 @@ public class DRCDashboard
                   {
                      ThreadTools.sleep(5000);
                      scsSpawner.spawn(DRCDemo01.class, new String[] { "-Xms1024m", "-Xmx2048m" }, new String[] { "--sim", "--env", newTask, "--gazebo",
-                           "--gazeboHost", DRCConfigParameters.GAZEBO_HOST, "--initialize-estimator", "--start", startingLocationsList.getSelectedValue().toString() });
+                           "--gazeboHost", DRCLocalCloudConfig.getIPAddress(gazeboMachine), "--initialize-estimator", "--start", startingLocationsList.getSelectedValue().toString() });
                   }
                   else
                   {
                      ThreadTools.sleep(5000);
                      scsSpawner.spawn(DRCDemo01.class, new String[] { "-Xms1024m", "-Xmx2048m" }, new String[] { "--sim", "--env", newTask, "--gazebo",
-                           "--gazeboHost", DRCConfigParameters.GAZEBO_HOST, "--start", startingLocationsList.getSelectedValue().toString() });
+                           "--gazeboHost", DRCLocalCloudConfig.getIPAddress(gazeboMachine), "--start", startingLocationsList.getSelectedValue().toString() });
                   }
                }
                else
