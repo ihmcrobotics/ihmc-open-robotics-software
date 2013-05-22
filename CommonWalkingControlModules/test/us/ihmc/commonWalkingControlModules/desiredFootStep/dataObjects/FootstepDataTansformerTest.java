@@ -58,7 +58,6 @@ public class FootstepDataTansformerTest
    private static FootstepData getTestFootstepData()
    {
       FootstepData ret = new FootstepData();
-      ret.id = "name";
       ret.rigidBodyName = "rigidBodyNameHere";
       ret.location = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
       AxisAngle4d axisAngle = RandomTools.generateRandomRotation(random);
@@ -85,9 +84,6 @@ public class FootstepDataTansformerTest
    private static void performEqualsTestsWithTransform(FootstepData footstepData, Transform3D transform3D, FootstepData transformedFootstepData)
    {
       double distance;
-
-      // public String id;
-      assertTrue(footstepData.getId().equals(transformedFootstepData.getId()));
 
       // public String rigidBodyName;
       assertTrue(footstepData.getRigidBodyName().equals(transformedFootstepData.getRigidBodyName()));

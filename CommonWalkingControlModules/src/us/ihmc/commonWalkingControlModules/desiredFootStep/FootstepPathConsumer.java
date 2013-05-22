@@ -39,8 +39,11 @@ public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
    public void consumeObject(FootstepDataList footstepList)
    {
       ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
-      for (FootstepData footstepData : footstepList)
+      for (int i = 0; i < footstepList.size(); i++)
       {
+         FootstepData footstepData = footstepList.get(i);
+         String id = "footstep_" + i;
+         
          ContactablePlaneBody contactableBody = findContactableBodyByName(footstepData.getRigidBodyName());
 
          FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
@@ -52,7 +55,7 @@ public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
          List<FramePoint> expectedContactPoints = FootstepUtils.getContactPointsInFrame(contactableBody, soleReferenceFrame);
          
 
-         Footstep footstep = new Footstep(footstepData.getId(), contactableBody, footstepPoseFrame, soleReferenceFrame, expectedContactPoints, true);
+         Footstep footstep = new Footstep(id, contactableBody, footstepPoseFrame, soleReferenceFrame, expectedContactPoints, true);
          TrajectoryParameters trajectoryParameters = null;
 
          if (footstepData.getTrajectoryWaypointGenerationMethod() != null)
