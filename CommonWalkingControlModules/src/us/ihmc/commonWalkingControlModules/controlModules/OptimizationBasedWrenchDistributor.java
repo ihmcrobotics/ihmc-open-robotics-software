@@ -28,7 +28,10 @@ import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
@@ -50,9 +53,8 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
    private final ReferenceFrame centerOfMassFrame;
    private final BooleanYoVariable debug;
    private final YoVariableRegistry registry;
-   private final List<YoFrameVector> wrenchLinearComponents = new ArrayList<YoFrameVector>();
-   private final List<YoFrameVector> wrenchRotaryComponents = new ArrayList<YoFrameVector>();
-   private final List<YoFramePoint> wrenchOrigins = new ArrayList<YoFramePoint>();
+   
+   private final List<DynamicGraphicObject> endEffectorResultGraphics = new ArrayList<DynamicGraphicObject>();
    private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
    private int yoNameNumber = 0;
 
@@ -178,10 +180,17 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
    private void setEndEffectorOutputsFresh(List<EndEffector> endEffectorsLocal, List<EndEffectorOutput> endEffectorOutputs)
    {
       endEffectorOutputs.clear();
+      for (int i = 0 ; i< endEffectorResultGraphics.size();i++)
+      {
+         endEffectorResultGraphics.get(i).hideGraphicObject();
+      }
 
       for (int i = 0; i < endEffectorsLocal.size(); i++)
       {
-         endEffectorOutputs.add(endEffectorsLocal.get(i).getOutput());
+         EndEffectorOutput output = endEffectorsLocal.get(i).getOutput();
+         endEffectorOutputs.add(output);
+         output.getWrenchAngularVectorGraphic().showGraphicObject();
+         output.getWrenchLinearVectorGraphic().showGraphicObject();
       }
    }
 
@@ -193,9 +202,6 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
          {
             ReferenceFrame frame = endEffectorsLocal.get(i).getReferenceFrame();
             wrenchesLocal.add(new Wrench(frame, centerOfMassFrame));
-            wrenchLinearComponents.add(new YoFrameVector(frame.getName() + i + "DistributedWrenchLinear", frame, this.registry));
-            wrenchRotaryComponents.add(new YoFrameVector(frame.getName() + i + "DistributedWrenchRotary", frame, this.registry));
-            wrenchOrigins.add(new YoFramePoint(frame.getName() + i + "DistributedWrenchOrigin", frame, this.registry));
          }
       }
    }
@@ -255,6 +261,7 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
 
       EndEffector endEffector = EndEffector.fromPlane(nameSuffix, centerOfMassFrame, plane, registry);
       previouslyUsedPlaneEndEffectors.put(plane, endEffector);
+      registerEndEffectorGraphic(endEffector);
 
       return endEffector;
    }
@@ -271,8 +278,20 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
 
       EndEffector endEffector = EndEffector.fromCylinder(centerOfMassFrame, cylinder, registry);
       previouslyUsedCylinderEndEffectors.put(cylinder, endEffector);
+      registerEndEffectorGraphic(endEffector);
 
       return endEffector;
+   }
+
+   public void registerEndEffectorGraphic(EndEffector endEffector)
+   {
+      DynamicGraphicVector wrenchAngularVectorGraphic = endEffector.getOutput().getWrenchAngularVectorGraphic();
+      DynamicGraphicVector wrenchLinearVectorGraphic = endEffector.getOutput().getWrenchLinearVectorGraphic();
+      endEffectorResultGraphics.add(wrenchAngularVectorGraphic);
+      endEffectorResultGraphics.add(wrenchLinearVectorGraphic);
+      String listName = this.getClass().getSimpleName()+"EndEffectorResultGraphics";
+      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, wrenchAngularVectorGraphic);
+      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, wrenchLinearVectorGraphic);
    }
 
    private void printIfDebug(String message)

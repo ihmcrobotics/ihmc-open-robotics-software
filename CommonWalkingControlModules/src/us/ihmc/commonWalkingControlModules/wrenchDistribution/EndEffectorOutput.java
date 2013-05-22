@@ -1,9 +1,12 @@
 package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -12,57 +15,73 @@ import us.ihmc.utilities.screwTheory.Wrench;
 
 public class EndEffectorOutput
 {
+   private static final double VECTOR_SCALE = 0.001;
    private final SpatialForceVector resultingExternalForceVector;
    private final Wrench resultingWrench;
    private final YoFrameVector wrenchLinear;
-   private final YoFrameVector wrenchRotary;
+   private final YoFrameVector wrenchAngular;
    private final YoFramePoint wrenchOrigin;
    private final ReferenceFrame centerOfMassFrame;
    private final ReferenceFrame endEffectorFrame;
    private final YoVariableRegistry registry;
    private final FrameVector tempFrameVector;
    private final FramePoint tempFramePoint;
-   
-   
-   public EndEffectorOutput(String nameSuffix, ReferenceFrame centerOfMassFrame, ReferenceFrame endEffectorFrame, YoVariableRegistry registry)
+   private final DynamicGraphicVector linearVectorGraphic;
+   private final DynamicGraphicVector angularVectorGraphic;
+
+
+   public EndEffectorOutput(String nameSuffix, ReferenceFrame centerOfMassFrame, ReferenceFrame endEffectorFrame, YoVariableRegistry parentRegistry)
    {
-      this.registry = registry;
-      this.endEffectorFrame=endEffectorFrame;
-      this.centerOfMassFrame=centerOfMassFrame;
+      String name = this.getClass().getSimpleName() + endEffectorFrame.getName() + nameSuffix;
+      this.registry = new YoVariableRegistry(name);
+      parentRegistry.addChild(registry);
+      this.endEffectorFrame = endEffectorFrame;
+      this.centerOfMassFrame = centerOfMassFrame;
       this.resultingExternalForceVector = new SpatialForceVector(centerOfMassFrame);
-      this.resultingWrench = new Wrench(endEffectorFrame, centerOfMassFrame); 
-      String name = endEffectorFrame.getName() + nameSuffix;
-      this.wrenchLinear = new YoFrameVector(name+"EndEffectorOutputWrenchLinear",endEffectorFrame,this.registry);
-      this.wrenchRotary = new YoFrameVector(name+"EndEffectorOutputWrenchRotary",endEffectorFrame,this.registry);
-      this.wrenchOrigin = new YoFramePoint(name+"EndEffectorOutputWrenchOrigin",endEffectorFrame,this.registry);
-      this.tempFrameVector=new FrameVector(endEffectorFrame);
+      this.resultingWrench = new Wrench(endEffectorFrame, centerOfMassFrame);
+      this.wrenchLinear = new YoFrameVector("WrenchLinear", endEffectorFrame.getRootFrame(), this.registry);
+      this.wrenchAngular = new YoFrameVector("wrenchAngular", endEffectorFrame.getRootFrame(), this.registry);
+      this.wrenchOrigin = new YoFramePoint("WrenchOrigin", endEffectorFrame.getRootFrame(), this.registry);
+      linearVectorGraphic=new DynamicGraphicVector(name+"linear", wrenchOrigin,wrenchLinear, VECTOR_SCALE, new YoAppearanceRGBColor(1.0, 0.0, 0.0, 0.2), true);
+      angularVectorGraphic = new DynamicGraphicVector(name+"angular", wrenchOrigin,wrenchAngular, VECTOR_SCALE, new YoAppearanceRGBColor(0.5, 0.0, 0.5, 0.2), true);
+      this.tempFrameVector = new FrameVector(endEffectorFrame);
       this.tempFramePoint = new FramePoint(endEffectorFrame);
    }
-   
+
    public void setExternallyActingSpatialForceVector(SpatialForceVector spatialForceVector)
    {
       resultingExternalForceVector.set(spatialForceVector);
       this.resultingWrench.changeFrame(centerOfMassFrame);
       this.resultingWrench.set(spatialForceVector);
       this.resultingWrench.changeFrame(endEffectorFrame);
+      tempFrameVector.changeFrame(endEffectorFrame);
       this.resultingWrench.packLinearPart(tempFrameVector);
+      tempFrameVector.changeFrame(endEffectorFrame.getRootFrame());
       this.wrenchLinear.set(tempFrameVector);
+      tempFrameVector.changeFrame(endEffectorFrame);
       this.resultingWrench.packAngularPart(tempFrameVector);
-      this.wrenchRotary.set(tempFrameVector);
+      tempFrameVector.changeFrame(endEffectorFrame.getRootFrame());
+      this.wrenchAngular.set(tempFrameVector);
       this.tempFramePoint.setToZero(endEffectorFrame);
+      tempFramePoint.changeFrame(endEffectorFrame.getRootFrame());
       this.wrenchOrigin.set(tempFramePoint);
    }
-   
+
    public void packExternallyActingSpatialForceVector(SpatialForceVector vectorToPack)
    {
       vectorToPack.set(resultingExternalForceVector);
    }
-   
+
    public Wrench getWrenchOnEndEffector()
    {
       return this.resultingWrench;
    }
-
-   
-   
+   public DynamicGraphicVector getWrenchLinearVectorGraphic()
+   {
+      return linearVectorGraphic;
+   }
+   public DynamicGraphicVector getWrenchAngularVectorGraphic()
+   {
+      return angularVectorGraphic;
+   }
 }
