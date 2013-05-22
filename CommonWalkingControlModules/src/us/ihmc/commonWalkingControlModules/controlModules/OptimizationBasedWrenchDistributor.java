@@ -53,7 +53,7 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
    private final ReferenceFrame centerOfMassFrame;
    private final BooleanYoVariable debug;
    private final YoVariableRegistry registry;
-   
+
    private final List<DynamicGraphicObject> endEffectorResultGraphics = new ArrayList<DynamicGraphicObject>();
    private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
    private int yoNameNumber = 0;
@@ -71,7 +71,7 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
    {
       this.registry = new YoVariableRegistry(this.getClass().getSimpleName());
       paentRegistry.addChild(this.registry);
-      
+
       nativeOptimizer = new CylinderAndPlaneContactForceOptimizerNative(registry);
       this.dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistry;
       this.debug = new BooleanYoVariable(this.getClass().getSimpleName() + "Debug", registry);
@@ -80,7 +80,7 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
       optimizerInputPopulator = new CylinderAndPlaneContactForceOptimizerMatrixCalculator("inputPopulator", centerOfMassFrame, registry,
               dynamicGraphicObjectsListRegistry);
       optimizerOutputExtractor = new CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator("outputExtractor", centerOfMassFrame, registry,
-            dynamicGraphicObjectsListRegistry);
+              dynamicGraphicObjectsListRegistry);
    }
 
    public void setWeights(double[] diagonalCWeights, double phiWeight, double rhoWeight)
@@ -180,7 +180,8 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
    private void setEndEffectorOutputsFresh(List<EndEffector> endEffectorsLocal, List<EndEffectorOutput> endEffectorOutputs)
    {
       endEffectorOutputs.clear();
-      for (int i = 0 ; i< endEffectorResultGraphics.size();i++)
+
+      for (int i = 0; i < endEffectorResultGraphics.size(); i++)
       {
          endEffectorResultGraphics.get(i).hideGraphicObject();
       }
@@ -289,9 +290,12 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
       DynamicGraphicVector wrenchLinearVectorGraphic = endEffector.getOutput().getWrenchLinearVectorGraphic();
       endEffectorResultGraphics.add(wrenchAngularVectorGraphic);
       endEffectorResultGraphics.add(wrenchLinearVectorGraphic);
-      String listName = this.getClass().getSimpleName()+"EndEffectorResultGraphics";
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, wrenchAngularVectorGraphic);
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, wrenchLinearVectorGraphic);
+      String listName = this.getClass().getSimpleName() + "EndEffectorResultGraphics";
+      if (dynamicGraphicObjectsListRegistry != null)
+      {
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, wrenchAngularVectorGraphic);
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, wrenchLinearVectorGraphic);
+      }
    }
 
    private void printIfDebug(String message)
