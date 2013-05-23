@@ -33,7 +33,7 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 
 	private static boolean RECORD = false;
 
-	private Subscriber<CompressedImage> leftEyeImageSubscriber, rightEyeImageSubscriber;
+   protected Subscriber<CompressedImage> leftEyeImageSubscriber, rightEyeImageSubscriber;
 	private BufferedImage leftEyeImage, rightEyeImage;
 
    protected Subscriber<std_msgs.Float64> steeringWheelStateSubscriber, handBrakeStateSubscriber, gasPedalStateSubscriber, brakePedalStateSubscriber;
