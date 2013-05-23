@@ -32,7 +32,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 
-public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchDistributor
+public class CylinderAndContactPointWrenchDistributor implements GroundReactionWrenchDistributor
 {
    private CylinderAndPlaneContactForceOptimizerNative nativeOptimizer;
    private CylinderAndPlaneContactForceOptimizerNativeInput optimizerInput = new CylinderAndPlaneContactForceOptimizerNativeInput();
@@ -63,8 +63,8 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
    double wRho = 0.000001;
 
 
-   public OptimizationBasedWrenchDistributor(ReferenceFrame centerOfMassFrame, YoVariableRegistry paentRegistry,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public CylinderAndContactPointWrenchDistributor(ReferenceFrame centerOfMassFrame, YoVariableRegistry paentRegistry,
+                                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.registry = new YoVariableRegistry(this.getClass().getSimpleName());
       paentRegistry.addChild(this.registry);
