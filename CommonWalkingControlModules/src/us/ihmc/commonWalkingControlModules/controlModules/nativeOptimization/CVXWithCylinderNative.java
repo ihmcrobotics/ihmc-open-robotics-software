@@ -18,7 +18,7 @@ public class CVXWithCylinderNative
    public static final int wrenchLength = 6;
    public static final int nDoF = 34;
    public static final int nNull = 4;
-   public static final int rhoSize = nSupportVectors * nPointsPerPlane * nPlanes+nCylinderVectors*nCylinders;
+   public static final int rhoSize = nSupportVectors * nPointsPerPlane * nPlanes + nCylinderVectors * nCylinders;
    public static final int phiSize = nCylinders * nCylinderBoundedVariables;
 
    private static native void initialize();
@@ -38,7 +38,7 @@ public class CVXWithCylinderNative
    private static native ByteBuffer getLambdaBuffer();
 
    private static native ByteBuffer getQrhoBuffer();
-   
+
    private static native ByteBuffer getQphiBuffer();
 
    private static native ByteBuffer getcBuffer();
@@ -50,11 +50,11 @@ public class CVXWithCylinderNative
    private static native ByteBuffer getrhoMinBuffer();
 
    private static native ByteBuffer getrhoBuffer();
-   
+
    private static native ByteBuffer getphiBuffer();
-   
+
    private static native ByteBuffer getphiMinBuffer();
-   
+
    private static native ByteBuffer getphiMaxBuffer();
 
    private static native ByteBuffer getvdBuffer();
@@ -130,7 +130,7 @@ public class CVXWithCylinderNative
 
    public CVXWithCylinderNative(int nDoF, int rhoSize, int phiSize)
    {
-      CheckTools.checkRange(nDoF,    0, CVXWithCylinderNative.nDoF);
+      CheckTools.checkRange(nDoF, 0, CVXWithCylinderNative.nDoF);
       CheckTools.checkRange(rhoSize, 0, CVXWithCylinderNative.rhoSize);
       CheckTools.checkRange(phiSize, 0, CVXWithCylinderNative.phiSize);
       cvxWithCylinderNativeOutput = new CVXWithCylinderNativeOutput(nDoF, rhoSize, phiSize);
@@ -148,19 +148,19 @@ public class CVXWithCylinderNative
     *   nCylinders = 2 # number of cylindrical hands
     *   nCylinderVectors = 8
     *   nCylinderBoundedVariables = 5
-    * end 
-    * 
+    * end
+    *
     * parameters
     *   A (wrenchLength, nDoF) # CentroidalMomentumMatrix
     *   b (wrenchLength, 1) # MomentumDotEquationRightHandSide DesiredChangeInMomentum
     *   C (wrenchLength, wrenchLength) diagonal psd #MomentumDotWeight
-    *   
+    *
     *   Js (nDoF, nDoF) # SecondaryConstraintJacobian
     *   ps (nDoF, 1) # SecondaryConstraintRightHandSide
     *   Ws (nDoF, nDoF) diagonal psd # SecondaryConstraintWeight
-    *   
+    *
     *   Lambda (nDoF, nDoF) diagonal psd # JointAccelerationRegularization
-    *   
+    *
     *   Qrho (wrenchLength, nPlanes * nSupportVectors * nPointsPerContact + nCylinders*nCylinderVectors ) # ContactPointWrenchMatrix
     *   Qphi (wrenchLength, nCylinders*nCylinderBoundedVariables) # ContactPointWrenchMatrixForFullyBoundedVariables
     *   c (wrenchLength, 1) # WrenchEquationRightHandSide
@@ -168,17 +168,17 @@ public class CVXWithCylinderNative
     *   wRho positive # GroundReactionForceRegularization
     *   phiMin (nCylinders*nCylinderBoundedVariables) negative
     *   phiMax (nCylinders*nCylinderBoundedVariables) positive
-    *   
+    *
     *   N (nDoF, nNull) # NullspaceMatrix null space of joint torques due to not only limb singularity but also multi-ground contact overconstraint.
     *   z(nNull, 1) # NullspaceMultipliers
     * end
-    * 
+    *
     * variables
     *   rho (nSupportVectors * nPointsPerContact * nPlanes + nCylinders*nCylinderVectors ) # magnitude of each ground reaction force component
     *   phi (nCylinders*nCylinderBoundedVariables) # specific to cylinders. bounded above and below
     *   vd (nDoF) # JointAccelerations
     * end
-    * 
+    *
     * minimize
     *   quad(A * vd - b, C) + quad(Js * vd - ps, Ws) + wRho * quad(rho) + quad(vd, Lambda)
     * subject to
@@ -189,9 +189,8 @@ public class CVXWithCylinderNative
     * end
     * @param cvxWithCylinderNativeInput
     */
-   
-   public void solve(CVXWithCylinderNativeInput cvxWithCylinderNativeInput)
-           throws NoConvergenceException
+
+   public void solve(CVXWithCylinderNativeInput cvxWithCylinderNativeInput) throws NoConvergenceException
    {
       double[] A = cvxWithCylinderNativeInput.getA();
       double[] b = cvxWithCylinderNativeInput.getB();
@@ -219,9 +218,9 @@ public class CVXWithCylinderNative
       return cvxWithCylinderNativeOutput;
    }
 
-   private void solve(double[] A, double[] b, double[] C, double[] Js, double[] ps, double[] Ws, double[] Lambda, double[] Qrho, double[] Qphi,
-                                               double[] c, double[] rhoMin, double[] phiMin, double[] phiMax,
-                                               double[] N, double[] z, double wRho) throws NoConvergenceException
+   private void solve(double[] A, double[] b, double[] C, double[] Js, double[] ps, double[] Ws, double[] Lambda, double[] Qrho, double[] Qphi, double[] c,
+                      double[] rhoMin, double[] phiMin, double[] phiMax, double[] N, double[] z, double wRho)
+           throws NoConvergenceException
    {
       int numberOfIterations;
       synchronized (solveConch)
@@ -249,7 +248,7 @@ public class CVXWithCylinderNative
 
          vdDoubleBuffer.rewind();
          vdDoubleBuffer.get(vd);
-         
+
          phiDoubleBuffer.rewind();
          phiDoubleBuffer.get(phi);
 
@@ -307,8 +306,8 @@ public class CVXWithCylinderNative
       }
    }
 
-   private static void load_default_data(double[] A, double[] b, double[] C, double[] Js, double[] ps, double[] Ws, double[] Lambda, double[] Qrho, double[] Qphi, double[] c,
-           double[] rhoMin, double[] phiMin, double[] phiMax, double[] N, double[] z, double[] wRho)
+   private static void load_default_data(double[] A, double[] b, double[] C, double[] Js, double[] ps, double[] Ws, double[] Lambda, double[] Qrho,
+           double[] Qphi, double[] c, double[] rhoMin, double[] phiMin, double[] phiMax, double[] N, double[] z, double[] wRho)
    {
       A[0] = 0.20319161029830202;
       A[1] = 0.8325912904724193;
