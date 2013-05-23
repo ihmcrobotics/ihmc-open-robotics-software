@@ -20,8 +20,8 @@ public class CylinderAndPlaneContactForceOptimizerNativeInput
 
    // conversion helpers
    private final DenseMatrix64F CMatrix;
-   private final DenseMatrix64F QrhoMatrix;
-   private final DenseMatrix64F QphiMatrix;
+   private final DenseMatrix64F qRhoMatrix;
+   private final DenseMatrix64F qPhiMatrix;
    private final DenseMatrix64F cMatrix;
    private final DenseMatrix64F rhoMinMatrix;
    private final DenseMatrix64F phiMinMatrix;
@@ -34,16 +34,16 @@ public class CylinderAndPlaneContactForceOptimizerNativeInput
       int wrenchLength = CylinderAndPlaneContactForceOptimizerNative.wrenchLength;
 
       CMatrix = new DenseMatrix64F(wrenchLength, wrenchLength);
-      QrhoMatrix = new DenseMatrix64F(wrenchLength, rhoSize);
-      QphiMatrix = new DenseMatrix64F(wrenchLength, phiSize);
+      qRhoMatrix = new DenseMatrix64F(wrenchLength, rhoSize);
+      qPhiMatrix = new DenseMatrix64F(wrenchLength, phiSize);
       cMatrix = new DenseMatrix64F(wrenchLength, 1);
       rhoMinMatrix = new DenseMatrix64F(rhoSize, 1);
       phiMinMatrix = new DenseMatrix64F(phiSize, 1);
       phiMaxMatrix = new DenseMatrix64F(phiSize, 1);
 
       C = new double[CMatrix.getNumRows()];
-      Qrho = new double[QrhoMatrix.getNumElements()];
-      Qphi = new double[QphiMatrix.getNumElements()];
+      Qrho = new double[qRhoMatrix.getNumElements()];
+      Qphi = new double[qPhiMatrix.getNumElements()];
       c = new double[cMatrix.getNumElements()];
       rhoMin = new double[rhoMinMatrix.getNumElements()];
       phiMin = new double[phiMinMatrix.getNumElements()];
@@ -59,14 +59,14 @@ public class CylinderAndPlaneContactForceOptimizerNativeInput
 
    public double[] getQrho()
    {
-      MatrixTools.denseMatrixToArrayColumnMajor(this.QrhoMatrix, this.Qrho);
+      MatrixTools.denseMatrixToArrayColumnMajor(this.qRhoMatrix, this.Qrho);
 
       return Qrho;
    }
 
    public double[] getQphi()
    {
-      MatrixTools.denseMatrixToArrayColumnMajor(this.QphiMatrix, this.Qphi);
+      MatrixTools.denseMatrixToArrayColumnMajor(this.qPhiMatrix, this.Qphi);
 
       return Qphi;
    }
@@ -112,8 +112,8 @@ public class CylinderAndPlaneContactForceOptimizerNativeInput
    public void resetToZeros()
    {
       CMatrix.zero();
-      QrhoMatrix.zero();
-      QphiMatrix.zero();
+      qRhoMatrix.zero();
+      qPhiMatrix.zero();
       cMatrix.zero();
       rhoMinMatrix.zero();
       phiMinMatrix.zero();
@@ -126,16 +126,6 @@ public class CylinderAndPlaneContactForceOptimizerNativeInput
    {
       // diagonal
       CommonOps.insert(C, this.CMatrix, 0, 0);
-   }
-
-   public void setContactPointWrenchMatrix(DenseMatrix64F Qrho)
-   {
-      CommonOps.insert(Qrho, this.QrhoMatrix, 0, 0);
-   }
-
-   public void setContactPointWrenchMatrixForBoundedCylinderVariables(DenseMatrix64F Qphi)
-   {
-      CommonOps.insert(Qphi, this.QphiMatrix, 0, 0);
    }
 
    public void setWrenchEquationRightHandSide(DenseMatrix64F c)
@@ -173,31 +163,21 @@ public class CylinderAndPlaneContactForceOptimizerNativeInput
       rhoMinMatrix.set(rhoLocation, i, rhoMin2);
    }
 
-   public void setPhiMin(int phiLocation, int i, double phiMin)
+   public void setQRho(DenseMatrix64F qRho)
    {
-      phiMinMatrix.set(phiLocation, i, phiMin);
+      CommonOps.insert(qRho, this.qRhoMatrix, 0, 0);
    }
 
-   public void setPhiMax(int phiLocation, int i, double phiMax)
+   public void setQPhi(DenseMatrix64F qPhi)
    {
-      phiMaxMatrix.set(phiLocation, i, phiMax);
-   }
-
-   public void setQRho(int rhoLocation, SpatialForceVector spatialForceVector)
-   {
-      spatialForceVector.packMatrixColumn(QrhoMatrix, rhoLocation);
-   }
-
-   public void setQPhi(int phiLocation, SpatialForceVector spatialForceVector)
-   {
-      spatialForceVector.packMatrixColumn(QphiMatrix, phiLocation);
+      CommonOps.insert(qPhi, this.qPhiMatrix, 0, 0);
    }
 
    public void packQphi(int i, DenseMatrix64F tempVector)
    {
       for (int j = 0; j < SpatialForceVector.SIZE; j++)
       {
-         tempVector.set(j, QphiMatrix.get(j, i));
+         tempVector.set(j, qPhiMatrix.get(j, i));
       }
    }
    
@@ -205,7 +185,7 @@ public class CylinderAndPlaneContactForceOptimizerNativeInput
    {
       for (int j = 0; j < SpatialForceVector.SIZE; j++)
       {
-         tempVector.set(j, QrhoMatrix.get(j, i));
+         tempVector.set(j, qRhoMatrix.get(j, i));
       }
    }
    
@@ -214,8 +194,8 @@ public class CylinderAndPlaneContactForceOptimizerNativeInput
       StringBuilder ret = new StringBuilder(1000);
       ret.append("CylinderAndPlaneContactForceOptimizerNativeInput with \n");
       appendMatrix(ret,"CMatrix",CMatrix);
-      appendMatrix(ret,"QrhoMatrix",QrhoMatrix);
-      appendMatrix(ret,"QphiMatrix",QphiMatrix);
+      appendMatrix(ret,"QrhoMatrix", qRhoMatrix);
+      appendMatrix(ret,"QphiMatrix", qPhiMatrix);
       appendMatrix(ret,"cMatrix",cMatrix);
       appendMatrix(ret,"rhoMinMatrix",rhoMinMatrix);
       appendMatrix(ret,"phiMinMatrix",phiMinMatrix);

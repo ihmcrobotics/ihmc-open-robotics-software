@@ -74,8 +74,10 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
       this.debug = new BooleanYoVariable(this.getClass().getSimpleName() + "Debug", registry);
       this.debug.set(false);
       this.centerOfMassFrame = centerOfMassFrame;
+      int rhoSize = CylinderAndPlaneContactForceOptimizerNative.rhoSize;
+      int phiSize = CylinderAndPlaneContactForceOptimizerNative.phiSize;
       optimizerInputPopulator = new CylinderAndPlaneContactForceOptimizerMatrixCalculator("inputPopulator", centerOfMassFrame, registry,
-              dynamicGraphicObjectsListRegistry);
+              dynamicGraphicObjectsListRegistry, rhoSize, phiSize);
       optimizerOutputExtractor = new CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator("outputExtractor", centerOfMassFrame, registry,
               dynamicGraphicObjectsListRegistry);
    }
@@ -244,7 +246,13 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
       optimizerInputLocal.setMomentumDotWeight(cmatrixLocal);
       optimizerInputLocal.setWrenchEquationRightHandSide(desiredNetEnvironmentReactionWrenchLocal);
 
-      optimizerInputPopulator.computeAllMatriciesAndPopulateNativeInput(endEffectorsLocal, optimizerInputLocal);
+      optimizerInputPopulator.computeAllMatriciesAndPopulateNativeInput(endEffectorsLocal);
+
+      optimizerInputLocal.setRhoMin(optimizerInputPopulator.getRhoMin());
+      optimizerInputLocal.setPhiMin(optimizerInputPopulator.getPhiMin());
+      optimizerInputLocal.setPhiMax(optimizerInputPopulator.getPhiMax());
+      optimizerInputLocal.setQRho(optimizerInputPopulator.getQRho());
+      optimizerInputLocal.setQPhi(optimizerInputPopulator.getQPhi());
    }
 
    private EndEffector getOrCreate(String nameSuffix, PlaneContactState plane)

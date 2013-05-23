@@ -229,8 +229,10 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
    public void runSolver(List<EndEffector> endEffectorsWithDefinedContactModels, List<EndEffectorOutput> endEffectorsWithAssignedForces,
                          double[] desiredCOMForces)
    {
+      int rhoSize = CylinderAndPlaneContactForceOptimizerNative.rhoSize;
+      int phiSize = CylinderAndPlaneContactForceOptimizerNative.phiSize;
       CylinderAndPlaneContactForceOptimizerMatrixCalculator calc = new CylinderAndPlaneContactForceOptimizerMatrixCalculator("calc",comFrame,
-                                                                      new YoVariableRegistry("rootRegistry"), new DynamicGraphicObjectsListRegistry());
+                                                                      new YoVariableRegistry("rootRegistry"), new DynamicGraphicObjectsListRegistry(), rhoSize, phiSize);
       CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator vectorCalc =
          new CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator("vectorCalc",comFrame,
                new YoVariableRegistry("rootRegistry"), new DynamicGraphicObjectsListRegistry());
@@ -253,7 +255,13 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
       nativeSolverInput.setGroundReactionForceRegularization(wRho);
       nativeSolverInput.setMomentumDotWeight(Cmatrix);
       nativeSolverInput.setWrenchEquationRightHandSide(desiredNetEnvironmentReactionWrench);
-      calc.computeAllMatriciesAndPopulateNativeInput(endEffectorsWithDefinedContactModels, nativeSolverInput);
+      calc.computeAllMatriciesAndPopulateNativeInput(endEffectorsWithDefinedContactModels);
+
+      nativeSolverInput.setRhoMin(calc.getRhoMin());
+      nativeSolverInput.setPhiMin(calc.getPhiMin());
+      nativeSolverInput.setPhiMax(calc.getPhiMax());
+      nativeSolverInput.setQRho(calc.getQRho());
+      nativeSolverInput.setQPhi(calc.getQPhi());
 
       try
       {
