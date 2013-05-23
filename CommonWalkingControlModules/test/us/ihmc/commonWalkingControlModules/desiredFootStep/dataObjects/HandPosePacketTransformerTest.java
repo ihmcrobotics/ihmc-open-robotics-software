@@ -66,25 +66,30 @@ public class HandPosePacketTransformerTest
 
    private static void performEqualsTest(HandPosePacket starting, Transform3D transform3D, HandPosePacket ending)
    {
-      // Frame referenceFrame;
-      assertTrue(starting.getReferenceFrame().equals(ending.getReferenceFrame()));
-
       // RobotSide robotSide;
       assertTrue(starting.getRobotSide().equals(ending.getRobotSide()));
-
+      
       // boolean toHomePosition;
       assertTrue(starting.isToHomePosition() == ending.isToHomePosition());
 
-      // Point3d position;
-      double distance = getDistanceBetweenPoints(starting.getPosition(), transform3D, ending.getPosition());
-      assertEquals("not equal", 0.0, distance, 1e-6);
-
-      // Quat4d orientation;
-      Quat4d startQuat = starting.getOrientation();
-      Quat4d endQuat = ending.getOrientation();
-      assertTrue(areOrientationsEqualWithTransform(startQuat, transform3D, endQuat));
-
-      // boolean handLoadBearing;
+      if(!ending.isToHomePosition())
+      {
+      
+         // Frame referenceFrame;
+         assertTrue(starting.getReferenceFrame().equals(ending.getReferenceFrame()));
+   
+   
+   
+         // Point3d position;
+         double distance = getDistanceBetweenPoints(starting.getPosition(), transform3D, ending.getPosition());
+         assertEquals("not equal", 0.0, distance, 1e-6);
+   
+         // Quat4d orientation;
+         Quat4d startQuat = starting.getOrientation();
+         Quat4d endQuat = ending.getOrientation();
+         assertTrue(areOrientationsEqualWithTransform(startQuat, transform3D, endQuat));
+   
+      }
    }
 
    private static double getDistanceBetweenPoints(Point3d startingPoint, Transform3D transform3D, Point3d endPoint)
