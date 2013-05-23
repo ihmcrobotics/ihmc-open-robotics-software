@@ -10,6 +10,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -31,6 +32,7 @@ public class YoRollingContactState implements PlaneContactState
    private final Transform3D transformFromContactFrameToBodyFrame = new Transform3D();
    private final ArrayList<DynamicGraphicPosition> contactPointGraphics = new ArrayList<DynamicGraphicPosition>();
    private final ContactableCylinderBody contactableCylinderBody;
+   private final FrameVector contactNormalFrameVector;
 
    // Class enabling to update the contact points of a contactable cylindrical body as it is rolling on the ground or on another contactable surface 
    
@@ -73,6 +75,8 @@ public class YoRollingContactState implements PlaneContactState
       updateContactPoints();
       
       parentRegistry.addChild(registry);
+      
+      this.contactNormalFrameVector = new FrameVector(updatableContactFrame, 0.0, 0.0, 1.0);
    }
 
    private void setContactPoints(List<FramePoint2d> contactPoints)
@@ -209,5 +213,10 @@ public class YoRollingContactState implements PlaneContactState
             ret++;
       }
       return ret;
+   }
+
+   public FrameVector getContactNormalFrameVector()
+   {
+      return contactNormalFrameVector;
    }
 }

@@ -1,9 +1,15 @@
 package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+
 import us.ihmc.commonWalkingControlModules.WrenchDistributorTools;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.ContactPointWrenchOptimizerNative;
 import us.ihmc.utilities.math.MatrixTools;
@@ -13,8 +19,6 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Wrench;
-
-import java.util.*;
 
 /**
  * @author twan
@@ -74,7 +78,7 @@ public class ContactPointWrenchMatrixCalculator
       for (PlaneContactState contactState : contactStates)
       {
          List<FramePoint2d> contactPoints2d = contactState.getContactPoints2d();
-         WrenchDistributorTools.getSupportVectors(normalizedSupportVectors, contactState.getCoefficientOfFriction(), contactState.getPlaneFrame());
+         WrenchDistributorTools.getSupportVectors(normalizedSupportVectors, contactState.getCoefficientOfFriction(), contactState.getContactNormalFrameVector().getReferenceFrame());
 
          for (FramePoint2d contactPoint2d : contactPoints2d)
          {
