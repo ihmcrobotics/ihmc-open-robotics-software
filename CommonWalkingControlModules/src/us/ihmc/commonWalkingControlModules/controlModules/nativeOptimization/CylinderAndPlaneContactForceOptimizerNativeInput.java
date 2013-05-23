@@ -172,22 +172,6 @@ public class CylinderAndPlaneContactForceOptimizerNativeInput
    {
       CommonOps.insert(qPhi, this.qPhiMatrix, 0, 0);
    }
-
-   public void packQphi(int i, DenseMatrix64F tempVector)
-   {
-      for (int j = 0; j < SpatialForceVector.SIZE; j++)
-      {
-         tempVector.set(j, qPhiMatrix.get(j, i));
-      }
-   }
-   
-   public void packQrho(int i, DenseMatrix64F tempVector)
-   {
-      for (int j = 0; j < SpatialForceVector.SIZE; j++)
-      {
-         tempVector.set(j, qRhoMatrix.get(j, i));
-      }
-   }
    
    public String toString()
    {

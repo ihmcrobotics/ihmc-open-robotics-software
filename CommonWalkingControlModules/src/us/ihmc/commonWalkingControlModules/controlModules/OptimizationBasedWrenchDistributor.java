@@ -79,7 +79,7 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
       optimizerInputPopulator = new CylinderAndPlaneContactForceOptimizerMatrixCalculator("inputPopulator", centerOfMassFrame, registry,
               dynamicGraphicObjectsListRegistry, rhoSize, phiSize);
       optimizerOutputExtractor = new CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator("outputExtractor", centerOfMassFrame, registry,
-              dynamicGraphicObjectsListRegistry);
+              dynamicGraphicObjectsListRegistry, rhoSize, phiSize);
    }
 
    public void setWeights(double[] diagonalCWeights, double phiWeight, double rhoWeight)
@@ -212,8 +212,9 @@ public class OptimizationBasedWrenchDistributor implements GroundReactionWrenchD
    {
       nativeOptimizer.solve(optimizerInputLocal);
       optimizerOutput = nativeOptimizer.getOutput();
-      optimizerOutputExtractor.computeAllWrenchesBasedOnNativeOutputAndInput(endEffectorsLocal, optimizerInputLocal, optimizerOutput);
-
+      optimizerOutputExtractor.setQRho(optimizerInputPopulator.getQRho());
+      optimizerOutputExtractor.setQPhi(optimizerInputPopulator.getQPhi());
+      optimizerOutputExtractor.computeAllWrenchesBasedOnNativeOutputAndInput(endEffectorsLocal, optimizerOutput.getRho(), optimizerOutput.getPhi());
 
       for (int i = 0; i < endEffectorsLocal.size(); i++)
       {
