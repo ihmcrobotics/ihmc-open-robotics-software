@@ -70,9 +70,15 @@ public class OldMomentumControlModule implements MomentumControlModule
    private final MomentumRateOfChangeData momentumRateOfChangeData;
    private final SixDoFJoint rootJoint;
    private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
-
+   private GroundReactionWrenchDistributorOutputData distributedWrenches = new GroundReactionWrenchDistributorOutputData();
+   
    private GroundReactionWrenchDistributorInputData wrenchDistributorInput = new GroundReactionWrenchDistributorInputData();
 
+//   private final SpatialForceVector netGroundReactionWrench;
+//   private final SpatialForceVector desiredNetWrench;
+
+   
+   
 
    public OldMomentumControlModule(SixDoFJoint rootJoint, double gravityZ, GroundReactionWrenchDistributor groundReactionWrenchDistributor,
                                    ReferenceFrame centerOfMassFrame, double controlDT, TwistCalculator twistCalculator,
@@ -125,7 +131,7 @@ public class OldMomentumControlModule implements MomentumControlModule
       externalWrenchesToCompensateFor.clear();
    }
 
-   private GroundReactionWrenchDistributorOutputData distributedWrenches = new GroundReactionWrenchDistributorOutputData();
+   
    public void compute(Map<ContactablePlaneBody, ? extends PlaneContactState> planeContactStates, RobotSide upcomingSupportLeg,
                        Map<RigidBody, ? extends CylindricalContactState> cylinderContactStates)
    {
