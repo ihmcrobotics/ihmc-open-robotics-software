@@ -3,12 +3,11 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
-import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.MomentumOptimizerNative;
-import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.MomentumOptimizerNativeInput;
-import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.MomentumOptimizerNativeOutput;
+import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXWithCylinderNative;
+import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXWithCylinderNativeInput;
+import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXWithCylinderNativeOutput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
@@ -41,8 +40,8 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    private final MotionConstraintHandler primaryMotionConstraintHandler;
    private final MotionConstraintHandler secondaryMotionConstraintHandler;
    private final ContactPointWrenchMatrixCalculator contactPointWrenchMatrixCalculator;
-   private final MomentumOptimizerNativeInput momentumOptimizerNativeInput = new MomentumOptimizerNativeInput();
-   private final MomentumOptimizerNative momentumOptimizerNative;
+   private final CVXWithCylinderNativeInput momentumOptimizerNativeInput = new CVXWithCylinderNativeInput();
+   private final CVXWithCylinderNative momentumOptimizerNative;
    private final MomentumOptimizationSettings momentumOptimizationSettings;
 
    private final BooleanYoVariable converged = new BooleanYoVariable("converged", registry);
@@ -52,18 +51,18 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    private final DampedLeastSquaresSolver hardMotionConstraintSolver;
 
    public OptimizationMomentumControlModule(InverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame, double controlDT,
-                                            YoVariableRegistry parentRegistry, InverseDynamicsJoint[] jointsToOptimizeFor,
-                                            MomentumOptimizationSettings momentumOptimizationSettings,
-                                            double gravityZ, TwistCalculator twistCalculator)
+           YoVariableRegistry parentRegistry, InverseDynamicsJoint[] jointsToOptimizeFor, MomentumOptimizationSettings momentumOptimizationSettings,
+           double gravityZ, TwistCalculator twistCalculator)
    {
       this.centroidalMomentumHandler = new CentroidalMomentumHandler(rootJoint, centerOfMassFrame, controlDT, registry);
       this.externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, rootJoint);
       this.primaryMotionConstraintHandler = new MotionConstraintHandler(jointsToOptimizeFor, twistCalculator);
       this.secondaryMotionConstraintHandler = new MotionConstraintHandler(jointsToOptimizeFor, twistCalculator);
-      this.contactPointWrenchMatrixCalculator = new ContactPointWrenchMatrixCalculator(centerOfMassFrame, MomentumOptimizerNative.nSupportVectors,
-            MomentumOptimizerNative.rhoSize);
+      this.contactPointWrenchMatrixCalculator = new ContactPointWrenchMatrixCalculator(centerOfMassFrame, CVXWithCylinderNative.nSupportVectors,
+            CVXWithCylinderNative.rhoSize);
 
-      this.momentumOptimizerNative = new MomentumOptimizerNative(ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor), MomentumOptimizerNative.rhoSize);
+      this.momentumOptimizerNative = new CVXWithCylinderNative(ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor), CVXWithCylinderNative.rhoSize,
+              CVXWithCylinderNative.phiSize);
       this.momentumOptimizationSettings = momentumOptimizationSettings;
 
       this.jointsToOptimizeFor = jointsToOptimizeFor;
@@ -114,17 +113,17 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       momentumOptimizerNativeInput.setMomentumDotEquationRightHandSide(b);
 
       momentumOptimizerNativeInput.setRhoMin(contactPointWrenchMatrixCalculator.getRhoMin(planeContactStates.values(),
-            momentumOptimizationSettings.getRhoMinScalar()));
+              momentumOptimizationSettings.getRhoMinScalar()));
 
       contactPointWrenchMatrixCalculator.computeMatrix(contactStates.values());
       momentumOptimizerNativeInput.setContactPointWrenchMatrix(contactPointWrenchMatrixCalculator.getMatrix());
       DenseMatrix64F wrenchEquationRightHandSide =
-            externalWrenchHandler.computeWrenchEquationRightHandSide(centroidalMomentumHandler.getCentroidalMomentumConvectiveTerm(), bOriginal, b);
+         externalWrenchHandler.computeWrenchEquationRightHandSide(centroidalMomentumHandler.getCentroidalMomentumConvectiveTerm(), bOriginal, b);
       momentumOptimizerNativeInput.setWrenchEquationRightHandSide(wrenchEquationRightHandSide);
 
       momentumOptimizerNativeInput.setMomentumDotWeight(momentumOptimizationSettings.getMomentumDotWeight(momentumRateOfChangeData.getMomentumSubspace()));
       momentumOptimizerNativeInput.setJointAccelerationRegularization(
-            momentumOptimizationSettings.getDampedLeastSquaresFactorMatrix(ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor)));
+          momentumOptimizationSettings.getDampedLeastSquaresFactorMatrix(ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor)));
 
       secondaryMotionConstraintHandler.compute();
       DenseMatrix64F jSecondary = secondaryMotionConstraintHandler.getJacobian();
@@ -140,15 +139,14 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
       optimize(momentumOptimizerNativeInput);
 
-      MomentumOptimizerNativeOutput output = momentumOptimizerNative.getOutput();
+      CVXWithCylinderNativeOutput output = momentumOptimizerNative.getOutput();
 
       Map<RigidBody, Wrench> groundReactionWrenches = contactPointWrenchMatrixCalculator.computeWrenches(planeContactStates, output.getRho());
 
       externalWrenchHandler.computeExternalWrenches(groundReactionWrenches);
 
 
-      DenseMatrix64F jointAccelerations =
-            hardMotionConstraintEnforcer.constrainResult(output.getJointAccelerations());
+      DenseMatrix64F jointAccelerations = hardMotionConstraintEnforcer.constrainResult(output.getJointAccelerations());
       ScrewTools.setDesiredAccelerations(jointsToOptimizeFor, jointAccelerations);
 
       centroidalMomentumHandler.computeCentroidalMomentumRate(jointsToOptimizeFor, jointAccelerations);
@@ -165,19 +163,20 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       return ret;
    }
 
-   private void optimize(MomentumOptimizerNativeInput momentumOptimizerNativeInput)
+   private void optimize(CVXWithCylinderNativeInput momentumOptimizerNativeInput)
    {
       try
       {
          momentumOptimizerNative.solve(momentumOptimizerNativeInput);
          converged.set(true);
-      } catch (NoConvergenceException e)
+      }
+      catch (NoConvergenceException e)
       {
          if (!hasNotConvergedInPast.getBooleanValue())
          {
             e.printStackTrace();
             System.err.println("WARNING: Only showing the stack trace of the first " + e.getClass().getSimpleName()
-                  + ". This may be happening more than once. See value of YoVariable " + converged.getName() + ".");
+                               + ". This may be happening more than once. See value of YoVariable " + converged.getName() + ".");
          }
 
          converged.set(false);
@@ -198,6 +197,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
    {
       primaryMotionConstraintHandler.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData, Double.POSITIVE_INFINITY);    // weight is arbitrary,
+
       // actually
    }
 
