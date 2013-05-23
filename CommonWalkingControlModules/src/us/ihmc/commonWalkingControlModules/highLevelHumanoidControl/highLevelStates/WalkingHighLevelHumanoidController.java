@@ -57,6 +57,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.SettableOrientationProvi
 import us.ihmc.commonWalkingControlModules.trajectories.SimpleTwoWaypointTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.ThirdOrderPolynomialTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointTrajectoryUtils;
 import us.ihmc.commonWalkingControlModules.trajectories.YoVariableDoubleProvider;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -1666,7 +1667,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          Footstep nextFootstep = upcomingFootstepList.getNextFootstep();
          ReferenceFrame finalSoleFrame = nextFootstep.getSoleReferenceFrame();
 
-         if (SimpleTwoWaypointTrajectoryParameters.stepOnOrOff(initialSoleFrame, finalSoleFrame))
+         if (TwoWaypointTrajectoryUtils.stepOnOrOff(initialSoleFrame, finalSoleFrame))
          {
             TrajectoryParameters trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(TrajectoryWaypointGenerationMethod.STEP_ON_OR_OFF);
             mapFromFootstepsToTrajectoryParameters.put(nextFootstep, trajectoryParameters);
