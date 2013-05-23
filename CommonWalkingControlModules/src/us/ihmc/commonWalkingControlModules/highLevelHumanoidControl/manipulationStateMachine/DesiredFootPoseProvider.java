@@ -18,14 +18,12 @@ import us.ihmc.utilities.net.ObjectConsumer;
 public class DesiredFootPoseProvider implements ObjectConsumer<FootPosePacket>
 {
    private final SideDependentList<FramePose> desiredFootPoses = new SideDependentList<FramePose>();
-   private final SideDependentList<MutableBoolean> contactStates = new SideDependentList<MutableBoolean>();
    private SideDependentList<Boolean> hasNewPose = new SideDependentList<Boolean>();
 
    public DesiredFootPoseProvider()
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         contactStates.put(robotSide, new MutableBoolean(false));
          hasNewPose.put(robotSide, false);
       }
    }
@@ -42,16 +40,10 @@ public class DesiredFootPoseProvider implements ObjectConsumer<FootPosePacket>
       return desiredFootPoses.get(robotSide);
    }
 
-   public synchronized boolean isInContact(RobotSide robotSide)
-   {
-      return contactStates.get(robotSide).booleanValue();
-   }
-
    public void consumeObject(FootPosePacket object)
    {
       RobotSide robotSide = object.getRobotSide();
       hasNewPose.put(robotSide, true);
-      contactStates.get(robotSide).setValue(object.isLoadBearing);
 
       FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), object.getPosition(), object.getOrientation());
       desiredFootPoses.put(robotSide, pose);

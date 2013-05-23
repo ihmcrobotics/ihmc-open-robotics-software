@@ -49,7 +49,7 @@ public class FootPosePacketTransformerTest
 
          Point3d point3d = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
 
-         FootPosePacket starting = new FootPosePacket(robotSide, point3d, quat, i % 2 == 0);
+         FootPosePacket starting = new FootPosePacket(robotSide, point3d, quat);
 
          transform3D = RandomTools.generateRandomTransform(random);
 
@@ -72,9 +72,6 @@ public class FootPosePacketTransformerTest
       Quat4d startQuat = starting.getOrientation();
       Quat4d endQuat = ending.getOrientation();
       assertTrue(areOrientationsEqualWithTransform(startQuat, transform3D, endQuat));
-
-      // boolean handLoadBearing;
-      assertTrue(starting.isLoadBearing() == ending.isLoadBearing());
    }
 
    private static double getDistanceBetweenPoints(Point3d startingPoint, Transform3D transform3D, Point3d endPoint)
