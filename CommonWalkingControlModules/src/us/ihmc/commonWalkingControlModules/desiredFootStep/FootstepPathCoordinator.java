@@ -4,49 +4,67 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.BlindWalkingDirection;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.BlindWalkingPacket;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.BlindWalkingSpeed;
 import us.ihmc.utilities.io.streamingData.QueueBasedStreamingDataProducer;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectCommunicator;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
-/**
- * User: Matt
- * Date: 1/17/13
- */
+
 public class FootstepPathCoordinator implements FootstepProvider
 {
    private boolean DEBUG = false;
    private final ConcurrentLinkedQueue<Footstep> footstepQueue = new ConcurrentLinkedQueue<Footstep>();
-   private YoVariableRegistry registry = new YoVariableRegistry("FootstepPathCoordinator");
-   private final BooleanYoVariable walk = new BooleanYoVariable("walk", registry);
+   private final YoVariableRegistry registry = new YoVariableRegistry("FootstepPathCoordinator");
+   private final EnumYoVariable<WalkMethod> walkMethod = new EnumYoVariable<WalkMethod>("walkMethod", registry, WalkMethod.class);
    private final BooleanYoVariable isPaused = new BooleanYoVariable("isPaused", registry);
    private final QueueBasedStreamingDataProducer<FootstepStatus> footstepStatusDataProducer;
    private Footstep stepInProgress = null;
 
-   
+   private final BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator;
+   private final DesiredFootstepCalculatorFootstepProviderWrapper desiredFootstepCalculatorFootstepProviderWrapper;
+
    public FootstepPathCoordinator()
    {
-      this(null);
+      this(null, null);
    }
-   
-   public FootstepPathCoordinator(ObjectCommunicator objectCommunicator)
+
+   public FootstepPathCoordinator(ObjectCommunicator objectCommunicator,
+                                  BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator)
    {
+      this(objectCommunicator, blindWalkingToDestinationDesiredFootstepCalculator, null);
+   }
+
+   public FootstepPathCoordinator(ObjectCommunicator objectCommunicator,
+                                  BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator,
+                                  YoVariableRegistry parentRegistry)
+   {
+      setWalkMethod(WalkMethod.FOOTSTEP_PATH);
       setPaused(false);
-      setWalk(true);
+
+      this.blindWalkingToDestinationDesiredFootstepCalculator = blindWalkingToDestinationDesiredFootstepCalculator;
 
       footstepStatusDataProducer = new QueueBasedStreamingDataProducer<FootstepStatus>();
-      if(objectCommunicator != null)
+
+      if (objectCommunicator != null)
       {
          footstepStatusDataProducer.addConsumer(objectCommunicator);
       }
-      footstepStatusDataProducer.startProducingData();
-   }
 
-   public FootstepPathCoordinator(ObjectCommunicator objectCommunicator, YoVariableRegistry parentRegistry)
-   {
-      this(objectCommunicator);
-      parentRegistry.addChild(registry);
+      footstepStatusDataProducer.startProducingData();
+
+      desiredFootstepCalculatorFootstepProviderWrapper =
+         new DesiredFootstepCalculatorFootstepProviderWrapper(blindWalkingToDestinationDesiredFootstepCalculator, registry);
+      desiredFootstepCalculatorFootstepProviderWrapper.setWalk(true);
+
+      if (parentRegistry != null)
+         parentRegistry.addChild(registry);
    }
 
    public Footstep poll()
@@ -56,7 +74,7 @@ public class FootstepPathCoordinator implements FootstepProvider
          return null;
       }
 
-      stepInProgress = footstepQueue.poll();
+      determineStepInProgress();
 
       if (stepInProgress != null)
       {
@@ -71,16 +89,95 @@ public class FootstepPathCoordinator implements FootstepProvider
       return stepInProgress;
    }
 
+   private void determineStepInProgress()
+   {
+      switch (walkMethod.getEnumValue())
+      {
+         case STOP :
+         {
+            stepInProgress = null;
+
+            break;
+         }
+
+         case BLIND :
+         {
+            stepInProgress = desiredFootstepCalculatorFootstepProviderWrapper.poll();
+
+            break;
+         }
+
+         case FOOTSTEP_PATH :
+         {
+            stepInProgress = footstepQueue.poll();
+
+            break;
+         }
+
+         default :
+         {
+            throw new RuntimeException("Shouldn't get here!");
+         }
+      }
+   }
+
    public Footstep peek()
    {
-      return footstepQueue.peek();
+      switch (walkMethod.getEnumValue())
+      {
+         case STOP :
+         {
+            return footstepQueue.peek();
+         }
+
+         case BLIND :
+         {
+            return desiredFootstepCalculatorFootstepProviderWrapper.peek();
+         }
+
+         case FOOTSTEP_PATH :
+         {
+            return footstepQueue.peek();
+         }
+
+         default :
+         {
+            throw new RuntimeException("Shouldn't get here!");
+         }
+      }
    }
-   
+
    public Footstep peekPeek()
    {
+      switch (walkMethod.getEnumValue())
+      {
+         case STOP :
+         {
+            return peekPeekUsingFootstepQueue();
+         }
+
+         case BLIND :
+         {
+            return desiredFootstepCalculatorFootstepProviderWrapper.peekPeek();
+         }
+
+         case FOOTSTEP_PATH :
+         {
+            return peekPeekUsingFootstepQueue();
+         }
+
+         default :
+         {
+            throw new RuntimeException("Shouldn't get here!");
+         }
+      }
+   }
+
+   private Footstep peekPeekUsingFootstepQueue()
+   {
       Iterator<Footstep> iterator = footstepQueue.iterator();
-      
-      if (iterator.hasNext()) 
+
+      if (iterator.hasNext())
       {
          iterator.next();
       }
@@ -88,7 +185,8 @@ public class FootstepPathCoordinator implements FootstepProvider
       {
          return null;
       }
-      if (iterator.hasNext()) 
+
+      if (iterator.hasNext())
       {
          return iterator.next();
       }
@@ -106,7 +204,28 @@ public class FootstepPathCoordinator implements FootstepProvider
 
    public boolean isEmpty()
    {
-      return (!walk.getBooleanValue() || footstepQueue.isEmpty() || isPaused.getBooleanValue());
+      switch (walkMethod.getEnumValue())
+      {
+         case STOP :
+         {
+            return true;
+         }
+
+         case BLIND :
+         {
+            return isPaused.getBooleanValue() || desiredFootstepCalculatorFootstepProviderWrapper.isEmpty();
+         }
+
+         case FOOTSTEP_PATH :
+         {
+            return footstepQueue.isEmpty() || isPaused.getBooleanValue();
+         }
+
+         default :
+         {
+            throw new RuntimeException("Shouldn't get here!");
+         }
+      }
    }
 
    public void notifyComplete()
@@ -119,6 +238,8 @@ public class FootstepPathCoordinator implements FootstepProvider
 
    public void updatePath(ArrayList<Footstep> footsteps)
    {
+      setWalkMethod(WalkMethod.FOOTSTEP_PATH);
+
       if (DEBUG)
       {
          System.out.println("clearing queue\n" + footstepQueue);
@@ -150,9 +271,11 @@ public class FootstepPathCoordinator implements FootstepProvider
       }
    }
 
-   public void setWalk(boolean walk)
+   public void setWalkMethod(WalkMethod walkMethod)
    {
-      this.walk.set(walk);
+      if (walkMethod == null)
+         walkMethod = WalkMethod.STOP;
+      this.walkMethod.set(walkMethod);
    }
 
    public void close()
@@ -161,6 +284,86 @@ public class FootstepPathCoordinator implements FootstepProvider
 
    public int getNumberOfFootstepsToProvide()
    {
-      return footstepQueue.size();
+      switch (walkMethod.getEnumValue())
+      {
+         case STOP :
+         {
+            return 0;
+         }
+
+         case BLIND :
+         {
+            return desiredFootstepCalculatorFootstepProviderWrapper.getNumberOfFootstepsToProvide();
+         }
+
+         case FOOTSTEP_PATH :
+         {
+            return footstepQueue.size();
+         }
+
+         default :
+         {
+            throw new RuntimeException("Shouldn't get here!");
+         }
+      }
    }
+
+   public void setBlindWalking(BlindWalkingPacket blindWalkingPacket)
+   {
+      FramePoint2d desiredDestination = new FramePoint2d(ReferenceFrame.getWorldFrame(), blindWalkingPacket.getDesiredDestination());
+      blindWalkingToDestinationDesiredFootstepCalculator.setDesiredDestination(desiredDestination);
+
+      BlindWalkingDirection blindWalkingDirection = blindWalkingPacket.getBlindWalkingDirection();
+      BlindWalkingSpeed blindWalkingSpeed = blindWalkingPacket.getBlindWalkingSpeed();
+
+      if (blindWalkingDirection == BlindWalkingDirection.BACKWARD)
+      {
+         blindWalkingToDestinationDesiredFootstepCalculator.setWalkBackwards(true);
+      }
+      else
+      {
+         blindWalkingToDestinationDesiredFootstepCalculator.setWalkBackwards(false);
+      }
+
+      double stepLength;
+      switch (blindWalkingSpeed)
+      {
+         case SLOW :
+         {
+            stepLength = 0.1;
+
+            break;
+         }
+
+         case MEDIUM :
+         {
+            stepLength = 0.2;
+
+            break;
+         }
+
+         case FAST :
+         {
+            stepLength = 0.3;
+
+            break;
+         }
+
+         default :
+         {
+            stepLength = 0.0;
+
+            break;
+         }
+      }
+
+      blindWalkingToDestinationDesiredFootstepCalculator.setDesiredStepForward(stepLength);
+
+//    blindWalkingToDestinationDesiredFootstepCalculator.setInPlaceWidth(stepWidth);
+
+      setWalkMethod(WalkMethod.BLIND);
+      footstepQueue.clear();
+   }
+
+   private enum WalkMethod {STOP, FOOTSTEP_PATH, BLIND;}
 }
