@@ -1,58 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.processManagement;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.TimerTask;
-
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListModel;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTree;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.border.BevelBorder;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.DefaultTreeModel;
-
 import org.apache.commons.lang.WordUtils;
-
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01Types;
 import us.ihmc.darpaRoboticsChallenge.DRCEnvironmentModel;
@@ -64,6 +12,18 @@ import us.ihmc.darpaRoboticsChallenge.userInterface.DRCOperatorUserInterface;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
+
+import javax.swing.*;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.DefaultTreeModel;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+import java.util.HashMap;
+import java.util.TimerTask;
 
 public class DRCDashboard
 {
@@ -86,9 +46,6 @@ public class DRCDashboard
    private JPanel gazeboMachineSelectionPanel;
    private JLabel gazeboMachineSelectionLabel;
    private JComboBox gazeboMachineSelectionCombo;
-   private JPanel cloudMachineInfoPanel;
-   private JLabel cloudMachineIPAddressLabel;
-   private JLabel cloudMachineHostnameLabel;
    private JPanel controllerMachineSelectionPanel;
    private JLabel controllerMachineSelectionLabel;
    private JComboBox controllerMachineSelectionCombo;
@@ -124,7 +81,6 @@ public class DRCDashboard
    private HashMap<LocalCloudMachines, Pair<JTree, DefaultMutableTreeNode>> cloudMachineTrees = new HashMap<LocalCloudMachines, Pair<JTree, DefaultMutableTreeNode>>();
    JTree currentSelection = null;
 
-//   private ArrayList<LocalCloudMachines> userOwnedSims = new ArrayList<DRCLocalCloudConfig.LocalCloudMachines>();
    protected LocalCloudMachines userOwnedSim;
    private HashMap<JTree, JButton> launchButtons = new HashMap<JTree, JButton>();
 
@@ -183,6 +139,8 @@ public class DRCDashboard
       {
          try
          {
+            if(configFile.exists())
+               configFile.delete();
             configFile.createNewFile();
             configFileHandle = configFile;
          }
@@ -236,7 +194,7 @@ public class DRCDashboard
                {
                   String startOption = line.substring(line.indexOf(":") + 1, line.length());
                   
-                  if (startOption != "")
+                  if (!startOption.equals(""))
                      startingLocationsList.setSelectedValue(startOption, true);
                }
                else if (line != null && line.startsWith("UI:"))
@@ -639,32 +597,31 @@ public class DRCDashboard
                   ((JTree) e.getSource()).setSelectionRow(0);
                   if (e.getClickCount() > 1)
                   {
-                     final LocalCloudMachines gazeboMachine = machine;
                      final LocalCloudMachines controllerMachine = (LocalCloudMachines) controllerMachineSelectionCombo.getSelectedItem();
                      final String task = taskCombo.getSelectedItem().toString();
                      final String pluginOption = radioGroup.getSelection().getActionCommand();
                      if (sshSimLauncher.isMachineReachable(machine))
                      {
-                        if (!sshSimLauncher.isMachineRunningSim(gazeboMachine))
+                        if (!sshSimLauncher.isMachineRunningSim(machine))
                         {
                            String[] options = new String[] { "Yes", "No" };
-                           int n = JOptionPane.showOptionDialog(frame, "Do you want to launch " + task.toString() + " on " + gazeboMachine.toString() + "?",
+                           int n = JOptionPane.showOptionDialog(frame, "Do you want to launch " + task + " on " + machine.toString() + "?",
                                  "Confirm Launch ROS/Gazebo Sim", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 
                            if (n == 0)
                            {
-                              startLaunchProcess(gazeboMachine, controllerMachine, task, pluginOption);
+                              startLaunchProcess(machine, controllerMachine, task, pluginOption);
                            }
                         }
-                        else if (userOwnedSim == gazeboMachine)
+                        else if (userOwnedSim == machine)
                         {
                            String[] options = new String[] { "Yes", "No" };
-                           int n = JOptionPane.showOptionDialog(frame, "Do you want to kill your sim on " + gazeboMachine.toString() + "?",
+                           int n = JOptionPane.showOptionDialog(frame, "Do you want to kill your sim on " + machine.toString() + "?",
                                  "Confirm Kill ROS/Gazebo Sim", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]);
 
                            if (n == 0)
                            {
-                              nukeAllProcesses(gazeboMachine, controllerMachine);
+                              nukeAllProcesses(machine, controllerMachine);
                            }
                         }
                         else
@@ -860,35 +817,6 @@ public class DRCDashboard
       gazeboMachineSelectionCombo = new JComboBox(LocalCloudMachines.values());
       gazeboMachineSelectionCombo.setEnabled(false);
       gazeboMachineSelectionPanel.add(gazeboMachineSelectionCombo);
-
-//      gazeboMachineSelectionCombo.addActionListener(new ActionListener()
-//      {
-//         public void actionPerformed(ActionEvent e)
-//         {
-//            cloudMachineHostnameLabel.setText(updatedCloudHostnameString());
-//            cloudMachineIPAddressLabel.setText(updatedCloudIpAddressString());
-//         }
-//      });
-   }
-
-   private void setupCloudMachineInfoPanel()
-   {
-      c.gridheight = 4;
-      c.gridy = 7;
-      c.ipady = 70;
-      //      c.ipadx = 150;
-      c.weighty = 1.0;
-      c.insets = new Insets(30, 15, 40, 65);
-      c.fill = GridBagConstraints.BOTH;
-      cloudMachineInfoPanel = new JPanel(new GridLayout(2, 1));
-      cloudMachineInfoPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-      ((GridLayout) cloudMachineInfoPanel.getLayout()).setVgap(-50);
-      machineSelectionPanel.add(cloudMachineInfoPanel, c);
-      cloudMachineHostnameLabel = new JLabel(updatedCloudHostnameString());
-      cloudMachineIPAddressLabel = new JLabel(updatedCloudIpAddressString());
-      //      cloudMachineInfoPanel.add(cloudMachineHostnameLabel);
-      //      cloudMachineInfoPanel.add(cloudMachineIPAddressLabel);
-      c.insets = new Insets(5, 5, 5, 5);
    }
 
    private void setupLaunchSCSAndUIPanel()
@@ -896,12 +824,9 @@ public class DRCDashboard
       c.gridheight = 4;
       c.gridy = 7;
       c.ipady = 70;
-      //      c.ipadx = 150;
-//      c.weighty = 1.0;
-//      c.insets = new Insets(30, 15, 40, 65);
-//      c.fill = GridBagConstraints.BOTH;
+
       launchSCSAndUIPanel = new JPanel(new GridLayout(2, 1));
-//      ((GridLayout) cloudMachineInfoPanel.getLayout()).setVgap(-50);
+
       machineSelectionPanel.add(launchSCSAndUIPanel, c);
       
       launchSCSButton = new JButton("Launch SCS");
@@ -1009,7 +934,7 @@ public class DRCDashboard
 
    private void showFrame()
    {
-      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
       frame.setSize(1000, 520);
       frame.setLocationRelativeTo(null);
@@ -1028,18 +953,6 @@ public class DRCDashboard
       frame.repaint();
    }
 
-   private String updatedCloudHostnameString()
-   {
-      return "<html><body style=\"padding-left:8px;\"><br>Gazebo Machine Hostname: <br><br><div style=\"padding-left:15px;font-size:1.1em;color:blue;font-weight:bold;\">"
-            + DRCLocalCloudConfig.getHostName((LocalCloudMachines) gazeboMachineSelectionCombo.getSelectedItem()) + "</div></body></html>";
-   }
-
-   private String updatedCloudIpAddressString()
-   {
-      return "<html><body style=\"padding-left:8px;\"><br>Gazebo Machine IP Address: <br><br><div style=\"padding-left:15px;font-size:1.1em;color:blue;font-weight:bold\">"
-            + DRCLocalCloudConfig.getIPAddress((LocalCloudMachines) gazeboMachineSelectionCombo.getSelectedItem()) + "</div></body></html>";
-   }
-
    public static DRCDashboard getInstance()
    {
       return instance;
@@ -1047,17 +960,8 @@ public class DRCDashboard
 
    private void startTimers()
    {
-      //      Timer redrawTimer = new Timer(10, new ActionListener()
-      //      {
-      //         public void actionPerformed(ActionEvent e)
-      //         {
-      //
-      //         }
-      //      });
-
       java.util.Timer updateNetStatusTimer = new java.util.Timer();
 
-      //      redrawTimer.start();
       updateNetStatusTimer.schedule(new TimerTask()
       {
          @Override
@@ -1077,8 +981,7 @@ public class DRCDashboard
       {
          public void run()
          {
-            ((JPanel) networkStatusScrollPane.getViewport().getView()).repaint();
-
+            networkStatusScrollPane.getViewport().getView().repaint();
             recalculateNodeSizes();
          }
       });
@@ -1236,7 +1139,7 @@ public class DRCDashboard
    {
       if (pluginOption.contains("plugin"))
       {
-         String newTask = "";
+         String newTask;
 
          if (task.toLowerCase().contains("vehicle"))
             newTask = "ATLAS_VEHICLE";
