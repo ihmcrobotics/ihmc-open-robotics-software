@@ -21,6 +21,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
+import us.ihmc.utilities.screwTheory.Wrench;
 
 public class CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator
 {
@@ -49,12 +50,19 @@ public class CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator
    private static final int ANGULAR = 1;
    private final boolean visualize;
 
+   private final DenseMatrix64F qRho;
+   private final DenseMatrix64F qPhi;
 
 
    public CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator(String name, ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, int rhoSize, int phiSize)
    {
-      visualize = null != dynamicGraphicObjectsListRegistry;
+      int wrenchLength = Wrench.SIZE;
+
+      qRho = new DenseMatrix64F(wrenchLength, rhoSize);
+      qPhi = new DenseMatrix64F(wrenchLength, phiSize);
+
+      visualize = dynamicGraphicObjectsListRegistry != null;
       YoVariableRegistry registry = new YoVariableRegistry(name);
       parentRegistry.addChild(registry);
       this.centerOfMassFrame = centerOfMassFrame;
@@ -121,16 +129,22 @@ public class CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("OptimizerOutputVectorsPhiLinear ", dynamicGraphicVectorsPhiLinear);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects( "OptimizerOutputVectorsPhiAngular", dynamicGraphicVectorsPhiAngular);
       }
-
    }
 
-   public void computeAllWrenchesBasedOnNativeOutputAndInput(Collection<? extends EndEffector> endEffectors,
-           CylinderAndPlaneContactForceOptimizerNativeInput nativeInput, CylinderAndPlaneContactForceOptimizerNativeOutput nativeOutput)
+   public void setQRho(DenseMatrix64F qRho)
+   {
+      this.qRho.set(qRho);
+   }
+
+   public void setQPhi(DenseMatrix64F qPhi)
+   {
+      this.qPhi.set(qPhi);
+   }
+
+   public void computeAllWrenchesBasedOnNativeOutputAndInput(Collection<? extends EndEffector> endEffectors, DenseMatrix64F rho, DenseMatrix64F phi)
    {
       int iRho = 0;
       int phiLocation = 0;
-      DenseMatrix64F rho = nativeOutput.getRho();
-      DenseMatrix64F phi = nativeOutput.getPhi();
 
       for (EndEffector endEffector : endEffectors)
       {
@@ -140,7 +154,7 @@ public class CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator
             OptimizerContactModel model = endEffector.getContactModel();
             for (int iRhoModel = 0; iRhoModel < model.getSizeInRho(); iRhoModel++)
             {
-               nativeInput.packQrho(iRho, tempVectorMatrix);
+               packQrho(iRho, tempVectorMatrix);
                double rhoOfI = rho.get(iRho);
                
                for (int j = 0; j < SpatialForceVector.SIZE; j++)
@@ -154,7 +168,7 @@ public class CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator
 
             for (int iPhiModel = 0; iPhiModel < model.getSizeInPhi(); iPhiModel++)
             {
-               nativeInput.packQphi(phiLocation, tempVectorMatrix);
+               packQphi(phiLocation, tempVectorMatrix);
                double phiOfI = phi.get(phiLocation);
 
                for (int j = 0; j < SpatialForceVector.SIZE; j++)
@@ -200,7 +214,7 @@ public class CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator
 
                for (int iRhoModel = 0; iRhoModel < contactModel.getSizeInRho(); iRhoModel++)
                {
-                  nativeInput.packQrho(iRho, tempVectorMatrix);
+                  packQrho(iRho, tempVectorMatrix);
                   double rhoOfI = rho.get(iRho);
                   tempSpatialVector.set(centerOfMassFrame, tempVectorMatrix);
 
@@ -215,7 +229,7 @@ public class CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator
 
                for (int iPhiModel = 0; iPhiModel < contactModel.getSizeInPhi(); iPhiModel++)
                {
-                  nativeInput.packQphi(phiLocation, tempVectorMatrix);
+                  packQphi(phiLocation, tempVectorMatrix);
                   double phiOfI = phi.get(phiLocation);
 
                   tempSpatialVector.set(centerOfMassFrame, tempVectorMatrix);
@@ -229,6 +243,22 @@ public class CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator
                }
             }
          }
+      }
+   }
+
+   public void packQphi(int i, DenseMatrix64F tempVector)
+   {
+      for (int j = 0; j < SpatialForceVector.SIZE; j++)
+      {
+         tempVector.set(j, qPhi.get(j, i));
+      }
+   }
+
+   public void packQrho(int i, DenseMatrix64F tempVector)
+   {
+      for (int j = 0; j < SpatialForceVector.SIZE; j++)
+      {
+         tempVector.set(j, qRho.get(j, i));
       }
    }
 
