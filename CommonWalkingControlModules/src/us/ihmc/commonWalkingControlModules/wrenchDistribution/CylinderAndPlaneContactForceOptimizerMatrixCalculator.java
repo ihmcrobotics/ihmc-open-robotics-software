@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CylinderAndPlaneContactForceOptimizerNative;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CylinderAndPlaneContactForceOptimizerNativeInput;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
@@ -17,6 +19,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
+import us.ihmc.utilities.screwTheory.Wrench;
 
 
 public class CylinderAndPlaneContactForceOptimizerMatrixCalculator
@@ -49,12 +52,25 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculator
    private ArrayList<DynamicGraphicObject> dynamicGraphicVectorsPhiAngular;
    private final boolean visualize;
 
+   private final DenseMatrix64F rhoMin;
+   private final DenseMatrix64F qRho;
+   private final DenseMatrix64F phiMin;
+   private final DenseMatrix64F phiMax;
+   private final DenseMatrix64F qPhi;
 
 
    public CylinderAndPlaneContactForceOptimizerMatrixCalculator(String name, ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, int rhoSize, int phiSize)
    {
-      visualize = null != dynamicGraphicObjectsListRegistry;
+      int wrenchLength = Wrench.SIZE;
+
+      qRho = new DenseMatrix64F(wrenchLength, rhoSize);
+      qPhi = new DenseMatrix64F(wrenchLength, phiSize);
+      rhoMin = new DenseMatrix64F(rhoSize, 1);
+      phiMin = new DenseMatrix64F(phiSize, 1);
+      phiMax = new DenseMatrix64F(phiSize, 1);
+
+      visualize = dynamicGraphicObjectsListRegistry != null;
       YoVariableRegistry registry = new YoVariableRegistry(name);
       parentRegistry.addChild(registry);
       this.centerOfMassFrame = centerOfMassFrame;
@@ -139,8 +155,9 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculator
 
    }
 
-   public void computeAllMatriciesAndPopulateNativeInput(Collection<? extends EndEffector> endEffectors,
-           CylinderAndPlaneContactForceOptimizerNativeInput nativeInput)
+
+
+   public void computeAllMatriciesAndPopulateNativeInput(Collection<? extends EndEffector> endEffectors)
    {
       int iRho = 0;
       int iPhi = 0;
@@ -155,11 +172,11 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculator
             {
                SpatialForceVector currentBasisVector = qRhoVectors[iRho];
 
-               nativeInput.setRhoMin(iRho, 0, model.getRhoMin(iRhoModel));
+               setRhoMin(iRho, 0, model.getRhoMin(iRhoModel));
                model.packQRhoBodyFrame(iRhoModel, currentBasisVector, endEffector.getReferenceFrame());
 
                currentBasisVector.changeFrame(centerOfMassFrame);
-               nativeInput.setQRho(iRho, currentBasisVector);
+               setQRho(iRho, currentBasisVector);
 
                iRho++;
             }
@@ -168,12 +185,12 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculator
             {
                SpatialForceVector currentBasisVector = qPhiVectors[iPhi];
 
-               nativeInput.setPhiMin(iPhi, 0, model.getPhiMin(iPhiModel));
-               nativeInput.setPhiMax(iPhi, 0, model.getPhiMax(iPhiModel));
+               setPhiMin(iPhi, 0, model.getPhiMin(iPhiModel));
+               setPhiMax(iPhi, 0, model.getPhiMax(iPhiModel));
                model.packQPhiBodyFrame(iPhiModel, currentBasisVector, endEffector.getReferenceFrame());
 
                currentBasisVector.changeFrame(centerOfMassFrame);
-               nativeInput.setQPhi(iPhi, currentBasisVector);
+               setQPhi(iPhi, currentBasisVector);
 
                iPhi++;
             }
@@ -226,6 +243,31 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculator
 
    }
 
+   public void setRhoMin(int rhoLocation, int i, double rhoMin2)
+   {
+      rhoMin.set(rhoLocation, i, rhoMin2);
+   }
+
+   public void setQRho(int rhoLocation, SpatialForceVector spatialForceVector)
+   {
+      spatialForceVector.packMatrixColumn(qRho, rhoLocation);
+   }
+
+   public void setPhiMin(int phiLocation, int i, double phiMin)
+   {
+      this.phiMin.set(phiLocation, i, phiMin);
+   }
+
+   public void setPhiMax(int phiLocation, int i, double phiMax)
+   {
+      this.phiMax.set(phiLocation, i, phiMax);
+   }
+
+   public void setQPhi(int phiLocation, SpatialForceVector spatialForceVector)
+   {
+      spatialForceVector.packMatrixColumn(qPhi, phiLocation);
+   }
+
    private void packYoDoubles(int iPhi, int q, SpatialForceVector currentBasisVector, FramePoint localPoint)
    {
       graphicYoDoubles[q][iPhi][X].set(localPoint.getX());
@@ -243,6 +285,31 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculator
       graphicYoDoubles[q][iPhi][x].set(tempVector.getX());
       graphicYoDoubles[q][iPhi][y].set(tempVector.getY());
       graphicYoDoubles[q][iPhi][z].set(tempVector.getZ());
+   }
+
+   public DenseMatrix64F getRhoMin()
+   {
+      return rhoMin;
+   }
+
+   public DenseMatrix64F getQRho()
+   {
+      return qRho;
+   }
+
+   public DenseMatrix64F getPhiMin()
+   {
+      return phiMin;
+   }
+
+   public DenseMatrix64F getPhiMax()
+   {
+      return phiMax;
+   }
+
+   public DenseMatrix64F getQPhi()
+   {
+      return qPhi;
    }
 
    public void printIfDebug(String message)
