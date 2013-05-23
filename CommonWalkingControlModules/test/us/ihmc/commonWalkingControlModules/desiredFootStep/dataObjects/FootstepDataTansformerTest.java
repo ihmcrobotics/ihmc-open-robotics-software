@@ -15,10 +15,11 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
+import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointTrajectoryUtils;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.math.geometry.Box3d;
 import us.ihmc.utilities.math.geometry.Direction;
+import us.ihmc.utilities.math.geometry.FrameBox3d;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -43,18 +44,24 @@ public class FootstepDataTansformerTest
       FootstepData originalFootstepData;
       FootstepData transformedFootstepData;
 
-      int numberOfTests = 10;
+      int numberOfTests = 1;
 
       for (int i = 0; i < numberOfTests; i++)
       {
          originalFootstepData = getTestFootstepData();
-         transform3D = RandomTools.generateRandomTransform(random);
+         transform3D = new Transform3D();
+         transform3D.set(new Vector3d(1.0, 0.0, 0.0));
+//         transform3D = RandomTools.generateRandomTransform(random);
+         
+//         Vector3d v1 = new Vector3d();
+//         transform3D.get(v1);
+//         System.out.println(v1 + "  T");
+         
          transformedFootstepData = FootstepDataTransformer.transformFootstepData(originalFootstepData, transform3D);
 
          performEqualsTestsWithTransform(originalFootstepData, transform3D, transformedFootstepData);
       }
    }
-
 
    private static FootstepData getTestFootstepData()
    {
@@ -72,10 +79,18 @@ public class FootstepDataTansformerTest
             listOfPoints.add(RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0));
          }
       }
-      
-//      Point3d point = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-//      ret.trajectoryBoxData = new FrameBox3d(RandomTools.generateRandomTransform(random), Math.abs(point.getX()), Math.abs(point.getY()), Math.abs(point.getZ()));
 
+      Point3d boxDimensions = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
+      Transform3D randomBoxToWorldTransform = new Transform3D(); // RandomTools.generateRandomTransform(random);
+      randomBoxToWorldTransform.set(new Vector3d(0.0, 1.0, 0.0));
+      
+      ReferenceFrame randomBoxFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("randomFrame", ReferenceFrame.getWorldFrame(),
+            randomBoxToWorldTransform);
+      
+      ret.trajectoryBoxData = TwoWaypointTrajectoryUtils.getTopFaceOfBox(new FrameBox3d(randomBoxFrame, Math.abs(boxDimensions.getX()), Math.abs(boxDimensions.getY()), Math.abs(boxDimensions.getZ())));
+      
+//      System.out.println((TwoWaypointTrajectoryUtils.getTopFaceOfBox(new FrameBox3d(randomBoxFrame, Math.abs(boxDimensions.getX()), Math.abs(boxDimensions.getY()), Math.abs(boxDimensions.getZ()))).location) + "   <- dis");
+      
       int index = (int) Math.floor(random.nextDouble() * TrajectoryWaypointGenerationMethod.values().length);
       ret.trajectoryWaypointGenerationMethod = TrajectoryWaypointGenerationMethod.values()[index];
 
@@ -87,7 +102,7 @@ public class FootstepDataTansformerTest
       double distance;
 
       // public String rigidBodyName;
-      assertTrue(footstepData.getRobotSide()== transformedFootstepData.getRobotSide());
+      assertTrue(footstepData.getRobotSide() == transformedFootstepData.getRobotSide());
 
       // public Point3d location;
       distance = getDistanceBetweenPoints(footstepData.getLocation(), transform3D, transformedFootstepData.getLocation());
@@ -98,13 +113,11 @@ public class FootstepDataTansformerTest
       Quat4d endQuat = transformedFootstepData.getOrientation();
       assertTrue(areOrientationsEqualWithTransform(startQuat, transform3D, endQuat));
 
-      // public FlatHorizontalBoxData trajectoryBoxData;
-//      assertTrue(areBoxesEqual(footstepData.getTrajectoryBox(), transform3D, transformedFootstepData.getTrajectoryBox()));
+      assertTrue(areBoxesEqual(footstepData.getTrajectoryBox(), transform3D, transformedFootstepData.getTrajectoryBox()));
 
       // public TrajectoryWaypointGenerationMethod trajectoryWaypointGenerationMethod;
       assertTrue("", footstepData.getTrajectoryWaypointGenerationMethod().equals(transformedFootstepData.getTrajectoryWaypointGenerationMethod()));
    }
-
 
    @Test
    public void testDistance()
@@ -164,35 +177,13 @@ public class FootstepDataTansformerTest
       return true;
    }
 
-   private static boolean areBoxesEqual(Box3d boxStarting, Transform3D transform3D, Box3d boxEnding)
+   private static boolean areBoxesEqual(FrameBox3d boxStarting, Transform3D expectedTransform, FrameBox3d boxEnding)
    {
-      //This is just a double check
-      ReferenceFrame ending = ReferenceFrame.constructARootFrame("ending", false, true, true);
-      ReferenceFrame starting = ReferenceFrame.constructFrameWithUnchangingTransformToParent("starting", ending, transform3D, false, true, true);
-
-      FramePoint startingCenter = new FramePoint(starting, boxStarting.getCenterCopy());
-      startingCenter.changeFrame(ending);
-      FramePoint endingCenter = new FramePoint(ending, boxEnding.getCenterCopy());
-
-      if (!endingCenter.epsilonEquals(startingCenter, 1e-6))
+      Transform3D actualTransform = boxEnding.getReferenceFrame().getTransformToDesiredFrame(boxStarting.getReferenceFrame());
+      
+      if (!expectedTransform.epsilonEquals(actualTransform, 1e-6))
          return false;
-
-//      Matrix3d startingMatrix  = boxStarting.getRotationCopy();
-//      FramePoint start = new FramePoint(starting, startingPoint);
-//      FramePoint end = new FramePoint(ending, endPoint);
-
-
-
-      boxStarting.applyTransform(transform3D);
-
-      Transform3D startWithTransform =  boxStarting.getTransformCopy();
-      Transform3D endingTransform =  boxEnding.getTransformCopy();
-
-
-
-      if (!endingTransform.epsilonEquals(startWithTransform, 1e-6))
-         return false;
-
+      
       for (Direction direction : Direction.values())
       {
          double startDimension = boxStarting.getDimension(direction);
@@ -201,7 +192,6 @@ public class FootstepDataTansformerTest
          if (Math.abs(startDimension - endDimension) > 1e-6)
             return false;
       }
-
 
       return true;
    }
