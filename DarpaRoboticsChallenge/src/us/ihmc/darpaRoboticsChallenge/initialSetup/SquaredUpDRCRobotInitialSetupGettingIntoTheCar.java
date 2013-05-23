@@ -25,10 +25,12 @@ public class SquaredUpDRCRobotInitialSetupGettingIntoTheCar implements RobotInit
 {
    private enum Methods
    {
-      FACING_LHAND_GRABBING, FACING_BOTH_HANDS_GRABBING, SIDE_RHAND_GRABBING_FRONT_BAR, SIDE_RHAND_GRABBING_TOP_BAR, SIDE_BOTH_HANDS_GRABBING
+      FACING_LHAND_GRABBING, FACING_BOTH_HANDS_GRABBING,
+      SIDE_RHAND_GRABBING_FRONT_BAR, SIDE_RHAND_GRABBING_TOP_BAR, SIDE_BOTH_HANDS_GRABBING_TOP_AND_FRONT_BARS, SIDE_BOTH_HANDS_GRABBING_FRONT_BAR_AND_WHEEL,
+      BACK_BOTH_HANDS_GRABBING
    };
 
-   private static final Methods SELECTED_METHOD = Methods.SIDE_BOTH_HANDS_GRABBING;
+   private static final Methods SELECTED_METHOD = Methods.SIDE_BOTH_HANDS_GRABBING_FRONT_BAR_AND_WHEEL;
 
    private final double groundZ;
 
@@ -184,7 +186,7 @@ public class SquaredUpDRCRobotInitialSetupGettingIntoTheCar implements RobotInit
          rightArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, -1.15);
          break;
 
-      case SIDE_BOTH_HANDS_GRABBING:
+      case SIDE_BOTH_HANDS_GRABBING_TOP_AND_FRONT_BARS:
          pelvisPosition.set(0.1, 0.15, 0.8326);
          pelvisOrientation.setYawPitchRoll(Math.PI / 2.0, 0, 0);
 
@@ -205,6 +207,52 @@ public class SquaredUpDRCRobotInitialSetupGettingIntoTheCar implements RobotInit
          rightArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, -0.3731);
          rightArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, -0.53);
          rightArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, -1.15);
+         break;
+
+      case SIDE_BOTH_HANDS_GRABBING_FRONT_BAR_AND_WHEEL:
+         pelvisPosition.set(0.1, 0.15, 0.8326);
+         pelvisOrientation.setYawPitchRoll(Math.PI / 2.0, 0, 0);
+
+         legInitialJointPositions.put(LegJointName.HIP_PITCH, -0.6521);
+         legInitialJointPositions.put(LegJointName.KNEE, 1.1418);
+         legInitialJointPositions.put(LegJointName.ANKLE_PITCH, -0.49);
+
+         leftArmInitialJointPositions.put(ArmJointName.SHOULDER_PITCH, -1.7913);
+         leftArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, -1.3976);
+         leftArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 0.9252);
+         leftArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, 0.8858);
+         leftArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, 0.1378);
+         leftArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, 0.4528);
+
+         rightArmInitialJointPositions.put(ArmJointName.SHOULDER_PITCH, 0.2559);
+         rightArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, 0.4528);
+         rightArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 0.7677);
+         rightArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, -1.6732);
+         rightArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, 0.2165);
+         rightArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, -1.0039);
+         break;
+
+      case BACK_BOTH_HANDS_GRABBING:
+         pelvisPosition.set(0.1, 0.15, 0.8326);
+         pelvisOrientation.setYawPitchRoll(Math.PI, 0, 0);
+
+         legInitialJointPositions.put(LegJointName.HIP_PITCH, -0.6521);
+         legInitialJointPositions.put(LegJointName.KNEE, 1.1418);
+         legInitialJointPositions.put(LegJointName.ANKLE_PITCH, -0.49);
+
+         leftArmInitialJointPositions.put(ArmJointName.SHOULDER_PITCH, 0.0);
+         leftArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, 0.0);
+         leftArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 0.0);
+         leftArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, 0.0);
+         leftArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, 0.0);
+         leftArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, 0.0);
+
+         rightArmInitialJointPositions.put(ArmJointName.SHOULDER_PITCH, 0.0);
+         rightArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, 0.0);
+         rightArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 0.0);
+         rightArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, 0.0);
+         rightArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, 0.0);
+         rightArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, 0.0);
          break;
 
       default:
