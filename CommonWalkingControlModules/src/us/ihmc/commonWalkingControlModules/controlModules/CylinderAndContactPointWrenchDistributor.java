@@ -12,14 +12,8 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CylinderAndPlaneContactForceOptimizerNative;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CylinderAndPlaneContactForceOptimizerNativeInput;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CylinderAndPlaneContactForceOptimizerNativeOutput;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylinderAndPlaneContactForceOptimizerMatrixCalculator;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylindricalContactState;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.EndEffector;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.EndEffectorOutput;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributor;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributorInputData;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributorOutputData;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.*;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylinderAndPlaneContactMatrixCalculator;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -37,8 +31,8 @@ public class CylinderAndContactPointWrenchDistributor implements GroundReactionW
    private CylinderAndPlaneContactForceOptimizerNative nativeOptimizer;
    private CylinderAndPlaneContactForceOptimizerNativeInput optimizerInput = new CylinderAndPlaneContactForceOptimizerNativeInput();
    private CylinderAndPlaneContactForceOptimizerNativeOutput optimizerOutput;
-   private CylinderAndPlaneContactForceOptimizerMatrixCalculator optimizerInputPopulator;
-   private CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator optimizerOutputExtractor;
+   private CylinderAndPlaneContactMatrixCalculator optimizerInputPopulator;
+   private CylinderAndPlaneContactSpatialForceVectorCalculator optimizerOutputExtractor;
 
    private Map<PlaneContactState, EndEffector> previouslyUsedPlaneEndEffectors = new LinkedHashMap<PlaneContactState, EndEffector>();
    private Map<CylindricalContactState, EndEffector> previouslyUsedCylinderEndEffectors = new LinkedHashMap<CylindricalContactState, EndEffector>();
@@ -76,9 +70,9 @@ public class CylinderAndContactPointWrenchDistributor implements GroundReactionW
       this.centerOfMassFrame = centerOfMassFrame;
       int rhoSize = CylinderAndPlaneContactForceOptimizerNative.rhoSize;
       int phiSize = CylinderAndPlaneContactForceOptimizerNative.phiSize;
-      optimizerInputPopulator = new CylinderAndPlaneContactForceOptimizerMatrixCalculator("inputPopulator", centerOfMassFrame, registry,
+      optimizerInputPopulator = new CylinderAndPlaneContactMatrixCalculator(centerOfMassFrame, registry,
               dynamicGraphicObjectsListRegistry, rhoSize, phiSize);
-      optimizerOutputExtractor = new CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator("outputExtractor", centerOfMassFrame, registry,
+      optimizerOutputExtractor = new CylinderAndPlaneContactSpatialForceVectorCalculator(centerOfMassFrame, registry,
               dynamicGraphicObjectsListRegistry, rhoSize, phiSize);
    }
 
@@ -214,7 +208,7 @@ public class CylinderAndContactPointWrenchDistributor implements GroundReactionW
       optimizerOutput = nativeOptimizer.getOutput();
       optimizerOutputExtractor.setQRho(optimizerInputPopulator.getQRho());
       optimizerOutputExtractor.setQPhi(optimizerInputPopulator.getQPhi());
-      optimizerOutputExtractor.computeAllWrenchesBasedOnNativeOutputAndInput(endEffectorsLocal, optimizerOutput.getRho(), optimizerOutput.getPhi());
+      optimizerOutputExtractor.computeWrenches(endEffectorsLocal, optimizerOutput.getRho(), optimizerOutput.getPhi());
 
       for (int i = 0; i < endEffectorsLocal.size(); i++)
       {
@@ -247,7 +241,7 @@ public class CylinderAndContactPointWrenchDistributor implements GroundReactionW
       optimizerInputLocal.setMomentumDotWeight(cmatrixLocal);
       optimizerInputLocal.setWrenchEquationRightHandSide(desiredNetEnvironmentReactionWrenchLocal);
 
-      optimizerInputPopulator.computeAllMatriciesAndPopulateNativeInput(endEffectorsLocal);
+      optimizerInputPopulator.computeMatrices(endEffectorsLocal);
 
       optimizerInputLocal.setRhoMin(optimizerInputPopulator.getRhoMin());
       optimizerInputLocal.setPhiMin(optimizerInputPopulator.getPhiMin());

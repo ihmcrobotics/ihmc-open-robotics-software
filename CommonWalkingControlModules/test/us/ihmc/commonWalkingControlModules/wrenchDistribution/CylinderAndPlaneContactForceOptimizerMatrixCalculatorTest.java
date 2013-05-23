@@ -231,10 +231,10 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
    {
       int rhoSize = CylinderAndPlaneContactForceOptimizerNative.rhoSize;
       int phiSize = CylinderAndPlaneContactForceOptimizerNative.phiSize;
-      CylinderAndPlaneContactForceOptimizerMatrixCalculator calc = new CylinderAndPlaneContactForceOptimizerMatrixCalculator("calc",comFrame,
+      CylinderAndPlaneContactMatrixCalculator calc = new CylinderAndPlaneContactMatrixCalculator(comFrame,
                                                                       new YoVariableRegistry("rootRegistry"), new DynamicGraphicObjectsListRegistry(), rhoSize, phiSize);
-      CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator vectorCalc =
-         new CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator("vectorCalc",comFrame,
+      CylinderAndPlaneContactSpatialForceVectorCalculator vectorCalc =
+         new CylinderAndPlaneContactSpatialForceVectorCalculator(comFrame,
                new YoVariableRegistry("rootRegistry"), new DynamicGraphicObjectsListRegistry(), rhoSize, phiSize);
       CylinderAndPlaneContactForceOptimizerNativeInput nativeSolverInput = new CylinderAndPlaneContactForceOptimizerNativeInput();
       CylinderAndPlaneContactForceOptimizerNativeOutput nativeSolverOutput;
@@ -255,7 +255,7 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
       nativeSolverInput.setGroundReactionForceRegularization(wRho);
       nativeSolverInput.setMomentumDotWeight(Cmatrix);
       nativeSolverInput.setWrenchEquationRightHandSide(desiredNetEnvironmentReactionWrench);
-      calc.computeAllMatriciesAndPopulateNativeInput(endEffectorsWithDefinedContactModels);
+      calc.computeMatrices(endEffectorsWithDefinedContactModels);
 
       nativeSolverInput.setRhoMin(calc.getRhoMin());
       nativeSolverInput.setPhiMin(calc.getPhiMin());
@@ -282,7 +282,7 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
 
       vectorCalc.setQRho(calc.getQRho());
       vectorCalc.setQPhi(calc.getQPhi());
-      vectorCalc.computeAllWrenchesBasedOnNativeOutputAndInput(endEffectorsWithDefinedContactModels, nativeSolverOutput.getRho(), nativeSolverOutput.getPhi());
+      vectorCalc.computeWrenches(endEffectorsWithDefinedContactModels, nativeSolverOutput.getRho(), nativeSolverOutput.getPhi());
 
       for (int i = 0; i < endEffectorsWithDefinedContactModels.size(); i++)
       {

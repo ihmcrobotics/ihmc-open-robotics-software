@@ -47,7 +47,7 @@ import java.util.*;
  */
 public class SimpleStanceController implements RobotController
 {
-   private final String name = getClass().getSimpleName();
+   private final String name = SimpleStanceController.class.getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final SDFPerfectSimulatedSensorReader sensorReader;
    private final SDFPerfectSimulatedOutputWriter outputWriter;
@@ -79,8 +79,9 @@ public class SimpleStanceController implements RobotController
       MomentumOptimizationSettings momentumOptimizationSettings = createOptimizationSettings(1.0, 5e-2, 1e-5, 0.0);
       rootJoint = fullRobotModel.getRootJoint();
       twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), fullRobotModel.getPelvis());
-      this.momentumControlModule = new OptimizationMomentumControlModule(rootJoint, referenceFrames.getCenterOfMassFrame(), controlDT, registry,
-              jointsToOptimize, momentumOptimizationSettings, gravityZ, twistCalculator);
+      this.momentumControlModule = new OptimizationMomentumControlModule(rootJoint, referenceFrames.getCenterOfMassFrame(), controlDT, jointsToOptimize, momentumOptimizationSettings, gravityZ, twistCalculator, null, registry
+
+      );
 
       for (RobotSide robotSide : RobotSide.values)
       {

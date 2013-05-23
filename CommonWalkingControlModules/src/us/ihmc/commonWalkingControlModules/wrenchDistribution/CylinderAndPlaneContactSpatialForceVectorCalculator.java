@@ -18,7 +18,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator
+public class CylinderAndPlaneContactSpatialForceVectorCalculator
 {
    private final ReferenceFrame centerOfMassFrame;
    private final Map<EndEffector, SpatialForceVector> spatialForceVectors = new LinkedHashMap<EndEffector, SpatialForceVector>();
@@ -47,8 +47,8 @@ public class CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator
    private final DenseMatrix64F qPhi;
 
 
-   public CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator(String name, ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, int rhoSize, int phiSize)
+   public CylinderAndPlaneContactSpatialForceVectorCalculator(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry,
+                                                              DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, int rhoSize, int phiSize)
    {
       int wrenchLength = Wrench.SIZE;
 
@@ -56,6 +56,7 @@ public class CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator
       qPhi = new DenseMatrix64F(wrenchLength, phiSize);
 
       visualize = dynamicGraphicObjectsListRegistry != null;
+      String name = getClass().getSimpleName();
       YoVariableRegistry registry = new YoVariableRegistry(name);
       parentRegistry.addChild(registry);
       this.centerOfMassFrame = centerOfMassFrame;
@@ -134,7 +135,7 @@ public class CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator
       this.qPhi.set(qPhi);
    }
 
-   public void computeAllWrenchesBasedOnNativeOutputAndInput(Collection<? extends EndEffector> endEffectors, DenseMatrix64F rho, DenseMatrix64F phi)
+   public void computeWrenches(Collection<? extends EndEffector> endEffectors, DenseMatrix64F rho, DenseMatrix64F phi)
    {
       int iRho = 0;
       int phiLocation = 0;

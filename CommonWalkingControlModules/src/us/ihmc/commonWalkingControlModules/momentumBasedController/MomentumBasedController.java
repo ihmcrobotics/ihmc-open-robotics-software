@@ -315,7 +315,7 @@ public class MomentumBasedController implements RobotController
       rootJointTaskSpaceConstraintData.set(rootJointAcceleration, rootJointNullspaceMultipliers, rootJointSelectionMatrix);
       momentumControlModule.setDesiredSpatialAcceleration(fullRobotModel.getRootJoint().getMotionSubspace(), rootJointTaskSpaceConstraintData);
       momentumControlModule.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
-      momentumControlModule.compute(this.contactStates, upcomingSupportLeg.getEnumValue(), this.cylindricalContactStates);
+      momentumControlModule.compute(this.contactStates, this.cylindricalContactStates, upcomingSupportLeg.getEnumValue());
 
       SpatialForceVector desiredCentroidalMomentumRate = momentumControlModule.getDesiredCentroidalMomentumRate();
 

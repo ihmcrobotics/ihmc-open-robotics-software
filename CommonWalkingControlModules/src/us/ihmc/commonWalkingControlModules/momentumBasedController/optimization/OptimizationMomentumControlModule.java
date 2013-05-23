@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
@@ -11,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVX
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointWrenchMatrixCalculator;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylinderAndPlaneContactMatrixCalculatorAdapter;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylindricalContactState;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
@@ -39,7 +40,11 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    private final HardMotionConstraintEnforcer hardMotionConstraintEnforcer;
    private final MotionConstraintHandler primaryMotionConstraintHandler;
    private final MotionConstraintHandler secondaryMotionConstraintHandler;
-   private final ContactPointWrenchMatrixCalculator contactPointWrenchMatrixCalculator;
+
+// private final ContactPointWrenchMatrixCalculator contactPointWrenchMatrixCalculator;
+
+   private final CylinderAndPlaneContactMatrixCalculatorAdapter wrenchMatrixCalculator;
+
    private final CVXWithCylinderNativeInput momentumOptimizerNativeInput = new CVXWithCylinderNativeInput();
    private final CVXWithCylinderNative momentumOptimizerNative;
    private final MomentumOptimizationSettings momentumOptimizationSettings;
@@ -51,18 +56,21 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    private final DampedLeastSquaresSolver hardMotionConstraintSolver;
 
    public OptimizationMomentumControlModule(InverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame, double controlDT,
-           YoVariableRegistry parentRegistry, InverseDynamicsJoint[] jointsToOptimizeFor, MomentumOptimizationSettings momentumOptimizationSettings,
-           double gravityZ, TwistCalculator twistCalculator)
+           InverseDynamicsJoint[] jointsToOptimizeFor, MomentumOptimizationSettings momentumOptimizationSettings, double gravityZ,
+           TwistCalculator twistCalculator, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.centroidalMomentumHandler = new CentroidalMomentumHandler(rootJoint, centerOfMassFrame, controlDT, registry);
       this.externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, rootJoint);
       this.primaryMotionConstraintHandler = new MotionConstraintHandler(jointsToOptimizeFor, twistCalculator);
       this.secondaryMotionConstraintHandler = new MotionConstraintHandler(jointsToOptimizeFor, twistCalculator);
-      this.contactPointWrenchMatrixCalculator = new ContactPointWrenchMatrixCalculator(centerOfMassFrame, CVXWithCylinderNative.nSupportVectors,
-            CVXWithCylinderNative.rhoSize);
 
-      this.momentumOptimizerNative = new CVXWithCylinderNative(ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor), CVXWithCylinderNative.rhoSize,
-              CVXWithCylinderNative.phiSize);
+      int rhoSize = CVXWithCylinderNative.rhoSize;
+      int phiSize = CVXWithCylinderNative.phiSize;
+      dynamicGraphicObjectsListRegistry = null; // don't visualize vectors
+      this.wrenchMatrixCalculator = new CylinderAndPlaneContactMatrixCalculatorAdapter(centerOfMassFrame, registry, dynamicGraphicObjectsListRegistry, rhoSize,
+              phiSize);
+
+      this.momentumOptimizerNative = new CVXWithCylinderNative(ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor), rhoSize, phiSize);
       this.momentumOptimizationSettings = momentumOptimizationSettings;
 
       this.jointsToOptimizeFor = jointsToOptimizeFor;
@@ -88,8 +96,8 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       externalWrenchHandler.reset();
    }
 
-   public void compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, RobotSide upcomingSupportLeg,
-                       Map<RigidBody, ? extends CylindricalContactState> cylinderContactStates)
+   public void compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates,
+                       Map<RigidBody, ? extends CylindricalContactState> cylinderContactStates, RobotSide upcomingSupportLeg)
    {
       LinkedHashMap<RigidBody, PlaneContactState> planeContactStates = convertContactStates(contactStates);
       hardMotionConstraintSolver.setAlpha(momentumOptimizationSettings.getDampedLeastSquaresFactor());
@@ -112,11 +120,14 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       momentumOptimizerNativeInput.setCentroidalMomentumMatrix(a);
       momentumOptimizerNativeInput.setMomentumDotEquationRightHandSide(b);
 
-      momentumOptimizerNativeInput.setRhoMin(contactPointWrenchMatrixCalculator.getRhoMin(planeContactStates.values(),
-              momentumOptimizationSettings.getRhoMinScalar()));
+      wrenchMatrixCalculator.computeMatrices(planeContactStates, cylinderContactStates);
 
-      contactPointWrenchMatrixCalculator.computeMatrix(contactStates.values());
-      momentumOptimizerNativeInput.setContactPointWrenchMatrix(contactPointWrenchMatrixCalculator.getMatrix());
+      momentumOptimizerNativeInput.setContactPointWrenchMatrix(wrenchMatrixCalculator.getQRho());
+      momentumOptimizerNativeInput.setContactPointWrenchMatrixForBoundedCylinderVariables(wrenchMatrixCalculator.getQPhi());
+      momentumOptimizerNativeInput.setPhiMin(wrenchMatrixCalculator.getPhiMin());
+      momentumOptimizerNativeInput.setPhiMax(wrenchMatrixCalculator.getPhiMax());
+      momentumOptimizerNativeInput.setRhoMin(wrenchMatrixCalculator.getRhoMin());
+
       DenseMatrix64F wrenchEquationRightHandSide =
          externalWrenchHandler.computeWrenchEquationRightHandSide(centroidalMomentumHandler.getCentroidalMomentumConvectiveTerm(), bOriginal, b);
       momentumOptimizerNativeInput.setWrenchEquationRightHandSide(wrenchEquationRightHandSide);
@@ -141,7 +152,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
       CVXWithCylinderNativeOutput output = momentumOptimizerNative.getOutput();
 
-      Map<RigidBody, Wrench> groundReactionWrenches = contactPointWrenchMatrixCalculator.computeWrenches(planeContactStates, output.getRho());
+      Map<RigidBody, Wrench> groundReactionWrenches = wrenchMatrixCalculator.computeWrenches(output.getRho(), output.getPhi());
 
       externalWrenchHandler.computeExternalWrenches(groundReactionWrenches);
 

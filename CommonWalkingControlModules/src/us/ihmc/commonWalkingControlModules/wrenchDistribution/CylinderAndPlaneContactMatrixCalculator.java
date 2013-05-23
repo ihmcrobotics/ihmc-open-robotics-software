@@ -1,32 +1,26 @@
 package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CylinderAndPlaneContactForceOptimizerNative;
-import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CylinderAndPlaneContactForceOptimizerNativeInput;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
-import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.SpatialForceVector;
-
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
+import org.ejml.data.DenseMatrix64F;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.Wrench;
 
+import java.util.ArrayList;
+import java.util.Collection;
 
-public class CylinderAndPlaneContactForceOptimizerMatrixCalculator
+
+public class CylinderAndPlaneContactMatrixCalculator
 {
    private static final boolean DEBUG = false;
-   private static final int PHISIZE = CylinderAndPlaneContactForceOptimizerNative.phiSize;
-   private static final int RHOSIZE = CylinderAndPlaneContactForceOptimizerNative.rhoSize;
    private final ReferenceFrame centerOfMassFrame;
    private final SpatialForceVector[] qRhoVectors;
    private final SpatialForceVector[] qPhiVectors;
@@ -59,8 +53,8 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculator
    private final DenseMatrix64F qPhi;
 
 
-   public CylinderAndPlaneContactForceOptimizerMatrixCalculator(String name, ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, int rhoSize, int phiSize)
+   public CylinderAndPlaneContactMatrixCalculator(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry,
+                                                  DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, int rhoSize, int phiSize)
    {
       int wrenchLength = Wrench.SIZE;
 
@@ -71,31 +65,31 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculator
       phiMax = new DenseMatrix64F(phiSize, 1);
 
       visualize = dynamicGraphicObjectsListRegistry != null;
-      YoVariableRegistry registry = new YoVariableRegistry(name);
+      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
       parentRegistry.addChild(registry);
       this.centerOfMassFrame = centerOfMassFrame;
       this.tempPoint = new FramePoint(centerOfMassFrame);
       this.tempVector = new FrameVector(centerOfMassFrame);
 
-      qRhoVectors = new SpatialForceVector[RHOSIZE];
-      qPhiVectors = new SpatialForceVector[PHISIZE];
+      qRhoVectors = new SpatialForceVector[rhoSize];
+      qPhiVectors = new SpatialForceVector[phiSize];
 
-      for (int i = 0; i < RHOSIZE; i++)
+      for (int i = 0; i < rhoSize; i++)
       {
          qRhoVectors[i] = new SpatialForceVector(centerOfMassFrame);
       }
 
-      for (int i = 0; i < PHISIZE; i++)
+      for (int i = 0; i < phiSize; i++)
       {
          qPhiVectors[i] = new SpatialForceVector(centerOfMassFrame);
       }
 
       if (visualize)
       {
-         graphicWrenches[0] = new DynamicGraphicVector[RHOSIZE][2];
-         graphicYoDoubles[0] = new DoubleYoVariable[RHOSIZE][9];
-         graphicWrenches[1] = new DynamicGraphicVector[PHISIZE][2];
-         graphicYoDoubles[1] = new DoubleYoVariable[PHISIZE][9];
+         graphicWrenches[0] = new DynamicGraphicVector[rhoSize][2];
+         graphicYoDoubles[0] = new DoubleYoVariable[rhoSize][9];
+         graphicWrenches[1] = new DynamicGraphicVector[phiSize][2];
+         graphicYoDoubles[1] = new DoubleYoVariable[phiSize][9];
          dynamicGraphicVectorsRhoLinear = new ArrayList<DynamicGraphicObject>();
          dynamicGraphicVectorsRhoAngular = new ArrayList<DynamicGraphicObject>();
          dynamicGraphicVectorsPhiLinear = new ArrayList<DynamicGraphicObject>();
@@ -105,14 +99,14 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculator
 
 
          int q = 0;
-         for (int i = 0; i < RHOSIZE; i++)
+         for (int i = 0; i < rhoSize; i++)
          {
             for (int j = 0; j < 9; j++)
             {
                graphicYoDoubles[q][i][j] = new DoubleYoVariable("rhoGraphicVectorElement" + q + i + j, registry);
             }
 
-            double greenLevel = 0.25 * i / (double) RHOSIZE;
+            double greenLevel = 0.25 * i / (double) rhoSize;
             graphicWrenches[q][i][LINEAR] = new DynamicGraphicVector("RhoGraphicBasis" + q + i + "Linear", graphicYoDoubles[q][i][X],
                     graphicYoDoubles[q][i][Y], graphicYoDoubles[q][i][Z], graphicYoDoubles[q][i][x], graphicYoDoubles[q][i][y], graphicYoDoubles[q][i][z],
                     scaleFactor, new YoAppearanceRGBColor(0.5, greenLevel, 0.0, 0.7));
@@ -125,9 +119,9 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculator
 
          q = 1;
 
-         for (int i = 0; i < PHISIZE; i++)
+         for (int i = 0; i < phiSize; i++)
          {
-            double greenLevel = 0.25 * i / (double) PHISIZE;
+            double greenLevel = 0.25 * i / (double) phiSize;
             for (int j = 0; j < 9; j++)
             {
                graphicYoDoubles[q][i][j] = new DoubleYoVariable("rhoGraphicVectorElement" + q + i + j, registry);
@@ -157,11 +151,17 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculator
 
 
 
-   public void computeAllMatriciesAndPopulateNativeInput(Collection<? extends EndEffector> endEffectors)
+   public void computeMatrices(Collection<? extends EndEffector> endEffectors)
    {
       int iRho = 0;
       int iPhi = 0;
-      
+
+      rhoMin.zero();
+      qRho.zero();
+      phiMin.zero();
+      phiMax.zero();
+      qPhi.zero();
+
       for (EndEffector endEffector : endEffectors)
       {
          if (endEffector.isLoadBearing())
@@ -243,27 +243,27 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculator
 
    }
 
-   public void setRhoMin(int rhoLocation, int i, double rhoMin2)
+   private void setRhoMin(int rhoLocation, int i, double rhoMin2)
    {
       rhoMin.set(rhoLocation, i, rhoMin2);
    }
 
-   public void setQRho(int rhoLocation, SpatialForceVector spatialForceVector)
+   private void setQRho(int rhoLocation, SpatialForceVector spatialForceVector)
    {
       spatialForceVector.packMatrixColumn(qRho, rhoLocation);
    }
 
-   public void setPhiMin(int phiLocation, int i, double phiMin)
+   private void setPhiMin(int phiLocation, int i, double phiMin)
    {
       this.phiMin.set(phiLocation, i, phiMin);
    }
 
-   public void setPhiMax(int phiLocation, int i, double phiMax)
+   private void setPhiMax(int phiLocation, int i, double phiMax)
    {
       this.phiMax.set(phiLocation, i, phiMax);
    }
 
-   public void setQPhi(int phiLocation, SpatialForceVector spatialForceVector)
+   private void setQPhi(int phiLocation, SpatialForceVector spatialForceVector)
    {
       spatialForceVector.packMatrixColumn(qPhi, phiLocation);
    }
