@@ -31,7 +31,6 @@ import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWren
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributorOutputData;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
-import us.ihmc.utilities.ArrayTools;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
@@ -99,7 +98,7 @@ public class GroundReactionWrenchDistributorTest
       Point3d centerOfMassPoint3d = new Point3d(0.0, 0.0, 1.0);
       PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
 
-      GroundReactionWrenchDistributor distributor = new OptimizationBasedWrenchDistributor(centerOfMassFrame, parentRegistry, null);
+      GroundReactionWrenchDistributor distributor = new CylinderAndContactPointWrenchDistributor(centerOfMassFrame, parentRegistry, null);
       testSimpleWrenchDistribution(centerOfMassFrame, distributor, parentRegistry, 1e-4);
    }
 
@@ -129,10 +128,10 @@ public class GroundReactionWrenchDistributorTest
       return distributor;
    }
 
-   private OptimizationBasedWrenchDistributor createOptimizationBasedWrenchDistributor(YoVariableRegistry parentRegistry, PoseReferenceFrame centerOfMassFrame,
+   private CylinderAndContactPointWrenchDistributor createOptimizationBasedWrenchDistributor(YoVariableRegistry parentRegistry, PoseReferenceFrame centerOfMassFrame,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      OptimizationBasedWrenchDistributor distributor = new OptimizationBasedWrenchDistributor(centerOfMassFrame, parentRegistry,
+      CylinderAndContactPointWrenchDistributor distributor = new CylinderAndContactPointWrenchDistributor(centerOfMassFrame, parentRegistry,
                                                           dynamicGraphicObjectsListRegistry);
 
       double[] diagonalCWeights = new double[]
@@ -260,7 +259,7 @@ public class GroundReactionWrenchDistributorTest
       PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
 
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
-      GroundReactionWrenchDistributor distributor = new OptimizationBasedWrenchDistributor(centerOfMassFrame, parentRegistry, null);
+      GroundReactionWrenchDistributor distributor = new CylinderAndContactPointWrenchDistributor(centerOfMassFrame, parentRegistry, null);
 
       boolean verifyForcesAreInsideFrictionCones = false;
       boolean feasibleMomentSolutions = true;
@@ -301,7 +300,7 @@ public class GroundReactionWrenchDistributorTest
 
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
 
-      GroundReactionWrenchDistributor distributor = new OptimizationBasedWrenchDistributor(centerOfMassFrame, parentRegistry, null);
+      GroundReactionWrenchDistributor distributor = new CylinderAndContactPointWrenchDistributor(centerOfMassFrame, parentRegistry, null);
       testNonFlatGroundExample(centerOfMassFrame, distributor, parentRegistry);
    }
 
@@ -314,7 +313,7 @@ public class GroundReactionWrenchDistributorTest
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
 
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
-      GroundReactionWrenchDistributor distributor = new OptimizationBasedWrenchDistributor(centerOfMassFrame, parentRegistry,
+      GroundReactionWrenchDistributor distributor = new CylinderAndContactPointWrenchDistributor(centerOfMassFrame, parentRegistry,
                                                        dynamicGraphicObjectsListRegistry);
       testSimpleWrenchDistributionWithCylinders(centerOfMassFrame, distributor, parentRegistry, 1e-3, dynamicGraphicObjectsListRegistry);
    }
@@ -354,7 +353,7 @@ public class GroundReactionWrenchDistributorTest
 
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
 
-      GroundReactionWrenchDistributor distributor = new OptimizationBasedWrenchDistributor(centerOfMassFrame, parentRegistry, null);
+      GroundReactionWrenchDistributor distributor = new CylinderAndContactPointWrenchDistributor(centerOfMassFrame, parentRegistry, null);
       testTroublesomeExampleOne(centerOfMassFrame, distributor, parentRegistry);
       testTroublesomeExampleTwo(centerOfMassFrame, distributor, parentRegistry);
    }
@@ -372,7 +371,7 @@ public class GroundReactionWrenchDistributorTest
          YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
          
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
-         GroundReactionWrenchDistributor distributor = new OptimizationBasedWrenchDistributor(centerOfMassFrame, parentRegistry,
+         GroundReactionWrenchDistributor distributor = new CylinderAndContactPointWrenchDistributor(centerOfMassFrame, parentRegistry,
                dynamicGraphicObjectsListRegistry);
          testRandomMultiContact(centerOfMassFrame, distributor, parentRegistry, 1e-1, dynamicGraphicObjectsListRegistry, random);
       }
