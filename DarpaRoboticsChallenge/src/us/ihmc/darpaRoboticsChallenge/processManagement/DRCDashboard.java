@@ -1134,45 +1134,52 @@ public class DRCDashboard
 
    private void launchDemo01(final LocalCloudMachines gazeboMachine, final String task, final String pluginOption)
    {
-      if (pluginOption.contains("plugin"))
+      if (gazeboMachine == null)
       {
-         String newTask;
-
-         if (task.toLowerCase().contains("vehicle"))
-            newTask = "ATLAS_VEHICLE";
-         else
-            newTask = task;
-
-         if (newTask.toLowerCase().contains("parking") || newTask.toLowerCase().contains("hand")
-                 || (newTask.toLowerCase().equals("atlas") &&!(newTask.toLowerCase().contains("vehicle"))))
-         {
-            System.err.println("Can't launch SCS; no environment for selected task");
-
-            return;
-         }
-
-         if (estimatorCheckBox.isEnabled() && estimatorCheckBox.isSelected())
-         {
-            ThreadTools.sleep(5000);
-            scsSpawner.spawn(DRCDemo01.class, new String[] {"-Xms1024m", "-Xmx2048m"}, new String[]
-            {
-               "--sim", "--env", newTask, "--gazebo", "--gazeboHost", DRCLocalCloudConfig.getIPAddress(gazeboMachine), "--initialize-estimator", "--start",
-               startingLocationsList.getSelectedValue().toString()
-            });
-         }
-         else
-         {
-            ThreadTools.sleep(5000);
-            scsSpawner.spawn(DRCDemo01.class, new String[] {"-Xms1024m", "-Xmx2048m"}, new String[]
-            {
-               "--sim", "--env", newTask, "--gazebo", "--gazeboHost", DRCLocalCloudConfig.getIPAddress(gazeboMachine), "--start",
-               startingLocationsList.getSelectedValue().toString()
-            });
-         }
+         scsSpawner.spawn(DRCDemo01.class, new String[] {"-Xms1024m", "-Xmx2048m"}, null);
       }
       else
       {
-         System.err.println("Launching SCS without Jesper plugin not yet implemented");
+         if (pluginOption.contains("plugin"))
+         {
+            String newTask;
+
+            if (task.toLowerCase().contains("vehicle"))
+               newTask = "ATLAS_VEHICLE";
+            else
+               newTask = task;
+
+            if (newTask.toLowerCase().contains("parking") || newTask.toLowerCase().contains("hand")
+                    || (newTask.toLowerCase().equals("atlas") &&!(newTask.toLowerCase().contains("vehicle"))))
+            {
+               System.err.println("Can't launch SCS; no environment for selected task");
+
+               return;
+            }
+
+            if (estimatorCheckBox.isEnabled() && estimatorCheckBox.isSelected())
+            {
+               ThreadTools.sleep(5000);
+               scsSpawner.spawn(DRCDemo01.class, new String[] {"-Xms1024m", "-Xmx2048m"}, new String[]
+               {
+                  "--sim", "--env", newTask, "--gazebo", "--gazeboHost", DRCLocalCloudConfig.getIPAddress(gazeboMachine), "--initialize-estimator", "--start",
+                  startingLocationsList.getSelectedValue().toString()
+               });
+            }
+            else
+            {
+               ThreadTools.sleep(5000);
+               scsSpawner.spawn(DRCDemo01.class, new String[] {"-Xms1024m", "-Xmx2048m"}, new String[]
+               {
+                  "--sim", "--env", newTask, "--gazebo", "--gazeboHost", DRCLocalCloudConfig.getIPAddress(gazeboMachine), "--start",
+                  startingLocationsList.getSelectedValue().toString()
+               });
+            }
+         }
+         else
+         {
+            System.err.println("Launching SCS without Jesper plugin not yet implemented");
+         }
       }
    }
 
