@@ -135,17 +135,29 @@ public class CommandRecorder
                System.out.println("CommandRecorder:transform ");
                System.out.println(recordTransform.toString());
 
-               System.out.println("CommandRecorder: hand position before= " + ((HandPosePacket) object).position);
-               FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), ((HandPosePacket) object).orientation);
-               System.out.println("orienetaiton before: ");
-               ArrayTools.printArray(frameOrientation.getYawPitchRoll(), System.out);
+               if(((HandPosePacket) object).toHomePosition)
+               {
+                  System.out.println("CommandRecorder: hand position before = home");
+               }
+               else
+               {
+                  System.out.println("CommandRecorder: hand position before = " + ((HandPosePacket) object).position);
+                  FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), ((HandPosePacket) object).orientation);
+                  System.out.println("orienetaiton before: ");
+                  ArrayTools.printArray(frameOrientation.getYawPitchRoll(), System.out);  
+               }
 
-
-               System.out.println("CommandRecorder: hand position after= " + ((HandPosePacket) objectToWrite).position);
-               frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), ((HandPosePacket) objectToWrite).orientation);
-               System.out.println("orienetaiton after: ");
-               ArrayTools.printArray(frameOrientation.getYawPitchRoll(), System.out);
-               System.out.println("\n*****");
+               if(((HandPosePacket) objectToWrite).toHomePosition)
+               {
+                  System.out.println("CommandRecorder: hand position after = home");
+               }
+               else
+               {
+                  System.out.println("CommandRecorder: hand position after = " + ((HandPosePacket) objectToWrite).position);
+                  FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), ((HandPosePacket) objectToWrite).orientation);
+                  System.out.println("orienetaiton after: ");
+                  ArrayTools.printArray(frameOrientation.getYawPitchRoll(), System.out);  
+               }
             }
          }
          else
