@@ -11,8 +11,9 @@ public class DRCFuzzyStringClassLauncher extends FuzzyStringClassLauncher
 
    public static void main(String[] args)
    {
-      DRCFuzzyStringClassLauncher launcher = new DRCFuzzyStringClassLauncher("Class Launcher");
-      
+      if(System.getProperty("os.name").toLowerCase().contains("mac"))
+         System.setProperty("apple.awt.UIElement", "true");
+      DRCFuzzyStringClassLauncher launcher = new DRCFuzzyStringClassLauncher("Class Launcher");      
       launcher.start();
    }
 }
