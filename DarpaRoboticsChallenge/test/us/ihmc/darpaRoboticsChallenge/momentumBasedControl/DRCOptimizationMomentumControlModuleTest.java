@@ -82,8 +82,8 @@ public class DRCOptimizationMomentumControlModuleTest
       double gravityZ = 9.81;
       TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), rootJoint.getSuccessor());
       twistCalculator.compute();
-      OptimizationMomentumControlModule momentumControlModule = new OptimizationMomentumControlModule(rootJoint, centerOfMassFrame, controlDT, registry,
-                                                                   jointsToOptimizeFor, optimizationSettings, gravityZ, twistCalculator);
+      OptimizationMomentumControlModule momentumControlModule = new OptimizationMomentumControlModule(rootJoint, centerOfMassFrame, controlDT,
+                                                                   jointsToOptimizeFor, optimizationSettings, gravityZ, twistCalculator, null, registry);
       momentumControlModule.initialize();
 
       double mass = TotalMassCalculator.computeMass(ScrewTools.computeSupportAndSubtreeSuccessors(rootJoint.getSuccessor()));
@@ -154,8 +154,8 @@ public class DRCOptimizationMomentumControlModuleTest
       double gravityZ = 9.81;
       TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), rootJoint.getSuccessor());
       twistCalculator.compute();
-      OptimizationMomentumControlModule momentumControlModule = new OptimizationMomentumControlModule(rootJoint, centerOfMassFrame, controlDT, registry,
-                                                                   jointsToOptimizeFor, optimizationSettings, gravityZ, twistCalculator);
+      OptimizationMomentumControlModule momentumControlModule = new OptimizationMomentumControlModule(rootJoint, centerOfMassFrame, controlDT,
+                                                                   jointsToOptimizeFor, optimizationSettings, gravityZ, twistCalculator, null, registry);
       momentumControlModule.initialize();
 
       double mass = TotalMassCalculator.computeMass(ScrewTools.computeSupportAndSubtreeSuccessors(rootJoint.getSuccessor()));

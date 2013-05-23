@@ -24,7 +24,7 @@ public interface MomentumControlModule
 
    void reset();
 
-   void compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, RobotSide upcomingSupportSide, Map<RigidBody, ? extends CylindricalContactState> cylinderContactStates);
+   void compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, Map<RigidBody, ? extends CylindricalContactState> cylinderContactStates, RobotSide upcomingSupportSide);
 
    void resetGroundReactionWrenchFilter();
 
