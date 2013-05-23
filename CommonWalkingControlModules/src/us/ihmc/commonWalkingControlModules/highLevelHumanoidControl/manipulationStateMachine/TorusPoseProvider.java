@@ -1,13 +1,9 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine;
 
 import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectConsumer;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
 
 /**
  * @author twan
@@ -15,39 +11,68 @@ import javax.vecmath.Quat4d;
  */
 public class TorusPoseProvider implements ObjectConsumer<TorusPosePacket>
 {
+   private final Object synchronizationObject = new Object();
    private final FrameVector normal = new FrameVector(ReferenceFrame.getWorldFrame());
    private final FramePoint origin = new FramePoint(ReferenceFrame.getWorldFrame());
    private double radius;
    private boolean hasNewPose;
+   private double desiredRotationAngle;
 
    public void consumeObject(TorusPosePacket object)
    {
-      normal.set(object.getNormal());
-      origin.set(object.getPosition());
-      radius = object.getRadius();
-      hasNewPose = true;
+      synchronized (synchronizationObject)
+      {
+         normal.set(object.getNormal());
+         origin.set(object.getPosition());
+         radius = object.getRadius();
+         desiredRotationAngle = object.getDesiredRotationAngle();
+         hasNewPose = true;
+      }
    }
 
-   public synchronized boolean checkForNewPose()
+   public boolean checkForNewPose()
    {
-      return hasNewPose;
+      synchronized (synchronizationObject)
+      {
+         return hasNewPose;
+      }
    }
 
-   public synchronized double getRadius()
+   public double getRadius()
    {
-      hasNewPose = false;
-      return radius;
+      synchronized (synchronizationObject)
+      {
+         hasNewPose = false;
+
+         return radius;
+      }
    }
 
    public FrameVector getNormal()
    {
-      hasNewPose = false;
-      return normal;
+      synchronized (synchronizationObject)
+      {
+         hasNewPose = false;
+
+         return normal;
+      }
    }
 
    public FramePoint getOrigin()
    {
-      hasNewPose = false;
-      return origin;
+      synchronized (synchronizationObject)
+      {
+         hasNewPose = false;
+
+         return origin;
+      }
+   }
+
+   public double getDesiredRotationAngle()
+   {
+      synchronized (synchronizationObject)
+      {
+         return desiredRotationAngle;
+      }
    }
 }
