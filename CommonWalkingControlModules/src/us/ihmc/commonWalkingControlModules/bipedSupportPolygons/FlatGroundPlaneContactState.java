@@ -10,6 +10,7 @@ import javax.vecmath.Point3d;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class FlatGroundPlaneContactState implements PlaneContactState
@@ -17,6 +18,7 @@ public class FlatGroundPlaneContactState implements PlaneContactState
    private final ArrayList<FramePoint> contactPoints;
    private final ArrayList<FramePoint2d> contactPoints2d;
    private final double coefficientOfFriction;
+   private final FrameVector contactNormalFrameVector;
 
    public static FlatGroundPlaneContactState createRandomFlatGroundContactState(Random random, boolean leftSide, double coefficientOfFriction)
    {
@@ -45,6 +47,7 @@ public class FlatGroundPlaneContactState implements PlaneContactState
          contactPoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), contactPointLocation[0], contactPointLocation[1]));
       }
       this.coefficientOfFriction = coefficientOfFriction;
+      this.contactNormalFrameVector = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
    }
 
    public FlatGroundPlaneContactState(double footLength, double footWidth, Point3d midfootLocation, double coefficientOfFriction)
@@ -77,8 +80,10 @@ public class FlatGroundPlaneContactState implements PlaneContactState
       contactPoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), projectToXY(frontRight)));
       contactPoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), projectToXY(backRight)));
       contactPoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), projectToXY(backLeft)));
-
+      
       this.coefficientOfFriction = coefficientOfFriction;
+      
+      this.contactNormalFrameVector = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
    }
 
    private Point2d projectToXY(Point3d point)
@@ -127,4 +132,8 @@ public class FlatGroundPlaneContactState implements PlaneContactState
       return contactPoints2d.size();
    }
 
+   public FrameVector getContactNormalFrameVector()
+   {
+      return contactNormalFrameVector;
+   }
 }

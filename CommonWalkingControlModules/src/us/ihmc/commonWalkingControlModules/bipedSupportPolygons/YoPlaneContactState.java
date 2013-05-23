@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -21,6 +22,7 @@ public class YoPlaneContactState implements PlaneContactState
    private final List<YoFramePoint2d> contactPoints = new ArrayList<YoFramePoint2d>();
    private final BooleanYoVariable inContact;
    private final DoubleYoVariable coefficientOfFriction;
+   private final FrameVector contactNormalFrameVector;
 
    public YoPlaneContactState(String namePrefix, ReferenceFrame frameAfterJoint, ReferenceFrame planeFrame, YoVariableRegistry parentRegistry)
    {
@@ -31,6 +33,14 @@ public class YoPlaneContactState implements PlaneContactState
       this.frameAfterJoint = frameAfterJoint;
       this.planeFrame = planeFrame;
       parentRegistry.addChild(registry);
+      this.contactNormalFrameVector = new FrameVector(planeFrame, 0.0, 0.0, 1.0);
+   }
+
+   public void set(List<FramePoint2d> contactPoints, double coefficientOfFriction, FrameVector normalContactVector)
+   {
+      this.contactNormalFrameVector.setAndChangeFrame(normalContactVector);
+      
+      set(contactPoints, coefficientOfFriction);
    }
 
    public void set(List<FramePoint2d> contactPoints, double coefficientOfFriction)
@@ -126,5 +136,10 @@ public class YoPlaneContactState implements PlaneContactState
             ret++;
       }
       return ret;
+   }
+
+   public FrameVector getContactNormalFrameVector()
+   {
+      return contactNormalFrameVector;
    }
 }
