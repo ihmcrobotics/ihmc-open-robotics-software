@@ -49,7 +49,7 @@ public class DRCDashboard
    private JPanel controllerMachineSelectionPanel;
    private JLabel controllerMachineSelectionLabel;
    private JComboBox controllerMachineSelectionCombo;
-   
+
    private JPanel launchSCSAndUIPanel;
    private JButton launchSCSButton;
    private JButton launchUIButton;
@@ -78,7 +78,8 @@ public class DRCDashboard
    private JavaProcessSpawner scsSpawner = new JavaProcessSpawner(true);
    private GazeboSimLauncher sshSimLauncher = new GazeboSimLauncher();
 
-   private HashMap<LocalCloudMachines, Pair<JTree, DefaultMutableTreeNode>> cloudMachineTrees = new HashMap<LocalCloudMachines, Pair<JTree, DefaultMutableTreeNode>>();
+   private HashMap<LocalCloudMachines, Pair<JTree, DefaultMutableTreeNode>> cloudMachineTrees = new HashMap<LocalCloudMachines,
+                                                                                                   Pair<JTree, DefaultMutableTreeNode>>();
    JTree currentSelection = null;
 
    protected LocalCloudMachines userOwnedSim;
@@ -104,22 +105,18 @@ public class DRCDashboard
       }
       catch (ClassNotFoundException e)
       {
-
          e.printStackTrace();
       }
       catch (InstantiationException e)
       {
-
          e.printStackTrace();
       }
       catch (IllegalAccessException e)
       {
-
          e.printStackTrace();
       }
       catch (UnsupportedLookAndFeelException e)
       {
-
          e.printStackTrace();
       }
    }
@@ -130,7 +127,7 @@ public class DRCDashboard
 
       File configFile = new File(fileName);
 
-      if (configFile.exists() && configFile.length() > 0)
+      if (configFile.exists() && (configFile.length() > 0))
       {
          configFileHandle = configFile;
          shouldLoadConfig = true;
@@ -139,7 +136,7 @@ public class DRCDashboard
       {
          try
          {
-            if(configFile.exists())
+            if (configFile.exists())
                configFile.delete();
             configFile.createNewFile();
             configFileHandle = configFile;
@@ -161,15 +158,17 @@ public class DRCDashboard
          while (!done)
          {
             line = reader.readLine();
-            if (line.contains("END") || line == null)
+
+            if (line.contains("END") || (line == null))
             {
                done = true;
             }
             else
             {
-               if (line != null && line.startsWith("PLUGIN:"))
+               if ((line != null) && line.startsWith("PLUGIN:"))
                {
                   pluginOption = line.substring(line.indexOf(":") + 1, line.length());
+
                   if (pluginOption.contains("plugin"))
                   {
                      radioGroup.setSelected(usePluginButton.getModel(), true);
@@ -179,7 +178,7 @@ public class DRCDashboard
                      radioGroup.setSelected(useDefaultButton.getModel(), true);
                   }
                }
-               else if (line != null && line.startsWith("TASK:"))
+               else if ((line != null) && line.startsWith("TASK:"))
                {
                   String taskOption = line.substring(line.indexOf(":") + 1, line.length());
 
@@ -190,14 +189,14 @@ public class DRCDashboard
                   else
                      taskCombo.setSelectedItem(DRCROSTasks.valueOf(taskOption));
                }
-               else if (line != null && line.startsWith("START:"))
+               else if ((line != null) && line.startsWith("START:"))
                {
                   String startOption = line.substring(line.indexOf(":") + 1, line.length());
-                  
+
                   if (!startOption.equals(""))
                      startingLocationsList.setSelectedValue(startOption, true);
                }
-               else if (line != null && line.startsWith("UI:"))
+               else if ((line != null) && line.startsWith("UI:"))
                {
                   String uiOption = line.substring(line.indexOf(":") + 1, line.length());
 
@@ -206,7 +205,7 @@ public class DRCDashboard
                   else
                      operatorUICheckBox.setSelected(false);
                }
-               else if (line != null && line.startsWith("SCS:"))
+               else if ((line != null) && line.startsWith("SCS:"))
                {
                   String scsOption = line.substring(line.indexOf(":") + 1, line.length());
 
@@ -215,7 +214,7 @@ public class DRCDashboard
                   else
                      scsCheckBox.setSelected(false);
                }
-               else if (line != null && line.startsWith("ESTIMATOR:"))
+               else if ((line != null) && line.startsWith("ESTIMATOR:"))
                {
                   String estimatorOption = line.substring(line.indexOf(":") + 1, line.length());
 
@@ -227,11 +226,12 @@ public class DRCDashboard
                   {
                      estimatorCheckBox.setSelected(false);
                   }
-                  
+
                   estimatorCheckBox.setEnabled(scsCheckBox.isSelected());
                }
             }
          }
+
          reader.close();
       }
       catch (FileNotFoundException e)
@@ -336,25 +336,20 @@ public class DRCDashboard
    {
       frame.addWindowListener(new WindowListener()
       {
-
          public void windowOpened(WindowEvent arg0)
          {
-
          }
 
          public void windowIconified(WindowEvent arg0)
          {
-
          }
 
          public void windowDeiconified(WindowEvent arg0)
          {
-
          }
 
          public void windowDeactivated(WindowEvent arg0)
          {
-
          }
 
          public void windowClosing(WindowEvent arg0)
@@ -364,12 +359,10 @@ public class DRCDashboard
 
          public void windowClosed(WindowEvent arg0)
          {
-
          }
 
          public void windowActivated(WindowEvent arg0)
          {
-
          }
       });
    }
@@ -467,7 +460,7 @@ public class DRCDashboard
 
       c.insets = oldInsets;
 
-      //      networkStatusScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+      // networkStatusScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
       JPanel view = (JPanel) networkStatusScrollPane.getViewport().getView();
       GridBagConstraints c2 = new GridBagConstraints();
 
@@ -486,12 +479,13 @@ public class DRCDashboard
          if (!machine.equals(LocalCloudMachines.LOCALHOST))
          {
             DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("<html><body style=\"font-weight:bold;font-size:1.1em;\">"
-                  + WordUtils.capitalize(machine.toString().toLowerCase().replace("_", " ")) + "</body></html>");
+                                                 + WordUtils.capitalize(machine.toString().toLowerCase().replace("_", " ")) + "</body></html>");
             rootNode.add(new DefaultMutableTreeNode("ROS/GZ Sim:"));
             rootNode.add(new DefaultMutableTreeNode("SCS Controller?"));
 
             JTree tree = new JTree(rootNode);
-            //            tree.setLargeModel(true);
+
+            // tree.setLargeModel(true);
             tree.setBorder(BorderFactory.createEmptyBorder(15, 10, 15, 0));
             if (sshSimLauncher.isMachineReachable(machine))
                setCloudStatusItemIcon(tree, goodConnectionIcon);
@@ -523,13 +517,13 @@ public class DRCDashboard
                   if (launchMode)
                   {
                      startLaunchProcess(machine, controllerMachine, task, pluginOption);
-                     
+
                      launchMode = false;
                   }
                   else
                   {
                      nukeAllProcesses(machine, controllerMachine);
-                     
+
                      launchMode = true;
                   }
                }
@@ -571,30 +565,26 @@ public class DRCDashboard
          if (!machine.equals(LocalCloudMachines.LOCALHOST))
             cloudMachineTrees.get(machine).first().addMouseListener(new MouseListener()
             {
-
                public void mouseReleased(MouseEvent e)
                {
-
                }
 
                public void mousePressed(MouseEvent e)
                {
-
                }
 
                public void mouseExited(MouseEvent e)
                {
-
                }
 
                public void mouseEntered(MouseEvent e)
                {
-
                }
 
                public void mouseClicked(MouseEvent e)
                {
                   ((JTree) e.getSource()).setSelectionRow(0);
+
                   if (e.getClickCount() > 1)
                   {
                      final LocalCloudMachines controllerMachine = (LocalCloudMachines) controllerMachineSelectionCombo.getSelectedItem();
@@ -604,9 +594,10 @@ public class DRCDashboard
                      {
                         if (!sshSimLauncher.isMachineRunningSim(machine))
                         {
-                           String[] options = new String[] { "Yes", "No" };
+                           String[] options = new String[] {"Yes", "No"};
                            int n = JOptionPane.showOptionDialog(frame, "Do you want to launch " + task + " on " + machine.toString() + "?",
-                                 "Confirm Launch ROS/Gazebo Sim", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+                                      "Confirm Launch ROS/Gazebo Sim", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options,
+                                      options[0]);
 
                            if (n == 0)
                            {
@@ -615,9 +606,9 @@ public class DRCDashboard
                         }
                         else if (userOwnedSim == machine)
                         {
-                           String[] options = new String[] { "Yes", "No" };
+                           String[] options = new String[] {"Yes", "No"};
                            int n = JOptionPane.showOptionDialog(frame, "Do you want to kill your sim on " + machine.toString() + "?",
-                                 "Confirm Kill ROS/Gazebo Sim", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]);
+                                      "Confirm Kill ROS/Gazebo Sim", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]);
 
                            if (n == 0)
                            {
@@ -675,7 +666,6 @@ public class DRCDashboard
 
    private void disableNodeCollapse()
    {
-
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
          if (!machine.equals(LocalCloudMachines.LOCALHOST))
@@ -714,6 +704,7 @@ public class DRCDashboard
          public void actionPerformed(ActionEvent e)
          {
             ((DefaultComboBoxModel) taskCombo.getModel()).removeAllElements();
+
             for (DRCROSTasks task : DRCROSTasks.values())
             {
                ((DefaultComboBoxModel) taskCombo.getModel()).addElement(task);
@@ -726,6 +717,7 @@ public class DRCDashboard
          public void actionPerformed(ActionEvent e)
          {
             ((DefaultComboBoxModel) taskCombo.getModel()).removeAllElements();
+
             for (DRCPluginTasks task : DRCPluginTasks.values())
             {
                ((DefaultComboBoxModel) taskCombo.getModel()).addElement(task);
@@ -785,8 +777,8 @@ public class DRCDashboard
 
       setupSelectGazeboMachine();
 
-//      setupCloudMachineInfoPanel();
-      
+//    setupCloudMachineInfoPanel();
+
       setupLaunchSCSAndUIPanel();
    }
 
@@ -828,34 +820,33 @@ public class DRCDashboard
       launchSCSAndUIPanel = new JPanel(new GridLayout(2, 1));
 
       machineSelectionPanel.add(launchSCSAndUIPanel, c);
-      
+
       launchSCSButton = new JButton("Launch SCS");
       launchUIButton = new JButton("Launch UI");
-      
+
       launchSCSAndUIPanel.add(launchSCSButton);
       launchSCSAndUIPanel.add(launchUIButton);
-      
+
       launchSCSButton.addActionListener(new ActionListener()
       {
-         
          public void actionPerformed(ActionEvent e)
          {
             String task = taskCombo.getSelectedItem().toString();
             String pluginOption = radioGroup.getSelection().getActionCommand();
-            
+
             launchDemo01(userOwnedSim, task, pluginOption);
          }
       });
-      
+
       launchUIButton.addActionListener(new ActionListener()
       {
          public void actionPerformed(ActionEvent e)
          {
-            uiSpawner.spawn(DRCOperatorUserInterface.class, new String[] { "-Xms1024m", "-Xmx2048m" }, null);
+            uiSpawner.spawn(DRCOperatorUserInterface.class, new String[] {"-Xms1024m", "-Xmx2048m"}, null);
          }
       });
    }
-   
+
    private void setupRightContentPanel()
    {
       setupGazeboLauncherList();
@@ -885,7 +876,8 @@ public class DRCDashboard
       c.ipadx = 200;
       c.anchor = GridBagConstraints.PAGE_START;
       c.fill = GridBagConstraints.BOTH;
-      //      c.insets = new Insets(10, 35, 10, 35);
+
+      // c.insets = new Insets(10, 35, 10, 35);
       startingLocationsListModel = new DefaultListModel();
       startingLocationsList = new JList(startingLocationsListModel);
       startingLocationsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -898,15 +890,17 @@ public class DRCDashboard
          public void actionPerformed(ActionEvent e)
          {
             startingLocationsListModel.clear();
-            if (taskCombo.getSelectedItem() != null && taskCombo.getSelectedItem() != DRCPluginTasks.ATLAS
-                  && taskCombo.getSelectedItem() != DRCPluginTasks.HAND && taskCombo.getSelectedItem() != DRCPluginTasks.PARKING_LOT)
+
+            if ((taskCombo.getSelectedItem() != null) && (taskCombo.getSelectedItem() != DRCPluginTasks.ATLAS)
+                    && (taskCombo.getSelectedItem() != DRCPluginTasks.HAND) && (taskCombo.getSelectedItem() != DRCPluginTasks.PARKING_LOT))
             {
-               Object[] startingLocations = DRCDemo01Types.environmentModelMap
-                     .get(DRCEnvironmentModel.valueOf(taskCombo.getSelectedItem().toString().toUpperCase())).keySet().toArray();
+               Object[] startingLocations =
+                  DRCDemo01Types.environmentModelMap.get(DRCEnvironmentModel.valueOf(taskCombo.getSelectedItem().toString().toUpperCase())).keySet().toArray();
                for (int i = startingLocations.length - 1; i >= 0; --i)
                {
                   startingLocationsListModel.addElement(startingLocations[i].toString());
                }
+
                startingLocationsList.setSelectedIndex(0);
             }
          }
@@ -1019,7 +1013,8 @@ public class DRCDashboard
             if (sshSimLauncher.isMachineRunningSim(machine))
             {
                node.setUserObject("<html><body>GZ Sim: <span style=\"color:red;font-style:italic;\">" + sshSimLauncher.getSimTaskname(machine)
-                     + "</span></body></html>");
+                                  + "</span></body></html>");
+
                if (userOwnedSim != machine)
                {
                   launchButtons.get(cloudMachineTrees.get(machine).first()).setEnabled(false);
@@ -1064,11 +1059,13 @@ public class DRCDashboard
             {
                setCloudStatusItemIcon(cloudMachineTrees.get(machine).first(), goodConnectionIcon);
                cloudMachineTrees.get(machine).first().expandRow(0);
+               launchButtons.get(cloudMachineTrees.get(machine).first()).setEnabled(true);
             }
             else
             {
                setCloudStatusItemIcon(cloudMachineTrees.get(machine).first(), badConnectionIcon);
                cloudMachineTrees.get(machine).first().collapseRow(0);
+               launchButtons.get(cloudMachineTrees.get(machine).first()).setEnabled(false);
             }
          }
       }
@@ -1095,7 +1092,7 @@ public class DRCDashboard
    }
 
    private void startLaunchProcess(final LocalCloudMachines gazeboMachine, final LocalCloudMachines controllerMachine, final String task,
-         final String pluginOption)
+                                   final String pluginOption)
    {
       startGazebo(gazeboMachine, controllerMachine, task, pluginOption);
 
@@ -1113,7 +1110,7 @@ public class DRCDashboard
       {
          public void run()
          {
-            if (scsCheckBox.isSelected() && !scsSpawner.hasRunningProcesses())
+            if (scsCheckBox.isSelected() &&!scsSpawner.hasRunningProcesses())
             {
                launchDemo01(gazeboMachine, task, pluginOption);
             }
@@ -1123,9 +1120,9 @@ public class DRCDashboard
 
    private void startOperatorUI()
    {
-      if (operatorUICheckBox.isSelected() && !uiSpawner.hasRunningProcesses())
+      if (operatorUICheckBox.isSelected() &&!uiSpawner.hasRunningProcesses())
       {
-         uiSpawner.spawn(DRCOperatorUserInterface.class, new String[] { "-Xms1024m", "-Xmx2048m" }, null);
+         uiSpawner.spawn(DRCOperatorUserInterface.class, new String[] {"-Xms1024m", "-Xmx2048m"}, null);
       }
    }
 
@@ -1146,24 +1143,31 @@ public class DRCDashboard
          else
             newTask = task;
 
-         if (newTask.toLowerCase().contains("parking") || newTask.toLowerCase().contains("hand") || (newTask.toLowerCase().equals("atlas") && !(newTask.toLowerCase().contains("vehicle"))))
+         if (newTask.toLowerCase().contains("parking") || newTask.toLowerCase().contains("hand")
+                 || (newTask.toLowerCase().equals("atlas") &&!(newTask.toLowerCase().contains("vehicle"))))
          {
             System.err.println("Can't launch SCS; no environment for selected task");
+
             return;
          }
 
          if (estimatorCheckBox.isEnabled() && estimatorCheckBox.isSelected())
          {
             ThreadTools.sleep(5000);
-            scsSpawner.spawn(DRCDemo01.class, new String[] { "-Xms1024m", "-Xmx2048m" }, new String[] { "--sim", "--env", newTask, "--gazebo",
-                  "--gazeboHost", DRCLocalCloudConfig.getIPAddress(gazeboMachine), "--initialize-estimator", "--start",
-                  startingLocationsList.getSelectedValue().toString() });
+            scsSpawner.spawn(DRCDemo01.class, new String[] {"-Xms1024m", "-Xmx2048m"}, new String[]
+            {
+               "--sim", "--env", newTask, "--gazebo", "--gazeboHost", DRCLocalCloudConfig.getIPAddress(gazeboMachine), "--initialize-estimator", "--start",
+               startingLocationsList.getSelectedValue().toString()
+            });
          }
          else
          {
             ThreadTools.sleep(5000);
-            scsSpawner.spawn(DRCDemo01.class, new String[] { "-Xms1024m", "-Xmx2048m" }, new String[] { "--sim", "--env", newTask, "--gazebo",
-                  "--gazeboHost", DRCLocalCloudConfig.getIPAddress(gazeboMachine), "--start", startingLocationsList.getSelectedValue().toString() });
+            scsSpawner.spawn(DRCDemo01.class, new String[] {"-Xms1024m", "-Xmx2048m"}, new String[]
+            {
+               "--sim", "--env", newTask, "--gazebo", "--gazeboHost", DRCLocalCloudConfig.getIPAddress(gazeboMachine), "--start",
+               startingLocationsList.getSelectedValue().toString()
+            });
          }
       }
       else
