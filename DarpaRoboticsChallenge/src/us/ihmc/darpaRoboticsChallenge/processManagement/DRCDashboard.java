@@ -1059,13 +1059,13 @@ public class DRCDashboard
             {
                setCloudStatusItemIcon(cloudMachineTrees.get(machine).first(), goodConnectionIcon);
                cloudMachineTrees.get(machine).first().expandRow(0);
-               launchButtons.get(cloudMachineTrees.get(machine).first()).setEnabled(true);
+               launchButtons.get(cloudMachineTrees.get(machine).first()).setVisible(true);
             }
             else
             {
                setCloudStatusItemIcon(cloudMachineTrees.get(machine).first(), badConnectionIcon);
                cloudMachineTrees.get(machine).first().collapseRow(0);
-               launchButtons.get(cloudMachineTrees.get(machine).first()).setEnabled(false);
+               launchButtons.get(cloudMachineTrees.get(machine).first()).setVisible(false);
             }
          }
       }
