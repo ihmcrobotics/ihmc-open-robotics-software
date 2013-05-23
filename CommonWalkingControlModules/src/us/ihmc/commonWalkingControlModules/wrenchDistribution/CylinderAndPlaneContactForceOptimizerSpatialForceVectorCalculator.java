@@ -1,21 +1,11 @@
 package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import org.ejml.data.DenseMatrix64F;
-
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
-
-import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CylinderAndPlaneContactForceOptimizerNative;
-import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CylinderAndPlaneContactForceOptimizerNativeInput;
-import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CylinderAndPlaneContactForceOptimizerNativeOutput;
+import org.ejml.data.DenseMatrix64F;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -23,10 +13,13 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.Wrench;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 public class CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator
 {
-   private static final int PHISIZE = CylinderAndPlaneContactForceOptimizerNative.phiSize;
-   private static final int RHOSIZE = CylinderAndPlaneContactForceOptimizerNative.rhoSize;
    private final ReferenceFrame centerOfMassFrame;
    private final Map<EndEffector, SpatialForceVector> spatialForceVectors = new LinkedHashMap<EndEffector, SpatialForceVector>();
    private final DenseMatrix64F tempVectorMatrix = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
@@ -72,11 +65,11 @@ public class CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator
 
       if (visualize)
       {
-         graphicWrenches[0] = new DynamicGraphicVector[RHOSIZE][2];
-         graphicYoDoubles[0] = new DoubleYoVariable[RHOSIZE][9];
+         graphicWrenches[0] = new DynamicGraphicVector[rhoSize][2];
+         graphicYoDoubles[0] = new DoubleYoVariable[rhoSize][9];
 
-         graphicWrenches[1] = new DynamicGraphicVector[PHISIZE][2];
-         graphicYoDoubles[1] = new DoubleYoVariable[PHISIZE][9];
+         graphicWrenches[1] = new DynamicGraphicVector[phiSize][2];
+         graphicYoDoubles[1] = new DoubleYoVariable[phiSize][9];
          double scaleFactor = 0.01;
 
          ArrayList<DynamicGraphicObject> dynamicGraphicVectorsRhoLinear = new ArrayList<DynamicGraphicObject>();
@@ -85,14 +78,14 @@ public class CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator
          ArrayList<DynamicGraphicObject> dynamicGraphicVectorsPhiAngular = new ArrayList<DynamicGraphicObject>();
 
          int q = 0;
-         for (int i = 0; i < RHOSIZE; i++)
+         for (int i = 0; i < rhoSize; i++)
          {
             for (int j = 0; j < 9; j++)
             {
                graphicYoDoubles[q][i][j] = new DoubleYoVariable(name + "rhoOptimizerOutputVectorsElement" + q + i + j, registry);
             }
 
-            double greenLevel = 0.25 * i / (double) RHOSIZE;
+            double greenLevel = 0.25 * i / (double) rhoSize;
             graphicWrenches[q][i][LINEAR] = new DynamicGraphicVector( "RhoGraphicOutput" + q + i + "Linear", graphicYoDoubles[q][i][X],
                     graphicYoDoubles[q][i][Y], graphicYoDoubles[q][i][Z], graphicYoDoubles[q][i][x], graphicYoDoubles[q][i][y], graphicYoDoubles[q][i][z],
                     scaleFactor, new YoAppearanceRGBColor(0.5, greenLevel, 0.0, 0.7));
@@ -105,9 +98,9 @@ public class CylinderAndPlaneContactForceOptimizerSpatialForceVectorCalculator
 
          q = 1;
 
-         for (int i = 0; i < PHISIZE; i++)
+         for (int i = 0; i < phiSize; i++)
          {
-            double greenLevel = 0.25 * i / (double) PHISIZE;
+            double greenLevel = 0.25 * i / (double) phiSize;
             for (int j = 0; j < 9; j++)
             {
                graphicYoDoubles[q][i][j] = new DoubleYoVariable( "rhoOptimizerOutputVectorsElement" + q + i + j, registry);
