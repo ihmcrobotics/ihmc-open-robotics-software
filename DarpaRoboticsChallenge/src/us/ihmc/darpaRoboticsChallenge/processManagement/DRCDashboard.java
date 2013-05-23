@@ -232,6 +232,13 @@ public class DRCDashboard
                   else
                      taskCombo.setSelectedItem(DRCROSTasks.valueOf(taskOption));
                }
+               else if (line != null && line.startsWith("START:"))
+               {
+                  String startOption = line.substring(line.indexOf(":") + 1, line.length());
+                  
+                  if (startOption != "")
+                     startingLocationsList.setSelectedValue(startOption, true);
+               }
                else if (line != null && line.startsWith("UI:"))
                {
                   String uiOption = line.substring(line.indexOf(":") + 1, line.length());
@@ -284,6 +291,11 @@ public class DRCDashboard
       System.out.println("Writing config...");
       String taskOption = taskCombo.getSelectedItem().toString();
       String pluginOption = radioGroup.getSelection().getActionCommand();
+      String startingOption;
+      if (startingLocationsList.getSelectedValue() != null)
+         startingOption = startingLocationsList.getSelectedValue().toString();
+      else
+         startingOption = "";
 
       try
       {
@@ -291,6 +303,8 @@ public class DRCDashboard
          fileWriter.write("PLUGIN:" + pluginOption);
          fileWriter.newLine();
          fileWriter.write("TASK:" + taskOption);
+         fileWriter.newLine();
+         fileWriter.write("START:" + startingOption);
          fileWriter.newLine();
          fileWriter.write("UI:" + (operatorUICheckBox.isSelected() ? "true" : "false"));
          fileWriter.newLine();
