@@ -187,7 +187,7 @@ public class JointConfigurationGathererAndProducer
    private class JointConfigurationWorker implements Runnable
    {
       private final DRCJointConfigurationData jointConfigurationData = new DRCJointConfigurationData();
-
+      
       public void run()
       {
          try
@@ -199,7 +199,7 @@ public class JointConfigurationGathererAndProducer
             lock.unlock();
    
             objectCommunicator.consumeObject(jointConfigurationData);
-   
+              
             lock.lock();
             {
                jointConfigurationData.setJointAngles(allJointAngles);

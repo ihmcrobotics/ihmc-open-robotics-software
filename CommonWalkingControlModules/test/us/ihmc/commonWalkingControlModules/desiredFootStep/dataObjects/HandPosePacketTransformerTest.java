@@ -1,22 +1,23 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Random;
+
+import javax.media.j3d.Transform3D;
+import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+
 import org.junit.Test;
-import us.ihmc.commonWalkingControlModules.controlModules.head.PelvisOrientationPacket;
+
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.HandPosePacket;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-
-import javax.media.j3d.Transform3D;
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import java.util.Random;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Created with IntelliJ IDEA.
@@ -53,7 +54,7 @@ public class HandPosePacketTransformerTest
 
          Point3d point3d = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
 
-         HandPosePacket starting = new HandPosePacket(robotSide, frame, point3d, quat, i % 2 == 0, i % 2 == 1);
+         HandPosePacket starting = new HandPosePacket(robotSide, frame, point3d, quat, i % 2 == 1);
 
          transform3D = RandomTools.generateRandomTransform(random);
 
@@ -84,7 +85,6 @@ public class HandPosePacketTransformerTest
       assertTrue(areOrientationsEqualWithTransform(startQuat, transform3D, endQuat));
 
       // boolean handLoadBearing;
-      assertTrue(starting.isLoadBearing() == ending.isLoadBearing());
    }
 
    private static double getDistanceBetweenPoints(Point3d startingPoint, Transform3D transform3D, Point3d endPoint)

@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine;
 
-import org.apache.commons.lang.mutable.MutableBoolean;
-
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.robotSide.RobotSide;
@@ -15,7 +13,6 @@ public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>
 
    private final SideDependentList<FramePose> homePositions = new SideDependentList<FramePose>();
    private final SideDependentList<FramePose> desiredHandPoses = new SideDependentList<FramePose>();
-   private final SideDependentList<MutableBoolean> contactStates  = new SideDependentList<MutableBoolean>();
 
    private SideDependentList<Boolean> hasNewPose = new SideDependentList<Boolean>();
 
@@ -30,7 +27,6 @@ public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>
          homePositions.put(robotSide, new FramePose(chestFrame, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame().get(robotSide)));
 
          desiredHandPoses.put(robotSide, homePositions.get(robotSide));
-         contactStates.put(robotSide, new MutableBoolean(false));
          hasNewPose.put(robotSide, false);
       }
 
@@ -47,11 +43,6 @@ public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>
       return desiredHandPoses.get(robotSide);
    }
    
-   public synchronized boolean isInContact(RobotSide robotSide)
-   {
-      return contactStates.get(robotSide).booleanValue();
-   }
-   
    public synchronized boolean isRelativeToWorld()
    {
       return relativeToWorld;
@@ -61,7 +52,6 @@ public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>
    {
       RobotSide robotSide = object.getRobotSide();
       hasNewPose.put(robotSide, true);
-      contactStates.get(robotSide).setValue(object.isLoadBearing);
       
       if(object.isToHomePosition())
       {
