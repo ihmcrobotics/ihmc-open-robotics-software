@@ -8,6 +8,7 @@ import javax.vecmath.Point3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.BlindWalkingPacket;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
@@ -110,6 +111,11 @@ public class DRCSimulationTestHelper
    public void sendFootstepListToListeners(FootstepDataList footstepDataList)
    {
       networkObjectCommunicator.sendFootstepListToListeners(footstepDataList);
+   }
+   
+   public void sendFootstepListToListeners(BlindWalkingPacket blindWalkingPacket)
+   {
+      networkObjectCommunicator.sendBlindWalkingPacketToListeners(blindWalkingPacket);
    }
 
    public DRCObstacleCourseSimulation getDRCSimulation()
