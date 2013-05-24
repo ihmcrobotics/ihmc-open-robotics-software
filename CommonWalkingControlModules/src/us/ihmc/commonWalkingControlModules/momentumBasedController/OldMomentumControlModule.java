@@ -304,4 +304,19 @@ public class OldMomentumControlModule implements MomentumControlModule
    {
       return externalWrenches;
    }
+
+   public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase)
+   {
+      throw new NoSuchMethodError();
+   }
+
+   public void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration, double weight)
+   {
+      throw new NoSuchMethodError();
+   }
+
+   public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData, double weight)
+   {
+      throw new NoSuchMethodError();
+   }
 }

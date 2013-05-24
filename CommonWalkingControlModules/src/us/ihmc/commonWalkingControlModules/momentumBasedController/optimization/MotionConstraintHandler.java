@@ -51,7 +51,6 @@ public class MotionConstraintHandler
    private final PointJacobian pointJacobian = new PointJacobian();
 
    private int motionConstraintIndex = 0;
-   private int nullspaceIndex = 0;
    private final FrameVector pPointVelocity = new FrameVector();
    private final PointJacobianConvectiveTermCalculator pointJacobianConvectiveTermCalculator;
 
@@ -71,7 +70,6 @@ public class MotionConstraintHandler
    public void reset()
    {
       motionConstraintIndex = 0;
-      nullspaceIndex = 0;
    }
 
    public void setDesiredSpatialAcceleration(GeometricJacobian jacobian,
