@@ -23,7 +23,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParamete
  */
 public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
 {
-   private boolean DEBUG = false;
+   private boolean DEBUG = true;
    private FootstepPathCoordinator footstepPathCoordinator;
    private final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
    private final HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters;
@@ -39,6 +39,13 @@ public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
    public void consumeObject(FootstepDataList footstepList)
    {
       ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
+      
+      TrajectoryParameters trajectoryParameters = null;
+      if(footstepList.getTrajectoryWaypointGenerationMethod() != null)
+         trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(footstepList.getTrajectoryWaypointGenerationMethod());
+      else
+         System.out.println("trajectory parameters are null");
+      
       for (int i = 0; i < footstepList.size(); i++)
       {
          FootstepData footstepData = footstepList.get(i);
@@ -56,20 +63,6 @@ public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
          
 
          Footstep footstep = new Footstep(id, contactableBody, footstepPoseFrame, soleReferenceFrame, expectedContactPoints, true);
-         TrajectoryParameters trajectoryParameters = null;
-
-         if (footstepData.getTrajectoryWaypointGenerationMethod() != null)
-         {
-            switch (footstepData.getTrajectoryWaypointGenerationMethod())
-            {
-               case BY_BOX :
-                  trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(footstepData.getTrajectoryBox());
-                  break;
-                default:
-                  trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(footstepData.getTrajectoryWaypointGenerationMethod());
-                  break;
-            }
-         }
          
          footsteps.add(footstep);
          mapFromFootstepsToTrajectoryParameters.put(footstep, trajectoryParameters);
@@ -82,6 +75,5 @@ public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
 
       footstepPathCoordinator.updatePath(footsteps);
    }
-
 
 }

@@ -15,16 +15,11 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointTrajectoryUtils;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.math.geometry.Direction;
-import us.ihmc.utilities.math.geometry.FrameBox3d;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-
-import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypointGenerationMethod;
 
 /**
  * Created with IntelliJ IDEA.
@@ -50,12 +45,7 @@ public class FootstepDataTansformerTest
       {
          originalFootstepData = getTestFootstepData();
          transform3D = new Transform3D();
-         transform3D.set(new Vector3d(1.0, 0.0, 0.0));
-//         transform3D = RandomTools.generateRandomTransform(random);
-         
-//         Vector3d v1 = new Vector3d();
-//         transform3D.get(v1);
-//         System.out.println(v1 + "  T");
+         transform3D = RandomTools.generateRandomTransform(random);
          
          transformedFootstepData = FootstepDataTransformer.transformFootstepData(originalFootstepData, transform3D);
 
@@ -79,21 +69,7 @@ public class FootstepDataTansformerTest
             listOfPoints.add(RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0));
          }
       }
-
-      Point3d boxDimensions = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      Transform3D randomBoxToWorldTransform = new Transform3D(); // RandomTools.generateRandomTransform(random);
-      randomBoxToWorldTransform.set(new Vector3d(0.0, 1.0, 0.0));
       
-      ReferenceFrame randomBoxFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("randomFrame", ReferenceFrame.getWorldFrame(),
-            randomBoxToWorldTransform);
-      
-      ret.trajectoryBoxData = TwoWaypointTrajectoryUtils.getTopFaceOfBox(new FrameBox3d(randomBoxFrame, Math.abs(boxDimensions.getX()), Math.abs(boxDimensions.getY()), Math.abs(boxDimensions.getZ())));
-      
-//      System.out.println((TwoWaypointTrajectoryUtils.getTopFaceOfBox(new FrameBox3d(randomBoxFrame, Math.abs(boxDimensions.getX()), Math.abs(boxDimensions.getY()), Math.abs(boxDimensions.getZ()))).location) + "   <- dis");
-      
-      int index = (int) Math.floor(random.nextDouble() * TrajectoryWaypointGenerationMethod.values().length);
-      ret.trajectoryWaypointGenerationMethod = TrajectoryWaypointGenerationMethod.values()[index];
-
       return ret;
    }
 
@@ -112,11 +88,6 @@ public class FootstepDataTansformerTest
       Quat4d startQuat = footstepData.getOrientation();
       Quat4d endQuat = transformedFootstepData.getOrientation();
       assertTrue(areOrientationsEqualWithTransform(startQuat, transform3D, endQuat));
-
-      assertTrue(areBoxesEqual(footstepData.getTrajectoryBox(), transform3D, transformedFootstepData.getTrajectoryBox()));
-
-      // public TrajectoryWaypointGenerationMethod trajectoryWaypointGenerationMethod;
-      assertTrue("", footstepData.getTrajectoryWaypointGenerationMethod().equals(transformedFootstepData.getTrajectoryWaypointGenerationMethod()));
    }
 
    @Test
@@ -171,25 +142,6 @@ public class FootstepDataTansformerTest
       for (int i = 0; i < rpyThat.length; i++)
       {
          if (Math.abs(rpyThis[i] - rpyThat[i]) > 1e-6)
-            return false;
-      }
-
-      return true;
-   }
-
-   private static boolean areBoxesEqual(FrameBox3d boxStarting, Transform3D expectedTransform, FrameBox3d boxEnding)
-   {
-      Transform3D actualTransform = boxEnding.getReferenceFrame().getTransformToDesiredFrame(boxStarting.getReferenceFrame());
-      
-      if (!expectedTransform.epsilonEquals(actualTransform, 1e-6))
-         return false;
-      
-      for (Direction direction : Direction.values())
-      {
-         double startDimension = boxStarting.getDimension(direction);
-         double endDimension = boxEnding.getDimension(direction);
-
-         if (Math.abs(startDimension - endDimension) > 1e-6)
             return false;
       }
 
