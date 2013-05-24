@@ -310,7 +310,6 @@ public class FootstepPathCoordinator implements FootstepProvider
 
    public void setBlindWalking(BlindWalkingPacket blindWalkingPacket)
    {
-      System.out.println("Receiving blind walking packet");
       FramePoint2d desiredDestination = new FramePoint2d(ReferenceFrame.getWorldFrame(), blindWalkingPacket.getDesiredDestination());
       blindWalkingToDestinationDesiredFootstepCalculator.setDesiredDestination(desiredDestination);
 
@@ -364,6 +363,8 @@ public class FootstepPathCoordinator implements FootstepProvider
 
       setWalkMethod(WalkMethod.BLIND);
       footstepQueue.clear();
+      setPaused(false);
+
    }
 
    private enum WalkMethod {STOP, FOOTSTEP_PATH, BLIND;}
