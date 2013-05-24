@@ -29,4 +29,6 @@ public interface StateEstimator
    public abstract DenseMatrix64F getState();
 
    public abstract void setState(DenseMatrix64F x, DenseMatrix64F covariance);
+
+   public abstract void initializeOrientationEstimateToMeasurement();
 }
