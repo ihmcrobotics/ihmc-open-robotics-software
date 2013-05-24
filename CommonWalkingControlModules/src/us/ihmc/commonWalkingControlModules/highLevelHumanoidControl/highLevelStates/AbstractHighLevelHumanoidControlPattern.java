@@ -20,10 +20,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.TorusPoseProvider;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OrientationTrajectoryData;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
-import us.ihmc.commonWalkingControlModules.trajectories.FixedOrientationTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.FixedPositionTrajectoryGenerator;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -78,12 +75,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
    protected final SideDependentList<GeometricJacobian> legJacobians = new SideDependentList<GeometricJacobian>();
    protected final LinkedHashMap<ContactablePlaneBody, EndEffectorControlModule> footEndEffectorControlModules = new LinkedHashMap<ContactablePlaneBody,
                                                                                                                     EndEffectorControlModule>();
-
-   protected final LinkedHashMap<ContactablePlaneBody, FixedPositionTrajectoryGenerator> swingPositionTrajectoryGenerators =
-      new LinkedHashMap<ContactablePlaneBody, FixedPositionTrajectoryGenerator>();
-   protected final LinkedHashMap<ContactablePlaneBody, FixedOrientationTrajectoryGenerator> swingOrientationTrajectoryGenerators =
-      new LinkedHashMap<ContactablePlaneBody, FixedOrientationTrajectoryGenerator>();
-
    protected final FullRobotModel fullRobotModel;
    protected final MomentumBasedController momentumBasedController;
    protected final WalkingControllerParameters walkingControllerParameters;
@@ -122,13 +113,13 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
       kUpperBody.set(100.0);
       zetaUpperBody.set(1.0);
-      coefficientOfFriction.set(1.0);
+      coefficientOfFriction.set(1.0); // 0.6);// 
 
       // Setup jacobians for legs and arms
       setupLegJacobians(fullRobotModel);
 
       // Setup foot control modules:
-      setupFootControlModules();
+//      setupFootControlModules(); //TODO: get rid of that?
 
       // Setup arm+hand manipulation state machines
       manipulationControlModule = new ManipulationControlModule(yoTime, fullRobotModel, twistCalculator, walkingControllerParameters, handPoseProvider,
