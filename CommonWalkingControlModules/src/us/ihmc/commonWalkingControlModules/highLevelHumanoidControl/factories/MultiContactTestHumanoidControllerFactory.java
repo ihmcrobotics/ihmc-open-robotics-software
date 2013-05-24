@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.MultiContactTestHumanoidController;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredFootPoseProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredHandPoseProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.TorusPoseProvider;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CoMBasedMomentumRateOfChangeControlModule;
@@ -157,12 +158,13 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
 
       DesiredHandPoseProvider desiredHandPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters);
       TorusPoseProvider torusPoseProvider = new TorusPoseProvider();
+      DesiredFootPoseProvider desiredFootPoseProvider = new DesiredFootPoseProvider();
 
       MultiContactTestHumanoidController multiContactBehavior = new MultiContactTestHumanoidController(feet, hands,
                                                                    momentumRateOfChangeControlModule.getDesiredCoMPositionInputPort(),
                                                                    desiredPelvisOrientationTrajectoryInputPort, null, momentumBasedController,
-                                                                   walkingControllerParameters, desiredHandPoseProvider, torusPoseProvider, null, null,
-                                                                   dynamicGraphicObjectsListRegistry);
+                                                                   walkingControllerParameters, desiredHandPoseProvider, torusPoseProvider,
+                                                                   desiredFootPoseProvider, null, null, dynamicGraphicObjectsListRegistry);
 
       double coefficientOfFriction = 1.0;
 
