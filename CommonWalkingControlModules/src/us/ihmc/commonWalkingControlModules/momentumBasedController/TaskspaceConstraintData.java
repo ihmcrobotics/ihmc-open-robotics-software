@@ -34,10 +34,11 @@ public class TaskspaceConstraintData
       this.spatialAcceleration.set(spatialAcceleration);
       this.nullspaceMultipliers.setReshape(nullspaceMultipliers);
       this.selectionMatrix.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
-      CommonOps.setIdentity(selectionMatrix);      
+      CommonOps.setIdentity(selectionMatrix);
    }
-   
-   public void set(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector desiredAngularAcceleration, DenseMatrix64F nullspaceMultipliers)
+
+   public void setAngularAcceleration(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector desiredAngularAcceleration,
+         DenseMatrix64F nullspaceMultipliers)
    {
       this.spatialAcceleration.setToZero(bodyFrame, baseFrame, desiredAngularAcceleration.getReferenceFrame());
       this.spatialAcceleration.setAngularPart(desiredAngularAcceleration.getVector());
@@ -48,6 +49,20 @@ public class TaskspaceConstraintData
       this.selectionMatrix.set(0, 0, 1.0);
       this.selectionMatrix.set(1, 1, 1.0);
       this.selectionMatrix.set(2, 2, 1.0);
+   }
+
+   public void setLinearAcceleration(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector desiredLinearAcceleration)
+   {
+      this.spatialAcceleration.setToZero(bodyFrame, baseFrame, desiredLinearAcceleration.getReferenceFrame());
+      this.spatialAcceleration.setLinearPart(desiredLinearAcceleration.getVector());
+      spatialAcceleration.changeFrameNoRelativeMotion(bodyFrame);
+
+      this.nullspaceMultipliers.reshape(0, 1);
+
+      this.selectionMatrix.reshape(3, SpatialMotionVector.SIZE);
+      this.selectionMatrix.set(0, 3, 1.0);
+      this.selectionMatrix.set(1, 4, 1.0);
+      this.selectionMatrix.set(2, 5, 1.0);
    }
 
    public SpatialAccelerationVector getSpatialAcceleration()

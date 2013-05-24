@@ -246,7 +246,7 @@ public class SimpleStanceController implements RobotController
 
       DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 1);
 
-      taskspaceConstraintData.set(pelvisFrame, pelvisJacobian.getBaseFrame(), output, nullspaceMultipliers);
+      taskspaceConstraintData.setAngularAcceleration(pelvisFrame, pelvisJacobian.getBaseFrame(), output, nullspaceMultipliers);
 
       momentumControlModule.setDesiredSpatialAcceleration(pelvisJacobian, taskspaceConstraintData, 1.0);
 
