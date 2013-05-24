@@ -330,21 +330,21 @@ public class FootstepPathCoordinator implements FootstepProvider
       {
          case SLOW :
          {
-            stepLength = 0.1;
+            stepLength = 0.2;
 
             break;
          }
 
          case MEDIUM :
          {
-            stepLength = 0.2;
+            stepLength = 0.35;
 
             break;
          }
 
          case FAST :
          {
-            stepLength = 0.3;
+            stepLength = 0.5;
 
             break;
          }
