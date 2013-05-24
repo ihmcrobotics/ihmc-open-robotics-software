@@ -15,6 +15,7 @@ public class BlindWalkingPacketConsumer implements ObjectConsumer<BlindWalkingPa
 
    public void consumeObject(BlindWalkingPacket blindWalkingPacket)
    {
+      System.out.println("Received aaa blind packet " + blindWalkingPacket);
       footstepPathCoordinator.setBlindWalking(blindWalkingPacket);
    }
 }
