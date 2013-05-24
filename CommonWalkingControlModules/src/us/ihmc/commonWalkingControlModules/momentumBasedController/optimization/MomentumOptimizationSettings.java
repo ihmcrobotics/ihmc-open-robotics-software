@@ -22,6 +22,7 @@ public class MomentumOptimizationSettings
 
    private final DenseMatrix64F C = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
    private double wRho;
+   private double wPhi;
    private double lambda;
    private double rhoMin;
 
@@ -45,6 +46,11 @@ public class MomentumOptimizationSettings
    public void setGroundReactionForceRegularization(double wRho)
    {
       this.wRho = wRho;
+   }
+
+   public void setPhiRegularization(double wPhi)
+   {
+      this.wPhi = wPhi;
    }
 
    public void setDampedLeastSquaresFactor(double lambda)
@@ -80,6 +86,11 @@ public class MomentumOptimizationSettings
    public double getGroundReactionForceRegularization()
    {
       return wRho;
+   }
+
+   public double getPhiRegularization()
+   {
+      return wPhi;
    }
 
    public DenseMatrix64F getDampedLeastSquaresFactorMatrix(int size)

@@ -19,8 +19,6 @@ public class CVXWithCylinderNativeInput
    private final double[] rhoMin;
    private final double[] phiMin;
    private final double[] phiMax;
-   private final double[] N;
-   private final double[] z;
    private double wRho;
 
    // conversion helpers
@@ -37,8 +35,7 @@ public class CVXWithCylinderNativeInput
    private final DenseMatrix64F rhoMinMatrix;
    private final DenseMatrix64F phiMinMatrix;
    private final DenseMatrix64F phiMaxMatrix;
-   private final DenseMatrix64F NMatrix;
-   private final DenseMatrix64F zMatrix;
+   private double wPhi;
 
    public CVXWithCylinderNativeInput()
    {
@@ -46,7 +43,6 @@ public class CVXWithCylinderNativeInput
       int phiSize = CVXWithCylinderNative.phiSize;
       int wrenchLength = CVXWithCylinderNative.wrenchLength;
       int nDoF = CVXWithCylinderNative.nDoF;
-      int nNull = CVXWithCylinderNative.nNull;
 
       AMatrix = new DenseMatrix64F(wrenchLength, nDoF);
       bMatrix = new DenseMatrix64F(wrenchLength, 1);
@@ -61,8 +57,6 @@ public class CVXWithCylinderNativeInput
       rhoMinMatrix = new DenseMatrix64F(rhoSize, 1);
       phiMinMatrix = new DenseMatrix64F(phiSize, 1);
       phiMaxMatrix = new DenseMatrix64F(phiSize, 1);
-      NMatrix = new DenseMatrix64F(nDoF, nNull);
-      zMatrix = new DenseMatrix64F(nNull, 1);
 
       A = new double[AMatrix.getNumElements()];
       b = new double[bMatrix.getNumElements()];
@@ -77,8 +71,6 @@ public class CVXWithCylinderNativeInput
       rhoMin = new double[rhoMinMatrix.getNumElements()];
       phiMin = new double[phiMinMatrix.getNumElements()];
       phiMax = new double[phiMaxMatrix.getNumElements()];
-      N = new double[NMatrix.getNumElements()];
-      z = new double[zMatrix.getNumElements()];
    }
 
    public double[] getA()
@@ -146,19 +138,14 @@ public class CVXWithCylinderNativeInput
       return phiMax;
    }
 
-   public double[] getN()
-   {
-      return N;
-   }
-
-   public double[] getZ()
-   {
-      return z;
-   }
-
    public double getwRho()
    {
       return wRho;
+   }
+
+   public double getwPhi()
+   {
+      return wPhi;
    }
 
    public void setCentroidalMomentumMatrix(DenseMatrix64F A)
@@ -242,21 +229,14 @@ public class CVXWithCylinderNativeInput
       MatrixTools.denseMatrixToArrayColumnMajor(this.phiMaxMatrix, this.phiMax);
    }
 
-   public void setNullspaceMatrix(DenseMatrix64F N)
-   {
-      CommonOps.insert(N, this.NMatrix, 0, 0);
-      MatrixTools.denseMatrixToArrayColumnMajor(this.NMatrix, this.N);
-   }
-
-   public void setNullspaceMultipliers(DenseMatrix64F z)
-   {
-      CommonOps.insert(z, this.zMatrix, 0, 0);
-      MatrixTools.denseMatrixToArrayColumnMajor(this.zMatrix, this.z);
-   }
-
    public void setGroundReactionForceRegularization(double wRho)
    {
       this.wRho = wRho;
+   }
+
+   public void setPhiRegularization(double wPhi)
+   {
+      this.wPhi = wPhi;
    }
 }
 

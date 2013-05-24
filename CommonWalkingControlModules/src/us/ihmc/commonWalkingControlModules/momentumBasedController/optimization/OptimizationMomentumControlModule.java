@@ -147,6 +147,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       momentumOptimizerNativeInput.setSecondaryConstraintWeight(secondaryMotionConstraintHandler.getWeightMatrix());
 
       momentumOptimizerNativeInput.setGroundReactionForceRegularization(momentumOptimizationSettings.getGroundReactionForceRegularization());
+      momentumOptimizerNativeInput.setPhiRegularization(momentumOptimizationSettings.getPhiRegularization());
 
       optimize(momentumOptimizerNativeInput);
 

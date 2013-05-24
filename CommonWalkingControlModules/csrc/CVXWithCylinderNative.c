@@ -18,7 +18,6 @@
 #define nCylinderBoundedVariables us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative_nCylinderBoundedVariables
 #define wrenchLength us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative_wrenchLength
 #define nDoF us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative_nDoF
-#define nNull us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative_nNull
 
 #define rhoSize (nSupportVectors * nPointsPerPlane * nPlanes+nCylinderVectors*nCylinders)
 #define phiSize (nCylinders * nCylinderBoundedVariables)
@@ -37,8 +36,6 @@
 #define rhoMinSize rhoSize
 #define phiMinSize phiSize
 #define phiMaxSize phiSize
-#define NSize (nDoF * nNull)
-#define zSize nNull
 
 
 
@@ -58,8 +55,6 @@ jobject LambdaByteBuffer;
 jobject QrhoByteBuffer;
 jobject QphiByteBuffer;
 jobject cByteBuffer;
-jobject NByteBuffer;
-jobject zByteBuffer;
 jobject rhoMinByteBuffer;
 jobject phiMinByteBuffer;
 jobject phiMaxByteBuffer;
@@ -84,8 +79,6 @@ JNIEXPORT void JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_n
     QrhoByteBuffer = (*env)->NewDirectByteBuffer(env, params.Qrho, sizeof(double) * QrhoSize);
     QphiByteBuffer = (*env)->NewDirectByteBuffer(env, params.Qphi, sizeof(double) * QphiSize);
     cByteBuffer = (*env)->NewDirectByteBuffer(env, params.c, sizeof(double) * cSize);
-    NByteBuffer = (*env)->NewDirectByteBuffer(env, params.N, sizeof(double) * NSize);
-    zByteBuffer = (*env)->NewDirectByteBuffer(env, params.z, sizeof(double) * zSize);
     rhoMinByteBuffer = (*env)->NewDirectByteBuffer(env, params.rhoMin, sizeof(double) * rhoMinSize);
     phiMinByteBuffer = (*env)->NewDirectByteBuffer(env, params.phiMin, sizeof(double) * phiMinSize);
     phiMaxByteBuffer = (*env)->NewDirectByteBuffer(env, params.phiMax, sizeof(double) * phiMaxSize);
@@ -154,18 +147,6 @@ JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModule
     return cByteBuffer;
 }
 
-JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative_getNBuffer
-  (JNIEnv * env, jclass jClass)
-{
-    return NByteBuffer;
-}
-
-JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative_getzBuffer
-  (JNIEnv * env, jclass jClass)
-{
-    return zByteBuffer;
-}
-
 JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative_getrhoMinBuffer
   (JNIEnv * env, jclass jClass)
 {
@@ -203,11 +184,12 @@ JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModule
 }
 
 JNIEXPORT jint JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative_solveNative
-  (JNIEnv * env, jclass jClass, jdouble wRho)
+  (JNIEnv * env, jclass jClass, jdouble wRho, jdouble wPhi)
 {
 	int numberOfIterations;
 
 	params.wRho[0] = wRho;
+	params.wPhi[0] = wPhi;
 	numberOfIterations = solve();
 
 	if(work.converged == 1)

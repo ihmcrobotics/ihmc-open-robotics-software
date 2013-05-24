@@ -23,8 +23,6 @@ extern "C" {
 #define us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative_wrenchLength 6L
 #undef us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative_nDoF
 #define us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative_nDoF 34L
-#undef us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative_nNull
-#define us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative_nNull 4L
 #undef us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative_rhoSize
 #define us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative_rhoSize 40L
 #undef us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative_phiSize
@@ -119,22 +117,6 @@ JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModule
 
 /*
  * Class:     us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative
- * Method:    getNBuffer
- * Signature: ()Ljava/nio/ByteBuffer;
- */
-JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative_getNBuffer
-  (JNIEnv *, jclass);
-
-/*
- * Class:     us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative
- * Method:    getzBuffer
- * Signature: ()Ljava/nio/ByteBuffer;
- */
-JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative_getzBuffer
-  (JNIEnv *, jclass);
-
-/*
- * Class:     us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative
  * Method:    getrhoMinBuffer
  * Signature: ()Ljava/nio/ByteBuffer;
  */
@@ -187,7 +169,7 @@ JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModule
  * Signature: (D)I
  */
 JNIEXPORT jint JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative_solveNative
-  (JNIEnv *, jclass, jdouble);
+  (JNIEnv *, jclass, jdouble, jdouble);
 
 /*
  * Class:     us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative
