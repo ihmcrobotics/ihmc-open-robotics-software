@@ -314,7 +314,7 @@ public class MomentumBasedController implements RobotController
       CommonOps.transpose(accelerationSubspace, rootJointSelectionMatrix);
       rootJointTaskSpaceConstraintData.set(rootJointAcceleration, rootJointNullspaceMultipliers, rootJointSelectionMatrix);
       momentumControlModule.setDesiredSpatialAcceleration(fullRobotModel.getRootJoint().getMotionSubspace(), rootJointTaskSpaceConstraintData);
-      momentumControlModule.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
+      setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
       momentumControlModule.compute(this.contactStates, this.cylindricalContactStates, upcomingSupportLeg.getEnumValue());
 
       SpatialForceVector desiredCentroidalMomentumRate = momentumControlModule.getDesiredCentroidalMomentumRate();
@@ -480,6 +480,11 @@ public class MomentumBasedController implements RobotController
    public void setDesiredJointAcceleration(OneDoFJoint joint, DenseMatrix64F jointAcceleration)
    {
       momentumControlModule.setDesiredJointAcceleration(joint, jointAcceleration);
+   }
+
+   public void setDesiredRateOfChangeOfMomentum(MomentumRateOfChangeData momentumRateOfChangeData)
+   {
+      momentumControlModule.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
    }
 
    public ReferenceFrame getPelvisZUpFrame()

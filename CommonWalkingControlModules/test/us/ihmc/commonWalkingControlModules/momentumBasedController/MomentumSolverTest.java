@@ -621,7 +621,7 @@ public class MomentumSolverTest
       DenseMatrix64F nullspaceMultiplier = new DenseMatrix64F(0, 1);
       
       TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
-      taskspaceConstraintData.set(jacobian.getEndEffector().getBodyFixedFrame(), elevator.getBodyFixedFrame(), endEffectorAngularAcceleration, nullspaceMultiplier);
+      taskspaceConstraintData.setAngularAcceleration(jacobian.getEndEffector().getBodyFixedFrame(), elevator.getBodyFixedFrame(), endEffectorAngularAcceleration, nullspaceMultiplier);
 
       solver.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
 
