@@ -129,36 +129,37 @@ public class CommandRecorder
          {
             objectToWrite = ObjectTransformationHelper.transform(recordTransform, (TransformableDataObject) object);
 
-            if (object instanceof HandPosePacket)
-            {
-               System.out.println("\n*****");
-               System.out.println("CommandRecorder:transform ");
-               System.out.println(recordTransform.toString());
-
-               if(((HandPosePacket) object).toHomePosition)
-               {
-                  System.out.println("CommandRecorder: hand position before = home");
-               }
-               else
-               {
-                  System.out.println("CommandRecorder: hand position before = " + ((HandPosePacket) object).position);
-                  FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), ((HandPosePacket) object).orientation);
-                  System.out.println("orienetaiton before: ");
-                  ArrayTools.printArray(frameOrientation.getYawPitchRoll(), System.out);  
-               }
-
-               if(((HandPosePacket) objectToWrite).toHomePosition)
-               {
-                  System.out.println("CommandRecorder: hand position after = home");
-               }
-               else
-               {
-                  System.out.println("CommandRecorder: hand position after = " + ((HandPosePacket) objectToWrite).position);
-                  FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), ((HandPosePacket) objectToWrite).orientation);
-                  System.out.println("orienetaiton after: ");
-                  ArrayTools.printArray(frameOrientation.getYawPitchRoll(), System.out);  
-               }
-            }
+            //This is just for debugging.
+//            if (object instanceof HandPosePacket)
+//            {
+//               System.out.println("\n*****");
+//               System.out.println("CommandRecorder:transform ");
+//               System.out.println(recordTransform.toString());
+//
+//               if(((HandPosePacket) object).toHomePosition)
+//               {
+//                  System.out.println("CommandRecorder: hand position before = home");
+//               }
+//               else
+//               {
+//                  System.out.println("CommandRecorder: hand position before = " + ((HandPosePacket) object).position);
+//                  FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), ((HandPosePacket) object).orientation);
+//                  System.out.println("orienetaiton before: ");
+//                  ArrayTools.printArray(frameOrientation.getYawPitchRoll(), System.out);
+//               }
+//
+//               if(((HandPosePacket) objectToWrite).toHomePosition)
+//               {
+//                  System.out.println("CommandRecorder: hand position after = home");
+//               }
+//               else
+//               {
+//                  System.out.println("CommandRecorder: hand position after = " + ((HandPosePacket) objectToWrite).position);
+//                  FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), ((HandPosePacket) objectToWrite).orientation);
+//                  System.out.println("orienetaiton after: ");
+//                  ArrayTools.printArray(frameOrientation.getYawPitchRoll(), System.out);
+//               }
+//            }
          }
          else
          {
