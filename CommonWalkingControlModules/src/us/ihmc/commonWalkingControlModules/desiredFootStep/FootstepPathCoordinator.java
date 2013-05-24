@@ -7,6 +7,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.BlindWalkingDirection;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.BlindWalkingPacket;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.BlindWalkingSpeed;
+import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
+import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
 import us.ihmc.utilities.io.streamingData.QueueBasedStreamingDataProducer;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -19,6 +21,12 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class FootstepPathCoordinator implements FootstepProvider
 {
+   private static final double FOOTSTEP_PATH_SWING_TIME = 0.6;
+   private static final double SLOW_BLIND_WALKING_SWING_TIME = 2.5;
+   
+   private static final double FOOTSTEP_PATH_TRANSFER_TIME = 0.2;
+   private static final double SLOW_BLIND_WALKING_TRANSFER_TIME = 1.5;
+   
    private boolean DEBUG = false;
    private final ConcurrentLinkedQueue<Footstep> footstepQueue = new ConcurrentLinkedQueue<Footstep>();
    private final YoVariableRegistry registry = new YoVariableRegistry("FootstepPathCoordinator");
@@ -29,27 +37,35 @@ public class FootstepPathCoordinator implements FootstepProvider
 
    private final BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator;
    private final DesiredFootstepCalculatorFootstepProviderWrapper desiredFootstepCalculatorFootstepProviderWrapper;
-
+   private final ConstantSwingTimeCalculator constantSwingTimeCalculator;
+   private final ConstantTransferTimeCalculator constantTransferTimeCalculator;
+   
    public FootstepPathCoordinator()
    {
-      this(null, null);
+      this(null, null, null, null);
    }
 
    public FootstepPathCoordinator(ObjectCommunicator objectCommunicator,
-                                  BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator)
+                                  BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator, 
+                                  ConstantSwingTimeCalculator constantSwingTimeCalculator,
+                                  ConstantTransferTimeCalculator constantTransferTimeCalculator)
    {
-      this(objectCommunicator, blindWalkingToDestinationDesiredFootstepCalculator, null);
+      this(objectCommunicator, blindWalkingToDestinationDesiredFootstepCalculator, constantSwingTimeCalculator, constantTransferTimeCalculator, null);
    }
 
    public FootstepPathCoordinator(ObjectCommunicator objectCommunicator,
                                   BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator,
+                                  ConstantSwingTimeCalculator constantSwingTimeCalculator,
+                                  ConstantTransferTimeCalculator constantTransferTimeCalculator,
                                   YoVariableRegistry parentRegistry)
    {
       setWalkMethod(WalkMethod.FOOTSTEP_PATH);
       setPaused(false);
 
       this.blindWalkingToDestinationDesiredFootstepCalculator = blindWalkingToDestinationDesiredFootstepCalculator;
-
+      this.constantSwingTimeCalculator = constantSwingTimeCalculator;
+      this.constantTransferTimeCalculator = constantTransferTimeCalculator;
+      
       footstepStatusDataProducer = new QueueBasedStreamingDataProducer<FootstepStatus>();
 
       if (objectCommunicator != null)
@@ -240,6 +256,9 @@ public class FootstepPathCoordinator implements FootstepProvider
    {
       setWalkMethod(WalkMethod.FOOTSTEP_PATH);
 
+      constantSwingTimeCalculator.setSwingTime(FOOTSTEP_PATH_SWING_TIME);
+      constantTransferTimeCalculator.setTransferTime(FOOTSTEP_PATH_TRANSFER_TIME);
+      
       if (DEBUG)
       {
          System.out.println("clearing queue\n" + footstepQueue);
@@ -326,38 +345,48 @@ public class FootstepPathCoordinator implements FootstepProvider
       }
 
       double stepLength;
+      double swingTime;
+      double transferTime;
+      
       switch (blindWalkingSpeed)
       {
          case SLOW :
          {
             stepLength = 0.2;
-
+            swingTime = SLOW_BLIND_WALKING_SWING_TIME;
+            transferTime = SLOW_BLIND_WALKING_TRANSFER_TIME;
             break;
          }
 
          case MEDIUM :
          {
             stepLength = 0.35;
-
+            swingTime = FOOTSTEP_PATH_SWING_TIME;
+            transferTime = FOOTSTEP_PATH_TRANSFER_TIME;
             break;
          }
 
          case FAST :
          {
             stepLength = 0.5;
-
+            swingTime = FOOTSTEP_PATH_SWING_TIME;
+            transferTime = FOOTSTEP_PATH_TRANSFER_TIME;
             break;
          }
 
          default :
          {
             stepLength = 0.0;
+            swingTime = SLOW_BLIND_WALKING_SWING_TIME;
+            transferTime = SLOW_BLIND_WALKING_TRANSFER_TIME;
 
             break;
          }
       }
 
       blindWalkingToDestinationDesiredFootstepCalculator.setDesiredStepForward(stepLength);
+      constantSwingTimeCalculator.setSwingTime(swingTime);
+      constantTransferTimeCalculator.setTransferTime(transferTime);
 
 //    blindWalkingToDestinationDesiredFootstepCalculator.setInPlaceWidth(stepWidth);
 
