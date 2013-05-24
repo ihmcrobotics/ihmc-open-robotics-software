@@ -141,7 +141,7 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
    // TODO: clean up
    private FrameVector2d computeDesiredOffsetFromSupportAnkle(ReferenceFrame supportAnkleZUpFrame, RobotSide swingLegSide, double angleToDestination, double distanceToDestination)
    {   		
-      if (distanceToDestination < 0.5) return new FrameVector2d(supportAnkleZUpFrame, 0.0, swingLegSide.negateIfRightSide(inPlaceWidth.getDoubleValue()));
+      if (distanceToDestination < 0.3) return new FrameVector2d(supportAnkleZUpFrame, 0.0, swingLegSide.negateIfRightSide(inPlaceWidth.getDoubleValue()));
       
       double absoluteAngleToDestination;
       if (walkBackwards.getBooleanValue())
@@ -165,7 +165,7 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
       
       if (walkBackwards.getBooleanValue())
       {
-         double backwardsDistanceReduction = 0.4;
+         double backwardsDistanceReduction = 0.75;
          desiredOffsetFromAnkle = new FrameVector2d(supportAnkleZUpFrame, -backwardsDistanceReduction * percentToStepInX * desiredStepForward.getDoubleValue(), swingLegSide.negateIfRightSide(inPlaceWidth.getDoubleValue()));
       }
       else
