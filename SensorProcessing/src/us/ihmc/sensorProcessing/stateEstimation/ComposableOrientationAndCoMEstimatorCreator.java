@@ -486,22 +486,25 @@ public class ComposableOrientationAndCoMEstimatorCreator
 
       public void initializeOrientationEstimateToMeasurement()
       {
-         // R^W_M
-         OrientationSensorConfiguration firstOrientationSensorConfiguration = orientationSensorConfigurations.get(0);
-         ControlFlowOutputPort<Matrix3d> firstOrientationMeasurementOutputPort = firstOrientationSensorConfiguration.getOutputPort();
-         Matrix3d measurementToWorld = firstOrientationMeasurementOutputPort.getData();
+         if (orientationSensorConfigurations.size() > 0)
+         {
+            // R^W_M
+            OrientationSensorConfiguration firstOrientationSensorConfiguration = orientationSensorConfigurations.get(0);
+            ControlFlowOutputPort<Matrix3d> firstOrientationMeasurementOutputPort = firstOrientationSensorConfiguration.getOutputPort();
+            Matrix3d measurementToWorld = firstOrientationMeasurementOutputPort.getData();
 
-         // R^M_E
-         ReferenceFrame measurementFrame = firstOrientationSensorConfiguration.getMeasurementFrame();
-         FrameOrientation estimationFrameOrientation = new FrameOrientation(estimationFrame);
-         estimationFrameOrientation.changeFrame(measurementFrame);
-         Matrix3d estimationToMeasurement = estimationFrameOrientation.getMatrix3d();
+            // R^M_E
+            ReferenceFrame measurementFrame = firstOrientationSensorConfiguration.getMeasurementFrame();
+            FrameOrientation estimationFrameOrientation = new FrameOrientation(estimationFrame);
+            estimationFrameOrientation.changeFrame(measurementFrame);
+            Matrix3d estimationToMeasurement = estimationFrameOrientation.getMatrix3d();
 
-         // R^W_E
-         Matrix3d estimationToWorld = new Matrix3d();
-         estimationToWorld.mul(measurementToWorld, estimationToMeasurement);
-         FrameOrientation initialOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), estimationToWorld);
-         setEstimatedOrientation(initialOrientation);
+            // R^W_E
+            Matrix3d estimationToWorld = new Matrix3d();
+            estimationToWorld.mul(measurementToWorld, estimationToMeasurement);
+            FrameOrientation initialOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), estimationToWorld);
+            setEstimatedOrientation(initialOrientation);
+         }
       }
 
       private void setUpdatedInverseDynamicsStructureOutputPort(FullInverseDynamicsStructure inverseDynamicsStructure)
