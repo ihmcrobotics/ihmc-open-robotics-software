@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine;
 
-import org.apache.commons.lang.mutable.MutableBoolean;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -22,9 +21,12 @@ public class DesiredFootPoseProvider implements ObjectConsumer<FootPosePacket>
 
    public DesiredFootPoseProvider()
    {
+      FramePose pose = new FramePose(ReferenceFrame.getWorldFrame());
       for (RobotSide robotSide : RobotSide.values)
       {
          hasNewPose.put(robotSide, false);
+         // Just initializing to whatever...
+         desiredFootPoses.put(robotSide, pose);
       }
    }
 
