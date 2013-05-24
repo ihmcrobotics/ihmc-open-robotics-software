@@ -249,7 +249,14 @@ public class DRCSimulationFactory
       {
          for(int i = 0; i < ROSSandiaJointMap.numberOfJointsPerHand; i++)
          {
-            simulatedRobot.getOneDoFJoint(ROSSandiaJointMap.handNames.get(robotSide)[i]).setDamping(DRCRobotDampingParameters.getSandiaHandDamping(robotSide, i));
+            try
+            {
+               simulatedRobot.getOneDoFJoint(ROSSandiaJointMap.handNames.get(robotSide)[i]).setDamping(DRCRobotDampingParameters.getSandiaHandDamping(robotSide, i));
+            }
+            catch (NullPointerException e)
+            {
+               System.err.println("NullPointerException for the joint: " + ROSSandiaJointMap.handNames.get(robotSide)[i]);
+            }
          }
       }
    }
