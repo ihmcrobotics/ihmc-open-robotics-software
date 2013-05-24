@@ -172,6 +172,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
 
       private final ControlFlowOutputPort<FullInverseDynamicsStructure> updatedInverseDynamicsStructureOutputPort;
       private final CenterOfMassBasedFullRobotModelUpdater centerOfMassBasedFullRobotModelUpdater;
+      private final ReferenceFrame estimationFrame;
 
       public ComposableOrientationAndCoMEstimator(String name, double controlDT, ReferenceFrame estimationFrame,
             AfterJointReferenceFrameNameMap estimatorFrameMap, RigidBodyToIndexMap estimatorRigidBodyToIndexMap, ControlFlowGraph controlFlowGraph,
@@ -179,6 +180,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
       {
          super(name, controlDT, parentRegistry);
 
+         this.estimationFrame = estimationFrame;
          this.controlFlowGraph = controlFlowGraph;
          this.inverseDynamicsStructureInputPort = createInputPort("inverseDynamicsStructureInputPort");
          controlFlowGraph.connectElements(inverseDynamicsStructureOutputPort, inverseDynamicsStructureInputPort);
@@ -481,7 +483,27 @@ public class ComposableOrientationAndCoMEstimatorCreator
          inverseDynamicsStructure.updateInternalState();
          setUpdatedInverseDynamicsStructureOutputPort(inverseDynamicsStructure);
       }
-      
+
+      public void initializeOrientationEstimateToMeasurement()
+      {
+         // R^W_M
+         OrientationSensorConfiguration firstOrientationSensorConfiguration = orientationSensorConfigurations.get(0);
+         ControlFlowOutputPort<Matrix3d> firstOrientationMeasurementOutputPort = firstOrientationSensorConfiguration.getOutputPort();
+         Matrix3d measurementToWorld = firstOrientationMeasurementOutputPort.getData();
+
+         // R^M_E
+         ReferenceFrame measurementFrame = firstOrientationSensorConfiguration.getMeasurementFrame();
+         FrameOrientation estimationFrameOrientation = new FrameOrientation(estimationFrame);
+         estimationFrameOrientation.changeFrame(measurementFrame);
+         Matrix3d estimationToMeasurement = estimationFrameOrientation.getMatrix3d();
+
+         // R^W_E
+         Matrix3d estimationToWorld = new Matrix3d();
+         estimationToWorld.mul(measurementToWorld, estimationToMeasurement);
+         FrameOrientation initialOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), estimationToWorld);
+         setEstimatedOrientation(initialOrientation);
+      }
+
       private void setUpdatedInverseDynamicsStructureOutputPort(FullInverseDynamicsStructure inverseDynamicsStructure)
       {
          updatedInverseDynamicsStructureOutputPort.setData(inverseDynamicsStructure);

@@ -1,15 +1,7 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
@@ -32,7 +24,12 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 public class ComposableOrientationEstimatorCreator
 {
@@ -95,12 +92,14 @@ public class ComposableOrientationEstimatorCreator
 
       private final ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort;
       private final ControlFlowInputPort<FrameVector> desiredAngularAccelerationInputPort;
+      private final ReferenceFrame estimationFrame;
 
       public ComposableOrientationEstimator(String name, double controlDT, ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph,
               YoVariableRegistry parentRegistry)
       {
          super(name, controlDT, parentRegistry);
 
+         this.estimationFrame = estimationFrame;
          this.controlFlowGraph = controlFlowGraph;
          
          orientationStatePort = new YoFrameQuaternionControlFlowOutputPort(this, name, ReferenceFrame.getWorldFrame(), parentRegistry);
@@ -241,6 +240,26 @@ public class ComposableOrientationEstimatorCreator
       public void setState(DenseMatrix64F x, DenseMatrix64F covariance)
       {
          kalmanFilter.setState(x, covariance);
+      }
+
+      public void initializeOrientationEstimateToMeasurement()
+      {
+         // R^W_M
+         OrientationSensorConfiguration firstOrientationSensorConfiguration = orientationSensorConfigurations.get(0);
+         ControlFlowOutputPort<Matrix3d> firstOrientationMeasurementOutputPort = firstOrientationSensorConfiguration.getOutputPort();
+         Matrix3d measurementToWorld = firstOrientationMeasurementOutputPort.getData();
+
+         // R^M_E
+         ReferenceFrame measurementFrame = firstOrientationSensorConfiguration.getMeasurementFrame();
+         FrameOrientation estimationFrameOrientation = new FrameOrientation(estimationFrame);
+         estimationFrameOrientation.changeFrame(measurementFrame);
+         Matrix3d estimationToMeasurement = estimationFrameOrientation.getMatrix3d();
+
+         // R^W_E
+         Matrix3d estimationToWorld = new Matrix3d();
+         estimationToWorld.mul(measurementToWorld, estimationToMeasurement);
+         FrameOrientation initialOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), estimationToWorld);
+         setEstimatedOrientation(initialOrientation);
       }
 
       public ControlFlowInputPort<FrameVector> getDesiredAngularAccelerationInputPort()
