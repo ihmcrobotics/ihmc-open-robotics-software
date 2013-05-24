@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepD
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
+import us.ihmc.commonWalkingControlModules.trajectories.SimpleTwoWaypointTrajectoryParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 import us.ihmc.robotSide.RobotSide;
@@ -42,7 +43,7 @@ public class ScriptedFootstepGenerator
 
    public FootstepDataList generateFootstepsFromLocationsAndOrientations(RobotSide[] robotSides, double[][][] footstepLocationsAndOrientations)
    {
-      FootstepDataList footstepDataList = new FootstepDataList();
+      FootstepDataList footstepDataList = new FootstepDataList(new SimpleTwoWaypointTrajectoryParameters());
 
       for (int i = 0; i < robotSides.length; i++)
       {

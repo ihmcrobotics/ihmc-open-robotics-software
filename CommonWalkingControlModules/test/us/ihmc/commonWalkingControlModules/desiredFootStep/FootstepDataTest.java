@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypointGenerationMethod;
 import org.junit.After;
 import org.junit.Before;
@@ -105,7 +106,7 @@ public class FootstepDataTest
 
       // create test footsteps
       ArrayList<Footstep> sentFootsteps = createRandomFootsteps(50);
-      FootstepDataList footstepsData = convertFootstepsToFootstepData(sentFootsteps);
+      FootstepDataList footstepsData = convertFootstepsToFootstepData(sentFootsteps, null);
  
       queueBasedStreamingDataProducer.queueDataToSend(footstepsData);
       ThreadTools.sleep(100);
@@ -184,7 +185,7 @@ public class FootstepDataTest
 
       // send test footstep path
       ArrayList<Footstep> sentFootsteps = createRandomFootsteps(50);
-      FootstepDataList footstepsData = convertFootstepsToFootstepData(sentFootsteps);
+      FootstepDataList footstepsData = convertFootstepsToFootstepData(sentFootsteps, null);
 
       pathQueueBasedStreamingDataProducer.queueDataToSend(footstepsData);
       ThreadTools.sleep(100);
@@ -204,7 +205,7 @@ public class FootstepDataTest
 
       // send another footstep path
       ArrayList<Footstep> sentFootsteps2 = createRandomFootsteps(50);
-      footstepsData = convertFootstepsToFootstepData(sentFootsteps2);
+      footstepsData = convertFootstepsToFootstepData(sentFootsteps2, null);
 
       pathQueueBasedStreamingDataProducer.queueDataToSend(footstepsData);
       sentFootsteps.addAll(sentFootsteps2);
@@ -374,9 +375,9 @@ public class FootstepDataTest
       }
    }
 
-   private static FootstepDataList convertFootstepsToFootstepData(ArrayList<Footstep> footsteps)
+   private static FootstepDataList convertFootstepsToFootstepData(ArrayList<Footstep> footsteps, TrajectoryParameters trajectoryParameters)
    {
-      FootstepDataList footstepsData = new FootstepDataList();
+      FootstepDataList footstepsData = new FootstepDataList(trajectoryParameters);
 
       for (Footstep footstep : footsteps)
       {
