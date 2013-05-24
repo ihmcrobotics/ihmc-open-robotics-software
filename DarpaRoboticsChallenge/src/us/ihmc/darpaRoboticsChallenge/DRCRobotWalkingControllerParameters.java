@@ -143,8 +143,8 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    }
 
    private double minimumHeightAboveGround = 0.66; //0.70;
-   private double nominalHeightAboveGround = 0.78;
-   private double maximumHeightAboveGround = 0.86;//0.84;
+   private double nominalHeightAboveGround = 0.74; //0.78;
+   private double maximumHeightAboveGround = 0.82; //0.86;//0.84;
 
    public double minimumHeightAboveAnkle()
    {
