@@ -1,4 +1,4 @@
-# Produced by CVXGEN, 2013-05-07 16:39:31 -0400.
+# Produced by CVXGEN, 2013-05-24 10:53:06 -0400.
 # CVXGEN is Copyright (C) 2006-2012 Jacob Mattingley, jem@cvxgen.com.
 # The code in this file is Copyright (C) 2006-2012 Jacob Mattingley.
 # CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
@@ -8,12 +8,11 @@
 # Description: A description of the CVXGEN problem.
 
 dimensions
-  nSupportVectors = 3 # support vectors are the cone approximation vectors.
-  nPointsPerContact = 4 # points per foot/flat hand
-  nPlanes = 2 # number of plane feet
+  nSupportVectors = 3 # number of basis vectors for approximation of friciton cones
+  nPointsPerContact = 4 # points per plane contact
+  nPlanes = 2 # number of plane contacts
   wrenchLength = 6 # universal constant for physical space
-  nDoF = 34 # size of the robot actuator torque space.
-  nNull = 4 # number of degrees removed by singularity which need to be specified seperately.
+  nDoF = 34 # size of the robot actuator joint acceleration space.
   nCylinders = 2 # number of cylindrical hands
   nCylinderVectors = 8
   nCylinderBoundedVariables = 5
@@ -35,11 +34,9 @@ parameters
   c (wrenchLength, 1) # WrenchEquationRightHandSide
   rhoMin (nSupportVectors * nPointsPerContact * nPlanes + nCylinders*nCylinderVectors ) positive
   wRho positive # GroundReactionForceRegularization
+  wPhi positive
   phiMin (nCylinders*nCylinderBoundedVariables) negative
   phiMax (nCylinders*nCylinderBoundedVariables) positive
-
-  N (nDoF, nNull) # NullspaceMatrix null space of joint torques due to not only limb singularity but also multi-ground contact overconstraint.
-  z(nNull, 1) # NullspaceMultipliers
 end
 
 variables
@@ -49,10 +46,9 @@ variables
 end
 
 minimize
-  quad(A * vd - b, C) + quad(Js * vd - ps, Ws) + wRho * quad(rho) + quad(vd, Lambda)
+  quad(A * vd - b, C) + quad(Js * vd - ps, Ws) + wRho * quad(rho) + wPhi * quad(phi) + quad(vd, Lambda)
 subject to
-  Qrho * rho +Qphi*phi == A * vd + c # simple force ballance, net acceleration due to GRFs is equal to total acceleration due to joint accelerations
-  N' * vd == z # constrains the joint accelleration nullspace
+  Qrho * rho + Qphi * phi == A * vd + c # simple force balance
   rho >= rhoMin
-  phiMin<=phi<=phiMax # phi is fully bounded
+  phiMin <= phi <= phiMax # phi is fully bounded
 end

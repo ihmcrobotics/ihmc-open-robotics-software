@@ -76,7 +76,7 @@ public class SimpleStanceController implements RobotController
    {
       this.sensorReader = new SDFPerfectSimulatedSensorReader(robot, fullRobotModel, referenceFrames);
       this.outputWriter = new SDFPerfectSimulatedOutputWriter(robot, fullRobotModel);
-      MomentumOptimizationSettings momentumOptimizationSettings = createOptimizationSettings(1.0, 5e-2, 1e-5, 0.0);
+      MomentumOptimizationSettings momentumOptimizationSettings = createOptimizationSettings(1.0, 5e-2, 1e-5, 0.0, 1e-5);
       rootJoint = fullRobotModel.getRootJoint();
       twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), fullRobotModel.getPelvis());
       this.momentumControlModule = new OptimizationMomentumControlModule(rootJoint, referenceFrames.getCenterOfMassFrame(), controlDT, jointsToOptimize, momentumOptimizationSettings, gravityZ, twistCalculator, null, registry
@@ -130,12 +130,13 @@ public class SimpleStanceController implements RobotController
       spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootJoint.getPredecessor(), twistCalculator, gravityZ, true);
    }
 
-   private static MomentumOptimizationSettings createOptimizationSettings(double momentumWeight, double lambda, double wRho, double rhoMin)
+   private static MomentumOptimizationSettings createOptimizationSettings(double momentumWeight, double lambda, double wRho, double rhoMin, double wPhi)
    {
       MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(new YoVariableRegistry("test1"));
       momentumOptimizationSettings.setMomentumWeight(momentumWeight, momentumWeight, momentumWeight, momentumWeight);
       momentumOptimizationSettings.setDampedLeastSquaresFactor(lambda);
       momentumOptimizationSettings.setGroundReactionForceRegularization(wRho);
+      momentumOptimizationSettings.setPhiRegularization(wPhi);
       momentumOptimizationSettings.setRhoMin(rhoMin);
 
       return momentumOptimizationSettings;

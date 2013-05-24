@@ -1,4 +1,4 @@
-/* Produced by CVXGEN, 2013-05-07 16:41:41 -0400.  */
+/* Produced by CVXGEN, 2013-05-24 10:56:03 -0400.  */
 /* CVXGEN is Copyright (C) 2006-2012 Jacob Mattingley, jem@cvxgen.com. */
 /* The code in this file is Copyright (C) 2006-2012 Jacob Mattingley. */
 /* CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial */
@@ -35,12 +35,11 @@ typedef struct Params_t {
   double ps[34];
   double Ws[34];
   double wRho[1];
+  double wPhi[1];
   double Lambda[34];
   double Qrho[240];
   double Qphi[60];
   double c[6];
-  double N[136];
-  double z[4];
   double rhoMin[40];
   double phiMin[10];
   double phiMax[10];
@@ -55,22 +54,22 @@ typedef struct Workspace_t {
   double h[60];
   double s_inv[60];
   double s_inv_z[60];
-  double b[16];
+  double b[12];
   double q[90];
-  double rhs[226];
-  double x[226];
+  double rhs[222];
+  double x[222];
   double *s;
   double *z;
   double *y;
-  double lhs_aff[226];
-  double lhs_cc[226];
-  double buffer[226];
-  double buffer2[226];
-  double KKT[1731];
-  double L[1546];
-  double d[226];
-  double v[226];
-  double d_inv[226];
+  double lhs_aff[222];
+  double lhs_cc[222];
+  double buffer[222];
+  double buffer2[222];
+  double KKT[1605];
+  double L[1410];
+  double d[222];
+  double v[222];
+  double d_inv[222];
   double gap;
   double optval;
   double ineq_resid_squared;
