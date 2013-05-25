@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.desiredChestOrientation.DesiredChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.head.DesiredHeadOrientationProvider;
@@ -23,8 +24,10 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OrientationTrajectoryData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantConfigurationProvider;
+import us.ihmc.commonWalkingControlModules.trajectories.CurrentOrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SE3ConfigurationProvider;
+import us.ihmc.commonWalkingControlModules.trajectories.SettableOrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.ThirdOrderPolynomialTrajectoryGenerator;
 import us.ihmc.controlFlow.ControlFlowInputPort;
@@ -64,6 +67,13 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    private final OrientationInterpolationTrajectoryGenerator pelvisOrientationTrajectoryGenerator;
    private double pelvisTrajectoryStartTime = 0.0;
 
+   private final DesiredChestOrientationProvider chestOrientationProvider;
+   private final ReferenceFrame chestPositionControlFrame;
+   private final SettableOrientationProvider desiredChestOrientation;
+   private final OrientationInterpolationTrajectoryGenerator chestOrientationTrajectoryGenerator;
+   private double chestTrajectoryStartTime = 0.0;
+   
+   
    private final BooleanYoVariable l_footDoHeelOff = new BooleanYoVariable("l_footDoHeelOff", registry);
    private final BooleanYoVariable r_footDoHeelOff = new BooleanYoVariable("r_footDoHeelOff", registry);
    private final SideDependentList<BooleanYoVariable> doHeelOff = new SideDependentList<BooleanYoVariable>(l_footDoHeelOff, r_footDoHeelOff);
@@ -76,10 +86,12 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
    private final ConstantDoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(1.0);
 
+
    public CarIngressEgressController(SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<? extends ContactablePlaneBody> hands,
          ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationPort, DesiredHeadOrientationProvider desiredHeadOrientationProvider,
          MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters, DesiredHandPoseProvider handPoseProvider,
-         TorusPoseProvider torusPoseProvider, DesiredFootPoseProvider footPoseProvider, DesiredPelvisPoseProvider pelvisPoseProvider, SideDependentList<HandControllerInterface> handControllers,
+         TorusPoseProvider torusPoseProvider, DesiredFootPoseProvider footPoseProvider, DesiredPelvisPoseProvider pelvisPoseProvider,
+         DesiredChestOrientationProvider chestOrientationProvider, SideDependentList<HandControllerInterface> handControllers,
          LidarControllerInterface lidarControllerInterface, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       super(feet, desiredPelvisOrientationPort, desiredHeadOrientationProvider, momentumBasedController, walkingControllerParameters, handPoseProvider,
@@ -88,6 +100,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       this.footPoseProvider = footPoseProvider;
       this.contactStates = momentumBasedController.getContactStates();
 
+      
+      // Setup the pelvis trajectory generator 
       this.pelvisPoseProvider = pelvisPoseProvider;
       pelvisPositionControlFrame = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint();
       this.pelvisPositionController = new EuclideanPositionController("pelvis", pelvisPositionControlFrame, registry);
@@ -104,6 +118,14 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
             currentPelvisConfigurationProvider, desiredPelvisConfigurationProvider, registry, false);
       pelvisOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("pelvis", worldFrame, trajectoryTimeProvider,
             currentPelvisConfigurationProvider, desiredPelvisConfigurationProvider, registry, false);
+      
+      // Setup the chest trajectory generator
+      this.chestOrientationProvider = chestOrientationProvider;
+      chestPositionControlFrame = fullRobotModel.getChest().getParentJoint().getFrameAfterJoint();
+      final CurrentOrientationProvider currentChestOrientationProvider = new CurrentOrientationProvider(worldFrame, chestPositionControlFrame); // TODO: not sure about that
+      desiredChestOrientation = new SettableOrientationProvider("chest", worldFrame, registry);
+      chestOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("chest", worldFrame, trajectoryTimeProvider, currentChestOrientationProvider,
+            desiredChestOrientation, registry, false);
       
       setupFootControlModules();
 
@@ -158,19 +180,17 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    {
       super.initialize();
 
-      FrameOrientation currentPelvisOrientaton = new FrameOrientation(referenceFrames.getPelvisFrame());
-      currentPelvisOrientaton.changeFrame(desiredPelvisOrientation.getReferenceFrame());
-      desiredPelvisOrientation.set(currentPelvisOrientaton);
-
       FramePose currentPelvisPose = new FramePose(pelvisPositionControlFrame);
       desiredPelvisConfigurationProvider.set(currentPelvisPose);
 
       pelvisPositionTrajectoryGenerator.initialize();
       pelvisOrientationTrajectoryGenerator.initialize();
       
-      // keep desired pelvis orientation as it is
-      desiredPelvisAngularVelocity.set(0.0, 0.0, 0.0);
-      desiredPelvisAngularAcceleration.set(0.0, 0.0, 0.0);
+      FrameOrientation currentChestOrientation = new FrameOrientation(chestPositionControlFrame);
+      currentChestOrientation.changeFrame(worldFrame);
+      desiredChestOrientation.setOrientation(currentChestOrientation);
+      
+      chestOrientationTrajectoryGenerator.initialize();
    }
 
    protected void doPelvisControl()
@@ -222,6 +242,29 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       desiredPelvisOrientationTrajectoryInputPort.setData(pelvisOrientationTrajectoryData);
    }
 
+   protected void doChestControl()
+   {
+      if (chestOrientationProvider.checkForNewPose())
+      {
+         desiredChestOrientation.setOrientation(chestOrientationProvider.getDesiredChestOrientation());
+         chestTrajectoryStartTime = yoTime.getDoubleValue();
+         
+         chestOrientationTrajectoryGenerator.initialize();
+      }
+      
+      chestOrientationTrajectoryGenerator.compute(yoTime.getDoubleValue() - chestTrajectoryStartTime);
+      FrameOrientation desiredOrientation = new FrameOrientation(chestPositionControlFrame);
+      FrameVector desiredAngularVelocity = new FrameVector(chestPositionControlFrame);
+      FrameVector desiredAngularAcceleration = new FrameVector(chestPositionControlFrame);
+      chestOrientationTrajectoryGenerator.get(desiredOrientation);
+      chestOrientationTrajectoryGenerator.packAngularVelocity(desiredAngularVelocity);
+      chestOrientationTrajectoryGenerator.packAngularAcceleration(desiredAngularAcceleration);
+      
+      chestOrientationControlModule.setDesireds(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      
+      super.doChestControl();
+   }
+   
    protected void doFootControl()
    {
       for (RobotSide robotSide : RobotSide.values)
