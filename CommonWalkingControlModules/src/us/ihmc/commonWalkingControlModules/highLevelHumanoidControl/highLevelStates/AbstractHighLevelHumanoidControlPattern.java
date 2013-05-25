@@ -54,7 +54,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
    protected final TwistCalculator twistCalculator;
 
-   private final ChestOrientationControlModule chestOrientationControlModule;
+   protected final ChestOrientationControlModule chestOrientationControlModule;
 
    private final HeadOrientationControlModule headOrientationControlModule;
    private final DesiredHeadOrientationProvider desiredHeadOrientationProvider;
