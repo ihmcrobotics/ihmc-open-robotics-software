@@ -13,7 +13,7 @@ public class DRCConfigParameters
    public static final boolean START_READY_GET_INTO_CAR = false;
    public static final boolean USE_SUPER_DUPER_HIGH_RESOLUTION_FOR_COMMS = false;
    
-   public static final boolean USE_GAZEBO_PHYSICS = false;    // TODO: This one is needed just for FlatGroundWalkingTrack in Gazebo...
+   public static final boolean USE_GAZEBO_PHYSICS = true;    // TODO: This one is needed just for FlatGroundWalkingTrack in Gazebo...
 
    public static final boolean USE_PERFECT_SENSORS = false;
 
@@ -49,7 +49,7 @@ public class DRCConfigParameters
 
 
 
-   public static final String GAZEBO_HOST = CLOUD_MONSTER_JR_IP;
+   public static final String GAZEBO_HOST = LOCALHOST;
    public static final String SCS_MACHINE_IP_ADDRESS = LOCALHOST; //CLOUD_MONSTER_IP;
 
    public static final String OPERATOR_INTERFACE_IP_ADDRESS = LOCALHOST;
