@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -13,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.head.DesiredHeadOrientationProvider;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvisOrientation.DesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
@@ -27,7 +27,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolation
 import us.ihmc.commonWalkingControlModules.trajectories.SE3ConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.ThirdOrderPolynomialTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.YoVariableDoubleProvider;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -45,7 +44,6 @@ import com.yobotics.simulationconstructionset.VariableChangedListener;
 import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.util.EuclideanPositionController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
@@ -56,17 +54,21 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
    private final DesiredFootPoseProvider footPoseProvider;
 
+   private final DesiredPelvisPoseProvider pelvisPoseProvider;
    private final EuclideanPositionController pelvisPositionController;
-   private final YoFramePoint desiredPelvisPosition = new YoFramePoint("desiredPelvisPosition", worldFrame, registry);
    private final ReferenceFrame pelvisPositionControlFrame;
    private final GeometricJacobian pelvisJacobian;
    private final TaskspaceConstraintData pelvisTaskspaceConstraintData = new TaskspaceConstraintData();
+   private final ChangeableConfigurationProvider desiredPelvisConfigurationProvider;
+   private final StraightLinePositionTrajectoryGenerator pelvisPositionTrajectoryGenerator;
+   private final OrientationInterpolationTrajectoryGenerator pelvisOrientationTrajectoryGenerator;
+   private double pelvisTrajectoryStartTime = 0.0;
 
    private final BooleanYoVariable l_footDoHeelOff = new BooleanYoVariable("l_footDoHeelOff", registry);
    private final BooleanYoVariable r_footDoHeelOff = new BooleanYoVariable("r_footDoHeelOff", registry);
    private final SideDependentList<BooleanYoVariable> doHeelOff = new SideDependentList<BooleanYoVariable>(l_footDoHeelOff, r_footDoHeelOff);
 
-   private final LinkedHashMap<ContactablePlaneBody, ChangeableConfigurationProvider> desiredConfigurationProviders = new LinkedHashMap<ContactablePlaneBody, ChangeableConfigurationProvider>();
+   private final LinkedHashMap<ContactablePlaneBody, ChangeableConfigurationProvider> desiredFootConfigurationProviders = new LinkedHashMap<ContactablePlaneBody, ChangeableConfigurationProvider>();
    private final LinkedHashMap<ContactablePlaneBody, StraightLinePositionTrajectoryGenerator> swingPositionTrajectoryGenerators = new LinkedHashMap<ContactablePlaneBody, StraightLinePositionTrajectoryGenerator>();
    private final LinkedHashMap<ContactablePlaneBody, OrientationInterpolationTrajectoryGenerator> swingOrientationTrajectoryGenerators = new LinkedHashMap<ContactablePlaneBody, OrientationInterpolationTrajectoryGenerator>();
 
@@ -77,7 +79,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    public CarIngressEgressController(SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<? extends ContactablePlaneBody> hands,
          ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationPort, DesiredHeadOrientationProvider desiredHeadOrientationProvider,
          MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters, DesiredHandPoseProvider handPoseProvider,
-         TorusPoseProvider torusPoseProvider, DesiredFootPoseProvider footPoseProvider, SideDependentList<HandControllerInterface> handControllers,
+         TorusPoseProvider torusPoseProvider, DesiredFootPoseProvider footPoseProvider, DesiredPelvisPoseProvider pelvisPoseProvider, SideDependentList<HandControllerInterface> handControllers,
          LidarControllerInterface lidarControllerInterface, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       super(feet, desiredPelvisOrientationPort, desiredHeadOrientationProvider, momentumBasedController, walkingControllerParameters, handPoseProvider,
@@ -86,17 +88,26 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       this.footPoseProvider = footPoseProvider;
       this.contactStates = momentumBasedController.getContactStates();
 
+      this.pelvisPoseProvider = pelvisPoseProvider;
       pelvisPositionControlFrame = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint();
       this.pelvisPositionController = new EuclideanPositionController("pelvis", pelvisPositionControlFrame, registry);
-      double kPelvis = 20.0;
-      double dPelvis = GainCalculator.computeDerivativeGain(kPelvis, 1.0);
+      double kPelvis = 75.0;
+      double dPelvis = GainCalculator.computeDerivativeGain(kPelvis, 2.0);
       pelvisPositionController.setProportionalGains(kPelvis, kPelvis, kPelvis);
       pelvisPositionController.setDerivativeGains(dPelvis, dPelvis, dPelvis);
       pelvisJacobian = new GeometricJacobian(fullRobotModel.getElevator(), fullRobotModel.getPelvis(), fullRobotModel.getPelvis().getBodyFixedFrame());
 
+      final ConstantConfigurationProvider currentPelvisConfigurationProvider = new ConstantConfigurationProvider(new FramePose(pelvisPositionControlFrame));
+      desiredPelvisConfigurationProvider = new ChangeableConfigurationProvider(new FramePose(pelvisPositionControlFrame));
+      
+      pelvisPositionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator("pelvis", worldFrame, trajectoryTimeProvider.getValue(),
+            currentPelvisConfigurationProvider, desiredPelvisConfigurationProvider, registry, false);
+      pelvisOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("pelvis", worldFrame, trajectoryTimeProvider,
+            currentPelvisConfigurationProvider, desiredPelvisConfigurationProvider, registry, false);
+      
       setupFootControlModules();
 
-      for (final RobotSide robotSide : RobotSide.values)
+      for (RobotSide robotSide : RobotSide.values)
       {
          doHeelOff.get(robotSide).addVariableChangedListener(this);
       }
@@ -114,7 +125,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
          final ConstantConfigurationProvider currentConfigurationProvider = new ConstantConfigurationProvider(new FramePose(foot.getBodyFrame()));
          final ChangeableConfigurationProvider desiredConfigurationProvider = new ChangeableConfigurationProvider(
-               footPoseProvider.getDesiredFootPose(robotSide));
+               new FramePose(foot.getBodyFrame()));
 
          StraightLinePositionTrajectoryGenerator positionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator(bodyName, worldFrame,
                trajectoryTimeProvider.getValue(), currentConfigurationProvider, desiredConfigurationProvider, registry, false);
@@ -122,7 +133,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(bodyName, worldFrame,
                trajectoryTimeProvider, currentConfigurationProvider, desiredConfigurationProvider, registry, false);
 
-         desiredConfigurationProviders.put(foot, desiredConfigurationProvider);
+         desiredFootConfigurationProviders.put(foot, desiredConfigurationProvider);
          swingPositionTrajectoryGenerators.put(foot, positionTrajectoryGenerator);
          swingOrientationTrajectoryGenerators.put(foot, orientationTrajectoryGenerator);
 
@@ -151,20 +162,40 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       currentPelvisOrientaton.changeFrame(desiredPelvisOrientation.getReferenceFrame());
       desiredPelvisOrientation.set(currentPelvisOrientaton);
 
-      FramePoint currentPelvisPosition = new FramePoint(pelvisPositionControlFrame);
-      currentPelvisPosition.changeFrame(desiredPelvisPosition.getReferenceFrame());
-      desiredPelvisPosition.set(currentPelvisPosition);
+      FramePose currentPelvisPose = new FramePose(pelvisPositionControlFrame);
+      desiredPelvisConfigurationProvider.set(currentPelvisPose);
 
+      pelvisPositionTrajectoryGenerator.initialize();
+      pelvisOrientationTrajectoryGenerator.initialize();
+      
       // keep desired pelvis orientation as it is
       desiredPelvisAngularVelocity.set(0.0, 0.0, 0.0);
       desiredPelvisAngularAcceleration.set(0.0, 0.0, 0.0);
    }
 
-   protected void doCoMControl()
+   protected void doPelvisControl()
    {
-      FrameVector desiredPelvisAcceleration = new FrameVector(pelvisPositionControlFrame);
-      FramePoint desiredPosition = desiredPelvisPosition.getFramePointCopy();
+      if (pelvisPoseProvider.checkForNewPose())
+      {
+         desiredPelvisConfigurationProvider.set(pelvisPoseProvider.getDesiredPelvisPose());
+         pelvisTrajectoryStartTime = yoTime.getDoubleValue();
+
+         pelvisPositionTrajectoryGenerator.initialize();
+         pelvisOrientationTrajectoryGenerator.initialize();
+      }
+      
+      pelvisPositionTrajectoryGenerator.compute(yoTime.getDoubleValue() - pelvisTrajectoryStartTime);
+      
+      FramePoint desiredPosition = new FramePoint(pelvisPositionControlFrame);
       FrameVector desiredVelocity = new FrameVector(pelvisPositionControlFrame);
+      FrameVector desiredPelvisAcceleration = new FrameVector(pelvisPositionControlFrame);
+      pelvisPositionTrajectoryGenerator.get(desiredPosition);
+      pelvisPositionTrajectoryGenerator.packVelocity(desiredVelocity);
+      pelvisPositionTrajectoryGenerator.packAcceleration(desiredPelvisAcceleration);
+      desiredPosition.changeFrame(pelvisPositionControlFrame);
+      desiredVelocity.changeFrame(pelvisPositionControlFrame);
+      desiredPelvisAcceleration.changeFrame(pelvisPositionControlFrame);
+      
       FrameVector currentVelocity = new FrameVector(pelvisPositionControlFrame);
       Twist pelvisTwist = new Twist();
       fullRobotModel.getRootJoint().packJointTwist(pelvisTwist);
@@ -177,6 +208,18 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       pelvisTaskspaceConstraintData.setLinearAcceleration(fullRobotModel.getPelvis().getBodyFixedFrame(), fullRobotModel.getElevatorFrame(),
             desiredPelvisAcceleration);
       momentumBasedController.setDesiredSpatialAcceleration(pelvisJacobian, pelvisTaskspaceConstraintData);
+
+      pelvisOrientationTrajectoryGenerator.compute(yoTime.getDoubleValue() - pelvisTrajectoryStartTime);
+      FrameOrientation desiredOrientation = new FrameOrientation(pelvisPositionControlFrame);
+      FrameVector desiredAngularVelocity = new FrameVector(pelvisPositionControlFrame);
+      FrameVector desiredAngularAcceleration = new FrameVector(pelvisPositionControlFrame);
+      pelvisOrientationTrajectoryGenerator.get(desiredOrientation);
+      pelvisOrientationTrajectoryGenerator.packAngularVelocity(desiredAngularVelocity);
+      pelvisOrientationTrajectoryGenerator.packAngularAcceleration(desiredAngularAcceleration);
+      
+      OrientationTrajectoryData pelvisOrientationTrajectoryData = new OrientationTrajectoryData();
+      pelvisOrientationTrajectoryData.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      desiredPelvisOrientationTrajectoryInputPort.setData(pelvisOrientationTrajectoryData);
    }
 
    protected void doFootControl()
@@ -188,8 +231,10 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          if (footPoseProvider.checkForNewPose(robotSide))
          {
             FramePose newFootPose = footPoseProvider.getDesiredFootPose(robotSide);
-            desiredConfigurationProviders.get(foot).set(newFootPose);
+            desiredFootConfigurationProviders.get(foot).set(newFootPose);
             footEndEffectorControlModules.get(foot).resetCurrentState();
+            
+            System.out.println(footPoseProvider.getDesiredFootPose(robotSide));
          }
 
          EndEffectorControlModule endEffectorControlModule = footEndEffectorControlModules.get(foot);
@@ -244,7 +289,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    {
       // Initialize desired foot pose to the actual, so no surprising behavior
       ReferenceFrame footFrame = footEndEffectorControlModules.get(contactableBody).getEndEffectorFrame();
-      desiredConfigurationProviders.get(contactableBody).set(new FramePose(footFrame));
+      desiredFootConfigurationProviders.get(contactableBody).set(new FramePose(footFrame));
 
       FrameVector normalContactVector = new FrameVector(contactableBody.getPlaneFrame(), 0.0, 0.0, 1.0);
       setContactState(contactableBody, new ArrayList<FramePoint2d>(), ConstraintType.UNCONSTRAINED, normalContactVector);
