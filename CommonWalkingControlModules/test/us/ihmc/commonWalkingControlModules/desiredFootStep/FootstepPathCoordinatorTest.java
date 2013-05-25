@@ -4,13 +4,18 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
+import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
+import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
@@ -49,7 +54,13 @@ public class FootstepPathCoordinatorTest
    public void testPoll() throws Exception
    {
       // create a random list of footsteps
-      FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator();
+      YoVariableRegistry registry = new YoVariableRegistry("Test");
+      ObjectCommunicator objectCommunicator = null;
+      BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator = null;
+      ConstantSwingTimeCalculator constantSwingTimeCalculator = new ConstantSwingTimeCalculator(0.6, registry);
+      ConstantTransferTimeCalculator constantTransferTimeCalculator = new ConstantTransferTimeCalculator(0.3, registry);
+      
+      FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator(objectCommunicator, blindWalkingToDestinationDesiredFootstepCalculator, constantSwingTimeCalculator, constantTransferTimeCalculator, registry);
       ArrayList<Footstep> footsteps = createRandomFootsteps(10);
       footstepPathCoordinator.updatePath(footsteps);
 
@@ -69,7 +80,13 @@ public class FootstepPathCoordinatorTest
    public void testIsEmpty() throws Exception
    {
       // verify list is initially empty
-      FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator();
+      YoVariableRegistry registry = new YoVariableRegistry("Test");
+      ObjectCommunicator objectCommunicator = null;
+      BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator = null;
+      ConstantSwingTimeCalculator constantSwingTimeCalculator = new ConstantSwingTimeCalculator(0.6, registry);
+      ConstantTransferTimeCalculator constantTransferTimeCalculator = new ConstantTransferTimeCalculator(0.3, registry);
+      FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator(objectCommunicator, blindWalkingToDestinationDesiredFootstepCalculator, constantSwingTimeCalculator, constantTransferTimeCalculator, registry);
+      
       assertTrue(footstepPathCoordinator.isEmpty());
 
       // create a random list of footsteps
@@ -93,7 +110,13 @@ public class FootstepPathCoordinatorTest
    public void testUpdatePath() throws Exception
    {
       // create a random list of footsteps
-      FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator();
+      YoVariableRegistry registry = new YoVariableRegistry("Test");
+      ObjectCommunicator objectCommunicator = null;
+      BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator = null;
+      ConstantSwingTimeCalculator constantSwingTimeCalculator = new ConstantSwingTimeCalculator(0.6, registry);
+      ConstantTransferTimeCalculator constantTransferTimeCalculator = new ConstantTransferTimeCalculator(0.3, registry);
+      FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator(objectCommunicator, blindWalkingToDestinationDesiredFootstepCalculator, constantSwingTimeCalculator, constantTransferTimeCalculator, registry);
+     
       ArrayList<Footstep> footsteps = createRandomFootsteps(10);
       footstepPathCoordinator.updatePath(footsteps);
 
@@ -126,7 +149,13 @@ public class FootstepPathCoordinatorTest
    public void testSetPaused() throws Exception
    {
       // create a random list of footsteps
-      FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator();
+      YoVariableRegistry registry = new YoVariableRegistry("Test");
+      ObjectCommunicator objectCommunicator = null;
+      BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator = null;
+      ConstantSwingTimeCalculator constantSwingTimeCalculator = new ConstantSwingTimeCalculator(0.6, registry);
+      ConstantTransferTimeCalculator constantTransferTimeCalculator = new ConstantTransferTimeCalculator(0.3, registry);
+      FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator(objectCommunicator, blindWalkingToDestinationDesiredFootstepCalculator, constantSwingTimeCalculator, constantTransferTimeCalculator, registry);
+     
       ArrayList<Footstep> footsteps = createRandomFootsteps(10);
       footstepPathCoordinator.updatePath(footsteps);
 

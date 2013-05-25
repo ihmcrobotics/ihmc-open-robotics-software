@@ -39,19 +39,6 @@ public class FootstepPathCoordinator implements FootstepProvider
    private final DesiredFootstepCalculatorFootstepProviderWrapper desiredFootstepCalculatorFootstepProviderWrapper;
    private final ConstantSwingTimeCalculator constantSwingTimeCalculator;
    private final ConstantTransferTimeCalculator constantTransferTimeCalculator;
-   
-   public FootstepPathCoordinator()
-   {
-      this(null, null, null, null);
-   }
-
-   public FootstepPathCoordinator(ObjectCommunicator objectCommunicator,
-                                  BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator, 
-                                  ConstantSwingTimeCalculator constantSwingTimeCalculator,
-                                  ConstantTransferTimeCalculator constantTransferTimeCalculator)
-   {
-      this(objectCommunicator, blindWalkingToDestinationDesiredFootstepCalculator, constantSwingTimeCalculator, constantTransferTimeCalculator, null);
-   }
 
    public FootstepPathCoordinator(ObjectCommunicator objectCommunicator,
                                   BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator,
