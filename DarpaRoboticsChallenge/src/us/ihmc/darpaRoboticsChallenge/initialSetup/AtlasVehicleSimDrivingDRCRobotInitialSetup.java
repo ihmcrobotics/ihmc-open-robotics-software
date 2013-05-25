@@ -4,15 +4,16 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 
-public class SquaredUpDRCRobotInitialSetupForAtlasAndVehicleSim extends SquaredUpDRCRobotInitialSetup
+public class AtlasVehicleSimDrivingDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot>
 {
 
    private final double groundZ;
    private final Transform3D rootToWorld = new Transform3D();
    private final Vector3d offset = new Vector3d();
 
-   public SquaredUpDRCRobotInitialSetupForAtlasAndVehicleSim(double groundZ)
+   public AtlasVehicleSimDrivingDRCRobotInitialSetup(double groundZ)
    {
       this.groundZ = groundZ;
    }
@@ -47,17 +48,10 @@ public class SquaredUpDRCRobotInitialSetupForAtlasAndVehicleSim extends SquaredU
       robot.getOneDoFJoint("l_leg_uay").setQ(thighPitch - .3);  //0.087 + thighPitch);
       robot.getOneDoFJoint("r_leg_uay").setQ(thighPitch - .3); //0.087 + thighPitch);
 
-      robot.update();
-      robot.getRootJointToWorldTransform(rootToWorld);
-      rootToWorld.get(offset);
-
-
       offset.setX(0.7);
-      offset.setY(-0.1);
-      offset.setZ(groundZ + 0.01);
-      offset.add(robot.getPositionInWorld());
+      offset.setY(-0.07);
+      offset.setZ(groundZ + 1.04);
       robot.setPositionInWorld(offset);
       robot.setOrientation(Math.PI / 2.0, forwardLean, 0.0);
    }
-
 }
