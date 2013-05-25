@@ -64,7 +64,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
    private final OneDoFJoint jointForExtendedNeckPitchRange;
    private final List<OneDoFJoint> torqueControlJoints = new ArrayList<OneDoFJoint>();
-   private final OneDoFJoint[] positionControlJoints;
+   protected final OneDoFJoint[] positionControlJoints;
 
    protected final ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort;
 
@@ -79,8 +79,8 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
    protected final MomentumBasedController momentumBasedController;
    protected final WalkingControllerParameters walkingControllerParameters;
 
-   protected final DoubleYoVariable kUpperBody = new DoubleYoVariable("kUpperBody", registry);
-   protected final DoubleYoVariable zetaUpperBody = new DoubleYoVariable("zetaUpperBody", registry);
+   protected final DoubleYoVariable kJointPositionControl = new DoubleYoVariable("kUpperBody", registry);
+   protected final DoubleYoVariable zetaJointPositionControl = new DoubleYoVariable("zetaUpperBody", registry);
 
    protected final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
 
@@ -111,8 +111,8 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
       this.bipedFeet = feet;
 
-      kUpperBody.set(100.0);
-      zetaUpperBody.set(1.0);
+      kJointPositionControl.set(100.0);
+      zetaJointPositionControl.set(1.0);
       coefficientOfFriction.set(1.0); // 0.6);// 
 
       // Setup jacobians for legs and arms
@@ -328,8 +328,8 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
       if (jointForExtendedNeckPitchRange != null)
       {
-         double kUpperBody = this.kUpperBody.getDoubleValue();
-         double dUpperBody = GainCalculator.computeDerivativeGain(kUpperBody, zetaUpperBody.getDoubleValue());
+         double kUpperBody = this.kJointPositionControl.getDoubleValue();
+         double dUpperBody = GainCalculator.computeDerivativeGain(kUpperBody, zetaJointPositionControl.getDoubleValue());
          double angle = 0.0;
 
          if (desiredHeadOrientationProvider != null)
@@ -380,8 +380,8 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
    protected void doJointPositionControl()
    {
-      double kUpperBody = this.kUpperBody.getDoubleValue();
-      double dUpperBody = GainCalculator.computeDerivativeGain(kUpperBody, zetaUpperBody.getDoubleValue());
+      double kUpperBody = this.kJointPositionControl.getDoubleValue();
+      double dUpperBody = GainCalculator.computeDerivativeGain(kUpperBody, zetaJointPositionControl.getDoubleValue());
       momentumBasedController.doPDControl(positionControlJoints, kUpperBody, dUpperBody);
    }
 
@@ -399,8 +399,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
    @Override
    public void doTransitionOutOfAction()
    {
-      // TODO Auto-generated method stub
-
    }
 
    public YoVariableRegistry getYoVariableRegistry()
