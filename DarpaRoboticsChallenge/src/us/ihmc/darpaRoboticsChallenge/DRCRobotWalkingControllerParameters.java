@@ -121,20 +121,28 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
 //      return false; //TODO: JEP. Changed to false for now so we can try out the new ICP trajectory stuff. Need to do toe off a little more smoothly.
    }
 
-   public String[] getHeadOrientationControlJointNames()
+   public String[] getDefaultHeadOrientationControlJointNames()
    {
       // Get rid of back_ubx to prevent hip roll jumps.
 //      return new String[] {"back_lbz", "back_ubx", "neck_ay"}; // Pelvis will jump around with these setting.
       return new String[] {"back_lbz", "neck_ay"}; 
 //      return new String[] {"neck_ay"};
    }
-
-   public String[] getChestOrientationControlJointNames()
+   
+   public String[] getAllowableHeadOrientationControlJointNames()
    {
-//    return new String[] {"back_mby"};
-      return new String[]
-      {
-      };
+      return new String[] {"back_lbz", "back_ubx", "neck_ay"}; 
+   }
+
+   public String[] getDefaultChestOrientationControlJointNames()
+   {
+      //    return new String[] {"back_mby"};
+      return new String[]{};
+   }
+
+   public String[] getAllowableChestOrientationControlJointNames()
+   {
+      return new String[] {"back_mby"};
    }
 
    public boolean checkOrbitalEnergyCondition()

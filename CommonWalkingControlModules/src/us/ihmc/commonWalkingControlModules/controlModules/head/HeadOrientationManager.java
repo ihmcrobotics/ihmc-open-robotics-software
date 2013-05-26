@@ -47,13 +47,13 @@ public class HeadOrientationManager
    {
       parentRegistry.addChild(registry);
       
-      String[] headOrientationControlJointNames = walkingControllerParameters.getHeadOrientationControlJointNames();
+      String[] defaultHeadOrientationControlJointNames = walkingControllerParameters.getDefaultHeadOrientationControlJointNames();
       FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       CommonWalkingReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
       
       InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
-      InverseDynamicsJoint[] headOrientationControlJoints = ScrewTools.findJointsWithNames(allJoints, headOrientationControlJointNames);
+      InverseDynamicsJoint[] headOrientationControlJoints = ScrewTools.findJointsWithNames(allJoints, defaultHeadOrientationControlJointNames);
 
       if (headOrientationControlJoints.length <= 0)
          return null;
