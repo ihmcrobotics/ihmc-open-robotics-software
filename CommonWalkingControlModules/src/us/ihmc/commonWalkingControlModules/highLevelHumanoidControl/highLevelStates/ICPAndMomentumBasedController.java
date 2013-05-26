@@ -44,15 +44,15 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
 
-public class ICPAndMomentumBasedController 
+public class ICPAndMomentumBasedController
 {
    private static final boolean USE_CONSTANT_OMEGA0 = true;
-   
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   
+
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final MomentumBasedController momentumBasedController;
-   
+
    protected final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
    protected final BipedSupportPolygons bipedSupportPolygons;
    protected final YoFramePoint2d desiredICP;
@@ -63,15 +63,12 @@ public class ICPAndMomentumBasedController
    private final DoubleYoVariable omega0;
    private final Omega0CalculatorInterface omega0Calculator;
 
-   public ICPAndMomentumBasedController(MomentumBasedController momentumBasedController, RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
-           CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime, double gravityZ,
-           TwistCalculator twistCalculator, SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
-           double controlDT, ProcessedOutputsInterface processedOutputs, MomentumControlModule momentumControlModule, ArrayList<Updatable> updatables,
-           MomentumRateOfChangeControlModule momentumRateOfChangeControlModule, RootJointAccelerationControlModule rootJointAccelerationControlModule,
-           StateEstimationDataFromControllerSink stateEstimationFromControllerDataSink, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public ICPAndMomentumBasedController(MomentumBasedController momentumBasedController, FullRobotModel fullRobotModel,
+           SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry,
+           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       parentRegistry.addChild(registry);
-      
+
       this.momentumBasedController = momentumBasedController;
 
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
@@ -98,11 +95,11 @@ public class ICPAndMomentumBasedController
 
       supportLeg = EnumYoVariable.create("supportLeg", "", RobotSide.class, registry, true);
 
-      //TODO: Have local updatables, instead of adding them to the momentum based controller.
+      // TODO: Have local updatables, instead of adding them to the momentum based controller.
       momentumBasedController.addUpdatable(new Omega0Updater());
       momentumBasedController.addUpdatable(new BipedSupportPolygonsUpdater());
       momentumBasedController.addUpdatable(new CapturePointUpdater());
-      
+
       LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> planeContactStates = momentumBasedController.getContactStates();
       momentumBasedController.addUpdatable(new FootPolygonVisualizer(planeContactStates.values(), dynamicGraphicObjectsListRegistry, registry));
 
@@ -145,7 +142,7 @@ public class ICPAndMomentumBasedController
    private FramePoint computeCenterOfMass()
    {
       ReferenceFrame centerOfMassFrame = momentumBasedController.getCenterOfMassFrame();
-      
+
       return new FramePoint(centerOfMassFrame);
    }
 
@@ -188,21 +185,21 @@ public class ICPAndMomentumBasedController
          ReferenceFrame centerOfMassFrame = momentumBasedController.getCenterOfMassFrame();
          SpatialForceVector admissibleGroundReactionWrench = new SpatialForceVector(centerOfMassFrame);
 
-//         FrameVector force = admissibleDesiredGroundReactionForce.getFrameVectorCopy();
+//       FrameVector force = admissibleDesiredGroundReactionForce.getFrameVectorCopy();
          FrameVector force = momentumBasedController.getAdmissibleDesiredGroundReactionForceCopy();
 
          force.changeFrame(admissibleGroundReactionWrench.getExpressedInFrame());
          admissibleGroundReactionWrench.setLinearPart(force.getVector());
 
-//         FrameVector torque = admissibleDesiredGroundReactionTorque.getFrameVectorCopy();
+//       FrameVector torque = admissibleDesiredGroundReactionTorque.getFrameVectorCopy();
          FrameVector torque = momentumBasedController.getAdmissibleDesiredGroundReactionTorqueCopy();
-               
+
          torque.changeFrame(admissibleGroundReactionWrench.getExpressedInFrame());
          admissibleGroundReactionWrench.setAngularPart(torque.getVector());
 
          SpatialForceVector gravitationalWrench = momentumBasedController.getGravitationalWrench();
          if (admissibleGroundReactionWrench.getLinearPartCopy().getZ() == 0.0)
-            admissibleGroundReactionWrench.set(gravitationalWrench );    // FIXME: hack to resolve circularity
+            admissibleGroundReactionWrench.set(gravitationalWrench);    // FIXME: hack to resolve circularity
 
          setOmega0(omega0Calculator.computeOmega0(cops, admissibleGroundReactionWrench));
       }
