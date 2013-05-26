@@ -92,7 +92,7 @@ public class MomentumBasedController implements RobotController
 
    protected final ProcessedOutputsInterface processedOutputs;
    protected final MomentumRateOfChangeControlModule momentumRateOfChangeControlModule;
-   protected final RootJointAccelerationControlModule rootJointAccelerationControlModule;
+   protected final RootJointAngularAccelerationControlModule rootJointAccelerationControlModule;
    protected final InverseDynamicsCalculator inverseDynamicsCalculator;
 
    private final DesiredCoMAndAngularAccelerationGrabber desiredCoMAndAngularAccelerationGrabber;
@@ -110,7 +110,7 @@ public class MomentumBasedController implements RobotController
                                   double gravityZ, TwistCalculator twistCalculator, Collection<? extends ContactablePlaneBody> contactablePlaneBodies,
                                   double controlDT, ProcessedOutputsInterface processedOutputs, MomentumControlModule momentumControlModule,
                                   ArrayList<Updatable> updatables, MomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
-                                  RootJointAccelerationControlModule rootJointAccelerationControlModule,
+                                  RootJointAngularAccelerationControlModule rootJointAccelerationControlModule,
                                   StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
@@ -125,7 +125,7 @@ public class MomentumBasedController implements RobotController
                                   Collection<? extends ContactableCylinderBody> contactableCylinderBodies, double controlDT,
                                   ProcessedOutputsInterface processedOutputs, MomentumControlModule momentumControlModule, ArrayList<Updatable> updatables,
                                   MomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
-                                  RootJointAccelerationControlModule rootJointAccelerationControlModule,
+                                  RootJointAngularAccelerationControlModule rootJointAccelerationControlModule,
                                   StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {

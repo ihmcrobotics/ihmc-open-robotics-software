@@ -11,7 +11,7 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
-public class RootJointAngularAccelerationControlModule extends AbstractControlFlowElement implements RootJointAccelerationControlModule
+public class RootJointAngularAccelerationControlModule extends AbstractControlFlowElement
 {
    private final YoVariableRegistry registry;
 
