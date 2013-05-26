@@ -126,6 +126,7 @@ public class OldMomentumControlModule implements MomentumControlModule
 
    public void reset()
    {
+      rootJointAccelerationData.setEmpty();
       solver.reset();
       externalWrenches.clear();
       externalWrenchesToCompensateFor.clear();
