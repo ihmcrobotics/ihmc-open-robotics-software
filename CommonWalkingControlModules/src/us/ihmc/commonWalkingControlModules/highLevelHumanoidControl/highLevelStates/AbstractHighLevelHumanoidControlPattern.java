@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.head.DesiredHeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationControlModule;
@@ -55,7 +56,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
    protected final TwistCalculator twistCalculator;
 
-   protected final ChestOrientationControlModule chestOrientationControlModule;
+   protected final ChestOrientationManager chestOrientationManager;
 
    private final HeadOrientationManager headOrientationManager;
    private final DesiredHeadOrientationProvider desiredHeadOrientationProvider;
@@ -131,8 +132,9 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       headOrientationManager = new HeadOrientationManager(momentumBasedController, headOrientationControlModule);
       
       jointForExtendedNeckPitchRange = setupJointForExtendedNeckPitchRange();
-      chestOrientationControlModule = setupChestOrientationControlModule();
-
+      ChestOrientationControlModule chestOrientationControlModule = setupChestOrientationControlModule();
+      chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestOrientationControlModule);
+      
       // Setup joint constraints
       positionControlJoints = setupJointConstraints();
    }
@@ -348,12 +350,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
    protected void doChestControl()
    {
-      if (chestOrientationControlModule == null)
-         return;
-
-      chestOrientationControlModule.compute();
-      momentumBasedController.setDesiredSpatialAcceleration(chestOrientationControlModule.getJacobian(),
-              chestOrientationControlModule.getTaskspaceConstraintData());
+      chestOrientationManager.compute();
    }
 
    protected void doFootControl()
