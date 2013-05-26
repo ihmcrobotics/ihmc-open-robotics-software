@@ -1,9 +1,13 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine;
 
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectConsumer;
+
+import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Quat4d;
 
 /**
  * @author twan
@@ -12,20 +16,16 @@ import us.ihmc.utilities.net.ObjectConsumer;
 public class TorusPoseProvider implements ObjectConsumer<TorusPosePacket>
 {
    private final Object synchronizationObject = new Object();
-   private final FrameVector normal = new FrameVector(ReferenceFrame.getWorldFrame());
-   private final FramePoint origin = new FramePoint(ReferenceFrame.getWorldFrame());
-   private double radius;
+   private FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame());
+   private double fingerHoleRadius;
    private boolean hasNewPose;
-   private double desiredRotationAngle;
 
    public void consumeObject(TorusPosePacket object)
    {
       synchronized (synchronizationObject)
       {
-         normal.set(object.getNormal());
-         origin.set(object.getPosition());
-         radius = object.getRadius();
-         desiredRotationAngle = object.getDesiredRotationAngle();
+         framePose = new FramePose(ReferenceFrame.getWorldFrame(), object.getPosition(), object.getOrientation());
+         fingerHoleRadius = object.getFingerHoleRadius();
          hasNewPose = true;
       }
    }
@@ -38,41 +38,41 @@ public class TorusPoseProvider implements ObjectConsumer<TorusPosePacket>
       }
    }
 
-   public double getRadius()
+   public double getFingerHoleRadius()
    {
       synchronized (synchronizationObject)
       {
          hasNewPose = false;
 
-         return radius;
+         return fingerHoleRadius;
       }
    }
 
    public FrameVector getNormal()
    {
+      // TODO: Twan, please review this "getting" of the normal
+      AxisAngle4d axisAngle4d = new AxisAngle4d();
+      Quat4d quat4d = framePose.getOrientationCopy().getQuaternion();
+      axisAngle4d.set(quat4d);
+
+      FrameVector normal = new FrameVector(framePose.getReferenceFrame(), axisAngle4d.getX(), axisAngle4d.getY(), axisAngle4d.getZ());
+
+      return normal;
+   }
+
+   public FramePoint getPosition()
+   {
+      return framePose.getPostionCopy();
+   }
+
+   public FramePose getFramePose()
+   {
+      // TODO: this is NOT a defensive copy. Should we make one?
       synchronized (synchronizationObject)
       {
          hasNewPose = false;
 
-         return normal;
-      }
-   }
-
-   public FramePoint getOrigin()
-   {
-      synchronized (synchronizationObject)
-      {
-         hasNewPose = false;
-
-         return origin;
-      }
-   }
-
-   public double getDesiredRotationAngle()
-   {
-      synchronized (synchronizationObject)
-      {
-         return desiredRotationAngle;
+         return framePose;
       }
    }
 }
