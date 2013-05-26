@@ -353,36 +353,10 @@ public class OldMomentumControlModule implements MomentumControlModule
          return accelerationMultipliers;
       }
 
-      public void setAngularAcceleration(FrameVector rootJointAngularAcceleration)
-      {
-         rootJointAngularAcceleration.checkReferenceFrameMatch(expressedInFrame);
-
-         accelerationSubspace.reshape(SpatialMotionVector.SIZE, 3);
-         accelerationSubspace.set(0, 0, 1.0);
-         accelerationSubspace.set(1, 1, 1.0);
-         accelerationSubspace.set(2, 2, 1.0);
-
-         accelerationMultipliers.reshape(3, 1);
-         MatrixTools.setDenseMatrixFromTuple3d(accelerationMultipliers, rootJointAngularAcceleration.getVector(), 0, 0);
-      }
-
       public void setEmpty()
       {
          accelerationSubspace.reshape(SpatialForceVector.SIZE, 0);
          accelerationMultipliers.reshape(0, 1);
-      }
-
-      public void setSpatialAcceleration(SpatialAccelerationVector spatialAcceleration)
-      {
-         spatialAcceleration.getBodyFrame().checkReferenceFrameMatch(bodyFrame);
-         spatialAcceleration.getBaseFrame().checkReferenceFrameMatch(baseFrame);
-         spatialAcceleration.getExpressedInFrame().checkReferenceFrameMatch(expressedInFrame);
-
-         accelerationSubspace.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
-         CommonOps.setIdentity(accelerationSubspace);
-
-         accelerationMultipliers.reshape(SpatialAccelerationVector.SIZE, 1);
-         spatialAcceleration.packMatrix(accelerationMultipliers, 0);
       }
 
       public void setUsingSelectionMatrix(DenseMatrix64F selectionMatrix, SpatialAccelerationVector spatialAcceleration)
