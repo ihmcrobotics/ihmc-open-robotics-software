@@ -1458,6 +1458,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       doHeadControl();
 
+      doLidarJointControl();
+      
       doArmControl();
 
       setICPBasedMomentumRateOfChangeControlModuleInputs();
