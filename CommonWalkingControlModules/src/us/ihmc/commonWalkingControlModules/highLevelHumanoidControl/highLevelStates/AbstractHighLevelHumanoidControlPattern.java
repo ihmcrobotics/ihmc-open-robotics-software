@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationContro
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.head.DesiredHeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
@@ -56,7 +57,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
    protected final ChestOrientationControlModule chestOrientationControlModule;
 
-   private final HeadOrientationControlModule headOrientationControlModule;
+   private final HeadOrientationManager headOrientationManager;
    private final DesiredHeadOrientationProvider desiredHeadOrientationProvider;
    private final ManipulationControlModule manipulationControlModule;
 
@@ -126,7 +127,9 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
               torusPoseProvider, dynamicGraphicObjectsListRegistry, handControllers, momentumBasedController, registry);
 
       // Setup head and chest control modules
-      headOrientationControlModule = setupHeadOrientationControlModule(dynamicGraphicObjectsListRegistry);
+      HeadOrientationControlModule headOrientationControlModule = setupHeadOrientationControlModule(dynamicGraphicObjectsListRegistry);
+      headOrientationManager = new HeadOrientationManager(momentumBasedController, headOrientationControlModule);
+      
       jointForExtendedNeckPitchRange = setupJointForExtendedNeckPitchRange();
       chestOrientationControlModule = setupChestOrientationControlModule();
 
@@ -307,6 +310,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       doFootControl();
       doArmControl();
       doHeadControl();
+      doLidarJointControl();
       doChestControl();
       doCoMControl();
       doPelvisControl();
@@ -317,14 +321,15 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       momentumBasedController.doSecondaryControl();
    }
 
+   protected void doLidarJointControl()
+   {
+      if (lidarControllerInterface != null)
+         momentumBasedController.setOneDoFJointAcceleration(lidarControllerInterface.getLidarJoint(), 0.0);
+   }
+
    protected void doHeadControl()
    {
-      if (headOrientationControlModule != null)
-      {
-         headOrientationControlModule.compute();
-         momentumBasedController.setDesiredSpatialAcceleration(headOrientationControlModule.getJacobian(),
-                 headOrientationControlModule.getTaskspaceConstraintData());
-      }
+      headOrientationManager.compute();
 
       if (jointForExtendedNeckPitchRange != null)
       {
@@ -338,8 +343,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
          momentumBasedController.doPDControl(jointForExtendedNeckPitchRange, kUpperBody, dUpperBody, angle, 0.0);
       }
 
-      if (lidarControllerInterface != null)
-         momentumBasedController.setOneDoFJointAcceleration(lidarControllerInterface.getLidarJoint(), 0.0);
+     
    }
 
    protected void doChestControl()
