@@ -1,21 +1,22 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects;
 
-import org.junit.Test;
-import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationPacket;
-import us.ihmc.commonWalkingControlModules.controlModules.head.PelvisOrientationPacket;
-import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
-import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Random;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
-import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+
+import us.ihmc.commonWalkingControlModules.controlModules.head.PelvisOrientationPacket;
+import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 /**
  * Created with IntelliJ IDEA.
@@ -38,7 +39,7 @@ public class PelvisOrientationPacketTransformerTest
          Quat4d quat = new Quat4d();
          quat.set(axisAngle);
 
-         PelvisOrientationPacket starting = new PelvisOrientationPacket(quat, "string1", "string2");
+         PelvisOrientationPacket starting = new PelvisOrientationPacket(quat);
 
          transform3D = RandomTools.generateRandomTransform(random);
 
@@ -51,7 +52,7 @@ public class PelvisOrientationPacketTransformerTest
       {
          Point3d point3d = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
 
-         PelvisOrientationPacket starting = new PelvisOrientationPacket(point3d, "string1", "string2");
+         PelvisOrientationPacket starting = new PelvisOrientationPacket(point3d);
          transform3D = RandomTools.generateRandomTransform(random);
          PelvisOrientationPacket ending = PelvisOrientationPacketTransformer.transformPelvisOrientationPacket(starting, transform3D);
          performEqualsTestForPoint(starting, transform3D, ending);
@@ -69,11 +70,6 @@ public class PelvisOrientationPacketTransformerTest
       assertTrue(starting.getPoint() == null);
       assertTrue(ending.getPoint() == null);
 
-//    public String frameName;
-      assertTrue(starting.getFrameName().equals(ending.getFrameName()));
-
-//    public String baseName;
-      assertTrue(starting.getBaseName().equals(ending.getBaseName()));
    }
 
    private static void performEqualsTestForPoint(PelvisOrientationPacket starting, Transform3D transform3D, PelvisOrientationPacket ending)
@@ -87,12 +83,6 @@ public class PelvisOrientationPacketTransformerTest
 //    public Point3d point;
       assertTrue(starting.getQuaternion() == null);
       assertTrue(ending.getQuaternion() == null);
-
-//    public String frameName;
-      assertTrue(starting.getFrameName().equals(ending.getFrameName()));
-
-//    public String baseName;
-      assertTrue(starting.getBaseName().equals(ending.getBaseName()));
    }
 
    private static double getDistanceBetweenPoints(Point3d startingPoint, Transform3D transform3D, Point3d endPoint)
