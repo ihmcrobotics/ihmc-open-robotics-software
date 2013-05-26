@@ -35,6 +35,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.Instantaneo
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointTrajectoryData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OrientationTrajectoryData;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.HeelSwitch;
@@ -229,9 +230,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
            WalkingControllerParameters walkingControllerParameters, ICPBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
            ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationPort, LidarControllerInterface lidarControllerInterface,
            InstantaneousCapturePointPlanner instantaneousCapturePointPlanner, SideDependentList<HandControllerInterface> handControllers,
-           ICPAndMomentumBasedController icpAndMomentumBasedController, WalkingStatusReporter walkingStatusReporter)
+           ICPAndMomentumBasedController icpAndMomentumBasedController, MomentumBasedController momentumBasedController, WalkingStatusReporter walkingStatusReporter)
    {
-      super(icpAndMomentumBasedController.getBipedFeet(), desiredPelvisOrientationPort, desiredHeadOrientationProvider, icpAndMomentumBasedController.getMomentumBasedController(),
+      super(icpAndMomentumBasedController.getBipedFeet(), desiredPelvisOrientationPort, desiredHeadOrientationProvider, momentumBasedController,
             walkingControllerParameters, handPoseProvider, torusPoseProvider, handControllers, lidarControllerInterface, dynamicGraphicObjectsListRegistry,
             controllerState);
 

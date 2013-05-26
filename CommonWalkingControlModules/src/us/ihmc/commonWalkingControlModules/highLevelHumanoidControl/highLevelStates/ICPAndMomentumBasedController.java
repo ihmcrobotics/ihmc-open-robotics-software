@@ -63,7 +63,7 @@ public class ICPAndMomentumBasedController //extends MomentumBasedController
    private final DoubleYoVariable omega0;
    private final Omega0CalculatorInterface omega0Calculator;
 
-   public ICPAndMomentumBasedController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
+   public ICPAndMomentumBasedController(MomentumBasedController momentumBasedController, RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
            CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime, double gravityZ,
            TwistCalculator twistCalculator, SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
            double controlDT, ProcessedOutputsInterface processedOutputs, MomentumControlModule momentumControlModule, ArrayList<Updatable> updatables,
@@ -72,9 +72,7 @@ public class ICPAndMomentumBasedController //extends MomentumBasedController
    {
       parentRegistry.addChild(registry);
       
-      this.momentumBasedController = new MomentumBasedController(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, bipedFeet.values(),
-            controlDT, processedOutputs, momentumControlModule, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
-            stateEstimationFromControllerDataSink, dynamicGraphicObjectsListRegistry);
+      this.momentumBasedController = momentumBasedController;
 
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
 
@@ -264,11 +262,6 @@ public class ICPAndMomentumBasedController //extends MomentumBasedController
    public SideDependentList<? extends ContactablePlaneBody> getBipedFeet()
    {
       return bipedFeet;
-   }
-
-   public MomentumBasedController getMomentumBasedController()
-   {
-      return momentumBasedController;
    }
 
 }
