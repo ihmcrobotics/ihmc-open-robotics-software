@@ -22,8 +22,9 @@ public class RootJointAngularAccelerationControlModule
 
    private final YoFrameVector desiredPelvisAngularAcceleration;
    private InverseDynamicsJoint rootJoint;
+   private final DenseMatrix64F rootJointNullspaceMultipliers = new DenseMatrix64F(0, 1);
 
-   private final RootJointAccelerationData rootJointAccelerationData;
+   private final TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
    private MomentumBasedController momentumBasedController;
 
    public RootJointAngularAccelerationControlModule(MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
@@ -34,8 +35,7 @@ public class RootJointAngularAccelerationControlModule
               momentumBasedController.getTwistCalculator(), registry);
       this.desiredPelvisAngularAcceleration = new YoFrameVector("desired" + rootJoint.getName() + "AngularAcceleration", rootJoint.getFrameAfterJoint(),
               registry);
-      rootJointAccelerationData = new RootJointAccelerationData(rootJoint.getSuccessor().getBodyFixedFrame(), rootJoint.getPredecessor().getBodyFixedFrame(),
-              rootJoint.getFrameAfterJoint());
+
       this.momentumBasedController = momentumBasedController;
       parentRegistry.addChild(registry);
    }
@@ -43,9 +43,11 @@ public class RootJointAngularAccelerationControlModule
    public void doControl(OrientationTrajectoryData orientationTrajectoryData)
    {
       FrameVector rootJointAngularAcceleration = computeDesiredRootJointAngularAcceleration(orientationTrajectoryData);
+      taskspaceConstraintData.setAngularAcceleration(rootJoint.getSuccessor().getBodyFixedFrame(), rootJoint.getPredecessor().getBodyFixedFrame(), rootJointAngularAcceleration, rootJointNullspaceMultipliers);
+      momentumBasedController.setDesiredSpatialAcceleration(rootJoint.getMotionSubspace(), taskspaceConstraintData);
+
+      rootJointAngularAcceleration.changeFrame(this.desiredPelvisAngularAcceleration.getReferenceFrame());
       this.desiredPelvisAngularAcceleration.set(rootJointAngularAcceleration);
-      rootJointAccelerationData.setAngularAcceleration(rootJointAngularAcceleration);
-      setRootJointAcceleration();
    }
 
    public void waitUntilComputationIsDone()
@@ -58,7 +60,7 @@ public class RootJointAngularAccelerationControlModule
       FrameVector ret = new FrameVector(rootJoint.getFrameAfterJoint());
       rootJointOrientationControlModule.compute(ret, orientationTrajectoryData.getOrientation(), orientationTrajectoryData.getAngularVelocity(),
               orientationTrajectoryData.getAngularAcceleration());
-      ret.changeFrame(rootJoint.getFrameAfterJoint());
+//      ret.changeFrame(rootJoint.getFrameAfterJoint());
 
       return ret;
    }
@@ -71,25 +73,5 @@ public class RootJointAngularAccelerationControlModule
    public void setDerivativeGains(double derivativeGainX, double derivativeGainY, double derivativeGainZ)
    {
       rootJointOrientationControlModule.setDerivativeGains(derivativeGainX, derivativeGainY, derivativeGainZ);
-   }
-
-   private void setRootJointAcceleration()
-   {
-      TaskspaceConstraintData rootJointTaskSpaceConstraintData = new TaskspaceConstraintData();
-      SpatialAccelerationVector rootJointAcceleration = new SpatialAccelerationVector();
-      DenseMatrix64F rootJointAccelerationMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
-      DenseMatrix64F rootJointNullspaceMultipliers = new DenseMatrix64F(0, 1);
-      DenseMatrix64F rootJointSelectionMatrix = new DenseMatrix64F(1, 1);
-
-      CommonOps.mult(rootJointAccelerationData.getAccelerationSubspace(), rootJointAccelerationData.getAccelerationMultipliers(),
-            rootJointAccelerationMatrix);
-      rootJointAcceleration.set(rootJointAccelerationData.getBodyFrame(), rootJointAccelerationData.getBaseFrame(),
-            rootJointAccelerationData.getExpressedInFrame(), rootJointAccelerationMatrix, 0);
-      rootJointAcceleration.changeFrameNoRelativeMotion(rootJointAccelerationData.getBodyFrame());
-      DenseMatrix64F accelerationSubspace = rootJointAccelerationData.getAccelerationSubspace();
-      rootJointSelectionMatrix.reshape(accelerationSubspace.getNumCols(), accelerationSubspace.getNumRows());
-      CommonOps.transpose(accelerationSubspace, rootJointSelectionMatrix);
-      rootJointTaskSpaceConstraintData.set(rootJointAcceleration, rootJointNullspaceMultipliers, rootJointSelectionMatrix);
-      momentumBasedController.setDesiredSpatialAcceleration(rootJoint.getMotionSubspace(), rootJointTaskSpaceConstraintData);
    }
 }
