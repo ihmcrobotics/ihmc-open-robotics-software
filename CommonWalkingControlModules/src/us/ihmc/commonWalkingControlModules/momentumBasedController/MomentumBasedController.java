@@ -102,12 +102,6 @@ public class MomentumBasedController implements RobotController
    protected final SpatialForceVector gravitationalWrench;
    protected final EnumYoVariable<RobotSide> upcomingSupportLeg = EnumYoVariable.create("upcomingSupportLeg", "", RobotSide.class, registry, true);    // FIXME: not general enough; this should not be here
 
-   private final TaskspaceConstraintData rootJointTaskSpaceConstraintData = new TaskspaceConstraintData();
-   private final SpatialAccelerationVector rootJointAcceleration;
-   private final DenseMatrix64F rootJointAccelerationMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
-   private final DenseMatrix64F rootJointNullspaceMultipliers = new DenseMatrix64F(0, 1);
-   private final DenseMatrix64F rootJointSelectionMatrix = new DenseMatrix64F(1, 1);
-
    private final PlaneContactWrenchProcessor planeContactWrenchProcessor;
 
    public MomentumBasedController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
@@ -259,8 +253,6 @@ public class MomentumBasedController implements RobotController
       this.rootJointAccelerationControlModule = rootJointAccelerationControlModule;
 
       this.planeContactWrenchProcessor = new PlaneContactWrenchProcessor(this.contactablePlaneBodies, dynamicGraphicObjectsListRegistry, registry);
-
-      this.rootJointAcceleration = new SpatialAccelerationVector();
    }
 
    protected static double computeDesiredAcceleration(double k, double d, double qDesired, double qdDesired, OneDoFJoint joint)
@@ -295,25 +287,12 @@ public class MomentumBasedController implements RobotController
    // TODO: Temporary method for a big refactor allowing switching between high level behaviors
    public void doSecondaryControl()
    {
-      rootJointAccelerationControlModule.startComputation();
-      rootJointAccelerationControlModule.waitUntilComputationIsDone();
-      RootJointAccelerationData rootJointAccelerationData = rootJointAccelerationControlModule.getRootJointAccelerationOutputPort().getData();
+      setRootJointAcceleration();
+
 
       momentumRateOfChangeControlModule.startComputation();
       momentumRateOfChangeControlModule.waitUntilComputationIsDone();
       MomentumRateOfChangeData momentumRateOfChangeData = momentumRateOfChangeControlModule.getMomentumRateOfChangeOutputPort().getData();
-
-
-      CommonOps.mult(rootJointAccelerationData.getAccelerationSubspace(), rootJointAccelerationData.getAccelerationMultipliers(), rootJointAccelerationMatrix);
-      rootJointAcceleration.set(rootJointAccelerationData.getBodyFrame(), rootJointAccelerationData.getBaseFrame(),
-                                rootJointAccelerationData.getExpressedInFrame(), rootJointAccelerationMatrix, 0);
-      rootJointAcceleration.changeFrameNoRelativeMotion(rootJointAccelerationData.getBodyFrame());
-
-      DenseMatrix64F accelerationSubspace = rootJointAccelerationData.getAccelerationSubspace();
-      rootJointSelectionMatrix.reshape(accelerationSubspace.getNumCols(), accelerationSubspace.getNumRows());
-      CommonOps.transpose(accelerationSubspace, rootJointSelectionMatrix);
-      rootJointTaskSpaceConstraintData.set(rootJointAcceleration, rootJointNullspaceMultipliers, rootJointSelectionMatrix);
-      momentumControlModule.setDesiredSpatialAcceleration(fullRobotModel.getRootJoint().getMotionSubspace(), rootJointTaskSpaceConstraintData);
       setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
       momentumControlModule.compute(this.contactStates, this.cylindricalContactStates, upcomingSupportLeg.getEnumValue());
 
@@ -350,6 +329,29 @@ public class MomentumBasedController implements RobotController
       if (processedOutputs != null)
          fullRobotModel.setTorques(processedOutputs);
       updateYoVariables();
+   }
+
+   private void setRootJointAcceleration()
+   {
+      TaskspaceConstraintData rootJointTaskSpaceConstraintData = new TaskspaceConstraintData();
+      SpatialAccelerationVector rootJointAcceleration = new SpatialAccelerationVector();
+      DenseMatrix64F rootJointAccelerationMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
+      DenseMatrix64F rootJointNullspaceMultipliers = new DenseMatrix64F(0, 1);
+      DenseMatrix64F rootJointSelectionMatrix = new DenseMatrix64F(1, 1);
+
+      rootJointAccelerationControlModule.startComputation();
+      rootJointAccelerationControlModule.waitUntilComputationIsDone();
+      RootJointAccelerationData rootJointAccelerationData = rootJointAccelerationControlModule.getRootJointAccelerationOutputPort().getData();
+
+      CommonOps.mult(rootJointAccelerationData.getAccelerationSubspace(), rootJointAccelerationData.getAccelerationMultipliers(), rootJointAccelerationMatrix);
+      rootJointAcceleration.set(rootJointAccelerationData.getBodyFrame(), rootJointAccelerationData.getBaseFrame(),
+            rootJointAccelerationData.getExpressedInFrame(), rootJointAccelerationMatrix, 0);
+      rootJointAcceleration.changeFrameNoRelativeMotion(rootJointAccelerationData.getBodyFrame());
+      DenseMatrix64F accelerationSubspace = rootJointAccelerationData.getAccelerationSubspace();
+      rootJointSelectionMatrix.reshape(accelerationSubspace.getNumCols(), accelerationSubspace.getNumRows());
+      CommonOps.transpose(accelerationSubspace, rootJointSelectionMatrix);
+      rootJointTaskSpaceConstraintData.set(rootJointAcceleration, rootJointNullspaceMultipliers, rootJointSelectionMatrix);
+      momentumControlModule.setDesiredSpatialAcceleration(fullRobotModel.getRootJoint().getMotionSubspace(), rootJointTaskSpaceConstraintData);
    }
 
    public final void doControl()
