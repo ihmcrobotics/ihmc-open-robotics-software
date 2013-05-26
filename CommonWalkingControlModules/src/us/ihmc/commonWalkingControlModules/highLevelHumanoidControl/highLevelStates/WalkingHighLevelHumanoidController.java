@@ -32,11 +32,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.TorusPoseProvider;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPBasedMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.InstantaneousCapturePointPlanner;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointData;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointTrajectoryData;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.OrientationTrajectoryData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.*;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.HeelSwitch;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightPartialDerivativesData;
@@ -228,11 +224,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
            YoPositionProvider finalPositionProvider,
            TrajectoryParametersProvider trajectoryParametersProvider, boolean stayOntoes, double desiredPelvisPitch, double trailingFootPitch,
            WalkingControllerParameters walkingControllerParameters, ICPBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
-           ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationPort, LidarControllerInterface lidarControllerInterface,
+           RootJointAngularAccelerationControlModule rootJointAngularAccelerationControlModule, LidarControllerInterface lidarControllerInterface,
            InstantaneousCapturePointPlanner instantaneousCapturePointPlanner, SideDependentList<HandControllerInterface> handControllers,
            ICPAndMomentumBasedController icpAndMomentumBasedController, MomentumBasedController momentumBasedController, WalkingStatusReporter walkingStatusReporter)
    {
-      super(icpAndMomentumBasedController.getBipedFeet(), desiredPelvisOrientationPort, desiredHeadOrientationProvider, momentumBasedController,
+      super(icpAndMomentumBasedController.getBipedFeet(), rootJointAngularAccelerationControlModule, desiredHeadOrientationProvider, momentumBasedController,
             walkingControllerParameters, handPoseProvider, torusPoseProvider, handControllers, lidarControllerInterface, dynamicGraphicObjectsListRegistry,
             controllerState);
 
@@ -1435,6 +1431,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       this.supportLeg.set(supportLeg);
    }
 
+   // FIXME: don't override
    public void doMotionControl()
    {
       momentumBasedController.doPrioritaryControl();
@@ -1466,6 +1463,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       setICPBasedMomentumRateOfChangeControlModuleInputs();
 
+      doPelvisControl();
+
       setTorqueControlJointsToZeroDersiredAcceleration();
 
       momentumBasedController.doSecondaryControl();
@@ -1487,11 +1486,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       icpBasedMomentumRateOfChangeControlModule.getSupportLegInputPort().setData(getSupportLeg());
 
       icpBasedMomentumRateOfChangeControlModule.getDesiredCenterOfMassHeightAccelerationInputPort().setData(desiredCoMHeightAcceleration.getDoubleValue());
-
-      OrientationTrajectoryData desiredPelvisOrientationTrajectoryData = new OrientationTrajectoryData();
-      desiredPelvisOrientationTrajectoryData.set(desiredPelvisOrientation.getFrameOrientationCopy(), desiredPelvisAngularVelocity.getFrameVectorCopy(),
-              desiredPelvisAngularAcceleration.getFrameVectorCopy());
-      desiredPelvisOrientationTrajectoryInputPort.setData(desiredPelvisOrientationTrajectoryData);
    }
 
    // Temporary objects to reduce garbage collection.
