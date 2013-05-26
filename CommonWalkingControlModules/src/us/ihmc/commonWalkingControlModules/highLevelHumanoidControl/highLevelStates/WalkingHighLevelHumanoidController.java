@@ -231,7 +231,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
            InstantaneousCapturePointPlanner instantaneousCapturePointPlanner, SideDependentList<HandControllerInterface> handControllers,
            ICPAndMomentumBasedController icpAndMomentumBasedController, WalkingStatusReporter walkingStatusReporter)
    {
-      super(icpAndMomentumBasedController.getBipedFeet(), desiredPelvisOrientationPort, desiredHeadOrientationProvider, icpAndMomentumBasedController,
+      super(icpAndMomentumBasedController.getBipedFeet(), desiredPelvisOrientationPort, desiredHeadOrientationProvider, icpAndMomentumBasedController.getMomentumBasedController(),
             walkingControllerParameters, handPoseProvider, torusPoseProvider, handControllers, lidarControllerInterface, dynamicGraphicObjectsListRegistry,
             controllerState);
 
@@ -266,15 +266,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       // Getting parameters from the icpAndMomentumBasedController
       this.icpAndMomentumBasedController = icpAndMomentumBasedController;
-      contactStates = icpAndMomentumBasedController.getContactStates();
-      upcomingSupportLeg = icpAndMomentumBasedController.getUpcomingSupportLeg();
+      
+      contactStates = momentumBasedController.getContactStates();
+      upcomingSupportLeg = momentumBasedController.getUpcomingSupportLeg();
       supportLeg = icpAndMomentumBasedController.getYoSupportLeg();
       capturePoint = icpAndMomentumBasedController.getCapturePoint();
       desiredICP = icpAndMomentumBasedController.getDesiredICP();
       desiredICPVelocity = icpAndMomentumBasedController.getDesiredICPVelocity();
       bipedSupportPolygons = icpAndMomentumBasedController.getBipedSupportPolygons();
       desiredCoMHeightAcceleration = icpAndMomentumBasedController.getDesiredCoMHeightAcceleration();
-      centerOfMassJacobian = icpAndMomentumBasedController.getCenterOfMassJacobian();
+      centerOfMassJacobian = momentumBasedController.getCenterOfMassJacobian();
 
       coMHeightTimeDerivativesSmoother = new CoMHeightTimeDerivativesSmoother(controlDT, registry);
 
@@ -565,7 +566,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          
          if (doneFinishingSingleSupportTransfer || estimatedTimeRemainingForState < 0.02)
          {
-            upcomingFootstepList.checkForFootsteps(icpAndMomentumBasedController.getPointPositionGrabber(), readyToGrabNextFootstep, upcomingSupportLeg,
+            upcomingFootstepList.checkForFootsteps(momentumBasedController.getPointPositionGrabber(), readyToGrabNextFootstep, upcomingSupportLeg,
                   bipedFeet);
             checkForSteppingOnOrOff(transferToSide);
          }
@@ -1435,12 +1436,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    public void doMotionControl()
    {
-      icpAndMomentumBasedController.doPrioritaryControl();
+      momentumBasedController.doPrioritaryControl();
 
       for (ContactablePlaneBody contactablePlaneBody : footEndEffectorControlModules.keySet())
       {
          EndEffectorControlModule endEffectorControlModule = footEndEffectorControlModules.get(contactablePlaneBody);
-         FramePoint2d cop = icpAndMomentumBasedController.getCoP(contactablePlaneBody);
+         FramePoint2d cop = momentumBasedController.getCoP(contactablePlaneBody);
          endEffectorControlModule.setCenterOfPressure(cop);
       }
 
@@ -1466,7 +1467,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       setTorqueControlJointsToZeroDersiredAcceleration();
 
-      icpAndMomentumBasedController.doSecondaryControl();
+      momentumBasedController.doSecondaryControl();
    }
 
    // TODO: connect ports instead
@@ -1500,7 +1501,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       ReferenceFrame frame = worldFrame;
 
-      centerOfMassHeightInputData.setCenterOfMassFrame(icpAndMomentumBasedController.getCenterOfMassFrame());
+      centerOfMassHeightInputData.setCenterOfMassFrame(momentumBasedController.getCenterOfMassFrame());
 
       List<? extends PlaneContactState> contactStatesList = getContactStatesList();
 

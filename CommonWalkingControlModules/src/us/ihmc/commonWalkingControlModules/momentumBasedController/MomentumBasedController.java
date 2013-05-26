@@ -28,6 +28,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
@@ -255,6 +256,11 @@ public class MomentumBasedController implements RobotController
       this.planeContactWrenchProcessor = new PlaneContactWrenchProcessor(this.contactablePlaneBodies, dynamicGraphicObjectsListRegistry, registry);
    }
 
+   public SpatialForceVector getGravitationalWrench()
+   {
+      return gravitationalWrench;
+   }
+   
    protected static double computeDesiredAcceleration(double k, double d, double qDesired, double qdDesired, OneDoFJoint joint)
    {
       return k * (qDesired - joint.getQ()) + d * (qdDesired - joint.getQd());
@@ -547,5 +553,15 @@ public class MomentumBasedController implements RobotController
    public MomentumControlModule getMomentumControlModule()
    {
       return momentumControlModule;
+   }
+
+   public FrameVector getAdmissibleDesiredGroundReactionForceCopy()
+   {
+      return admissibleDesiredGroundReactionForce.getFrameVectorCopy();
+   }
+
+   public FrameVector getAdmissibleDesiredGroundReactionTorqueCopy()
+   {
+      return admissibleDesiredGroundReactionTorque.getFrameVectorCopy();
    }
 }
