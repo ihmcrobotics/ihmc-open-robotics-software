@@ -31,7 +31,6 @@ public class DesiredChestOrientationProvider implements ObjectConsumer<ChestOrie
 
    public void consumeObject(ChestOrientationPacket object)
    {
-      System.out.println("YOUHOUUUUUUUUUUUUUUUUUUUUUUUUUUU");
       hasNewPose = true;
       desiredChestOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), object.getQuaternion());
    }
