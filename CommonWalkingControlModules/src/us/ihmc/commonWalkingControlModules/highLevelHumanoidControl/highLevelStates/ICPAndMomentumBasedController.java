@@ -44,7 +44,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
 
-public class ICPAndMomentumBasedController //extends MomentumBasedController
+public class ICPAndMomentumBasedController 
 {
    private static final boolean USE_CONSTANT_OMEGA0 = true;
    
