@@ -206,13 +206,6 @@ public class MomentumSolver3 implements MomentumSolverInterface
       CommonOps.addEquals(hdot, adotV);
    }
 
-
-   public void solve(RootJointAccelerationData rootJointAccelerationData, MomentumRateOfChangeData momentumRateOfChangeData)
-   {
-      solve(rootJointAccelerationData.getAccelerationSubspace(), rootJointAccelerationData.getAccelerationMultipliers(),
-            momentumRateOfChangeData.getMomentumSubspace(), momentumRateOfChangeData.getMomentumMultipliers());
-   }
-
    public void getRateOfChangeOfMomentum(SpatialForceVector rateOfChangeOfMomentumToPack)
    {
       rateOfChangeOfMomentumToPack.set(centroidalMomentumMatrix.getReferenceFrame(), hdot);

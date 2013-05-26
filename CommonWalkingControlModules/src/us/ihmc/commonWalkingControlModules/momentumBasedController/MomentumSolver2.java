@@ -299,12 +299,6 @@ public class MomentumSolver2 implements MomentumSolverInterface
 //      }
 //   }
 
-   public void solve(RootJointAccelerationData rootJointAccelerationData, MomentumRateOfChangeData momentumRateOfChangeData)
-   {
-      solve(rootJointAccelerationData.getAccelerationSubspace(), rootJointAccelerationData.getAccelerationMultipliers(),
-            momentumRateOfChangeData.getMomentumSubspace(), momentumRateOfChangeData.getMomentumMultipliers());
-   }
-
    public void getRateOfChangeOfMomentum(SpatialForceVector rateOfChangeOfMomentumToPack)
    {
       CommonOps.mult(centroidalMomentumMatrix.getMatrix(), vdot, hdot);
