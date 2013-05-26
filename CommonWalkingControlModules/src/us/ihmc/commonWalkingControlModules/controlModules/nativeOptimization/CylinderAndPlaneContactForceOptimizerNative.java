@@ -15,7 +15,7 @@ public class CylinderAndPlaneContactForceOptimizerNative
    private static final boolean DEBUG = false;
    public static final int nSupportVectors = 3;
    public static final int nPointsPerPlane = 4;
-   public static final int nPlanes = 2;
+   public static final int nPlanes = 4;
    public static final int nCylinders = 2;
    public static final int nCylinderVectors = 8;
    public static final int nCylinderBoundedVariables = 5;

@@ -1,4 +1,4 @@
-# Produced by CVXGEN, 2013-05-24 10:53:06 -0400.
+# Produced by CVXGEN, 2013-05-26 12:24:30 -0400.
 # CVXGEN is Copyright (C) 2006-2012 Jacob Mattingley, jem@cvxgen.com.
 # The code in this file is Copyright (C) 2006-2012 Jacob Mattingley.
 # CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
@@ -10,7 +10,7 @@
 dimensions
   nSupportVectors = 3 # number of basis vectors for approximation of friciton cones
   nPointsPerContact = 4 # points per plane contact
-  nPlanes = 2 # number of plane contacts
+  nPlanes = 4 # number of plane contacts
   wrenchLength = 6 # universal constant for physical space
   nDoF = 34 # size of the robot actuator joint acceleration space.
   nCylinders = 2 # number of cylindrical hands

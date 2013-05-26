@@ -4,7 +4,7 @@
 %
 % solves the convex optimization problem
 %
-%   minimize(quad_form(A*vd - b, C) + quad_form(Js*vd - ps, Ws) + wRho*quad_form(rho, eye(40)) + wPhi*quad_form(phi, eye(10)) + quad_form(vd, Lambda))
+%   minimize(quad_form(A*vd - b, C) + quad_form(Js*vd - ps, Ws) + wRho*quad_form(rho, eye(64)) + wPhi*quad_form(phi, eye(10)) + quad_form(vd, Lambda))
 %   subject to
 %     Qrho*rho + Qphi*phi == A*vd + c
 %     rho >= rhoMin
@@ -13,7 +13,7 @@
 %
 % with variables
 %      phi  10 x 1
-%      rho  40 x 1
+%      rho  64 x 1
 %       vd  34 x 1
 %
 % and parameters
@@ -22,14 +22,14 @@
 %       Js  34 x 34
 %   Lambda  34 x 34   PSD, diagonal
 %     Qphi   6 x 10
-%     Qrho   6 x 40
+%     Qrho   6 x 64
 %       Ws  34 x 34   PSD, diagonal
 %        b   6 x 1
 %        c   6 x 1
 %   phiMax  10 x 1    positive
 %   phiMin  10 x 1    negative
 %       ps  34 x 1
-%   rhoMin  40 x 1    positive
+%   rhoMin  64 x 1    positive
 %     wPhi   1 x 1    positive
 %     wRho   1 x 1    positive
 %
@@ -42,7 +42,7 @@
 %
 % Specify params.A, ..., params.wRho, then run
 %   [vars, status] = csolve(params, settings)
-% Produced by CVXGEN, 2013-05-24 10:53:06 -0400.
+% Produced by CVXGEN, 2013-05-26 12:24:30 -0400.
 % CVXGEN is Copyright (C) 2006-2012 Jacob Mattingley, jem@cvxgen.com.
 % The code in this file is Copyright (C) 2006-2012 Jacob Mattingley.
 % CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
