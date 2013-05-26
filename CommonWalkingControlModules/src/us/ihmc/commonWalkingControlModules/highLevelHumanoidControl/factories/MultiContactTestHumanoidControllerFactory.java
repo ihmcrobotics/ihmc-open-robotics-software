@@ -132,11 +132,6 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       momentumRateOfChangeControlModule.setProportionalGains(comProportionalGain, comProportionalGain, comProportionalGain);
       momentumRateOfChangeControlModule.setDerivativeGains(comDerivativeGain, comDerivativeGain, comDerivativeGain);
 
-      RootJointAngularAccelerationControlModule rootJointAccelerationControlModule =
-         new RootJointAngularAccelerationControlModule(fullRobotModel.getRootJoint(), twistCalculator, registry);
-      rootJointAccelerationControlModule.setProportionalGains(100.0, 100.0, 100.0);
-      rootJointAccelerationControlModule.setDerivativeGains(20.0, 20.0, 20.0);
-
       DampedLeastSquaresSolver jacobianSolver = new DampedLeastSquaresSolver(SpatialMotionVector.SIZE);
       jacobianSolver.setAlpha(5e-2);
 
@@ -150,6 +145,11 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       MomentumBasedController momentumBasedController = new MomentumBasedController(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, contactablePlaneBodiesAndBases.keySet(),
                  null, controlDT, processedOutputs, momentumControlModule, null, momentumRateOfChangeControlModule,
             stateEstimationDataFromControllerSink, dynamicGraphicObjectsListRegistry);
+
+      RootJointAngularAccelerationControlModule rootJointAccelerationControlModule =
+            new RootJointAngularAccelerationControlModule(momentumBasedController, registry);
+      rootJointAccelerationControlModule.setProportionalGains(100.0, 100.0, 100.0);
+      rootJointAccelerationControlModule.setDerivativeGains(20.0, 20.0, 20.0);
 
       DesiredHandPoseProvider desiredHandPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters);
       TorusPoseProvider torusPoseProvider = new TorusPoseProvider();

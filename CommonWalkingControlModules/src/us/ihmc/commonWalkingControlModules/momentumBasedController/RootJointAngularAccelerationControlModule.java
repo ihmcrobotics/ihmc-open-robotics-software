@@ -1,11 +1,14 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationControlModule;
 import us.ihmc.controlFlow.AbstractControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -15,7 +18,8 @@ public class RootJointAngularAccelerationControlModule extends AbstractControlFl
 {
    private final YoVariableRegistry registry;
 
-   private final ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort = createInputPort("desiredPelvisOrientationTrajectoryInputPort");
+   private final ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort = createInputPort
+         ("desiredPelvisOrientationTrajectoryInputPort");
    private final ControlFlowOutputPort<RootJointAccelerationData> rootJointAccelerationOutputPort = createOutputPort("rootJointAccelerationOutputPort");
 
    private final RigidBodyOrientationControlModule rootJointOrientationControlModule;
@@ -24,18 +28,20 @@ public class RootJointAngularAccelerationControlModule extends AbstractControlFl
    private InverseDynamicsJoint rootJoint;
 
    private final RootJointAccelerationData rootJointAccelerationData;
+   private MomentumBasedController momentumBasedController;
 
-   public RootJointAngularAccelerationControlModule(InverseDynamicsJoint rootJoint, TwistCalculator twistCalculator, YoVariableRegistry parentRegistry)
+   public RootJointAngularAccelerationControlModule(MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
    {
-      this.rootJoint = rootJoint;
+      this.rootJoint = momentumBasedController.getFullRobotModel().getRootJoint();
       registry = new YoVariableRegistry(getClass().getSimpleName());
       rootJointOrientationControlModule = new RigidBodyOrientationControlModule(rootJoint.getName(), rootJoint.getPredecessor(), rootJoint.getSuccessor(),
-              twistCalculator, registry);
+              momentumBasedController.getTwistCalculator(), registry);
       this.desiredPelvisAngularAcceleration = new YoFrameVector("desired" + rootJoint.getName() + "AngularAcceleration", rootJoint.getFrameAfterJoint(),
               registry);
       rootJointAccelerationData = new RootJointAccelerationData(rootJoint.getSuccessor().getBodyFixedFrame(), rootJoint.getPredecessor().getBodyFixedFrame(),
               rootJoint.getFrameAfterJoint());
       rootJointAccelerationOutputPort.setData(rootJointAccelerationData);
+      this.momentumBasedController = momentumBasedController;
       parentRegistry.addChild(registry);
    }
 
@@ -44,6 +50,7 @@ public class RootJointAngularAccelerationControlModule extends AbstractControlFl
       FrameVector rootJointAngularAcceleration = computeDesiredRootJointAngularAcceleration();
       this.desiredPelvisAngularAcceleration.set(rootJointAngularAcceleration);
       rootJointAccelerationData.setAngularAcceleration(rootJointAngularAcceleration);
+      setRootJointAcceleration();
    }
 
    public void waitUntilComputationIsDone()
@@ -80,5 +87,25 @@ public class RootJointAngularAccelerationControlModule extends AbstractControlFl
    public ControlFlowOutputPort<RootJointAccelerationData> getRootJointAccelerationOutputPort()
    {
       return rootJointAccelerationOutputPort;
+   }
+
+   private void setRootJointAcceleration()
+   {
+      TaskspaceConstraintData rootJointTaskSpaceConstraintData = new TaskspaceConstraintData();
+      SpatialAccelerationVector rootJointAcceleration = new SpatialAccelerationVector();
+      DenseMatrix64F rootJointAccelerationMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
+      DenseMatrix64F rootJointNullspaceMultipliers = new DenseMatrix64F(0, 1);
+      DenseMatrix64F rootJointSelectionMatrix = new DenseMatrix64F(1, 1);
+
+      CommonOps.mult(rootJointAccelerationData.getAccelerationSubspace(), rootJointAccelerationData.getAccelerationMultipliers(),
+            rootJointAccelerationMatrix);
+      rootJointAcceleration.set(rootJointAccelerationData.getBodyFrame(), rootJointAccelerationData.getBaseFrame(),
+            rootJointAccelerationData.getExpressedInFrame(), rootJointAccelerationMatrix, 0);
+      rootJointAcceleration.changeFrameNoRelativeMotion(rootJointAccelerationData.getBodyFrame());
+      DenseMatrix64F accelerationSubspace = rootJointAccelerationData.getAccelerationSubspace();
+      rootJointSelectionMatrix.reshape(accelerationSubspace.getNumCols(), accelerationSubspace.getNumRows());
+      CommonOps.transpose(accelerationSubspace, rootJointSelectionMatrix);
+      rootJointTaskSpaceConstraintData.set(rootJointAcceleration, rootJointNullspaceMultipliers, rootJointSelectionMatrix);
+      momentumBasedController.setDesiredSpatialAcceleration(rootJoint.getMotionSubspace(), rootJointTaskSpaceConstraintData);
    }
 }
