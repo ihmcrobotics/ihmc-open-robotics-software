@@ -29,7 +29,5 @@ public interface MomentumSolverInterface
    void solve(DenseMatrix64F accelerationSubspace, DenseMatrix64F accelerationMultipliers, DenseMatrix64F momentumSubspace,
               DenseMatrix64F momentumMultipliers);
 
-   void solve(RootJointAccelerationData rootJointAccelerationData, MomentumRateOfChangeData momentumRateOfChangeData);
-
    void getRateOfChangeOfMomentum(SpatialForceVector rateOfChangeOfMomentumToPack);
 }
