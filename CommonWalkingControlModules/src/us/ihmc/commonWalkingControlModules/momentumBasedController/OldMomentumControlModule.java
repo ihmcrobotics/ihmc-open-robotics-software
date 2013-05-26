@@ -61,7 +61,6 @@ public class OldMomentumControlModule implements MomentumControlModule
    private final RootJointAccelerationData rootJointAccelerationData;
    private final MomentumRateOfChangeData momentumRateOfChangeData;
    private final SixDoFJoint rootJoint;
-   private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
    private GroundReactionWrenchDistributorOutputData distributedWrenches = new GroundReactionWrenchDistributorOutputData();
    
    private GroundReactionWrenchDistributorInputData wrenchDistributorInput = new GroundReactionWrenchDistributorInputData();
@@ -77,7 +76,6 @@ public class OldMomentumControlModule implements MomentumControlModule
                                    LinearSolver<DenseMatrix64F> jacobianSolver, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
-      this.dynamicGraphicObjectsListRegistry=dynamicGraphicObjectsListRegistry;
       this.solver = new MomentumSolver(rootJoint, rootJoint.getPredecessor(), centerOfMassFrame, twistCalculator, jacobianSolver, controlDT, registry);
 
       double totalMass = TotalMassCalculator.computeMass(ScrewTools.computeSupportAndSubtreeSuccessors(rootJoint.getSuccessor()));
