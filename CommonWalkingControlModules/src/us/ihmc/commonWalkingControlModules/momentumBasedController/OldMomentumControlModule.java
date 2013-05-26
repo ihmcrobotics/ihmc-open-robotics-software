@@ -10,6 +10,7 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolver;
 
+import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.WrenchDistributorTools;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
@@ -19,21 +20,12 @@ import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWren
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributorOutputData;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.ScrewTools;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
-import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
-import us.ihmc.utilities.screwTheory.SpatialForceVector;
-import us.ihmc.utilities.screwTheory.TotalMassCalculator;
-import us.ihmc.utilities.screwTheory.TotalWrenchCalculator;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
-import us.ihmc.utilities.screwTheory.Wrench;
+import us.ihmc.utilities.screwTheory.*;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -319,5 +311,91 @@ public class OldMomentumControlModule implements MomentumControlModule
    public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData, double weight)
    {
       throw new NoSuchMethodError();
+   }
+
+   private static class RootJointAccelerationData
+   {
+      private final ReferenceFrame bodyFrame;
+      private final ReferenceFrame baseFrame;
+      private final ReferenceFrame expressedInFrame;
+      private final DenseMatrix64F accelerationSubspace = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
+      private final DenseMatrix64F accelerationMultipliers = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
+
+      public RootJointAccelerationData(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)
+      {
+         this.bodyFrame = bodyFrame;
+         this.baseFrame = baseFrame;
+         this.expressedInFrame = expressedInFrame;
+      }
+
+      public ReferenceFrame getBodyFrame()
+      {
+         return bodyFrame;
+      }
+
+      public ReferenceFrame getBaseFrame()
+      {
+         return baseFrame;
+      }
+
+      public ReferenceFrame getExpressedInFrame()
+      {
+         return expressedInFrame;
+      }
+
+      public DenseMatrix64F getAccelerationSubspace()
+      {
+         return accelerationSubspace;
+      }
+
+      public DenseMatrix64F getAccelerationMultipliers()
+      {
+         return accelerationMultipliers;
+      }
+
+      public void setAngularAcceleration(FrameVector rootJointAngularAcceleration)
+      {
+         rootJointAngularAcceleration.checkReferenceFrameMatch(expressedInFrame);
+
+         accelerationSubspace.reshape(SpatialMotionVector.SIZE, 3);
+         accelerationSubspace.set(0, 0, 1.0);
+         accelerationSubspace.set(1, 1, 1.0);
+         accelerationSubspace.set(2, 2, 1.0);
+
+         accelerationMultipliers.reshape(3, 1);
+         MatrixTools.setDenseMatrixFromTuple3d(accelerationMultipliers, rootJointAngularAcceleration.getVector(), 0, 0);
+      }
+
+      public void setEmpty()
+      {
+         accelerationSubspace.reshape(SpatialForceVector.SIZE, 0);
+         accelerationMultipliers.reshape(0, 1);
+      }
+
+      public void setSpatialAcceleration(SpatialAccelerationVector spatialAcceleration)
+      {
+         spatialAcceleration.getBodyFrame().checkReferenceFrameMatch(bodyFrame);
+         spatialAcceleration.getBaseFrame().checkReferenceFrameMatch(baseFrame);
+         spatialAcceleration.getExpressedInFrame().checkReferenceFrameMatch(expressedInFrame);
+
+         accelerationSubspace.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+         CommonOps.setIdentity(accelerationSubspace);
+
+         accelerationMultipliers.reshape(SpatialAccelerationVector.SIZE, 1);
+         spatialAcceleration.packMatrix(accelerationMultipliers, 0);
+      }
+
+      public void setUsingSelectionMatrix(DenseMatrix64F selectionMatrix, SpatialAccelerationVector spatialAcceleration)
+      {
+         // NOTE: doesn't work in all cases of selectionMatrix (only works when pseudo inverse == transpose)
+
+         accelerationSubspace.reshape(selectionMatrix.getNumCols(), selectionMatrix.getNumRows());
+         CommonOps.transpose(selectionMatrix, accelerationSubspace);
+
+         accelerationMultipliers.reshape(selectionMatrix.getNumRows(), 1);
+         DenseMatrix64F spatialAccelerationMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
+         spatialAcceleration.packMatrix(spatialAccelerationMatrix, 0);
+         CommonOps.mult(selectionMatrix, spatialAccelerationMatrix, accelerationMultipliers);
+      }
    }
 }
