@@ -337,34 +337,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
               desiredPelvisAngularAcceleration.getFrameVectorCopy());
 
       rootJointAccelerationControlModule.getDesiredPelvisOrientationTrajectoryInputPort().setData(pelvisOrientationTrajectoryData);
-      setRootJointAcceleration();
-   }
-
-   private void setRootJointAcceleration()
-   {
-      if (rootJointAccelerationControlModule != null)
-      {
-         TaskspaceConstraintData rootJointTaskSpaceConstraintData = new TaskspaceConstraintData();
-         SpatialAccelerationVector rootJointAcceleration = new SpatialAccelerationVector();
-         DenseMatrix64F rootJointAccelerationMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
-         DenseMatrix64F rootJointNullspaceMultipliers = new DenseMatrix64F(0, 1);
-         DenseMatrix64F rootJointSelectionMatrix = new DenseMatrix64F(1, 1);
-
-         rootJointAccelerationControlModule.startComputation();
-         rootJointAccelerationControlModule.waitUntilComputationIsDone();
-         RootJointAccelerationData rootJointAccelerationData = rootJointAccelerationControlModule.getRootJointAccelerationOutputPort().getData();
-
-         CommonOps.mult(rootJointAccelerationData.getAccelerationSubspace(), rootJointAccelerationData.getAccelerationMultipliers(),
-                        rootJointAccelerationMatrix);
-         rootJointAcceleration.set(rootJointAccelerationData.getBodyFrame(), rootJointAccelerationData.getBaseFrame(),
-                                   rootJointAccelerationData.getExpressedInFrame(), rootJointAccelerationMatrix, 0);
-         rootJointAcceleration.changeFrameNoRelativeMotion(rootJointAccelerationData.getBodyFrame());
-         DenseMatrix64F accelerationSubspace = rootJointAccelerationData.getAccelerationSubspace();
-         rootJointSelectionMatrix.reshape(accelerationSubspace.getNumCols(), accelerationSubspace.getNumRows());
-         CommonOps.transpose(accelerationSubspace, rootJointSelectionMatrix);
-         rootJointTaskSpaceConstraintData.set(rootJointAcceleration, rootJointNullspaceMultipliers, rootJointSelectionMatrix);
-         momentumBasedController.setDesiredSpatialAcceleration(fullRobotModel.getRootJoint().getMotionSubspace(), rootJointTaskSpaceConstraintData);
-      }
+      rootJointAccelerationControlModule.startComputation();
    }
 
    protected void doJointPositionControl()
