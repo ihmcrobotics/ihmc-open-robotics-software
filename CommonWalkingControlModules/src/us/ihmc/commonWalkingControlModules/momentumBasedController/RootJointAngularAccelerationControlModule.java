@@ -14,13 +14,9 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
-public class RootJointAngularAccelerationControlModule extends AbstractControlFlowElement
+public class RootJointAngularAccelerationControlModule
 {
    private final YoVariableRegistry registry;
-
-   private final ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort = createInputPort
-         ("desiredPelvisOrientationTrajectoryInputPort");
-   private final ControlFlowOutputPort<RootJointAccelerationData> rootJointAccelerationOutputPort = createOutputPort("rootJointAccelerationOutputPort");
 
    private final RigidBodyOrientationControlModule rootJointOrientationControlModule;
 
@@ -40,14 +36,13 @@ public class RootJointAngularAccelerationControlModule extends AbstractControlFl
               registry);
       rootJointAccelerationData = new RootJointAccelerationData(rootJoint.getSuccessor().getBodyFixedFrame(), rootJoint.getPredecessor().getBodyFixedFrame(),
               rootJoint.getFrameAfterJoint());
-      rootJointAccelerationOutputPort.setData(rootJointAccelerationData);
       this.momentumBasedController = momentumBasedController;
       parentRegistry.addChild(registry);
    }
 
-   public void startComputation()
+   public void doControl(OrientationTrajectoryData orientationTrajectoryData)
    {
-      FrameVector rootJointAngularAcceleration = computeDesiredRootJointAngularAcceleration();
+      FrameVector rootJointAngularAcceleration = computeDesiredRootJointAngularAcceleration(orientationTrajectoryData);
       this.desiredPelvisAngularAcceleration.set(rootJointAngularAcceleration);
       rootJointAccelerationData.setAngularAcceleration(rootJointAngularAcceleration);
       setRootJointAcceleration();
@@ -58,10 +53,9 @@ public class RootJointAngularAccelerationControlModule extends AbstractControlFl
       // empty
    }
 
-   private FrameVector computeDesiredRootJointAngularAcceleration()
+   private FrameVector computeDesiredRootJointAngularAcceleration(OrientationTrajectoryData orientationTrajectoryData)
    {
       FrameVector ret = new FrameVector(rootJoint.getFrameAfterJoint());
-      OrientationTrajectoryData orientationTrajectoryData = desiredPelvisOrientationTrajectoryInputPort.getData();
       rootJointOrientationControlModule.compute(ret, orientationTrajectoryData.getOrientation(), orientationTrajectoryData.getAngularVelocity(),
               orientationTrajectoryData.getAngularAcceleration());
       ret.changeFrame(rootJoint.getFrameAfterJoint());
@@ -77,16 +71,6 @@ public class RootJointAngularAccelerationControlModule extends AbstractControlFl
    public void setDerivativeGains(double derivativeGainX, double derivativeGainY, double derivativeGainZ)
    {
       rootJointOrientationControlModule.setDerivativeGains(derivativeGainX, derivativeGainY, derivativeGainZ);
-   }
-
-   public ControlFlowInputPort<OrientationTrajectoryData> getDesiredPelvisOrientationTrajectoryInputPort()
-   {
-      return desiredPelvisOrientationTrajectoryInputPort;
-   }
-
-   public ControlFlowOutputPort<RootJointAccelerationData> getRootJointAccelerationOutputPort()
-   {
-      return rootJointAccelerationOutputPort;
    }
 
    private void setRootJointAcceleration()
