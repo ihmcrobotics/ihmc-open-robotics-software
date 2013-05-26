@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.TorusPoseProvider;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OrientationTrajectoryData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAngularAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SE3ConfigurationProvider;
@@ -67,13 +68,13 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
    private final ConstantDoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(1.0);
 
    public MultiContactTestHumanoidController(SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<? extends ContactablePlaneBody> hands,
-           ControlFlowInputPort<FramePoint> desiredCoMPositionPort, ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationPort,
+           ControlFlowInputPort<FramePoint> desiredCoMPositionPort, RootJointAngularAccelerationControlModule rootJointAccelerationControlModule,
            DesiredHeadOrientationProvider desiredHeadOrientationProvider, MomentumBasedController momentumBasedController,
            WalkingControllerParameters walkingControllerParameters, DesiredHandPoseProvider handPoseProvider, TorusPoseProvider torusPoseProvider, DesiredFootPoseProvider footPoseProvider,
            SideDependentList<HandControllerInterface> handControllers, LidarControllerInterface lidarControllerInterface,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      super(feet, desiredPelvisOrientationPort, desiredHeadOrientationProvider, momentumBasedController, walkingControllerParameters, handPoseProvider,
+      super(feet, rootJointAccelerationControlModule, desiredHeadOrientationProvider, momentumBasedController, walkingControllerParameters, handPoseProvider,
             torusPoseProvider, handControllers, lidarControllerInterface, dynamicGraphicObjectsListRegistry, controllerState);
 
       this.footPoseProvider = footPoseProvider;

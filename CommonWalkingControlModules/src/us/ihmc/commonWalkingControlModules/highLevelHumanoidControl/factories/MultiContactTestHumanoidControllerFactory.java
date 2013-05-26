@@ -137,9 +137,6 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       rootJointAccelerationControlModule.setProportionalGains(100.0, 100.0, 100.0);
       rootJointAccelerationControlModule.setDerivativeGains(20.0, 20.0, 20.0);
 
-      ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort =
-         rootJointAccelerationControlModule.getDesiredPelvisOrientationTrajectoryInputPort();
-
       DampedLeastSquaresSolver jacobianSolver = new DampedLeastSquaresSolver(SpatialMotionVector.SIZE);
       jacobianSolver.setAlpha(5e-2);
 
@@ -150,11 +147,9 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       momentumControlModule.setGroundReactionWrenchBreakFrequencyHertz(groundReactionWrenchBreakFrequencyHertz);
 
       // The controllers do not extend the MomentumBasedController anymore. Instead, it is passed through the constructor.
-      MomentumBasedController momentumBasedController = new MomentumBasedController(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian,
-                                                           referenceFrames, yoTime, gravityZ, twistCalculator, contactablePlaneBodiesAndBases.keySet(),
-                                                           controlDT, processedOutputs, momentumControlModule, null, momentumRateOfChangeControlModule,
-                                                           rootJointAccelerationControlModule, stateEstimationDataFromControllerSink,
-                                                           dynamicGraphicObjectsListRegistry);
+      MomentumBasedController momentumBasedController = new MomentumBasedController(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, contactablePlaneBodiesAndBases.keySet(),
+                 null, controlDT, processedOutputs, momentumControlModule, null, momentumRateOfChangeControlModule,
+            stateEstimationDataFromControllerSink, dynamicGraphicObjectsListRegistry);
 
       DesiredHandPoseProvider desiredHandPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters);
       TorusPoseProvider torusPoseProvider = new TorusPoseProvider();
@@ -162,7 +157,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
 
       MultiContactTestHumanoidController multiContactBehavior = new MultiContactTestHumanoidController(feet, hands,
                                                                    momentumRateOfChangeControlModule.getDesiredCoMPositionInputPort(),
-                                                                   desiredPelvisOrientationTrajectoryInputPort, null, momentumBasedController,
+                                                                   rootJointAccelerationControlModule, null, momentumBasedController,
                                                                    walkingControllerParameters, desiredHandPoseProvider, torusPoseProvider,
                                                                    desiredFootPoseProvider, null, null, dynamicGraphicObjectsListRegistry);
 

@@ -9,7 +9,6 @@ import java.util.Map;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableCylinderBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
@@ -92,7 +91,6 @@ public class MomentumBasedController implements RobotController
 
    protected final ProcessedOutputsInterface processedOutputs;
    protected final MomentumRateOfChangeControlModule momentumRateOfChangeControlModule;
-   protected final RootJointAngularAccelerationControlModule rootJointAccelerationControlModule;
    protected final InverseDynamicsCalculator inverseDynamicsCalculator;
 
    private final DesiredCoMAndAngularAccelerationGrabber desiredCoMAndAngularAccelerationGrabber;
@@ -108,24 +106,9 @@ public class MomentumBasedController implements RobotController
    public MomentumBasedController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
                                   CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime,
                                   double gravityZ, TwistCalculator twistCalculator, Collection<? extends ContactablePlaneBody> contactablePlaneBodies,
-                                  double controlDT, ProcessedOutputsInterface processedOutputs, MomentumControlModule momentumControlModule,
-                                  ArrayList<Updatable> updatables, MomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
-                                  RootJointAngularAccelerationControlModule rootJointAccelerationControlModule,
-                                  StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink,
-                                  DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
-   {
-      this(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, contactablePlaneBodies,
-           null, controlDT, processedOutputs, momentumControlModule, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
-           stateEstimationDataFromControllerSink, dynamicGraphicObjectsListRegistry);
-   }
-
-   public MomentumBasedController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
-                                  CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime,
-                                  double gravityZ, TwistCalculator twistCalculator, Collection<? extends ContactablePlaneBody> contactablePlaneBodies,
                                   Collection<? extends ContactableCylinderBody> contactableCylinderBodies, double controlDT,
                                   ProcessedOutputsInterface processedOutputs, MomentumControlModule momentumControlModule, ArrayList<Updatable> updatables,
                                   MomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
-                                  RootJointAngularAccelerationControlModule rootJointAccelerationControlModule,
                                   StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
@@ -165,7 +148,7 @@ public class MomentumBasedController implements RobotController
          double touchdownTime = 0.12;
          double minCoPDistance = 0.01;
 
-//         this.pointPositionGrabber = new SingleReferenceFramePointPositionGrabber(stateEstimationDataFromControllerSink, registry, controlDT, touchdownTime, minCoPDistance);
+//       this.pointPositionGrabber = new SingleReferenceFramePointPositionGrabber(stateEstimationDataFromControllerSink, registry, controlDT, touchdownTime, minCoPDistance);
          this.pointPositionGrabber = new PointPositionGrabber(stateEstimationDataFromControllerSink, registry, controlDT, touchdownTime, minCoPDistance);
       }
       else
@@ -251,7 +234,6 @@ public class MomentumBasedController implements RobotController
       }
 
       this.momentumRateOfChangeControlModule = momentumRateOfChangeControlModule;
-      this.rootJointAccelerationControlModule = rootJointAccelerationControlModule;
 
       this.planeContactWrenchProcessor = new PlaneContactWrenchProcessor(this.contactablePlaneBodies, dynamicGraphicObjectsListRegistry, registry);
    }
@@ -260,7 +242,7 @@ public class MomentumBasedController implements RobotController
    {
       return gravitationalWrench;
    }
-   
+
    protected static double computeDesiredAcceleration(double k, double d, double qDesired, double qdDesired, OneDoFJoint joint)
    {
       return k * (qDesired - joint.getQ()) + d * (qdDesired - joint.getQd());
@@ -293,9 +275,6 @@ public class MomentumBasedController implements RobotController
    // TODO: Temporary method for a big refactor allowing switching between high level behaviors
    public void doSecondaryControl()
    {
-      setRootJointAcceleration();
-
-
       momentumRateOfChangeControlModule.startComputation();
       momentumRateOfChangeControlModule.waitUntilComputationIsDone();
       MomentumRateOfChangeData momentumRateOfChangeData = momentumRateOfChangeControlModule.getMomentumRateOfChangeOutputPort().getData();
@@ -335,32 +314,6 @@ public class MomentumBasedController implements RobotController
       if (processedOutputs != null)
          fullRobotModel.setTorques(processedOutputs);
       updateYoVariables();
-   }
-
-   private void setRootJointAcceleration()
-   {
-      if (rootJointAccelerationControlModule != null)
-      {
-         TaskspaceConstraintData rootJointTaskSpaceConstraintData = new TaskspaceConstraintData();
-         SpatialAccelerationVector rootJointAcceleration = new SpatialAccelerationVector();
-         DenseMatrix64F rootJointAccelerationMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
-         DenseMatrix64F rootJointNullspaceMultipliers = new DenseMatrix64F(0, 1);
-         DenseMatrix64F rootJointSelectionMatrix = new DenseMatrix64F(1, 1);
-
-         rootJointAccelerationControlModule.startComputation();
-         rootJointAccelerationControlModule.waitUntilComputationIsDone();
-         RootJointAccelerationData rootJointAccelerationData = rootJointAccelerationControlModule.getRootJointAccelerationOutputPort().getData();
-
-         CommonOps.mult(rootJointAccelerationData.getAccelerationSubspace(), rootJointAccelerationData.getAccelerationMultipliers(), rootJointAccelerationMatrix);
-         rootJointAcceleration.set(rootJointAccelerationData.getBodyFrame(), rootJointAccelerationData.getBaseFrame(),
-               rootJointAccelerationData.getExpressedInFrame(), rootJointAccelerationMatrix, 0);
-         rootJointAcceleration.changeFrameNoRelativeMotion(rootJointAccelerationData.getBodyFrame());
-         DenseMatrix64F accelerationSubspace = rootJointAccelerationData.getAccelerationSubspace();
-         rootJointSelectionMatrix.reshape(accelerationSubspace.getNumCols(), accelerationSubspace.getNumRows());
-         CommonOps.transpose(accelerationSubspace, rootJointSelectionMatrix);
-         rootJointTaskSpaceConstraintData.set(rootJointAcceleration, rootJointNullspaceMultipliers, rootJointSelectionMatrix);
-         momentumControlModule.setDesiredSpatialAcceleration(fullRobotModel.getRootJoint().getMotionSubspace(), rootJointTaskSpaceConstraintData);
-      }
    }
 
    public final void doControl()

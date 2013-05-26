@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -20,20 +22,14 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredHandPoseProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.TorusPoseProvider;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.OrientationTrajectoryData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.*;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.ScrewTools;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.utilities.screwTheory.*;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -68,8 +64,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
    private final List<OneDoFJoint> torqueControlJoints = new ArrayList<OneDoFJoint>();
    protected final OneDoFJoint[] positionControlJoints;
 
-   protected final ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort;
-
    protected final YoFrameOrientation desiredPelvisOrientation = new YoFrameOrientation("desiredPelvis", worldFrame, registry);
    protected final YoFrameVector desiredPelvisAngularVelocity = new YoFrameVector("desiredPelvisAngularVelocity", worldFrame, registry);
 
@@ -87,9 +81,10 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
    protected final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
 
    protected final DoubleYoVariable coefficientOfFriction = new DoubleYoVariable("coefficientOfFriction", registry);
+   private final RootJointAngularAccelerationControlModule rootJointAccelerationControlModule;
 
    public AbstractHighLevelHumanoidControlPattern(SideDependentList<? extends ContactablePlaneBody> feet,
-           ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationPort, DesiredHeadOrientationProvider desiredHeadOrientationProvider,
+           RootJointAngularAccelerationControlModule rootJointAccelerationControlModule, DesiredHeadOrientationProvider desiredHeadOrientationProvider,
            MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters, DesiredHandPoseProvider handPoseProvider,
            TorusPoseProvider torusPoseProvider, SideDependentList<HandControllerInterface> handControllers, LidarControllerInterface lidarControllerInterface,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, HighLevelState controllerState)
@@ -106,7 +101,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       referenceFrames = momentumBasedController.getReferenceFrames();
 
 
-      this.desiredPelvisOrientationTrajectoryInputPort = desiredPelvisOrientationPort;
       this.desiredHeadOrientationProvider = desiredHeadOrientationProvider;
       this.lidarControllerInterface = lidarControllerInterface;
       this.walkingControllerParameters = walkingControllerParameters;
@@ -115,25 +109,29 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
       kJointPositionControl.set(100.0);
       zetaJointPositionControl.set(1.0);
-      coefficientOfFriction.set(1.0); // 0.6);// 
+      coefficientOfFriction.set(1.0);    // 0.6);//
 
       // Setup jacobians for legs and arms
       setupLegJacobians(fullRobotModel);
 
       // Setup foot control modules:
-//      setupFootControlModules(); //TODO: get rid of that?
+//    setupFootControlModules(); //TODO: get rid of that?
 
       // Setup arm+hand manipulation state machines
       manipulationControlModule = new ManipulationControlModule(yoTime, fullRobotModel, twistCalculator, walkingControllerParameters, handPoseProvider,
               torusPoseProvider, dynamicGraphicObjectsListRegistry, handControllers, momentumBasedController, registry);
 
       // Setup head and chest control modules
-      headOrientationManager = new HeadOrientationManager(momentumBasedController, walkingControllerParameters, desiredHeadOrientationProvider, registry, dynamicGraphicObjectsListRegistry);
-      
+      headOrientationManager = new HeadOrientationManager(momentumBasedController, walkingControllerParameters, desiredHeadOrientationProvider, registry,
+              dynamicGraphicObjectsListRegistry);
+
       jointForExtendedNeckPitchRange = setupJointForExtendedNeckPitchRange();
       ChestOrientationControlModule chestOrientationControlModule = setupChestOrientationControlModule();
       chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestOrientationControlModule);
-      
+
+
+      this.rootJointAccelerationControlModule = rootJointAccelerationControlModule;
+
       // Setup joint constraints
       positionControlJoints = setupJointConstraints();
    }
@@ -258,11 +256,12 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       momentumBasedController.initialize();
       manipulationControlModule.initialize();
    }
-   
+
    public double getDeterminantOfHipToAnkleJacobian(RobotSide robotSide)
    {
-         legJacobians.get(robotSide).compute();
-         return legJacobians.get(robotSide).det();
+      legJacobians.get(robotSide).compute();
+
+      return legJacobians.get(robotSide).det();
    }
 
    public void doMotionControl()
@@ -305,7 +304,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
          momentumBasedController.doPDControl(jointForExtendedNeckPitchRange, kUpperBody, dUpperBody, angle, 0.0);
       }
 
-     
+
    }
 
    protected void doChestControl()
@@ -336,7 +335,36 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       OrientationTrajectoryData pelvisOrientationTrajectoryData = new OrientationTrajectoryData();
       pelvisOrientationTrajectoryData.set(desiredPelvisOrientation.getFrameOrientationCopy(), desiredPelvisAngularVelocity.getFrameVectorCopy(),
               desiredPelvisAngularAcceleration.getFrameVectorCopy());
-      desiredPelvisOrientationTrajectoryInputPort.setData(pelvisOrientationTrajectoryData);
+
+      rootJointAccelerationControlModule.getDesiredPelvisOrientationTrajectoryInputPort().setData(pelvisOrientationTrajectoryData);
+      setRootJointAcceleration();
+   }
+
+   private void setRootJointAcceleration()
+   {
+      if (rootJointAccelerationControlModule != null)
+      {
+         TaskspaceConstraintData rootJointTaskSpaceConstraintData = new TaskspaceConstraintData();
+         SpatialAccelerationVector rootJointAcceleration = new SpatialAccelerationVector();
+         DenseMatrix64F rootJointAccelerationMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
+         DenseMatrix64F rootJointNullspaceMultipliers = new DenseMatrix64F(0, 1);
+         DenseMatrix64F rootJointSelectionMatrix = new DenseMatrix64F(1, 1);
+
+         rootJointAccelerationControlModule.startComputation();
+         rootJointAccelerationControlModule.waitUntilComputationIsDone();
+         RootJointAccelerationData rootJointAccelerationData = rootJointAccelerationControlModule.getRootJointAccelerationOutputPort().getData();
+
+         CommonOps.mult(rootJointAccelerationData.getAccelerationSubspace(), rootJointAccelerationData.getAccelerationMultipliers(),
+                        rootJointAccelerationMatrix);
+         rootJointAcceleration.set(rootJointAccelerationData.getBodyFrame(), rootJointAccelerationData.getBaseFrame(),
+                                   rootJointAccelerationData.getExpressedInFrame(), rootJointAccelerationMatrix, 0);
+         rootJointAcceleration.changeFrameNoRelativeMotion(rootJointAccelerationData.getBodyFrame());
+         DenseMatrix64F accelerationSubspace = rootJointAccelerationData.getAccelerationSubspace();
+         rootJointSelectionMatrix.reshape(accelerationSubspace.getNumCols(), accelerationSubspace.getNumRows());
+         CommonOps.transpose(accelerationSubspace, rootJointSelectionMatrix);
+         rootJointTaskSpaceConstraintData.set(rootJointAcceleration, rootJointNullspaceMultipliers, rootJointSelectionMatrix);
+         momentumBasedController.setDesiredSpatialAcceleration(fullRobotModel.getRootJoint().getMotionSubspace(), rootJointTaskSpaceConstraintData);
+      }
    }
 
    protected void doJointPositionControl()

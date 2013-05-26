@@ -22,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.TorusPoseProvider;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OrientationTrajectoryData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAngularAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.CurrentOrientationProvider;
@@ -88,13 +89,13 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
 
    public CarIngressEgressController(SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<? extends ContactablePlaneBody> hands,
-         ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationPort, DesiredHeadOrientationProvider desiredHeadOrientationProvider,
+                                     RootJointAngularAccelerationControlModule rootJointAccelerationControlModule, DesiredHeadOrientationProvider desiredHeadOrientationProvider,
          MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters, DesiredHandPoseProvider handPoseProvider,
          TorusPoseProvider torusPoseProvider, DesiredFootPoseProvider footPoseProvider, DesiredPelvisPoseProvider pelvisPoseProvider,
          DesiredChestOrientationProvider chestOrientationProvider, SideDependentList<HandControllerInterface> handControllers,
          LidarControllerInterface lidarControllerInterface, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      super(feet, desiredPelvisOrientationPort, desiredHeadOrientationProvider, momentumBasedController, walkingControllerParameters, handPoseProvider,
+      super(feet, rootJointAccelerationControlModule, desiredHeadOrientationProvider, momentumBasedController, walkingControllerParameters, handPoseProvider,
             torusPoseProvider, handControllers, lidarControllerInterface, dynamicGraphicObjectsListRegistry, controllerState);
 
       this.footPoseProvider = footPoseProvider;
@@ -236,10 +237,9 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       pelvisOrientationTrajectoryGenerator.get(desiredOrientation);
       pelvisOrientationTrajectoryGenerator.packAngularVelocity(desiredAngularVelocity);
       pelvisOrientationTrajectoryGenerator.packAngularAcceleration(desiredAngularAcceleration);
-      
-      OrientationTrajectoryData pelvisOrientationTrajectoryData = new OrientationTrajectoryData();
-      pelvisOrientationTrajectoryData.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
-      desiredPelvisOrientationTrajectoryInputPort.setData(pelvisOrientationTrajectoryData);
+
+      // TODO: clean up
+      super.doPelvisControl();
    }
 
    protected void doChestControl()
