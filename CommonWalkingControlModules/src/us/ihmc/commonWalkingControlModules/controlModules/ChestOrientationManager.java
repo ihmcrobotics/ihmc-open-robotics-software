@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.geometry.FrameVector;
 
 
 public class ChestOrientationManager
@@ -24,5 +26,10 @@ public class ChestOrientationManager
       momentumBasedController.setDesiredSpatialAcceleration(chestOrientationControlModule.getJacobian(),
             chestOrientationControlModule.getTaskspaceConstraintData());
 
+   }
+
+   public void setDesireds(FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector desiredAngularAcceleration)
+   {
+      chestOrientationControlModule.setDesireds(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);    
    }
 }

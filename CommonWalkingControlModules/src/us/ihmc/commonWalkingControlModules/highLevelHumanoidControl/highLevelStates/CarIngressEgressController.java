@@ -260,7 +260,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       chestOrientationTrajectoryGenerator.packAngularVelocity(desiredAngularVelocity);
       chestOrientationTrajectoryGenerator.packAngularAcceleration(desiredAngularAcceleration);
       
-      chestOrientationControlModule.setDesireds(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      chestOrientationManager.setDesireds(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       
       super.doChestControl();
    }
