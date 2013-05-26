@@ -158,7 +158,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       RigidBody chest = fullRobotModel.getChest();
       RigidBody pelvis = fullRobotModel.getPelvis();
 
-      String[] chestOrientationControlJointNames = walkingControllerParameters.getChestOrientationControlJointNames();
+      String[] chestOrientationControlJointNames = walkingControllerParameters.getDefaultChestOrientationControlJointNames();
 
       InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
       InverseDynamicsJoint[] chestOrientationControlJoints = ScrewTools.findJointsWithNames(allJoints, chestOrientationControlJointNames);
@@ -197,8 +197,8 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       RigidBody pelvis = fullRobotModel.getPelvis();
       RigidBody chest = fullRobotModel.getChest();
 
-      String[] headOrientationControlJointNames = walkingControllerParameters.getHeadOrientationControlJointNames();
-      String[] chestOrientationControlJointNames = walkingControllerParameters.getChestOrientationControlJointNames();
+      String[] headOrientationControlJointNames = walkingControllerParameters.getDefaultHeadOrientationControlJointNames();
+      String[] chestOrientationControlJointNames = walkingControllerParameters.getDefaultChestOrientationControlJointNames();
 
       InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
       InverseDynamicsJoint[] headOrientationControlJoints = ScrewTools.findJointsWithNames(allJoints, headOrientationControlJointNames);

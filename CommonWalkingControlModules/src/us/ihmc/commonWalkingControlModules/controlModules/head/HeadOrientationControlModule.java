@@ -46,7 +46,7 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
          ReferenceFrame[] availableHeadOrientationControlFrames, ReferenceFrame chestFrame, HeadOrientationControllerParameters headOrientationControllerParameters, YoVariableRegistry parentRegistry,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      super("head", new RigidBody[] {elevator, pelvis}, neckJacobian.getEndEffector(), neckJacobian, twistCalculator, parentRegistry);
+      super("head", new RigidBody[] {elevator, pelvis}, neckJacobian.getEndEffector(), new GeometricJacobian[]{neckJacobian}, twistCalculator, parentRegistry);
 
       pointTrackingFrame = new OriginAndPointFrame("headPointTrackingFrame", ReferenceFrame.getWorldFrame());
 
@@ -77,7 +77,8 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
       ReferenceFrame referenceFrame = framesToTrackIn[trackingFrameIndex.getIntegerValue()];
 
       FramePoint positionToPointAt = pointToTrack.getPointInFrame(referenceFrame).getFramePointCopy();
-      ReferenceFrame headFrame = jacobian.getEndEffectorFrame(); // TODO: change to midEyeFrame?
+      GeometricJacobian jacobian = super.getJacobian();
+      ReferenceFrame headFrame = jacobian .getEndEffectorFrame(); // TODO: change to midEyeFrame?
       pointTrackingFrame.setOriginAndPositionToPointAt(new FramePoint(headFrame), positionToPointAt);
 
       FrameOrientation frameOrientation;

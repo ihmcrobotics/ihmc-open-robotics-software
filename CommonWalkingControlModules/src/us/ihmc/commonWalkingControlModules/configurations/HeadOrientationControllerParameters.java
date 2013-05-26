@@ -2,7 +2,9 @@ package us.ihmc.commonWalkingControlModules.configurations;
 
 public interface HeadOrientationControllerParameters
 {
-   public abstract String[] getHeadOrientationControlJointNames();
+   public abstract String[] getDefaultHeadOrientationControlJointNames();
+   
+   public abstract String[] getAllowableHeadOrientationControlJointNames();
    
    public abstract String getJointNameForExtendedPitchRange();
    
