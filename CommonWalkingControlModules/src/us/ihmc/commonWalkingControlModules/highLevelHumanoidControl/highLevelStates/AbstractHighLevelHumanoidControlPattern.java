@@ -128,8 +128,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
               torusPoseProvider, dynamicGraphicObjectsListRegistry, handControllers, momentumBasedController, registry);
 
       // Setup head and chest control modules
-      HeadOrientationControlModule headOrientationControlModule = setupHeadOrientationControlModule(dynamicGraphicObjectsListRegistry);
-      headOrientationManager = new HeadOrientationManager(momentumBasedController, headOrientationControlModule);
+      headOrientationManager = new HeadOrientationManager(momentumBasedController, walkingControllerParameters, desiredHeadOrientationProvider, registry, dynamicGraphicObjectsListRegistry);
       
       jointForExtendedNeckPitchRange = setupJointForExtendedNeckPitchRange();
       ChestOrientationControlModule chestOrientationControlModule = setupChestOrientationControlModule();
@@ -191,45 +190,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
          return jointForExtendedNeckPitchControl[0];
       else
          return null;
-   }
-
-   protected HeadOrientationControlModule setupHeadOrientationControlModule(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
-   {
-      String[] headOrientationControlJointNames = walkingControllerParameters.getHeadOrientationControlJointNames();
-      InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
-      InverseDynamicsJoint[] headOrientationControlJoints = ScrewTools.findJointsWithNames(allJoints, headOrientationControlJointNames);
-
-      if (headOrientationControlJoints.length <= 0)
-         return null;
-
-      RigidBody pelvis = fullRobotModel.getPelvis();
-      RigidBody head = fullRobotModel.getHead();
-      RigidBody elevator = fullRobotModel.getElevator();
-      GeometricJacobian neckJacobian = new GeometricJacobian(headOrientationControlJoints, head.getBodyFixedFrame());
-      ReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
-      ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
-      ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
-      ReferenceFrame[] availableHeadOrientationControlFrames = new ReferenceFrame[] {pelvisZUpFrame, pelvisFrame, ReferenceFrame.getWorldFrame()};
-
-      HeadOrientationControlModule headOrientationControlModule = new HeadOrientationControlModule(neckJacobian, pelvis, elevator, twistCalculator,
-                                                                     availableHeadOrientationControlFrames, chestFrame, walkingControllerParameters, registry,
-                                                                     dynamicGraphicObjectsListRegistry);
-
-      // Setting initial head pitch
-      // This magic number (0.67) is a good default head pitch for getting good LIDAR point coverage of ground by feet
-      // it would be in DRC config parameters, but the would require updating several nested constructors with an additional parameter
-      FrameOrientation orientation = new FrameOrientation(pelvisZUpFrame, 0.0, 0.67, 0.0);
-      headOrientationControlModule.setOrientationToTrack(new FrameOrientation(orientation), pelvis);
-      double headKp = 40.0;
-      double headZeta = 1.0;
-      double headKd = GainCalculator.computeDerivativeGain(headKp, headZeta);
-      headOrientationControlModule.setProportionalGains(headKp, headKp, headKp);
-      headOrientationControlModule.setDerivativeGains(headKd, headKd, headKd);
-
-      if (desiredHeadOrientationProvider != null)
-         desiredHeadOrientationProvider.setHeadOrientationControlModule(headOrientationControlModule);
-
-      return headOrientationControlModule;
    }
 
    protected OneDoFJoint[] setupJointConstraints()
