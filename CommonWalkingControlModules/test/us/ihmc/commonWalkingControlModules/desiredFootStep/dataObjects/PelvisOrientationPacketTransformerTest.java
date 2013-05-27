@@ -43,7 +43,7 @@ public class PelvisOrientationPacketTransformerTest
 
          transform3D = RandomTools.generateRandomTransform(random);
 
-         PelvisOrientationPacket ending = PelvisOrientationPacketTransformer.transformPelvisOrientationPacket(starting, transform3D);
+         PelvisOrientationPacket ending = starting.transform(transform3D);
 
          performEqualsTestForQuat(starting, transform3D, ending);
       }
@@ -54,7 +54,7 @@ public class PelvisOrientationPacketTransformerTest
 
          PelvisOrientationPacket starting = new PelvisOrientationPacket(point3d);
          transform3D = RandomTools.generateRandomTransform(random);
-         PelvisOrientationPacket ending = PelvisOrientationPacketTransformer.transformPelvisOrientationPacket(starting, transform3D);
+         PelvisOrientationPacket ending = starting.transform(transform3D);
          performEqualsTestForPoint(starting, transform3D, ending);
       }
    }

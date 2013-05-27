@@ -9,8 +9,6 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.TorusPosePacket;
@@ -33,7 +31,6 @@ public class TorusPosePacketTransformerTest
    {
       int numberOfTests = 10;
       double radius = 1.0;
-      double angle = 0;
 
       Random random = new Random(100L);
       Transform3D transform3D;
@@ -41,7 +38,6 @@ public class TorusPosePacketTransformerTest
       for (int i = 0; i < numberOfTests; i++)
       {
          Point3d point3d = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-         Vector3d normal = RandomTools.generateRandomVector(random, 1.0);
 
          AxisAngle4d axisAngle = RandomTools.generateRandomRotation(random);
          Quat4d quat = new Quat4d();
@@ -51,7 +47,7 @@ public class TorusPosePacketTransformerTest
 
          transform3D = RandomTools.generateRandomTransform(random);
 
-         TorusPosePacket ending = TorusPosePacketTransformer.transformTorusPosePacket(starting, transform3D);
+         TorusPosePacket ending = starting.transform(transform3D);
 
          performEqualsTest(starting, transform3D, ending);
       }
