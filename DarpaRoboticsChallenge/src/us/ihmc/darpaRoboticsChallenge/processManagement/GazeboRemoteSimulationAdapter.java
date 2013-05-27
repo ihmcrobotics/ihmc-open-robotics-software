@@ -1,9 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.processManagement;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
+import java.io.*;
 import java.net.InetAddress;
 import java.util.Properties;
 import java.util.Timer;
@@ -26,7 +23,7 @@ import us.ihmc.utilities.Pair;
 
 public class GazeboRemoteSimulationAdapter extends Thread
 {
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
 
    public static final char KILL_CHAR = 0x03;
 
@@ -49,8 +46,6 @@ public class GazeboRemoteSimulationAdapter extends Thread
 
    private static final int REACHABLE_TIMEOUT = 5000;
    private static final int CONNECTION_TIMEOUT = 5000;
-
-   private boolean waitingOnGazebo = false;
 
    public GazeboRemoteSimulationAdapter()
    {
@@ -103,7 +98,9 @@ public class GazeboRemoteSimulationAdapter extends Thread
       {
          if (isMachineRunningSim(gazeboMachine))
          {
-            sendCommandThroughExecChannel(gazeboMachine, "kill -2 " + getRosSimPID(gazeboMachine));
+            sendCommandThroughShellChannel(gazeboMachine, "kill -2 " + getRosSimPID(gazeboMachine));
+
+//          sendCommandThroughExecChannel(gazeboMachine, "kill -2 " + getRosSimPID(gazeboMachine));
             updateRosSimPID(gazeboMachine);
             updateRosSimTaskname(gazeboMachine);
             isRunningRos.get(gazeboMachine).setValue(false);
@@ -115,9 +112,9 @@ public class GazeboRemoteSimulationAdapter extends Thread
       }
    }
 
-   public boolean isWaitingOnGazebo()
+   public boolean isWaitingOnGazebo(LocalCloudMachines machine)
    {
-      return waitingOnGazebo;
+      return !isGazeboAvailable(machine);
    }
 
    public void run()
@@ -373,6 +370,52 @@ public class GazeboRemoteSimulationAdapter extends Thread
       }
    }
 
+   private boolean isGazeboAvailable(LocalCloudMachines machine)
+   {
+      boolean ret = false;
+      ChannelShell channel = null;
+      BufferedReader reader;
+      PrintStream stream;
+      try
+      {
+         channel = (ChannelShell) sessions.get(machine).openChannel("shell");
+         stream = new PrintStream(channel.getOutputStream(), true);
+         reader = new BufferedReader(new InputStreamReader(channel.getInputStream()));
+         channel.setInputStream(null);
+         channel.setOutputStream(null);
+         channel.connect(CONNECTION_TIMEOUT);
+
+         stream.println("echo $ROS_MASTER_URI; echo $ROS_HOSTNAME; rosnode ping -c 1 gazebo");
+         stream.flush();
+
+
+         String tmp;
+
+         while ((tmp = reader.readLine()) != null)
+         {
+            if(tmp.contains("test"))
+               ret = true;
+            if (DEBUG)
+            {
+               System.err.println("tmp: " + tmp);
+            }
+         }
+
+      }
+      catch (JSchException e)
+      {
+         e.printStackTrace();
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+
+      channel.disconnect();
+
+      return ret;
+   }
+
    private void updateRosSimPID(LocalCloudMachines machine)
    {
       int pid = -1;
@@ -392,8 +435,8 @@ public class GazeboRemoteSimulationAdapter extends Thread
          if (tmp != null)
             pid = Integer.parseInt(tmp);
 
-         if (DEBUG)
-            System.out.println(pid);
+//       if (DEBUG)
+//          System.out.println(pid);
 
          channel.disconnect();
       }
@@ -430,8 +473,8 @@ public class GazeboRemoteSimulationAdapter extends Thread
          if (tmp != null)
             pid = Integer.parseInt(tmp);
 
-         if (DEBUG)
-            System.out.println(pid);
+//       if (DEBUG)
+//          System.out.println(pid);
 
          channel.disconnect();
       }
@@ -467,8 +510,8 @@ public class GazeboRemoteSimulationAdapter extends Thread
          if (tmp != null)
             taskName = tmp;
 
-         if (DEBUG)
-            System.out.println(taskName);
+//       if (DEBUG)
+//          System.out.println(taskName);
 
          channel.disconnect();
       }

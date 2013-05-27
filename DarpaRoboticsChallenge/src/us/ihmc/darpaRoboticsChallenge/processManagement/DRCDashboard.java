@@ -976,7 +976,7 @@ public class DRCDashboard
          {
             updateNetworkStatus();
          }
-      }, 0l, 5000l);
+      }, 0l, 6500l);
    }
 
    private void updateNetworkStatus()
@@ -1175,7 +1175,7 @@ public class DRCDashboard
 
             if (estimatorCheckBox.isEnabled() && estimatorCheckBox.isSelected())
             {
-               ThreadTools.sleep(5000);
+               ThreadTools.sleep(6000);
                scsSpawner.spawn(DRCDemo01.class, new String[] {"-Xms1024m", "-Xmx2048m"}, new String[]
                {
                   "--sim", "--env", newTask, "--gazebo", "--gazeboHost", DRCLocalCloudConfig.getIPAddress(gazeboMachine), "--initialize-estimator", "--start",
@@ -1184,7 +1184,7 @@ public class DRCDashboard
             }
             else
             {
-               ThreadTools.sleep(5000);
+               ThreadTools.sleep(6000);
                scsSpawner.spawn(DRCDemo01.class, new String[] {"-Xms1024m", "-Xmx2048m"}, new String[]
                {
                   "--sim", "--env", newTask, "--gazebo", "--gazeboHost", DRCLocalCloudConfig.getIPAddress(gazeboMachine), "--start",
