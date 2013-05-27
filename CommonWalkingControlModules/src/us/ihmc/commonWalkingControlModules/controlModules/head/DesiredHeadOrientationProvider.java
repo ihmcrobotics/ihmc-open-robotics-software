@@ -1,15 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controlModules.head;
 
-import java.util.LinkedHashMap;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectConsumer;
-import us.ihmc.utilities.screwTheory.RigidBody;
 
 /**
  * User: Matt
@@ -19,35 +13,53 @@ public class DesiredHeadOrientationProvider
 {
    private HeadOrientationControlModule headOrientationControlModule;
 
-   private ObjectConsumer<HeadOrientationPacket> headOrientationPacketConsumer;
-   private final LinkedHashMap<String, ReferenceFrame> availableHeadControlFrames = new LinkedHashMap<String, ReferenceFrame>();
-   private final LinkedHashMap<String, RigidBody> availableBases = new LinkedHashMap<String, RigidBody>();
+   
+   private final  ObjectConsumer<HeadOrientationPacket> headOrientationPacketConsumer;
+   private final ObjectConsumer<LookAtPacket> lookAtPacketConsumer;
+   private final ReferenceFrame lookAtFrame = ReferenceFrame.getWorldFrame();
+   private ReferenceFrame headOrientationFrame;
+   
    
    private double desiredJointForExtendedNeckPitchRangeAngle = 0.0;
 
    public DesiredHeadOrientationProvider()
    {
       headOrientationPacketConsumer = new HeadOrientationPacketConsumer();
+      lookAtPacketConsumer = new LookAtPacketConsumer();
    }
 
    public ObjectConsumer<HeadOrientationPacket> getHeadOrientationPacketConsumer()
    {
       return headOrientationPacketConsumer;
    }
+   
+
+   public ObjectConsumer<LookAtPacket> getLookAtPacketConsumer()
+   {
+      return lookAtPacketConsumer;
+   }
 
    public void setHeadOrientationControlModule(HeadOrientationControlModule headOrientationControlModule)
    {
       this.headOrientationControlModule = headOrientationControlModule;
       
-      for (ReferenceFrame frame : headOrientationControlModule.getAvailableHeadControlFrames())
-      {
-         this.availableHeadControlFrames.put(frame.getName(), frame);
-      }
+      this.headOrientationFrame = headOrientationControlModule.getHeadOrientationFrame();
+   }
+   
+   private class LookAtPacketConsumer implements ObjectConsumer<LookAtPacket>
+   {
 
-      for (RigidBody base : headOrientationControlModule.getAvailableBases())
+      public void consumeObject(LookAtPacket object)
       {
-         this.availableBases.put(base.getName(), base);
+         if (headOrientationControlModule != null)
+         {
+            FramePoint pointToTrack = new FramePoint(lookAtFrame, object.getLookAtPoint());
+            headOrientationControlModule.setPointToTrack(pointToTrack);
+            
+            desiredJointForExtendedNeckPitchRangeAngle = 0.0;
+         }         
       }
+      
    }
 
    private class HeadOrientationPacketConsumer implements ObjectConsumer<HeadOrientationPacket>
@@ -56,29 +68,9 @@ public class DesiredHeadOrientationProvider
       {
          if (headOrientationControlModule != null)
          {
-            ReferenceFrame frame = availableHeadControlFrames.get(packet.getFrameName());
-            if (frame == null)
-               throw new RuntimeException("Frame with name " + packet.getFrameName() + " is not an available head control frame");
-
-            RigidBody base = availableBases.get(packet.getBaseName());
-            if (base == null)
-               throw new RuntimeException("Base with name " + packet.getBaseName() + " is not an available head control base");
-
-            Quat4d quaternion = packet.getQuaternion();
-            Point3d point = packet.getPoint();
-
-            if (quaternion != null)
-            {
-               FrameOrientation frameOrientation = new FrameOrientation(frame, quaternion);
-               headOrientationControlModule.setOrientationToTrack(frameOrientation, base);
-            }
-
-            if (point != null)
-            {
-               FramePoint pointToTrack = new FramePoint(frame, point);
-               headOrientationControlModule.setPointToTrack(pointToTrack, base);
-            }
-            
+            FrameOrientation frameOrientation = new FrameOrientation(headOrientationFrame, packet.getQuaternion());
+            headOrientationControlModule.setOrientationToTrack(frameOrientation);
+ 
             desiredJointForExtendedNeckPitchRangeAngle = packet.getDesiredJointForExtendedNeckPitchRangeAngle();
          }
       }
@@ -88,4 +80,5 @@ public class DesiredHeadOrientationProvider
    {
       return desiredJointForExtendedNeckPitchRangeAngle;
    }
+
 }
