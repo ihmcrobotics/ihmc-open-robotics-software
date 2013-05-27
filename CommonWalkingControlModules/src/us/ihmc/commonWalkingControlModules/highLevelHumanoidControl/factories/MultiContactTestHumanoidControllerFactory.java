@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.MultiContactTestHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredFootPoseProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredHandPoseProvider;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.TorusManipulationProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.TorusPoseProvider;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CoMBasedMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -152,11 +153,12 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
 
       DesiredHandPoseProvider desiredHandPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters);
       TorusPoseProvider torusPoseProvider = new TorusPoseProvider();
+      TorusManipulationProvider torusManipulationProvider = new TorusManipulationProvider();
       DesiredFootPoseProvider desiredFootPoseProvider = new DesiredFootPoseProvider();
 
       MultiContactTestHumanoidController multiContactBehavior = new MultiContactTestHumanoidController(momentumRateOfChangeControlModule,
                                                                    rootJointAccelerationControlModule, null, momentumBasedController,
-                                                                   walkingControllerParameters, desiredHandPoseProvider, torusPoseProvider,
+                                                                   walkingControllerParameters, desiredHandPoseProvider, torusPoseProvider, torusManipulationProvider,
                                                                    desiredFootPoseProvider, null, null, dynamicGraphicObjectsListRegistry);
 
       for (RobotSide robotSide : RobotSide.values)
