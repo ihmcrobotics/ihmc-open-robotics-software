@@ -220,6 +220,10 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       pelvisOrientationTrajectoryGenerator.packAngularVelocity(desiredAngularVelocity);
       pelvisOrientationTrajectoryGenerator.packAngularAcceleration(desiredAngularAcceleration);
 
+      desiredPelvisOrientation.set(desiredOrientation);
+      desiredPelvisAngularVelocity.set(desiredAngularVelocity);
+      desiredPelvisAngularAcceleration.set(desiredAngularAcceleration);
+      
       // TODO: clean up
       super.doPelvisControl();
    }
