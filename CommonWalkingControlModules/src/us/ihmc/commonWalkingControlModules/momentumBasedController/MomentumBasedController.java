@@ -54,56 +54,56 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 public class MomentumBasedController implements RobotController
 {
    private final String name = getClass().getSimpleName();
-   protected final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
-   protected final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   protected final ReferenceFrame elevatorFrame;
-   protected final ReferenceFrame centerOfMassFrame;
+   private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private final ReferenceFrame elevatorFrame;
+   private final ReferenceFrame centerOfMassFrame;
 
-   protected final FullRobotModel fullRobotModel;
-   protected final CenterOfMassJacobian centerOfMassJacobian;
-   protected final CommonWalkingReferenceFrames referenceFrames;
-   protected final TwistCalculator twistCalculator;
-   protected final SideDependentList<ContactablePlaneBody> feet, handPalms;
-   protected final SideDependentList<ContactableCylinderBody> graspingHands;
-   protected final SideDependentList<ContactableRollingBody> rollingThighs;
-   protected final List<ContactablePlaneBody> listOfAllContactablePlaneBodies;
-   protected final List<ContactableRollingBody> listOfAllContactableRollingBodies;
-   protected final List<ContactableCylinderBody> listOfAllContactableCylinderBodies;
+   private final FullRobotModel fullRobotModel;
+   private final CenterOfMassJacobian centerOfMassJacobian;
+   private final CommonWalkingReferenceFrames referenceFrames;
+   private final TwistCalculator twistCalculator;
+   private final SideDependentList<ContactablePlaneBody> feet, handPalms;
+   private final SideDependentList<ContactableCylinderBody> graspingHands;
+   private final SideDependentList<ContactableRollingBody> rollingThighs;
+   private final List<ContactablePlaneBody> listOfAllContactablePlaneBodies;
+   private final List<ContactableRollingBody> listOfAllContactableRollingBodies;
+   private final List<ContactableCylinderBody> listOfAllContactableCylinderBodies;
 
    // Creating a Map that will contain all of the YoPlaneContactState and YoRollingContactState to pass to the MomentumControlModule compute method
-   protected final Map<ContactablePlaneBody, PlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, PlaneContactState>();
-   protected final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> planeContactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
-   protected final LinkedHashMap<ContactableRollingBody, YoRollingContactState> rollingContactStates = new LinkedHashMap<ContactableRollingBody,
+   private final Map<ContactablePlaneBody, PlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, PlaneContactState>();
+   private final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> planeContactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
+   private final LinkedHashMap<ContactableRollingBody, YoRollingContactState> rollingContactStates = new LinkedHashMap<ContactableRollingBody,
                                                                                                            YoRollingContactState>();
-   protected final LinkedHashMap<ContactableCylinderBody, YoCylindricalContactState> cylindricalContactStates = new LinkedHashMap<ContactableCylinderBody, YoCylindricalContactState>();
-   protected final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
-   protected final DoubleYoVariable yoTime;
-   protected final double controlDT;
-   protected final double gravity;
+   private final LinkedHashMap<ContactableCylinderBody, YoCylindricalContactState> cylindricalContactStates = new LinkedHashMap<ContactableCylinderBody, YoCylindricalContactState>();
+   private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
+   private final DoubleYoVariable yoTime;
+   private final double controlDT;
+   private final double gravity;
 
-   protected final YoFrameVector finalDesiredPelvisLinearAcceleration;
-   protected final YoFrameVector finalDesiredPelvisAngularAcceleration;
-   protected final YoFrameVector desiredPelvisForce;
-   protected final YoFrameVector desiredPelvisTorque;
+   private final YoFrameVector finalDesiredPelvisLinearAcceleration;
+   private final YoFrameVector finalDesiredPelvisAngularAcceleration;
+   private final YoFrameVector desiredPelvisForce;
+   private final YoFrameVector desiredPelvisTorque;
 
-   protected final YoFrameVector admissibleDesiredGroundReactionTorque;
-   protected final YoFrameVector admissibleDesiredGroundReactionForce;
-   protected final YoFrameVector groundReactionTorqueCheck;
-   protected final YoFrameVector groundReactionForceCheck;
+   private final YoFrameVector admissibleDesiredGroundReactionTorque;
+   private final YoFrameVector admissibleDesiredGroundReactionForce;
+   private final YoFrameVector groundReactionTorqueCheck;
+   private final YoFrameVector groundReactionForceCheck;
 
-   protected final LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredAccelerationYoVariables = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
+   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredAccelerationYoVariables = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
 
-   protected final ProcessedOutputsInterface processedOutputs;
-   protected final InverseDynamicsCalculator inverseDynamicsCalculator;
+   private final ProcessedOutputsInterface processedOutputs;
+   private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
    private final DesiredCoMAndAngularAccelerationGrabber desiredCoMAndAngularAccelerationGrabber;
-   protected final PointPositionGrabberInterface pointPositionGrabber;
+   private final PointPositionGrabberInterface pointPositionGrabber;
 
-   protected final MomentumControlModule momentumControlModule;
+   private final MomentumControlModule momentumControlModule;
 
-   protected final SpatialForceVector gravitationalWrench;
-   protected final EnumYoVariable<RobotSide> upcomingSupportLeg = EnumYoVariable.create("upcomingSupportLeg", "", RobotSide.class, registry, true);    // FIXME: not general enough; this should not be here
+   private final SpatialForceVector gravitationalWrench;
+   private final EnumYoVariable<RobotSide> upcomingSupportLeg = EnumYoVariable.create("upcomingSupportLeg", "", RobotSide.class, registry, true);    // FIXME: not general enough; this should not be here
 
    private final PlaneContactWrenchProcessor planeContactWrenchProcessor;
 
@@ -272,7 +272,7 @@ public class MomentumBasedController implements RobotController
       return gravitationalWrench;
    }
 
-   protected static double computeDesiredAcceleration(double k, double d, double qDesired, double qdDesired, OneDoFJoint joint)
+   private static double computeDesiredAcceleration(double k, double d, double qDesired, double qdDesired, OneDoFJoint joint)
    {
       return k * (qDesired - joint.getQ()) + d * (qdDesired - joint.getQd());
    }
@@ -348,7 +348,7 @@ public class MomentumBasedController implements RobotController
       doSecondaryControl();
    }
 
-   protected void resetGroundReactionWrenchFilter()
+   private void resetGroundReactionWrenchFilter()
    {
       momentumControlModule.resetGroundReactionWrenchFilter();
    }
