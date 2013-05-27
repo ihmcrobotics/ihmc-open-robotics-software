@@ -76,7 +76,7 @@ public class DRCDashboard
 
    private JavaProcessSpawner uiSpawner = new JavaProcessSpawner(true);
    private JavaProcessSpawner scsSpawner = new JavaProcessSpawner(true);
-   private DRCRemoteProcessManager sshSimLauncher = new DRCRemoteProcessManager();
+   private GazeboRemoteSimulationAdapter sshSimLauncher = new GazeboRemoteSimulationAdapter();
 
    private HashMap<LocalCloudMachines, Pair<JTree, DefaultMutableTreeNode>> cloudMachineTrees = new HashMap<LocalCloudMachines,
                                                                                                    Pair<JTree, DefaultMutableTreeNode>>();
