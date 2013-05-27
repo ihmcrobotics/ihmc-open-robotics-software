@@ -58,7 +58,7 @@ public class HandPosePacketTransformerTest
 
          transform3D = RandomTools.generateRandomTransform(random);
 
-         HandPosePacket ending = HandPosePacketTransformer.transformHandPosePacket(starting, transform3D);
+         HandPosePacket ending = starting.transform(transform3D);
 
          performEqualsTest(starting, transform3D, ending);
       }

@@ -8,10 +8,6 @@ import java.util.ArrayList;
 import javax.media.j3d.Transform3D;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.EndOfScriptCommand;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.HandPosePacket;
-import us.ihmc.utilities.ArrayTools;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.KryoStreamSerializer;
 import us.ihmc.utilities.net.NetClassList;
 import us.ihmc.utilities.net.TimestampProvider;
@@ -127,7 +123,7 @@ public class CommandRecorder
          Object objectToWrite;
          if(object instanceof TransformableDataObject)
          {
-            objectToWrite = ObjectTransformationHelper.transform(recordTransform, (TransformableDataObject) object);
+            objectToWrite = ((TransformableDataObject) object).transform(recordTransform);
 
             //This is just for debugging.
 //            if (object instanceof HandPosePacket)

@@ -126,7 +126,7 @@ public class CommandPlayer implements TimestampListener
          Object objectToSend;
          if(object instanceof TransformableDataObject)
          {
-            objectToSend = ObjectTransformationHelper.transform(playbackTransform, (TransformableDataObject) object);         
+            objectToSend = ((TransformableDataObject) object).transform(playbackTransform);         
          }
          else if(object instanceof EndOfScriptCommand)
          {

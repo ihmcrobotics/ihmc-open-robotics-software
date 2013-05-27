@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects;
 
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.FootPosePacket;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.HandPosePacket;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -53,7 +52,7 @@ public class FootPosePacketTransformerTest
 
          transform3D = RandomTools.generateRandomTransform(random);
 
-         FootPosePacket ending = FootPosePacketTransformer.transformFootPosePacket(starting, transform3D);
+         FootPosePacket ending = starting.transform(transform3D);
 
          performEqualsTest(starting, transform3D, ending);
       }
