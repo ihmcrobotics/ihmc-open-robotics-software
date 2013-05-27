@@ -24,7 +24,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import us.ihmc.utilities.Pair;
 
-public class DRCRemoteProcessManager extends Thread
+public class GazeboRemoteSimulationAdapter extends Thread
 {
    private static final boolean DEBUG = false;
 
@@ -52,7 +52,7 @@ public class DRCRemoteProcessManager extends Thread
 
    private boolean waitingOnGazebo = false;
 
-   public DRCRemoteProcessManager()
+   public GazeboRemoteSimulationAdapter()
    {
       jsch = new JSch();
 
