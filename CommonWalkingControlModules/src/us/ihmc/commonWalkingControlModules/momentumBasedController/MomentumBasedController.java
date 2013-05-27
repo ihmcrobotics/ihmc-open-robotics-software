@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoRollingContactState;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.stateEstimation.DesiredCoMAndAngularAccelerationGrabber;
@@ -55,7 +56,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class MomentumBasedController implements RobotController
 {
-   private static final boolean SPY_ON_MOMENTUM_BASED_CONTROLLER = false;
+   private static final boolean SPY_ON_MOMENTUM_BASED_CONTROLLER = true;
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
@@ -293,6 +294,16 @@ public class MomentumBasedController implements RobotController
       
       momentumControlModule.setExternalWrenchToCompensateFor(rigidBody, wrench);
    }
+   
+   public void setDesiredPointAcceleration(GeometricJacobian rootToEndEffectorJacobian, FramePoint contactPoint, FrameVector desiredAcceleration)
+   {
+      if (momentumBasedControllerSpy != null)
+      {
+         momentumBasedControllerSpy.setDesiredPointAcceleration(rootToEndEffectorJacobian, contactPoint, desiredAcceleration);
+      }
+
+      momentumControlModule.setDesiredPointAcceleration(rootToEndEffectorJacobian, contactPoint, desiredAcceleration);
+   }
 
    public void doMotionControl()
    {
@@ -475,14 +486,15 @@ public class MomentumBasedController implements RobotController
    {
       return planeContactWrenchProcessor.getCops().get(contactablePlaneBody);
    }
-   
-   public void setContactState(ContactablePlaneBody contactablePlaneBody, List<FramePoint2d> contactPoints, double coefficientOfFriction)
-   {
-      setContactState(contactablePlaneBody, contactPoints, coefficientOfFriction, null);
-   }
 
-   public void setContactState(ContactablePlaneBody contactableBody, List<FramePoint2d> contactPoints, double coefficientOfFriction, FrameVector normalContactVector)
+
+   public void setPlaneContactState(ContactablePlaneBody contactableBody, List<FramePoint2d> contactPoints, double coefficientOfFriction, FrameVector normalContactVector)
    {
+      if (momentumBasedControllerSpy != null)
+      {
+         momentumBasedControllerSpy.setPlaneContactState(contactableBody, contactPoints, coefficientOfFriction, normalContactVector);
+      }
+      
       YoPlaneContactState yoPlaneContactState = planeContactStates.get(contactableBody);
 
       if (normalContactVector == null)
@@ -497,6 +509,11 @@ public class MomentumBasedController implements RobotController
    
    public void setRollingContactState(ContactableRollingBody contactableRollingBody, List<FramePoint2d> contactPoints, double coefficientOfFriction)
    {
+      if (momentumBasedControllerSpy != null)
+      {
+         momentumBasedControllerSpy.setRollingContactState(contactableRollingBody, contactPoints, coefficientOfFriction);
+      }
+      
       YoRollingContactState yoRollingContactState = rollingContactStates.get(contactableRollingBody);
 
       yoRollingContactState.setContactPoints(contactPoints);
@@ -505,6 +522,11 @@ public class MomentumBasedController implements RobotController
 
    public void setCylindricalContactInContact(ContactableCylinderBody contactableCylinderBody, boolean setInContact)
    {
+      if (momentumBasedControllerSpy != null)
+      {
+         momentumBasedControllerSpy.setCylindricalContactInContact(contactableCylinderBody, setInContact);
+      }
+      
       YoCylindricalContactState yoCylindricalContactState = cylindricalContactStates.get(contactableCylinderBody);
       yoCylindricalContactState.setInContact(setInContact);
    }
@@ -584,14 +606,10 @@ public class MomentumBasedController implements RobotController
       return centerOfMassJacobian;
    }
 
-//   public LinkedHashMap<ContactableCylinderBody, YoCylindricalContactState> getCylindricalContactStates()
-//   {
-//      return cylindricalContactStates;
-//   }
-
-   public MomentumControlModule getMomentumControlModule()
+   
+   public boolean isUsingOptimizationMomentumControlModule()
    {
-      return momentumControlModule;
+      return (momentumControlModule instanceof OptimizationMomentumControlModule);
    }
 
    public FrameVector getAdmissibleDesiredGroundReactionForceCopy()

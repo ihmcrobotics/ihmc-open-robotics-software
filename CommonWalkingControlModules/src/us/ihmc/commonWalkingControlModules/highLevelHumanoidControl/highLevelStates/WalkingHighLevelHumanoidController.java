@@ -353,7 +353,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactablePlaneBody bipedFoot = feet.get(robotSide);
-         momentumBasedController.setContactState(bipedFoot, bipedFoot.getContactPoints2d(), coefficientOfFriction.getDoubleValue());
+         
+         //TODO: If we know the surface normal here, use it.
+         FrameVector normalContactVector = null;
+         momentumBasedController.setPlaneContactState(bipedFoot, bipedFoot.getContactPoints2d(), coefficientOfFriction.getDoubleValue(), normalContactVector);
          
          String sideString = robotSide.getCamelCaseNameForStartOfExpression();
 
@@ -1588,13 +1591,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       {
          footEndEffectorControlModules.get(contactableBody).doSingularityEscapeBeforeTransitionToNextState();
       }
-
-//      YoPlaneContactState contactState = contactStates.get(contactableBody);
-////      int oldNumberOfContactPoints = contactState.getNumberOfContactPoints();
-//      contactState.set(contactPoints, coefficientOfFriction.getDoubleValue());
       
-      
-      momentumBasedController.setContactState(contactableBody, contactPoints, coefficientOfFriction.getDoubleValue());
+      //TODO: If we know the surface normal here, use it.
+      FrameVector normalContactVector = null;
+      momentumBasedController.setPlaneContactState(contactableBody, contactPoints, coefficientOfFriction.getDoubleValue(), normalContactVector);
       updateEndEffectorControlModule(contactableBody, contactPoints, constraintType);
 
 //      if (contactPoints.size() < oldNumberOfContactPoints)
