@@ -10,7 +10,6 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 
-
 public class YoCylindricalContactState implements CylindricalContactState
 {
    private final YoVariableRegistry registry;
@@ -34,7 +33,7 @@ public class YoCylindricalContactState implements CylindricalContactState
       this.halfHandWidth = new DoubleYoVariable(namePrefix + "halfHandWidth", registry);
       this.gripWeaknessFactor = new DoubleYoVariable(namePrefix + "gripWeaknessFactor", registry);
       this.frameAfterJoint = frameAfterJoint;
-      this.cylinderFrame = new PoseReferenceFrame(frameAfterJoint.getName()+"GrippedCylinderFrame",new FramePose(frameAfterJoint));
+      this.cylinderFrame = new PoseReferenceFrame(frameAfterJoint.getName() + "GrippedCylinderFrame", new FramePose(frameAfterJoint));
       parentRegistry.addChild(registry);
       this.cylinderRefererenceFrameGraphic = new DynamicGraphicReferenceFrame(cylinderFrame, registry, 0.1);
    }
@@ -43,6 +42,13 @@ public class YoCylindricalContactState implements CylindricalContactState
    {
       return this.cylinderRefererenceFrameGraphic;
    }
+
+   public void set(double coefficientOfFriction, ContactableCylinderBody contactableCylinderBody, boolean inContact)
+   {
+      set(coefficientOfFriction, contactableCylinderBody.getGripStrength(), contactableCylinderBody.getCylinderRadius(),
+            contactableCylinderBody.getHalfHandWidth(), contactableCylinderBody.getGripWeaknessFactor(), inContact);
+   }
+
    public void set(double coefficientOfFriction, double gripStrength, double cylinderRadius, double halfHandWidth, double gripWeaknessFactor, boolean inContact)
    {
       this.inContact.set(inContact);
@@ -62,21 +68,23 @@ public class YoCylindricalContactState implements CylindricalContactState
       if (halfHandWidth < 0.0)
          throw new RuntimeException("halfHandWidth is negative: " + halfHandWidth);
       this.halfHandWidth.set(halfHandWidth);
-      
+
       if (gripWeaknessFactor < 0.0)
          throw new RuntimeException("gripWeaknessFactor is negative: " + gripWeaknessFactor);
       if (gripWeaknessFactor > 1.0)
          throw new RuntimeException("gripWeaknessFactor is over 1, : " + gripWeaknessFactor);
       this.gripWeaknessFactor.set(gripWeaknessFactor);
    }
+
    public void setFramePoseOfCylinder(FramePose cylinderPose)
    {
       this.cylinderFrame.updatePose(cylinderPose);
    }
+
    public boolean isInContact()
    {
       this.cylinderFrame.update();
-//      cylinderRefererenceFrameGraphic.update();
+      //      cylinderRefererenceFrameGraphic.update();
       return inContact.getBooleanValue();
    }
 
@@ -99,7 +107,7 @@ public class YoCylindricalContactState implements CylindricalContactState
    {
       return this.tensileGripForce.getDoubleValue();
    }
-   
+
    public double getGripWeaknessFactor()
    {
       return this.gripWeaknessFactor.getDoubleValue();
@@ -119,5 +127,4 @@ public class YoCylindricalContactState implements CylindricalContactState
    {
       return this.cylinderFrame;
    }
-
 }

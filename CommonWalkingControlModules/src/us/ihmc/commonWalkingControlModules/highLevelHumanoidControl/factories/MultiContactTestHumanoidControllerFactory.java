@@ -23,14 +23,12 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CoMBasedMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OldMomentumControlModule;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.OrientationTrajectoryData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAngularAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FingerForceSensors;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointGroundReactionWrenchDistributor;
-import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
@@ -143,8 +141,8 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
 
       // The controllers do not extend the MomentumBasedController anymore. Instead, it is passed through the constructor.
       MomentumBasedController momentumBasedController = new MomentumBasedController(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian,
-                                                           referenceFrames, yoTime, gravityZ, twistCalculator, contactablePlaneBodiesAndBases.keySet(), null,
-                                                           controlDT, processedOutputs, momentumControlModule, null, stateEstimationDataFromControllerSink,
+                                                           referenceFrames, yoTime, gravityZ, twistCalculator, feet, hands, null, null, controlDT,
+                                                           processedOutputs, momentumControlModule, null, stateEstimationDataFromControllerSink,
                                                            dynamicGraphicObjectsListRegistry);
 
       RootJointAngularAccelerationControlModule rootJointAccelerationControlModule = new RootJointAngularAccelerationControlModule(momentumBasedController,
@@ -156,26 +154,25 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       TorusPoseProvider torusPoseProvider = new TorusPoseProvider();
       DesiredFootPoseProvider desiredFootPoseProvider = new DesiredFootPoseProvider();
 
-      MultiContactTestHumanoidController multiContactBehavior = new MultiContactTestHumanoidController(feet, hands, momentumRateOfChangeControlModule,
+      MultiContactTestHumanoidController multiContactBehavior = new MultiContactTestHumanoidController(momentumRateOfChangeControlModule,
                                                                    rootJointAccelerationControlModule, null, momentumBasedController,
                                                                    walkingControllerParameters, desiredHandPoseProvider, torusPoseProvider,
                                                                    desiredFootPoseProvider, null, null, dynamicGraphicObjectsListRegistry);
 
-      double coefficientOfFriction = 1.0;
-
-      for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodiesAndBases.keySet())
+      for (RobotSide robotSide : RobotSide.values)
       {
-         multiContactBehavior.setContactablePlaneBodiesInContact(contactablePlaneBody, false, coefficientOfFriction);
+         multiContactBehavior.setFootInContact(robotSide, false);
+         multiContactBehavior.setHandInContact(robotSide, false);
       }
 
       for (RobotSide robotSide : footContactSides)
       {
-         multiContactBehavior.setContactablePlaneBodiesInContact(feet.get(robotSide), true, coefficientOfFriction);
+         multiContactBehavior.setFootInContact(robotSide, true);
       }
 
       for (RobotSide robotSide : handContactSides)
       {
-         multiContactBehavior.setContactablePlaneBodiesInContact(hands.get(robotSide), true, coefficientOfFriction);
+         multiContactBehavior.setHandInContact(robotSide, true);
       }
 
       // Creation of the "highest level" state machine.

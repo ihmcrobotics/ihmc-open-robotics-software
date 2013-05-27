@@ -7,7 +7,6 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -16,8 +15,6 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 
 public class YoRollingContactState implements PlaneContactState
@@ -30,18 +27,12 @@ public class YoRollingContactState implements PlaneContactState
    private final BooleanYoVariable inContact;
    private final DoubleYoVariable coefficientOfFriction;
    private final Transform3D transformFromContactFrameToBodyFrame = new Transform3D();
-   private final ArrayList<DynamicGraphicPosition> contactPointGraphics = new ArrayList<DynamicGraphicPosition>();
-   private final ContactableCylinderBody contactableCylinderBody;
+   private final ContactableRollingBody contactableCylinderBody;
    private final FrameVector contactNormalFrameVector;
 
    // Class enabling to update the contact points of a contactable cylindrical body as it is rolling on the ground or on another contactable surface 
    
-   public YoRollingContactState(String namePrefix, ContactableCylinderBody contactableCylinderBody, YoVariableRegistry parentRegistry)
-   {
-      this(namePrefix, contactableCylinderBody, parentRegistry, null);
-   }
-   
-   public YoRollingContactState(String namePrefix, ContactableCylinderBody contactableCylinderBody, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public YoRollingContactState(String namePrefix, ContactableRollingBody contactableCylinderBody, YoVariableRegistry parentRegistry)
    {
       this.namePrefix = namePrefix;
       // The rolling contactable body
@@ -62,16 +53,6 @@ public class YoRollingContactState implements PlaneContactState
       
       setContactPoints(contactableCylinderBody.getContactPoints2d());
       
-      if (dynamicGraphicObjectsListRegistry != null)
-      {
-         for (int i = 0; i < contactPoints.size(); i++)
-         {
-            contactPointGraphics.add(new DynamicGraphicPosition(namePrefix + "GC", String.valueOf(i), registry, 0.01, YoAppearance.Red()));
-            dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("thighContactPoints", contactPointGraphics.get(i));
-            dynamicGraphicObjectsListRegistry.registerArtifact("thighContactPoints", contactPointGraphics.get(i).createArtifact());
-         }
-      }
-
       updateContactPoints();
       
       parentRegistry.addChild(registry);
@@ -79,7 +60,7 @@ public class YoRollingContactState implements PlaneContactState
       this.contactNormalFrameVector = new FrameVector(updatableContactFrame, 0.0, 0.0, 1.0);
    }
 
-   private void setContactPoints(List<FramePoint2d> contactPoints)
+   public void setContactPoints(List<FramePoint2d> contactPoints)
    {
       createYoFramePoints(contactPoints);
 
@@ -134,14 +115,6 @@ public class YoRollingContactState implements PlaneContactState
       transformFromContactFrameToBodyFrame.setTranslation(translation);
 
       updatableContactFrame.update();
-      
-      // Updating the dynamic graphic object representing the contact points location
-      for (int i = 0; i < contactPointGraphics.size(); i++)
-      {
-         FramePoint point = new FramePoint(getContactPoints().get(i));
-         point.changeFrame(worldFrame);
-         contactPointGraphics.get(i).setPosition(point);
-      }
    }
    
    public List<FramePoint2d> getContactPoints2d()

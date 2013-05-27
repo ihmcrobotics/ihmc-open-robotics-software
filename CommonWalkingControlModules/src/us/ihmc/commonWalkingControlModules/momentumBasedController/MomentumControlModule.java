@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableCylinderBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylindricalContactState;
@@ -26,7 +27,7 @@ public interface MomentumControlModule
 
    void reset();
 
-   void compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, Map<RigidBody, ? extends CylindricalContactState> cylinderContactStates, RobotSide upcomingSupportSide);
+   void compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, Map<ContactableCylinderBody, ? extends CylindricalContactState> cylinderContactStates, RobotSide upcomingSupportSide);
 
    void resetGroundReactionWrenchFilter();
 

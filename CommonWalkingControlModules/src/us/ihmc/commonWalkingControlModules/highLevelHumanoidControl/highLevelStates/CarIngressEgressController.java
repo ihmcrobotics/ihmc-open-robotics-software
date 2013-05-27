@@ -5,8 +5,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableRollingBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoRollingContactState;
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.desiredChestOrientation.DesiredChestOrientationProvider;
@@ -21,7 +23,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredHandPoseProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.TorusPoseProvider;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.OrientationTrajectoryData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAngularAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantConfigurationProvider;
@@ -31,7 +32,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.SE3ConfigurationProvider
 import us.ihmc.commonWalkingControlModules.trajectories.SettableOrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.ThirdOrderPolynomialTrajectoryGenerator;
-import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -86,21 +86,19 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    private final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> contactStates;
 
    private final ConstantDoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(1.0);
+   
 
-
-   public CarIngressEgressController(SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<? extends ContactablePlaneBody> hands,
-                                     RootJointAngularAccelerationControlModule rootJointAccelerationControlModule, DesiredHeadOrientationProvider desiredHeadOrientationProvider,
-         MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters, DesiredHandPoseProvider handPoseProvider,
-         TorusPoseProvider torusPoseProvider, DesiredFootPoseProvider footPoseProvider, DesiredPelvisPoseProvider pelvisPoseProvider,
-         DesiredChestOrientationProvider chestOrientationProvider, SideDependentList<HandControllerInterface> handControllers,
-         LidarControllerInterface lidarControllerInterface, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public CarIngressEgressController(RootJointAngularAccelerationControlModule rootJointAccelerationControlModule, DesiredHeadOrientationProvider desiredHeadOrientationProvider,
+                                     MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters, DesiredHandPoseProvider handPoseProvider,
+                                     TorusPoseProvider torusPoseProvider, DesiredFootPoseProvider footPoseProvider, DesiredPelvisPoseProvider pelvisPoseProvider,
+                                     DesiredChestOrientationProvider chestOrientationProvider, SideDependentList<HandControllerInterface> handControllers,
+                                     LidarControllerInterface lidarControllerInterface, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      super(feet, rootJointAccelerationControlModule, desiredHeadOrientationProvider, momentumBasedController, walkingControllerParameters, handPoseProvider,
+      super(rootJointAccelerationControlModule, desiredHeadOrientationProvider, momentumBasedController, walkingControllerParameters, handPoseProvider,
             torusPoseProvider, handControllers, lidarControllerInterface, dynamicGraphicObjectsListRegistry, controllerState);
 
       this.footPoseProvider = footPoseProvider;
       this.contactStates = momentumBasedController.getContactStates();
-
       
       // Setup the pelvis trajectory generator 
       this.pelvisPoseProvider = pelvisPoseProvider;
@@ -140,7 +138,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         ContactablePlaneBody foot = bipedFeet.get(robotSide);
+         ContactablePlaneBody foot = feet.get(robotSide);
          GeometricJacobian jacobian = legJacobians.get(robotSide);
 
          String bodyName = foot.getRigidBody().getName();
@@ -269,7 +267,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         ContactablePlaneBody foot = bipedFeet.get(robotSide);
+         ContactablePlaneBody foot = feet.get(robotSide);
 
          if (footPoseProvider.checkForNewPose(robotSide))
          {
@@ -288,29 +286,46 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       super.doFootControl();
    }
 
-   public void setContactablePlaneBodiesInContact(ContactablePlaneBody contactablePlaneBody, boolean inContact, double coefficientOfFriction)
+   public void setFootInContact(RobotSide robotSide, boolean inContact)
    {
-      if (!footEndEffectorControlModules.keySet().contains(contactablePlaneBody))
-      {
-         YoPlaneContactState contactState = momentumBasedController.getContactStates().get(contactablePlaneBody);
-         if (inContact)
-         {
-            contactState.set(contactablePlaneBody.getContactPoints2d(), coefficientOfFriction);
-         }
-         else
-         {
-            contactState.set(new ArrayList<FramePoint2d>(), coefficientOfFriction);
-         }
+      if (feet == null)
          return;
-      }
-
+      
       if (inContact)
       {
-         setFlatFootContactState(contactablePlaneBody);
+         setFlatFootContactState(feet.get(robotSide));
       }
       else
       {
-         setContactStateForSwing(contactablePlaneBody);
+         setContactStateForSwing(feet.get(robotSide));
+      }
+   }
+
+   public void setHandInContact(RobotSide robotSide, boolean inContact)
+   {
+      ContactablePlaneBody handPalm = handPalms.get(robotSide);
+      YoPlaneContactState contactState = momentumBasedController.getContactStates().get(handPalm);
+      if (inContact)
+      {
+         contactState.set(handPalm.getContactPoints2d(), coefficientOfFriction.getDoubleValue());
+      }
+      else
+      {
+         contactState.set(new ArrayList<FramePoint2d>(), coefficientOfFriction.getDoubleValue());
+      }
+   }
+
+   public void setThighInContact(RobotSide robotSide, boolean inContact)
+   {
+      ContactableRollingBody rollingThigh = rollingThighs.get(robotSide);
+      YoRollingContactState contactState = momentumBasedController.getRollingContactStates().get(rollingThigh);
+      if (inContact)
+      {
+         contactState.setContactPoints(rollingThigh.getContactPoints2d());
+      }
+      else
+      {
+         contactState.setContactPoints(new ArrayList<FramePoint2d>());
       }
    }
 
@@ -388,11 +403,11 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          {
             if (doHeelOff.get(robotSide).getBooleanValue())
             {
-               setOnToesContactState(bipedFeet.get(robotSide));
+               setOnToesContactState(feet.get(robotSide));
             }
             else
             {
-               setFlatFootContactState(bipedFeet.get(robotSide));
+               setFlatFootContactState(feet.get(robotSide));
             }
          }
       }
