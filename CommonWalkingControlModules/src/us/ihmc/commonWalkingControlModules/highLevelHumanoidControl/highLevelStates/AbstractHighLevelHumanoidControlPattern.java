@@ -5,7 +5,9 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableCylinderBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableRollingBody;
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationControlModule;
@@ -73,12 +75,14 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
    protected final DoubleYoVariable kJointPositionControl = new DoubleYoVariable("kUpperBody", registry);
    protected final DoubleYoVariable zetaJointPositionControl = new DoubleYoVariable("zetaUpperBody", registry);
 
-   protected final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
+   protected final SideDependentList<? extends ContactablePlaneBody> feet, handPalms;
+   protected final SideDependentList<ContactableCylinderBody> graspingHands;
+   protected final SideDependentList<ContactableRollingBody> rollingThighs;
 
    protected final DoubleYoVariable coefficientOfFriction = new DoubleYoVariable("coefficientOfFriction", registry);
    private final RootJointAngularAccelerationControlModule rootJointAccelerationControlModule;
 
-   public AbstractHighLevelHumanoidControlPattern(SideDependentList<? extends ContactablePlaneBody> feet,
+   public AbstractHighLevelHumanoidControlPattern(
            RootJointAngularAccelerationControlModule rootJointAccelerationControlModule, DesiredHeadOrientationProvider desiredHeadOrientationProvider,
            MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters, DesiredHandPoseProvider handPoseProvider,
            TorusPoseProvider torusPoseProvider, SideDependentList<HandControllerInterface> handControllers, LidarControllerInterface lidarControllerInterface,
@@ -95,12 +99,14 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       twistCalculator = momentumBasedController.getTwistCalculator();
       referenceFrames = momentumBasedController.getReferenceFrames();
 
+      feet = momentumBasedController.getContactablePlaneFeet();
+      handPalms = momentumBasedController.getContactablePlaneHands();
+      graspingHands = momentumBasedController.getContactableCylinderHands();
+      rollingThighs = momentumBasedController.getContactableRollingThighs();
 
       this.desiredHeadOrientationProvider = desiredHeadOrientationProvider;
       this.lidarControllerInterface = lidarControllerInterface;
       this.walkingControllerParameters = walkingControllerParameters;
-
-      this.bipedFeet = feet;
 
       kJointPositionControl.set(100.0);
       zetaJointPositionControl.set(1.0);

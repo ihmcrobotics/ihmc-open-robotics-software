@@ -57,7 +57,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.ThirdOrderPolynomialTraj
 import us.ihmc.commonWalkingControlModules.trajectories.TransferTimeCalculationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointTrajectoryUtils;
 import us.ihmc.commonWalkingControlModules.trajectories.YoVariableDoubleProvider;
-import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -226,10 +225,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
            InstantaneousCapturePointPlanner instantaneousCapturePointPlanner, SideDependentList<HandControllerInterface> handControllers,
            ICPAndMomentumBasedController icpAndMomentumBasedController, MomentumBasedController momentumBasedController, WalkingStatusReporter walkingStatusReporter)
    {
-      super(icpAndMomentumBasedController.getBipedFeet(), rootJointAngularAccelerationControlModule, desiredHeadOrientationProvider, momentumBasedController,
-            walkingControllerParameters, handPoseProvider, torusPoseProvider, handControllers, lidarControllerInterface, dynamicGraphicObjectsListRegistry,
-            controllerState);
-
+      super(rootJointAngularAccelerationControlModule, desiredHeadOrientationProvider, momentumBasedController, walkingControllerParameters, handPoseProvider,
+            torusPoseProvider, handControllers, lidarControllerInterface, dynamicGraphicObjectsListRegistry, controllerState);
       
       toeOffLegDeterminantThreashold.set(-0.08);
       useLegDeterminantAsToeOffTrigger.set(true);
@@ -356,7 +353,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         ContactablePlaneBody bipedFoot = bipedFeet.get(robotSide);
+         ContactablePlaneBody bipedFoot = feet.get(robotSide);
          contactStates.get(bipedFoot).set(bipedFoot.getContactPoints2d(), coefficientOfFriction.getDoubleValue());    // flat feet
          String sideString = robotSide.getCamelCaseNameForStartOfExpression();
 
@@ -456,7 +453,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       ResetICPTrajectoryAction resetICPTrajectoryAction = new ResetICPTrajectoryAction();
       for (RobotSide robotSide : RobotSide.values)
       {
-         EndEffectorControlModule swingEndEffectorControlModule = footEndEffectorControlModules.get(bipedFeet.get(robotSide.getOppositeSide()));
+         EndEffectorControlModule swingEndEffectorControlModule = footEndEffectorControlModules.get(feet.get(robotSide.getOppositeSide()));
          StopWalkingCondition stopWalkingCondition = new StopWalkingCondition(swingEndEffectorControlModule);
          ResetSwingTrajectoryDoneAction resetSwingTrajectoryDoneAction = new ResetSwingTrajectoryDoneAction(swingEndEffectorControlModule);
 
@@ -542,7 +539,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 //         leadingLegJacobianDeterminant.set(getDeterminantOfHipToAnkleJacobian(leadingLegSide));
 
 
-         ContactablePlaneBody transferFoot = bipedFeet.get(transferToSide);
+         ContactablePlaneBody transferFoot = feet.get(transferToSide);
 
          if ((footEndEffectorControlModules.get(transferFoot) != null) && footEndEffectorControlModules.get(transferFoot).onHeel()
                  && footSwitches.get(transferToSide).hasFootHitGround())
@@ -558,7 +555,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (doneFinishingSingleSupportTransfer || estimatedTimeRemainingForState < 0.02)
          {
             upcomingFootstepList.checkForFootsteps(momentumBasedController.getPointPositionGrabber(), readyToGrabNextFootstep, upcomingSupportLeg,
-                  bipedFeet);
+                  feet);
             checkForSteppingOnOrOff(transferToSide);
          }
 
@@ -625,7 +622,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                if (!stayOnToes.getBooleanValue() && (transferToSide != null))    // the only case left for determining the contact state of the trailing foot
                {
                   RobotSide trailingLeg = transferToSide.getOppositeSide();
-                  ContactablePlaneBody supportFoot = bipedFeet.get(trailingLeg);
+                  ContactablePlaneBody supportFoot = feet.get(trailingLeg);
                   FrameConvexPolygon2d onToesTriangle = getOnToesTriangle(finalDesiredICP, supportFoot);
 
                   boolean desiredICPOK = onToesTriangle.isPointInside(desiredICP.getFramePoint2dCopy())
@@ -658,10 +655,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                {
                   RobotSide trailingLeg = transferToSide.getOppositeSide();
 
-                  ContactablePlaneBody supportFoot = bipedFeet.get(trailingLeg);
+                  ContactablePlaneBody supportFoot = feet.get(trailingLeg);
 
-                  ContactablePlaneBody trailingFoot = bipedFeet.get(trailingLeg);
-                  ContactablePlaneBody leadingFoot = bipedFeet.get(transferToSide);
+                  ContactablePlaneBody trailingFoot = feet.get(trailingLeg);
+                  ContactablePlaneBody leadingFoot = feet.get(transferToSide);
                   FrameConvexPolygon2d OnToesSupportPolygon = getOnToesSupportPolygon(trailingFoot, leadingFoot);
                   boolean desiredECMPOK = OnToesSupportPolygon.isPointInside(desiredECMP.getFramePoint2dCopy());
                   desiredECMPinSupportPolygon.set(desiredECMPOK);
@@ -743,9 +740,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       public TransferToAndNextFootstepsData createTransferToAndNextFootstepDataForDoubleSupport(RobotSide transferToSide, boolean inInitialize)
       {
          Footstep transferFromFootstep = createFootstepFromFootAndContactablePlaneBody(referenceFrames.getFootFrame(transferToSide.getOppositeSide()),
-                                            bipedFeet.get(transferToSide.getOppositeSide()));
+                                            feet.get(transferToSide.getOppositeSide()));
          Footstep transferToFootstep = createFootstepFromFootAndContactablePlaneBody(referenceFrames.getFootFrame(transferToSide),
-                                          bipedFeet.get(transferToSide));
+                                          feet.get(transferToSide));
 
          FrameConvexPolygon2d transferToFootPolygon = computeFootPolygon(transferToSide, referenceFrames.getSoleFrame(transferToSide));
 
@@ -812,7 +809,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             for (RobotSide robotSide : RobotSide.values)
             {
-               setOnToesContactState(bipedFeet.get(robotSide));
+               setOnToesContactState(feet.get(robotSide));
             }
          }
          else
@@ -821,16 +818,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             {
                for (RobotSide robotSide : RobotSide.values)
                {
-                  setFlatFootContactState(bipedFeet.get(robotSide));
+                  setFlatFootContactState(feet.get(robotSide));
                }
             }
             else if (landOnHeels())
             {
-               setOnHeelContactState(bipedFeet.get(transferToSide));
+               setOnHeelContactState(feet.get(transferToSide));
             }
             else
             {
-               setFlatFootContactState(bipedFeet.get(transferToSide));
+               setFlatFootContactState(feet.get(transferToSide));
 
                // still need to determine contact state for trailing leg. This is done in doAction as soon as the previous ICP trajectory is done
             }
@@ -839,7 +836,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (!instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue()) && (transferToSide != null))
          {
             Footstep transferToFootstep = createFootstepFromFootAndContactablePlaneBody(referenceFrames.getFootFrame(transferToSide),
-                                             bipedFeet.get(transferToSide));
+                                             feet.get(transferToSide));
             TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(transferToFootstep,
                                                                                transferToSide);
 
@@ -891,8 +888,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private void setDesiredPelvisYawToAverageOfFeetOnStartupOnly()
    {
       FrameOrientation averageOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
-      averageOrientationCalculator.computeAverageOrientation(averageOrientation, bipedFeet.get(RobotSide.LEFT).getPlaneFrame(),
-              bipedFeet.get(RobotSide.RIGHT).getPlaneFrame(), ReferenceFrame.getWorldFrame());
+      averageOrientationCalculator.computeAverageOrientation(averageOrientation, feet.get(RobotSide.LEFT).getPlaneFrame(),
+              feet.get(RobotSide.RIGHT).getPlaneFrame(), ReferenceFrame.getWorldFrame());
 
       double[] yawPitchRoll = averageOrientation.getYawPitchRoll();
 
@@ -1045,11 +1042,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (stayOnToes.getBooleanValue())
          {
-            setOnToesContactState(bipedFeet.get(supportSide));
+            setOnToesContactState(feet.get(supportSide));
          }
          else
          {
-            setFlatFootContactState(bipedFeet.get(supportSide));
+            setFlatFootContactState(feet.get(supportSide));
          }
 
          finalPositionProvider.set(nextFootstep.getPositionInFrame(worldFrame));
@@ -1057,7 +1054,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          SideDependentList<Transform3D> footToWorldTransform = new SideDependentList<Transform3D>();
          for (RobotSide robotSide : RobotSide.values)
          {
-            Transform3D transform = bipedFeet.get(robotSide).getBodyFrame().getTransformToDesiredFrame(worldFrame);
+            Transform3D transform = feet.get(robotSide).getBodyFrame().getTransformToDesiredFrame(worldFrame);
             footToWorldTransform.set(robotSide, transform);
          }
 
@@ -1086,7 +1083,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          FramePoint centerOfMass = new FramePoint(referenceFrames.getCenterOfMassFrame());
          centerOfMass.changeFrame(worldFrame);
-         ContactablePlaneBody supportFoot = bipedFeet.get(supportSide);
+         ContactablePlaneBody supportFoot = feet.get(supportSide);
          Transform3D supportFootToWorldTransform = footToWorldTransform.get(supportSide);
          double footHeight = DesiredFootstepCalculatorTools.computeMinZPointInFrame(supportFootToWorldTransform, supportFoot, worldFrame).getZ();
          double comHeight = centerOfMass.getZ() - footHeight;
@@ -1102,7 +1099,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
          FramePoint2d finalDesiredICP = getSingleSupportFinalDesiredICPForWalking(transferToAndNextFootstepsData, swingSide);
 
-         ContactablePlaneBody swingFoot = bipedFeet.get(swingSide);
+         ContactablePlaneBody swingFoot = feet.get(swingSide);
          setContactStateForSwing(swingFoot);
          setSupportLeg(supportSide);
          icpAndMomentumBasedController.updateBipedSupportPolygons(bipedSupportPolygons);
@@ -1316,7 +1313,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       finalDesiredICPInWorld.set(finalDesiredICP);
 
-      ContactablePlaneBody supportFoot = bipedFeet.get(swingSide.getOppositeSide());
+      ContactablePlaneBody supportFoot = feet.get(swingSide.getOppositeSide());
 
       FrameConvexPolygon2d onToesTriangle = getOnToesTriangle(finalDesiredICP, supportFoot);
       double onToesTriangleArea = onToesTriangle.getArea();
@@ -1348,10 +1345,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    public TransferToAndNextFootstepsData createTransferToAndNextFootstepDataForSingleSupport(Footstep transferToFootstep, RobotSide swingSide)
    {
       Footstep transferFromFootstep = createFootstepFromFootAndContactablePlaneBody(referenceFrames.getFootFrame(swingSide.getOppositeSide()),
-                                         bipedFeet.get(swingSide.getOppositeSide()));
+                                         feet.get(swingSide.getOppositeSide()));
 
       FrameConvexPolygon2d footPolygon;
-      ContactablePlaneBody contactableBody = bipedFeet.get(swingSide);
+      ContactablePlaneBody contactableBody = feet.get(swingSide);
       if (stayOnToes.getBooleanValue())
       {
          List<FramePoint> contactPoints = getContactPointsForWalkingOnEdge(contactableBody, ConstraintType.TOES);
@@ -1549,7 +1546,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       List<PlaneContactState> contactStatesList = new ArrayList<PlaneContactState>();
 
-      for (ContactablePlaneBody contactablePlaneBody : bipedFeet)
+      for (ContactablePlaneBody contactablePlaneBody : feet)
       {
          YoPlaneContactState contactState = contactStates.get(contactablePlaneBody);
          if (contactState.inContact())
@@ -1631,7 +1628,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    // TODO: should probably precompute this somewhere else
    private FrameConvexPolygon2d computeFootPolygon(RobotSide robotSide, ReferenceFrame referenceFrame)
    {
-      List<FramePoint> contactPoints = contactStates.get(bipedFeet.get(robotSide)).getContactPoints();
+      List<FramePoint> contactPoints = contactStates.get(feet.get(robotSide)).getContactPoints();
       FrameConvexPolygon2d footPolygon = FrameConvexPolygon2d.constructByProjectionOntoXYPlane(contactPoints, referenceFrame);
 
       return footPolygon;
@@ -1651,7 +1648,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          // NOTE: the foot may have moved so its ideal to get the previous footstep, rather than the current foot frame, if possible
          if (upcomingFootstepList.doesNextFootstepListHaveFewerThanTwoElements())
          {
-            initialSoleFrame = bipedFeet.get(transferToSide.getOppositeSide()).getPlaneFrame();
+            initialSoleFrame = feet.get(transferToSide.getOppositeSide()).getPlaneFrame();
          }
          else
          {

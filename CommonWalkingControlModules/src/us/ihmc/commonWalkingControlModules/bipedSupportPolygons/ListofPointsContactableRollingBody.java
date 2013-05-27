@@ -15,7 +15,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 // Class defining a contactable rolling body
-public class ListofPointsContactableCylinderBody implements ContactableCylinderBody
+public class ListofPointsContactableRollingBody implements ContactableRollingBody
 {
    private final RigidBody rigidBody;
    private final double cylinderRadius;
@@ -26,7 +26,7 @@ public class ListofPointsContactableCylinderBody implements ContactableCylinderB
    private final FramePoint originInBodyFrame;
    private final String name;
 
-   public ListofPointsContactableCylinderBody(String name, RigidBody rigidBody, ReferenceFrame bodyFrame, double cylinderRadius, FramePoint originInBodyFrame,
+   public ListofPointsContactableRollingBody(String name, RigidBody rigidBody, ReferenceFrame bodyFrame, double cylinderRadius, FramePoint originInBodyFrame,
          List<Double> contactPositionOnCylinderEdge, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry)
    {
       this.rigidBody = rigidBody;

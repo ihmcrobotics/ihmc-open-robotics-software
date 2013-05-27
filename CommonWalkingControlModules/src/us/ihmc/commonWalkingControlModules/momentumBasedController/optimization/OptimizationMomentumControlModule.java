@@ -4,6 +4,8 @@ import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import org.ejml.data.DenseMatrix64F;
+
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableCylinderBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXWithCylinderNative;
@@ -97,9 +99,10 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    }
 
    public void compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates,
-                       Map<RigidBody, ? extends CylindricalContactState> cylinderContactStates, RobotSide upcomingSupportLeg)
+                       Map<ContactableCylinderBody, ? extends CylindricalContactState> cylinderContactStates, RobotSide upcomingSupportLeg)
    {
       LinkedHashMap<RigidBody, PlaneContactState> planeContactStates = convertContactStates(contactStates);
+      LinkedHashMap<RigidBody, CylindricalContactState> cylinderContactStatesConverted = convertCylindricalContactStates(cylinderContactStates);
       hardMotionConstraintSolver.setAlpha(momentumOptimizationSettings.getDampedLeastSquaresFactor());
 
       primaryMotionConstraintHandler.compute();
@@ -120,7 +123,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       momentumOptimizerNativeInput.setCentroidalMomentumMatrix(a);
       momentumOptimizerNativeInput.setMomentumDotEquationRightHandSide(b);
 
-      wrenchMatrixCalculator.computeMatrices(planeContactStates, cylinderContactStates);
+      wrenchMatrixCalculator.computeMatrices(planeContactStates, cylinderContactStatesConverted);
 
       momentumOptimizerNativeInput.setContactPointWrenchMatrix(wrenchMatrixCalculator.getQRho());
       momentumOptimizerNativeInput.setContactPointWrenchMatrixForBoundedCylinderVariables(wrenchMatrixCalculator.getQPhi());
@@ -172,6 +175,17 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
          ret.put(contactablePlaneBody.getRigidBody(), contactStates.get(contactablePlaneBody));
       }
 
+      return ret;
+   }
+
+   private static LinkedHashMap<RigidBody, CylindricalContactState> convertCylindricalContactStates(
+         Map<ContactableCylinderBody, ? extends CylindricalContactState> contactStates)
+   {
+      LinkedHashMap<RigidBody, CylindricalContactState> ret = new LinkedHashMap<RigidBody, CylindricalContactState>();
+      for (ContactableCylinderBody contactableCylinderBody : contactStates.keySet())
+      {
+         ret.put(contactableCylinderBody.getRigidBody(), contactStates.get(contactableCylinderBody));
+      }
       return ret;
    }
 
