@@ -15,14 +15,9 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.states.ObjectManipulationState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.states.TaskspaceHandControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.trajectories.ConstantConfigurationProvider;
-import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.SE3ConfigurationProvider;
-import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.*;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.FormattingTools;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
-import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
@@ -371,34 +366,4 @@ public class IndividualHandControlStateMachine
       return stateMachine.getCurrentStateEnum() == IndividualHandControlState.TWO_HANDED_TOROID_MANIPULATION;
    }
 
-   private static class ChangeableConfigurationProvider implements SE3ConfigurationProvider
-   {
-      private final FramePose configuration;
-
-      public ChangeableConfigurationProvider(FramePose initialConfiguration)
-      {
-         configuration = new FramePose(initialConfiguration);
-      }
-
-      public void get(FramePose framePose)
-      {
-         framePose.setIncludingFrame(configuration);
-      }
-
-      public void get(FramePoint positionToPack)
-      {
-         configuration.getPosition(positionToPack);
-      }
-
-      public void get(FrameOrientation orientationToPack)
-      {
-         configuration.getOrientation(orientationToPack);
-      }
-
-      public void set(FramePose newPose)
-      {
-         configuration.setIncludingFrame(newPose);
-      }
-
-   }
 }
