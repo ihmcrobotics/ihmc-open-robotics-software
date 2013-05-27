@@ -22,16 +22,13 @@ import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import us.ihmc.utilities.Pair;
 
 public class DRCRemoteProcessManager extends Thread
 {
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
 
    public static final char KILL_CHAR = 0x03;
-   private String username = System.getProperty("user.name");
-   private String ip = "localhost";
-   private String hostname = "localhost";
-   private String password;
 
    private JSch jsch;
    private Properties config;
@@ -57,15 +54,14 @@ public class DRCRemoteProcessManager extends Thread
 
    public DRCRemoteProcessManager()
    {
-
       jsch = new JSch();
 
       config = new Properties();
       config.put("StrictHostKeyChecking", "no");
 
-      for(LocalCloudMachines machine : LocalCloudMachines.values())
+      for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
-         if(machine != LocalCloudMachines.LOCALHOST)
+         if (machine != LocalCloudMachines.LOCALHOST)
          {
             reachability.put(machine, new MutableBoolean(false));
             isRunningRos.put(machine, new MutableBoolean(false));
@@ -77,8 +73,6 @@ public class DRCRemoteProcessManager extends Thread
    public void launchSim(String task, LocalCloudMachines gazeboMachine, String launchCommandType)
    {
       String drcTask;
-
-      initCredentials(gazeboMachine);
 
       if (isMachineReachable(gazeboMachine))
       {
@@ -105,9 +99,9 @@ public class DRCRemoteProcessManager extends Thread
 
    public void killSim(LocalCloudMachines gazeboMachine)
    {
-      if(isMachineReachable(gazeboMachine))
+      if (isMachineReachable(gazeboMachine))
       {
-         if(isMachineRunningSim(gazeboMachine))
+         if (isMachineRunningSim(gazeboMachine))
          {
             sendCommandThroughExecChannel(gazeboMachine, "kill -2 " + getRosSimPID(gazeboMachine));
             updateRosSimPID(gazeboMachine);
@@ -132,7 +126,7 @@ public class DRCRemoteProcessManager extends Thread
 
       setupNetworkPollingTimer();
 
-      while(true);
+      while (true);
    }
 
    public void sendCommandThroughShellChannel(LocalCloudMachines machine, String command)
@@ -200,10 +194,11 @@ public class DRCRemoteProcessManager extends Thread
       return shellPrintStreams.get(shellChannelForMachine(machine));
    }
 
-   private void initCredentials(LocalCloudMachines machine)
+   private Pair<String, String> initCredentials(LocalCloudMachines machine)
    {
-      ip = DRCLocalCloudConfig.getIPAddress(machine);
-      hostname = DRCLocalCloudConfig.getHostName(machine);
+      String hostname = DRCLocalCloudConfig.getHostName(machine);
+
+      String username, password;
 
       if (hostname == "localhost")
       {
@@ -215,16 +210,18 @@ public class DRCRemoteProcessManager extends Thread
          username = "unknownid";
          password = "unknownpw";
       }
+
+      return new Pair<String, String>(username, password);
    }
 
-   private void setupSession(LocalCloudMachines machine) throws JSchException
+   private void setupSession(LocalCloudMachines machine, Pair<String, String> authPair) throws JSchException
    {
       Session session;
-      session = jsch.getSession(username, ip, 22);
+      session = jsch.getSession(authPair.first(), DRCLocalCloudConfig.getIPAddress(machine), 22);
 
       session.setConfig(config);
 
-      session.setPassword(password);
+      session.setPassword(authPair.second());
 
       session.connect(30000);
 
@@ -258,11 +255,9 @@ public class DRCRemoteProcessManager extends Thread
          {
             if (machine != LocalCloudMachines.LOCALHOST)
             {
-               initCredentials(machine);
-
-               if (InetAddress.getByName(ip).isReachable(REACHABLE_TIMEOUT))
+               if (InetAddress.getByName(DRCLocalCloudConfig.getIPAddress(machine)).isReachable(REACHABLE_TIMEOUT))
                {
-                  reachability.put(machine, new MutableBoolean(true));
+                  reachability.get(machine).setValue(true);
                   checkSessionStatus(machine);
                   updateRosSimPID(machine);
 
@@ -270,18 +265,18 @@ public class DRCRemoteProcessManager extends Thread
                   {
                      updateRosSimTaskname(machine);
                      runningRosTaskNames.put(machine, runningRosTaskNames.get(machine));
-                     isRunningRos.put(machine, new MutableBoolean(true));
+                     isRunningRos.get(machine).setValue(true);
                   }
                   else
                   {
-                     isRunningRos.put(machine, new MutableBoolean(false));
+                     isRunningRos.get(machine).setValue(false);
                   }
 
                   updateControllerPID(machine);
 
                   if (runningControllerPIDs.get(machine) > 0)
                   {
-                     isRunningController.put(machine, new MutableBoolean(false));
+                     isRunningController.get(machine).setValue(false);
                      runningControllerPIDs.put(machine, runningControllerPIDs.get(machine));
                   }
                }
@@ -289,9 +284,11 @@ public class DRCRemoteProcessManager extends Thread
          }
          catch (Exception e)
          {
-            reachability.put(machine, new MutableBoolean(false));
-            isRunningController.put(machine, new MutableBoolean(false));
-            isRunningRos.put(machine, new MutableBoolean(false));
+            if (DEBUG)
+               e.printStackTrace();
+            reachability.get(machine).setValue(false);
+            isRunningController.get(machine).setValue(false);
+            isRunningRos.get(machine).setValue(false);
          }
       }
    }
@@ -308,7 +305,7 @@ public class DRCRemoteProcessManager extends Thread
             updateNetworkStatus();
 
          }
-      }, 0l, 3000l);
+      }, 0l, REACHABLE_TIMEOUT + 1000l);
    }
 
    private void updateNetworkStatus()
@@ -319,7 +316,7 @@ public class DRCRemoteProcessManager extends Thread
          {
             try
             {
-               if (InetAddress.getByName(ip).isReachable(REACHABLE_TIMEOUT))
+               if (InetAddress.getByName(DRCLocalCloudConfig.getIPAddress(machine)).isReachable(REACHABLE_TIMEOUT))
                {
                   reachability.get(machine).setValue(true);
                   checkSessionStatus(machine);
@@ -350,11 +347,13 @@ public class DRCRemoteProcessManager extends Thread
                   runningRosPIDs.put(machine, -1);
 
                   runningRosTaskNames.remove(machine);
-                  runningRosTaskNames.put(machine, null);
+                  runningRosTaskNames.put(machine, "");
                }
             }
             catch (Exception e)
             {
+               if (DEBUG)
+                  e.printStackTrace();
                shutdownSession(machine);
 
                reachability.get(machine).setValue(false);
@@ -362,13 +361,13 @@ public class DRCRemoteProcessManager extends Thread
                isRunningController.get(machine).setValue(false);
 
                runningControllerPIDs.remove(machine);
-//               runningControllerPIDs.put(machine, -1);
+               runningControllerPIDs.put(machine, -1);
 
                runningRosPIDs.remove(machine);
-//               runningRosPIDs.put(machine, -1);
+               runningRosPIDs.put(machine, -1);
 
                runningRosTaskNames.remove(machine);
-//               runningRosTaskNames.put(machine, "");
+               runningRosTaskNames.put(machine, "");
             }
          }
       }
@@ -451,7 +450,7 @@ public class DRCRemoteProcessManager extends Thread
 
    private void updateRosSimTaskname(LocalCloudMachines machine)
    {
-      String taskName = null;
+      String taskName = "";
 
       try
       {
@@ -464,7 +463,9 @@ public class DRCRemoteProcessManager extends Thread
 
          channel.connect(CONNECTION_TIMEOUT);
 
-         taskName = reader.readLine();
+         String tmp = reader.readLine();
+         if (tmp != null)
+            taskName = tmp;
 
          if (DEBUG)
             System.out.println(taskName);
@@ -492,12 +493,12 @@ public class DRCRemoteProcessManager extends Thread
       }
       else
       {
-         if(sessions.containsKey(machine))
+         if (sessions.containsKey(machine))
             shutdownSession(machine);
 
          try
          {
-            setupSession(machine);
+            setupSession(machine, initCredentials(machine));
          }
          catch (JSchException e)
          {
