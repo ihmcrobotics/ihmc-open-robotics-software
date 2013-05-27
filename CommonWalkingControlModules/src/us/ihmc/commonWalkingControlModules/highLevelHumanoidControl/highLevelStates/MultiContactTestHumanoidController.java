@@ -183,11 +183,14 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       
       if (inContact)
       {
-         momentumBasedController.setContactState(handPalm, handPalm.getContactPoints2d(), coefficientOfFriction.getDoubleValue());
+         //TODO: If we know the surface normal here, use it.
+         FrameVector normalContactVector = null;
+         momentumBasedController.setPlaneContactState(handPalm, handPalm.getContactPoints2d(), coefficientOfFriction.getDoubleValue(), normalContactVector);
       }
       else
       {
-         momentumBasedController.setContactState(handPalm, new ArrayList<FramePoint2d>(), coefficientOfFriction.getDoubleValue());
+         FrameVector normalContactVector = null;
+         momentumBasedController.setPlaneContactState(handPalm, new ArrayList<FramePoint2d>(), coefficientOfFriction.getDoubleValue(), normalContactVector);
       }
    }
 
@@ -257,7 +260,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
          footEndEffectorControlModules.get(contactableBody).doSingularityEscapeBeforeTransitionToNextState();
       }
       
-      momentumBasedController.setContactState(contactableBody, contactPoints, coefficientOfFriction.getDoubleValue(), normalContactVector);
+      momentumBasedController.setPlaneContactState(contactableBody, contactPoints, coefficientOfFriction.getDoubleValue(), normalContactVector);
       
       updateEndEffectorControlModule(contactableBody, contactPoints, constraintType);
    }
