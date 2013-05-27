@@ -25,7 +25,7 @@ import com.jcraft.jsch.Session;
 
 public class DRCRemoteProcessManager extends Thread
 {
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
 
    public static final char KILL_CHAR = 0x03;
    private String username = System.getProperty("user.name");
@@ -44,23 +44,95 @@ public class DRCRemoteProcessManager extends Thread
    private static volatile ConcurrentHashMap<Session, ChannelShell> shellChannels = new ConcurrentHashMap<Session, ChannelShell>();
    private static volatile ConcurrentHashMap<ChannelShell, PrintStream> shellPrintStreams = new ConcurrentHashMap<ChannelShell, PrintStream>();
 
-   private static volatile ConcurrentHashMap<LocalCloudMachines, MutableBoolean> availability = new ConcurrentHashMap<LocalCloudMachines, MutableBoolean>();
-   private static volatile ConcurrentHashMap<LocalCloudMachines, MutableBoolean> isRunningRos = new ConcurrentHashMap<DRCLocalCloudConfig.LocalCloudMachines, MutableBoolean>();
-   private static volatile ConcurrentHashMap<LocalCloudMachines, MutableBoolean> isRunningController = new ConcurrentHashMap<DRCLocalCloudConfig.LocalCloudMachines, MutableBoolean>();
-   
-   private static final int REACHABLE_TIMEOUT = 3000;
-   private static final int CONNECTION_TIMEOUT = 3000;
+   private static volatile ConcurrentHashMap<LocalCloudMachines, MutableBoolean> reachability = new ConcurrentHashMap<LocalCloudMachines, MutableBoolean>();
+   private static volatile ConcurrentHashMap<LocalCloudMachines, MutableBoolean> isRunningRos = new ConcurrentHashMap<DRCLocalCloudConfig.LocalCloudMachines,
+                                                                                                   MutableBoolean>();
+   private static volatile ConcurrentHashMap<LocalCloudMachines, MutableBoolean> isRunningController =
+      new ConcurrentHashMap<DRCLocalCloudConfig.LocalCloudMachines, MutableBoolean>();
 
-   public void run()
+   private static final int REACHABLE_TIMEOUT = 5000;
+   private static final int CONNECTION_TIMEOUT = 5000;
+
+   private boolean waitingOnGazebo = false;
+
+   public DRCRemoteProcessManager()
    {
+
       jsch = new JSch();
 
       config = new Properties();
       config.put("StrictHostKeyChecking", "no");
 
+      for(LocalCloudMachines machine : LocalCloudMachines.values())
+      {
+         if(machine != LocalCloudMachines.LOCALHOST)
+         {
+            reachability.put(machine, new MutableBoolean(false));
+            isRunningRos.put(machine, new MutableBoolean(false));
+            isRunningController.put(machine, new MutableBoolean(false));
+         }
+      }
+   }
+
+   public void launchSim(String task, LocalCloudMachines gazeboMachine, String launchCommandType)
+   {
+      String drcTask;
+
+      initCredentials(gazeboMachine);
+
+      if (isMachineReachable(gazeboMachine))
+      {
+         checkSessionStatus(gazeboMachine);
+
+         if (isMachineRunningSim(gazeboMachine))
+         {
+            System.err.println(gazeboMachine + " is already running a sim.");
+         }
+         else
+         {
+            if (launchCommandType.contains("plugin"))
+               drcTask = DRCDashboardTypes.getPluginCommand(DRCDashboardTypes.DRCPluginTasks.valueOf(task));
+            else
+               drcTask = DRCDashboardTypes.getDefaultCommand(DRCDashboardTypes.DRCROSTasks.valueOf(task));
+
+            sendCommandThroughShellChannel(gazeboMachine, drcTask);
+
+            updateRosSimPID(gazeboMachine);
+            updateRosSimTaskname(gazeboMachine);
+         }
+      }
+   }
+
+   public void killSim(LocalCloudMachines gazeboMachine)
+   {
+      if(isMachineReachable(gazeboMachine))
+      {
+         if(isMachineRunningSim(gazeboMachine))
+         {
+            sendCommandThroughExecChannel(gazeboMachine, "kill -2 " + getRosSimPID(gazeboMachine));
+            updateRosSimPID(gazeboMachine);
+            updateRosSimTaskname(gazeboMachine);
+            isRunningRos.get(gazeboMachine).setValue(false);
+         }
+         else
+         {
+            System.err.println("No sim running on " + gazeboMachine);
+         }
+      }
+   }
+
+   public boolean isWaitingOnGazebo()
+   {
+      return waitingOnGazebo;
+   }
+
+   public void run()
+   {
       initializeNetworkStatus();
 
       setupNetworkPollingTimer();
+
+      while(true);
    }
 
    public void sendCommandThroughShellChannel(LocalCloudMachines machine, String command)
@@ -83,9 +155,9 @@ public class DRCRemoteProcessManager extends Thread
       }
    }
 
-   public boolean isMachineAvailable(LocalCloudMachines machine)
+   public boolean isMachineReachable(LocalCloudMachines machine)
    {
-      return availability.get(machine).booleanValue();
+      return reachability.get(machine).booleanValue();
    }
 
    public boolean isMachineRunningSim(LocalCloudMachines machine)
@@ -163,12 +235,14 @@ public class DRCRemoteProcessManager extends Thread
          ChannelShell channel = (ChannelShell) sessions.get(machine).openChannel("shell");
          shellPrintStreams.put(channel, new PrintStream(channel.getOutputStream(), true));
 
-         channel.setOutputStream(System.out);
+         channel.setOutputStream(null);
          channel.setInputStream(null);
 
          channel.connect(CONNECTION_TIMEOUT);
 
          shellChannels.put(session, channel);
+
+         channel.setOutputStream(System.out);
       }
       catch (IOException e)
       {
@@ -185,11 +259,13 @@ public class DRCRemoteProcessManager extends Thread
             if (machine != LocalCloudMachines.LOCALHOST)
             {
                initCredentials(machine);
+
                if (InetAddress.getByName(ip).isReachable(REACHABLE_TIMEOUT))
                {
-                  availability.put(machine, new MutableBoolean(true));
-                  setupSession(machine);
+                  reachability.put(machine, new MutableBoolean(true));
+                  checkSessionStatus(machine);
                   updateRosSimPID(machine);
+
                   if (getRosSimPID(machine) > 0)
                   {
                      updateRosSimTaskname(machine);
@@ -202,6 +278,7 @@ public class DRCRemoteProcessManager extends Thread
                   }
 
                   updateControllerPID(machine);
+
                   if (runningControllerPIDs.get(machine) > 0)
                   {
                      isRunningController.put(machine, new MutableBoolean(false));
@@ -212,7 +289,7 @@ public class DRCRemoteProcessManager extends Thread
          }
          catch (Exception e)
          {
-            availability.put(machine, new MutableBoolean(false));
+            reachability.put(machine, new MutableBoolean(false));
             isRunningController.put(machine, new MutableBoolean(false));
             isRunningRos.put(machine, new MutableBoolean(false));
          }
@@ -225,14 +302,13 @@ public class DRCRemoteProcessManager extends Thread
 
       networkPollingTimer.schedule(new TimerTask()
       {
-
          @Override
          public void run()
          {
             updateNetworkStatus();
 
          }
-      }, 0l, 5000l);
+      }, 0l, 3000l);
    }
 
    private void updateNetworkStatus()
@@ -245,8 +321,8 @@ public class DRCRemoteProcessManager extends Thread
             {
                if (InetAddress.getByName(ip).isReachable(REACHABLE_TIMEOUT))
                {
-                  availability.get(machine).setValue(true);
-
+                  reachability.get(machine).setValue(true);
+                  checkSessionStatus(machine);
                   updateControllerPID(machine);
                   if (getControllerPID(machine) > 0)
                      isRunningController.get(machine).setValue(true);
@@ -263,7 +339,7 @@ public class DRCRemoteProcessManager extends Thread
                }
                else
                {
-                  availability.get(machine).setValue(false);
+                  reachability.get(machine).setValue(false);
                   isRunningRos.get(machine).setValue(false);
                   isRunningController.get(machine).setValue(false);
 
@@ -279,18 +355,20 @@ public class DRCRemoteProcessManager extends Thread
             }
             catch (Exception e)
             {
-               availability.get(machine).setValue(false);
+               shutdownSession(machine);
+
+               reachability.get(machine).setValue(false);
                isRunningRos.get(machine).setValue(false);
                isRunningController.get(machine).setValue(false);
 
                runningControllerPIDs.remove(machine);
-               runningControllerPIDs.put(machine, -1);
+//               runningControllerPIDs.put(machine, -1);
 
                runningRosPIDs.remove(machine);
-               runningRosPIDs.put(machine, -1);
+//               runningRosPIDs.put(machine, -1);
 
                runningRosTaskNames.remove(machine);
-               runningRosTaskNames.put(machine, null);
+//               runningRosTaskNames.put(machine, "");
             }
          }
       }
@@ -404,5 +482,37 @@ public class DRCRemoteProcessManager extends Thread
 
       runningRosTaskNames.remove(machine);
       runningRosTaskNames.put(machine, taskName);
+   }
+
+   private void checkSessionStatus(LocalCloudMachines machine)
+   {
+      if (sessions.containsKey(machine) && sessions.get(machine).isConnected())
+      {
+         return;
+      }
+      else
+      {
+         if(sessions.containsKey(machine))
+            shutdownSession(machine);
+
+         try
+         {
+            setupSession(machine);
+         }
+         catch (JSchException e)
+         {
+            e.printStackTrace();
+         }
+      }
+   }
+
+   private void shutdownSession(LocalCloudMachines machine)
+   {
+      shellCommandStreamForMachine(machine).close();
+      shellChannelForMachine(machine).disconnect();
+      sessionForMachine(machine).disconnect();
+      shellPrintStreams.remove(shellChannels.get(sessions.get(machine)));
+      shellChannels.remove(sessions.get(machine));
+      sessions.remove(machine);
    }
 }
