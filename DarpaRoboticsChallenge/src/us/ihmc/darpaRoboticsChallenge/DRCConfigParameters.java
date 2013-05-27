@@ -60,6 +60,8 @@ public class DRCConfigParameters
    public static final int NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT = 4895;
 
    public static final int NETWORK_PROCESSOR_TO_UI_TCP_PORT = 4897;
+   
+   public static final int NETWORK_PROCESSOR_TO_UI_RAW_PROTOCOL_TCP_PORT = 4898;
 
 
    public static final long ROBOT_JOINT_SERVER_UPDATE_MILLIS = 100;
