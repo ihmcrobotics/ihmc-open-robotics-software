@@ -26,7 +26,7 @@ import us.ihmc.utilities.Pair;
 
 public class DRCRemoteProcessManager extends Thread
 {
-   private static final boolean DEBUG = false
+   private static final boolean DEBUG = false;
 
    public static final char KILL_CHAR = 0x03;
 
