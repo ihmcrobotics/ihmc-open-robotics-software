@@ -19,17 +19,17 @@ public class DRCDashboardTypes
       private static final long serialVersionUID = 7295926598139266176L;
 
       {
-         put(DRCPluginTasks.QUAL1, "cd ~/workspace/GazeboStateCommunicator/launch/; ./qual1.sh &\n");
-         put(DRCPluginTasks.QUAL2, "cd ~/workspace/GazeboStateCommunicator/launch/; ./qual2.sh &\n");
-         put(DRCPluginTasks.QUAL3, "cd ~/workspace/GazeboStateCommunicator/launch/; ./qual3.sh &\n");
-         put(DRCPluginTasks.QUAL4, "cd ~/workspace/GazeboStateCommunicator/launch/; ./qual4.sh &\n");
-         put(DRCPluginTasks.VRC1, "cd ~/workspace/GazeboStateCommunicator/launch/; ./task1.sh &\n");
-         put(DRCPluginTasks.VRC2, "cd ~/workspace/GazeboStateCommunicator/launch/; ./task2.sh &\n");
-         put(DRCPluginTasks.VRC3, "cd ~/workspace/GazeboStateCommunicator/launch/; ./task3.sh &\n");
-         put(DRCPluginTasks.ATLAS, "cd ~/workspace/GazeboStateCommunicator/launch/; ./atlas.sh &\n");
-         put(DRCPluginTasks.ATLAS_VEHICLE, "cd ~/workspace/GazeboStateCommunicator/launch/; ./atlasVehicle.sh &\n");
-         put(DRCPluginTasks.PARKING_LOT, "cd ~/workspace/GazeboStateCommunicator/launch/; ./parkingLot.sh &\n");
-         put(DRCPluginTasks.HAND, "cd ~/workspace/GazeboStateCommunicator/launch/; ./hand.sh &\n");
+         put(DRCPluginTasks.QUAL1, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./qual1.sh &\n");
+         put(DRCPluginTasks.QUAL2, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./qual2.sh &\n");
+         put(DRCPluginTasks.QUAL3, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./qual3.sh &\n");
+         put(DRCPluginTasks.QUAL4, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./qual4.sh &\n");
+         put(DRCPluginTasks.VRC1, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./task1.sh &\n");
+         put(DRCPluginTasks.VRC2, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./task2.sh &\n");
+         put(DRCPluginTasks.VRC3, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./task3.sh &\n");
+         put(DRCPluginTasks.ATLAS, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./atlas.sh &\n");
+         put(DRCPluginTasks.ATLAS_VEHICLE, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./atlasVehicle.sh &\n");
+         put(DRCPluginTasks.PARKING_LOT, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./parkingLot.sh &\n");
+         put(DRCPluginTasks.HAND, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./hand.sh &\n");
       }
    };
 
@@ -43,13 +43,13 @@ public class DRCDashboardTypes
       private static final long serialVersionUID = 2304570433813141139L;
 
       {
-         put(DRCROSTasks.QUAL2, "roslaunch atlas_utils qual_task_2.launch &\n");
-         put(DRCROSTasks.QUAL1, "roslaunch atlas_utils qual_task_1.launch &\n");
-         put(DRCROSTasks.QUAL3, "roslaunch atlas_utils qual_task_3.launch &\n");
-         put(DRCROSTasks.QUAL4, "roslaunch atlas_utils qual_task_4.launch &\n");
-         put(DRCROSTasks.VRC1, "roslaunch atlas_utils vrc_task_1.launch &\n");
-         put(DRCROSTasks.VRC2, "roslaunch atlas_utils vrc_task_2.launch &\n");
-         put(DRCROSTasks.VRC3, "roslaunch atlas_utils vrc_task_3.launch &\n");
+         put(DRCROSTasks.QUAL2, "clear; roslaunch atlas_utils qual_task_2.launch &\n");
+         put(DRCROSTasks.QUAL1, "clear; roslaunch atlas_utils qual_task_1.launch &\n");
+         put(DRCROSTasks.QUAL3, "clear; roslaunch atlas_utils qual_task_3.launch &\n");
+         put(DRCROSTasks.QUAL4, "clear; roslaunch atlas_utils qual_task_4.launch &\n");
+         put(DRCROSTasks.VRC1, "clear; roslaunch atlas_utils vrc_task_1.launch &\n");
+         put(DRCROSTasks.VRC2, "clear; roslaunch atlas_utils vrc_task_2.launch &\n");
+         put(DRCROSTasks.VRC3, "clear; roslaunch atlas_utils vrc_task_3.launch &\n");
       }
    };
    

@@ -112,11 +112,6 @@ public class GazeboRemoteSimulationAdapter extends Thread
       }
    }
 
-   public boolean isWaitingOnGazebo(LocalCloudMachines machine)
-   {
-      return !isGazeboAvailable(machine);
-   }
-
    public void run()
    {
       initializeNetworkStatus();
@@ -368,52 +363,6 @@ public class GazeboRemoteSimulationAdapter extends Thread
             }
          }
       }
-   }
-
-   private boolean isGazeboAvailable(LocalCloudMachines machine)
-   {
-      boolean ret = false;
-      ChannelShell channel = null;
-      BufferedReader reader;
-      PrintStream stream;
-      try
-      {
-         channel = (ChannelShell) sessions.get(machine).openChannel("shell");
-         stream = new PrintStream(channel.getOutputStream(), true);
-         reader = new BufferedReader(new InputStreamReader(channel.getInputStream()));
-         channel.setInputStream(null);
-         channel.setOutputStream(null);
-         channel.connect(CONNECTION_TIMEOUT);
-
-         stream.println("echo $ROS_MASTER_URI; echo $ROS_HOSTNAME; rosnode ping -c 1 gazebo");
-         stream.flush();
-
-
-         String tmp;
-
-         while ((tmp = reader.readLine()) != null)
-         {
-            if(tmp.contains("test"))
-               ret = true;
-            if (DEBUG)
-            {
-               System.err.println("tmp: " + tmp);
-            }
-         }
-
-      }
-      catch (JSchException e)
-      {
-         e.printStackTrace();
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
-
-      channel.disconnect();
-
-      return ret;
    }
 
    private void updateRosSimPID(LocalCloudMachines machine)
