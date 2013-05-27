@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -473,17 +475,38 @@ public class MomentumBasedController implements RobotController
    {
       return planeContactWrenchProcessor.getCops().get(contactablePlaneBody);
    }
-
-   // TODO: Following has been added for big refactor. Need to be checked.
-
-   public LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> getContactStates()
+   
+   public void setContactState(ContactablePlaneBody contactablePlaneBody, List<FramePoint2d> contactPoints, double coefficientOfFriction)
    {
-      return planeContactStates;
+      setContactState(contactablePlaneBody, contactPoints, coefficientOfFriction, null);
    }
 
-   public LinkedHashMap<ContactableRollingBody, YoRollingContactState> getRollingContactStates()
+   public void setContactState(ContactablePlaneBody contactableBody, List<FramePoint2d> contactPoints, double coefficientOfFriction, FrameVector normalContactVector)
    {
-      return rollingContactStates;
+      YoPlaneContactState yoPlaneContactState = planeContactStates.get(contactableBody);
+
+      if (normalContactVector == null)
+      {
+         yoPlaneContactState.set(contactPoints, coefficientOfFriction);
+      }
+      else
+      {
+         yoPlaneContactState.set(contactPoints, coefficientOfFriction, normalContactVector);
+      }
+   }
+   
+   public void setRollingContactState(ContactableRollingBody contactableRollingBody, List<FramePoint2d> contactPoints, double coefficientOfFriction)
+   {
+      YoRollingContactState yoRollingContactState = rollingContactStates.get(contactableRollingBody);
+
+      yoRollingContactState.setContactPoints(contactPoints);
+      yoRollingContactState.setCoefficientOfFriction(coefficientOfFriction);
+   }
+
+   public void setCylindricalContactInContact(ContactableCylinderBody contactableCylinderBody, boolean setInContact)
+   {
+      YoCylindricalContactState yoCylindricalContactState = cylindricalContactStates.get(contactableCylinderBody);
+      yoCylindricalContactState.setInContact(setInContact);
    }
 
    public ReferenceFrame getCenterOfMassFrame()
@@ -561,10 +584,10 @@ public class MomentumBasedController implements RobotController
       return centerOfMassJacobian;
    }
 
-   public LinkedHashMap<ContactableCylinderBody, YoCylindricalContactState> getCylindricalContactStates()
-   {
-      return cylindricalContactStates;
-   }
+//   public LinkedHashMap<ContactableCylinderBody, YoCylindricalContactState> getCylindricalContactStates()
+//   {
+//      return cylindricalContactStates;
+//   }
 
    public MomentumControlModule getMomentumControlModule()
    {
@@ -610,4 +633,20 @@ public class MomentumBasedController implements RobotController
    {
       return rollingThighs;
    }
+
+   public List<FramePoint> getContactPoints(ContactablePlaneBody contactablePlaneBody)
+   {
+      return contactStates.get(contactablePlaneBody).getContactPoints();
+   }
+
+   public PlaneContactState getContactState(ContactablePlaneBody contactablePlaneBody)
+   {
+      return contactStates.get(contactablePlaneBody);
+   }
+
+   public Collection<PlaneContactState> getPlaneContactStates()
+   {
+       return contactStates.values();
+   }
+   
 }
