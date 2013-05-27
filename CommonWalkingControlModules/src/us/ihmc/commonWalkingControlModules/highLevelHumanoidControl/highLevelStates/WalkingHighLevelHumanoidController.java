@@ -80,7 +80,6 @@ import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.util.PDController;
-import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatus;
 import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter;
 import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter.ErrorType;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
@@ -110,7 +109,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final double PELVIS_YAW_INITIALIZATION_TIME = 1.5;
 
-   private final WalkingStatusReporter walkingStatusReporter;
    private BooleanYoVariable alreadyBeenInDoubleSupportOnce;
 
    private static enum WalkingState {LEFT_SUPPORT, RIGHT_SUPPORT, TRANSFER_TO_LEFT_SUPPORT, TRANSFER_TO_RIGHT_SUPPORT, DOUBLE_SUPPORT}
@@ -339,8 +337,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       additionalSwingTimeForICP.set(0.1);
 
-      this.walkingStatusReporter = walkingStatusReporter;
-
       double initialLeadingFootPitch = 0.0;    // 0.05;
       upcomingSupportLeg.set(RobotSide.RIGHT);    // TODO: stairs hack, so that the following lines use the correct leading leg
       RobotSide leadingLeg = getUpcomingSupportLeg();
@@ -353,8 +349,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       controllerInitializationTime = new DoubleYoVariable("controllerInitializationTime", registry);
       alreadyBeenInDoubleSupportOnce = new BooleanYoVariable("alreadyBeenInDoubleSupportOnce", registry);
 
-      if (walkingStatusReporter != null)
-         updateWalkingStatusReporter();
    }
 
    protected void setupFootControlModules(SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators,
@@ -977,14 +971,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          //// don't change desiredICP
          // desiredICPVelocity.set(0.0, 0.0);
          // }
-
-         if (walkingStatusReporter != null)
-         {
-            if (walkingStatusReporter.areAnyErrorsOutOfBounds(singleSupportErrorToMonitor))
-               walkingStatusReporter.notifyConsumerOfWalkingStatus(WalkingStatus.UNSTABLE_SINGLE_SUPPORT);
-            else
-               walkingStatusReporter.notifyConsumerOfWalkingStatus(WalkingStatus.STABLE);
-         }
 
          FramePoint2d desiredICPLocal = new FramePoint2d(desiredICP.getReferenceFrame());
          FrameVector2d desiredICPVelocityLocal = new FrameVector2d(desiredICPVelocity.getReferenceFrame());
@@ -1697,22 +1683,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       Footstep footstep = new Footstep(contactablePlaneBody, poseReferenceFrame, soleReferenceFrame, expectedContactPoints, trustHeight);
 
       return footstep;
-   }
-
-   private void updateWalkingStatusReporter()
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         DoubleYoVariable footPositionErrorMagnitude = (DoubleYoVariable) registry.getVariable(robotSide.getShortLowerCaseName()
-                                                          + "_footPositionErrorMagnitude");
-         Pair<Double, Double> footPositionErrorBounds = new Pair<Double, Double>(-0.025, 0.025);
-         ErrorType errorType = (robotSide == RobotSide.LEFT) ? ErrorType.L_FOOT_POSITION : ErrorType.R_FOOT_POSITION;
-         walkingStatusReporter.setErrorAndBounds(errorType, footPositionErrorMagnitude, footPositionErrorBounds);
-      }
-
-      DoubleYoVariable comPositionError = (DoubleYoVariable) registry.getVariable("positionError_comHeight");
-      Pair<Double, Double> comPositionErrorBounds = new Pair<Double, Double>(-0.015, 0.015);
-      walkingStatusReporter.setErrorAndBounds(ErrorType.COM_Z, comPositionError, comPositionErrorBounds);
    }
 
 }
