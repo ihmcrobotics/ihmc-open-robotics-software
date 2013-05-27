@@ -1,14 +1,13 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableRollingBody;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoRollingContactState;
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.VariableChangedListener;
+import com.yobotics.simulationconstructionset.YoVariable;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.*;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule.ConstraintType;
@@ -19,28 +18,22 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalcul
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredFootPoseProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredHandPoseProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.TorusPoseProvider;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.*;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.CoMBasedMomentumRateOfChangeControlModule;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAngularAccelerationControlModule;
+import us.ihmc.commonWalkingControlModules.trajectories.ChangeableConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.SE3ConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
-import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FramePoint2d;
-import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.*;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.VariableChangedListener;
-import com.yobotics.simulationconstructionset.YoVariable;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoidControlPattern implements VariableChangedListener
 {
@@ -333,36 +326,5 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       };
 
       return onToesFixedTrajectory;
-   }
-
-   private static class ChangeableConfigurationProvider implements SE3ConfigurationProvider
-   {
-      private final FramePose configuration;
-
-      public ChangeableConfigurationProvider(FramePose initialConfiguration)
-      {
-         configuration = new FramePose(initialConfiguration);
-      }
-
-      @SuppressWarnings("unused")
-      public void get(FramePose framePose)
-      {
-         framePose.setIncludingFrame(configuration);
-      }
-
-      public void get(FramePoint positionToPack)
-      {
-         configuration.getPosition(positionToPack);
-      }
-
-      public void get(FrameOrientation orientationToPack)
-      {
-         configuration.getOrientation(orientationToPack);
-      }
-
-      public void set(FramePose newPose)
-      {
-         configuration.setIncludingFrame(newPose);
-      }
    }
 }
