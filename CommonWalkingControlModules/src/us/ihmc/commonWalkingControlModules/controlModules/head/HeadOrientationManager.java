@@ -62,20 +62,18 @@ public class HeadOrientationManager
       RigidBody head = fullRobotModel.getHead();
       RigidBody elevator = fullRobotModel.getElevator();
       GeometricJacobian neckJacobian = new GeometricJacobian(headOrientationControlJoints, head.getBodyFixedFrame());
-      ReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
       ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
       ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
-      ReferenceFrame[] availableHeadOrientationControlFrames = new ReferenceFrame[] {pelvisZUpFrame, pelvisFrame, ReferenceFrame.getWorldFrame()};
 
       HeadOrientationControlModule headOrientationControlModule = new HeadOrientationControlModule(neckJacobian, pelvis, elevator, twistCalculator,
-                                                                     availableHeadOrientationControlFrames, chestFrame, walkingControllerParameters, registry,
+            pelvisZUpFrame, chestFrame, walkingControllerParameters, registry,
                                                                      dynamicGraphicObjectsListRegistry);
 
       // Setting initial head pitch
       // This magic number (0.67) is a good default head pitch for getting good LIDAR point coverage of ground by feet
       // it would be in DRC config parameters, but the would require updating several nested constructors with an additional parameter
       FrameOrientation orientation = new FrameOrientation(pelvisZUpFrame, 0.0, 0.67, 0.0);
-      headOrientationControlModule.setOrientationToTrack(new FrameOrientation(orientation), pelvis);
+      headOrientationControlModule.setOrientationToTrack(new FrameOrientation(orientation));
       double headKp = 40.0;
       double headZeta = 1.0;
       double headKd = GainCalculator.computeDerivativeGain(headKp, headZeta);
