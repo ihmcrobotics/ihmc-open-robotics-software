@@ -23,29 +23,29 @@ import us.ihmc.utilities.screwTheory.Wrench;
  */
 public interface MomentumControlModule
 {
-   void initialize();
+   public abstract void initialize();
 
-   void reset();
+   public abstract void reset();
 
-   void compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, Map<ContactableCylinderBody, ? extends CylindricalContactState> cylinderContactStates, RobotSide upcomingSupportSide);
+   public abstract void compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, Map<ContactableCylinderBody, ? extends CylindricalContactState> cylinderContactStates, RobotSide upcomingSupportSide);
 
-   void resetGroundReactionWrenchFilter();
+   public abstract void resetGroundReactionWrenchFilter();
 
-   void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration);
+   public abstract void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration);
 
-   void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData);
+   public abstract void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData);
 
-   void setDesiredRateOfChangeOfMomentum(MomentumRateOfChangeData momentumRateOfChangeData);
+   public abstract void setDesiredRateOfChangeOfMomentum(MomentumRateOfChangeData momentumRateOfChangeData);
 
-   SpatialForceVector getDesiredCentroidalMomentumRate();
+   public abstract SpatialForceVector getDesiredCentroidalMomentumRate();
 
-   Map<RigidBody, Wrench> getExternalWrenches();
+   public abstract Map<RigidBody, Wrench> getExternalWrenches();
 
-   void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench);
+   public abstract void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench);
 
-   void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase);
+   public abstract void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase);
 
-   void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration, double weight);
+   public abstract void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration, double weight);
 
-   void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData, double weight);
+   public abstract void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData, double weight);
 }
