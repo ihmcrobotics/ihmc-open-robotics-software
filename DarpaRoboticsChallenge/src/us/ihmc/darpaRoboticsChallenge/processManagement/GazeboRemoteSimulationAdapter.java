@@ -98,12 +98,17 @@ public class GazeboRemoteSimulationAdapter extends Thread
       {
          if (isMachineRunningSim(gazeboMachine))
          {
-            sendCommandThroughShellChannel(gazeboMachine, "kill -2 " + getRosSimPID(gazeboMachine));
-
 //          sendCommandThroughExecChannel(gazeboMachine, "kill -2 " + getRosSimPID(gazeboMachine));
-            updateRosSimPID(gazeboMachine);
-            updateRosSimTaskname(gazeboMachine);
+
+            runningRosPIDs.remove(gazeboMachine);
+            runningRosPIDs.put(gazeboMachine, -1);
+
+            runningRosTaskNames.remove(gazeboMachine);
+            runningRosTaskNames.put(gazeboMachine, "");
+
             isRunningRos.get(gazeboMachine).setValue(false);
+
+            sendCommandThroughShellChannel(gazeboMachine, "kill -2 " + getRosSimPID(gazeboMachine));
          }
          else
          {
