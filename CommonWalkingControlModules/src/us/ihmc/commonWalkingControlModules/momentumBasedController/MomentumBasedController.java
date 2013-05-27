@@ -53,6 +53,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class MomentumBasedController implements RobotController
 {
+   private static final boolean SPY_ON_MOMENTUM_BASED_CONTROLLER = false;
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
@@ -106,6 +107,7 @@ public class MomentumBasedController implements RobotController
    private final EnumYoVariable<RobotSide> upcomingSupportLeg = EnumYoVariable.create("upcomingSupportLeg", "", RobotSide.class, registry, true);    // FIXME: not general enough; this should not be here
 
    private final PlaneContactWrenchProcessor planeContactWrenchProcessor;
+   private final MomentumBasedControllerSpy momentumBasedControllerSpy;
 
    public MomentumBasedController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
                                   CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime,
@@ -116,6 +118,9 @@ public class MomentumBasedController implements RobotController
                                   StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
+      if (SPY_ON_MOMENTUM_BASED_CONTROLLER) momentumBasedControllerSpy = new MomentumBasedControllerSpy(registry); 
+      else momentumBasedControllerSpy = null;
+      
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
       this.momentumControlModule = momentumControlModule;
@@ -279,6 +284,11 @@ public class MomentumBasedController implements RobotController
 
    public void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench)
    {
+      if (momentumBasedControllerSpy != null)
+      {
+         momentumBasedControllerSpy.setExternalWrenchToCompensateFor(rigidBody, wrench);
+      }
+      
       momentumControlModule.setExternalWrenchToCompensateFor(rigidBody, wrench);
    }
 
@@ -289,6 +299,11 @@ public class MomentumBasedController implements RobotController
    // TODO: Temporary method for a big refactor allowing switching between high level behaviors
    public void doPrioritaryControl()
    {
+      if (momentumBasedControllerSpy != null)
+      {
+         momentumBasedControllerSpy.doPrioritaryControl();
+      }
+      
       for (ContactableRollingBody contactableRollingBody : listOfAllContactableRollingBodies)
       {
          // Update the contact points, so they remain underneath the cylindrical body
@@ -304,6 +319,11 @@ public class MomentumBasedController implements RobotController
    // TODO: Temporary method for a big refactor allowing switching between high level behaviors
    public void doSecondaryControl()
    {
+      if (momentumBasedControllerSpy != null)
+      {
+         momentumBasedControllerSpy.doSecondaryControl();
+      }
+      
       momentumControlModule.compute(this.contactStates, this.cylindricalContactStates, upcomingSupportLeg.getEnumValue());
 
       SpatialForceVector desiredCentroidalMomentumRate = momentumControlModule.getDesiredCentroidalMomentumRate();
@@ -392,6 +412,11 @@ public class MomentumBasedController implements RobotController
    // TODO: visibility changed to public
    public void setOneDoFJointAcceleration(OneDoFJoint joint, double desiredAcceleration)
    {
+      if (momentumBasedControllerSpy != null)
+      {
+         momentumBasedControllerSpy.setOneDoFJointAcceleration(joint, desiredAcceleration);
+      }
+      
       DenseMatrix64F jointAcceleration = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
       jointAcceleration.set(0, 0, desiredAcceleration);
       momentumControlModule.setDesiredJointAcceleration(joint, jointAcceleration);
@@ -468,16 +493,21 @@ public class MomentumBasedController implements RobotController
 
    public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
    {
+      if (momentumBasedControllerSpy != null)
+      {
+         momentumBasedControllerSpy.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
+      }
+      
       momentumControlModule.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
-   }
-
-   public void setDesiredJointAcceleration(OneDoFJoint joint, DenseMatrix64F jointAcceleration)
-   {
-      momentumControlModule.setDesiredJointAcceleration(joint, jointAcceleration);
    }
 
    public void setDesiredRateOfChangeOfMomentum(MomentumRateOfChangeData momentumRateOfChangeData)
    {
+      if (momentumBasedControllerSpy != null)
+      {
+         momentumBasedControllerSpy.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
+      }
+      
       momentumControlModule.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
    }
 
