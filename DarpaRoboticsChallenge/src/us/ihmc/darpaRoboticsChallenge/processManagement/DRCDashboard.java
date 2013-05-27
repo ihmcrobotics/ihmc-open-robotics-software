@@ -1110,6 +1110,9 @@ public class DRCDashboard
 
    private void startLaunchProcess(final LocalCloudMachines gazeboMachine, final String task, final String pluginOption)
    {
+      for(int i = 0; i < 20; i++)
+         System.out.println();
+
       startGazebo(gazeboMachine, task, pluginOption);
 
       startOperatorUI();
