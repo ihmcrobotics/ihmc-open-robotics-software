@@ -7,11 +7,20 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Wrench;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class MomentumBasedControllerSpy
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
+   private final BooleanYoVariable printMomentumCommands = new BooleanYoVariable("printMomentumCommands", registry);
+
+   private final IntegerYoVariable numberOfExternalWrenchCommands = new IntegerYoVariable("numExternalWrenchCommands", registry);
+   private final IntegerYoVariable numberOfOneDoFJointAccelerationCommands = new IntegerYoVariable("numOneDoFJointAccelerationCommands", registry);
+   private final IntegerYoVariable numberOfDesiredRateOfChangeOfMomentumCommands = new IntegerYoVariable("numDesiredRateOfChangeOfMomentumCommands", registry);
+   private final IntegerYoVariable numberOfDesiredSpatialAccelerationCommands = new IntegerYoVariable("numDesiredSpatialAccelerationCommands", registry);
 
    private final ArrayList<ExternalWrenchCommand> externalWrenchCommands = new ArrayList<ExternalWrenchCommand>();
    private final ArrayList<OneDoFJointAccelerationCommand> oneDoFJointAccelerationCommands = new ArrayList<OneDoFJointAccelerationCommand>();
@@ -57,14 +66,26 @@ public class MomentumBasedControllerSpy
 
    public void doSecondaryControl()
    {
-      StringBuffer stringBuffer = new StringBuffer();
-      getCommandsIntoStringBuffer(stringBuffer);
+      setYoVariables();
 
-      System.out.println("\n\n***** MomentumBasedControllerSpy: *****\n" + stringBuffer);
+      if (printMomentumCommands.getBooleanValue())
+      {
+         StringBuffer stringBuffer = new StringBuffer();
+         getCommandsIntoStringBufferBrief(stringBuffer);
+         System.out.println("\n\n***** MomentumBasedControllerSpy: *****\n" + stringBuffer);
+
+         stringBuffer = new StringBuffer();
+
+         getCommandsIntoStringBufferVerbose(stringBuffer);
+         System.out.println("\n\n***** MomentumBasedControllerSpy: *****\n" + stringBuffer);
+
+         printMomentumCommands.set(false);
+      }
+
    }
 
 
-   public void getCommandsIntoStringBuffer(StringBuffer stringBuffer)
+   private void getCommandsIntoStringBufferVerbose(StringBuffer stringBuffer)
    {
       for (ExternalWrenchCommand externalWrenchCommand : externalWrenchCommands)
       {
@@ -87,6 +108,23 @@ public class MomentumBasedControllerSpy
       }
 
    }
+
+   private void setYoVariables()
+   {
+      numberOfExternalWrenchCommands.set(externalWrenchCommands.size());
+      numberOfOneDoFJointAccelerationCommands.set(oneDoFJointAccelerationCommands.size());
+      numberOfDesiredRateOfChangeOfMomentumCommands.set(desiredRateOfChangeOfMomentumCommands.size());
+      numberOfDesiredSpatialAccelerationCommands.set(desiredSpatialAccelerationCommands.size());
+   }
+
+   private void getCommandsIntoStringBufferBrief(StringBuffer stringBuffer)
+   {
+      stringBuffer.append(externalWrenchCommands.size() + " ExternalWrenchCommands\n");
+      stringBuffer.append(oneDoFJointAccelerationCommands.size() + " OneDoFJointAccelerationCommands\n");
+      stringBuffer.append(desiredRateOfChangeOfMomentumCommands.size() + " DesiredRateOfChangeOfMomentumCommands\n");
+      stringBuffer.append(desiredSpatialAccelerationCommands.size() + " DesiredSpatialAccelerationCommands\n");
+   }
+
 
    private class ExternalWrenchCommand
    {
@@ -185,8 +223,8 @@ public class MomentumBasedControllerSpy
       className = className.substring(lastDotIndex + 1);
 
       String methodName = stackTraceElement.getMethodName();
-      int lineNumber = stackTrace[0].getLineNumber();
+      int lineNumber = stackTrace[stackIndexForCallIntoMomentumBasedController].getLineNumber();
 
-      return className + "." + methodName + "(): Line " + lineNumber;
+      return "+++ " + className + "." + methodName + "(): Line " + lineNumber;
    }
 }
