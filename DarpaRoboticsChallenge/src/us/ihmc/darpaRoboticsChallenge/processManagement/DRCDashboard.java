@@ -76,7 +76,7 @@ public class DRCDashboard
 
    private JavaProcessSpawner uiSpawner = new JavaProcessSpawner(true);
    private JavaProcessSpawner scsSpawner = new JavaProcessSpawner(true);
-   private GazeboSimLauncher sshSimLauncher = new GazeboSimLauncher();
+   private DRCRemoteProcessManager sshSimLauncher = new DRCRemoteProcessManager();
 
    private HashMap<LocalCloudMachines, Pair<JTree, DefaultMutableTreeNode>> cloudMachineTrees = new HashMap<LocalCloudMachines,
                                                                                                    Pair<JTree, DefaultMutableTreeNode>>();
@@ -90,6 +90,8 @@ public class DRCDashboard
 
    public DRCDashboard()
    {
+      sshSimLauncher.start();
+
       setNativeLookAndFeel();
 
       instance = this;
@@ -300,12 +302,19 @@ public class DRCDashboard
 
       setupProcessStatusPanel();
 
-      updateNetworkStatus();
-
       setupFrameCloseListener();
 
       if (shouldLoadConfig)
          loadConfig();
+
+
+      SwingUtilities.invokeLater(new Runnable()
+      {
+         public void run()
+         {
+            updateNetworkStatus();
+         }
+      });
 
       startTimers();
    }
@@ -476,7 +485,8 @@ public class DRCDashboard
 
       for (final LocalCloudMachines machine : LocalCloudMachines.values())
       {
-         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMONSTER) || machine.equals(LocalCloudMachines.CLOUDMONSTER_JR)))
+         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMONSTER)
+               || machine.equals(LocalCloudMachines.CLOUDMONSTER_JR)))
          {
             DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("<html><body style=\"font-weight:bold;font-size:1.1em;\">"
                                                  + WordUtils.capitalize(machine.toString().toLowerCase().replace("_", " ")) + "</body></html>");
@@ -516,13 +526,13 @@ public class DRCDashboard
 
                   if (launchMode)
                   {
-                     startLaunchProcess(machine, controllerMachine, task, pluginOption);
+                     startLaunchProcess(machine, task, pluginOption);
 
                      launchMode = false;
                   }
                   else
                   {
-                     nukeAllProcesses(machine, controllerMachine);
+                     nukeAllProcesses(machine);
 
                      launchMode = true;
                   }
@@ -562,7 +572,8 @@ public class DRCDashboard
    {
       for (final LocalCloudMachines machine : LocalCloudMachines.values())
       {
-         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMONSTER) || machine.equals(LocalCloudMachines.CLOUDMONSTER_JR)))
+         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMONSTER)
+               || machine.equals(LocalCloudMachines.CLOUDMONSTER_JR)))
             cloudMachineTrees.get(machine).first().addMouseListener(new MouseListener()
             {
                public void mouseReleased(MouseEvent e)
@@ -601,7 +612,7 @@ public class DRCDashboard
 
                            if (n == 0)
                            {
-                              startLaunchProcess(machine, controllerMachine, task, pluginOption);
+                              startLaunchProcess(machine, task, pluginOption);
                            }
                         }
                         else if (userOwnedSim == machine)
@@ -612,7 +623,7 @@ public class DRCDashboard
 
                            if (n == 0)
                            {
-                              nukeAllProcesses(machine, controllerMachine);
+                              nukeAllProcesses(machine);
                            }
                         }
                         else
@@ -659,7 +670,8 @@ public class DRCDashboard
 
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
-         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMONSTER) || machine.equals(LocalCloudMachines.CLOUDMONSTER_JR)))
+         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMONSTER)
+               || machine.equals(LocalCloudMachines.CLOUDMONSTER_JR)))
             cloudMachineTrees.get(machine).first().addTreeSelectionListener(customTreeSelectionListener);
       }
    }
@@ -668,7 +680,8 @@ public class DRCDashboard
    {
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
-         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMONSTER) || machine.equals(LocalCloudMachines.CLOUDMONSTER_JR)))
+         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMONSTER)
+               || machine.equals(LocalCloudMachines.CLOUDMONSTER_JR)))
             cloudMachineTrees.get(machine).first().setToggleClickCount(0);
       }
    }
@@ -992,7 +1005,8 @@ public class DRCDashboard
    {
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
-         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMONSTER) || machine.equals(LocalCloudMachines.CLOUDMONSTER_JR)))
+         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMONSTER)
+               || machine.equals(LocalCloudMachines.CLOUDMONSTER_JR)))
          {
             DefaultMutableTreeNode root = cloudMachineTrees.get(machine).second();
             ((DefaultTreeModel) cloudMachineTrees.get(machine).first().getModel()).nodeChanged(root);
@@ -1006,13 +1020,14 @@ public class DRCDashboard
    {
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
-         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMONSTER) || machine.equals(LocalCloudMachines.CLOUDMONSTER_JR)))
+         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMONSTER)
+               || machine.equals(LocalCloudMachines.CLOUDMONSTER_JR)))
          {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) cloudMachineTrees.get(machine).second().getChildAt(0);
 
             if (sshSimLauncher.isMachineRunningSim(machine))
             {
-               node.setUserObject("<html><body>GZ Sim: <span style=\"color:red;font-style:italic;\">" + sshSimLauncher.getSimTaskname(machine)
+               node.setUserObject("<html><body>GZ Sim: <span style=\"color:red;font-style:italic;\">" + sshSimLauncher.getRunningRosSimTaskName(machine)
                                   + "</span></body></html>");
 
                if (userOwnedSim != machine)
@@ -1033,7 +1048,8 @@ public class DRCDashboard
    {
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
-         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMONSTER) || machine.equals(LocalCloudMachines.CLOUDMONSTER_JR)))
+         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMONSTER)
+               || machine.equals(LocalCloudMachines.CLOUDMONSTER_JR)))
          {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) cloudMachineTrees.get(machine).second().getChildAt(1);
 
@@ -1053,7 +1069,8 @@ public class DRCDashboard
    {
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
-         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMONSTER) || machine.equals(LocalCloudMachines.CLOUDMONSTER_JR)))
+         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMONSTER)
+               || machine.equals(LocalCloudMachines.CLOUDMONSTER_JR)))
          {
             if (sshSimLauncher.isMachineReachable(machine))
             {
@@ -1080,9 +1097,9 @@ public class DRCDashboard
       renderer.setLeafIcon(null);
    }
 
-   private void nukeAllProcesses(final LocalCloudMachines gazeboMachine, final LocalCloudMachines controllerMachine)
+   private void nukeAllProcesses(final LocalCloudMachines gazeboMachine)
    {
-      sshSimLauncher.killSim(gazeboMachine, controllerMachine);
+      sshSimLauncher.killSim(gazeboMachine);
       userOwnedSim = null;
       uiSpawner.killAll();
       scsSpawner.killAll();
@@ -1091,10 +1108,9 @@ public class DRCDashboard
       launchButtons.get(cloudMachineTrees.get(gazeboMachine).first()).getParent().repaint();
    }
 
-   private void startLaunchProcess(final LocalCloudMachines gazeboMachine, final LocalCloudMachines controllerMachine, final String task,
-                                   final String pluginOption)
+   private void startLaunchProcess(final LocalCloudMachines gazeboMachine, final String task, final String pluginOption)
    {
-      startGazebo(gazeboMachine, controllerMachine, task, pluginOption);
+      startGazebo(gazeboMachine, task, pluginOption);
 
       startOperatorUI();
 
@@ -1126,9 +1142,9 @@ public class DRCDashboard
       }
    }
 
-   private void startGazebo(final LocalCloudMachines gazeboMachine, final LocalCloudMachines controllerMachine, final String task, final String pluginOption)
+   private void startGazebo(final LocalCloudMachines gazeboMachine, final String task, final String pluginOption)
    {
-      sshSimLauncher.launchSim(task, gazeboMachine, controllerMachine, pluginOption);
+      sshSimLauncher.launchSim(task, gazeboMachine, pluginOption);
       userOwnedSim = gazeboMachine;
    }
 
