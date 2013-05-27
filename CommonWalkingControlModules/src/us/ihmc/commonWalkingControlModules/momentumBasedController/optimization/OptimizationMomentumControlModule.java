@@ -102,7 +102,15 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
                        Map<ContactableCylinderBody, ? extends CylindricalContactState> cylinderContactStates, RobotSide upcomingSupportLeg)
    {
       LinkedHashMap<RigidBody, PlaneContactState> planeContactStates = convertContactStates(contactStates);
-      LinkedHashMap<RigidBody, CylindricalContactState> cylinderContactStatesConverted = convertCylindricalContactStates(cylinderContactStates);
+      LinkedHashMap<RigidBody, CylindricalContactState> cylinderContactStatesConverted;
+      if (cylinderContactStates != null)
+      {
+         cylinderContactStatesConverted = convertCylindricalContactStates(cylinderContactStates);
+      }
+      else
+      {
+         cylinderContactStatesConverted = null;
+      }
       hardMotionConstraintSolver.setAlpha(momentumOptimizationSettings.getDampedLeastSquaresFactor());
 
       primaryMotionConstraintHandler.compute();
