@@ -20,6 +20,7 @@ import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredHandPoseProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.ManipulationControlModule;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.TorusManipulationProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.TorusPoseProvider;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.*;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
@@ -85,7 +86,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
    public AbstractHighLevelHumanoidControlPattern(
            RootJointAngularAccelerationControlModule rootJointAccelerationControlModule, DesiredHeadOrientationProvider desiredHeadOrientationProvider,
            MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters, DesiredHandPoseProvider handPoseProvider,
-           TorusPoseProvider torusPoseProvider, SideDependentList<HandControllerInterface> handControllers, LidarControllerInterface lidarControllerInterface,
+           TorusPoseProvider torusPoseProvider, TorusManipulationProvider torusManipulationProvider, SideDependentList<HandControllerInterface> handControllers, LidarControllerInterface lidarControllerInterface,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, HighLevelState controllerState)
    {
       super(controllerState);
@@ -120,7 +121,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
       // Setup arm+hand manipulation state machines
       manipulationControlModule = new ManipulationControlModule(yoTime, fullRobotModel, twistCalculator, walkingControllerParameters, handPoseProvider,
-              torusPoseProvider, dynamicGraphicObjectsListRegistry, handControllers, momentumBasedController, registry);
+              torusPoseProvider, torusManipulationProvider, dynamicGraphicObjectsListRegistry, handControllers, momentumBasedController, registry);
 
       // Setup head and chest control modules
       headOrientationManager = new HeadOrientationManager(momentumBasedController, walkingControllerParameters, desiredHeadOrientationProvider, registry,
