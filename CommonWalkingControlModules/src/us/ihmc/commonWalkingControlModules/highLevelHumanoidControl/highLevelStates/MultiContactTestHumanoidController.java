@@ -17,9 +17,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalcul
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredFootPoseProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredHandPoseProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.TorusPoseProvider;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.OrientationTrajectoryData;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAngularAccelerationControlModule;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.*;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SE3ConfigurationProvider;
@@ -47,42 +45,43 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
 {
    public final static HighLevelState controllerState = HighLevelState.MULTI_CONTACT;
 
-   private final ControlFlowInputPort<FramePoint> desiredCoMPositionPort;
    private final YoFramePoint desiredCoMPosition = new YoFramePoint("desiredCoM", worldFrame, registry);
-   
+
    private final DesiredFootPoseProvider footPoseProvider;
 
    private final BooleanYoVariable l_footDoHeelOff = new BooleanYoVariable("l_footDoHeelOff", registry);
    private final BooleanYoVariable r_footDoHeelOff = new BooleanYoVariable("r_footDoHeelOff", registry);
    private final SideDependentList<BooleanYoVariable> doHeelOff = new SideDependentList<BooleanYoVariable>(l_footDoHeelOff, r_footDoHeelOff);
-   
-   private final LinkedHashMap<ContactablePlaneBody, ChangeableConfigurationProvider> desiredConfigurationProviders =
-      new LinkedHashMap<ContactablePlaneBody, ChangeableConfigurationProvider>();
+
+   private final LinkedHashMap<ContactablePlaneBody, ChangeableConfigurationProvider> desiredConfigurationProviders = new LinkedHashMap<ContactablePlaneBody,
+                                                                                                                         ChangeableConfigurationProvider>();
    private final LinkedHashMap<ContactablePlaneBody, StraightLinePositionTrajectoryGenerator> swingPositionTrajectoryGenerators =
       new LinkedHashMap<ContactablePlaneBody, StraightLinePositionTrajectoryGenerator>();
    private final LinkedHashMap<ContactablePlaneBody, OrientationInterpolationTrajectoryGenerator> swingOrientationTrajectoryGenerators =
       new LinkedHashMap<ContactablePlaneBody, OrientationInterpolationTrajectoryGenerator>();
 
    private final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> contactStates;
-   
+
    private final ConstantDoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(1.0);
+   private final CoMBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule;
 
    public MultiContactTestHumanoidController(SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<? extends ContactablePlaneBody> hands,
-           ControlFlowInputPort<FramePoint> desiredCoMPositionPort, RootJointAngularAccelerationControlModule rootJointAccelerationControlModule,
-           DesiredHeadOrientationProvider desiredHeadOrientationProvider, MomentumBasedController momentumBasedController,
-           WalkingControllerParameters walkingControllerParameters, DesiredHandPoseProvider handPoseProvider, TorusPoseProvider torusPoseProvider, DesiredFootPoseProvider footPoseProvider,
-           SideDependentList<HandControllerInterface> handControllers, LidarControllerInterface lidarControllerInterface,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           CoMBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
+           RootJointAngularAccelerationControlModule rootJointAccelerationControlModule, DesiredHeadOrientationProvider desiredHeadOrientationProvider,
+           MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters, DesiredHandPoseProvider handPoseProvider,
+           TorusPoseProvider torusPoseProvider, DesiredFootPoseProvider footPoseProvider, SideDependentList<HandControllerInterface> handControllers,
+           LidarControllerInterface lidarControllerInterface, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       super(feet, rootJointAccelerationControlModule, desiredHeadOrientationProvider, momentumBasedController, walkingControllerParameters, handPoseProvider,
             torusPoseProvider, handControllers, lidarControllerInterface, dynamicGraphicObjectsListRegistry, controllerState);
 
       this.footPoseProvider = footPoseProvider;
-      this.desiredCoMPositionPort = desiredCoMPositionPort;
       this.contactStates = momentumBasedController.getContactStates();
 
+      this.momentumRateOfChangeControlModule = momentumRateOfChangeControlModule;
+
       setupFootControlModules();
-      
+
       for (final RobotSide robotSide : RobotSide.values)
       {
          doHeelOff.get(robotSide).addVariableChangedListener(this);
@@ -97,25 +96,28 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
          GeometricJacobian jacobian = legJacobians.get(robotSide);
 
          String bodyName = foot.getRigidBody().getName();
-         
+
 
          final ConstantConfigurationProvider currentConfigurationProvider = new ConstantConfigurationProvider(new FramePose(foot.getBodyFrame()));
-         final ChangeableConfigurationProvider desiredConfigurationProvider = new ChangeableConfigurationProvider(footPoseProvider.getDesiredFootPose(robotSide));
-         
+         final ChangeableConfigurationProvider desiredConfigurationProvider =
+            new ChangeableConfigurationProvider(footPoseProvider.getDesiredFootPose(robotSide));
+
          StraightLinePositionTrajectoryGenerator positionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator(bodyName, worldFrame,
-               trajectoryTimeProvider.getValue(), currentConfigurationProvider, desiredConfigurationProvider, registry, false);
-         
+                                                                                  trajectoryTimeProvider.getValue(), currentConfigurationProvider,
+                                                                                  desiredConfigurationProvider, registry, false);
+
          OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(bodyName, worldFrame,
-               trajectoryTimeProvider, currentConfigurationProvider, desiredConfigurationProvider, registry, false);
-         
+                                                                                         trajectoryTimeProvider, currentConfigurationProvider,
+                                                                                         desiredConfigurationProvider, registry, false);
+
          desiredConfigurationProviders.put(foot, desiredConfigurationProvider);
          swingPositionTrajectoryGenerators.put(foot, positionTrajectoryGenerator);
          swingOrientationTrajectoryGenerators.put(foot, orientationTrajectoryGenerator);
 
          DoubleTrajectoryGenerator onToesFixedTrajectory = createDummyDoubleTrajectoryGenerator();
-         
+
          EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(foot, jacobian, positionTrajectoryGenerator, null,
-               orientationTrajectoryGenerator, onToesFixedTrajectory, momentumBasedController, registry);
+                                                                orientationTrajectoryGenerator, onToesFixedTrajectory, momentumBasedController, registry);
          footEndEffectorControlModules.put(foot, endEffectorControlModule);
 
       }
@@ -140,7 +142,12 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
 
    protected void doCoMControl()
    {
-      desiredCoMPositionPort.setData(desiredCoMPosition.getFramePointCopy());
+      momentumRateOfChangeControlModule.getDesiredCoMPositionInputPort().setData(desiredCoMPosition.getFramePointCopy());
+
+      momentumRateOfChangeControlModule.startComputation();
+      momentumRateOfChangeControlModule.waitUntilComputationIsDone();
+      MomentumRateOfChangeData momentumRateOfChangeData = momentumRateOfChangeControlModule.getMomentumRateOfChangeOutputPort().getData();
+      momentumBasedController.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
    }
 
    protected void doFootControl()
@@ -177,9 +184,10 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
          {
             contactState.set(new ArrayList<FramePoint2d>(), coefficientOfFriction);
          }
+
          return;
       }
-      
+
       if (inContact)
       {
          setFlatFootContactState(contactablePlaneBody);
@@ -209,7 +217,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       // Initialize desired foot pose to the actual, so no surprising behavior
       ReferenceFrame footFrame = footEndEffectorControlModules.get(contactableBody).getEndEffectorFrame();
       desiredConfigurationProviders.get(contactableBody).set(new FramePose(footFrame));
-      
+
       FrameVector normalContactVector = new FrameVector(contactableBody.getPlaneFrame(), 0.0, 0.0, 1.0);
       setContactState(contactableBody, new ArrayList<FramePoint2d>(), ConstraintType.UNCONSTRAINED, normalContactVector);
    }
@@ -222,7 +230,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
 
       return DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactableBody.getContactPoints(), direction, 2);
    }
-   
+
    private List<FramePoint2d> getContactPoints2d(ContactablePlaneBody contactableBody, List<FramePoint> contactPoints)
    {
       List<FramePoint2d> contactPoints2d = new ArrayList<FramePoint2d>(contactPoints.size());
@@ -235,12 +243,14 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       return contactPoints2d;
    }
 
-   private void setContactState(ContactablePlaneBody contactableBody, List<FramePoint2d> contactPoints, ConstraintType constraintType, FrameVector normalContactVector)
+   private void setContactState(ContactablePlaneBody contactableBody, List<FramePoint2d> contactPoints, ConstraintType constraintType,
+                                FrameVector normalContactVector)
    {
       if (contactPoints.size() == 0)
       {
          footEndEffectorControlModules.get(contactableBody).doSingularityEscapeBeforeTransitionToNextState();
       }
+
       YoPlaneContactState contactState = contactStates.get(contactableBody);
       contactState.set(contactPoints, coefficientOfFriction.getDoubleValue(), normalContactVector);
       updateEndEffectorControlModule(contactableBody, contactState, constraintType);
@@ -256,7 +266,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
    {
       if (!(v instanceof BooleanYoVariable))
          return;
-      
+
       for (RobotSide robotSide : RobotSide.values)
       {
          if (v.equals(doHeelOff.get(robotSide)))
@@ -277,35 +287,35 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
    {
       DoubleTrajectoryGenerator onToesFixedTrajectory = new DoubleTrajectoryGenerator()
       {
-         
          public double getValue()
          {
             return 0;
          }
-         
+
          public boolean isDone()
          {
             return true;
          }
-         
+
          public void initialize()
          {
          }
-         
+
          public void compute(double time)
          {
          }
-         
+
          public double getVelocity()
          {
             return 0;
          }
-         
+
          public double getAcceleration()
          {
             return 0;
          }
       };
+
       return onToesFixedTrajectory;
    }
 

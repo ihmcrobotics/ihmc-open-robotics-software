@@ -90,7 +90,6 @@ public class MomentumBasedController implements RobotController
    protected final LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredAccelerationYoVariables = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
 
    protected final ProcessedOutputsInterface processedOutputs;
-   protected final MomentumRateOfChangeControlModule momentumRateOfChangeControlModule;
    protected final InverseDynamicsCalculator inverseDynamicsCalculator;
 
    private final DesiredCoMAndAngularAccelerationGrabber desiredCoMAndAngularAccelerationGrabber;
@@ -108,7 +107,6 @@ public class MomentumBasedController implements RobotController
                                   double gravityZ, TwistCalculator twistCalculator, Collection<? extends ContactablePlaneBody> contactablePlaneBodies,
                                   Collection<? extends ContactableCylinderBody> contactableCylinderBodies, double controlDT,
                                   ProcessedOutputsInterface processedOutputs, MomentumControlModule momentumControlModule, ArrayList<Updatable> updatables,
-                                  MomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
                                   StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
@@ -233,7 +231,6 @@ public class MomentumBasedController implements RobotController
          contactStates.put(contactableCylinderBody, rollingContactStates.get(contactableCylinderBody));
       }
 
-      this.momentumRateOfChangeControlModule = momentumRateOfChangeControlModule;
 
       this.planeContactWrenchProcessor = new PlaneContactWrenchProcessor(this.contactablePlaneBodies, dynamicGraphicObjectsListRegistry, registry);
    }
@@ -275,10 +272,6 @@ public class MomentumBasedController implements RobotController
    // TODO: Temporary method for a big refactor allowing switching between high level behaviors
    public void doSecondaryControl()
    {
-      momentumRateOfChangeControlModule.startComputation();
-      momentumRateOfChangeControlModule.waitUntilComputationIsDone();
-      MomentumRateOfChangeData momentumRateOfChangeData = momentumRateOfChangeControlModule.getMomentumRateOfChangeOutputPort().getData();
-      setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
       momentumControlModule.compute(this.contactStates, this.cylindricalContactStates, upcomingSupportLeg.getEnumValue());
 
       SpatialForceVector desiredCentroidalMomentumRate = momentumControlModule.getDesiredCentroidalMomentumRate();
