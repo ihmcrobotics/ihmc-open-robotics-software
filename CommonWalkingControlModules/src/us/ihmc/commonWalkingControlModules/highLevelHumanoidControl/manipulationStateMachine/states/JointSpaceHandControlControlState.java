@@ -129,9 +129,7 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
          PDController pdController = pdControllers.get(joint);
          double desiredAccleration = feedforwardAcceleration + pdController.compute(currentPosition, desiredPosition, currentVelocity, desiredVelocity);
 
-         DenseMatrix64F jointAccelerationMatrix = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
-         jointAccelerationMatrix.set(0, 0, desiredAccleration);
-         momentumBasedController.setDesiredJointAcceleration(joint, jointAccelerationMatrix);
+         momentumBasedController.setOneDoFJointAcceleration(joint, desiredAccleration);
       }
    }
 
