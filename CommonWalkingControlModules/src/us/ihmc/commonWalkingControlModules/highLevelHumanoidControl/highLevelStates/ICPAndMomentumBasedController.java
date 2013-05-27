@@ -1,18 +1,13 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.EnumYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.FootPolygonVisualizer;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.calculators.ConstantOmega0Calculator;
 import us.ihmc.commonWalkingControlModules.calculators.Omega0Calculator;
 import us.ihmc.commonWalkingControlModules.calculators.Omega0CalculatorInterface;
@@ -31,9 +26,15 @@ import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.EnumYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
 
 public class ICPAndMomentumBasedController
 {
@@ -90,9 +91,9 @@ public class ICPAndMomentumBasedController
       momentumBasedController.addUpdatable(new Omega0Updater());
       momentumBasedController.addUpdatable(new BipedSupportPolygonsUpdater());
       momentumBasedController.addUpdatable(new CapturePointUpdater());
-
-      LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> planeContactStates = momentumBasedController.getContactStates();
-      momentumBasedController.addUpdatable(new FootPolygonVisualizer(planeContactStates.values(), dynamicGraphicObjectsListRegistry, registry));
+      
+      Collection<PlaneContactState> planeContactStates = momentumBasedController.getPlaneContactStates();
+      momentumBasedController.addUpdatable(new FootPolygonVisualizer(planeContactStates, dynamicGraphicObjectsListRegistry, registry));
 
       if (dynamicGraphicObjectsListRegistry != null)
       {
@@ -150,12 +151,11 @@ public class ICPAndMomentumBasedController
 
    protected void updateBipedSupportPolygons(BipedSupportPolygons bipedSupportPolygons)
    {
-      LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> planeContactStates = momentumBasedController.getContactStates();
-
       SideDependentList<List<FramePoint>> footContactPoints = new SideDependentList<List<FramePoint>>();
       for (RobotSide robotSide : RobotSide.values)
       {
-         footContactPoints.put(robotSide, planeContactStates.get(bipedFeet.get(robotSide)).getContactPoints());
+         List<FramePoint> contactPoints = momentumBasedController.getContactPoints(bipedFeet.get(robotSide));
+         footContactPoints.put(robotSide, contactPoints);
       }
 
       bipedSupportPolygons.update(footContactPoints);

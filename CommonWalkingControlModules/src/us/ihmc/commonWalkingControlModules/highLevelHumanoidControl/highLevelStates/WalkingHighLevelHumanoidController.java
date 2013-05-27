@@ -180,8 +180,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final AverageOrientationCalculator averageOrientationCalculator = new AverageOrientationCalculator();
 
-   // TODO: New variables
-   private final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> contactStates;
    private final ICPAndMomentumBasedController icpAndMomentumBasedController;
    private final EnumYoVariable<RobotSide> upcomingSupportLeg;
    private final EnumYoVariable<RobotSide> supportLeg;
@@ -260,7 +258,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       // Getting parameters from the icpAndMomentumBasedController
       this.icpAndMomentumBasedController = icpAndMomentumBasedController;
       
-      contactStates = momentumBasedController.getContactStates();
+//      contactStates = momentumBasedController.getContactStates();
       upcomingSupportLeg = momentumBasedController.getUpcomingSupportLeg();
       supportLeg = icpAndMomentumBasedController.getYoSupportLeg();
       capturePoint = icpAndMomentumBasedController.getCapturePoint();
@@ -355,7 +353,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactablePlaneBody bipedFoot = feet.get(robotSide);
-         contactStates.get(bipedFoot).set(bipedFoot.getContactPoints2d(), coefficientOfFriction.getDoubleValue());    // flat feet
+         momentumBasedController.setContactState(bipedFoot, bipedFoot.getContactPoints2d(), coefficientOfFriction.getDoubleValue());
+         
          String sideString = robotSide.getCamelCaseNameForStartOfExpression();
 
          PositionTrajectoryGenerator swingPositionTrajectoryGenerator = footPositionTrajectoryGenerators.get(robotSide);
@@ -1549,7 +1548,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       for (ContactablePlaneBody contactablePlaneBody : feet)
       {
-         YoPlaneContactState contactState = contactStates.get(contactablePlaneBody);
+         PlaneContactState contactState = momentumBasedController.getContactState(contactablePlaneBody);
+         
+//         YoPlaneContactState contactState = contactStates.get(contactablePlaneBody);
          if (contactState.inContact())
             contactStatesList.add(contactState);
       }
@@ -1588,15 +1589,18 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          footEndEffectorControlModules.get(contactableBody).doSingularityEscapeBeforeTransitionToNextState();
       }
 
-      YoPlaneContactState contactState = contactStates.get(contactableBody);
-      int oldNumberOfContactPoints = contactState.getNumberOfContactPoints();
-      contactState.set(contactPoints, coefficientOfFriction.getDoubleValue());
-      updateEndEffectorControlModule(contactableBody, contactState, constraintType);
+//      YoPlaneContactState contactState = contactStates.get(contactableBody);
+////      int oldNumberOfContactPoints = contactState.getNumberOfContactPoints();
+//      contactState.set(contactPoints, coefficientOfFriction.getDoubleValue());
+      
+      
+      momentumBasedController.setContactState(contactableBody, contactPoints, coefficientOfFriction.getDoubleValue());
+      updateEndEffectorControlModule(contactableBody, contactPoints, constraintType);
 
-      if (contactPoints.size() < oldNumberOfContactPoints)
-      {
-         // resetGroundReactionWrenchFilter();    // so that we don't end up with CoPs outside of the base of support
-      }
+//      if (contactPoints.size() < oldNumberOfContactPoints)
+//      {
+//         // resetGroundReactionWrenchFilter();    // so that we don't end up with CoPs outside of the base of support
+//      }
    }
 
    private List<FramePoint2d> getContactPoints2d(ContactablePlaneBody contactableBody, List<FramePoint> contactPoints)
@@ -1620,16 +1624,17 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       return DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactableBody.getContactPoints(), direction, 2);
    }
 
-   private void updateEndEffectorControlModule(ContactablePlaneBody contactablePlaneBody, PlaneContactState contactState, ConstraintType constraintType)
+   private void updateEndEffectorControlModule(ContactablePlaneBody contactablePlaneBody, List<FramePoint2d> contactPoints, ConstraintType constraintType)
    {
-      List<FramePoint2d> contactPoints = contactState.getContactPoints2d();
+//      List<FramePoint2d> contactPoints = contactState.getContactPoints2d();
       footEndEffectorControlModules.get(contactablePlaneBody).setContactPoints(contactPoints, constraintType);
    }
 
    // TODO: should probably precompute this somewhere else
    private FrameConvexPolygon2d computeFootPolygon(RobotSide robotSide, ReferenceFrame referenceFrame)
    {
-      List<FramePoint> contactPoints = contactStates.get(feet.get(robotSide)).getContactPoints();
+//      List<FramePoint> contactPoints = contactStates.get(feet.get(robotSide)).getContactPoints();
+      List<FramePoint> contactPoints = momentumBasedController.getContactPoints(feet.get(robotSide));
       FrameConvexPolygon2d footPolygon = FrameConvexPolygon2d.constructByProjectionOntoXYPlane(contactPoints, referenceFrame);
 
       return footPolygon;

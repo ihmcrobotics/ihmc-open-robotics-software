@@ -55,7 +55,6 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
    private final LinkedHashMap<ContactablePlaneBody, OrientationInterpolationTrajectoryGenerator> swingOrientationTrajectoryGenerators =
       new LinkedHashMap<ContactablePlaneBody, OrientationInterpolationTrajectoryGenerator>();
 
-   private final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> contactStates;
 
    private final ConstantDoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(1.0);
    private final CoMBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule;
@@ -70,8 +69,6 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
             torusPoseProvider, torusManipulationProvider, handControllers, lidarControllerInterface, dynamicGraphicObjectsListRegistry, controllerState);
 
       this.footPoseProvider = footPoseProvider;
-      this.contactStates = momentumBasedController.getContactStates();
-
       this.momentumRateOfChangeControlModule = momentumRateOfChangeControlModule;
 
       setupFootControlModules();
@@ -183,28 +180,27 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
    public void setHandInContact(RobotSide robotSide, boolean inContact)
    {
       ContactablePlaneBody handPalm = handPalms.get(robotSide);
-      YoPlaneContactState contactState = momentumBasedController.getContactStates().get(handPalm);
+      
       if (inContact)
       {
-         contactState.set(handPalm.getContactPoints2d(), coefficientOfFriction.getDoubleValue());
+         momentumBasedController.setContactState(handPalm, handPalm.getContactPoints2d(), coefficientOfFriction.getDoubleValue());
       }
       else
       {
-         contactState.set(new ArrayList<FramePoint2d>(), coefficientOfFriction.getDoubleValue());
+         momentumBasedController.setContactState(handPalm, new ArrayList<FramePoint2d>(), coefficientOfFriction.getDoubleValue());
       }
    }
 
    public void setThighInContact(RobotSide robotSide, boolean inContact)
    {
       ContactableRollingBody rollingThigh = rollingThighs.get(robotSide);
-      YoRollingContactState contactState = momentumBasedController.getRollingContactStates().get(rollingThigh);
       if (inContact)
       {
-         contactState.setContactPoints(rollingThigh.getContactPoints2d());
+         momentumBasedController.setRollingContactState(rollingThigh, rollingThigh.getContactPoints2d(), coefficientOfFriction.getDoubleValue());
       }
       else
       {
-         contactState.setContactPoints(new ArrayList<FramePoint2d>());
+         momentumBasedController.setRollingContactState(rollingThigh, new ArrayList<FramePoint2d>(), coefficientOfFriction.getDoubleValue());
       }
    }
 
@@ -260,15 +256,14 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       {
          footEndEffectorControlModules.get(contactableBody).doSingularityEscapeBeforeTransitionToNextState();
       }
-
-      YoPlaneContactState contactState = contactStates.get(contactableBody);
-      contactState.set(contactPoints, coefficientOfFriction.getDoubleValue(), normalContactVector);
-      updateEndEffectorControlModule(contactableBody, contactState, constraintType);
+      
+      momentumBasedController.setContactState(contactableBody, contactPoints, coefficientOfFriction.getDoubleValue(), normalContactVector);
+      
+      updateEndEffectorControlModule(contactableBody, contactPoints, constraintType);
    }
 
-   private void updateEndEffectorControlModule(ContactablePlaneBody contactablePlaneBody, PlaneContactState contactState, ConstraintType constraintType)
+   private void updateEndEffectorControlModule(ContactablePlaneBody contactablePlaneBody, List<FramePoint2d> contactPoints, ConstraintType constraintType)
    {
-      List<FramePoint2d> contactPoints = contactState.getContactPoints2d();
       footEndEffectorControlModules.get(contactablePlaneBody).setContactPoints(contactPoints, constraintType);
    }
 
