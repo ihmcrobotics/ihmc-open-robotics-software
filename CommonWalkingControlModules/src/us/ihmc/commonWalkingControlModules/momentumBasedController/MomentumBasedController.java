@@ -54,8 +54,6 @@ public class MomentumBasedController implements RobotController
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
-   private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final ReferenceFrame elevatorFrame;
    private final ReferenceFrame centerOfMassFrame;
 
    private final FullRobotModel fullRobotModel;
@@ -186,8 +184,6 @@ public class MomentumBasedController implements RobotController
          this.updatables.addAll(updatables);
       }
 
-
-      elevatorFrame = fullRobotModel.getElevatorFrame();
 
       double coefficientOfFriction = 1.0;    // TODO: magic number...
 
