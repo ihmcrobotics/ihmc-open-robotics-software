@@ -64,7 +64,6 @@ public class FootCenterToToeEvaluator
 
    private double doubleSupportFirstStepFraction = 0.5;
    private int maxNumberOfConsideredFootsteps = 4;
-   private boolean doHeelToToeTransfer = true; 
    private DoubleSupportFootCenterToToeICPComputer smoothICPComputer;  
 
 
@@ -74,8 +73,8 @@ public class FootCenterToToeEvaluator
    public void createRegistryBeforeTests()
    {
       registry = new YoVariableRegistry(getClass().getSimpleName());
-//      smoothICPComputer = new DoubleSupportFootCenterToToeICPComputer(doubleSupportFirstStepFraction, doHeelToToeTransfer,
-//            maxNumberOfConsideredFootsteps, registry, dynamicGraphicObjectsListRegistry);
+      smoothICPComputer = new DoubleSupportFootCenterToToeICPComputer(doubleSupportFirstStepFraction,  
+            maxNumberOfConsideredFootsteps, registry, dynamicGraphicObjectsListRegistry);
    }
 
    private DoubleYoVariable stopSignalTime = new DoubleYoVariable("stopSignalTime", registry);
@@ -192,7 +191,7 @@ public class FootCenterToToeEvaluator
          {
             icpFootCenterCornerPointsViz.get(i).set(smoothICPComputer.getFootCenterICPCornerPoints().get(i).getFramePointCopy()); 
             
-            if (doHeelToToeTransfer)
+            if (smoothICPComputer.getDoHeelToToeTransfer())
             {
             icpToeCornerPointsViz.get(i).set(smoothICPComputer.getToeICPCornerPoints().get(i).getFramePointCopy()); 
             }
@@ -240,7 +239,7 @@ public class FootCenterToToeEvaluator
          {
             icpFootCenterCornerPointsViz.get(i).set(smoothICPComputer.getFootCenterICPCornerPoints().get(i).getFramePointCopy()); 
             
-            if (doHeelToToeTransfer)
+            if (smoothICPComputer.getDoHeelToToeTransfer())
             {
             icpToeCornerPointsViz.get(i).set(smoothICPComputer.getToeICPCornerPoints().get(i).getFramePointCopy()); 
             }
@@ -280,7 +279,7 @@ public class FootCenterToToeEvaluator
             {
                icpFootCenterCornerPointsViz.get(i).set(smoothICPComputer.getFootCenterICPCornerPoints().get(i).getFramePointCopy()); 
                
-               if (doHeelToToeTransfer)
+               if (smoothICPComputer.getDoHeelToToeTransfer())
                {
                icpToeCornerPointsViz.get(i).set(smoothICPComputer.getToeICPCornerPoints().get(i).getFramePointCopy()); 
                }
@@ -315,7 +314,7 @@ public class FootCenterToToeEvaluator
             {
                icpFootCenterCornerPointsViz.get(i).set(smoothICPComputer.getFootCenterICPCornerPoints().get(i).getFramePointCopy()); 
                
-               if (doHeelToToeTransfer)
+               if (smoothICPComputer.getDoHeelToToeTransfer())
                {
                icpToeCornerPointsViz.get(i).set(smoothICPComputer.getToeICPCornerPoints().get(i).getFramePointCopy()); 
                }
@@ -489,7 +488,7 @@ public class FootCenterToToeEvaluator
             {
                icpFootCenterCornerPointsViz.get(i).set(smoothICPComputer.getFootCenterICPCornerPoints().get(i).getFramePointCopy()); 
                
-               if (doHeelToToeTransfer)
+               if (smoothICPComputer.getDoHeelToToeTransfer())
                {
                icpToeCornerPointsViz.get(i).set(smoothICPComputer.getToeICPCornerPoints().get(i).getFramePointCopy()); 
                }
@@ -542,7 +541,7 @@ public class FootCenterToToeEvaluator
             {
                icpFootCenterCornerPointsViz.get(i).set(smoothICPComputer.getFootCenterICPCornerPoints().get(i).getFramePointCopy()); 
                
-               if (doHeelToToeTransfer)
+               if (smoothICPComputer.getDoHeelToToeTransfer())
                {
                icpToeCornerPointsViz.get(i).set(smoothICPComputer.getToeICPCornerPoints().get(i).getFramePointCopy()); 
                }
@@ -635,7 +634,7 @@ public class FootCenterToToeEvaluator
          YoFramePoint cornerICPFramePoint = pointAndLinePlotter.plotPoint3d("cornerICPFramePoint" + i, new Point3d(), YoAppearance.Green(), 0.003);
          icpFootCenterCornerPointsViz.add(cornerICPFramePoint);
          
-         if (doHeelToToeTransfer)
+         if (smoothICPComputer.getDoHeelToToeTransfer())
          {
             YoFramePoint toeCornerICPFramePoint = pointAndLinePlotter.plotPoint3d("toeCornerICPFramePoint" + i, new Point3d(), YoAppearance.Blue(), 0.003);
             icpToeCornerPointsViz.add(toeCornerICPFramePoint);
