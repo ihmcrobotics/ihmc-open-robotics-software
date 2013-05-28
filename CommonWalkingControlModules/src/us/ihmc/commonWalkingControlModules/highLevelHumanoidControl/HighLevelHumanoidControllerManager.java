@@ -11,27 +11,27 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 
 public class HighLevelHumanoidControllerManager implements RobotController
 {
-
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
    private final StateMachine<HighLevelState> stateMachine;
+   private final HighLevelState initialBehavior;
 
-   private HighLevelState activeHighLevelState;
 
-   public HighLevelHumanoidControllerManager(StateMachine<HighLevelState> stateMachine, HighLevelState activeHighLevelState,
-         ArrayList<YoVariableRegistry> highLevelStateRegistries)
+   public HighLevelHumanoidControllerManager(StateMachine<HighLevelState> stateMachine, HighLevelState initialBehavior, ArrayList<YoVariableRegistry> highLevelStateRegistries)
    {
       this.stateMachine = stateMachine;
-      this.activeHighLevelState = activeHighLevelState;
 
       for (YoVariableRegistry highLevelStateRegistry : highLevelStateRegistries)
+      {
          this.registry.addChild(highLevelStateRegistry);
+      }
+      this.initialBehavior = initialBehavior;
    }
 
    public void initialize()
    {
-      stateMachine.setCurrentState(activeHighLevelState);
+      stateMachine.setCurrentState(initialBehavior);
    }
 
    public void doControl()
