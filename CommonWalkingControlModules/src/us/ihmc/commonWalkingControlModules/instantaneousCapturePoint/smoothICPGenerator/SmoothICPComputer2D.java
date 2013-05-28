@@ -13,12 +13,16 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
-public class SmoothICPComputer2D extends SmoothICPComputer implements InstantaneousCapturePointPlanner
+
+
+
+//public class SmoothICPComputer2D extends SmoothICPComputer implements InstantaneousCapturePointPlanner
+public class SmoothICPComputer2D extends DoubleSupportFootCenterToToeICPComputer implements InstantaneousCapturePointPlanner
 {
-   public SmoothICPComputer2D(double doubleSupportFirstStepFraction, int maxNumberOfConsideredFootsteps, YoVariableRegistry parentRegistry,
+   public SmoothICPComputer2D(double doubleSupportFirstStepFraction, boolean doHeelToToeTransfer, int maxNumberOfConsideredFootsteps, YoVariableRegistry parentRegistry,
                               DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      super(doubleSupportFirstStepFraction, maxNumberOfConsideredFootsteps, parentRegistry, dynamicGraphicObjectsListRegistry);
+      super(doubleSupportFirstStepFraction, doHeelToToeTransfer, maxNumberOfConsideredFootsteps, parentRegistry, dynamicGraphicObjectsListRegistry);
    }
 
    private Point3d icpPostionToPackTemp = new Point3d();
@@ -27,7 +31,7 @@ public class SmoothICPComputer2D extends SmoothICPComputer implements Instantane
 
    public void getICPPositionAndVelocity(FramePoint2d icpPostionToPack, FrameVector2d icpVelocityToPack, FramePoint2d ecmpToPack, FramePoint2d actualICP, double time)
    {
-      super.getICPPositionAndVelocity(icpPostionToPackTemp, icpVelocityToPackTemp, ecmpToPackTemp, time);
+      super.computeICPPositionAndVelocity(icpPostionToPackTemp, icpVelocityToPackTemp, ecmpToPackTemp, time);
 
       icpPostionToPack.set(icpPostionToPackTemp.getX(), icpPostionToPackTemp.getY());
       icpVelocityToPack.set(icpVelocityToPackTemp.getX(), icpVelocityToPackTemp.getY());
@@ -46,7 +50,7 @@ public class SmoothICPComputer2D extends SmoothICPComputer implements Instantane
 
    public FramePoint2d getFinalDesiredICP()
    {
-      Point3d upcomingCornerPoint = getUpcomingCornerPoint();
+      Point3d upcomingCornerPoint = super.getUpcomingCornerPoint();
       
       //TODO: Need to use Frames throughout here, or don't assume this!
       FramePoint2d ret = new FramePoint2d(ReferenceFrame.getWorldFrame(), upcomingCornerPoint.getX(), upcomingCornerPoint.getY());
