@@ -34,7 +34,7 @@ import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChan
 
 public class DRCFlatGroundWalkingTest
 {
-   private static final boolean ALWAYS_SHOW_GUI = false;
+   private static final boolean ALWAYS_SHOW_GUI = !false;
    private static final boolean KEEP_SCS_UP = false;
 
    private static final boolean CREATE_MOVIE = BambooTools.doMovieCreation();
@@ -125,7 +125,7 @@ public class DRCFlatGroundWalkingTest
       {
          blockingSimulationRunner.simulateAndBlock(timeIncrement);
 
-         if (Math.abs(comError.getDoubleValue()) > 0.05)
+         if (Math.abs(comError.getDoubleValue()) > 0.07)
          {
             fail("comError = " + Math.abs(comError.getDoubleValue()));
          }
