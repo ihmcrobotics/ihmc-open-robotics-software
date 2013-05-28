@@ -218,7 +218,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
 
       // This is the "highest level" controller that enables switching between the different controllers (walking, multi-contact, driving, etc.)
       HighLevelHumanoidControllerManager ret = new HighLevelHumanoidControllerManager(highLevelStateMachine, HighLevelState.MULTI_CONTACT,
-                                                  multiContactControllerRegistry);
+                                                  multiContactControllerRegistry, momentumBasedController);
 
       return ret;
    }

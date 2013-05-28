@@ -44,11 +44,10 @@ import us.ihmc.utilities.screwTheory.Wrench;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
-public class MomentumBasedController implements RobotController
+public class MomentumBasedController
 {
    private static final boolean SPY_ON_MOMENTUM_BASED_CONTROLLER = true;
    private final String name = getClass().getSimpleName();
