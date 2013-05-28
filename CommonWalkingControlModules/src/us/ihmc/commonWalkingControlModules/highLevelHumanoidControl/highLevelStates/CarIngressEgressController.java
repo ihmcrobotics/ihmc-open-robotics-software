@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import com.yobotics.simulationconstructionset.EnumYoVariable;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableRollingBody;
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
@@ -84,6 +85,20 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    private final ConstantDoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(1.0);
 
 
+   private BooleanYoVariable requestedLeftFootLoadBearing = new BooleanYoVariable("requestedLeftFootLoadBearing", registry);
+   private BooleanYoVariable requestedRightFootLoadBearing = new BooleanYoVariable("requestedRightFootLoadBearing", registry);
+   private BooleanYoVariable requestedLeftHandLoadBearing = new BooleanYoVariable("requestedLeftHandLoadBearing", registry);
+   private BooleanYoVariable requestedRightHandLoadBearing = new BooleanYoVariable("requestedRightHandLoadBearing", registry);
+   private BooleanYoVariable requestedLeftThighLoadBearing = new BooleanYoVariable("requestedLeftThighLoadBearing", registry);
+   private BooleanYoVariable requestedRightThighLoadBearing = new BooleanYoVariable("requestedRightThighLoadBearing", registry);
+   private SideDependentList<BooleanYoVariable> requestedFootLoadBearing = new SideDependentList<BooleanYoVariable>(requestedLeftFootLoadBearing,
+         requestedRightFootLoadBearing);
+   private SideDependentList<BooleanYoVariable> requestedHandLoadBearing = new SideDependentList<BooleanYoVariable>(requestedLeftHandLoadBearing,
+         requestedRightHandLoadBearing);
+   private SideDependentList<BooleanYoVariable> requestedThighLoadBearing = new SideDependentList<BooleanYoVariable>(requestedLeftThighLoadBearing,
+         requestedRightThighLoadBearing);
+
+
    public CarIngressEgressController(VariousWalkingProviders variousWalkingProviders,
                                      RootJointAngularAccelerationControlModule rootJointAccelerationControlModule,
                                      MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
@@ -126,6 +141,20 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       for (RobotSide robotSide : RobotSide.values)
       {
          doHeelOff.get(robotSide).addVariableChangedListener(this);
+      }
+
+      LoadBearingVariableChangedListener loadBearingVariableChangedListener = new LoadBearingVariableChangedListener();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         requestedFootLoadBearing.get(robotSide).addVariableChangedListener(loadBearingVariableChangedListener);
+         requestedHandLoadBearing.get(robotSide).addVariableChangedListener(loadBearingVariableChangedListener);
+         requestedThighLoadBearing.get(robotSide).addVariableChangedListener(loadBearingVariableChangedListener);
+      }
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         requestedFootLoadBearing.get(robotSide).set(true);
       }
    }
 
@@ -391,6 +420,28 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    private void updateEndEffectorControlModule(ContactablePlaneBody contactablePlaneBody, List<FramePoint2d> contactPoints, ConstraintType constraintType)
    {
       footEndEffectorControlModules.get(contactablePlaneBody).setContactPoints(contactPoints, constraintType);
+   }
+
+
+   private class LoadBearingVariableChangedListener implements  VariableChangedListener
+   {
+      public void variableChanged(YoVariable v)
+      {
+         if (!(v instanceof BooleanYoVariable))
+            return;
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            if (v.equals(requestedFootLoadBearing.get(robotSide)))
+               setFootInContact(robotSide, requestedFootLoadBearing.get(robotSide).getBooleanValue());
+
+            if (v.equals(requestedHandLoadBearing.get(robotSide)))
+               setHandInContact(robotSide, requestedHandLoadBearing.get(robotSide).getBooleanValue());
+
+            if (v.equals(requestedThighLoadBearing.get(robotSide)))
+               setThighInContact(robotSide, requestedThighLoadBearing.get(robotSide).getBooleanValue());
+         }
+      }
    }
 
    public void variableChanged(YoVariable v)
