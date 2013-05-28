@@ -8,9 +8,12 @@ public class SwingTimeCalculationProvider implements DoubleProvider
 {
    private final SwingTimeCalculator swingTimeCalculator;
    private final DoubleYoVariable swingTime;
+   private static int instanceNumber = 0;
 
-   public SwingTimeCalculationProvider(String name, YoVariableRegistry registry, SwingTimeCalculator swingTimeCalculator, double defaultSwingTime)
+   public SwingTimeCalculationProvider(String name, YoVariableRegistry parentRegistry, SwingTimeCalculator swingTimeCalculator, double defaultSwingTime)
    {
+      YoVariableRegistry registry = new YoVariableRegistry("swingTimeCalculationProvider"+instanceNumber++);
+      parentRegistry.addChild(registry);
       this.swingTime = new DoubleYoVariable(name, registry);
       this.swingTimeCalculator = swingTimeCalculator;
       this.swingTime.set(defaultSwingTime);
