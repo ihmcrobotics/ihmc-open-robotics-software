@@ -152,11 +152,6 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          requestedHandLoadBearing.get(robotSide).addVariableChangedListener(loadBearingVariableChangedListener);
          requestedThighLoadBearing.get(robotSide).addVariableChangedListener(loadBearingVariableChangedListener);
       }
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         requestedFootLoadBearing.get(robotSide).set(true);
-      }
    }
 
    protected void setupFootControlModules()
@@ -205,6 +200,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    {
       super.initialize();
 
+      initializeContacts();
+
       FramePose currentPelvisPose = new FramePose(pelvisPositionControlFrame);
       desiredPelvisConfigurationProvider.set(currentPelvisPose);
 
@@ -216,6 +213,15 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       desiredChestOrientation.setOrientation(currentChestOrientation);
 
       chestOrientationTrajectoryGenerator.initialize();
+   }
+
+   private void initializeContacts()
+   {
+      momentumBasedController.clearContacts();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         requestedFootLoadBearing.get(robotSide).set(true);
+      }
    }
 
    protected void doPelvisControl()

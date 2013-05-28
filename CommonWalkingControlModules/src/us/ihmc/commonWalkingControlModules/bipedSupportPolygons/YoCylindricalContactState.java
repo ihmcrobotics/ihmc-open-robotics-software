@@ -10,7 +10,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 
-public class YoCylindricalContactState implements CylindricalContactState
+public class YoCylindricalContactState implements CylindricalContactState, ModifiableContactState
 {
    private final YoVariableRegistry registry;
    private final ReferenceFrame frameAfterJoint;
@@ -126,5 +126,10 @@ public class YoCylindricalContactState implements CylindricalContactState
    public ReferenceFrame getCylinderFrame()
    {
       return this.cylinderFrame;
+   }
+
+   public void clear()
+   {
+      inContact.set(false);
    }
 }
