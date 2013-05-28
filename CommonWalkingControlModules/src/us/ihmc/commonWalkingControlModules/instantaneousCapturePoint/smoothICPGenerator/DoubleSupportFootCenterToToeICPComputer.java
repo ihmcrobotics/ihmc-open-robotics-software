@@ -23,14 +23,15 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class DoubleSupportFootCenterToToeICPComputer
 {
+   protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   
    private final int maxNumberOfConsideredFootsteps;
    private final double doubleSupportFirstStepFraction;
    private final double singleSupportToePercentage;
-   private boolean doHeelToToeTransfer;
    private int numberOfCornerPoints;
 
+   
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final ArrayList<YoFramePoint> constantFootCenterCentersOfPressure = new ArrayList<YoFramePoint>();
    private final ArrayList<YoFramePoint> constantToeCentersOfPressure = new ArrayList<YoFramePoint>();
@@ -81,6 +82,7 @@ public class DoubleSupportFootCenterToToeICPComputer
    private final DoubleYoVariable omega0 = new DoubleYoVariable("icpPlannerOmega0", registry);
    
    private final double frontalToeOffset = 0.08;
+   private final BooleanYoVariable doHeelToToeTransfer = new BooleanYoVariable("doHeelToToeTransfer", registry); 
 
 
    // TODO: Finish YoVariablizing these to make rewindable and visualizable.
@@ -102,12 +104,12 @@ public class DoubleSupportFootCenterToToeICPComputer
 
 
 
-   public DoubleSupportFootCenterToToeICPComputer(double doubleSupportFirstStepFraction, boolean doHeelToToeTransfer,
+   public DoubleSupportFootCenterToToeICPComputer(double doubleSupportFirstStepFraction, 
            int maxNumberOfConsideredFootsteps, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.singleSupportToePercentage = 0.5;
-      this.doHeelToToeTransfer = doHeelToToeTransfer;
 
+      doHeelToToeTransfer.set(!false);
       hasBeenInitialized.set(false);
 
       parentRegistry.addChild(registry);
@@ -126,7 +128,7 @@ public class DoubleSupportFootCenterToToeICPComputer
          YoFramePoint yoFramePoint = new YoFramePoint(icpCornerPointsName, ReferenceFrame.getWorldFrame(), registry);
          footCenterICPCornerFramePoints.add(yoFramePoint);
 
-         if (doHeelToToeTransfer)
+         if (doHeelToToeTransfer.getBooleanValue())
          {
             String toeICPCornerPointsName = "toeICPCornerPointsName" + i;
             YoFramePoint yoToeFramePoint = new YoFramePoint(toeICPCornerPointsName, ReferenceFrame.getWorldFrame(), registry);
@@ -141,7 +143,7 @@ public class DoubleSupportFootCenterToToeICPComputer
          YoFramePoint yoFramePoint = new YoFramePoint(constantCoPName, ReferenceFrame.getWorldFrame(), registry);
          constantFootCenterCentersOfPressure.add(yoFramePoint);
 
-         if (doHeelToToeTransfer)
+         if (doHeelToToeTransfer.getBooleanValue())
          {
             String constantToeCoPName = "constantToeCoP" + i;
             YoFramePoint toeFramePoint = new YoFramePoint(constantToeCoPName, ReferenceFrame.getWorldFrame(), registry);
@@ -170,7 +172,7 @@ public class DoubleSupportFootCenterToToeICPComputer
       double steppingDuration = singleSupportDuration + doubleSupportDuration;
 
 
-      if (doHeelToToeTransfer)
+      if (doHeelToToeTransfer.getBooleanValue())
       {
          double toeToFootCenterShiftDuration = steppingDuration * singleSupportToePercentage;
          double footCenterToToeShiftDuration = steppingDuration * (1 - singleSupportToePercentage);
@@ -242,7 +244,7 @@ public class DoubleSupportFootCenterToToeICPComputer
       double footCenterToToeShiftDuration = steppingDuration * (1 - singleSupportToePercentage);
       
       
-      if (doHeelToToeTransfer)
+      if (doHeelToToeTransfer.getBooleanValue())
       {
          NewDoubleSupportICPComputer.computeConstantCentersOfPressureAndCornerPointsForFootCenterAndToe(constantFootCenterCentersOfPressure,
                constantToeCentersOfPressure, footCenterICPCornerFramePoints, toeICPCornerFramePoints, frontalToeOffset, footLocationList,
@@ -275,7 +277,7 @@ public class DoubleSupportFootCenterToToeICPComputer
       singleSupportEndICP.set(initialICPPosition);
       singleSupportEndICPVelocity.set(0.0, 0.0, 0.0);
       
-      if (doHeelToToeTransfer)
+      if (doHeelToToeTransfer.getBooleanValue())
       {
          double secondDoubleSupportFractionDuration = doubleSupportDuration * (1 - doubleSupportFirstStepFraction);
 
@@ -353,7 +355,7 @@ public class DoubleSupportFootCenterToToeICPComputer
 
 
 
-      if (doHeelToToeTransfer)
+      if (doHeelToToeTransfer.getBooleanValue())
       {
          double toeToFootCenterShiftDuration = steppingDuration * singleSupportToePercentage;
          double toeShiftToDoubleSupportDuration = toeToFootCenterShiftDuration - doubleSupportDuration * doubleSupportFirstStepFraction;
@@ -436,7 +438,7 @@ public class DoubleSupportFootCenterToToeICPComputer
 
    private void getICPPositionAndVelocitySingleSupport(Point3d icpPositionToPack, Vector3d icpVelocityToPack, Point3d ecmpToPack, double timeInState)
    {
-      if (doHeelToToeTransfer)
+      if (doHeelToToeTransfer.getBooleanValue())
       {
          double timePow3 = Math.pow(timeInState, 3.0);
          double timePow2 = Math.pow(timeInState, 2.0);
@@ -678,6 +680,11 @@ public class DoubleSupportFootCenterToToeICPComputer
    public Point3d getUpcomingCornerPoint()
    {
       return upcomingCornerPoint;
+   }
+   
+   public boolean getDoHeelToToeTransfer()
+   {
+      return doHeelToToeTransfer.getBooleanValue(); 
    }
 
 }

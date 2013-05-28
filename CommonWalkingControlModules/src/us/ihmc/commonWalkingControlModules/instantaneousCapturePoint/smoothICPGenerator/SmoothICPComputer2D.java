@@ -10,6 +10,7 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
@@ -19,10 +20,14 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 //public class SmoothICPComputer2D extends SmoothICPComputer implements InstantaneousCapturePointPlanner
 public class SmoothICPComputer2D extends DoubleSupportFootCenterToToeICPComputer implements InstantaneousCapturePointPlanner
 {
-   public SmoothICPComputer2D(double doubleSupportFirstStepFraction, boolean doHeelToToeTransfer, int maxNumberOfConsideredFootsteps, YoVariableRegistry parentRegistry,
+   
+   
+   
+   
+   public SmoothICPComputer2D(double doubleSupportFirstStepFraction, int maxNumberOfConsideredFootsteps, YoVariableRegistry parentRegistry,
                               DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      super(doubleSupportFirstStepFraction, doHeelToToeTransfer, maxNumberOfConsideredFootsteps, parentRegistry, dynamicGraphicObjectsListRegistry);
+      super(doubleSupportFirstStepFraction, maxNumberOfConsideredFootsteps, parentRegistry, dynamicGraphicObjectsListRegistry);
    }
 
    private Point3d icpPostionToPackTemp = new Point3d();
