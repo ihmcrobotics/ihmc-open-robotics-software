@@ -23,6 +23,8 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    private final double heightThreshold;
    private int numberOfNodes = 0;
    private int maxNodes=1;
+   private boolean octreeChanged = false;
+   private Octree octree;
    private LowPassTimingReporter clearingTimer = new LowPassTimingReporter(7);
 
    public GroundOnlyQuadTree(double minX, double minY, double maxX, double maxY, double resolution, double heightThreshold, int maxNodes)
@@ -56,9 +58,11 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    }
 
    public boolean addPoint(double x, double y, double z)
-   {
-      return this.put(new double[] {x, y}, (float)z);
+   { 
+      final boolean quadTreeChanged = this.put(new double[] {x, y}, (float)z);
+      return quadTreeChanged || octreeChanged;
    }
+   
    private PointToLineUnProjector unProjector = new PointToLineUnProjector();
    public void addLidarRay(Point3d origin, Point3d end)
    {
@@ -104,6 +108,7 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
 
    public boolean put(double[] location, Float value)
    {
+      octreeChanged = false;
       checkDimensionality(location);
       HyperCubeLeaf<GroundAirDescriptor> leaf = new HyperCubeLeaf<GroundAirDescriptor>(new GroundAirDescriptor(value,null), location);
 
@@ -116,7 +121,7 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
          return;
       double[] location = new double[]{leafToPunt.getLocation()[0],leafToPunt.getLocation()[1],leafToPunt.getValue().getHeight()};
       octree.upRezz(location);
-      octree.put(location, true);
+      octreeChanged = octree.put(location, true);
    }
 
    public void mergeOneLevel(RecursableHyperTreeNode<GroundAirDescriptor, GroundOnlyQuadTreeData> node)
@@ -403,7 +408,7 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    {
       this.remove(this.get(toLocation(x, y)));
    }
-   private Octree octree;
+   
    public void setOctree(Octree octree)
    {
       this.octree=octree;
