@@ -199,19 +199,6 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       }
    }
 
-   public void setThighInContact(RobotSide robotSide, boolean inContact)
-   {
-      ContactableRollingBody rollingThigh = rollingThighs.get(robotSide);
-      if (inContact)
-      {
-         momentumBasedController.setRollingContactState(rollingThigh, rollingThigh.getContactPoints2d(), coefficientOfFriction.getDoubleValue());
-      }
-      else
-      {
-         momentumBasedController.setRollingContactState(rollingThigh, new ArrayList<FramePoint2d>(), coefficientOfFriction.getDoubleValue());
-      }
-   }
-
    private void setOnToesContactState(ContactablePlaneBody contactableBody)
    {
       FrameVector normalContactVector = new FrameVector(worldFrame, 0.0, 0.0, 1.0);
