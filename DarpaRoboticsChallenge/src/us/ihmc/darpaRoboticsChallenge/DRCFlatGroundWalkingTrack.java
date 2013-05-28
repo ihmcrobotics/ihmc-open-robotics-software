@@ -40,16 +40,10 @@ public class DRCFlatGroundWalkingTrack
          dynamicGraphicObjectsListRegistry = null;
       YoVariableRegistry registry = new YoVariableRegistry("adjustableParabolicTrajectoryDemoSimRegistry");
 
-      double inPlaceWidth = 0.25;
-      double maxStepLength = 0.35;
-      double minStepWidth = 0.15;
-      double maxStepWidth = 0.4;
-      double stepPitch = 0.0;
       boolean useFastTouchdowns = DRCConfigParameters.USE_GAZEBO_PHYSICS;
 
       FlatGroundWalkingHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory =
-         new FlatGroundWalkingHighLevelHumanoidControllerFactory(drcControlParameters, inPlaceWidth, maxStepLength, minStepWidth, maxStepWidth, stepPitch,
-            useVelocityAndHeadingScript, useFastTouchdowns);
+         new FlatGroundWalkingHighLevelHumanoidControllerFactory(drcControlParameters, useVelocityAndHeadingScript, useFastTouchdowns);
 
       if (cheatWithGroundHeightAtForFootstep)
       {
