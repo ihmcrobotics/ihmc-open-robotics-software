@@ -93,6 +93,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
    public void reset()
    {
+      momentumRateOfChangeData.setEmpty();
       primaryMotionConstraintHandler.reset();
       secondaryMotionConstraintHandler.reset();
       externalWrenchHandler.reset();
