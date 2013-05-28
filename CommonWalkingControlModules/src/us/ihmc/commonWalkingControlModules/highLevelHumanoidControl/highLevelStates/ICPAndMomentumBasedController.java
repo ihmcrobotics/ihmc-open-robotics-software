@@ -45,16 +45,18 @@ public class ICPAndMomentumBasedController
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final MomentumBasedController momentumBasedController;
 
-   protected final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
-   protected final BipedSupportPolygons bipedSupportPolygons;
-   protected final YoFramePoint2d desiredICP;
-   protected final YoFrameVector2d desiredICPVelocity;
-   protected final EnumYoVariable<RobotSide> supportLeg;
-   protected final DoubleYoVariable desiredCoMHeightAcceleration;
-   protected final YoFramePoint capturePoint;
+   private final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
+   private final BipedSupportPolygons bipedSupportPolygons;
+   private final YoFramePoint2d desiredICP;
+   private final YoFrameVector2d desiredICPVelocity;
+   private final EnumYoVariable<RobotSide> supportLeg;
+   private final DoubleYoVariable desiredCoMHeightAcceleration;
+   private final YoFramePoint capturePoint;
    private final DoubleYoVariable omega0;
    private final Omega0CalculatorInterface omega0Calculator;
 
+   private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
+   
    public ICPAndMomentumBasedController(MomentumBasedController momentumBasedController, FullRobotModel fullRobotModel,
            SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
@@ -88,9 +90,14 @@ public class ICPAndMomentumBasedController
       supportLeg = EnumYoVariable.create("supportLeg", "", RobotSide.class, registry, true);
 
       // TODO: Have local updatables, instead of adding them to the momentum based controller.
-      momentumBasedController.addUpdatable(new Omega0Updater());
-      momentumBasedController.addUpdatable(new BipedSupportPolygonsUpdater());
-      momentumBasedController.addUpdatable(new CapturePointUpdater());
+      
+      this.updatables.add(new Omega0Updater());
+      this.updatables.add(new BipedSupportPolygonsUpdater());
+      this.updatables.add(new CapturePointUpdater());
+      
+//      momentumBasedController.addUpdatable(new Omega0Updater());
+//      momentumBasedController.addUpdatable(new BipedSupportPolygonsUpdater());
+//      momentumBasedController.addUpdatable(new CapturePointUpdater());
       
       Collection<PlaneContactState> planeContactStates = momentumBasedController.getPlaneContactStates();
       momentumBasedController.addUpdatable(new FootPolygonVisualizer(planeContactStates, dynamicGraphicObjectsListRegistry, registry));
@@ -101,6 +108,14 @@ public class ICPAndMomentumBasedController
                                                      GraphicType.ROTATED_CROSS);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("Capture Point", capturePointViz);
          dynamicGraphicObjectsListRegistry.registerArtifact("Capture Point", capturePointViz.createArtifact());
+      }
+   }
+   
+   public void updateUpdatables(double time)
+   {
+      for (int i=0; i<updatables.size(); i++)
+      {
+         updatables.get(i).update(time);
       }
    }
 
@@ -241,6 +256,11 @@ public class ICPAndMomentumBasedController
    {
       return desiredICP;
    }
+   
+   public void getDesiredICP(FramePoint2d pointToPack)
+   {
+      this.desiredICP.getFramePoint2d(pointToPack);
+   }
 
    public YoFrameVector2d getDesiredICPVelocity()
    {
@@ -251,5 +271,12 @@ public class ICPAndMomentumBasedController
    {
       return bipedFeet;
    }
+
+   public ArrayList<Updatable> getUpdatables()
+   {
+      return updatables;
+   }
+
+
 
 }

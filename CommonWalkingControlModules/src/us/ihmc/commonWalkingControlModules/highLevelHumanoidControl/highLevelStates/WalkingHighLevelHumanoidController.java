@@ -240,11 +240,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       super(variousWalkingProviders, rootJointAngularAccelerationControlModule, momentumBasedController, walkingControllerParameters, 
             handControllers, lidarControllerInterface, dynamicGraphicObjectsListRegistry, controllerState);
      
+      super.addUpdatables(icpAndMomentumBasedController.getUpdatables());
+
      FootstepProvider footstepProvider = variousWalkingProviders.getFootstepProvider();
      HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = variousWalkingProviders.getMapFromFootstepsToTrajectoryParameters();
          
       toeOffKneeAngleThreashold.set(52*Math.PI/180);
       useTrailingLegKneeAngleAsToeOffTrigger.set(true);
+      
       
       toeOffAnklePitchThreashold.set(-40*Math.PI/180);
       useAnklePitchAngleAsToeOffTrigger.set(true);
@@ -1436,6 +1439,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    public void doMotionControl()
    {
       momentumBasedController.doPrioritaryControl();
+      super.callUpdatables();
 
       for (ContactablePlaneBody contactablePlaneBody : footEndEffectorControlModules.keySet())
       {
@@ -1448,28 +1452,23 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
 
-      doFootControl();
-
       desiredCoMHeightAcceleration.set(computeDesiredCoMHeightAcceleration(desiredICPVelocity.getFrameVector2dCopy()));
 
-      doJointPositionControl();
-
-      doChestControl();
-
-      doHeadControl();
-
-      doLidarJointControl();
-      
+      doFootControl();
       doArmControl();
-
+      doHeadControl();
+      doLidarJointControl();
+//    doCoMControl(); //TODO: Should we be doing this too?
+      doChestControl();
       setICPBasedMomentumRateOfChangeControlModuleInputs();
-
       doPelvisControl();
+      doJointPositionControl();
 
       setTorqueControlJointsToZeroDersiredAcceleration();
 
       momentumBasedController.doSecondaryControl();
    }
+ 
 
    // TODO: connect ports instead
    private void setICPBasedMomentumRateOfChangeControlModuleInputs()
