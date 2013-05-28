@@ -109,7 +109,7 @@ public class DoubleSupportFootCenterToToeICPComputer
    {
       this.singleSupportToePercentage = 0.5;
 
-      doHeelToToeTransfer.set(!false);
+      doHeelToToeTransfer.set(false);
       hasBeenInitialized.set(false);
 
       parentRegistry.addChild(registry);
