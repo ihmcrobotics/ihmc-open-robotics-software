@@ -9,6 +9,9 @@ import us.ihmc.graphics3DAdapter.camera.VideoSettingsH264LowLatency;
 
 public class DRCConfigParameters
 {
+   
+   public static final boolean USE_KRYONET_FOR_UI_COMMS = true;
+   
    // TODO: Temporary static variable for testing the grasping control.
    public static final boolean START_READY_GET_INTO_CAR = false;
    public static final boolean USE_SUPER_DUPER_HIGH_RESOLUTION_FOR_COMMS = false;

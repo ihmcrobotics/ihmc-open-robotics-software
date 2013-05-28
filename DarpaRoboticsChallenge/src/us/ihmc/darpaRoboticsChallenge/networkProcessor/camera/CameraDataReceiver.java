@@ -9,6 +9,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.messages.controller.RobotPoseData;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
+import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorControllerStateHandler;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.graphics3DAdapter.camera.CompressedVideoDataServer;
 import us.ihmc.graphics3DAdapter.camera.VideoPacket;
@@ -30,6 +31,8 @@ public abstract class CameraDataReceiver
    public CameraDataReceiver(RobotPoseBuffer robotPoseBuffer, VideoSettings videoSettings, final DRCNetworkProcessorNetworkingManager networkingManager)
    {
       this.robotPoseBuffer = robotPoseBuffer;
+      final DRCNetworkProcessorControllerStateHandler controllerStateHandler = networkingManager.getControllerStateHandler();
+      
       ObjectCommunicator videoConsumer = new ObjectCommunicator()
       {
          
@@ -37,7 +40,7 @@ public abstract class CameraDataReceiver
          {
             if(object instanceof VideoPacket)
             {
-               networkingManager.sendVideoPacket((VideoPacket) object);
+               controllerStateHandler.sendVideoPacket((VideoPacket) object);
             }
          }
          
