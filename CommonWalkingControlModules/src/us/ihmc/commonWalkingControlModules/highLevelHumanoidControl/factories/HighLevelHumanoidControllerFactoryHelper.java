@@ -6,6 +6,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.BlindWalkingToDestinationDesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.ComponentBasedDesiredFootstepCalculator;
@@ -16,23 +17,34 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.ManualDesir
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.RateBasedDesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.SimpleDesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModule;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.OldMomentumControlModule;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributor;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.SpatialMotionVector;
+import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter;
 import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter.ErrorType;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class HighLevelHumanoidControllerFactoryHelper
 {
+   private static final boolean USE_NEW_OPTIMIZATION_MOMENTUM_CONTROL_MODULE = false;
+
    public static BlindWalkingToDestinationDesiredFootstepCalculator getBlindWalkingToDestinationDesiredFootstepCalculator(
            WalkingControllerParameters walkingControllerParameters, CommonWalkingReferenceFrames referenceFrames,
            SideDependentList<ContactablePlaneBody> bipedFeet, YoVariableRegistry registry)
@@ -127,5 +139,38 @@ public class HighLevelHumanoidControllerFactoryHelper
 
       return joints.toArray(new InverseDynamicsJoint[joints.size()]);
    }
+   
+   public static MomentumControlModule createMomentumControlModule(WalkingControllerParameters walkingControllerParameters, FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, double gravityZ,
+         TwistCalculator twistCalculator, double controlDT, LidarControllerInterface lidarControllerInterface,
+         GroundReactionWrenchDistributor groundReactionWrenchDistributor, YoVariableRegistry registry,
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   {
+      MomentumControlModule momentumControlModule;
+      if (USE_NEW_OPTIMIZATION_MOMENTUM_CONTROL_MODULE)
+      {
+         InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, lidarControllerInterface.getLidarJoint());
+         MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(registry);
+         momentumOptimizationSettings.setDampedLeastSquaresFactor(Math.sqrt(5e-2));
+         momentumOptimizationSettings.setGroundReactionForceRegularization(0.001);
+         momentumOptimizationSettings.setPhiRegularization(0.001);
+         momentumOptimizationSettings.setMomentumWeight(1.0, 1.0, 10.0, 10.0);
+         momentumOptimizationSettings.setRhoMin(0.0);
+         momentumControlModule = new OptimizationMomentumControlModule(fullRobotModel.getRootJoint(), referenceFrames.getCenterOfMassFrame(), controlDT,
+                 jointsToOptimizeFor, momentumOptimizationSettings, gravityZ, twistCalculator, dynamicGraphicObjectsListRegistry, registry);
+      }
+      else
+      {
+         DampedLeastSquaresSolver jacobianSolver = new DampedLeastSquaresSolver(SpatialMotionVector.SIZE);
+         jacobianSolver.setAlpha(5e-2);
 
+         OldMomentumControlModule oldMomentumControlModule = new OldMomentumControlModule(fullRobotModel.getRootJoint(), gravityZ,
+                                                                groundReactionWrenchDistributor, referenceFrames.getCenterOfMassFrame(), controlDT,
+                                                                twistCalculator, jacobianSolver, registry, dynamicGraphicObjectsListRegistry);
+         oldMomentumControlModule.setGroundReactionWrenchBreakFrequencyHertz(walkingControllerParameters.getGroundReactionWrenchBreakFrequencyHertz());
+
+         momentumControlModule = oldMomentumControlModule;
+      }
+      return momentumControlModule;
+   }
+  
 }
