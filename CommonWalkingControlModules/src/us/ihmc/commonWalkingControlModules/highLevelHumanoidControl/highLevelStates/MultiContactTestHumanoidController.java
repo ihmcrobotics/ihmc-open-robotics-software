@@ -40,17 +40,13 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
 
-public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoidControlPattern implements VariableChangedListener
+public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoidControlPattern
 {
    public final static HighLevelState controllerState = HighLevelState.MULTI_CONTACT;
 
    private final YoFramePoint desiredCoMPosition = new YoFramePoint("desiredCoM", worldFrame, registry);
 
    private final DesiredFootPoseProvider footPoseProvider;
-
-   private final BooleanYoVariable l_footDoHeelOff = new BooleanYoVariable("l_footDoHeelOff", registry);
-   private final BooleanYoVariable r_footDoHeelOff = new BooleanYoVariable("r_footDoHeelOff", registry);
-   private final SideDependentList<BooleanYoVariable> doHeelOff = new SideDependentList<BooleanYoVariable>(l_footDoHeelOff, r_footDoHeelOff);
 
    private final LinkedHashMap<ContactablePlaneBody, ChangeableConfigurationProvider> desiredConfigurationProviders = new LinkedHashMap<ContactablePlaneBody,
                                                                                                                          ChangeableConfigurationProvider>();
@@ -77,11 +73,6 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       this.momentumRateOfChangeControlModule = momentumRateOfChangeControlModule;
 
       setupFootControlModules();
-
-      for (final RobotSide robotSide : RobotSide.values)
-      {
-         doHeelOff.get(robotSide).addVariableChangedListener(this);
-      }
    }
 
    protected void setupFootControlModules()
@@ -110,10 +101,9 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
          swingPositionTrajectoryGenerators.put(foot, positionTrajectoryGenerator);
          swingOrientationTrajectoryGenerators.put(foot, orientationTrajectoryGenerator);
 
-         DoubleTrajectoryGenerator onToesFixedTrajectory = createDummyDoubleTrajectoryGenerator();
 
          EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(foot, jacobian, positionTrajectoryGenerator, null,
-                                                                orientationTrajectoryGenerator, onToesFixedTrajectory, momentumBasedController, registry);
+                                                                orientationTrajectoryGenerator, null, momentumBasedController, registry);
          footEndEffectorControlModules.put(foot, endEffectorControlModule);
 
       }
@@ -199,14 +189,6 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       }
    }
 
-   private void setOnToesContactState(ContactablePlaneBody contactableBody)
-   {
-      FrameVector normalContactVector = new FrameVector(worldFrame, 0.0, 0.0, 1.0);
-      List<FramePoint> contactPoints = getContactPointsAccordingToFootConstraint(contactableBody, ConstraintType.TOES);
-      List<FramePoint2d> contactPoints2d = getContactPoints2d(contactableBody, contactPoints);
-      setContactState(contactableBody, contactPoints2d, ConstraintType.TOES, normalContactVector);
-   }
-
    private void setFlatFootContactState(ContactablePlaneBody contactableBody)
    {
       FrameVector normalContactVector = new FrameVector(contactableBody.getPlaneFrame(), 0.0, 0.0, 1.0);
@@ -260,62 +242,5 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
    private void updateEndEffectorControlModule(ContactablePlaneBody contactablePlaneBody, List<FramePoint2d> contactPoints, ConstraintType constraintType)
    {
       footEndEffectorControlModules.get(contactablePlaneBody).setContactPoints(contactPoints, constraintType);
-   }
-
-   public void variableChanged(YoVariable v)
-   {
-      if (!(v instanceof BooleanYoVariable))
-         return;
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         if (v.equals(doHeelOff.get(robotSide)))
-         {
-            if (doHeelOff.get(robotSide).getBooleanValue())
-            {
-               setOnToesContactState(feet.get(robotSide));
-            }
-            else
-            {
-               setFlatFootContactState(feet.get(robotSide));
-            }
-         }
-      }
-   }
-
-   private DoubleTrajectoryGenerator createDummyDoubleTrajectoryGenerator()
-   {
-      DoubleTrajectoryGenerator onToesFixedTrajectory = new DoubleTrajectoryGenerator()
-      {
-         public double getValue()
-         {
-            return 0;
-         }
-
-         public boolean isDone()
-         {
-            return true;
-         }
-
-         public void initialize()
-         {
-         }
-
-         public void compute(double time)
-         {
-         }
-
-         public double getVelocity()
-         {
-            return 0;
-         }
-
-         public double getAcceleration()
-         {
-            return 0;
-         }
-      };
-
-      return onToesFixedTrajectory;
    }
 }
