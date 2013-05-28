@@ -205,27 +205,6 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       setContactState(contactableBody, new ArrayList<FramePoint2d>(), ConstraintType.UNCONSTRAINED, normalContactVector);
    }
 
-   private List<FramePoint> getContactPointsAccordingToFootConstraint(ContactablePlaneBody contactableBody, ConstraintType constraintType)
-   {
-      FrameVector direction = new FrameVector(contactableBody.getBodyFrame(), 1.0, 0.0, 0.0);
-      if (constraintType == ConstraintType.HEEL)
-         direction.scale(-1.0);
-
-      return DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactableBody.getContactPoints(), direction, 2);
-   }
-
-   private List<FramePoint2d> getContactPoints2d(ContactablePlaneBody contactableBody, List<FramePoint> contactPoints)
-   {
-      List<FramePoint2d> contactPoints2d = new ArrayList<FramePoint2d>(contactPoints.size());
-      for (FramePoint contactPoint : contactPoints)
-      {
-         contactPoint.changeFrame(contactableBody.getPlaneFrame());
-         contactPoints2d.add(contactPoint.toFramePoint2d());
-      }
-
-      return contactPoints2d;
-   }
-
    private void setContactState(ContactablePlaneBody contactableBody, List<FramePoint2d> contactPoints, ConstraintType constraintType,
                                 FrameVector normalContactVector)
    {
