@@ -472,6 +472,11 @@ public class GazeboRemoteSimulationAdapter extends Thread
          if (tmp != null)
             taskName = tmp;
 
+         if(taskName.contains("vehicle"))
+         {
+            taskName = taskName.substring(0, taskName.indexOf("_Purgatory"));
+         }
+
 //       if (DEBUG)
 //          System.out.println(taskName);
 
