@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -11,8 +12,13 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.desiredChestOrientation.DesiredChestOrientationProvider;
+import us.ihmc.commonWalkingControlModules.controlModules.head.DesiredHeadOrientationProvider;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvisOrientation.DesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
@@ -51,6 +57,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
+import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
 
 public class MultiContactTestHumanoidControllerFactory implements HighLevelHumanoidControllerFactory
 {
@@ -151,15 +158,27 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       rootJointAccelerationControlModule.setProportionalGains(100.0, 100.0, 100.0);
       rootJointAccelerationControlModule.setDerivativeGains(20.0, 20.0, 20.0);
 
+
       DesiredHandPoseProvider desiredHandPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters);
       TorusPoseProvider torusPoseProvider = new TorusPoseProvider();
       TorusManipulationProvider torusManipulationProvider = new TorusManipulationProvider();
       DesiredFootPoseProvider desiredFootPoseProvider = new DesiredFootPoseProvider();
 
-      MultiContactTestHumanoidController multiContactBehavior = new MultiContactTestHumanoidController(momentumRateOfChangeControlModule,
-                                                                   rootJointAccelerationControlModule, null, momentumBasedController,
-                                                                   walkingControllerParameters, desiredHandPoseProvider, torusPoseProvider, torusManipulationProvider,
-                                                                   desiredFootPoseProvider, null, null, dynamicGraphicObjectsListRegistry);
+      FootstepProvider footstepProvider = null;
+      HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = null;
+      DesiredHeadOrientationProvider desiredHeadOrientationProvider = null;
+      DesiredPelvisPoseProvider desiredPelvisPoseProvider = null;
+      DesiredChestOrientationProvider desiredChestOrientationProvider = null;
+
+      VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepProvider, mapFromFootstepsToTrajectoryParameters,
+                                                           desiredHeadOrientationProvider, desiredPelvisPoseProvider, desiredHandPoseProvider,
+                                                           torusPoseProvider, torusManipulationProvider, desiredChestOrientationProvider,
+                                                           desiredFootPoseProvider);
+
+      MultiContactTestHumanoidController multiContactBehavior = new MultiContactTestHumanoidController(variousWalkingProviders,
+                                                                   momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
+                                                                   momentumBasedController, walkingControllerParameters, null, null,
+                                                                   dynamicGraphicObjectsListRegistry);
 
       for (RobotSide robotSide : RobotSide.values)
       {

@@ -1,24 +1,19 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.VariableChangedListener;
-import com.yobotics.simulationconstructionset.YoVariable;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableRollingBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.controlModules.head.DesiredHeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredFootPoseProvider;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredHandPoseProvider;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.TorusManipulationProvider;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.TorusPoseProvider;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CoMBasedMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeData;
@@ -29,12 +24,21 @@ import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolation
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.math.geometry.*;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.VariableChangedListener;
+import com.yobotics.simulationconstructionset.YoVariable;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
 
 public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoidControlPattern implements VariableChangedListener
 {
@@ -59,16 +63,17 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
    private final ConstantDoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(1.0);
    private final CoMBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule;
 
-   public MultiContactTestHumanoidController(CoMBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
-           RootJointAngularAccelerationControlModule rootJointAccelerationControlModule, DesiredHeadOrientationProvider desiredHeadOrientationProvider,
-           MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters, DesiredHandPoseProvider handPoseProvider,
-           TorusPoseProvider torusPoseProvider, TorusManipulationProvider torusManipulationProvider, DesiredFootPoseProvider footPoseProvider, SideDependentList<HandControllerInterface> handControllers,
-           LidarControllerInterface lidarControllerInterface, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public MultiContactTestHumanoidController(VariousWalkingProviders variousWalkingProviders,
+           CoMBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
+           RootJointAngularAccelerationControlModule rootJointAccelerationControlModule, MomentumBasedController momentumBasedController,
+           WalkingControllerParameters walkingControllerParameters, 
+           SideDependentList<HandControllerInterface> handControllers, LidarControllerInterface lidarControllerInterface,
+           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      super(rootJointAccelerationControlModule, desiredHeadOrientationProvider, momentumBasedController, walkingControllerParameters, handPoseProvider,
-            torusPoseProvider, torusManipulationProvider, handControllers, lidarControllerInterface, dynamicGraphicObjectsListRegistry, controllerState);
+      super(variousWalkingProviders, rootJointAccelerationControlModule, momentumBasedController, walkingControllerParameters, handControllers,
+            lidarControllerInterface, dynamicGraphicObjectsListRegistry, controllerState);
 
-      this.footPoseProvider = footPoseProvider;
+      this.footPoseProvider = variousWalkingProviders.getDesiredFootPoseProvider();
       this.momentumRateOfChangeControlModule = momentumRateOfChangeControlModule;
 
       setupFootControlModules();
@@ -166,7 +171,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
    {
       if (feet == null)
          return;
-      
+
       if (inContact)
       {
          setFlatFootContactState(feet.get(robotSide));
@@ -180,10 +185,10 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
    public void setHandInContact(RobotSide robotSide, boolean inContact)
    {
       ContactablePlaneBody handPalm = handPalms.get(robotSide);
-      
+
       if (inContact)
       {
-         //TODO: If we know the surface normal here, use it.
+         // TODO: If we know the surface normal here, use it.
          FrameVector normalContactVector = null;
          momentumBasedController.setPlaneContactState(handPalm, handPalm.getContactPoints2d(), coefficientOfFriction.getDoubleValue(), normalContactVector);
       }
@@ -259,9 +264,9 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       {
          footEndEffectorControlModules.get(contactableBody).doSingularityEscapeBeforeTransitionToNextState();
       }
-      
+
       momentumBasedController.setPlaneContactState(contactableBody, contactPoints, coefficientOfFriction.getDoubleValue(), normalContactVector);
-      
+
       updateEndEffectorControlModule(contactableBody, contactPoints, constraintType);
    }
 
