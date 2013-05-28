@@ -74,8 +74,8 @@ public class FootCenterToToeEvaluator
    public void createRegistryBeforeTests()
    {
       registry = new YoVariableRegistry(getClass().getSimpleName());
-      smoothICPComputer = new DoubleSupportFootCenterToToeICPComputer(doubleSupportFirstStepFraction, doHeelToToeTransfer, 
-            maxNumberOfConsideredFootsteps, registry, dynamicGraphicObjectsListRegistry);
+//      smoothICPComputer = new DoubleSupportFootCenterToToeICPComputer(doubleSupportFirstStepFraction, doHeelToToeTransfer,
+//            maxNumberOfConsideredFootsteps, registry, dynamicGraphicObjectsListRegistry);
    }
 
    private DoubleYoVariable stopSignalTime = new DoubleYoVariable("stopSignalTime", registry);
