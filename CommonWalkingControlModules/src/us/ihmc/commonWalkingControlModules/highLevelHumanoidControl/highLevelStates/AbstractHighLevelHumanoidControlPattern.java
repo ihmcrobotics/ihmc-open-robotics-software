@@ -79,7 +79,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
    protected final SideDependentList<? extends ContactablePlaneBody> feet, handPalms;
    protected final SideDependentList<ContactableCylinderBody> graspingHands;
-   protected final SideDependentList<ContactableRollingBody> rollingThighs;
 
    protected final DoubleYoVariable coefficientOfFriction = new DoubleYoVariable("coefficientOfFriction", registry);
    private final RootJointAngularAccelerationControlModule rootJointAccelerationControlModule;
@@ -104,7 +103,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       feet = momentumBasedController.getContactablePlaneFeet();
       handPalms = momentumBasedController.getContactablePlaneHands();
       graspingHands = momentumBasedController.getContactableCylinderHands();
-      rollingThighs = momentumBasedController.getContactableRollingThighs();
 
       this.desiredHeadOrientationProvider = variousWalkingProviders.getDesiredHeadOrientationProvider();
       this.lidarControllerInterface = lidarControllerInterface;
