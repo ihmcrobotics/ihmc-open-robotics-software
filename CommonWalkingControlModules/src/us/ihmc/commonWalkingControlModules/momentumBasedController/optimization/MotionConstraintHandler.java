@@ -198,7 +198,6 @@ public class MotionConstraintHandler
       }
    }
 
-   // FIXME: pd term, move to its own class
    public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase, double weight)
    {
       pointJacobian.set(jacobian, bodyFixedPoint);

@@ -355,14 +355,14 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
    public void setThighInContact(RobotSide robotSide, boolean inContact)
    {
-      ContactableRollingBody rollingThigh = rollingThighs.get(robotSide);
+      ContactablePlaneBody thigh = momentumBasedController.getContactablePlaneThighs().get(robotSide);
       if (inContact)
       {
-         momentumBasedController.setRollingContactState(rollingThigh, rollingThigh.getContactPoints2d(), coefficientOfFriction.getDoubleValue());
+         momentumBasedController.setPlaneContactState(thigh, thigh.getContactPoints2d(), coefficientOfFriction.getDoubleValue(), null);
       }
       else
       {
-         momentumBasedController.setRollingContactState(rollingThigh, new ArrayList<FramePoint2d>(), coefficientOfFriction.getDoubleValue());
+         momentumBasedController.setPlaneContactState(thigh, new ArrayList<FramePoint2d>(), coefficientOfFriction.getDoubleValue(), null);
       }
    }
 
