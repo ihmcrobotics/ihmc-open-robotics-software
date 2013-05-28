@@ -283,10 +283,6 @@ public class MomentumBasedController implements RobotController
       momentumControlModule.setDesiredPointAcceleration(rootToEndEffectorJacobian, contactPoint, desiredAcceleration);
    }
 
-   public void doMotionControl()
-   {
-   }
-
    // TODO: Temporary method for a big refactor allowing switching between high level behaviors
    public void doPrioritaryControl()
    {
@@ -373,7 +369,6 @@ public class MomentumBasedController implements RobotController
    public final void doControl()
    {
       doPrioritaryControl();
-      doMotionControl();
       doSecondaryControl();
    }
 
