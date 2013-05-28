@@ -12,8 +12,8 @@ public class DRCConfigParameters
    
    public static final boolean USE_KRYONET_FOR_UI_COMMS = true;
    
-   // TODO: Temporary static variable for testing the grasping control.
-   public static final boolean START_READY_GET_INTO_CAR = false;
+   // TODO: Temporary static variable for testing getting into the car
+   public static final boolean TEST_GETTING_INTO_CAR = false; // true;
    public static final boolean USE_SUPER_DUPER_HIGH_RESOLUTION_FOR_COMMS = false;
    
    public static final boolean USE_GAZEBO_PHYSICS = false;    // TODO: This one is needed just for FlatGroundWalkingTrack in Gazebo...
