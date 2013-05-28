@@ -123,7 +123,7 @@ public class GazeboRemoteSimulationAdapter extends Thread
 
       setupNetworkPollingTimer();
 
-      while (true);
+//      while (true);
    }
 
    public void sendCommandThroughShellChannel(LocalCloudMachines machine, String command)
