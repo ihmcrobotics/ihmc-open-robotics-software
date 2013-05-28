@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationMa
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredHandPoseProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.TorusManipulationProvider;
@@ -83,10 +84,10 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
    protected final DoubleYoVariable coefficientOfFriction = new DoubleYoVariable("coefficientOfFriction", registry);
    private final RootJointAngularAccelerationControlModule rootJointAccelerationControlModule;
 
-   public AbstractHighLevelHumanoidControlPattern(
-           RootJointAngularAccelerationControlModule rootJointAccelerationControlModule, DesiredHeadOrientationProvider desiredHeadOrientationProvider,
-           MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters, DesiredHandPoseProvider handPoseProvider,
-           TorusPoseProvider torusPoseProvider, TorusManipulationProvider torusManipulationProvider, SideDependentList<HandControllerInterface> handControllers, LidarControllerInterface lidarControllerInterface,
+   public AbstractHighLevelHumanoidControlPattern(VariousWalkingProviders variousWalkingProviders,
+           RootJointAngularAccelerationControlModule rootJointAccelerationControlModule, 
+           MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters, 
+           SideDependentList<HandControllerInterface> handControllers, LidarControllerInterface lidarControllerInterface,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, HighLevelState controllerState)
    {
       super(controllerState);
@@ -105,7 +106,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       graspingHands = momentumBasedController.getContactableCylinderHands();
       rollingThighs = momentumBasedController.getContactableRollingThighs();
 
-      this.desiredHeadOrientationProvider = desiredHeadOrientationProvider;
+      this.desiredHeadOrientationProvider = variousWalkingProviders.getDesiredHeadOrientationProvider();
       this.lidarControllerInterface = lidarControllerInterface;
       this.walkingControllerParameters = walkingControllerParameters;
 
@@ -119,6 +120,10 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       // Setup foot control modules:
 //    setupFootControlModules(); //TODO: get rid of that?
 
+      DesiredHandPoseProvider handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
+      TorusPoseProvider torusPoseProvider = variousWalkingProviders.getTorusPoseProvider();
+      TorusManipulationProvider torusManipulationProvider = variousWalkingProviders.getTorusManipulationProvider();
+      
       // Setup arm+hand manipulation state machines
       manipulationControlModule = new ManipulationControlModule(yoTime, fullRobotModel, twistCalculator, walkingControllerParameters, handPoseProvider,
               torusPoseProvider, torusManipulationProvider, dynamicGraphicObjectsListRegistry, handControllers, momentumBasedController, registry);
