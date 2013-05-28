@@ -506,6 +506,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       super.initialize();
 
+      initializeContacts();
+
       FrameOrientation initialDesiredPelvisOrientation = new FrameOrientation(referenceFrames.getAnkleZUpFrame(getUpcomingSupportLeg()));
       initialDesiredPelvisOrientation.changeFrame(worldFrame);
       double yaw = initialDesiredPelvisOrientation.getYawPitchRoll()[0];
@@ -518,6 +520,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       stateMachine.setCurrentState(WalkingState.DOUBLE_SUPPORT);
 
+   }
+
+   private void initializeContacts()
+   {
+      momentumBasedController.clearContacts();
+
+      for (ContactablePlaneBody contactablePlaneBody : momentumBasedController.getContactablePlaneFeet())
+      {
+         setFlatFootContactState(contactablePlaneBody);
+      }
    }
 
    private class DoubleSupportState extends State<WalkingState>

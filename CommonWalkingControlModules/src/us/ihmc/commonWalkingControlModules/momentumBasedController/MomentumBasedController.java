@@ -10,13 +10,7 @@ import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableCylinderBody;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableRollingBody;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoCylindricalContactState;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoRollingContactState;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.*;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
@@ -81,6 +75,8 @@ public class MomentumBasedController implements RobotController
    private final LinkedHashMap<ContactableRollingBody, YoRollingContactState> rollingContactStates = new LinkedHashMap<ContactableRollingBody,
                                                                                                            YoRollingContactState>();
    private final LinkedHashMap<ContactableCylinderBody, YoCylindricalContactState> cylindricalContactStates = new LinkedHashMap<ContactableCylinderBody, YoCylindricalContactState>();
+   private final List<ModifiableContactState> modifiableContactStates = new ArrayList<ModifiableContactState>();
+
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
    private final DoubleYoVariable yoTime;
    private final double controlDT;
@@ -271,6 +267,9 @@ public class MomentumBasedController implements RobotController
          cylindricalContactStates.put(contactableCylinderBody, cylindricalContactState);
       }
 
+      modifiableContactStates.addAll(planeContactStates.values());
+      modifiableContactStates.addAll(rollingContactStates.values());
+      modifiableContactStates.addAll(cylindricalContactStates.values());
 
       this.planeContactWrenchProcessor = new PlaneContactWrenchProcessor(this.listOfAllContactablePlaneBodies, dynamicGraphicObjectsListRegistry, registry);
    }
@@ -332,11 +331,8 @@ public class MomentumBasedController implements RobotController
    // TODO: Temporary method for a big refactor allowing switching between high level behaviors
    public void doSecondaryControl()
    {
-      if (momentumBasedControllerSpy != null)
-      {
-         momentumBasedControllerSpy.doSecondaryControl();
-      }
-      
+      updateMomentumBasedControllerSpy();
+
       momentumControlModule.compute(this.contactStates, this.cylindricalContactStates, upcomingSupportLeg.getEnumValue());
 
       SpatialForceVector desiredCentroidalMomentumRate = momentumControlModule.getDesiredCentroidalMomentumRate();
@@ -372,6 +368,39 @@ public class MomentumBasedController implements RobotController
       if (processedOutputs != null)
          fullRobotModel.setTorques(processedOutputs);
       updateYoVariables();
+   }
+
+   private void updateMomentumBasedControllerSpy()
+   {
+      if (momentumBasedControllerSpy != null)
+      {
+         for (ContactablePlaneBody contactablePlaneBody : planeContactStates.keySet())
+         {
+            YoPlaneContactState contactState = planeContactStates.get(contactablePlaneBody);
+            if (contactState.inContact())
+            {
+               momentumBasedControllerSpy.setPlaneContactState(contactablePlaneBody, contactState.getContactPoints2d(), contactState.getCoefficientOfFriction(), contactState.getContactNormalFrameVector());
+            }
+         }
+
+         for (ContactableRollingBody contactableRollingBody : rollingContactStates.keySet())
+         {
+            YoRollingContactState contactState = rollingContactStates.get(contactableRollingBody);
+            if (contactState.inContact())
+            {
+               momentumBasedControllerSpy.setRollingContactState(contactableRollingBody, contactState.getContactPoints2d(), contactState.getCoefficientOfFriction());
+            }
+         }
+
+         for (ContactableCylinderBody contactableCylinderBody : cylindricalContactStates.keySet())
+         {
+            YoCylindricalContactState contactState = cylindricalContactStates.get(contactableCylinderBody);
+            if (contactState.isInContact())
+               momentumBasedControllerSpy.setCylindricalContactInContact(contactableCylinderBody, contactState.isInContact());
+         }
+
+         momentumBasedControllerSpy.doSecondaryControl();
+      }
    }
 
    public final void doControl()
@@ -490,11 +519,6 @@ public class MomentumBasedController implements RobotController
 
    public void setPlaneContactState(ContactablePlaneBody contactableBody, List<FramePoint2d> contactPoints, double coefficientOfFriction, FrameVector normalContactVector)
    {
-      if (momentumBasedControllerSpy != null)
-      {
-         momentumBasedControllerSpy.setPlaneContactState(contactableBody, contactPoints, coefficientOfFriction, normalContactVector);
-      }
-      
       YoPlaneContactState yoPlaneContactState = planeContactStates.get(contactableBody);
 
       if (normalContactVector == null)
@@ -509,11 +533,6 @@ public class MomentumBasedController implements RobotController
    
    public void setRollingContactState(ContactableRollingBody contactableRollingBody, List<FramePoint2d> contactPoints, double coefficientOfFriction)
    {
-      if (momentumBasedControllerSpy != null)
-      {
-         momentumBasedControllerSpy.setRollingContactState(contactableRollingBody, contactPoints, coefficientOfFriction);
-      }
-      
       YoRollingContactState yoRollingContactState = rollingContactStates.get(contactableRollingBody);
 
       yoRollingContactState.setContactPoints(contactPoints);
@@ -522,11 +541,6 @@ public class MomentumBasedController implements RobotController
 
    public void setCylindricalContactInContact(ContactableCylinderBody contactableCylinderBody, boolean setInContact)
    {
-      if (momentumBasedControllerSpy != null)
-      {
-         momentumBasedControllerSpy.setCylindricalContactInContact(contactableCylinderBody, setInContact);
-      }
-      
       YoCylindricalContactState yoCylindricalContactState = cylindricalContactStates.get(contactableCylinderBody);
       yoCylindricalContactState.setInContact(setInContact);
    }
@@ -666,5 +680,12 @@ public class MomentumBasedController implements RobotController
    {
        return contactStates.values();
    }
-   
+
+   public void clearContacts()
+   {
+      for (ModifiableContactState modifiableContactState : modifiableContactStates)
+      {
+         modifiableContactState.clear();
+      }
+   }
 }

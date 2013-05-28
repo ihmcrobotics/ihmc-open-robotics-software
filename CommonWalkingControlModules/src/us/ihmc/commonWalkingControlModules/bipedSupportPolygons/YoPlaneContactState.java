@@ -13,7 +13,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 
-public class YoPlaneContactState implements PlaneContactState
+public class YoPlaneContactState implements PlaneContactState, ModifiableContactState
 {
    private final String namePrefix;
    private final YoVariableRegistry registry;
@@ -52,21 +52,27 @@ public class YoPlaneContactState implements PlaneContactState
 
       for (int i = 0; i < this.contactPoints.size(); i++)
       {
+         YoFramePoint2d contactPoint = this.contactPoints.get(i);
          if (i < contactPoints.size())
          {
             FramePoint2d point = contactPoints.get(i);
             temp.setAndChangeFrame(point);
             temp.changeFrame(planeFrame);
-            this.contactPoints.get(i).set(temp);
+            contactPoint.set(temp);
             inContact.set(true);
          }
          else
-            this.contactPoints.get(i).set(Double.NaN, Double.NaN);
+            invalidateContactPoint(contactPoint);
       }
 
       if (coefficientOfFriction < 0.0)
          throw new RuntimeException("Coefficient of friction is negative: " + coefficientOfFriction);
       this.coefficientOfFriction.set(coefficientOfFriction);
+   }
+
+   private void invalidateContactPoint(YoFramePoint2d contactPoint)
+   {
+      contactPoint.set(Double.NaN, Double.NaN);
    }
 
    public List<FramePoint2d> getContactPoints2d()
@@ -141,5 +147,13 @@ public class YoPlaneContactState implements PlaneContactState
    public FrameVector getContactNormalFrameVector()
    {
       return contactNormalFrameVector;
+   }
+
+   public void clear()
+   {
+      for (YoFramePoint2d contactPoint : contactPoints)
+      {
+         invalidateContactPoint(contactPoint);
+      }
    }
 }
