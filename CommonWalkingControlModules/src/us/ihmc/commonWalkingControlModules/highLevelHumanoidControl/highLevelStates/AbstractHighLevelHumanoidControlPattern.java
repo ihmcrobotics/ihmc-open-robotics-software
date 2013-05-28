@@ -7,7 +7,6 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableCylinderBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableRollingBody;
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationControlModule;
@@ -352,11 +351,13 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
    }
 
    // TODO: New methods coming from extending State class
+   @Override
    public void doAction()
    {
       doMotionControl();
    }
 
+   @Override
    public void doTransitionIntoAction()
    {
       initialize();

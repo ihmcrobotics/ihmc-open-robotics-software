@@ -226,10 +226,27 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       }
    }
 
+   public void doMotionControl()
+   {
+      momentumBasedController.doPrioritaryControl();
+      momentumBasedController.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
+
+      doFootControl();
+      doArmControl();
+      doHeadControl();
+      doLidarJointControl();
+      doChestControl();
+      doCoMControl();
+      doPelvisControl();
+      doJointPositionControl();
+
+      setTorqueControlJointsToZeroDersiredAcceleration();
+
+      momentumBasedController.doSecondaryControl();
+   }
+
    protected void doPelvisControl()
    {
-      momentumBasedController.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
-      
       if (pelvisPoseProvider.checkForNewPose())
       {
          desiredPelvisConfigurationProvider.set(pelvisPoseProvider.getDesiredPelvisPose());
