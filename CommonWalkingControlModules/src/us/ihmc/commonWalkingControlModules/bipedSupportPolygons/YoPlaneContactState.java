@@ -12,6 +12,7 @@ import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class YoPlaneContactState implements PlaneContactState, ModifiableContactState
 {
@@ -22,7 +23,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    private final List<YoFramePoint2d> contactPoints = new ArrayList<YoFramePoint2d>();
    private final BooleanYoVariable inContact;
    private final DoubleYoVariable coefficientOfFriction;
-   private final FrameVector contactNormalFrameVector;
+   private final YoFrameVector contactNormalFrameVector;
 
    public YoPlaneContactState(String namePrefix, ReferenceFrame frameAfterJoint, ReferenceFrame planeFrame, YoVariableRegistry parentRegistry)
    {
@@ -33,13 +34,13 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       this.frameAfterJoint = frameAfterJoint;
       this.planeFrame = planeFrame;
       parentRegistry.addChild(registry);
-      this.contactNormalFrameVector = new FrameVector(planeFrame, 0.0, 0.0, 1.0);
+      this.contactNormalFrameVector = new YoFrameVector(namePrefix + "ContactNormalFrameVector", planeFrame, registry);
    }
 
    public void set(List<FramePoint2d> contactPoints, double coefficientOfFriction, FrameVector normalContactVector)
    {
-      this.contactNormalFrameVector.setAndChangeFrame(normalContactVector);
-      
+      this.contactNormalFrameVector.set(normalContactVector);
+
       set(contactPoints, coefficientOfFriction);
    }
 
@@ -146,7 +147,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
 
    public FrameVector getContactNormalFrameVector()
    {
-      return contactNormalFrameVector;
+      return contactNormalFrameVector.getFrameVectorCopy();
    }
 
    public void clear()
