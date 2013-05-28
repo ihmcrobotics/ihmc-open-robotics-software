@@ -64,7 +64,6 @@ public class FootCenterToToeEvaluator
 
    private double doubleSupportFirstStepFraction = 0.5;
    private int maxNumberOfConsideredFootsteps = 4;
-   private double singleSupportToePercentage = 0.5; 
    private boolean doHeelToToeTransfer = true; 
    private DoubleSupportFootCenterToToeICPComputer smoothICPComputer;  
 
