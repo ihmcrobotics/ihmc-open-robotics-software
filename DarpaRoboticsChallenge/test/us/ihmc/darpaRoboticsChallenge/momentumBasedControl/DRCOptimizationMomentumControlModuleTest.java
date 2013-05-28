@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
@@ -75,7 +76,7 @@ public class DRCOptimizationMomentumControlModuleTest
       CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", ReferenceFrame.getWorldFrame(), rootJoint.getSuccessor());
       centerOfMassFrame.update();
       OneDoFJoint lidarJoint = fullRobotModel.getOneDoFJointByName(jointMap.getLidarJointName());
-      InverseDynamicsJoint[] jointsToOptimizeFor = computeJointsToOptimizeFor(fullRobotModel, lidarJoint);
+      InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, lidarJoint);
 
       double controlDT = 1e-4;
       MomentumOptimizationSettings optimizationSettings = createOptimizationSettings(0.0, 1e-3, 1e-9, 0.0, 0.0);
@@ -147,7 +148,7 @@ public class DRCOptimizationMomentumControlModuleTest
 
       CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", ReferenceFrame.getWorldFrame(), rootJoint.getSuccessor());
       OneDoFJoint lidarJoint = fullRobotModel.getOneDoFJointByName(jointMap.getLidarJointName());
-      InverseDynamicsJoint[] jointsToOptimizeFor = computeJointsToOptimizeFor(fullRobotModel, lidarJoint);
+      InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, lidarJoint);
 
       double controlDT = 0.005;
       MomentumOptimizationSettings optimizationSettings = createOptimizationSettings(0.0, 0.0, 1e-5, 0.0, 0.0);
@@ -298,23 +299,6 @@ public class DRCOptimizationMomentumControlModuleTest
       }
 
       return bipedFeet;
-   }
-
-   private InverseDynamicsJoint[] computeJointsToOptimizeFor(FullRobotModel fullRobotModel, InverseDynamicsJoint lidarJoint)
-   {
-      List<InverseDynamicsJoint> joints = new ArrayList<InverseDynamicsJoint>();
-      InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
-      joints.addAll(Arrays.asList(allJoints));
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         List<InverseDynamicsJoint> fingerJoints = Arrays.asList(ScrewTools.computeSubtreeJoints(fullRobotModel.getHand(robotSide)));
-         joints.removeAll(fingerJoints);
-      }
-
-      joints.remove(lidarJoint);
-
-      return joints.toArray(new InverseDynamicsJoint[joints.size()]);
    }
 
    private static MomentumOptimizationSettings createOptimizationSettings(double momentumWeight, double lambda, double wRho, double rhoMin, double wPhi)
