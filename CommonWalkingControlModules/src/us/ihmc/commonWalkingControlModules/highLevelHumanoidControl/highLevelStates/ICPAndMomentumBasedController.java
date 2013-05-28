@@ -121,7 +121,6 @@ public class ICPAndMomentumBasedController
 
    public void initialize()
    {
-      momentumBasedController.initialize();
    }
 
    // TODO: visibility changed for "public"

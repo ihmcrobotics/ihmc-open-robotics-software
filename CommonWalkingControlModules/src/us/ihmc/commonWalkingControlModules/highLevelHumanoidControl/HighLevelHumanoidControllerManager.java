@@ -16,9 +16,10 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    private final StateMachine<HighLevelState> stateMachine;
    private final HighLevelState initialBehavior;
+   private final MomentumBasedController momentumBasedController;
 
 
-   public HighLevelHumanoidControllerManager(StateMachine<HighLevelState> stateMachine, HighLevelState initialBehavior, ArrayList<YoVariableRegistry> highLevelStateRegistries)
+   public HighLevelHumanoidControllerManager(StateMachine<HighLevelState> stateMachine, HighLevelState initialBehavior, ArrayList<YoVariableRegistry> highLevelStateRegistries, MomentumBasedController momentumBasedController)
    {
       this.stateMachine = stateMachine;
 
@@ -27,10 +28,12 @@ public class HighLevelHumanoidControllerManager implements RobotController
          this.registry.addChild(highLevelStateRegistry);
       }
       this.initialBehavior = initialBehavior;
+      this.momentumBasedController = momentumBasedController;
    }
 
    public void initialize()
    {
+      momentumBasedController.initialize();
       stateMachine.setCurrentState(initialBehavior);
    }
 

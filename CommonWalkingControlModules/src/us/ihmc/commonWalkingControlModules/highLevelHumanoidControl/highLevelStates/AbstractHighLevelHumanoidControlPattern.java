@@ -261,7 +261,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
    public void initialize()
    {
       callUpdatables();
-      momentumBasedController.initialize();
       manipulationControlModule.initialize();
    }
    
