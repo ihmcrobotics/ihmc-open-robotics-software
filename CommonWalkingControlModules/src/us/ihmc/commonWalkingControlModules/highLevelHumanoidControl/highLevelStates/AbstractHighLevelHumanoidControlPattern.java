@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.head.DesiredHeadOrient
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
+import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredHandPoseProvider;
@@ -82,6 +83,8 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
    protected final DoubleYoVariable coefficientOfFriction = new DoubleYoVariable("coefficientOfFriction", registry);
    private final RootJointAngularAccelerationControlModule rootJointAccelerationControlModule;
 
+   private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
+   
    public AbstractHighLevelHumanoidControlPattern(VariousWalkingProviders variousWalkingProviders,
            RootJointAngularAccelerationControlModule rootJointAccelerationControlModule, 
            MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters, 
@@ -257,8 +260,18 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
    public void initialize()
    {
+      callUpdatables();
       momentumBasedController.initialize();
       manipulationControlModule.initialize();
+   }
+   
+   protected void callUpdatables()
+   {
+      double time = yoTime.getDoubleValue();
+      for (Updatable updatable : updatables)
+      {
+         updatable.update(time);
+      }
    }
 
    public double getDeterminantOfHipToAnkleJacobian(RobotSide robotSide)
@@ -271,6 +284,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
    public void doMotionControl()
    {
       momentumBasedController.doPrioritaryControl();
+      callUpdatables();
 
       doFootControl();
       doArmControl();
@@ -379,5 +393,10 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       {
          momentumBasedController.setOneDoFJointAcceleration(joint, 0.0);
       }
+   }
+
+   public void addUpdatables(ArrayList<Updatable> updatables)
+   {
+      this.updatables.addAll(updatables);
    }
 }
