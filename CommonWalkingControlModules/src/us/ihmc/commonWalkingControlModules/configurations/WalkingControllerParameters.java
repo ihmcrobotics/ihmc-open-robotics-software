@@ -37,4 +37,16 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract boolean doToeOffIfPossible();
 
    public abstract double getFinalToeOffPitchAngularVelocity();
+
+   public abstract double getInPlaceWidth();
+
+   public abstract double getDesiredStepForward();
+
+   public abstract double getMaxStepLength();
+
+   public abstract double getMinStepWidth();
+
+   public abstract double getMaxStepWidth();
+
+   public abstract double getStepPitch();
 }
