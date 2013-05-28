@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import com.yobotics.simulationconstructionset.EnumYoVariable;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableRollingBody;
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.desiredChestOrientation.DesiredChestOrientationProvider;
@@ -19,6 +17,8 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalcul
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredFootPoseProvider;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.NullMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAngularAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.trajectories.ChangeableConfigurationProvider;
@@ -84,6 +84,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
    private final ConstantDoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(1.0);
 
+   private final NullMomentumRateOfChangeControlModule nullMomentumRateOfChange = new NullMomentumRateOfChangeControlModule();
+   private final MomentumRateOfChangeData momentumRateOfChangeData = nullMomentumRateOfChange.getMomentumRateOfChangeOutputPort().getData();
 
    private BooleanYoVariable requestedLeftFootLoadBearing = new BooleanYoVariable("requestedLeftFootLoadBearing", registry);
    private BooleanYoVariable requestedRightFootLoadBearing = new BooleanYoVariable("requestedRightFootLoadBearing", registry);
@@ -226,6 +228,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
    protected void doPelvisControl()
    {
+      momentumBasedController.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
+      
       if (pelvisPoseProvider.checkForNewPose())
       {
          desiredPelvisConfigurationProvider.set(pelvisPoseProvider.getDesiredPelvisPose());
