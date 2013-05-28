@@ -34,7 +34,7 @@ import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChan
 
 public class DRCFlatGroundWalkingTest
 {
-   private static final boolean ALWAYS_SHOW_GUI = !false;
+   private static final boolean ALWAYS_SHOW_GUI = false;
    private static final boolean KEEP_SCS_UP = false;
 
    private static final boolean CREATE_MOVIE = BambooTools.doMovieCreation();
