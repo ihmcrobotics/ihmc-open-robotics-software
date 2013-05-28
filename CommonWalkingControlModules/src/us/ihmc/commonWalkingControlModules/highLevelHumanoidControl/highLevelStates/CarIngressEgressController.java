@@ -48,7 +48,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProv
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
 
-public class CarIngressEgressController extends AbstractHighLevelHumanoidControlPattern implements VariableChangedListener
+public class CarIngressEgressController extends AbstractHighLevelHumanoidControlPattern
 {
    public final static HighLevelState controllerState = HighLevelState.INGRESS_EGRESS;
 
@@ -138,9 +138,10 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
       setupFootControlModules();
 
+      VariableChangedListener heelOffVariableChangedListener = new HeelOffYoVariableChangedListener();
       for (RobotSide robotSide : RobotSide.values)
       {
-         doHeelOff.get(robotSide).addVariableChangedListener(this);
+         doHeelOff.get(robotSide).addVariableChangedListener(heelOffVariableChangedListener);
       }
 
       LoadBearingVariableChangedListener loadBearingVariableChangedListener = new LoadBearingVariableChangedListener();
@@ -444,22 +445,25 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       }
    }
 
-   public void variableChanged(YoVariable v)
+   private class HeelOffYoVariableChangedListener implements VariableChangedListener
    {
-      if (!(v instanceof BooleanYoVariable))
-         return;
-
-      for (RobotSide robotSide : RobotSide.values)
+      public void variableChanged(YoVariable v)
       {
-         if (v.equals(doHeelOff.get(robotSide)))
+         if (!(v instanceof BooleanYoVariable))
+            return;
+
+         for (RobotSide robotSide : RobotSide.values)
          {
-            if (doHeelOff.get(robotSide).getBooleanValue())
+            if (v.equals(doHeelOff.get(robotSide)))
             {
-               setOnToesContactState(feet.get(robotSide));
-            }
-            else
-            {
-               setFlatFootContactState(feet.get(robotSide));
+               if (doHeelOff.get(robotSide).getBooleanValue())
+               {
+                  setOnToesContactState(feet.get(robotSide));
+               }
+               else
+               {
+                  setFlatFootContactState(feet.get(robotSide));
+               }
             }
          }
       }
