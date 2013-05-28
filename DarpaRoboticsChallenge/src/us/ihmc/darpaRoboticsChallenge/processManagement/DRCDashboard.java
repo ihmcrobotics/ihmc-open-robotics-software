@@ -1153,9 +1153,10 @@ public class DRCDashboard
 
    private void launchDemo01(final LocalCloudMachines gazeboMachine, final String task, final String pluginOption)
    {
+      String[] javaArgs = {"-Xms1024m", "-Xmx3000m"}; // {"-Xms1024m", "-Xmx2048m"};
       if (gazeboMachine == null)
       {
-         scsSpawner.spawn(DRCDemo01.class, new String[] {"-Xms1024m", "-Xmx2048m"}, null);
+         scsSpawner.spawn(DRCDemo01.class, javaArgs, null);
       }
       else
       {
@@ -1179,7 +1180,7 @@ public class DRCDashboard
             if (estimatorCheckBox.isEnabled() && estimatorCheckBox.isSelected())
             {
                ThreadTools.sleep(6000);
-               scsSpawner.spawn(DRCDemo01.class, new String[] {"-Xms1024m", "-Xmx2048m"}, new String[]
+               scsSpawner.spawn(DRCDemo01.class, javaArgs, new String[]
                {
                   "--sim", "--env", newTask, "--gazebo", "--gazeboHost", DRCLocalCloudConfig.getIPAddress(gazeboMachine), "--initialize-estimator", "--start",
                   startingLocationsList.getSelectedValue().toString()
@@ -1188,7 +1189,7 @@ public class DRCDashboard
             else
             {
                ThreadTools.sleep(6000);
-               scsSpawner.spawn(DRCDemo01.class, new String[] {"-Xms1024m", "-Xmx2048m"}, new String[]
+               scsSpawner.spawn(DRCDemo01.class, javaArgs, new String[]
                {
                   "--sim", "--env", newTask, "--gazebo", "--gazeboHost", DRCLocalCloudConfig.getIPAddress(gazeboMachine), "--start",
                   startingLocationsList.getSelectedValue().toString()
