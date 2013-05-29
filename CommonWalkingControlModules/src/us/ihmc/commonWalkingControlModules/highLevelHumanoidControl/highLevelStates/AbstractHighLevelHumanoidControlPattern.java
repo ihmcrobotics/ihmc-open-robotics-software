@@ -91,6 +91,8 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
    
+   private final VariousWalkingManagers variousWalkingManagers;
+   
    public AbstractHighLevelHumanoidControlPattern(VariousWalkingProviders variousWalkingProviders, 
          VariousWalkingManagers variousWalkingManagers,
            RootJointAngularAccelerationControlModule rootJointAccelerationControlModule, 
@@ -100,6 +102,8 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
    {
       super(controllerState);
 
+      this.variousWalkingManagers = variousWalkingManagers;
+      
       // Getting parameters from the momentumBasedController
       this.momentumBasedController = momentumBasedController;
       fullRobotModel = momentumBasedController.getFullRobotModel();
@@ -142,6 +146,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       // Setup joint constraints
       positionControlJoints = setupJointConstraints();
    }
+   
 
    protected void setupLegJacobians(FullRobotModel fullRobotModel)
    {
@@ -239,7 +244,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
    }
 
    public void initialize()
-   {
+   {      
       callUpdatables();
       manipulationControlModule.goToDefaultState();
    }

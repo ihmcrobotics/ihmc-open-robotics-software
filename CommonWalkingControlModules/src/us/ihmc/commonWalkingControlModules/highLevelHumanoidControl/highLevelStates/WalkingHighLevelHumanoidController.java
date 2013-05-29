@@ -14,9 +14,9 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.commonWalkingControlModules.calculators.EquivalentConstantCoPCalculator;
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
@@ -219,9 +219,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private double maximumToeOffAngle = 0.5; 
    private double referenceTime = 0.22; 
    private MaximumConstantJerkFinalToeOffAngleComputer maximumConstantJerkFinalToeOffAngleComputer = new MaximumConstantJerkFinalToeOffAngleComputer();  
-   YoVariableDoubleProvider onToesFinalPitchProvider = new YoVariableDoubleProvider("OnToesFinalPitch", registry);
+   private YoVariableDoubleProvider onToesFinalPitchProvider = new YoVariableDoubleProvider("OnToesFinalPitch", registry);
 
-   
+   private final VariousWalkingManagers variousWalkingManagers;
 
    public WalkingHighLevelHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          SideDependentList<FootSwitchInterface> footSwitches,
@@ -243,6 +243,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
      
       super.addUpdatables(icpAndMomentumBasedController.getUpdatables());
 
+      this.variousWalkingManagers = variousWalkingManagers;
+      
+      setupManagers(variousWalkingManagers);
+      
       FootstepProvider footstepProvider = variousWalkingProviders.getFootstepProvider();
       HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = variousWalkingProviders.getMapFromFootstepsToTrajectoryParameters();
 
@@ -369,6 +373,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       controllerInitializationTime = new DoubleYoVariable("controllerInitializationTime", registry);
       alreadyBeenInDoubleSupportOnce = new BooleanYoVariable("alreadyBeenInDoubleSupportOnce", registry);
 
+   }
+
+   
+   public void setupManagers(VariousWalkingManagers variousWalkingManagers)
+   {
+      
    }
 
   
@@ -512,9 +522,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    public void initialize()
    {
       super.initialize();
-
+      
       initializeContacts();
 
+      ChestOrientationManager chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
+      chestOrientationManager.turnOff();
+      
       FrameOrientation initialDesiredPelvisOrientation = new FrameOrientation(referenceFrames.getAnkleZUpFrame(getUpcomingSupportLeg()));
       initialDesiredPelvisOrientation.changeFrame(worldFrame);
       double yaw = initialDesiredPelvisOrientation.getYawPitchRoll()[0];

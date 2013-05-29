@@ -50,7 +50,7 @@ public class VariousWalkingManagers
 
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
 
-      ChestOrientationControlModule chestOrientationControlModule = setupChestOrientationControlModule(fullRobotModel, walkingControllerParameters,
+      ChestOrientationControlModule chestOrientationControlModule = setupChestOrientationControlModule(fullRobotModel, 
                                                                        twistCalculator, registry);
       ChestOrientationManager chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestOrientationControlModule);
 
@@ -67,21 +67,12 @@ public class VariousWalkingManagers
    }
 
    private static ChestOrientationControlModule setupChestOrientationControlModule(FullRobotModel fullRobotModel,
-           WalkingControllerParameters walkingControllerParameters, TwistCalculator twistCalculator, YoVariableRegistry registry)
+           TwistCalculator twistCalculator, YoVariableRegistry registry)
    {
       RigidBody chest = fullRobotModel.getChest();
       RigidBody pelvis = fullRobotModel.getPelvis();
-
-      String[] chestOrientationControlJointNames = walkingControllerParameters.getDefaultChestOrientationControlJointNames();
-
-      InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
-      InverseDynamicsJoint[] chestOrientationControlJoints = ScrewTools.findJointsWithNames(allJoints, chestOrientationControlJointNames);
-
-      if (chestOrientationControlJoints.length <= 0)
-         return null;
-
-      GeometricJacobian spineJacobian = new GeometricJacobian(chestOrientationControlJoints, chest.getBodyFixedFrame());
-      ChestOrientationControlModule chestOrientationControlModule = new ChestOrientationControlModule(pelvis, fullRobotModel.getChest(), spineJacobian,
+      
+      ChestOrientationControlModule chestOrientationControlModule = new ChestOrientationControlModule(pelvis, chest, 
                                                                        twistCalculator, registry);
       chestOrientationControlModule.setProportionalGains(100.0, 100.0, 100.0);
       chestOrientationControlModule.setDerivativeGains(20.0, 20.0, 20.0);
@@ -103,4 +94,5 @@ public class VariousWalkingManagers
    {
       return manipulationControlModule;
    }
+
 }
