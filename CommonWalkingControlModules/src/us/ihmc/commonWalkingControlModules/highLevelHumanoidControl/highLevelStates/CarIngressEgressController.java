@@ -120,7 +120,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
               registry);
 
       double kPelvisPosition = 100.0;
-      double dPelvisPosition = GainCalculator.computeDerivativeGain(kPelvisPosition, 5.0);
+      double dPelvisPosition = GainCalculator.computeDerivativeGain(kPelvisPosition, 1.0);
       pelvisController.setPositionProportionalGains(kPelvisPosition, kPelvisPosition, kPelvisPosition);
       pelvisController.setPositionDerivativeGains(dPelvisPosition, dPelvisPosition, dPelvisPosition);
 
@@ -218,7 +218,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    {
       baseForChestOrientationControl = fullRobotModel.getPelvis();
       ChestOrientationManager chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
-      String[] chestOrientationControlJointNames = new String[]{"back_mby"};
+      String[] chestOrientationControlJointNames = walkingControllerParameters.getDefaultChestOrientationControlJointNames();
       spineJacobianForChestOrientationControl = chestOrientationManager.createJacobian(fullRobotModel, baseForChestOrientationControl, chestOrientationControlJointNames);
       
       baseForHeadOrientationControl = fullRobotModel.getPelvis();
@@ -260,24 +260,6 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       {
          requestedFootLoadBearing.get(robotSide).set(true);
       }
-   }
-
-   public void doMotionControl()
-   {
-      momentumBasedController.doPrioritaryControl();
-
-      doFootControl();
-      doArmControl();
-      doHeadControl();
-      doLidarJointControl();
-      doChestControl();
-      doCoMControl();
-      doPelvisControl();
-      doJointPositionControl();
-
-      setTorqueControlJointsToZeroDersiredAcceleration();
-
-      momentumBasedController.doSecondaryControl();
    }
 
    protected void doPelvisControl()
