@@ -11,7 +11,5 @@ import javax.media.j3d.Transform3D;
  */
 public interface VehicleModelObjects
 {
-   Transform3D getTransform(VehicleObject vehicleObject);
-
    FramePose getFramePose(ReferenceFrame vehicleReferenceFrame, VehicleObject vehicleObject);
 }

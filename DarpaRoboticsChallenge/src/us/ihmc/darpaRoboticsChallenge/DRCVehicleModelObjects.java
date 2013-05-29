@@ -35,61 +35,148 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
       }
 
       {
+         //0.630000 0.100000 0.580000 0.000000 0.000000 0.000000
+         //-0.038500 0.000000 -0.086000 -3.141592 1.125593 -3.141592
 
+         //parent transform
+         Transform3D transform3DfromWorldToParent;
+         {
          double roll = 0.0;
-         double pitch = -1.0;
+         double pitch = 0.0;
          double yaw = 0.0;
-
-         Vector3d translation = new Vector3d(0.580000, 0.140000, 0.510000);
-
+         Vector3d translation = new Vector3d(0.630000, 0.100000, 0.580000);
          Matrix3d matrix3d = new Matrix3d();
          RotationFunctions.setYawPitchRoll(matrix3d, yaw, pitch, roll);
+            transform3DfromWorldToParent = new Transform3D(matrix3d, translation, 1.0);
+         }
 
-         Transform3D transform3D = new Transform3D(matrix3d, translation, 1.0);
+         //transform to parent
+         Transform3D transform3DfromParentToChild;
+         {
+            double roll = -3.141592;
+            double pitch = 1.125593;
+            double yaw = -3.141592;
+            Vector3d translation = new Vector3d(-0.038500, 0.000000, -0.086000);
+            Matrix3d matrix3d = new Matrix3d();
+            RotationFunctions.setYawPitchRoll(matrix3d, yaw, pitch, roll);
+            transform3DfromParentToChild = new Transform3D(matrix3d, translation, 1.0);
+         }
+
+         Transform3D transform3D = new Transform3D();
+         transform3D.mul(transform3DfromWorldToParent, transform3DfromParentToChild);
 
          objectTransforms.put(VehicleObject.GAS_PEDAL, transform3D);
       }
 
       {
-         double roll = 0.0;
-         double pitch = -1.0;
-         double yaw = 0.0;
+         //0.640000 0.270000 0.580000 0.000000 0.000000 0.000000
+         //-0.040000 0.000000 -0.086000 -3.141592 1.142593 -3.141592
+         //parent transform
+         Transform3D transform3DfromWorldToParent;
+         {
+            double roll = 0.0;
+            double pitch = 0.0;
+            double yaw = 0.0;
+            Vector3d translation = new Vector3d(0.640000, 0.270000, 0.580000);
+            Matrix3d matrix3d = new Matrix3d();
+            RotationFunctions.setYawPitchRoll(matrix3d, yaw, pitch, roll);
+            transform3DfromWorldToParent = new Transform3D(matrix3d, translation, 1.0);
+         }
 
-         Vector3d translation = new Vector3d(0.590000, 0.270000, 0.530000);
+         //transform to parent
+         Transform3D transform3DfromParentToChild;
+         {
+            double roll = -3.141592;
+            double pitch = 1.142593;
+            double yaw = -3.141592;
+            Vector3d translation = new Vector3d(-0.040000, 0.000000, -0.086000);
+            Matrix3d matrix3d = new Matrix3d();
+            RotationFunctions.setYawPitchRoll(matrix3d, yaw, pitch, roll);
+            transform3DfromParentToChild = new Transform3D(matrix3d, translation, 1.0);
+         }
 
-         Matrix3d matrix3d = new Matrix3d();
-         RotationFunctions.setYawPitchRoll(matrix3d, yaw, pitch, roll);
-
-         Transform3D transform3D = new Transform3D(matrix3d, translation, 1.0);
+         Transform3D transform3D = new Transform3D();
+         transform3D.mul(transform3DfromWorldToParent, transform3DfromParentToChild);
 
          objectTransforms.put(VehicleObject.BRAKE_PEDAL, transform3D);
       }
 
       {
-         double roll = 0.0;
-         double pitch = -0.8;
-         double yaw = 0.0;
+         //0.340000 0.300000 1.290000 0.000000 -0.870000 0.000000
+         //0.000000 0.000000 0.000000 -0.690000 0.000000 -1.570796
 
-         Vector3d translation = new Vector3d(0.370000, 0.300000, 1.200000);
+         Transform3D transform3DfromWorldToParent;
+         {
+            double roll = 0.0;
+            double pitch = -0.870000;
+            double yaw = 0.0;
+            Vector3d translation = new Vector3d(0.340000, 0.300000, 1.290000);
+            Matrix3d matrix3d = new Matrix3d();
+            RotationFunctions.setYawPitchRoll(matrix3d, yaw, pitch, roll);
+            transform3DfromWorldToParent = new Transform3D(matrix3d, translation, 1.0);
+         }
 
-         Matrix3d matrix3d = new Matrix3d();
-         RotationFunctions.setYawPitchRoll(matrix3d, yaw, pitch, roll);
+         //transform to parent
+         Transform3D transform3DfromParentToChild;
+         {
+            double roll = -0.690000;
+            double pitch = 0.0;
+            double yaw = -1.570796;
+            Vector3d translation = new Vector3d(0.0, 0.0, 0.0);
+            Matrix3d matrix3d = new Matrix3d();
+            RotationFunctions.setYawPitchRoll(matrix3d, yaw, pitch, roll);
+            transform3DfromParentToChild = new Transform3D(matrix3d, translation, 1.0);
+         }
 
-         Transform3D transform3D = new Transform3D(matrix3d, translation, 1.0);
+         Transform3D transform3D = new Transform3D();
+         transform3D.mul(transform3DfromWorldToParent, transform3DfromParentToChild);
          objectTransforms.put(VehicleObject.STEERING_WHEEL, transform3D);
       }
 
       {
-         double roll = 3.141590;
-         double pitch = -0.058407;
-         double yaw = -3.141590;
+         //0.530000 0.070000 1.050000 0.000000 0.000000 0.000000
+         //0.000000 0.000000 0.050000 -0.200000 -0.000000 -1.570796
 
-         Vector3d translation = new Vector3d(0.500000, 0.000000, 1.050000);
+         Transform3D transform3DfromWorldToParent;
+         {
+            double roll = 0.0;
+            double pitch = 0.0;
+            double yaw = 0.0;
+            Vector3d translation = new Vector3d(0.530000, 0.070000, 1.050000);
+            Matrix3d matrix3d = new Matrix3d();
+            RotationFunctions.setYawPitchRoll(matrix3d, yaw, pitch, roll);
+            transform3DfromWorldToParent = new Transform3D(matrix3d, translation, 1.0);
+         }
+
+         //transform to parent
+         Transform3D transform3DfromParentToChild;
+         {
+            double roll = -0.200000;
+            double pitch = 0.0;
+            double yaw = -1.570796;
+            Vector3d translation = new Vector3d(0.000000, 0.000000, 0.050000);
+            Matrix3d matrix3d = new Matrix3d();
+            RotationFunctions.setYawPitchRoll(matrix3d, yaw, pitch, roll);
+            transform3DfromParentToChild = new Transform3D(matrix3d, translation, 1.0);
+         }
+
+         Transform3D transform3D = new Transform3D();
+         transform3D.mul(transform3DfromWorldToParent, transform3DfromParentToChild);
+         objectTransforms.put(VehicleObject.HAND_BRAKE, transform3D);
+      }
+
+      {
+         //0.560000 -0.020000 1.080000 0.000000 0.250000 0.000000
+         double roll = 0.000000;
+         double pitch = 0.250000;
+         double yaw =  0.000000;
+
+         Vector3d translation = new Vector3d(0.560000, -0.020000, 1.080000);
          Matrix3d matrix3d = new Matrix3d();
          RotationFunctions.setYawPitchRoll(matrix3d, yaw, pitch, roll);
 
          Transform3D transform3D = new Transform3D(matrix3d, translation, 1.0);
-         objectTransforms.put(VehicleObject.HAND_BRAKE, transform3D);
+         objectTransforms.put(VehicleObject.FNR_SWITCH, transform3D);
       }
    }
 

@@ -55,7 +55,7 @@ public class DRCVehicleSDFLoader extends DRCWorld
       DRCVehicleSDFLoader drcVehicleSDFLoader = new DRCVehicleSDFLoader();
       scs.addStaticLinkGraphics(drcVehicleSDFLoader.loadDRCVehicle());
 
-      DRCVehicleModelObjectVisualizer drcVehicleModelObjectVisualizer = new DRCVehicleModelObjectVisualizer(scs, false);
+      DRCVehicleModelObjectVisualizer drcVehicleModelObjectVisualizer = new DRCVehicleModelObjectVisualizer(scs);
 
 
       Thread thread = new Thread(scs);
