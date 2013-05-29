@@ -234,12 +234,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
            TrajectoryParametersProvider trajectoryParametersProvider, boolean stayOntoes, double desiredPelvisPitch, double trailingFootPitch,
            WalkingControllerParameters walkingControllerParameters, ICPBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
            RootJointAngularAccelerationControlModule rootJointAngularAccelerationControlModule, LidarControllerInterface lidarControllerInterface,
-           InstantaneousCapturePointPlanner instantaneousCapturePointPlanner, SideDependentList<HandControllerInterface> handControllers,
+           InstantaneousCapturePointPlanner instantaneousCapturePointPlanner, 
            ICPAndMomentumBasedController icpAndMomentumBasedController, MomentumBasedController momentumBasedController, WalkingStatusReporter walkingStatusReporter)
    {
       
       super(variousWalkingProviders, variousWalkingManagers,rootJointAngularAccelerationControlModule, momentumBasedController, walkingControllerParameters, 
-            handControllers, lidarControllerInterface, dynamicGraphicObjectsListRegistry, controllerState);
+            lidarControllerInterface, dynamicGraphicObjectsListRegistry, controllerState);
      
       super.addUpdatables(icpAndMomentumBasedController.getUpdatables());
 

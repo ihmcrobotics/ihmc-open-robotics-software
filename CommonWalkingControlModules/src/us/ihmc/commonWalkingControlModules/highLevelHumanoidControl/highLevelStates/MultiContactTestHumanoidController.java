@@ -5,13 +5,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableRollingBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredFootPoseProvider;
@@ -24,7 +21,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.ConstantConfigurationPro
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.robotSide.RobotSide;
-import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -33,13 +29,9 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.VariableChangedListener;
-import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
 
 public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoidControlPattern
 {
@@ -64,10 +56,10 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
            CoMBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
            RootJointAngularAccelerationControlModule rootJointAccelerationControlModule, MomentumBasedController momentumBasedController,
            WalkingControllerParameters walkingControllerParameters, 
-           SideDependentList<HandControllerInterface> handControllers, LidarControllerInterface lidarControllerInterface,
+           LidarControllerInterface lidarControllerInterface,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      super(variousWalkingProviders, variousWalkingManagers, rootJointAccelerationControlModule, momentumBasedController, walkingControllerParameters, handControllers,
+      super(variousWalkingProviders, variousWalkingManagers, rootJointAccelerationControlModule, momentumBasedController, walkingControllerParameters,
             lidarControllerInterface, dynamicGraphicObjectsListRegistry, controllerState);
 
       this.footPoseProvider = variousWalkingProviders.getDesiredFootPoseProvider();

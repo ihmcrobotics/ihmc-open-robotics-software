@@ -175,12 +175,12 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
                                                            torusPoseProvider, torusManipulationProvider, desiredChestOrientationProvider,
                                                            desiredFootPoseProvider);
 
-      VariousWalkingManagers variousWalkingManagers = VariousWalkingManagers.create(momentumBasedController, variousWalkingProviders,
+      VariousWalkingManagers variousWalkingManagers = VariousWalkingManagers.create(momentumBasedController, handControllers, yoTime, variousWalkingProviders,
             walkingControllerParameters, registry, dynamicGraphicObjectsListRegistry);
       
       MultiContactTestHumanoidController multiContactBehavior = new MultiContactTestHumanoidController(variousWalkingProviders, variousWalkingManagers,
                                                                    momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
-                                                                   momentumBasedController, walkingControllerParameters, null, null,
+                                                                   momentumBasedController, walkingControllerParameters, null,
                                                                    dynamicGraphicObjectsListRegistry);
 
       for (RobotSide robotSide : RobotSide.values)
