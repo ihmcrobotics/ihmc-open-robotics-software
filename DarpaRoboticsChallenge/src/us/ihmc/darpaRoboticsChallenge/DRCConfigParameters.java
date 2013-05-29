@@ -52,7 +52,7 @@ public class DRCConfigParameters
 
 
 
-   public static final String GAZEBO_HOST = CLOUD_MINION5_IP; //"192.168.100.2";
+   public static final String GAZEBO_HOST = "192.168.100.2";
    public static final String SCS_MACHINE_IP_ADDRESS = LOCALHOST; //CLOUD_MONSTER_IP;
 
    public static final String OPERATOR_INTERFACE_IP_ADDRESS = LOCALHOST;
