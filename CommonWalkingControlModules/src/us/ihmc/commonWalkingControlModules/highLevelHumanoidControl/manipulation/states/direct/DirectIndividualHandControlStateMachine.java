@@ -349,8 +349,8 @@ public class DirectIndividualHandControlStateMachine
    {
       ConstantDoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(TASK_SPACE_TRAJECTORY_TIME);
 
-      RigidBody base = fullRobotModel.getElevator();
-      ReferenceFrame referenceFrame = base.getBodyFixedFrame();
+      RigidBody base = fullRobotModel.getChest(); // FIXME: should use: fullRobotModel.getElevator();
+      ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame(); // FIXME: should use: base.getBodyFixedFrame();
 
       String namePrefix = FormattingTools.underscoredToCamelCase(stateEnum.toString(), true);
       StraightLinePositionTrajectoryGenerator positionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator(namePrefix, referenceFrame,
