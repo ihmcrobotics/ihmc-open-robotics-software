@@ -105,11 +105,6 @@ public class VariousWalkingManagers
       // it would be in DRC config parameters, but the would require updating several nested constructors with an additional parameter
       FrameOrientation orientation = new FrameOrientation(pelvisZUpFrame, 0.0, 0.67, 0.0);
       headOrientationControlModule.setOrientationToTrack(new FrameOrientation(orientation));
-      double headKp = 40.0;
-      double headZeta = 1.0;
-      double headKd = GainCalculator.computeDerivativeGain(headKp, headZeta);
-      headOrientationControlModule.setProportionalGains(headKp, headKp, headKp);
-      headOrientationControlModule.setDerivativeGains(headKd, headKd, headKd);
 
       if (desiredHeadOrientationProvider != null)
          desiredHeadOrientationProvider.setHeadOrientationControlModule(headOrientationControlModule);

@@ -29,8 +29,7 @@ public class ChestOrientationManager
       {
          chestOrientationControlModule.compute();
 
-         momentumBasedController.setDesiredSpatialAcceleration(jacobian,
-               chestOrientationControlModule.getTaskspaceConstraintData());
+         momentumBasedController.setDesiredSpatialAcceleration(jacobian, chestOrientationControlModule.getTaskspaceConstraintData());
       }
    }
 
@@ -43,17 +42,19 @@ public class ChestOrientationManager
    {
       InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
       InverseDynamicsJoint[] chestOrientationControlJoints = ScrewTools.findJointsWithNames(allJoints, chestOrientationControlJointNames);
-      
+
       return createJacobian(base, chestOrientationControlJoints);
    }
-   
+
    public GeometricJacobian createJacobian(RigidBody base, InverseDynamicsJoint[] chestOrientationControlJoints)
    {
       GeometricJacobian spineJacobian = new GeometricJacobian(chestOrientationControlJoints, chestOrientationControlModule.getChest().getBodyFixedFrame());
+
       return spineJacobian;
    }
 
-   public void setUp(RigidBody base, GeometricJacobian spineJacobian, double proportionalGainX, double proportionalGainY, double proportionalGainZ, double derivativeGainX, double derivativeGainY, double derivativeGainZ)
+   public void setUp(RigidBody base, GeometricJacobian spineJacobian, double proportionalGainX, double proportionalGainY, double proportionalGainZ,
+                     double derivativeGainX, double derivativeGainY, double derivativeGainZ)
    {
       chestOrientationControlModule.setBase(base);
       chestOrientationControlModule.setJacobian(spineJacobian);

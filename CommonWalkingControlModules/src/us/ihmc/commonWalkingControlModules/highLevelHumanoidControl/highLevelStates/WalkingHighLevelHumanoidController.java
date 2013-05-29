@@ -534,9 +534,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       ChestOrientationManager chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
       chestOrientationManager.turnOff();
-      
+
       HeadOrientationManager headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
-      headOrientationManager.setBaseAndJacobian(baseForHeadOrientationControl, jacobianForHeadOrientationControl);
+      double headKp = 40.0;
+      double headZeta = 1.0;
+      double headKd = GainCalculator.computeDerivativeGain(headKp, headZeta);
+      headOrientationManager.setUp(baseForHeadOrientationControl, jacobianForHeadOrientationControl, headKp, headKp, headKp, headKd, headKd, headKd);
       
       FrameOrientation initialDesiredPelvisOrientation = new FrameOrientation(referenceFrames.getAnkleZUpFrame(getUpcomingSupportLeg()));
       initialDesiredPelvisOrientation.changeFrame(worldFrame);
