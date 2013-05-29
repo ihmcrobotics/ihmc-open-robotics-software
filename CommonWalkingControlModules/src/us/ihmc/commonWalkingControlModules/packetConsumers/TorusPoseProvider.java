@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation;
+package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import us.ihmc.commonWalkingControlModules.packets.TorusPosePacket;
 import us.ihmc.utilities.math.geometry.FramePoint;

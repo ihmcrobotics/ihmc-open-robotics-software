@@ -16,6 +16,9 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.direct.HighLevelDirectControlManipulationState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.fingerToroidManipulation.HighLevelFingerToroidManipulationState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.TorusManipulationProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.TorusPoseProvider;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;

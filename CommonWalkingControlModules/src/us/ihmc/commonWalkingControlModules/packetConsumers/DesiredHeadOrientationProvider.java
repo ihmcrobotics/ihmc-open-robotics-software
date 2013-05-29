@@ -1,5 +1,8 @@
-package us.ihmc.commonWalkingControlModules.controlModules.head;
+package us.ihmc.commonWalkingControlModules.packetConsumers;
 
+import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationControlModule;
+import us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket;
+import us.ihmc.commonWalkingControlModules.packets.LookAtPacket;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
