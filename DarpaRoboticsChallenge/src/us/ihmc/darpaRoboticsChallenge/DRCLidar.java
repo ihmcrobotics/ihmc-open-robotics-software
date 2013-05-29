@@ -55,7 +55,7 @@ public class DRCLidar
             polarLidar.setWorld(graphics3dAdapter);
             if (DRCConfigParameters.OVERRIDE_DRC_LIDAR_CONFIG)
             {
-               PolarLidarScanParameters largeScan = new PolarLidarScanParameters(DRCConfigParameters.LIDAR_POINTS_PER_SWEEP,
+               PolarLidarScanParameters largeScan = new PolarLidarScanParameters(true, DRCConfigParameters.LIDAR_POINTS_PER_SWEEP,
                      DRCConfigParameters.LIDAR_SWEEPS_PER_SCAN, DRCConfigParameters.LIDAR_SWEEP_MAX_YAW, DRCConfigParameters.LIDAR_SWEEP_MIN_YAW,
                      DRCConfigParameters.LIDAR_ANGLE_INCREMENT, DRCConfigParameters.LIDAR_TIME_INCREMENT, DRCConfigParameters.LIDAR_SCAN_TIME,
                      DRCConfigParameters.LIDAR_SCAN_MAX_ROLL, DRCConfigParameters.LIDAR_SCAN_MIN_ROLL, DRCConfigParameters.LIDAR_MIN_DISTANCE, DRCConfigParameters.LIDAR_MAX_DISTANCE);

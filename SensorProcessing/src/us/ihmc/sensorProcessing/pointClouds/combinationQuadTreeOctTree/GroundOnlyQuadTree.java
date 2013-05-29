@@ -26,6 +26,8 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    private boolean octreeChanged = false;
    private Octree octree;
    private LowPassTimingReporter clearingTimer = new LowPassTimingReporter(7);
+   private PointToLineUnProjector unProjector = new PointToLineUnProjector();
+   private boolean updateOctree = true;
 
    public GroundOnlyQuadTree(double minX, double minY, double maxX, double maxY, double resolution, double heightThreshold, int maxNodes)
    {
@@ -63,7 +65,7 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
       return quadTreeChanged || octreeChanged;
    }
    
-   private PointToLineUnProjector unProjector = new PointToLineUnProjector();
+   
    public void addLidarRay(Point3d origin, Point3d end)
    {
       clearingTimer.startTime();
@@ -117,7 +119,7 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
 
    private void puntLeaf(HyperCubeLeaf<GroundAirDescriptor> leafToPunt)
    {
-      if (null==octree)
+      if (null==octree || !updateOctree)
          return;
       double[] location = new double[]{leafToPunt.getLocation()[0],leafToPunt.getLocation()[1],leafToPunt.getValue().getHeight()};
       octree.upRezz(location);
@@ -418,6 +420,11 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    {
       // TODO Auto-generated method stub
       
+   }
+
+   public void updateOctree(boolean updateOctree)
+   {
+      this.updateOctree = updateOctree;
    }
    
    
