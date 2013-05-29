@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -38,8 +39,10 @@ public class HeadOrientationManager
       if (headOrientationControlModule != null)
       {
          headOrientationControlModule.compute();
-         momentumBasedController.setDesiredSpatialAcceleration(headOrientationControlModule.getJacobian(),
-               headOrientationControlModule.getTaskspaceConstraintData());
+         GeometricJacobian jacobian = headOrientationControlModule.getJacobian();
+         TaskspaceConstraintData taskspaceConstraintData = headOrientationControlModule.getTaskspaceConstraintData();
+         momentumBasedController.setDesiredSpatialAcceleration(jacobian,
+               taskspaceConstraintData);
       }
    }
    

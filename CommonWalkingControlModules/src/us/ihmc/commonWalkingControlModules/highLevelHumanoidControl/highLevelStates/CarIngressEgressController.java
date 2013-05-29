@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.pelvisOrientation.Desi
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredFootPoseProvider;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -84,12 +85,13 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
                                                                                requestedRightThighLoadBearing);
 
 
-   public CarIngressEgressController(VariousWalkingProviders variousWalkingProviders, MomentumBasedController momentumBasedController,
-                                     WalkingControllerParameters walkingControllerParameters, SideDependentList<HandControllerInterface> handControllers,
-                                     LidarControllerInterface lidarControllerInterface, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public CarIngressEgressController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
+                                     MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
+                                     SideDependentList<HandControllerInterface> handControllers, LidarControllerInterface lidarControllerInterface,
+                                     DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      super(variousWalkingProviders, null, momentumBasedController, walkingControllerParameters, handControllers, lidarControllerInterface,
-            dynamicGraphicObjectsListRegistry, controllerState);
+      super(variousWalkingProviders, variousWalkingManagers, null, momentumBasedController, walkingControllerParameters, handControllers,
+            lidarControllerInterface, dynamicGraphicObjectsListRegistry, controllerState);
 
       this.pelvisPoseProvider = variousWalkingProviders.getDesiredPelvisPoseProvider();
       this.footPoseProvider = variousWalkingProviders.getDesiredFootPoseProvider();

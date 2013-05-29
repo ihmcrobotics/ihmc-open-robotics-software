@@ -18,17 +18,25 @@ import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredHandPoseProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.TorusManipulationProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.TorusPoseProvider;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.*;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.OrientationTrajectoryData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAngularAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.*;
+import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -85,7 +93,8 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
    
-   public AbstractHighLevelHumanoidControlPattern(VariousWalkingProviders variousWalkingProviders,
+   public AbstractHighLevelHumanoidControlPattern(VariousWalkingProviders variousWalkingProviders, 
+         VariousWalkingManagers variousWalkingManagers,
            RootJointAngularAccelerationControlModule rootJointAccelerationControlModule, 
            MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters, 
            SideDependentList<HandControllerInterface> handControllers, LidarControllerInterface lidarControllerInterface,
@@ -107,6 +116,8 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       graspingHands = momentumBasedController.getContactableCylinderHands();
 
       this.desiredHeadOrientationProvider = variousWalkingProviders.getDesiredHeadOrientationProvider();
+      this.headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
+      
       this.lidarControllerInterface = lidarControllerInterface;
       this.walkingControllerParameters = walkingControllerParameters;
 
@@ -128,9 +139,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       manipulationControlModule = new ManipulationControlModule(yoTime, fullRobotModel, twistCalculator, walkingControllerParameters, handPoseProvider,
               torusPoseProvider, torusManipulationProvider, dynamicGraphicObjectsListRegistry, handControllers, momentumBasedController, registry);
 
-      // Setup head and chest control modules
-      headOrientationManager = new HeadOrientationManager(momentumBasedController, walkingControllerParameters, desiredHeadOrientationProvider, registry,
-              dynamicGraphicObjectsListRegistry);
+     
 
       jointForExtendedNeckPitchRange = setupJointForExtendedNeckPitchRange();
       ChestOrientationControlModule chestOrientationControlModule = setupChestOrientationControlModule();

@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffecto
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredFootPoseProvider;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CoMBasedMomentumRateOfChangeControlModule;
@@ -59,14 +60,14 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
    private final ConstantDoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(1.0);
    private final CoMBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule;
 
-   public MultiContactTestHumanoidController(VariousWalkingProviders variousWalkingProviders,
+   public MultiContactTestHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
            CoMBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
            RootJointAngularAccelerationControlModule rootJointAccelerationControlModule, MomentumBasedController momentumBasedController,
            WalkingControllerParameters walkingControllerParameters, 
            SideDependentList<HandControllerInterface> handControllers, LidarControllerInterface lidarControllerInterface,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      super(variousWalkingProviders, rootJointAccelerationControlModule, momentumBasedController, walkingControllerParameters, handControllers,
+      super(variousWalkingProviders, variousWalkingManagers, rootJointAccelerationControlModule, momentumBasedController, walkingControllerParameters, handControllers,
             lidarControllerInterface, dynamicGraphicObjectsListRegistry, controllerState);
 
       this.footPoseProvider = variousWalkingProviders.getDesiredFootPoseProvider();
