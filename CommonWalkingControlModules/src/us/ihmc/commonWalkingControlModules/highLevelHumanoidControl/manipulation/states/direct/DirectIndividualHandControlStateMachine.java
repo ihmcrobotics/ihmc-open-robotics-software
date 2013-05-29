@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandPoseProvider;
 import us.ihmc.commonWalkingControlModules.sensors.MassMatrixEstimatingToolRigidBody;
 import us.ihmc.commonWalkingControlModules.trajectories.*;
@@ -40,16 +41,19 @@ public class DirectIndividualHandControlStateMachine
    private final StateMachine<DirectIndividualHandControlState> stateMachine;
    private final RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule;
    private final BooleanYoVariable isReadyToBearLoad;
-   final DesiredHandPoseProvider handPoseProvider;
+   private final DesiredHandPoseProvider handPoseProvider;
+   private final DesiredHandLoadBearingProvider handLoadBearingProvider;
 
    private final HandControllerInterface handController;
    private final MassMatrixEstimatingToolRigidBody toolBody;
    private BooleanYoVariable prepareForLocomotion;
 
+   private final RobotSide robotSide;
+
 
    public DirectIndividualHandControlStateMachine(final DoubleYoVariable simulationTime, final RobotSide robotSide, final FullRobotModel fullRobotModel,
            final ManipulationControllerParameters parameters, final TwistCalculator twistCalculator, ReferenceFrame handPositionControlFrame,
-           final DesiredHandPoseProvider handPoseProvider, final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+           final DesiredHandPoseProvider handPoseProvider, final DesiredHandLoadBearingProvider handLoadBearingProvider, final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
            HandControllerInterface handController, double gravity, final double controlDT, MomentumBasedController momentumBasedController,
            GeometricJacobian jacobian, final YoVariableRegistry parentRegistry)
    {
@@ -60,7 +64,8 @@ public class DirectIndividualHandControlStateMachine
 
       String name = endEffector.getName() + getClass().getSimpleName();
       registry = new YoVariableRegistry(name);
-
+      this.robotSide = robotSide;
+      
       prepareForLocomotion = new BooleanYoVariable("prepareForLocomotion", registry);
 
       this.toolBody = new MassMatrixEstimatingToolRigidBody(name + "Tool", handController.getWristJoint(), fullRobotModel, gravity, controlDT, registry,
@@ -73,6 +78,7 @@ public class DirectIndividualHandControlStateMachine
       stateMachine = new StateMachine<DirectIndividualHandControlState>(name, name + "SwitchTime", DirectIndividualHandControlState.class, simulationTime,
                                       registry);
       this.handPoseProvider = handPoseProvider;
+      this.handLoadBearingProvider = handLoadBearingProvider;
 
       handSpatialAccelerationControlModule = new RigidBodySpatialAccelerationControlModule(endEffector.getName(), twistCalculator, endEffector,
               handPositionControlFrame, registry);
@@ -239,14 +245,13 @@ public class DirectIndividualHandControlStateMachine
       {
          public boolean checkCondition()
          {
-            return isReadyToBearLoad.getBooleanValue() && (handController != null) && handController.isClosed();
+            return isReadyToBearLoad.getBooleanValue() && (handController != null) && handController.isAbleToBearLoad();
          }
       };
       StateTransitionAction stateTransitionAction = new StateTransitionAction()
       {
          public void doTransitionAction()
          {
-            isReadyToBearLoad.set(true);
          }
       };
 
@@ -284,14 +289,13 @@ public class DirectIndividualHandControlStateMachine
       {
          public boolean checkCondition()
          {
-            return !isReadyToSwitchToLoadBearing.getBooleanValue();    // ||!handPoseProvider.isInContact(robotSide);
+            return !isReadyToSwitchToLoadBearing.getBooleanValue();
          }
       };
       StateTransitionAction stateTransitionAction = new StateTransitionAction()
       {
          public void doTransitionAction()
          {
-            isReadyToSwitchToLoadBearing.set(false);
          }
       };
 
@@ -406,6 +410,8 @@ public class DirectIndividualHandControlStateMachine
 
    public void doControl()
    {
+      updateHandLoadBearingState();
+            
       stateMachine.checkTransitionConditionsThoroughly();
       prepareForLocomotion.set(false);
       stateMachine.doAction();
@@ -413,6 +419,20 @@ public class DirectIndividualHandControlStateMachine
       for (DynamicGraphicReferenceFrame frame : dynamicGraphicReferenceFrames)
       {
          frame.update();
+      }
+   }
+
+   private void updateHandLoadBearingState()
+   {
+      if (handPoseProvider.checkForNewPose(robotSide) || !handController.isClosed())
+      {
+         isReadyToBearLoad.set(false);
+      }
+      
+      if (handLoadBearingProvider.checkForNewLoadBearingRequest(robotSide) && handController.isClosed())
+      {
+         handController.crush();
+         isReadyToBearLoad.set(true);
       }
    }
 
