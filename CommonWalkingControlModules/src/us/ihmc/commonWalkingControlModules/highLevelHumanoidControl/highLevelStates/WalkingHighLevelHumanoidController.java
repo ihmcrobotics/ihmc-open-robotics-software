@@ -935,7 +935,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (DEBUG)
             System.out.println("WalkingHighLevelHumanoidController: leavingDoubleSupportState");
          desiredICPVelocity.set(0.0, 0.0);
-         manipulationControlModule.goToDefaultState();
+         manipulationControlModule.prepareForLocomotion();
       }
    }
 
