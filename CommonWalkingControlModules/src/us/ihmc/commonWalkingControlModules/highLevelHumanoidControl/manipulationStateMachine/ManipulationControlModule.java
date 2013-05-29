@@ -168,4 +168,9 @@ public class ManipulationControlModule
          dynamicGraphicReferenceFrames.get(i).update();
       }
    }
+
+   public void prepareForLocomotion()
+   {
+      directControlManipulationState.prepareForLocomotion();
+   }
 }
