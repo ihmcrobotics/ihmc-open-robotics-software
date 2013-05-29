@@ -6,7 +6,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.states.direct.IndividualHandControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.states.direct.DirectIndividualHandControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationTrajectoryGenerator;
 import us.ihmc.robotSide.RobotSide;
@@ -45,7 +45,7 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
    private final FrameVector desiredAngularVelocity = new FrameVector(worldFrame);
    private final FrameVector desiredAngularAcceleration = new FrameVector(worldFrame);
 
-   public TaskspaceHandPositionControlState(IndividualHandControlState stateEnum, RobotSide robotSide,
+   public TaskspaceHandPositionControlState(DirectIndividualHandControlState stateEnum, RobotSide robotSide,
            PositionTrajectoryGenerator positionTrajectoryGenerator, OrientationTrajectoryGenerator orientationTrajectoryGenerator,
            RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule, MomentumBasedController momentumBasedController,
            GeometricJacobian jacobian, RigidBody base, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
