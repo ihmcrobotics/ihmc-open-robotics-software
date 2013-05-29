@@ -7,6 +7,7 @@ import java.net.URL;
 
 import javax.xml.bind.JAXBException;
 
+import com.yobotics.simulationconstructionset.Robot;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.SdfLoader.SDFModelVisual;
@@ -48,12 +49,15 @@ public class DRCVehicleSDFLoader extends DRCWorld
    
    public static void main(String argv[]) throws FileNotFoundException, JAXBException, MalformedURLException
    {
-      SimulationConstructionSet scs = new SimulationConstructionSet();
+      Robot robot = new Robot("robot");
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
       
       DRCVehicleSDFLoader drcVehicleSDFLoader = new DRCVehicleSDFLoader();
       scs.addStaticLinkGraphics(drcVehicleSDFLoader.loadDRCVehicle());
-      
-      
+
+      DRCVehicleModelObjectVisualizer drcVehicleModelObjectVisualizer = new DRCVehicleModelObjectVisualizer(scs, false);
+
+
       Thread thread = new Thread(scs);
       thread.start();
    }
