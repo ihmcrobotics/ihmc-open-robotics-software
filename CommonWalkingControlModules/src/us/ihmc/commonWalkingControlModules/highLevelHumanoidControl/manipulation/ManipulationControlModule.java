@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.states.direct.HighLevelDirectControlManipulationState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.states.fingerToroidManipulation.HighLevelFingerToroidManipulationState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.TorusManipulationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.TorusPoseProvider;
@@ -91,13 +92,14 @@ public class ManipulationControlModule
                                   SideDependentList<GeometricJacobian> jacobians)
    {
       final DesiredHandPoseProvider handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
+      final DesiredHandLoadBearingProvider handLoadBearingProvider = variousWalkingProviders.getDesiredHandLoadBearingProvider();
       final TorusPoseProvider torusPoseProvider = variousWalkingProviders.getTorusPoseProvider();
       final TorusManipulationProvider torusManipulationProvider = variousWalkingProviders.getTorusManipulationProvider();
 
-      directControlManipulationState = new HighLevelDirectControlManipulationState(yoTime, fullRobotModel,
-                                                                                  twistCalculator, parameters, handPoseProvider,
-                                                                                  dynamicGraphicObjectsListRegistry, handControllers,
-                                                                                  handPositionControlFrames, jacobians, momentumBasedController, registry);
+      directControlManipulationState = new HighLevelDirectControlManipulationState(yoTime, fullRobotModel, twistCalculator, parameters, handPoseProvider,
+                                                                                  handLoadBearingProvider, dynamicGraphicObjectsListRegistry,
+                                                                                  handControllers, handPositionControlFrames, jacobians,
+                                                                                  momentumBasedController, registry);
 
 //      HighLevelToroidManipulationState toroidManipulationState = new HighLevelToroidManipulationState(yoTime, fullRobotModel, twistCalculator,
 //                                                                    handPositionControlFrames, handControllers, jacobians, torusPoseProvider,
