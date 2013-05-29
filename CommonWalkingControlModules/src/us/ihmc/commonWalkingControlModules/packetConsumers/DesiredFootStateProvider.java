@@ -1,15 +1,15 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation;
+package us.ihmc.commonWalkingControlModules.packetConsumers;
 
-import us.ihmc.commonWalkingControlModules.packets.HandLoadBearingPacket;
+import us.ihmc.commonWalkingControlModules.packets.FootStatePacket;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.net.ObjectConsumer;
 
-public class DesiredHandLoadBearingProvider implements ObjectConsumer<HandLoadBearingPacket>
+public class DesiredFootStateProvider implements ObjectConsumer<FootStatePacket>
 {
    private SideDependentList<Boolean> hasLoadBearingBeenRequested = new SideDependentList<Boolean>();
    
-   public DesiredHandLoadBearingProvider()
+   public DesiredFootStateProvider()
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -25,7 +25,7 @@ public class DesiredHandLoadBearingProvider implements ObjectConsumer<HandLoadBe
       return ret;
    }
 
-   public void consumeObject(HandLoadBearingPacket object)
+   public void consumeObject(FootStatePacket object)
    {
       RobotSide robotSide = object.getRobotSide();
       hasLoadBearingBeenRequested.put(robotSide, true);

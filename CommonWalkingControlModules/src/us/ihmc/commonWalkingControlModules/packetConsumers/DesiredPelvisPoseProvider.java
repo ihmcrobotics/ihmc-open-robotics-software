@@ -1,6 +1,6 @@
-package us.ihmc.commonWalkingControlModules.controlModules.pelvisOrientation;
+package us.ihmc.commonWalkingControlModules.packetConsumers;
 
-import us.ihmc.commonWalkingControlModules.controlModules.head.PelvisOrientationPacket;
+import us.ihmc.commonWalkingControlModules.packets.PelvisOrientationPacket;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectConsumer;
