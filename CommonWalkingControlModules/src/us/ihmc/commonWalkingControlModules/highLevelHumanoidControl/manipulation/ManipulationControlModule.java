@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine;
+package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -13,8 +13,8 @@ import us.ihmc.commonWalkingControlModules.configurations.ManipulationController
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.direct.HighLevelDirectControlManipulationState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.fingerToroidManipulation.HighLevelFingerToroidManipulationState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.direct.HighLevelDirectControlManipulationState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.fingerToroidManipulation.HighLevelFingerToroidManipulationState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;

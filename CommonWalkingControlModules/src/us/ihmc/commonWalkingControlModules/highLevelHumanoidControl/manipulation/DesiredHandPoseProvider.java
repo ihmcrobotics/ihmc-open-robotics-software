@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine;
+package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;

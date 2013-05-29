@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.direct.states;
+package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.direct.states;
 
 /**
  * @author twan

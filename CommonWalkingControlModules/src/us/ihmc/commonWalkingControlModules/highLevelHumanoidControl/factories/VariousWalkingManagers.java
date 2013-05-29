@@ -10,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationCo
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.ManipulationControlModule;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.SideDependentList;

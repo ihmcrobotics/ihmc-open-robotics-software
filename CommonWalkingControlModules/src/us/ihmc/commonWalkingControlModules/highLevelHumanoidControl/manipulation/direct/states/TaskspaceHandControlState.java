@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.direct.states;
+package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.direct.states;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
