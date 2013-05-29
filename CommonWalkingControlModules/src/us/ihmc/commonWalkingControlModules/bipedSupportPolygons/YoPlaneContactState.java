@@ -156,5 +156,6 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       {
          invalidateContactPoint(contactPoint);
       }
+      inContact.set(false);
    }
 }
