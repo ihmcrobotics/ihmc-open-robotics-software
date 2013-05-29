@@ -53,15 +53,17 @@ public class ChestOrientationManager
       return spineJacobian;
    }
 
-   public void setBaseAndJacobian(RigidBody base, GeometricJacobian spineJacobian)
+   public void setUp(RigidBody base, GeometricJacobian spineJacobian, double proportionalGainX, double proportionalGainY, double proportionalGainZ, double derivativeGainX, double derivativeGainY, double derivativeGainZ)
    {
       chestOrientationControlModule.setBase(base);
       chestOrientationControlModule.setJacobian(spineJacobian);
+      chestOrientationControlModule.setProportionalGains(proportionalGainX, proportionalGainY, proportionalGainZ);
+      chestOrientationControlModule.setDerivativeGains(derivativeGainX, derivativeGainY, derivativeGainZ);
    }
 
    public void turnOff()
    {
-      setBaseAndJacobian(null, null);
+      setUp(null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
    }
 
 }
