@@ -6,5 +6,5 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.driving;
 */
 public enum VehicleObject
 {
-   ORIGIN, GAS_PEDAL, BRAKE_PEDAL, STEERING_WHEEL, HAND_BRAKE
+   ORIGIN, GAS_PEDAL, BRAKE_PEDAL, STEERING_WHEEL, HAND_BRAKE, FNR_SWITCH
 }
