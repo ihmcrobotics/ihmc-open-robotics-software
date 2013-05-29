@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine;
+package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation;
 
 import us.ihmc.commonWalkingControlModules.packets.VehiclePosePacket;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -7,7 +7,7 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectConsumer;
 
-public class VehcilePoseProvider implements ObjectConsumer<VehiclePosePacket>
+public class VehiclePoseProvider implements ObjectConsumer<VehiclePosePacket>
 {
    private final Object synchronizationObject = new Object();
    private FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame());
