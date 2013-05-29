@@ -22,7 +22,7 @@ import java.util.Collection;
  * @author twan
  *         Date: 5/9/13
  */
-public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
+public class TaskspaceHandPositionControlState<T extends Enum<T>> extends TaskspaceHandControlState<T>
 {
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule;
@@ -45,7 +45,7 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
    private final FrameVector desiredAngularVelocity = new FrameVector(worldFrame);
    private final FrameVector desiredAngularAcceleration = new FrameVector(worldFrame);
 
-   public TaskspaceHandPositionControlState(DirectIndividualHandControlState stateEnum, RobotSide robotSide,
+   public TaskspaceHandPositionControlState(T stateEnum, RobotSide robotSide,
            PositionTrajectoryGenerator positionTrajectoryGenerator, OrientationTrajectoryGenerator orientationTrajectoryGenerator,
            RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule, MomentumBasedController momentumBasedController,
            GeometricJacobian jacobian, RigidBody base, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)

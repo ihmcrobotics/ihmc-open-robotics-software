@@ -10,7 +10,7 @@ import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 
-public abstract class TaskspaceHandControlState extends State<DirectIndividualHandControlState>
+public abstract class TaskspaceHandControlState<T extends Enum<T>> extends State<T>
 {
    protected final String name;
    protected final YoVariableRegistry registry;
@@ -20,7 +20,7 @@ public abstract class TaskspaceHandControlState extends State<DirectIndividualHa
    protected final MomentumBasedController momentumBasedController;
 
 
-   public TaskspaceHandControlState(DirectIndividualHandControlState stateEnum, MomentumBasedController momentumBasedController, GeometricJacobian jacobian,
+   public TaskspaceHandControlState(T stateEnum, MomentumBasedController momentumBasedController, GeometricJacobian jacobian,
                                     YoVariableRegistry parentRegistry)
    {
       super(stateEnum);
