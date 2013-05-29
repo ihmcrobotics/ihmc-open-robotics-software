@@ -1,6 +1,10 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.driving;
 
 /**
+ *
+ *
+ * throw an exeption if a new command is sent before the previous is finished.
+ *
  * @author twan
  *         Date: 5/28/13
  */
@@ -17,6 +21,8 @@ public interface DrivingInterface
    public abstract void setParkingBrake(boolean engaged);
 
    public abstract void setGear(GearName gearName);
+
+   public abstract boolean isCommandFinished();
 
    enum GearName
    {
