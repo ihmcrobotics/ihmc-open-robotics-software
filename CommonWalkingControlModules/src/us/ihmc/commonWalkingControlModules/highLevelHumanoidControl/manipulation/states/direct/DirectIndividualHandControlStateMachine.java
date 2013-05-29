@@ -30,14 +30,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
-public class IndividualHandControlStateMachine
+public class DirectIndividualHandControlStateMachine
 {
    private static final double TASK_SPACE_TRAJECTORY_TIME = 1.0;
 
    private final YoVariableRegistry registry;
 
    private final Collection<DynamicGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<DynamicGraphicReferenceFrame>();
-   private final StateMachine<IndividualHandControlState> stateMachine;
+   private final StateMachine<DirectIndividualHandControlState> stateMachine;
    private final RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule;
    private final BooleanYoVariable isReadyToBearLoad;
    final DesiredHandPoseProvider handPoseProvider;
@@ -47,11 +47,13 @@ public class IndividualHandControlStateMachine
    private BooleanYoVariable prepareForLocomotion;
 
 
-   public IndividualHandControlStateMachine(final DoubleYoVariable simulationTime, final RobotSide robotSide, final FullRobotModel fullRobotModel,
-           final ManipulationControllerParameters parameters, final TwistCalculator twistCalculator, ReferenceFrame handPositionControlFrame,
-           final DesiredHandPoseProvider handPoseProvider, final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-           HandControllerInterface handController, double gravity, final double controlDT, MomentumBasedController momentumBasedController,
-           GeometricJacobian jacobian, final YoVariableRegistry parentRegistry)
+   public DirectIndividualHandControlStateMachine(final DoubleYoVariable simulationTime, final RobotSide robotSide, final FullRobotModel fullRobotModel,
+                                                  final ManipulationControllerParameters parameters, final TwistCalculator twistCalculator,
+                                                  ReferenceFrame handPositionControlFrame,
+                                                  final DesiredHandPoseProvider handPoseProvider, final DynamicGraphicObjectsListRegistry
+         dynamicGraphicObjectsListRegistry,
+                                                  HandControllerInterface handController, double gravity, final double controlDT, MomentumBasedController momentumBasedController,
+                                                  GeometricJacobian jacobian, final YoVariableRegistry parentRegistry)
    {
       RigidBody endEffector = jacobian.getEndEffector();
       Map<OneDoFJoint, Double> defaultJointPositions = parameters.getDefaultArmJointPositions(fullRobotModel, robotSide);
@@ -70,7 +72,7 @@ public class IndividualHandControlStateMachine
       this.handController = handController;
 
       this.isReadyToBearLoad = new BooleanYoVariable(name + "IsReadyToSwitchToLoadBearing", registry);
-      stateMachine = new StateMachine<IndividualHandControlState>(name, name + "SwitchTime", IndividualHandControlState.class, simulationTime, registry);
+      stateMachine = new StateMachine<DirectIndividualHandControlState>(name, name + "SwitchTime", DirectIndividualHandControlState.class, simulationTime, registry);
       this.handPoseProvider = handPoseProvider;
 
       handSpatialAccelerationControlModule = new RigidBodySpatialAccelerationControlModule(endEffector.getName(), twistCalculator, endEffector,
@@ -84,28 +86,28 @@ public class IndividualHandControlStateMachine
       final ConstantConfigurationProvider currentConfigurationProvider = new ConstantConfigurationProvider(new FramePose(handPositionControlFrame));
       final ChangeableConfigurationProvider desiredConfigurationProvider = new ChangeableConfigurationProvider(handPoseProvider.getDesiredHandPose(robotSide));
 
-      final JointSpaceHandControlControlState defaultState = new JointSpaceHandControlControlState(IndividualHandControlState.DEFAULT, simulationTime,
+      final JointSpaceHandControlControlState defaultState = new JointSpaceHandControlControlState(DirectIndividualHandControlState.DEFAULT, simulationTime,
                                                                 robotSide, jacobian, momentumBasedController, registry, 1.0);
       defaultState.setDesiredJointPositions(defaultJointPositions);
 
-      final TaskspaceHandControlState objectManipulationInWorldState = createTaskspaceWorldHandControlState(IndividualHandControlState.OBJECT_MANIPULATION,
+      final TaskspaceHandControlState objectManipulationInWorldState = createTaskspaceWorldHandControlState(DirectIndividualHandControlState.OBJECT_MANIPULATION,
                                                                           robotSide, fullRobotModel, dynamicGraphicObjectsListRegistry, handController,
                                                                           momentumBasedController, jacobian, parentRegistry, currentConfigurationProvider,
                                                                           desiredConfigurationProvider);
 
       final TaskspaceHandControlState objectManipulationInChestState =
-         createTaskspaceChestHandControlState(IndividualHandControlState.OBJECT_MANIPULATION_CHEST, robotSide, fullRobotModel,
+         createTaskspaceChestHandControlState(DirectIndividualHandControlState.OBJECT_MANIPULATION_CHEST, robotSide, fullRobotModel,
             dynamicGraphicObjectsListRegistry, handController, momentumBasedController, jacobian, registry, currentConfigurationProvider);
 
-      final MoveJointsInRangeState singularityEscapeState = new MoveJointsInRangeState(IndividualHandControlState.SINGULARITY_ESCAPE, minTaskSpacePositions,
+      final MoveJointsInRangeState singularityEscapeState = new MoveJointsInRangeState(DirectIndividualHandControlState.SINGULARITY_ESCAPE, minTaskSpacePositions,
                                                                maxTaskSpacePositions, simulationTime, robotSide, jacobian, momentumBasedController, registry,
                                                                0.3);
 
       final LoadBearingCylindricalHandControlState loadBearingCylindricalState =
-         new LoadBearingCylindricalHandControlState(IndividualHandControlState.LOAD_BEARING_CYLINDRICAL, momentumBasedController, jacobian, parentRegistry,
+         new LoadBearingCylindricalHandControlState(DirectIndividualHandControlState.LOAD_BEARING_CYLINDRICAL, momentumBasedController, jacobian, parentRegistry,
             isReadyToBearLoad, dynamicGraphicObjectsListRegistry, robotSide, parameters);
 
-//    final LoadBearingPlaneHandControlState loadBearingPlaneState = new LoadBearingPlaneHandControlState(IndividualHandControlState.LOAD_BEARING_PLANE,
+//    final LoadBearingPlaneHandControlState loadBearingPlaneState = new LoadBearingPlaneHandControlState(DirectIndividualHandControlState.LOAD_BEARING_PLANE,
 //          robotSide, handPositionControlFrame, handSpatialAccelerationControlModule, momentumBasedController, jacobian, jacobian.getBase(), handController,
 //          isReadyToBearLoad, dynamicGraphicObjectsListRegistry, registry);
 
@@ -150,28 +152,28 @@ public class IndividualHandControlStateMachine
             return prepareForLocomotion.getBooleanValue();
          }
       };
-      StateTransition<IndividualHandControlState> stateTransition = new StateTransition<IndividualHandControlState>(objectManipulationInChestState.getStateEnum(), condition);
+      StateTransition<DirectIndividualHandControlState> stateTransition = new StateTransition<DirectIndividualHandControlState>(objectManipulationInChestState.getStateEnum(), condition);
       objectManipulationInWorldState.addStateTransition(stateTransition);
    }
 
    private void addSingularityEscapeToTaskspaceTransition(TaskspaceHandControlState objectManipulationInWorldState, MoveJointsInRangeState
          singularityEscapeState)
    {
-      StateTransition<IndividualHandControlState> singularityEscapeToTaskspaceTransition =
+      StateTransition<DirectIndividualHandControlState> singularityEscapeToTaskspaceTransition =
          createSingularityEscapeToTaskspaceTransition(objectManipulationInWorldState, singularityEscapeState);
       singularityEscapeState.addStateTransition(singularityEscapeToTaskspaceTransition);
    }
 
    private void addLoadBearingToTaskspaceTransition(RobotSide robotSide, LoadBearingCylindricalHandControlState loadBearingCylindricalState)
    {
-      StateTransition<IndividualHandControlState> loadBearingToTaskSpaceTransition = createLoadBearingToTaskSpaceTransition(robotSide, isReadyToBearLoad);
+      StateTransition<DirectIndividualHandControlState> loadBearingToTaskSpaceTransition = createLoadBearingToTaskSpaceTransition(robotSide, isReadyToBearLoad);
       loadBearingCylindricalState.addStateTransition(loadBearingToTaskSpaceTransition);
    }
 
    private void addTransitionToSingularityEscape(RobotSide robotSide, DesiredHandPoseProvider handPoseProvider, ChangeableConfigurationProvider
-         desiredConfigurationProvider, State<IndividualHandControlState> objectManipulationInWorldState, MoveJointsInRangeState singularityEscapeState)
+         desiredConfigurationProvider, State<DirectIndividualHandControlState> objectManipulationInWorldState, MoveJointsInRangeState singularityEscapeState)
    {
-      StateTransition<IndividualHandControlState> taskspaceToSingularityEscapeTransition = createSingularityEscapeTransition(robotSide, handPoseProvider,
+      StateTransition<DirectIndividualHandControlState> taskspaceToSingularityEscapeTransition = createSingularityEscapeTransition(robotSide, handPoseProvider,
                                                                                               desiredConfigurationProvider, singularityEscapeState);
       objectManipulationInWorldState.addStateTransition(taskspaceToSingularityEscapeTransition);
    }
@@ -195,14 +197,14 @@ public class IndividualHandControlStateMachine
          }
       };
 
-      StateTransition<IndividualHandControlState> taskSpaceToDefaultTransition = new StateTransition<IndividualHandControlState>(defaultState.getStateEnum(),
+      StateTransition<DirectIndividualHandControlState> taskSpaceToDefaultTransition = new StateTransition<DirectIndividualHandControlState>(defaultState.getStateEnum(),
                                                                                     stateTransitionCondition, stateTransitionAction);
       fromState.addStateTransition(taskSpaceToDefaultTransition);
    }
 
    private void addNewHandPoseAvailableTransition(final RobotSide robotSide, final DesiredHandPoseProvider handPoseProvider,
-           final ChangeableConfigurationProvider desiredConfigurationProvider, State<IndividualHandControlState> fromState,
-           State<IndividualHandControlState> toState)
+           final ChangeableConfigurationProvider desiredConfigurationProvider, State<DirectIndividualHandControlState> fromState,
+           State<DirectIndividualHandControlState> toState)
    {
       StateTransitionCondition nextPoseAvailableCondition = new StateTransitionCondition()
       {
@@ -220,14 +222,14 @@ public class IndividualHandControlStateMachine
          }
       };
 
-      final StateTransition<IndividualHandControlState> ret = new StateTransition<IndividualHandControlState>(toState.getStateEnum(),
+      final StateTransition<DirectIndividualHandControlState> ret = new StateTransition<DirectIndividualHandControlState>(toState.getStateEnum(),
                                                                  nextPoseAvailableCondition, setDesiredPoseBasedOnProvider);
 
-      StateTransition<IndividualHandControlState> defaultToTaskspaceCondition = ret;
+      StateTransition<DirectIndividualHandControlState> defaultToTaskspaceCondition = ret;
       fromState.addStateTransition(defaultToTaskspaceCondition);
    }
 
-   private void addTransitionToCylindricalLoadBearing(State<IndividualHandControlState> fromState)
+   private void addTransitionToCylindricalLoadBearing(State<DirectIndividualHandControlState> fromState)
    {
       StateTransitionCondition stateTransitionCondition = new StateTransitionCondition()
       {
@@ -244,12 +246,12 @@ public class IndividualHandControlStateMachine
          }
       };
 
-      StateTransition<IndividualHandControlState> defaultToCylindricalLoadBearingTransition =
-         new StateTransition<IndividualHandControlState>(IndividualHandControlState.LOAD_BEARING_CYLINDRICAL, stateTransitionCondition, stateTransitionAction);
+      StateTransition<DirectIndividualHandControlState> defaultToCylindricalLoadBearingTransition =
+         new StateTransition<DirectIndividualHandControlState>(DirectIndividualHandControlState.LOAD_BEARING_CYLINDRICAL, stateTransitionCondition, stateTransitionAction);
       fromState.addStateTransition(defaultToCylindricalLoadBearingTransition);
    }
 
-   // private StateTransition<IndividualHandControlState> createTaskSpaceToPlaneLoadBearingTransition(final RobotSide robotSide,
+   // private StateTransition<DirectIndividualHandControlState> createTaskSpaceToPlaneLoadBearingTransition(final RobotSide robotSide,
 // final BooleanYoVariable isReadyToSwitchToLoadBearing)
 // {
 //    StateTransitionCondition stateTransitionCondition = new StateTransitionCondition()
@@ -267,10 +269,10 @@ public class IndividualHandControlStateMachine
 //       }
 //    };
 //
-//    return new StateTransition<IndividualHandControlState>(IndividualHandControlState.LOAD_BEARING_PLANE, stateTransitionCondition, stateTransitionAction);
+//    return new StateTransition<DirectIndividualHandControlState>(DirectIndividualHandControlState.LOAD_BEARING_PLANE, stateTransitionCondition, stateTransitionAction);
 // }
 
-   private StateTransition<IndividualHandControlState> createLoadBearingToTaskSpaceTransition(final RobotSide robotSide,
+   private StateTransition<DirectIndividualHandControlState> createLoadBearingToTaskSpaceTransition(final RobotSide robotSide,
            final BooleanYoVariable isReadyToSwitchToLoadBearing)
    {
       StateTransitionCondition stateTransitionCondition = new StateTransitionCondition()
@@ -288,10 +290,10 @@ public class IndividualHandControlStateMachine
          }
       };
 
-      return new StateTransition<IndividualHandControlState>(IndividualHandControlState.OBJECT_MANIPULATION, stateTransitionCondition, stateTransitionAction);
+      return new StateTransition<DirectIndividualHandControlState>(DirectIndividualHandControlState.OBJECT_MANIPULATION, stateTransitionCondition, stateTransitionAction);
    }
 
-   private StateTransition<IndividualHandControlState> createSingularityEscapeToTaskspaceTransition(TaskspaceHandControlState taskSpaceState,
+   private StateTransition<DirectIndividualHandControlState> createSingularityEscapeToTaskspaceTransition(TaskspaceHandControlState taskSpaceState,
            final MoveJointsInRangeState singularityEscapeState)
    {
       StateTransitionCondition condition = new StateTransitionCondition()
@@ -302,10 +304,10 @@ public class IndividualHandControlStateMachine
          }
       };
 
-      return new StateTransition<IndividualHandControlState>(taskSpaceState.getStateEnum(), condition);
+      return new StateTransition<DirectIndividualHandControlState>(taskSpaceState.getStateEnum(), condition);
    }
 
-   private StateTransition<IndividualHandControlState> createSingularityEscapeTransition(final RobotSide robotSide,
+   private StateTransition<DirectIndividualHandControlState> createSingularityEscapeTransition(final RobotSide robotSide,
            final DesiredHandPoseProvider handPoseProvider, final ChangeableConfigurationProvider desiredConfigurationProvider,
            final MoveJointsInRangeState goalState)
    {
@@ -327,13 +329,13 @@ public class IndividualHandControlStateMachine
          }
       };
 
-      final StateTransition<IndividualHandControlState> ret = new StateTransition<IndividualHandControlState>(goalState.getStateEnum(),
+      final StateTransition<DirectIndividualHandControlState> ret = new StateTransition<DirectIndividualHandControlState>(goalState.getStateEnum(),
                                                                  nextPoseAvailableCondition, setDesiredPoseBasedOnProvider);
 
       return ret;
    }
 
-   private TaskspaceHandControlState createTaskspaceWorldHandControlState(IndividualHandControlState stateEnum, RobotSide robotSide,
+   private TaskspaceHandControlState createTaskspaceWorldHandControlState(DirectIndividualHandControlState stateEnum, RobotSide robotSide,
            FullRobotModel fullRobotModel, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, HandControllerInterface handController,
            MomentumBasedController momentumBasedController, GeometricJacobian jacobian, YoVariableRegistry parentRegistry,
            SE3ConfigurationProvider currentConfigurationProvider, SE3ConfigurationProvider desiredConfigurationProvider)
@@ -359,7 +361,7 @@ public class IndividualHandControlStateMachine
       return taskspaceHandControlState;
    }
 
-   private TaskspaceHandControlState createTaskspaceChestHandControlState(IndividualHandControlState stateEnum, RobotSide robotSide,
+   private TaskspaceHandControlState createTaskspaceChestHandControlState(DirectIndividualHandControlState stateEnum, RobotSide robotSide,
            FullRobotModel fullRobotModel, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, HandControllerInterface handController,
            MomentumBasedController momentumBasedController, GeometricJacobian jacobian, YoVariableRegistry parentRegistry,
            SE3ConfigurationProvider currentConfigurationProvider)
@@ -385,11 +387,11 @@ public class IndividualHandControlStateMachine
    {
       if (handPoseProvider.isRelativeToWorld())
       {
-         stateMachine.setCurrentState(IndividualHandControlState.OBJECT_MANIPULATION);    // TODO: why?
+         stateMachine.setCurrentState(DirectIndividualHandControlState.OBJECT_MANIPULATION);    // TODO: why?
       }
       else
       {
-         stateMachine.setCurrentState(IndividualHandControlState.DEFAULT);
+         stateMachine.setCurrentState(DirectIndividualHandControlState.DEFAULT);
       }
    }
 
@@ -405,14 +407,14 @@ public class IndividualHandControlStateMachine
       }
    }
 
-   private void addState(State<IndividualHandControlState> state)
+   private void addState(State<DirectIndividualHandControlState> state)
    {
       stateMachine.addState(state);
    }
 
    public void goToDefaultState()
    {
-      IndividualHandControlState defaultState = IndividualHandControlState.DEFAULT;
+      DirectIndividualHandControlState defaultState = DirectIndividualHandControlState.DEFAULT;
       if (stateMachine.getCurrentStateEnum() != defaultState)
          stateMachine.setCurrentState(defaultState);
    }
