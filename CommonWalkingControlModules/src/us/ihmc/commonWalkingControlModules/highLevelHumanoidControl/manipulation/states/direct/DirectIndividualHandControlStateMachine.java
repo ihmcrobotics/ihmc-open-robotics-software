@@ -424,12 +424,12 @@ public class DirectIndividualHandControlStateMachine
 
    private void updateHandLoadBearingState()
    {
-      if (handPoseProvider.checkForNewPose(robotSide) || !handController.isClosed())
+      if (handPoseProvider.checkForNewPose(robotSide) || !handController.isClosing())
       {
          isReadyToBearLoad.set(false);
       }
       
-      if (handLoadBearingProvider.checkForNewLoadBearingRequest(robotSide) && handController.isClosed())
+      if (handLoadBearingProvider.checkForNewLoadBearingRequest(robotSide) && handController.isClosing())
       {
          handController.crush();
          isReadyToBearLoad.set(true);
