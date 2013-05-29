@@ -68,21 +68,22 @@ public class PointPositionMeasurementModelElement extends AbstractMeasurementMod
    {
       CommonOps.setIdentity(outputMatrixBlocks.get(centerOfMassPositionPort));
    }
-
+   
+   private final FramePoint tempCenterOfMassPosition = new FramePoint();
+   
    private void computeOrientationStateOutputBlock()
    {
       estimationFrame.getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
       tempTransform.get(rotationFromEstimationToWorld);
 
-      // TODO: garbage
-      FramePoint centerOfMassPosition = new FramePoint(centerOfMassPositionPort.getData());
-      centerOfMassPosition.changeFrame(estimationFrame);
+      tempCenterOfMassPosition.setAndChangeFrame(centerOfMassPositionPort.getData());
+      tempCenterOfMassPosition.changeFrame(estimationFrame);
 
       ReferenceFrame referenceFrame = referenceFrameMap.getFrameByName(pointPositionMeasurementInputPort.getData().getBodyFixedReferenceFrameName());
       tempFramePoint.setAndChangeFrame(referenceFrame, pointPositionMeasurementInputPort.getData().getMeasurementPointInBodyFrame());
 
       tempFramePoint.changeFrame(estimationFrame);
-      tempFramePoint.sub(centerOfMassPosition);
+      tempFramePoint.sub(tempCenterOfMassPosition);
       tempFramePoint.scale(-1.0);
 
       MatrixTools.toTildeForm(tempMatrix, tempFramePoint.getPoint());

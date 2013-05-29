@@ -125,6 +125,9 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
       computeBiasBlock();
    }
 
+   private final FrameVector rdTemp = new FrameVector();
+   private final FramePoint rPTemp = new FramePoint();
+   private final FrameVector rPdTemp = new FrameVector();
    public void computeMatrixBlocks()
    {
       FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureInputPort.getData();
@@ -144,37 +147,35 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
       // T_{i}^{p,p}
       twistCalculator.packRelativeTwist(twistOfMeasurementFrameWithRespectToEstimation, estimationLink, measurementLink);
 
-      // r^{p} TODO: garbage
-      FramePoint rP = new FramePoint(centerOfMassPositionPort.getData());
-      rP.changeFrame(estimationFrame);
+      // r^{p} 
+      rPTemp.setAndChangeFrame(centerOfMassPositionPort.getData());
+      rPTemp.changeFrame(estimationFrame);
 
-      FrameVector rd = new FrameVector(centerOfMassVelocityPort.getData());
-      FrameVector rPd = computeRpd(twistCalculator, rP, rd);
+      rdTemp.setAndChangeFrame(centerOfMassVelocityPort.getData());
+      computeRpd(rPdTemp, twistCalculator, rPTemp, rdTemp);
       jacobianAssembler.preCompute(estimatedMeasurement.getVector());
 
       computeCenterOfMassVelocityBlock();
       computeCenterOfMassAccelerationBlock();
-      computeOrientationBlock(twistCalculator, spatialAccelerationCalculator, rotationFromEstimationToWorld, twistOfMeasurementFrameWithRespectToEstimation, rP, rPd);
-      computeAngularVelocityBlock(rotationFromEstimationToWorld, twistOfMeasurementFrameWithRespectToEstimation, rP, rd, rPd);
+      computeOrientationBlock(twistCalculator, spatialAccelerationCalculator, rotationFromEstimationToWorld, twistOfMeasurementFrameWithRespectToEstimation, rPTemp, rPdTemp);
+      computeAngularVelocityBlock(rotationFromEstimationToWorld, twistOfMeasurementFrameWithRespectToEstimation, rPTemp, rdTemp, rPdTemp);
       computeAngularAccelerationBlock(rotationFromEstimationToMeasurement);
    }
 
-   private FrameVector computeRpd(TwistCalculator twistCalculator, FramePoint rP, FrameVector rd)
+   private void computeRpd(FrameVector rPdToPack, TwistCalculator twistCalculator, FramePoint rP, FrameVector rd)
    {
       // T_{p}^{p,w}
       twistCalculator.packTwistOfBody(twistOfEstimationLink, estimationLink);
       twistOfEstimationLink.changeFrame(estimationFrame);
       
       // \dot{r}^{p} = R_{w}^{p} \dot{r} - \tilde{\omega}r^{p} - v_{p}^{p,w}
-      FrameVector rPd = new FrameVector(rd);
-      rPd.changeFrame(estimationFrame);
+      rPdToPack.setAndChangeFrame(rd);
+      rPdToPack.changeFrame(estimationFrame);
       twistOfEstimationLink.packAngularPart(tempFrameVector);
       tempFrameVector.cross(tempFrameVector, rP);
-      rPd.sub(tempFrameVector);
+      rPdToPack.sub(tempFrameVector);
       twistOfEstimationLink.packLinearPart(tempFrameVector);
-      rPd.sub(tempFrameVector);
-
-      return rPd;
+      rPdToPack.sub(tempFrameVector);
    }
 
    private final FrameVector s = new FrameVector();

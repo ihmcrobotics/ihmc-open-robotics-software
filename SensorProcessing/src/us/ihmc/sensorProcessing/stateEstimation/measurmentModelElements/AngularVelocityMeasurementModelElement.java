@@ -82,6 +82,7 @@ public class AngularVelocityMeasurementModelElement extends AbstractMeasurementM
       computeAngularVelocityStateOutputBlock();
    }
 
+   private final FrameVector predictedAngularVelocityMeasurementTemp = new FrameVector();
    public DenseMatrix64F computeResidual()
    {
       Vector3d measuredAngularVelocityVector3d = angularVelocityMeasurementInputPort.getData();
@@ -91,14 +92,13 @@ public class AngularVelocityMeasurementModelElement extends AbstractMeasurementM
       tempTwist.packAngularPart(relativeAngularVelocity);
       relativeAngularVelocity.changeFrame(measurementFrame);
 
-      // TODO: garbage generation
-      FrameVector predictedAngularVelocityMeasurement = new FrameVector(angularVelocityStatePort.getData());
-      predictedAngularVelocityMeasurement.changeFrame(measurementFrame);
-      predictedAngularVelocityMeasurement.add(relativeAngularVelocity);
-      predictedAngularVelocityMeasurement.add(biasStatePort.getData());
+      predictedAngularVelocityMeasurementTemp.setAndChangeFrame(angularVelocityStatePort.getData());
+      predictedAngularVelocityMeasurementTemp.changeFrame(measurementFrame);
+      predictedAngularVelocityMeasurementTemp.add(relativeAngularVelocity);
+      predictedAngularVelocityMeasurementTemp.add(biasStatePort.getData());
 
       angularVelocityResidual.set(measurementFrame, measuredAngularVelocityVector3d);
-      angularVelocityResidual.sub(predictedAngularVelocityMeasurement);
+      angularVelocityResidual.sub(predictedAngularVelocityMeasurementTemp);
       MatrixTools.insertTuple3dIntoEJMLVector(angularVelocityResidual.getVector(), residual, 0);
 
       return residual;

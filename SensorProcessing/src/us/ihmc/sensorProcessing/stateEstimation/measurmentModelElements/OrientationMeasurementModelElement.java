@@ -72,6 +72,7 @@ public class OrientationMeasurementModelElement extends AbstractMeasurementModel
       MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix3d, orientationStateOutputBlock);
    }
 
+   private final FrameOrientation tempMeasuredOrientationFrameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
    public DenseMatrix64F computeResidual()
    {
       orientationStatePort.getData().getQuaternion(estimatedOrientationQuaternion);
@@ -80,10 +81,9 @@ public class OrientationMeasurementModelElement extends AbstractMeasurementModel
       orientationOfMeasurementFrameInEstimationFrame.changeFrame(estimationFrame);
       orientationOfMeasurementFrameInEstimationFrame.getQuaternion(measurmentFrameToEstimationFrame);
       
-      // TODO: garbage generation
       // Compute orientationResidual as a quaternion
-      FrameOrientation measuredOrientationFrameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), orientationMeasurementInputPort.getData());
-      measuredOrientationFrameOrientation.getQuaternion(actualOrientationMeasurement);
+      tempMeasuredOrientationFrameOrientation.set(ReferenceFrame.getWorldFrame(), orientationMeasurementInputPort.getData());
+      tempMeasuredOrientationFrameOrientation.getQuaternion(actualOrientationMeasurement);
      
       // Compute the estimated measurement
       estimatedOrientationMeasurement.set(estimatedOrientationQuaternion);
