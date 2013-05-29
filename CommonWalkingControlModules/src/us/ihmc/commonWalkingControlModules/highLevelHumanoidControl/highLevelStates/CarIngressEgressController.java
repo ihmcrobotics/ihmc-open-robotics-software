@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccele
 import us.ihmc.commonWalkingControlModules.controlModules.desiredChestOrientation.DesiredChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvisOrientation.DesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
@@ -210,12 +211,20 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    private RigidBody baseForChestOrientationControl;
    private GeometricJacobian spineJacobianForChestOrientationControl;
    
+   private RigidBody baseForHeadOrientationControl;
+   private GeometricJacobian jacobianForHeadOrientationControl;
+   
    private void setupManagers(VariousWalkingManagers variousWalkingManagers)
    {
       baseForChestOrientationControl = fullRobotModel.getPelvis();
       ChestOrientationManager chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
       String[] chestOrientationControlJointNames = new String[]{"back_mby"};
       spineJacobianForChestOrientationControl = chestOrientationManager.createJacobian(fullRobotModel, baseForChestOrientationControl, chestOrientationControlJointNames);
+      
+      baseForHeadOrientationControl = fullRobotModel.getPelvis();
+      HeadOrientationManager headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
+      String[] headOrientationControlJointNames = walkingControllerParameters.getDefaultHeadOrientationControlJointNames();
+      jacobianForHeadOrientationControl = headOrientationManager.createJacobian(fullRobotModel, baseForHeadOrientationControl, headOrientationControlJointNames);
    }
    
    public void initialize()
@@ -224,6 +233,9 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
       ChestOrientationManager chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
       chestOrientationManager.setBaseAndJacobian(baseForChestOrientationControl, spineJacobianForChestOrientationControl);
+      
+      HeadOrientationManager headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
+      headOrientationManager.setBaseAndJacobian(baseForHeadOrientationControl, jacobianForHeadOrientationControl);
       
       initializeContacts();
 

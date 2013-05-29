@@ -84,6 +84,10 @@ public abstract class DegenerateOrientationControlModule
       String baseName = FormattingTools.capitalizeFirstLetter(base.getName());
       RigidBodyOrientationControlModule rigidBodyOrientationControlModule = new RigidBodyOrientationControlModule(namePrefix + baseName, base, endEffector,
                                                                                twistCalculator, registry);
+      
+      rigidBodyOrientationControlModule.setProportionalGains(proportionalGainX, proportionalGainY, proportionalGainZ);
+      rigidBodyOrientationControlModule.setDerivativeGains(derivativeGainX, derivativeGainY, derivativeGainZ);
+      
       rigidBodyOrientationControlModules.add(rigidBodyOrientationControlModule);
       
       int index = bases.size()-1;
@@ -136,8 +140,15 @@ public abstract class DegenerateOrientationControlModule
       return taskspaceConstraintData;
    }
 
+   private double proportionalGainX, proportionalGainY, proportionalGainZ;
+   private double derivativeGainX, derivativeGainY, derivativeGainZ;
+   
    public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
    {
+      this.proportionalGainX = proportionalGainX;
+      this.proportionalGainY = proportionalGainY;
+      this.proportionalGainZ = proportionalGainZ;
+      
       for (RigidBodyOrientationControlModule rigidBodyOrientationControlModule : rigidBodyOrientationControlModules)
       {
          rigidBodyOrientationControlModule.setProportionalGains(proportionalGainX, proportionalGainY, proportionalGainZ);
@@ -146,6 +157,10 @@ public abstract class DegenerateOrientationControlModule
 
    public void setDerivativeGains(double derivativeGainX, double derivativeGainY, double derivativeGainZ)
    {
+      this.derivativeGainX = derivativeGainX;
+      this.derivativeGainY = derivativeGainY;
+      this.derivativeGainZ = derivativeGainZ;
+      
       for (RigidBodyOrientationControlModule rigidBodyOrientationControlModule : rigidBodyOrientationControlModules)
       {
          rigidBodyOrientationControlModule.setDerivativeGains(derivativeGainX, derivativeGainY, derivativeGainZ);
