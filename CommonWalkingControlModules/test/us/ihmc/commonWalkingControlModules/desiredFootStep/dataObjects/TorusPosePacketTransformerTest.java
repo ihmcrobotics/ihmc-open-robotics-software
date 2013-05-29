@@ -11,7 +11,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.TorusPosePacket;
+import us.ihmc.commonWalkingControlModules.packets.TorusPosePacket;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;

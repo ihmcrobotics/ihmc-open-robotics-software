@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects;
 
 import org.junit.Test;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.FootPosePacket;
+import us.ihmc.commonWalkingControlModules.packets.FootPosePacket;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;

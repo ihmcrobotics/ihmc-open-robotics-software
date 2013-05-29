@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine;
 
+import us.ihmc.commonWalkingControlModules.packets.FootStatePacket;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.net.ObjectConsumer;
