@@ -519,7 +519,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    
    public void setupManagers(VariousWalkingManagers variousWalkingManagers)
    {
-      baseForHeadOrientationControl = fullRobotModel.getPelvis();
+      baseForHeadOrientationControl = fullRobotModel.getElevator();
       HeadOrientationManager headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
       String[] headOrientationControlJointNames = walkingControllerParameters.getDefaultHeadOrientationControlJointNames(); 
 
