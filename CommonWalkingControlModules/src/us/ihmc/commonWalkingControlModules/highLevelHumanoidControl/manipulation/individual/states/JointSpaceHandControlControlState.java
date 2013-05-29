@@ -17,7 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 
-public class JointSpaceHandControlControlState extends State<DirectIndividualHandControlState>
+public class JointSpaceHandControlControlState<T extends Enum<T>> extends State<T>
 {
    private final DoubleYoVariable yoTime;
    protected final OneDoFJoint[] oneDoFJoints;
@@ -35,7 +35,7 @@ public class JointSpaceHandControlControlState extends State<DirectIndividualHan
 
    private final DoubleYoVariable endMoveTime;
 
-   public JointSpaceHandControlControlState(DirectIndividualHandControlState stateEnum, DoubleYoVariable yoTime, RobotSide robotSide, GeometricJacobian jacobian,
+   public JointSpaceHandControlControlState(T stateEnum, DoubleYoVariable yoTime, RobotSide robotSide, GeometricJacobian jacobian,
                                             MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry, double moveTime)
    {
       super(stateEnum);
