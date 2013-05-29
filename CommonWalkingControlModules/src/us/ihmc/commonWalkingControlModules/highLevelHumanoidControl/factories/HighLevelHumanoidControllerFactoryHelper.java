@@ -43,7 +43,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 
 public class HighLevelHumanoidControllerFactoryHelper
 {
-   private static final boolean USE_NEW_OPTIMIZATION_MOMENTUM_CONTROL_MODULE = false;
+   private static final boolean USE_NEW_OPTIMIZATION_MOMENTUM_CONTROL_MODULE = true;
 
    public static BlindWalkingToDestinationDesiredFootstepCalculator getBlindWalkingToDestinationDesiredFootstepCalculator(
            WalkingControllerParameters walkingControllerParameters, CommonWalkingReferenceFrames referenceFrames,
