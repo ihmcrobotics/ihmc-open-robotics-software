@@ -32,8 +32,12 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHead
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.SimpleDesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredFootPoseProvider;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredFootStateProvider;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredHandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.DesiredHandPoseProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.FootPosePacket;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.FootStatePacket;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.HandLoadBearingPacket;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.HandPosePacket;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.TorusManipulationProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.TorusPosePacket;
@@ -61,24 +65,33 @@ public class VariousWalkingProviders
    private final TorusManipulationProvider torusManipulationProvider;
    private final DesiredChestOrientationProvider desiredChestOrientationProvider;
    private final DesiredFootPoseProvider desiredFootPoseProvider;
+   private final DesiredFootStateProvider desiredFootStateProvider;
+   private DesiredHandLoadBearingProvider desiredHandLoadBearingProvider;
 
    public VariousWalkingProviders(FootstepProvider footstepProvider, HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters,
                                   DesiredHeadOrientationProvider desiredHeadOrientationProvider, DesiredPelvisPoseProvider desiredPelvisPoseProvider,
-                                  DesiredHandPoseProvider desiredHandPoseProvider, TorusPoseProvider torusPoseProvider,
-                                  TorusManipulationProvider torusManipulationProvider, DesiredChestOrientationProvider desiredChestOrientationProvider,
-                                  DesiredFootPoseProvider footPoseProvider)
+                                  DesiredHandPoseProvider desiredHandPoseProvider, DesiredHandLoadBearingProvider desiredHandLoadBearingProvider,
+                                  TorusPoseProvider torusPoseProvider, TorusManipulationProvider torusManipulationProvider,
+                                  DesiredChestOrientationProvider desiredChestOrientationProvider, DesiredFootPoseProvider footPoseProvider,
+                                  DesiredFootStateProvider footStateProvider)
    {
       this.footstepProvider = footstepProvider;
       this.mapFromFootstepsToTrajectoryParameters = mapFromFootstepsToTrajectoryParameters;
 
       this.desiredHeadOrientationProvider = desiredHeadOrientationProvider;
+      
       this.desiredPelvisPoseProvider = desiredPelvisPoseProvider;
-      this.desiredHandPoseProvider = desiredHandPoseProvider;
+      
+      this.desiredChestOrientationProvider = desiredChestOrientationProvider;
+      
       this.torusPoseProvider = torusPoseProvider;
       this.torusManipulationProvider = torusManipulationProvider;
-
-      this.desiredChestOrientationProvider = desiredChestOrientationProvider;
+      
+      this.desiredHandPoseProvider = desiredHandPoseProvider;
+      this.desiredHandLoadBearingProvider = desiredHandLoadBearingProvider;
+      
       this.desiredFootPoseProvider = footPoseProvider;
+      this.desiredFootStateProvider = footStateProvider;
    }
 
    public FootstepProvider getFootstepProvider()
@@ -99,6 +112,11 @@ public class VariousWalkingProviders
    public DesiredHandPoseProvider getDesiredHandPoseProvider()
    {
       return desiredHandPoseProvider;
+   }
+
+   public DesiredHandLoadBearingProvider getDesiredHandLoadBearingProvider()
+   {
+      return desiredHandLoadBearingProvider;
    }
 
    public TorusManipulationProvider getTorusManipulationProvider()
@@ -126,12 +144,18 @@ public class VariousWalkingProviders
       return desiredFootPoseProvider;
    }
 
+   public DesiredFootStateProvider getDesiredFootStateProvider()
+   {
+      return desiredFootStateProvider;
+   }
+
    public static VariousWalkingProviders createUsingObjectCommunicator(ObjectCommunicator objectCommunicator, FullRobotModel fullRobotModel,
            WalkingControllerParameters walkingControllerParameters, CommonWalkingReferenceFrames referenceFrames,
            SideDependentList<ContactablePlaneBody> bipedFeet, ConstantTransferTimeCalculator transferTimeCalculator,
            ConstantSwingTimeCalculator swingTimeCalculator, YoVariableRegistry registry)
    {
       DesiredHandPoseProvider desiredHandPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters);
+      DesiredHandLoadBearingProvider desiredHandLoadBearingProvider = new DesiredHandLoadBearingProvider();
       TorusPoseProvider torusPoseProvider = new TorusPoseProvider();
       TorusManipulationProvider torusManipulationProvider = new TorusManipulationProvider();
 
@@ -150,6 +174,7 @@ public class VariousWalkingProviders
       DesiredPelvisPoseProvider desiredPelvisPoseProvider = new DesiredPelvisPoseProvider();
       DesiredChestOrientationProvider desiredChestOrientationProvider = new DesiredChestOrientationProvider();
       DesiredFootPoseProvider footPoseProvider = new DesiredFootPoseProvider();
+      DesiredFootStateProvider footStateProvider = new DesiredFootStateProvider();
 
 
       objectCommunicator.attachListener(FootstepDataList.class, footstepPathConsumer);
@@ -159,14 +184,16 @@ public class VariousWalkingProviders
       objectCommunicator.attachListener(LookAtPacket.class, desiredHeadOrientationProvider.getLookAtPacketConsumer());
       objectCommunicator.attachListener(PelvisOrientationPacket.class, desiredPelvisPoseProvider);
       objectCommunicator.attachListener(HandPosePacket.class, desiredHandPoseProvider);
+      objectCommunicator.attachListener(HandLoadBearingPacket.class, desiredHandLoadBearingProvider);
       objectCommunicator.attachListener(TorusPosePacket.class, torusPoseProvider);
       objectCommunicator.attachListener(FootPosePacket.class, footPoseProvider);
+      objectCommunicator.attachListener(FootStatePacket.class, footStateProvider);
       objectCommunicator.attachListener(ChestOrientationPacket.class, desiredChestOrientationProvider);
 
 
       VariousWalkingProviders variousProvidersFactory = new VariousWalkingProviders(footstepPathCoordinator, mapFromFootstepsToTrajectoryParameters,
                                                            desiredHeadOrientationProvider, desiredPelvisPoseProvider, desiredHandPoseProvider,
-                                                           torusPoseProvider, torusManipulationProvider, desiredChestOrientationProvider, footPoseProvider);
+                                                           desiredHandLoadBearingProvider, torusPoseProvider, torusManipulationProvider, desiredChestOrientationProvider, footPoseProvider, footStateProvider);
 
       return variousProvidersFactory;
    }
@@ -192,14 +219,16 @@ public class VariousWalkingProviders
       DesiredPelvisPoseProvider desiredPelvisPoseProvider = null;
       DesiredChestOrientationProvider desiredChestOrientationProvider = null;
       DesiredHandPoseProvider desiredHandPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters);
+      DesiredHandLoadBearingProvider desiredHandLoadBearingProvider = new DesiredHandLoadBearingProvider();
       TorusPoseProvider torusPoseProvider = new TorusPoseProvider();
       TorusManipulationProvider torusManipulationProvider = new TorusManipulationProvider();
       DesiredFootPoseProvider desiredFootPoseProvider = new DesiredFootPoseProvider();
+      DesiredFootStateProvider desiredFootStateProvider = new DesiredFootStateProvider();
 
       VariousWalkingProviders variousProvidersFactory = new VariousWalkingProviders(footstepProvider, mapFromFootstepsToTrajectoryParameters,
                                                            desiredHeadOrientationProvider, desiredPelvisPoseProvider, desiredHandPoseProvider,
-                                                           torusPoseProvider, torusManipulationProvider, desiredChestOrientationProvider,
-                                                           desiredFootPoseProvider);
+                                                           desiredHandLoadBearingProvider, torusPoseProvider, torusManipulationProvider, desiredChestOrientationProvider,
+                                                           desiredFootPoseProvider, desiredFootStateProvider);
 
       return variousProvidersFactory;
 
@@ -213,7 +242,6 @@ public class VariousWalkingProviders
                                                                            desiredHeadingControlModule, registry);
       desiredFootstepCalculator.setupParametersForR2InverseDynamics();
       FootstepProvider footstepProvider = new DesiredFootstepCalculatorFootstepProviderWrapper(desiredFootstepCalculator, registry);
-      DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters);
       TorusPoseProvider torusPoseProvider = new TorusPoseProvider();
       TorusManipulationProvider torusManipulationProvider = new TorusManipulationProvider();
       LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
@@ -221,13 +249,15 @@ public class VariousWalkingProviders
       DesiredHeadOrientationProvider desiredHeadOrientationProvider = null;
       DesiredPelvisPoseProvider desiredPelvisPoseProvider = null;
       DesiredHandPoseProvider desiredHandPoseProvider = null;
+      DesiredHandLoadBearingProvider desiredHandLoadBearingProvider = null;
       DesiredChestOrientationProvider desiredChestOrientationProvider = null;
       DesiredFootPoseProvider desiredFootPoseProvider = null;
+      DesiredFootStateProvider desiredFootStateProvider = null;
 
       VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepProvider, mapFromFootstepsToTrajectoryParameters,
                                                            desiredHeadOrientationProvider, desiredPelvisPoseProvider, desiredHandPoseProvider,
-                                                           torusPoseProvider, torusManipulationProvider, desiredChestOrientationProvider,
-                                                           desiredFootPoseProvider);
+                                                           desiredHandLoadBearingProvider, torusPoseProvider, torusManipulationProvider, desiredChestOrientationProvider,
+                                                           desiredFootPoseProvider, desiredFootStateProvider);
 
       return variousWalkingProviders;
    }
@@ -253,15 +283,17 @@ public class VariousWalkingProviders
 
 
       LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
-      DesiredPelvisPoseProvider desiredPelvisPoseProvider = null;
 
+      DesiredPelvisPoseProvider desiredPelvisPoseProvider = null;
+      DesiredHandLoadBearingProvider desiredHandLoadBearingProvider = null;
       DesiredChestOrientationProvider desiredChestOrientationProvider = null;
       DesiredFootPoseProvider desiredFootPoseProvider = null;
+      DesiredFootStateProvider desiredFootStateProvider = null;
 
       VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepProvider, mapFromFootstepsToTrajectoryParameters,
                                                            desiredHeadOrientationProvider, desiredPelvisPoseProvider, desiredHandPoseProvider,
-                                                           torusPoseProvider, torusManipulationProvider, desiredChestOrientationProvider,
-                                                           desiredFootPoseProvider);
+                                                           desiredHandLoadBearingProvider, torusPoseProvider, torusManipulationProvider, desiredChestOrientationProvider,
+                                                           desiredFootPoseProvider, desiredFootStateProvider);
 
       return variousWalkingProviders;
    }
