@@ -58,7 +58,7 @@ public class DRCLidar
                PolarLidarScanParameters largeScan = new PolarLidarScanParameters(DRCConfigParameters.LIDAR_POINTS_PER_SWEEP,
                      DRCConfigParameters.LIDAR_SWEEPS_PER_SCAN, DRCConfigParameters.LIDAR_SWEEP_MAX_YAW, DRCConfigParameters.LIDAR_SWEEP_MIN_YAW,
                      DRCConfigParameters.LIDAR_ANGLE_INCREMENT, DRCConfigParameters.LIDAR_TIME_INCREMENT, DRCConfigParameters.LIDAR_SCAN_TIME,
-                     DRCConfigParameters.LIDAR_SCAN_MAX_ROLL, DRCConfigParameters.LDIAR_SCAN_MIN_ROLL, DRCConfigParameters.LIDAR_MIN_DISTANCE, DRCConfigParameters.LIDAR_MAX_DISTANCE);
+                     DRCConfigParameters.LIDAR_SCAN_MAX_ROLL, DRCConfigParameters.LIDAR_SCAN_MIN_ROLL, DRCConfigParameters.LIDAR_MIN_DISTANCE, DRCConfigParameters.LIDAR_MAX_DISTANCE);
                polarLidar.setScan(largeScan);
                updateParameters.setUpdateRate(DRCConfigParameters.LIDAR_UPDATE_RATE_OVERRIDE);
             }

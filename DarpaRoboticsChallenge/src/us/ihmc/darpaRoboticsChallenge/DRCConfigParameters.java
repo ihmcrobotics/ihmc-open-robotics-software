@@ -87,10 +87,10 @@ public class DRCConfigParameters
    public static final double LIDAR_SPINDLE_VELOCITY = 2.5;
 
    public static final boolean STREAM_POLAR_LIDAR = true;
-   static final int LIDAR_UPDATE_RATE_OVERRIDE = 5;    // 3
-   static final int LIDAR_SWEEPS_PER_SCAN = 1;    // 6;    // 1
-   static final int LIDAR_POINTS_PER_SWEEP = 640;    // 70;    // 640
-   static final boolean OVERRIDE_DRC_LIDAR_CONFIG = true;
+   public static final int LIDAR_UPDATE_RATE_OVERRIDE = 5;
+   public static final int LIDAR_SWEEPS_PER_SCAN = 1;
+   public static final int LIDAR_POINTS_PER_SWEEP = 640; //I assume this number will never be 720 in SCS -Gray.
+   public static final boolean OVERRIDE_DRC_LIDAR_CONFIG = true;
    public static final float LIDAR_MIN_DISTANCE = 0.2f;
    public static final float LIDAR_MAX_DISTANCE = 10.0f;
    public static final float LIDAR_NEAR_SCAN_MAX_DISTANCE = 3.0f;
@@ -98,7 +98,7 @@ public class DRCConfigParameters
    public static final float LIDAR_SWEEP_MAX_YAW = 0.8f;
    public static final float LIDAR_SWEEP_MIN_YAW = -0.8f;
    public static final float LIDAR_SCAN_MAX_ROLL = 0.0f;    // rolls the LIDAR to simulate a faster update rate.
-   public static final float LDIAR_SCAN_MIN_ROLL = 0.0f;
+   public static final float LIDAR_SCAN_MIN_ROLL = 0.0f;
    public static final float LIDAR_ANGLE_INCREMENT = (float) Math.toRadians(0.25);
    public static final float LIDAR_TIME_INCREMENT = 0.0f;
    public static final float LIDAR_SCAN_TIME = 0.0f;
