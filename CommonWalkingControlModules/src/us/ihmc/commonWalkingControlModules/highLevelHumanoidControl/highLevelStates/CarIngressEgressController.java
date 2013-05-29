@@ -7,6 +7,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.desiredChestOrientation.DesiredChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
@@ -35,6 +36,7 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -94,7 +96,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
                                                                               requestedRightHandLoadBearing);
    private SideDependentList<BooleanYoVariable> requestedThighLoadBearing = new SideDependentList<BooleanYoVariable>(requestedLeftThighLoadBearing,
                                                                                requestedRightThighLoadBearing);
-
+   private final VariousWalkingManagers variousWalkingManagers;
 
    public CarIngressEgressController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
                                      MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
@@ -104,6 +106,10 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       super(variousWalkingProviders, variousWalkingManagers, null, momentumBasedController, walkingControllerParameters,
             lidarControllerInterface, dynamicGraphicObjectsListRegistry, controllerState);
 
+      setupManagers(variousWalkingManagers);
+      
+      this.variousWalkingManagers = variousWalkingManagers;
+      
       this.pelvisPoseProvider = variousWalkingProviders.getDesiredPelvisPoseProvider();
       this.footPoseProvider = variousWalkingProviders.getDesiredFootPoseProvider();
 
@@ -201,10 +207,24 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       }
    }
 
+   private RigidBody baseForChestOrientationControl;
+   private GeometricJacobian spineJacobianForChestOrientationControl;
+   
+   private void setupManagers(VariousWalkingManagers variousWalkingManagers)
+   {
+      baseForChestOrientationControl = fullRobotModel.getPelvis();
+      ChestOrientationManager chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
+      String[] chestOrientationControlJointNames = new String[]{"back_mby"};
+      spineJacobianForChestOrientationControl = chestOrientationManager.createJacobian(fullRobotModel, baseForChestOrientationControl, chestOrientationControlJointNames);
+   }
+   
    public void initialize()
    {
       super.initialize();
 
+      ChestOrientationManager chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
+      chestOrientationManager.setBaseAndJacobian(baseForChestOrientationControl, spineJacobianForChestOrientationControl);
+      
       initializeContacts();
 
       FramePose currentPelvisPose = new FramePose(pelvisPositionControlFrame);

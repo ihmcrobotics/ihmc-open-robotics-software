@@ -16,17 +16,25 @@ public class ChestOrientationControlModule extends DegenerateOrientationControlM
    private final YoFrameOrientation desiredOrientation;
    private final YoFrameVector desiredAngularVelocity;
    private final YoFrameVector feedForwardAngularAcceleration;
-
-   public ChestOrientationControlModule(RigidBody pelvis, RigidBody chest, GeometricJacobian jacobian, TwistCalculator twistCalculator,
+   private final RigidBody chest;
+   
+   public ChestOrientationControlModule(RigidBody pelvis, RigidBody chest, TwistCalculator twistCalculator,
            YoVariableRegistry parentRegistry)
    {
-      super("chest", new RigidBody[] {pelvis}, chest, new GeometricJacobian[]{jacobian}, twistCalculator, parentRegistry);
+      super("chest", new RigidBody[] {}, chest, new GeometricJacobian[]{}, twistCalculator, parentRegistry);
+      
+      this.chest = chest;
       ReferenceFrame baseFrame = pelvis.getBodyFixedFrame();
       this.desiredOrientation = new YoFrameOrientation("desiredChestOrientation", baseFrame, registry);
       this.desiredAngularVelocity = new YoFrameVector("desiredChestAngularVelocity", baseFrame, registry);
       this.feedForwardAngularAcceleration = new YoFrameVector("desiredChestAngularAcceleration", baseFrame, registry);
    }
 
+   public RigidBody getChest()
+   {
+      return chest;
+   }
+   
    protected FrameOrientation getDesiredFrameOrientation()
    {
       return desiredOrientation.getFrameOrientationCopy();
