@@ -1,20 +1,22 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.driving.VehicleModelObjects;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.driving.VehicleObject;
+
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 import java.util.EnumMap;
 
-public class DRCVehicleModelObjects
+public class DRCVehicleModelObjects implements VehicleModelObjects
 {
-   private static EnumMap<VehicleObject, Transform3D> objectTransforms;
+   private EnumMap<VehicleObject, Transform3D> objectTransforms;
 
-   static
+   public DRCVehicleModelObjects()
    {
       objectTransforms = new EnumMap<VehicleObject, Transform3D>(VehicleObject.class);
 
@@ -91,14 +93,12 @@ public class DRCVehicleModelObjects
       }
    }
 
-   public static Transform3D getTransform(VehicleObject vehicleObject)
+   public Transform3D getTransform(VehicleObject vehicleObject)
    {
       return new Transform3D(objectTransforms.get(vehicleObject));
    }
 
-
-
-   public static FramePose getFramePose(ReferenceFrame vehicleReferenceFrame, VehicleObject vehicleObject)
+   public FramePose getFramePose(ReferenceFrame vehicleReferenceFrame, VehicleObject vehicleObject)
    {
       FramePose framePose = new FramePose(vehicleReferenceFrame);
       Transform3D transform3D = getTransform(vehicleObject);
@@ -106,11 +106,5 @@ public class DRCVehicleModelObjects
       framePose.set(vehicleReferenceFrame, transform3D);
 
       return framePose;
-   }
-
-
-   public enum VehicleObject
-   {
-      ORIGIN, GAS_PEDAL, BRAKE_PEDAL, STEERING_WHEEL, HAND_BRAKE,
    }
 }
