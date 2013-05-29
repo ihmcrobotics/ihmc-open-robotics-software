@@ -11,7 +11,6 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateTransition
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 import us.ihmc.commonWalkingControlModules.configurations.ManipulationControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.fingerToroidManipulation.HighLevelFingerToroidManipulationState;
@@ -95,20 +94,28 @@ public class ManipulationControlModule
                                                                                   twistCalculator, parameters, handPoseProvider,
                                                                                   dynamicGraphicObjectsListRegistry, handControllers,
                                                                                   handPositionControlFrames, jacobians, momentumBasedController, registry);
-      stateMachine.addState(directControlManipulationState);
 
+//      HighLevelToroidManipulationState toroidManipulationState = new HighLevelToroidManipulationState(yoTime, fullRobotModel, twistCalculator,
+//                                                                    handPositionControlFrames, handControllers, jacobians, torusPoseProvider,
+//                                                                    momentumBasedController, dynamicGraphicObjectsListRegistry, parentRegistry);
 
-      HighLevelToroidManipulationState toroidManipulationState = new HighLevelToroidManipulationState(yoTime, fullRobotModel, twistCalculator,
-                                                                    handPositionControlFrames, handControllers, jacobians, torusPoseProvider,
-                                                                    momentumBasedController, dynamicGraphicObjectsListRegistry, parentRegistry);
-      stateMachine.addState(toroidManipulationState);
 
       final State<ManipulationState> fingerToroidManipulationState = new HighLevelFingerToroidManipulationState(twistCalculator, jacobians,
                                                                         momentumBasedController, fullRobotModel.getElevator(), torusPoseProvider,
                                                                         torusManipulationProvider, handControllers, registry,
                                                                         dynamicGraphicObjectsListRegistry);
-      stateMachine.addState(fingerToroidManipulationState);
 
+      addTransitionFromDirectToToroid(directControlManipulationState, torusPoseProvider, fingerToroidManipulationState);
+      addTransitionFromToroidToDirectBackToDefault(directControlManipulationState, handPoseProvider, fingerToroidManipulationState);
+      addTransitionFromToroidToDirectWhenDone(directControlManipulationState, fingerToroidManipulationState);
+
+      stateMachine.addState(directControlManipulationState);
+      stateMachine.addState(fingerToroidManipulationState);
+   }
+
+   private static void addTransitionFromDirectToToroid(HighLevelDirectControlManipulationState directControlManipulationState,
+                                                       final TorusPoseProvider torusPoseProvider, State<ManipulationState> fingerToroidManipulationState)
+   {
       StateTransitionCondition stateTransitionCondition = new StateTransitionCondition()
       {
          public boolean checkCondition()
@@ -120,7 +127,12 @@ public class ManipulationControlModule
       StateTransition<ManipulationState> toToroidManipulation = new StateTransition<ManipulationState>(fingerToroidManipulationState.getStateEnum(),
                                                                    stateTransitionCondition);
       directControlManipulationState.addStateTransition(toToroidManipulation);
+   }
 
+   private static void addTransitionFromToroidToDirectBackToDefault(HighLevelDirectControlManipulationState directControlManipulationState,
+                                                                    final DesiredHandPoseProvider
+         handPoseProvider, State<ManipulationState> fingerToroidManipulationState)
+   {
       StateTransitionCondition toDirectManipulationCondition = new StateTransitionCondition()
       {
          public boolean checkCondition()
@@ -131,9 +143,13 @@ public class ManipulationControlModule
          }
       };
       StateTransition<ManipulationState> toDirectManipulation = new StateTransition<ManipulationState>(directControlManipulationState.getStateEnum(),
-                                                                   toDirectManipulationCondition);
+            toDirectManipulationCondition);
       fingerToroidManipulationState.addStateTransition(toDirectManipulation);
+   }
 
+   private static void addTransitionFromToroidToDirectWhenDone(HighLevelDirectControlManipulationState directControlManipulationState,
+                                                               final State<ManipulationState> fingerToroidManipulationState)
+   {
       StateTransitionCondition doneWithFingerToroidManipulationCondition = new StateTransitionCondition()
       {
          public boolean checkCondition()
@@ -142,10 +158,8 @@ public class ManipulationControlModule
          }
       };
       StateTransition<ManipulationState> fingerToroidManipulationDoneToDirectManipulation =
-         new StateTransition<ManipulationState>(directControlManipulationState.getStateEnum(), doneWithFingerToroidManipulationCondition);
+            new StateTransition<ManipulationState>(directControlManipulationState.getStateEnum(), doneWithFingerToroidManipulationCondition);
       fingerToroidManipulationState.addStateTransition(fingerToroidManipulationDoneToDirectManipulation);
-
-//    toroidManipulationState.addStateTransition(toToroidManipulation);
    }
 
    public void goToDefaultState()
