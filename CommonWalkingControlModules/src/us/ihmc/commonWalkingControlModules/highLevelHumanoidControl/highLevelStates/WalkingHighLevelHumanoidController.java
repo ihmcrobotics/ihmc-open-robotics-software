@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
@@ -77,6 +78,7 @@ import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.utilities.screwTheory.RigidBody;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -375,13 +377,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    }
 
-   
-   public void setupManagers(VariousWalkingManagers variousWalkingManagers)
-   {
-      
-   }
-
-  
 
    protected void setupFootControlModules(SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators,
            SideDependentList<DoubleTrajectoryGenerator> heelPitchTrajectoryGenerators)
@@ -519,6 +514,18 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
    }
 
+   private RigidBody baseForHeadOrientationControl;
+   private GeometricJacobian jacobianForHeadOrientationControl;
+   
+   public void setupManagers(VariousWalkingManagers variousWalkingManagers)
+   {
+      baseForHeadOrientationControl = fullRobotModel.getPelvis();
+      HeadOrientationManager headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
+      String[] headOrientationControlJointNames = walkingControllerParameters.getDefaultHeadOrientationControlJointNames(); 
+
+      jacobianForHeadOrientationControl = headOrientationManager.createJacobian(fullRobotModel, baseForHeadOrientationControl, headOrientationControlJointNames);
+   }
+  
    public void initialize()
    {
       super.initialize();
@@ -527,6 +534,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       ChestOrientationManager chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
       chestOrientationManager.turnOff();
+      
+      HeadOrientationManager headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
+      headOrientationManager.setBaseAndJacobian(baseForHeadOrientationControl, jacobianForHeadOrientationControl);
       
       FrameOrientation initialDesiredPelvisOrientation = new FrameOrientation(referenceFrames.getAnkleZUpFrame(getUpcomingSupportLeg()));
       initialDesiredPelvisOrientation.changeFrame(worldFrame);

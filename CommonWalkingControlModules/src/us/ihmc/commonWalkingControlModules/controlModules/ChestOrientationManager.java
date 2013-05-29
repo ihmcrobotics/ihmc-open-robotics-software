@@ -23,11 +23,12 @@ public class ChestOrientationManager
 
    public void compute()
    {
-      chestOrientationControlModule.compute();
       GeometricJacobian jacobian = chestOrientationControlModule.getJacobian();
 
       if (jacobian != null)
       {
+         chestOrientationControlModule.compute();
+
          momentumBasedController.setDesiredSpatialAcceleration(jacobian,
                chestOrientationControlModule.getTaskspaceConstraintData());
       }

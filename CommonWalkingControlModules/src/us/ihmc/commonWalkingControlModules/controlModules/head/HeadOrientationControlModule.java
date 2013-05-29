@@ -38,12 +38,16 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
    private final DoubleYoVariable pitchUpperLimit = new DoubleYoVariable("pitchUpperLimit", registry);
    private final DoubleYoVariable rollLimit = new DoubleYoVariable("rollLimit", registry);
    
-   public HeadOrientationControlModule(GeometricJacobian neckJacobian, RigidBody pelvis, RigidBody elevator, TwistCalculator twistCalculator,
+   private final RigidBody head; 
+   
+   public HeadOrientationControlModule(RigidBody pelvis, RigidBody elevator, RigidBody head, TwistCalculator twistCalculator,
          ReferenceFrame headOrientationFrame, ReferenceFrame chestFrame, HeadOrientationControllerParameters headOrientationControllerParameters, YoVariableRegistry parentRegistry,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      super("head", new RigidBody[] {elevator, pelvis}, neckJacobian.getEndEffector(), new GeometricJacobian[]{neckJacobian}, twistCalculator, parentRegistry);
+      super("head", new RigidBody[] {}, head, new GeometricJacobian[]{}, twistCalculator, parentRegistry);
 
+      this.head = head;
+      
       pointTrackingFrame = new OriginAndPointFrame("headPointTrackingFrame", ReferenceFrame.getWorldFrame());
 
       this.chestFrame = chestFrame;
@@ -66,6 +70,11 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
       setHeadOrientationLimits(headOrientationControllerParameters);
    }
 
+   public RigidBody getHead()
+   {
+      return head;
+   }
+   
    @Override
    protected FrameOrientation getDesiredFrameOrientation()
    {
