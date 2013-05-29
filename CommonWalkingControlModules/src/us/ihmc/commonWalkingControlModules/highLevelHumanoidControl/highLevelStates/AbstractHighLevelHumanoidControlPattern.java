@@ -9,12 +9,10 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableCylin
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.head.DesiredHeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
-import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
@@ -59,10 +57,10 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
    protected final TwistCalculator twistCalculator;
 
-   protected final ChestOrientationManager chestOrientationManager;
-
-   private final HeadOrientationManager headOrientationManager;
    private final DesiredHeadOrientationProvider desiredHeadOrientationProvider;
+
+   protected final ChestOrientationManager chestOrientationManager;
+   private final HeadOrientationManager headOrientationManager;
    private final ManipulationControlModule manipulationControlModule;
 
    private final LidarControllerInterface lidarControllerInterface;
@@ -97,7 +95,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
          VariousWalkingManagers variousWalkingManagers,
            RootJointAngularAccelerationControlModule rootJointAccelerationControlModule, 
            MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters, 
-           SideDependentList<HandControllerInterface> handControllers, LidarControllerInterface lidarControllerInterface,
+           LidarControllerInterface lidarControllerInterface,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, HighLevelState controllerState)
    {
       super(controllerState);
@@ -117,6 +115,8 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
       this.desiredHeadOrientationProvider = variousWalkingProviders.getDesiredHeadOrientationProvider();
       this.headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
+      this.chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
+      this.manipulationControlModule = variousWalkingManagers.getManipulationControlModule();
       
       this.lidarControllerInterface = lidarControllerInterface;
       this.walkingControllerParameters = walkingControllerParameters;
@@ -134,18 +134,9 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       DesiredHandPoseProvider handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
       TorusPoseProvider torusPoseProvider = variousWalkingProviders.getTorusPoseProvider();
       TorusManipulationProvider torusManipulationProvider = variousWalkingProviders.getTorusManipulationProvider();
-      
-      // Setup arm+hand manipulation state machines
-      manipulationControlModule = new ManipulationControlModule(yoTime, fullRobotModel, twistCalculator, walkingControllerParameters, handPoseProvider,
-              torusPoseProvider, torusManipulationProvider, dynamicGraphicObjectsListRegistry, handControllers, momentumBasedController, registry);
-
-     
 
       jointForExtendedNeckPitchRange = setupJointForExtendedNeckPitchRange();
-      ChestOrientationControlModule chestOrientationControlModule = setupChestOrientationControlModule();
-      chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestOrientationControlModule);
-
-
+      
       this.rootJointAccelerationControlModule = rootJointAccelerationControlModule;
 
       // Setup joint constraints
@@ -167,27 +158,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       // TODO should find a default setup for the foot control modules
    }
 
-   protected ChestOrientationControlModule setupChestOrientationControlModule()
-   {
-      RigidBody chest = fullRobotModel.getChest();
-      RigidBody pelvis = fullRobotModel.getPelvis();
-
-      String[] chestOrientationControlJointNames = walkingControllerParameters.getDefaultChestOrientationControlJointNames();
-
-      InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
-      InverseDynamicsJoint[] chestOrientationControlJoints = ScrewTools.findJointsWithNames(allJoints, chestOrientationControlJointNames);
-
-      if (chestOrientationControlJoints.length <= 0)
-         return null;
-
-      GeometricJacobian spineJacobian = new GeometricJacobian(chestOrientationControlJoints, chest.getBodyFixedFrame());
-      ChestOrientationControlModule chestOrientationControlModule = new ChestOrientationControlModule(pelvis, fullRobotModel.getChest(), spineJacobian,
-                                                                       twistCalculator, registry);
-      chestOrientationControlModule.setProportionalGains(100.0, 100.0, 100.0);
-      chestOrientationControlModule.setDerivativeGains(20.0, 20.0, 20.0);
-
-      return chestOrientationControlModule;
-   }
+   
 
    protected OneDoFJoint setupJointForExtendedNeckPitchRange()
    {
