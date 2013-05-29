@@ -21,6 +21,11 @@ public class TorusPoseProvider implements ObjectConsumer<TorusPosePacket>
    private double fingerHoleRadius;
    private boolean hasNewPose;
 
+   public TorusPoseProvider()
+   {
+
+   }
+
    public void consumeObject(TorusPosePacket object)
    {
       synchronized (synchronizationObject)
