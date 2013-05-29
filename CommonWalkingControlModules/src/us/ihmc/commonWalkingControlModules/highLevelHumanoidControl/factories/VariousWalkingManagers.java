@@ -78,13 +78,6 @@ public class VariousWalkingManagers
       ChestOrientationControlModule chestOrientationControlModule = new ChestOrientationControlModule(pelvis, chest, 
                                                                        twistCalculator, registry);
 
-      double chestKp = 100.0;
-      double chestZeta = 1.0;
-      double chestKd = GainCalculator.computeDerivativeGain(chestKp, chestZeta);
-
-      chestOrientationControlModule.setProportionalGains(chestKp, chestKp, chestKp);
-      chestOrientationControlModule.setDerivativeGains(chestKd, chestKd, chestKd);
-
       return chestOrientationControlModule;
    }
    

@@ -212,7 +212,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    }
 
    private RigidBody baseForChestOrientationControl;
-   private GeometricJacobian spineJacobianForChestOrientationControl;
+   private GeometricJacobian jacobianForChestOrientationControl;
    
    private RigidBody baseForHeadOrientationControl;
    private GeometricJacobian jacobianForHeadOrientationControl;
@@ -222,7 +222,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       baseForChestOrientationControl = fullRobotModel.getPelvis();
       ChestOrientationManager chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
       String[] chestOrientationControlJointNames = walkingControllerParameters.getDefaultChestOrientationControlJointNames();
-      spineJacobianForChestOrientationControl = chestOrientationManager.createJacobian(fullRobotModel, baseForChestOrientationControl, chestOrientationControlJointNames);
+      jacobianForChestOrientationControl = chestOrientationManager.createJacobian(fullRobotModel, baseForChestOrientationControl, chestOrientationControlJointNames);
       
       baseForHeadOrientationControl = fullRobotModel.getPelvis();
       HeadOrientationManager headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
@@ -235,7 +235,12 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       super.initialize();
 
       ChestOrientationManager chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
-      chestOrientationManager.setBaseAndJacobian(baseForChestOrientationControl, spineJacobianForChestOrientationControl);
+
+      double chestKp = 100.0;
+      double chestZeta = 1.0;
+      double chestKd = GainCalculator.computeDerivativeGain(chestKp, chestZeta);
+
+      chestOrientationManager.setUp(baseForChestOrientationControl, jacobianForChestOrientationControl, chestKp, chestKp, chestKp, chestKd, chestKd, chestKd);
       
       HeadOrientationManager headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
       headOrientationManager.setBaseAndJacobian(baseForHeadOrientationControl, jacobianForHeadOrientationControl);
