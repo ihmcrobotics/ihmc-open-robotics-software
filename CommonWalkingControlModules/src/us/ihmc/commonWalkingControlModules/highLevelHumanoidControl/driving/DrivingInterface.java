@@ -20,6 +20,6 @@ public interface DrivingInterface
 
    enum GearName
    {
-      FORWARD, REVERSE
+      FORWARD, NEUTRAL, REVERSE
    }
 }
