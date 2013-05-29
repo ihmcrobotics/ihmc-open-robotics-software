@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.desiredChestOrientatio
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
@@ -53,6 +54,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    public final static HighLevelState controllerState = HighLevelState.INGRESS_EGRESS;
 
    private final DesiredFootPoseProvider footPoseProvider;
+   private final DesiredFootStateProvider footStateProvider;
 
    private final DesiredPelvisPoseProvider pelvisPoseProvider;
    private final RigidBodySpatialAccelerationControlModule pelvisController;
@@ -113,6 +115,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       
       this.pelvisPoseProvider = variousWalkingProviders.getDesiredPelvisPoseProvider();
       this.footPoseProvider = variousWalkingProviders.getDesiredFootPoseProvider();
+      this.footStateProvider = variousWalkingProviders.getDesiredFootStateProvider();
 
       // Setup the pelvis trajectory generator
       pelvisPositionControlFrame = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint();
@@ -345,16 +348,21 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
          if (footPoseProvider.checkForNewPose(robotSide))
          {
+            setFootInContact(robotSide, false);
+
             FramePose newFootPose = footPoseProvider.getDesiredFootPose(robotSide);
             desiredFootConfigurationProviders.get(foot).set(newFootPose);
             footEndEffectorControlModules.get(foot).resetCurrentState();
-
-            System.out.println(footPoseProvider.getDesiredFootPose(robotSide));
          }
 
          EndEffectorControlModule endEffectorControlModule = footEndEffectorControlModules.get(foot);
          FramePoint2d cop = momentumBasedController.getCoP(foot);
          endEffectorControlModule.setCenterOfPressure(cop);
+         
+         if (footStateProvider.checkForNewLoadBearingRequest(robotSide))
+         {
+            setFootInContact(robotSide, true);
+         }
       }
 
       super.doFootControl();
