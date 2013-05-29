@@ -235,15 +235,16 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       super.initialize();
 
       ChestOrientationManager chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
-
       double chestKp = 100.0;
       double chestZeta = 1.0;
       double chestKd = GainCalculator.computeDerivativeGain(chestKp, chestZeta);
-
       chestOrientationManager.setUp(baseForChestOrientationControl, jacobianForChestOrientationControl, chestKp, chestKp, chestKp, chestKd, chestKd, chestKd);
       
       HeadOrientationManager headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
-      headOrientationManager.setBaseAndJacobian(baseForHeadOrientationControl, jacobianForHeadOrientationControl);
+      double headKp = 40.0;
+      double headZeta = 1.0;
+      double headKd = GainCalculator.computeDerivativeGain(headKp, headZeta);
+      headOrientationManager.setUp(baseForHeadOrientationControl, jacobianForHeadOrientationControl, headKp, headKp, headKp, headKd, headKd, headKd);
       
       initializeContacts();
 

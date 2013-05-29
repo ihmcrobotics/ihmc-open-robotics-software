@@ -56,15 +56,18 @@ public class HeadOrientationManager
       return spineJacobian;
    }
 
-   public void setBaseAndJacobian(RigidBody base, GeometricJacobian spineJacobian)
+   public void setUp(RigidBody base, GeometricJacobian spineJacobian, double proportionalGainX, double proportionalGainY, double proportionalGainZ,
+                     double derivativeGainX, double derivativeGainY, double derivativeGainZ)
    {
       headOrientationControlModule.setBase(base);
       headOrientationControlModule.setJacobian(spineJacobian);
+      headOrientationControlModule.setProportionalGains(proportionalGainX, proportionalGainY, proportionalGainZ);
+      headOrientationControlModule.setDerivativeGains(derivativeGainX, derivativeGainY, derivativeGainZ);
    }
 
    public void turnOff()
    {
-      setBaseAndJacobian(null, null);
+      setUp(null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
    }
 
 }
