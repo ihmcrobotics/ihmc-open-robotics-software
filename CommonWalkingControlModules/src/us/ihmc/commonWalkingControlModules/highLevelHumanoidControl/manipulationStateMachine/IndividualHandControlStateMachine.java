@@ -366,4 +366,10 @@ public class IndividualHandControlStateMachine
       return stateMachine.getCurrentStateEnum() == IndividualHandControlState.TWO_HANDED_TOROID_MANIPULATION;
    }
 
+   public void goToDefaultState()
+   {
+      IndividualHandControlState defaultState = IndividualHandControlState.DEFAULT;
+      if (stateMachine.getCurrentStateEnum() != defaultState)
+         stateMachine.setCurrentState(defaultState);
+   }
 }
