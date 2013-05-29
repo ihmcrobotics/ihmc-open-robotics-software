@@ -13,8 +13,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsCont
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.desiredChestOrientation.DesiredChestOrientationProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHeadOrientationProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.*;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
@@ -23,12 +22,6 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.MultiContactTestHumanoidController;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandLoadBearingProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandPoseProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.TorusManipulationProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.TorusPoseProvider;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CoMBasedMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OldMomentumControlModule;
@@ -173,11 +166,12 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       DesiredPelvisPoseProvider desiredPelvisPoseProvider = null;
       DesiredChestOrientationProvider desiredChestOrientationProvider = null;
       DesiredFootStateProvider desiredFootStateProvider = null;
+      VehiclePoseProvider vehiclePoseProvider = null;
 
       VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepProvider, mapFromFootstepsToTrajectoryParameters,
                                                            desiredHeadOrientationProvider, desiredPelvisPoseProvider, desiredHandPoseProvider,
                                                            desiredHandLoadBearingProvider, torusPoseProvider, torusManipulationProvider, desiredChestOrientationProvider,
-                                                           desiredFootPoseProvider, desiredFootStateProvider);
+                                                           desiredFootPoseProvider, desiredFootStateProvider, vehiclePoseProvider);
 
       VariousWalkingManagers variousWalkingManagers = VariousWalkingManagers.create(momentumBasedController, handControllers, yoTime, variousWalkingProviders,
             walkingControllerParameters, registry, dynamicGraphicObjectsListRegistry);
