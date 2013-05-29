@@ -22,8 +22,6 @@ public interface DrivingInterface
 
    public abstract void setGear(GearName gearName);
 
-   public abstract boolean isCommandFinished();
-
    enum GearName
    {
       FORWARD, NEUTRAL, REVERSE
