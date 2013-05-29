@@ -10,15 +10,18 @@ import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCNetClassList;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCSensorParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.GazeboCameraReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.SCSCameraDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.GazeboLidarDataReceiver;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.RobotBoundingBoxes;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.SCSLidarDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosMainNode;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
+import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.DRCJointConfigurationData;
 import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
 import us.ihmc.utilities.net.KryoObjectClient;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
@@ -35,6 +38,7 @@ public class DRCNetworkProcessor
    
    private final SDFFullRobotModel fullRobotModel;
    private final DRCRobotJointMap jointMap;
+   private final RobotBoundingBoxes robotBoundingBoxes;
 
    /*
     * This will become a stand-alone application in the final competition. Do
@@ -54,7 +58,7 @@ public class DRCNetworkProcessor
       rosMainNode = new RosMainNode(rosCoreURI, "darpaRoboticsChallange/networkProcessor");
 
       new GazeboCameraReceiver(robotPoseBuffer, DRCConfigParameters.VIDEOSETTINGS, rosMainNode, networkingManager, DRCSensorParameters.FIELD_OF_VIEW);
-      new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, fullRobotModel, jointMap, rosCoreURI.toString());
+      new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, fullRobotModel, robotBoundingBoxes, jointMap, rosCoreURI.toString());
       rosMainNode.execute();
       connect();
    }
@@ -63,7 +67,7 @@ public class DRCNetworkProcessor
    {
       this(drcNetworkObjectCommunicator);
       new SCSCameraDataReceiver(robotPoseBuffer, DRCConfigParameters.VIDEOSETTINGS, scsCommunicator, networkingManager);
-      new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, fullRobotModel, jointMap);
+      new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, fullRobotModel, robotBoundingBoxes, jointMap);
       connect();
    }
 
@@ -85,7 +89,11 @@ public class DRCNetworkProcessor
       
       jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_SANDIA_HANDS, false);  
       JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap, true);
+      
       fullRobotModel = loader.createFullRobotModel(jointMap);
+      DRCRobotDataReceiver drcRobotDataReceiver = new DRCRobotDataReceiver(DRCRobotModel.ATLAS_SANDIA_HANDS, fullRobotModel);
+      this.fieldComputerClient.attachListener(DRCJointConfigurationData.class, drcRobotDataReceiver);
+      robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, fullRobotModel);
    }
 
    private void connect()
