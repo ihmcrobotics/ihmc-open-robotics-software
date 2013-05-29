@@ -101,17 +101,17 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
       CommonOps.setIdentity(outputMatrixBlocks.get(centerOfMassVelocityPort));
    }
 
+   private final FramePoint tempCenterOfMassPosition = new FramePoint();
    private void computeAngularVelocityStateOutputBlock(Matrix3d rotationFromPelvisToWorld)
    {
-      // TODO: garbage
-      FramePoint centerOfMassPosition = new FramePoint(centerOfMassPositionPort.getData());
-      centerOfMassPosition.changeFrame(estimationFrame);
+      tempCenterOfMassPosition.setAndChangeFrame(centerOfMassPositionPort.getData());
+      tempCenterOfMassPosition.changeFrame(estimationFrame);
 
       ReferenceFrame referenceFrame = referenceFrameNameMap.getFrameByName(pointVelocityMeasurementInputPort.getData().getBodyFixedReferenceFrameName());
       tempFramePoint.setAndChangeFrame(referenceFrame, pointVelocityMeasurementInputPort.getData().getMeasurementPointInBodyFrame());
       
       tempFramePoint.changeFrame(estimationFrame);
-      tempFramePoint.sub(centerOfMassPosition);
+      tempFramePoint.sub(tempCenterOfMassPosition);
       tempFramePoint.scale(-1.0);
 
       MatrixTools.toTildeForm(tempMatrix, tempFramePoint.getPoint());
@@ -119,15 +119,15 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
       MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, outputMatrixBlocks.get(angularVelocityPort));
    }
 
+   private final FrameVector tempCenterOfMassVelocity = new FrameVector();
    private void computeOrientationStateOutputBlock(Matrix3d rotationFromPelvisToWorld)
    {
       computeVelocityOfStationaryPoint(tempFrameVector);
       tempFrameVector.changeFrame(estimationFrame);
 
-      // TODO: garbage
-      FrameVector centerOfMassVelocity = new FrameVector(centerOfMassVelocityPort.getData());
-      centerOfMassVelocity.changeFrame(estimationFrame);
-      tempFrameVector.sub(centerOfMassVelocity);
+      tempCenterOfMassVelocity.setAndChangeFrame(centerOfMassVelocityPort.getData());
+      tempCenterOfMassVelocity.changeFrame(estimationFrame);
+      tempFrameVector.sub(tempCenterOfMassVelocity);
       tempFrameVector.scale(-1.0);
 
       MatrixTools.toTildeForm(tempMatrix, tempFrameVector.getVector());
