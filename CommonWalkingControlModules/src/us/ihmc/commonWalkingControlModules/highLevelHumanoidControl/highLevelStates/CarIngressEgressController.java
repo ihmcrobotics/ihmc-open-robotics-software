@@ -89,14 +89,15 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
    private BooleanYoVariable requestedLeftFootLoadBearing = new BooleanYoVariable("requestedLeftFootLoadBearing", registry);
    private BooleanYoVariable requestedRightFootLoadBearing = new BooleanYoVariable("requestedRightFootLoadBearing", registry);
-   private BooleanYoVariable requestedLeftHandLoadBearing = new BooleanYoVariable("requestedLeftHandLoadBearing", registry);
-   private BooleanYoVariable requestedRightHandLoadBearing = new BooleanYoVariable("requestedRightHandLoadBearing", registry);
+   //TODO: This controller should not be able to change the hand load bearing state, this is a manipulation control module feature.
+//   private BooleanYoVariable requestedLeftHandLoadBearing = new BooleanYoVariable("requestedLeftHandLoadBearing", registry);
+//   private BooleanYoVariable requestedRightHandLoadBearing = new BooleanYoVariable("requestedRightHandLoadBearing", registry);
    private BooleanYoVariable requestedLeftThighLoadBearing = new BooleanYoVariable("requestedLeftThighLoadBearing", registry);
    private BooleanYoVariable requestedRightThighLoadBearing = new BooleanYoVariable("requestedRightThighLoadBearing", registry);
    private SideDependentList<BooleanYoVariable> requestedFootLoadBearing = new SideDependentList<BooleanYoVariable>(requestedLeftFootLoadBearing,
                                                                               requestedRightFootLoadBearing);
-   private SideDependentList<BooleanYoVariable> requestedHandLoadBearing = new SideDependentList<BooleanYoVariable>(requestedLeftHandLoadBearing,
-                                                                              requestedRightHandLoadBearing);
+//   private SideDependentList<BooleanYoVariable> requestedHandLoadBearing = new SideDependentList<BooleanYoVariable>(requestedLeftHandLoadBearing,
+//                                                                              requestedRightHandLoadBearing);
    private SideDependentList<BooleanYoVariable> requestedThighLoadBearing = new SideDependentList<BooleanYoVariable>(requestedLeftThighLoadBearing,
                                                                                requestedRightThighLoadBearing);
    private final VariousWalkingManagers variousWalkingManagers;
@@ -164,7 +165,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       for (RobotSide robotSide : RobotSide.values)
       {
          requestedFootLoadBearing.get(robotSide).addVariableChangedListener(loadBearingVariableChangedListener);
-         requestedHandLoadBearing.get(robotSide).addVariableChangedListener(loadBearingVariableChangedListener);
+//         requestedHandLoadBearing.get(robotSide).addVariableChangedListener(loadBearingVariableChangedListener);
          requestedThighLoadBearing.get(robotSide).addVariableChangedListener(loadBearingVariableChangedListener);
       }
    }
@@ -348,14 +349,14 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
    protected void doFootControl()
    {
+      updateFootLoadBearingState();
+      
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactablePlaneBody foot = feet.get(robotSide);
 
          if (footPoseProvider.checkForNewPose(robotSide))
          {
-            setFootInContact(robotSide, false);
-
             FramePose newFootPose = footPoseProvider.getDesiredFootPose(robotSide);
             desiredFootConfigurationProviders.get(foot).set(newFootPose);
             footEndEffectorControlModules.get(foot).resetCurrentState();
@@ -364,14 +365,25 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          EndEffectorControlModule endEffectorControlModule = footEndEffectorControlModules.get(foot);
          FramePoint2d cop = momentumBasedController.getCoP(foot);
          endEffectorControlModule.setCenterOfPressure(cop);
-         
-         if (footStateProvider.checkForNewLoadBearingRequest(robotSide))
-         {
-            setFootInContact(robotSide, true);
-         }
       }
 
       super.doFootControl();
+   }
+
+   private void updateFootLoadBearingState()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (footPoseProvider.checkForNewPose(robotSide))
+         {
+            requestedFootLoadBearing.get(robotSide).set(false);
+         }
+         
+         if (footStateProvider.checkForNewLoadBearingRequest(robotSide))
+         {
+            requestedFootLoadBearing.get(robotSide).set(true);
+         }
+      }
    }
 
    public void setFootInContact(RobotSide robotSide, boolean inContact)
@@ -494,8 +506,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
             if (v.equals(requestedFootLoadBearing.get(robotSide)))
                setFootInContact(robotSide, requestedFootLoadBearing.get(robotSide).getBooleanValue());
 
-            if (v.equals(requestedHandLoadBearing.get(robotSide)))
-               setHandInContact(robotSide, requestedHandLoadBearing.get(robotSide).getBooleanValue());
+//            if (v.equals(requestedHandLoadBearing.get(robotSide)))
+//               setHandInContact(robotSide, requestedHandLoadBearing.get(robotSide).getBooleanValue());
 
             if (v.equals(requestedThighLoadBearing.get(robotSide)))
                setThighInContact(robotSide, requestedThighLoadBearing.get(robotSide).getBooleanValue());
