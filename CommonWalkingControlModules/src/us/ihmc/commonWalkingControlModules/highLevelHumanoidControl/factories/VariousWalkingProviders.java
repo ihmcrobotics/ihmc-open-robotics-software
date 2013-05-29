@@ -174,6 +174,7 @@ public class VariousWalkingProviders
       objectCommunicator.attachListener(HandPosePacket.class, desiredHandPoseProvider);
       objectCommunicator.attachListener(HandLoadBearingPacket.class, desiredHandLoadBearingProvider);
       objectCommunicator.attachListener(TorusPosePacket.class, torusPoseProvider);
+      objectCommunicator.attachListener(TorusManipulationPacket.class, torusManipulationProvider);
       objectCommunicator.attachListener(FootPosePacket.class, footPoseProvider);
       objectCommunicator.attachListener(FootStatePacket.class, footStateProvider);
       objectCommunicator.attachListener(ChestOrientationPacket.class, desiredChestOrientationProvider);
