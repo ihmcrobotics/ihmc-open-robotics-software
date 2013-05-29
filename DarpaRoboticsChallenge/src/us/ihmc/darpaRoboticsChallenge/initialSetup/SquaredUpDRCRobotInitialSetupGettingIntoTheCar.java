@@ -25,12 +25,13 @@ public class SquaredUpDRCRobotInitialSetupGettingIntoTheCar implements RobotInit
 {
    private enum Methods
    {
-      FACING_LHAND_GRABBING, FACING_BOTH_HANDS_GRABBING,
-      SIDE_RHAND_GRABBING_FRONT_BAR, SIDE_RHAND_GRABBING_TOP_BAR, SIDE_BOTH_HANDS_GRABBING_TOP_AND_FRONT_BARS, SIDE_BOTH_HANDS_GRABBING_FRONT_BAR_AND_WHEEL,
+      FACING_LHAND_GRABBING, FACING_BOTH_HANDS_GRABBING, FACING_LHAND_GRABBING_RHAND_SEAT,
+      SIDE_RHAND_GRABBING_FRONT_BAR, SIDE_BOTH_HANDS_GRABBING_FRONT_AND_ABOVE_HEAD_BARS, SIDE_RHAND_GRABBING_TOP_BAR, SIDE_BOTH_HANDS_GRABBING_TOP_AND_FRONT_BARS, SIDE_BOTH_HANDS_GRABBING_FRONT_BAR_AND_STEERING_WHEEL,
+      SIDE_LHAND_GRABBING_FRONT_BAR_RHAND_ON_SEAT,
       BACK_BOTH_HANDS_GRABBING
    };
 
-   private static final Methods SELECTED_METHOD = Methods.SIDE_BOTH_HANDS_GRABBING_FRONT_BAR_AND_WHEEL;
+   private static final Methods SELECTED_METHOD = Methods.SIDE_BOTH_HANDS_GRABBING_TOP_AND_FRONT_BARS;
 
    private final double groundZ;
 
@@ -74,6 +75,21 @@ public class SquaredUpDRCRobotInitialSetupGettingIntoTheCar implements RobotInit
          robot.getOneDoFJoint(prefix + "_f2_j2").setQ(0.883);//0.4);
          robot.getOneDoFJoint(prefix + "_f3_j2").setQ(0.837);
       }
+      switch(SELECTED_METHOD)
+      {
+      case FACING_LHAND_GRABBING_RHAND_SEAT:
+      case SIDE_LHAND_GRABBING_FRONT_BAR_RHAND_ON_SEAT:
+         robot.getOneDoFJoint("right_f0_j1").setQ(-1.4672);
+         robot.getOneDoFJoint("right_f1_j1").setQ(-1.4672);
+         robot.getOneDoFJoint("right_f2_j1").setQ(-1.4672);
+         robot.getOneDoFJoint("right_f3_j1").setQ(0.0);
+         
+         robot.getOneDoFJoint("right_f0_j2").setQ(-1.4706);
+         robot.getOneDoFJoint("right_f1_j2").setQ(-1.4706);
+         robot.getOneDoFJoint("right_f2_j2").setQ(-1.4706);
+         robot.getOneDoFJoint("right_f3_j2").setQ(0.0);
+      }
+      
       robot.update();
       
       robot.setPositionInWorld(new Vector3d(pelvisInitialPose.getX(), pelvisInitialPose.getY(), groundZ + pelvisInitialPose.getZ()));
@@ -117,6 +133,29 @@ public class SquaredUpDRCRobotInitialSetupGettingIntoTheCar implements RobotInit
          rightArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, 0.07);
          break;
 
+      case FACING_LHAND_GRABBING_RHAND_SEAT:
+         pelvisPosition.set(-0.016, 0.21, 0.8413);
+         pelvisOrientation.setYawPitchRoll(0, 0, 0);
+         
+         legInitialJointPositions.put(LegJointName.HIP_PITCH, -0.5958);
+         legInitialJointPositions.put(LegJointName.KNEE, 1.0931);
+         legInitialJointPositions.put(LegJointName.ANKLE_PITCH, -0.4973);
+
+         leftArmInitialJointPositions.put(ArmJointName.SHOULDER_PITCH, 0.0957);
+         leftArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, -0.5149);
+         leftArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 1.5455);
+         leftArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, 1.8304);
+         leftArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, -0.58);
+         leftArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, 0.55);
+
+         rightArmInitialJointPositions.put(ArmJointName.SHOULDER_PITCH, -0.7885);
+         rightArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, 1.028);
+         rightArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 1.979);
+         rightArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, -0.872);
+         rightArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, 0.532);
+         rightArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, 0.07);
+         break;
+
       case FACING_BOTH_HANDS_GRABBING:
          pelvisPosition.set(-0.1, 0.2548, 0.7891);
          pelvisOrientation.setYawPitchRoll(0, 0, 0);
@@ -141,7 +180,7 @@ public class SquaredUpDRCRobotInitialSetupGettingIntoTheCar implements RobotInit
          break;
 
       case SIDE_RHAND_GRABBING_FRONT_BAR:
-         pelvisPosition.set(-0.554, 0.0, 0.8326);
+         pelvisPosition.set(0.13, 0.21, 0.8326);
          pelvisOrientation.setYawPitchRoll(Math.PI / 2.0, 0, 0);
          
          legInitialJointPositions.put(LegJointName.HIP_PITCH, -0.6521);
@@ -209,7 +248,7 @@ public class SquaredUpDRCRobotInitialSetupGettingIntoTheCar implements RobotInit
          rightArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, -1.15);
          break;
 
-      case SIDE_BOTH_HANDS_GRABBING_FRONT_BAR_AND_WHEEL:
+      case SIDE_BOTH_HANDS_GRABBING_FRONT_BAR_AND_STEERING_WHEEL:
          pelvisPosition.set(0.1, 0.15, 0.8326);
          pelvisOrientation.setYawPitchRoll(Math.PI / 2.0, 0, 0);
 
@@ -230,6 +269,35 @@ public class SquaredUpDRCRobotInitialSetupGettingIntoTheCar implements RobotInit
          rightArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, -1.6732);
          rightArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, 0.2165);
          rightArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, -1.0039);
+         break;
+
+      case SIDE_BOTH_HANDS_GRABBING_FRONT_AND_ABOVE_HEAD_BARS:
+         pelvisPosition.set(0.1, 0.15, 0.8326);
+         pelvisOrientation.setYawPitchRoll(Math.PI / 2.0, 0, 0);
+
+         legInitialJointPositions.put(LegJointName.HIP_PITCH, -0.6521);
+         legInitialJointPositions.put(LegJointName.KNEE, 1.1418);
+         legInitialJointPositions.put(LegJointName.ANKLE_PITCH, -0.49);
+
+         leftArmInitialJointPositions.put(ArmJointName.SHOULDER_PITCH, -1.7913);
+         leftArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, -1.3976);
+         leftArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 0.9252);
+         leftArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, 0.8858);
+         leftArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, 0.1378);
+         leftArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, 0.4528);
+
+         rightArmInitialJointPositions.put(ArmJointName.SHOULDER_PITCH, -0.9122);
+         rightArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, -0.6542);
+         rightArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 0.5442);
+         rightArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, -1.206);
+         rightArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, -1.1752);
+         rightArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, -0.4202);
+//         rightArmInitialJointPositions.put(ArmJointName.SHOULDER_PITCH, -0.1772);
+//         rightArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, -0.3346);
+//         rightArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 1.2);
+//         rightArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, -2.03);
+//         rightArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, -2.03);
+//         rightArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, -0.69);
          break;
 
       case BACK_BOTH_HANDS_GRABBING:
@@ -253,6 +321,29 @@ public class SquaredUpDRCRobotInitialSetupGettingIntoTheCar implements RobotInit
          rightArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, 0.0);
          rightArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, 0.0);
          rightArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, 0.0);
+         break;
+
+      case SIDE_LHAND_GRABBING_FRONT_BAR_RHAND_ON_SEAT:
+         pelvisPosition.set(0.1, 0.15, 0.8326);
+         pelvisOrientation.setYawPitchRoll(Math.PI / 2.0, 0, 0);
+
+         legInitialJointPositions.put(LegJointName.HIP_PITCH, -0.6521);
+         legInitialJointPositions.put(LegJointName.KNEE, 1.1418);
+         legInitialJointPositions.put(LegJointName.ANKLE_PITCH, -0.49);
+
+         leftArmInitialJointPositions.put(ArmJointName.SHOULDER_PITCH, -1.7913);
+         leftArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, -1.3976);
+         leftArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 0.9252);
+         leftArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, 0.8858);
+         leftArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, 0.1378);
+         leftArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, 0.4528);
+
+         rightArmInitialJointPositions.put(ArmJointName.SHOULDER_PITCH, 0.48);
+         rightArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, 0.76);
+         rightArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 1.29);
+         rightArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, -0.48);
+         rightArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, 0.33);
+         rightArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, -0.34);
          break;
 
       default:
