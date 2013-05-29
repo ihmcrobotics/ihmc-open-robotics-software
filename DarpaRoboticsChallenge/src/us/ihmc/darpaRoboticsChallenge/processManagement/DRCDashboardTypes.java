@@ -19,17 +19,17 @@ public class DRCDashboardTypes
       private static final long serialVersionUID = 7295926598139266176L;
 
       {
-         put(DRCPluginTasks.QUAL1, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./qual1.sh &\n");
-         put(DRCPluginTasks.QUAL2, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./qual2.sh &\n");
-         put(DRCPluginTasks.QUAL3, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./qual3.sh &\n");
-         put(DRCPluginTasks.QUAL4, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./qual4.sh &\n");
-         put(DRCPluginTasks.VRC1, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./task1.sh &\n");
-         put(DRCPluginTasks.VRC2, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./task2.sh &\n");
-         put(DRCPluginTasks.VRC3, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./task3.sh &\n");
-         put(DRCPluginTasks.ATLAS, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./atlas.sh &\n");
-         put(DRCPluginTasks.ATLAS_VEHICLE, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./atlasVehicle.sh &\n");
-         put(DRCPluginTasks.PARKING_LOT, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./parkingLot.sh &\n");
-         put(DRCPluginTasks.HAND, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./hand.sh &\n");
+         put(DRCPluginTasks.QUAL1, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./qual1.sh; cd ~/workspace/GazeboStateCommunicator/util/; ./turnOnAtlasControllerPlugin.sh;\n");
+         put(DRCPluginTasks.QUAL2, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./qual2.sh; cd ~/workspace/GazeboStateCommunicator/util/; ./turnOnAtlasControllerPlugin.sh;\n");
+         put(DRCPluginTasks.QUAL3, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./qual3.sh; cd ~/workspace/GazeboStateCommunicator/util/; ./turnOnAtlasControllerPlugin.sh;\n");
+         put(DRCPluginTasks.QUAL4, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./qual4.sh; cd ~/workspace/GazeboStateCommunicator/util/; ./turnOnAtlasControllerPlugin.sh;\n");
+         put(DRCPluginTasks.VRC1, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./task1.sh; cd ~/workspace/GazeboStateCommunicator/util/; ./turnOnAtlasControllerPlugin.sh;\n");
+         put(DRCPluginTasks.VRC2, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./task2.sh; cd ~/workspace/GazeboStateCommunicator/util/; ./turnOnAtlasControllerPlugin.sh;\n");
+         put(DRCPluginTasks.VRC3, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./task3.sh; cd ~/workspace/GazeboStateCommunicator/util/; ./turnOnAtlasControllerPlugin.sh;\n");
+         put(DRCPluginTasks.ATLAS, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./atlas.sh; cd ~/workspace/GazeboStateCommunicator/util/; ./turnOnAtlasControllerPlugin.sh;\n");
+         put(DRCPluginTasks.ATLAS_VEHICLE, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./atlasVehicle.sh; cd ~/workspace/GazeboStateCommunicator/util/; ./turnOnAtlasControllerPlugin.sh;\n");
+         put(DRCPluginTasks.PARKING_LOT, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./parkingLot.sh; cd ~/workspace/GazeboStateCommunicator/util/; ./turnOnAtlasControllerPlugin.sh;\n");
+         put(DRCPluginTasks.HAND, "clear; cd ~/workspace/GazeboStateCommunicator/launch/; ./hand.sh; cd ~/workspace/GazeboStateCommunicator/util/; ./turnOnAtlasControllerPlugin.sh;\n");
       }
    };
 
