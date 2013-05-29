@@ -25,7 +25,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypoint
  */
 public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
 {
-   private boolean DEBUG = true;
+   private boolean DEBUG = false;
    private FootstepPathCoordinator footstepPathCoordinator;
    private final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
    private final HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters;
