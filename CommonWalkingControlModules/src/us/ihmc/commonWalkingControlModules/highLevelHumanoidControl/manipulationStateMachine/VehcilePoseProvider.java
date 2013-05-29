@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine;
 
+import us.ihmc.commonWalkingControlModules.packets.VehiclePosePacket;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;

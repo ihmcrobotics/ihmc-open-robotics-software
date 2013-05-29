@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine;
 
+import us.ihmc.commonWalkingControlModules.packets.TorusPosePacket;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;

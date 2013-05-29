@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.packets.HandPosePacket;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FramePose;
