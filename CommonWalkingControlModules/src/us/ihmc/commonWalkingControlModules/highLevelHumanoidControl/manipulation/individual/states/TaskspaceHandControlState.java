@@ -1,7 +1,8 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.direct.states;
+package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.states.direct.IndividualHandControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.utilities.FormattingTools;
