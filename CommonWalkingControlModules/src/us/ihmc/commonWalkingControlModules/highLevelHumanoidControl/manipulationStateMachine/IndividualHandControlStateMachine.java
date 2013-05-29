@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ManipulationController
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.states.*;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.direct.states.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.sensors.MassMatrixEstimatingToolRigidBody;
 import us.ihmc.commonWalkingControlModules.trajectories.*;
