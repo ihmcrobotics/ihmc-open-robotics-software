@@ -54,14 +54,9 @@ public class VariousWalkingManagers
                                                                        twistCalculator, registry);
       ChestOrientationManager chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestOrientationControlModule);
 
-
-      DesiredHandPoseProvider handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
-      TorusPoseProvider torusPoseProvider = variousWalkingProviders.getTorusPoseProvider();
-      TorusManipulationProvider torusManipulationProvider = variousWalkingProviders.getTorusManipulationProvider();
-
       // Setup arm+hand manipulation state machines
       ManipulationControlModule manipulationControlModule = new ManipulationControlModule(yoTime, fullRobotModel, twistCalculator, walkingControllerParameters,
-                                                               handPoseProvider, torusPoseProvider, torusManipulationProvider,
+                                                               variousWalkingProviders,
                                                                dynamicGraphicObjectsListRegistry, handControllers, momentumBasedController, registry);
 
 

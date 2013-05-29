@@ -61,7 +61,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
    protected final ChestOrientationManager chestOrientationManager;
    private final HeadOrientationManager headOrientationManager;
-   private final ManipulationControlModule manipulationControlModule;
+   protected final ManipulationControlModule manipulationControlModule;
 
    private final LidarControllerInterface lidarControllerInterface;
 
@@ -241,7 +241,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
    public void initialize()
    {
       callUpdatables();
-      manipulationControlModule.initialize();
+      manipulationControlModule.goToDefaultState();
    }
    
    protected void callUpdatables()

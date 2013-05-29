@@ -243,9 +243,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
      
       super.addUpdatables(icpAndMomentumBasedController.getUpdatables());
 
-     FootstepProvider footstepProvider = variousWalkingProviders.getFootstepProvider();
-     HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = variousWalkingProviders.getMapFromFootstepsToTrajectoryParameters();
-         
+      FootstepProvider footstepProvider = variousWalkingProviders.getFootstepProvider();
+      HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = variousWalkingProviders.getMapFromFootstepsToTrajectoryParameters();
+
       toeOffKneeAngleThreashold.set(52*Math.PI/180);
       useTrailingLegKneeAngleAsToeOffTrigger.set(true);
       
@@ -922,6 +922,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (DEBUG)
             System.out.println("WalkingHighLevelHumanoidController: leavingDoubleSupportState");
          desiredICPVelocity.set(0.0, 0.0);
+         manipulationControlModule.goToDefaultState();
       }
    }
 

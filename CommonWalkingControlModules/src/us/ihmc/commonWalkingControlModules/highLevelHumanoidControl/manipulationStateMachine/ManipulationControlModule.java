@@ -11,7 +11,9 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateTransition
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 import us.ihmc.commonWalkingControlModules.configurations.ManipulationControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.fingerToroidManipulation.HighLevelFingerToroidManipulationState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotSide.RobotSide;
@@ -33,10 +35,10 @@ public class ManipulationControlModule
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final StateMachine<ManipulationState> stateMachine;
    private final List<DynamicGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<DynamicGraphicReferenceFrame>();
+   private HighLevelDirectControlManipulationState directControlManipulationState;
 
    public ManipulationControlModule(DoubleYoVariable yoTime, FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
-                                    ManipulationControllerParameters parameters, final DesiredHandPoseProvider handPoseProvider,
-                                    final TorusPoseProvider torusPoseProvider, final TorusManipulationProvider torusManipulationProvider,
+                                    ManipulationControllerParameters parameters, final VariousWalkingProviders variousWalkingProviders,
                                     DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
                                     SideDependentList<HandControllerInterface> handControllers, MomentumBasedController momentumBasedController,
                                     YoVariableRegistry parentRegistry)
@@ -72,25 +74,29 @@ public class ManipulationControlModule
          }
       }
 
-      setUpStateMachine(yoTime, fullRobotModel, twistCalculator, parameters, handPoseProvider, torusPoseProvider, torusManipulationProvider,
+      setUpStateMachine(yoTime, fullRobotModel, twistCalculator, parameters, variousWalkingProviders,
                         dynamicGraphicObjectsListRegistry, handControllers, momentumBasedController, parentRegistry, handPositionControlFrames, jacobians);
 
       parentRegistry.addChild(registry);
    }
 
    private void setUpStateMachine(DoubleYoVariable yoTime, FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
-                                  ManipulationControllerParameters parameters, final DesiredHandPoseProvider handPoseProvider,
-                                  final TorusPoseProvider torusPoseProvider, final TorusManipulationProvider torusManipulationProvider,
+                                  ManipulationControllerParameters parameters, final VariousWalkingProviders variousWalkingProviders,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
                                   SideDependentList<HandControllerInterface> handControllers, MomentumBasedController momentumBasedController,
                                   YoVariableRegistry parentRegistry, SideDependentList<ReferenceFrame> handPositionControlFrames,
                                   SideDependentList<GeometricJacobian> jacobians)
    {
-      HighLevelDirectControlManipulationState directControlManipulationState = new HighLevelDirectControlManipulationState(yoTime, fullRobotModel,
+      final DesiredHandPoseProvider handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
+      final TorusPoseProvider torusPoseProvider = variousWalkingProviders.getTorusPoseProvider();
+      final TorusManipulationProvider torusManipulationProvider = variousWalkingProviders.getTorusManipulationProvider();
+
+      directControlManipulationState = new HighLevelDirectControlManipulationState(yoTime, fullRobotModel,
                                                                                   twistCalculator, parameters, handPoseProvider,
                                                                                   dynamicGraphicObjectsListRegistry, handControllers,
                                                                                   handPositionControlFrames, jacobians, momentumBasedController, registry);
       stateMachine.addState(directControlManipulationState);
+
 
       HighLevelToroidManipulationState toroidManipulationState = new HighLevelToroidManipulationState(yoTime, fullRobotModel, twistCalculator,
                                                                     handPositionControlFrames, handControllers, jacobians, torusPoseProvider,
@@ -111,9 +117,6 @@ public class ManipulationControlModule
          }
       };
 
-//    StateTransition<ManipulationState> toToroidManipulation = new StateTransition<ManipulationState>(toroidManipulationState.getStateEnum(),
-//          stateTransitionCondition);
-
       StateTransition<ManipulationState> toToroidManipulation = new StateTransition<ManipulationState>(fingerToroidManipulationState.getStateEnum(),
                                                                    stateTransitionCondition);
       directControlManipulationState.addStateTransition(toToroidManipulation);
@@ -124,7 +127,6 @@ public class ManipulationControlModule
          {
             // TODO: hack
             boolean defaultRequested = handPoseProvider.checkForNewPose(RobotSide.LEFT) &&!handPoseProvider.isRelativeToWorld();
-
             return defaultRequested;
          }
       };
@@ -146,9 +148,10 @@ public class ManipulationControlModule
 //    toroidManipulationState.addStateTransition(toToroidManipulation);
    }
 
-   public void initialize()
+   public void goToDefaultState()
    {
       stateMachine.setCurrentState(ManipulationState.DIRECT_CONTROL);
+      directControlManipulationState.goToDefaultState();
    }
 
    public void doControl()
