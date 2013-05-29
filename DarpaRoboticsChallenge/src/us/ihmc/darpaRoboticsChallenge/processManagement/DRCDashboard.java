@@ -440,7 +440,7 @@ public class DRCDashboard
       c.gridy = 0;
       c.weighty = 1.0;
       c.weightx = 1.0;
-      c.ipadx = 140;
+      c.ipadx = 150;
       c.ipady = 388;
       mainContentPanel.add(processPanel, c);
 
@@ -489,7 +489,8 @@ public class DRCDashboard
                || machine.equals(LocalCloudMachines.CLOUDMONSTER_JR)))
          {
             DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("<html><body style=\"font-weight:bold;font-size:1.1em;\">"
-                                                 + WordUtils.capitalize(machine.toString().toLowerCase().replace("_", " ")) + "</body></html>");
+                                                 + WordUtils.capitalize(machine.toString().toLowerCase().replace("_", " ")) + ": "
+                                                 + DRCLocalCloudConfig.getIPAddress(machine) + "</body></html>");
             rootNode.add(new DefaultMutableTreeNode("ROS/GZ Sim:"));
             rootNode.add(new DefaultMutableTreeNode("SCS Controller?"));
 
@@ -504,7 +505,7 @@ public class DRCDashboard
 
             c2.gridx = 0;
             c2.gridwidth = 5;
-            c2.ipadx = 50;
+            c2.ipadx = 30;
             c2.weightx = 0.3;
             view.add(tree, c2);
 
