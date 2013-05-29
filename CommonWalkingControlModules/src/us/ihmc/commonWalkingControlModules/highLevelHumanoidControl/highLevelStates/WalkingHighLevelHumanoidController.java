@@ -25,6 +25,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepUtils;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsDataVisualizer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.UpcomingFootstepList;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPBasedMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.InstantaneousCapturePointPlanner;
@@ -222,7 +223,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    
 
-   public WalkingHighLevelHumanoidController(VariousWalkingProviders variousWalkingProviders,
+   public WalkingHighLevelHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          SideDependentList<FootSwitchInterface> footSwitches,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, 
            CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator,
@@ -237,7 +238,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
            ICPAndMomentumBasedController icpAndMomentumBasedController, MomentumBasedController momentumBasedController, WalkingStatusReporter walkingStatusReporter)
    {
       
-      super(variousWalkingProviders, rootJointAngularAccelerationControlModule, momentumBasedController, walkingControllerParameters, 
+      super(variousWalkingProviders, variousWalkingManagers,rootJointAngularAccelerationControlModule, momentumBasedController, walkingControllerParameters, 
             handControllers, lidarControllerInterface, dynamicGraphicObjectsListRegistry, controllerState);
      
       super.addUpdatables(icpAndMomentumBasedController.getUpdatables());
