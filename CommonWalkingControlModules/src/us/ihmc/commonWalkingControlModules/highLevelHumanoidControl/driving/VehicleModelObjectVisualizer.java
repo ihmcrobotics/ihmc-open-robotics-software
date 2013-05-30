@@ -15,7 +15,8 @@ public class VehicleModelObjectVisualizer
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DynamicGraphicObjectsList dynamicGraphicObjectsList;
-   private final double scale = 0.1;
+   private final double objectFrameScale = 0.1;
+   private final double vehicleFrameScale = 1.0;
 
    public VehicleModelObjectVisualizer(ReferenceFrame vehicleFrame, VehicleModelObjects vehicleModelObjects,
                                 DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
@@ -30,10 +31,13 @@ public class VehicleModelObjectVisualizer
          String objectName = FormattingTools.underscoredToCamelCase(vehicleObject.toString(), false);
          ReferenceFrame objectFrame = new PoseReferenceFrame(objectName, framePose);
          objectFrame.update();
-         DynamicGraphicReferenceFrame dynamicGraphicReferenceFrame = new DynamicGraphicReferenceFrame(objectFrame, registry, scale);
 
+         DynamicGraphicReferenceFrame dynamicGraphicReferenceFrame = new DynamicGraphicReferenceFrame(objectFrame, registry, objectFrameScale);
          dynamicGraphicObjectsList.add(dynamicGraphicReferenceFrame);
       }
+
+      DynamicGraphicReferenceFrame vehicleFrameViz = new DynamicGraphicReferenceFrame(vehicleFrame, registry, vehicleFrameScale);
+      dynamicGraphicObjectsList.add(vehicleFrameViz);
 
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
       parentRegistry.addChild(registry);
