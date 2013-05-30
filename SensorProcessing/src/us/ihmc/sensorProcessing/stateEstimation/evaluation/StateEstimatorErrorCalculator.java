@@ -17,6 +17,7 @@ import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameQuaternion;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class StateEstimatorErrorCalculator
@@ -33,10 +34,12 @@ public class StateEstimatorErrorCalculator
    private final DoubleYoVariable comZPositionError = new DoubleYoVariable("comZPositionError", registry);
    private final DoubleYoVariable comVelocityError = new DoubleYoVariable("comVelocityError", registry);
 
+   private final YoFrameQuaternion perfectOrientation = new YoFrameQuaternion("perfectOrientation", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector perfectAngularVelocity = new YoFrameVector("perfectAngularVelocity", ReferenceFrame.getWorldFrame(), registry);
+
    private final YoFramePoint perfectCoMPosition = new YoFramePoint("perfectCoMPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector perfectCoMVelocity = new YoFrameVector("perfectCoMVelocity", ReferenceFrame.getWorldFrame(), registry);
    
-   private final YoFrameVector perfectAngularVelocity = new YoFrameVector("perfectAngularVelocity", ReferenceFrame.getWorldFrame(), registry);
 
    public StateEstimatorErrorCalculator(Robot robot, Joint estimationJoint, StateEstimator orientationEstimator,
            YoVariableRegistry parentRegistry)
@@ -53,11 +56,21 @@ public class StateEstimatorErrorCalculator
    private void computeOrientationError()
    {
       orientationEstimator.getEstimatedOrientation(estimatedOrientation);
+     
       Quat4d estimatedOrientationQuat4d = new Quat4d();
       estimatedOrientation.getQuaternion(estimatedOrientationQuat4d);
 
-      Quat4d orientationErrorQuat4d = new Quat4d();
-      estimationJoint.getRotationToWorld(orientationErrorQuat4d);
+      Quat4d actualOrientation = new Quat4d();
+      estimationJoint.getRotationToWorld(actualOrientation);
+      
+      if (((estimatedOrientationQuat4d.getW() > 0.0) && (actualOrientation.getW() < 0.0)) || ((estimatedOrientationQuat4d.getW() < 0.0) && (actualOrientation.getW() > 0.0)))
+      {
+         actualOrientation.negate();
+      }
+      
+      perfectOrientation.set(actualOrientation);
+      
+      Quat4d orientationErrorQuat4d = new Quat4d(actualOrientation);
       orientationErrorQuat4d.mulInverse(estimatedOrientationQuat4d);
 
       AxisAngle4d orientationErrorAxisAngle = new AxisAngle4d();
