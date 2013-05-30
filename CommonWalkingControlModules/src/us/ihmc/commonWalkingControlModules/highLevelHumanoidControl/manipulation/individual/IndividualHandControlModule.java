@@ -139,15 +139,17 @@ public class IndividualHandControlModule
 
       addTransitionToCylindricalLoadBearing(requestedState, handController, jointSpaceHandControlState, loadBearingCylindricalState, simulationTime);
       addTransitionToCylindricalLoadBearing(requestedState, handController, taskspaceHandPositionControlState, loadBearingCylindricalState, simulationTime);
+      addTransitionToLeaveCylindricalLoadBearing(requestedState, handController, loadBearingCylindricalState, taskspaceHandPositionControlState);
 
-      addTransitionToPlaneLoadBearing(requestedState, handController, jointSpaceHandControlState, loadBearingPlaneState);
-      addTransitionToPlaneLoadBearing(requestedState, handController, taskspaceHandPositionControlState, loadBearingPlaneState);
+      // TODO I just don't trust the plane load bearing state for now (Sylvain)
+//      addTransitionToPlaneLoadBearing(requestedState, handController, jointSpaceHandControlState, loadBearingPlaneState);
+//      addTransitionToPlaneLoadBearing(requestedState, handController, taskspaceHandPositionControlState, loadBearingPlaneState);
 
       stateMachine.addState(jointSpaceHandControlState);
       stateMachine.addState(taskspaceHandPositionControlState);
       stateMachine.addState(objectManipulationState);
       stateMachine.addState(loadBearingCylindricalState);
-      stateMachine.addState(loadBearingPlaneState);
+//      stateMachine.addState(loadBearingPlaneState);
 
       parentRegistry.addChild(registry);
    }
@@ -166,18 +168,12 @@ public class IndividualHandControlModule
             return transitionRequested && (ableToBearLoad || initializedClosedHack);
          }
       };
-      StateTransitionAction stateTransitionAction = new StateTransitionAction()
-      {
-         public void doTransitionAction()
-         {
-         }
-      };
       StateTransition<IndividualHandControlState> stateTransition = new StateTransition<IndividualHandControlState>(toState.getStateEnum(),
-                                                                       stateTransitionCondition, stateTransitionAction);
+                                                                       stateTransitionCondition);
       fromState.addStateTransition(stateTransition);
    }
 
-   private static void addTransitionToPlaneLoadBearing(final EnumYoVariable<IndividualHandControlState> requestedState,
+   private static void addTransitionToLeaveCylindricalLoadBearing(final EnumYoVariable<IndividualHandControlState> requestedState,
            final HandControllerInterface handControllerInterface, State<IndividualHandControlState> fromState, final State<IndividualHandControlState> toState)
    {
       StateTransitionCondition stateTransitionCondition = new StateTransitionCondition()
@@ -185,21 +181,39 @@ public class IndividualHandControlModule
          public boolean checkCondition()
          {
             boolean transitionRequested = requestedState.getEnumValue() == toState.getStateEnum();
-            boolean ableToBearLoad = handControllerInterface.isOpen();
-
-            return transitionRequested && ableToBearLoad;
+            
+            return transitionRequested;
          }
       };
       StateTransitionAction stateTransitionAction = new StateTransitionAction()
       {
          public void doTransitionAction()
          {
+            handControllerInterface.openFingers();
          }
       };
       StateTransition<IndividualHandControlState> stateTransition = new StateTransition<IndividualHandControlState>(toState.getStateEnum(),
                                                                        stateTransitionCondition, stateTransitionAction);
       fromState.addStateTransition(stateTransition);
    }
+
+//   private static void addTransitionToPlaneLoadBearing(final EnumYoVariable<IndividualHandControlState> requestedState,
+//           final HandControllerInterface handControllerInterface, State<IndividualHandControlState> fromState, final State<IndividualHandControlState> toState)
+//   {
+//      StateTransitionCondition stateTransitionCondition = new StateTransitionCondition()
+//      {
+//         public boolean checkCondition()
+//         {
+//            boolean transitionRequested = requestedState.getEnumValue() == toState.getStateEnum();
+//            boolean ableToBearLoad = handControllerInterface.isOpen();
+//
+//            return transitionRequested && ableToBearLoad;
+//         }
+//      };
+//      StateTransition<IndividualHandControlState> stateTransition = new StateTransition<IndividualHandControlState>(toState.getStateEnum(),
+//                                                                       stateTransitionCondition);
+//      fromState.addStateTransition(stateTransition);
+//   }
 
    public void doControl()
    {
@@ -232,12 +246,17 @@ public class IndividualHandControlModule
                                  getOrCreateOrientationInterpolationTrajectoryGenerator(trajectoryFrame), frameToControlPoseOf, base, holdObject);
    }
 
+   public boolean isInCylindricalLoadBearingState()
+   {
+      return stateMachine.isCurrentState(IndividualHandControlState.LOAD_BEARING_CYLINDRICAL);
+   }
+   
    public void requestLoadBearing()
    {
       if (handController.isClosed() || handController.isClosing())
          requestedState.set(loadBearingCylindricalState.getStateEnum());
-      else
-         requestedState.set(loadBearingPlaneState.getStateEnum());
+//      else
+//         requestedState.set(loadBearingPlaneState.getStateEnum());
    }
 
    public void executeJointSpaceTrajectory(Map<OneDoFJoint, ? extends DoubleTrajectoryGenerator> trajectories)
