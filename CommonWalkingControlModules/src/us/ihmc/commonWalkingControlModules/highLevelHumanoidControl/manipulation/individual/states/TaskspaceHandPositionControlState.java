@@ -6,7 +6,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.states.direct.IndividualHandControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.IndividualHandControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationTrajectoryGenerator;
 import us.ihmc.robotSide.RobotSide;

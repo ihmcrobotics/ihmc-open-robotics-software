@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.states.direct;
+package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
