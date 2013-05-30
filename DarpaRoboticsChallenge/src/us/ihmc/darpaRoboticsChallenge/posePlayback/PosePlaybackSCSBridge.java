@@ -38,10 +38,10 @@ public class PosePlaybackSCSBridge
       DRCRobotMidiSliderBoardPositionManipulation sliderBoard = new DRCRobotMidiSliderBoardPositionManipulation(scs);
 
       CaptureSnapshotListener captureSnapshotListener = new CaptureSnapshotListener(sdfRobot);
-      sliderBoard.addIsCaptureSnapshotListener(captureSnapshotListener);
+      sliderBoard.addCaptureSnapshotListener(captureSnapshotListener);
       
       SaveSequenceListener saveSequenceListener = new SaveSequenceListener();
-      sliderBoard.addIsSaveSequenceRequestedListener(saveSequenceListener);
+      sliderBoard.addSaveSequenceRequestedListener(saveSequenceListener);
 
       scs.startOnAThread();
 
