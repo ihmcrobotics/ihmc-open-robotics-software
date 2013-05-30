@@ -2,9 +2,12 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
 import java.util.ArrayList;
 
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.packets.DesiredHighLevelStateProvider;
 
+import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
@@ -17,11 +20,21 @@ public class HighLevelHumanoidControllerManager implements RobotController
    private final StateMachine<HighLevelState> stateMachine;
    private final HighLevelState initialBehavior;
    private final MomentumBasedController momentumBasedController;
+   
+   private final EnumYoVariable<HighLevelState> requestedHighLeveState;
+   private final DesiredHighLevelStateProvider highLevelStateProvider;
 
-
-   public HighLevelHumanoidControllerManager(StateMachine<HighLevelState> stateMachine, HighLevelState initialBehavior, ArrayList<YoVariableRegistry> highLevelStateRegistries, MomentumBasedController momentumBasedController)
+   public HighLevelHumanoidControllerManager(StateMachine<HighLevelState> stateMachine, HighLevelState initialBehavior,
+         ArrayList<YoVariableRegistry> highLevelStateRegistries, MomentumBasedController momentumBasedController,
+         EnumYoVariable<HighLevelState> requestedHighLeveState, VariousWalkingProviders variousWalkingProviders)
    {
       this.stateMachine = stateMachine;
+      
+      this.requestedHighLeveState = requestedHighLeveState;
+      if (variousWalkingProviders != null)
+         this.highLevelStateProvider = variousWalkingProviders.getDesiredHighLevelStateProvider();
+      else
+         this.highLevelStateProvider = null;
 
       for (YoVariableRegistry highLevelStateRegistry : highLevelStateRegistries)
       {
@@ -39,6 +52,11 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    public void doControl()
    {
+      if (highLevelStateProvider != null && highLevelStateProvider.checkForNewState())
+      {
+         requestedHighLeveState.set(highLevelStateProvider.getDesiredHighLevelState());
+      }
+      
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
    }
