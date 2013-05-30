@@ -1,5 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.ros;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -80,6 +81,14 @@ public class ROSAtlasJointMap
       jointNames[r_arm_mwx] = "r_arm_mwx";
    }
    
+   public static LinkedHashMap<String, Integer> nameToIndexMap = new LinkedHashMap<String, Integer>();
+   static
+   {
+      for (int i=0; i<jointNames.length; i++)
+      {
+         nameToIndexMap.put(jointNames[i], i);
+      }
+   }
    
    public static OneDoFJoint[] getJointMap(Map<String, OneDoFJoint> jointsByName)
    {

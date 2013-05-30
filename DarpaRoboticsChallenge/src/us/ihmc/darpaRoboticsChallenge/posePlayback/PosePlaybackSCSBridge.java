@@ -2,10 +2,12 @@ package us.ihmc.darpaRoboticsChallenge.posePlayback;
 
 import java.io.IOException;
 
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.environment.VRCTask;
+import us.ihmc.darpaRoboticsChallenge.environment.VRCTaskName;
 import us.ihmc.utilities.ThreadTools;
 
-import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
@@ -22,15 +24,25 @@ public class PosePlaybackSCSBridge
       posePlaybackSender.connect();
       posePlaybackSender.waitUntilConnected();
       
+      VRCTask vrcTask = new VRCTask(VRCTaskName.ONLY_VEHICLE);
+      SDFRobot sdfRobot = vrcTask.getRobot();
       
-      SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("PlaybackPoseSCSBridgeRobot"));
+      SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot);
       scs.addYoVariableRegistry(registry);
+      
+      
+      DRCRobotMidiSliderBoardPositionManipulation sliderBoard = new DRCRobotMidiSliderBoardPositionManipulation(scs);
+
+      
       scs.startOnAThread();
       
       while(true)
       {
-         posePlaybackSender.writeData();
+         PosePlaybackRobotPose pose = new PosePlaybackRobotPose(sdfRobot);
+         posePlaybackController.setPlaybackPose(pose);
 
+         posePlaybackSender.writeData();
+         
          ThreadTools.sleep(1000);
       }
    }
