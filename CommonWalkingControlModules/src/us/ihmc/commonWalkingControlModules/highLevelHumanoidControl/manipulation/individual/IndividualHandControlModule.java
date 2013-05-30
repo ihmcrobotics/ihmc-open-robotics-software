@@ -351,4 +351,9 @@ public class IndividualHandControlModule
 
       return ret;
    }
+
+   public boolean isControllingInTaskSpace()
+   {
+      return stateMachine.getCurrentState() instanceof TaskspaceHandControlState;
+   }
 }
