@@ -25,8 +25,6 @@ import java.util.Collection;
 public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
 {
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule;
-
    private final SpatialAccelerationVector handAcceleration = new SpatialAccelerationVector();
 
    // viz stuff:
@@ -45,14 +43,14 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
    private PositionTrajectoryGenerator positionTrajectoryGenerator;
    private OrientationTrajectoryGenerator orientationTrajectoryGenerator;
    private RigidBody base;
+   private RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule;
 
    public TaskspaceHandPositionControlState(IndividualHandControlState stateEnum, RobotSide robotSide,
-           RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule, MomentumBasedController momentumBasedController,
-           GeometricJacobian jacobian, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+                                            MomentumBasedController momentumBasedController,
+                                            GeometricJacobian jacobian, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
       super(stateEnum, momentumBasedController, jacobian, parentRegistry);
 
-      this.handSpatialAccelerationControlModule = handSpatialAccelerationControlModule;
       desiredPositionFrame = new PoseReferenceFrame(robotSide.getCamelCaseNameForStartOfExpression() + name + "DesiredFrame", worldFrame);
 
       if (dynamicGraphicObjectsListRegistry != null)
@@ -118,10 +116,11 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
       }
    }
 
-   public void setTrajectory(PositionTrajectoryGenerator positionTrajectoryGenerator, OrientationTrajectoryGenerator orientationTrajectoryGenerator, RigidBody base)
+   public void setTrajectory(PositionTrajectoryGenerator positionTrajectoryGenerator, OrientationTrajectoryGenerator orientationTrajectoryGenerator, RigidBody base, RigidBodySpatialAccelerationControlModule rigidBodySpatialAccelerationControlModule)
    {
       this.positionTrajectoryGenerator = positionTrajectoryGenerator;
       this.orientationTrajectoryGenerator = orientationTrajectoryGenerator;
       this.base = base;
+      this.handSpatialAccelerationControlModule = rigidBodySpatialAccelerationControlModule;
    }
 }
