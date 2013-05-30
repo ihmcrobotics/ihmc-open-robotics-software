@@ -86,12 +86,12 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       isLeftLegControlRequested.set(true);
    }
    
-   public void addIsCaptureSnapshotListener(VariableChangedListener variableChangedListener)
+   public void addCaptureSnapshotListener(VariableChangedListener variableChangedListener)
    {
       isCaptureSnapshotRequested.addVariableChangedListener(variableChangedListener);
    }
    
-   public void addIsSaveSequenceRequestedListener(VariableChangedListener variableChangedListener)
+   public void addSaveSequenceRequestedListener(VariableChangedListener variableChangedListener)
    {
       isSaveSequenceRequested.addVariableChangedListener(variableChangedListener);
    }
