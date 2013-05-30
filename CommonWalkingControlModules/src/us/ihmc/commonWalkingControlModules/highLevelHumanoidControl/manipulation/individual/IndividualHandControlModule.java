@@ -86,8 +86,11 @@ public class IndividualHandControlModule
          quinticPolynomialTrajectoryGenerators.put(oneDoFJoint, trajectoryGenerator);
       }
 
-      this.toolBody = new MassMatrixEstimatingToolRigidBody(name + "Tool", handController.getWristJoint(), fullRobotModel, gravity, controlDT, registry,
-              dynamicGraphicObjectsListRegistry);
+      if (handController != null)
+         this.toolBody = new MassMatrixEstimatingToolRigidBody(name + "Tool", handController.getWristJoint(), fullRobotModel, gravity, controlDT, registry,
+               dynamicGraphicObjectsListRegistry);
+      else
+         this.toolBody = null;
 
       this.jacobian = jacobian;
 
