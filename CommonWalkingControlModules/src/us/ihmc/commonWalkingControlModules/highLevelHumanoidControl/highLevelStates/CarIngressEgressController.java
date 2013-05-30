@@ -139,8 +139,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       final ConstantConfigurationProvider currentPelvisConfigurationProvider = new ConstantConfigurationProvider(new FramePose(pelvisPositionControlFrame));
       desiredPelvisConfigurationProvider = new ChangeableConfigurationProvider(new FramePose(pelvisPositionControlFrame));
 
-      pelvisPositionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator("pelvis", worldFrame, trajectoryTimeProvider.getValue(),
-              currentPelvisConfigurationProvider, desiredPelvisConfigurationProvider, registry, false);
+      pelvisPositionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator("pelvis", worldFrame, trajectoryTimeProvider,
+              currentPelvisConfigurationProvider, desiredPelvisConfigurationProvider, registry);
       pelvisOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("pelvis", worldFrame, trajectoryTimeProvider,
               currentPelvisConfigurationProvider, desiredPelvisConfigurationProvider, registry, false);
 
@@ -184,8 +184,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          final ChangeableConfigurationProvider desiredConfigurationProvider = new ChangeableConfigurationProvider(new FramePose(foot.getBodyFrame()));
 
          StraightLinePositionTrajectoryGenerator positionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator(bodyName, worldFrame,
-                                                                                  trajectoryTimeProvider.getValue(), currentConfigurationProvider,
-                                                                                  desiredConfigurationProvider, registry, false);
+                                                                                  trajectoryTimeProvider, currentConfigurationProvider,
+                                                                                  desiredConfigurationProvider, registry);
 
          OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(bodyName, worldFrame,
                                                                                          trajectoryTimeProvider, currentConfigurationProvider,
