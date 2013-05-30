@@ -5,16 +5,21 @@ import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import javax.media.j3d.Transform3D;
 import javax.xml.bind.JAXBException;
 
 import com.yobotics.simulationconstructionset.Robot;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.SdfLoader.SDFModelVisual;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.SDFWorldLoader;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.driving.VehicleModelObjectVisualizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCWorld;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.TimestampProvider;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -55,8 +60,17 @@ public class DRCVehicleSDFLoader extends DRCWorld
       DRCVehicleSDFLoader drcVehicleSDFLoader = new DRCVehicleSDFLoader();
       scs.addStaticLinkGraphics(drcVehicleSDFLoader.loadDRCVehicle());
 
-      DRCVehicleModelObjectVisualizer drcVehicleModelObjectVisualizer = new DRCVehicleModelObjectVisualizer(scs);
+      Transform3D vehicleToWorldTransform = new Transform3D();
+      ReferenceFrame vehicleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("vehicle", ReferenceFrame.getWorldFrame(),
+            vehicleToWorldTransform, false, true, true);
+      DRCVehicleModelObjects vehicleModelObjects = new DRCVehicleModelObjects();
+      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      YoVariableRegistry registry = scs.getRootRegistry();
+      VehicleModelObjectVisualizer vehicleModelObjectVisualizer = new VehicleModelObjectVisualizer(vehicleFrame, vehicleModelObjects, dynamicGraphicObjectsListRegistry, registry);
+      vehicleModelObjectVisualizer.setVisible(true);
+      vehicleModelObjectVisualizer.update();
 
+      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
 
       Thread thread = new Thread(scs);
       thread.start();
