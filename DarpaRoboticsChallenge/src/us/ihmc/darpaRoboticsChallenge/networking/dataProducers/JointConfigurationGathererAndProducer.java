@@ -196,6 +196,7 @@ public class JointConfigurationGathererAndProducer
             jointConfigurationData.setJointAngles(allJointAngles);
             jointConfigurationData.setRootTranslation(rootTranslation);
             jointConfigurationData.setRootOrientation(rootOrientation);
+            jointConfigurationData.setSimTime(nextTimestamp.getLongValue() - TimeTools.milliSecondsToNanoSeconds(delay.getIntegerValue()));
             lock.unlock();
    
             objectCommunicator.consumeObject(jointConfigurationData);
