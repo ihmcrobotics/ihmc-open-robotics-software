@@ -22,7 +22,7 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    private final double constantResolution;
    private final double heightThreshold;
    private int numberOfNodes = 0;
-   private int maxNodes=1;
+   private int maxNodes = 1;
    private boolean octreeChanged = false;
    private Octree octree;
    private LowPassTimingReporter clearingTimer = new LowPassTimingReporter(7);
@@ -43,7 +43,8 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
       this.getRootNode().setMetaData(new GroundOnlyQuadTreeData(false));
       this.maxNodes = maxNodes;
       numberOfNodes = 1;
-//      clearingTimer.setupRecording("GroundOnlyQuadTree", "perform the lidar beam search", 10000L, 20000L);
+
+//    clearingTimer.setupRecording("GroundOnlyQuadTree", "perform the lidar beam search", 10000L, 20000L);
    }
 
    public double heightAtPoint(double x, double y)
@@ -60,35 +61,38 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    }
 
    public boolean addPoint(double x, double y, double z)
-   { 
-      final boolean quadTreeChanged = this.put(new double[] {x, y}, (float)z);
+   {
+      final boolean quadTreeChanged = this.put(new double[] {x, y}, (float) z);
+
       return quadTreeChanged || octreeChanged;
    }
-   
-   
+
+
    public void addLidarRay(Point3d origin, Point3d end)
    {
       clearingTimer.startTime();
-      Point2d point1 = new Point2d(origin.getX(),origin.getY());
-      Point2d point2 = new Point2d(end.getX(),end.getY());
+      Point2d point1 = new Point2d(origin.getX(), origin.getY());
+      Point2d point2 = new Point2d(end.getX(), end.getY());
       LineSegmentSearchVolume lineSegment = new LineSegmentSearchVolume(point1, point2);
       List<RecursableHyperTreeNode<GroundAirDescriptor, GroundOnlyQuadTreeData>> hyperVolumeIntersection = this.getHyperVolumeIntersection(lineSegment);
       unProjector.setLine(point1, point2, origin.getZ(), end.getZ());
-      for (int i=0;i<hyperVolumeIntersection.size();i++)
+
+      for (int i = 0; i < hyperVolumeIntersection.size(); i++)
       {
-//         if (null==hyperVolumeIntersection.get(i).getLeaf())
-//            hyperVolumeIntersection.get(i).setLeaf(new HyperCubeLeaf<GroundAirDescriptor>(new GroundAirDescriptor(height, minClearHeight), location))
+//       if (null==hyperVolumeIntersection.get(i).getLeaf())
+//          hyperVolumeIntersection.get(i).setLeaf(new HyperCubeLeaf<GroundAirDescriptor>(new GroundAirDescriptor(height, minClearHeight), location))
          GroundAirDescriptor leafValue = hyperVolumeIntersection.get(i).getLeaf().getValue();
          Float minClearHeight = leafValue.getMinClearHeight();
          double[] intersection = lineSegment.intersectionWithBounds(hyperVolumeIntersection.get(i).getBoundsCopy());
          float newMinClearHeight = (float) unProjector.unProject(intersection[0], intersection[1]);
-         if (null==minClearHeight)
+         if (null == minClearHeight)
             leafValue.setMinClearHeight(newMinClearHeight);
-         if (newMinClearHeight<minClearHeight)
+         if (newMinClearHeight < minClearHeight)
             leafValue.setMinClearHeight(newMinClearHeight);
          hyperVolumeIntersection.get(i).getMetaData();
-         
+
       }
+
       clearingTimer.endTime();
    }
 
@@ -112,21 +116,23 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    {
       octreeChanged = false;
       checkDimensionality(location);
-      HyperCubeLeaf<GroundAirDescriptor> leaf = new HyperCubeLeaf<GroundAirDescriptor>(new GroundAirDescriptor(value,null), location);
-
-      return this.putRecursively(this.getRootNode(), leaf);
+      HyperCubeLeaf<GroundAirDescriptor> leaf = new HyperCubeLeaf<GroundAirDescriptor>(new GroundAirDescriptor(value, null), location);
+      synchronized (synchronizationObject)
+      {
+         return this.putRecursively(this.getRootNode(), leaf);
+      }
    }
 
    private void puntLeaf(HyperCubeLeaf<GroundAirDescriptor> leafToPunt)
    {
-      if (null==octree || !updateOctree)
+      if ((null == octree) ||!updateOctree)
          return;
-      double[] location = new double[]{leafToPunt.getLocation()[0],leafToPunt.getLocation()[1],leafToPunt.getValue().getHeight()};
+      double[] location = new double[] {leafToPunt.getLocation()[0], leafToPunt.getLocation()[1], leafToPunt.getValue().getHeight()};
       octree.upRezz(location);
       octreeChanged = octree.put(location, true);
    }
 
-   public void mergeOneLevel(RecursableHyperTreeNode<GroundAirDescriptor, GroundOnlyQuadTreeData> node)
+   public void unSynchronizedMergeOneLevel(RecursableHyperTreeNode<GroundAirDescriptor, GroundOnlyQuadTreeData> node)
    {
       if (!node.hasChildren())
          return;
@@ -167,7 +173,7 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
       {
          boolean treeChanged = putRecursively(node.getChildAtLocation(leaf.getLocation()), leaf);
          if (treeChanged)
-            this.mergeOneLevel(node);
+            this.unSynchronizedMergeOneLevel(node);
 
          return treeChanged;
       }
@@ -189,7 +195,7 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
          return false;
       }
 
-      if(!newLeafIsSignificantyAboveOldLeaf && ! newLeafIsSignificantyBelowOldLeaf)
+      if (!newLeafIsSignificantyAboveOldLeaf &&!newLeafIsSignificantyBelowOldLeaf)
       {
          return false;
       }
@@ -316,8 +322,9 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
 
    protected boolean canSplit(RecursableHyperTreeNode<GroundAirDescriptor, GroundOnlyQuadTreeData> node)
    {
-      if (this.numberOfNodes>=this.maxNodes)
+      if (this.numberOfNodes >= this.maxNodes)
          return false;
+
       for (int i = 0; i < node.getDimensionality(); i++)
       {
          if (node.getBounds(i).size() <= constantResolution)
@@ -366,11 +373,13 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
       super.nodeAdded(id, bounds, leaf);
       this.numberOfNodes++;
    }
+
    public void nodeRemoved(String id)
    {
       super.nodeRemoved(id);
       this.numberOfNodes--;
    }
+
    public RecursableHyperTreeNode<GroundAirDescriptor, GroundOnlyQuadTreeData> getLeafNodeAtLocation(float xToTest, float yToTest)
    {
       return getLeafNodeAtLocation(toLocation(xToTest, yToTest));
@@ -410,23 +419,23 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    {
       this.remove(this.get(toLocation(x, y)));
    }
-   
+
    public void setOctree(Octree octree)
    {
-      this.octree=octree;
+      this.octree = octree;
    }
 
    public void treeCleared()
    {
       // TODO Auto-generated method stub
-      
+
    }
 
    public void updateOctree(boolean updateOctree)
    {
       this.updateOctree = updateOctree;
    }
-   
-   
+
+
 
 }
