@@ -89,15 +89,10 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
    private BooleanYoVariable requestedLeftFootLoadBearing = new BooleanYoVariable("requestedLeftFootLoadBearing", registry);
    private BooleanYoVariable requestedRightFootLoadBearing = new BooleanYoVariable("requestedRightFootLoadBearing", registry);
-   //TODO: This controller should not be able to change the hand load bearing state, this is a manipulation control module feature.
-//   private BooleanYoVariable requestedLeftHandLoadBearing = new BooleanYoVariable("requestedLeftHandLoadBearing", registry);
-//   private BooleanYoVariable requestedRightHandLoadBearing = new BooleanYoVariable("requestedRightHandLoadBearing", registry);
    private BooleanYoVariable requestedLeftThighLoadBearing = new BooleanYoVariable("requestedLeftThighLoadBearing", registry);
    private BooleanYoVariable requestedRightThighLoadBearing = new BooleanYoVariable("requestedRightThighLoadBearing", registry);
    private SideDependentList<BooleanYoVariable> requestedFootLoadBearing = new SideDependentList<BooleanYoVariable>(requestedLeftFootLoadBearing,
                                                                               requestedRightFootLoadBearing);
-//   private SideDependentList<BooleanYoVariable> requestedHandLoadBearing = new SideDependentList<BooleanYoVariable>(requestedLeftHandLoadBearing,
-//                                                                              requestedRightHandLoadBearing);
    private SideDependentList<BooleanYoVariable> requestedThighLoadBearing = new SideDependentList<BooleanYoVariable>(requestedLeftThighLoadBearing,
                                                                                requestedRightThighLoadBearing);
    private final VariousWalkingManagers variousWalkingManagers;
@@ -148,7 +143,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       this.chestOrientationProvider = variousWalkingProviders.getDesiredChestOrientationProvider();
       chestPositionControlFrame = fullRobotModel.getChest().getParentJoint().getFrameAfterJoint();
       final CurrentOrientationProvider currentChestOrientationProvider = new CurrentOrientationProvider(worldFrame, chestPositionControlFrame);    // TODO: not sure about that
-      desiredChestOrientation = new SettableOrientationProvider("chest", worldFrame, registry);
+      desiredChestOrientation = new SettableOrientationProvider("desiredChestProvider", worldFrame, registry);
       chestOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("chest", worldFrame, trajectoryTimeProvider,
               currentChestOrientationProvider, desiredChestOrientation, registry);
 
@@ -165,7 +160,6 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       for (RobotSide robotSide : RobotSide.values)
       {
          requestedFootLoadBearing.get(robotSide).addVariableChangedListener(loadBearingVariableChangedListener);
-//         requestedHandLoadBearing.get(robotSide).addVariableChangedListener(loadBearingVariableChangedListener);
          requestedThighLoadBearing.get(robotSide).addVariableChangedListener(loadBearingVariableChangedListener);
       }
    }
@@ -252,6 +246,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       FramePose currentPelvisPose = new FramePose(pelvisPositionControlFrame);
       desiredPelvisConfigurationProvider.set(currentPelvisPose);
 
+      pelvisTrajectoryStartTime = yoTime.getDoubleValue();
       pelvisPositionTrajectoryGenerator.initialize();
       pelvisOrientationTrajectoryGenerator.initialize();
 
@@ -259,6 +254,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       currentChestOrientation.changeFrame(worldFrame);
       desiredChestOrientation.setOrientation(currentChestOrientation);
 
+      chestTrajectoryStartTime = yoTime.getDoubleValue();
       chestOrientationTrajectoryGenerator.initialize();
    }
 
@@ -269,6 +265,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       for (RobotSide robotSide : RobotSide.values)
       {
          requestedFootLoadBearing.get(robotSide).set(true);
+         requestedFootLoadBearing.get(robotSide).notifyVariableChangedListeners();
       }
    }
 
@@ -505,9 +502,6 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          {
             if (v.equals(requestedFootLoadBearing.get(robotSide)))
                setFootInContact(robotSide, requestedFootLoadBearing.get(robotSide).getBooleanValue());
-
-//            if (v.equals(requestedHandLoadBearing.get(robotSide)))
-//               setHandInContact(robotSide, requestedHandLoadBearing.get(robotSide).getBooleanValue());
 
             if (v.equals(requestedThighLoadBearing.get(robotSide)))
                setThighInContact(robotSide, requestedThighLoadBearing.get(robotSide).getBooleanValue());
