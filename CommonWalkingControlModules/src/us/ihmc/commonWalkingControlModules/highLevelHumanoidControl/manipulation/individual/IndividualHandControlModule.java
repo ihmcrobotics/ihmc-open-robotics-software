@@ -356,10 +356,10 @@ public class IndividualHandControlModule
                                                                                       desiredConfigurationProvider, registry, false);
 
       TaskspaceHandPositionControlState taskspaceHandControlState = new ObjectManipulationState(stateEnum, robotSide, handSpatialAccelerationControlModule,
-                                                                       momentumBasedController, jacobian, base, handController, toolBody,
+                                                                       momentumBasedController, jacobian, handController, toolBody,
                                                                        dynamicGraphicObjectsListRegistry, parentRegistry);
 
-      taskspaceHandControlState.setTrajectory(positionTrajectoryGenerator, orientationTrajectoryGenerator);
+      taskspaceHandControlState.setTrajectory(positionTrajectoryGenerator, orientationTrajectoryGenerator, base);
 
       return taskspaceHandControlState;
    }
@@ -380,10 +380,10 @@ public class IndividualHandControlModule
                                                                          currentConfigurationProvider, TASK_SPACE_TRAJECTORY_TIME, registry);
 
       TaskspaceHandPositionControlState taskspaceHandControlState = new ObjectManipulationState(stateEnum, robotSide, handSpatialAccelerationControlModule,
-                                                                       momentumBasedController, jacobian, base, handController, toolBody,
+                                                                       momentumBasedController, jacobian, handController, toolBody,
                                                                        dynamicGraphicObjectsListRegistry, parentRegistry);
 
-      taskspaceHandControlState.setTrajectory(positionTrajectoryGenerator, orientationTrajectoryGenerator);
+      taskspaceHandControlState.setTrajectory(positionTrajectoryGenerator, orientationTrajectoryGenerator, base);
 
       return taskspaceHandControlState;
    }
