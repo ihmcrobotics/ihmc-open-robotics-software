@@ -355,9 +355,11 @@ public class IndividualHandControlModule
                                                                                       trajectoryTimeProvider, currentConfigurationProvider,
                                                                                       desiredConfigurationProvider, registry, false);
 
-      TaskspaceHandControlState taskspaceHandControlState = new ObjectManipulationState(stateEnum, robotSide, positionTrajectoryGenerator,
-                                                               orientationTrajectoryGenerator, handSpatialAccelerationControlModule, momentumBasedController,
-                                                               jacobian, base, handController, toolBody, dynamicGraphicObjectsListRegistry, parentRegistry);
+      TaskspaceHandPositionControlState taskspaceHandControlState = new ObjectManipulationState(stateEnum, robotSide, handSpatialAccelerationControlModule,
+                                                                       momentumBasedController, jacobian, base, handController, toolBody,
+                                                                       dynamicGraphicObjectsListRegistry, parentRegistry);
+
+      taskspaceHandControlState.setTrajectory(positionTrajectoryGenerator, orientationTrajectoryGenerator);
 
       return taskspaceHandControlState;
    }
@@ -377,9 +379,11 @@ public class IndividualHandControlModule
       OrientationTrajectoryGenerator orientationTrajectoryGenerator = new ConstantOrientationTrajectoryGenerator(namePrefix, referenceFrame,
                                                                          currentConfigurationProvider, TASK_SPACE_TRAJECTORY_TIME, registry);
 
-      TaskspaceHandControlState taskspaceHandControlState = new ObjectManipulationState(stateEnum, robotSide, positionTrajectoryGenerator,
-                                                               orientationTrajectoryGenerator, handSpatialAccelerationControlModule, momentumBasedController,
-                                                               jacobian, base, handController, toolBody, dynamicGraphicObjectsListRegistry, parentRegistry);
+      TaskspaceHandPositionControlState taskspaceHandControlState = new ObjectManipulationState(stateEnum, robotSide, handSpatialAccelerationControlModule,
+                                                                       momentumBasedController, jacobian, base, handController, toolBody,
+                                                                       dynamicGraphicObjectsListRegistry, parentRegistry);
+
+      taskspaceHandControlState.setTrajectory(positionTrajectoryGenerator, orientationTrajectoryGenerator);
 
       return taskspaceHandControlState;
    }
@@ -429,5 +433,10 @@ public class IndividualHandControlModule
    public void prepareForLocomotion()
    {
       this.prepareForLocomotion.set(true);
+   }
+
+   public void executeTrajectory(PositionTrajectoryGenerator positionTrajectory, OrientationTrajectoryGenerator orientationTrajectory, double time,
+                                 boolean estimateMassProperties)
+   {
    }
 }
