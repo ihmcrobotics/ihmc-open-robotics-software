@@ -33,8 +33,12 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    private final EnumMap<ArmJointName, Double> armJointUpperLimits = new EnumMap<ArmJointName, Double>(ArmJointName.class);
 
    private final YoVariableRegistry registry = new YoVariableRegistry("SliderBoardRegistry");
+   
+   private final BooleanYoVariable isCaptureSnapshotRequested = new BooleanYoVariable("isCaptureSnapshotRequested", registry);
+
    private final BooleanYoVariable isPelvisControlRequested = new BooleanYoVariable("isPelvisControlRequested", registry);
    private final BooleanYoVariable isChestControlRequested = new BooleanYoVariable("isChestControlRequested", registry);
+   
    private final BooleanYoVariable isLeftLegControlRequested = new BooleanYoVariable("isLeftLegControlRequested", registry);
    private final BooleanYoVariable isRightLegControlRequested = new BooleanYoVariable("isRightLegControlRequested", registry);
    private final BooleanYoVariable isLeftArmControlRequested = new BooleanYoVariable("isLeftArmControlRequested", registry);
@@ -79,6 +83,11 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       q_roll.addVariableChangedListener(pelvisListener);
       
       isLeftLegControlRequested.set(true);
+   }
+   
+   public void addIsCaptureSnapshotListener(VariableChangedListener variableChangedListener)
+   {
+      isCaptureSnapshotRequested.addVariableChangedListener(variableChangedListener);
    }
 
    private void init()
@@ -210,15 +219,16 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       ((DoubleYoVariable) scs.getVariable("q_qz")).set(q_qz);
 
       int buttonChannel = 1;
-      sliderBoard.setButton(buttonChannel++, "isChestControlRequested", scs);
+      sliderBoard.setButton(buttonChannel++, isCaptureSnapshotRequested.getName(), scs);
       buttonChannel = 9;
-      sliderBoard.setButton(buttonChannel++, "isPelvisControlRequested", scs);
-      
+      sliderBoard.setButton(buttonChannel++, isPelvisControlRequested.getName(), scs);
+      sliderBoard.setButton(buttonChannel++, isChestControlRequested.getName(), scs);
+
       buttonChannel = 17;
-      sliderBoard.setButton(buttonChannel++, "isLeftArmControlRequested", scs);
-      sliderBoard.setButton(buttonChannel++, "isRightArmControlRequested", scs);
-      sliderBoard.setButton(buttonChannel++, "isLeftLegControlRequested", scs);
-      sliderBoard.setButton(buttonChannel++, "isRightLegControlRequested", scs);
+      sliderBoard.setButton(buttonChannel++, isLeftArmControlRequested.getName(), scs);
+      sliderBoard.setButton(buttonChannel++, isRightArmControlRequested.getName(), scs);
+      sliderBoard.setButton(buttonChannel++, isLeftLegControlRequested.getName(), scs);
+      sliderBoard.setButton(buttonChannel++, isRightLegControlRequested.getName(), scs);
 
    }
 
