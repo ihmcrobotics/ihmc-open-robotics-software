@@ -1,28 +1,34 @@
 package us.ihmc.darpaRoboticsChallenge.initialSetup;
 
 import javax.media.j3d.Transform3D;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.GroundContactPoint;
 
 public class DRCSimDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot>
 {
    private final double groundZ;
+   private final double initialYaw;
    private final Transform3D rootToWorld = new Transform3D();
    private final Vector3d offset = new Vector3d();
+   private final Quat4d rotation = new Quat4d();
 
    public DRCSimDRCRobotInitialSetup()
    {
-      this(0.0);
+      this(0.0, 0.0);
    }
 
-   public DRCSimDRCRobotInitialSetup(double groundZ)
+   public DRCSimDRCRobotInitialSetup(double groundZ, double initialYaw)
    {
       this.groundZ = groundZ;
+      this.initialYaw = initialYaw;
    }
 
    public void initializeRobot(SDFRobot robot)
@@ -61,8 +67,7 @@ public class DRCSimDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot>
       
       robot.update();
       robot.getRootJointToWorldTransform(rootToWorld);
-      rootToWorld.get(offset);
-
+      rootToWorld.get(rotation, offset);
 
     GroundContactPoint gc1 = robot.getFootGroundContactPoints(RobotSide.LEFT).get(0);
     double pelvisToFoot = offset.getZ() - gc1.getPositionPoint().getZ();
@@ -75,6 +80,15 @@ public class DRCSimDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot>
 
 //    offset.add(robot.getPositionInWorld());
       robot.setPositionInWorld(offset);
+      
+      FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), rotation);
+      double[] yawPitchRoll = frameOrientation.getYawPitchRoll();
+      yawPitchRoll[0] = initialYaw;
+      frameOrientation.setYawPitchRoll(yawPitchRoll);
+      
+      robot.setOrientation(frameOrientation.getQuaternion());
+      
+      robot.update();
    }
 
    public void getOffset(Vector3d offsetToPack)

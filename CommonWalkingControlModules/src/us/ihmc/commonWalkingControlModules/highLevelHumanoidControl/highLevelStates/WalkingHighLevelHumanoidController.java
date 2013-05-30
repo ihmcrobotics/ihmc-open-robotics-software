@@ -113,7 +113,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final double PELVIS_YAW_INITIALIZATION_TIME = 1.5;
 
-   private BooleanYoVariable alreadyBeenInDoubleSupportOnce;
+   private final BooleanYoVariable alreadyBeenInDoubleSupportOnce;
 
    private static enum WalkingState {LEFT_SUPPORT, RIGHT_SUPPORT, TRANSFER_TO_LEFT_SUPPORT, TRANSFER_TO_RIGHT_SUPPORT, DOUBLE_SUPPORT}
 
