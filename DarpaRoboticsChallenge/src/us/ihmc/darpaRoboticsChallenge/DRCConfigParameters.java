@@ -11,6 +11,7 @@ public class DRCConfigParameters
 {
    
    public static final boolean USE_KRYONET_FOR_UI_COMMS = false;
+   public static final boolean TRANFORM_LIDAR_WITH_KRYO = false;
    
    // TODO: Temporary static variable for testing getting into the car
    public static final boolean TEST_GETTING_INTO_CAR = false; // true;
@@ -131,5 +132,7 @@ public class DRCConfigParameters
    public static final double LIDAR_RESOLUTION_SPHERE_INNER_RESOLUTION = 0.05;
    public static final double LIDAR_RESOLUTION_SPHERE_INNER_RADIUS = 0.5;
    public static final double LIDAR_RESOLUTION_SPHERE_DISTANCE_FROM_HEAD = 1.0;
+
+   
 
 }
