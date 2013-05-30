@@ -7,6 +7,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.environment.VRCTask;
 import us.ihmc.darpaRoboticsChallenge.environment.VRCTaskName;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.VariableChangedListener;
 import com.yobotics.simulationconstructionset.YoVariable;
@@ -18,12 +19,14 @@ public class PosePlaybackSCSBridge
 
    private final PosePlaybackAllJointsController posePlaybackController;
    private final PosePlaybackSender posePlaybackSender;
+   private PosePlaybackRobotPoseSequence posePlaybackRobotPoseSequence;
 
    public PosePlaybackSCSBridge() throws IOException
    {
       YoVariableRegistry registry = new YoVariableRegistry("PlaybackPoseSCSBridge");
       posePlaybackController = new PosePlaybackAllJointsController(registry);
       posePlaybackSender = new PosePlaybackSender(posePlaybackController, ipAddress);
+      posePlaybackRobotPoseSequence = new PosePlaybackRobotPoseSequence();
 
       VRCTask vrcTask = new VRCTask(VRCTaskName.ONLY_VEHICLE);
       SDFRobot sdfRobot = vrcTask.getRobot();
@@ -34,8 +37,11 @@ public class PosePlaybackSCSBridge
 
       DRCRobotMidiSliderBoardPositionManipulation sliderBoard = new DRCRobotMidiSliderBoardPositionManipulation(scs);
 
-      CaptureSnapshotListener listener = new CaptureSnapshotListener(sdfRobot);
-      sliderBoard.addIsCaptureSnapshotListener(listener);
+      CaptureSnapshotListener captureSnapshotListener = new CaptureSnapshotListener(sdfRobot);
+      sliderBoard.addIsCaptureSnapshotListener(captureSnapshotListener);
+      
+      SaveSequenceListener saveSequenceListener = new SaveSequenceListener();
+      sliderBoard.addIsSaveSequenceRequestedListener(saveSequenceListener);
 
       scs.startOnAThread();
 
@@ -71,24 +77,36 @@ public class PosePlaybackSCSBridge
 
       public void variableChanged(YoVariable yoVariable)
       {
-//         BooleanYoVariable captureSnapshot = (BooleanYoVariable) yoVariable;
-         //         if (captureSnapshot.getBooleanValue())
-         //         {
-         PosePlaybackRobotPose pose = new PosePlaybackRobotPose(sdfRobot);
-         System.out.println(pose);
-
-         posePlaybackController.setPlaybackPose(pose);
-
-         try
+         BooleanYoVariable captureSnapshot = (BooleanYoVariable) yoVariable;
+         if (captureSnapshot.getBooleanValue())
          {
-            if (posePlaybackSender.isConnected())
-               posePlaybackSender.writeData();
-         }
-         catch (IOException e)
-         {
+            PosePlaybackRobotPose pose = new PosePlaybackRobotPose(sdfRobot);
+            System.out.println(pose);
+            posePlaybackRobotPoseSequence.addPose(pose);
+            System.out.println("adding pose to sequence list");
+
+            posePlaybackController.setPlaybackPose(pose);
+
+            try
+            {
+               if (posePlaybackSender.isConnected())
+                  posePlaybackSender.writeData();
+
+            }
+            catch (IOException e)
+            {
+            }
          }
       }
-
+   }
+   
+   private class SaveSequenceListener implements VariableChangedListener
+   {
+      public void variableChanged(YoVariable yoVariable)
+      {         
+         System.out.println("saving file");
+         posePlaybackRobotPoseSequence.promptWriteToFile();
+      }
    }
 
 
