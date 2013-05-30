@@ -94,18 +94,19 @@ public class SaveImagesAtSimulationTime
    private void checkProcessImage() {
       if( timestampLeft == timestampRight ) {
          process( imageLeft , imageRight );
+      } else {
       }
    }
 
    private synchronized void process( BufferedImage left , BufferedImage right ) {
       if( simulationTime > previousTime + period ) {
+//         System.out.println("####### saving image time "+simulationTime);
          if( right == null )
             System.out.println("WTF");
          previousTime = simulationTime;
-         UtilImageIO.saveImage(left, String.format("%s/left%04d.png",directory,numFrames));
-         UtilImageIO.saveImage(right, String.format("%s/right%04d.png",directory,numFrames));
+         UtilImageIO.saveImage(left, String.format("%s/left%05d.ppm",directory,numFrames));
+         UtilImageIO.saveImage(right, String.format("%s/right%05d.ppm",directory,numFrames));
          numFrames++;
       }
-
    }
 }
