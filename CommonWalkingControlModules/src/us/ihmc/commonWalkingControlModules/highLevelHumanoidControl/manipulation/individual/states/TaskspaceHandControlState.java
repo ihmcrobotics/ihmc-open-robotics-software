@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.states.direct.DirectIndividualHandControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.states.direct.IndividualHandControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.utilities.FormattingTools;
@@ -10,7 +10,7 @@ import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 
-public abstract class TaskspaceHandControlState<T extends Enum<T>> extends State<T>
+public abstract class TaskspaceHandControlState extends State<IndividualHandControlState>
 {
    protected final String name;
    protected final YoVariableRegistry registry;
@@ -20,7 +20,7 @@ public abstract class TaskspaceHandControlState<T extends Enum<T>> extends State
    protected final MomentumBasedController momentumBasedController;
 
 
-   public TaskspaceHandControlState(T stateEnum, MomentumBasedController momentumBasedController, GeometricJacobian jacobian,
+   public TaskspaceHandControlState(IndividualHandControlState stateEnum, MomentumBasedController momentumBasedController, GeometricJacobian jacobian,
                                     YoVariableRegistry parentRegistry)
    {
       super(stateEnum);
