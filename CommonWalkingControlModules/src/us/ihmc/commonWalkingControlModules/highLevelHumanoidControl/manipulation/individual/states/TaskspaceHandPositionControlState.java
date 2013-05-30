@@ -27,8 +27,6 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule;
    private final RigidBody base;
-   private final PositionTrajectoryGenerator positionTrajectoryGenerator;
-   private final OrientationTrajectoryGenerator orientationTrajectoryGenerator;
 
    private final SpatialAccelerationVector handAcceleration = new SpatialAccelerationVector();
 
@@ -44,9 +42,10 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
    private final FrameOrientation desiredOrientation = new FrameOrientation(worldFrame);
    private final FrameVector desiredAngularVelocity = new FrameVector(worldFrame);
    private final FrameVector desiredAngularAcceleration = new FrameVector(worldFrame);
+   private PositionTrajectoryGenerator positionTrajectoryGenerator;
+   private OrientationTrajectoryGenerator orientationTrajectoryGenerator;
 
    public TaskspaceHandPositionControlState(IndividualHandControlState stateEnum, RobotSide robotSide,
-           PositionTrajectoryGenerator positionTrajectoryGenerator, OrientationTrajectoryGenerator orientationTrajectoryGenerator,
            RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule, MomentumBasedController momentumBasedController,
            GeometricJacobian jacobian, RigidBody base, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
@@ -54,8 +53,6 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
 
       this.handSpatialAccelerationControlModule = handSpatialAccelerationControlModule;
       this.base = base;
-      this.positionTrajectoryGenerator = positionTrajectoryGenerator;
-      this.orientationTrajectoryGenerator = orientationTrajectoryGenerator;
       desiredPositionFrame = new PoseReferenceFrame(robotSide.getCamelCaseNameForStartOfExpression() + name + "DesiredFrame", worldFrame);
 
       if (dynamicGraphicObjectsListRegistry != null)
@@ -119,5 +116,11 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
       {
          dynamicGraphicReferenceFrame.update();
       }
+   }
+
+   public void setTrajectory(PositionTrajectoryGenerator positionTrajectoryGenerator, OrientationTrajectoryGenerator orientationTrajectoryGenerator)
+   {
+      this.positionTrajectoryGenerator = positionTrajectoryGenerator;
+      this.orientationTrajectoryGenerator = orientationTrajectoryGenerator;
    }
 }
