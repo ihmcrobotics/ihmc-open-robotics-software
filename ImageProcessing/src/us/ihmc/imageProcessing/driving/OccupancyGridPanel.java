@@ -2,14 +2,14 @@ package us.ihmc.imageProcessing.driving;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 /**
  * @author Peter Abeles
  */
 public class OccupancyGridPanel extends JPanel
 {
-
-   protected OccupancyGrid map = new OccupancyGrid(1,1,1);
+   protected OccupancyGrid map = new OccupancyGrid(1, 1, 1);
 
    protected double cellToPixel = 1.0;
 
@@ -23,22 +23,28 @@ public class OccupancyGridPanel extends JPanel
 
       gray = new Color[256];
 
-      for( int i = 0; i < 256; i++ ) {
-         gray[i] = new Color(i,i,i);
+      for (int i = 0; i < 256; i++)
+      {
+         gray[i] = new Color(i, i, i);
       }
    }
 
-   public void autoPreferredSize() {
-      if(adjustView)
-         setPreferredSize(new Dimension((int)(map.height*cellToPixel),(int)(map.width*cellToPixel)));
+   public void autoPreferredSize()
+   {
+      if (adjustView)
+         setPreferredSize(new Dimension((int) (map.height * cellToPixel), (int) (map.width * cellToPixel)));
       else
-         setPreferredSize(new Dimension((int)(map.width*cellToPixel),(int)(map.height*cellToPixel)));
+         setPreferredSize(new Dimension((int) (map.width * cellToPixel), (int) (map.height * cellToPixel)));
    }
 
-   public synchronized void setMap( OccupancyGrid map , boolean copy ) {
-      if( copy ) {
+   public synchronized void setMap(OccupancyGrid map, boolean copy)
+   {
+      if (copy)
+      {
          this.map.setTo(map);
-      } else {
+      }
+      else
+      {
          this.map = map;
       }
    }
@@ -49,23 +55,29 @@ public class OccupancyGridPanel extends JPanel
       int h = getHeight();
       int w = getWidth();
 
-      for( int y = 0; y < map.height; y++ ) {
-         int y0 = (int)(y*cellToPixel);
-         int y1 = (int)((y+1)*cellToPixel);
+      for (int y = 0; y < map.height; y++)
+      {
+         int y0 = (int) (y * cellToPixel);
+         int y1 = (int) ((y + 1) * cellToPixel);
 
-         for( int x = 0; x < map.width; x++ ) {
-            int x0 = (int)(x*cellToPixel);
-            int x1 = (int)((x+1)*cellToPixel);
+         for (int x = 0; x < map.width; x++)
+         {
+            int x0 = (int) (x * cellToPixel);
+            int x1 = (int) ((x + 1) * cellToPixel);
 
-            int value = (int)(255.0*map.unsafe_get(x,y));
+            int value = (int) (255.0 * map.unsafe_get(x, y));
 
             g.setColor(gray[value]);
-            if(adjustView) {
+
+            if (adjustView)
+            {
                x0 = h - x0 - 1;
                x1 = h - x1 - 1;
-               g.fillRect(w-y0-1,x1,y1-y0,x0-x1);
-            } else {
-               g.fillRect(x0,y0,x1-x0,y1-y0);
+               g.fillRect(w - y0 - 1, x1, y1 - y0, x0 - x1);
+            }
+            else
+            {
+               g.fillRect(x0, y0, x1 - x0, y1 - y0);
             }
          }
       }
