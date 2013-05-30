@@ -55,7 +55,7 @@ public class DRCConfigParameters
 
 
 
-   public static final String GAZEBO_HOST = "192.168.100.2";
+   public static final String GAZEBO_HOST = CLOUD_MINION3_IP;
    public static final String SCS_MACHINE_IP_ADDRESS = LOCALHOST; //CLOUD_MONSTER_IP;
 
    public static final String OPERATOR_INTERFACE_IP_ADDRESS = LOCALHOST;
@@ -111,7 +111,7 @@ public class DRCConfigParameters
    // LIDAR Processor
    public static final boolean LIDAR_PROCESSOR_TIMING_REPORTING_ON = false;
    public static final double GRID_RESOLUTION = 0.025;    // in meters
-   public static final double OCTREE_RESOLUTION = 0.05;
+   public static final double OCTREE_RESOLUTION_WHEN_NOT_USING_RESOLUTION_SPHERE = 0.05;
    public static final float QUADTREE_HEIGHT_THRESHOLD = 0.05f;
    public static final double LIDAR_BLINDNESS_CYLINDAR_SQUARED_RADIUS = 0.1;
    public static final boolean HIDE_THINGS_ABOVE_HEAD_FROM_LIDAR = true;
@@ -123,5 +123,13 @@ public class DRCConfigParameters
                   + 0.25 * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH);
 
    public static final int JOINT_CONFIGURATION_RATE_IN_MS = 50;
+
+   // Resolution Sphere
+   public static final boolean USE_RESOLUTION_SPHERE = false;
+   public static final double LIDAR_RESOLUTION_SPHERE_OUTER_RESOLUTION = 0.5;
+   public static final double LIDAR_RESOLUTION_SPHERE_OUTER_RADIUS = 4.5;
+   public static final double LIDAR_RESOLUTION_SPHERE_INNER_RESOLUTION = 0.05;
+   public static final double LIDAR_RESOLUTION_SPHERE_INNER_RADIUS = 0.5;
+   public static final double LIDAR_RESOLUTION_SPHERE_DISTANCE_FROM_HEAD = 1.0;
 
 }
