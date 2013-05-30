@@ -83,8 +83,8 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
             new ChangeableConfigurationProvider(footPoseProvider.getDesiredFootPose(robotSide));
 
          StraightLinePositionTrajectoryGenerator positionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator(bodyName, worldFrame,
-                                                                                  trajectoryTimeProvider.getValue(), currentConfigurationProvider,
-                                                                                  desiredConfigurationProvider, registry, false);
+                                                                                  trajectoryTimeProvider, currentConfigurationProvider,
+                                                                                  desiredConfigurationProvider, registry);
 
          OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(bodyName, worldFrame,
                                                                                          trajectoryTimeProvider, currentConfigurationProvider,

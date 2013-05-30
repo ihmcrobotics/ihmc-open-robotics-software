@@ -122,5 +122,6 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
    {
       this.positionTrajectoryGenerator = positionTrajectoryGenerator;
       this.orientationTrajectoryGenerator = orientationTrajectoryGenerator;
+      this.base = base;
    }
 }
