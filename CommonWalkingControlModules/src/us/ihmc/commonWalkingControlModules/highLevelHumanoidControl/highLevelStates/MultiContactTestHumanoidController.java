@@ -88,7 +88,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
 
          OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(bodyName, worldFrame,
                                                                                          trajectoryTimeProvider, currentConfigurationProvider,
-                                                                                         desiredConfigurationProvider, registry, false);
+                                                                                         desiredConfigurationProvider, registry);
 
          desiredConfigurationProviders.put(foot, desiredConfigurationProvider);
          swingPositionTrajectoryGenerators.put(foot, positionTrajectoryGenerator);

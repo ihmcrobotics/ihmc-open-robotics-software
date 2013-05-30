@@ -142,7 +142,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       pelvisPositionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator("pelvis", worldFrame, trajectoryTimeProvider,
               currentPelvisConfigurationProvider, desiredPelvisConfigurationProvider, registry);
       pelvisOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("pelvis", worldFrame, trajectoryTimeProvider,
-              currentPelvisConfigurationProvider, desiredPelvisConfigurationProvider, registry, false);
+              currentPelvisConfigurationProvider, desiredPelvisConfigurationProvider, registry);
 
       // Set up the chest trajectory generator
       this.chestOrientationProvider = variousWalkingProviders.getDesiredChestOrientationProvider();
@@ -150,7 +150,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       final CurrentOrientationProvider currentChestOrientationProvider = new CurrentOrientationProvider(worldFrame, chestPositionControlFrame);    // TODO: not sure about that
       desiredChestOrientation = new SettableOrientationProvider("chest", worldFrame, registry);
       chestOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("chest", worldFrame, trajectoryTimeProvider,
-              currentChestOrientationProvider, desiredChestOrientation, registry, false);
+              currentChestOrientationProvider, desiredChestOrientation, registry);
 
       setupFootControlModules();
 
@@ -189,7 +189,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
          OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(bodyName, worldFrame,
                                                                                          trajectoryTimeProvider, currentConfigurationProvider,
-                                                                                         desiredConfigurationProvider, registry, false);
+                                                                                         desiredConfigurationProvider, registry);
 
          desiredFootConfigurationProviders.put(foot, desiredConfigurationProvider);
          swingPositionTrajectoryGenerators.put(foot, positionTrajectoryGenerator);

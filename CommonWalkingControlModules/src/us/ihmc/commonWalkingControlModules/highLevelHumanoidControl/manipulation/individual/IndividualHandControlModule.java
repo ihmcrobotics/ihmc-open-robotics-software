@@ -37,8 +37,8 @@ public class IndividualHandControlModule
 
    private final Map<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator> quinticPolynomialTrajectoryGenerators;
 
-   private final StraightLinePositionTrajectoryGenerator straightLinePositionWorldTrajectoryGenerator;
-   private final OrientationInterpolationTrajectoryGenerator orientationInterpolationWorldTrajectoryGenerator;
+   private final Map<ReferenceFrame, StraightLinePositionTrajectoryGenerator> straightLinePositionWorldTrajectoryGenerators;
+   private final Map<ReferenceFrame, OrientationInterpolationTrajectoryGenerator> orientationInterpolationWorldTrajectoryGenerators;
    private final YoVariableDoubleProvider trajectoryTimeProvider;
 
    private final ConstantPositionTrajectoryGenerator holdPositionInBaseTrajectoryGenerator;
@@ -54,6 +54,7 @@ public class IndividualHandControlModule
    private final HandControllerInterface handController;
    private final OneDoFJoint[] oneDoFJoints;
    private final GeometricJacobian jacobian;
+   private final String name;
 
    public IndividualHandControlModule(final DoubleYoVariable simulationTime, final RobotSide robotSide, final FullRobotModel fullRobotModel,
                                       final TwistCalculator twistCalculator, ReferenceFrame handPositionControlFrame,
@@ -63,7 +64,7 @@ public class IndividualHandControlModule
    {
       RigidBody endEffector = jacobian.getEndEffector();
 
-      String name = endEffector.getName() + getClass().getSimpleName();
+      name = endEffector.getName() + getClass().getSimpleName();
       registry = new YoVariableRegistry(name);
 
       this.handController = handController;
@@ -102,11 +103,8 @@ public class IndividualHandControlModule
       currentConfigurationProvider = new ConstantConfigurationProvider(new FramePose(handPositionControlFrame));
       desiredConfigurationProvider = new ChangeableConfigurationProvider(new FramePose(handPositionControlFrame));    // FIXME: make Yo, but is difficult because frame can change
 
-      ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
-      straightLinePositionWorldTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator(name, referenceFrame, trajectoryTimeProvider,
-              currentConfigurationProvider, desiredConfigurationProvider, registry);
-      orientationInterpolationWorldTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(name, referenceFrame, trajectoryTimeProvider,
-              currentConfigurationProvider, desiredConfigurationProvider, registry, false);
+      straightLinePositionWorldTrajectoryGenerators = new LinkedHashMap<ReferenceFrame, StraightLinePositionTrajectoryGenerator>();
+      orientationInterpolationWorldTrajectoryGenerators = new LinkedHashMap<ReferenceFrame, OrientationInterpolationTrajectoryGenerator>();
 
       holdPositionInBaseTrajectoryGenerator = new ConstantPositionTrajectoryGenerator(name + "HoldPosition", jacobian.getBaseFrame(),
               currentConfigurationProvider, 0.0, registry);
@@ -222,11 +220,12 @@ public class IndividualHandControlModule
       requestedState.set(state.getStateEnum());
    }
 
-   public void moveInStraightLine(FramePose finalDesiredPose, double time, RigidBody base, boolean holdObject)
+   public void moveInStraightLine(FramePose finalDesiredPose, double time, RigidBody base, ReferenceFrame referenceFrame, boolean holdObject)
    {
       desiredConfigurationProvider.set(finalDesiredPose);
       trajectoryTimeProvider.set(time);
-      executeTaskSpaceTrajectory(straightLinePositionWorldTrajectoryGenerator, orientationInterpolationWorldTrajectoryGenerator, base, holdObject);
+      executeTaskSpaceTrajectory(getOrCreateStraightLinePositionTrajectoryGenerator(referenceFrame),
+                                 getOrCreateOrientationInterpolationTrajectoryGenerator(referenceFrame), base, holdObject);
    }
 
    public void requestLoadBearing()
@@ -305,5 +304,31 @@ public class IndividualHandControlModule
          if ((minJointPosition != null) && (maxJointPosition != null) && (minJointPosition > maxJointPosition))
             throw new RuntimeException("min > max");
       }
+   }
+
+   private StraightLinePositionTrajectoryGenerator getOrCreateStraightLinePositionTrajectoryGenerator(ReferenceFrame referenceFrame)
+   {
+      StraightLinePositionTrajectoryGenerator ret = straightLinePositionWorldTrajectoryGenerators.get(referenceFrame);
+      if (ret == null)
+      {
+         ret = new StraightLinePositionTrajectoryGenerator(name + referenceFrame.getName(), referenceFrame, trajectoryTimeProvider,
+                 currentConfigurationProvider, desiredConfigurationProvider, registry);
+         straightLinePositionWorldTrajectoryGenerators.put(referenceFrame, ret);
+      }
+
+      return ret;
+   }
+
+   private OrientationInterpolationTrajectoryGenerator getOrCreateOrientationInterpolationTrajectoryGenerator(ReferenceFrame referenceFrame)
+   {
+      OrientationInterpolationTrajectoryGenerator ret = orientationInterpolationWorldTrajectoryGenerators.get(referenceFrame);
+      if (ret == null)
+      {
+         ret = new OrientationInterpolationTrajectoryGenerator(name + referenceFrame.getName(), referenceFrame, trajectoryTimeProvider,
+                 currentConfigurationProvider, desiredConfigurationProvider, registry);
+         orientationInterpolationWorldTrajectoryGenerators.put(referenceFrame, ret);
+      }
+
+      return ret;
    }
 }
