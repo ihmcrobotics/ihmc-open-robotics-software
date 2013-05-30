@@ -171,7 +171,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepProvider, mapFromFootstepsToTrajectoryParameters,
                                                            desiredHeadOrientationProvider, desiredPelvisPoseProvider, desiredHandPoseProvider,
                                                            desiredHandLoadBearingProvider, torusPoseProvider, torusManipulationProvider, desiredChestOrientationProvider,
-                                                           desiredFootPoseProvider, desiredFootStateProvider, vehiclePoseProvider);
+                                                           desiredFootPoseProvider, desiredFootStateProvider, vehiclePoseProvider, null);
 
       VariousWalkingManagers variousWalkingManagers = VariousWalkingManagers.create(momentumBasedController, handControllers, yoTime, variousWalkingProviders,
             walkingControllerParameters, registry, dynamicGraphicObjectsListRegistry);
@@ -219,7 +219,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
 
       // This is the "highest level" controller that enables switching between the different controllers (walking, multi-contact, driving, etc.)
       HighLevelHumanoidControllerManager ret = new HighLevelHumanoidControllerManager(highLevelStateMachine, HighLevelState.MULTI_CONTACT,
-                                                  multiContactControllerRegistry, momentumBasedController);
+                                                  multiContactControllerRegistry, momentumBasedController, null, null);
 
       return ret;
    }

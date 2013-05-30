@@ -44,6 +44,7 @@ public class VariousWalkingProviders
    private final FootstepProvider footstepProvider;
    private final HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters;
 
+   private final DesiredHighLevelStateProvider desiredHighLevelStateProvider;
    private final DesiredHeadOrientationProvider desiredHeadOrientationProvider;
    private final DesiredPelvisPoseProvider desiredPelvisPoseProvider;
    private final DesiredHandPoseProvider desiredHandPoseProvider;
@@ -60,8 +61,9 @@ public class VariousWalkingProviders
                                   DesiredHandPoseProvider desiredHandPoseProvider, DesiredHandLoadBearingProvider desiredHandLoadBearingProvider,
                                   TorusPoseProvider torusPoseProvider, TorusManipulationProvider torusManipulationProvider,
                                   DesiredChestOrientationProvider desiredChestOrientationProvider, DesiredFootPoseProvider footPoseProvider,
-                                  DesiredFootStateProvider footStateProvider, VehiclePoseProvider vehiclePoseProvider)
+                                  DesiredFootStateProvider footStateProvider, VehiclePoseProvider vehiclePoseProvider, DesiredHighLevelStateProvider desiredHighLevelStateProvider)
    {
+      this.desiredHighLevelStateProvider = desiredHighLevelStateProvider;
       this.footstepProvider = footstepProvider;
       this.mapFromFootstepsToTrajectoryParameters = mapFromFootstepsToTrajectoryParameters;
       this.desiredHeadOrientationProvider = desiredHeadOrientationProvider;
@@ -74,6 +76,11 @@ public class VariousWalkingProviders
       this.desiredFootPoseProvider = footPoseProvider;
       this.desiredFootStateProvider = footStateProvider;
       this.vehiclePoseProvider = vehiclePoseProvider;
+   }
+
+   public DesiredHighLevelStateProvider getDesiredHighLevelStateProvider()
+   {
+      return desiredHighLevelStateProvider;
    }
 
    public FootstepProvider getFootstepProvider()
@@ -157,6 +164,7 @@ public class VariousWalkingProviders
       FootstepPathConsumer footstepPathConsumer = new FootstepPathConsumer(bipedFeet, footstepPathCoordinator, mapFromFootstepsToTrajectoryParameters);
       BlindWalkingPacketConsumer blindWalkingPacketConsumer = new BlindWalkingPacketConsumer(footstepPathCoordinator);
       PauseCommandConsumer pauseCommandConsumer = new PauseCommandConsumer(footstepPathCoordinator);
+      DesiredHighLevelStateProvider desiredHighLevelStateProvider = new DesiredHighLevelStateProvider();
       DesiredHeadOrientationProvider desiredHeadOrientationProvider = new DesiredHeadOrientationProvider();
       DesiredPelvisPoseProvider desiredPelvisPoseProvider = new DesiredPelvisPoseProvider();
       DesiredChestOrientationProvider desiredChestOrientationProvider = new DesiredChestOrientationProvider();
@@ -168,6 +176,7 @@ public class VariousWalkingProviders
       objectCommunicator.attachListener(FootstepDataList.class, footstepPathConsumer);
       objectCommunicator.attachListener(BlindWalkingPacket.class, blindWalkingPacketConsumer);
       objectCommunicator.attachListener(PauseCommand.class, pauseCommandConsumer);
+      objectCommunicator.attachListener(HighLevelStatePacket.class, desiredHighLevelStateProvider);
       objectCommunicator.attachListener(HeadOrientationPacket.class, desiredHeadOrientationProvider.getHeadOrientationPacketConsumer());
       objectCommunicator.attachListener(LookAtPacket.class, desiredHeadOrientationProvider.getLookAtPacketConsumer());
       objectCommunicator.attachListener(PelvisOrientationPacket.class, desiredPelvisPoseProvider);
@@ -184,7 +193,7 @@ public class VariousWalkingProviders
       VariousWalkingProviders variousProvidersFactory = new VariousWalkingProviders(footstepPathCoordinator, mapFromFootstepsToTrajectoryParameters,
                                                            desiredHeadOrientationProvider, desiredPelvisPoseProvider, desiredHandPoseProvider,
                                                            desiredHandLoadBearingProvider, torusPoseProvider, torusManipulationProvider,
-                                                           desiredChestOrientationProvider, footPoseProvider, footStateProvider, vehiclePoseProvider);
+                                                           desiredChestOrientationProvider, footPoseProvider, footStateProvider, vehiclePoseProvider, desiredHighLevelStateProvider);
 
       return variousProvidersFactory;
    }
@@ -206,6 +215,7 @@ public class VariousWalkingProviders
                                                                              registry);
       LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
 
+      DesiredHighLevelStateProvider desiredHighLevelStateProvider = null;
       DesiredHeadOrientationProvider desiredHeadOrientationProvider = null;
       DesiredPelvisPoseProvider desiredPelvisPoseProvider = null;
       DesiredChestOrientationProvider desiredChestOrientationProvider = null;
@@ -221,7 +231,7 @@ public class VariousWalkingProviders
                                                            desiredHeadOrientationProvider, desiredPelvisPoseProvider, desiredHandPoseProvider,
                                                            desiredHandLoadBearingProvider, torusPoseProvider, torusManipulationProvider,
                                                            desiredChestOrientationProvider, desiredFootPoseProvider, desiredFootStateProvider,
-                                                           vehiclePoseProvider);
+                                                           vehiclePoseProvider, desiredHighLevelStateProvider);
 
       return variousProvidersFactory;
 
@@ -239,6 +249,7 @@ public class VariousWalkingProviders
       TorusManipulationProvider torusManipulationProvider = new TorusManipulationProvider();
       LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
 
+      DesiredHighLevelStateProvider desiredHighLevelStateProvider = null;
       DesiredHeadOrientationProvider desiredHeadOrientationProvider = null;
       DesiredPelvisPoseProvider desiredPelvisPoseProvider = null;
       DesiredHandPoseProvider desiredHandPoseProvider = null;
@@ -252,7 +263,7 @@ public class VariousWalkingProviders
                                                            desiredHeadOrientationProvider, desiredPelvisPoseProvider, desiredHandPoseProvider,
                                                            desiredHandLoadBearingProvider, torusPoseProvider, torusManipulationProvider,
                                                            desiredChestOrientationProvider, desiredFootPoseProvider, desiredFootStateProvider,
-                                                           vehiclePoseProvider);
+                                                           vehiclePoseProvider, desiredHighLevelStateProvider);
 
       return variousWalkingProviders;
    }
@@ -279,6 +290,7 @@ public class VariousWalkingProviders
 
       LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
 
+      DesiredHighLevelStateProvider desiredHighLevelStateProvider = null;
       DesiredPelvisPoseProvider desiredPelvisPoseProvider = null;
       DesiredHandLoadBearingProvider desiredHandLoadBearingProvider = null;
       DesiredChestOrientationProvider desiredChestOrientationProvider = null;
@@ -290,7 +302,7 @@ public class VariousWalkingProviders
                                                            desiredHeadOrientationProvider, desiredPelvisPoseProvider, desiredHandPoseProvider,
                                                            desiredHandLoadBearingProvider, torusPoseProvider, torusManipulationProvider,
                                                            desiredChestOrientationProvider, desiredFootPoseProvider, desiredFootStateProvider,
-                                                           vehiclePoseProvider);
+                                                           vehiclePoseProvider, desiredHighLevelStateProvider);
 
       return variousWalkingProviders;
    }
