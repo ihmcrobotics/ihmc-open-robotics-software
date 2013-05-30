@@ -134,8 +134,8 @@ public class IndividualHandControlModule
       addRequestedStateTransition(requestedState, false, objectManipulationState, taskspaceHandPositionControlState);
       addRequestedStateTransition(requestedState, false, objectManipulationState, objectManipulationState);
 
-      addTransitionToCylindricalLoadBearing(requestedState, handController, jointSpaceHandControlState, loadBearingCylindricalState);
-      addTransitionToCylindricalLoadBearing(requestedState, handController, taskspaceHandPositionControlState, loadBearingCylindricalState);
+      addTransitionToCylindricalLoadBearing(requestedState, handController, jointSpaceHandControlState, loadBearingCylindricalState, simulationTime);
+      addTransitionToCylindricalLoadBearing(requestedState, handController, taskspaceHandPositionControlState, loadBearingCylindricalState, simulationTime);
 
       addTransitionToPlaneLoadBearing(requestedState, handController, jointSpaceHandControlState, loadBearingPlaneState);
       addTransitionToPlaneLoadBearing(requestedState, handController, taskspaceHandPositionControlState, loadBearingPlaneState);
@@ -150,7 +150,7 @@ public class IndividualHandControlModule
    }
 
    private static void addTransitionToCylindricalLoadBearing(final EnumYoVariable<IndividualHandControlState> requestedState,
-           final HandControllerInterface handControllerInterface, State<IndividualHandControlState> fromState, final State<IndividualHandControlState> toState)
+           final HandControllerInterface handControllerInterface, State<IndividualHandControlState> fromState, final State<IndividualHandControlState> toState, final DoubleYoVariable time)
    {
       StateTransitionCondition stateTransitionCondition = new StateTransitionCondition()
       {
@@ -158,8 +158,9 @@ public class IndividualHandControlModule
          {
             boolean transitionRequested = requestedState.getEnumValue() == toState.getStateEnum();
             boolean ableToBearLoad = handControllerInterface.isAbleToBearLoad();
+            boolean initializedClosedHack = time.getDoubleValue() < .01; // FIXME: get rid of this. Currently necessary for getting into car
 
-            return transitionRequested && ableToBearLoad;
+            return transitionRequested && (ableToBearLoad || initializedClosedHack);
          }
       };
       StateTransitionAction stateTransitionAction = new StateTransitionAction()
