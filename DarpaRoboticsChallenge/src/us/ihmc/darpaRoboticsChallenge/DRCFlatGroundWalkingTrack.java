@@ -84,7 +84,10 @@ public class DRCFlatGroundWalkingTrack
       DRCRobotInterface robotInterface = new PlainDRCRobot(DRCRobotModel.getDefaultRobotModel(), false);
       final double groundHeight = 0.0;
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(new FlatGroundProfile(groundHeight), robotInterface.getSimulateDT());
-      RobotInitialSetup<SDFRobot> robotInitialSetup = new DRCSimDRCRobotInitialSetup(groundHeight);
+      scsInitialSetup.setInitializeEstimatorToActual(true);
+      
+      double initialYaw = 0.3;
+      RobotInitialSetup<SDFRobot> robotInitialSetup = new DRCSimDRCRobotInitialSetup(groundHeight, initialYaw);
 
       boolean useVelocityAndHeadingScript = true;
       boolean cheatWithGroundHeightAtForFootstep = false;
