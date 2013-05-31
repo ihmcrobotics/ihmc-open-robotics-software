@@ -6,7 +6,6 @@ import java.io.IOException;
 import javax.swing.JFileChooser;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.environment.VRCTask;
 import us.ihmc.darpaRoboticsChallenge.environment.VRCTaskName;
 import us.ihmc.utilities.ThreadTools;
@@ -15,6 +14,7 @@ import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.VariableChangedListener;
 import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class PosePlaybackSCSBridge
 {
@@ -25,11 +25,15 @@ public class PosePlaybackSCSBridge
    private PosePlaybackRobotPoseSequence posePlaybackRobotPoseSequence;
 
    private final PosePlaybackSmoothPoseInterpolator interpolator;
+   private final YoVariableRegistry registry = new YoVariableRegistry("PlaybackPoseSCSBridge");
 
+//   private final BooleanYoVariable plotBalls = new BooleanYoVariable("plotBalls", registry);
+   private DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+   
+//   private final BagOfBalls balls = new BagOfBalls(500, 0.01, YoAppearance.AliceBlue(), registry, dynamicGraphicObjectsListRegistry);
+   
    public PosePlaybackSCSBridge() throws IOException
    {
-      YoVariableRegistry registry = new YoVariableRegistry("PlaybackPoseSCSBridge");
-
       interpolator = new PosePlaybackSmoothPoseInterpolator(registry);
 
       posePlaybackController = new PosePlaybackAllJointsController(registry);
@@ -41,7 +45,7 @@ public class PosePlaybackSCSBridge
 
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot);
       scs.addYoVariableRegistry(registry);
-
+//      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
 
       DRCRobotMidiSliderBoardPositionManipulation sliderBoard = new DRCRobotMidiSliderBoardPositionManipulation(scs);
 
@@ -95,7 +99,10 @@ public class PosePlaybackSCSBridge
          }
 
          System.out.println("Adding pose to sequence list: " + pose);
-         posePlaybackRobotPoseSequence.addPose(pose);
+         posePlaybackRobotPoseSequence.addPose(pose);  
+         
+//         FramePoint location = new FramePoint(ReferenceFrame.getWorldFrame(), Math.random(), Math.random(), Math.random());
+//         balls.setBall(location);
 
          double dt = 0.01;
          double morphTime = 1.0;
