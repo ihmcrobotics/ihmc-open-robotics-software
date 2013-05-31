@@ -4,17 +4,22 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.swing.JFileChooser;
+import javax.vecmath.Point3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.environment.VRCTask;
 import us.ihmc.darpaRoboticsChallenge.environment.VRCTaskName;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.VariableChangedListener;
 import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public class PosePlaybackSCSBridge
 {
@@ -28,7 +33,9 @@ public class PosePlaybackSCSBridge
    private final YoVariableRegistry registry = new YoVariableRegistry("PlaybackPoseSCSBridge");
 
 //   private final BooleanYoVariable plotBalls = new BooleanYoVariable("plotBalls", registry);
-   private DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+   private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+   private final YoFramePoint centerOfMassPosition = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint centerOfMassPosition2d = new YoFramePoint("centerOfMass2d", ReferenceFrame.getWorldFrame(), registry);
    
 //   private final BagOfBalls balls = new BagOfBalls(500, 0.01, YoAppearance.AliceBlue(), registry, dynamicGraphicObjectsListRegistry);
    
@@ -45,7 +52,14 @@ public class PosePlaybackSCSBridge
 
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot);
       scs.addYoVariableRegistry(registry);
-//      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+      
+      DynamicGraphicPosition centerOfMassViz = new DynamicGraphicPosition("centerOfMass", centerOfMassPosition, 0.03, YoAppearance.Gold());
+      DynamicGraphicPosition centerOfMass2dViz = new DynamicGraphicPosition("centerOfMass2d", centerOfMassPosition2d, 0.03, YoAppearance.Gold());
+      
+      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(getClass().getSimpleName(), centerOfMassViz);
+      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(getClass().getSimpleName(), centerOfMass2dViz);
+      
+      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
 
       DRCRobotMidiSliderBoardPositionManipulation sliderBoard = new DRCRobotMidiSliderBoardPositionManipulation(scs);
 
@@ -60,7 +74,11 @@ public class PosePlaybackSCSBridge
 
 
       scs.startOnAThread();
-
+  
+      CenterOfMassGraphicUpdater centerOfMassGraphicUpdater = new CenterOfMassGraphicUpdater(sdfRobot);
+      Thread thread = new Thread(centerOfMassGraphicUpdater);
+      thread.start();
+      
       try
       {
          posePlaybackSender.connect();
@@ -70,7 +88,40 @@ public class PosePlaybackSCSBridge
       {
          System.err.println("Didn't connect to posePlaybackSender!");
       }
+      
+      
 
+   }
+
+   private class CenterOfMassGraphicUpdater implements Runnable
+   {
+      private final SDFRobot sdfRobot;
+
+      private final Point3d comPoint = new Point3d();
+      private final Point3d comPoint2d = new Point3d();
+
+
+      CenterOfMassGraphicUpdater(SDFRobot sdfRobot)
+      {
+         this.sdfRobot = sdfRobot;
+      }
+
+      public void run()
+      {
+         while(true)
+         {
+            sdfRobot.update();
+
+            sdfRobot.computeCenterOfMass(comPoint);
+            centerOfMassPosition.set(comPoint);
+
+            System.out.println(comPoint);
+            comPoint2d.set(comPoint.getX(), comPoint.getY(), 0.0);
+            centerOfMassPosition2d.set(comPoint2d);
+
+            ThreadTools.sleep(100);
+         }
+      }  
    }
 
    private class CaptureSnapshotListener implements VariableChangedListener
