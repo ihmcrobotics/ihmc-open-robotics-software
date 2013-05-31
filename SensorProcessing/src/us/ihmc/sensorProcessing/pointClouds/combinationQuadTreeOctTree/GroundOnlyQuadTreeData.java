@@ -2,13 +2,31 @@ package us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree;
 
 public class GroundOnlyQuadTreeData
 {
-   private final boolean isStuffAboveMe;
-   public GroundOnlyQuadTreeData(boolean stuffAbove)
+   private boolean isStuffAboveMe;
+   private double height;
+   public GroundOnlyQuadTreeData()
    {
-      this.isStuffAboveMe=stuffAbove;
+      this.isStuffAboveMe=false;
+      this.height=Double.NaN;
    }
    public boolean getIsStuffAboveMe()
    {
       return isStuffAboveMe;
+   }
+   public double getHeight()
+   {
+      return height;
+   }
+   public boolean isHeightValid()
+   {
+      return !Double.isNaN(height);
+   }
+   public void setIsStuffAboveMe(boolean isStuffAbove)
+   {
+      this.isStuffAboveMe=isStuffAbove;
+   }
+   public void setHeight(double height)
+   {
+      this.height=height;
    }
 }
