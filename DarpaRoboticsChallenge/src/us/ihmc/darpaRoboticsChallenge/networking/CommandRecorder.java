@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import javax.media.j3d.Transform3D;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.EndOfScriptCommand;
+import us.ihmc.darpaRoboticsChallenge.scriptEngine.ScriptObject;
 import us.ihmc.utilities.net.KryoStreamSerializer;
 import us.ihmc.utilities.net.NetClassList;
 import us.ihmc.utilities.net.TimestampProvider;
