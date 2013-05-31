@@ -17,7 +17,7 @@ public class InstantaneousCapturePointPlannerWithTimeFreezer implements Instanta
    private final DoubleYoVariable timeDelay = new DoubleYoVariable("timeDelay", registry);
    private final DoubleYoVariable previousTime = new DoubleYoVariable("previousTime", registry);
    private final DoubleYoVariable freezeTimeFactor = new DoubleYoVariable("freezeTimeFactor", "Set to 0.0 to turn off, 1.0 to completely freeze time", registry);
-   
+   private final double maxFreezeLineICPErrorWithoutTimeFreeze = -0.03; 
    
    
    private final InstantaneousCapturePointPlanner instantaneousCapturePointPlanner;
@@ -28,7 +28,7 @@ public class InstantaneousCapturePointPlannerWithTimeFreezer implements Instanta
       
       parentRegistry.addChild(registry);
       timeDelay.set(0.0);
-      freezeTimeFactor.set(0.9);
+      freezeTimeFactor.set(0.9); 
    }
    
    public void initializeSingleSupport(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double initialTime)
@@ -63,7 +63,7 @@ public class InstantaneousCapturePointPlannerWithTimeFreezer implements Instanta
 
       double distance = computeDistanceFromFreezeLine(icpPostionToPack, icpVelocityToPack, actualICP);
 
-      if ((distance < -0.01) || (this.isDone(time)))
+      if ((distance < maxFreezeLineICPErrorWithoutTimeFreeze) || (this.isDone(time)))
       {
          freezeTime(time);
       }
