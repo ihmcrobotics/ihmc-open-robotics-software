@@ -2,7 +2,6 @@ package us.ihmc.imageProcessing.driving;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
 
 /**
  * @author Peter Abeles
@@ -41,6 +40,7 @@ public class OccupancyGridPanel extends JPanel
    {
       if (copy)
       {
+         this.map.resize(map.getWidth(),map.getHeight());
          this.map.setTo(map);
       }
       else
