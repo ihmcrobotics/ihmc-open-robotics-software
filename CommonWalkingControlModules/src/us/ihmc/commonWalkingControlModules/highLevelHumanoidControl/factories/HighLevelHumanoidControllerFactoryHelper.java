@@ -6,6 +6,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.CylinderAndContactPointWrenchDistributor;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.BlindWalkingToDestinationDesiredFootstepCalculator;
@@ -22,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.OldMomentumCo
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointGroundReactionWrenchDistributor;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributor;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -44,6 +46,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 public class HighLevelHumanoidControllerFactoryHelper
 {
    private static final boolean USE_NEW_OPTIMIZATION_MOMENTUM_CONTROL_MODULE = false;
+   private static final boolean USE_PLANE_ONLY_FORCE_DISTRIBUTOR = true;
 
    public static BlindWalkingToDestinationDesiredFootstepCalculator getBlindWalkingToDestinationDesiredFootstepCalculator(
            WalkingControllerParameters walkingControllerParameters, CommonWalkingReferenceFrames referenceFrames,
@@ -141,8 +144,7 @@ public class HighLevelHumanoidControllerFactoryHelper
    }
    
    public static MomentumControlModule createMomentumControlModule(WalkingControllerParameters walkingControllerParameters, FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, double gravityZ,
-         TwistCalculator twistCalculator, double controlDT, LidarControllerInterface lidarControllerInterface,
-         GroundReactionWrenchDistributor groundReactionWrenchDistributor, YoVariableRegistry registry,
+         TwistCalculator twistCalculator, double controlDT, LidarControllerInterface lidarControllerInterface, YoVariableRegistry registry,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       MomentumControlModule momentumControlModule;
@@ -160,6 +162,26 @@ public class HighLevelHumanoidControllerFactoryHelper
       }
       else
       {
+         GroundReactionWrenchDistributor groundReactionWrenchDistributor = null;
+         if (USE_PLANE_ONLY_FORCE_DISTRIBUTOR)
+         {
+            ContactPointGroundReactionWrenchDistributor contactPointGroundReactionWrenchDistributor =
+                  new ContactPointGroundReactionWrenchDistributor(referenceFrames.getCenterOfMassFrame(), registry);
+            double[] diagonalCWeights = new double[]
+                  {
+                        1.0, 1.0, 1.0, 10.0, 10.0, 10.0
+                  };
+            contactPointGroundReactionWrenchDistributor.setWeights(diagonalCWeights, 5.0, 0.001);
+            groundReactionWrenchDistributor = contactPointGroundReactionWrenchDistributor;
+         }
+         else
+         {
+            CylinderAndContactPointWrenchDistributor optimizationBasedWrenchDistributor =
+                  new CylinderAndContactPointWrenchDistributor(referenceFrames.getCenterOfMassFrame(), registry, dynamicGraphicObjectsListRegistry);
+            groundReactionWrenchDistributor = optimizationBasedWrenchDistributor;
+         }
+
+
          DampedLeastSquaresSolver jacobianSolver = new DampedLeastSquaresSolver(SpatialMotionVector.SIZE);
          jacobianSolver.setAlpha(5e-2);
 
