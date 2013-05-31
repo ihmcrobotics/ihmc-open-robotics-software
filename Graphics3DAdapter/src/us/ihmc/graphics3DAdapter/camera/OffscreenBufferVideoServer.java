@@ -19,11 +19,11 @@ public class OffscreenBufferVideoServer
    private final TimestampProvider timestampProvider;
 
    public OffscreenBufferVideoServer(Graphics3DAdapter adapter, CameraMountList mountList, CameraConfiguration cameraConfiguration,
-         CameraTrackingAndDollyPositionHolder cameraTrackingAndDollyPositionHolder, VideoSettings settings, VideoDataServer videoDataServer, TimestampProvider timestampProvider)
+         CameraTrackingAndDollyPositionHolder cameraTrackingAndDollyPositionHolder, int width, int height, VideoDataServer videoDataServer, TimestampProvider timestampProvider)
    {
       ViewportAdapter viewport = adapter.createNewViewport(null, false, true);
       camera = viewport.getCamera();
-      viewport.setupOffscreenView(settings.getWidth(), settings.getHeight());
+      viewport.setupOffscreenView(width, height);
 
       ClassicCameraController cameraController = new ClassicCameraController(adapter, viewport, cameraTrackingAndDollyPositionHolder);
       cameraController.setConfiguration(cameraConfiguration, mountList);

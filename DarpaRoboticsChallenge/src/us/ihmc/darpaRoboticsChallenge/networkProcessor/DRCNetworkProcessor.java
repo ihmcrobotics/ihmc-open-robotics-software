@@ -18,12 +18,12 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.SCSCameraDataRecei
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.GazeboLidarDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.RobotBoundingBoxes;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.SCSLidarDataReceiver;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.settings.DRCBandwidthSettings;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.settings.DRCBandwidthSettingsFactory;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosMainNode;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.DRCJointConfigurationData;
+import us.ihmc.graphics3DAdapter.camera.VideoSettings;
+import us.ihmc.graphics3DAdapter.camera.VideoSettingsFactory;
 import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
 import us.ihmc.utilities.net.KryoObjectClient;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
@@ -31,7 +31,10 @@ import us.ihmc.utilities.net.ObjectCommunicator;
 
 public class DRCNetworkProcessor
 {
-
+   //TODO: make command line option
+   private final VideoSettings videoSettings = VideoSettingsFactory.get512kBitSettings();
+   
+   
    private final ObjectCommunicator fieldComputerClient;
    private final AtomicSettableTimestampProvider timestampProvider = new AtomicSettableTimestampProvider();
    private final DRCNetworkProcessorNetworkingManager networkingManager;
@@ -46,34 +49,34 @@ public class DRCNetworkProcessor
     * This will become a stand-alone application in the final competition. Do
     * NOT pass in objects shared with the DRC simulation!
     */
-   public DRCNetworkProcessor(URI rosCoreURI, DRCBandwidthSettings drcBandwidthSettings)
+   public DRCNetworkProcessor(URI rosCoreURI)
    {
-      this(rosCoreURI, null, drcBandwidthSettings);
+      this(rosCoreURI, null);
    }
    
-   public DRCNetworkProcessor(URI rosCoreURI, ObjectCommunicator drcNetworkObjectCommunicator, DRCBandwidthSettings drcBandwidthSettings)
+   public DRCNetworkProcessor(URI rosCoreURI, ObjectCommunicator drcNetworkObjectCommunicator)
    {
-      this(drcNetworkObjectCommunicator, drcBandwidthSettings);
+      this(drcNetworkObjectCommunicator);
 
       System.out.println("Connecting to ROS");
       RosMainNode rosMainNode;
       rosMainNode = new RosMainNode(rosCoreURI, "darpaRoboticsChallange/networkProcessor");
 
-      new GazeboCameraReceiver(robotPoseBuffer, DRCConfigParameters.VIDEOSETTINGS, rosMainNode, networkingManager, DRCSensorParameters.FIELD_OF_VIEW);
-      new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, fullRobotModel, robotBoundingBoxes, jointMap, rosCoreURI.toString(), drcBandwidthSettings);
+      new GazeboCameraReceiver(robotPoseBuffer, videoSettings, rosMainNode, networkingManager, DRCSensorParameters.FIELD_OF_VIEW);
+      new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, fullRobotModel, robotBoundingBoxes, jointMap, rosCoreURI.toString());
       rosMainNode.execute();
       connect();
    }
    
-   public DRCNetworkProcessor(LocalObjectCommunicator scsCommunicator, ObjectCommunicator drcNetworkObjectCommunicator, DRCBandwidthSettings drcBandwidthSettings)
+   public DRCNetworkProcessor(LocalObjectCommunicator scsCommunicator, ObjectCommunicator drcNetworkObjectCommunicator)
    {
-      this(drcNetworkObjectCommunicator, drcBandwidthSettings);
-      new SCSCameraDataReceiver(robotPoseBuffer, DRCConfigParameters.VIDEOSETTINGS, scsCommunicator, networkingManager);
-      new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, fullRobotModel, robotBoundingBoxes, jointMap, drcBandwidthSettings);
+      this(drcNetworkObjectCommunicator);
+      new SCSCameraDataReceiver(robotPoseBuffer, videoSettings, scsCommunicator, networkingManager);
+      new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, fullRobotModel, robotBoundingBoxes, jointMap);
       connect();
    }
 
-   private DRCNetworkProcessor(ObjectCommunicator fieldComputerClient, DRCBandwidthSettings drcBandwidthSettings)
+   private DRCNetworkProcessor(ObjectCommunicator fieldComputerClient)
    {
       if(fieldComputerClient == null)
       {
@@ -87,7 +90,7 @@ public class DRCNetworkProcessor
       }
      
       robotPoseBuffer = new RobotPoseBuffer(this.fieldComputerClient, 1000, timestampProvider);
-      networkingManager = new DRCNetworkProcessorNetworkingManager(this.fieldComputerClient, timestampProvider, drcBandwidthSettings);
+      networkingManager = new DRCNetworkProcessorNetworkingManager(this.fieldComputerClient, timestampProvider);
       
       jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_SANDIA_HANDS, false);  
       JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap, true);
@@ -116,15 +119,13 @@ public class DRCNetworkProcessor
    public static void main(String[] args) throws URISyntaxException
    {
       
-      DRCBandwidthSettings drcBandwidthSettings = DRCBandwidthSettingsFactory.getLowBitRateSettings();
-      
       if(args.length == 1)
       {
-         new DRCNetworkProcessor(new URI(args[0]), drcBandwidthSettings);
+         new DRCNetworkProcessor(new URI(args[0]));
       }
       else
       {
-         new DRCNetworkProcessor(new URI(DRCConfigParameters.ROS_MASTER_URI), drcBandwidthSettings);
+         new DRCNetworkProcessor(new URI(DRCConfigParameters.ROS_MASTER_URI));
       }
    }
 }
