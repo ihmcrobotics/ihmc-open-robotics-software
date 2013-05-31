@@ -125,7 +125,7 @@ public class DRCFlatGroundWalkingTest
       {
          blockingSimulationRunner.simulateAndBlock(timeIncrement);
 
-         if (Math.abs(comError.getDoubleValue()) > 0.07)
+         if (Math.abs(comError.getDoubleValue()) > 0.09)
          {
             fail("comError = " + Math.abs(comError.getDoubleValue()));
          }
