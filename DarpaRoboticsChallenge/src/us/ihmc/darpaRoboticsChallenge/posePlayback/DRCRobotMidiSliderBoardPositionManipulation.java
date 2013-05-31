@@ -128,17 +128,17 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       legJointStringNames.put(LegJointName.ANKLE_PITCH, legPrefix + "uay");
       legJointStringNames.put(LegJointName.ANKLE_ROLL, legPrefix + "lax");
 
-      double hipYawLeftMax = 1.14;
-      double hipYawLeftMin = -0.32;
+      double hipYawMax = 1.14;
+      double hipYawMin = -0.32;
       
-      SideDependentList<Double> hipYawLowerLimit = new SideDependentList<Double>(hipYawLeftMin, -hipYawLeftMax);
-      SideDependentList<Double> hipYawUpperLimit = new SideDependentList<Double>(hipYawLeftMax, -hipYawLeftMin);
+      SideDependentList<Double> hipYawLowerLimit = new SideDependentList<Double>(hipYawMin, -hipYawMin);
+      SideDependentList<Double> hipYawUpperLimit = new SideDependentList<Double>(hipYawMax, -hipYawMax);
       
-      double hipRollLeftMax = 0.495;
-      double hipRollLeftMin = -0.47;
+      double hipRollMax = 0.495;
+      double hipRollMin = -0.47; 
       
-      SideDependentList<Double> hipRollLowerLimit = new SideDependentList<Double>(hipRollLeftMin, -hipRollLeftMax);
-      SideDependentList<Double> hipRollUpperLimit = new SideDependentList<Double>(hipRollLeftMax, -hipRollLeftMin);
+      SideDependentList<Double> hipRollLowerLimit = new SideDependentList<Double>(hipRollMin, -hipRollMin);
+      SideDependentList<Double> hipRollUpperLimit = new SideDependentList<Double>(hipRollMax, -hipRollMax);
       
       
       for (RobotSide robotSide : RobotSide.values())
@@ -166,22 +166,22 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       armJointStringNames.put(ArmJointName.WRIST_PITCH, armPrefix + "uwy");
       armJointStringNames.put(ArmJointName.WRIST_ROLL, armPrefix + "mwx");
 
-      double shoulderRollLeftMax = 1.74533;
-      double shoulderRollLeftMin = -1.39626;
+      double shoulderRollMax = 1.74533;
+      double shoulderRollMin = -1.39626;
       
-      SideDependentList<Double> shoulderRollLowerLimit = new SideDependentList<Double>(shoulderRollLeftMin, -shoulderRollLeftMax);
-      SideDependentList<Double> shoulderRollUpperLimit = new SideDependentList<Double>(shoulderRollLeftMax, -shoulderRollLeftMin);
+      SideDependentList<Double> shoulderRollLowerLimit = new SideDependentList<Double>(shoulderRollMin, -shoulderRollMin);
+      SideDependentList<Double> shoulderRollUpperLimit = new SideDependentList<Double>(shoulderRollMax, -shoulderRollMax);
       
       
-      double elbowRollLeftMin = 0.0;
-      double elbowRollLeftMax = 2.35619;
-      SideDependentList<Double> elbowRollLowerLimit = new SideDependentList<Double>(elbowRollLeftMin, -elbowRollLeftMax);
-      SideDependentList<Double> elbowRollUpperLimit = new SideDependentList<Double>(elbowRollLeftMax, -elbowRollLeftMin);
+      double elbowRollMin = 0.0;
+      double elbowRollMax = 2.35619;
+      SideDependentList<Double> elbowRollLowerLimit = new SideDependentList<Double>(elbowRollMin, -elbowRollMin);
+      SideDependentList<Double> elbowRollUpperLimit = new SideDependentList<Double>(elbowRollMax, -elbowRollMax);
       
-      double wristRollLeftMin = -0.436;
-      double wristRollLeftMax = 1.571;
-      SideDependentList<Double> wristRollLowerLimit = new SideDependentList<Double>(wristRollLeftMin, -wristRollLeftMax);
-      SideDependentList<Double> wristRollUpperLimit = new SideDependentList<Double>(wristRollLeftMax, -wristRollLeftMin);
+      double wristRollMin = -0.436;
+      double wristRollMax = 1.571;
+      SideDependentList<Double> wristRollLowerLimit = new SideDependentList<Double>(wristRollMin, -wristRollMin);
+      SideDependentList<Double> wristRollUpperLimit = new SideDependentList<Double>(wristRollMax, -wristRollMax);
       
       
       for (RobotSide robotSide : RobotSide.values())
