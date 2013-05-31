@@ -452,8 +452,9 @@ public class SmoothICPComputer
    public void initializeSingleSupport(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double initialTime)
    {
       footLocationList.clear();
+      ArrayList<ReferenceFrame> dummyReferenceFrameList = new ArrayList<ReferenceFrame>(); 
 
-      transferToAndNextFootstepsData.getFootLocationList(footLocationList, icpForwardFromCenter.getDoubleValue());
+      transferToAndNextFootstepsData.getFootLocationList(footLocationList, dummyReferenceFrameList, icpForwardFromCenter.getDoubleValue());
       double singleSupportDuration = transferToAndNextFootstepsData.getSingleSupportDuration();
       double doubleSupportDuration = transferToAndNextFootstepsData.getDoubleSupportDuration();
       double omega0 = transferToAndNextFootstepsData.getW0();
@@ -465,8 +466,9 @@ public class SmoothICPComputer
    public void reInitializeSingleSupport(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double currentTime)
    {
       footLocationList.clear();
+      ArrayList<ReferenceFrame> dummyReferenceFrameList = new ArrayList<ReferenceFrame>(); 
 
-      transferToAndNextFootstepsData.getFootLocationList(footLocationList, icpForwardFromCenter.getDoubleValue());
+      transferToAndNextFootstepsData.getFootLocationList(footLocationList, dummyReferenceFrameList, icpForwardFromCenter.getDoubleValue());
       double singleSupportDuration = transferToAndNextFootstepsData.getSingleSupportDuration();
       double doubleSupportDuration = transferToAndNextFootstepsData.getDoubleSupportDuration();
       double omega0 = transferToAndNextFootstepsData.getW0();
@@ -479,8 +481,9 @@ public class SmoothICPComputer
            double initialTime)
    {
       footLocationList.clear();
+      ArrayList<ReferenceFrame> dummyReferenceFrameList = new ArrayList<ReferenceFrame>(); 
 
-      transferToAndNextFootstepsData.getFootLocationList(footLocationList, icpForwardFromCenter.getDoubleValue());
+      transferToAndNextFootstepsData.getFootLocationList(footLocationList, dummyReferenceFrameList, icpForwardFromCenter.getDoubleValue());
       double singleSupportDuration = transferToAndNextFootstepsData.getSingleSupportDuration();
       double doubleSupportDuration = transferToAndNextFootstepsData.getDoubleSupportDuration();
       double doubleSupportInitialTransferDuration = transferToAndNextFootstepsData.getDoubleSupportInitialTransferDuration();
@@ -494,8 +497,9 @@ public class SmoothICPComputer
    public void initializeDoubleSupport(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double initialTime)
    {
       footLocationList.clear();
+      ArrayList<ReferenceFrame> dummyReferenceFrameList = new ArrayList<ReferenceFrame>(); 
 
-      transferToAndNextFootstepsData.getFootLocationList(footLocationList, icpForwardFromCenter.getDoubleValue());
+      transferToAndNextFootstepsData.getFootLocationList(footLocationList, dummyReferenceFrameList, icpForwardFromCenter.getDoubleValue());
       double singleSupportDuration = transferToAndNextFootstepsData.getSingleSupportDuration();
       double doubleSupportDuration = transferToAndNextFootstepsData.getDoubleSupportDuration();
       double omega0 = transferToAndNextFootstepsData.getW0();

@@ -127,12 +127,12 @@ public class FootCenterToToeEvaluator
 
       RobotSide stepSide = RobotSide.LEFT;
       int numberOfStepsInStepList = 7;
-      double stepLength = 0.7;
+      double stepLength = 0.3;
       double halfStepWidth = 0.1;
       boolean startSquaredUp = true;
 
-      double singleSupportDuration = 0.6;
-      double doubleSupportDuration = 0.3;
+      double singleSupportDuration = 0.7;
+      double doubleSupportDuration = 0.2;
       double doubleSupportInitialTransferDuration = 0.4;
 
       double eCMPHeight = 1.0;
@@ -147,13 +147,17 @@ public class FootCenterToToeEvaluator
       Point3d initialICPPosition = new Point3d();
       Point3d initialECMPPosition = new Point3d();
       Vector3d initialICPVelocity = new Vector3d();
+      Vector3d initialICPAcceleration = new Vector3d();
 
       Point3d icpPosition = new Point3d();
       Vector3d icpVelocity = new Vector3d();
+      Vector3d icpAcceleration = new Vector3d();
       Point3d ecmpPosition = new Point3d();
 
       double initialTime = 0.0;
-      ArrayList<FramePoint> footLocations = getFirstSteps(stepList, 4);
+      ArrayList<FramePoint> footLocations = getFirstSteps(stepList, 4); 
+      ArrayList<ReferenceFrame> dummyReferenceFrameList = new ArrayList<ReferenceFrame>(); 
+      
       if (visualize)
       {
          for (int i = 0; i < Math.min(footLocations.size(), footstepYoFramePoints.size()); i++)
@@ -170,10 +174,16 @@ public class FootCenterToToeEvaluator
       initialICPPosition.set(footLocations.get(0).getPoint());
       initialICPPosition.add(footLocations.get(1).getPoint());
       initialICPPosition.scale(0.5);
+      
+      dummyReferenceFrameList.clear();
+      for (int i = 0; i < footLocations.size(); i++)
+      {
+         dummyReferenceFrameList.add(ReferenceFrame.getWorldFrame()); 
+      }
 
-      smoothICPComputer.initializeDoubleSupportInitialTransfer(footLocations, initialICPPosition, singleSupportDuration, doubleSupportDuration,
+      smoothICPComputer.initializeDoubleSupportInitialTransfer(footLocations, dummyReferenceFrameList, initialICPPosition, singleSupportDuration, doubleSupportDuration,
               doubleSupportInitialTransferDuration, omega0, initialTime);
-      smoothICPComputer.computeICPPositionAndVelocity(initialICPPosition, initialICPVelocity, initialECMPPosition, initialTime);
+      smoothICPComputer.computeICPPositionVelocityAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration, initialECMPPosition, initialTime);
 
       if (visualize)
       {
@@ -199,7 +209,7 @@ public class FootCenterToToeEvaluator
       }
 
       Point3d transferFromFoot = footLocations.get(0).getPoint();
-      simulateForwardAndCheckDoubleSupport(icpPosition, icpVelocity, ecmpPosition, smoothICPComputer, doubleSupportInitialTransferDuration, initialTime,
+      simulateForwardAndCheckDoubleSupport(icpPosition, icpVelocity, icpAcceleration, ecmpPosition, smoothICPComputer, doubleSupportInitialTransferDuration, initialTime,
               deltaT, omega0, initialICPPosition, stepList, footLocations);
 
       initialTime = initialTime + doubleSupportInitialTransferDuration;
@@ -263,7 +273,14 @@ public class FootCenterToToeEvaluator
             }
          }
 
-         smoothICPComputer.initializeSingleSupport(footLocations, singleSupportDuration, doubleSupportDuration, omega0, initialTime);
+         
+         dummyReferenceFrameList.clear(); 
+         for (int i = 0; i < footLocations.size(); i++)
+         {
+            dummyReferenceFrameList.add(ReferenceFrame.getWorldFrame()); 
+         }
+         
+         smoothICPComputer.initializeSingleSupport(footLocations, dummyReferenceFrameList, singleSupportDuration, doubleSupportDuration, omega0, initialTime);
 
          if (visualize)
          {
@@ -286,18 +303,24 @@ public class FootCenterToToeEvaluator
             }
          }
 
-         smoothICPComputer.computeICPPositionAndVelocity(initialICPPosition, initialICPVelocity, initialECMPPosition, initialTime);
+         smoothICPComputer.computeICPPositionVelocityAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration, initialECMPPosition, initialTime);
 
 
          transferFromFoot = footLocations.get(0).getPoint();
 
-         simulateForwardAndCheckSingleSupport(icpPosition, icpVelocity, ecmpPosition, smoothICPComputer, singleSupportDuration, initialTime, omega0,
+         simulateForwardAndCheckSingleSupport(icpPosition, icpVelocity, icpAcceleration, ecmpPosition, smoothICPComputer, singleSupportDuration, initialTime, omega0,
                  initialICPPosition, transferFromFoot, stepList, footLocations);
 
          initialTime = initialTime + singleSupportDuration;
 
-         smoothICPComputer.initializeDoubleSupport(footLocations, singleSupportDuration, doubleSupportDuration, omega0, initialTime);
-         smoothICPComputer.computeICPPositionAndVelocity(initialICPPosition, initialICPVelocity, initialECMPPosition, initialTime);
+         dummyReferenceFrameList.clear(); 
+         for (int i = 0; i < footLocations.size(); i++)
+         {
+            dummyReferenceFrameList.add(ReferenceFrame.getWorldFrame()); 
+         }
+         
+         smoothICPComputer.initializeDoubleSupport(footLocations, dummyReferenceFrameList, singleSupportDuration, doubleSupportDuration, omega0, initialTime);
+         smoothICPComputer.computeICPPositionVelocityAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration, initialECMPPosition, initialTime);
 
 
          if (visualize)
@@ -321,7 +344,7 @@ public class FootCenterToToeEvaluator
             }
          }
 
-         simulateForwardAndCheckDoubleSupport(icpPosition, icpVelocity, ecmpPosition, smoothICPComputer, doubleSupportDuration, initialTime, deltaT, omega0,
+         simulateForwardAndCheckDoubleSupport(icpPosition, icpVelocity, icpAcceleration, ecmpPosition, smoothICPComputer, doubleSupportDuration, initialTime, deltaT, omega0,
                  initialICPPosition, stepList, footLocations);
 
          initialTime = initialTime + doubleSupportDuration;
@@ -332,7 +355,7 @@ public class FootCenterToToeEvaluator
 
       double timeToSimulateAtEnd = 1.0;
       initialICPPosition.set(icpPosition);
-      simulateForwardAndCheckDoubleSupport(icpPosition, icpVelocity, ecmpPosition, smoothICPComputer, timeToSimulateAtEnd, initialTime, deltaT, omega0,
+      simulateForwardAndCheckDoubleSupport(icpPosition, icpVelocity, icpAcceleration, ecmpPosition, smoothICPComputer, timeToSimulateAtEnd, initialTime, deltaT, omega0,
               initialICPPosition, stepList, footLocations);
 
       if (visualize)
@@ -453,7 +476,7 @@ public class FootCenterToToeEvaluator
       return footLocations;
    }
 
-   private void simulateForwardAndCheckSingleSupport(Point3d icpPositionToPack, Vector3d icpVelocityToPack, Point3d ecmpPositionToPack,
+   private void simulateForwardAndCheckSingleSupport(Point3d icpPositionToPack, Vector3d icpVelocityToPack, Vector3d icpAccelerationToPack, Point3d ecmpPositionToPack,
          DoubleSupportFootCenterToToeICPComputer smoothICPComputer, double singleSupportDuration, double initialTime, double omega0, Point3d initialICPPosition,
            Point3d transferFromFoot, ArrayList<YoFramePoint> stepList, ArrayList<FramePoint> footLocations)
    {
@@ -496,7 +519,7 @@ public class FootCenterToToeEvaluator
          }
 
 
-         smoothICPComputer.computeICPPositionAndVelocity(icpPositionToPack, icpVelocityToPack, ecmpPositionToPack, time);
+         smoothICPComputer.computeICPPositionVelocityAcceleration(icpPositionToPack, icpVelocityToPack, icpAccelerationToPack, ecmpPositionToPack, time);
 
          if (visualize)
          {
@@ -507,7 +530,7 @@ public class FootCenterToToeEvaluator
       }
    }
 
-   private void simulateForwardAndCheckDoubleSupport(Point3d icpPositionToPack, Vector3d icpVelocityToPack, Point3d ecmpPositionToPack,
+   private void simulateForwardAndCheckDoubleSupport(Point3d icpPositionToPack, Vector3d icpVelocityToPack, Vector3d icpAccelerationToPack, Point3d ecmpPositionToPack,
          DoubleSupportFootCenterToToeICPComputer smoothICPComputer, double doubleSupportDuration, double initialTime, double deltaT, double omega0, Point3d initialICPPosition,
            ArrayList<YoFramePoint> stepList, ArrayList<FramePoint> footLocations)
    {
@@ -549,7 +572,7 @@ public class FootCenterToToeEvaluator
          }
 
 
-         smoothICPComputer.computeICPPositionAndVelocity(icpPositionToPack, icpVelocityToPack, ecmpPositionToPack, time);
+         smoothICPComputer.computeICPPositionVelocityAcceleration(icpPositionToPack, icpVelocityToPack, icpAccelerationToPack, ecmpPositionToPack, time);
 
          if (visualize)
          {

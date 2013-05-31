@@ -32,11 +32,12 @@ public class SmoothICPComputer2D extends DoubleSupportFootCenterToToeICPComputer
 
    private Point3d icpPostionToPackTemp = new Point3d();
    private Vector3d icpVelocityToPackTemp = new Vector3d();
+   private Vector3d icpAccelerationToPackTemp = new Vector3d();
    private Point3d ecmpToPackTemp = new Point3d();
 
    public void getICPPositionAndVelocity(FramePoint2d icpPostionToPack, FrameVector2d icpVelocityToPack, FramePoint2d ecmpToPack, FramePoint2d actualICP, double time)
    {
-      super.computeICPPositionAndVelocity(icpPostionToPackTemp, icpVelocityToPackTemp, ecmpToPackTemp, time);
+      super.computeICPPositionVelocityAcceleration(icpPostionToPackTemp, icpVelocityToPackTemp, icpAccelerationToPackTemp, ecmpToPackTemp, time);
 
       icpPostionToPack.set(icpPostionToPackTemp.getX(), icpPostionToPackTemp.getY());
       icpVelocityToPack.set(icpVelocityToPackTemp.getX(), icpVelocityToPackTemp.getY());
