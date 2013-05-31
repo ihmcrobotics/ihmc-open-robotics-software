@@ -18,6 +18,8 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.SCSCameraDataRecei
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.GazeboLidarDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.RobotBoundingBoxes;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.SCSLidarDataReceiver;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.settings.DRCBandwidthSettings;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.settings.DRCBandwidthSettingsFactory;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosMainNode;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
@@ -35,6 +37,7 @@ public class DRCNetworkProcessor
    private final DRCNetworkProcessorNetworkingManager networkingManager;
    private final RobotPoseBuffer robotPoseBuffer;
 
+   private final DRCBandwidthSettings drcBandwidthSettings;   
    
    private final SDFFullRobotModel fullRobotModel;
    private final DRCRobotJointMap jointMap;
@@ -44,34 +47,34 @@ public class DRCNetworkProcessor
     * This will become a stand-alone application in the final competition. Do
     * NOT pass in objects shared with the DRC simulation!
     */
-   public DRCNetworkProcessor(URI rosCoreURI)
+   public DRCNetworkProcessor(URI rosCoreURI, DRCBandwidthSettings drcBandwidthSettings)
    {
-      this(rosCoreURI, null);
+      this(rosCoreURI, null, drcBandwidthSettings);
    }
    
-   public DRCNetworkProcessor(URI rosCoreURI, ObjectCommunicator drcNetworkObjectCommunicator)
+   public DRCNetworkProcessor(URI rosCoreURI, ObjectCommunicator drcNetworkObjectCommunicator, DRCBandwidthSettings drcBandwidthSettings)
    {
-      this(drcNetworkObjectCommunicator);
+      this(drcNetworkObjectCommunicator, drcBandwidthSettings);
 
       System.out.println("Connecting to ROS");
       RosMainNode rosMainNode;
       rosMainNode = new RosMainNode(rosCoreURI, "darpaRoboticsChallange/networkProcessor");
 
       new GazeboCameraReceiver(robotPoseBuffer, DRCConfigParameters.VIDEOSETTINGS, rosMainNode, networkingManager, DRCSensorParameters.FIELD_OF_VIEW);
-      new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, fullRobotModel, robotBoundingBoxes, jointMap, rosCoreURI.toString());
+      new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, fullRobotModel, robotBoundingBoxes, jointMap, rosCoreURI.toString(), drcBandwidthSettings);
       rosMainNode.execute();
       connect();
    }
    
-   public DRCNetworkProcessor(LocalObjectCommunicator scsCommunicator, ObjectCommunicator drcNetworkObjectCommunicator)
+   public DRCNetworkProcessor(LocalObjectCommunicator scsCommunicator, ObjectCommunicator drcNetworkObjectCommunicator, DRCBandwidthSettings drcBandwidthSettings)
    {
-      this(drcNetworkObjectCommunicator);
+      this(drcNetworkObjectCommunicator, drcBandwidthSettings);
       new SCSCameraDataReceiver(robotPoseBuffer, DRCConfigParameters.VIDEOSETTINGS, scsCommunicator, networkingManager);
-      new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, fullRobotModel, robotBoundingBoxes, jointMap);
+      new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, fullRobotModel, robotBoundingBoxes, jointMap, drcBandwidthSettings);
       connect();
    }
 
-   private DRCNetworkProcessor(ObjectCommunicator fieldComputerClient)
+   private DRCNetworkProcessor(ObjectCommunicator fieldComputerClient, DRCBandwidthSettings drcBandwidthSettings)
    {
       if(fieldComputerClient == null)
       {
@@ -83,9 +86,10 @@ public class DRCNetworkProcessor
       {
          this.fieldComputerClient = fieldComputerClient;
       }
+      this.drcBandwidthSettings = drcBandwidthSettings;
       
       robotPoseBuffer = new RobotPoseBuffer(this.fieldComputerClient, 1000, timestampProvider);
-      networkingManager = new DRCNetworkProcessorNetworkingManager(this.fieldComputerClient, timestampProvider);
+      networkingManager = new DRCNetworkProcessorNetworkingManager(this.fieldComputerClient, timestampProvider, drcBandwidthSettings);
       
       jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_SANDIA_HANDS, false);  
       JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap, true);
@@ -113,13 +117,16 @@ public class DRCNetworkProcessor
    
    public static void main(String[] args) throws URISyntaxException
    {
+      
+      DRCBandwidthSettings drcBandwidthSettings = DRCBandwidthSettingsFactory.getLowBitRateSettings();
+      
       if(args.length == 1)
       {
-         new DRCNetworkProcessor(new URI(args[0]));
+         new DRCNetworkProcessor(new URI(args[0]), drcBandwidthSettings);
       }
       else
       {
-         new DRCNetworkProcessor(new URI(DRCConfigParameters.ROS_MASTER_URI));
+         new DRCNetworkProcessor(new URI(DRCConfigParameters.ROS_MASTER_URI), drcBandwidthSettings);
       }
    }
 }
