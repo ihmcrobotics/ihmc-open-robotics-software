@@ -3,9 +3,6 @@ package us.ihmc.darpaRoboticsChallenge;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig.LocalCloudMachines;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
-import us.ihmc.graphics3DAdapter.camera.VideoSettings;
-import us.ihmc.graphics3DAdapter.camera.VideoSettings.Quality;
-import us.ihmc.graphics3DAdapter.camera.VideoSettingsH264LowLatency;
 
 public class DRCConfigParameters
 {
@@ -76,9 +73,6 @@ public class DRCConfigParameters
 
    // Video Settings
    public static final boolean STREAM_VIDEO = true;
-   public static final VideoSettings VIDEOSETTINGS = new VideoSettingsH264LowLatency(800, 800, Quality.MEDIUM);
-
-   // public static final VideoSettings VIDEOSETTINGS = new VideoSettingsH264LowLatency(200, 150, Quality.LOW);
 
    // State Estimator
    public static final boolean USE_STATE_ESTIMATOR = true;
