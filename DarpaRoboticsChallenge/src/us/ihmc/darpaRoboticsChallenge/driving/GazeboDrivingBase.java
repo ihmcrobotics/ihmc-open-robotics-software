@@ -87,7 +87,7 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 	}
 
 	protected abstract void handleStateSteeringWheel( std_msgs.Float64 message );
-	protected abstract void handleStateBreak( std_msgs.Float64 message );
+	protected abstract void handleHandBrakeState(std_msgs.Float64 message);
 	protected abstract void handleStateGasPedal( std_msgs.Float64 message );
 	protected abstract void handleStateBreakPedal( std_msgs.Float64 message );
 
@@ -109,7 +109,7 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 
 			public void onNewMessage(std_msgs.Float64 message)
 			{
-				handleStateBreak(message);
+				handleHandBrakeState(message);
 			}
 		});
 
