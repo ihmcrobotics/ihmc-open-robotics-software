@@ -18,6 +18,8 @@ public class TransferToAndNextFootstepsData
    
    private Footstep nextFootstep;
    private Footstep nextNextFootstep;
+  
+   
 
    private double w0;
    private double estimatedStepTime;
@@ -95,7 +97,7 @@ public class TransferToAndNextFootstepsData
    
    public double getW0()
    {
-      return w0;
+      return  3.4; // w0; // NOTE: Attention, magic number!!!
    }
 
    public void setW0(double w0)
@@ -113,37 +115,40 @@ public class TransferToAndNextFootstepsData
       this.estimatedStepTime = estimatedStepTime;
    }
 
-   public void getFootLocationList(ArrayList<FramePoint> footLocationListToPack, double centimetersForwardFromCenter)
+   public void getFootLocationList(ArrayList<FramePoint> footLocationListToPack, ArrayList<ReferenceFrame> soleFrameListToPack, double centimetersForwardFromCenter)
    {
       if (transferFromFootstep != null)
       {
-         getFootLocationFromFootstepInWorldFrame(footLocationListToPack, transferFromFootstep, centimetersForwardFromCenter);
+         getFootLocationFromFootstepInWorldFramePlusSoleframe(footLocationListToPack, soleFrameListToPack, transferFromFootstep, centimetersForwardFromCenter);
       }
       else return;
       
       if (transferToFootstep != null)
       {
-         getFootLocationFromFootstepInWorldFrame(footLocationListToPack, transferToFootstep, centimetersForwardFromCenter);
+         getFootLocationFromFootstepInWorldFramePlusSoleframe(footLocationListToPack, soleFrameListToPack, transferToFootstep, centimetersForwardFromCenter);
       }
       else return;
 
       if (nextFootstep != null)
       {
-         getFootLocationFromFootstepInWorldFrame(footLocationListToPack, nextFootstep, centimetersForwardFromCenter);
+         getFootLocationFromFootstepInWorldFramePlusSoleframe(footLocationListToPack, soleFrameListToPack, nextFootstep, centimetersForwardFromCenter);
       }
       else return;
 
       if (nextNextFootstep != null)
       {
-         getFootLocationFromFootstepInWorldFrame(footLocationListToPack, nextNextFootstep, centimetersForwardFromCenter);
+         getFootLocationFromFootstepInWorldFramePlusSoleframe(footLocationListToPack, soleFrameListToPack, nextNextFootstep, centimetersForwardFromCenter);
       }
       else return;
    }
 
-   private static void getFootLocationFromFootstepInWorldFrame(ArrayList<FramePoint> footLocationListToPack, Footstep footstep, double centimetersForwardFromCenter)
+   private static void getFootLocationFromFootstepInWorldFramePlusSoleframe(ArrayList<FramePoint> footLocationListToPack, 
+         ArrayList<ReferenceFrame> soleFrameListToPack, Footstep footstep, double centimetersForwardFromCenter)
    {
       FramePoint centerOfFootstep = FootstepUtils.getCenterOfFootstep(footstep, centimetersForwardFromCenter);
+      ReferenceFrame soleFrame = footstep.getSoleReferenceFrame(); 
       footLocationListToPack.add(centerOfFootstep);
+      soleFrameListToPack.add(soleFrame);
    }
 
    public double getSingleSupportDuration()
