@@ -1,13 +1,16 @@
 package us.ihmc.darpaRoboticsChallenge.posePlayback;
 
+import java.io.File;
 import java.io.IOException;
+
+import javax.swing.JFileChooser;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.environment.VRCTask;
 import us.ihmc.darpaRoboticsChallenge.environment.VRCTaskName;
+import us.ihmc.utilities.ThreadTools;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.VariableChangedListener;
 import com.yobotics.simulationconstructionset.YoVariable;
@@ -21,9 +24,14 @@ public class PosePlaybackSCSBridge
    private final PosePlaybackSender posePlaybackSender;
    private PosePlaybackRobotPoseSequence posePlaybackRobotPoseSequence;
 
+   private final PosePlaybackSmoothPoseInterpolator interpolator;
+
    public PosePlaybackSCSBridge() throws IOException
    {
       YoVariableRegistry registry = new YoVariableRegistry("PlaybackPoseSCSBridge");
+
+      interpolator = new PosePlaybackSmoothPoseInterpolator(registry);
+
       posePlaybackController = new PosePlaybackAllJointsController(registry);
       posePlaybackSender = new PosePlaybackSender(posePlaybackController, ipAddress);
       posePlaybackRobotPoseSequence = new PosePlaybackRobotPoseSequence();
@@ -37,11 +45,15 @@ public class PosePlaybackSCSBridge
 
       DRCRobotMidiSliderBoardPositionManipulation sliderBoard = new DRCRobotMidiSliderBoardPositionManipulation(scs);
 
-      CaptureSnapshotListener captureSnapshotListener = new CaptureSnapshotListener(sdfRobot);
+      CaptureSnapshotListener captureSnapshotListener = new CaptureSnapshotListener(sdfRobot, scs);
       sliderBoard.addCaptureSnapshotListener(captureSnapshotListener);
-      
+
       SaveSequenceListener saveSequenceListener = new SaveSequenceListener();
       sliderBoard.addSaveSequenceRequestedListener(saveSequenceListener);
+
+      LoadSequenceListener loadSequenceListener = new LoadSequenceListener(sdfRobot, scs);
+      sliderBoard.addLoadSequenceRequestedListener(loadSequenceListener);
+
 
       scs.startOnAThread();
 
@@ -55,43 +67,125 @@ public class PosePlaybackSCSBridge
          System.err.println("Didn't connect to posePlaybackSender!");
       }
 
-//    while (true)
-//    {
-//       PosePlaybackRobotPose pose = new PosePlaybackRobotPose(sdfRobot);
-//       posePlaybackController.setPlaybackPose(pose);
-//
-//       posePlaybackSender.writeData();
-//
-//       ThreadTools.sleep(1000);
-//    }
    }
 
    private class CaptureSnapshotListener implements VariableChangedListener
    {
       private final SDFRobot sdfRobot;
+      private final SimulationConstructionSet scs;
+      private PosePlaybackRobotPose previousPose;
 
-      public CaptureSnapshotListener(SDFRobot sdfRobot)
+      public CaptureSnapshotListener(SDFRobot sdfRobot, SimulationConstructionSet scs)
       {
          this.sdfRobot = sdfRobot;
+         this.scs = scs;
       }
+
 
       public void variableChanged(YoVariable yoVariable)
       {
-         BooleanYoVariable captureSnapshot = (BooleanYoVariable) yoVariable;
-         if (captureSnapshot.getBooleanValue())
-         {
-            PosePlaybackRobotPose pose = new PosePlaybackRobotPose(sdfRobot);
-            System.out.println(pose);
-            posePlaybackRobotPoseSequence.addPose(pose);
-            System.out.println("adding pose to sequence list");
+         PosePlaybackRobotPose pose = new PosePlaybackRobotPose(sdfRobot);
 
-            posePlaybackController.setPlaybackPose(pose);
+         if (previousPose != null)
+         {
+            if (pose.epsilonEquals(previousPose, 1e-3))
+            {
+               return;
+            }
+         }
+
+         System.out.println("Adding pose to sequence list: " + pose);
+         posePlaybackRobotPoseSequence.addPose(pose);
+
+         double dt = 0.01;
+         double morphTime = 1.0;
+         for (double time = 0.0; time < morphTime; time = time + dt)
+         {
+            double morphPercentage = time / morphTime;
+            PosePlaybackRobotPose morphedPose;
+
+            if (previousPose == null)
+            {
+               morphedPose = pose;
+            }
+            else
+            {
+               morphedPose = PosePlaybackRobotPose.morph(previousPose, pose, morphPercentage);
+            }
+
+            posePlaybackController.setPlaybackPose(morphedPose);
+            scs.setTime(time);
+            scs.tickAndUpdate();
 
             try
             {
                if (posePlaybackSender.isConnected())
                   posePlaybackSender.writeData();
+               ThreadTools.sleep((long) (dt * 1000));
+            }
+            catch (IOException e)
+            {
+            }
+         }
 
+         previousPose = pose;
+      }
+
+   }
+
+
+   private class LoadSequenceListener implements VariableChangedListener
+   {
+      private final SDFRobot sdfRobot;
+      private final SimulationConstructionSet scs;
+      private PosePlaybackRobotPose previousPose;
+
+      public LoadSequenceListener(SDFRobot sdfRobot, SimulationConstructionSet scs)
+      {
+         this.sdfRobot = sdfRobot;
+         this.scs = scs;
+      }
+
+      public void variableChanged(YoVariable yoVariable)
+      {
+         System.out.println("Load Sequence Listener");
+
+         JFileChooser chooser = new JFileChooser(new File("PoseSequences"));
+         int approveOption = chooser.showOpenDialog(null);
+
+         if (approveOption != JFileChooser.APPROVE_OPTION)
+         {
+            System.err.println("Can not load selected file :" + chooser.getName());
+
+            return;
+         }
+
+         File selectedFile = chooser.getSelectedFile();
+
+         PosePlaybackRobotPoseSequence sequence = new PosePlaybackRobotPoseSequence();
+         sequence.appendFromFile(selectedFile);
+
+         double startTime = 0.0;
+         double time = startTime;
+         double dt = 0.005;
+
+         interpolator.startSequencePlayback(sequence, startTime);
+
+         while (!interpolator.isDone())
+         {
+            time = time + dt;
+
+            PosePlaybackRobotPose morphedPose = interpolator.getPose(time);
+
+            posePlaybackController.setPlaybackPose(morphedPose);
+            scs.setTime(time);
+            scs.tickAndUpdate();
+
+            try
+            {
+               if (posePlaybackSender.isConnected())
+                  posePlaybackSender.writeData();
+               ThreadTools.sleep((long) (dt * 1000));
             }
             catch (IOException e)
             {
@@ -99,11 +193,12 @@ public class PosePlaybackSCSBridge
          }
       }
    }
-   
+
+
    private class SaveSequenceListener implements VariableChangedListener
    {
       public void variableChanged(YoVariable yoVariable)
-      {         
+      {
          System.out.println("saving file");
          posePlaybackRobotPoseSequence.promptWriteToFile();
       }
