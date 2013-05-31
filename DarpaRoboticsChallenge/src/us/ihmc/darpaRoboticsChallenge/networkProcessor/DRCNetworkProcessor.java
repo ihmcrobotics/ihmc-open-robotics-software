@@ -37,8 +37,7 @@ public class DRCNetworkProcessor
    private final DRCNetworkProcessorNetworkingManager networkingManager;
    private final RobotPoseBuffer robotPoseBuffer;
 
-   private final DRCBandwidthSettings drcBandwidthSettings;   
-   
+  
    private final SDFFullRobotModel fullRobotModel;
    private final DRCRobotJointMap jointMap;
    private final RobotBoundingBoxes robotBoundingBoxes;
@@ -86,8 +85,7 @@ public class DRCNetworkProcessor
       {
          this.fieldComputerClient = fieldComputerClient;
       }
-      this.drcBandwidthSettings = drcBandwidthSettings;
-      
+     
       robotPoseBuffer = new RobotPoseBuffer(this.fieldComputerClient, 1000, timestampProvider);
       networkingManager = new DRCNetworkProcessorNetworkingManager(this.fieldComputerClient, timestampProvider, drcBandwidthSettings);
       
