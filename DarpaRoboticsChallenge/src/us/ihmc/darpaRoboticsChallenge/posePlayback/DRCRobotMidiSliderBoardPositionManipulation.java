@@ -1,8 +1,11 @@
 package us.ihmc.darpaRoboticsChallenge.posePlayback;
 
 import java.util.EnumMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.vecmath.Quat4d;
+
 
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
@@ -22,15 +25,15 @@ import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 public class DRCRobotMidiSliderBoardPositionManipulation
 {
    private final SideDependentList<String> sideString = new SideDependentList<String>("q_l_", "q_r_");
-   private final EnumMap<SpineJointName, String> spineJointStringNames = new EnumMap<SpineJointName, String>(SpineJointName.class);
-   private final EnumMap<SpineJointName, Double> spineJointLowerLimits = new EnumMap<SpineJointName, Double>(SpineJointName.class);
-   private final EnumMap<SpineJointName, Double> spineJointUpperLimits = new EnumMap<SpineJointName, Double>(SpineJointName.class);
-   private final EnumMap<LegJointName, String> legJointStringNames = new EnumMap<LegJointName, String>(LegJointName.class);
-   private final EnumMap<LegJointName, Double> legJointLowerLimits = new EnumMap<LegJointName, Double>(LegJointName.class);
-   private final EnumMap<LegJointName, Double> legJointUpperLimits = new EnumMap<LegJointName, Double>(LegJointName.class);
-   private final EnumMap<ArmJointName, String> armJointStringNames = new EnumMap<ArmJointName, String>(ArmJointName.class);
-   private final EnumMap<ArmJointName, Double> armJointLowerLimits = new EnumMap<ArmJointName, Double>(ArmJointName.class);
-   private final EnumMap<ArmJointName, Double> armJointUpperLimits = new EnumMap<ArmJointName, Double>(ArmJointName.class);
+   private final LinkedHashMap<SpineJointName, String> spineJointStringNames = new LinkedHashMap<SpineJointName, String>();
+   private final LinkedHashMap<SpineJointName, Double> spineJointLowerLimits = new LinkedHashMap<SpineJointName, Double>();
+   private final LinkedHashMap<SpineJointName, Double> spineJointUpperLimits = new LinkedHashMap<SpineJointName, Double>();
+   private final LinkedHashMap<LegJointName, String> legJointStringNames = new LinkedHashMap<LegJointName, String>();
+   private final SideDependentList<Map<LegJointName, Double>> legJointLowerLimits = SideDependentList.createListOfHashMaps();
+   private final SideDependentList<Map<LegJointName, Double>> legJointUpperLimits = SideDependentList.createListOfHashMaps();
+   private final LinkedHashMap<ArmJointName, String> armJointStringNames = new LinkedHashMap<ArmJointName, String>();
+   private final SideDependentList<Map<ArmJointName, Double>> armJointLowerLimits = SideDependentList.createListOfHashMaps();
+   private final SideDependentList<Map<ArmJointName, Double>> armJointUpperLimits = SideDependentList.createListOfHashMaps();
 
    private final YoVariableRegistry registry = new YoVariableRegistry("SliderBoardRegistry");
    
@@ -125,20 +128,36 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       legJointStringNames.put(LegJointName.ANKLE_PITCH, legPrefix + "uay");
       legJointStringNames.put(LegJointName.ANKLE_ROLL, legPrefix + "lax");
 
-      legJointLowerLimits.put(LegJointName.HIP_YAW, -0.32);
-      legJointLowerLimits.put(LegJointName.HIP_ROLL,-0.47 );
-      legJointLowerLimits.put(LegJointName.HIP_PITCH, -1.75);
-      legJointLowerLimits.put(LegJointName.KNEE, 0.0);
-      legJointLowerLimits.put(LegJointName.ANKLE_PITCH, -0.698);
-      legJointLowerLimits.put(LegJointName.ANKLE_ROLL, -0.436);
+      double hipYawMax = 1.14;
+      double hipYawMin = -0.32;
+      
+      SideDependentList<Double> hipYawLowerLimit = new SideDependentList<Double>(hipYawMin, -hipYawMin);
+      SideDependentList<Double> hipYawUpperLimit = new SideDependentList<Double>(hipYawMax, -hipYawMax);
+      
+      double hipRollMax = 0.495;
+      double hipRollMin = -0.47;
+      
+      SideDependentList<Double> hipRollLowerLimit = new SideDependentList<Double>(hipRollMin, -hipRollMin);
+      SideDependentList<Double> hipRollUpperLimit = new SideDependentList<Double>(hipRollMax, -hipRollMax);
+      
+      
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         legJointLowerLimits.get(robotSide).put(LegJointName.HIP_YAW, hipYawLowerLimit.get(robotSide));
+         legJointLowerLimits.get(robotSide).put(LegJointName.HIP_ROLL, hipRollLowerLimit.get(robotSide));
+         legJointLowerLimits.get(robotSide).put(LegJointName.HIP_PITCH, -1.75);
+         legJointLowerLimits.get(robotSide).put(LegJointName.KNEE, 0.0);
+         legJointLowerLimits.get(robotSide).put(LegJointName.ANKLE_PITCH, -0.698);
+         legJointLowerLimits.get(robotSide).put(LegJointName.ANKLE_ROLL, -0.436);
 
-      legJointUpperLimits.put(LegJointName.HIP_YAW, 1.14);
-      legJointUpperLimits.put(LegJointName.HIP_ROLL, 0.495);
-      legJointUpperLimits.put(LegJointName.HIP_PITCH, 0.524);
-      legJointUpperLimits.put(LegJointName.KNEE, 2.45);
-      legJointUpperLimits.put(LegJointName.ANKLE_PITCH, 0.698);
-      legJointUpperLimits.put(LegJointName.ANKLE_ROLL, 0.436);
-
+         legJointUpperLimits.get(robotSide).put(LegJointName.HIP_YAW, hipYawUpperLimit.get(robotSide));
+         legJointUpperLimits.get(robotSide).put(LegJointName.HIP_ROLL, hipRollUpperLimit.get(robotSide));
+         legJointUpperLimits.get(robotSide).put(LegJointName.HIP_PITCH, 0.524);
+         legJointUpperLimits.get(robotSide).put(LegJointName.KNEE, 2.45);
+         legJointUpperLimits.get(robotSide).put(LegJointName.ANKLE_PITCH, 0.698);
+         legJointUpperLimits.get(robotSide).put(LegJointName.ANKLE_ROLL, 0.436);
+      }
+      
       String armPrefix = "arm_";
       armJointStringNames.put(ArmJointName.SHOULDER_PITCH, armPrefix + "usy");
       armJointStringNames.put(ArmJointName.SHOULDER_ROLL, armPrefix + "shx");
@@ -147,35 +166,57 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       armJointStringNames.put(ArmJointName.WRIST_PITCH, armPrefix + "uwy");
       armJointStringNames.put(ArmJointName.WRIST_ROLL, armPrefix + "mwx");
 
-      armJointLowerLimits.put(ArmJointName.SHOULDER_PITCH, -1.9635);
-      armJointLowerLimits.put(ArmJointName.SHOULDER_ROLL, -1.39626);
-      armJointLowerLimits.put(ArmJointName.ELBOW_PITCH, 0.0);
-      armJointLowerLimits.put(ArmJointName.ELBOW_ROLL, -2.35619);
-      armJointLowerLimits.put(ArmJointName.WRIST_PITCH, -1.571);
-      armJointLowerLimits.put(ArmJointName.WRIST_ROLL, -0.436);
+      double shoulderRollMax = 1.74533;
+      double shoulderRollMin = -1.39626;
+      
+      SideDependentList<Double> shoulderRollLowerLimit = new SideDependentList<Double>(shoulderRollMin, -shoulderRollMin);
+      SideDependentList<Double> shoulderRollUpperLimit = new SideDependentList<Double>(shoulderRollMax, -shoulderRollMax);
+      
+      
+      double elbowRollMin = 0.0;
+      double elbowRollMax = 2.35619;
+      SideDependentList<Double> elbowRollLowerLimit = new SideDependentList<Double>(elbowRollMin, -elbowRollMin);
+      SideDependentList<Double> elbowRollUpperLimit = new SideDependentList<Double>(elbowRollMax, -elbowRollMax);
+      
+      double wristRollMin = -0.436;
+      double wristRollMax = 1.571;
+      SideDependentList<Double> wristRollLowerLimit = new SideDependentList<Double>(wristRollMin, -wristRollMin);
+      SideDependentList<Double> wristRollUpperLimit = new SideDependentList<Double>(wristRollMax, -wristRollMax);
+      
+      
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         armJointLowerLimits.get(robotSide).put(ArmJointName.SHOULDER_PITCH, -1.9635);
+         armJointLowerLimits.get(robotSide).put(ArmJointName.SHOULDER_ROLL, shoulderRollLowerLimit.get(robotSide));
+         armJointLowerLimits.get(robotSide).put(ArmJointName.ELBOW_PITCH, 0.0);
+         armJointLowerLimits.get(robotSide).put(ArmJointName.ELBOW_ROLL, elbowRollLowerLimit.get(robotSide));
+         armJointLowerLimits.get(robotSide).put(ArmJointName.WRIST_PITCH, -1.571);
+         armJointLowerLimits.get(robotSide).put(ArmJointName.WRIST_ROLL, wristRollLowerLimit.get(robotSide));
 
-      armJointUpperLimits.put(ArmJointName.SHOULDER_PITCH, 1.9635);
-      armJointUpperLimits.put(ArmJointName.SHOULDER_ROLL, 1.74533);
-      armJointUpperLimits.put(ArmJointName.ELBOW_PITCH, 3.14159);
-      armJointUpperLimits.put(ArmJointName.ELBOW_ROLL, 0.0);
-      armJointUpperLimits.put(ArmJointName.WRIST_PITCH, 1.571);
-      armJointUpperLimits.put(ArmJointName.WRIST_ROLL, 1.571);
+         armJointUpperLimits.get(robotSide).put(ArmJointName.SHOULDER_PITCH, 1.9635);
+         armJointUpperLimits.get(robotSide).put(ArmJointName.SHOULDER_ROLL, shoulderRollUpperLimit.get(robotSide));
+         armJointUpperLimits.get(robotSide).put(ArmJointName.ELBOW_PITCH, 3.14159);
+         armJointUpperLimits.get(robotSide).put(ArmJointName.ELBOW_ROLL, elbowRollUpperLimit.get(robotSide));
+         armJointUpperLimits.get(robotSide).put(ArmJointName.WRIST_PITCH, 1.571);
+         armJointUpperLimits.get(robotSide).put(ArmJointName.WRIST_ROLL, wristRollUpperLimit.get(robotSide));
+      }
    }
 
    private void resetSliderBoard()
    {
-      EnumMap<SpineJointName, Double> spineJointPositions = new EnumMap<SpineJointName, Double>(SpineJointName.class);
+      LinkedHashMap<SpineJointName, Double> spineJointPositions = new LinkedHashMap<SpineJointName, Double>();
       for (SpineJointName spineJointName : spineJointStringNames.keySet())
       {
          double q = ((DoubleYoVariable)scs.getVariable(spineJointStringNames.get(spineJointName))).getDoubleValue();
          spineJointPositions.put(spineJointName, q);
       }
-      SideDependentList<EnumMap<ArmJointName, Double>> armJointPositions = SideDependentList.createListOfEnumMaps(ArmJointName.class);
-      SideDependentList<EnumMap<LegJointName, Double>> legJointPositions = SideDependentList.createListOfEnumMaps(LegJointName.class);
+      SideDependentList<Map<ArmJointName, Double>> armJointPositions = SideDependentList.createListOfHashMaps();
+      SideDependentList<Map<LegJointName, Double>> legJointPositions = SideDependentList.createListOfHashMaps();
+      
       for (RobotSide robotSide : RobotSide.values)
       {
          String prefix = sideString.get(robotSide);
-         EnumMap<ArmJointName, Double> armTemp = new EnumMap<ArmJointName, Double>(ArmJointName.class);
+         LinkedHashMap<ArmJointName, Double> armTemp = new LinkedHashMap<ArmJointName, Double>();
          for (ArmJointName armJointName : armJointStringNames.keySet())
          {
             double q = ((DoubleYoVariable)scs.getVariable(prefix + armJointStringNames.get(armJointName))).getDoubleValue();
@@ -255,7 +296,9 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
       for (LegJointName legJointName : legJointStringNames.keySet())
       {
-         sliderBoard.setSlider(sliderChannel++, prefix + legJointStringNames.get(legJointName), scs, legJointLowerLimits.get(legJointName), legJointUpperLimits.get(legJointName));
+         Double min = legJointLowerLimits.get(robotSide).get(legJointName);
+         Double max = legJointUpperLimits.get(robotSide).get(legJointName);
+         sliderBoard.setSlider(sliderChannel++, prefix + legJointStringNames.get(legJointName), scs, min, max);
       }
    }
 
@@ -267,7 +310,11 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       String prefix = sideString.get(robotSide);
 
       for (ArmJointName armJointName : armJointStringNames.keySet())
-         sliderBoard.setSlider(sliderChannel++, prefix + armJointStringNames.get(armJointName), scs, armJointLowerLimits.get(armJointName), armJointUpperLimits.get(armJointName));
+      {
+         Double min = armJointLowerLimits.get(robotSide).get(armJointName);
+         Double max = armJointUpperLimits.get(robotSide).get(armJointName);
+         sliderBoard.setSlider(sliderChannel++, prefix + armJointStringNames.get(armJointName), scs, min, max);
+      }
    }
 
    private void setupSliderForPelvis()
