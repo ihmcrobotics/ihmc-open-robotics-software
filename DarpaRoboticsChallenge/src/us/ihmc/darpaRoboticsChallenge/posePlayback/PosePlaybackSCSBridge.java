@@ -187,7 +187,8 @@ public class PosePlaybackSCSBridge
             posePlaybackController.setPlaybackPose(morphedPose);
             scs.setTime(time);
             scs.tickAndUpdate();
-
+            morphedPose.setRobotAtPose(sdfRobot);
+            
             try
             {
                if (posePlaybackSender.isConnected())
