@@ -121,11 +121,11 @@ public class DRCConfigParameters
    public static final int JOINT_CONFIGURATION_RATE_IN_MS = 10;
 
    // Resolution Sphere
-   public static final boolean USE_RESOLUTION_SPHERE = false;
+   public static final boolean USE_RESOLUTION_SPHERE = true;
    public static final double LIDAR_RESOLUTION_SPHERE_OUTER_RESOLUTION = 0.5;
-   public static final double LIDAR_RESOLUTION_SPHERE_OUTER_RADIUS = 4.5;
-   public static final double LIDAR_RESOLUTION_SPHERE_INNER_RESOLUTION = 0.05;
-   public static final double LIDAR_RESOLUTION_SPHERE_INNER_RADIUS = 0.5;
+   public static final double LIDAR_RESOLUTION_SPHERE_OUTER_RADIUS = 6.0;
+   public static final double LIDAR_RESOLUTION_SPHERE_INNER_RESOLUTION = 0.02;
+   public static final double LIDAR_RESOLUTION_SPHERE_INNER_RADIUS = 1.0;
    public static final double LIDAR_RESOLUTION_SPHERE_DISTANCE_FROM_HEAD = 1.0;
 
    
