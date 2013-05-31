@@ -53,7 +53,9 @@ public class DRCConfigParameters
    public static final String CLOUD_MONSTER_JR_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMONSTER_JR);
    public static final String CLOUD_MONSTER_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMONSTER);
 
-
+   public static final String CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP = "10.0.0.51";
+   public static final String CONSTELLATION_FIELD_COMPUTER_1_VPN_IP = "10.0.0.52";
+   public static final String CONSTELLATION_FIELD_COMPUTER_2_VPN_IP = "10.0.0.53";
 
    public static final String GAZEBO_HOST = CLOUD_MINION3_IP;
    public static final String SCS_MACHINE_IP_ADDRESS = LOCALHOST; //CLOUD_MONSTER_IP;
