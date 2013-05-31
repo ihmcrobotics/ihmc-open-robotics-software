@@ -98,6 +98,10 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
          Transform3D transform3D = new Transform3D();
          transform3D.mul(transform3DfromWorldToParent, transform3DfromParentToChild);
 
+         //Rotate to have the Z axis point out
+         Transform3D finalAdjustment = new Transform3D();
+         finalAdjustment.setEuler(new Vector3d(Math.PI, 0.0, 0.0));
+
          objectTransforms.put(VehicleObject.BRAKE_PEDAL, transform3D);
       }
 
