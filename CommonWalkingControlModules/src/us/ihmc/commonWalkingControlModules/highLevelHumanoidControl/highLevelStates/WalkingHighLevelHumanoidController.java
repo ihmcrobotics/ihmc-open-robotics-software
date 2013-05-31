@@ -252,7 +252,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       FootstepProvider footstepProvider = variousWalkingProviders.getFootstepProvider();
       HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = variousWalkingProviders.getMapFromFootstepsToTrajectoryParameters();
 
-      toeOffKneeAngleThreashold.set(52*Math.PI/180);
+      toeOffKneeAngleThreashold.set(45*Math.PI/180); //52*Math.PI/180);
       useTrailingLegKneeAngleAsToeOffTrigger.set(true);
       
       
