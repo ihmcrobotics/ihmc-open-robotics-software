@@ -37,21 +37,39 @@ public class JojosICPutilities
       icpVelocityToPack.set(tempVect);
       icpVelocityToPack.scale(omega0);
    }
+   
+   public static void extrapolateDCMPosVelAcc(Point3d icpPositionToPack, Vector3d icpVelocityToPack, Vector3d icpAccelerationToPack, 
+         Point3d constantCenterOfPressure, double time, double omega0, Point3d initialICP)
+   {
+      double exponentialTerm = Math.exp(time * omega0);
+      Vector3d tempVect = new Vector3d(initialICP);
+      tempVect.sub(constantCenterOfPressure);
+      tempVect.scale(exponentialTerm);
+
+      icpPositionToPack.set(constantCenterOfPressure);
+      icpPositionToPack.add(tempVect);
+
+      icpVelocityToPack.set(tempVect);
+      icpVelocityToPack.scale(omega0);
+      
+      icpAccelerationToPack.set(tempVect);
+      icpAccelerationToPack.scale(omega0*omega0);
+   }
 
 
    public static void discreteIntegrateCoMAndGetCoMVelocity(double sampleTime, double omega0, Point3d icp, Point3d comPositionToPack,
            Vector3d comVelocityToPack)
    {
       double exponentialFactor = Math.exp(-sampleTime * omega0);
-      Vector3d tempVector = new Vector3d(comPositionToPack);
+      Vector3d tempVector = new Vector3d();
+      tempVector.set(comPositionToPack);
       tempVector.sub(icp);
       tempVector.scale(exponentialFactor);
       
       comPositionToPack.set(icp);
       comPositionToPack.add(tempVector);
       
-      comVelocityToPack.set(comPositionToPack);
-      comVelocityToPack.sub(icp);
+      comVelocityToPack.set(tempVector);
       comVelocityToPack.scale(-1.0 * omega0);
    }  
 

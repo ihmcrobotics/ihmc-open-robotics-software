@@ -7,6 +7,8 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 
@@ -81,12 +83,15 @@ public class NewDoubleSupportICPComputer
       return singleSupportStateICP;
    }
 
-   public static void computeSingleSupportICPPositionAndVelocity(Point3d icpPositionToPack, Vector3d icpVelocityToPack, Point3d constantCenterOfPressure,
-           Point3d singleSupportStartICP, double omega0, double time)
+   public static void computeSingleSupportICPPositionAndVelocity(Point3d icpPositionToPack, Vector3d icpVelocityToPack,  
+         Point3d constantCenterOfPressure, Point3d singleSupportStartICP, double omega0, double time)
    {
       JojosICPutilities.extrapolateDCMposAndVel(icpPositionToPack, icpVelocityToPack, constantCenterOfPressure, time, omega0, singleSupportStartICP);
-
    }
+   
+   
+
+         
 
    public static void computeConstantCentersOfPressure(ArrayList<YoFramePoint> constantCentersOfPressureToModify, ArrayList<FramePoint> footLocations,
            int maxNumberOfConsideredFootsteps, boolean isInitialTransfer)
@@ -136,13 +141,13 @@ public class NewDoubleSupportICPComputer
 
    public static void computeConstantCentersOfPressureAndCornerPointsForFootCenterAndToe(ArrayList<YoFramePoint> constantFootCenterCentersOfPressureToModify,
            ArrayList<YoFramePoint> constantToeCentersOfPressureToModify, ArrayList<YoFramePoint> footCenterCornerPointsToModify,
-           ArrayList<YoFramePoint> toeCornerPointsToModify, double frontalToeOffset, ArrayList<FramePoint> footLocations, int maxNumberOfConsideredFootsteps,
+           ArrayList<YoFramePoint> toeCornerPointsToModify, double maxFrontalToeOffset, ArrayList<FramePoint> footLocations, ArrayList<ReferenceFrame> soleFrameList, int maxNumberOfConsideredFootsteps,
            boolean isInitialTransfer, double omega0, double toeToFootCenterShiftDuration, double footCenterToToeShiftDuration)
    {
       computeConstantCentersOfPressure(constantFootCenterCentersOfPressureToModify, footLocations, maxNumberOfConsideredFootsteps, isInitialTransfer);
 
       computeConstantToeCentersOfPressure(constantToeCentersOfPressureToModify, constantFootCenterCentersOfPressureToModify, 
-            footLocations, maxNumberOfConsideredFootsteps, frontalToeOffset); 
+            footLocations, soleFrameList, maxNumberOfConsideredFootsteps, maxFrontalToeOffset); 
 
 
 
@@ -174,16 +179,35 @@ public class NewDoubleSupportICPComputer
 
 
    private static void computeConstantToeCentersOfPressure(ArrayList<YoFramePoint> constantToeCentersOfPressureToModify, ArrayList<YoFramePoint> constantFootCenterCentersOfPressure, 
-         ArrayList<FramePoint> footLocations, int maxNumberOfConsideredFootsteps, double frontalToeOffset)
+         ArrayList<FramePoint> footLocations, ArrayList<ReferenceFrame> soleFrameList, int maxNumberOfConsideredFootsteps, double maxFrontalToeOffset)
    {
       for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
       {
-         double localFrontalToeOffset = frontalToeOffset;
+         double localFrontalToeOffset;
+         double desiredFrontalToeOffset; 
 
          int finalShiftIsFromFootCenter = 1; // set to zero to have the final icp shift going over the toe-ICP-waypoint
-         if (i >= footLocations.size() - 1 - finalShiftIsFromFootCenter)
-            localFrontalToeOffset = 0.0;
-         FrameVector toeOffsetFromFootCenter = new FrameVector(footLocations.get(Math.min(i, footLocations.size() - 1)).getReferenceFrame());
+         
+//         if (i >= constantFootCenterCentersOfPressure.size() - 1 - finalShiftIsFromFootCenter) 
+         if (i >= footLocations.size() - 1 - finalShiftIsFromFootCenter) 
+            {
+            desiredFrontalToeOffset = 0.0; 
+            }
+         else
+         {
+            FramePoint localCurrentFramePoint = new FramePoint(); 
+            localCurrentFramePoint.set(constantFootCenterCentersOfPressure.get(i).getFramePointCopy()); 
+            localCurrentFramePoint.changeFrame(soleFrameList.get(Math.min(i, soleFrameList.size() - 1)));
+            
+            FramePoint localNextFramePoint = new FramePoint(); 
+            localNextFramePoint.set(constantFootCenterCentersOfPressure.get(i + 1).getFramePointCopy()); 
+            localNextFramePoint.changeFrame(soleFrameList.get(Math.min(i, soleFrameList.size() - 1)));
+            desiredFrontalToeOffset = localNextFramePoint.getX() - localCurrentFramePoint.getX(); 
+         }
+         
+         localFrontalToeOffset = Math.max(Math.min(desiredFrontalToeOffset, maxFrontalToeOffset), 0);
+         
+         FrameVector toeOffsetFromFootCenter = new FrameVector(soleFrameList.get(Math.min(i, soleFrameList.size() - 1)));
          toeOffsetFromFootCenter.set(localFrontalToeOffset, 0.0, 0.0);
          toeOffsetFromFootCenter.changeFrame(constantFootCenterCentersOfPressure.get(i).getReferenceFrame());
 
