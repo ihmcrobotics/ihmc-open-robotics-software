@@ -54,18 +54,6 @@ public class TorusPoseProvider implements ObjectConsumer<TorusPosePacket>
       }
    }
 
-   public FrameVector getNormal()
-   {
-      // TODO: Twan, please review this "getting" of the normal
-      AxisAngle4d axisAngle4d = new AxisAngle4d();
-      Quat4d quat4d = framePose.getOrientationCopy().getQuaternion();
-      axisAngle4d.set(quat4d);
-
-      FrameVector normal = new FrameVector(framePose.getReferenceFrame(), axisAngle4d.getX(), axisAngle4d.getY(), axisAngle4d.getZ());
-
-      return normal;
-   }
-
    public FramePoint getPosition()
    {
       return framePose.getPostionCopy();
@@ -73,12 +61,11 @@ public class TorusPoseProvider implements ObjectConsumer<TorusPosePacket>
 
    public FramePose getFramePose()
    {
-      // TODO: this is NOT a defensive copy. Should we make one?
       synchronized (synchronizationObject)
       {
          hasNewPose = false;
 
-         return framePose;
+         return new FramePose(framePose);
       }
    }
 }
