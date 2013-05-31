@@ -11,7 +11,6 @@ public class DRCConfigParameters
 {
    
    public static final boolean USE_KRYONET_FOR_UI_COMMS = false;
-   public static final boolean TRANFORM_LIDAR_WITH_KRYO = false;
    
    // TODO: Temporary static variable for testing getting into the car
    public static final boolean TEST_GETTING_INTO_CAR = false; // true;
@@ -56,7 +55,7 @@ public class DRCConfigParameters
 
 
 
-   public static final String GAZEBO_HOST = "192.168.100.2";
+   public static final String GAZEBO_HOST = CLOUD_MINION3_IP;
    public static final String SCS_MACHINE_IP_ADDRESS = LOCALHOST; //CLOUD_MONSTER_IP;
 
    public static final String OPERATOR_INTERFACE_IP_ADDRESS = LOCALHOST;
@@ -123,7 +122,7 @@ public class DRCConfigParameters
       * Math.sqrt(DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD * DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD
                   + 0.25 * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH);
 
-   public static final int JOINT_CONFIGURATION_RATE_IN_MS = 50;
+   public static final int JOINT_CONFIGURATION_RATE_IN_MS = 10;
 
    // Resolution Sphere
    public static final boolean USE_RESOLUTION_SPHERE = false;
