@@ -1,4 +1,5 @@
 root*false*false
-root.testRobot*false*false
-root.testRobot.PointAndLinePlotter*false*false
-root.testRobot.SCSDoubleSupportICPTesterController5*false*false
+root.TestRobot*false*false
+root.TestRobot.FootCenterToToeEvaluator*false*false
+root.TestRobot.FootCenterToToeEvaluator.DoubleSupportFootCenterToToeICPComputer*false*false
+root.TestRobot.FootCenterToToeEvaluator.PointAndLinePlotter*false*false
