@@ -113,7 +113,7 @@ public class ManipulationControlModule
                                                                         torusManipulationProvider, handControllers, registry,
                                                                         dynamicGraphicObjectsListRegistry);
 
-      addTransitionFromDirectToToroid(directControlManipulationState, torusPoseProvider, fingerToroidManipulationState);
+      addTransitionFromDirectToToroid(directControlManipulationState, torusManipulationProvider, fingerToroidManipulationState);
       addTransitionFromToroidToDirectBackToDefault(directControlManipulationState, handPoseProvider, fingerToroidManipulationState);
       addTransitionFromToroidToDirectWhenDone(directControlManipulationState, fingerToroidManipulationState);
 
@@ -122,13 +122,13 @@ public class ManipulationControlModule
    }
 
    private static void addTransitionFromDirectToToroid(HighLevelDirectControlManipulationState directControlManipulationState,
-                                                       final TorusPoseProvider torusPoseProvider, State<ManipulationState> fingerToroidManipulationState)
+                                                       final TorusManipulationProvider torusManipulationProvider, State<ManipulationState> fingerToroidManipulationState)
    {
       StateTransitionCondition stateTransitionCondition = new StateTransitionCondition()
       {
          public boolean checkCondition()
          {
-            return torusPoseProvider.checkForNewPose();
+            return torusManipulationProvider.checkForNewData();
          }
       };
 
