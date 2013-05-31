@@ -1,5 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -13,8 +16,6 @@ import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 public class DRCRobotWalkingControllerParameters implements WalkingControllerParameters
 {
@@ -150,9 +151,9 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
       return false;
    }
 
-   private double minimumHeightAboveGround = 0.68; //0.66; //0.70;
-   private double nominalHeightAboveGround = 0.76; //0.74; //0.78;
-   private double maximumHeightAboveGround = 0.82; //0.86;//0.84;
+   private double minimumHeightAboveGround = 0.68;                                        //0.66; //0.70;
+   private double nominalHeightAboveGround = 0.80;  // NOTE: used to be 0.76, jojo        //0.74; //0.78;
+   private double maximumHeightAboveGround = 0.84;  // NOTE: used to be 0.82, jojo        //0.86;//0.84;
 
    public double minimumHeightAboveAnkle()
    {
