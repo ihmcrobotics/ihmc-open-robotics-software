@@ -246,7 +246,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
    public void initialize()
    {      
       callUpdatables();
-      manipulationControlModule.goToDefaultState();
    }
    
    protected void callUpdatables()

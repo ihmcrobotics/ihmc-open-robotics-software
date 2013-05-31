@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
@@ -40,6 +41,7 @@ public class ManipulationControlModule
    private final StateMachine<ManipulationState> stateMachine;
    private final List<DynamicGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<DynamicGraphicReferenceFrame>();
    private HighLevelDirectControlManipulationState directControlManipulationState;
+   private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("onFirstTick", registry);
 
    public ManipulationControlModule(DoubleYoVariable yoTime, FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
                                     ManipulationControllerParameters parameters, final VariousWalkingProviders variousWalkingProviders,
@@ -176,6 +178,12 @@ public class ManipulationControlModule
 
    public void doControl()
    {
+      if (!hasBeenInitialized.getBooleanValue())
+      {
+         goToDefaultState();
+         hasBeenInitialized.set(true);
+      }
+
       updateGraphics();
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
