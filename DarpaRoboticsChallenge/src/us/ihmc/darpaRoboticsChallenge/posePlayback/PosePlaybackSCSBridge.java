@@ -18,7 +18,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class PosePlaybackSCSBridge
 {
-   private static final String ipAddress = DRCConfigParameters.CLOUD_MINION5_IP;
+   private static final String ipAddress = "localhost"; //DRCConfigParameters.CLOUD_MINION5_IP;
 
    private final PosePlaybackAllJointsController posePlaybackController;
    private final PosePlaybackSender posePlaybackSender;
