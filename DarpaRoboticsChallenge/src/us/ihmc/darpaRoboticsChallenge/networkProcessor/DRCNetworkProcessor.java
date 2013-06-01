@@ -1,6 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -65,7 +64,6 @@ public class DRCNetworkProcessor
       new GazeboCameraReceiver(robotPoseBuffer, videoSettings, rosMainNode, networkingManager, DRCSensorParameters.FIELD_OF_VIEW);
       new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, fullRobotModel, robotBoundingBoxes, jointMap, rosCoreURI.toString());
       rosMainNode.execute();
-      connect();
    }
    
    public DRCNetworkProcessor(LocalObjectCommunicator scsCommunicator, ObjectCommunicator drcNetworkObjectCommunicator)
@@ -73,7 +71,6 @@ public class DRCNetworkProcessor
       this(drcNetworkObjectCommunicator);
       new SCSCameraDataReceiver(robotPoseBuffer, videoSettings, scsCommunicator, networkingManager);
       new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, fullRobotModel, robotBoundingBoxes, jointMap);
-      connect();
    }
 
    private DRCNetworkProcessor(ObjectCommunicator fieldComputerClient)
@@ -101,19 +98,6 @@ public class DRCNetworkProcessor
       robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, fullRobotModel);
    }
 
-   private void connect()
-   {
-      System.out.println("Connecting network processor");
-      try
-      {
-         fieldComputerClient.connect();
-         networkingManager.connect();
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
-   }
 
    
    public static void main(String[] args) throws URISyntaxException
