@@ -123,4 +123,13 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
       this.base = base;
       this.handSpatialAccelerationControlModule = rigidBodySpatialAccelerationControlModule;
    }
+
+   public ReferenceFrame getReferenceFrame()
+   {
+      // FIXME: hack
+
+      FramePoint point = new FramePoint();
+      positionTrajectoryGenerator.get(point);
+      return point.getReferenceFrame();
+   }
 }
