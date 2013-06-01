@@ -112,7 +112,11 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       {
          cylinderContactStatesConverted = null;
       }
+
       hardMotionConstraintSolver.setAlpha(momentumOptimizationSettings.getDampedLeastSquaresFactor());
+
+      if (HardMotionConstraintEnforcer.TEST_CONSTRAINT_CONSISTENCY)
+         hardMotionConstraintSolver.setAlpha(0.0);
 
       primaryMotionConstraintHandler.compute();
 
