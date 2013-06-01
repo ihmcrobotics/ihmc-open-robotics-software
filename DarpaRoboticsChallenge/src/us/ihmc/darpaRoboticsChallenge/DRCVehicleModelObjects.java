@@ -65,6 +65,12 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
          Transform3D transform3D = new Transform3D();
          transform3D.mul(transform3DfromWorldToParent, transform3DfromParentToChild);
 
+         //Rotate to have the Z axis point out
+         Transform3D finalAdjustment = new Transform3D();
+         finalAdjustment.setEuler(new Vector3d(0.0, Math.PI, 0.0));
+
+         transform3D.mul(finalAdjustment);
+
          objectTransforms.put(VehicleObject.GAS_PEDAL, transform3D);
       }
 
@@ -100,7 +106,9 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
 
          //Rotate to have the Z axis point out
          Transform3D finalAdjustment = new Transform3D();
-         finalAdjustment.setEuler(new Vector3d(Math.PI, 0.0, 0.0));
+         finalAdjustment.setEuler(new Vector3d(0.0, Math.PI, 0.0));
+
+         transform3D.mul(finalAdjustment);
 
          objectTransforms.put(VehicleObject.BRAKE_PEDAL, transform3D);
       }
@@ -134,6 +142,21 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
 
          Transform3D transform3D = new Transform3D();
          transform3D.mul(transform3DfromWorldToParent, transform3DfromParentToChild);
+
+         //Rotate to have the Z axis point
+         double xRotation = Math.toRadians(29.0);
+         Transform3D finalAdjustment = new Transform3D();
+         finalAdjustment.setEuler(new Vector3d(xRotation, 0.0, 0.0));
+         transform3D.mul(finalAdjustment);
+
+         finalAdjustment = new Transform3D();
+         finalAdjustment.setEuler(new Vector3d(0.0, 0.0, Math.PI/2.0));
+         transform3D.mul(finalAdjustment);
+
+         finalAdjustment = new Transform3D();
+         finalAdjustment.set(new Vector3d(0.03, 0.0, 0.0));
+         transform3D.mul(finalAdjustment);
+
          objectTransforms.put(VehicleObject.STEERING_WHEEL, transform3D);
       }
 
@@ -166,6 +189,16 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
 
          Transform3D transform3D = new Transform3D();
          transform3D.mul(transform3DfromWorldToParent, transform3DfromParentToChild);
+
+         //Rotate to have the Z axis point out
+         Transform3D finalAdjustment = new Transform3D();
+         finalAdjustment.setEuler(new Vector3d(Math.PI/2.0, 0.0, 0.0));
+         transform3D.mul(finalAdjustment);
+
+         finalAdjustment = new Transform3D();
+         finalAdjustment.setEuler(new Vector3d(0.0, 0.0, Math.PI/2.0));
+         transform3D.mul(finalAdjustment);
+
          objectTransforms.put(VehicleObject.HAND_BRAKE, transform3D);
       }
 
@@ -180,6 +213,13 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
          RotationFunctions.setYawPitchRoll(matrix3d, yaw, pitch, roll);
 
          Transform3D transform3D = new Transform3D(matrix3d, translation, 1.0);
+
+         //Rotate to have the Z axis point out
+         Transform3D finalAdjustment = new Transform3D();
+         finalAdjustment.setEuler(new Vector3d(0.0, -Math.PI/2.0, 0.0));
+
+         transform3D.mul(finalAdjustment);
+
          objectTransforms.put(VehicleObject.FNR_SWITCH, transform3D);
       }
    }

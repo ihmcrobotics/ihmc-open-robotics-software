@@ -15,7 +15,7 @@ public class VehicleModelObjectVisualizer
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DynamicGraphicObjectsList dynamicGraphicObjectsList;
-   private final double objectFrameScale = 0.1;
+   private final double objectFrameScale = 0.2;
    private final double vehicleFrameScale = 1.0;
 
    public VehicleModelObjectVisualizer(ReferenceFrame vehicleFrame, VehicleModelObjects vehicleModelObjects,
