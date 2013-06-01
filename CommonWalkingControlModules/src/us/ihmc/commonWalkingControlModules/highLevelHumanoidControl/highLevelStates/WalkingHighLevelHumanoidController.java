@@ -218,6 +218,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    
    private final BooleanYoVariable toeOffTrigger = new BooleanYoVariable("toeOffTrigger", registry);
    
+
+   private double minimumKneeAngleAfterToeOff = 60*Math.PI/180; 
    private double maximumToeOffAngle = 0.5; 
    private double referenceTime = 0.22; 
    private MaximumConstantJerkFinalToeOffAngleComputer maximumConstantJerkFinalToeOffAngleComputer = new MaximumConstantJerkFinalToeOffAngleComputer();  
@@ -736,6 +738,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                               (!useTrailingLegKneeAngleAsToeOffTrigger.getBooleanValue() && !useAnklePitchAngleAsToeOffTrigger.getBooleanValue()) || 
                               (trailingLegKneeAngle.getDoubleValue() < toeOffKneeAngleThreashold.getDoubleValue() && useTrailingLegKneeAngleAsToeOffTrigger.getBooleanValue()) || 
                               (trailingLegAnklePitchAngle.getDoubleValue() < toeOffAnklePitchThreashold.getDoubleValue() && useAnklePitchAngleAsToeOffTrigger.getBooleanValue())
+                              
+                              && (Math.abs(trailingLegKneeAngle.getDoubleValue()) < Math.PI - (minimumKneeAngleAfterToeOff + maximumToeOffAngle))
                         )
                         
                   );
