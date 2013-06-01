@@ -152,7 +152,7 @@ public class HighLevelHumanoidControllerFactoryHelper
       {
          InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, lidarControllerInterface.getLidarJoint());
          MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(registry);
-         momentumOptimizationSettings.setDampedLeastSquaresFactor(Math.sqrt(5e-2));
+         momentumOptimizationSettings.setDampedLeastSquaresFactor(5e-2);
          momentumOptimizationSettings.setGroundReactionForceRegularization(0.001);
          momentumOptimizationSettings.setPhiRegularization(0.001);
          momentumOptimizationSettings.setMomentumWeight(1.0, 1.0, 10.0, 10.0);
