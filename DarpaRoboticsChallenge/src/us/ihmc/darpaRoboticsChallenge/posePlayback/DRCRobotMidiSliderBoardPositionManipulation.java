@@ -40,6 +40,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    private final BooleanYoVariable isCaptureSnapshotRequested = new BooleanYoVariable("isCaptureSnapshotRequested", registry);
    private final BooleanYoVariable isSaveSequenceRequested = new BooleanYoVariable("isSaveSequenceRequested", registry);
    private final BooleanYoVariable isLoadSequenceRequested = new BooleanYoVariable("isLoadSequenceRequested", registry);
+   private final BooleanYoVariable isClearSequenceRequested = new BooleanYoVariable("isClearSequenceRequested", registry);
 
    private final BooleanYoVariable isPelvisControlRequested = new BooleanYoVariable("isPelvisControlRequested", registry);
    private final BooleanYoVariable isChestControlRequested = new BooleanYoVariable("isChestControlRequested", registry);
@@ -103,6 +104,11 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    public void addLoadSequenceRequestedListener(VariableChangedListener variableChangedListener)
    {
       isLoadSequenceRequested.addVariableChangedListener(variableChangedListener);
+   }
+   
+   public void addClearSequenceRequestedListener(VariableChangedListener variableChangedListener)
+   {
+      isClearSequenceRequested.addVariableChangedListener(variableChangedListener);
    }
 
    private void init()
@@ -275,6 +281,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       sliderBoard.setButton(buttonChannel++, isCaptureSnapshotRequested.getName(), scs);
       sliderBoard.setButton(buttonChannel++, isSaveSequenceRequested.getName(), scs);
       sliderBoard.setButton(buttonChannel++, isLoadSequenceRequested.getName(), scs);
+      sliderBoard.setButton(buttonChannel++, isClearSequenceRequested.getName(), scs);
       buttonChannel = 9;
       sliderBoard.setButton(buttonChannel++, isPelvisControlRequested.getName(), scs);
       sliderBoard.setButton(buttonChannel++, isChestControlRequested.getName(), scs);

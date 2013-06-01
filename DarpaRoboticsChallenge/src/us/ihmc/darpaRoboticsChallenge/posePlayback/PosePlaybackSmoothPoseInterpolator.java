@@ -13,6 +13,8 @@ public class PosePlaybackSmoothPoseInterpolator
    private final DoubleYoVariable poseMorphPercentage = new DoubleYoVariable("poseMorphPercentage", registry);
    private final DoubleYoVariable poseMorphDuration = new DoubleYoVariable("poseMorphDuration", registry);
    private final IntegerYoVariable poseSequenceIndex = new IntegerYoVariable("poseSequenceIndex", registry);
+   
+   private boolean lastPoseIncrementedSequence = false;
 
    private final int numberOfCoefficients = 4;    // Cubic
 
@@ -69,8 +71,18 @@ public class PosePlaybackSmoothPoseInterpolator
       {
          poseSequenceIndex.increment();
          poseStartTime.set(time);
+         lastPoseIncrementedSequence = true;
+      }
+      else
+      {
+         lastPoseIncrementedSequence = false;
       }
       return morphedPose;
+   }
+   
+   public boolean didLastPoseIncrementSequence()
+   {
+      return lastPoseIncrementedSequence;
    }
 
    public boolean isDone()
