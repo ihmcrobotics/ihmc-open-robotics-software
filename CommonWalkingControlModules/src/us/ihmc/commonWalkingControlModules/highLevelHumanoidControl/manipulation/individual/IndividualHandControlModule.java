@@ -19,7 +19,9 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.*;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.yobotics.simulationconstructionset.util.statemachines.StateMachineTools.addRequestedStateTransition;
@@ -48,7 +50,8 @@ public class IndividualHandControlModule
    private final JointSpaceHandControlControlState jointSpaceHandControlState;
    private final LoadBearingCylindricalHandControlState loadBearingCylindricalState;
    private final ObjectManipulationState objectManipulationState;
-   private final LoadBearingPlaneHandControlState loadBearingPlaneState;
+//   private final LoadBearingPlaneHandControlState loadBearingPlaneState;
+   private final List<TaskspaceHandPositionControlState> taskSpacePositionControlStates = new ArrayList<TaskspaceHandPositionControlState>();
 
    private final EnumYoVariable<IndividualHandControlState> requestedState;
    private final HandControllerInterface handController;
@@ -113,8 +116,8 @@ public class IndividualHandControlModule
       loadBearingCylindricalState = new LoadBearingCylindricalHandControlState(IndividualHandControlState.LOAD_BEARING_CYLINDRICAL, momentumBasedController,
               jacobian, parentRegistry, robotSide);
 
-      loadBearingPlaneState = new LoadBearingPlaneHandControlState(IndividualHandControlState.LOAD_BEARING_PLANE, robotSide, momentumBasedController, jacobian,
-              handController, registry);
+//      loadBearingPlaneState = new LoadBearingPlaneHandControlState(IndividualHandControlState.LOAD_BEARING_PLANE, robotSide, momentumBasedController, jacobian,
+//              handController, registry);
 
       jointSpaceHandControlState = new JointSpaceHandControlControlState(IndividualHandControlState.JOINT_SPACE, robotSide, jacobian, momentumBasedController,
               registry, 1.0);
@@ -150,6 +153,9 @@ public class IndividualHandControlModule
       stateMachine.addState(objectManipulationState);
       stateMachine.addState(loadBearingCylindricalState);
 //      stateMachine.addState(loadBearingPlaneState);
+
+      taskSpacePositionControlStates.add(taskspaceHandPositionControlState);
+      taskSpacePositionControlStates.add(objectManipulationState);
 
       parentRegistry.addChild(registry);
    }
@@ -375,8 +381,15 @@ public class IndividualHandControlModule
       return ret;
    }
 
-   public boolean isControllingInTaskSpace()
+   public boolean isControllingPoseInWorld()
    {
-      return stateMachine.getCurrentState() instanceof TaskspaceHandControlState;
+      State<IndividualHandControlState> currentState = stateMachine.getCurrentState();
+
+      for (TaskspaceHandPositionControlState taskSpacePositionControlState : taskSpacePositionControlStates)
+      {
+         if (currentState == taskSpacePositionControlState)
+            return taskSpacePositionControlState.getReferenceFrame() == ReferenceFrame.getWorldFrame();
+      }
+      return false;
    }
 }
