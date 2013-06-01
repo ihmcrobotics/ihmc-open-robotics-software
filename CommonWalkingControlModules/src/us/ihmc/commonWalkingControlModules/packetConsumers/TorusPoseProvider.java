@@ -54,11 +54,6 @@ public class TorusPoseProvider implements ObjectConsumer<TorusPosePacket>
       }
    }
 
-   public FramePoint getPosition()
-   {
-      return framePose.getPostionCopy();
-   }
-
    public FramePose getFramePose()
    {
       synchronized (synchronizationObject)
