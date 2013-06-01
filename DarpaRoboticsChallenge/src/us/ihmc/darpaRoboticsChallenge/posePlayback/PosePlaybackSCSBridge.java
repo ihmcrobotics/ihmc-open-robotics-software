@@ -7,12 +7,14 @@ import javax.swing.JFileChooser;
 import javax.vecmath.Point3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.environment.VRCTask;
 import us.ihmc.darpaRoboticsChallenge.environment.VRCTaskName;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.VariableChangedListener;
 import com.yobotics.simulationconstructionset.YoVariable;
@@ -23,7 +25,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public class PosePlaybackSCSBridge
 {
-   private static final String ipAddress = "localhost"; //DRCConfigParameters.CLOUD_MINION5_IP;
+   private static final String ipAddress = DRCConfigParameters.CLOUD_MINION5_IP;
 
    private final PosePlaybackAllJointsController posePlaybackController;
    private final PosePlaybackSender posePlaybackSender;
@@ -72,6 +74,14 @@ public class PosePlaybackSCSBridge
       LoadSequenceListener loadSequenceListener = new LoadSequenceListener(sdfRobot, scs);
       sliderBoard.addLoadSequenceRequestedListener(loadSequenceListener);
 
+      sliderBoard.addClearSequenceRequestedListener(new VariableChangedListener()
+      {
+         public void variableChanged(YoVariable yoVariable)
+         {
+            posePlaybackRobotPoseSequence.clear();
+            System.out.println("Clearing Sequence");
+         }
+      });
 
       scs.startOnAThread();
   
@@ -115,7 +125,7 @@ public class PosePlaybackSCSBridge
             sdfRobot.computeCenterOfMass(comPoint);
             centerOfMassPosition.set(comPoint);
 
-            System.out.println(comPoint);
+//            System.out.println(comPoint);
             comPoint2d.set(comPoint.getX(), comPoint.getY(), 0.0);
             centerOfMassPosition2d.set(comPoint2d);
 
@@ -206,6 +216,9 @@ public class PosePlaybackSCSBridge
 
       public void variableChanged(YoVariable yoVariable)
       {
+         if(!((BooleanYoVariable) yoVariable).getBooleanValue())
+            return;
+         
          System.out.println("Load Sequence Listener");
 
          JFileChooser chooser = new JFileChooser(new File("PoseSequences"));
@@ -228,6 +241,7 @@ public class PosePlaybackSCSBridge
          double dt = 0.005;
 
          interpolator.startSequencePlayback(sequence, startTime);
+         int poseNumber = 0;
 
          while (!interpolator.isDone())
          {
@@ -243,7 +257,14 @@ public class PosePlaybackSCSBridge
             try
             {
                if (posePlaybackSender.isConnected())
+               {
                   posePlaybackSender.writeData();
+                  if(interpolator.didLastPoseIncrementSequence())
+                  {
+                     ThreadTools.sleep(3000);
+                     System.out.println("pose #: " + poseNumber++);
+                  }
+               }
                ThreadTools.sleep((long) (dt * 1000));
             }
             catch (IOException e)
@@ -258,8 +279,11 @@ public class PosePlaybackSCSBridge
    {
       public void variableChanged(YoVariable yoVariable)
       {
-         System.out.println("saving file");
-         posePlaybackRobotPoseSequence.promptWriteToFile();
+         if(((BooleanYoVariable) yoVariable).getBooleanValue())
+         {
+            System.out.println("saving file");
+            posePlaybackRobotPoseSequence.promptWriteToFile();            
+         }
       }
    }
 
