@@ -18,7 +18,10 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -27,6 +30,7 @@ import com.yobotics.simulationconstructionset.VariableChangedListener;
 import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
@@ -52,9 +56,14 @@ public class PosePlaybackSCSBridge
    private final YoFramePoint rightAnklePosition = new YoFramePoint("rightAnklePosition", ReferenceFrame.getWorldFrame(), registry);
    private final SideDependentList<YoFramePoint> anklePositions = new SideDependentList<YoFramePoint>(leftAnklePosition, rightAnklePosition);
    
+   private final SideDependentList<DynamicGraphicCoordinateSystem> feetCoordinateSystems;
+   
+   
    private final YoFramePoint leftWristPosition = new YoFramePoint("leftWristPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint rightWristPosition = new YoFramePoint("rightWristPosition", ReferenceFrame.getWorldFrame(), registry);
    private final SideDependentList<YoFramePoint> wristPositions = new SideDependentList<YoFramePoint>(leftWristPosition, rightWristPosition);
+
+   private final SideDependentList<DynamicGraphicCoordinateSystem> handCoordinateSystems;
 
 
 // private final BagOfBalls balls = new BagOfBalls(500, 0.01, YoAppearance.AliceBlue(), registry, dynamicGraphicObjectsListRegistry);
@@ -90,14 +99,31 @@ public class PosePlaybackSCSBridge
       DynamicGraphicPosition leftWristViz = new DynamicGraphicPosition("leftWristViz", leftWristPosition, 0.05, YoAppearance.Red());
       DynamicGraphicPosition rightWristViz = new DynamicGraphicPosition("rightWristViz", rightWristPosition, 0.05, YoAppearance.Green());
 
+      DynamicGraphicCoordinateSystem leftFootCoordinateSystem = new DynamicGraphicCoordinateSystem("leftFoot", "", registry, 0.25);
+      DynamicGraphicCoordinateSystem rightFootCoordinateSystem = new DynamicGraphicCoordinateSystem("rightFoot", "", registry, 0.25);
+      feetCoordinateSystems = new SideDependentList<DynamicGraphicCoordinateSystem>(leftFootCoordinateSystem, rightFootCoordinateSystem);
+      
+      DynamicGraphicCoordinateSystem leftHandCoordinateSystem = new DynamicGraphicCoordinateSystem("leftHand", "", registry, 0.25);
+      DynamicGraphicCoordinateSystem rightHandCoordinateSystem = new DynamicGraphicCoordinateSystem("rightHand", "", registry, 0.25);
+      handCoordinateSystems = new SideDependentList<DynamicGraphicCoordinateSystem>(leftHandCoordinateSystem, rightHandCoordinateSystem);
+      
+      
+      
       dynamicGraphicObjectsList.add(centerOfMassViz);
       dynamicGraphicObjectsList.add(centerOfMass2dViz);
 
       dynamicGraphicObjectsList.add(leftAnkleViz);
       dynamicGraphicObjectsList.add(rightAnkleViz);
       
+      dynamicGraphicObjectsList.add(leftFootCoordinateSystem);
+      dynamicGraphicObjectsList.add(rightFootCoordinateSystem);
+
+      
       dynamicGraphicObjectsList.add(leftWristViz);
       dynamicGraphicObjectsList.add(rightWristViz);
+      
+      dynamicGraphicObjectsList.add(leftHandCoordinateSystem);
+      dynamicGraphicObjectsList.add(rightHandCoordinateSystem);
 
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
       dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
@@ -266,10 +292,31 @@ public class PosePlaybackSCSBridge
             anklePosition.changeFrame(ReferenceFrame.getWorldFrame());
             anklePositions.get(robotSide).set(anklePosition);
             
+            ReferenceFrame footFrame = fullRobotModel.getFoot(robotSide).getBodyFixedFrame();
+            feetCoordinateSystems.get(robotSide).setToReferenceFrame(footFrame);
+            
             ReferenceFrame wristFrame = fullRobotModel.getHand(robotSide).getParentJoint().getFrameAfterJoint();
             FramePoint wristPosition = new FramePoint(wristFrame);
             wristPosition.changeFrame(ReferenceFrame.getWorldFrame());
             wristPositions.get(robotSide).set(wristPosition);
+            
+            ReferenceFrame handFrame = fullRobotModel.getHand(robotSide).getBodyFixedFrame(); 
+            
+            FramePose palmPose = new FramePose(handFrame);
+            FramePoint palmPositionWithRespectToHandFrame = new FramePoint(handFrame, 0.0, robotSide.negateIfRightSide(0.08), -0.04);
+            double yaw = 0.0;
+            double pitch = 0.0;
+            double roll = robotSide.negateIfLeftSide(0.4);
+            FrameOrientation palmOrientationWithRespectToHandFrame = new FrameOrientation(handFrame, yaw, pitch, roll);
+
+            
+            palmPose.setPosition(palmPositionWithRespectToHandFrame);
+            palmPose.setOrientation(palmOrientationWithRespectToHandFrame);
+            
+            PoseReferenceFrame palmFrame = new PoseReferenceFrame("palmFrame", palmPose );
+            palmFrame.update();
+            
+            handCoordinateSystems.get(robotSide).setToReferenceFrame(palmFrame);
          }
       }
 
