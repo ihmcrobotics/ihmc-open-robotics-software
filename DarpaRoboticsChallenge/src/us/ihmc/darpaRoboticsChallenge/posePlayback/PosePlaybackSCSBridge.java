@@ -335,7 +335,7 @@ public class PosePlaybackSCSBridge
                   posePlaybackSender.writeData();
                   if(interpolator.didLastPoseIncrementSequence())
                   {
-                     ThreadTools.sleep(3000);
+                     ThreadTools.sleep(2500);//3000 worked for standing up, 2000 failed at about 33 in standcde, 1000 failed at about 23 in standcde
                      System.out.println("pose #: " + poseNumber++);
                   }
                }
