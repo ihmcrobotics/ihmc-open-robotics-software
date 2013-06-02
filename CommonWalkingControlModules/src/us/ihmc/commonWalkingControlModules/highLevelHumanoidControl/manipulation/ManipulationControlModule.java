@@ -1,19 +1,17 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
-import com.yobotics.simulationconstructionset.util.statemachines.State;
-import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
-import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
-import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+
 import us.ihmc.commonWalkingControlModules.configurations.ManipulationControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.IndividualHandControlModule;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.states.direct.DispatchTasksManipulationState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.states.direct.HighLevelDirectControlManipulationState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.states.fingerToroidManipulation.HighLevelFingerValveManipulationState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -31,10 +29,16 @@ import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import java.util.ArrayList;
-import java.util.List;
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
+import com.yobotics.simulationconstructionset.util.statemachines.State;
+import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
+import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
+import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 
 /**
  * @author twan
@@ -49,7 +53,10 @@ public class ManipulationControlModule
    private final List<DynamicGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<DynamicGraphicReferenceFrame>();
    private final DoubleYoVariable time;
    private final VariousWalkingProviders variousWalkingProviders;
+   
    private HighLevelDirectControlManipulationState directControlManipulationState;
+   private DispatchTasksManipulationState dispatchTasksManipulationState;
+   
    private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("onFirstTick", registry);
    private boolean haveSentDummyTorusPacket = false;
 
@@ -112,10 +119,22 @@ public class ManipulationControlModule
       final TorusPoseProvider torusPoseProvider = variousWalkingProviders.getTorusPoseProvider();
       final TorusManipulationProvider torusManipulationProvider = variousWalkingProviders.getTorusManipulationProvider();
 
+      
+
+      SideDependentList<IndividualHandControlModule> individualHandControlModules = createIndividualHandControlModules(yoTime, fullRobotModel, twistCalculator,
+            dynamicGraphicObjectsListRegistry, handControllers, momentumBasedController, jacobians);
+      
+      
       directControlManipulationState = new HighLevelDirectControlManipulationState(yoTime, fullRobotModel, twistCalculator, parameters, handPoseProvider,
-              handLoadBearingProvider, dynamicGraphicObjectsListRegistry, handControllers, handPositionControlFrames, jacobians, momentumBasedController,
+              handLoadBearingProvider, dynamicGraphicObjectsListRegistry, handControllers, handPositionControlFrames, individualHandControlModules, momentumBasedController,
               registry);
 
+      
+      
+      dispatchTasksManipulationState = new DispatchTasksManipulationState(yoTime, fullRobotModel, twistCalculator, parameters, handPoseProvider,
+              handLoadBearingProvider, dynamicGraphicObjectsListRegistry, handControllers, handPositionControlFrames, individualHandControlModules, momentumBasedController,
+              registry);
+      
 //    HighLevelToroidManipulationState toroidManipulationState = new HighLevelToroidManipulationState(yoTime, fullRobotModel, twistCalculator,
 //                                                                  handPositionControlFrames, handControllers, jacobians, torusPoseProvider,
 //                                                                  momentumBasedController, dynamicGraphicObjectsListRegistry, parentRegistry);
@@ -134,7 +153,36 @@ public class ManipulationControlModule
       addTransitionFromToroidToDirectWhenDone(directControlManipulationState, fingerToroidManipulationState);
 
       stateMachine.addState(directControlManipulationState);
+      stateMachine.addState(dispatchTasksManipulationState);
       stateMachine.addState(fingerToroidManipulationState);
+   }
+
+   private SideDependentList<IndividualHandControlModule> createIndividualHandControlModules(DoubleYoVariable yoTime, FullRobotModel fullRobotModel,
+         TwistCalculator twistCalculator, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+         SideDependentList<HandControllerInterface> handControllers, MomentumBasedController momentumBasedController,
+         SideDependentList<GeometricJacobian> jacobians)
+   {
+      SideDependentList<IndividualHandControlModule> individualHandControlModules = new SideDependentList<IndividualHandControlModule>();
+      
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         HandControllerInterface handControllerInterface = null;
+         if (handControllers != null)
+         {
+            handControllerInterface = handControllers.get(robotSide);
+         }
+
+
+         GeometricJacobian jacobian = jacobians.get(robotSide);
+         double gravityZ = momentumBasedController.getGravityZ();
+         double controlDT = momentumBasedController.getControlDT();
+         
+         IndividualHandControlModule individualHandControlModule = new IndividualHandControlModule(yoTime, robotSide, fullRobotModel, twistCalculator,
+                                                                      dynamicGraphicObjectsListRegistry, handControllerInterface, gravityZ, controlDT,
+                                                                      momentumBasedController, jacobian, registry);
+         individualHandControlModules.put(robotSide, individualHandControlModule);
+      }
+      return individualHandControlModules;
    }
 
    private static void addTransitionFromDirectToToroid(HighLevelDirectControlManipulationState directControlManipulationState,
@@ -188,8 +236,11 @@ public class ManipulationControlModule
 
    public void goToDefaultState()
    {
+      //TODO: Switch to DISPATCH_TASKS. Get rid of other states. Remove state machine.
       stateMachine.setCurrentState(ManipulationState.DIRECT_CONTROL);
+//      stateMachine.setCurrentState(ManipulationState.DISPATCH_TASKS);
       directControlManipulationState.goToDefaultState();
+      dispatchTasksManipulationState.goToDefaultState();
    }
 
    public void doControl()
@@ -239,5 +290,6 @@ public class ManipulationControlModule
    public void prepareForLocomotion()
    {
       directControlManipulationState.prepareForLocomotion();
+      dispatchTasksManipulationState.prepareForLocomotion();
    }
 }
