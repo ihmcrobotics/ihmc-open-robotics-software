@@ -59,8 +59,9 @@ public class IndividualHandControlModule
    private final GeometricJacobian jacobian;
    private final String name;
    private final TwistCalculator twistCalculator;
+   private final FullRobotModel fullRobotModel;
 
-   public IndividualHandControlModule(final DoubleYoVariable simulationTime, final RobotSide robotSide, final FullRobotModel fullRobotModel,
+   public IndividualHandControlModule(final DoubleYoVariable simulationTime, final RobotSide robotSide, FullRobotModel fullRobotModel,
                                       final TwistCalculator twistCalculator, final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
                                       HandControllerInterface handController, double gravity, final double controlDT,
                                       MomentumBasedController momentumBasedController, GeometricJacobian jacobian, final YoVariableRegistry parentRegistry)
@@ -70,7 +71,7 @@ public class IndividualHandControlModule
       name = endEffector.getName() + getClass().getSimpleName();
       registry = new YoVariableRegistry(name);
       this.twistCalculator = twistCalculator;
-
+      this.fullRobotModel = fullRobotModel;
       this.handController = handController;
 
       oneDoFJoints = ScrewTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJoint.class);
@@ -319,8 +320,12 @@ public class IndividualHandControlModule
 
    public void holdPositionInBase()
    {
+      // NOTE here we make poseToHolinBase in chestFrame, not in the endEffectorFrame. Otherwise the hand will sag.
       ReferenceFrame endEffectorFrame = jacobian.getEndEffectorFrame();
-      currentConfigurationProvider.set(new FramePose(endEffectorFrame));
+      FramePose poseToHoldInBase = new FramePose(endEffectorFrame);
+      ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
+      poseToHoldInBase.changeFrame(chestFrame);
+      currentConfigurationProvider.set(poseToHoldInBase);
       PositionTrajectoryGenerator positionTrajectory = holdPositionInBaseTrajectoryGenerator;
       OrientationTrajectoryGenerator orientationTrajectory = holdOrientationInBaseTrajectoryGenerator;
       executeTaskSpaceTrajectory(positionTrajectory, orientationTrajectory, endEffectorFrame, jacobian.getBase(), isHoldingObject());
