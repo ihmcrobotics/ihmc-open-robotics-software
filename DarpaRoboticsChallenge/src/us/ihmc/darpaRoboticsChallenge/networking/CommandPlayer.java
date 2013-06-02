@@ -1,7 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge.networking;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -10,17 +8,16 @@ import javax.media.j3d.Transform3D;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.EndOfScriptCommand;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCNetClassList;
+import us.ihmc.darpaRoboticsChallenge.scriptEngine.ScriptEngineSettings;
+import us.ihmc.darpaRoboticsChallenge.scriptEngine.ScriptFileLoader;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
-import us.ihmc.utilities.net.KryoStreamDeSerializer;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.TimestampListener;
 import us.ihmc.utilities.net.TimestampProvider;
-import us.ihmc.utilities.net.TransformableDataObject;
 
 public class CommandPlayer implements TimestampListener
 {
-   private final KryoStreamDeSerializer deSerializer = new KryoStreamDeSerializer(1048576);
    private final ExecutorService threadPool = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory("CommandPlaybackThread"));
    private final TimestampProvider timestampProvider;
    private final ObjectCommunicator fieldComputerClient;
@@ -28,19 +25,17 @@ public class CommandPlayer implements TimestampListener
    private Object syncObject = new Object();
    
    private boolean playingBack = false;
-   private FileInputStream inputStream;
    private Transform3D playbackTransform = new Transform3D();
    private long startTime = Long.MIN_VALUE; 
    private long nextCommandtimestamp = Long.MIN_VALUE;
+   
+   private ScriptFileLoader loader;
    
    public CommandPlayer(AtomicSettableTimestampProvider timestampProvider, ObjectCommunicator fieldComputerClient, DRCNetClassList drcNetClassList)
    {
       this.timestampProvider = timestampProvider;
       this.fieldComputerClient = fieldComputerClient;
       timestampProvider.attachListener(this);
-      
-      deSerializer.registerClasses(drcNetClassList);
-      deSerializer.registerClass(TimestampPacket.class);
    }
    
    public void startPlayback(String filename, Transform3D playbackTransform)
@@ -55,21 +50,15 @@ public class CommandPlayer implements TimestampListener
       }
       try
       {
-         File file = new File(CommandRecorder.directory + "/" + filename + ".script");
+         String fullpath = ScriptEngineSettings.scriptDirectory + filename + ScriptEngineSettings.extension;
          
-         if(!file.exists())
-         {
-            throw new RuntimeException("Script " + filename + " does not exist");
-         }
-         
-         inputStream = new FileInputStream(file);
+         loader = new ScriptFileLoader(fullpath);
          startTime = timestampProvider.getTimestamp();
          this.playbackTransform.set(playbackTransform);
-         
-         getNextCommandTimestamp();
-         
+                  
          synchronized (syncObject)
          {
+            nextCommandtimestamp = loader.getTimestamp();
             playingBack = true;
          }
          System.out.println("Started playback of " + filename);
@@ -77,22 +66,6 @@ public class CommandPlayer implements TimestampListener
       catch(IOException e)
       {
          throw new RuntimeException(e);
-      }
-   }
-
-   private void getNextCommandTimestamp() throws IOException
-   {
-      Object timestampPacket = deSerializer.read(inputStream);
-      if(timestampPacket instanceof TimestampPacket)
-      {
-         synchronized (syncObject)
-         {
-            nextCommandtimestamp = (((TimestampPacket) timestampPacket).getTimestamp());
-         }
-      }
-      else
-      {
-         throw new RuntimeException("Invalid packet, expected TimestampPacket, got " + timestampPacket.getClass().getSimpleName());
       }
    }
 
@@ -121,45 +94,27 @@ public class CommandPlayer implements TimestampListener
    {
       try
       {
-         Object object = deSerializer.read(inputStream);
+         Object object = loader.getObject(playbackTransform);
          
-         Object objectToSend;
-         if(object instanceof TransformableDataObject)
+         if(!(object instanceof EndOfScriptCommand))
          {
-            objectToSend = ((TransformableDataObject) object).transform(playbackTransform);         
+            fieldComputerClient.consumeObject(object);
          }
-         else if(object instanceof EndOfScriptCommand)
-         {
-            //Do not do anything.
-            objectToSend = null;
-         }
-         else
-         {
-            objectToSend = object;
-         }
+         
 
-         if (objectToSend != null)
-            fieldComputerClient.consumeObject(objectToSend);
-         
-         if(inputStream.available() > 0)
-         {
-            getNextCommandTimestamp();
-         }
-         else
-         {
-            System.out.println("End of inputstream reached, stopping playback");
-            synchronized (syncObject)
-            {
-               playingBack = false;
-            }
-            
-            inputStream.close();
-         }
+         nextCommandtimestamp = loader.getTimestamp();
+       
          
       }
       catch (IOException e)
       {
-         throw new RuntimeException(e);
+         System.out.println("End of inputstream reached, stopping playback");
+         synchronized (syncObject)
+         {
+            playingBack = false;
+         }
+         
+         loader.close();
       }
    }
 }
