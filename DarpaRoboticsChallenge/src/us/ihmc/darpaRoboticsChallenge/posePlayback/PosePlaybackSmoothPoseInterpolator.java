@@ -80,6 +80,11 @@ public class PosePlaybackSmoothPoseInterpolator
       return morphedPose;
    }
    
+   public double getTransitionTimeDelay()
+   {
+      return sequence.getPose(poseSequenceIndex.getIntegerValue()).getPlayBackDelayBeforePose();
+   }
+   
    public boolean didLastPoseIncrementSequence()
    {
       return lastPoseIncrementedSequence;
