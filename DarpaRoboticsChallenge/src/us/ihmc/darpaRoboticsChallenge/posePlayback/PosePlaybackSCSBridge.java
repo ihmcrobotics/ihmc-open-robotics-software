@@ -6,6 +6,7 @@ import java.io.IOException;
 import javax.swing.JFileChooser;
 import javax.vecmath.Point3d;
 
+import com.yobotics.simulationconstructionset.*;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
 import us.ihmc.SdfLoader.SDFRobot;
@@ -24,11 +25,6 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.VariableChangedListener;
-import com.yobotics.simulationconstructionset.YoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
@@ -56,9 +52,13 @@ public class PosePlaybackSCSBridge
    private final YoFramePoint rightAnklePosition = new YoFramePoint("rightAnklePosition", ReferenceFrame.getWorldFrame(), registry);
    private final SideDependentList<YoFramePoint> anklePositions = new SideDependentList<YoFramePoint>(leftAnklePosition, rightAnklePosition);
    
+   private final EnumYoVariable leftPalmPoseClassification = new EnumYoVariable("leftPalmPose", "", registry, PalmPoseClassification.class, true);
+   private final EnumYoVariable rightPalmPoseClassification = new EnumYoVariable("rightPalmPose", "", registry, PalmPoseClassification.class, true);
+   private final SideDependentList<EnumYoVariable> palmPoseClassifications = new SideDependentList<EnumYoVariable>(leftPalmPoseClassification, rightPalmPoseClassification);
+
+
    private final SideDependentList<DynamicGraphicCoordinateSystem> feetCoordinateSystems;
-   
-   
+
    private final YoFramePoint leftWristPosition = new YoFramePoint("leftWristPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint rightWristPosition = new YoFramePoint("rightWristPosition", ReferenceFrame.getWorldFrame(), registry);
    private final SideDependentList<YoFramePoint> wristPositions = new SideDependentList<YoFramePoint>(leftWristPosition, rightWristPosition);
@@ -313,10 +313,16 @@ public class PosePlaybackSCSBridge
             palmPose.setPosition(palmPositionWithRespectToHandFrame);
             palmPose.setOrientation(palmOrientationWithRespectToHandFrame);
             
-            PoseReferenceFrame palmFrame = new PoseReferenceFrame("palmFrame", palmPose );
+            PoseReferenceFrame palmFrame = new PoseReferenceFrame("palmFrame", palmPose);
             palmFrame.update();
             
             handCoordinateSystems.get(robotSide).setToReferenceFrame(palmFrame);
+
+            PalmPoseClassification classifcation = PalmPoseClassifier.getClassification(robotSide, handFrame, fullRobotModel.getChest().getBodyFixedFrame());
+            palmPoseClassifications.get(robotSide).set(classifcation);
+
+//            PoseReferenceFrame toDisplay = PalmPoseClassifier.getPoseReferenceFrame(RobotSide.RIGHT, PalmPoseClassification.PALM_IN);
+//            handCoordinateSystems.get(robotSide).setToReferenceFrame(toDisplay);
          }
       }
 
