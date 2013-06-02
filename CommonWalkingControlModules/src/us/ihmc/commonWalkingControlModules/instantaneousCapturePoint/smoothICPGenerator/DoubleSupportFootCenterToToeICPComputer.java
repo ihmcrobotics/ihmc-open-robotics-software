@@ -103,7 +103,9 @@ public class DoubleSupportFootCenterToToeICPComputer
    public DoubleSupportFootCenterToToeICPComputer(double doubleSupportFirstStepFraction, int maxNumberOfConsideredFootsteps, YoVariableRegistry parentRegistry,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      doHeelToToeTransfer.set(true);
+      //Don't set setDoHeelToToeTransfer to true unless you make the VRC Task 2 work with it on first, especially the mud!
+      this.setDoHeelToToeTransfer(false);
+//      doHeelToToeTransfer.set(true);
       
       this.singleSupportToePercentage = 0.5;
 
@@ -737,6 +739,11 @@ public class DoubleSupportFootCenterToToeICPComputer
    public boolean getDoHeelToToeTransfer()
    {
       return doHeelToToeTransfer.getBooleanValue();
+   }
+   
+   public void setDoHeelToToeTransfer(boolean doHeelToToeTransfer)
+   {
+      this.doHeelToToeTransfer.set(doHeelToToeTransfer);
    }
 
 }
