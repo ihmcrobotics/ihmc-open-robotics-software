@@ -30,6 +30,10 @@ public class CompressedVideoDataClient implements ObjectConsumer<VideoPacket>, N
       objectCommunicator.attachStateListener(this);
       objectCommunicator.attachListener(VideoPacket.class, this);
 
+      if (objectCommunicator.isConnected())
+      {
+         throw new RuntimeException("Do not connect the ObjectCommunicator before the video server is live");
+      }
 
    }
 
