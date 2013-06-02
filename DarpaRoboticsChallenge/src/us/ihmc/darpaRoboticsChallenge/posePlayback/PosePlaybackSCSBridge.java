@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.vecmath.Point3d;
 
 import com.yobotics.simulationconstructionset.*;
@@ -35,6 +36,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 public class PosePlaybackSCSBridge
 {
    private static final String ipAddress = DRCConfigParameters.CLOUD_MINION5_IP;
+   private static final boolean promptForTimeDelay = false;
 
    private final PosePlaybackAllJointsController posePlaybackController;
    private final PosePlaybackSender posePlaybackSender;
@@ -259,6 +261,14 @@ public class PosePlaybackSCSBridge
             {
                morphedPose = PosePlaybackRobotPose.morph(previousPose, pose, morphPercentage);
             }
+            
+            if(promptForTimeDelay)
+            {
+               String requestedPlaybackDelay = JOptionPane.showInputDialog("Playback delay before this transition in milliseconds?");
+               double playBackDelayPoseTransition = (requestedPlaybackDelay == "") ? PosePlaybackAtlasDefaultParameters.defaultPlaybackTransitionDelayMillis : Double
+                     .parseDouble(requestedPlaybackDelay);
+               pose.setPlaybackDelayBeforePose(playBackDelayPoseTransition);
+            }
 
             posePlaybackController.setPlaybackPose(morphedPose);
             scs.setTime(time);
@@ -386,10 +396,10 @@ public class PosePlaybackSCSBridge
                if (posePlaybackSender.isConnected())
                {
                   posePlaybackSender.writeData();
-                  if(interpolator.didLastPoseIncrementSequence())
+                  if(interpolator.didLastPoseIncrementSequence() || (poseNumber == 0))
                   {
-                     ThreadTools.sleep(2500);//3000 worked for standing up, 2000 failed at about 33 in standcde, 1000 failed at about 23 in standcde
-                     System.out.println("pose #: " + poseNumber++);
+                     System.out.println("pose #: " + poseNumber++ + " \t pausing for " + interpolator.getTransitionTimeDelay());
+                     ThreadTools.sleep((long) interpolator.getTransitionTimeDelay());//3000 worked for standing up, 2000 failed at about 33 in standcde, 1000 failed at about 23 in standcde
                   }
                }
                ThreadTools.sleep((long) (dt * 1000));
