@@ -47,9 +47,6 @@ public class HighLevelHumanoidControllerFactoryHelper
 {
    //TODO: JEP: USE_NEW_OPTIMIZATION_MOMENTUM_CONTROL_MODULE has to be false or walking sucks. 
    private static final boolean USE_NEW_OPTIMIZATION_MOMENTUM_CONTROL_MODULE = false;
-   
-   //TODO: JEP: USE_PLANE_ONLY_FORCE_DISTRIBUTOR has to be true or walking sucks. 
-   private static final boolean USE_PLANE_ONLY_FORCE_DISTRIBUTOR = true;
 
    public static BlindWalkingToDestinationDesiredFootstepCalculator getBlindWalkingToDestinationDesiredFootstepCalculator(
            WalkingControllerParameters walkingControllerParameters, CommonWalkingReferenceFrames referenceFrames,
@@ -166,7 +163,7 @@ public class HighLevelHumanoidControllerFactoryHelper
       else
       {
          GroundReactionWrenchDistributor groundReactionWrenchDistributor = null;
-         if (USE_PLANE_ONLY_FORCE_DISTRIBUTOR)
+//         if (USE_PLANE_ONLY_FORCE_DISTRIBUTOR)
          {
             ContactPointGroundReactionWrenchDistributor contactPointGroundReactionWrenchDistributor =
                   new ContactPointGroundReactionWrenchDistributor(referenceFrames.getCenterOfMassFrame(), registry);
@@ -176,13 +173,14 @@ public class HighLevelHumanoidControllerFactoryHelper
                   };
             contactPointGroundReactionWrenchDistributor.setWeights(diagonalCWeights, 5.0, 0.001);
             groundReactionWrenchDistributor = contactPointGroundReactionWrenchDistributor;
-         }
-         else
-         {
-            CylinderAndContactPointWrenchDistributor optimizationBasedWrenchDistributor =
-                  new CylinderAndContactPointWrenchDistributor(referenceFrames.getCenterOfMassFrame(), registry, dynamicGraphicObjectsListRegistry);
-            groundReactionWrenchDistributor = optimizationBasedWrenchDistributor;
-         }
+         } 
+         //JEP: Don't use CylinderAndContactPointWrenchDistributor when walking. only when getting in car.
+//         else
+//         {
+//            CylinderAndContactPointWrenchDistributor optimizationBasedWrenchDistributor =
+//                  new CylinderAndContactPointWrenchDistributor(referenceFrames.getCenterOfMassFrame(), registry, dynamicGraphicObjectsListRegistry);
+//            groundReactionWrenchDistributor = optimizationBasedWrenchDistributor;
+//         }
 
 
          DampedLeastSquaresSolver jacobianSolver = new DampedLeastSquaresSolver(SpatialMotionVector.SIZE);
