@@ -15,7 +15,7 @@ public class DRCConfigParameters
    
    public static final boolean USE_GAZEBO_PHYSICS = false;    // TODO: This one is needed just for FlatGroundWalkingTrack in Gazebo...
 
-   public static final boolean USE_PERFECT_SENSORS = true;
+   public static final boolean USE_PERFECT_SENSORS = false;
 
    static
    {
