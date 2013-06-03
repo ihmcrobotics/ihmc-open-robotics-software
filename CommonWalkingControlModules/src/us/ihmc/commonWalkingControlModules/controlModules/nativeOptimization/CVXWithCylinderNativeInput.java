@@ -19,7 +19,8 @@ public class CVXWithCylinderNativeInput
    private final double[] rhoMin;
    private final double[] phiMin;
    private final double[] phiMax;
-   private double wRho;
+   private final double[] WRho;
+   private final double[] WPhi;
 
    // conversion helpers
    private final DenseMatrix64F AMatrix;
@@ -35,7 +36,8 @@ public class CVXWithCylinderNativeInput
    private final DenseMatrix64F rhoMinMatrix;
    private final DenseMatrix64F phiMinMatrix;
    private final DenseMatrix64F phiMaxMatrix;
-   private double wPhi;
+   private final DenseMatrix64F WRhoMatrix;
+   private final DenseMatrix64F WPhiMatrix;
 
    public CVXWithCylinderNativeInput()
    {
@@ -57,6 +59,8 @@ public class CVXWithCylinderNativeInput
       rhoMinMatrix = new DenseMatrix64F(rhoSize, 1);
       phiMinMatrix = new DenseMatrix64F(phiSize, 1);
       phiMaxMatrix = new DenseMatrix64F(phiSize, 1);
+      WRhoMatrix = new DenseMatrix64F(rhoSize, rhoSize);
+      WPhiMatrix = new DenseMatrix64F(phiSize, phiSize);
 
       A = new double[AMatrix.getNumElements()];
       b = new double[bMatrix.getNumElements()];
@@ -71,6 +75,8 @@ public class CVXWithCylinderNativeInput
       rhoMin = new double[rhoMinMatrix.getNumElements()];
       phiMin = new double[phiMinMatrix.getNumElements()];
       phiMax = new double[phiMaxMatrix.getNumElements()];
+      WRho = new double[WRhoMatrix.getNumRows()]; // diagonal
+      WPhi = new double[WPhiMatrix.getNumRows()]; // diagonal
    }
 
    public double[] getA()
@@ -138,14 +144,14 @@ public class CVXWithCylinderNativeInput
       return phiMax;
    }
 
-   public double getwRho()
+   public double[] getWRho()
    {
-      return wRho;
+      return WRho;
    }
 
-   public double getwPhi()
+   public double[] getWPhi()
    {
-      return wPhi;
+      return WPhi;
    }
 
    public void setCentroidalMomentumMatrix(DenseMatrix64F A)
@@ -231,12 +237,22 @@ public class CVXWithCylinderNativeInput
 
    public void setGroundReactionForceRegularization(double wRho)
    {
-      this.wRho = wRho;
+      // TODO: temporary, should allow setting of individual elements
+
+      // diagonal
+      CommonOps.setIdentity(this.WRhoMatrix);
+      CommonOps.scale(wRho, this.WRhoMatrix);
+      MatrixTools.extractDiagonal(this.WRhoMatrix, this.WRho);
    }
 
    public void setPhiRegularization(double wPhi)
    {
-      this.wPhi = wPhi;
+      // TODO: temporary, should allow setting of individual elements
+
+      // diagonal
+      CommonOps.setIdentity(this.WPhiMatrix);
+      CommonOps.scale(wPhi, this.WPhiMatrix);
+      MatrixTools.extractDiagonal(this.WPhiMatrix, this.WPhi);
    }
 }
 

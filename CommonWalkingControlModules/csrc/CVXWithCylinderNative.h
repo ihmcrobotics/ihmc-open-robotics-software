@@ -165,11 +165,27 @@ JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModule
 
 /*
  * Class:     us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative
+ * Method:    getWRhoBuffer
+ * Signature: ()Ljava/nio/ByteBuffer;
+ */
+JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative_getWRhoBuffer
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative
+ * Method:    getWPhiBuffer
+ * Signature: ()Ljava/nio/ByteBuffer;
+ */
+JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative_getWPhiBuffer
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative
  * Method:    solveNative
  * Signature: (D)I
  */
 JNIEXPORT jint JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative_solveNative
-  (JNIEnv *, jclass, jdouble, jdouble);
+  (JNIEnv *, jclass);
 
 /*
  * Class:     us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative
