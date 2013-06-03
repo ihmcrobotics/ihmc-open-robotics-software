@@ -26,7 +26,7 @@ import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunc
 
 public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEnvironmentInterface
 {
-   private static final double BOX_LENGTH = 0.5;
+   private static final double BOX_LENGTH = 0.7;
    private static final double BOX_WIDTH = 0.5;
    private static final double BOX_HEIGHT = 0.6;
    private final CombinedTerrainObject combinedTerrainObject;
