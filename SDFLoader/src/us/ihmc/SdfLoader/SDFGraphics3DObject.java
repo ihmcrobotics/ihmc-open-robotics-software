@@ -29,7 +29,7 @@ import us.ihmc.utilities.math.geometry.GeometryTools;
 public class SDFGraphics3DObject extends Graphics3DObject
 {
    private static final boolean SHOW_COORDINATE_SYSTEMS = false;
-   private static final AppearanceDefinition DEFAULT_APPEARANCE = YoAppearance.White();
+   private static final AppearanceDefinition DEFAULT_APPEARANCE = YoAppearance.Orange();
    
    public SDFGraphics3DObject(List<? extends AbstractSDFMesh> sdfVisuals, ArrayList<String> resourceDirectories)
    {
