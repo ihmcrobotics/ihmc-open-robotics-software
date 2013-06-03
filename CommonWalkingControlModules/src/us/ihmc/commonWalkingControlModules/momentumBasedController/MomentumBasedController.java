@@ -237,7 +237,9 @@ public class MomentumBasedController
       {
          RigidBody rigidBody = contactableCylinderBody.getRigidBody();
          // YoCylindricalContactState: used to enable load bearing with hands while grasping a cylinder
-         YoCylindricalContactState cylindricalContactState = new YoCylindricalContactState(rigidBody.getName(), rigidBody.getParentJoint().getFrameAfterJoint(), contactableCylinderBody.getCylinderFrame(), registry);
+         YoCylindricalContactState cylindricalContactState = new YoCylindricalContactState(rigidBody.getName(), 
+               rigidBody.getParentJoint().getFrameAfterJoint(), contactableCylinderBody.getCylinderFrame(),
+               registry, dynamicGraphicObjectsListRegistry);
          cylindricalContactState.set(coefficientOfFriction, contactableCylinderBody, false);
          cylindricalContactStates.put(contactableCylinderBody, cylindricalContactState);
       }
