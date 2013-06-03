@@ -10,6 +10,7 @@ import javax.vecmath.Vector3d;
 import org.apache.commons.math3.util.FastMath;
 
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.driving.VehicleObject;
 import us.ihmc.darpaRoboticsChallenge.controllers.SteeringWheelDisturbanceController;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 
@@ -28,7 +29,7 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
 {
    private static final double BOX_LENGTH = 0.7;
    private static final double BOX_WIDTH = 0.5;
-   private static final double BOX_HEIGHT = 0.6;
+   private static final double BOX_HEIGHT = 0.85;
    private final CombinedTerrainObject combinedTerrainObject;
 
    private final ArrayList<Robot> environmentRobots = new ArrayList<Robot>();
@@ -38,45 +39,44 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
 
    public DRCDemoEnvironmentWithBoxAndSteeringWheel(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
+      DRCVehicleModelObjects drcVehicleModelObjects = new DRCVehicleModelObjects();
+
+
+      Transform3D steeringWheelTransform = drcVehicleModelObjects.getTransform(VehicleObject.STEERING_WHEEL);
+
+
       /*
        * Quick estimates from 3D files:
        */
-      double steeringWheelAngleFromVertical = FastMath.toRadians(50.0);
-      double seatEdgeToSteeringWheelCentroidX = 0.18;
-      double seatEdgeToSteeringWheelCentroidZ = 0.24;
-      double externalSteeringWheelRadius = 0.175;
-      double internalSteeringWheelRadius = 0.142;
+      double externalSteeringWheelRadius = 0.173;
+      double internalSteeringWheelRadius = 0.143;
 
       double toroidRadius = (externalSteeringWheelRadius - internalSteeringWheelRadius) / 2.0;
       double steeringWheelRadius = (externalSteeringWheelRadius + internalSteeringWheelRadius) / 2.0;
-      double steeringWheelAngleFromHorizontal = steeringWheelAngleFromVertical - Math.PI / 2.0;
-      double steeringWheelCentroidX = BOX_LENGTH / 2.0 + seatEdgeToSteeringWheelCentroidX;
-      double steeringWheelCentroidZ = BOX_HEIGHT + seatEdgeToSteeringWheelCentroidZ;
 
-      combinedTerrainObject = createCombinedTerrainObject();
-      Matrix3d pinJointZRotation = new Matrix3d();
-      pinJointZRotation.rotZ(-FastMath.PI / 2.0);
-      Matrix3d pinJointRotation = new Matrix3d();
-      pinJointRotation.rotY(steeringWheelAngleFromHorizontal);
-      pinJointRotation.mul(pinJointZRotation);
+      double xOffsetFromSeat = 0.15;
 
-      Vector3d pinJointLocation = new Vector3d(steeringWheelCentroidX, 0.0, steeringWheelCentroidZ);
-      Transform3D pinJointTransform = new Transform3D(pinJointRotation, pinJointLocation, 1.0);
+      combinedTerrainObject = createCombinedTerrainObject(steeringWheelTransform, xOffsetFromSeat);
 
       double mass = 1.0;
-      steeringWheelRobot = new ContactableToroidRobot("steeringWheel", pinJointTransform, steeringWheelRadius, toroidRadius, mass);
+      steeringWheelRobot = new ContactableToroidRobot("steeringWheel", steeringWheelTransform, steeringWheelRadius, toroidRadius, mass);
       steeringWheelRobot.setDamping(2.0);
       steeringWheelRobot.createAvailableContactPoints(1, 30, 0.005, false);
       contactables.add(steeringWheelRobot);
       environmentRobots.add(steeringWheelRobot);
    }
 
-   private CombinedTerrainObject createCombinedTerrainObject()
+   private CombinedTerrainObject createCombinedTerrainObject(Transform3D steeringWheelTransform, double xOffsetFromSeat)
    {
       CombinedTerrainObject terrainObject = new CombinedTerrainObject("carSeatBox");
 
+      Vector3d steeringWheelTranslation = new Vector3d();
+      steeringWheelTransform.get(steeringWheelTranslation);
+
       // seat
-      terrainObject.addBox(-BOX_LENGTH / 2.0, -BOX_WIDTH / 2.0, BOX_LENGTH / 2.0, BOX_WIDTH / 2.0, BOX_HEIGHT);
+      double xOffset = steeringWheelTranslation.getX() - BOX_LENGTH / 2.0 - xOffsetFromSeat;
+      double yOffset = steeringWheelTranslation.getY();
+      terrainObject.addBox(-BOX_LENGTH / 2.0 + xOffset, -BOX_WIDTH / 2.0 + yOffset, BOX_LENGTH / 2.0 + xOffset, BOX_WIDTH / 2.0 + yOffset, BOX_HEIGHT);
 
       // ground
       terrainObject.addBox(-100.0, -100.0, 100.0, 100.0, -0.05, 0.0, YoAppearance.DarkGray());
