@@ -64,6 +64,7 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
    private final SideDependentList<List<Pair<String, Vector3d>>> footGroundContactPoints = new SideDependentList<List<Pair<String, Vector3d>>>();
    private final SideDependentList<List<Pair<String, Vector3d>>> handGroundContactPoints = new SideDependentList<List<Pair<String, Vector3d>>>();
    private final SideDependentList<List<Pair<String, Vector3d>>> thighGroundContactPoints = new SideDependentList<List<Pair<String, Vector3d>>>();
+   private final List<Pair<String, Vector3d>> pelvisContactPoints = new ArrayList<Pair<String, Vector3d>>();
    private final List<Pair<String, Vector3d>> jointNameGroundContactPointMap = new ArrayList<Pair<String, Vector3d>>();
    private final DRCRobotModel selectedModel;
 
@@ -174,8 +175,16 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
       }
       
 
-      
-      
+      if (addLoadsOfContactPoints)
+      {
+         for (Point2d point : DRCRobotParameters.pelvisContactPoints)
+         {
+            Point3d point3d = new Point3d(point.getX(), point.getY(), 0.0);
+            DRCRobotParameters.pelvisContactPointTransform.transform(point3d);
+            pelvisContactPoints.add(new Pair<String, Vector3d>("pelvis", new Vector3d(point3d)));
+         }
+      }
+
       spineJointNames.put("back_lbz", SpineJointName.SPINE_YAW);
       spineJointNames.put("back_mby", SpineJointName.SPINE_PITCH);
       spineJointNames.put("back_ubx", SpineJointName.SPINE_ROLL);
@@ -209,6 +218,7 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
          jointNameGroundContactPointMap.addAll(handGroundContactPoints.get(robotSide));
          jointNameGroundContactPointMap.addAll(thighGroundContactPoints.get(robotSide));
       }
+      jointNameGroundContactPointMap.addAll(pelvisContactPoints);
    }
 
    public String getNameOfJointBeforeHand(RobotSide robotSide)

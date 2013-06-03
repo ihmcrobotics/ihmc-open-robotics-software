@@ -38,7 +38,7 @@ import java.util.List;
 public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an SDFHumanoidRobot
 {
    private static final boolean DEBUG = false;
-   private static final boolean SHOW_CONTACT_POINTS = false;
+   private static final boolean SHOW_CONTACT_POINTS = true;
    private static final boolean USE_POLAR_LIDAR_MODEL = true;
    private static final boolean SHOW_COM_REFERENCE_FRAMES = false;
 
@@ -97,6 +97,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
          enableTorqueVelocityLimits = enableTorqueVelocityLimits && sdfJointNameMap.enableTorqueVelocityLimits();
       }
 
+      jointTransforms.put(rootJoint.getName(), new Transform3D());
       for (SDFJointHolder child : rootLink.getChildren())
       {
          addJointsRecursively(child, rootJoint, MatrixTools.IDENTITY, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
@@ -130,14 +131,22 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
             ExternalForcePoint externalForcePoint = new ExternalForcePoint("ef_" + SDFConversionsHelper.sanitizeJointName(jointName) + "_" + count++, gcOffset,
                                                        this);
 
-            oneDoFJoints.get(jointName).addGroundContactPoint(groundContactPoint);
-            oneDoFJoints.get(jointName).addExternalForcePoint(externalForcePoint);
+            Joint joint;
+            if (jointName.equals(rootJoint.getName()))
+               joint = rootJoint;
+            else
+            {
+               joint = oneDoFJoints.get(jointName);
+            }
+
+            joint.addGroundContactPoint(groundContactPoint);
+            joint.addExternalForcePoint(externalForcePoint);
 
             counters.put(jointName, count);
 
             if (SHOW_CONTACT_POINTS)
             {
-               Graphics3DObject graphics = oneDoFJoints.get(jointName).getLink().getLinkGraphics();
+               Graphics3DObject graphics = joint.getLink().getLinkGraphics();
                graphics.identity();
                graphics.translate(jointContactPoint.second());
                double radius = 0.01;
