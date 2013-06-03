@@ -33,14 +33,14 @@ public class DRCVehicleSDFLoader extends DRCWorld
       super();
    }
    
-   public SDFModelVisual loadDRCVehicle()
+   public SDFModelVisual loadDRCVehicle(boolean loadCollisionModel)
    {
       URL fileURL = DRCVehicleSDFLoader.class.getResource("models/GFE/drc_vehicle.sdf");
       try
       {
          SDFWorldLoader sdfWorldLoader = new SDFWorldLoader(new File(fileURL.getFile()), resourceDirectories);
          GeneralizedSDFRobotModel generalizedSDFRobotModel = sdfWorldLoader.getGeneralizedRobotModelAndRemoveFromWorld("drc_vehicle");
-         return new SDFModelVisual(generalizedSDFRobotModel);
+         return new SDFModelVisual(generalizedSDFRobotModel, loadCollisionModel);
       }
       catch (FileNotFoundException e)
       {
@@ -58,7 +58,8 @@ public class DRCVehicleSDFLoader extends DRCWorld
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
       
       DRCVehicleSDFLoader drcVehicleSDFLoader = new DRCVehicleSDFLoader();
-      scs.addStaticLinkGraphics(drcVehicleSDFLoader.loadDRCVehicle());
+      scs.addStaticLinkGraphics(drcVehicleSDFLoader.loadDRCVehicle(true));
+      scs.addStaticLinkGraphics(drcVehicleSDFLoader.loadDRCVehicle(false));
 
       Transform3D vehicleToWorldTransform = new Transform3D();
       ReferenceFrame vehicleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("vehicle", ReferenceFrame.getWorldFrame(),

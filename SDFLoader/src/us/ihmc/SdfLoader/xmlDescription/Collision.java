@@ -1,10 +1,16 @@
 package us.ihmc.SdfLoader.xmlDescription;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 
-public class Collision
+import us.ihmc.SdfLoader.xmlDescription.SDFVisual.SDFMaterial;
+
+public class Collision implements AbstractSDFMesh
 {
+   private String name;
+   private String pose;
    private Surface surface;
+   private SDFGeometry geometry;
 
    public static class Surface
    {
@@ -78,6 +84,27 @@ public class Collision
          this.contact = contact;
       }
    }
+   public String getPose()
+   {
+      return pose;
+   }
+
+   @XmlElement(name = "pose")
+   public void setPose(String pose)
+   {
+      this.pose = pose;
+   }
+   
+   public String getName()
+   {
+      return name;
+   }
+
+   @XmlAttribute(name = "name")
+   public void setName(String name)
+   {
+      this.name = name;
+   }
 
    public Surface getSurface()
    {
@@ -89,5 +116,22 @@ public class Collision
    {
       this.surface = surface;
    }
+
+   public SDFGeometry getGeometry()
+   {
+      return geometry;
+   }
+
+   @XmlElement(name = "geometry")
+   public void setGeometry(SDFGeometry geometry)
+   {
+      this.geometry = geometry;
+   }
+
+   public SDFMaterial getMaterial()
+   {
+      return null;
+   }
+   
 
 }

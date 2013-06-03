@@ -12,7 +12,7 @@ public class SDFLink
    private Inertial inertial;
    private List<SDFVisual> visuals;
    private List<SDFSensor> sensors;
-   private Collision collision;
+   private List<Collision> collisions;
 
    public String getName()
    {
@@ -58,15 +58,15 @@ public class SDFLink
       this.visuals = visual;
    }
 
-   public Collision getCollision()
+   public List<Collision> getCollisions()
    {
-      return collision;
+      return collisions;
    }
 
    @XmlElement(name = "collision")
-   public void setCollision(Collision collision)
+   public void setCollisions(List<Collision> collision)
    {
-      this.collision = collision;
+      this.collisions = collision;
    }
 
    public List<SDFSensor> getSensors()

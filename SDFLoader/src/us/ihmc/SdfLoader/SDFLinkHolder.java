@@ -7,6 +7,7 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.SdfLoader.xmlDescription.Collision;
 import us.ihmc.SdfLoader.xmlDescription.SDFLink;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.SdfLoader.xmlDescription.SDFVisual;
@@ -28,6 +29,7 @@ public class SDFLinkHolder
    
    private final List<SDFVisual> visuals;
    private final List<SDFSensor> sensors;
+   private final List<Collision> collisions;
    
    // Set by loader
    private SDFJointHolder joint = null;
@@ -55,21 +57,22 @@ public class SDFLinkHolder
         inertia = new Matrix3d();
      }
      visuals = sdfLink.getVisuals();
+     collisions = sdfLink.getCollisions();
      sensors = sdfLink.getSensors();
-     if(sdfLink.getCollision() != null)
+     if(sdfLink.getCollisions().get(0) != null)
      {
-        if(sdfLink.getCollision().getSurface() != null)
+        if(sdfLink.getCollisions().get(0).getSurface() != null)
         {
-           if(sdfLink.getCollision().getSurface().getContact() != null)
+           if(sdfLink.getCollisions().get(0).getSurface().getContact() != null)
            {
-              if(sdfLink.getCollision().getSurface().getContact().getOde() != null)
+              if(sdfLink.getCollisions().get(0).getSurface().getContact().getOde() != null)
               {
-                 if(sdfLink.getCollision().getSurface().getContact().getOde().getKp() != null)
-                    contactKp = Double.parseDouble(sdfLink.getCollision().getSurface().getContact().getOde().getKp());
-                 if(sdfLink.getCollision().getSurface().getContact().getOde().getKd() != null)
-                    contactKd = Double.parseDouble(sdfLink.getCollision().getSurface().getContact().getOde().getKd());
-                 if(sdfLink.getCollision().getSurface().getContact().getOde().getMaxVel() != null)
-                    contactMaxVel = Double.parseDouble(sdfLink.getCollision().getSurface().getContact().getOde().getMaxVel());
+                 if(sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getKp() != null)
+                    contactKp = Double.parseDouble(sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getKp());
+                 if(sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getKd() != null)
+                    contactKd = Double.parseDouble(sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getKd());
+                 if(sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getMaxVel() != null)
+                    contactMaxVel = Double.parseDouble(sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getMaxVel());
                  
               }
            }
@@ -178,6 +181,11 @@ public class SDFLinkHolder
    public List<SDFSensor> getSensors()
    {
       return sensors;
+   }
+
+   public List<Collision> getCollisions()
+   {
+      return collisions;
    }
    
    

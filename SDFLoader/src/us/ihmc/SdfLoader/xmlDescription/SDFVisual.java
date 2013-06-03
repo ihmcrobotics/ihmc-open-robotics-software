@@ -5,7 +5,7 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 
-public class SDFVisual
+public class SDFVisual implements AbstractSDFMesh
 {
    private String name;
    private String castShadows;

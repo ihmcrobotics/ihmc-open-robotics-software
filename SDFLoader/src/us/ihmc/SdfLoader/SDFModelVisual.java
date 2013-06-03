@@ -12,17 +12,22 @@ public class SDFModelVisual extends Graphics3DObject
    
    public SDFModelVisual(GeneralizedSDFRobotModel generalizedSDFRobotModel)
    {
+      this(generalizedSDFRobotModel, false);
+   }
+   
+   public SDFModelVisual(GeneralizedSDFRobotModel generalizedSDFRobotModel, boolean useCollisionMeshes)
+   {
       resourceDirectories = generalizedSDFRobotModel.getResourceDirectories();
       ArrayList<SDFLinkHolder> rootLinks = generalizedSDFRobotModel.getRootLinks();
       
       Transform3D modelTransform = generalizedSDFRobotModel.getTransformToRoot();
       for(SDFLinkHolder link : rootLinks)
       {  
-         recursivelyAddLinks(link, modelTransform);
+         recursivelyAddLinks(link, modelTransform, useCollisionMeshes);
       }
    }
    
-   private void recursivelyAddLinks(SDFLinkHolder link, Transform3D modelTransform)
+   private void recursivelyAddLinks(SDFLinkHolder link, Transform3D modelTransform, boolean useCollisionMeshes)
    {
       if(link.getVisuals() != null)
       {
@@ -30,14 +35,23 @@ public class SDFModelVisual extends Graphics3DObject
          Transform3D transformToModel = new Transform3D(modelTransform);
          transformToModel.mul(link.getTransformFromModelReferenceFrame());
          
-         SDFGraphics3DObject sdfGraphics3DObject = new SDFGraphics3DObject(link.getVisuals(), resourceDirectories, transformToModel);
+         
+         SDFGraphics3DObject sdfGraphics3DObject;
+         if(useCollisionMeshes)
+         {
+            sdfGraphics3DObject = new SDFGraphics3DObject(link.getCollisions(), resourceDirectories, transformToModel);
+         }
+         else
+         {
+            sdfGraphics3DObject = new SDFGraphics3DObject(link.getVisuals(), resourceDirectories, transformToModel);
+         }
          getGraphics3DInstructions().addAll(sdfGraphics3DObject.getGraphics3DInstructions());
          
       }
       
       for(SDFJointHolder joint: link.getChildren())
       {
-         recursivelyAddLinks(joint.getChild(), modelTransform);
+         recursivelyAddLinks(joint.getChild(), modelTransform, useCollisionMeshes);
       }
    }
 }
