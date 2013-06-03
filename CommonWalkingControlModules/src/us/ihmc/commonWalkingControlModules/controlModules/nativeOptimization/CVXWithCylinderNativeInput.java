@@ -235,23 +235,17 @@ public class CVXWithCylinderNativeInput
       MatrixTools.denseMatrixToArrayColumnMajor(this.phiMaxMatrix, this.phiMax);
    }
 
-   public void setGroundReactionForceRegularization(double wRho)
+   public void setGroundReactionForceRegularization(DenseMatrix64F WRho)
    {
-      // TODO: temporary, should allow setting of individual elements
-
       // diagonal
-      CommonOps.setIdentity(this.WRhoMatrix);
-      CommonOps.scale(wRho, this.WRhoMatrix);
+      CommonOps.insert(WRho, this.WRhoMatrix, 0, 0);
       MatrixTools.extractDiagonal(this.WRhoMatrix, this.WRho);
    }
 
-   public void setPhiRegularization(double wPhi)
+   public void setPhiRegularization(DenseMatrix64F WPhi)
    {
-      // TODO: temporary, should allow setting of individual elements
-
       // diagonal
-      CommonOps.setIdentity(this.WPhiMatrix);
-      CommonOps.scale(wPhi, this.WPhiMatrix);
+      CommonOps.insert(WPhi, this.WPhiMatrix, 0, 0);
       MatrixTools.extractDiagonal(this.WPhiMatrix, this.WPhi);
    }
 }

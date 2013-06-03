@@ -4,7 +4,6 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import org.ejml.ops.MatrixFeatures;
 import us.ihmc.utilities.screwTheory.Momentum;
 
 /**
@@ -21,8 +20,9 @@ public class MomentumOptimizationSettings
    private final double[] momentumWeightDiagonal = new double[Momentum.SIZE];
 
    private final DenseMatrix64F C = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
-   private double wRho;
-   private double wPhi;
+   private double wRhoCylinder;
+   private double wPhiCylinder;
+   private double wRhoPlane;
    private double lambda;
    private double rhoMin;
 
@@ -43,14 +43,19 @@ public class MomentumOptimizationSettings
       this.angularMomentumZWeight.set(angularMomentumZWeight);
    }
 
-   public void setGroundReactionForceRegularization(double wRho)
+   public void setRhoCylinderContactRegularization(double wRho)
    {
-      this.wRho = wRho;
+      this.wRhoCylinder = wRho;
    }
 
-   public void setPhiRegularization(double wPhi)
+   public void setPhiCylinderContactRegularization(double wPhi)
    {
-      this.wPhi = wPhi;
+      this.wPhiCylinder = wPhi;
+   }
+
+   public void setRhoPlaneContactRegularization(double wRho)
+   {
+      this.wRhoPlane = wRho;
    }
 
    public void setDampedLeastSquaresFactor(double lambda)
@@ -83,14 +88,19 @@ public class MomentumOptimizationSettings
       return C;
    }
 
-   public double getGroundReactionForceRegularization()
+   public double getRhoCylinderContactRegularization()
    {
-      return wRho;
+      return wRhoCylinder;
    }
 
-   public double getPhiRegularization()
+   public double getPhiCylinderContactRegularization()
    {
-      return wPhi;
+      return wPhiCylinder;
+   }
+
+   public double getRhoPlaneContactRegularization()
+   {
+      return wRhoPlane;
    }
 
    public DenseMatrix64F getDampedLeastSquaresFactorMatrix(int size)

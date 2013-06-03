@@ -255,12 +255,12 @@ public class CylinderAndContactPointWrenchDistributor implements GroundReactionW
       if (previouslyUsedPlaneEndEffectors.containsKey(plane))
       {
          EndEffector endEffector = previouslyUsedPlaneEndEffectors.get(plane);
-         endEffector.updateFromPlane(plane);
+         endEffector.updateFromPlane(plane, Double.NaN); // TODO: don't use NaN. Currently not being used for anything though
 
          return endEffector;
       }
 
-      EndEffector endEffector = EndEffector.fromPlane(nameSuffix, centerOfMassFrame, plane, registry);
+      EndEffector endEffector = EndEffector.fromPlane(nameSuffix, centerOfMassFrame, plane, Double.NaN, registry); // TODO: don't use NaN. Currently not being used for anything though
       previouslyUsedPlaneEndEffectors.put(plane, endEffector);
       registerEndEffectorGraphic(endEffector);
 
@@ -272,12 +272,12 @@ public class CylinderAndContactPointWrenchDistributor implements GroundReactionW
       if (previouslyUsedCylinderEndEffectors.containsKey(cylinder))
       {
          EndEffector endEffector = previouslyUsedCylinderEndEffectors.get(cylinder);
-         endEffector.updateFromCylinder(cylinder);
+         endEffector.updateFromCylinder(cylinder, Double.NaN, Double.NaN); // TODO: don't use NaN. Currently not being used for anything though
 
          return endEffector;
       }
 
-      EndEffector endEffector = EndEffector.fromCylinder(centerOfMassFrame, cylinder, registry);
+      EndEffector endEffector = EndEffector.fromCylinder(centerOfMassFrame, cylinder, Double.NaN, Double.NaN, registry); // TODO: don't use NaN. Currently not being used for anything though
       previouslyUsedCylinderEndEffectors.put(cylinder, endEffector);
       registerEndEffectorGraphic(endEffector);
 

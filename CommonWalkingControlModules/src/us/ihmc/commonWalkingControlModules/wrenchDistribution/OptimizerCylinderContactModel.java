@@ -20,6 +20,8 @@ public class OptimizerCylinderContactModel implements OptimizerContactModel
    private static int PHI_Z = 2;
    private static int PHI_XX = 3;
    private static int PHI_YY = 4;
+   private double wPhi;
+   private double wRho;
 
    // Expects hand to be strongest pushing in positive y, and basically open in positive z, so pulling(positive z) is extremely weak. 
    // This weakness is described by the gripWeaknessFactor which goes from 0, a fully useless grip to 1, for a grip which is just as 
@@ -68,7 +70,7 @@ public class OptimizerCylinderContactModel implements OptimizerContactModel
    }
 
    public void setup(double mu, double cylinderRadius, double cylinderHalfHandWidth, double cylinderTensileGripStrength, double gripWeaknessFactor,
-                     ReferenceFrame grippedCylinderFrame)
+                     ReferenceFrame grippedCylinderFrame, double wRho, double wPhi)
    {
       this.grippedCylinderFrame = grippedCylinderFrame;
       initializePhiLimitsToHandStrength(cylinderTensileGripStrength);
@@ -77,6 +79,8 @@ public class OptimizerCylinderContactModel implements OptimizerContactModel
       accountForMomentArms(cylinderRadius, cylinderHalfHandWidth);
       setQPhiToFirstFiveColumnsOfIdentity();
       setupQRho(mu, cylinderRadius, cylinderHalfHandWidth);
+      this.wRho = wRho;
+      this.wPhi = wPhi;
    }
 
    private void setupQRho(double mu, double cylinderRadius, double cylinderHalfHandWidth)
@@ -136,4 +140,13 @@ public class OptimizerCylinderContactModel implements OptimizerContactModel
       phiMax[PHI_YY] *= cylinderHalfHandWidth;
    }
 
+   public double getWPhi()
+   {
+      return wPhi;
+   }
+
+   public double getWRho()
+   {
+      return wRho;
+   }
 }

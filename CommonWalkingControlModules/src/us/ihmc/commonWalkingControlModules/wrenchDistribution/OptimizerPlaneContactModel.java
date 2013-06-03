@@ -19,11 +19,12 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
    private static final int RHO_SIZE = POINTS * VECTORS;
    private static final double ANGLE_INCRMENT = 2 * Math.PI / ((double) VECTORS);
    private double mu = 0.3;
+   private double wRho;
    private final DenseMatrix64F[] rhoQ = new DenseMatrix64F[RHO_SIZE];
    private SpatialForceVector tempForceVector= new SpatialForceVector();
    private Vector3d tempLinearPart = new Vector3d();
    private Vector3d tempArm = new Vector3d();
-   
+
 
    public OptimizerPlaneContactModel()
    {
@@ -37,7 +38,7 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
       }
    }
    
-   public void setup(double coefficientOfFriction, List<FramePoint> contactPointsInPlaneFrame, ReferenceFrame endEffectorFrame)
+   public void setup(double coefficientOfFriction, List<FramePoint> contactPointsInPlaneFrame, ReferenceFrame endEffectorFrame, double wRho)
    {
       this.mu = coefficientOfFriction;
       int numPoints = contactPointsInPlaneFrame.size();
@@ -72,6 +73,7 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
             tempForceVector.packMatrix(rhoQ[rhoPosition]);
          }
       }
+      this.wRho = wRho;
    }
    
    public int getSizeInRho()
@@ -106,6 +108,16 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
 
    public void packQPhiBodyFrame(int i, SpatialForceVector spatialForceVector, ReferenceFrame referenceFrame)
    {
+   }
+
+   public double getWPhi()
+   {
+      return Double.NaN;
+   }
+
+   public double getWRho()
+   {
+      return wRho;
    }
 
 }

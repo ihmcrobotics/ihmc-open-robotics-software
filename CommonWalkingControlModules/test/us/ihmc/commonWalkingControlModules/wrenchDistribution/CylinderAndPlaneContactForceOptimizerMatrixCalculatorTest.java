@@ -161,7 +161,7 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
       leftFootContactPoints.add(new FramePoint(leftFootPlaneFrame, -footLengthBackward, -footHalfWidth, 0));
       endEffectorsWithDefinedContactModels.add(leftFoot);
 
-      planeContactModel.setup(0.3, leftFootContactPoints, leftFootFrame);
+      planeContactModel.setup(0.3, leftFootContactPoints, leftFootFrame, Double.NaN); // TODO: don't use NaN. Currently not being used for anything though
    }
 
    public void addFootAtPose(List<EndEffector> endEffectorsWithDefinedContactModels, String name, FramePose pose)
@@ -182,7 +182,7 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
       contactPoints.add(new FramePoint(leftFootPlaneFrame, -footLengthBackward, -footHalfWidth, 0));
       endEffectorsWithDefinedContactModels.add(leftFoot);
 
-      planeContactModel.setup(0.3, contactPoints, footFrame);
+      planeContactModel.setup(0.3, contactPoints, footFrame, Double.NaN); // TODO: don't use NaN. Currently not being used for anything though
 
       footFrame.updatePose(pose);
    }
@@ -203,7 +203,7 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
 
       endEffectorsWithDefinedContactModels.add(leftHand);
 
-      cylinderCon.setup(mu, cylinderRadius, cylinderHalfHandWidth, cylinderTensileGripStrength, gripWeaknessFactor, leftHandFrame);
+      cylinderCon.setup(mu, cylinderRadius, cylinderHalfHandWidth, cylinderTensileGripStrength, gripWeaknessFactor, leftHandFrame, Double.NaN, Double.NaN); // TODO: don't use NaN. Currently not being used for anything though
    }
 
    public void addHandAtPose(List<EndEffector> endEffectorsWithDefinedContactModels, String name, FramePose pose)
@@ -222,7 +222,7 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
 
       endEffectorsWithDefinedContactModels.add(leftHand);
 
-      cylinderCon.setup(mu, cylinderRadius, cylinderHalfHandWidth, cylinderTensileGripStrength, gripWeaknessFactor, handFrame);
+      cylinderCon.setup(mu, cylinderRadius, cylinderHalfHandWidth, cylinderTensileGripStrength, gripWeaknessFactor, handFrame, Double.NaN, Double.NaN); // TODO: don't use NaN. Currently not being used for anything though
       handFrame.updatePose(pose);
    }
 
