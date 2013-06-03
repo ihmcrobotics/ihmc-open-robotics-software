@@ -1,17 +1,18 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylindricalContactState;
-import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 
 public class YoCylindricalContactState implements CylindricalContactState, ModifiableContactState
 {
+   private boolean VISUALIZE = false;
+   
    private final YoVariableRegistry registry;
    private final ReferenceFrame frameAfterJoint;
    private final ReferenceFrame cylinderFrame;
@@ -23,24 +24,36 @@ public class YoCylindricalContactState implements CylindricalContactState, Modif
    private final DoubleYoVariable gripWeaknessFactor;
    private final DynamicGraphicReferenceFrame cylinderRefererenceFrameGraphic;
 
-   public YoCylindricalContactState(String namePrefix, ReferenceFrame frameAfterJoint, ReferenceFrame cylinderFrame, YoVariableRegistry parentRegistry)
+   public YoCylindricalContactState(String namePrefix, ReferenceFrame frameAfterJoint, ReferenceFrame cylinderFrame, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-      this.inContact = new BooleanYoVariable(namePrefix + "InContact", registry);
-      this.coefficientOfFriction = new DoubleYoVariable(namePrefix + "CoefficientOfFriction", registry);
-      this.tensileGripForce = new DoubleYoVariable(namePrefix + "TensileGripForce", registry);
-      this.cylinderRadius = new DoubleYoVariable(namePrefix + "CylinderRadius", registry);
-      this.halfHandWidth = new DoubleYoVariable(namePrefix + "halfHandWidth", registry);
-      this.gripWeaknessFactor = new DoubleYoVariable(namePrefix + "gripWeaknessFactor", registry);
+
+      if (dynamicGraphicObjectsListRegistry == null)
+      {
+         VISUALIZE = false;
+      }
+
+      String name = "cyl_" + namePrefix;
+      this.inContact = new BooleanYoVariable(name + "InContact", registry);
+      this.coefficientOfFriction = new DoubleYoVariable(name + "CoefficientOfFriction", registry);
+      this.tensileGripForce = new DoubleYoVariable(name + "TensileGripForce", registry);
+      this.cylinderRadius = new DoubleYoVariable(name + "CylinderRadius", registry);
+      this.halfHandWidth = new DoubleYoVariable(name + "halfHandWidth", registry);
+      this.gripWeaknessFactor = new DoubleYoVariable(name + "gripWeaknessFactor", registry);
       this.frameAfterJoint = frameAfterJoint;
       this.cylinderFrame = cylinderFrame;
       parentRegistry.addChild(registry);
-      this.cylinderRefererenceFrameGraphic = new DynamicGraphicReferenceFrame(cylinderFrame, registry, 0.1);
-   }
-
-   public DynamicGraphicReferenceFrame getCylinderFrameGraphic()
-   {
-      return this.cylinderRefererenceFrameGraphic;
+      
+      
+      if (VISUALIZE)
+      {
+         this.cylinderRefererenceFrameGraphic = new DynamicGraphicReferenceFrame(cylinderFrame, registry, 0.2);
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("YoCylindricalContactState", cylinderRefererenceFrameGraphic);
+      }
+      else
+      {
+         cylinderRefererenceFrameGraphic = null;
+      }
    }
 
    public void set(double coefficientOfFriction, ContactableCylinderBody contactableCylinderBody, boolean inContact)
@@ -74,6 +87,8 @@ public class YoCylindricalContactState implements CylindricalContactState, Modif
       if (gripWeaknessFactor > 1.0)
          throw new RuntimeException("gripWeaknessFactor is over 1, : " + gripWeaknessFactor);
       this.gripWeaknessFactor.set(gripWeaknessFactor);
+      
+      if (cylinderRefererenceFrameGraphic != null) cylinderRefererenceFrameGraphic.update();
    }
 
    public boolean isInContact()

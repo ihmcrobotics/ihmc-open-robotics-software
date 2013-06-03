@@ -524,7 +524,7 @@ public class GroundReactionWrenchDistributorTest
       poses[index++]=cylinderPose;
 
       PoseReferenceFrame cylinderFrame = new PoseReferenceFrame("GraspingCylinderFrame", cylinderPose);
-      YoCylindricalContactState contactState = new YoCylindricalContactState(name, afterJointFrame, cylinderFrame, registry);
+      YoCylindricalContactState contactState = new YoCylindricalContactState(name, afterJointFrame, cylinderFrame, registry, null);
       contactState.set(coefficientOfFriction, gripStrength, cylinderRadius, halfHandWidth, gripWeaknessFactor, inContact);
 
       return contactState;
