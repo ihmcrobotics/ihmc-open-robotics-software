@@ -45,8 +45,11 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 
 public class HighLevelHumanoidControllerFactoryHelper
 {
+   //TODO: JEP: USE_NEW_OPTIMIZATION_MOMENTUM_CONTROL_MODULE has to be false or walking sucks. 
    private static final boolean USE_NEW_OPTIMIZATION_MOMENTUM_CONTROL_MODULE = false;
-   private static final boolean USE_PLANE_ONLY_FORCE_DISTRIBUTOR = false;
+   
+   //TODO: JEP: USE_PLANE_ONLY_FORCE_DISTRIBUTOR has to be true or walking sucks. 
+   private static final boolean USE_PLANE_ONLY_FORCE_DISTRIBUTOR = true;
 
    public static BlindWalkingToDestinationDesiredFootstepCalculator getBlindWalkingToDestinationDesiredFootstepCalculator(
            WalkingControllerParameters walkingControllerParameters, CommonWalkingReferenceFrames referenceFrames,
