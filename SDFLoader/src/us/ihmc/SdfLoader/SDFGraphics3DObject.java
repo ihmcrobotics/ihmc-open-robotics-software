@@ -14,9 +14,9 @@ import javax.vecmath.Vector3d;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 
+import us.ihmc.SdfLoader.xmlDescription.AbstractSDFMesh;
 import us.ihmc.SdfLoader.xmlDescription.SDFGeometry.HeightMap.Blend;
 import us.ihmc.SdfLoader.xmlDescription.SDFGeometry.HeightMap.Texture;
-import us.ihmc.SdfLoader.xmlDescription.SDFVisual;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.ModelFileType;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
@@ -31,18 +31,18 @@ public class SDFGraphics3DObject extends Graphics3DObject
    private static final boolean SHOW_COORDINATE_SYSTEMS = false;
    private static final AppearanceDefinition DEFAULT_APPEARANCE = YoAppearance.White();
    
-   public SDFGraphics3DObject(List<SDFVisual> sdfVisuals, ArrayList<String> resourceDirectories)
+   public SDFGraphics3DObject(List<? extends AbstractSDFMesh> sdfVisuals, ArrayList<String> resourceDirectories)
    {
       this(sdfVisuals, resourceDirectories, new Transform3D());
    }
    
-   public SDFGraphics3DObject(List<SDFVisual> sdfVisuals, ArrayList<String> resourceDirectories, Transform3D graphicsTransform)
+   public SDFGraphics3DObject(List<? extends AbstractSDFMesh> sdfVisuals, ArrayList<String> resourceDirectories, Transform3D graphicsTransform)
    {
       Matrix3d rotation = new Matrix3d();
       Vector3d offset = new Vector3d();
       graphicsTransform.get(rotation, offset);
       
-      for(SDFVisual sdfVisual : sdfVisuals)
+      for(AbstractSDFMesh sdfVisual : sdfVisuals)
       {
          identity();
          translate(offset);
