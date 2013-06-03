@@ -1,4 +1,4 @@
-/* Produced by CVXGEN, 2013-05-26 12:24:29 -0400.  */
+/* Produced by CVXGEN, 2013-06-03 12:26:48 -0400.  */
 /* CVXGEN is Copyright (C) 2006-2012 Jacob Mattingley, jem@cvxgen.com. */
 /* The code in this file is Copyright (C) 2006-2012 Jacob Mattingley. */
 /* CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial */
@@ -264,6 +264,84 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     }
   }
   this_var_errors = 0;
+  xm = mxGetField(prhs[0], 0, "WPhi");
+  if (xm == NULL) {
+    printf("could not find params.WPhi.\n");
+  } else {
+    if (!((mxGetM(xm) == 10) && (mxGetN(xm) == 10))) {
+      printf("WPhi must be size (10,10), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
+      this_var_errors++;
+    }
+    if (mxIsComplex(xm)) {
+      printf("parameter WPhi must be real.\n");
+      this_var_errors++;
+    }
+    if (!mxIsClass(xm, "double")) {
+      printf("parameter WPhi must be a full matrix of doubles.\n");
+      this_var_errors++;
+    }
+    if (mxIsSparse(xm)) {
+      printf("parameter WPhi must be a full matrix.\n");
+      this_var_errors++;
+    }
+    if (this_var_errors == 0) {
+      dest = params.WPhi;
+      src = mxGetPr(xm);
+      warned_diags = 0;
+      for (i = 0; i < 10; i++) {
+        for (j = 0; j < 10; j++) {
+          if (i == j) {
+            *dest++ = *src;
+          } else if (!warned_diags && (*src != 0)) {
+            printf("\n!!! Warning: ignoring off-diagonal elements in WPhi !!!\n\n");
+            warned_diags = 1;
+          }
+          src++;
+        }
+      }
+      valid_vars++;
+    }
+  }
+  this_var_errors = 0;
+  xm = mxGetField(prhs[0], 0, "WRho");
+  if (xm == NULL) {
+    printf("could not find params.WRho.\n");
+  } else {
+    if (!((mxGetM(xm) == 64) && (mxGetN(xm) == 64))) {
+      printf("WRho must be size (64,64), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
+      this_var_errors++;
+    }
+    if (mxIsComplex(xm)) {
+      printf("parameter WRho must be real.\n");
+      this_var_errors++;
+    }
+    if (!mxIsClass(xm, "double")) {
+      printf("parameter WRho must be a full matrix of doubles.\n");
+      this_var_errors++;
+    }
+    if (mxIsSparse(xm)) {
+      printf("parameter WRho must be a full matrix.\n");
+      this_var_errors++;
+    }
+    if (this_var_errors == 0) {
+      dest = params.WRho;
+      src = mxGetPr(xm);
+      warned_diags = 0;
+      for (i = 0; i < 64; i++) {
+        for (j = 0; j < 64; j++) {
+          if (i == j) {
+            *dest++ = *src;
+          } else if (!warned_diags && (*src != 0)) {
+            printf("\n!!! Warning: ignoring off-diagonal elements in WRho !!!\n\n");
+            warned_diags = 1;
+          }
+          src++;
+        }
+      }
+      valid_vars++;
+    }
+  }
+  this_var_errors = 0;
   xm = mxGetField(prhs[0], 0, "Ws");
   if (xm == NULL) {
     printf("could not find params.Ws.\n");
@@ -476,64 +554,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
       valid_vars++;
     }
   }
-  this_var_errors = 0;
-  xm = mxGetField(prhs[0], 0, "wPhi");
-  if (xm == NULL) {
-    printf("could not find params.wPhi.\n");
-  } else {
-    if (!((mxGetM(xm) == 1) && (mxGetN(xm) == 1))) {
-      printf("wPhi must be size (1,1), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
-      this_var_errors++;
-    }
-    if (mxIsComplex(xm)) {
-      printf("parameter wPhi must be real.\n");
-      this_var_errors++;
-    }
-    if (!mxIsClass(xm, "double")) {
-      printf("parameter wPhi must be a full matrix of doubles.\n");
-      this_var_errors++;
-    }
-    if (mxIsSparse(xm)) {
-      printf("parameter wPhi must be a full matrix.\n");
-      this_var_errors++;
-    }
-    if (this_var_errors == 0) {
-      dest = params.wPhi;
-      src = mxGetPr(xm);
-      for (i = 0; i < 1; i++)
-        *dest++ = *src++;
-      valid_vars++;
-    }
-  }
-  this_var_errors = 0;
-  xm = mxGetField(prhs[0], 0, "wRho");
-  if (xm == NULL) {
-    printf("could not find params.wRho.\n");
-  } else {
-    if (!((mxGetM(xm) == 1) && (mxGetN(xm) == 1))) {
-      printf("wRho must be size (1,1), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
-      this_var_errors++;
-    }
-    if (mxIsComplex(xm)) {
-      printf("parameter wRho must be real.\n");
-      this_var_errors++;
-    }
-    if (!mxIsClass(xm, "double")) {
-      printf("parameter wRho must be a full matrix of doubles.\n");
-      this_var_errors++;
-    }
-    if (mxIsSparse(xm)) {
-      printf("parameter wRho must be a full matrix.\n");
-      this_var_errors++;
-    }
-    if (this_var_errors == 0) {
-      dest = params.wRho;
-      src = mxGetPr(xm);
-      for (i = 0; i < 1; i++)
-        *dest++ = *src++;
-      valid_vars++;
-    }
-  }
   if (valid_vars != 15) {
     printf("Error: %d parameters are invalid.\n", 15 - valid_vars);
     mexErrMsgTxt("invalid parameters found.");
@@ -552,10 +572,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
       printf("  params.ps[%d] = %.6g;\n", i, params.ps[i]);
     for (i = 0; i < 34; i++)
       printf("  params.Ws[%d] = %.6g;\n", i, params.Ws[i]);
-    for (i = 0; i < 1; i++)
-      printf("  params.wRho[%d] = %.6g;\n", i, params.wRho[i]);
-    for (i = 0; i < 1; i++)
-      printf("  params.wPhi[%d] = %.6g;\n", i, params.wPhi[i]);
+    for (i = 0; i < 64; i++)
+      printf("  params.WRho[%d] = %.6g;\n", i, params.WRho[i]);
+    for (i = 0; i < 10; i++)
+      printf("  params.WPhi[%d] = %.6g;\n", i, params.WPhi[i]);
     for (i = 0; i < 34; i++)
       printf("  params.Lambda[%d] = %.6g;\n", i, params.Lambda[i]);
     for (i = 0; i < 384; i++)

@@ -36,6 +36,8 @@
 #define rhoMinSize rhoSize
 #define phiMinSize phiSize
 #define phiMaxSize phiSize
+#define WRhoSize rhoSize
+#define WPhiSize phiSize
 
 
 
@@ -61,6 +63,8 @@ jobject phiMaxByteBuffer;
 jobject rhoByteBuffer;
 jobject phiByteBuffer;
 jobject vdByteBuffer;
+jobject WRhoByteBuffer;
+jobject WPhiByteBuffer;
 
 JNIEXPORT void JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative_initialize
   (JNIEnv * env, jclass jClass)
@@ -82,6 +86,9 @@ JNIEXPORT void JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_n
     rhoMinByteBuffer = (*env)->NewDirectByteBuffer(env, params.rhoMin, sizeof(double) * rhoMinSize);
     phiMinByteBuffer = (*env)->NewDirectByteBuffer(env, params.phiMin, sizeof(double) * phiMinSize);
     phiMaxByteBuffer = (*env)->NewDirectByteBuffer(env, params.phiMax, sizeof(double) * phiMaxSize);
+    WRhoByteBuffer = (*env)->NewDirectByteBuffer(env, params.WRho, sizeof(double) * WRhoSize);
+    WPhiByteBuffer = (*env)->NewDirectByteBuffer(env, params.WPhi, sizeof(double) * WPhiSize);
+
     rhoByteBuffer = (*env)->NewDirectByteBuffer(env, vars.rho, sizeof(double) * rhoSize);
     phiByteBuffer = (*env)->NewDirectByteBuffer(env, vars.phi, sizeof(double) * phiSize);
     vdByteBuffer = (*env)->NewDirectByteBuffer(env, vars.vd, sizeof(double) * vdSize);
@@ -183,13 +190,23 @@ JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModule
     return vdByteBuffer;
 }
 
+JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative_getWRhoBuffer
+  (JNIEnv * env, jclass jClass)
+{
+    return WRhoByteBuffer;
+}
+
+JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative_getWPhiBuffer
+  (JNIEnv * env, jclass jClass)
+{
+    return WPhiByteBuffer;
+}
+
 JNIEXPORT jint JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative_solveNative
-  (JNIEnv * env, jclass jClass, jdouble wRho, jdouble wPhi)
+  (JNIEnv * env, jclass jClass)
 {
 	int numberOfIterations;
 
-	params.wRho[0] = wRho;
-	params.wPhi[0] = wPhi;
 	numberOfIterations = solve();
 
 	if(work.converged == 1)
