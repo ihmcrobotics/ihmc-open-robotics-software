@@ -28,7 +28,7 @@ public class PoseSequenceEditorGUI extends JFrame
    
    private class ButtonPanel extends JPanel implements ActionListener 
    { 
-      private JButton selectPoseSequence, deleteRow, updateSCS, save; 
+      private JButton selectPoseSequence, deleteRow, updateSCS, setRowWithSlider, save; 
       
       public ButtonPanel()
       {
@@ -37,16 +37,19 @@ public class PoseSequenceEditorGUI extends JFrame
          selectPoseSequence = new JButton("Select pose sequence");
          deleteRow = new JButton("Delete"); 
          updateSCS = new JButton("Update SCS");
+         setRowWithSlider = new JButton("Set row with slider");
          save = new JButton("Save");
          
          buttonPanel.add(selectPoseSequence);
          buttonPanel.add(deleteRow);
          buttonPanel.add(updateSCS);
+         buttonPanel.add(setRowWithSlider);
          buttonPanel.add(save);
          
          selectPoseSequence.addActionListener(this);
          deleteRow.addActionListener(this);
          updateSCS.addActionListener(this);
+         setRowWithSlider.addActionListener(this);
          save.addActionListener(this);
                   
          setLayout(new BorderLayout());
@@ -62,12 +65,10 @@ public class PoseSequenceEditorGUI extends JFrame
             poseSequenceSelectorPanel.deleteSelectedRows();
          else if(e.getSource().equals(updateSCS))
             poseSequenceSelectorPanel.updateSCS();
+         else if(e.getSource().equals(setRowWithSlider))
+            poseSequenceSelectorPanel.setRowWithSlider();
          else if(e.getSource().equals(save))
-            save();
-      }
-      
-      private void save()
-      {
+            poseSequenceSelectorPanel.save();
       }
    }
    

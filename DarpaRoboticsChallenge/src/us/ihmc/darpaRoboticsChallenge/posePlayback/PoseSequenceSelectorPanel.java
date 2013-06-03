@@ -4,13 +4,12 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableModel;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
@@ -28,9 +27,10 @@ public class PoseSequenceSelectorPanel extends JPanel
    private final YoVariableRegistry registry = new YoVariableRegistry("PoseSequenceGUI");
    private final PosePlaybackAllJointsController posePlaybackController;
    private final SDFRobot sdfRobot;
+   private final DRCRobotMidiSliderBoardPositionManipulation sliderBoard;
    
    private final JTable table;
-   private final ScriptEditorTableModel tableModel;
+   private final DefaultTableModel tableModel;
    private PosePlaybackRobotPoseSequence sequence = new PosePlaybackRobotPoseSequence();
    
    public PoseSequenceSelectorPanel() 
@@ -50,8 +50,15 @@ public class PoseSequenceSelectorPanel extends JPanel
        SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot);
        scs.addYoVariableRegistry(registry);
        scs.startOnAThread();
+       sliderBoard = new DRCRobotMidiSliderBoardPositionManipulation(scs);
 
-       tableModel = new ScriptEditorTableModel();
+       String[] columnNames = new String[]
+       {
+             "#", "sy", "sp", "sr", "neck", "lhy", "lhr", "lhp", "lk", "lap", "lar", "rhy", "rhr", 
+             "rhp", "rk", "rap", "rar", "lsp", "lsr", "lep", "ler", "lwp", "lwr", 
+             "rsp", "rsr", "rep", "rer", "rwp", "rwr", "pause"
+       };
+       tableModel = new DefaultTableModel(columnNames, 0); // new ScriptEditorTableModel();
        table = new JTable(tableModel);
 
        table.getColumnModel().getColumn(0).setPreferredWidth(40);
@@ -108,10 +115,26 @@ public class PoseSequenceSelectorPanel extends JPanel
    public void updateSCS()
    {
       int selectedRow = table.getSelectedRow();
+      if(selectedRow == -1)
+         return;
       
       PosePlaybackRobotPose selectedPose = sequence.getPoseSequence().get(selectedRow);
       
       selectedPose.setRobotAtPose(sdfRobot);
+   }
+   
+   public void setRowWithSlider()
+   {
+      int selectedRow = table.getSelectedRow();
+      if(selectedRow == -1)
+         return;
+      
+      sequence.getPose(selectedRow).setRobotAtPose(sdfRobot);
+   }
+   
+   public void save()
+   {
+      sequence.promptWriteToFile();
    }
    
    private void deleteRow(int row)
@@ -119,65 +142,10 @@ public class PoseSequenceSelectorPanel extends JPanel
       ArrayList<PosePlaybackRobotPose> poseSequence = sequence.getPoseSequence();
       poseSequence.remove(row);
    }
-
-   private class ScriptEditorTableModel extends AbstractTableModel 
-   {
-      private int numberOfRows = 1;
-  
-       private String[] columnNames = new String[]
-       {
-             "#", "sy", "sp", "sr", "neck", "lhy", "lhr", "lhp", "lk", "lap", "lar", "rhy", "rhr", 
-             "rhp", "rk", "rap", "rar", "lsp", "lsr", "lep", "ler", "lwp", "lwr", 
-             "rsp", "rsr", "rep", "rer", "rwp", "rwr", "pause"
-       };
-
-       private List<Object[]> data = new ArrayList<Object[]>();
-
-       public ScriptEditorTableModel()
-       {
-         data.add(new Object[]
-            {
-               0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-               0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
-            });
-       }
-
-       public int getColumnCount() 
-       {
-           return columnNames.length;
-       }
-
-       public int getRowCount() 
-       {
-           return data.size();
-       }
-       
-       public String getColumnName(int col) 
-       {
-           return columnNames[col];
-       }
-
-       public Object getValueAt(int row, int col) 
-       {
-           return data.get(row)[col];
-       }
-
-       public boolean isCellEditable(int row, int col) 
-       {
-          return true;
-       }
-       
-       public void addRow(Object[] row)
-       {
-          numberOfRows++;
-          data.add(row);
-          fireTableDataChanged();
-       }   
-   }
       
    private void updateTableBasedOnPoseSequence()
-   {
-      tableModel.data.clear();
+   {      
+      tableModel.setRowCount(0);
       
       ArrayList<PosePlaybackRobotPose> poseSequence = sequence.getPoseSequence();
       for(int i = 0; i < poseSequence.size(); i++)
@@ -195,8 +163,6 @@ public class PoseSequenceSelectorPanel extends JPanel
          row[jointAngles.length + 1] = pose.getPlayBackDelayBeforePose();
          
          tableModel.addRow(row);
-      }
-      
-      System.out.println(table.getRowCount());
+      }      
    }
 }
