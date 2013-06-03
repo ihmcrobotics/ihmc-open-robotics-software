@@ -13,6 +13,7 @@ import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
 
 public class DRCGuiInitialSetup implements GuiInitialSetup
 {
+   private static final boolean SHOW_ONLY_WRENCH_VISUALIZER = true;
    private boolean isGuiShown = true;
    private boolean is3dGraphicsShown = true;
    private final boolean groundProfileVisible;
@@ -54,6 +55,12 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       if(!is3dGraphicsShown)
       {
          scs.hideViewport();
+      }
+
+      if (SHOW_ONLY_WRENCH_VISUALIZER)
+      {
+         scs.hideAllDynamicGraphicObjects();
+         scs.setDynamicGraphicObjectsListVisible("wrenchVisualizer", true);
       }
    }
 
