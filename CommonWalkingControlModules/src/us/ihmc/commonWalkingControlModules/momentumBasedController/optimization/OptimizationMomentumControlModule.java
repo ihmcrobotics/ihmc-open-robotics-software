@@ -69,8 +69,11 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       int rhoSize = CVXWithCylinderNative.rhoSize;
       int phiSize = CVXWithCylinderNative.phiSize;
       dynamicGraphicObjectsListRegistry = null; // don't visualize vectors
+      double wRhoCylinderContacts = momentumOptimizationSettings.getRhoCylinderContactRegularization();
+      double wPhiCylinderContacts = momentumOptimizationSettings.getPhiCylinderContactRegularization();
+      double wRhoPlaneContacts = momentumOptimizationSettings.getRhoPlaneContactRegularization();
       this.wrenchMatrixCalculator = new CylinderAndPlaneContactMatrixCalculatorAdapter(centerOfMassFrame, registry, dynamicGraphicObjectsListRegistry, rhoSize,
-              phiSize);
+              phiSize, wRhoCylinderContacts, wPhiCylinderContacts, wRhoPlaneContacts);
 
       this.momentumOptimizerNative = new CVXWithCylinderNative(ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor), rhoSize, phiSize);
       this.momentumOptimizationSettings = momentumOptimizationSettings;
@@ -162,8 +165,8 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       momentumOptimizerNativeInput.setSecondaryConstraintRightHandSide(pSecondary);
       momentumOptimizerNativeInput.setSecondaryConstraintWeight(secondaryMotionConstraintHandler.getWeightMatrix());
 
-      momentumOptimizerNativeInput.setGroundReactionForceRegularization(momentumOptimizationSettings.getGroundReactionForceRegularization());
-      momentumOptimizerNativeInput.setPhiRegularization(momentumOptimizationSettings.getPhiRegularization());
+      momentumOptimizerNativeInput.setGroundReactionForceRegularization(wrenchMatrixCalculator.getWRho());
+      momentumOptimizerNativeInput.setPhiRegularization(wrenchMatrixCalculator.getWPhi());
 
       optimize(momentumOptimizerNativeInput);
 

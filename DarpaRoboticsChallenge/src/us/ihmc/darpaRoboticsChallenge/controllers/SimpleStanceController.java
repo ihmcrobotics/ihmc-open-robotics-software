@@ -135,8 +135,8 @@ public class SimpleStanceController implements RobotController
       MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(new YoVariableRegistry("test1"));
       momentumOptimizationSettings.setMomentumWeight(momentumWeight, momentumWeight, momentumWeight, momentumWeight);
       momentumOptimizationSettings.setDampedLeastSquaresFactor(lambda);
-      momentumOptimizationSettings.setGroundReactionForceRegularization(wRho);
-      momentumOptimizationSettings.setPhiRegularization(wPhi);
+      momentumOptimizationSettings.setRhoPlaneContactRegularization(wRho);
+      momentumOptimizationSettings.setPhiCylinderContactRegularization(wPhi);
       momentumOptimizationSettings.setRhoMin(rhoMin);
 
       return momentumOptimizationSettings;

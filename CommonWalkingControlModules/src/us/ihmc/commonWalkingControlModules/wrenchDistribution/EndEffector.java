@@ -54,43 +54,43 @@ public class EndEffector
       return this.output;
    }
 
-   public static EndEffector fromCylinder(ReferenceFrame centerOfMassFrame, CylindricalContactState cylinder, YoVariableRegistry registry)
+   public static EndEffector fromCylinder(ReferenceFrame centerOfMassFrame, CylindricalContactState cylinder, double wRho, double wPhi, YoVariableRegistry registry)
    {
       EndEffector ret = new EndEffector(centerOfMassFrame, cylinder.getEndEffectorFrame(), registry);
       OptimizerCylinderContactModel cylinderContactModel = new OptimizerCylinderContactModel();
       cylinderContactModel.setup(cylinder.getCoefficientOfFriction(), cylinder.getCylinderRadius(), cylinder.getHalfHandWidth(),
-                                 cylinder.getTensileGripForce(), cylinder.getGripWeaknessFactor(), cylinder.getCylinderFrame());
+                                 cylinder.getTensileGripForce(), cylinder.getGripWeaknessFactor(), cylinder.getCylinderFrame(), wRho, wPhi);
       ret.setContactModel(cylinderContactModel);
       ret.setLoadBearing(cylinder.isInContact());
 
       return ret;
    }
 
-   public static EndEffector fromPlane(String nameSuffix, ReferenceFrame centerOfMassFrame, PlaneContactState plane, YoVariableRegistry registry)
+   public static EndEffector fromPlane(String nameSuffix, ReferenceFrame centerOfMassFrame, PlaneContactState plane, double wRho, YoVariableRegistry registry)
    {
       EndEffector ret = new EndEffector(nameSuffix, centerOfMassFrame, plane.getBodyFrame(), registry);
       OptimizerPlaneContactModel model = new OptimizerPlaneContactModel();
-      model.setup(plane.getCoefficientOfFriction(), plane.getContactPoints(), plane.getBodyFrame());
+      model.setup(plane.getCoefficientOfFriction(), plane.getContactPoints(), plane.getBodyFrame(), wRho);
       ret.setContactModel(model);
       ret.setLoadBearing(plane.inContact());
 
       return ret;
    }
 
-   public void updateFromCylinder(CylindricalContactState cylinder)
+   public void updateFromCylinder(CylindricalContactState cylinder, double wRho, double wPhi)
    {
       referenceFrame.checkReferenceFrameMatch(cylinder.getEndEffectorFrame());
       OptimizerCylinderContactModel optimizerModel = (OptimizerCylinderContactModel) this.getContactModel();
       optimizerModel.setup(cylinder.getCoefficientOfFriction(), cylinder.getCylinderRadius(), cylinder.getHalfHandWidth(), cylinder.getTensileGripForce(),
-                           cylinder.getGripWeaknessFactor(), cylinder.getCylinderFrame());
+                           cylinder.getGripWeaknessFactor(), cylinder.getCylinderFrame(), wRho, wPhi);
       this.setLoadBearing(cylinder.isInContact());
    }
 
-   public void updateFromPlane(PlaneContactState plane)
+   public void updateFromPlane(PlaneContactState plane, double wRho)
    {
       referenceFrame.checkReferenceFrameMatch(plane.getBodyFrame());
       OptimizerPlaneContactModel optimizerPlaneContactModel = (OptimizerPlaneContactModel) this.getContactModel();
-      optimizerPlaneContactModel.setup(plane.getCoefficientOfFriction(), plane.getContactPoints(), plane.getBodyFrame());
+      optimizerPlaneContactModel.setup(plane.getCoefficientOfFriction(), plane.getContactPoints(), plane.getBodyFrame(), wRho);
       this.setLoadBearing(plane.inContact());
    }
 

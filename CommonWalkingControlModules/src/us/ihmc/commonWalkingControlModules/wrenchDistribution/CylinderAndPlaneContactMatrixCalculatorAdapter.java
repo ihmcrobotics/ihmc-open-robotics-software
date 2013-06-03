@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
@@ -27,10 +28,13 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
    private final Map<RigidBody, Wrench> wrenches = new LinkedHashMap<RigidBody, Wrench>();
    private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
    private final IntegerYoVariable planeContactIndex = new IntegerYoVariable("planeContactIndex", registry);
+   private final DoubleYoVariable wRhoCylinderContacts = new DoubleYoVariable("wRhoCylinderContacts", registry);
+   private final DoubleYoVariable wPhiCylinderContacts = new DoubleYoVariable("wPhiCylinderContacts", registry);
+   private final DoubleYoVariable wRhoPlaneContacts = new DoubleYoVariable("wRhoPlaneContacts", registry);
 
 
    public CylinderAndPlaneContactMatrixCalculatorAdapter(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, int rhoSize, int phiSize)
+           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, int rhoSize, int phiSize, double wRhoCylinderContacts, double wPhiCylinderContacts, double wRhoPlaneContacts)
    {
       cylinderAndPlaneContactMatrixCalculator = new CylinderAndPlaneContactMatrixCalculator(centerOfMassFrame, registry, dynamicGraphicObjectsListRegistry,
               rhoSize, phiSize);
@@ -39,6 +43,10 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
       this.centerOfMassFrame = centerOfMassFrame;
       this.dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistry;
       parentRegistry.addChild(registry);
+
+      this.wRhoCylinderContacts.set(wRhoCylinderContacts);
+      this.wPhiCylinderContacts.set(wPhiCylinderContacts);
+      this.wRhoPlaneContacts.set(wRhoPlaneContacts);
    }
 
    public DenseMatrix64F getRhoMin()
@@ -135,12 +143,12 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
       if (previouslyUsedPlaneEndEffectors.containsKey(planeContactState))
       {
          EndEffector endEffector = previouslyUsedPlaneEndEffectors.get(planeContactState);
-         endEffector.updateFromPlane(planeContactState);
+         endEffector.updateFromPlane(planeContactState, wRhoPlaneContacts.getDoubleValue());
 
          return endEffector;
       }
 
-      EndEffector endEffector = EndEffector.fromPlane("" + planeContactIndex.getIntegerValue(), centerOfMassFrame, planeContactState, registry);
+      EndEffector endEffector = EndEffector.fromPlane("" + planeContactIndex.getIntegerValue(), centerOfMassFrame, planeContactState, wRhoPlaneContacts.getDoubleValue(), registry);
       previouslyUsedPlaneEndEffectors.put(planeContactState, endEffector);
       registerEndEffectorGraphic(endEffector);
       planeContactIndex.increment();
@@ -153,12 +161,12 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
       if (previouslyUsedCylinderEndEffectors.containsKey(cylinder))
       {
          EndEffector endEffector = previouslyUsedCylinderEndEffectors.get(cylinder);
-         endEffector.updateFromCylinder(cylinder);
+         endEffector.updateFromCylinder(cylinder, wRhoCylinderContacts.getDoubleValue(), wPhiCylinderContacts.getDoubleValue());
 
          return endEffector;
       }
 
-      EndEffector endEffector = EndEffector.fromCylinder(centerOfMassFrame, cylinder, registry);
+      EndEffector endEffector = EndEffector.fromCylinder(centerOfMassFrame, cylinder, wRhoCylinderContacts.getDoubleValue(), wPhiCylinderContacts.getDoubleValue(), registry);
       previouslyUsedCylinderEndEffectors.put(cylinder, endEffector);
       registerEndEffectorGraphic(endEffector);
 
@@ -177,5 +185,15 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, wrenchAngularVectorGraphic);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, wrenchLinearVectorGraphic);
       }
+   }
+
+   public DenseMatrix64F getWRho()
+   {
+      return cylinderAndPlaneContactMatrixCalculator.getWRho();
+   }
+
+   public DenseMatrix64F getWPhi()
+   {
+      return cylinderAndPlaneContactMatrixCalculator.getWPhi();
    }
 }

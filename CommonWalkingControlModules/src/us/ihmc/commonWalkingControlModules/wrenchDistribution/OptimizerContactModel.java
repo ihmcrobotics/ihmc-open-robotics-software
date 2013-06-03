@@ -13,5 +13,6 @@ public interface OptimizerContactModel
    public double getPhiMax(int i);
    public void packQRhoBodyFrame(int i, SpatialForceVector spatialForceVector, ReferenceFrame referenceFrame);
    public void packQPhiBodyFrame(int i, SpatialForceVector spatialForceVector, ReferenceFrame referenceFrame);
-
+   public double getWPhi();
+   public double getWRho();
 }

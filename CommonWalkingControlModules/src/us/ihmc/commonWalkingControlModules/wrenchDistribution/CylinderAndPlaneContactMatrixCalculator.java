@@ -7,6 +7,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -51,6 +52,8 @@ public class CylinderAndPlaneContactMatrixCalculator
    private final DenseMatrix64F phiMin;
    private final DenseMatrix64F phiMax;
    private final DenseMatrix64F qPhi;
+   private final DenseMatrix64F wRho;
+   private final DenseMatrix64F wPhi;
 
 
    public CylinderAndPlaneContactMatrixCalculator(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry,
@@ -63,6 +66,8 @@ public class CylinderAndPlaneContactMatrixCalculator
       rhoMin = new DenseMatrix64F(rhoSize, 1);
       phiMin = new DenseMatrix64F(phiSize, 1);
       phiMax = new DenseMatrix64F(phiSize, 1);
+      wRho = new DenseMatrix64F(rhoSize, rhoSize);
+      wPhi = new DenseMatrix64F(phiSize, phiSize);
 
       visualize = dynamicGraphicObjectsListRegistry != null;
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -162,6 +167,11 @@ public class CylinderAndPlaneContactMatrixCalculator
       phiMax.zero();
       qPhi.zero();
 
+      // Initializing these to identity instead of zero will make sure that there is a unique optimum of 0 for
+      // unused rhos and phis, so that there are no NoConvergenceExceptions
+      CommonOps.setIdentity(wRho);
+      CommonOps.setIdentity(wPhi);
+
       for (EndEffector endEffector : endEffectors)
       {
          if (endEffector.isLoadBearing())
@@ -178,6 +188,8 @@ public class CylinderAndPlaneContactMatrixCalculator
                currentBasisVector.changeFrame(centerOfMassFrame);
                setQRho(iRho, currentBasisVector);
 
+               wRho.set(iRho, iRho, model.getWRho());
+
                iRho++;
             }
 
@@ -191,6 +203,8 @@ public class CylinderAndPlaneContactMatrixCalculator
 
                currentBasisVector.changeFrame(centerOfMassFrame);
                setQPhi(iPhi, currentBasisVector);
+
+               wPhi.set(iPhi, iPhi, model.getWPhi());
 
                iPhi++;
             }
@@ -318,5 +332,15 @@ public class CylinderAndPlaneContactMatrixCalculator
       {
          System.out.println(this.getClass().getSimpleName() + ": " + message);
       }
+   }
+
+   public DenseMatrix64F getWRho()
+   {
+      return wRho;
+   }
+
+   public DenseMatrix64F getWPhi()
+   {
+      return wPhi;
    }
 }
