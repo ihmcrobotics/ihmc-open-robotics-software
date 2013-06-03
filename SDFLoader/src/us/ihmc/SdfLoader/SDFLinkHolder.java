@@ -59,21 +59,24 @@ public class SDFLinkHolder
      visuals = sdfLink.getVisuals();
      collisions = sdfLink.getCollisions();
      sensors = sdfLink.getSensors();
-     if(sdfLink.getCollisions().get(0) != null)
+     if(sdfLink.getCollisions() != null)
      {
-        if(sdfLink.getCollisions().get(0).getSurface() != null)
+        if(sdfLink.getCollisions().get(0) != null)
         {
-           if(sdfLink.getCollisions().get(0).getSurface().getContact() != null)
+           if(sdfLink.getCollisions().get(0).getSurface() != null)
            {
-              if(sdfLink.getCollisions().get(0).getSurface().getContact().getOde() != null)
+              if(sdfLink.getCollisions().get(0).getSurface().getContact() != null)
               {
-                 if(sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getKp() != null)
-                    contactKp = Double.parseDouble(sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getKp());
-                 if(sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getKd() != null)
-                    contactKd = Double.parseDouble(sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getKd());
-                 if(sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getMaxVel() != null)
-                    contactMaxVel = Double.parseDouble(sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getMaxVel());
-                 
+                 if(sdfLink.getCollisions().get(0).getSurface().getContact().getOde() != null)
+                 {
+                    if(sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getKp() != null)
+                       contactKp = Double.parseDouble(sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getKp());
+                    if(sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getKd() != null)
+                       contactKd = Double.parseDouble(sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getKd());
+                    if(sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getMaxVel() != null)
+                       contactMaxVel = Double.parseDouble(sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getMaxVel());
+                    
+                 }
               }
            }
         }
