@@ -101,6 +101,7 @@ public class MomentumBasedController
    private final PlaneContactWrenchProcessor planeContactWrenchProcessor;
    private final MomentumBasedControllerSpy momentumBasedControllerSpy;
    private final ContactPointVisualizer contactPointVisualizer;
+   private final WrenchVisualizer wrenchVisualizer;
 
    public MomentumBasedController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
                                   CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime,
@@ -247,9 +248,15 @@ public class MomentumBasedController
       this.planeContactWrenchProcessor = new PlaneContactWrenchProcessor(this.listOfAllContactablePlaneBodies, dynamicGraphicObjectsListRegistry, registry);
 
       if (dynamicGraphicObjectsListRegistry != null)
+      {
          contactPointVisualizer = new ContactPointVisualizer(20, dynamicGraphicObjectsListRegistry, registry);
+         wrenchVisualizer = new WrenchVisualizer(6, dynamicGraphicObjectsListRegistry, registry);
+      }
       else
+      {
          contactPointVisualizer = null;
+         wrenchVisualizer = null;
+      }
    }
 
    public SpatialForceVector getGravitationalWrench()
@@ -317,6 +324,8 @@ public class MomentumBasedController
       }
 
       planeContactWrenchProcessor.compute(externalWrenches);
+      if (wrenchVisualizer != null)
+         wrenchVisualizer.visualize(externalWrenches.values());
 
       SpatialForceVector totalGroundReactionWrench = new SpatialForceVector(centerOfMassFrame);
       Wrench admissibleGroundReactionWrench = TotalWrenchCalculator.computeTotalWrench(externalWrenches.values(),
