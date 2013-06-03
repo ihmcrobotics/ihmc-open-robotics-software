@@ -6,6 +6,9 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 
 public class DRCConfigParameters
 {
+   public static final boolean USE_COLLISIONS_MESHS_FOR_VISUALIZATION = false;
+   
+   
    // TODO: Temporary static variable for testing getting into the car
    public static final boolean TEST_GETTING_INTO_CAR = false; // true;
    

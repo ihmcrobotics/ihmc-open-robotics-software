@@ -57,10 +57,11 @@ public class SDFLinkHolder
         inertia = new Matrix3d();
      }
      visuals = sdfLink.getVisuals();
-     collisions = sdfLink.getCollisions();
+     
      sensors = sdfLink.getSensors();
      if(sdfLink.getCollisions() != null)
      {
+        collisions = sdfLink.getCollisions();
         if(sdfLink.getCollisions().get(0) != null)
         {
            if(sdfLink.getCollisions().get(0).getSurface() != null)
@@ -80,6 +81,10 @@ public class SDFLinkHolder
               }
            }
         }
+     }
+     else
+     {
+        collisions = new ArrayList<Collision>();
      }
    }
 
