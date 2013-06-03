@@ -237,7 +237,7 @@ public class MomentumBasedController
       {
          this.listOfAllContactableCylinderBodies.addAll(graspingHands.values());
       }
-      coefficientOfFriction = 0.0;
+//      coefficientOfFriction = 0.0;
       for (ContactableCylinderBody contactableCylinderBody : this.listOfAllContactableCylinderBodies)
       {
          RigidBody rigidBody = contactableCylinderBody.getRigidBody();
