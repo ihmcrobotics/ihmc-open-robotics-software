@@ -35,7 +35,7 @@ public class DRCVehicleSDFLoader extends DRCWorld
    
    public SDFModelVisual loadDRCVehicle()
    {
-      URL fileURL = DRCVehicleSDFLoader.class.getResource("models/GFE/atlasVehicleWorld.sdf");
+      URL fileURL = DRCVehicleSDFLoader.class.getResource("models/GFE/drc_vehicle.sdf");
       try
       {
          SDFWorldLoader sdfWorldLoader = new SDFWorldLoader(new File(fileURL.getFile()), resourceDirectories);
