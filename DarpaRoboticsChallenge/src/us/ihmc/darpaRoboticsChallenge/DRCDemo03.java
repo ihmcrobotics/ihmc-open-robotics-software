@@ -1,5 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.media.j3d.Transform3D;
@@ -14,6 +15,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DrivingDRCRobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -22,6 +24,8 @@ import com.martiansoftware.jsap.JSAPException;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
+import us.ihmc.utilities.net.LocalObjectCommunicator;
+import us.ihmc.utilities.net.ObjectCommunicator;
 
 public class DRCDemo03
 {
@@ -49,15 +53,33 @@ public class DRCDemo03
 
       environment.activateDisturbanceControllerOnSteeringWheel(YoFunctionGeneratorMode.SINE);
 
+      ObjectCommunicator drcNetworkProcessorServer = new LocalObjectCommunicator();
+
       WalkingControllerParameters drivingControllerParameters = new DRCRobotDrivingControllerParameters();
       DRCRobotJointMap jointMap = robotInterface.getJointMap();
       HighLevelState initialBehavior = HighLevelState.DRIVING;
-      ControllerFactory controllerFactory = DRCObstacleCourseSimulation.createDRCMultiControllerFactory(null, drivingControllerParameters, false, jointMap, initialBehavior);
+      ControllerFactory controllerFactory = DRCObstacleCourseSimulation.createDRCMultiControllerFactory(drcNetworkProcessorServer, drivingControllerParameters, false, jointMap,
+                                               initialBehavior);
 
       drcSimulation = DRCSimulationFactory.createSimulation(controllerFactory, environment, robotInterface, robotInitialSetup, scsInitialSetup,
-              guiInitialSetup, null);
+              guiInitialSetup, drcNetworkProcessorServer);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulation.getSimulationConstructionSet();
+
+      LocalObjectCommunicator localObjectCommunicator = DRCObstacleCourseSimulation.createLocalObjectCommunicator(drcSimulation, robotInterface);
+
+      new DRCNetworkProcessor(localObjectCommunicator, drcNetworkProcessorServer);
+
+      try
+      {
+         drcNetworkProcessorServer.connect();
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+
+
 
       // add other registries
       drcSimulation.addAdditionalDynamicGraphicObjectsListRegistries(dynamicGraphicObjectsListRegistry);
