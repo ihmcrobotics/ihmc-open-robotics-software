@@ -35,6 +35,8 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    
    private final BooleanYoVariable hasBeenInitializedWithNextStep = new BooleanYoVariable("hasBeenInitializedWithNextStep", registry);
    
+   private final DoubleYoVariable offsetHeightAboveGround = new DoubleYoVariable("offsetHeightAboveGround", registry);
+
    private final DoubleYoVariable minimumHeightAboveGround = new DoubleYoVariable("minimumHeightAboveGround", registry);
    private final DoubleYoVariable nominalHeightAboveGround = new DoubleYoVariable("nominalHeightAboveGround", registry);
    private final DoubleYoVariable maximumHeightAboveGround = new DoubleYoVariable("maximumHeightAboveGround", registry);
@@ -60,6 +62,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    
    public LookAheadCoMHeightTrajectoryGenerator(double minimumHeightAboveGround, double nominalHeightAboveGround, double maximumHeightAboveGround, double doubleSupportPercentageIn, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
+      setOffsetHeightAboveGround(0.0);
       setMinimumHeightAboveGround(minimumHeightAboveGround);
       setNominalHeightAboveGround(nominalHeightAboveGround);
       setMaximumHeightAboveGround(maximumHeightAboveGround);
@@ -153,6 +156,11 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       }
    }
    
+   private void setOffsetHeightAboveGround(double offsetHeightAboveGround)
+   {
+      this.offsetHeightAboveGround.set(offsetHeightAboveGround);
+   }
+
    public void setMinimumHeightAboveGround(double minimumHeightAboveGround)
    {
       this.minimumHeightAboveGround.set(minimumHeightAboveGround);
@@ -543,7 +551,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       double splineQuery = projectionSegment.percentageAlongLineSegment(queryPoint) * projectionSegment.length();
 
       double[] splineOutput = spline.getZSlopeAndSecondDerivative(splineQuery);
-      double z = splineOutput[0];
+      double z = splineOutput[0] + offsetHeightAboveGround.getDoubleValue();
       double dzds = splineOutput[1];
       double ddzdds = splineOutput[2];
 
