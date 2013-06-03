@@ -60,6 +60,7 @@ public class MomentumBasedController
    private final CommonWalkingReferenceFrames referenceFrames;
    private final TwistCalculator twistCalculator;
    private final SideDependentList<ContactablePlaneBody> feet, handPalms, thighs;
+   private final ContactablePlaneBody pelvis;
    private final SideDependentList<ContactableCylinderBody> graspingHands;
    private final List<ContactablePlaneBody> listOfAllContactablePlaneBodies;
    private final List<ContactableCylinderBody> listOfAllContactableCylinderBodies;
@@ -107,7 +108,7 @@ public class MomentumBasedController
                                   CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime,
                                   double gravityZ, TwistCalculator twistCalculator, SideDependentList<ContactablePlaneBody> feet,
                                   SideDependentList<ContactablePlaneBody> handPalms, SideDependentList<ContactableCylinderBody> graspingHands,
-                                  SideDependentList<ContactablePlaneBody> thighs, double controlDT,
+                                  SideDependentList<ContactablePlaneBody> thighs, ContactablePlaneBody pelvis, double controlDT,
                                   ProcessedOutputsInterface processedOutputs, MomentumControlModule momentumControlModule, ArrayList<Updatable> updatables,
                                   StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
@@ -134,6 +135,7 @@ public class MomentumBasedController
       this.handPalms = handPalms; // Plane contact used to bear load with open hands
       this.graspingHands = graspingHands; // Cylindrical contact used to bear load while grasping a cylinder
       this.thighs = thighs;
+      this.pelvis = pelvis;
 
       RigidBody elevator = fullRobotModel.getElevator();
 
@@ -201,6 +203,9 @@ public class MomentumBasedController
       {
          this.listOfAllContactablePlaneBodies.addAll(thighs.values());
       }
+
+      if (pelvis != null)
+         this.listOfAllContactablePlaneBodies.add(pelvis);
 
       for (ContactablePlaneBody contactablePlaneBody : this.listOfAllContactablePlaneBodies)
       {
@@ -641,5 +646,10 @@ public class MomentumBasedController
       {
          modifiableContactState.clear();
       }
+   }
+
+   public ContactablePlaneBody getContactablePlanePelvis()
+   {
+      return pelvis;
    }
 }
