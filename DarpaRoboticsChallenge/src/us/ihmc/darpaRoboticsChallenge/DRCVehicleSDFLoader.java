@@ -35,11 +35,11 @@ public class DRCVehicleSDFLoader extends DRCWorld
    
    public SDFModelVisual loadDRCVehicle()
    {
-      URL fileURL = DRCVehicleSDFLoader.class.getResource("models/GFE/models/polaris_ranger_ev/model-1_3.sdf");
+      URL fileURL = DRCVehicleSDFLoader.class.getResource("models/GFE/atlasVehicleWorld.sdf");
       try
       {
          SDFWorldLoader sdfWorldLoader = new SDFWorldLoader(new File(fileURL.getFile()), resourceDirectories);
-         GeneralizedSDFRobotModel generalizedSDFRobotModel = sdfWorldLoader.getGeneralizedRobotModelAndRemoveFromWorld("polaris_ranger_ev");
+         GeneralizedSDFRobotModel generalizedSDFRobotModel = sdfWorldLoader.getGeneralizedRobotModelAndRemoveFromWorld("drc_vehicle");
          return new SDFModelVisual(generalizedSDFRobotModel);
       }
       catch (FileNotFoundException e)
