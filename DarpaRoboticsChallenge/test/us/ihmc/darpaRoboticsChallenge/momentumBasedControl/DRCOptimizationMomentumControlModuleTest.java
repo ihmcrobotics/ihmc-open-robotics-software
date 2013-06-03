@@ -54,7 +54,7 @@ public class DRCOptimizationMomentumControlModuleTest
       DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_SANDIA_HANDS, false);
       JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       SDFFullRobotModel fullRobotModel = jaxbSDFLoader.createFullRobotModel(jointMap);
-      SDFRobot robot = jaxbSDFLoader.createRobot(jointMap);
+      SDFRobot robot = jaxbSDFLoader.createRobot(jointMap, false);
       ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, jointMap.getAnkleHeight());
 
       RobotInitialSetup<SDFRobot> intialSetup = new SquaredUpDRCRobotInitialSetup();
@@ -125,7 +125,7 @@ public class DRCOptimizationMomentumControlModuleTest
       DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_SANDIA_HANDS, false);
       JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       SDFFullRobotModel fullRobotModel = jaxbSDFLoader.createFullRobotModel(jointMap);
-      SDFRobot robot = jaxbSDFLoader.createRobot(jointMap);
+      SDFRobot robot = jaxbSDFLoader.createRobot(jointMap, false);
       ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, jointMap.getAnkleHeight());
 
       RobotInitialSetup<SDFRobot> intialSetup = new SquaredUpDRCRobotInitialSetup();

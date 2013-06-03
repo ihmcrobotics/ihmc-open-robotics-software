@@ -86,20 +86,20 @@ public class JaxbSDFLoader
       return generalizedSDFRobotModels.get(name);
    }
 
-   public SDFRobot createRobot(SDFJointNameMap sdfJointNameMap)
+   public SDFRobot createRobot(SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
    {
-      return createRobot(sdfJointNameMap.getModelName(), sdfJointNameMap);
+      return createRobot(sdfJointNameMap.getModelName(), sdfJointNameMap, useCollisionMeshes);
    }
    
-   public SDFRobot createRobot(String modelName)
+   public SDFRobot createRobot(String modelName, boolean useCollisionMeshes)
    {
-      return createRobot(modelName, null);
+      return createRobot(modelName, null, useCollisionMeshes);
    }
    
-   private SDFRobot createRobot(String modelName, SDFJointNameMap sdfJointNameMap)
+   private SDFRobot createRobot(String modelName, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
    {
       checkModelName(modelName);
-      return new SDFRobot(generalizedSDFRobotModels.get(modelName), sdfJointNameMap);
+      return new SDFRobot(generalizedSDFRobotModels.get(modelName), sdfJointNameMap, useCollisionMeshes);
    }
 
    public SDFFullRobotModel createFullRobotModel(SDFJointNameMap sdfJointNameMap)
