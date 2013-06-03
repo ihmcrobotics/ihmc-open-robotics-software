@@ -41,7 +41,7 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
                                       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, RobotSide[] footContactSides, RobotSide[] handContactSides)
    {
       JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
-      SDFRobot robotForEnvironmentSetup = jaxbSDFLoader.createRobot(jointMap);
+      SDFRobot robotForEnvironmentSetup = jaxbSDFLoader.createRobot(jointMap, DRCConfigParameters.USE_COLLISIONS_MESHS_FOR_VISUALIZATION);
       robotInitialSetup.initializeRobot(robotForEnvironmentSetup);
       robotForEnvironmentSetup.update();
       FullRobotModel fullRobotModelForEnvironmentSetup = jaxbSDFLoader.createFullRobotModel(jointMap);

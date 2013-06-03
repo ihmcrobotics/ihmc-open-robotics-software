@@ -56,12 +56,12 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
 
    private final LinkedHashMap<String, SDFCamera> cameras = new LinkedHashMap<String, SDFCamera>();
 
-   public SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap)
+   public SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
    {
-      this(generalizedSDFRobotModel, sdfJointNameMap, true, true);
+      this(generalizedSDFRobotModel, sdfJointNameMap, useCollisionMeshes, true, true);
    }
 
-   protected SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean enableTorqueVelocityLimits,
+   protected SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits,
                       boolean enableDamping)
    {
       super(generalizedSDFRobotModel.getName());
@@ -87,7 +87,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
 
       addSensors(rootJoint, rootLink);
 
-      Link scsRootLink = createLink(rootLink, new Transform3D());
+      Link scsRootLink = createLink(rootLink, new Transform3D(), useCollisionMeshes);
       rootJoint.setLink(scsRootLink);
 
       addRootJoint(rootJoint);
@@ -99,7 +99,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
 
       for (SDFJointHolder child : rootLink.getChildren())
       {
-         addJointsRecursively(child, rootJoint, MatrixTools.IDENTITY, enableTorqueVelocityLimits, enableDamping);
+         addJointsRecursively(child, rootJoint, MatrixTools.IDENTITY, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
       }
 
       for (RobotSide robotSide : RobotSide.values)
@@ -208,7 +208,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
       return oneDoFJoints.values();
    }
 
-   private void addJointsRecursively(SDFJointHolder joint, Joint scsParentJoint, Matrix3d chainRotationIn, boolean enableTorqueVelocityLimits,
+   private void addJointsRecursively(SDFJointHolder joint, Joint scsParentJoint, Matrix3d chainRotationIn, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits,
                                      boolean enableDamping)
    {
       Matrix3d rotation = new Matrix3d();
@@ -328,7 +328,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
             throw new RuntimeException("Joint type not implemented: " + joint.getType());
       }
 
-      scsJoint.setLink(createLink(joint.getChild(), rotationTransform));
+      scsJoint.setLink(createLink(joint.getChild(), rotationTransform, useCollisionMeshes));
       scsParentJoint.addJoint(scsJoint);
 
       if (DEBUG)
@@ -342,7 +342,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
 
       for (SDFJointHolder child : joint.getChild().getChildren())
       {
-         addJointsRecursively(child, scsJoint, chainRotation, enableTorqueVelocityLimits, enableDamping);
+         addJointsRecursively(child, scsJoint, chainRotation, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
       }
 
    }
@@ -554,10 +554,15 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
 
 
 
-   private Link createLink(SDFLinkHolder link, Transform3D rotationTransform)
+   private Link createLink(SDFLinkHolder link, Transform3D rotationTransform, boolean useCollisionMeshes)
    {
-      Link scsLink = new Link(link.getName());
-      if (link.getVisuals() != null)
+      Link scsLink = new Link(link.getName());      
+      if(useCollisionMeshes)
+      {
+         SDFGraphics3DObject linkGraphics = new SDFGraphics3DObject(link.getCollisions(), resourceDirectories, rotationTransform);
+         scsLink.setLinkGraphics(linkGraphics);
+      }
+      else if (link.getVisuals() != null)
       {
          SDFGraphics3DObject linkGraphics = new SDFGraphics3DObject(link.getVisuals(), resourceDirectories, rotationTransform);
          scsLink.setLinkGraphics(linkGraphics);
