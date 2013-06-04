@@ -32,7 +32,7 @@ import us.ihmc.utilities.net.ObjectCommunicator;
 public class DRCNetworkProcessor
 {
    //TODO: make command line option
-   private final VideoSettings videoSettings = VideoSettingsFactory.get512kBitSettings();
+   private final VideoSettings videoSettings = VideoSettingsFactory.get32kBitSettings();
    
    
    private final ObjectCommunicator fieldComputerClient;
