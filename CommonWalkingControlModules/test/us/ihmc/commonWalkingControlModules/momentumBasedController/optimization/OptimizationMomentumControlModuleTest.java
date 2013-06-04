@@ -400,8 +400,9 @@ public class OptimizationMomentumControlModuleTest
       OptimizationMomentumControlModule momentumControlModule = createAndInitializeMomentumControlModule(rootJoint, revoluteJoints, controlDT,
             centerOfMassFrame, momentumOptimizationSettings);
 
-      SpatialForceVector desiredMomentumRate = new SpatialForceVector(centerOfMassFrame, RandomTools.generateRandomVector(random),
-            RandomTools.generateRandomVector(random));
+      double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
+      SpatialForceVector desiredMomentumRate = generateRandomFeasibleMomentumRateOfChange(centerOfMassFrame, contactStates, totalMass, gravityZ, random,
+            0.0);
       MomentumRateOfChangeData momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
       momentumRateOfChangeData.set(desiredMomentumRate);
       momentumControlModule.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
@@ -415,6 +416,7 @@ public class OptimizationMomentumControlModuleTest
       SpatialAccelerationVector taskSpaceAcceleration = new SpatialAccelerationVector(endEffector.getBodyFixedFrame(), elevator.getBodyFixedFrame(),
             endEffector.getBodyFixedFrame(), RandomTools.generateRandomVector(random),
             RandomTools.generateRandomVector(random));
+
       int nullity = 1;
       DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(nullity, 1);
       CommonOps.fill(nullspaceMultipliers, 0.0);
@@ -441,11 +443,10 @@ public class OptimizationMomentumControlModuleTest
 
       assertTrue(MatrixFeatures.isConstantVal(nullspaceMultiplierCheck, 0.0, 1e-7));
 
-      double mass = TotalMassCalculator.computeSubTreeMass(elevator);
       SpatialForceVector momentumRateOfChangeOut = momentumControlModule.getDesiredCentroidalMomentumRate();
-      assertWrenchesSumUpToMomentumDot(momentumControlModule.getExternalWrenches().values(), momentumRateOfChangeOut, gravityZ, mass, centerOfMassFrame,
+      assertWrenchesSumUpToMomentumDot(momentumControlModule.getExternalWrenches().values(), momentumRateOfChangeOut, gravityZ, totalMass, centerOfMassFrame,
             1e-3);
-//      JUnitTools.assertSpatialForceVectorEquals(desiredMomentumRate, momentumRateOfChangeOut, 1e-1); FIXME: get this to pass!!
+      JUnitTools.assertSpatialForceVectorEquals(desiredMomentumRate, momentumRateOfChangeOut, 1e-1);
       assertWrenchesInFrictionCones(momentumControlModule.getExternalWrenches(), contactStates, coefficientOfFriction);
       assertRootJointWrenchZero(momentumControlModule.getExternalWrenches(), rootJoint, gravityZ, 1e-2);
    }
