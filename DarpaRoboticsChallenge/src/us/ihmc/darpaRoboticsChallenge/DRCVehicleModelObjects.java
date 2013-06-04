@@ -167,6 +167,10 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
          finalAdjustment.setEuler(new Vector3d(0.0, 0.0, -Math.PI/2.0));
          transform3D.mul(finalAdjustment);
 
+         finalAdjustment = new Transform3D();
+         finalAdjustment.setTranslation(new Vector3d(0.0, -0.0225, 0.0)); // to line up the center better
+         transform3D.mul(finalAdjustment);
+
          objectTransforms.put(VehicleObject.STEERING_WHEEL, transform3D);
       }
 
