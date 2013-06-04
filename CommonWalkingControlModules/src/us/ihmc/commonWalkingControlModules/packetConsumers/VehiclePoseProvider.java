@@ -32,22 +32,27 @@ public class VehiclePoseProvider implements ObjectConsumer<VehiclePosePacket>
 
    public FramePoint getPosition()
    {
-      return framePose.getPostionCopy();
+      synchronized (synchronizationObject)
+      {
+         return framePose.getPostionCopy();
+      }
    }
 
    public FrameOrientation getOrientation()
    {
-      return framePose.getOrientationCopy();
+      synchronized (synchronizationObject)
+      {
+         return framePose.getOrientationCopy();
+      }
    }
 
    public FramePose getFramePose()
    {
-      // TODO: this is NOT a defensive copy. Should we make one?
       synchronized (synchronizationObject)
       {
          hasNewPose = false;
 
-         return framePose;
+         return new FramePose(framePose);
       }
    }
 }
