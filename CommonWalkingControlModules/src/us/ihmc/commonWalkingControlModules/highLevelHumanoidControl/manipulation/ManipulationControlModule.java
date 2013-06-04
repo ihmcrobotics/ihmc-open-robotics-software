@@ -131,9 +131,9 @@ public class ManipulationControlModule
 
       
       
-      dispatchTasksManipulationState = new DispatchTasksManipulationState(yoTime, fullRobotModel, twistCalculator, parameters, handPoseProvider,
-              handLoadBearingProvider, dynamicGraphicObjectsListRegistry, handControllers, handPositionControlFrames, individualHandControlModules, momentumBasedController,
-              registry);
+      dispatchTasksManipulationState = new DispatchTasksManipulationState(fullRobotModel, parameters, handPoseProvider,
+              handLoadBearingProvider, handControllers, handPositionControlFrames, individualHandControlModules,
+            registry);
       
 //    HighLevelToroidManipulationState toroidManipulationState = new HighLevelToroidManipulationState(yoTime, fullRobotModel, twistCalculator,
 //                                                                  handPositionControlFrames, handControllers, jacobians, torusPoseProvider,
