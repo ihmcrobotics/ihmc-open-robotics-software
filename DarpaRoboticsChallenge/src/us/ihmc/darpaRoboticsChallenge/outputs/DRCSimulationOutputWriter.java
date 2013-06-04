@@ -36,7 +36,11 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
          OneDegreeOfFreedomJoint pinJoint = jointPair.first();
          OneDoFJoint revoluteJoint = jointPair.second();
 
-         pinJoint.setTau(revoluteJoint.getTau());
+         double control = (revoluteJoint.getKp() * (revoluteJoint.getqDesired() - pinJoint.getQ().getDoubleValue()))
+               + (revoluteJoint.getKd() * (revoluteJoint.getQdDesired() - pinJoint.getQD().getDoubleValue()));
+         double tau = revoluteJoint.getTau();
+         
+         pinJoint.setTau(control + tau);
       }
       
       if(dynamicGraphicObjectsListRegistry != null)
