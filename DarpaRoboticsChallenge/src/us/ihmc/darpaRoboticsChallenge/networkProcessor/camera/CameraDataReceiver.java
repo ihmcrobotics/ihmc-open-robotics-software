@@ -70,6 +70,8 @@ public abstract class CameraDataReceiver
       };
       compressedVideoDataServer = new CompressedVideoDataServer(videoSettings, videoConsumer);
       
+      networkingManager.getControllerCommandHandler().setVideoCommandListener(compressedVideoDataServer);
+      
    }
 
    public void updateImage(BufferedImage bufferedImage, long timeStamp, double fov)
