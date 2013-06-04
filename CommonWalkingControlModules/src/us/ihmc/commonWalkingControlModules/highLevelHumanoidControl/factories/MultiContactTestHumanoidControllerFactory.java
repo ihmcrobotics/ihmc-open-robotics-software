@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.desiredChestOrientation.DesiredChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.*;
+import us.ihmc.commonWalkingControlModules.packets.DesiredHighLevelStateProvider;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
@@ -154,24 +155,28 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       rootJointAccelerationControlModule.setDerivativeGains(20.0, 20.0, 20.0);
 
 
-      DesiredHandPoseProvider desiredHandPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters);
+      DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters);
       TorusPoseProvider torusPoseProvider = new TorusPoseProvider();
       TorusManipulationProvider torusManipulationProvider = new TorusManipulationProvider();
-      DesiredFootPoseProvider desiredFootPoseProvider = new DesiredFootPoseProvider();
+      DesiredFootPoseProvider footPoseProvider = new DesiredFootPoseProvider();
 
-      DesiredHandLoadBearingProvider desiredHandLoadBearingProvider = null;
+      DesiredHandLoadBearingProvider handLoadBearingProvider = null;
       FootstepProvider footstepProvider = null;
       HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = null;
-      DesiredHeadOrientationProvider desiredHeadOrientationProvider = null;
-      DesiredPelvisPoseProvider desiredPelvisPoseProvider = null;
-      DesiredChestOrientationProvider desiredChestOrientationProvider = null;
-      DesiredFootStateProvider desiredFootStateProvider = null;
+      DesiredHeadOrientationProvider headOrientationProvider = null;
+      DesiredPelvisPoseProvider pelvisPoseProvider = null;
+      DesiredChestOrientationProvider chestOrientationProvider = null;
+      DesiredFootStateProvider footLoadBearingProvider = null;
       VehiclePoseProvider vehiclePoseProvider = null;
-
+      DesiredThighLoadBearingProvider thighLoadBearingProvider = null;
+      DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = null;
+      DesiredHighLevelStateProvider highLevelStateProvider = null;
+      
       VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepProvider, mapFromFootstepsToTrajectoryParameters,
-                                                           desiredHeadOrientationProvider, desiredPelvisPoseProvider, desiredHandPoseProvider,
-                                                           desiredHandLoadBearingProvider, torusPoseProvider, torusManipulationProvider, desiredChestOrientationProvider,
-                                                           desiredFootPoseProvider, desiredFootStateProvider, vehiclePoseProvider, null);
+                                                           headOrientationProvider, pelvisPoseProvider, handPoseProvider,
+                                                           handLoadBearingProvider, torusPoseProvider, torusManipulationProvider, chestOrientationProvider,
+                                                           footPoseProvider, footLoadBearingProvider, vehiclePoseProvider, highLevelStateProvider,
+                                                           thighLoadBearingProvider, pelvisLoadBearingProvider);
 
       VariousWalkingManagers variousWalkingManagers = VariousWalkingManagers.create(momentumBasedController, handControllers, yoTime, variousWalkingProviders,
             walkingControllerParameters, registry, dynamicGraphicObjectsListRegistry);

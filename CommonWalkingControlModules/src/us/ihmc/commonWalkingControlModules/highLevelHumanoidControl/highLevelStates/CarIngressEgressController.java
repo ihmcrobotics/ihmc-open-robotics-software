@@ -14,7 +14,9 @@ import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffecto
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
@@ -54,7 +56,9 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    public final static HighLevelState controllerState = HighLevelState.INGRESS_EGRESS;
 
    private final DesiredFootPoseProvider footPoseProvider;
-   private final DesiredFootStateProvider footStateProvider;
+   private final DesiredFootStateProvider footLoadBearingProvider;
+   private DesiredThighLoadBearingProvider thighLoadBearingProvider;
+   private DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider;
 
    private final DesiredPelvisPoseProvider pelvisPoseProvider;
    private final RigidBodySpatialAccelerationControlModule pelvisController;
@@ -112,8 +116,10 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       
       this.pelvisPoseProvider = variousWalkingProviders.getDesiredPelvisPoseProvider();
       this.footPoseProvider = variousWalkingProviders.getDesiredFootPoseProvider();
-      this.footStateProvider = variousWalkingProviders.getDesiredFootStateProvider();
-
+      this.footLoadBearingProvider = variousWalkingProviders.getDesiredFootStateProvider();
+      this.thighLoadBearingProvider = variousWalkingProviders.getDesiredThighLoadBearingProvider();
+      this.pelvisLoadBearingProvider = variousWalkingProviders.getDesiredPelvisLoadBearingProvider();
+      
       // Setup the pelvis trajectory generator
       pelvisPositionControlFrame = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint();
       this.pelvisController = new RigidBodySpatialAccelerationControlModule("pelvis", twistCalculator, fullRobotModel.getPelvis(), pelvisPositionControlFrame,
@@ -348,8 +354,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
    protected void doFootControl()
    {
-      updateFootLoadBearingState();
-      
+      updateLoadBearingStates();
+
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactablePlaneBody foot = feet.get(robotSide);
@@ -369,7 +375,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       super.doFootControl();
    }
 
-   private void updateFootLoadBearingState()
+   private void updateLoadBearingStates()
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -378,10 +384,25 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
             requestedFootLoadBearing.get(robotSide).set(false);
          }
          
-         if (footStateProvider.checkForNewLoadBearingRequest(robotSide))
+         if (footLoadBearingProvider.checkForNewLoadBearingRequest(robotSide))
          {
             requestedFootLoadBearing.get(robotSide).set(true);
          }
+         
+         if (thighLoadBearingProvider.checkForNewLoadBearingState(robotSide))
+         {
+            requestedThighLoadBearing.get(robotSide).set(thighLoadBearingProvider.getDesiredThighLoadBearingState(robotSide));
+         }
+      }
+
+      if (pelvisLoadBearingProvider.checkForNewLoadBearingRequest())
+      {
+         requestedPelvisLoadBearing.set(true);
+      }
+      
+      if (pelvisPoseProvider.checkForNewPose())
+      {
+         requestedPelvisLoadBearing.set(false);
       }
    }
 
@@ -513,8 +534,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          if (!(v instanceof BooleanYoVariable))
             return;
 
-            if (v.equals(requestedPelvisLoadBearing))
-               setPelvisInContact(requestedPelvisLoadBearing.getBooleanValue());
+         if (v.equals(requestedPelvisLoadBearing))
+            setPelvisInContact(requestedPelvisLoadBearing.getBooleanValue());
          
          for (RobotSide robotSide : RobotSide.values)
          {
