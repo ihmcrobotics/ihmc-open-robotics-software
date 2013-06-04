@@ -87,6 +87,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    private final ConstantDoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(1.0);
 
 
+   private BooleanYoVariable requestedPelvisLoadBearing = new BooleanYoVariable("requestedPelvisLoadBearing", registry);
    private BooleanYoVariable requestedLeftFootLoadBearing = new BooleanYoVariable("requestedLeftFootLoadBearing", registry);
    private BooleanYoVariable requestedRightFootLoadBearing = new BooleanYoVariable("requestedRightFootLoadBearing", registry);
    private BooleanYoVariable requestedLeftThighLoadBearing = new BooleanYoVariable("requestedLeftThighLoadBearing", registry);
@@ -157,6 +158,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
       LoadBearingVariableChangedListener loadBearingVariableChangedListener = new LoadBearingVariableChangedListener();
 
+      requestedPelvisLoadBearing.addVariableChangedListener(loadBearingVariableChangedListener);
       for (RobotSide robotSide : RobotSide.values)
       {
          requestedFootLoadBearing.get(robotSide).addVariableChangedListener(loadBearingVariableChangedListener);
@@ -427,6 +429,19 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       }
    }
 
+   public void setPelvisInContact(boolean inContact)
+   {
+      ContactablePlaneBody contactablePelvis = momentumBasedController.getContactablePlanePelvis();
+      if (inContact)
+      {
+         momentumBasedController.setPlaneContactState(contactablePelvis, contactablePelvis.getContactPoints2d(), coefficientOfFriction.getDoubleValue(), null);
+      }
+      else
+      {
+         momentumBasedController.setPlaneContactState(contactablePelvis, new ArrayList<FramePoint2d>(), coefficientOfFriction.getDoubleValue(), null);
+      }
+   }
+
    private void setOnToesContactState(ContactablePlaneBody contactableBody)
    {
       FrameVector normalContactVector = new FrameVector(worldFrame, 0.0, 0.0, 1.0);
@@ -498,6 +513,9 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          if (!(v instanceof BooleanYoVariable))
             return;
 
+            if (v.equals(requestedPelvisLoadBearing))
+               setPelvisInContact(requestedPelvisLoadBearing.getBooleanValue());
+         
          for (RobotSide robotSide : RobotSide.values)
          {
             if (v.equals(requestedFootLoadBearing.get(robotSide)))
