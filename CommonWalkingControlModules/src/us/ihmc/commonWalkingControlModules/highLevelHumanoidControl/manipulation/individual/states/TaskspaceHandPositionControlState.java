@@ -105,6 +105,12 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
    {
    }
 
+   @Override
+   public boolean isDone()
+   {
+      return positionTrajectoryGenerator.isDone() && orientationTrajectoryGenerator.isDone();
+   }
+
    private void updateVisualizers()
    {
       desiredPositionFrame.updatePose(desiredPosition, desiredOrientation);
@@ -131,5 +137,21 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
       FramePoint point = new FramePoint();
       positionTrajectoryGenerator.get(point);
       return point.getReferenceFrame();
+   }
+
+   public FramePose getDesiredPose()
+   {
+      positionTrajectoryGenerator.get(desiredPosition);
+      desiredPosition.changeFrame(getFrameToControlPoseOf());
+
+      orientationTrajectoryGenerator.get(desiredOrientation);
+      desiredOrientation.changeFrame(getFrameToControlPoseOf());
+
+      return new FramePose(desiredPosition, desiredOrientation);
+   }
+
+   public ReferenceFrame getFrameToControlPoseOf()
+   {
+      return handSpatialAccelerationControlModule.getTrackingFrame();
    }
 }
