@@ -4,6 +4,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.utilities.math.MatrixTools;
 
+import java.util.Arrays;
+
 public class CVXWithCylinderNativeInput
 {
    private final double[] A;
@@ -77,6 +79,41 @@ public class CVXWithCylinderNativeInput
       phiMax = new double[phiMaxMatrix.getNumElements()];
       WRho = new double[WRhoMatrix.getNumRows()]; // diagonal
       WPhi = new double[WPhiMatrix.getNumRows()]; // diagonal
+   }
+
+   public void reset()
+   {
+      AMatrix.zero();
+      bMatrix.zero();
+      CMatrix.zero();
+      JsMatrix.zero();
+      psMatrix.zero();
+      WsMatrix.zero();
+      LambdaMatrix.zero();
+      QrhoMatrix.zero();
+      QphiMatrix.zero();
+      cMatrix.zero();
+      rhoMinMatrix.zero();
+      phiMinMatrix.zero();
+      phiMaxMatrix.zero();
+      WRhoMatrix.zero();
+      WPhiMatrix.zero();
+
+      Arrays.fill(A, 0.0);
+      Arrays.fill(b, 0.0);
+      Arrays.fill(C, 0.0);
+      Arrays.fill(Js, 0.0);
+      Arrays.fill(ps, 0.0);
+      Arrays.fill(Ws, 0.0);
+      Arrays.fill(Lambda, 0.0);
+      Arrays.fill(Qrho, 0.0);
+      Arrays.fill(Qphi, 0.0);
+      Arrays.fill(c, 0.0);
+      Arrays.fill(rhoMin, 0.0);
+      Arrays.fill(phiMin, 0.0);
+      Arrays.fill(phiMax, 0.0);
+      Arrays.fill(WRho, 0.0);
+      Arrays.fill(WPhi, 0.0);
    }
 
    public double[] getA()

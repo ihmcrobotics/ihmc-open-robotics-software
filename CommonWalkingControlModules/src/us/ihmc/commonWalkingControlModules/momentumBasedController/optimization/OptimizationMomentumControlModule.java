@@ -117,6 +117,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       }
 
       hardMotionConstraintSolver.setAlpha(momentumOptimizationSettings.getDampedLeastSquaresFactor());
+      momentumOptimizerNativeInput.reset();
 
       if (HardMotionConstraintEnforcer.TEST_CONSTRAINT_CONSISTENCY)
          hardMotionConstraintSolver.setAlpha(0.0);

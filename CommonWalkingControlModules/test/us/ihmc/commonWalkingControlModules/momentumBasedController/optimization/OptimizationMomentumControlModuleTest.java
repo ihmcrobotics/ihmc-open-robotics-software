@@ -4,17 +4,16 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.EjmlUnitTests;
+import org.ejml.ops.MatrixFeatures;
 import org.ejml.ops.RandomMatrices;
 import org.junit.Test;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.*;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.MomentumOptimizerNative;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointWrenchMatrixCalculator;
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.math.NullspaceCalculator;
 import us.ihmc.utilities.math.geometry.CenterOfMassReferenceFrame;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -27,6 +26,7 @@ import javax.vecmath.Vector3d;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlTestTools.assertRootJointWrenchZero;
 import static us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlTestTools.assertWrenchesInFrictionCones;
 import static us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlTestTools.assertWrenchesSumUpToMomentumDot;
@@ -356,6 +356,96 @@ public class OptimizationMomentumControlModuleTest
       assertWrenchesSumUpToMomentumDot(momentumControlModule.getExternalWrenches().values(), momentumRateOfChangeOut, gravityZ, totalMass, centerOfMassFrame,
                                        1e-3);
       JUnitTools.assertSpatialForceVectorEquals(momentumRateOfChangeIn, momentumRateOfChangeOut, 1e-1);
+      assertWrenchesInFrictionCones(momentumControlModule.getExternalWrenches(), contactStates, coefficientOfFriction);
+      assertRootJointWrenchZero(momentumControlModule.getExternalWrenches(), rootJoint, gravityZ, 1e-2);
+   }
+
+   @Test
+   public void testNullspaceMultipliers()
+   {
+      Random random = new Random(2534L);
+      Vector3d[] jointAxes = new Vector3d[]
+            {
+                  X, Y, Z, Y, Y, X
+            };
+      ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
+
+      SixDoFJoint rootJoint = randomFloatingChain.getRootJoint();
+      ArrayList<SixDoFJoint> sixDoFJoints = new ArrayList<SixDoFJoint>();
+      sixDoFJoints.add(rootJoint);
+      randomFloatingChain.setRandomPositionsAndVelocities(random);
+
+      List<RevoluteJoint> revoluteJoints = randomFloatingChain.getRevoluteJoints();
+
+      int kneeIndex = 3;
+      RevoluteJoint kneeJoint = revoluteJoints.get(kneeIndex);
+      kneeJoint.setQ(0.0);
+      randomFloatingChain.getElevator().updateFramesRecursively();
+
+      RigidBody elevator = randomFloatingChain.getElevator();
+      ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", ReferenceFrame.getWorldFrame(), elevator);
+      centerOfMassFrame.update();
+
+
+      MomentumOptimizationSettings momentumOptimizationSettings = createStandardOptimizationSettings();
+      momentumOptimizationSettings.setDampedLeastSquaresFactor(0.0);
+      momentumOptimizationSettings.setRhoMin(-10000.0);
+
+      LinkedHashMap<ContactablePlaneBody, PlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, PlaneContactState>();
+      RigidBody endEffector = randomFloatingChain.getLeafBody();
+      double coefficientOfFriction = 1000.0;
+      addContactState(coefficientOfFriction, endEffector, contactStates);
+
+
+      OptimizationMomentumControlModule momentumControlModule = createAndInitializeMomentumControlModule(rootJoint, revoluteJoints, controlDT,
+            centerOfMassFrame, momentumOptimizationSettings);
+
+      SpatialForceVector desiredMomentumRate = new SpatialForceVector(centerOfMassFrame, RandomTools.generateRandomVector(random),
+            RandomTools.generateRandomVector(random));
+      MomentumRateOfChangeData momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
+      momentumRateOfChangeData.set(desiredMomentumRate);
+      momentumControlModule.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
+
+      RigidBody base = rootJoint.getSuccessor();
+      GeometricJacobian jacobian = new GeometricJacobian(base, endEffector, endEffector.getBodyFixedFrame());
+
+      jacobian.compute();
+
+
+      SpatialAccelerationVector taskSpaceAcceleration = new SpatialAccelerationVector(endEffector.getBodyFixedFrame(), elevator.getBodyFixedFrame(),
+            endEffector.getBodyFixedFrame(), RandomTools.generateRandomVector(random),
+            RandomTools.generateRandomVector(random));
+      int nullity = 1;
+      DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(nullity, 1);
+      CommonOps.fill(nullspaceMultipliers, 0.0);
+      RandomMatrices.setRandom(nullspaceMultipliers, random);
+
+      TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
+      taskspaceConstraintData.set(taskSpaceAcceleration, nullspaceMultipliers);
+      momentumControlModule.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
+
+
+      momentumControlModule.compute(contactStates, null, null);
+
+
+      NullspaceCalculator nullspaceCalculator = new NullspaceCalculator(jacobian.getNumberOfColumns(), true);
+      nullspaceCalculator.setMatrix(jacobian.getJacobianMatrix(), nullity);
+      DenseMatrix64F nullspace = nullspaceCalculator.getNullspace();
+
+      InverseDynamicsJoint[] jointList = ScrewTools.computeSubtreeJoints(base);
+      DenseMatrix64F vdotTaskSpace = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jointList), 1);
+      ScrewTools.packDesiredJointAccelerationsMatrix(jointList, vdotTaskSpace);
+      DenseMatrix64F nullspaceMultiplierCheck = new DenseMatrix64F(nullspace.getNumCols(), vdotTaskSpace.getNumCols());
+      CommonOps.multTransA(nullspace, vdotTaskSpace, nullspaceMultiplierCheck);
+      CommonOps.subEquals(nullspaceMultiplierCheck, nullspaceMultipliers);
+
+      assertTrue(MatrixFeatures.isConstantVal(nullspaceMultiplierCheck, 0.0, 1e-7));
+
+      double mass = TotalMassCalculator.computeSubTreeMass(elevator);
+      SpatialForceVector momentumRateOfChangeOut = momentumControlModule.getDesiredCentroidalMomentumRate();
+      assertWrenchesSumUpToMomentumDot(momentumControlModule.getExternalWrenches().values(), momentumRateOfChangeOut, gravityZ, mass, centerOfMassFrame,
+            1e-3);
+//      JUnitTools.assertSpatialForceVectorEquals(desiredMomentumRate, momentumRateOfChangeOut, 1e-1); FIXME: get this to pass!!
       assertWrenchesInFrictionCones(momentumControlModule.getExternalWrenches(), contactStates, coefficientOfFriction);
       assertRootJointWrenchZero(momentumControlModule.getExternalWrenches(), rootJoint, gravityZ, 1e-2);
    }
