@@ -6,7 +6,6 @@ import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
@@ -15,12 +14,13 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
 {
    private static final double MIN_RHO_FORCE = 0.15; //TODO: TuneMe.
    private static final int VECTORS = 3;
-   private static final int POINTS = 4;
-   private static final int RHO_SIZE = POINTS * VECTORS;
+   private static final int MAXPOINTS = 4;
+   private int points=MAXPOINTS;
+   private static final int MAX_RHO_SIZE = MAXPOINTS * VECTORS;
    private static final double ANGLE_INCRMENT = 2 * Math.PI / ((double) VECTORS);
    private double mu = 0.3;
    private double wRho;
-   private final DenseMatrix64F[] rhoQ = new DenseMatrix64F[RHO_SIZE];
+   private final DenseMatrix64F[] rhoQ = new DenseMatrix64F[MAX_RHO_SIZE];
    private SpatialForceVector tempForceVector= new SpatialForceVector();
    private Vector3d tempLinearPart = new Vector3d();
    private Vector3d tempArm = new Vector3d();
@@ -28,7 +28,7 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
 
    public OptimizerPlaneContactModel()
    {
-      for (int i = 0; i < POINTS; i++)
+      for (int i = 0; i < MAXPOINTS; i++)
       {
          for (int j = 0; j < VECTORS; j++)
          {
@@ -41,20 +41,12 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
    public void setup(double coefficientOfFriction, List<FramePoint> contactPointsInPlaneFrame, ReferenceFrame endEffectorFrame, double wRho)
    {
       this.mu = coefficientOfFriction;
-      int numPoints = contactPointsInPlaneFrame.size();
-      if (numPoints !=4)
+      points = contactPointsInPlaneFrame.size();
+      if ((points >MAXPOINTS)||(points<0))
       {
-         if (numPoints == 2)
-         {
-            contactPointsInPlaneFrame.add(contactPointsInPlaneFrame.get(0));
-            contactPointsInPlaneFrame.add(contactPointsInPlaneFrame.get(1));
-         }
-         else
-         {
-            throw new RuntimeException("Unhandled number of contact points.");
-         }
+         throw new RuntimeException("Unhandled number of contact points: "+points);
       }
-      for (int i = 0; i < POINTS; i++)
+      for (int i = 0; i < points; i++)
       {
          for (int j = 0; j < VECTORS; j++)
          {
@@ -78,7 +70,7 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
    
    public int getSizeInRho()
    {
-      return RHO_SIZE;
+      return VECTORS*points;
    }
 
    public int getSizeInPhi()
