@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.states.direct.DirectControlManipulationTaskDispatcher;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.states.fingerToroidManipulation.HighLevelFingerValveManipulationState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.taskExecutor.PipeLine;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.taskExecutor.Task;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandPoseProvider;
@@ -53,7 +54,7 @@ public class ManipulationControlModule
    private boolean haveSentDummyTorusPacket = false;
    private SideDependentList<IndividualHandControlModule> individualHandControlModules;
 
-   private final PipeLine pipeline = new PipeLine();
+   private final PipeLine<RobotSide> pipeline = new PipeLine<RobotSide>();
 
    public ManipulationControlModule(DoubleYoVariable yoTime, FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
                                     ManipulationControllerParameters parameters, final VariousWalkingProviders variousWalkingProviders,
@@ -222,5 +223,25 @@ public class ManipulationControlModule
    public void prepareForLocomotion()
    {
       directControlManipulationTaskDispatcher.prepareForLocomotion();
+   }
+
+   public void submitTask(RobotSide robotSide, Task task)
+   {
+      pipeline.submit(robotSide, task);
+   }
+
+   public void submitTask(Task task)
+   {
+      pipeline.submit(task);
+   }
+
+   public void clear()
+   {
+      pipeline.clear();
+   }
+
+   public IndividualHandControlModule getIndividualHandControlModule(RobotSide robotSide)
+   {
+      return individualHandControlModules.get(robotSide);
    }
 }
