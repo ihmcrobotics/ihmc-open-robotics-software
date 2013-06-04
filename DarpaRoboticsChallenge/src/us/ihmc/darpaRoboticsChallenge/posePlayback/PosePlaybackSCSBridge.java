@@ -412,6 +412,8 @@ public class PosePlaybackSCSBridge
             {
             }
          }
+         
+         System.out.println("End of Play back");
       }
    }
 
