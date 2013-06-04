@@ -355,14 +355,16 @@ public class DRCRobotMidiSliderBoardPositionManipulation
          placeCartesianTargetsAtActuals();
 
          YoFramePose yoFramePose = feetIKs.get(robotSide);
+
+         FramePoint footPosition = new FramePoint(fullRobotModel.getFoot(robotSide).getBodyFixedFrame());
+         footPosition.changeFrame(ReferenceFrame.getWorldFrame());
          
-         double xyMinMax = 2.0;
-         double zMin = 0.0;
-         double zMax = 3.0;
+         double xyRange = 1.0;
+         double zRange = 2.0;
          
-         sliderBoard.setSlider(sliderChannel++, yoFramePose.getPosition().getYoX(), -xyMinMax, xyMinMax);
-         sliderBoard.setSlider(sliderChannel++, yoFramePose.getPosition().getYoY(), -xyMinMax, xyMinMax);
-         sliderBoard.setSlider(sliderChannel++, yoFramePose.getPosition().getYoZ(), zMin, zMax);
+         sliderBoard.setSlider(sliderChannel++, yoFramePose.getPosition().getYoX(), footPosition.getX() - xyRange/2.0, footPosition.getX() + xyRange/2.0);
+         sliderBoard.setSlider(sliderChannel++, yoFramePose.getPosition().getYoY(), footPosition.getY() - xyRange/2.0, footPosition.getY() + xyRange/2.0);
+         sliderBoard.setSlider(sliderChannel++, yoFramePose.getPosition().getYoZ(), footPosition.getZ() - zRange/2.0, footPosition.getZ() + zRange/2.0);
 
          sliderBoard.setSlider(sliderChannel++, yoFramePose.getOrientation().getYaw(), -Math.PI, Math.PI);
          sliderBoard.setSlider(sliderChannel++, yoFramePose.getOrientation().getPitch(), -Math.PI, Math.PI);
@@ -376,8 +378,6 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
    private void setupSliderForArms(RobotSide robotSide)
    {
-//      resetSliderBoard();
-
       int sliderChannel = 1;
       String prefix = sideString.get(robotSide);
 
@@ -399,12 +399,14 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
          YoFramePose yoFramePose = handIKs.get(robotSide);
          
-         double xyMinMax = 2.0;
-         double zMin = 1.0;
-         double zMax = 3.0;
-         sliderBoard.setSlider(sliderChannel++, yoFramePose.getPosition().getYoX(), -xyMinMax, xyMinMax);
-         sliderBoard.setSlider(sliderChannel++, yoFramePose.getPosition().getYoY(), -xyMinMax, xyMinMax);
-         sliderBoard.setSlider(sliderChannel++, yoFramePose.getPosition().getYoZ(), zMin, zMax);
+         FramePoint handPosition = new FramePoint(fullRobotModel.getHand(robotSide).getBodyFixedFrame());
+         handPosition.changeFrame(ReferenceFrame.getWorldFrame());
+         
+         double xyRange = 1.0;
+         double zRange = 1.0;
+         sliderBoard.setSlider(sliderChannel++, yoFramePose.getPosition().getYoX(), handPosition.getX() - xyRange/2.0, handPosition.getX() + xyRange/2.0);
+         sliderBoard.setSlider(sliderChannel++, yoFramePose.getPosition().getYoY(), handPosition.getY() - xyRange/2.0, handPosition.getY() + xyRange/2.0);
+         sliderBoard.setSlider(sliderChannel++, yoFramePose.getPosition().getYoZ(), handPosition.getZ() - zRange/2.0, handPosition.getZ() + zRange/2.0);
          
          sliderBoard.setSlider(sliderChannel++, yoFramePose.getOrientation().getYaw(), -Math.PI, Math.PI);
          sliderBoard.setSlider(sliderChannel++, yoFramePose.getOrientation().getPitch(), -Math.PI, Math.PI);
@@ -418,16 +420,19 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
    private void setupSliderForPelvis()
    {
-//      resetSliderBoard();
-
       int sliderChannel = 1;
       double angle_min = - Math.PI;
       double angle_max = + Math.PI;
-      double qmin = -1.0;
-      double qmax = 1.0;
-      sliderBoard.setSlider(sliderChannel++, "q_x", scs, qmin, qmax);
-      sliderBoard.setSlider(sliderChannel++, "q_y", scs, qmin, qmax);
-      sliderBoard.setSlider(sliderChannel++, "q_z", scs, qmin, qmax);
+      
+      FramePoint pelvisPosition = new FramePoint(fullRobotModel.getPelvis().getBodyFixedFrame());
+      pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      
+      double xyRange = 2.0;
+      double zRange = 2.0;
+
+      sliderBoard.setSlider(sliderChannel++, "q_x", scs,  pelvisPosition.getX() - xyRange/2.0, pelvisPosition.getX() + xyRange/2.0);
+      sliderBoard.setSlider(sliderChannel++, "q_y", scs, pelvisPosition.getY() - xyRange/2.0, pelvisPosition.getY() + xyRange/2.0);
+      sliderBoard.setSlider(sliderChannel++, "q_z", scs, pelvisPosition.getZ() - zRange/2.0, pelvisPosition.getZ() + zRange/2.0);
       sliderBoard.setSlider(sliderChannel++, "q_yaw", scs, angle_min, angle_max);
       sliderBoard.setSlider(sliderChannel++, "q_pitch", scs, angle_min, angle_max);
       sliderBoard.setSlider(sliderChannel++, "q_roll", scs, angle_min, angle_max);
@@ -436,8 +441,6 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
    private void setupSliderForChest()
    {
-//      resetSliderBoard();
-
       int sliderChannel = 1;
 
       for (SpineJointName spineJointName : spineJointStringNames.keySet())
