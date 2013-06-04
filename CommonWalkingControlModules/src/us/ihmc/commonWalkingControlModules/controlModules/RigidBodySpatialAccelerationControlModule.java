@@ -124,4 +124,9 @@ public class RigidBodySpatialAccelerationControlModule
    {
       se3pdController.getOrientationController().setDerivativeGains(bx, by, bz);
    }
+
+   public ReferenceFrame getTrackingFrame()
+   {
+      return endEffectorFrame;
+   }
 }
