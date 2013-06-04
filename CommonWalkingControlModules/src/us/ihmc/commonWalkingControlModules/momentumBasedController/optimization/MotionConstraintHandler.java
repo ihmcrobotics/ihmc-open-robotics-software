@@ -202,6 +202,7 @@ public class MotionConstraintHandler
    {
       pointJacobian.set(jacobian, bodyFixedPoint);
       pointJacobian.compute();
+      desiredAccelerationWithRespectToBase.changeFrame(jacobian.getBaseFrame());
 
       DenseMatrix64F pointJacobianMatrix = pointJacobian.getJacobianMatrix();
       DenseMatrix64F jFullBlock = getMatrixFromList(jList, motionConstraintIndex, pointJacobianMatrix.getNumRows(), nDegreesOfFreedom);
