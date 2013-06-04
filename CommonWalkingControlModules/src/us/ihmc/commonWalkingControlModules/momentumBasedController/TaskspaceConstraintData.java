@@ -79,4 +79,14 @@ public class TaskspaceConstraintData
    {
       return selectionMatrix;
    }
+
+   @Override
+   public String toString()
+   {
+      StringBuilder builder = new StringBuilder();
+      builder.append(getClass().getSimpleName());
+      builder.append("spatialAcceleration: " + spatialAcceleration);
+      builder.append("selectionMatrix:\n" + selectionMatrix);
+      return builder.toString();
+   }
 }

@@ -307,7 +307,7 @@ public class MomentumBasedControllerSpy
 
       public String toString()
       {
-         return getStackInformation(stackTrace) + ", DesiredSpatialAccelerationCommand: GeometricJacobian = " + jacobian + ", taskspaceConstraintData = "
+         return getStackInformation(stackTrace) + ", DesiredSpatialAccelerationCommand: GeometricJacobian = " + jacobian.getShortInfo() + ", taskspaceConstraintData = "
                 + taskspaceConstraintData;
       }
 
