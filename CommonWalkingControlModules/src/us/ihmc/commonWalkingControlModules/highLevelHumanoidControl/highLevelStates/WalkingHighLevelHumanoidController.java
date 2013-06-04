@@ -134,6 +134,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final DoubleYoVariable stopInDoubleSupporTrajectoryTime = new DoubleYoVariable("stopInDoubleSupporTrajectoryTime", registry);
 
+   private final BooleanYoVariable justFall = new BooleanYoVariable("justFall", registry);
+   private final BooleanYoVariable hasMinimumTimePassed = new BooleanYoVariable("hasMinimumTimePassed", registry);
+   private final DoubleYoVariable minimumSwingFraction = new DoubleYoVariable("minimumSwingFraction", registry);
+   
    // private final FinalDesiredICPCalculator finalDesiredICPCalculator;
 
    private final BooleanYoVariable rememberFinalICPFromSingleSupport = new BooleanYoVariable("rememberFinalICPFromSingleSupport", registry);
@@ -353,7 +357,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       transferTimeCalculationProvider.setTransferTime();   
       
       totalEstimatedToeOffTimeProvider.set(transferTimeCalculationProvider.getValue());
-      
+            
       stopInDoubleSupporTrajectoryTime.set(0.5);
       this.userDesiredPelvisPitch.set(desiredPelvisPitch);
       this.stayOnToes.set(stayOntoes);
@@ -364,6 +368,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       doToeOffIfPossible.set(walkingControllerParameters.doToeOffIfPossible());
 
       additionalSwingTimeForICP.set(0.1);
+      minimumSwingFraction.set(0.8);
 
       double initialLeadingFootPitch = 0.0;    // 0.05;
       upcomingSupportLeg.set(RobotSide.RIGHT);    // TODO: stairs hack, so that the following lines use the correct leading leg
@@ -1246,8 +1251,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       public boolean checkCondition()
       {
          RobotSide swingSide = getSupportLeg().getOppositeSide();
-         boolean hasMinimumTimePassed = hasMinimumTimePassed();
-
+         hasMinimumTimePassed.set(hasMinimumTimePassed());
+                  
          FootSwitchInterface footSwitch = footSwitches.get(swingSide);
 
          // TODO probably make all FootSwitches in this class be HeelSwitches and get rid of instanceof
@@ -1267,25 +1272,29 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             footSwitchActivated = footSwitch.hasFootHitGround();
          }
 
+         if (hasMinimumTimePassed.getBooleanValue() && justFall.getBooleanValue()) return true;
+
+         //Just switch states if icp is done. You had a little extra time and more isn't going to do any good.
+         if (instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue())) return true;
+         
          if (walkingControllerParameters.finishSwingWhenTrajectoryDone())
          {
             boolean trajectoryDone = instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue());    // endEffectorControlModule.isTrajectoryDone();
 
-            return hasMinimumTimePassed && (trajectoryDone || footSwitchActivated);
+            return  hasMinimumTimePassed.getBooleanValue() && (trajectoryDone || footSwitchActivated);
          }
          else
          {
-            return hasMinimumTimePassed && footSwitchActivated;
+            return hasMinimumTimePassed.getBooleanValue() && footSwitchActivated;
          }
       }
 
       private boolean hasMinimumTimePassed()
       {
-         double minimumSwingFraction = 0.5;
-         double minimumSwingTime = swingTimeCalculationProvider.getValue() * minimumSwingFraction;
+         double minimumSwingTime = swingTimeCalculationProvider.getValue() * minimumSwingFraction.getDoubleValue();
 
          return stateMachine.timeInCurrentState() > minimumSwingTime;
-      }
+      }  
    }
 
 
