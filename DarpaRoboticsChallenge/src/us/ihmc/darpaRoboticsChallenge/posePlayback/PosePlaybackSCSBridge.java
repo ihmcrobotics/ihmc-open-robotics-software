@@ -35,7 +35,9 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public class PosePlaybackSCSBridge
 {
-   private static final String ipAddress = DRCConfigParameters.CLOUD_MINION5_IP;
+   private static final String ipAddress = "localhost"; //DRCConfigParameters.CLOUD_MINION5_IP;
+   private static final double controlDT = 0.005;
+   
    private static final boolean promptForTimeDelay = false;
 
    private final PosePlaybackAllJointsController posePlaybackController;
@@ -89,6 +91,7 @@ public class PosePlaybackSCSBridge
       controller.setRawSensorReader(reader);
       
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot);
+      scs.setDT(controlDT, 1);
       scs.addYoVariableRegistry(registry);
 
       DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList(getClass().getSimpleName());
@@ -130,8 +133,11 @@ public class PosePlaybackSCSBridge
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
       dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
 
-      DRCRobotMidiSliderBoardPositionManipulation sliderBoard = new DRCRobotMidiSliderBoardPositionManipulation(scs);
-
+      
+      SDFFullRobotModel fullRobotModelForSlider = vrcTask.getFullRobotModelFactory().create();
+      ReferenceFrames referenceFramesForSlider = new ReferenceFrames(fullRobotModelForSlider, vrcTask.getJointMap(), vrcTask.getJointMap().getAnkleHeight());
+      DRCRobotMidiSliderBoardPositionManipulation sliderBoard = new DRCRobotMidiSliderBoardPositionManipulation(scs, sdfRobot, referenceFramesForSlider, fullRobotModelForSlider, dynamicGraphicObjectsListRegistry);
+      
       CaptureSnapshotListener captureSnapshotListener = new CaptureSnapshotListener(sdfRobot, referenceFrames, fullRobotModel, controller, scs);
       sliderBoard.addCaptureSnapshotListener(captureSnapshotListener);
 
@@ -228,8 +234,6 @@ public class PosePlaybackSCSBridge
       {
          PosePlaybackRobotPose pose = new PosePlaybackRobotPose(sdfRobot);
 
-
-
          if (previousPose != null)
          {
             if (pose.epsilonEquals(previousPose, 1e-3))
@@ -270,6 +274,7 @@ public class PosePlaybackSCSBridge
                pose.setPlaybackDelayBeforePose(playBackDelayPoseTransition);
             }
 
+            morphedPose.setRobotAtPose(sdfRobot);
             posePlaybackController.setPlaybackPose(morphedPose);
             scs.setTime(time);
             scs.tickAndUpdate();
@@ -375,14 +380,13 @@ public class PosePlaybackSCSBridge
 
          double startTime = 0.0;
          double time = startTime;
-         double dt = 0.005;
 
          interpolator.startSequencePlayback(sequence, startTime);
          int poseNumber = 0;
 
          while (!interpolator.isDone())
          {
-            time = time + dt;
+            time = time + controlDT;
 
             PosePlaybackRobotPose morphedPose = interpolator.getPose(time);
 
@@ -402,7 +406,7 @@ public class PosePlaybackSCSBridge
                      ThreadTools.sleep((long) interpolator.getTransitionTimeDelay());//3000 worked for standing up, 2000 failed at about 33 in standcde, 1000 failed at about 23 in standcde
                   }
                }
-               ThreadTools.sleep((long) (dt * 1000));
+               ThreadTools.sleep((long) (controlDT * 1000));
             }
             catch (IOException e)
             {
