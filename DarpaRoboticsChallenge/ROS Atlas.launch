@@ -8,10 +8,6 @@
 <stringAttribute key="org.eclipse.cdt.launch.launchGroup.1.enabled" value="true"/>
 <stringAttribute key="org.eclipse.cdt.launch.launchGroup.1.mode" value="run"/>
 <stringAttribute key="org.eclipse.cdt.launch.launchGroup.1.name" value="VRC Task 2 - UI"/>
-<stringAttribute key="org.eclipse.cdt.launch.launchGroup.2.action" value="NONE"/>
-<stringAttribute key="org.eclipse.cdt.launch.launchGroup.2.enabled" value="true"/>
-<stringAttribute key="org.eclipse.cdt.launch.launchGroup.2.mode" value="run"/>
-<stringAttribute key="org.eclipse.cdt.launch.launchGroup.2.name" value="DRCNetworkProcessor"/>
 <listAttribute key="org.eclipse.debug.ui.favoriteGroups">
 <listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
 </listAttribute>
