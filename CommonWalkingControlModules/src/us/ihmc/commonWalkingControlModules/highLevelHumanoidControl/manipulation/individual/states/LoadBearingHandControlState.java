@@ -32,4 +32,10 @@ public abstract class LoadBearingHandControlState extends TaskspaceHandControlSt
    {
       return handAcceleration;
    }
+
+   @Override
+   public boolean isDone()
+   {
+      return true;
+   }
 }

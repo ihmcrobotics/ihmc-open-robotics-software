@@ -129,4 +129,13 @@ public class RigidBodySpatialAccelerationControlModule
    {
       return endEffectorFrame;
    }
+
+   public void setGains(SE3PDGains gains)
+   {
+      se3pdController.getPositionController().setProportionalGains(gains.getPositionProportionalGains());
+      se3pdController.getPositionController().setDerivativeGains(gains.getPositionDerivativeGains());
+
+      se3pdController.getOrientationController().setProportionalGains(gains.getOrientationProportionalGains());
+      se3pdController.getOrientationController().setDerivativeGains(gains.getOrientationDerivativeGains());
+   }
 }
