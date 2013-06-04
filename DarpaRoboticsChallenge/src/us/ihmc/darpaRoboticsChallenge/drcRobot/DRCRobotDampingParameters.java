@@ -10,7 +10,7 @@ public class DRCRobotDampingParameters
    private final static double[] atlasDampingParameters = new double[ROSAtlasJointMap.numberOfJoints];
 
    private final static SideDependentList<double[]> sandiaDampingParameters = new SideDependentList<double[]>();
-   private static final boolean USE_REALLY_HIGH_FINGER_DAMPING=false;
+   private static final boolean USE_REALLY_HIGH_FINGER_DAMPING=true;
    static
    {
       atlasDampingParameters[ROSAtlasJointMap.back_lbz]  = 0.1;
@@ -45,7 +45,9 @@ public class DRCRobotDampingParameters
       for(RobotSide robotSide : RobotSide.values)
       {
          double[] sandiaDampingParametersForSide = new double[ROSSandiaJointMap.numberOfJointsPerHand];
-         double standardFingerDamping = USE_REALLY_HIGH_FINGER_DAMPING?10.0:1.0; //1.0;
+         double standardFingerDamping = USE_REALLY_HIGH_FINGER_DAMPING?5.0:1.0; //1.0;
+         double firstJointDamping = USE_REALLY_HIGH_FINGER_DAMPING?5.0:30.0;
+         
          sandiaDampingParametersForSide[ROSSandiaJointMap.f0_j0] = 30.0;
          sandiaDampingParametersForSide[ROSSandiaJointMap.f0_j1] = standardFingerDamping;
          sandiaDampingParametersForSide[ROSSandiaJointMap.f0_j2] = standardFingerDamping;
