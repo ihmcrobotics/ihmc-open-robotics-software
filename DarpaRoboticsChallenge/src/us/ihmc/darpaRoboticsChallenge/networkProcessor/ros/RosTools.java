@@ -23,6 +23,22 @@ import org.ros.node.NodeConfiguration;
 public class RosTools
 {
 
+   public static BufferedImage bufferedImageFromByteArrayJpeg(ColorModel colorModel, byte[] payload)
+   {
+      BufferedImage ret = null;
+
+      try
+      {
+         ret = ImageIO.read(new ByteArrayInputStream(payload, 0, payload.length));
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+
+      return ret;
+   }
+
    public static BufferedImage bufferedImageFromRosMessageRaw(ColorModel colorModel, sensor_msgs.Image imageMessage)
    {
       int width = imageMessage.getWidth();
