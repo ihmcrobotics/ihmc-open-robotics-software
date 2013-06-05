@@ -121,10 +121,9 @@ public class ManipulationControlModule
             dynamicGraphicReferenceFrames.add(dynamicGraphicReferenceFrame);
             list.add(dynamicGraphicReferenceFrame);
          }
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(list);
+         list.hideDynamicGraphicObjects();
       }
-
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(list);
-      list.hideDynamicGraphicObjects();
    }
 
    private void setUpStateMachine(DoubleYoVariable yoTime, FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
