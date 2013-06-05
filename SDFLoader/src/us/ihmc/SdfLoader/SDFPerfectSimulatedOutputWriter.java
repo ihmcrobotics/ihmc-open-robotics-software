@@ -20,7 +20,6 @@ public class SDFPerfectSimulatedOutputWriter implements RawOutputWriter
    protected final SDFRobot robot;
    protected Pair<FloatingJoint, SixDoFJoint> rootJointPair;
    protected final ArrayList<Pair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<Pair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
-   private FullRobotModel fullRobotModel; 
    
    public SDFPerfectSimulatedOutputWriter(SDFRobot robot)
    {
@@ -47,8 +46,6 @@ public class SDFPerfectSimulatedOutputWriter implements RawOutputWriter
    
    public void setFullRobotModel(FullRobotModel fullRobotModel)
    {
-      this.fullRobotModel = fullRobotModel;
-      
       revoluteJoints.clear();
       OneDoFJoint[] revoluteJointsArray = fullRobotModel.getOneDoFJoints();
       
