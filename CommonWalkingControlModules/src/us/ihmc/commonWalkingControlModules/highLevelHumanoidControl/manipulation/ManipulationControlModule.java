@@ -30,8 +30,10 @@ import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
+import javax.media.j3d.Transform3D;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,6 +57,8 @@ public class ManipulationControlModule
    private SideDependentList<IndividualHandControlModule> individualHandControlModules;
 
    private final PipeLine<RobotSide> pipeline = new PipeLine<RobotSide>();
+   private final SideDependentList<ReferenceFrame> handPositionControlFrames = new SideDependentList<ReferenceFrame>();
+   private final SideDependentList<ReferenceFrame> fingerPositionControlFrames;
 
    public ManipulationControlModule(DoubleYoVariable yoTime, FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
                                     ManipulationControllerParameters parameters, final VariousWalkingProviders variousWalkingProviders,
@@ -66,7 +70,6 @@ public class ManipulationControlModule
 
       this.time = momentumBasedController.getYoTime();
 
-      SideDependentList<ReferenceFrame> handPositionControlFrames = new SideDependentList<ReferenceFrame>();
       SideDependentList<GeometricJacobian> jacobians = new SideDependentList<GeometricJacobian>();
 
       for (RobotSide robotSide : RobotSide.values)
@@ -75,30 +78,47 @@ public class ManipulationControlModule
 
          GeometricJacobian jacobian = new GeometricJacobian(fullRobotModel.getChest(), endEffector, endEffector.getBodyFixedFrame());
          jacobians.put(robotSide, jacobian);
+      }
 
+      fingerPositionControlFrames = createFingerPositionControlFramesHack(jacobians);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody endEffector = jacobians.get(robotSide).getEndEffector();
          String frameName = endEffector.getName() + "PositionControlFrame";
          final ReferenceFrame frameAfterJoint = endEffector.getParentJoint().getFrameAfterJoint();
          ReferenceFrame handPositionControlFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(frameName, frameAfterJoint,
                                                       parameters.getHandControlFramesWithRespectToFrameAfterWrist().get(robotSide));
          handPositionControlFrames.put(robotSide, handPositionControlFrame);
-
-         if (dynamicGraphicObjectsListRegistry != null)
-         {
-            DynamicGraphicObjectsList list = new DynamicGraphicObjectsList("handPositionControlFrames");
-
-            DynamicGraphicReferenceFrame dynamicGraphicReferenceFrame = new DynamicGraphicReferenceFrame(handPositionControlFrame, registry, 0.5);
-            dynamicGraphicReferenceFrames.add(dynamicGraphicReferenceFrame);
-            list.add(dynamicGraphicReferenceFrame);
-
-            dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(list);
-            list.hideDynamicGraphicObjects();
-         }
       }
+
+
+      createFrameVisualizers(dynamicGraphicObjectsListRegistry, handPositionControlFrames, "handPositionControlFrames");
+      createFrameVisualizers(dynamicGraphicObjectsListRegistry, fingerPositionControlFrames, "fingerPositionControlFrames");
 
       setUpStateMachine(yoTime, fullRobotModel, twistCalculator, parameters, variousWalkingProviders, dynamicGraphicObjectsListRegistry, handControllers,
                         momentumBasedController, handPositionControlFrames, jacobians);
 
       parentRegistry.addChild(registry);
+   }
+
+   private void createFrameVisualizers(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+           SideDependentList<ReferenceFrame> framesToVisualize, String listName)
+   {
+      DynamicGraphicObjectsList list = new DynamicGraphicObjectsList(listName);
+      if (dynamicGraphicObjectsListRegistry != null)
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            ReferenceFrame handPositionControlFrame = framesToVisualize.get(robotSide);
+            DynamicGraphicReferenceFrame dynamicGraphicReferenceFrame = new DynamicGraphicReferenceFrame(handPositionControlFrame, registry, 0.1);
+            dynamicGraphicReferenceFrames.add(dynamicGraphicReferenceFrame);
+            list.add(dynamicGraphicReferenceFrame);
+         }
+      }
+
+      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(list);
+      list.hideDynamicGraphicObjects();
    }
 
    private void setUpStateMachine(DoubleYoVariable yoTime, FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
@@ -116,10 +136,10 @@ public class ManipulationControlModule
       individualHandControlModules = createIndividualHandControlModules(yoTime, fullRobotModel, twistCalculator, dynamicGraphicObjectsListRegistry,
               handControllers, momentumBasedController, jacobians);
 
-      final HighLevelFingerValveManipulationState fingerToroidManipulationState = new HighLevelFingerValveManipulationState(twistCalculator, jacobians,
-                                                                                     momentumBasedController, fullRobotModel.getElevator(), torusPoseProvider,
-                                                                                     torusManipulationProvider, handControllers, individualHandControlModules, registry,
-                                                                                     dynamicGraphicObjectsListRegistry);
+      final HighLevelFingerValveManipulationState fingerToroidManipulationState = new HighLevelFingerValveManipulationState(jacobians, momentumBasedController,
+                                                                                     fullRobotModel.getElevator(), torusPoseProvider,
+                                                                                     torusManipulationProvider, handControllers, individualHandControlModules,
+                                                                                     fingerPositionControlFrames, registry, dynamicGraphicObjectsListRegistry);
 
       directControlManipulationTaskDispatcher = new DirectControlManipulationTaskDispatcher(fullRobotModel, parameters, handPoseProvider,
               handLoadBearingProvider, handControllers, handPositionControlFrames, individualHandControlModules, pipeline, fingerToroidManipulationState,
@@ -235,6 +255,11 @@ public class ManipulationControlModule
       pipeline.submit(task);
    }
 
+   public void submitAll(List<Task> tasks)
+   {
+      pipeline.submitAll(tasks);
+   }
+
    public void clear()
    {
       pipeline.clear();
@@ -243,5 +268,58 @@ public class ManipulationControlModule
    public IndividualHandControlModule getIndividualHandControlModule(RobotSide robotSide)
    {
       return individualHandControlModules.get(robotSide);
+   }
+
+   public SideDependentList<IndividualHandControlModule> getIndividualHandControlModules()
+   {
+      return individualHandControlModules;
+   }
+
+   public SideDependentList<ReferenceFrame> getHandPositionControlFrames()
+   {
+      return handPositionControlFrames;
+   }
+
+   public SideDependentList<ReferenceFrame> getFingerPositionControlFrames()
+   {
+      return fingerPositionControlFrames;
+   }
+
+
+   private SideDependentList<ReferenceFrame> createFingerPositionControlFramesHack(SideDependentList<GeometricJacobian> jacobians)
+   {
+      SideDependentList<ReferenceFrame> fingerPositionControlFrames = new SideDependentList<ReferenceFrame>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody indexFingerTip = getIndexFingerTipHack(jacobians, robotSide);    // FIXME: total hack!
+
+         // FIXME: reference frame is currently not updated based on finger angle. Angle is zero at all times:
+         ReferenceFrame fingerTipFrameAfterJoint = indexFingerTip.getParentJoint().getFrameAfterJoint();
+         Transform3D transform = new Transform3D();
+         if (robotSide == RobotSide.LEFT)
+         {
+            transform.setEuler(new Vector3d(Math.PI, 0.0, 0.0));
+         }
+
+         transform.setTranslation(new Vector3d(0.057, 0.0, 0.0));    // TODO: hack: specific to DRC Sandia hands
+         ReferenceFrame fingerPositionControlFrame =
+            ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(robotSide.getCamelCaseNameForStartOfExpression() + "FingerPositionControlFrame",
+               fingerTipFrameAfterJoint, transform);
+         fingerPositionControlFrames.put(robotSide, fingerPositionControlFrame);
+      }
+
+      return fingerPositionControlFrames;
+   }
+
+   private RigidBody getIndexFingerTipHack(SideDependentList<GeometricJacobian> jacobians, RobotSide robotSide)
+   {
+      RigidBody indexFingerTip = jacobians.get(robotSide).getEndEffector();
+
+      while (indexFingerTip.hasChildrenJoints())
+      {
+         indexFingerTip = indexFingerTip.getChildrenJoints().get(0).getSuccessor();
+      }
+
+      return indexFingerTip;
    }
 }
