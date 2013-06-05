@@ -33,6 +33,7 @@ import us.ihmc.commonWalkingControlModules.terrain.VaryingStairGroundProfile;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
 import us.ihmc.graphics3DAdapter.GroundProfile;
+import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.net.ObjectCommunicator;
 
@@ -85,6 +86,31 @@ public class VariousWalkingProviders
       this.desiredFootLoadBearingProvider = footStateProvider;
       this.desiredThighLoadBearingProvider = thighLoadBearingProvider;
       this.desiredPelvisLoadBearingProvider = pelvisLoadBearingProvider;
+   }
+   
+   public void clearPoseProviders()
+   {
+      if(desiredPelvisPoseProvider != null)
+      {
+         desiredPelvisPoseProvider.getDesiredPelvisPose();
+      }
+      if(desiredChestOrientationProvider != null)
+      {
+         desiredChestOrientationProvider.getDesiredChestOrientation();
+      }
+      
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         if(desiredHandPoseProvider != null)
+         {
+            desiredHandPoseProvider.getDesiredHandPose(robotSide);
+         }
+         
+         if(desiredFootPoseProvider != null)
+         {
+            desiredFootPoseProvider.getDesiredFootPose(robotSide);
+         }
+      }
    }
 
    public DesiredHighLevelStateProvider getDesiredHighLevelStateProvider()
