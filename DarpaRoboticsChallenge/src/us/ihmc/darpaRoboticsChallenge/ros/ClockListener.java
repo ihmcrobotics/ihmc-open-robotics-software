@@ -4,5 +4,5 @@ import us.ihmc.darpaRoboticsChallenge.ros.messages.ClockMessage;
 
 public interface ClockListener
 {
-   public void receivedClockMessage(ClockMessage message, long timestamp);
+   public void receivedClockMessage(ClockMessage message);
 }
