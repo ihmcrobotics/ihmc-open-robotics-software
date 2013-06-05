@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.ros.messages;
 
 import java.nio.IntBuffer;
+import java.nio.LongBuffer;
 
 public class ClockMessage
 {
@@ -11,17 +12,17 @@ public class ClockMessage
     * are obtained by performing artithmetic on the nanoseconds portion.
     */
 
-   private int secs;
-   private int nsecs;
+   private long secs;
+   private long nsecs;
 
-   public void setFromBuffer(IntBuffer buffer)
+   public void setFromBuffer(LongBuffer buffer)
    {
       buffer.rewind();
       secs = buffer.get();
       nsecs = buffer.get();
    }
 
-   public void packTime(int[] time)
+   public void packTime(long[] time)
    {
       if(time.length < 2)
          throw new RuntimeException("Array for packing time not large enough");

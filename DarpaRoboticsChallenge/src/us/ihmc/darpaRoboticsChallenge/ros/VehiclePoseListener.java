@@ -4,5 +4,5 @@ import us.ihmc.darpaRoboticsChallenge.ros.messages.PoseMessage;
 
 public interface VehiclePoseListener
 {
-   public void receivedVehiclePose(PoseMessage message, long timestamp);
+   public void receivedVehiclePose(PoseMessage message);
 }

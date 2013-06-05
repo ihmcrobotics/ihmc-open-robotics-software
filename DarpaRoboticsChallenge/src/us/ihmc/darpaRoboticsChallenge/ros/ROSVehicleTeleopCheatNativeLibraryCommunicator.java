@@ -17,7 +17,7 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
     */
    private final DoubleBuffer vehiclePoseBuffer;
    private final ByteBuffer leftEyeImageBuffer, rightEyeImageBuffer;
-   private final IntBuffer clockBuffer;
+   private final LongBuffer clockBuffer;
 
    /*
     * Subscriber Messages
@@ -76,7 +76,7 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
       }
 
       vehiclePoseBuffer = setupDoubleBuffer(getVehiclePoseBuffer());
-      clockBuffer = setupIntBuffer(getClockBuffer());
+      clockBuffer = setupLongBuffer(getClockBuffer());
       atlasTeleportPoseCommandBuffer = setupDoubleBuffer(getAtlasTeleportPoseBuffer());
       leftEyeImageBuffer = setupByteBuffer(getLeftEyeImageBuffer());
       rightEyeImageBuffer = setupByteBuffer(getRightEyeImageBuffer());
@@ -115,11 +115,11 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
       return buffer.asDoubleBuffer();
    }
 
-   private static IntBuffer setupIntBuffer(ByteBuffer buffer)
+   private static LongBuffer setupLongBuffer(ByteBuffer buffer)
    {
       buffer.order(ByteOrder.nativeOrder());
 
-      return buffer.asIntBuffer();
+      return buffer.asLongBuffer();
    }
 
    private static ByteBuffer setupByteBuffer(ByteBuffer buffer)
@@ -175,13 +175,13 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
     * Do not remove due to non-use! Invoked by native library!
     */
    @SuppressWarnings("UnusedDeclaration")
-   private void receivedClockMessage(long timestamp)
+   private void receivedClockMessage()
    {
       clock.setFromBuffer(clockBuffer);
 
       for (int i = 0; i < clockListeners.size(); i++)
       {
-         clockListeners.get(i).receivedClockMessage(clock, timestamp);
+         clockListeners.get(i).receivedClockMessage(clock);
       }
    }
 
@@ -189,13 +189,13 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
     * Do not remove due to non-use! Invoked by native library!
     */
    @SuppressWarnings("UnusedDeclaration")
-   private void receivedVehiclePose(long timestamp)
+   private void receivedVehiclePose()
    {
       vehiclePose.setFromBuffer(vehiclePoseBuffer);
 
       for (int i = 0; i < vehiclePoseListeners.size(); i++)
       {
-         vehiclePoseListeners.get(i).receivedVehiclePose(vehiclePose, timestamp);
+         vehiclePoseListeners.get(i).receivedVehiclePose(vehiclePose);
       }
    }
 
