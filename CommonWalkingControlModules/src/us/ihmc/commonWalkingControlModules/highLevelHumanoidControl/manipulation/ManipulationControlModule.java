@@ -359,4 +359,9 @@ public class ManipulationControlModule
    {
       return handControllers;
    }
+
+   public void submitAll(RobotSide robotSide, List<Task> tasks)
+   {
+      pipeline.submitAll(robotSide, tasks);
+   }
 }
