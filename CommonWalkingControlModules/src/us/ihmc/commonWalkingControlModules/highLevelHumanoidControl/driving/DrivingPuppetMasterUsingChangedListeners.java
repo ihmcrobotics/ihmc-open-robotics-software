@@ -15,12 +15,13 @@ public class DrivingPuppetMasterUsingChangedListeners
    private final DoubleYoVariable desiredGasPedalAngle = new DoubleYoVariable("desiredGasPedalAngle", registry);
    private final DoubleYoVariable desiredBrakePedalAngle = new DoubleYoVariable("desiredBrakePedalAngle", registry);
    private final BooleanYoVariable desiredParkingBrakeMode = new BooleanYoVariable("desiredParkingBrakeMode", registry);
-   private final EnumYoVariable<DrivingInterface.GearName> desiredGear = new EnumYoVariable<DrivingInterface.GearName>("desiredGearName", registry, DrivingInterface.GearName.class);
+   private final EnumYoVariable<DrivingInterface.GearName> desiredGear = new EnumYoVariable<DrivingInterface.GearName>("desiredGearName", "", registry, DrivingInterface.GearName.class, true);
 
    public DrivingPuppetMasterUsingChangedListeners(YoVariableRegistry parentRegistry, DrivingInterface drivingInterface)
    {
       this.drivingInterface = drivingInterface;
       parentRegistry.addChild(registry);
+      desiredGear.set(null);
 
       setUpChangedListeners();
    }
