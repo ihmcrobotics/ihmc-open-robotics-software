@@ -10,9 +10,10 @@ public class CompressedImageMessage
 {
    private byte[] imageData;
 
-   public void setFromBuffer(ByteBuffer buffer)
+   public void setFromBuffer(ByteBuffer buffer, int size)
    {
-      imageData = buffer.array();
+      imageData = new byte[size];
+      buffer.get(this.imageData, 0, size);
    }
 
    public void packBufferedImage(BufferedImage image, ColorModel colorModel)
