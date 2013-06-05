@@ -241,7 +241,39 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
          finalAdjustment.setEuler(new Vector3d(0.0, 0.0, -Math.PI/2.0));
          transform3D.mul(finalAdjustment);
 
-         objectTransforms.put(VehicleObject.FNR_SWITCH, transform3D);
+         Transform3D adjustmentForSwitch = new Transform3D();
+         adjustmentForSwitch.setTranslation(new Vector3d(0.0, 0.025, 0.0));
+         transform3D.mul(adjustmentForSwitch);
+
+         objectTransforms.put(VehicleObject.FNR_SWITCH_F, transform3D);
+      }
+
+      {
+         //0.560000 -0.020000 1.080000 0.000000 0.250000 0.000000
+         double roll = 0.000000;
+         double pitch = 0.250000;
+         double yaw =  0.000000;
+
+         Vector3d translation = new Vector3d(0.560000, -0.020000, 1.080000);
+         Matrix3d matrix3d = new Matrix3d();
+         RotationFunctions.setYawPitchRoll(matrix3d, yaw, pitch, roll);
+
+         Transform3D transform3D = new Transform3D(matrix3d, translation, 1.0);
+
+         //Rotate to have the Z axis point out
+         Transform3D finalAdjustment = new Transform3D();
+         finalAdjustment.setEuler(new Vector3d(0.0, -Math.PI/2.0, 0.0));
+         transform3D.mul(finalAdjustment);
+
+         finalAdjustment = new Transform3D();
+         finalAdjustment.setEuler(new Vector3d(0.0, 0.0, -Math.PI/2.0));
+         transform3D.mul(finalAdjustment);
+
+         Transform3D adjustmentForSwitch = new Transform3D();
+         adjustmentForSwitch.setTranslation(new Vector3d(0.0, -0.025, 0.0));
+         transform3D.mul(adjustmentForSwitch);
+
+         objectTransforms.put(VehicleObject.FNR_SWITCH_R, transform3D);
       }
    }
 
