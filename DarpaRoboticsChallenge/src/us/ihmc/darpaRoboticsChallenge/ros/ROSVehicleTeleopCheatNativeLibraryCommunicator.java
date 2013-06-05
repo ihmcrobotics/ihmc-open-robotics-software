@@ -49,8 +49,8 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
     */
 
    private final ArrayList<ClockListener> clockListeners = new ArrayList<ClockListener>();
-   private final ArrayList<ImageListener> leftEyeImageListeners = new ArrayList<ImageListener>();
-   private final ArrayList<ImageListener> rightEyeImageListeners = new ArrayList<ImageListener>();
+   private final ArrayList<CompressedImageListener> leftEyeImageListeners = new ArrayList<CompressedImageListener>();
+   private final ArrayList<CompressedImageListener> rightEyeImageListeners = new ArrayList<CompressedImageListener>();
    private final ArrayList<VehiclePoseListener> vehiclePoseListeners = new ArrayList<VehiclePoseListener>();
    private final ArrayList<HandBrakeStateListener> handBrakeStateListeners = new ArrayList<HandBrakeStateListener>();
    private final ArrayList<SteeringWheelStateListener> steeringWheelStateListeners = new ArrayList<SteeringWheelStateListener>();
@@ -259,9 +259,9 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
     * Do not remove due to non-use! Invoked by native library!
     */
    @SuppressWarnings("UnusedDeclaration")
-   private void receivedLeftEyeImage(long timestamp)
+   private void receivedLeftEyeImage(long timestamp, int size)
    {
-      leftEyeImageMessage.setFromBuffer(leftEyeImageBuffer);
+      leftEyeImageMessage.setFromBuffer(leftEyeImageBuffer, size);
 
       for(int i = 0 ; i < leftEyeImageListeners.size(); i++)
       {
@@ -273,9 +273,9 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
     * Do not remove due to non-use! Invoked by native library!
     */
    @SuppressWarnings("UnusedDeclaration")
-   private void receivedRightEye(long timestamp)
+   private void receivedRightEyeImage(long timestamp, int size)
    {
-      rightEyeImageMessage.setFromBuffer(rightEyeImageBuffer);
+      rightEyeImageMessage.setFromBuffer(rightEyeImageBuffer, size);
 
       for(int i = 0 ; i < rightEyeImageListeners.size(); i++)
       {
