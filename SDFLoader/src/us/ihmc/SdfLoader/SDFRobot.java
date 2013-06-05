@@ -38,7 +38,7 @@ import java.util.List;
 public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an SDFHumanoidRobot
 {
    private static final boolean DEBUG = false;
-   private static final boolean SHOW_CONTACT_POINTS = true;
+   private static final boolean SHOW_CONTACT_POINTS = false;
    private static final boolean USE_POLAR_LIDAR_MODEL = true;
    private static final boolean SHOW_COM_REFERENCE_FRAMES = false;
 
