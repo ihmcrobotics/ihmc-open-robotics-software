@@ -25,6 +25,7 @@ public class CommandPlayer implements TimestampListener
    private Object syncObject = new Object();
    
    private boolean playingBack = false;
+   private boolean playbackNextPacket = false;
    private Transform3D playbackTransform = new Transform3D();
    private long startTime = Long.MIN_VALUE; 
    private long nextCommandtimestamp = Long.MIN_VALUE;
@@ -60,6 +61,7 @@ public class CommandPlayer implements TimestampListener
          {
             nextCommandtimestamp = loader.getTimestamp();
             playingBack = true;
+            playbackNextPacket = true;
          }
          System.out.println("Started playback of " + filename);
       }
@@ -75,8 +77,9 @@ public class CommandPlayer implements TimestampListener
       {
          if(playingBack)
          {
-            if(((newTimestamp - startTime) >= nextCommandtimestamp))
+            if(((newTimestamp - startTime) >= nextCommandtimestamp) && playbackNextPacket)
             {
+               playbackNextPacket = false;
                threadPool.execute(new Runnable()
                {
                   
@@ -101,8 +104,11 @@ public class CommandPlayer implements TimestampListener
             fieldComputerClient.consumeObject(object);
          }
          
-
-         nextCommandtimestamp = loader.getTimestamp();
+         synchronized (syncObject)
+         {
+            nextCommandtimestamp = loader.getTimestamp();
+            playbackNextPacket = true;
+         }
        
          
       }
@@ -112,6 +118,7 @@ public class CommandPlayer implements TimestampListener
          synchronized (syncObject)
          {
             playingBack = false;
+            playbackNextPacket = false;
          }
          
          loader.close();
