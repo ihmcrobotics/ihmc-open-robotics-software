@@ -8,7 +8,7 @@ public class Float64Message
 
    private double value;
 
-   public void setValue(float value)
+   public void setValue(double value)
    {
       this.value = value;
    }
