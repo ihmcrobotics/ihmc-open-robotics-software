@@ -57,8 +57,11 @@ public class ManipulationControlModule
    private SideDependentList<IndividualHandControlModule> individualHandControlModules;
 
    private final PipeLine<RobotSide> pipeline = new PipeLine<RobotSide>();
-   private final SideDependentList<ReferenceFrame> handPositionControlFrames = new SideDependentList<ReferenceFrame>();
+   private final SideDependentList<ReferenceFrame> midHandPositionControlFrames = new SideDependentList<ReferenceFrame>();
    private final SideDependentList<ReferenceFrame> fingerPositionControlFrames;
+   private final SideDependentList<ReferenceFrame> barPositionControlFrames;
+
+   private final SideDependentList<HandControllerInterface> handControllers;
 
    public ManipulationControlModule(DoubleYoVariable yoTime, FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
                                     ManipulationControllerParameters parameters, final VariousWalkingProviders variousWalkingProviders,
@@ -67,6 +70,7 @@ public class ManipulationControlModule
                                     YoVariableRegistry parentRegistry)
    {
       this.variousWalkingProviders = variousWalkingProviders;
+      this.handControllers = handControllers;
 
       this.time = momentumBasedController.getYoTime();
 
@@ -80,24 +84,26 @@ public class ManipulationControlModule
          jacobians.put(robotSide, jacobian);
       }
 
-      fingerPositionControlFrames = createFingerPositionControlFramesHack(jacobians);
-
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBody endEffector = jacobians.get(robotSide).getEndEffector();
          String frameName = endEffector.getName() + "PositionControlFrame";
          final ReferenceFrame frameAfterJoint = endEffector.getParentJoint().getFrameAfterJoint();
          ReferenceFrame handPositionControlFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(frameName, frameAfterJoint,
-                                                      parameters.getHandControlFramesWithRespectToFrameAfterWrist().get(robotSide));
-         handPositionControlFrames.put(robotSide, handPositionControlFrame);
+               parameters.getHandControlFramesWithRespectToFrameAfterWrist().get(robotSide));
+         midHandPositionControlFrames.put(robotSide, handPositionControlFrame);
       }
 
+      fingerPositionControlFrames = createFingerPositionControlFramesHack(jacobians);
+      barPositionControlFrames = createBarPositionControlFramesHack(midHandPositionControlFrames);
 
-      createFrameVisualizers(dynamicGraphicObjectsListRegistry, handPositionControlFrames, "handPositionControlFrames");
+
+      createFrameVisualizers(dynamicGraphicObjectsListRegistry, midHandPositionControlFrames, "midHandPositionControlFrames");
       createFrameVisualizers(dynamicGraphicObjectsListRegistry, fingerPositionControlFrames, "fingerPositionControlFrames");
+      createFrameVisualizers(dynamicGraphicObjectsListRegistry, barPositionControlFrames, "barPositionControlFrames");
 
       setUpStateMachine(yoTime, fullRobotModel, twistCalculator, parameters, variousWalkingProviders, dynamicGraphicObjectsListRegistry, handControllers,
-                        momentumBasedController, handPositionControlFrames, jacobians);
+                        momentumBasedController, midHandPositionControlFrames, jacobians);
 
       parentRegistry.addChild(registry);
    }
@@ -275,9 +281,9 @@ public class ManipulationControlModule
       return individualHandControlModules;
    }
 
-   public SideDependentList<ReferenceFrame> getHandPositionControlFrames()
+   public SideDependentList<ReferenceFrame> getMidHandPositionControlFrames()
    {
-      return handPositionControlFrames;
+      return midHandPositionControlFrames;
    }
 
    public SideDependentList<ReferenceFrame> getFingerPositionControlFrames()
@@ -285,6 +291,10 @@ public class ManipulationControlModule
       return fingerPositionControlFrames;
    }
 
+   public SideDependentList<ReferenceFrame> getBarPositionControlFrames()
+   {
+      return barPositionControlFrames;
+   }
 
    private SideDependentList<ReferenceFrame> createFingerPositionControlFramesHack(SideDependentList<GeometricJacobian> jacobians)
    {
@@ -321,5 +331,33 @@ public class ManipulationControlModule
       }
 
       return indexFingerTip;
+   }
+
+   private SideDependentList<ReferenceFrame> createBarPositionControlFramesHack(SideDependentList<ReferenceFrame> midHandPositionControlFrames)
+   {
+      SideDependentList<ReferenceFrame> ret = new SideDependentList<ReferenceFrame>();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ReferenceFrame midHandPositionControlFrame = midHandPositionControlFrames.get(robotSide);
+
+         Transform3D preRotation = new Transform3D();
+         preRotation.setEuler(new Vector3d(0.0, 0.670796, 0.0));
+
+         Transform3D transform = new Transform3D();
+         transform.setTranslation(new Vector3d(0.09, robotSide.negateIfRightSide(-0.03), 0.04));
+
+         transform.mul(preRotation, transform);
+
+         ReferenceFrame referenceFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(robotSide.getCamelCaseNameForStartOfExpression() +
+               "Bar", midHandPositionControlFrame, transform);
+         ret.put(robotSide, referenceFrame);
+      }
+      return ret;
+   }
+
+   public SideDependentList<HandControllerInterface> getHandControllers()
+   {
+      return handControllers;
    }
 }

@@ -50,7 +50,7 @@ public class VRCTask1InVehicleInitialSetup implements RobotInitialSetup<SDFRobot
 
       offset.setX(-0.07);
       offset.setY(0.28);
-      offset.setZ(groundZ + 1.04);
+      offset.setZ(groundZ + 1.08); // 1.04);
       robot.setPositionInWorld(offset);
       robot.setOrientation(0.0, forwardLean, 0.0);
    }
