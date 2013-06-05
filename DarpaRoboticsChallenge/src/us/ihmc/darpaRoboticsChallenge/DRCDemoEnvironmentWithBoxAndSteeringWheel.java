@@ -106,6 +106,7 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
    {
       // add contact controller to any robot so it gets called
       ContactController contactController = new ContactController();
+      contactController.setContactParameters(10000.0, 1000.0, 0.5, 0.3);
       contactController.addContactPoints(contactPoints);
       contactController.addContactables(contactables);
       environmentRobots.get(0).setController(contactController);

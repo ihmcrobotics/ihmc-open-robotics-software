@@ -17,7 +17,6 @@ public class ContactController implements RobotController
    public ContactController()
    {
       contactModel = new SimpleStickSlipContactModel("simpleContact", registry);
-      initialize();
    }
 
    public void addContactPoints(ArrayList<ExternalForcePoint> contactPoints)
@@ -46,11 +45,15 @@ public class ContactController implements RobotController
       contactModel.addContactable(contactable);
    }
 
+   public void setContactParameters(double kContact, double bContact, double alphaStick, double alphaSlip)
+   {
+      contactModel.setKContact(kContact);
+      contactModel.setBContact(bContact);
+      contactModel.setFrictionCoefficients(alphaStick, alphaSlip);
+   }
+
    public void initialize()
    {
-      contactModel.setKContact(10000.0);
-      contactModel.setBContact(1000.0);
-      contactModel.setFrictionCoefficients(0.5, 0.3);
    }
 
 
