@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.packets;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.net.ObjectConsumer;
 
 public class DesiredHighLevelStateProvider implements ObjectConsumer<HighLevelStatePacket>

@@ -91,6 +91,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
    
+   private final VariousWalkingProviders variousWalkingProviders;
    private final VariousWalkingManagers variousWalkingManagers;
    
    public AbstractHighLevelHumanoidControlPattern(VariousWalkingProviders variousWalkingProviders, 
@@ -101,7 +102,8 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, HighLevelState controllerState)
    {
       super(controllerState);
-
+      
+      this.variousWalkingProviders = variousWalkingProviders;
       this.variousWalkingManagers = variousWalkingManagers;
       
       // Getting parameters from the momentumBasedController
@@ -245,6 +247,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
    public void initialize()
    {      
+      variousWalkingProviders.clearPoseProviders();
       callUpdatables();
    }
    

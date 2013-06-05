@@ -1,14 +1,9 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import us.ihmc.commonWalkingControlModules.packets.TorusPosePacket;
-import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectConsumer;
-
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Quat4d;
 
 /**
  * @author twan
