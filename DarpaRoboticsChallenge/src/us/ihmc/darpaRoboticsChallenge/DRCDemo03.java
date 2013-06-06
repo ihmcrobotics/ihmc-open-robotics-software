@@ -31,7 +31,7 @@ public class DRCDemo03
                     int simulationDataBufferSize)
    {
       DRCSCSInitialSetup scsInitialSetup;
-      RobotInitialSetup<SDFRobot> robotInitialSetup = new VRCTask1InVehicleInitialSetup(0.0); // DrivingDRCRobotInitialSetup();
+      RobotInitialSetup<SDFRobot> robotInitialSetup = new VRCTask1InVehicleInitialSetup(-0.05); // DrivingDRCRobotInitialSetup();
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
 
       environment = new DRCDemoEnvironmentWithBoxAndSteeringWheel(dynamicGraphicObjectsListRegistry);
