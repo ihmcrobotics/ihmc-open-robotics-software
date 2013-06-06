@@ -53,8 +53,9 @@ public class DRCDemo03
       WalkingControllerParameters drivingControllerParameters = new DRCRobotDrivingControllerParameters();
       DRCRobotJointMap jointMap = robotInterface.getJointMap();
       HighLevelState initialBehavior = HighLevelState.DRIVING;
-      ControllerFactory controllerFactory = DRCObstacleCourseSimulation.createDRCMultiControllerFactory(drcNetworkProcessorServer, drivingControllerParameters, false, jointMap,
-                                               initialBehavior);
+      ControllerFactory controllerFactory = DRCObstacleCourseSimulation.createDRCMultiControllerFactory(drcNetworkProcessorServer, drivingControllerParameters, false,
+
+            initialBehavior);
 
       drcSimulation = DRCSimulationFactory.createSimulation(controllerFactory, environment, robotInterface, robotInitialSetup, scsInitialSetup,
               guiInitialSetup, drcNetworkProcessorServer);
