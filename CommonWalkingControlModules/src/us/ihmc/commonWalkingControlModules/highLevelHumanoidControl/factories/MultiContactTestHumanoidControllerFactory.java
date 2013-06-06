@@ -27,6 +27,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.CoMBasedMomen
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OldMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAngularAccelerationControlModule;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FingerForceSensors;
@@ -137,16 +138,18 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       DampedLeastSquaresSolver jacobianSolver = new DampedLeastSquaresSolver(SpatialMotionVector.SIZE);
       jacobianSolver.setAlpha(5e-2);
 
-      OldMomentumControlModule momentumControlModule = new OldMomentumControlModule(fullRobotModel.getRootJoint(), gravityZ, groundReactionWrenchDistributor,
+      OldMomentumControlModule oldMomentumControlModule = new OldMomentumControlModule(fullRobotModel.getRootJoint(), gravityZ, groundReactionWrenchDistributor,
                                                           referenceFrames.getCenterOfMassFrame(), controlDT, twistCalculator, jacobianSolver, registry,
                                                           dynamicGraphicObjectsListRegistry);
       double groundReactionWrenchBreakFrequencyHertz = 7.0;
-      momentumControlModule.setGroundReactionWrenchBreakFrequencyHertz(groundReactionWrenchBreakFrequencyHertz);
+      oldMomentumControlModule.setGroundReactionWrenchBreakFrequencyHertz(groundReactionWrenchBreakFrequencyHertz);
 
+      OptimizationMomentumControlModule optimizationMomentumControlModule = null;
+      
       // The controllers do not extend the MomentumBasedController anymore. Instead, it is passed through the constructor.
       MomentumBasedController momentumBasedController = new MomentumBasedController(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian,
                                                            referenceFrames, yoTime, gravityZ, twistCalculator, feet, hands, null, null, null, null, controlDT,
-                                                           processedOutputs, momentumControlModule, null, stateEstimationDataFromControllerSink,
+                                                           processedOutputs, optimizationMomentumControlModule , oldMomentumControlModule, null, stateEstimationDataFromControllerSink,
                                                            dynamicGraphicObjectsListRegistry);
 
       RootJointAngularAccelerationControlModule rootJointAccelerationControlModule = new RootJointAngularAccelerationControlModule(momentumBasedController,

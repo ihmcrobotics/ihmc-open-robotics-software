@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -97,7 +98,9 @@ public class MomentumBasedController
    private final DesiredCoMAndAngularAccelerationGrabber desiredCoMAndAngularAccelerationGrabber;
    private final PointPositionGrabberInterface pointPositionGrabber;
 
-   private final MomentumControlModule momentumControlModule;
+   private MomentumControlModule activeMomentumControlModule;
+   public enum MomentumControlModuleType {OPTIMIZATION, OLD};
+   private final EnumMap<MomentumControlModuleType, MomentumControlModule> momentumControlModules = new EnumMap<MomentumBasedController.MomentumControlModuleType, MomentumControlModule>(MomentumControlModuleType.class);
 
    private final SpatialForceVector gravitationalWrench;
    private final EnumYoVariable<RobotSide> upcomingSupportLeg = EnumYoVariable.create("upcomingSupportLeg", "", RobotSide.class, registry, true);    // FIXME: not general enough; this should not be here
@@ -113,7 +116,8 @@ public class MomentumBasedController
                                   SideDependentList<ContactablePlaneBody> handPalms, SideDependentList<ContactableCylinderBody> graspingHands,
                                   SideDependentList<ContactablePlaneBody> thighs, ContactablePlaneBody pelvis,
                                   ContactablePlaneBody pelvisBack, double controlDT, ProcessedOutputsInterface processedOutputs,
-                                  MomentumControlModule momentumControlModule, ArrayList<Updatable> updatables,
+                                  OptimizationMomentumControlModule optimizationMomentumControlModule,
+                                  OldMomentumControlModule oldMomentumControlModule, ArrayList<Updatable> updatables,
                                   StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
@@ -124,8 +128,12 @@ public class MomentumBasedController
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
-      this.momentumControlModule = momentumControlModule;
-
+      this.momentumControlModules.put(MomentumControlModuleType.OPTIMIZATION, optimizationMomentumControlModule);
+      this.momentumControlModules.put(MomentumControlModuleType.OLD, oldMomentumControlModule);
+      
+      // By default use OldMomentumControlModule, can be changed via setMomentumControlModuleToUse method
+      this.activeMomentumControlModule = oldMomentumControlModule;
+      
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
       this.fullRobotModel = fullRobotModel;
@@ -219,7 +227,7 @@ public class MomentumBasedController
 
       for (ContactablePlaneBody contactablePlaneBody : this.listOfAllContactablePlaneBodies)
       {
-         RigidBody rigidBody = contactablePlaneBody.getRigidBody();
+//         RigidBody rigidBody = contactablePlaneBody.getRigidBody();
          YoPlaneContactState contactState = new YoPlaneContactState(contactablePlaneBody.getPlaneFrame().getName(), contactablePlaneBody.getBodyFrame(),
                                                contactablePlaneBody.getPlaneFrame(), registry);
 
@@ -296,7 +304,7 @@ public class MomentumBasedController
          momentumBasedControllerSpy.setExternalWrenchToCompensateFor(rigidBody, wrench);
       }
 
-      momentumControlModule.setExternalWrenchToCompensateFor(rigidBody, wrench);
+      activeMomentumControlModule.setExternalWrenchToCompensateFor(rigidBody, wrench);
    }
 
    public void setDesiredPointAcceleration(GeometricJacobian rootToEndEffectorJacobian, FramePoint contactPoint, FrameVector desiredAcceleration)
@@ -306,7 +314,7 @@ public class MomentumBasedController
          momentumBasedControllerSpy.setDesiredPointAcceleration(rootToEndEffectorJacobian, contactPoint, desiredAcceleration);
       }
 
-      momentumControlModule.setDesiredPointAcceleration(rootToEndEffectorJacobian, contactPoint, desiredAcceleration);
+      activeMomentumControlModule.setDesiredPointAcceleration(rootToEndEffectorJacobian, contactPoint, desiredAcceleration);
    }
 
    // TODO: Temporary method for a big refactor allowing switching between high level behaviors
@@ -320,7 +328,7 @@ public class MomentumBasedController
       callUpdatables();
 
       inverseDynamicsCalculator.reset();
-      momentumControlModule.reset();
+      activeMomentumControlModule.reset();
    }
 
    // TODO: Temporary method for a big refactor allowing switching between high level behaviors
@@ -331,11 +339,11 @@ public class MomentumBasedController
 
       updateMomentumBasedControllerSpy();
 
-      momentumControlModule.compute(this.contactStates, this.cylindricalContactStates, upcomingSupportLeg.getEnumValue());
+      activeMomentumControlModule.compute(this.contactStates, this.cylindricalContactStates, upcomingSupportLeg.getEnumValue());
 
-      SpatialForceVector desiredCentroidalMomentumRate = momentumControlModule.getDesiredCentroidalMomentumRate();
+      SpatialForceVector desiredCentroidalMomentumRate = activeMomentumControlModule.getDesiredCentroidalMomentumRate();
 
-      Map<RigidBody, Wrench> externalWrenches = momentumControlModule.getExternalWrenches();
+      Map<RigidBody, Wrench> externalWrenches = activeMomentumControlModule.getExternalWrenches();
 
 
       for (RigidBody rigidBody : externalWrenches.keySet())
@@ -395,15 +403,9 @@ public class MomentumBasedController
       }
    }
 
-   public final void doControl()
-   {
-      doPrioritaryControl();
-      doSecondaryControl();
-   }
-
    private void resetGroundReactionWrenchFilter()
    {
-      momentumControlModule.resetGroundReactionWrenchFilter();
+      activeMomentumControlModule.resetGroundReactionWrenchFilter();
    }
 
    private void callUpdatables()
@@ -443,7 +445,7 @@ public class MomentumBasedController
 
       DenseMatrix64F jointAcceleration = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
       jointAcceleration.set(0, 0, desiredAcceleration);
-      momentumControlModule.setDesiredJointAcceleration(joint, jointAcceleration);
+      activeMomentumControlModule.setDesiredJointAcceleration(joint, jointAcceleration);
    }
 
    private void updateYoVariables()
@@ -472,7 +474,7 @@ public class MomentumBasedController
    public void initialize()
    {
       inverseDynamicsCalculator.compute();
-      momentumControlModule.initialize();
+      activeMomentumControlModule.initialize();
       planeContactWrenchProcessor.initialize();
       callUpdatables();
    }
@@ -531,7 +533,7 @@ public class MomentumBasedController
          momentumBasedControllerSpy.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
       }
 
-      momentumControlModule.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
+      activeMomentumControlModule.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
    }
 
    public void setDesiredRateOfChangeOfMomentum(MomentumRateOfChangeData momentumRateOfChangeData)
@@ -541,7 +543,7 @@ public class MomentumBasedController
          momentumBasedControllerSpy.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
       }
 
-      momentumControlModule.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
+      activeMomentumControlModule.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
    }
 
    public ReferenceFrame getPelvisZUpFrame()
@@ -597,7 +599,7 @@ public class MomentumBasedController
 
    public boolean isUsingOptimizationMomentumControlModule()
    {
-      return (momentumControlModule instanceof OptimizationMomentumControlModule);
+      return (activeMomentumControlModule instanceof OptimizationMomentumControlModule);
    }
 
    public FrameVector getAdmissibleDesiredGroundReactionForceCopy()
@@ -671,5 +673,16 @@ public class MomentumBasedController
    public ContactablePlaneBody getContactablePlanePelvisBack()
    {
       return pelvisBack;
+   }
+
+   public void setMomentumControlModuleToUse(MomentumControlModuleType momentumControlModuleToUse)
+   {
+      activeMomentumControlModule = momentumControlModules.get(momentumControlModuleToUse);
+      
+      for (MomentumControlModule momentumControlModule : momentumControlModules.values())
+      {
+         if (momentumControlModule != null)
+            momentumControlModule.initialize();
+      }
    }
 }

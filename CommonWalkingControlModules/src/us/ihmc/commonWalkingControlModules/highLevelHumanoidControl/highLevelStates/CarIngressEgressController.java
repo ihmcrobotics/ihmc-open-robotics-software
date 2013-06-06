@@ -25,6 +25,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController.MomentumControlModuleType;
 import us.ihmc.commonWalkingControlModules.trajectories.ChangeableConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.CurrentOrientationProvider;
@@ -55,6 +56,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGe
 public class CarIngressEgressController extends AbstractHighLevelHumanoidControlPattern
 {
    public final static HighLevelState controllerState = HighLevelState.INGRESS_EGRESS;
+   private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OPTIMIZATION;
 
    private final DesiredFootPoseProvider footPoseProvider;
    private final DesiredFootStateProvider footLoadBearingProvider;
@@ -250,6 +252,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    {
       super.initialize();
 
+      momentumBasedController.setMomentumControlModuleToUse(MOMENTUM_CONTROL_MODULE_TO_USE);
+      
       ChestOrientationManager chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
       double chestKp = 100.0;
       double chestZeta = 1.0;
