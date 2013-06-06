@@ -86,6 +86,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    private boolean symmetricMode = false;
    private RobotSide symmetricControlSide;
    private final DoubleYoVariable q_qs, q_qx, q_qy, q_qz;
+   private Quat4d qprev;
 
    public DRCRobotMidiSliderBoardPositionManipulation(SimulationConstructionSet scs)
    {
@@ -494,6 +495,12 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       sliderBoard.setSlider(sliderChannel++, "q_x", scs,  pelvisPosition.getX() - xyRange/2.0, pelvisPosition.getX() + xyRange/2.0);
       sliderBoard.setSlider(sliderChannel++, "q_y", scs, pelvisPosition.getY() - xyRange/2.0, pelvisPosition.getY() + xyRange/2.0);
       sliderBoard.setSlider(sliderChannel++, "q_z", scs, pelvisPosition.getZ() - zRange/2.0, pelvisPosition.getZ() + zRange/2.0);
+      
+      //reset yaw pitch and roll so that it can be based off current 'global' yaw pitch and roll.
+      qprev = new Quat4d(q_qx.getDoubleValue(), q_qy.getDoubleValue(), q_qz.getDoubleValue(), q_qs.getDoubleValue());
+      q_yaw.set(0.0);
+      q_pitch.set(0.0);
+      q_roll.set(0.0);
       sliderBoard.setSlider(sliderChannel++, "q_yaw", scs, angle_min, angle_max);
       sliderBoard.setSlider(sliderChannel++, "q_pitch", scs, angle_min, angle_max);
       sliderBoard.setSlider(sliderChannel++, "q_roll", scs, angle_min, angle_max);
@@ -646,7 +653,14 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    private void setYawPitchRoll()
    {
       Quat4d q = new Quat4d();
+      
+      //This code has a singularity when yaw and roll line up (e.g. pitch is 90, can't rotate in one direction any more).
       RotationFunctions.setQuaternionBasedOnYawPitchRoll(q, q_yaw.getDoubleValue(), q_pitch.getDoubleValue(), q_roll.getDoubleValue());
+      
+      //This code compounds the rotations so that on subsequent frames the ability to rotate in lost rotation directions is regained
+      //This affectively uses global yaw pitch and roll each time.
+      q.mul(qprev);
+      
       q_qs.set(q.w);
       q_qx.set(q.x);
       q_qy.set(q.y);
