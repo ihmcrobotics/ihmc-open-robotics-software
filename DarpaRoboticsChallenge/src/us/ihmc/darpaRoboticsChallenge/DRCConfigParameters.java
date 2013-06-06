@@ -129,6 +129,6 @@ public class DRCConfigParameters
    public static final double LIDAR_RESOLUTION_SPHERE_INNER_RADIUS = 1.0;
    public static final double LIDAR_RESOLUTION_SPHERE_DISTANCE_FROM_HEAD = 1.0;
 
-   public static final boolean MY_MONITOR_IS_TOO_SMALL = false;
+   public static final boolean USE_TABS_IN_UI = false;
 
 }
