@@ -132,7 +132,6 @@ public class DRCConfigParameters
    public static final boolean USE_TABS_IN_UI = true;
    
    // Hand Controller
-   public static final boolean USE_CREEEPY_GRIP = false;
    public static final boolean USE_PURE_POSITION_CONTROL_FOR_HANDS = false;
 
 }
