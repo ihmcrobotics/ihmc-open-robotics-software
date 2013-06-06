@@ -6,6 +6,17 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 
 public class DRCConfigParameters
 {
+   public static final boolean ALLOW_LAG_SIMULATION = true;
+   public static final boolean ENABLE_LAG_SIMULATION_ON_START = false;
+   static
+   {
+      if(ALLOW_LAG_SIMULATION)
+      {
+         System.err.println("Warning: Allowing simulation of lag");
+      }
+   }
+   
+   
    public static final boolean USE_COLLISIONS_MESHS_FOR_VISUALIZATION = false;
    public static final boolean SEND_HIGH_SPEED_CONFIGURATION_DATA = false;
    
