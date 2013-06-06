@@ -62,11 +62,21 @@ public class DRCNetworkProcessor
       this(drcNetworkObjectCommunicator);
 
       System.out.println("Connecting to ROS");
+      
       RosMainNode rosMainNode;
       rosMainNode = new RosMainNode(rosCoreURI, "darpaRoboticsChallange/networkProcessor");
+      
+      RosNativeNetworkProcessor rosNativeNetworkProcessor;
+      if(RosNativeNetworkProcessor.hasNativeLibrary())
+      {
+         rosNativeNetworkProcessor = RosNativeNetworkProcessor.getInstance(rosCoreURI.toString());
+         rosNativeNetworkProcessor.connect();
+      }
+      else
+      {
+         rosNativeNetworkProcessor = null;
+      }
 
-      RosNativeNetworkProcessor rosNativeNetworkProcessor = RosNativeNetworkProcessor.getInstance(rosCoreURI.toString());
-      rosNativeNetworkProcessor.connect();
       
       new GazeboCameraReceiver(robotPoseBuffer, videoSettings, rosMainNode, networkingManager, DRCSensorParameters.FIELD_OF_VIEW);
       LidarDataReceiver lidarDataReceiver = new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, fullRobotModel, robotBoundingBoxes, jointMap, rosNativeNetworkProcessor);
