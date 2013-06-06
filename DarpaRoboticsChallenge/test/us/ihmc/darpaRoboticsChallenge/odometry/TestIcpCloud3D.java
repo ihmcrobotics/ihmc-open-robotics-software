@@ -16,7 +16,6 @@ import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Peter Abeles
@@ -129,7 +128,7 @@ public class TestIcpCloud3D {
    private IcpCloud3D createIcp(double maxDist) {
 
       MotionTransformPoint<Se3_F64, Point3D_F64> motionAlg = new MotionSe3PointSVD_F64();
-      NearestNeighbor<Point3D_F64> nn = FactoryNearestNeighbor.kdtree();
+      NearestNeighbor nn = FactoryNearestNeighbor.kdtree();
 
       return new IcpCloud3D(maxDist,100,1e-12,motionAlg,nn);
    }
