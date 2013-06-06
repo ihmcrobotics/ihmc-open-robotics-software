@@ -36,6 +36,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointT
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAngularAccelerationControlModule;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController.MomentumControlModuleType;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.HeelSwitch;
@@ -110,6 +111,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private boolean VISUALIZE = true;
 
    private final static HighLevelState controllerState = HighLevelState.WALKING;
+   private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OLD;
 
    private final double PELVIS_YAW_INITIALIZATION_TIME = 1.5;
 
@@ -536,6 +538,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    public void initialize()
    {
       super.initialize();
+      
+      momentumBasedController.setMomentumControlModuleToUse(MOMENTUM_CONTROL_MODULE_TO_USE);
       
       initializeContacts();
 
