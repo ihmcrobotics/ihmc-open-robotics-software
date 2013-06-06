@@ -12,6 +12,7 @@ import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
+import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.environment.VRCTask;
 import us.ihmc.darpaRoboticsChallenge.environment.VRCTaskName;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -39,7 +40,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public class PosePlaybackSCSBridge
 {
-   private static final String ipAddress = "localhost"; //DRCConfigParameters.CLOUD_MINION5_IP;
+   private static final String ipAddress = "localhost"; // DRCConfigParameters.CLOUD_MINION5_IP;
    private static final double controlDT = 0.005;
    
    private static final boolean promptForTimeDelay = false;
@@ -159,6 +160,7 @@ public class PosePlaybackSCSBridge
             System.out.println("Clearing Sequence");
          }
       });
+
 
       scs.startOnAThread();
 
