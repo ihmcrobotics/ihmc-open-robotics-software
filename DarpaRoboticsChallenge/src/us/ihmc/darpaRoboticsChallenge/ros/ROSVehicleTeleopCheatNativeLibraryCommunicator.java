@@ -16,7 +16,6 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
     * Subscriber Buffers
     */
    private final DoubleBuffer vehiclePoseBuffer;
-   private final ByteBuffer leftEyeImageBuffer, rightEyeImageBuffer;
    private final LongBuffer clockBuffer;
 
    /*
@@ -27,8 +26,6 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
    private final Float64Message
       steeringWheelState = new Float64Message(), handBrakeState = new Float64Message(), gasPedalState = new Float64Message(),
       brakePedalState = new Float64Message();
-   private final ImageMessage
-      leftEyeImageMessage = new ImageMessage(), rightEyeImageMessage = new ImageMessage();
 
    /*
     * Publisher Buffers
@@ -49,20 +46,11 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
     */
 
    private final ArrayList<ClockListener> clockListeners = new ArrayList<ClockListener>();
-   private final ArrayList<ImageListener> leftEyeImageListeners = new ArrayList<ImageListener>();
-   private final ArrayList<ImageListener> rightEyeImageListeners = new ArrayList<ImageListener>();
    private final ArrayList<VehiclePoseListener> vehiclePoseListeners = new ArrayList<VehiclePoseListener>();
    private final ArrayList<HandBrakeStateListener> handBrakeStateListeners = new ArrayList<HandBrakeStateListener>();
    private final ArrayList<SteeringWheelStateListener> steeringWheelStateListeners = new ArrayList<SteeringWheelStateListener>();
    private final ArrayList<GasPedalStateListener> gasPedalStateListeners = new ArrayList<GasPedalStateListener>();
    private final ArrayList<BrakePedalStateListener> brakePedalStateListeners = new ArrayList<BrakePedalStateListener>();
-
-   /*
-    * TODO: Make classes for messages
-    *
-    * ImageMessage
-    *
-    */
 
    private ROSVehicleTeleopCheatNativeLibraryCommunicator(String rosMasterURI)
    {
@@ -78,8 +66,6 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
       vehiclePoseBuffer = setupDoubleBuffer(getVehiclePoseBuffer());
       clockBuffer = setupLongBuffer(getClockBuffer());
       atlasTeleportPoseCommandBuffer = setupDoubleBuffer(getAtlasTeleportPoseBuffer());
-      leftEyeImageBuffer = setupByteBuffer(getLeftEyeImageBuffer());
-      rightEyeImageBuffer = setupByteBuffer(getRightEyeImageBuffer());
    }
 
    public static ROSVehicleTeleopCheatNativeLibraryCommunicator getInstance(String rosMasterURI)
@@ -255,35 +241,6 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
       }
    }
 
-   /*
-    * Do not remove due to non-use! Invoked by native library!
-    */
-   @SuppressWarnings("UnusedDeclaration")
-   private void receivedLeftEyeImage(long timestamp, int size)
-   {
-      leftEyeImageMessage.setFromBuffer(leftEyeImageBuffer, size);
-
-      for(int i = 0 ; i < leftEyeImageListeners.size(); i++)
-      {
-         leftEyeImageListeners.get(i).receivedImage(leftEyeImageMessage, timestamp);
-      }
-   }
-
-   /*
-    * Do not remove due to non-use! Invoked by native library!
-    */
-   @SuppressWarnings("UnusedDeclaration")
-   private void receivedRightEyeImage(long timestamp, int size)
-   {
-      rightEyeImageMessage.setFromBuffer(rightEyeImageBuffer, size);
-
-      for(int i = 0 ; i < rightEyeImageListeners.size(); i++)
-      {
-         rightEyeImageListeners.get(i).receivedImage(rightEyeImageMessage, timestamp);
-      }
-   }
-
-
    private native boolean register(String rosMasterURI, String myIP);
 
    private native void spin();
@@ -301,10 +258,6 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
    private native ByteBuffer getAtlasTeleportPoseBuffer();
 
    private native ByteBuffer getClockBuffer();
-
-   private native ByteBuffer getLeftEyeImageBuffer();
-
-   private native ByteBuffer getRightEyeImageBuffer();
 
    private native void sendDirectionCommand(byte directionCommand, long timestamp, int delay);
 
