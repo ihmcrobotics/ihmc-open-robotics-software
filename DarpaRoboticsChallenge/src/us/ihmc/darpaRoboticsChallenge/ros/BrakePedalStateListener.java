@@ -4,5 +4,5 @@ import us.ihmc.darpaRoboticsChallenge.ros.messages.Float64Message;
 
 public interface BrakePedalStateListener
 {
-   public void receivedBrakePedalState(Float64Message state, long timestamp);
+   public void receivedBrakePedalState(Float64Message state);
 }

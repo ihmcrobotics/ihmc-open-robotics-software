@@ -203,13 +203,13 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
     * Do not remove due to non-use! Invoked by native library!
     */
    @SuppressWarnings("UnusedDeclaration")
-   private void receivedHandBrakeState(long timestamp)
+   private void receivedHandBrakeState()
    {
       handBrakeState.setValue(getHandBrakeState());
 
       for (int i = 0; i < handBrakeStateListeners.size(); i++)
       {
-         handBrakeStateListeners.get(i).receivedHandBrakeState(handBrakeState, timestamp);
+         handBrakeStateListeners.get(i).receivedHandBrakeState(handBrakeState);
       }
    }
 
@@ -217,13 +217,13 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
     * Do not remove due to non-use! Invoked by native library!
     */
    @SuppressWarnings("UnusedDeclaration")
-   private void receivedSteeringWheelState(long timestamp)
+   private void receivedSteeringWheelState()
    {
       steeringWheelState.setValue(getSteeringWheelState());
 
       for (int i = 0; i < steeringWheelStateListeners.size(); i++)
       {
-         steeringWheelStateListeners.get(i).receivedSteeringWheelState(steeringWheelState, timestamp);
+         steeringWheelStateListeners.get(i).receivedSteeringWheelState(steeringWheelState);
       }
    }
 
@@ -231,13 +231,13 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
     * Do not remove due to non-use! Invoked by native library!
     */
    @SuppressWarnings("UnusedDeclaration")
-   private void receivedGasPedalState(long timestamp)
+   private void receivedGasPedalState()
    {
       gasPedalState.setValue(getGasPedalState());
 
       for (int i = 0; i < gasPedalStateListeners.size(); i++)
       {
-         gasPedalStateListeners.get(i).receivedGasPedalState(gasPedalState, timestamp);
+         gasPedalStateListeners.get(i).receivedGasPedalState(gasPedalState);
       }
    }
 
@@ -245,13 +245,13 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
     * Do not remove due to non-use! Invoked by native library!
     */
    @SuppressWarnings("UnusedDeclaration")
-   private void receivedBrakePedalState(long timestamp)
+   private void receivedBrakePedalState()
    {
       brakePedalState.setValue(getBrakePedalState());
 
       for (int i = 0; i < brakePedalStateListeners.size(); i++)
       {
-         brakePedalStateListeners.get(i).receivedBrakePedalState(brakePedalState, timestamp);
+         brakePedalStateListeners.get(i).receivedBrakePedalState(brakePedalState);
       }
    }
 
