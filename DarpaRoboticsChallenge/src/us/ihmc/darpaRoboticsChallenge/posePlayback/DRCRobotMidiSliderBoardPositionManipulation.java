@@ -61,6 +61,8 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    private final BooleanYoVariable isSaveSequenceRequested = new BooleanYoVariable("isSaveSequenceRequested", dontRecordRegistry);
    private final BooleanYoVariable isLoadSequenceRequested = new BooleanYoVariable("isLoadSequenceRequested", dontRecordRegistry);
    private final BooleanYoVariable isClearSequenceRequested = new BooleanYoVariable("isClearSequenceRequested", dontRecordRegistry);
+   private final BooleanYoVariable isLoadFrameByFrameSequenceRequested = new BooleanYoVariable("isLoadFrameByFrameSequenceRequested", dontRecordRegistry);
+   private final BooleanYoVariable isPlayPoseFromFrameByFrameSequenceRequested = new BooleanYoVariable("isPlayPoseFromFrameByFrameSequenceRequested", dontRecordRegistry);
    private final BooleanYoVariable isSymmetricModeRequested = new BooleanYoVariable("isSymmetricModeRequested", dontRecordRegistry);
 
    private final BooleanYoVariable isPelvisControlRequested = new BooleanYoVariable("isPelvisControlRequested", dontRecordRegistry);
@@ -157,6 +159,16 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    public void addClearSequenceRequestedListener(VariableChangedListener variableChangedListener)
    {
       isClearSequenceRequested.addVariableChangedListener(variableChangedListener);
+   }
+
+   public void addLoadFrameByFrameSequenceRequestedListener(VariableChangedListener variableChangedListener)
+   {
+      isLoadFrameByFrameSequenceRequested.addVariableChangedListener(variableChangedListener);
+   }
+
+   public void addPlayPoseFromFrameByFrameSequenceRequestedListener(VariableChangedListener variableChangedListener)
+   {
+      isPlayPoseFromFrameByFrameSequenceRequested.addVariableChangedListener(variableChangedListener);
    }
 
    private void init()
@@ -332,11 +344,15 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       sliderBoard.setButton(buttonChannel++, isSaveSequenceRequested);
       sliderBoard.setButton(buttonChannel++, isLoadSequenceRequested);
       sliderBoard.setButton(buttonChannel++, isClearSequenceRequested);
-      sliderBoard.setButton(buttonChannel++, isSymmetricModeRequested);
+      buttonChannel = 7;
+      sliderBoard.setButton(buttonChannel++, isLoadFrameByFrameSequenceRequested);
+      sliderBoard.setButton(buttonChannel++, isPlayPoseFromFrameByFrameSequenceRequested);
+      
       buttonChannel = 9;
       sliderBoard.setButton(buttonChannel++, isPelvisControlRequested);
       sliderBoard.setButton(buttonChannel++, isChestControlRequested);
-
+      sliderBoard.setButton(buttonChannel++, isSymmetricModeRequested);
+      
       buttonChannel = 17;
       sliderBoard.setButton(buttonChannel++, isLeftArmControlRequested);
       sliderBoard.setButton(buttonChannel++, isRightArmControlRequested);

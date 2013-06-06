@@ -40,7 +40,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public class PosePlaybackSCSBridge
 {
-   private static final String ipAddress = "localhost"; // DRCConfigParameters.CLOUD_MINION5_IP;
+   private static final String ipAddress = DRCConfigParameters.CLOUD_MINION2_IP;
    private static final double controlDT = 0.005;
    
    private static final boolean promptForTimeDelay = false;
@@ -48,6 +48,9 @@ public class PosePlaybackSCSBridge
    private final PosePlaybackAllJointsController posePlaybackController;
    private final PosePlaybackSender posePlaybackSender;
    private PosePlaybackRobotPoseSequence posePlaybackRobotPoseSequence;
+   
+   private int frameByframePoseNumber;
+   private double frameByframeTime;
 
    private final PosePlaybackSmoothPoseInterpolator interpolator;
    private final YoVariableRegistry registry = new YoVariableRegistry("PlaybackPoseSCSBridge");
@@ -152,16 +155,16 @@ public class PosePlaybackSCSBridge
       LoadSequenceListener loadSequenceListener = new LoadSequenceListener(sdfRobot, scs);
       sliderBoard.addLoadSequenceRequestedListener(loadSequenceListener);
 
-      sliderBoard.addClearSequenceRequestedListener(new VariableChangedListener()
-      {
-         public void variableChanged(YoVariable yoVariable)
-         {
-            posePlaybackRobotPoseSequence.clear();
-            System.out.println("Clearing Sequence");
-         }
-      });
+      ClearSequenceListener clearSequenceListener = new ClearSequenceListener();
+      sliderBoard.addClearSequenceRequestedListener(clearSequenceListener);
 
+      LoadFrameByFrameSequenceListener loadFrameByFrameSequenceListener = new LoadFrameByFrameSequenceListener(sdfRobot, scs);
+      sliderBoard.addLoadFrameByFrameSequenceRequestedListener(loadFrameByFrameSequenceListener);
 
+      PlayPoseFromFrameByFrameSequenceListener playPoseFromFrameByFrameSequenceListener = new PlayPoseFromFrameByFrameSequenceListener(sdfRobot, scs);
+      sliderBoard.addPlayPoseFromFrameByFrameSequenceRequestedListener(playPoseFromFrameByFrameSequenceListener);
+      
+      
       scs.startOnAThread();
 
       CenterOfMassGraphicUpdater centerOfMassGraphicUpdater = new CenterOfMassGraphicUpdater(sdfRobot);
@@ -354,8 +357,7 @@ public class PosePlaybackSCSBridge
    {
       private final SDFRobot sdfRobot;
       private final SimulationConstructionSet scs;
-      private PosePlaybackRobotPose previousPose;
-
+ 
       public LoadSequenceListener(SDFRobot sdfRobot, SimulationConstructionSet scs)
       {
          this.sdfRobot = sdfRobot;
@@ -367,7 +369,7 @@ public class PosePlaybackSCSBridge
          if(!((BooleanYoVariable) yoVariable).getBooleanValue())
             return;
          
-         System.out.println("Load Sequence Listener");
+         System.out.println("Load Sequence");
 
          JFileChooser chooser = new JFileChooser(new File("PoseSequences"));
          int approveOption = chooser.showOpenDialog(null);
@@ -406,11 +408,11 @@ public class PosePlaybackSCSBridge
                if (posePlaybackSender.isConnected())
                {
                   posePlaybackSender.writeData();
-                  if(interpolator.didLastPoseIncrementSequence() || (poseNumber == 0))
-                  {
-                     System.out.println("pose #: " + poseNumber++ + " \t pausing for " + interpolator.getTransitionTimeDelay());
-                     ThreadTools.sleep((long) interpolator.getTransitionTimeDelay());//3000 worked for standing up, 2000 failed at about 33 in standcde, 1000 failed at about 23 in standcde
-                  }
+               }
+               if(interpolator.didLastPoseIncrementSequence() || (poseNumber == 0))
+               {
+                  System.out.println("pose #: " + poseNumber++ + " \t pausing for " + interpolator.getTransitionTimeDelay());
+                  ThreadTools.sleep((long) interpolator.getTransitionTimeDelay());//3000 worked for standing up, 2000 failed at about 33 in standcde, 1000 failed at about 23 in standcde
                }
                ThreadTools.sleep((long) (controlDT * 1000));
             }
@@ -423,6 +425,97 @@ public class PosePlaybackSCSBridge
       }
    }
 
+   private class LoadFrameByFrameSequenceListener implements VariableChangedListener
+   {
+      private final SDFRobot sdfRobot;
+      private final SimulationConstructionSet scs;
+
+      public LoadFrameByFrameSequenceListener(SDFRobot sdfRobot, SimulationConstructionSet scs)
+      {
+         this.sdfRobot = sdfRobot;
+         this.scs = scs;
+      }
+
+      public void variableChanged(YoVariable yoVariable)
+      {
+         if(!((BooleanYoVariable) yoVariable).getBooleanValue())
+            return;
+         
+         System.out.println("Load Sequence for Frame by Frame Play Back");
+
+         JFileChooser chooser = new JFileChooser(new File("PoseSequences"));
+         int approveOption = chooser.showOpenDialog(null);
+
+         if (approveOption != JFileChooser.APPROVE_OPTION)
+         {
+            System.err.println("Can not load selected file :" + chooser.getName());
+
+            return;
+         }
+
+         File selectedFile = chooser.getSelectedFile();
+
+         System.out.println("    Clearing sequence for Frame by Frame Play Back");
+         posePlaybackRobotPoseSequence.clear();
+         posePlaybackRobotPoseSequence.appendFromFile(selectedFile);
+
+         double startTime = 0.0;
+         frameByframeTime = startTime;
+
+         interpolator.startSequencePlayback(posePlaybackRobotPoseSequence, startTime);
+         frameByframePoseNumber = 0;
+      }
+    }
+
+   private class PlayPoseFromFrameByFrameSequenceListener implements VariableChangedListener
+   {
+      private final SDFRobot sdfRobot;
+      private final SimulationConstructionSet scs;
+
+      public PlayPoseFromFrameByFrameSequenceListener(SDFRobot sdfRobot, SimulationConstructionSet scs)
+      {
+         this.sdfRobot = sdfRobot;
+         this.scs = scs;
+      }
+
+      public void variableChanged(YoVariable yoVariable)
+      {
+         if(!((BooleanYoVariable) yoVariable).getBooleanValue())
+            return;
+         
+         while (!interpolator.isDone())
+         {
+            frameByframeTime = frameByframeTime + controlDT;
+
+            PosePlaybackRobotPose morphedPose = interpolator.getPose(frameByframeTime);
+
+            posePlaybackController.setPlaybackPose(morphedPose);
+            scs.setTime(frameByframeTime);
+            scs.tickAndUpdate();
+            morphedPose.setRobotAtPose(sdfRobot);
+
+            try
+            {
+               if (posePlaybackSender.isConnected())
+               {
+                  posePlaybackSender.writeData();
+               }
+               if(interpolator.didLastPoseIncrementSequence() || (frameByframePoseNumber == 0))
+               {
+                  System.out.println("pose #: " + frameByframePoseNumber++ + " \t pausing for " + interpolator.getTransitionTimeDelay());
+                  ThreadTools.sleep((long) interpolator.getTransitionTimeDelay());//3000 worked for standing up, 2000 failed at about 33 in standcde, 1000 failed at about 23 in standcde
+                  return;
+               }
+               ThreadTools.sleep((long) (controlDT * 1000));
+            }
+            catch (IOException e)
+            {
+            }
+         }
+         
+         System.out.println("End of Play back");
+      }
+    }
 
    private class SaveSequenceListener implements VariableChangedListener
    {
@@ -436,6 +529,14 @@ public class PosePlaybackSCSBridge
       }
    }
 
+   private class ClearSequenceListener implements VariableChangedListener
+   {
+         public void variableChanged(YoVariable yoVariable)
+         {
+            posePlaybackRobotPoseSequence.clear();
+            System.out.println("Clearing Sequence");
+         }
+    }
 
    public static void main(String[] args) throws IOException
    {
