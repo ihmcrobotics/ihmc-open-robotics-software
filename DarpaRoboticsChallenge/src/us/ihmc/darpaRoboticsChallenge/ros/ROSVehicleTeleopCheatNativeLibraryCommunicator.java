@@ -52,6 +52,36 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
    private final ArrayList<GasPedalStateListener> gasPedalStateListeners = new ArrayList<GasPedalStateListener>();
    private final ArrayList<BrakePedalStateListener> brakePedalStateListeners = new ArrayList<BrakePedalStateListener>();
 
+   public void addClockListener(ClockListener listener)
+   {
+      clockListeners.add(listener);
+   }
+
+   public void addVehiclePoseListener(VehiclePoseListener listener)
+   {
+      vehiclePoseListeners.add(listener);
+   }
+
+   public void addSteeringWheelStateListener(SteeringWheelStateListener listener)
+   {
+      steeringWheelStateListeners.add(listener);
+   }
+
+   public void addHandBrakeStateListener(HandBrakeStateListener listener)
+   {
+      handBrakeStateListeners.add(listener);
+   }
+
+   public void addGasPedalStateListener(GasPedalStateListener listener)
+   {
+      gasPedalStateListeners.add(listener);
+   }
+
+   public void addBrakePedalStateListener(BrakePedalStateListener listener)
+   {
+      brakePedalStateListeners.add(listener);
+   }
+
    private ROSVehicleTeleopCheatNativeLibraryCommunicator(String rosMasterURI)
    {
       InetAddress myIP = RosTools.getMyIP(rosMasterURI);
@@ -164,7 +194,6 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
    private void receivedClockMessage()
    {
       clock.setFromBuffer(clockBuffer);
-
       for (int i = 0; i < clockListeners.size(); i++)
       {
          clockListeners.get(i).receivedClockMessage(clock);
@@ -178,7 +207,6 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
    private void receivedVehiclePose()
    {
       vehiclePose.setFromBuffer(vehiclePoseBuffer);
-
       for (int i = 0; i < vehiclePoseListeners.size(); i++)
       {
          vehiclePoseListeners.get(i).receivedVehiclePose(vehiclePose);
@@ -206,7 +234,6 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
    private void receivedSteeringWheelState()
    {
       steeringWheelState.setValue(getSteeringWheelState());
-
       for (int i = 0; i < steeringWheelStateListeners.size(); i++)
       {
          steeringWheelStateListeners.get(i).receivedSteeringWheelState(steeringWheelState);
