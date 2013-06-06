@@ -67,6 +67,40 @@ public class PoseMessage
       this.position[2] = position[2];
    }
 
+   public double getPosX()
+   {
+      return position[0];
+   }
+
+   public double getPosY()
+   {
+      return position[1];
+   }
+   public double getPosZ()
+   {
+      return position[2];
+   }
+
+   public double getOrientationW()
+   {
+      return orientation[0];
+   }
+
+   public double getOrientationX()
+   {
+      return orientation[1];
+   }
+
+   public double getOrientationY()
+   {
+      return orientation[2];
+   }
+
+   public double getOrientationZ()
+   {
+      return orientation[3];
+   }
+
    public void setOrientation(double[] orientation)
    {
       if(position.length < 4)
@@ -96,22 +130,22 @@ public class PoseMessage
 
    public void setOrientationW(double w)
    {
-      this.position[0] = w;
+      this.orientation[0] = w;
    }
 
    public void setOrientationX(double x)
    {
-      this.position[1] = x;
+      this.orientation[1] = x;
    }
 
    public void setOrientationY(double y)
    {
-      this.position[2] = y;
+      this.orientation[2] = y;
    }
 
    public void setOrientationZ(double z)
    {
-      this.position[3] = z;
+      this.orientation[3] = z;
    }
 
    @Override

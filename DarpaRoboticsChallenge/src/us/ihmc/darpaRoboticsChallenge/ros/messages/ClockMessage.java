@@ -31,6 +31,31 @@ public class ClockMessage
       time[1] = nsecs;
    }
 
+   public long secs()
+   {
+      return secs;
+   }
+
+   public long nsecs()
+   {
+      return nsecs;
+   }
+
+   public long toNSecs()
+   {
+      return (secs * 1000000000) + nsecs;
+   }
+
+   public void setSecs(long secs)
+   {
+      this.secs = secs;
+   }
+
+   public void setNSecs(long nsecs)
+   {
+      this.nsecs = nsecs;
+   }
+
    @Override
    public String toString()
    {
