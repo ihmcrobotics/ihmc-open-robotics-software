@@ -48,7 +48,7 @@ public class VRCTask1InVehicleInitialSetup implements RobotInitialSetup<SDFRobot
       robot.getOneDoFJoint("l_leg_uay").setQ(thighPitch - .3);  //0.087 + thighPitch);
       robot.getOneDoFJoint("r_leg_uay").setQ(thighPitch - .3); //0.087 + thighPitch);
 
-      offset.setX(-0.07);
+      offset.setX(-0.06);
       offset.setY(0.28);
       offset.setZ(groundZ + 1.08); // 1.04);
       robot.setPositionInWorld(offset);
