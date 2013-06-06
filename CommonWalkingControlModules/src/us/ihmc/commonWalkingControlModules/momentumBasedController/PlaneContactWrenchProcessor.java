@@ -42,13 +42,14 @@ public class PlaneContactWrenchProcessor
       this.contactablePlaneBodies = contactablePlaneBodies;
       for (ContactablePlaneBody contactableBody : contactablePlaneBodies)
       {
-         DoubleYoVariable forceMagnitude = new DoubleYoVariable(contactableBody.getRigidBody().getName() + "ForceMagnitude", registry);
+         String name = contactableBody.getPlaneFrame().getName();
+         DoubleYoVariable forceMagnitude = new DoubleYoVariable(name + "ForceMagnitude", registry);
          groundReactionForceMagnitudes.put(contactableBody, forceMagnitude);
 
-         DoubleYoVariable normalTorque = new DoubleYoVariable(contactableBody.getRigidBody().getName() + "NormalTorque", registry);
+         DoubleYoVariable normalTorque = new DoubleYoVariable(name + "NormalTorque", registry);
          normalTorques.put(contactableBody, normalTorque);
 
-         String copName = contactableBody.getRigidBody().getName() + "CoP";
+         String copName = name + "CoP";
          String listName = "cops";
 
          YoFramePoint2d cop2d = new YoFramePoint2d(copName + "2d", "", contactableBody.getPlaneFrame(), registry);

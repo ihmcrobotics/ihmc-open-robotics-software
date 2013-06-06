@@ -59,8 +59,10 @@ public class MomentumBasedController
    private final CenterOfMassJacobian centerOfMassJacobian;
    private final CommonWalkingReferenceFrames referenceFrames;
    private final TwistCalculator twistCalculator;
+
    private final SideDependentList<ContactablePlaneBody> feet, handPalms, thighs;
-   private final ContactablePlaneBody pelvis;
+   private final ContactablePlaneBody pelvis, pelvisBack;
+
    private final SideDependentList<ContactableCylinderBody> graspingHands;
    private final List<ContactablePlaneBody> listOfAllContactablePlaneBodies;
    private final List<ContactableCylinderBody> listOfAllContactableCylinderBodies;
@@ -68,7 +70,8 @@ public class MomentumBasedController
    // Creating a Map that will contain all of the YoPlaneContactState and YoRollingContactState to pass to the MomentumControlModule compute method
    private final Map<ContactablePlaneBody, PlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, PlaneContactState>();
    private final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> planeContactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
-   private final LinkedHashMap<ContactableCylinderBody, YoCylindricalContactState> cylindricalContactStates = new LinkedHashMap<ContactableCylinderBody, YoCylindricalContactState>();
+   private final LinkedHashMap<ContactableCylinderBody, YoCylindricalContactState> cylindricalContactStates = new LinkedHashMap<ContactableCylinderBody,
+                                                                                                                 YoCylindricalContactState>();
    private final List<ModifiableContactState> modifiableContactStates = new ArrayList<ModifiableContactState>();
 
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
@@ -108,14 +111,17 @@ public class MomentumBasedController
                                   CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime,
                                   double gravityZ, TwistCalculator twistCalculator, SideDependentList<ContactablePlaneBody> feet,
                                   SideDependentList<ContactablePlaneBody> handPalms, SideDependentList<ContactableCylinderBody> graspingHands,
-                                  SideDependentList<ContactablePlaneBody> thighs, ContactablePlaneBody pelvis, double controlDT,
-                                  ProcessedOutputsInterface processedOutputs, MomentumControlModule momentumControlModule, ArrayList<Updatable> updatables,
+                                  SideDependentList<ContactablePlaneBody> thighs, ContactablePlaneBody pelvis,
+                                  ContactablePlaneBody pelvisBack, double controlDT, ProcessedOutputsInterface processedOutputs,
+                                  MomentumControlModule momentumControlModule, ArrayList<Updatable> updatables,
                                   StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      if (SPY_ON_MOMENTUM_BASED_CONTROLLER) momentumBasedControllerSpy = new MomentumBasedControllerSpy(registry); 
-      else momentumBasedControllerSpy = null;
-      
+      if (SPY_ON_MOMENTUM_BASED_CONTROLLER)
+         momentumBasedControllerSpy = new MomentumBasedControllerSpy(registry);
+      else
+         momentumBasedControllerSpy = null;
+
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
       this.momentumControlModule = momentumControlModule;
@@ -129,13 +135,14 @@ public class MomentumBasedController
       this.controlDT = controlDT;
       this.gravity = gravityZ;
       this.yoTime = yoTime;
-      
+
       // Initialize the contactable bodies
       this.feet = feet;
-      this.handPalms = handPalms; // Plane contact used to bear load with open hands
-      this.graspingHands = graspingHands; // Cylindrical contact used to bear load while grasping a cylinder
+      this.handPalms = handPalms;    // Plane contact used to bear load with open hands
+      this.graspingHands = graspingHands;    // Cylindrical contact used to bear load while grasping a cylinder
       this.thighs = thighs;
       this.pelvis = pelvis;
+      this.pelvisBack = pelvisBack;
 
       RigidBody elevator = fullRobotModel.getElevator();
 
@@ -193,7 +200,7 @@ public class MomentumBasedController
       {
          this.listOfAllContactablePlaneBodies.addAll(feet.values());
       }
-      
+
       if (handPalms != null)
       {
          this.listOfAllContactablePlaneBodies.addAll(handPalms.values());
@@ -207,12 +214,16 @@ public class MomentumBasedController
       if (pelvis != null)
          this.listOfAllContactablePlaneBodies.add(pelvis);
 
+      if (pelvisBack != null)
+         this.listOfAllContactablePlaneBodies.add(pelvisBack);
+
       for (ContactablePlaneBody contactablePlaneBody : this.listOfAllContactablePlaneBodies)
       {
          RigidBody rigidBody = contactablePlaneBody.getRigidBody();
-         YoPlaneContactState contactState = new YoPlaneContactState(rigidBody.getName(), contactablePlaneBody.getBodyFrame(),
+         YoPlaneContactState contactState = new YoPlaneContactState(contactablePlaneBody.getPlaneFrame().getName(), contactablePlaneBody.getBodyFrame(),
                                                contactablePlaneBody.getPlaneFrame(), registry);
-//         contactState.set(contactablePlaneBody.getContactPoints2d(), coefficientOfFriction);    // initialize with flat 'feet'
+
+//       contactState.set(contactablePlaneBody.getContactPoints2d(), coefficientOfFriction);    // initialize with flat 'feet'
          planeContactStates.put(contactablePlaneBody, contactState);
       }
 
@@ -232,19 +243,21 @@ public class MomentumBasedController
 
 
       this.listOfAllContactableCylinderBodies = new ArrayList<ContactableCylinderBody>();
-      
-      if(graspingHands != null)
+
+      if (graspingHands != null)
       {
          this.listOfAllContactableCylinderBodies.addAll(graspingHands.values());
       }
-//      coefficientOfFriction = 0.0;
+
+//    coefficientOfFriction = 0.0;
       for (ContactableCylinderBody contactableCylinderBody : this.listOfAllContactableCylinderBodies)
       {
          RigidBody rigidBody = contactableCylinderBody.getRigidBody();
+
          // YoCylindricalContactState: used to enable load bearing with hands while grasping a cylinder
-         YoCylindricalContactState cylindricalContactState = new YoCylindricalContactState(rigidBody.getName(), 
-               rigidBody.getParentJoint().getFrameAfterJoint(), contactableCylinderBody.getCylinderFrame(),
-               registry, dynamicGraphicObjectsListRegistry);
+         YoCylindricalContactState cylindricalContactState = new YoCylindricalContactState(rigidBody.getName(),
+                                                                rigidBody.getParentJoint().getFrameAfterJoint(), contactableCylinderBody.getCylinderFrame(),
+                                                                registry, dynamicGraphicObjectsListRegistry);
          cylindricalContactState.set(coefficientOfFriction, contactableCylinderBody, false);
          cylindricalContactStates.put(contactableCylinderBody, cylindricalContactState);
       }
@@ -282,10 +295,10 @@ public class MomentumBasedController
       {
          momentumBasedControllerSpy.setExternalWrenchToCompensateFor(rigidBody, wrench);
       }
-      
+
       momentumControlModule.setExternalWrenchToCompensateFor(rigidBody, wrench);
    }
-   
+
    public void setDesiredPointAcceleration(GeometricJacobian rootToEndEffectorJacobian, FramePoint contactPoint, FrameVector desiredAcceleration)
    {
       if (momentumBasedControllerSpy != null)
@@ -366,7 +379,8 @@ public class MomentumBasedController
             YoPlaneContactState contactState = planeContactStates.get(contactablePlaneBody);
             if (contactState.inContact())
             {
-               momentumBasedControllerSpy.setPlaneContactState(contactablePlaneBody, contactState.getContactPoints2d(), contactState.getCoefficientOfFriction(), contactState.getContactNormalFrameVector());
+               momentumBasedControllerSpy.setPlaneContactState(contactablePlaneBody, contactState.getContactPoints2d(),
+                       contactState.getCoefficientOfFriction(), contactState.getContactNormalFrameVector());
             }
          }
 
@@ -426,7 +440,7 @@ public class MomentumBasedController
       {
          momentumBasedControllerSpy.setOneDoFJointAcceleration(joint, desiredAcceleration);
       }
-      
+
       DenseMatrix64F jointAcceleration = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
       jointAcceleration.set(0, 0, desiredAcceleration);
       momentumControlModule.setDesiredJointAcceleration(joint, jointAcceleration);
@@ -484,7 +498,8 @@ public class MomentumBasedController
    }
 
 
-   public void setPlaneContactState(ContactablePlaneBody contactableBody, List<FramePoint2d> contactPoints, double coefficientOfFriction, FrameVector normalContactVector)
+   public void setPlaneContactState(ContactablePlaneBody contactableBody, List<FramePoint2d> contactPoints, double coefficientOfFriction,
+                                    FrameVector normalContactVector)
    {
       YoPlaneContactState yoPlaneContactState = planeContactStates.get(contactableBody);
 
@@ -515,7 +530,7 @@ public class MomentumBasedController
       {
          momentumBasedControllerSpy.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
       }
-      
+
       momentumControlModule.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
    }
 
@@ -525,7 +540,7 @@ public class MomentumBasedController
       {
          momentumBasedControllerSpy.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
       }
-      
+
       momentumControlModule.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
    }
 
@@ -579,7 +594,7 @@ public class MomentumBasedController
       return centerOfMassJacobian;
    }
 
-   
+
    public boolean isUsingOptimizationMomentumControlModule()
    {
       return (momentumControlModule instanceof OptimizationMomentumControlModule);
@@ -609,12 +624,12 @@ public class MomentumBasedController
    {
       return handPalms.get(robotSide);
    }
-   
+
    public SideDependentList<ContactableCylinderBody> getContactableCylinderHands()
    {
       return graspingHands;
    }
-   
+
    public ContactableCylinderBody getContactableCylinderHand(RobotSide robotSide)
    {
       return graspingHands.get(robotSide);
@@ -637,7 +652,7 @@ public class MomentumBasedController
 
    public Collection<PlaneContactState> getPlaneContactStates()
    {
-       return contactStates.values();
+      return contactStates.values();
    }
 
    public void clearContacts()
@@ -651,5 +666,10 @@ public class MomentumBasedController
    public ContactablePlaneBody getContactablePlanePelvis()
    {
       return pelvis;
+   }
+
+   public ContactablePlaneBody getContactablePlanePelvisBack()
+   {
+      return pelvisBack;
    }
 }
