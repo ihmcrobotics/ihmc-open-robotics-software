@@ -13,7 +13,7 @@ import us.ihmc.imageProcessing.sfm.d2.EstimateCarMotion2D;
 /**
  * @author Peter Abeles
  */
-public class MonoPlane_to_CarMotion2D implements EstimateCarMotion2D
+public class MonoOverhead_to_CarMotion2D implements EstimateCarMotion2D
 {
    // convert RGB to gray scale image
    ImageFloat32 gray = new ImageFloat32(1,1);
@@ -23,7 +23,7 @@ public class MonoPlane_to_CarMotion2D implements EstimateCarMotion2D
 
    private Se2_F64 motion = new Se2_F64();
 
-   public MonoPlane_to_CarMotion2D(ImageMotion2D<ImageFloat32, Se2_F64> motion2D)
+   public MonoOverhead_to_CarMotion2D(ImageMotion2D<ImageFloat32, Se2_F64> motion2D)
    {
       this.motion2D = motion2D;
    }

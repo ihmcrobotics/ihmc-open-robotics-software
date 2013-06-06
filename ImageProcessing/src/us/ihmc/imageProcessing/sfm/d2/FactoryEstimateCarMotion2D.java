@@ -6,6 +6,8 @@ import boofcv.abst.feature.tracker.PkltConfig;
 import boofcv.abst.feature.tracker.PointTracker;
 import boofcv.abst.feature.tracker.PointTrackerTwoPass;
 import boofcv.abst.sfm.d2.ImageMotion2D;
+import boofcv.abst.sfm.d3.MonocularPlaneVisualOdometry;
+import boofcv.abst.sfm.d3.MonocularPlaneVisualOdometryScaleInput;
 import boofcv.abst.sfm.d3.StereoVisualOdometry;
 import boofcv.abst.sfm.d3.StereoVisualOdometryScaleInput;
 import boofcv.factory.feature.disparity.FactoryStereoDisparity;
@@ -13,9 +15,11 @@ import boofcv.factory.feature.tracker.FactoryPointTracker;
 import boofcv.factory.feature.tracker.FactoryPointTrackerTwoPass;
 import boofcv.factory.sfm.FactoryMotion2D;
 import boofcv.factory.sfm.FactoryVisualOdometry;
+import boofcv.struct.image.ImageDataType;
 import boofcv.struct.image.ImageFloat32;
 import georegression.struct.se.Se2_F64;
-import us.ihmc.imageProcessing.sfm.d2.wrappers.MonoPlane_to_CarMotion2D;
+import us.ihmc.imageProcessing.sfm.d2.wrappers.MonoOverhead_to_CarMotion2D;
+import us.ihmc.imageProcessing.sfm.d2.wrappers.Mono_to_CarMotion2D;
 import us.ihmc.imageProcessing.sfm.d2.wrappers.StereoVO_to_CarMotion2D;
 
 /**
@@ -46,7 +50,27 @@ public class FactoryEstimateCarMotion2D
             ransacIterations, inlierGroundTol * inlierGroundTol, thresholdRetire,
             absoluteMinimumTracks, respawnTrackFraction, respawnCoverageFraction, false, tracker, new Se2_F64());
 
-      return new MonoPlane_to_CarMotion2D(motion2D);
+      return new MonoOverhead_to_CarMotion2D(motion2D);
+   }
+
+   public static EstimateCarMotion2D monoPlaneRotTran( double scale ) {
+
+      // specify how the image features are going to be tracked
+      PkltConfig<ImageFloat32, ImageFloat32> configKlt = PkltConfig.createDefault(ImageFloat32.class, ImageFloat32.class);
+      configKlt.pyramidScaling = new int[] {1, 2, 4, 8};
+      configKlt.templateRadius = 5;
+
+      PointTrackerTwoPass<ImageFloat32> tracker = FactoryPointTrackerTwoPass.klt(configKlt, new ConfigGeneralDetector(-1, 3, 150));
+
+      // declares the algorithm
+      MonocularPlaneVisualOdometry<ImageFloat32> vo = FactoryVisualOdometry.monoPlaneRotTran(100, 2, 1.5, 200, tracker,
+            ImageDataType.single(ImageFloat32.class));
+
+      if( scale != 1.0 ) {
+         vo = new MonocularPlaneVisualOdometryScaleInput<ImageFloat32>(vo,scale);
+      }
+
+      return new Mono_to_CarMotion2D(vo);
    }
 
    public static EstimateCarMotion2D stereo01( double scale ) {
