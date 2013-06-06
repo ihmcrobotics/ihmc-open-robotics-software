@@ -1,34 +1,29 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import java.io.IOException;
-import java.util.List;
-
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Point2d;
-
+import com.martiansoftware.jsap.JSAPException;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.DrivingDRCRobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.initialSetup.VRCTask1InVehicleInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
-import us.ihmc.robotSide.RobotSide;
-import us.ihmc.robotSide.SideDependentList;
-
-import com.martiansoftware.jsap.JSAPException;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
 import us.ihmc.utilities.net.ObjectCommunicator;
 
+import java.io.IOException;
+
 public class DRCDemo03
 {
+   private static final boolean START_NETWORK = false;
    private final HumanoidRobotSimulation<SDFRobot> drcSimulation;
    private final DRCDemoEnvironmentWithBoxAndSteeringWheel environment;
 
@@ -36,7 +31,7 @@ public class DRCDemo03
                     int simulationDataBufferSize)
    {
       DRCSCSInitialSetup scsInitialSetup;
-      RobotInitialSetup<SDFRobot> robotInitialSetup = new DrivingDRCRobotInitialSetup();
+      RobotInitialSetup<SDFRobot> robotInitialSetup = new VRCTask1InVehicleInitialSetup(-0.05); // DrivingDRCRobotInitialSetup();
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
 
       environment = new DRCDemoEnvironmentWithBoxAndSteeringWheel(dynamicGraphicObjectsListRegistry);
@@ -66,17 +61,20 @@ public class DRCDemo03
 
       SimulationConstructionSet simulationConstructionSet = drcSimulation.getSimulationConstructionSet();
 
-      LocalObjectCommunicator localObjectCommunicator = DRCObstacleCourseSimulation.createLocalObjectCommunicator(drcSimulation, robotInterface);
-
-      new DRCNetworkProcessor(localObjectCommunicator, drcNetworkProcessorServer);
-
-      try
+      if (START_NETWORK)
       {
-         drcNetworkProcessorServer.connect();
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
+         LocalObjectCommunicator localObjectCommunicator = DRCObstacleCourseSimulation.createLocalObjectCommunicator(drcSimulation, robotInterface);
+
+         new DRCNetworkProcessor(localObjectCommunicator, drcNetworkProcessorServer);
+
+         try
+         {
+            drcNetworkProcessorServer.connect();
+         }
+         catch (IOException e)
+         {
+            throw new RuntimeException(e);
+         }
       }
 
 
@@ -88,6 +86,10 @@ public class DRCDemo03
       simulationConstructionSet.setCameraFix(-0.44, -0.17, 0.75);
 
 //    showSeatGraphics(simulationConstructionSet);
+
+      Graphics3DObject planeAtZ0 = new Graphics3DObject();
+      planeAtZ0.addHeightMap(drcSimulation.getRobot().getGroundContactModel().getGroundProfile(), 1000, 1000, YoAppearance.Red());
+      simulationConstructionSet.addStaticLinkGraphics(planeAtZ0);
 
       setUpJoyStick(simulationConstructionSet);
 
