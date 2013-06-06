@@ -64,7 +64,8 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    private final BooleanYoVariable isLoadFrameByFrameSequenceRequested = new BooleanYoVariable("isLoadFrameByFrameSequenceRequested", dontRecordRegistry);
    private final BooleanYoVariable isPlayPoseFromFrameByFrameSequenceRequested = new BooleanYoVariable("isPlayPoseFromFrameByFrameSequenceRequested", dontRecordRegistry);
    private final BooleanYoVariable isSymmetricModeRequested = new BooleanYoVariable("isSymmetricModeRequested", dontRecordRegistry);
-
+   private final BooleanYoVariable isResetToBasePoseRequested = new BooleanYoVariable("isResetToBasePoseRequested", dontRecordRegistry);
+   
    private final BooleanYoVariable isPelvisControlRequested = new BooleanYoVariable("isPelvisControlRequested", dontRecordRegistry);
    private final BooleanYoVariable isChestControlRequested = new BooleanYoVariable("isChestControlRequested", dontRecordRegistry);
    
@@ -170,6 +171,11 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    public void addPlayPoseFromFrameByFrameSequenceRequestedListener(VariableChangedListener variableChangedListener)
    {
       isPlayPoseFromFrameByFrameSequenceRequested.addVariableChangedListener(variableChangedListener);
+   }
+   
+   public void addResetToBasePoseRequestedListener(VariableChangedListener variableChangedListener)
+   {
+      isResetToBasePoseRequested.addVariableChangedListener(variableChangedListener);
    }
 
    private void init()
@@ -353,6 +359,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       sliderBoard.setButton(buttonChannel++, isPelvisControlRequested);
       sliderBoard.setButton(buttonChannel++, isChestControlRequested);
       sliderBoard.setButton(buttonChannel++, isSymmetricModeRequested);
+      sliderBoard.setButton(buttonChannel++, isResetToBasePoseRequested);
       
       buttonChannel = 17;
       sliderBoard.setButton(buttonChannel++, isLeftArmControlRequested);
