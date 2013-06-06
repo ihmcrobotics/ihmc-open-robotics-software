@@ -2,21 +2,22 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.driving;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.AxisAngleOrientationController;
 import com.yobotics.simulationconstructionset.util.EuclideanPositionController;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.trajectory.*;
+import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.Twist;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.utilities.screwTheory.*;
 
 import javax.media.j3d.Transform3D;
 import java.util.List;
@@ -38,7 +39,9 @@ public class DrivingFootControlModule
    private final FramePoint desiredPosition = new FramePoint();
    private final FrameVector desiredVelocity = new FrameVector();
    private final FrameVector feedForward = new FrameVector();
+
    private final FrameVector currentVelocity = new FrameVector();
+   private final FrameVector currentAngularVelocity = new FrameVector();
 
    private final PositionTrajectoryGenerator positionTrajectoryGenerator;
    private final YoFramePoint targetPosition;
@@ -46,15 +49,32 @@ public class DrivingFootControlModule
    private final DoubleYoVariable trajectoryInitializationTime;
    private final DoubleYoVariable time;
 
+   private final AxisAngleOrientationController orientationController;
+   private final DenseMatrix64F footOrientationSelectionMatrix;
+   private final SpatialAccelerationVector footRollSpatialAccelerationVector;
+   private final TaskspaceConstraintData footOrientationTaskspaceConstraintData = new TaskspaceConstraintData();
+
+   private final FrameOrientation desiredOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
+   private final FrameVector desiredAngularVelocity = new FrameVector();
+   private final FrameVector feedForwardAngularAcceleration = new FrameVector();
+
    private final TwistCalculator twistCalculator;
    private final Twist currentTwist = new Twist();
    private final FramePoint toePointInBase = new FramePoint();
    private final ReferenceFrame toePointFrame;
 
+   private final ReferenceFrame vehicleFrame;
+   private final RigidBody foot;
+
+   private final RigidBody elevator;
+
+   private final DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 1);
+
    public DrivingFootControlModule(RigidBody elevator, ContactablePlaneBody contactablePlaneFoot, MomentumBasedController momentumBasedController,
                                    ReferenceFrame vehicleFrame, DoubleYoVariable yoTime, TwistCalculator twistCalculator, YoVariableRegistry parentRegistry)
    {
-      RigidBody foot = contactablePlaneFoot.getRigidBody();
+      this.foot = contactablePlaneFoot.getRigidBody();
+      this.elevator = elevator;
       registry = new YoVariableRegistry(foot.getName() + getClass().getSimpleName());
       footJacobian = new GeometricJacobian(elevator, foot, elevator.getBodyFixedFrame());
       toePoint = getCenterToePoint(contactablePlaneFoot);
@@ -62,6 +82,7 @@ public class DrivingFootControlModule
       Transform3D transform = new Transform3D();
       transform.set(toePoint.getVectorCopy());
       toePointFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(toePointName, toePoint.getReferenceFrame(), transform);
+      this.vehicleFrame = vehicleFrame;
       toePointPositionController = new EuclideanPositionController(toePointName, toePointFrame, registry);
       this.momentumBasedController = momentumBasedController;
       this.time = yoTime;
@@ -81,6 +102,28 @@ public class DrivingFootControlModule
       toePointPositionController.setProportionalGains(kP, kP, kP);
       toePointPositionController.setDerivativeGains(kD, kD, kD);
 
+
+      orientationController = new AxisAngleOrientationController(foot.getName() + "PD", foot.getBodyFixedFrame(), registry);
+      double kPOrientation = 15.0;
+      double kDOrientation = GainCalculator.computeDerivativeGain(kPOrientation, dampingRatio);
+      orientationController.setProportionalGains(kPOrientation, kPOrientation, kPOrientation);
+      orientationController.setDerivativeGains(kDOrientation, kDOrientation, kDOrientation);
+
+      FrameVector rollAxis = new FrameVector(contactablePlaneFoot.getPlaneFrame(), 1.0, 0.0, 0.0);
+      FrameVector yawAxis = new FrameVector(contactablePlaneFoot.getPlaneFrame(), 0.0, 0.0, 1.0);
+      rollAxis.changeFrame(foot.getBodyFixedFrame());
+      yawAxis.changeFrame(foot.getBodyFixedFrame());
+
+      footOrientationSelectionMatrix = new DenseMatrix64F(2, SpatialMotionVector.SIZE);
+      footOrientationSelectionMatrix.set(0, 0, rollAxis.getX());
+      footOrientationSelectionMatrix.set(0, 1, rollAxis.getY());
+      footOrientationSelectionMatrix.set(0, 2, rollAxis.getZ());
+      footOrientationSelectionMatrix.set(1, 0, yawAxis.getX());
+      footOrientationSelectionMatrix.set(1, 1, yawAxis.getY());
+      footOrientationSelectionMatrix.set(1, 2, yawAxis.getZ());
+
+      footRollSpatialAccelerationVector = new SpatialAccelerationVector();
+
       this.twistCalculator = twistCalculator;
 
       parentRegistry.addChild(registry);
@@ -94,22 +137,43 @@ public class DrivingFootControlModule
 
    public void doControl()
    {
+      footJacobian.compute();
+      updateCurrentVelocity();
+      doToePositionControl();
+      doFootOrientationControl();
+   }
+
+   private void doToePositionControl()
+   {
       positionTrajectoryGenerator.compute(time.getDoubleValue() - trajectoryInitializationTime.getDoubleValue());
       positionTrajectoryGenerator.get(desiredPosition);
       positionTrajectoryGenerator.packVelocity(desiredVelocity);
       positionTrajectoryGenerator.packAcceleration(feedForward);
 
-      updateCurrentVelocity();
-
       FrameVector output = new FrameVector(toePointFrame);
       toePointPositionController.compute(output, desiredPosition, desiredVelocity, currentVelocity, feedForward);
-      footJacobian.compute();
       momentumBasedController.setDesiredPointAcceleration(footJacobian, toePoint, output);
+   }
+
+   private void doFootOrientationControl()
+   {
+      desiredOrientation.set(vehicleFrame);
+      desiredAngularVelocity.setToZero(toePointFrame);
+      feedForwardAngularAcceleration.setToZero(toePointFrame);
+
+      FrameVector output = new FrameVector(toePointFrame);
+      orientationController.compute(output, desiredOrientation, desiredAngularVelocity, currentAngularVelocity, feedForwardAngularAcceleration);
+
+      footRollSpatialAccelerationVector.setToZero(foot.getBodyFixedFrame(), elevator.getBodyFixedFrame(), foot.getBodyFixedFrame());
+      footRollSpatialAccelerationVector.setAngularPart(output.getVector());
+      footOrientationTaskspaceConstraintData.set(footRollSpatialAccelerationVector, nullspaceMultipliers, footOrientationSelectionMatrix);
+      momentumBasedController.setDesiredSpatialAcceleration(footJacobian, footOrientationTaskspaceConstraintData);
    }
 
    private void updateCurrentVelocity()
    {
       twistCalculator.packRelativeTwist(currentTwist, footJacobian.getBase(), footJacobian.getEndEffector());
+      currentTwist.packAngularPart(currentAngularVelocity);
       currentTwist.changeFrame(footJacobian.getBaseFrame());
       toePointInBase.setAndChangeFrame(toePoint);
       toePointInBase.changeFrame(footJacobian.getBaseFrame());
