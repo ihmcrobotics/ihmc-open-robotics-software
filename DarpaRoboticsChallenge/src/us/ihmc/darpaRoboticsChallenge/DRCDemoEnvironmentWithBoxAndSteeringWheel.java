@@ -71,12 +71,22 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
 //      <size>0.6 1.15 0.1</size>
 //      </box>
 //      </geometry>
+//      Transform3D seatTransform = new Transform3D();
+//      seatTransform.setTranslation(new Vector3d(-0.1, 0.0, 0.81));
+//      Box3d seatBox = new Box3d(seatTransform, 0.6, 1.15, 0.1);
+//      terrainObject.addRotatableBox(seatBox, YoAppearance.DarkGray());
 
+      // seat
+//      <pose>-0.100000 0.000000 0.560000 0.000000 0.000000 0.000000</pose>
+//      <geometry>
+//      <box>
+//      <size>0.600000 1.220000 0.500000</size>
+//      </box>
       Transform3D seatTransform = new Transform3D();
-
-      seatTransform.setTranslation(new Vector3d(-0.1, 0.0, 0.81));
-      Box3d seatBox = new Box3d(seatTransform, 0.6, 1.15, 0.1);
+      seatTransform.setTranslation(new Vector3d(-0.1, 0.0, 0.56));
+      Box3d seatBox = new Box3d(seatTransform, 0.6, 1.22, 0.5);
       terrainObject.addRotatableBox(seatBox, YoAppearance.DarkGray());
+
 
       // seat_back
 //      <pose>-0.300000 0.000000 1.125000 0.000000 -0.200000 0.000000</pose>
