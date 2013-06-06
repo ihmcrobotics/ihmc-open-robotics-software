@@ -23,18 +23,14 @@ import org.ros.node.NodeConfiguration;
 public class RosTools
 {
 
-   public static BufferedImage bufferedImageFromByteArrayJpeg(ColorModel colorModel, byte[] payload)
+   public static BufferedImage bufferedImageFromByteArrayJpeg(ColorModel colorModel, byte[] payload, int width, int height)
    {
-      BufferedImage ret = null;
+      BufferedImage ret = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
+      DataBuffer dataBuffer = new DataBufferByte(payload, payload.length, 0);
+      SampleModel sampleModel = colorModel.createCompatibleSampleModel(width, height);
 
-      try
-      {
-         ret = ImageIO.read(new ByteArrayInputStream(payload, 0, payload.length));
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
+      WritableRaster raster = Raster.createWritableRaster(sampleModel, dataBuffer, null);
+      ret.setData(raster);
 
       return ret;
    }

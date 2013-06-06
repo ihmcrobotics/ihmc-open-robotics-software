@@ -27,8 +27,8 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
    private final Float64Message
       steeringWheelState = new Float64Message(), handBrakeState = new Float64Message(), gasPedalState = new Float64Message(),
       brakePedalState = new Float64Message();
-   private final CompressedImageMessage
-      leftEyeImageMessage = new CompressedImageMessage(), rightEyeImageMessage = new CompressedImageMessage();
+   private final ImageMessage
+      leftEyeImageMessage = new ImageMessage(), rightEyeImageMessage = new ImageMessage();
 
    /*
     * Publisher Buffers
@@ -49,8 +49,8 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
     */
 
    private final ArrayList<ClockListener> clockListeners = new ArrayList<ClockListener>();
-   private final ArrayList<CompressedImageListener> leftEyeImageListeners = new ArrayList<CompressedImageListener>();
-   private final ArrayList<CompressedImageListener> rightEyeImageListeners = new ArrayList<CompressedImageListener>();
+   private final ArrayList<ImageListener> leftEyeImageListeners = new ArrayList<ImageListener>();
+   private final ArrayList<ImageListener> rightEyeImageListeners = new ArrayList<ImageListener>();
    private final ArrayList<VehiclePoseListener> vehiclePoseListeners = new ArrayList<VehiclePoseListener>();
    private final ArrayList<HandBrakeStateListener> handBrakeStateListeners = new ArrayList<HandBrakeStateListener>();
    private final ArrayList<SteeringWheelStateListener> steeringWheelStateListeners = new ArrayList<SteeringWheelStateListener>();
