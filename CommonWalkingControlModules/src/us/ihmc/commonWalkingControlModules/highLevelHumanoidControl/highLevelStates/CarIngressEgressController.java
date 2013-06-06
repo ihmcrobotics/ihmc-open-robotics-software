@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
@@ -76,7 +77,6 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    private final OrientationInterpolationTrajectoryGenerator chestOrientationTrajectoryGenerator;
    private double chestTrajectoryStartTime = 0.0;
 
-
    private final BooleanYoVariable l_footDoHeelOff = new BooleanYoVariable("l_footDoHeelOff", registry);
    private final BooleanYoVariable r_footDoHeelOff = new BooleanYoVariable("r_footDoHeelOff", registry);
    private final SideDependentList<BooleanYoVariable> doHeelOff = new SideDependentList<BooleanYoVariable>(l_footDoHeelOff, r_footDoHeelOff);
@@ -90,8 +90,15 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
    private final ConstantDoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(1.0);
 
+   private final SideDependentList<ContactablePlaneBody> contactableThighs;
+   private final ContactablePlaneBody contactablePelvis, contactablePelvisBack;
+   
+   private final RigidBody elevator;
+   private final List<ContactablePlaneBody> bodiesInContact = new ArrayList<ContactablePlaneBody>();
+   private final Map<ContactablePlaneBody, GeometricJacobian> contactJacobians = new LinkedHashMap<ContactablePlaneBody, GeometricJacobian>();
 
    private BooleanYoVariable requestedPelvisLoadBearing = new BooleanYoVariable("requestedPelvisLoadBearing", registry);
+   private BooleanYoVariable requestedPelvisBackLoadBearing = new BooleanYoVariable("requestedPelvisBackLoadBearing", registry);
    private BooleanYoVariable requestedLeftFootLoadBearing = new BooleanYoVariable("requestedLeftFootLoadBearing", registry);
    private BooleanYoVariable requestedRightFootLoadBearing = new BooleanYoVariable("requestedRightFootLoadBearing", registry);
    private BooleanYoVariable requestedLeftThighLoadBearing = new BooleanYoVariable("requestedLeftThighLoadBearing", registry);
@@ -111,6 +118,11 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
             lidarControllerInterface, dynamicGraphicObjectsListRegistry, controllerState);
 
       setupManagers(variousWalkingManagers);
+      
+      elevator = fullRobotModel.getElevator();
+      contactableThighs = momentumBasedController.getContactablePlaneThighs();
+      contactablePelvis = momentumBasedController.getContactablePlanePelvis();
+      contactablePelvisBack = momentumBasedController.getContactablePlanePelvisBack();
       
       this.variousWalkingManagers = variousWalkingManagers;
       
@@ -165,6 +177,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       LoadBearingVariableChangedListener loadBearingVariableChangedListener = new LoadBearingVariableChangedListener();
 
       requestedPelvisLoadBearing.addVariableChangedListener(loadBearingVariableChangedListener);
+      requestedPelvisBackLoadBearing.addVariableChangedListener(loadBearingVariableChangedListener);
       for (RobotSide robotSide : RobotSide.values)
       {
          requestedFootLoadBearing.get(robotSide).addVariableChangedListener(loadBearingVariableChangedListener);
@@ -219,7 +232,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    
    private RigidBody baseForHeadOrientationControl;
    private GeometricJacobian jacobianForHeadOrientationControl;
-   
+
    private void setupManagers(VariousWalkingManagers variousWalkingManagers)
    {
       baseForChestOrientationControl = fullRobotModel.getPelvis();
@@ -268,17 +281,42 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
    private void initializeContacts()
    {
-      momentumBasedController.clearContacts();
-
+      requestedPelvisLoadBearing.set(isContactablePlaneBodyInContact(contactablePelvis));
+      requestedPelvisBackLoadBearing.set(isContactablePlaneBodyInContact(contactablePelvisBack));
+      
       for (RobotSide robotSide : RobotSide.values)
       {
-         requestedFootLoadBearing.get(robotSide).set(true);
-         requestedFootLoadBearing.get(robotSide).notifyVariableChangedListeners();
+         requestedFootLoadBearing.get(robotSide).set(isContactablePlaneBodyInContact(feet.get(robotSide)));
+         requestedThighLoadBearing.get(robotSide).set(isContactablePlaneBodyInContact(contactableThighs.get(robotSide)));
       }
+   }
+
+   public void doMotionControl()
+   {
+      momentumBasedController.doPrioritaryControl();
+      callUpdatables();
+      updateLoadBearingStates();
+
+      doContactPointControl();
+      doFootControl();
+      doArmControl();
+      doHeadControl();
+      doLidarJointControl();
+      doChestControl();
+      doCoMControl();
+      doPelvisControl();
+      doJointPositionControl();
+
+      setTorqueControlJointsToZeroDersiredAcceleration();
+
+      momentumBasedController.doSecondaryControl();
    }
 
    protected void doPelvisControl()
    {
+      if (requestedPelvisLoadBearing.getBooleanValue())
+         return;
+      
       if (pelvisPoseProvider.checkForNewPose())
       {
          desiredPelvisConfigurationProvider.set(pelvisPoseProvider.getDesiredPelvisPose());
@@ -354,8 +392,6 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
    protected void doFootControl()
    {
-      updateLoadBearingStates();
-
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactablePlaneBody foot = feet.get(robotSide);
@@ -375,6 +411,33 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       super.doFootControl();
    }
 
+   private void doContactPointControl()
+   {
+      for (ContactablePlaneBody body : bodiesInContact)
+      {
+         GeometricJacobian jacobian = contactJacobians.get(body);
+         jacobian.compute();
+         FrameVector desiredAcceleration = new FrameVector(jacobian.getBaseFrame(), 0.0, 0.0, 0.0);
+         for (FramePoint contactPoint : body.getContactPoints())
+         {
+            momentumBasedController.setDesiredPointAcceleration(jacobian, contactPoint, desiredAcceleration);
+         }
+      }
+   }
+
+   private void addBodyInContact(ContactablePlaneBody contactablePlaneBody)
+   {
+      bodiesInContact.add(contactablePlaneBody);
+      RigidBody rigidBody = contactablePlaneBody.getRigidBody();
+      contactJacobians.put(contactablePlaneBody, new GeometricJacobian(elevator, rigidBody, elevator.getBodyFixedFrame()));
+   }
+
+   private void removeBodyInContact(ContactablePlaneBody contactablePlaneBody)
+   {
+      bodiesInContact.remove(contactablePlaneBody);
+      contactJacobians.remove(contactablePlaneBody);
+   }
+   
    private void updateLoadBearingStates()
    {
       for (RobotSide robotSide : RobotSide.values)
@@ -397,15 +460,29 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
       if (pelvisLoadBearingProvider.checkForNewLoadBearingRequest())
       {
-         requestedPelvisLoadBearing.set(true);
+         if (requestedPelvisLoadBearing.getBooleanValue() && requestedPelvisBackLoadBearing.getBooleanValue())
+            requestedPelvisBackLoadBearing.set(false);
+         else if (requestedPelvisLoadBearing.getBooleanValue())
+            requestedPelvisBackLoadBearing.set(true);
+         else
+            requestedPelvisLoadBearing.set(true);
       }
       
       if (pelvisPoseProvider.checkForNewPose())
       {
          requestedPelvisLoadBearing.set(false);
+         requestedPelvisBackLoadBearing.set(false);
       }
    }
 
+   public boolean isContactablePlaneBodyInContact(ContactablePlaneBody contactablePlaneBody)
+   {
+      if (momentumBasedController.getContactPoints(contactablePlaneBody).size() == 0)
+         return false;
+      else
+         return true;
+   }
+   
    public void setFootInContact(RobotSide robotSide, boolean inContact)
    {
       if (feet == null)
@@ -439,27 +516,44 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
    public void setThighInContact(RobotSide robotSide, boolean inContact)
    {
-      ContactablePlaneBody thigh = momentumBasedController.getContactablePlaneThighs().get(robotSide);
+      ContactablePlaneBody thigh = contactableThighs.get(robotSide);
       if (inContact)
       {
          momentumBasedController.setPlaneContactState(thigh, thigh.getContactPoints2d(), coefficientOfFriction.getDoubleValue(), null);
+         addBodyInContact(thigh);
       }
       else
       {
          momentumBasedController.setPlaneContactState(thigh, new ArrayList<FramePoint2d>(), coefficientOfFriction.getDoubleValue(), null);
+         removeBodyInContact(thigh);
       }
    }
 
    public void setPelvisInContact(boolean inContact)
    {
-      ContactablePlaneBody contactablePelvis = momentumBasedController.getContactablePlanePelvis();
       if (inContact)
       {
          momentumBasedController.setPlaneContactState(contactablePelvis, contactablePelvis.getContactPoints2d(), coefficientOfFriction.getDoubleValue(), null);
+         addBodyInContact(contactablePelvis);
       }
       else
       {
          momentumBasedController.setPlaneContactState(contactablePelvis, new ArrayList<FramePoint2d>(), coefficientOfFriction.getDoubleValue(), null);
+         removeBodyInContact(contactablePelvis);
+      }
+   }
+
+   public void setPelvisBackInContact(boolean inContact)
+   {
+      if (inContact)
+      {
+         momentumBasedController.setPlaneContactState(contactablePelvisBack, contactablePelvisBack.getContactPoints2d(), coefficientOfFriction.getDoubleValue(), null);
+         addBodyInContact(contactablePelvisBack);
+      }
+      else
+      {
+         momentumBasedController.setPlaneContactState(contactablePelvisBack, new ArrayList<FramePoint2d>(), coefficientOfFriction.getDoubleValue(), null);
+         removeBodyInContact(contactablePelvisBack);
       }
    }
 
@@ -468,13 +562,13 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       FrameVector normalContactVector = new FrameVector(worldFrame, 0.0, 0.0, 1.0);
       List<FramePoint> contactPoints = getContactPointsAccordingToFootConstraint(contactableBody, ConstraintType.TOES);
       List<FramePoint2d> contactPoints2d = getContactPoints2d(contactableBody, contactPoints);
-      setContactState(contactableBody, contactPoints2d, ConstraintType.TOES, normalContactVector);
+      setFootContactState(contactableBody, contactPoints2d, ConstraintType.TOES, normalContactVector);
    }
 
    private void setFlatFootContactState(ContactablePlaneBody contactableBody)
    {
       FrameVector normalContactVector = new FrameVector(contactableBody.getPlaneFrame(), 0.0, 0.0, 1.0);
-      setContactState(contactableBody, contactableBody.getContactPoints2d(), ConstraintType.FULL, normalContactVector);
+      setFootContactState(contactableBody, contactableBody.getContactPoints2d(), ConstraintType.FULL, normalContactVector);
    }
 
    private void setContactStateForSwing(ContactablePlaneBody contactableBody)
@@ -484,7 +578,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       desiredFootConfigurationProviders.get(contactableBody).set(new FramePose(footFrame));
 
       FrameVector normalContactVector = new FrameVector(contactableBody.getPlaneFrame(), 0.0, 0.0, 1.0);
-      setContactState(contactableBody, new ArrayList<FramePoint2d>(), ConstraintType.UNCONSTRAINED, normalContactVector);
+      setFootContactState(contactableBody, new ArrayList<FramePoint2d>(), ConstraintType.UNCONSTRAINED, normalContactVector);
    }
 
    private List<FramePoint> getContactPointsAccordingToFootConstraint(ContactablePlaneBody contactableBody, ConstraintType constraintType)
@@ -508,7 +602,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       return contactPoints2d;
    }
 
-   private void setContactState(ContactablePlaneBody contactableBody, List<FramePoint2d> contactPoints, ConstraintType constraintType,
+   private void setFootContactState(ContactablePlaneBody contactableBody, List<FramePoint2d> contactPoints, ConstraintType constraintType,
                                 FrameVector normalContactVector)
    {
       if (contactPoints.size() == 0)
@@ -518,10 +612,10 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
       momentumBasedController.setPlaneContactState(contactableBody, contactPoints, coefficientOfFriction.getDoubleValue(), normalContactVector);
 
-      updateEndEffectorControlModule(contactableBody, contactPoints, constraintType);
+      updateFootEndEffectorControlModule(contactableBody, contactPoints, constraintType);
    }
 
-   private void updateEndEffectorControlModule(ContactablePlaneBody contactablePlaneBody, List<FramePoint2d> contactPoints, ConstraintType constraintType)
+   private void updateFootEndEffectorControlModule(ContactablePlaneBody contactablePlaneBody, List<FramePoint2d> contactPoints, ConstraintType constraintType)
    {
       footEndEffectorControlModules.get(contactablePlaneBody).setContactPoints(contactPoints, constraintType);
    }
@@ -536,6 +630,9 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
          if (v.equals(requestedPelvisLoadBearing))
             setPelvisInContact(requestedPelvisLoadBearing.getBooleanValue());
+
+         if (v.equals(requestedPelvisBackLoadBearing))
+            setPelvisBackInContact(requestedPelvisBackLoadBearing.getBooleanValue());
          
          for (RobotSide robotSide : RobotSide.values)
          {
