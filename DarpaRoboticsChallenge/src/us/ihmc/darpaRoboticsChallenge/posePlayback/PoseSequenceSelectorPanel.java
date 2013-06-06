@@ -130,6 +130,7 @@ public class PoseSequenceSelectorPanel extends JPanel
          return;
       
       sequence.getPoseSequence().set(selectedRow, new PosePlaybackRobotPose(sdfRobot));
+      updateTableBasedOnPoseSequence();
    }
    
    public void save()

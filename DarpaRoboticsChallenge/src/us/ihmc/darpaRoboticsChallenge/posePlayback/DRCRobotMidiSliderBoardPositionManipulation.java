@@ -61,6 +61,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    private final BooleanYoVariable isSaveSequenceRequested = new BooleanYoVariable("isSaveSequenceRequested", dontRecordRegistry);
    private final BooleanYoVariable isLoadSequenceRequested = new BooleanYoVariable("isLoadSequenceRequested", dontRecordRegistry);
    private final BooleanYoVariable isClearSequenceRequested = new BooleanYoVariable("isClearSequenceRequested", dontRecordRegistry);
+   private final BooleanYoVariable isSymmetricModeRequested = new BooleanYoVariable("isSymmetricModeRequested", dontRecordRegistry);
 
    private final BooleanYoVariable isPelvisControlRequested = new BooleanYoVariable("isPelvisControlRequested", dontRecordRegistry);
    private final BooleanYoVariable isChestControlRequested = new BooleanYoVariable("isChestControlRequested", dontRecordRegistry);
@@ -80,6 +81,8 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    private final DoubleYoVariable q_pitch = new DoubleYoVariable("q_pitch", registry);
    private final DoubleYoVariable q_roll = new DoubleYoVariable("q_roll", registry);
 
+   private boolean symmetricMode = false;
+   private RobotSide symmetricControlSide;
    private final DoubleYoVariable q_qs, q_qx, q_qy, q_qz;
 
    public DRCRobotMidiSliderBoardPositionManipulation(SimulationConstructionSet scs)
@@ -124,6 +127,16 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       q_roll.addVariableChangedListener(pelvisListener);
       
       isLeftLegControlRequested.set(true);
+      
+      isSymmetricModeRequested.addVariableChangedListener(new VariableChangedListener()
+      {
+         public void variableChanged(YoVariable yoVariable)
+         {
+            symmetricMode = isSymmetricModeRequested.getBooleanValue();
+         }  
+      });
+      
+      setupSymmetricModeListeners();
    }
    
    public void addCaptureSnapshotListener(VariableChangedListener variableChangedListener)
@@ -319,6 +332,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       sliderBoard.setButton(buttonChannel++, isSaveSequenceRequested);
       sliderBoard.setButton(buttonChannel++, isLoadSequenceRequested);
       sliderBoard.setButton(buttonChannel++, isClearSequenceRequested);
+      sliderBoard.setButton(buttonChannel++, isSymmetricModeRequested);
       buttonChannel = 9;
       sliderBoard.setButton(buttonChannel++, isPelvisControlRequested);
       sliderBoard.setButton(buttonChannel++, isChestControlRequested);
@@ -330,11 +344,40 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       sliderBoard.setButton(buttonChannel++, isRightLegControlRequested);
 
    }
+   
+   private void setupSymmetricModeListeners()
+   {
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         String thisSidePrefix = sideString.get(robotSide);
+         String oppositeSidePrefix = sideString.get(robotSide.getOppositeSide());
+         
+         for(LegJointName legJointName : legJointStringNames.keySet())
+         {
+            YoVariable thisVariable = scs.getVariable(thisSidePrefix + legJointStringNames.get(legJointName));
+            YoVariable oppositeSideVariable = scs.getVariable(oppositeSidePrefix + legJointStringNames.get(legJointName));
+            boolean setToOppositeSign = (legJointName == LegJointName.HIP_YAW) || (legJointName == LegJointName.ANKLE_ROLL) || (legJointName == LegJointName.HIP_ROLL);
+            SymmetricModeListener symmetricModeListener = new SymmetricModeListener((DoubleYoVariable) oppositeSideVariable, robotSide, setToOppositeSign);
+            thisVariable.addVariableChangedListener(symmetricModeListener);
+         }
+         
+         for(ArmJointName armJointName : armJointStringNames.keySet())
+         {
+            YoVariable thisVariable = scs.getVariable(thisSidePrefix + armJointStringNames.get(armJointName));
+            YoVariable oppositeSideVariable = scs.getVariable(oppositeSidePrefix + armJointStringNames.get(armJointName));
+            boolean setToOppositeSign = (armJointName == ArmJointName.WRIST_ROLL) || (armJointName == ArmJointName.ELBOW_ROLL) || (armJointName == ArmJointName.SHOULDER_ROLL);
+            SymmetricModeListener symmetricModeListener = new SymmetricModeListener((DoubleYoVariable) oppositeSideVariable, robotSide, setToOppositeSign);
+            thisVariable.addVariableChangedListener(symmetricModeListener);            
+         }
+      }
+
+   }
 
    public void setupSliderForLegs(RobotSide robotSide)
    {
 //      resetSliderBoard();
-
+      symmetricControlSide = robotSide;
+      
       int sliderChannel = 1;
       String prefix = sideString.get(robotSide);
 
@@ -378,6 +421,8 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
    private void setupSliderForArms(RobotSide robotSide)
    {
+      symmetricControlSide = robotSide;
+
       int sliderChannel = 1;
       String prefix = sideString.get(robotSide);
 
@@ -545,6 +590,28 @@ public class DRCRobotMidiSliderBoardPositionManipulation
          }
       }
       
+   }
+   
+   private class SymmetricModeListener implements VariableChangedListener
+   {
+      private final DoubleYoVariable variableToSet;
+      private final RobotSide robotSide;
+      private final double respectiveSign;
+      
+      public SymmetricModeListener(DoubleYoVariable variableToSet, RobotSide robotSide, boolean setToOppositeSign)
+      {
+         this.variableToSet = variableToSet;
+         this.robotSide = robotSide;
+         this.respectiveSign = setToOppositeSign ? -1.0 : 1.0;
+      }
+      
+      public void variableChanged(YoVariable yoVariable)
+      {
+         if(symmetricMode && (robotSide == symmetricControlSide))
+         {
+            variableToSet.set(respectiveSign * ((DoubleYoVariable) yoVariable).getDoubleValue());
+         }
+      }
    }
    
    private class PelvisRotationListener implements VariableChangedListener
