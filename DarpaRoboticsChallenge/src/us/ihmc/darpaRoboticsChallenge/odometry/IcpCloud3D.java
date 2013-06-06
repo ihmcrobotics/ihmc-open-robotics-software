@@ -13,6 +13,7 @@ import org.ddogleg.nn.FactoryNearestNeighbor;
 import org.ddogleg.nn.NearestNeighbor;
 import org.ddogleg.nn.NnData;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,18 +38,20 @@ public class IcpCloud3D {
    MotionTransformPoint<Se3_F64, Point3D_F64> motionAlg;
 
    // Finds the nearest neighbor.
-   NearestNeighbor<Point3D_F64> nn;
+   NearestNeighbor<SrcData> nn;
 
-   FastQueue<Point3D_F64> ref = new FastQueue<Point3D_F64>(Point3D_F64.class,true);
+   FastQueue<SrcData> ref = new FastQueue<SrcData>(SrcData.class,true);
    FastQueue<double[]> refArray = new FastQueueArray_F64(3);
 
+   // keep track of which reference data has been used.
+   List<SrcData> usedRef = new ArrayList<SrcData>();
 
    // modified list of 'current' point cloud after applying the most recent estimate of camera motion
    // Much less numerical errors when applying the total transform as compared to compounding transforms
    FastQueue<Point3D_F64> currentModified = new FastQueue<Point3D_F64>(Point3D_F64.class,true);
 
    double[] work = new double[3];
-   NnData<Point3D_F64> bestMatch = new NnData<Point3D_F64>();
+   NnData<SrcData> bestMatch = new NnData<SrcData>();
 
    FastQueue<Point3D_F64> src = new FastQueue<Point3D_F64>(Point3D_F64.class,false);
    FastQueue<Point3D_F64> dst = new FastQueue<Point3D_F64>(Point3D_F64.class,false);
@@ -58,6 +61,9 @@ public class IcpCloud3D {
 
    // used to check for convergence
    Rodrigues rod = new Rodrigues();
+
+   // fraction of reference points which were matched with dst points
+   double fitFraction;
 
    /**
     * Constructor in which parameters and internal algorithms are specified
@@ -69,7 +75,7 @@ public class IcpCloud3D {
     * @param nn Nearest-Neighbor
     */
    public IcpCloud3D(double maxDistance, int maxIterations, double convergenceTol,
-                     MotionTransformPoint<Se3_F64, Point3D_F64> motionAlg, NearestNeighbor<Point3D_F64> nn)
+                     MotionTransformPoint<Se3_F64, Point3D_F64> motionAlg, NearestNeighbor<SrcData> nn)
    {
       this.maxDistance = maxDistance;
       this.maxIterations = maxIterations;
@@ -131,6 +137,8 @@ public class IcpCloud3D {
 
       total.reset();
       for( int i = 0; i < maxIterations; i++ ) {
+         usedRef.clear();
+
          src.reset();
          dst.reset();
 
@@ -142,7 +150,8 @@ public class IcpCloud3D {
             work[2] = p.z;
 
             if( nn.findNearest(work,maxDistance, bestMatch) ) {
-               src.add( bestMatch.data );
+               usedRef.add(bestMatch.data);
+               src.add( bestMatch.data.point );
                dst.add( p );
             }
          }
@@ -168,7 +177,40 @@ public class IcpCloud3D {
          }
       }
 
+      computeQualityOfFit();
+
       return true;
+   }
+
+   /**
+    * Computes the fraction of reference points which are used to compute the final motion
+    */
+   private void computeQualityOfFit()
+   {
+      // mark all points as not being used
+      for( int j = 0; j < ref.size(); j++ ) {
+         ref.get(j).hit = false;
+      }
+
+      // make used points
+      for( int j = 0; j < usedRef.size(); j++ ) {
+         usedRef.get(j).hit = true;
+      }
+
+      // count total points used
+      int count = 0;
+      for( int i = 0; i < ref.size(); i++ ) {
+         if( ref.get(i).hit )
+            count++;
+      }
+
+      fitFraction = count/(double)ref.size();
+   }
+
+
+   public double getFitFraction()
+   {
+      return fitFraction;
    }
 
    /**
@@ -178,5 +220,16 @@ public class IcpCloud3D {
     */
    public Se3_F64 getReferenceToCurrent() {
       return total;
+   }
+
+   public static class SrcData
+   {
+      // if
+      boolean hit;
+      Point3D_F64 point = new Point3D_F64();
+
+      public void set( Point3D_F64 p ) {
+         point.set(p);
+      }
    }
 }

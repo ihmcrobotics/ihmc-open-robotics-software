@@ -48,6 +48,8 @@ public class FitPointCloudFilesApp
 
       System.out.println("actual");
       refToCurrent.print();
+
+      System.out.println("Fit Fraction: "+icp.getFitFraction());
    }
 
    public static List<Point3D_F64> read( String fileName ) throws IOException
