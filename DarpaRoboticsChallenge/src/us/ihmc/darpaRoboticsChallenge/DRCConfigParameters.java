@@ -81,7 +81,6 @@ public class DRCConfigParameters
    public static final double NOISE_FILTER_ALPHA = 1e-1;
    public static final double POSITION_NOISE_STD = 0.01;
    public static final double QUATERNION_NOISE_STD = 0.01;
-   
 
 
    // LIDAR:
@@ -130,7 +129,7 @@ public class DRCConfigParameters
    public static final double LIDAR_RESOLUTION_SPHERE_INNER_RADIUS = 1.0;
    public static final double LIDAR_RESOLUTION_SPHERE_DISTANCE_FROM_HEAD = 1.0;
 
-   public static final boolean USE_TABS_IN_UI = false;
+   public static final boolean USE_TABS_IN_UI = true;
    
    // Hand Controller
    public static final boolean USE_CREEEPY_GRIP = false;
