@@ -68,6 +68,7 @@ public class PosePlaybackSCSBridge
    private final EnumYoVariable rightPalmPoseClassification = new EnumYoVariable("rightPalmPose", "", registry, PalmPoseClassification.class, true);
    private final SideDependentList<EnumYoVariable> palmPoseClassifications = new SideDependentList<EnumYoVariable>(leftPalmPoseClassification, rightPalmPoseClassification);
 
+   private PosePlaybackRobotPose previousPose;
 
    private final SideDependentList<DynamicGraphicCoordinateSystem> feetCoordinateSystems;
 
@@ -157,12 +158,15 @@ public class PosePlaybackSCSBridge
 
       ClearSequenceListener clearSequenceListener = new ClearSequenceListener();
       sliderBoard.addClearSequenceRequestedListener(clearSequenceListener);
-
+      
       LoadFrameByFrameSequenceListener loadFrameByFrameSequenceListener = new LoadFrameByFrameSequenceListener(sdfRobot, scs);
       sliderBoard.addLoadFrameByFrameSequenceRequestedListener(loadFrameByFrameSequenceListener);
 
       PlayPoseFromFrameByFrameSequenceListener playPoseFromFrameByFrameSequenceListener = new PlayPoseFromFrameByFrameSequenceListener(sdfRobot, scs);
       sliderBoard.addPlayPoseFromFrameByFrameSequenceRequestedListener(playPoseFromFrameByFrameSequenceListener);
+      
+      ResetToBasePoseListener resetToBasePoseListener = new ResetToBasePoseListener(sdfRobot);
+      sliderBoard.addResetToBasePoseRequestedListener(resetToBasePoseListener);
       
       
       scs.startOnAThread();
@@ -225,8 +229,6 @@ public class PosePlaybackSCSBridge
       private final SimulationConstructionSet scs;
       private final ReferenceFrames referenceFrames;
       private final ModularRobotController controller;
-
-      private PosePlaybackRobotPose previousPose;
 
       public CaptureSnapshotListener(SDFRobot sdfRobot, ReferenceFrames referenceFrames, SDFFullRobotModel fullRobotModel,
             ModularRobotController controller,
@@ -466,6 +468,22 @@ public class PosePlaybackSCSBridge
          frameByframePoseNumber = 0;
       }
     }
+   
+   private class ResetToBasePoseListener implements VariableChangedListener
+   {
+      private final SDFRobot sdfRobot;
+      
+      public ResetToBasePoseListener(SDFRobot sdfRobot)
+      {
+         this.sdfRobot = sdfRobot;
+      }
+      
+      public void variableChanged(YoVariable yoVariable)
+      {
+         previousPose.setRobotAtPose(sdfRobot);
+         posePlaybackController.setPlaybackPose(previousPose);
+      }
+   }
 
    private class PlayPoseFromFrameByFrameSequenceListener implements VariableChangedListener
    {
