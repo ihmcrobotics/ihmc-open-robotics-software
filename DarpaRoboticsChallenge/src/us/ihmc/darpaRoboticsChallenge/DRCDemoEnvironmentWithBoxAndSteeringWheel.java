@@ -1,19 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
-import org.apache.commons.math3.util.FastMath;
-
-import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.driving.VehicleObject;
-import us.ihmc.darpaRoboticsChallenge.controllers.SteeringWheelDisturbanceController;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.util.environments.ContactableToroidRobot;
@@ -24,12 +10,19 @@ import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.Contactable;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
 import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
+import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.driving.VehicleObject;
+import us.ihmc.darpaRoboticsChallenge.controllers.SteeringWheelDisturbanceController;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.utilities.math.geometry.Box3d;
+
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Vector3d;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEnvironmentInterface
 {
-   private static final double BOX_LENGTH = 0.7;
-   private static final double BOX_WIDTH = 3.0;
-   private static final double BOX_HEIGHT = 0.85;
    private final CombinedTerrainObject combinedTerrainObject;
 
    private final ArrayList<Robot> environmentRobots = new ArrayList<Robot>();
@@ -54,9 +47,7 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
       double toroidRadius = (externalSteeringWheelRadius - internalSteeringWheelRadius) / 2.0;
       double steeringWheelRadius = (externalSteeringWheelRadius + internalSteeringWheelRadius) / 2.0;
 
-      double xOffsetFromSeat = 0.15;
-
-      combinedTerrainObject = createCombinedTerrainObject(steeringWheelTransform, xOffsetFromSeat);
+      combinedTerrainObject = createCombinedTerrainObject(steeringWheelTransform);
 
       double mass = 1.0;
       steeringWheelRobot = new ContactableToroidRobot("steeringWheel", steeringWheelTransform, steeringWheelRadius, toroidRadius, mass);
@@ -66,20 +57,44 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
       environmentRobots.add(steeringWheelRobot);
    }
 
-   private CombinedTerrainObject createCombinedTerrainObject(Transform3D steeringWheelTransform, double xOffsetFromSeat)
+   private CombinedTerrainObject createCombinedTerrainObject(Transform3D steeringWheelTransform)
    {
       CombinedTerrainObject terrainObject = new CombinedTerrainObject("carSeatBox");
 
       Vector3d steeringWheelTranslation = new Vector3d();
       steeringWheelTransform.get(steeringWheelTranslation);
 
-      // seat
-      double xOffset = steeringWheelTranslation.getX() - BOX_LENGTH / 2.0 - xOffsetFromSeat;
-      double yOffset = steeringWheelTranslation.getY();
-      terrainObject.addBox(-BOX_LENGTH / 2.0 + xOffset, -BOX_WIDTH / 2.0 + yOffset, BOX_LENGTH / 2.0 + xOffset, BOX_WIDTH / 2.0 + yOffset, BOX_HEIGHT);
+      // mud_seat
+//      <pose>-0.1 0.0 0.81  0 0 0</pose>
+//      <geometry>
+//      <box>
+//      <size>0.6 1.15 0.1</size>
+//      </box>
+//      </geometry>
+
+      Transform3D seatTransform = new Transform3D();
+
+      seatTransform.setTranslation(new Vector3d(-0.1, 0.0, 0.81));
+      Box3d seatBox = new Box3d(seatTransform, 0.6, 1.15, 0.1);
+      terrainObject.addRotatableBox(seatBox, YoAppearance.DarkGray());
+
+      // seat_back
+//      <pose>-0.300000 0.000000 1.125000 0.000000 -0.200000 0.000000</pose>
+//      <geometry>
+//      <box>
+//      <size>0.060000 1.000000 0.400000</size>
+//      </box>
+//      </geometry>
+
+      Transform3D pose = new Transform3D();
+      pose.setEuler(new Vector3d(0.0, -0.2, 0.0));
+      pose.setTranslation(new Vector3d(-0.3, 0.0, 1.125));
+      Box3d seatBackBox = new Box3d(pose, 0.06, 1.0, 0.4);
+
+      terrainObject.addRotatableBox(seatBackBox, YoAppearance.DarkGray());
 
       // ground
-      terrainObject.addBox(-100.0, -100.0, 100.0, 100.0, -0.05, 0.0, YoAppearance.DarkGray());
+      terrainObject.addBox(-1.0, -1.0, 1.0, 1.0, -0.05, 0.0, YoAppearance.DarkGray());
 
       return terrainObject;
    }
