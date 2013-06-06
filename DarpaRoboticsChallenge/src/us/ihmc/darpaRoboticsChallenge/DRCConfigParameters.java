@@ -55,7 +55,7 @@ public class DRCConfigParameters
    public static final String CONSTELLATION_FIELD_COMPUTER_1_VPN_IP = "10.0.0.52";
    public static final String CONSTELLATION_FIELD_COMPUTER_2_VPN_IP = "10.0.0.53";
 
-   public static final String GAZEBO_HOST = LOCALHOST;
+   public static final String GAZEBO_HOST = CLOUD_MINION3_IP;
    public static final String SCS_MACHINE_IP_ADDRESS = LOCALHOST; //CLOUD_MONSTER_IP;
 
    public static final String OPERATOR_INTERFACE_IP_ADDRESS = LOCALHOST;
@@ -81,6 +81,7 @@ public class DRCConfigParameters
    public static final double NOISE_FILTER_ALPHA = 1e-1;
    public static final double POSITION_NOISE_STD = 0.01;
    public static final double QUATERNION_NOISE_STD = 0.01;
+   
 
 
    // LIDAR:
@@ -130,5 +131,9 @@ public class DRCConfigParameters
    public static final double LIDAR_RESOLUTION_SPHERE_DISTANCE_FROM_HEAD = 1.0;
 
    public static final boolean USE_TABS_IN_UI = false;
+   
+   // Hand Controller
+   public static final boolean USE_CREEEPY_GRIP = false;
+   public static final boolean USE_PURE_POSITION_CONTROL_FOR_HANDS = false;
 
 }

@@ -35,6 +35,22 @@ public class SandiaHandModel
             throw new RuntimeException("Unhandled Case");
          }
       }
+      public String getShortName()
+      {
+         switch (this)
+         {
+         case THUMB:
+            return "f3";
+         case INDEX:
+            return "f0";
+         case MIDDLE:
+            return "f1";
+         case RING:
+            return "f2";
+         default:
+            throw new RuntimeException("Unhandled Case");
+         }
+      }
    }
 
    public enum SandiaFingerJointName
@@ -51,6 +67,20 @@ public class SandiaHandModel
             return 1;
          case SECONDJOINT:
             return 2;
+         default:
+            throw new RuntimeException("Unhandled Case");
+         }
+      }
+      public String getShortName()
+      {
+         switch (this)
+         {
+         case BASEJOINT:
+            return "j0";
+         case FIRSTJOINT:
+            return "j1";
+         case SECONDJOINT:
+            return "j2";
          default:
             throw new RuntimeException("Unhandled Case");
          }
@@ -118,5 +148,10 @@ public class SandiaHandModel
    public ArrayList<FingerJoint> getHandJoints()
    {
       return allJoints;
+   }
+   
+   public EnumMap<SandiaFingerName,EnumMap<SandiaFingerJointName,FingerJoint>> getJointMap()
+   {
+      return handJoints;
    }
 }
