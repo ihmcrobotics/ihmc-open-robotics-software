@@ -56,6 +56,64 @@ public class PoseMessage
       buffer.put(orientation);
    }
 
+   public void setPosition(double[] position)
+   {
+      if(position.length < 3)
+      {
+         throw new RuntimeException("Bad position vector");
+      }
+      this.position[0] = position[0];
+      this.position[1] = position[1];
+      this.position[2] = position[2];
+   }
+
+   public void setOrientation(double[] orientation)
+   {
+      if(position.length < 4)
+      {
+         throw new RuntimeException("Bad position vector");
+      }
+      this.orientation[0] = orientation[0];
+      this.orientation[1] = orientation[1];
+      this.orientation[2] = orientation[2];
+      this.orientation[3] = orientation[3];
+   }
+
+   public void setPosX(double x)
+   {
+      this.position[0] = x;
+   }
+
+   public void setPosY(double y)
+   {
+      this.position[1] = y;
+   }
+
+   public void setPosZ(double z)
+   {
+      this.position[2] = z;
+   }
+
+   public void setOrientationW(double w)
+   {
+      this.position[0] = w;
+   }
+
+   public void setOrientationX(double x)
+   {
+      this.position[1] = x;
+   }
+
+   public void setOrientationY(double y)
+   {
+      this.position[2] = y;
+   }
+
+   public void setOrientationZ(double z)
+   {
+      this.position[3] = z;
+   }
+
    @Override
    public String toString()
    {
