@@ -2,6 +2,8 @@ package us.ihmc.darpaRoboticsChallenge.posePlayback;
 
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.File;
 import java.util.ArrayList;
 
@@ -17,6 +19,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.environment.VRCTask;
 import us.ihmc.darpaRoboticsChallenge.environment.VRCTaskName;
+import us.ihmc.userInterface.input.EscapeKeyActionBinding;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -60,6 +63,22 @@ public class PoseSequenceSelectorPanel extends JPanel
        };
        tableModel = new DefaultTableModel(columnNames, 0); // new ScriptEditorTableModel();
        table = new JTable(tableModel);
+       
+       table.addKeyListener(new KeyListener()
+       {
+         public void keyPressed(KeyEvent e)
+         {
+            if(e.getKeyChar() == KeyEvent.VK_ENTER)
+               updateSCS();
+         }
+         public void keyReleased(KeyEvent e)
+         {            
+         }
+         public void keyTyped(KeyEvent e)
+         {
+            
+         }
+       });
 
        table.getColumnModel().getColumn(0).setPreferredWidth(40);
        for(int i = 1; i < 29; i++)
@@ -100,12 +119,14 @@ public class PoseSequenceSelectorPanel extends JPanel
    
    public void deleteSelectedRows()
    {
+      updatePoseSequenceBasedOnTable();
+      
       int[] selectedRows = table.getSelectedRows();
       int numberOfRemovedRows = 0;
       
       for(int row : selectedRows)
       {
-         deleteRow(row - numberOfRemovedRows);
+         sequence.getPoseSequence().remove(row - numberOfRemovedRows);
          numberOfRemovedRows++;
       }
       
@@ -114,6 +135,8 @@ public class PoseSequenceSelectorPanel extends JPanel
    
    public void updateSCS()
    {
+      updatePoseSequenceBasedOnTable();
+      
       int selectedRow = table.getSelectedRow();
       if(selectedRow == -1)
          return;
@@ -135,6 +158,7 @@ public class PoseSequenceSelectorPanel extends JPanel
    
    public void save()
    {
+      updatePoseSequenceBasedOnTable();
       sequence.promptWriteToFile();
    }
    
@@ -165,5 +189,49 @@ public class PoseSequenceSelectorPanel extends JPanel
          
          tableModel.addRow(row);
       }      
+   }
+   
+   private void updatePoseSequenceBasedOnTable()
+   {
+      sequence.clear();
+      
+      for(int i = 0; i < tableModel.getRowCount(); i++)
+      {
+         sequence.addPose(getJointAnglesFromRow(i), getTimeDelayFromRow(i));
+      }
+   }
+   
+   private double[] getJointAnglesFromRow(int row)
+   {
+      double[] jointAngles = new double[28];
+      
+      for(int i = 0; i < 28; i++)
+      {
+         try
+         {
+            jointAngles[i] = Double.parseDouble((String) tableModel.getValueAt(row, i + 1));
+         }
+         catch(ClassCastException e)
+         {
+            jointAngles[i] = (Double) tableModel.getValueAt(row, i + 1);
+         }
+      }
+      
+      return jointAngles;
+   }
+   
+   private double getTimeDelayFromRow(int row)
+   {
+      double timeDelay;
+      try
+      {
+         timeDelay = Double.parseDouble((String) tableModel.getValueAt(row, 29));
+      }
+      catch(ClassCastException e)
+      {
+         timeDelay = (Double) tableModel.getValueAt(row, 29);
+      }
+      
+      return timeDelay;
    }
 }
