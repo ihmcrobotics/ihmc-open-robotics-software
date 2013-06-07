@@ -63,15 +63,15 @@ public class DrivingFootControlModule
    private final FramePoint toePointInBase = new FramePoint();
    private final ReferenceFrame toePointFrame;
 
-   private final ReferenceFrame vehicleFrame;
-   private final RigidBody foot;
+   private final DrivingReferenceFrames drivingReferenceFrames;
 
+   private final RigidBody foot;
    private final RigidBody elevator;
 
    private final DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 1);
 
    public DrivingFootControlModule(RigidBody elevator, ContactablePlaneBody contactablePlaneFoot, MomentumBasedController momentumBasedController,
-                                   ReferenceFrame vehicleFrame, DoubleYoVariable yoTime, TwistCalculator twistCalculator, YoVariableRegistry parentRegistry)
+                                   DrivingReferenceFrames drivingReferenceFrames, DoubleYoVariable yoTime, TwistCalculator twistCalculator, YoVariableRegistry parentRegistry)
    {
       this.foot = contactablePlaneFoot.getRigidBody();
       this.elevator = elevator;
@@ -82,12 +82,13 @@ public class DrivingFootControlModule
       Transform3D transform = new Transform3D();
       transform.set(toePoint.getVectorCopy());
       toePointFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(toePointName, toePoint.getReferenceFrame(), transform);
-      this.vehicleFrame = vehicleFrame;
+      this.drivingReferenceFrames = drivingReferenceFrames;
       toePointPositionController = new EuclideanPositionController(toePointName, toePointFrame, registry);
       this.momentumBasedController = momentumBasedController;
       this.time = yoTime;
       trajectoryInitializationTime = new DoubleYoVariable(toePointName + "InitializationTime", registry);
 
+      ReferenceFrame vehicleFrame = drivingReferenceFrames.getVehicleFrame();
       targetPosition = new YoFramePoint(toePointName + "Target", vehicleFrame, registry);
 
       PositionProvider initialPositionProvider = new ConstantPositionProvider(toePoint);
@@ -129,9 +130,25 @@ public class DrivingFootControlModule
       parentRegistry.addChild(registry);
    }
 
-   public void initialize()
+   public void holdPosition()
    {
       targetPosition.set(toePoint.changeFrameCopy(targetPosition.getReferenceFrame()));
+      initializeTrajectory();
+   }
+
+   public void moveToPositionInGasPedalFrame(double z)
+   {
+      FramePoint target = new FramePoint(drivingReferenceFrames.getObjectFrame(VehicleObject.GAS_PEDAL), 0.0, 0.0, z);
+      target.changeFrame(targetPosition.getReferenceFrame());
+      targetPosition.set(target);
+      initializeTrajectory();
+   }
+
+   public void moveToPositionInBrakePedalFrame(double z)
+   {
+      FramePoint target = new FramePoint(drivingReferenceFrames.getObjectFrame(VehicleObject.BRAKE_PEDAL), 0.0, 0.0, z);
+      target.changeFrame(targetPosition.getReferenceFrame());
+      targetPosition.set(target);
       initializeTrajectory();
    }
 
@@ -157,7 +174,7 @@ public class DrivingFootControlModule
 
    private void doFootOrientationControl()
    {
-      desiredOrientation.set(vehicleFrame);
+      desiredOrientation.set(drivingReferenceFrames.getVehicleFrame());
       desiredAngularVelocity.setToZero(toePointFrame);
       feedForwardAngularAcceleration.setToZero(toePointFrame);
 
