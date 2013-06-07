@@ -916,7 +916,8 @@ public class DRCRobotMidiSliderBoardPositionManipulation
          }
       }
 
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
+      if(dynamicGraphicObjectsListRegistry != null)
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
       dynamicGraphicObjectsList.hideDynamicGraphicObjects();
    }
 
