@@ -56,7 +56,7 @@ public class DrivingPuppetMasterUsingChangedListeners
       {
          public void variableChanged(YoVariable v)
          {
-            drivingInterface.setParkingBrake(desiredParkingBrakeMode.getBooleanValue());
+            drivingInterface.setParkingBrake(desiredParkingBrakeMode.getBooleanValue(), false);
          }
       });
 
@@ -64,7 +64,7 @@ public class DrivingPuppetMasterUsingChangedListeners
       {
          public void variableChanged(YoVariable v)
          {
-            drivingInterface.setGear(desiredGear.getEnumValue());
+            drivingInterface.setGear(desiredGear.getEnumValue(), false);
          }
       });
    }
