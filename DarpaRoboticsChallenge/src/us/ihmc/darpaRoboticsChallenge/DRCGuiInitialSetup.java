@@ -13,7 +13,7 @@ import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
 
 public class DRCGuiInitialSetup implements GuiInitialSetup
 {
-   private static final boolean SHOW_ONLY_WRENCH_VISUALIZER = true;
+   private static final boolean SHOW_ONLY_WRENCH_VISUALIZER = false;
    private boolean isGuiShown = true;
    private boolean is3dGraphicsShown = true;
    private final boolean groundProfileVisible;
