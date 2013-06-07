@@ -60,6 +60,7 @@ public class ManipulationControlModule
    private final SideDependentList<ReferenceFrame> midHandPositionControlFrames = new SideDependentList<ReferenceFrame>();
    private final SideDependentList<ReferenceFrame> fingerPositionControlFrames;
    private final SideDependentList<ReferenceFrame> barPositionControlFrames;
+   private final SideDependentList<ReferenceFrame> creepyPositionControlFrames;
 
    private final SideDependentList<HandControllerInterface> handControllers;
 
@@ -96,11 +97,12 @@ public class ManipulationControlModule
 
       fingerPositionControlFrames = createFingerPositionControlFramesHack(jacobians);
       barPositionControlFrames = createBarPositionControlFramesHack(midHandPositionControlFrames);
-
+      creepyPositionControlFrames = createCreepyPositionControlFramesHack(midHandPositionControlFrames);
 
       createFrameVisualizers(dynamicGraphicObjectsListRegistry, midHandPositionControlFrames, "midHandPositionControlFrames");
       createFrameVisualizers(dynamicGraphicObjectsListRegistry, fingerPositionControlFrames, "fingerPositionControlFrames");
       createFrameVisualizers(dynamicGraphicObjectsListRegistry, barPositionControlFrames, "barPositionControlFrames");
+      createFrameVisualizers(dynamicGraphicObjectsListRegistry, creepyPositionControlFrames, "creepyPositionControlFrames");
 
       setUpStateMachine(yoTime, fullRobotModel, twistCalculator, parameters, variousWalkingProviders, dynamicGraphicObjectsListRegistry, handControllers,
                         momentumBasedController, midHandPositionControlFrames, jacobians);
@@ -295,6 +297,11 @@ public class ManipulationControlModule
       return barPositionControlFrames;
    }
 
+   public SideDependentList<ReferenceFrame> getCreepyPositionControlFrames()
+   {
+      return creepyPositionControlFrames;
+   }
+
    private SideDependentList<ReferenceFrame> createFingerPositionControlFramesHack(SideDependentList<GeometricJacobian> jacobians)
    {
       SideDependentList<ReferenceFrame> fingerPositionControlFrames = new SideDependentList<ReferenceFrame>();
@@ -350,6 +357,34 @@ public class ManipulationControlModule
 
          ReferenceFrame referenceFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(robotSide.getCamelCaseNameForStartOfExpression() +
                "Bar", midHandPositionControlFrame, transform);
+         ret.put(robotSide, referenceFrame);
+      }
+      return ret;
+   }
+
+
+   private SideDependentList<ReferenceFrame> createCreepyPositionControlFramesHack(SideDependentList<ReferenceFrame> midHandPositionControlFrames)
+   {
+      SideDependentList<ReferenceFrame> ret = new SideDependentList<ReferenceFrame>();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ReferenceFrame midHandPositionControlFrame = midHandPositionControlFrames.get(robotSide);
+
+         Transform3D preRotation = new Transform3D();
+         preRotation.setEuler(new Vector3d(0.0, 0.670796, 0.0));
+
+         Transform3D transform = new Transform3D();
+         transform.setTranslation(new Vector3d(0.175, 0.0, 0.07));
+
+         Transform3D postRotation = new Transform3D();
+         postRotation.setEuler(new Vector3d(0.0, -0.3, 0.0));
+
+         transform.mul(preRotation, transform);
+         transform.mul(postRotation);
+
+         ReferenceFrame referenceFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(robotSide.getCamelCaseNameForStartOfExpression() +
+               "Creepy", midHandPositionControlFrame, transform);
          ret.put(robotSide, referenceFrame);
       }
       return ret;
