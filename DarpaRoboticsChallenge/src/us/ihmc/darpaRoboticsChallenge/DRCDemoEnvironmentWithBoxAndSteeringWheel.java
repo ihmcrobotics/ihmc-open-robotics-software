@@ -65,48 +65,33 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
       steeringWheelTransform.get(steeringWheelTranslation);
 
       // mud_seat
-//      <pose>-0.1 0.0 0.81  0 0 0</pose>
-//      <geometry>
-//      <box>
-//      <size>0.6 1.15 0.1</size>
-//      </box>
-//      </geometry>
-//      Transform3D seatTransform = new Transform3D();
-//      seatTransform.setTranslation(new Vector3d(-0.1, 0.0, 0.81));
-//      Box3d seatBox = new Box3d(seatTransform, 0.6, 1.15, 0.1);
-//      terrainObject.addRotatableBox(seatBox, YoAppearance.DarkGray());
+//      addBox(-0.1, 0.0, 0.81, 0.0, 0.0, 0.0, 0.6, 1.15, 0.1, terrainObject);
 
       // seat
-//      <pose>-0.100000 0.000000 0.560000 0.000000 0.000000 0.000000</pose>
-//      <geometry>
-//      <box>
-//      <size>0.600000 1.220000 0.500000</size>
-//      </box>
-      Transform3D seatTransform = new Transform3D();
-      seatTransform.setTranslation(new Vector3d(-0.1, 0.0, 0.56));
-      Box3d seatBox = new Box3d(seatTransform, 0.6, 1.22, 0.5);
-      terrainObject.addRotatableBox(seatBox, YoAppearance.DarkGray());
-
+      addBox(-0.1, 0.0, 0.56, 0.0, 0.0, 0.0, 0.6, 1.22, 0.5, terrainObject);
 
       // seat_back
-//      <pose>-0.300000 0.000000 1.125000 0.000000 -0.200000 0.000000</pose>
-//      <geometry>
-//      <box>
-//      <size>0.060000 1.000000 0.400000</size>
-//      </box>
-//      </geometry>
+      addBox(-0.3, 0.0, 1.125, 0.0, -0.2, 0.0, 0.06, 1.0, 0.4, terrainObject);
 
-      Transform3D pose = new Transform3D();
-      pose.setEuler(new Vector3d(0.0, -0.2, 0.0));
-      pose.setTranslation(new Vector3d(-0.3, 0.0, 1.125));
-      Box3d seatBackBox = new Box3d(pose, 0.06, 1.0, 0.4);
+      // chassis_bottom
+      addBox(0.1, 0.0, 0.37, 0.0, 0.0, 0.0, 1.5, 1.34, 0.06, terrainObject);
 
-      terrainObject.addRotatableBox(seatBackBox, YoAppearance.DarkGray());
+      // engine
+      addBox(1.05, 0.0, 0.7, 0.0, 0.0, 0.0, 0.58, 1.0, 0.8, terrainObject);
 
       // ground
       terrainObject.addBox(-1.0, -1.0, 1.0, 1.0, -0.05, 0.0, YoAppearance.DarkGray());
 
       return terrainObject;
+   }
+
+   private void addBox(double x, double y, double z, double roll, double pitch, double yaw, double sizeX, double sizeY, double sizeZ, CombinedTerrainObject terrainObject)
+   {
+      Transform3D transform = new Transform3D();
+      transform.setEuler(new Vector3d(roll, pitch, yaw));
+      transform.setTranslation(new Vector3d(x, y, z));
+      Box3d box = new Box3d(transform, sizeX, sizeY, sizeZ);
+      terrainObject.addRotatableBox(box, YoAppearance.DarkGray());
    }
 
    public TerrainObject getTerrainObject()
