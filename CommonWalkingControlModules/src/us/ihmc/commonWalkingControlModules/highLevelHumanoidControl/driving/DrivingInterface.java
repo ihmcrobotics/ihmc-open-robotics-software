@@ -30,11 +30,11 @@ public interface DrivingInterface
    public abstract void pressBrakePedal(double distance);
 
    /**
-    * Engage or disengage the parking brake.
+    * Engage or disengage the hand brake.
     * Will not do anything if already in the right position, except when overrideChecks == true
     * @param engaged
     */
-   public abstract void setParkingBrake(boolean engaged, boolean overrideChecks);
+   public abstract void setHandBrake(boolean engaged, boolean overrideChecks);
 
    /**
     * Change to the desired gear.

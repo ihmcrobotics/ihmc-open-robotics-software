@@ -295,12 +295,12 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
 
    public double getHandBrakeEngagedAngle()
    {
-      return 0.0;
+      return 0.6;
    }
 
    public double getHandBrakeDisengagedAngle()
    {
-      return 0.6;
+      return 0.0;
    }
 
    public Vector3d getHandBrakeAxis()

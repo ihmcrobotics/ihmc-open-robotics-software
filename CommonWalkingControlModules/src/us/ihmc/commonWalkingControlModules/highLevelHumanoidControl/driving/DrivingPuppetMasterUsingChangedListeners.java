@@ -14,7 +14,7 @@ public class DrivingPuppetMasterUsingChangedListeners
    private final DoubleYoVariable desiredSteeringWheelAngle = new DoubleYoVariable("desiredSteeringWheelAngle", registry);
    private final DoubleYoVariable desiredGasPedalPosition = new DoubleYoVariable("desiredGasPedalAngle", registry);
    private final DoubleYoVariable desiredBrakePedalPosition = new DoubleYoVariable("desiredBrakePedalAngle", registry);
-   private final BooleanYoVariable desiredParkingBrakeMode = new BooleanYoVariable("desiredParkingBrakeMode", registry);
+   private final BooleanYoVariable desiredHandBrakeMode = new BooleanYoVariable("desiredParkingBrakeMode", registry);
    private final EnumYoVariable<DrivingInterface.GearName> desiredGear = new EnumYoVariable<DrivingInterface.GearName>("desiredGearName", "", registry, DrivingInterface.GearName.class, true);
 
    public DrivingPuppetMasterUsingChangedListeners(YoVariableRegistry parentRegistry, DrivingInterface drivingInterface)
@@ -22,6 +22,7 @@ public class DrivingPuppetMasterUsingChangedListeners
       this.drivingInterface = drivingInterface;
       parentRegistry.addChild(registry);
       desiredGear.set(null);
+      desiredHandBrakeMode.set(true);
 
       setUpChangedListeners();
    }
@@ -52,11 +53,11 @@ public class DrivingPuppetMasterUsingChangedListeners
          }
       });
 
-      desiredParkingBrakeMode.addVariableChangedListener(new VariableChangedListener()
+      desiredHandBrakeMode.addVariableChangedListener(new VariableChangedListener()
       {
          public void variableChanged(YoVariable v)
          {
-            drivingInterface.setParkingBrake(desiredParkingBrakeMode.getBooleanValue(), false);
+            drivingInterface.setHandBrake(desiredHandBrakeMode.getBooleanValue(), false);
          }
       });
 
