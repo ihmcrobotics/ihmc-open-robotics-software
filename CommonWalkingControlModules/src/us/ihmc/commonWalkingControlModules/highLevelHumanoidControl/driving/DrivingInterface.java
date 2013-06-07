@@ -9,18 +9,40 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.driving;
  *         Date: 5/28/13
  */
 
-// TODO: add callbacks
 public interface DrivingInterface
 {
+   /**
+    * Turn the steering wheel to the desired angle
+    * @param angle angle in radians, counterclockwise when facing steering wheel, zero is straight ahead
+    */
    public abstract void turnSteeringWheel(double angle);
 
+   /**
+    * Press the gas pedal
+    * @param distance how far down to press the pedal
+    */
    public abstract void pressGasPedal(double distance);
 
+   /**
+    * Press the brake pedal
+    * @param distance how far down to press the pedal
+    */
    public abstract void pressBrakePedal(double distance);
 
-   public abstract void setParkingBrake(boolean engaged);
+   /**
+    * Engage or disengage the parking brake.
+    * Will not do anything if already in the right position, except when overrideChecks == true
+    * @param engaged
+    */
+   public abstract void setParkingBrake(boolean engaged, boolean overrideChecks);
 
-   public abstract void setGear(GearName gearName);
+   /**
+    * Change to the desired gear.
+    * Will not do anything if already in the right gear, except when overrideChecks == true
+    * @param gearName the gear to switch to
+    * @param overrideChecks whether or not to override checks
+    */
+   public abstract void setGear(GearName gearName, boolean overrideChecks);
 
    enum GearName
    {
