@@ -12,8 +12,8 @@ public class DrivingPuppetMasterUsingChangedListeners
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final DoubleYoVariable desiredSteeringWheelAngle = new DoubleYoVariable("desiredSteeringWheelAngle", registry);
-   private final DoubleYoVariable desiredGasPedalAngle = new DoubleYoVariable("desiredGasPedalAngle", registry);
-   private final DoubleYoVariable desiredBrakePedalAngle = new DoubleYoVariable("desiredBrakePedalAngle", registry);
+   private final DoubleYoVariable desiredGasPedalPosition = new DoubleYoVariable("desiredGasPedalAngle", registry);
+   private final DoubleYoVariable desiredBrakePedalPosition = new DoubleYoVariable("desiredBrakePedalAngle", registry);
    private final BooleanYoVariable desiredParkingBrakeMode = new BooleanYoVariable("desiredParkingBrakeMode", registry);
    private final EnumYoVariable<DrivingInterface.GearName> desiredGear = new EnumYoVariable<DrivingInterface.GearName>("desiredGearName", "", registry, DrivingInterface.GearName.class, true);
 
@@ -36,19 +36,19 @@ public class DrivingPuppetMasterUsingChangedListeners
          }
       });
 
-      desiredGasPedalAngle.addVariableChangedListener(new VariableChangedListener()
+      desiredGasPedalPosition.addVariableChangedListener(new VariableChangedListener()
       {
          public void variableChanged(YoVariable v)
          {
-            drivingInterface.pressGasPedal(desiredGasPedalAngle.getDoubleValue());
+            drivingInterface.pressGasPedal(desiredGasPedalPosition.getDoubleValue());
          }
       });
 
-      desiredBrakePedalAngle.addVariableChangedListener(new VariableChangedListener()
+      desiredBrakePedalPosition.addVariableChangedListener(new VariableChangedListener()
       {
          public void variableChanged(YoVariable v)
          {
-            drivingInterface.pressBrakePedal(desiredBrakePedalAngle.getDoubleValue());
+            drivingInterface.pressBrakePedal(desiredBrakePedalPosition.getDoubleValue());
          }
       });
 

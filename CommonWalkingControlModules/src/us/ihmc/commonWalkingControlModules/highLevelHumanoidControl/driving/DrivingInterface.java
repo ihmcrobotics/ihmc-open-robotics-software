@@ -14,9 +14,9 @@ public interface DrivingInterface
 {
    public abstract void turnSteeringWheel(double angle);
 
-   public abstract void pressGasPedal(double angle);
+   public abstract void pressGasPedal(double distance);
 
-   public abstract void pressBrakePedal(double angle);
+   public abstract void pressBrakePedal(double distance);
 
    public abstract void setParkingBrake(boolean engaged);
 
