@@ -99,10 +99,10 @@ public class ManipulationControlModule
       barPositionControlFrames = createBarPositionControlFramesHack(midHandPositionControlFrames);
       creepyPositionControlFrames = createCreepyPositionControlFramesHack(midHandPositionControlFrames);
 
-      createFrameVisualizers(dynamicGraphicObjectsListRegistry, midHandPositionControlFrames, "midHandPositionControlFrames");
-      createFrameVisualizers(dynamicGraphicObjectsListRegistry, fingerPositionControlFrames, "fingerPositionControlFrames");
-      createFrameVisualizers(dynamicGraphicObjectsListRegistry, barPositionControlFrames, "barPositionControlFrames");
-      createFrameVisualizers(dynamicGraphicObjectsListRegistry, creepyPositionControlFrames, "creepyPositionControlFrames");
+      createFrameVisualizers(dynamicGraphicObjectsListRegistry, midHandPositionControlFrames, "midHandPositionControlFrames", false);
+      createFrameVisualizers(dynamicGraphicObjectsListRegistry, fingerPositionControlFrames, "fingerPositionControlFrames", false);
+      createFrameVisualizers(dynamicGraphicObjectsListRegistry, barPositionControlFrames, "barPositionControlFrames", false);
+      createFrameVisualizers(dynamicGraphicObjectsListRegistry, creepyPositionControlFrames, "creepyPositionControlFrames", true);
 
       setUpStateMachine(yoTime, fullRobotModel, twistCalculator, parameters, variousWalkingProviders, dynamicGraphicObjectsListRegistry, handControllers,
                         momentumBasedController, midHandPositionControlFrames, jacobians);
@@ -111,7 +111,7 @@ public class ManipulationControlModule
    }
 
    private void createFrameVisualizers(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-           SideDependentList<ReferenceFrame> framesToVisualize, String listName)
+                                       SideDependentList<ReferenceFrame> framesToVisualize, String listName, boolean enable)
    {
       DynamicGraphicObjectsList list = new DynamicGraphicObjectsList(listName);
       if (dynamicGraphicObjectsListRegistry != null)
@@ -124,7 +124,9 @@ public class ManipulationControlModule
             list.add(dynamicGraphicReferenceFrame);
          }
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(list);
-         list.hideDynamicGraphicObjects();
+
+         if (!enable)
+            list.hideDynamicGraphicObjects();
       }
    }
 
@@ -375,7 +377,7 @@ public class ManipulationControlModule
          preRotation.setEuler(new Vector3d(0.0, 0.670796, 0.0));
 
          Transform3D transform = new Transform3D();
-         transform.setTranslation(new Vector3d(0.175, 0.0, 0.07));
+         transform.setTranslation(new Vector3d(0.17, 0.0, 0.07));
 
          Transform3D postRotation = new Transform3D();
          postRotation.setEuler(new Vector3d(0.0, -0.3, 0.0));
