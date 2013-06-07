@@ -19,7 +19,7 @@ public class SCSCameraDataReceiver extends CameraDataReceiver implements ObjectC
 
    public void consumeObject(LocalVideoPacket object)
    {
-      updateImage(object.getImage(), object.getTimeStamp(), object.getFieldOfView());
+      updateLeftEyeImage(object.getImage(), object.getTimeStamp(), object.getFieldOfView());
    }
 
 }
