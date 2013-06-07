@@ -84,4 +84,14 @@ public class VehicleStatusManager
    {
       return handBrakeJoint;
    }
+
+   public double getHandBrakeDisengagedAngle()
+   {
+      return handBrakeDisengagedAngle;
+   }
+
+   public double getHandBrakeEngagedAngle()
+   {
+      return handBrakeEngagedAngle;
+   }
 }
