@@ -1,5 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.posePlayback;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -37,6 +38,7 @@ import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicLineSegment;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
@@ -105,6 +107,8 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
    //   private final DoubleYoVariable BaseControlPoint = new DoubleYoVariable("BaseControlPoint", registry);
    private final YoFramePoint[] baseControlPoints = new YoFramePoint[4];
+   private final ArrayList<DynamicGraphicObject> baseControlPointsList = new ArrayList<DynamicGraphicObject>();
+   private final ArrayList<DynamicGraphicObject> baseControlLinesList = new ArrayList<DynamicGraphicObject>();
 
    public DRCRobotMidiSliderBoardPositionManipulation(SimulationConstructionSet scs)
    {
@@ -167,8 +171,8 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       }
       baseControlPoints[0].set(0.18, 0.13, 0.0);
       baseControlPoints[1].set(0.18, -0.13, 0.0);
-      baseControlPoints[2].set(-0.08, 0.15, 0.0);
-      baseControlPoints[3].set(-0.08, -0.15, 0.0);
+      baseControlPoints[2].set(-0.08, -0.15, 0.0);
+      baseControlPoints[3].set(-0.08, 0.15, 0.0);
 
       SupportBaseControlRequestedListener supportBaseControlRequestedListener = new SupportBaseControlRequestedListener();
       isSupportBaseControlRequested.addVariableChangedListener(supportBaseControlRequestedListener);
@@ -631,17 +635,75 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
    private class SupportBaseControlRequestedListener implements VariableChangedListener
    {
+      private int displayState = 0;
+
       public void variableChanged(YoVariable v)
       {
+         System.out.println("SupportBaseControlRequested");
          setupSlidersForSupportBaseControl();
-         if (((BooleanYoVariable) v).getBooleanValue() == true)
+         displayState++;
+         if (displayState == 6)
+            displayState = 0;
+         switch (displayState)
          {
-            System.out.println("SupportBaseControlRequested");
-         }
-         else
-         {
-            System.out.println("SupportBaseControlToggled");
-            //            DynamicGraphicObjectsListRegistry thisone=new DynamicGraphicObjectsListRegistry()
+         case 0:
+            for (DynamicGraphicObject baseControlPoint : baseControlPointsList)
+            {
+               baseControlPoint.hideGraphicObject();
+            }
+            for (DynamicGraphicObject baseControlLine : baseControlLinesList)
+            {
+               baseControlLine.hideGraphicObject();
+            }
+            break;
+
+         case 1:
+            for (DynamicGraphicObject baseControlPoint : baseControlPointsList)
+            {
+               baseControlPoint.showGraphicObject();
+            }
+            for (DynamicGraphicObject baseControlLine : baseControlLinesList)
+            {
+               baseControlLine.showGraphicObject();
+            }
+            break;
+
+         case 2:
+            baseControlPointsList.get(0).hideGraphicObject();
+            
+            baseControlLinesList.get(0).hideGraphicObject();
+            baseControlLinesList.get(1).hideGraphicObject();
+            baseControlLinesList.get(2).hideGraphicObject();
+             break;
+
+         case 3:
+            baseControlPointsList.get(0).showGraphicObject();
+            baseControlPointsList.get(1).hideGraphicObject();
+            
+            baseControlLinesList.get(1).showGraphicObject();
+            baseControlLinesList.get(2).showGraphicObject();
+            baseControlLinesList.get(3).hideGraphicObject();
+            baseControlLinesList.get(4).hideGraphicObject();
+            break;
+
+         case 4:
+            baseControlPointsList.get(1).showGraphicObject();
+            baseControlPointsList.get(2).hideGraphicObject();
+
+            baseControlLinesList.get(0).showGraphicObject();
+            baseControlLinesList.get(4).showGraphicObject();
+            baseControlLinesList.get(1).hideGraphicObject();
+            baseControlLinesList.get(5).hideGraphicObject();
+            break;
+
+         default:
+            baseControlPointsList.get(2).showGraphicObject();
+            baseControlPointsList.get(3).hideGraphicObject();
+
+            baseControlLinesList.get(1).showGraphicObject();
+            baseControlLinesList.get(3).showGraphicObject();
+            baseControlLinesList.get(2).hideGraphicObject();
+            baseControlLinesList.get(4).hideGraphicObject();
          }
       }
    }
@@ -843,16 +905,19 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       {
          DynamicGraphicPosition baseControlPointViz = new DynamicGraphicPosition("baseControlPoint" + i, baseControlPoints[i], 0.01, cols[i]);
          dynamicGraphicObjectsList.add(baseControlPointViz);
+         baseControlPointsList.add(baseControlPointViz);
 
          for (int j = i + 1; j < baseControlPoints.length; j++)
          {
             DynamicGraphicLineSegment dynamicGraphicLineSegment = new DynamicGraphicLineSegment("baseSupportLine1", baseControlPoints[i], baseControlPoints[j],
                   1.0, YoAppearance.Green(), false);
             dynamicGraphicObjectsList.add(dynamicGraphicLineSegment);
+            baseControlLinesList.add(dynamicGraphicLineSegment);
          }
       }
 
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
+      dynamicGraphicObjectsList.hideDynamicGraphicObjects();
    }
 
 }
