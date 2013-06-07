@@ -7,6 +7,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.darpaRoboticsChallenge.driving.DRCStereoListener;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.messages.controller.RobotPoseData;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorControllerStateHandler;
@@ -23,6 +24,7 @@ public abstract class CameraDataReceiver
    
    private final RobotPoseBuffer robotPoseBuffer;
    private final CompressedVideoDataServer compressedVideoDataServer;
+   private DRCStereoListener drcStereoListener;
    
    private final Point3d cameraPosition = new Point3d();
    private final Quat4d cameraOrientation = new Quat4d();
@@ -74,8 +76,14 @@ public abstract class CameraDataReceiver
       
    }
 
-   public void updateImage(BufferedImage bufferedImage, long timeStamp, double fov)
+   protected void updateLeftEyeImage(BufferedImage bufferedImage, long timeStamp, double fov)
    {
+      if(drcStereoListener != null)
+      {
+         drcStereoListener.leftImage(bufferedImage, timeStamp, fov);
+      }
+      
+      
       RobotPoseData robotPoseData = robotPoseBuffer.floorEntry(timeStamp);
       if(robotPoseData == null)
       {
@@ -85,6 +93,22 @@ public abstract class CameraDataReceiver
       robotPoseData.getCameraPose().get(cameraOrientation, tempVector);
       cameraPosition.set(tempVector);
       compressedVideoDataServer.updateImage(bufferedImage, timeStamp, cameraPosition, cameraOrientation, fov);
+      
+      
+   }
+
+
+   protected void updateRightEyeImage(BufferedImage bufferedImage, long timeStamp, double fov)
+   {
+      if(drcStereoListener != null)
+      {
+         drcStereoListener.rightImage(bufferedImage, timeStamp, fov);
+      }
+   }
+   
+   public void registerCameraListener(DRCStereoListener drcStereoListener)
+   {
+      this.drcStereoListener = drcStereoListener;
    }
 
 }
