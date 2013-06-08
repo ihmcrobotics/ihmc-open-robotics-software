@@ -34,8 +34,8 @@ public abstract class RosJavaGrabImagesBase extends AbstractNodeMain
    BufferedImage imageLeft;
    BufferedImage imageRight;
 
-   long timestampLeft = 1;
-   long timestampRight = -1;
+   long timestampLeft=1;
+   long timestampRight=-1;
 
 
    public RosJavaGrabImagesBase()
@@ -86,7 +86,7 @@ public abstract class RosJavaGrabImagesBase extends AbstractNodeMain
       checkProcessImage();
    }
 
-   private void checkProcessImage() {
+   private synchronized void checkProcessImage() {
       if( timestampLeft == timestampRight ) {
          processImages(imageLeft, imageRight);
       }
