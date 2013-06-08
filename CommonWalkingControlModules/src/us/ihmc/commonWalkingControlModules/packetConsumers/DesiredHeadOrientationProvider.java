@@ -16,7 +16,6 @@ public class DesiredHeadOrientationProvider
 {
    private HeadOrientationControlModule headOrientationControlModule;
 
-   
    private final  ObjectConsumer<HeadOrientationPacket> headOrientationPacketConsumer;
    private final ObjectConsumer<LookAtPacket> lookAtPacketConsumer;
    private final ReferenceFrame lookAtFrame = ReferenceFrame.getWorldFrame();

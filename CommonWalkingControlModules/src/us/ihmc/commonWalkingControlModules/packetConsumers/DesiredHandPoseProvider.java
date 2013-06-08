@@ -49,7 +49,7 @@ public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>
       return relativeToWorld;
    }
 
-   public void consumeObject(HandPosePacket object)
+   public synchronized void consumeObject(HandPosePacket object)
    {
       RobotSide robotSide = object.getRobotSide();
       hasNewPose.put(robotSide, true);

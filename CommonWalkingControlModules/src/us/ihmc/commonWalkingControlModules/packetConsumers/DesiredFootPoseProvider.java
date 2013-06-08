@@ -43,7 +43,7 @@ public class DesiredFootPoseProvider implements ObjectConsumer<FootPosePacket>
       return desiredFootPoses.get(robotSide);
    }
 
-   public void consumeObject(FootPosePacket object)
+   public synchronized void consumeObject(FootPosePacket object)
    {
       RobotSide robotSide = object.getRobotSide();
       hasNewPose.put(robotSide, true);
