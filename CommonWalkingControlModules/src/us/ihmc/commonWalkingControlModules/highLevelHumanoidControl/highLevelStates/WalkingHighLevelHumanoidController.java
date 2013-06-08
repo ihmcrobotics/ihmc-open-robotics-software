@@ -321,7 +321,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       this.instantaneousCapturePointPlanner = instantaneousCapturePointPlanner;
 
-      this.upcomingFootstepList = new UpcomingFootstepList(footstepProvider);
+      this.upcomingFootstepList = new UpcomingFootstepList(footstepProvider, registry);
 
       this.centerOfMassHeightController = new PDController("comHeight", registry);
       centerOfMassHeightController.setProportionalGain(40.0);
@@ -508,10 +508,19 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                                                              stopWalkingStateTransitionActions);
          singleSupportState.addStateTransition(toDoubleSupport2);
 
-         DoneWithSingleSupportCondition doneWithSingleSupportCondition = new DoneWithSingleSupportCondition(swingEndEffectorControlModule);
-         StateTransition<WalkingState> toTransfer = new StateTransition<WalkingState>(transferStateEnums.get(robotSide.getOppositeSide()),
-                                                       doneWithSingleSupportCondition, resetSwingTrajectoryDoneAction);
-         singleSupportState.addStateTransition(toTransfer);
+         ContactablePlaneBody sameSideFoot = feet.get(robotSide);
+         SingleSupportToTransferToCondition doneWithSingleSupportAndTransferToOppositeSideCondition = new SingleSupportToTransferToCondition(sameSideFoot, swingEndEffectorControlModule);
+         StateTransition<WalkingState> toTransferOppositeSide = new StateTransition<WalkingState>(transferStateEnums.get(robotSide.getOppositeSide()),
+               doneWithSingleSupportAndTransferToOppositeSideCondition, resetSwingTrajectoryDoneAction);
+         singleSupportState.addStateTransition(toTransferOppositeSide);
+      
+         // Sometimes need transfer to same side when two steps are commanded on the same side. Otherwise, the feet cross over.
+         ContactablePlaneBody oppositeSideFoot = feet.get(robotSide.getOppositeSide());
+         SingleSupportToTransferToCondition doneWithSingleSupportAndTransferToSameSideCondition = new SingleSupportToTransferToCondition(oppositeSideFoot, swingEndEffectorControlModule);
+         StateTransition<WalkingState> toTransferSameSide = new StateTransition<WalkingState>(transferStateEnums.get(robotSide),
+               doneWithSingleSupportAndTransferToSameSideCondition, resetSwingTrajectoryDoneAction);
+         singleSupportState.addStateTransition(toTransferSameSide);
+         
          stateMachine.addState(singleSupportState);
       }
 
@@ -1246,6 +1255,31 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    }
 
 
+   private class SingleSupportToTransferToCondition extends DoneWithSingleSupportCondition
+   {
+      private final ContactablePlaneBody nextSwingFoot;
+      
+      public SingleSupportToTransferToCondition(ContactablePlaneBody nextSwingFoot, EndEffectorControlModule endEffectorControlModule)
+      {
+         super(endEffectorControlModule);
+         
+         this.nextSwingFoot = nextSwingFoot;
+      }
+      
+      public boolean checkCondition()
+      {
+         Footstep nextFootstep = upcomingFootstepList.getNextNextFootstep(); 
+         if (nextFootstep == null) return super.checkCondition();
+         
+         ContactablePlaneBody nextSwingFoot = nextFootstep.getBody();
+         if (this.nextSwingFoot != nextSwingFoot ) return false;
+
+         boolean condition = super.checkCondition();
+         return condition;
+      }
+   
+   }
+      
    private class DoneWithSingleSupportCondition implements StateTransitionCondition
    {
       public DoneWithSingleSupportCondition(EndEffectorControlModule endEffectorControlModule)
