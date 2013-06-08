@@ -278,7 +278,7 @@ public class MomentumBasedController
       if (dynamicGraphicObjectsListRegistry != null)
       {
          contactPointVisualizer = new ContactPointVisualizer(20, dynamicGraphicObjectsListRegistry, registry);
-         wrenchVisualizer = new WrenchVisualizer(6, dynamicGraphicObjectsListRegistry, registry);
+         wrenchVisualizer = new WrenchVisualizer(7, dynamicGraphicObjectsListRegistry, registry);
       }
       else
       {
