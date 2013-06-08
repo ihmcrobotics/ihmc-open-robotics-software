@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.desiredChestOrientation.DesiredChestOrientationProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.*;
 import us.ihmc.commonWalkingControlModules.packets.DesiredHighLevelStateProvider;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;

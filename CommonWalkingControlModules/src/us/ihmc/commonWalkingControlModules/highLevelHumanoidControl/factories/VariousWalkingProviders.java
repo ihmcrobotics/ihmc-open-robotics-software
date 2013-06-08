@@ -1,33 +1,20 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.desiredChestOrientation.DesiredChestOrientationProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.*;
-import us.ihmc.commonWalkingControlModules.packets.*;
 import us.ihmc.commonWalkingControlModules.controlModules.spine.ChestOrientationPacket;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.BlindWalkingPacketConsumer;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.BlindWalkingToDestinationDesiredFootstepCalculator;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.BoxDesiredFootstepCalculator;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.ComponentBasedDesiredFootstepCalculator;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorFootstepProviderWrapper;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepPathConsumer;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepPathCoordinator;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.PauseCommandConsumer;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.VaryingStairDesiredFootstepCalculator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.*;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.BlindWalkingPacket;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PauseCommand;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.SimpleDesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.packetConsumers.*;
+import us.ihmc.commonWalkingControlModules.packets.*;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.terrain.VaryingStairGroundProfile;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
@@ -37,8 +24,9 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.net.ObjectCommunicator;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class VariousWalkingProviders
 {
