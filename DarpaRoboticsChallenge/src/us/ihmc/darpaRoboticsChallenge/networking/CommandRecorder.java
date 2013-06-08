@@ -1,12 +1,15 @@
 package us.ihmc.darpaRoboticsChallenge.networking;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.media.j3d.Transform3D;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.EndOfScriptCommand;
 import us.ihmc.darpaRoboticsChallenge.scriptEngine.ScriptEngineSettings;
 import us.ihmc.darpaRoboticsChallenge.scriptEngine.ScriptFileSaver;
+import us.ihmc.utilities.FileTools;
 import us.ihmc.utilities.net.NetClassList;
 import us.ihmc.utilities.net.TimestampProvider;
 
@@ -30,8 +33,20 @@ public class CommandRecorder
    {
       try
       {
-         String path = ScriptEngineSettings.scriptDirectory + "/" + filename + ScriptEngineSettings.extension;
-         
+         int counter = 1;
+         filename = filename + ScriptEngineSettings.extension;
+         boolean fileAlreadyExists = doesFileAlreadyExists(filename);
+
+         while(fileAlreadyExists)
+         {
+            filename  = "duplicate"  + Integer.toString(counter) + "_";
+            counter++;
+            fileAlreadyExists = doesFileAlreadyExists(filename);
+         }
+
+         String path = ScriptEngineSettings.scriptDirectory + "/" + filename;
+
+
          scriptFileSaver = new ScriptFileSaver(path);
          startTime = timestampProvider.getTimestamp();
          this.recordTransform.set(recordTransform);
@@ -77,5 +92,21 @@ public class CommandRecorder
             throw new RuntimeException(e);
          }
       }
+   }
+
+   private boolean doesFileAlreadyExists(String filename)
+   {
+      filename = filename + ScriptEngineSettings.extension;
+      File directory = new File(ScriptEngineSettings.scriptDirectory);
+
+      ArrayList<File> files = FileTools.getAllFilesInDirectoryRecursive(directory);
+
+      for (File file : files)
+      {
+         if (file.getName().equals(filename))
+            return true;
+      }
+
+      return false;
    }
 }
