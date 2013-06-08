@@ -94,7 +94,11 @@ public class VariousWalkingManagers
 
       ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
 
-      ReferenceFrame headOrientationExpressedInFrame = desiredHeadOrientationProvider.getHeadOrientationExpressedInFrame();
+      ReferenceFrame headOrientationExpressedInFrame;
+      if (desiredHeadOrientationProvider != null)
+         headOrientationExpressedInFrame = desiredHeadOrientationProvider.getHeadOrientationExpressedInFrame();
+      else
+         headOrientationExpressedInFrame = referenceFrames.getPelvisZUpFrame();
       HeadOrientationControlModule headOrientationControlModule = new HeadOrientationControlModule(pelvis, elevator, head, twistCalculator,
             headOrientationExpressedInFrame, chestFrame, headOrientationControllerParameters, registry,
                                                                      dynamicGraphicObjectsListRegistry);
