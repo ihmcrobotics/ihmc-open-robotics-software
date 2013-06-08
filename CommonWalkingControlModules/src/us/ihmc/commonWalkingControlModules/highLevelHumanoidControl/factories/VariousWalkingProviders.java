@@ -209,7 +209,7 @@ public class VariousWalkingProviders
       BlindWalkingPacketConsumer blindWalkingPacketConsumer = new BlindWalkingPacketConsumer(footstepPathCoordinator);
       PauseCommandConsumer pauseCommandConsumer = new PauseCommandConsumer(footstepPathCoordinator);
       DesiredHighLevelStateProvider highLevelStateProvider = new DesiredHighLevelStateProvider();
-      DesiredHeadOrientationProvider headOrientationProvider = new DesiredHeadOrientationProvider();
+      DesiredHeadOrientationProvider headOrientationProvider = new DesiredHeadOrientationProvider(referenceFrames.getPelvisZUpFrame());
       DesiredPelvisPoseProvider pelvisPoseProvider = new DesiredPelvisPoseProvider();
       DesiredChestOrientationProvider chestOrientationProvider = new DesiredChestOrientationProvider();
       DesiredFootPoseProvider footPoseProvider = new DesiredFootPoseProvider();

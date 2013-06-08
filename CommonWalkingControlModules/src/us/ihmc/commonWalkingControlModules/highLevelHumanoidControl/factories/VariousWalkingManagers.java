@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
-import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.HeadOrientationControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationControlModule;
@@ -50,7 +49,7 @@ public class VariousWalkingManagers
             desiredHeadOrientationProvider, walkingControllerParameters);
 
       HeadOrientationManager headOrientationManager = new HeadOrientationManager(momentumBasedController, headOrientationControlModule,
-                                                         desiredHeadOrientationProvider, registry, dynamicGraphicObjectsListRegistry);
+                                                         desiredHeadOrientationProvider);
 
 
       ChestOrientationControlModule chestOrientationControlModule = setupChestOrientationControlModule(fullRobotModel, 
@@ -92,22 +91,19 @@ public class VariousWalkingManagers
       RigidBody head = fullRobotModel.getHead();
       RigidBody pelvis = fullRobotModel.getPelvis();
       RigidBody elevator = fullRobotModel.getElevator();
-      
-      ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
+
       ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
 
+      ReferenceFrame headOrientationExpressedInFrame = desiredHeadOrientationProvider.getHeadOrientationExpressedInFrame();
       HeadOrientationControlModule headOrientationControlModule = new HeadOrientationControlModule(pelvis, elevator, head, twistCalculator,
-            pelvisZUpFrame, chestFrame, headOrientationControllerParameters, registry,
+            headOrientationExpressedInFrame, chestFrame, headOrientationControllerParameters, registry,
                                                                      dynamicGraphicObjectsListRegistry);
 
       // Setting initial head pitch
       // This magic number (0.67) is a good default head pitch for getting good LIDAR point coverage of ground by feet
       // it would be in DRC config parameters, but the would require updating several nested constructors with an additional parameter
-      FrameOrientation orientation = new FrameOrientation(pelvisZUpFrame, 0.0, 0.67, 0.0);
+      FrameOrientation orientation = new FrameOrientation(headOrientationExpressedInFrame, 0.0, 0.67, 0.0);
       headOrientationControlModule.setOrientationToTrack(new FrameOrientation(orientation));
-
-      if (desiredHeadOrientationProvider != null)
-         desiredHeadOrientationProvider.setHeadOrientationControlModule(headOrientationControlModule);
 
       return headOrientationControlModule;
    }
