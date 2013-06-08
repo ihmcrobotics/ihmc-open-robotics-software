@@ -16,10 +16,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.taskExecutor.PipeLine;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.taskExecutor.Task;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandLoadBearingProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandPoseProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.TorusManipulationProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.TorusPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.*;
 import us.ihmc.commonWalkingControlModules.packets.TorusManipulationPacket;
 import us.ihmc.commonWalkingControlModules.packets.TorusPosePacket;
 import us.ihmc.robotSide.RobotSide;
@@ -140,10 +137,11 @@ public class ManipulationControlModule
                                   SideDependentList<HandControllerInterface> handControllers, MomentumBasedController momentumBasedController,
                                   SideDependentList<ReferenceFrame> handPositionControlFrames, SideDependentList<GeometricJacobian> jacobians)
    {
-      final DesiredHandPoseProvider handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
-      final DesiredHandLoadBearingProvider handLoadBearingProvider = variousWalkingProviders.getDesiredHandLoadBearingProvider();
-      final TorusPoseProvider torusPoseProvider = variousWalkingProviders.getTorusPoseProvider();
-      final TorusManipulationProvider torusManipulationProvider = variousWalkingProviders.getTorusManipulationProvider();
+      DesiredHandPoseProvider handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
+      DesiredHandLoadBearingProvider handLoadBearingProvider = variousWalkingProviders.getDesiredHandLoadBearingProvider();
+      TorusPoseProvider torusPoseProvider = variousWalkingProviders.getTorusPoseProvider();
+      TorusManipulationProvider torusManipulationProvider = variousWalkingProviders.getTorusManipulationProvider();
+      FingerStateProvider fingerStateProvider = variousWalkingProviders.getFingerStateProvider();
 
 
       individualHandControlModules = createIndividualHandControlModules(yoTime, fullRobotModel, twistCalculator, dynamicGraphicObjectsListRegistry,
@@ -155,7 +153,7 @@ public class ManipulationControlModule
                                                                                      fingerPositionControlFrames, registry, dynamicGraphicObjectsListRegistry);
 
       directControlManipulationTaskDispatcher = new DirectControlManipulationTaskDispatcher(fullRobotModel, parameters, handPoseProvider,
-              handLoadBearingProvider, handControllers, handPositionControlFrames, individualHandControlModules, pipeline, fingerToroidManipulationState,
+              handLoadBearingProvider, fingerStateProvider, handControllers, handPositionControlFrames, individualHandControlModules, pipeline, fingerToroidManipulationState,
               torusManipulationProvider, registry);
 
 //    HighLevelToroidManipulationState toroidManipulationState = new HighLevelToroidManipulationState(yoTime, fullRobotModel, twistCalculator,
