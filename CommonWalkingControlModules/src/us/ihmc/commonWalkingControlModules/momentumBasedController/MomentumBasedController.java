@@ -169,6 +169,7 @@ public class MomentumBasedController
 
 //       this.pointPositionGrabber = new SingleReferenceFramePointPositionGrabber(stateEstimationDataFromControllerSink, registry, controlDT, touchdownTime, minCoPDistance);
          this.pointPositionGrabber = new PointPositionGrabber(stateEstimationDataFromControllerSink, registry, controlDT, touchdownTime, minCoPDistance);
+         setDelayTimeBeforeTrustingContacts(touchdownTime);
       }
       else
       {
@@ -684,5 +685,10 @@ public class MomentumBasedController
          if (momentumControlModule != null)
             momentumControlModule.initialize();
       }
+   }
+   
+   public void setDelayTimeBeforeTrustingContacts(double delayTimeBeforeTrustingContacts)
+   {
+      pointPositionGrabber.setDelayTimeBeforeTrustingContacts(delayTimeBeforeTrustingContacts);
    }
 }
