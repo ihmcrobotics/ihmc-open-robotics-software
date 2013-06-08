@@ -1790,7 +1790,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    
    private void checkForReinitialization()
    {
-      if(reinitializeControllerProvider.isReinitializeRequested())
+      if(reinitializeControllerProvider.isReinitializeRequested() && (stateMachine.getCurrentStateEnum() == WalkingState.DOUBLE_SUPPORT))
       {
          reinitializeControllerProvider.set(false);
          initialize();
