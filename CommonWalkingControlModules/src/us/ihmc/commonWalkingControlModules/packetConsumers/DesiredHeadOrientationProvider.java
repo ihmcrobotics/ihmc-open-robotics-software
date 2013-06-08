@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
-import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket;
 import us.ihmc.commonWalkingControlModules.packets.LookAtPacket;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -8,79 +7,124 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectConsumer;
 
-/**
- * User: Matt
- * Date: 1/28/13
- */
 public class DesiredHeadOrientationProvider
 {
-   private HeadOrientationControlModule headOrientationControlModule;
+   private final Object synchronizationObject = new Object();
 
-   private final  ObjectConsumer<HeadOrientationPacket> headOrientationPacketConsumer;
-   private final ObjectConsumer<LookAtPacket> lookAtPacketConsumer;
-   private final ReferenceFrame lookAtFrame = ReferenceFrame.getWorldFrame();
-   private ReferenceFrame headOrientationFrame;
-   
-   
-   private double desiredJointForExtendedNeckPitchRangeAngle = 0.0;
+   private final HeadOrientationPacketConsumer headOrientationPacketConsumer;
+   private final LookAtPacketConsumer lookAtPacketConsumer;
+   private final ReferenceFrame headOrientationFrame;
 
-   public DesiredHeadOrientationProvider()
+   private boolean isNewLookAtInformationAvailable;
+   private boolean isNewHeadOrientationInformationAvailable;
+   private double desiredJointForExtendedNeckPitchRangeAngle;
+
+   public DesiredHeadOrientationProvider(ReferenceFrame headOrientationFrame)
    {
-      headOrientationPacketConsumer = new HeadOrientationPacketConsumer();
+      headOrientationPacketConsumer = new HeadOrientationPacketConsumer(headOrientationFrame);
       lookAtPacketConsumer = new LookAtPacketConsumer();
+      this.headOrientationFrame = headOrientationFrame;
    }
 
    public ObjectConsumer<HeadOrientationPacket> getHeadOrientationPacketConsumer()
    {
       return headOrientationPacketConsumer;
    }
-   
 
    public ObjectConsumer<LookAtPacket> getLookAtPacketConsumer()
    {
       return lookAtPacketConsumer;
    }
 
-   public void setHeadOrientationControlModule(HeadOrientationControlModule headOrientationControlModule)
-   {
-      this.headOrientationControlModule = headOrientationControlModule;
-      
-      this.headOrientationFrame = headOrientationControlModule.getHeadOrientationFrame();
-   }
-   
    private class LookAtPacketConsumer implements ObjectConsumer<LookAtPacket>
    {
+      private final ReferenceFrame lookAtFrame = ReferenceFrame.getWorldFrame();
+
+      private final FramePoint pointToTrack = new FramePoint(lookAtFrame);
 
       public void consumeObject(LookAtPacket object)
       {
-         if (headOrientationControlModule != null)
+         synchronized (synchronizationObject)
          {
-            FramePoint pointToTrack = new FramePoint(lookAtFrame, object.getLookAtPoint());
-            headOrientationControlModule.setPointToTrack(pointToTrack);
-            
+            pointToTrack.set(lookAtFrame, object.getLookAtPoint());
             desiredJointForExtendedNeckPitchRangeAngle = 0.0;
-         }         
-      }
-      
-   }
-
-   private class HeadOrientationPacketConsumer implements ObjectConsumer<HeadOrientationPacket>
-   {
-      public void consumeObject(HeadOrientationPacket packet)
-      {
-         if (headOrientationControlModule != null)
-         {
-            FrameOrientation frameOrientation = new FrameOrientation(headOrientationFrame, packet.getQuaternion());
-            headOrientationControlModule.setOrientationToTrack(frameOrientation);
- 
-            desiredJointForExtendedNeckPitchRangeAngle = packet.getDesiredJointForExtendedNeckPitchRangeAngle();
+            isNewLookAtInformationAvailable = true;
+            isNewHeadOrientationInformationAvailable = false;
          }
       }
    }
 
+
+   private class HeadOrientationPacketConsumer implements ObjectConsumer<HeadOrientationPacket>
+   {
+      private final FrameOrientation headOrientation;
+
+      public HeadOrientationPacketConsumer(ReferenceFrame headOrientationExpressedInFrame)
+      {
+         headOrientation = new FrameOrientation(headOrientationExpressedInFrame);
+      }
+
+      public void consumeObject(HeadOrientationPacket packet)
+      {
+         synchronized (synchronizationObject)
+         {
+            headOrientation.set(packet.getQuaternion());
+            desiredJointForExtendedNeckPitchRangeAngle = packet.getDesiredJointForExtendedNeckPitchRangeAngle();
+
+            isNewLookAtInformationAvailable = false;
+            isNewHeadOrientationInformationAvailable = true;
+         }
+      }
+   }
+
+
+   public boolean isNewLookAtInformationAvailable()
+   {
+      synchronized (synchronizationObject)
+      {
+         return isNewLookAtInformationAvailable;
+      }
+   }
+
+   public boolean isNewHeadOrientationInformationAvailable()
+   {
+      synchronized (synchronizationObject)
+      {
+         return isNewHeadOrientationInformationAvailable;
+      }
+   }
+
+   public FrameOrientation getDesiredHeadOrientation()
+   {
+      synchronized (synchronizationObject)
+      {
+         isNewHeadOrientationInformationAvailable = false;
+
+         return headOrientationPacketConsumer.headOrientation;
+      }
+   }
+
+   public FramePoint getLookAtPoint()
+   {
+      synchronized (synchronizationObject)
+      {
+         isNewLookAtInformationAvailable = false;
+
+         return lookAtPacketConsumer.pointToTrack;
+      }
+   }
+
+   public ReferenceFrame getHeadOrientationExpressedInFrame()
+   {
+      return headOrientationFrame;
+   }
+
    public double getDesiredExtendedNeckPitchJointAngle()
    {
-      return desiredJointForExtendedNeckPitchRangeAngle;
+      synchronized (synchronizationObject)
+      {
+         return desiredJointForExtendedNeckPitchRangeAngle;
+      }
    }
 
 }

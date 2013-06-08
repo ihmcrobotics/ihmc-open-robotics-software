@@ -16,20 +16,29 @@ public class HeadOrientationManager
 {   
    private final HeadOrientationControlModule headOrientationControlModule;
    private final MomentumBasedController momentumBasedController;
-//   private final DesiredHeadOrientationProvider desiredHeadOrientationProvider;
+   private final DesiredHeadOrientationProvider desiredHeadOrientationProvider;
 
 
-   public HeadOrientationManager(MomentumBasedController momentumBasedController, HeadOrientationControlModule headOrientationControlModule, 
-        DesiredHeadOrientationProvider desiredHeadOrientationProvider, YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public HeadOrientationManager(MomentumBasedController momentumBasedController, HeadOrientationControlModule headOrientationControlModule,
+                                 DesiredHeadOrientationProvider desiredHeadOrientationProvider)
    {
       this.momentumBasedController = momentumBasedController;
-//      this.desiredHeadOrientationProvider = desiredHeadOrientationProvider;
+      this.desiredHeadOrientationProvider = desiredHeadOrientationProvider;
       
       this.headOrientationControlModule = headOrientationControlModule;
    }
 
    public void compute()
-   { 
+   {
+      if (desiredHeadOrientationProvider.isNewHeadOrientationInformationAvailable())
+      {
+         headOrientationControlModule.setOrientationToTrack(desiredHeadOrientationProvider.getDesiredHeadOrientation());
+      }
+      if (desiredHeadOrientationProvider.isNewLookAtInformationAvailable())
+      {
+         headOrientationControlModule.setPointToTrack(desiredHeadOrientationProvider.getLookAtPoint());
+      }
+
       GeometricJacobian jacobian = headOrientationControlModule.getJacobian();
       
       if (jacobian != null)
