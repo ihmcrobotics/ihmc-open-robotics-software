@@ -34,9 +34,10 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointC
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointTrajectoryData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController.MomentumControlModuleType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAngularAccelerationControlModule;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController.MomentumControlModuleType;
+import us.ihmc.commonWalkingControlModules.packetConsumers.ReinitializeWalkingControllerProvider;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.HeelSwitch;
@@ -175,6 +176,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters;
    private final InstantaneousCapturePointPlanner instantaneousCapturePointPlanner;
+   private final ReinitializeWalkingControllerProvider reinitializeControllerProvider;
 
    private final SideDependentList<SettableOrientationProvider> finalFootOrientationProviders = new SideDependentList<SettableOrientationProvider>();
 
@@ -260,6 +262,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       
       FootstepProvider footstepProvider = variousWalkingProviders.getFootstepProvider();
       HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = variousWalkingProviders.getMapFromFootstepsToTrajectoryParameters();
+      this.reinitializeControllerProvider = variousWalkingProviders.getReinitializeWalkingControllerProvider();
 
       toeOffKneeAngleThreashold.set(45*Math.PI/180); //52*Math.PI/180);
       useTrailingLegKneeAngleAsToeOffTrigger.set(true);
@@ -551,7 +554,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       
       momentumBasedController.setMomentumControlModuleToUse(MOMENTUM_CONTROL_MODULE_TO_USE);
       momentumBasedController.setDelayTimeBeforeTrustingContacts(DELAY_TIME_BEFORE_TRUSTING_CONTACTS);
-          
+      
       initializeContacts();
 
       ChestOrientationManager chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
@@ -600,6 +603,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       @Override
       public void doAction()
       {
+         checkForReinitialization();
          RobotSide trailingLegSide;
          RobotSide leadingLegSide;
 
@@ -1044,6 +1048,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       @Override
       public void doAction()
       {
+         checkForReinitialization();
          FramePoint2d desiredICPLocal = new FramePoint2d(desiredICP.getReferenceFrame());
          FrameVector2d desiredICPVelocityLocal = new FrameVector2d(desiredICPVelocity.getReferenceFrame());
          FramePoint2d ecmpLocal = new FramePoint2d(ReferenceFrame.getWorldFrame());
@@ -1781,6 +1786,15 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       Footstep footstep = new Footstep(contactablePlaneBody, poseReferenceFrame, soleReferenceFrame, expectedContactPoints, trustHeight);
 
       return footstep;
+   }
+   
+   private void checkForReinitialization()
+   {
+      if(reinitializeControllerProvider.isReinitializeRequested())
+      {
+         reinitializeControllerProvider.set(false);
+         initialize();
+      }
    }
 
 }
