@@ -19,7 +19,7 @@ public class DesiredPelvisLoadBearingProvider implements ObjectConsumer<BumState
       return ret;
    }
 
-   public void consumeObject(BumStatePacket object)
+   public synchronized void consumeObject(BumStatePacket object)
    {
       hasLoadBearingBeenRequested = true;
    }

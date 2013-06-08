@@ -25,7 +25,7 @@ public class DesiredFootStateProvider implements ObjectConsumer<FootStatePacket>
       return ret;
    }
 
-   public void consumeObject(FootStatePacket object)
+   public synchronized void consumeObject(FootStatePacket object)
    {
       RobotSide robotSide = object.getRobotSide();
       hasLoadBearingBeenRequested.put(robotSide, true);

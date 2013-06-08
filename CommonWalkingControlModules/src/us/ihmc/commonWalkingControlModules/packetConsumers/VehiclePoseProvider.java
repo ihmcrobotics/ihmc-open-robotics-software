@@ -9,51 +9,34 @@ import us.ihmc.utilities.net.ObjectConsumer;
 
 public class VehiclePoseProvider implements ObjectConsumer<VehiclePosePacket>
 {
-   private final Object synchronizationObject = new Object();
    private FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame());
    private boolean hasNewPose;
 
-   public void consumeObject(VehiclePosePacket object)
+   public synchronized void consumeObject(VehiclePosePacket object)
    {
-      synchronized (synchronizationObject)
-      {
-         framePose = new FramePose(ReferenceFrame.getWorldFrame(), object.getPosition(), object.getOrientation());
-         hasNewPose = true;
-      }
+      framePose = new FramePose(ReferenceFrame.getWorldFrame(), object.getPosition(), object.getOrientation());
+      hasNewPose = true;
    }
 
-   public boolean checkForNewPose()
+   public synchronized boolean checkForNewPose()
    {
-      synchronized (synchronizationObject)
-      {
-         return hasNewPose;
-      }
+      return hasNewPose;
    }
 
-   public FramePoint getPosition()
+   public synchronized FramePoint getPosition()
    {
-      synchronized (synchronizationObject)
-      {
-         return framePose.getPostionCopy();
-      }
+      return framePose.getPostionCopy();
    }
 
-   public FrameOrientation getOrientation()
+   public synchronized FrameOrientation getOrientation()
    {
-      synchronized (synchronizationObject)
-      {
-         return framePose.getOrientationCopy();
-      }
+      return framePose.getOrientationCopy();
    }
 
-   public FramePose getFramePose()
+   public synchronized FramePose getFramePose()
    {
-      synchronized (synchronizationObject)
-      {
-         hasNewPose = false;
+      hasNewPose = false;
 
-         return new FramePose(framePose);
-      }
+      return new FramePose(framePose);
    }
 }
-

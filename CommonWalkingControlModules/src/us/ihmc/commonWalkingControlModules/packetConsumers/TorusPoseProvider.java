@@ -21,7 +21,7 @@ public class TorusPoseProvider implements ObjectConsumer<TorusPosePacket>
 
    }
 
-   public void consumeObject(TorusPosePacket object)
+   public synchronized void consumeObject(TorusPosePacket object)
    {
       synchronized (synchronizationObject)
       {
@@ -31,7 +31,7 @@ public class TorusPoseProvider implements ObjectConsumer<TorusPosePacket>
       }
    }
 
-   public boolean checkForNewPose()
+   public synchronized boolean checkForNewPose()
    {
       synchronized (synchronizationObject)
       {
@@ -39,7 +39,7 @@ public class TorusPoseProvider implements ObjectConsumer<TorusPosePacket>
       }
    }
 
-   public double getFingerHoleRadius()
+   public synchronized double getFingerHoleRadius()
    {
       synchronized (synchronizationObject)
       {
@@ -49,7 +49,7 @@ public class TorusPoseProvider implements ObjectConsumer<TorusPosePacket>
       }
    }
 
-   public FramePose getFramePose()
+   public synchronized FramePose getFramePose()
    {
       synchronized (synchronizationObject)
       {

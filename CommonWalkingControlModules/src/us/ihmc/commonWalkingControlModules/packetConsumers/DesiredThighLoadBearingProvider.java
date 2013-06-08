@@ -31,7 +31,7 @@ public class DesiredThighLoadBearingProvider implements ObjectConsumer<ThighStat
       return loadBearingState.get(robotSide);
    }
 
-   public void consumeObject(ThighStatePacket object)
+   public synchronized void consumeObject(ThighStatePacket object)
    {
       RobotSide robotSide = object.getRobotSide();
       hasNewLoadBearingState.put(robotSide, true);

@@ -34,7 +34,7 @@ public class DesiredPelvisPoseProvider implements ObjectConsumer<PelvisOrientati
       return desiredPelvisPose;
    }
 
-   public void consumeObject(PelvisOrientationPacket object)
+   public synchronized void consumeObject(PelvisOrientationPacket object)
    {
       hasNewPose = true;
       desiredPelvisPose = new FramePose(ReferenceFrame.getWorldFrame(), object.getPoint(), object.getQuaternion());
