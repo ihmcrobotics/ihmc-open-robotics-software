@@ -29,32 +29,34 @@ public class CommandRecorder
       this.timestampProvider = timestampProvider;
    }
 
-   public synchronized void startRecording(String filename, Transform3D recordTransform)
+   public synchronized void startRecording(String originalFilename, Transform3D recordTransform)
    {
       try
       {
          int counter = 1;
-         filename = filename + ScriptEngineSettings.extension;
-         boolean fileAlreadyExists = doesFileAlreadyExists(filename);
+         originalFilename = originalFilename + ScriptEngineSettings.extension;
+         String proposedFilename = new String(originalFilename);
+         boolean fileAlreadyExists = doesFileAlreadyExists(proposedFilename);
 
          while(fileAlreadyExists)
          {
-            filename  = "duplicate"  + Integer.toString(counter) + "_";
+            proposedFilename  = "duplicate"  + Integer.toString(counter) + "_" + originalFilename;
             counter++;
-            fileAlreadyExists = doesFileAlreadyExists(filename);
+            fileAlreadyExists = doesFileAlreadyExists(proposedFilename);
          }
 
-         String path = ScriptEngineSettings.scriptDirectory + "/" + filename;
+         String path = ScriptEngineSettings.scriptDirectory + "/" + proposedFilename;
 
 
          scriptFileSaver = new ScriptFileSaver(path);
          startTime = timestampProvider.getTimestamp();
          this.recordTransform.set(recordTransform);
          isRecording = true;
-         System.out.println("Started recording to " + filename);
+         System.out.println("Started recording to " + proposedFilename);
       }
       catch (IOException e)
       {
+         System.out.println("CommandRecorder; fileanme =" + originalFilename);
          throw new RuntimeException(e);
       }
    }
@@ -96,7 +98,6 @@ public class CommandRecorder
 
    private boolean doesFileAlreadyExists(String filename)
    {
-      filename = filename + ScriptEngineSettings.extension;
       File directory = new File(ScriptEngineSettings.scriptDirectory);
 
       ArrayList<File> files = FileTools.getAllFilesInDirectoryRecursive(directory);
