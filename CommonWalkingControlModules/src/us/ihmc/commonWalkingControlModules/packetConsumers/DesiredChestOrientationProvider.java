@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controlModules.desiredChestOrientation;
+package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import us.ihmc.commonWalkingControlModules.controlModules.spine.ChestOrientationPacket;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -29,7 +29,7 @@ public class DesiredChestOrientationProvider implements ObjectConsumer<ChestOrie
       return desiredChestOrientation;
    }
 
-   public void consumeObject(ChestOrientationPacket object)
+   public synchronized void consumeObject(ChestOrientationPacket object)
    {
       hasNewPose = true;
       desiredChestOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), object.getQuaternion());
