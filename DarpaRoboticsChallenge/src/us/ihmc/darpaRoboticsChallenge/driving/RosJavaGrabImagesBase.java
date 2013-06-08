@@ -70,7 +70,7 @@ public abstract class RosJavaGrabImagesBase extends AbstractNodeMain
 
    }
 
-   protected void handleImageLeft(CompressedImage message)
+   protected synchronized void handleImageLeft(CompressedImage message)
    {
       timestampLeft = message.getHeader().getStamp().totalNsecs();
       imageLeft = bufferedImageFromRosMessage(message);
@@ -78,7 +78,7 @@ public abstract class RosJavaGrabImagesBase extends AbstractNodeMain
       checkProcessImage();
    }
 
-   protected void handleImageRight(CompressedImage message)
+   protected synchronized void handleImageRight(CompressedImage message)
    {
       timestampRight = message.getHeader().getStamp().totalNsecs();
       imageRight = bufferedImageFromRosMessage(message);
@@ -86,7 +86,7 @@ public abstract class RosJavaGrabImagesBase extends AbstractNodeMain
       checkProcessImage();
    }
 
-   private synchronized void checkProcessImage() {
+   private void checkProcessImage() {
       if( timestampLeft == timestampRight ) {
          processImages(imageLeft, imageRight);
       }
