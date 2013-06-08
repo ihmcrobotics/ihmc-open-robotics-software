@@ -41,11 +41,6 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    {
       this.contactNormalFrameVector.set(normalContactVector);
 
-      set(contactPoints, coefficientOfFriction);
-   }
-
-   public void set(List<FramePoint2d> contactPoints, double coefficientOfFriction)
-   {
       createYoFramePoints(contactPoints);
 
       FramePoint2d temp = new FramePoint2d(planeFrame);
@@ -69,6 +64,11 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       if (coefficientOfFriction < 0.0)
          throw new RuntimeException("Coefficient of friction is negative: " + coefficientOfFriction);
       this.coefficientOfFriction.set(coefficientOfFriction);
+   }
+
+   public void set(List<FramePoint2d> contactPoints, double coefficientOfFriction)
+   {
+      set(contactPoints, coefficientOfFriction, new FrameVector(planeFrame, 0.0, 0.0, 1.0));
    }
 
    private void invalidateContactPoint(YoFramePoint2d contactPoint)
