@@ -59,6 +59,7 @@ public class ManipulationControlModule
    private final SideDependentList<ReferenceFrame> barPositionControlFrames;
    private final SideDependentList<ReferenceFrame> creepyPositionControlFrames;
    private final SideDependentList<ReferenceFrame> knucklePositionControlFrames;
+   private final SideDependentList<ReferenceFrame> fingersBentBackFrames;
 
    private final SideDependentList<HandControllerInterface> handControllers;
 
@@ -99,11 +100,19 @@ public class ManipulationControlModule
       creepyPositionControlFrames = createCreepyPositionControlFramesHack(midHandPositionControlFrames);
       knucklePositionControlFrames = createKnucklePositionControlFramesHack(midHandPositionControlFrames);
 
+      // TODO: remove
+      fingersBentBackFrames = new SideDependentList<ReferenceFrame>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         fingersBentBackFrames.put(robotSide, momentumBasedController.getContactablePlaneHandWithFingersBentBack(robotSide).getPlaneFrame());
+      }
+
       createFrameVisualizers(dynamicGraphicObjectsListRegistry, midHandPositionControlFrames, "midHandPositionControlFrames", false);
       createFrameVisualizers(dynamicGraphicObjectsListRegistry, fingerPositionControlFrames, "fingerPositionControlFrames", false);
       createFrameVisualizers(dynamicGraphicObjectsListRegistry, barPositionControlFrames, "barPositionControlFrames", false);
-      createFrameVisualizers(dynamicGraphicObjectsListRegistry, creepyPositionControlFrames, "creepyPositionControlFrames", true);
-      createFrameVisualizers(dynamicGraphicObjectsListRegistry, knucklePositionControlFrames, "knucklePositionControlFrames", true);
+      createFrameVisualizers(dynamicGraphicObjectsListRegistry, creepyPositionControlFrames, "creepyPositionControlFrames", false);
+      createFrameVisualizers(dynamicGraphicObjectsListRegistry, knucklePositionControlFrames, "knucklePositionControlFrames", false);
+      createFrameVisualizers(dynamicGraphicObjectsListRegistry, fingersBentBackFrames, "fingersBentBackFrames", true);
 
       setUpStateMachine(yoTime, fullRobotModel, twistCalculator, parameters, variousWalkingProviders, dynamicGraphicObjectsListRegistry, handControllers,
                         momentumBasedController, midHandPositionControlFrames, jacobians);

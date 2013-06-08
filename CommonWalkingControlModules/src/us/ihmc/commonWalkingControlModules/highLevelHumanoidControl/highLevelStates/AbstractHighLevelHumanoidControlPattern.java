@@ -116,7 +116,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       referenceFrames = momentumBasedController.getReferenceFrames();
 
       feet = momentumBasedController.getContactablePlaneFeet();
-      handPalms = momentumBasedController.getContactablePlaneHands();
+      handPalms = momentumBasedController.getContactablePlaneHandsWithFingersBentBack();
       graspingHands = momentumBasedController.getContactableCylinderHands();
 
       this.desiredHeadOrientationProvider = variousWalkingProviders.getDesiredHeadOrientationProvider();

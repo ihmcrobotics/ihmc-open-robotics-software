@@ -61,7 +61,7 @@ public class MomentumBasedController
    private final CommonWalkingReferenceFrames referenceFrames;
    private final TwistCalculator twistCalculator;
 
-   private final SideDependentList<ContactablePlaneBody> feet, handPalms, thighs;
+   private final SideDependentList<ContactablePlaneBody> feet, handsWithFingersBentBack, thighs;
    private final ContactablePlaneBody pelvis, pelvisBack;
 
    private final SideDependentList<ContactableCylinderBody> graspingHands;
@@ -113,7 +113,7 @@ public class MomentumBasedController
    public MomentumBasedController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
                                   CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime,
                                   double gravityZ, TwistCalculator twistCalculator, SideDependentList<ContactablePlaneBody> feet,
-                                  SideDependentList<ContactablePlaneBody> handPalms, SideDependentList<ContactableCylinderBody> graspingHands,
+                                  SideDependentList<ContactablePlaneBody> handsWithFingersBentBack, SideDependentList<ContactableCylinderBody> graspingHands,
                                   SideDependentList<ContactablePlaneBody> thighs, ContactablePlaneBody pelvis,
                                   ContactablePlaneBody pelvisBack, double controlDT, ProcessedOutputsInterface processedOutputs,
                                   OptimizationMomentumControlModule optimizationMomentumControlModule,
@@ -146,7 +146,7 @@ public class MomentumBasedController
 
       // Initialize the contactable bodies
       this.feet = feet;
-      this.handPalms = handPalms;    // Plane contact used to bear load with open hands
+      this.handsWithFingersBentBack = handsWithFingersBentBack;
       this.graspingHands = graspingHands;    // Cylindrical contact used to bear load while grasping a cylinder
       this.thighs = thighs;
       this.pelvis = pelvis;
@@ -210,9 +210,9 @@ public class MomentumBasedController
          this.listOfAllContactablePlaneBodies.addAll(feet.values());
       }
 
-      if (handPalms != null)
+      if (handsWithFingersBentBack != null)
       {
-         this.listOfAllContactablePlaneBodies.addAll(handPalms.values());
+         this.listOfAllContactablePlaneBodies.addAll(handsWithFingersBentBack.values());
       }
 
       if (thighs != null)
@@ -618,14 +618,14 @@ public class MomentumBasedController
       return feet;
    }
 
-   public SideDependentList<ContactablePlaneBody> getContactablePlaneHands()
+   public SideDependentList<ContactablePlaneBody> getContactablePlaneHandsWithFingersBentBack()
    {
-      return handPalms;
+      return handsWithFingersBentBack;
    }
 
-   public ContactablePlaneBody getContactablePlaneHand(RobotSide robotSide)
+   public ContactablePlaneBody getContactablePlaneHandWithFingersBentBack(RobotSide robotSide)
    {
-      return handPalms.get(robotSide);
+      return handsWithFingersBentBack.get(robotSide);
    }
 
    public SideDependentList<ContactableCylinderBody> getContactableCylinderHands()
