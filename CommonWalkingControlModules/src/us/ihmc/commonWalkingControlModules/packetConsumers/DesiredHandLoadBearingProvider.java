@@ -8,26 +8,34 @@ import us.ihmc.utilities.net.ObjectConsumer;
 public class DesiredHandLoadBearingProvider implements ObjectConsumer<HandLoadBearingPacket>
 {
    private SideDependentList<Boolean> hasLoadBearingBeenRequested = new SideDependentList<Boolean>();
-   
+   private SideDependentList<Boolean> hasNewInformation = new SideDependentList<Boolean>();
+
+
    public DesiredHandLoadBearingProvider()
    {
       for (RobotSide robotSide : RobotSide.values)
       {
          hasLoadBearingBeenRequested.put(robotSide, false);
+         hasNewInformation.put(robotSide, false);
       }
    }
-   
-   public synchronized boolean checkForNewLoadBearingRequest(RobotSide robotSide)
+
+   public synchronized boolean checkForNewInformation(RobotSide robotSide)
    {
-      boolean ret = hasLoadBearingBeenRequested.get(robotSide);
-      hasLoadBearingBeenRequested.put(robotSide, false);
-      
-      return ret;
+      return hasNewInformation.get(robotSide);
    }
 
-   public void consumeObject(HandLoadBearingPacket object)
+   public synchronized boolean hasLoadBearingBeenRequested(RobotSide robotSide)
+   {
+      hasNewInformation.put(robotSide, false);
+
+      return hasLoadBearingBeenRequested.get(robotSide);
+   }
+
+   public synchronized void consumeObject(HandLoadBearingPacket object)
    {
       RobotSide robotSide = object.getRobotSide();
-      hasLoadBearingBeenRequested.put(robotSide, true);
+      hasLoadBearingBeenRequested.put(robotSide, object.isLoadBearing());
+      hasNewInformation.put(robotSide, true);
    }
 }
