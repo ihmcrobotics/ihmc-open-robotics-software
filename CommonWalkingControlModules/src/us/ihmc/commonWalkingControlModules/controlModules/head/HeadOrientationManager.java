@@ -30,13 +30,16 @@ public class HeadOrientationManager
 
    public void compute()
    {
-      if (desiredHeadOrientationProvider.isNewHeadOrientationInformationAvailable())
+      if (desiredHeadOrientationProvider != null)
       {
-         headOrientationControlModule.setOrientationToTrack(desiredHeadOrientationProvider.getDesiredHeadOrientation());
-      }
-      if (desiredHeadOrientationProvider.isNewLookAtInformationAvailable())
-      {
-         headOrientationControlModule.setPointToTrack(desiredHeadOrientationProvider.getLookAtPoint());
+         if (desiredHeadOrientationProvider.isNewHeadOrientationInformationAvailable())
+         {
+            headOrientationControlModule.setOrientationToTrack(desiredHeadOrientationProvider.getDesiredHeadOrientation());
+         }
+         if (desiredHeadOrientationProvider.isNewLookAtInformationAvailable())
+         {
+            headOrientationControlModule.setPointToTrack(desiredHeadOrientationProvider.getLookAtPoint());
+         }
       }
 
       GeometricJacobian jacobian = headOrientationControlModule.getJacobian();
