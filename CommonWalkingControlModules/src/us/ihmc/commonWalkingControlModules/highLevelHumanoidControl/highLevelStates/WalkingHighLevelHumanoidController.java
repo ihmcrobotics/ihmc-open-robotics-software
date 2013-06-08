@@ -112,7 +112,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final static HighLevelState controllerState = HighLevelState.WALKING;
    private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OLD;
-
+   private final static double DELAY_TIME_BEFORE_TRUSTING_CONTACTS = 0.12;
+   
    private final double PELVIS_YAW_INITIALIZATION_TIME = 1.5;
 
    private final BooleanYoVariable alreadyBeenInDoubleSupportOnce;
@@ -549,7 +550,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       super.initialize();
       
       momentumBasedController.setMomentumControlModuleToUse(MOMENTUM_CONTROL_MODULE_TO_USE);
-      
+      momentumBasedController.setDelayTimeBeforeTrustingContacts(DELAY_TIME_BEFORE_TRUSTING_CONTACTS);
+          
       initializeContacts();
 
       ChestOrientationManager chestOrientationManager = variousWalkingManagers.getChestOrientationManager();

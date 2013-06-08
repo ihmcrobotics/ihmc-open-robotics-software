@@ -58,6 +58,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 {
    public final static HighLevelState controllerState = HighLevelState.INGRESS_EGRESS;
    private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OPTIMIZATION;
+   private final static double DELAY_TIME_BEFORE_TRUSTING_CONTACTS = 1.0;
 
    private final DesiredFootPoseProvider footPoseProvider;
    private final DesiredFootStateProvider footLoadBearingProvider;
@@ -260,7 +261,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       super.initialize();
 
       momentumBasedController.setMomentumControlModuleToUse(MOMENTUM_CONTROL_MODULE_TO_USE);
-      
+      momentumBasedController.setDelayTimeBeforeTrustingContacts(DELAY_TIME_BEFORE_TRUSTING_CONTACTS);
+
       ChestOrientationManager chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
       double chestKp = 100.0;
       double chestZeta = 1.0;
