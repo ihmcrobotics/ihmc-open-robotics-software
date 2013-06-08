@@ -34,8 +34,8 @@ public abstract class RosJavaGrabImagesBase extends AbstractNodeMain
    BufferedImage imageLeft;
    BufferedImage imageRight;
 
-   long timestampLeft;
-   long timestampRight;
+   long timestampLeft = 1;
+   long timestampRight = -1;
 
 
    public RosJavaGrabImagesBase()
