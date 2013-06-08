@@ -6,6 +6,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.ManipulationControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
@@ -104,7 +105,13 @@ public class ManipulationControlModule
       fingersBentBackFrames = new SideDependentList<ReferenceFrame>();
       for (RobotSide robotSide : RobotSide.values)
       {
-         fingersBentBackFrames.put(robotSide, momentumBasedController.getContactablePlaneHandWithFingersBentBack(robotSide).getPlaneFrame());
+         SideDependentList<ContactablePlaneBody> contactablePlaneHandsWithFingersBentBack = momentumBasedController
+               .getContactablePlaneHandsWithFingersBentBack();
+         if (contactablePlaneHandsWithFingersBentBack != null)
+         {
+            ContactablePlaneBody contactablePlaneHandWithFingersBentBack = contactablePlaneHandsWithFingersBentBack.get(robotSide);
+            fingersBentBackFrames.put(robotSide, contactablePlaneHandWithFingersBentBack.getPlaneFrame());
+         }
       }
 
       createFrameVisualizers(dynamicGraphicObjectsListRegistry, midHandPositionControlFrames, "midHandPositionControlFrames", false);
@@ -126,12 +133,13 @@ public class ManipulationControlModule
       DynamicGraphicObjectsList list = new DynamicGraphicObjectsList(listName);
       if (dynamicGraphicObjectsListRegistry != null)
       {
-         for (RobotSide robotSide : RobotSide.values)
+         for (ReferenceFrame handPositionControlFrame : framesToVisualize)
          {
-            ReferenceFrame handPositionControlFrame = framesToVisualize.get(robotSide);
-            DynamicGraphicReferenceFrame dynamicGraphicReferenceFrame = new DynamicGraphicReferenceFrame(handPositionControlFrame, registry, 0.1);
-            dynamicGraphicReferenceFrames.add(dynamicGraphicReferenceFrame);
-            list.add(dynamicGraphicReferenceFrame);
+            if (handPositionControlFrame != null)
+            {               DynamicGraphicReferenceFrame dynamicGraphicReferenceFrame = new DynamicGraphicReferenceFrame(handPositionControlFrame, registry, 0.1);
+               dynamicGraphicReferenceFrames.add(dynamicGraphicReferenceFrame);
+               list.add(dynamicGraphicReferenceFrame);
+            }
          }
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(list);
 
