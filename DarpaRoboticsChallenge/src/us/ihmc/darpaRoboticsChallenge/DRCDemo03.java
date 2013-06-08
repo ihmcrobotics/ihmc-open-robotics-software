@@ -23,7 +23,8 @@ import java.io.IOException;
 
 public class DRCDemo03
 {
-   private static final boolean START_NETWORK = false;
+   private static final boolean START_NETWORK = true;
+   private static final boolean SHOW_HEIGHTMAP = false;
    private final HumanoidRobotSimulation<SDFRobot> drcSimulation;
    private final DRCDemoEnvironmentWithBoxAndSteeringWheel environment;
 
@@ -88,9 +89,12 @@ public class DRCDemo03
 
 //    showSeatGraphics(simulationConstructionSet);
 
-      Graphics3DObject planeAtZ0 = new Graphics3DObject();
-      planeAtZ0.addHeightMap(drcSimulation.getRobot().getGroundContactModel().getGroundProfile(), 1000, 1000, YoAppearance.Red());
-      simulationConstructionSet.addStaticLinkGraphics(planeAtZ0);
+      if (SHOW_HEIGHTMAP)
+      {
+         Graphics3DObject planeAtZ0 = new Graphics3DObject();
+         planeAtZ0.addHeightMap(drcSimulation.getRobot().getGroundContactModel().getGroundProfile(), 1000, 1000, YoAppearance.Red());
+         simulationConstructionSet.addStaticLinkGraphics(planeAtZ0);
+      }
 
       setUpJoyStick(simulationConstructionSet);
 
