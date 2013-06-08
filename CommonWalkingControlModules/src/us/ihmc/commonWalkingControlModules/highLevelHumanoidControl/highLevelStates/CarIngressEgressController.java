@@ -46,6 +46,7 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.VariableChangedListener;
 import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
@@ -95,6 +96,9 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    private final SideDependentList<ContactablePlaneBody> contactableThighs;
    private final ContactablePlaneBody contactablePelvis, contactablePelvisBack;
    
+   private final DoubleYoVariable coefficientOfFrictionForBumAndThighs = new DoubleYoVariable("coefficientOfFrictionForBumAndThighs", registry);
+   private final DoubleYoVariable coefficientOfFrictionForFeet = new DoubleYoVariable("coefficientOfFrictionForFeet", registry);
+   
    private final RigidBody elevator;
    private final List<ContactablePlaneBody> bodiesInContact = new ArrayList<ContactablePlaneBody>();
    private final Map<ContactablePlaneBody, GeometricJacobian> contactJacobians = new LinkedHashMap<ContactablePlaneBody, GeometricJacobian>();
@@ -120,6 +124,9 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
             lidarControllerInterface, dynamicGraphicObjectsListRegistry, controllerState);
 
       setupManagers(variousWalkingManagers);
+
+      coefficientOfFrictionForBumAndThighs.set(0.0);
+      coefficientOfFrictionForFeet.set(0.6);
       
       elevator = fullRobotModel.getElevator();
       contactableThighs = momentumBasedController.getContactablePlaneThighs();
@@ -523,12 +530,12 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       ContactablePlaneBody thigh = contactableThighs.get(robotSide);
       if (inContact)
       {
-         momentumBasedController.setPlaneContactState(thigh, thigh.getContactPoints2d(), coefficientOfFriction.getDoubleValue(), null);
+         momentumBasedController.setPlaneContactState(thigh, thigh.getContactPoints2d(), coefficientOfFrictionForBumAndThighs.getDoubleValue(), null);
          addBodyInContact(thigh);
       }
       else
       {
-         momentumBasedController.setPlaneContactState(thigh, new ArrayList<FramePoint2d>(), coefficientOfFriction.getDoubleValue(), null);
+         momentumBasedController.setPlaneContactState(thigh, new ArrayList<FramePoint2d>(), coefficientOfFrictionForBumAndThighs.getDoubleValue(), null);
          removeBodyInContact(thigh);
       }
    }
@@ -537,12 +544,12 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    {
       if (inContact)
       {
-         momentumBasedController.setPlaneContactState(contactablePelvis, contactablePelvis.getContactPoints2d(), coefficientOfFriction.getDoubleValue(), null);
+         momentumBasedController.setPlaneContactState(contactablePelvis, contactablePelvis.getContactPoints2d(), coefficientOfFrictionForBumAndThighs.getDoubleValue(), null);
          addBodyInContact(contactablePelvis);
       }
       else
       {
-         momentumBasedController.setPlaneContactState(contactablePelvis, new ArrayList<FramePoint2d>(), coefficientOfFriction.getDoubleValue(), null);
+         momentumBasedController.setPlaneContactState(contactablePelvis, new ArrayList<FramePoint2d>(), coefficientOfFrictionForBumAndThighs.getDoubleValue(), null);
          removeBodyInContact(contactablePelvis);
       }
    }
@@ -551,12 +558,12 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    {
       if (inContact)
       {
-         momentumBasedController.setPlaneContactState(contactablePelvisBack, contactablePelvisBack.getContactPoints2d(), coefficientOfFriction.getDoubleValue(), null);
+         momentumBasedController.setPlaneContactState(contactablePelvisBack, contactablePelvisBack.getContactPoints2d(), coefficientOfFrictionForBumAndThighs.getDoubleValue(), null);
          addBodyInContact(contactablePelvisBack);
       }
       else
       {
-         momentumBasedController.setPlaneContactState(contactablePelvisBack, new ArrayList<FramePoint2d>(), coefficientOfFriction.getDoubleValue(), null);
+         momentumBasedController.setPlaneContactState(contactablePelvisBack, new ArrayList<FramePoint2d>(), coefficientOfFrictionForBumAndThighs.getDoubleValue(), null);
          removeBodyInContact(contactablePelvisBack);
       }
    }
@@ -614,7 +621,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          footEndEffectorControlModules.get(contactableBody).doSingularityEscapeBeforeTransitionToNextState();
       }
 
-      momentumBasedController.setPlaneContactState(contactableBody, contactPoints, coefficientOfFriction.getDoubleValue(), normalContactVector);
+      momentumBasedController.setPlaneContactState(contactableBody, contactPoints, coefficientOfFrictionForFeet.getDoubleValue(), normalContactVector);
 
       updateFootEndEffectorControlModule(contactableBody, contactPoints, constraintType);
    }
