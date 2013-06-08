@@ -33,9 +33,10 @@ public class UpcomingFootstepList
 
    private final YoFramePose nextFootstepPose = new YoFramePose("nextFootstep", "", worldFrame, registry);
 
-   public UpcomingFootstepList(FootstepProvider footstepProvider)
+   public UpcomingFootstepList(FootstepProvider footstepProvider, YoVariableRegistry parentRegistry)
    {
       this.footstepProvider = footstepProvider;
+      parentRegistry.addChild(registry);
    }
 
    public void checkForFootsteps(PointPositionGrabberInterface pointPositionGrabber, BooleanYoVariable readyToGrabNextFootstep,
