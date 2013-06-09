@@ -94,16 +94,15 @@ public class ICPAndMomentumBasedController
       this.updatables.add(new Omega0Updater());
       this.updatables.add(new BipedSupportPolygonsUpdater());
       this.updatables.add(new CapturePointUpdater());
-      
-//      momentumBasedController.addUpdatable(new Omega0Updater());
-//      momentumBasedController.addUpdatable(new BipedSupportPolygonsUpdater());
-//      momentumBasedController.addUpdatable(new CapturePointUpdater());
-      
-      Collection<PlaneContactState> planeContactStates = momentumBasedController.getPlaneContactStates();
-      momentumBasedController.addUpdatable(new FootPolygonVisualizer(planeContactStates, dynamicGraphicObjectsListRegistry, registry));
 
       if (dynamicGraphicObjectsListRegistry != null)
       {
+         ArrayList<PlaneContactState> feetContactStates = new ArrayList<PlaneContactState>();
+         momentumBasedController.getFeetContactStates(feetContactStates);
+//         Collection<PlaneContactState> planeContactStates = momentumBasedController.getPlaneContactStates();
+         FootPolygonVisualizer footPolygonVisualizer = new FootPolygonVisualizer(feetContactStates, dynamicGraphicObjectsListRegistry, registry);
+         momentumBasedController.addUpdatable(footPolygonVisualizer);
+         
          DynamicGraphicPosition capturePointViz = capturePoint.createDynamicGraphicPosition("Capture Point", 0.01, YoAppearance.Blue(),
                                                      GraphicType.ROTATED_CROSS);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("Capture Point", capturePointViz);
