@@ -41,7 +41,7 @@ public interface DrivingLowLevelInterface
     * Waits until the specified time in simulation-time has elapsed
     * @param seconds Number of seconds to wait
     */
-   public void wait(double seconds);
+   public void drivingWait(double seconds);
 
    public static interface PoseListener
    {
