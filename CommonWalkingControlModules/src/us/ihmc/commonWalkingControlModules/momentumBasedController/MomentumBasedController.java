@@ -11,7 +11,14 @@ import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.*;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointVisualizer;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableCylinderBody;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ModifiableContactState;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.WrenchVisualizer;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoCylindricalContactState;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
@@ -288,6 +295,19 @@ public class MomentumBasedController
       }
    }
 
+   public SideDependentList<ContactablePlaneBody> getFeet()
+   {
+      return feet;
+   }
+   
+   public void getFeetContactStates(ArrayList<PlaneContactState> feetContactStatesToPack)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         feetContactStatesToPack.add(contactStates.get(feet.get(robotSide)));
+      }
+   }
+   
    public SpatialForceVector getGravitationalWrench()
    {
       return gravitationalWrench;
