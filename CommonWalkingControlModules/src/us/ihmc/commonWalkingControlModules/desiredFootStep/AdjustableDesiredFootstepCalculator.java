@@ -266,4 +266,9 @@ public class AdjustableDesiredFootstepCalculator extends AbstractAdjustableDesir
    {
       return contactableBodies.get(swingSide).getContactPoints();
    }
+   
+   public boolean isDone()
+   {
+      return false;
+   }
 }

@@ -134,4 +134,9 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
    {
       return null;
    }
+   
+   public boolean isDone()
+   {
+      return false;
+   }
 }

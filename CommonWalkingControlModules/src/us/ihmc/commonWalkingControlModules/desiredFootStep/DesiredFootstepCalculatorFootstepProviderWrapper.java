@@ -54,7 +54,7 @@ public class DesiredFootstepCalculatorFootstepProviderWrapper implements Footste
 
    public boolean isEmpty()
    {
-      return !walk.getBooleanValue();
+      return !walk.getBooleanValue() || desiredFootstepCalculator.isDone();
    }
 
    public void notifyComplete()
