@@ -322,16 +322,10 @@ public class FootstepPathCoordinator implements FootstepProvider
       BlindWalkingDirection blindWalkingDirection = blindWalkingPacket.getBlindWalkingDirection();
       BlindWalkingSpeed blindWalkingSpeed = blindWalkingPacket.getBlindWalkingSpeed();
 
-      if (blindWalkingDirection == BlindWalkingDirection.BACKWARD)
-      {
-         blindWalkingToDestinationDesiredFootstepCalculator.setWalkBackwards(true);
-      }
-      else
-      {
-         blindWalkingToDestinationDesiredFootstepCalculator.setWalkBackwards(false);
-      }
-
-      double stepLength;
+      blindWalkingToDestinationDesiredFootstepCalculator.setBlindWalkingDirection(blindWalkingDirection);
+     
+      double stepLength; 
+      double stepSideward;
       double swingTime;
       double transferTime;
       
@@ -340,6 +334,7 @@ public class FootstepPathCoordinator implements FootstepProvider
          case SLOW :
          {
             stepLength = 0.2;
+            stepSideward = 0.1;
             swingTime = SLOW_BLIND_WALKING_SWING_TIME;
             transferTime = SLOW_BLIND_WALKING_TRANSFER_TIME;
             break;
@@ -348,6 +343,7 @@ public class FootstepPathCoordinator implements FootstepProvider
          case MEDIUM :
          {
             stepLength = 0.35;
+            stepSideward = 0.25;
             swingTime = FOOTSTEP_PATH_SWING_TIME;
             transferTime = FOOTSTEP_PATH_TRANSFER_TIME;
             break;
@@ -356,6 +352,7 @@ public class FootstepPathCoordinator implements FootstepProvider
          case FAST :
          {
             stepLength = 0.5;
+            stepSideward = 0.6;
             swingTime = FOOTSTEP_PATH_SWING_TIME;
             transferTime = FOOTSTEP_PATH_TRANSFER_TIME;
             break;
@@ -364,6 +361,7 @@ public class FootstepPathCoordinator implements FootstepProvider
          default :
          {
             stepLength = 0.0;
+            stepSideward = 0.0;
             swingTime = SLOW_BLIND_WALKING_SWING_TIME;
             transferTime = SLOW_BLIND_WALKING_TRANSFER_TIME;
 
@@ -372,6 +370,7 @@ public class FootstepPathCoordinator implements FootstepProvider
       }
 
       blindWalkingToDestinationDesiredFootstepCalculator.setDesiredStepForward(stepLength);
+      blindWalkingToDestinationDesiredFootstepCalculator.setDesiredStepSideward(stepSideward);
       constantSwingTimeCalculator.setSwingTime(swingTime);
       constantTransferTimeCalculator.setTransferTime(transferTime);
 
