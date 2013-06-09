@@ -7,15 +7,11 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.statemachines.*;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.SE3PDGains;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.JointSpaceHandControlControlState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LoadBearingCylindricalHandControlState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.ObjectManipulationState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TaskspaceHandPositionControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.sensors.MassMatrixEstimatingToolRigidBody;
 import us.ihmc.commonWalkingControlModules.trajectories.*;
@@ -56,7 +52,7 @@ public class IndividualHandControlModule
    private final JointSpaceHandControlControlState jointSpaceHandControlState;
    private final LoadBearingCylindricalHandControlState loadBearingCylindricalState;
    private final ObjectManipulationState objectManipulationState;
-//   private final LoadBearingPlaneHandControlState loadBearingPlaneState;
+   private final LoadBearingPlaneHandControlState loadBearingPlaneFingersBentBackState;
    private final List<TaskspaceHandPositionControlState> taskSpacePositionControlStates = new ArrayList<TaskspaceHandPositionControlState>();
 
    private final EnumYoVariable<IndividualHandControlState> requestedState;
@@ -101,7 +97,7 @@ public class IndividualHandControlModule
 
       if (handController != null)
          this.toolBody = new MassMatrixEstimatingToolRigidBody(name + "Tool", handController.getWristJoint(), fullRobotModel, gravity, controlDT, registry,
-               dynamicGraphicObjectsListRegistry);
+                 dynamicGraphicObjectsListRegistry);
       else
          this.toolBody = null;
 
@@ -119,15 +115,15 @@ public class IndividualHandControlModule
       orientationInterpolationWorldTrajectoryGenerators = new LinkedHashMap<ReferenceFrame, OrientationInterpolationTrajectoryGenerator>();
 
       holdPositionInBaseTrajectoryGenerator = new ConstantPositionTrajectoryGenerator(name + "HoldPosition", jacobian.getBaseFrame(),
-            initialConfigurationProvider, 0.0, registry);
+              initialConfigurationProvider, 0.0, registry);
       holdOrientationInBaseTrajectoryGenerator = new ConstantOrientationTrajectoryGenerator(name + "HoldOrientation", jacobian.getBaseFrame(),
-            initialConfigurationProvider, 0.0, registry);
+              initialConfigurationProvider, 0.0, registry);
 
       loadBearingCylindricalState = new LoadBearingCylindricalHandControlState(IndividualHandControlState.LOAD_BEARING_CYLINDRICAL, momentumBasedController,
               jacobian, parentRegistry, robotSide);
 
-//      loadBearingPlaneState = new LoadBearingPlaneHandControlState(IndividualHandControlState.LOAD_BEARING_PLANE, robotSide, momentumBasedController, jacobian,
-//              handController, registry);
+      loadBearingPlaneFingersBentBackState = new LoadBearingPlaneHandControlState(IndividualHandControlState.LOAD_BEARING_PLANE_FINGERS_BENT_BACK, robotSide,
+              momentumBasedController, jacobian, handController, registry);
 
       jointSpaceHandControlState = new JointSpaceHandControlControlState(IndividualHandControlState.JOINT_SPACE, robotSide, jacobian, momentumBasedController,
               registry, 1.0);
@@ -154,15 +150,14 @@ public class IndividualHandControlModule
       addTransitionToCylindricalLoadBearing(requestedState, handController, taskspaceHandPositionControlState, loadBearingCylindricalState, simulationTime);
       addTransitionToLeaveCylindricalLoadBearing(requestedState, handController, loadBearingCylindricalState, taskspaceHandPositionControlState);
 
-      // TODO I just don't trust the plane load bearing state for now (Sylvain)
-//      addTransitionToPlaneLoadBearing(requestedState, handController, jointSpaceHandControlState, loadBearingPlaneState);
-//      addTransitionToPlaneLoadBearing(requestedState, handController, taskspaceHandPositionControlState, loadBearingPlaneState);
+      addTransitionToPlaneLoadBearingFingersBentBack(requestedState, handController, taskspaceHandPositionControlState, loadBearingPlaneFingersBentBackState);
+      addRequestedStateTransition(requestedState, true, loadBearingPlaneFingersBentBackState, taskspaceHandPositionControlState);
 
       stateMachine.addState(jointSpaceHandControlState);
       stateMachine.addState(taskspaceHandPositionControlState);
       stateMachine.addState(objectManipulationState);
       stateMachine.addState(loadBearingCylindricalState);
-//      stateMachine.addState(loadBearingPlaneState);
+      stateMachine.addState(loadBearingPlaneFingersBentBackState);
 
       taskSpacePositionControlStates.add(taskspaceHandPositionControlState);
       taskSpacePositionControlStates.add(objectManipulationState);
@@ -171,7 +166,8 @@ public class IndividualHandControlModule
    }
 
    private static void addTransitionToCylindricalLoadBearing(final EnumYoVariable<IndividualHandControlState> requestedState,
-           final HandControllerInterface handControllerInterface, State<IndividualHandControlState> fromState, final State<IndividualHandControlState> toState, final DoubleYoVariable time)
+           final HandControllerInterface handControllerInterface, State<IndividualHandControlState> fromState, final State<IndividualHandControlState> toState,
+           final DoubleYoVariable time)
    {
       StateTransitionCondition stateTransitionCondition = new StateTransitionCondition()
       {
@@ -179,7 +175,7 @@ public class IndividualHandControlModule
          {
             boolean transitionRequested = requestedState.getEnumValue() == toState.getStateEnum();
             boolean ableToBearLoad = handControllerInterface.isAbleToBearLoad();
-            boolean initializedClosedHack = time.getDoubleValue() < .01; // FIXME: get rid of this. Currently necessary for getting into car
+            boolean initializedClosedHack = time.getDoubleValue() < .01;    // FIXME: get rid of this. Currently necessary for getting into car
 
             return transitionRequested && (ableToBearLoad || initializedClosedHack);
          }
@@ -197,7 +193,7 @@ public class IndividualHandControlModule
          public boolean checkCondition()
          {
             boolean transitionRequested = requestedState.getEnumValue() == toState.getStateEnum();
-            
+
             return transitionRequested;
          }
       };
@@ -213,23 +209,23 @@ public class IndividualHandControlModule
       fromState.addStateTransition(stateTransition);
    }
 
-//   private static void addTransitionToPlaneLoadBearing(final EnumYoVariable<IndividualHandControlState> requestedState,
-//           final HandControllerInterface handControllerInterface, State<IndividualHandControlState> fromState, final State<IndividualHandControlState> toState)
-//   {
-//      StateTransitionCondition stateTransitionCondition = new StateTransitionCondition()
-//      {
-//         public boolean checkCondition()
-//         {
-//            boolean transitionRequested = requestedState.getEnumValue() == toState.getStateEnum();
-//            boolean ableToBearLoad = handControllerInterface.isOpen();
-//
-//            return transitionRequested && ableToBearLoad;
-//         }
-//      };
-//      StateTransition<IndividualHandControlState> stateTransition = new StateTransition<IndividualHandControlState>(toState.getStateEnum(),
-//                                                                       stateTransitionCondition);
-//      fromState.addStateTransition(stateTransition);
-//   }
+   private static void addTransitionToPlaneLoadBearingFingersBentBack(final EnumYoVariable<IndividualHandControlState> requestedState,
+           final HandControllerInterface handControllerInterface, State<IndividualHandControlState> fromState, final State<IndividualHandControlState> toState)
+   {
+      StateTransitionCondition stateTransitionCondition = new StateTransitionCondition()
+      {
+         public boolean checkCondition()
+         {
+            boolean transitionRequested = requestedState.getEnumValue() == toState.getStateEnum();
+            boolean ableToBearLoad = handControllerInterface.areFingersBentBack();
+
+            return transitionRequested && ableToBearLoad;
+         }
+      };
+      StateTransition<IndividualHandControlState> stateTransition = new StateTransition<IndividualHandControlState>(toState.getStateEnum(),
+                                                                       stateTransitionCondition);
+      fromState.addStateTransition(stateTransition);
+   }
 
    public void doControl()
    {
@@ -273,21 +269,24 @@ public class IndividualHandControlModule
       finalConfigurationProvider.set(finalDesiredPose);
       trajectoryTimeProvider.set(time);
       executeTaskSpaceTrajectory(getOrCreateStraightLinePositionTrajectoryGenerator(trajectoryFrame),
-            getOrCreateOrientationInterpolationTrajectoryGenerator(trajectoryFrame), frameToControlPoseOf, base, holdObject, gains);
+                                 getOrCreateOrientationInterpolationTrajectoryGenerator(trajectoryFrame), frameToControlPoseOf, base, holdObject, gains);
    }
 
-   private FramePose getCurrentDesiredPose(TaskspaceHandPositionControlState taskspaceHandPositionControlState, ReferenceFrame frameToControlPoseOf, ReferenceFrame trajectoryFrame)
+   private FramePose getCurrentDesiredPose(TaskspaceHandPositionControlState taskspaceHandPositionControlState, ReferenceFrame frameToControlPoseOf,
+           ReferenceFrame trajectoryFrame)
    {
       FramePose pose = taskspaceHandPositionControlState.getDesiredPose();
       pose.changeFrame(trajectoryFrame);
 
       Transform3D oldTrackingFrameTransform = new Transform3D();
       pose.getTransformFromPoseToFrame(oldTrackingFrameTransform);
-      Transform3D transformFromNewTrackingFrameToOldTrackingFrame = frameToControlPoseOf.getTransformToDesiredFrame(taskspaceHandPositionControlState.getFrameToControlPoseOf());
+      Transform3D transformFromNewTrackingFrameToOldTrackingFrame =
+         frameToControlPoseOf.getTransformToDesiredFrame(taskspaceHandPositionControlState.getFrameToControlPoseOf());
 
       Transform3D newTrackingFrameTransform = new Transform3D();
       newTrackingFrameTransform.mul(oldTrackingFrameTransform, transformFromNewTrackingFrameToOldTrackingFrame);
       pose.set(trajectoryFrame, newTrackingFrameTransform);
+
       return pose;
    }
 
@@ -295,13 +294,13 @@ public class IndividualHandControlModule
    {
       return stateMachine.isCurrentState(IndividualHandControlState.LOAD_BEARING_CYLINDRICAL);
    }
-   
+
    public void requestLoadBearing()
    {
-      if (handController.isClosed() || handController.isClosing())
+      if (handController.isClosing())
          requestedState.set(loadBearingCylindricalState.getStateEnum());
-//      else
-//         requestedState.set(loadBearingPlaneState.getStateEnum());
+      else if (handController.areFingersBendingBack())
+       requestedState.set(loadBearingPlaneFingersBentBackState.getStateEnum());
    }
 
    public void executeJointSpaceTrajectory(Map<OneDoFJoint, ? extends DoubleTrajectoryGenerator> trajectories)
@@ -387,7 +386,7 @@ public class IndividualHandControlModule
       if (ret == null)
       {
          ret = new StraightLinePositionTrajectoryGenerator(name + referenceFrame.getName(), referenceFrame, trajectoryTimeProvider,
-               initialConfigurationProvider, finalConfigurationProvider, registry);
+                 initialConfigurationProvider, finalConfigurationProvider, registry);
          straightLinePositionWorldTrajectoryGenerators.put(referenceFrame, ret);
       }
 
@@ -400,7 +399,7 @@ public class IndividualHandControlModule
       if (ret == null)
       {
          ret = new OrientationInterpolationTrajectoryGenerator(name + referenceFrame.getName(), referenceFrame, trajectoryTimeProvider,
-               initialConfigurationProvider, finalConfigurationProvider, registry);
+                 initialConfigurationProvider, finalConfigurationProvider, registry);
          orientationInterpolationWorldTrajectoryGenerators.put(referenceFrame, ret);
       }
 
@@ -430,6 +429,7 @@ public class IndividualHandControlModule
          if (currentState == taskSpacePositionControlState)
             return taskSpacePositionControlState.getReferenceFrame() == ReferenceFrame.getWorldFrame();
       }
+
       return false;
    }
 }
