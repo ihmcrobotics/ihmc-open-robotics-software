@@ -260,7 +260,7 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
   
    public double getMaxStepLength()
    {
-       return 0.5; //0.35;
+       return 0.6; //0.5; //0.35;
    }
 
    public double getMinStepWidth()
@@ -270,7 +270,7 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
 
    public double getMaxStepWidth()
    {
-      return 0.4;
+      return 0.6; //0.4;
    }
 
    public double getStepPitch()

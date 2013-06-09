@@ -7,6 +7,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector2d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.BlindWalkingDirection;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.MathTools;
@@ -22,8 +23,8 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.math.geometry.ZUpFrame;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
@@ -34,13 +35,14 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
 
    private final YoFramePoint2d desiredDestination = new YoFramePoint2d("desiredDestination", "", ReferenceFrame.getWorldFrame(), registry);
 
-   private final BooleanYoVariable walkBackwards = new BooleanYoVariable("walkBackwards", registry);
+   private final EnumYoVariable<BlindWalkingDirection> blindWalkingDirection = new EnumYoVariable<BlindWalkingDirection>("blindWalkingDirection", "", registry, BlindWalkingDirection.class, false);
 
    private final DoubleYoVariable distanceToDestination = new DoubleYoVariable("distanceToDestination", registry);
    private final DoubleYoVariable angleToDestination = new DoubleYoVariable("angleToDestination", registry);
 
    private final DoubleYoVariable inPlaceWidth = new DoubleYoVariable("inPlaceWidth", registry);
    private final DoubleYoVariable desiredStepForward = new DoubleYoVariable("desiredStepForward", registry);
+   private final DoubleYoVariable desiredStepSideward = new DoubleYoVariable("desiredStepSideward", registry);
    private final DoubleYoVariable maxStepLength = new DoubleYoVariable("maxStepLength", registry);
 
    private final DoubleYoVariable minStepWidth = new DoubleYoVariable("minStepWidth", registry);
@@ -67,9 +69,9 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
       return super.updateAndGetDesiredFootstep(supportLegSide);   
    }
    
-   public void setWalkBackwards(boolean walkBackwards)
+   public void setBlindWalkingDirection(BlindWalkingDirection blindWalkingDirection)
    {
-      this.walkBackwards.set(walkBackwards);
+      this.blindWalkingDirection.set(blindWalkingDirection);
    }
    
    public void setDesiredDestination(FramePoint2d desiredDestinationInWorld)
@@ -163,7 +165,7 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
       }
       
       double absoluteAngleToDestination;
-      if (walkBackwards.getBooleanValue())
+      if (blindWalkingDirection.getEnumValue() == BlindWalkingDirection.BACKWARD)
       {
          absoluteAngleToDestination = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(angleToDestination, Math.PI));
       }
@@ -182,7 +184,7 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
            
       
       
-      if (walkBackwards.getBooleanValue())
+      if (blindWalkingDirection.getEnumValue() == BlindWalkingDirection.BACKWARD)
       {
          double backwardsDistanceReduction = 0.75;
          desiredOffsetFromSquaredUp.set(-backwardsDistanceReduction * percentToStepInX * desiredStepForward.getDoubleValue(), 0.0);
@@ -234,7 +236,7 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
       double maxTurnOutAngle = 0.4;
       
       double amountToYaw;
-      if (walkBackwards.getBooleanValue())
+      if (blindWalkingDirection.getEnumValue() == BlindWalkingDirection.BACKWARD)
       {
          amountToYaw = AngleTools.computeAngleDifferenceMinusPiToPi(angleToDestination, Math.PI);
       }
@@ -295,6 +297,11 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
    public void setDesiredStepForward(double desiredStepForward)
    {
       this.desiredStepForward.set(desiredStepForward);
+   }
+   
+   public void setDesiredStepSideward(double desiredStepSideward)
+   {
+      this.desiredStepSideward.set(desiredStepSideward);
    }
 
    public void setMinStepWidth(double minStepWidth)
