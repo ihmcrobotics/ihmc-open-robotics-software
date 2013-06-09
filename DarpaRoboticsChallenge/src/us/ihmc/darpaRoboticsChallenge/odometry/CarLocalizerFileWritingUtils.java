@@ -8,6 +8,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -22,8 +24,16 @@ public class CarLocalizerFileWritingUtils
       {
          throw new RuntimeException("couldn't find data directory");
       }
-
       return new File(url.toURI());
+   }
+   
+
+   public static List<Point3D_F64> readJARResource(String localFileName) throws IOException, URISyntaxException
+   {
+      InputStream resourceAsStream = CarLocalizerFileWritingUtils.class.getResourceAsStream(localFileName);
+      InputStreamReader bufferedInputStrem = new InputStreamReader(resourceAsStream);
+      BufferedReader bufferedReader =  new BufferedReader(bufferedInputStrem);
+      return read(bufferedReader);
    }
 
    public static File getCarLocalizerSourceDataDirectory() throws URISyntaxException
