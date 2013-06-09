@@ -32,20 +32,15 @@ public class MotionConstraintHandler
    private final DenseMatrix64F taskSpaceAccelerationMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
    private final List<DenseMatrix64F> jList = new ArrayList<DenseMatrix64F>();
    private final List<DenseMatrix64F> pList = new ArrayList<DenseMatrix64F>();
-   private final List<DenseMatrix64F> nList = new ArrayList<DenseMatrix64F>();
-   private final List<DenseMatrix64F> zList = new ArrayList<DenseMatrix64F>();
    private final List<MutableDouble> weightList = new ArrayList<MutableDouble>();
 
    private final DenseMatrix64F j = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F p = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F z = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F n = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F w = new DenseMatrix64F(1, 1);
 
    private final DenseMatrix64F jBlockCompact = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F sJ = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F nCompactBlock = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F nTranspose = new DenseMatrix64F(1, 1);
 
    private final ConvectiveTermCalculator convectiveTermCalculator = new ConvectiveTermCalculator();
    private final PointJacobian pointJacobian = new PointJacobian();
@@ -72,8 +67,7 @@ public class MotionConstraintHandler
       motionConstraintIndex = 0;
    }
 
-   public void setDesiredSpatialAcceleration(GeometricJacobian jacobian,
-                                             TaskspaceConstraintData taskspaceConstraintData, double weight)
+   public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData, double weight)
    {
       // (S * J) * vdot = S * (Tdot - Jdot * v)
 
@@ -101,7 +95,6 @@ public class MotionConstraintHandler
 
 
 
-
          int nullity = nullspaceMultipliers.getNumRows();
          if (nullity > 0)
          {
@@ -111,7 +104,7 @@ public class MotionConstraintHandler
             DenseMatrix64F nullspace = nullspaceCalculator.getNullspace();
 
 
-            DenseMatrix64F iMinusNNT = new DenseMatrix64F(1, 1); // TODO: make field
+            DenseMatrix64F iMinusNNT = new DenseMatrix64F(1, 1);    // TODO: make field
             iMinusNNT.reshape(nullspace.getNumRows(), nullspace.getNumRows());
             CommonOps.multOuter(nullspace, iMinusNNT);
             CommonOps.scale(-1.0, iMinusNNT);
@@ -139,8 +132,6 @@ public class MotionConstraintHandler
 
 
 
-
-
          DenseMatrix64F jFullBlock = getMatrixFromList(jList, motionConstraintIndex, jBlockCompact.getNumRows(), nDegreesOfFreedom);
          compactBlockToFullBlock(baseToEndEffectorJacobian.getJointsInOrder(), jBlockCompact, jFullBlock);
 
@@ -159,6 +150,7 @@ public class MotionConstraintHandler
    private void compactBlockToFullBlock(InverseDynamicsJoint[] joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullBlock)
    {
       fullBlock.zero();
+
       for (InverseDynamicsJoint joint : joints)
       {
          int[] indicesIntoCompactBlock = ScrewTools.computeIndicesForJoint(joints, joint);
@@ -178,7 +170,7 @@ public class MotionConstraintHandler
       CheckTools.checkEquals(joint.getDegreesOfFreedom(), jointAcceleration.getNumRows());
       int[] columnsForJoint = this.columnsForJoints.get(joint);
 
-      if (columnsForJoint != null) // don't do anything for joints that are not in the list
+      if (columnsForJoint != null)    // don't do anything for joints that are not in the list
       {
          DenseMatrix64F jBlock = getMatrixFromList(jList, motionConstraintIndex, jointAcceleration.getNumRows(), nDegreesOfFreedom);
          jBlock.zero();
@@ -198,7 +190,8 @@ public class MotionConstraintHandler
       }
    }
 
-   public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase, double weight)
+   public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase,
+           double weight)
    {
       pointJacobian.set(jacobian, bodyFixedPoint);
       pointJacobian.compute();
@@ -223,10 +216,6 @@ public class MotionConstraintHandler
    public void compute()
    {
       assembleEquation(jList, pList, motionConstraintIndex, j, p);
-//      assembleEquation(nList, zList, nullspaceIndex, nTranspose, z);
-      n.reshape(nTranspose.getNumCols(), nTranspose.getNumRows());
-      CommonOps.transpose(nTranspose, n);
-
       assembleWeightMatrix(weightList, jList, motionConstraintIndex, w);
    }
 
@@ -243,6 +232,8 @@ public class MotionConstraintHandler
 
       matrix.reshape(nRows, nDegreesOfFreedom);
       vector.reshape(nRows, 1);
+      matrix.zero();
+      vector.zero();
 
       int rowNumber = 0;
       for (int i = 0; i < size; i++)
@@ -290,24 +281,6 @@ public class MotionConstraintHandler
    public DenseMatrix64F getRightHandSide()
    {
       return p;
-   }
-
-   public DenseMatrix64F getNullspaceMatrix()
-   {
-      throw new RuntimeException();
-//      return n;
-   }
-
-   public DenseMatrix64F getNullspaceMatrixTranspose()
-   {
-      throw new RuntimeException();
-//      return nTranspose;
-   }
-
-   public DenseMatrix64F getNullspaceMultipliers()
-   {
-      throw new RuntimeException();
-//      return z;
    }
 
    public DenseMatrix64F getWeightMatrix()
