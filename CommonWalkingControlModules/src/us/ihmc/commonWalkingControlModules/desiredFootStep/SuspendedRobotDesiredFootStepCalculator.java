@@ -132,5 +132,10 @@ public class SuspendedRobotDesiredFootStepCalculator implements DesiredFootstepC
    {
       return null;
    }
+   
+   public boolean isDone()
+   {
+      return false;
+   }
 
 }

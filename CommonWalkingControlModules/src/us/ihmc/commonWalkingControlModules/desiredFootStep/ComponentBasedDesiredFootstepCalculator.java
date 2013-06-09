@@ -358,4 +358,9 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
          return DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(allContactPoints, forwardInFootFrame, nPoints);
       }
    }
+   
+   public boolean isDone()
+   {
+      return false;
+   }
 }

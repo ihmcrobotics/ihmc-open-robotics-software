@@ -142,4 +142,9 @@ public class SimpleWorldDesiredFootstepCalculator extends AbstractAdjustableDesi
    {
       return contactableBodies.get(swingSide).getContactPoints();
    }
+   
+   public boolean isDone()
+   {
+      return false;
+   }
 }

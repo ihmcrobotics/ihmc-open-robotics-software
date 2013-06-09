@@ -124,4 +124,9 @@ public class PushRecoveryDesiredFootstepCalculator implements DesiredFootstepCal
    public void setupParametersForR2()
    {
    }
+   
+   public boolean isDone()
+   {
+      return false;
+   }
 }
