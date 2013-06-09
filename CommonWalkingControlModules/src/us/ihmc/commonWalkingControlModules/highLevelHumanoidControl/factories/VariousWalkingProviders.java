@@ -245,7 +245,7 @@ public class VariousWalkingProviders
       objectCommunicator.attachListener(ThighStatePacket.class, thighLoadBearingProvider);
       objectCommunicator.attachListener(BumStatePacket.class, pelvisLoadBearingProvider);
 
-      objectCommunicator.attachListener(FingerStatePacket.class, fingerStateProvider);
+      objectCommunicator.attachListener(HandStatePacket.class, fingerStateProvider);
 
       VariousWalkingProviders variousProvidersFactory = new VariousWalkingProviders(footstepPathCoordinator, mapFromFootstepsToTrajectoryParameters,
             headOrientationProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, torusPoseProvider, torusManipulationProvider,
