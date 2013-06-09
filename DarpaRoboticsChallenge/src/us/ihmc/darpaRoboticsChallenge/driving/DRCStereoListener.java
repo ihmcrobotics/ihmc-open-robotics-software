@@ -9,6 +9,12 @@ import java.awt.image.BufferedImage;
  */
 public interface DRCStereoListener
 {
+   /**
+    *
+    * @param image
+    * @param timestamp Time stamp in nano-seconds
+    * @param fov
+    */
    public void leftImage( BufferedImage image , long timestamp, double fov );
 
    public void rightImage( BufferedImage image , long timestamp, double fov );
