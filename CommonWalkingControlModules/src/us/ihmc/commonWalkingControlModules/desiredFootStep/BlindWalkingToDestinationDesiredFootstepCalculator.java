@@ -155,7 +155,6 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
          
    }
    
-   // TODO: clean up
    private final Vector2d desiredOffsetFromSquaredUp = new Vector2d();
    private FrameVector2d computeDesiredOffsetFromSupportAnkle(ReferenceFrame supportAnkleZUpFrame, RobotSide swingLegSide, double angleToDestination, double distanceToDestination)
    {   		
@@ -165,35 +164,72 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
       }
       
       double absoluteAngleToDestination;
-      if (blindWalkingDirection.getEnumValue() == BlindWalkingDirection.BACKWARD)
+      switch(blindWalkingDirection.getEnumValue())
+      {
+      case BACKWARD:
       {
          absoluteAngleToDestination = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(angleToDestination, Math.PI));
+         break;
       }
-      else
+      case LEFT:
+      {
+         absoluteAngleToDestination = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(angleToDestination, Math.PI/2.0));
+         break;
+      }
+      case RIGHT:
+      {
+         absoluteAngleToDestination = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(angleToDestination, -Math.PI/2.0));
+         break;
+      }
+      case FORWARD:
       {
          absoluteAngleToDestination = Math.abs(angleToDestination);
+         break;
+      }
+      default:
+      {
+         throw new RuntimeException("Shouldn't get here!");
+      }
       }
      
       double minAngleBeforeShorterSteps = 0.1;
       double maxAngleBeforeTurnInPlace = 0.5;
       
-      double percentToStepInX = 1.0 - (absoluteAngleToDestination - minAngleBeforeShorterSteps)/(maxAngleBeforeTurnInPlace - minAngleBeforeShorterSteps);
+      double percentToStepInXY = 1.0 - (absoluteAngleToDestination - minAngleBeforeShorterSteps)/(maxAngleBeforeTurnInPlace - minAngleBeforeShorterSteps);
       
-      if (percentToStepInX > 1.0) percentToStepInX = 1.0;
-      if (percentToStepInX < 0.0) percentToStepInX = 0.0;
+      if (percentToStepInXY > 1.0) percentToStepInXY = 1.0;
+      if (percentToStepInXY < 0.0) percentToStepInXY = 0.0;
            
       
-      
-      if (blindWalkingDirection.getEnumValue() == BlindWalkingDirection.BACKWARD)
+      switch(blindWalkingDirection.getEnumValue())
+      {
+      case BACKWARD:
       {
          double backwardsDistanceReduction = 0.75;
-         desiredOffsetFromSquaredUp.set(-backwardsDistanceReduction * percentToStepInX * desiredStepForward.getDoubleValue(), 0.0);
+         desiredOffsetFromSquaredUp.set(-backwardsDistanceReduction * percentToStepInXY * desiredStepForward.getDoubleValue(), 0.0);
+         break;
       }
-      else
+      case LEFT:
       {
-         desiredOffsetFromSquaredUp.set(percentToStepInX * desiredStepForward.getDoubleValue(), 0.0);
+         desiredOffsetFromSquaredUp.set(0.0, percentToStepInXY * desiredStepSideward.getDoubleValue());
+         break;
       }
-
+      case RIGHT:
+      {
+         desiredOffsetFromSquaredUp.set(0.0, -percentToStepInXY * desiredStepSideward.getDoubleValue());
+         break;
+      }
+      case FORWARD:
+      {
+         desiredOffsetFromSquaredUp.set(percentToStepInXY * desiredStepForward.getDoubleValue(), 0.0);
+         break;
+      }
+      default:
+      {
+         throw new RuntimeException("Shouldn't get here!");
+      }
+      }
+     
       double stepLength = desiredOffsetFromSquaredUp.length();
       
       double maxDistanceToAllow = distanceToDestination - 0.5 * DISTANCE_TO_DESTINATION_FOR_STEP_IN_PLACE;
@@ -236,13 +272,32 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
       double maxTurnOutAngle = 0.4;
       
       double amountToYaw;
-      if (blindWalkingDirection.getEnumValue() == BlindWalkingDirection.BACKWARD)
+      switch(blindWalkingDirection.getEnumValue())
+      {
+      case BACKWARD:
       {
          amountToYaw = AngleTools.computeAngleDifferenceMinusPiToPi(angleToDestination, Math.PI);
+         break;
       }
-      else
+      case LEFT:
+      {
+         amountToYaw = AngleTools.computeAngleDifferenceMinusPiToPi(angleToDestination, Math.PI/2.0);
+         break;
+      }
+      case RIGHT:
+      {
+         amountToYaw = AngleTools.computeAngleDifferenceMinusPiToPi(angleToDestination, -Math.PI/2.0);
+         break;
+      }
+      case FORWARD:
       {
          amountToYaw = angleToDestination;
+         break;
+      }
+      default:
+      {
+         throw new RuntimeException("Shouldn't get here!");
+      }
       }
       
       if (swingLegSide == RobotSide.LEFT)
@@ -254,7 +309,6 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
       {
          amountToYaw = MathTools.clipToMinMax(amountToYaw, -maxTurnOutAngle, maxTurnInAngle);
       }
-     
       
       Matrix3d yawRotation = new Matrix3d();
       yawRotation.rotZ(amountToYaw);
