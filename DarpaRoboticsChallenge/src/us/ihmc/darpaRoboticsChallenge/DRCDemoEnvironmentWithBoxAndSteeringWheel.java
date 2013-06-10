@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Robot;
+import com.yobotics.simulationconstructionset.util.environments.ContactableStaticCylinderRobot;
 import com.yobotics.simulationconstructionset.util.environments.ContactableToroidRobot;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObject;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
@@ -35,8 +36,19 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
       DRCVehicleModelObjects drcVehicleModelObjects = new DRCVehicleModelObjects();
 
 
-      Transform3D steeringWheelTransform = drcVehicleModelObjects.getTransform(VehicleObject.STEERING_WHEEL);
 
+      combinedTerrainObject = createCombinedTerrainObject();
+
+      steeringWheelRobot = createSteeringWheel(drcVehicleModelObjects);
+      contactables.add(steeringWheelRobot);
+      environmentRobots.add(steeringWheelRobot);
+
+      createBars(environmentRobots, contactables);
+   }
+
+   private static ContactableToroidRobot createSteeringWheel(DRCVehicleModelObjects drcVehicleModelObjects)
+   {
+      Transform3D steeringWheelTransform = drcVehicleModelObjects.getTransform(VehicleObject.STEERING_WHEEL);
 
       /*
        * Quick estimates from 3D files:
@@ -47,22 +59,48 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
       double toroidRadius = (externalSteeringWheelRadius - internalSteeringWheelRadius) / 2.0;
       double steeringWheelRadius = (externalSteeringWheelRadius + internalSteeringWheelRadius) / 2.0;
 
-      combinedTerrainObject = createCombinedTerrainObject(steeringWheelTransform);
-
       double mass = 1.0;
-      steeringWheelRobot = new ContactableToroidRobot("steeringWheel", steeringWheelTransform, steeringWheelRadius, toroidRadius, mass);
+      ContactableToroidRobot steeringWheelRobot = new ContactableToroidRobot("steeringWheel", steeringWheelTransform, steeringWheelRadius, toroidRadius, mass);
       steeringWheelRobot.setDamping(2.0);
       steeringWheelRobot.createAvailableContactPoints(1, 30, 0.005, false);
-      contactables.add(steeringWheelRobot);
-      environmentRobots.add(steeringWheelRobot);
+      return steeringWheelRobot;
    }
 
-   private CombinedTerrainObject createCombinedTerrainObject(Transform3D steeringWheelTransform)
+   private static void createBars(ArrayList<Robot> environmentRobots, ArrayList<Contactable> contactables)
+   {
+      addContactableCylinderRobot(environmentRobots, contactables, "rollcage_top_left", 0.0, 0.61, 1.92, -3.141592, 1.531593, -3.141592, 0.030000, 0.680000);
+
+      addContactableCylinderRobot(environmentRobots, contactables, "rollcage_top_right", 0.000000, -0.610000, 1.920000, -3.141592, 1.531593, -3.141592, 0.03, 0.68);
+
+      addContactableCylinderRobot(environmentRobots, contactables, "rollcage_top_front", 0.325000, 0.000000, 1.890000, 1.570796, 0.000000, 0.000000, 0.030000, 1.220000);
+
+      addContactableCylinderRobot(environmentRobots, contactables, "rollcage_top_back", -0.330000, 0.000000, 1.920000, 1.570796, 0.000000, 0.000000, 0.030000, 1.220000);
+
+      addContactableCylinderRobot(environmentRobots, contactables, "rollcage_front_left", 0.540000, 0.610000, 1.450000, 0.000000, -0.440000, 0.000000, 0.030000, 1.040000);
+
+      addContactableCylinderRobot(environmentRobots, contactables, "rollcage_front_right", 0.540000, -0.610000, 1.450000, 0.000000, -0.440000, 0.000000, 0.030000, 1.040000);
+   }
+
+   private static void addContactableCylinderRobot(ArrayList<Robot> environmentRobots, ArrayList<Contactable> contactables, String name, double x, double y,
+                                            double z, double roll, double pitch, double yaw, double radius, double height)
+   {
+      Transform3D transform = new Transform3D();
+      transform.setEuler(new Vector3d(roll, pitch, yaw));
+
+      Vector3d position = new Vector3d(x, y, z);
+      Vector3d baseToCenter = new Vector3d(0.0, 0.0, -height / 2.0);
+      transform.transform(baseToCenter);
+      position.add(baseToCenter);
+
+      transform.setTranslation(position);
+      ContactableStaticCylinderRobot robot = new ContactableStaticCylinderRobot(name, transform, height, radius, YoAppearance.DarkGray());
+      environmentRobots.add(robot);
+      contactables.add(robot);
+   }
+
+   private CombinedTerrainObject createCombinedTerrainObject()
    {
       CombinedTerrainObject terrainObject = new CombinedTerrainObject("carSeatBox");
-
-      Vector3d steeringWheelTranslation = new Vector3d();
-      steeringWheelTransform.get(steeringWheelTranslation);
 
       // mud_seat
 //      addBox(-0.1, 0.0, 0.81, 0.0, 0.0, 0.0, 0.6, 1.15, 0.1, terrainObject);
