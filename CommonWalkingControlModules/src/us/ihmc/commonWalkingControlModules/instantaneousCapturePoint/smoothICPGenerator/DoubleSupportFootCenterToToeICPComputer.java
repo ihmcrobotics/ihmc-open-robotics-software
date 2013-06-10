@@ -25,6 +25,8 @@ public class DoubleSupportFootCenterToToeICPComputer
 {
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
+   private final double isDoneThreashold = -1e-4;
+
    private final int maxNumberOfConsideredFootsteps;
    private final double doubleSupportFirstStepFraction;
    private final double singleSupportToePercentage;
@@ -103,7 +105,10 @@ public class DoubleSupportFootCenterToToeICPComputer
    public DoubleSupportFootCenterToToeICPComputer(double doubleSupportFirstStepFraction, int maxNumberOfConsideredFootsteps, YoVariableRegistry parentRegistry,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      //Don't set setDoHeelToToeTransfer to true unless you make the VRC Task 2 work with it on first, especially the mud!
+      //Don't set setDoHeelToToeTransfer to true unless you make the VRC Task 2 work with it on first, especially the mud!      
+      this.doubleSupportInitialTransferDuration.set(1.0);
+
+
       this.setDoHeelToToeTransfer(false);
 //      doHeelToToeTransfer.set(true);
       
@@ -166,7 +171,6 @@ public class DoubleSupportFootCenterToToeICPComputer
 
       this.doubleSupportDuration.set(doubleSupportDuration);
       this.singleSupportDuration.set(singleSupportDuration);
-      this.doubleSupportInitialTransferDuration.set(Double.NaN);
 
       this.isDoubleSupport.set(false);
 
@@ -297,8 +301,8 @@ public class DoubleSupportFootCenterToToeICPComputer
          double initialTime)
    {
       if (atAStop.getBooleanValue())
-      {
-         double doubleSupportInitialTransferDuration = 1.0;
+      {         
+         double doubleSupportInitialTransferDuration = this.doubleSupportInitialTransferDuration.getDoubleValue(); 
 
          if (hasBeenInitialized.getBooleanValue())
          {
@@ -337,7 +341,7 @@ public class DoubleSupportFootCenterToToeICPComputer
 
       this.doubleSupportDuration.set(doubleSupportDuration);
       this.singleSupportDuration.set(singleSupportDuration);
-      this.doubleSupportInitialTransferDuration.set(Double.NaN);
+
 
       this.isDoubleSupport.set(true);
 
@@ -646,7 +650,7 @@ public class DoubleSupportFootCenterToToeICPComputer
    {
       computeTimeInStateAndEstimatedTimeRemaining(time);
 
-      return (estimatedTimeRemainingForState.getDoubleValue() <= -1e-4); // Note: might better be -1e-4
+      return (estimatedTimeRemainingForState.getDoubleValue() <= isDoneThreashold);  
    }
 
    public double getEstimatedTimeRemainingForState(double time)
@@ -661,7 +665,6 @@ public class DoubleSupportFootCenterToToeICPComputer
 
    public void reset(double time)
    {
-      doubleSupportInitialTransferDuration.set(0.6);
       atAStop.set(true);
       
       
@@ -690,8 +693,6 @@ public class DoubleSupportFootCenterToToeICPComputer
       
 
 
-      double doubleSupportInitialTransferDuration = 0.4; // TODO: What is that ?!?!?!
-
       Point3d initialICPPosition = new Point3d();
       Vector3d initialICPVelocity = new Vector3d();
       Vector3d initialICPAcceleration = new Vector3d();
@@ -699,8 +700,10 @@ public class DoubleSupportFootCenterToToeICPComputer
 
       computeICPPositionVelocityAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration, InitialECMPPosition, time);
 
+      
+
       initializeDoubleSupportInitialTransfer(footLocationList, soleFrameList, initialICPPosition, singleSupportDuration.getDoubleValue(),
-            doubleSupportDuration.getDoubleValue(), doubleSupportInitialTransferDuration, omega0.getDoubleValue(), time);
+            doubleSupportDuration.getDoubleValue(), doubleSupportInitialTransferDuration.getDoubleValue(), omega0.getDoubleValue(), time);
 
    }
 
