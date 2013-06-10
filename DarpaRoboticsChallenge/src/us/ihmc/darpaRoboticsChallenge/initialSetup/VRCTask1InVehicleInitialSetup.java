@@ -39,14 +39,15 @@ public class VRCTask1InVehicleInitialSetup implements RobotInitialSetup<SDFRobot
       robot.getOneDoFJoint("l_arm_uwy").setQ(0);
       robot.getOneDoFJoint("r_arm_uwy").setQ(0);
 
-      robot.getOneDoFJoint("l_leg_lhy").setQ(hipBend + thighPitch);
-      robot.getOneDoFJoint("r_leg_lhy").setQ(hipBend + thighPitch);
+      // limit is 1.75
+      robot.getOneDoFJoint("l_leg_lhy").setQ(-1.7); // hipBend + thighPitch);
+      robot.getOneDoFJoint("r_leg_lhy").setQ(-1.7); // hipBend + thighPitch);
 
-      robot.getOneDoFJoint("l_leg_kny").setQ(kneeBend);
-      robot.getOneDoFJoint("r_leg_kny").setQ(kneeBend);
+      robot.getOneDoFJoint("l_leg_kny").setQ(0.9); // kneeBend);
+      robot.getOneDoFJoint("r_leg_kny").setQ(1.8); // kneeBend);
 
-      robot.getOneDoFJoint("l_leg_uay").setQ(thighPitch - .3);  //0.087 + thighPitch);
-      robot.getOneDoFJoint("r_leg_uay").setQ(thighPitch - .3); //0.087 + thighPitch);
+      robot.getOneDoFJoint("l_leg_uay").setQ(-0.65); // thighPitch - .3);  //0.087 + thighPitch);
+      robot.getOneDoFJoint("r_leg_uay").setQ(0.2); // thighPitch - .3); //0.087 + thighPitch);
 
       offset.setX(-0.07);
       offset.setY(0.28);

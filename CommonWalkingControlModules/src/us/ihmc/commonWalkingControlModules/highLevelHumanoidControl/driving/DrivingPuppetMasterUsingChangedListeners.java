@@ -11,9 +11,9 @@ public class DrivingPuppetMasterUsingChangedListeners
    private final DrivingInterface drivingInterface;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final DoubleYoVariable desiredSteeringWheelAngle = new DoubleYoVariable("desiredSteeringWheelAngle", registry);
+   private final DoubleYoVariable desiredSteeringWheelAngle = new DoubleYoVariable("desiredSteeringWheelZ", registry);
    private final DoubleYoVariable desiredGasPedalPosition = new DoubleYoVariable("desiredGasPedalAngle", registry);
-   private final DoubleYoVariable desiredBrakePedalPosition = new DoubleYoVariable("desiredBrakePedalAngle", registry);
+   private final DoubleYoVariable desiredBrakePedalPosition = new DoubleYoVariable("desiredBrakePedalZ", registry);
    private final BooleanYoVariable desiredHandBrakeMode = new BooleanYoVariable("desiredParkingBrakeMode", registry);
    private final EnumYoVariable<DrivingInterface.GearName> desiredGear = new EnumYoVariable<DrivingInterface.GearName>("desiredGearName", "", registry, DrivingInterface.GearName.class, true);
 
