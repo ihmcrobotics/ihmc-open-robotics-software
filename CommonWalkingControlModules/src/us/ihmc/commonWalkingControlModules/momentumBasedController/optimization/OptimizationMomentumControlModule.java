@@ -83,7 +83,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       this.momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
 
       this.hardMotionConstraintSolver = new DampedLeastSquaresSolver(1);
-      this.hardMotionConstraintEnforcer = new HardMotionConstraintEnforcer(hardMotionConstraintSolver);
+      this.hardMotionConstraintEnforcer = new HardMotionConstraintEnforcer(hardMotionConstraintSolver, registry);
 
       parentRegistry.addChild(registry);
       reset();
