@@ -97,7 +97,7 @@ public class DrivingFootControlModule
       this.positionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator(toePointName + "Trajectory", vehicleFrame, trajectoryTimeProvider,
               initialPositionProvider, finalPositionProvider, registry);
 
-      double kP = 100.0;
+      double kP = 300.0;
       double dampingRatio = 1.0;
       double kD = GainCalculator.computeDerivativeGain(kP, dampingRatio);
       toePointPositionController.setProportionalGains(kP, kP, kP);
