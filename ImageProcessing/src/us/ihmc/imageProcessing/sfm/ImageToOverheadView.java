@@ -61,7 +61,7 @@ public class ImageToOverheadView
 
       // 2D to pixel
       pixel.y = gridHeight - 1 - (int)((x+centerX)/cellSize);
-      pixel.x = gridWidth - 1 -(int)((y+centerY)/cellSize);
+      pixel.x = (int)((y+centerY)/cellSize);
    }
 
    public void render( BufferedImage left , Se3_F64 groundToLeft ) {
@@ -71,7 +71,7 @@ public class ImageToOverheadView
       for( int i = 0; i < gridHeight; i++ ) {
          pt_floor.z = (gridHeight-1-i)*cellSize - centerX;
          for( int j = 0; j < gridWidth; j++ ) {
-            pt_floor.x = (gridWidth-1-j)*cellSize - centerY;
+            pt_floor.x = j*cellSize - centerY;
 
             // ground to left camera
             SePointOps_F64.transform(groundToLeft,pt_floor,pt_left);
