@@ -50,7 +50,7 @@ public class DrivingFootControlModule
    private final DoubleYoVariable time;
 
    private final AxisAngleOrientationController orientationController;
-   private final DenseMatrix64F footOrientationSelectionMatrix;
+//   private final DenseMatrix64F footOrientationSelectionMatrix;
    private final SpatialAccelerationVector footRollSpatialAccelerationVector;
    private final TaskspaceConstraintData footOrientationTaskspaceConstraintData = new TaskspaceConstraintData();
 
@@ -115,13 +115,13 @@ public class DrivingFootControlModule
       rollAxis.changeFrame(foot.getBodyFixedFrame());
       yawAxis.changeFrame(foot.getBodyFixedFrame());
 
-      footOrientationSelectionMatrix = new DenseMatrix64F(2, SpatialMotionVector.SIZE);
-      footOrientationSelectionMatrix.set(0, 0, rollAxis.getX());
-      footOrientationSelectionMatrix.set(0, 1, rollAxis.getY());
-      footOrientationSelectionMatrix.set(0, 2, rollAxis.getZ());
-      footOrientationSelectionMatrix.set(1, 0, yawAxis.getX());
-      footOrientationSelectionMatrix.set(1, 1, yawAxis.getY());
-      footOrientationSelectionMatrix.set(1, 2, yawAxis.getZ());
+//      footOrientationSelectionMatrix = new DenseMatrix64F(2, SpatialMotionVector.SIZE);
+//      footOrientationSelectionMatrix.set(0, 0, rollAxis.getX());
+//      footOrientationSelectionMatrix.set(0, 1, rollAxis.getY());
+//      footOrientationSelectionMatrix.set(0, 2, rollAxis.getZ());
+//      footOrientationSelectionMatrix.set(1, 0, yawAxis.getX());
+//      footOrientationSelectionMatrix.set(1, 1, yawAxis.getY());
+//      footOrientationSelectionMatrix.set(1, 2, yawAxis.getZ());
 
       footRollSpatialAccelerationVector = new SpatialAccelerationVector();
 
@@ -183,7 +183,7 @@ public class DrivingFootControlModule
 
       footRollSpatialAccelerationVector.setToZero(foot.getBodyFixedFrame(), elevator.getBodyFixedFrame(), foot.getBodyFixedFrame());
       footRollSpatialAccelerationVector.setAngularPart(output.getVector());
-      footOrientationTaskspaceConstraintData.set(footRollSpatialAccelerationVector, nullspaceMultipliers, footOrientationSelectionMatrix);
+      footOrientationTaskspaceConstraintData.set(footRollSpatialAccelerationVector); // , nullspaceMultipliers, footOrientationSelectionMatrix);
       momentumBasedController.setDesiredSpatialAcceleration(footJacobian, footOrientationTaskspaceConstraintData);
    }
 
