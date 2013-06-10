@@ -18,6 +18,19 @@ public class CombineMapsTogether
 
    double dx;double dy;double dyaw;
 
+   public void setOldMap( OccupancyGrid map ) {
+      old.resize(map.width,map.height);
+      old.setCellSize(map.getCellSize());
+
+      System.arraycopy(map.map,0,old.map,0,map.width*map.height);
+   }
+
+   public void setOldMap( double dx , double dy , double dyaw ) {
+      this.dx = dx;
+      this.dy = dy;
+      this.dyaw = dyaw;
+   }
+
    /**
     *
     * (dx,dy,dyaw) specify pose in the old map's coordinate system.

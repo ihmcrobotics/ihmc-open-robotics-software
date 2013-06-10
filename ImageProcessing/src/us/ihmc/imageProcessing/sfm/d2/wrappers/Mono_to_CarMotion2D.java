@@ -59,7 +59,7 @@ public class Mono_to_CarMotion2D implements EstimateCarMotion2D
       output.T.y = -groundToWorld.T.x;
 
       double[] euler = RotationMatrixGenerator.matrixToEulerXYZ(groundToWorld.getR());
-      double rotY = euler[1];
+      double rotY = -euler[1];
 
       output.setYaw(rotY);
 

@@ -25,12 +25,12 @@ public class ImageToOverheadView
    DenseMatrix64F K = new DenseMatrix64F(3,3);
 
    // meters per pixel
-   double cellSize = 0.05;
-   int gridWidth = 400;
-   int gridHeight = 700;
+   double cellSize;
+   int gridWidth;
+   int gridHeight;
 
-   int gridOffsetX = -200;
-   int gridOffsetY = 0;
+   double centerX;
+   double centerY;
 
    Se3_F64 groundToLeft;
 
@@ -55,8 +55,13 @@ public class ImageToOverheadView
     * Computes the location of a world coordinate on the rendered image
     */
    public void groundToPixel( Point3D_F64 worldPt , Point2D_I32 pixel) {
-      pixel.y = (int)(-worldPt.z/cellSize -1 + gridHeight - gridOffsetY);
-      pixel.x = (int)(worldPt.x/cellSize - gridOffsetX);
+      // 3D to 2D
+      double x = worldPt.z;
+      double y = -worldPt.x;
+
+      // 2D to pixel
+      pixel.y = gridHeight - 1 - (int)((x+centerX)/cellSize);
+      pixel.x = gridWidth - 1 -(int)((y+centerY)/cellSize);
    }
 
    public void render( BufferedImage left , Se3_F64 groundToLeft ) {
@@ -64,9 +69,9 @@ public class ImageToOverheadView
       this.groundToLeft = groundToLeft;
 
       for( int i = 0; i < gridHeight; i++ ) {
-         pt_floor.z = (gridHeight-i-gridOffsetY-1)*cellSize;
+         pt_floor.z = (gridHeight-1-i)*cellSize - centerX;
          for( int j = 0; j < gridWidth; j++ ) {
-            pt_floor.x = (j+gridOffsetX)*cellSize;
+            pt_floor.x = (gridWidth-1-j)*cellSize - centerY;
 
             // ground to left camera
             SePointOps_F64.transform(groundToLeft,pt_floor,pt_left);
@@ -101,16 +106,16 @@ public class ImageToOverheadView
       return output;
    }
 
-   public void setGridOffsetX(int gridOffsetX)
+   public void setCenterX(double centerX)
    {
-      this.gridOffsetX = gridOffsetX;
+      this.centerX = centerX;
    }
 
-   public void setGridOffsetY(int gridOffsetY)
+   public void setCenterY(double centerY)
    {
-      this.gridOffsetY = gridOffsetY;
+      this.centerY = centerY;
    }
-   
+
    public double getCellSize()
    {
       return cellSize;

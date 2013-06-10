@@ -53,7 +53,7 @@ public class FactoryEstimateCarMotion2D
       return new MonoOverhead_to_CarMotion2D(motion2D);
    }
 
-   public static EstimateCarMotion2D monoPlaneRotTran( double scale ) {
+   public static EstimateCarMotion2D monoPlaneInfinity(double scale) {
 
       // specify how the image features are going to be tracked
       PkltConfig<ImageFloat32, ImageFloat32> configKlt = PkltConfig.createDefault(ImageFloat32.class, ImageFloat32.class);
@@ -63,7 +63,7 @@ public class FactoryEstimateCarMotion2D
       PointTrackerTwoPass<ImageFloat32> tracker = FactoryPointTrackerTwoPass.klt(configKlt, new ConfigGeneralDetector(-1, 3, 150));
 
       // declares the algorithm
-      MonocularPlaneVisualOdometry<ImageFloat32> vo = FactoryVisualOdometry.monoPlaneRotTran(100, 2, 1.5, 200, tracker,
+      MonocularPlaneVisualOdometry<ImageFloat32> vo = FactoryVisualOdometry.monoPlaneInfinity(100, 2, 1.5, 200, tracker,
             ImageDataType.single(ImageFloat32.class));
 
       if( scale != 1.0 ) {
