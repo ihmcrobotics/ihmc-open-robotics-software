@@ -71,8 +71,15 @@ public class CommandRecorder
    {
       addEndOfScriptOjectToList();
       isRecording = false;
-      
-      scriptFileSaver.close();
+
+      try
+      {
+         scriptFileSaver.close();
+      }
+      catch (Exception e1)
+      {
+         System.err.print("Failed stop recording.");
+      }
       
       System.out.println("Stopped recording");
       startTime = Long.MIN_VALUE;
