@@ -57,7 +57,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class MomentumBasedController
 {
-   private static final boolean SPY_ON_MOMENTUM_BASED_CONTROLLER = true;
+   public static final boolean SPY_ON_MOMENTUM_BASED_CONTROLLER = false;
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
