@@ -92,7 +92,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    private final LinkedHashMap<ContactablePlaneBody, OrientationInterpolationTrajectoryGenerator> swingOrientationTrajectoryGenerators =
       new LinkedHashMap<ContactablePlaneBody, OrientationInterpolationTrajectoryGenerator>();
 
-   private final ConstantDoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(1.0);
+   private final ConstantDoubleProvider footTrajectoryTimeProvider = new ConstantDoubleProvider(1.0);
+   private final ConstantDoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(2.0);
 
    private final SideDependentList<ContactablePlaneBody> contactableThighs;
    private final ContactablePlaneBody contactablePelvis, contactablePelvisBack;
@@ -209,11 +210,11 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          final ChangeableConfigurationProvider desiredConfigurationProvider = new ChangeableConfigurationProvider(new FramePose(foot.getBodyFrame()));
 
          StraightLinePositionTrajectoryGenerator positionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator(bodyName, worldFrame,
-                                                                                  trajectoryTimeProvider, currentConfigurationProvider,
+                                                                                  footTrajectoryTimeProvider, currentConfigurationProvider,
                                                                                   desiredConfigurationProvider, registry);
 
          OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(bodyName, worldFrame,
-                                                                                         trajectoryTimeProvider, currentConfigurationProvider,
+                                                                                         footTrajectoryTimeProvider, currentConfigurationProvider,
                                                                                          desiredConfigurationProvider, registry);
 
          desiredFootConfigurationProviders.put(foot, desiredConfigurationProvider);
