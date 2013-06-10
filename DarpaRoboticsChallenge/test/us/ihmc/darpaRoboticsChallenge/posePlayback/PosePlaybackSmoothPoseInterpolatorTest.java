@@ -105,7 +105,7 @@ public class PosePlaybackSmoothPoseInterpolatorTest
       if (previousPose == null)
          return;
 
-      boolean smallDifference = pose.epsilonEquals(previousPose, 1e-2);
+      boolean smallDifference = pose.epsilonEquals(previousPose, 1e-2, 1.0);
       assertTrue(smallDifference);
    }
 
