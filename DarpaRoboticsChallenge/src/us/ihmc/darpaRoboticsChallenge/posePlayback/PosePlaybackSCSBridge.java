@@ -414,7 +414,7 @@ public class PosePlaybackSCSBridge
                if(interpolator.didLastPoseIncrementSequence() || (poseNumber == 0))
                {
                   System.out.println("pose #: " + poseNumber++ + " \t pausing for " + interpolator.getTransitionTimeDelay());
-                  ThreadTools.sleep((long) interpolator.getTransitionTimeDelay());//3000 worked for standing up, 2000 failed at about 33 in standcde, 1000 failed at about 23 in standcde
+//                  ThreadTools.sleep((long) interpolator.getTransitionTimeDelay());//3000 worked for standing up, 2000 failed at about 33 in standcde, 1000 failed at about 23 in standcde
                }
                ThreadTools.sleep((long) (controlDT * 1000));
             }

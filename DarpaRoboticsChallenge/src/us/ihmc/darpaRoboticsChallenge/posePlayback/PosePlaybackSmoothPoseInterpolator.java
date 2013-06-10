@@ -69,8 +69,9 @@ public class PosePlaybackSmoothPoseInterpolator
       poseMorphPercentage.set(timeIntoPose / poseMorphDuration.getDoubleValue());
       PosePlaybackRobotPose morphedPose = PosePlaybackRobotPose.morph(poseOne, poseTwo, poseMorphPercentage.getDoubleValue());
 
-      if (poseMorphPercentage.getDoubleValue() >= 1.0)
+      if (poseMorphPercentage.getDoubleValue() >= 1.0 && timeIntoPose >= (2.0 + poseTwo.getPlayBackDelayBeforePose() / 1000.0))
       {
+         System.out.println("incrementing pose");
          poseSequenceIndex.increment();
          poseStartTime.set(time);
          lastPoseIncrementedSequence = true;
