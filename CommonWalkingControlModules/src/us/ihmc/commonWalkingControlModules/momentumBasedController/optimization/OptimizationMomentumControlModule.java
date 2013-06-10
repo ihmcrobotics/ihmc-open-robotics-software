@@ -116,6 +116,8 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
          cylinderContactStatesConverted = null;
       }
 
+      wrenchMatrixCalculator.setRhoMinScalar(momentumOptimizationSettings.getRhoMinScalar());
+
       hardMotionConstraintSolver.setAlpha(momentumOptimizationSettings.getDampedLeastSquaresFactor());
       momentumOptimizerNativeInput.reset();
 

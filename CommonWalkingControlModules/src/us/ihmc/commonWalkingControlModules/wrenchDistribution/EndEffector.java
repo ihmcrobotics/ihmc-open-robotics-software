@@ -66,11 +66,11 @@ public class EndEffector
       return ret;
    }
 
-   public static EndEffector fromPlane(String nameSuffix, ReferenceFrame centerOfMassFrame, PlaneContactState plane, double wRho, YoVariableRegistry registry)
+   public static EndEffector fromPlane(String nameSuffix, ReferenceFrame centerOfMassFrame, PlaneContactState plane, double wRho, double rhoMin, YoVariableRegistry registry)
    {
       EndEffector ret = new EndEffector(nameSuffix, centerOfMassFrame, plane.getBodyFrame(), registry);
       OptimizerPlaneContactModel model = new OptimizerPlaneContactModel();
-      model.setup(plane.getCoefficientOfFriction(), plane.getContactPoints(), plane.getBodyFrame(), wRho);
+      model.setup(plane.getCoefficientOfFriction(), plane.getContactPoints(), plane.getBodyFrame(), wRho, rhoMin);
       ret.setContactModel(model);
       ret.setLoadBearing(plane.inContact());
 
@@ -86,11 +86,11 @@ public class EndEffector
       this.setLoadBearing(cylinder.isInContact());
    }
 
-   public void updateFromPlane(PlaneContactState plane, double wRho)
+   public void updateFromPlane(PlaneContactState plane, double wRho, double rhoMin)
    {
       referenceFrame.checkReferenceFrameMatch(plane.getBodyFrame());
       OptimizerPlaneContactModel optimizerPlaneContactModel = (OptimizerPlaneContactModel) this.getContactModel();
-      optimizerPlaneContactModel.setup(plane.getCoefficientOfFriction(), plane.getContactPoints(), plane.getBodyFrame(), wRho);
+      optimizerPlaneContactModel.setup(plane.getCoefficientOfFriction(), plane.getContactPoints(), plane.getBodyFrame(), wRho, rhoMin);
       this.setLoadBearing(plane.inContact());
    }
 

@@ -12,7 +12,7 @@ import us.ihmc.utilities.screwTheory.SpatialForceVector;
 
 public class OptimizerPlaneContactModel implements OptimizerContactModel
 {
-   private static final double MIN_RHO_FORCE = 0.15; //TODO: TuneMe.
+   private double rhoMin;
    private static final int VECTORS = 3;
    private static final int MAXPOINTS = 4;
    private int points=MAXPOINTS;
@@ -38,7 +38,7 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
       }
    }
    
-   public void setup(double coefficientOfFriction, List<FramePoint> contactPointsInPlaneFrame, ReferenceFrame endEffectorFrame, double wRho)
+   public void setup(double coefficientOfFriction, List<FramePoint> contactPointsInPlaneFrame, ReferenceFrame endEffectorFrame, double wRho, double rhoMin)
    {
       this.mu = coefficientOfFriction;
       points = contactPointsInPlaneFrame.size();
@@ -66,6 +66,7 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
          }
       }
       this.wRho = wRho;
+      this.rhoMin = rhoMin;
    }
    
    public int getSizeInRho()
@@ -80,7 +81,7 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
 
    public double getRhoMin(int i)
    {
-      return MIN_RHO_FORCE;
+      return rhoMin;
    }
 
    public double getPhiMin(int i)

@@ -252,15 +252,17 @@ public class CylinderAndContactPointWrenchDistributor implements GroundReactionW
 
    private EndEffector getOrCreate(String nameSuffix, PlaneContactState plane)
    {
+      double rhoMin = 0.15; // FIXME
+
       if (previouslyUsedPlaneEndEffectors.containsKey(plane))
       {
          EndEffector endEffector = previouslyUsedPlaneEndEffectors.get(plane);
-         endEffector.updateFromPlane(plane, Double.NaN); // TODO: don't use NaN. Currently not being used for anything though
+         endEffector.updateFromPlane(plane, Double.NaN, rhoMin); // TODO: don't use NaN. Currently not being used for anything though
 
          return endEffector;
       }
 
-      EndEffector endEffector = EndEffector.fromPlane(nameSuffix, centerOfMassFrame, plane, Double.NaN, registry); // TODO: don't use NaN. Currently not being used for anything though
+      EndEffector endEffector = EndEffector.fromPlane(nameSuffix, centerOfMassFrame, plane, Double.NaN, rhoMin, registry); // TODO: don't use NaN. Currently not being used for anything though
       previouslyUsedPlaneEndEffectors.put(plane, endEffector);
       registerEndEffectorGraphic(endEffector);
 
