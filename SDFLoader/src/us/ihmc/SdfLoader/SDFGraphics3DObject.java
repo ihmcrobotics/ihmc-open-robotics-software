@@ -30,6 +30,10 @@ public class SDFGraphics3DObject extends Graphics3DObject
 {
    private static final boolean SHOW_COORDINATE_SYSTEMS = false;
    private static final AppearanceDefinition DEFAULT_APPEARANCE = YoAppearance.Orange();
+   static
+   {
+      YoAppearance.makeTransparent(DEFAULT_APPEARANCE, 0.4);
+   }
    
    public SDFGraphics3DObject(List<? extends AbstractSDFMesh> sdfVisuals, ArrayList<String> resourceDirectories)
    {
