@@ -21,7 +21,7 @@ public class PosePlaybackSmoothPoseInterpolator
    private final YoPolynomial yoPolynomial = new YoPolynomial("posePolynomial", numberOfCoefficients, registry);
 
    private PosePlaybackRobotPoseSequence sequence;
-
+   private boolean hasInterpolatedASequence = false;
 
    public PosePlaybackSmoothPoseInterpolator(YoVariableRegistry parentRegistry)
    {
@@ -39,6 +39,8 @@ public class PosePlaybackSmoothPoseInterpolator
 
       poseStartTime.set(startTime);
       poseSequenceIndex.set(0);
+      
+      hasInterpolatedASequence = true;
    }
 
    private void computeMorphDuration()
@@ -94,5 +96,9 @@ public class PosePlaybackSmoothPoseInterpolator
    {
       return (poseSequenceIndex.getIntegerValue() >= sequence.getNumberOfPoses() - 1);
    }
-
+   
+   public boolean hasInterpolatedASequence()
+   {
+      return hasInterpolatedASequence;
+   }
 }
