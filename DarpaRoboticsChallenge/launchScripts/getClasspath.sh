@@ -3,6 +3,7 @@ MYDIR=`dirname $MYPATH`/
 
 
 THIRDPARTYJARS=$MYDIR/ThirdPartyJars/
+CONFIGFILES=$MYDIR/config/
 ROSDEPENDENCIES=$MYDIR/ROSDependencies/
 
 if [ -d $THIRDPARTYJARS ]; then
@@ -18,6 +19,14 @@ if [ -d $ROSDEPENDENCIES ]; then
 	svn up
 else
 	svn co	https://bengal.ihmc.us/svn/RobotControl/ROSJavaProjects/ROSDependencies/Jars/ $ROSDEPENDENCIES
+fi
+cd $MYDIR
+
+if [ -d $CONFIGFILES ]; then
+        cd $CONFIGFILES
+        svn up
+else
+        svn co  https://bengal.ihmc.us/svn/RobotControl/DarpaRoboticsChallenge/config $CONFIGFILES
 fi
 cd $MYDIR
 
