@@ -120,10 +120,10 @@ public class IndividualHandControlModule
               initialConfigurationProvider, 0.0, registry);
 
       loadBearingCylindricalState = new LoadBearingCylindricalHandControlState(IndividualHandControlState.LOAD_BEARING_CYLINDRICAL, momentumBasedController,
-              jacobian, parentRegistry, robotSide);
+              jacobian, fullRobotModel.getElevator(), parentRegistry, robotSide);
 
       loadBearingPlaneFingersBentBackState = new LoadBearingPlaneHandControlState(IndividualHandControlState.LOAD_BEARING_PLANE_FINGERS_BENT_BACK, robotSide,
-              momentumBasedController, jacobian, handController, registry);
+              momentumBasedController, jacobian, fullRobotModel.getElevator(), handController, registry);
 
       jointSpaceHandControlState = new JointSpaceHandControlControlState(IndividualHandControlState.JOINT_SPACE, robotSide, jacobian, momentumBasedController,
               registry, 1.0);
