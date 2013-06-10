@@ -86,7 +86,7 @@ public class DRCNetworkProcessor
       rosMainNode.execute();
       
       
-      DrivingProcessorFactory.createCheatingDrivingProcessor(networkingManager.getControllerCommandHandler(), cameraDataReceiver, timestampProvider, rosCoreURI.toString());
+      DrivingProcessorFactory.createCheatingDrivingProcessor(networkingManager.getControllerCommandHandler(), networkingManager.getControllerStateHandler(), cameraDataReceiver, timestampProvider, rosCoreURI.toString());
    }
    
    public DRCNetworkProcessor(LocalObjectCommunicator scsCommunicator, ObjectCommunicator drcNetworkObjectCommunicator)
