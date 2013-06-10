@@ -1,16 +1,43 @@
 package us.ihmc.darpaRoboticsChallenge.ros;
 
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosTools;
-import us.ihmc.darpaRoboticsChallenge.ros.messages.*;
-
 import java.net.InetAddress;
-import java.nio.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.DoubleBuffer;
+import java.nio.LongBuffer;
 import java.util.ArrayList;
+
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosTools;
+import us.ihmc.darpaRoboticsChallenge.ros.messages.ClockMessage;
+import us.ihmc.darpaRoboticsChallenge.ros.messages.Float64Message;
+import us.ihmc.darpaRoboticsChallenge.ros.messages.Int8Message;
+import us.ihmc.darpaRoboticsChallenge.ros.messages.PoseMessage;
 
 public class ROSVehicleTeleopCheatNativeLibraryCommunicator
 {
    private static ROSVehicleTeleopCheatNativeLibraryCommunicator instance = null;
    private static String rosMasterURI;
+   
+   private static boolean hasNativeLibrary;
+   static
+   {
+      try
+      {
+         System.loadLibrary("ROSVehicleTeleopCheatNativeLibraryCommunicator");
+         hasNativeLibrary = true;
+      }
+      catch(UnsatisfiedLinkError e)
+      {
+         System.err.println("Cannot load native ROS library for the vehicle teleop. Falling back to ROSJava, expect poor performance.");
+         hasNativeLibrary = false;
+      }
+      
+   }
+
+   public static boolean hasNativeLibrary()
+   {
+      return hasNativeLibrary;
+   }
 
    /*
     * Subscriber Buffers
@@ -86,7 +113,7 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
    {
       InetAddress myIP = RosTools.getMyIP(rosMasterURI);
 
-      System.loadLibrary("ROSVehicleTeleopCheatNativeLibraryCommunicator");
+      
 
       if (!register(rosMasterURI, myIP.getHostAddress()))
       {

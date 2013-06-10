@@ -146,5 +146,4 @@ public class DRCConfigParameters
    
    public static final int CHEATING_POLARIS_PORT = 1543;
    public static final String CHEATING_POLARIS_HOST = LOCALHOST;
-   public static final boolean USE_NATIVE_CHEATING_POLARIS_CONTROLLER = false;
 }
