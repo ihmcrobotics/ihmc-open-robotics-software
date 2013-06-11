@@ -115,6 +115,18 @@ public class ImageToOverheadView
    {
       this.centerY = centerY;
    }
+   
+   
+
+   public double getCenterX()
+   {
+      return centerX;
+   }
+
+   public double getCenterY()
+   {
+      return centerY;
+   }
 
    public double getCellSize()
    {

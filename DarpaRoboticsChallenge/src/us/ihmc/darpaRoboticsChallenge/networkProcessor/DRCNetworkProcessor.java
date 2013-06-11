@@ -36,7 +36,6 @@ import us.ihmc.utilities.net.ObjectCommunicator;
 
 public class DRCNetworkProcessor
 {
-   //TODO: make command line option
    private final VideoSettings videoSettings = VideoSettingsFactory.get32kBitSettings();
    
    
@@ -135,9 +134,29 @@ public class DRCNetworkProcessor
    public static void main(String[] args) throws URISyntaxException
    {
       
-      if(args.length == 1)
+      if(args.length >= 1)
       {
-         new DRCNetworkProcessor(new URI(args[0]));
+         if("-d".equals(args[0]))
+         {
+            System.err.println("Simulating DRC Controller");
+            ObjectCommunicator objectCommunicator = new LocalObjectCommunicator();
+            
+            String host;
+            if(args.length > 1)
+            {
+               host = args[1];
+            }
+            else
+            {
+               host = DRCConfigParameters.ROS_MASTER_URI;
+            }
+            new DummyController(host, objectCommunicator);
+            new DRCNetworkProcessor(new URI(host), objectCommunicator);
+         }
+         else
+         {
+            new DRCNetworkProcessor(new URI(args[0]));
+         }
       }
       else
       {

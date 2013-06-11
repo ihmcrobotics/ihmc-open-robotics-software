@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.camera;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -24,7 +25,7 @@ public abstract class CameraDataReceiver
    
    private final RobotPoseBuffer robotPoseBuffer;
    private final CompressedVideoDataServer compressedVideoDataServer;
-   private DRCStereoListener drcStereoListener;
+   private final ArrayList<DRCStereoListener> stereoListeners = new ArrayList<DRCStereoListener>();
    
    private final Point3d cameraPosition = new Point3d();
    private final Quat4d cameraOrientation = new Quat4d();
@@ -78,9 +79,9 @@ public abstract class CameraDataReceiver
 
    protected void updateLeftEyeImage(BufferedImage bufferedImage, long timeStamp, double fov)
    {
-      if(drcStereoListener != null)
+      for(int i = 0; i < stereoListeners.size(); i++)
       {
-         drcStereoListener.leftImage(bufferedImage, timeStamp, fov);
+         stereoListeners.get(i).leftImage(bufferedImage, timeStamp, fov);
       }
       
       
@@ -100,15 +101,15 @@ public abstract class CameraDataReceiver
 
    protected void updateRightEyeImage(BufferedImage bufferedImage, long timeStamp, double fov)
    {
-      if(drcStereoListener != null)
+      for(int i = 0; i < stereoListeners.size(); i++)
       {
-         drcStereoListener.rightImage(bufferedImage, timeStamp, fov);
+         stereoListeners.get(i).rightImage(bufferedImage, timeStamp, fov);
       }
    }
    
    public void registerCameraListener(DRCStereoListener drcStereoListener)
    {
-      this.drcStereoListener = drcStereoListener;
+      stereoListeners.add(drcStereoListener);
    }
 
 }
