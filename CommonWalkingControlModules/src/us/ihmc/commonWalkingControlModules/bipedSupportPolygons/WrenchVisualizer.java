@@ -39,7 +39,6 @@ public class WrenchVisualizer
    private final FrameVector tempVector = new FrameVector();
    private final FramePoint tempPoint = new FramePoint();
    private final int capacity;
-   private boolean hideAll = false;
 
    public WrenchVisualizer(int capacity, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
@@ -99,35 +98,23 @@ public class WrenchVisualizer
          tempPoint.setToZero(wrench.getBodyFrame());
          tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
          pointOfApplication.set(tempPoint);
-
-         DynamicGraphicVector forceVisualizer = forceVisualizers.get(i);
-         forceVisualizer.update();
-
-         DynamicGraphicVector torqueVisualizer = torqueVisualizers.get(i);
-         torqueVisualizer.update();
-
-         if (!hideAll)
-         {
-            forceVisualizer.showGraphicObject();
-            torqueVisualizer.showGraphicObject();
-         }
-
          i++;
       }
 
       for (int j = i; j < capacity; j++)
       {
-         DynamicGraphicVector forceVisualizer = forceVisualizers.get(i);
-         forceVisualizer.hideGraphicObject();
-
-         DynamicGraphicVector torqueVisualizer = torqueVisualizers.get(i);
-         torqueVisualizer.hideGraphicObject();
+         forces.get(j).set(0.0, 0.0, 0.0);
+         torques.get(j).set(0.0, 0.0, 0.0);
       }
-   }
 
-   public void hideAll()
-   {
-      dynamicGraphicObjectsList.hideDynamicGraphicObjects();
-      hideAll = true;
+      for (DynamicGraphicVector forceVisualizer : forceVisualizers)
+      {
+         forceVisualizer.update();
+      }
+
+      for (DynamicGraphicVector torqueVisualizer : torqueVisualizers)
+      {
+         torqueVisualizer.update();
+      }
    }
 }
