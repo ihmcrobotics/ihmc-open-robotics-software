@@ -86,7 +86,7 @@ public class DRCNetworkProcessor
       CameraDataReceiver cameraDataReceiver = new GazeboCameraReceiver(robotPoseBuffer, videoSettings, rosMainNode, networkingManager,
                                                  DRCSensorParameters.FIELD_OF_VIEW);
       LidarDataReceiver lidarDataReceiver = new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, fullRobotModel, robotBoundingBoxes,
-                                               jointMap, rosNativeNetworkProcessor);
+                                               jointMap, fieldComputerClient,rosNativeNetworkProcessor);
       new VRCScoreDataReceiver(networkingManager, lidarDataReceiver, rosNativeNetworkProcessor);
       rosMainNode.execute();
 
@@ -99,7 +99,7 @@ public class DRCNetworkProcessor
    {
       this(drcNetworkObjectCommunicator);
       new SCSCameraDataReceiver(robotPoseBuffer, videoSettings, scsCommunicator, networkingManager);
-      new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, fullRobotModel, robotBoundingBoxes, jointMap);
+      new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, fullRobotModel, robotBoundingBoxes, jointMap,fieldComputerClient);
    }
 
    private DRCNetworkProcessor(ObjectCommunicator fieldComputerClient)
