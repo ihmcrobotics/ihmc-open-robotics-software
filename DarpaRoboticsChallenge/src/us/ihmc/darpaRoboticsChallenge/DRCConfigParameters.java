@@ -6,6 +6,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 
 public class DRCConfigParameters
 {
+   public static final boolean TEST_DRIVING = true;
    public static final boolean ALLOW_LAG_SIMULATION = true;
    public static final boolean ENABLE_LAG_SIMULATION_ON_START = false;
 
@@ -157,4 +158,5 @@ public class DRCConfigParameters
 
    public static final int CHEATING_POLARIS_PORT = 1543;
    public static final String CHEATING_POLARIS_HOST = LOCALHOST;
+   
 }
