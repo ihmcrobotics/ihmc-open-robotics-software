@@ -62,7 +62,9 @@ public class ComposableStateEstimatorEvaluator
             new ArrayList<WrenchCalculatorInterface>(), robot.getPositionPoints(), robot.getVelocityPoints(), 
             registry);
       
-      simulatedSensorHolderAndReaderFromRobotFactory.build(inverseDynamicsStructure.getRootJoint(), null);
+      boolean addLinearAccelerationSensors = true;
+      
+      simulatedSensorHolderAndReaderFromRobotFactory.build(inverseDynamicsStructure.getRootJoint(), null, addLinearAccelerationSensors);
       
       SensorReader simulatedSensorHolderAndReader = simulatedSensorHolderAndReaderFromRobotFactory.getSensorReader();
       
