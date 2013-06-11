@@ -6,7 +6,9 @@ import java.util.concurrent.Executors;
 
 import javax.media.j3d.Transform3D;
 
+import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypointGenerationMethod;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.EndOfScriptCommand;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCNetClassList;
 import us.ihmc.darpaRoboticsChallenge.scriptEngine.ScriptEngineSettings;
 import us.ihmc.darpaRoboticsChallenge.scriptEngine.ScriptFileLoader;
@@ -98,11 +100,26 @@ public class CommandPlayer implements TimestampListener
       try
       {
          Object object = loader.getObject(playbackTransform);
-         
-         if(!(object instanceof EndOfScriptCommand))
+
+         boolean consumeObject = true;
+
+         if(object instanceof EndOfScriptCommand)
          {
-            fieldComputerClient.consumeObject(object);
+           consumeObject = false;
          }
+
+         else if (object instanceof FootstepDataList)
+         {
+            FootstepDataList footstepDataList = (FootstepDataList) object;
+            if (footstepDataList.getTrajectoryWaypointGenerationMethod().equals(TrajectoryWaypointGenerationMethod.NO_STEP))
+            {
+               consumeObject = false;
+            }
+         }
+
+
+         if (consumeObject)
+            fieldComputerClient.consumeObject(object);
          
          synchronized (syncObject)
          {
