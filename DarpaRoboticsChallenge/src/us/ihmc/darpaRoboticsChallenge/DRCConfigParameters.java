@@ -158,4 +158,6 @@ public class DRCConfigParameters
    // Hand Controller
    public static final boolean USE_PURE_POSITION_CONTROL_FOR_HANDS = false;
 
+   public static final int CHEATING_POLARIS_PORT = 1543;
+   public static final String CHEATING_POLARIS_HOST = LOCALHOST;
 }
