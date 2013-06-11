@@ -856,14 +856,7 @@ public class DRCDashboard
       {
          public void actionPerformed(ActionEvent e)
          {
-            String netProcIP = null;
-            if (userOwnedSim != null)
-            {
-               netProcIP = DRCLocalCloudConfig.getIPAddress(userOwnedSim);
-            }
-
-            uiSpawner.spawn(DRCOperatorUserInterface.class, new String[] {"-Xms1024m", "-Xmx2048m"}, (netProcIP != null) ? new String[] {"--net-proc-ip",
-                    netProcIP} : null);
+            uiSpawner.spawn(DRCOperatorUserInterface.class, new String[] {"-Xms1024m", "-Xmx2048m"}, null);
          }
       });
    }
@@ -1149,16 +1142,9 @@ public class DRCDashboard
 
    private void startOperatorUI()
    {
-      String netProcIP = null;
-      if (userOwnedSim != null)
-      {
-         netProcIP = DRCLocalCloudConfig.getIPAddress(userOwnedSim);
-      }
-
       if (operatorUICheckBox.isSelected() &&!uiSpawner.hasRunningProcesses())
       {
-         uiSpawner.spawn(DRCOperatorUserInterface.class, new String[] {"-Xms1024m", "-Xmx2048m"}, (netProcIP != null) ? new String[] {"--net-proc-ip",
-                 netProcIP} : null);
+         uiSpawner.spawn(DRCOperatorUserInterface.class, new String[] {"-Xms1024m", "-Xmx2048m"}, null);
       }
    }
 
