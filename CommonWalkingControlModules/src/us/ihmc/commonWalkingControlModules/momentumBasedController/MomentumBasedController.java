@@ -106,8 +106,14 @@ public class MomentumBasedController
    private final PointPositionGrabberInterface pointPositionGrabber;
 
    private MomentumControlModule activeMomentumControlModule;
-   public enum MomentumControlModuleType {OPTIMIZATION, OLD};
-   private final EnumMap<MomentumControlModuleType, MomentumControlModule> momentumControlModules = new EnumMap<MomentumBasedController.MomentumControlModuleType, MomentumControlModule>(MomentumControlModuleType.class);
+
+   public enum MomentumControlModuleType {OPTIMIZATION, OLD}
+
+   ;
+   private final EnumMap<MomentumControlModuleType, MomentumControlModule> momentumControlModules =
+      new EnumMap<MomentumBasedController.MomentumControlModuleType, MomentumControlModule>(MomentumControlModuleType.class);
+   private final EnumYoVariable<MomentumControlModuleType> momentumControlModuleInUse =
+      new EnumYoVariable<MomentumControlModuleType>("momentumControlModuleInUse", registry, MomentumControlModuleType.class);
 
    private final SpatialForceVector gravitationalWrench;
    private final EnumYoVariable<RobotSide> upcomingSupportLeg = EnumYoVariable.create("upcomingSupportLeg", "", RobotSide.class, registry, true);    // FIXME: not general enough; this should not be here
@@ -121,11 +127,10 @@ public class MomentumBasedController
                                   CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime,
                                   double gravityZ, TwistCalculator twistCalculator, SideDependentList<ContactablePlaneBody> feet,
                                   SideDependentList<ContactablePlaneBody> handsWithFingersBentBack, SideDependentList<ContactableCylinderBody> graspingHands,
-                                  SideDependentList<ContactablePlaneBody> thighs, ContactablePlaneBody pelvis,
-                                  ContactablePlaneBody pelvisBack, double controlDT, ProcessedOutputsInterface processedOutputs,
-                                  OptimizationMomentumControlModule optimizationMomentumControlModule,
-                                  OldMomentumControlModule oldMomentumControlModule, ArrayList<Updatable> updatables,
-                                  StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink,
+                                  SideDependentList<ContactablePlaneBody> thighs, ContactablePlaneBody pelvis, ContactablePlaneBody pelvisBack,
+                                  double controlDT, ProcessedOutputsInterface processedOutputs,
+                                  OptimizationMomentumControlModule optimizationMomentumControlModule, OldMomentumControlModule oldMomentumControlModule,
+                                  ArrayList<Updatable> updatables, StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       if (SPY_ON_MOMENTUM_BASED_CONTROLLER)
@@ -137,10 +142,10 @@ public class MomentumBasedController
 
       this.momentumControlModules.put(MomentumControlModuleType.OPTIMIZATION, optimizationMomentumControlModule);
       this.momentumControlModules.put(MomentumControlModuleType.OLD, oldMomentumControlModule);
-      
+
       // By default use OldMomentumControlModule, can be changed via setMomentumControlModuleToUse method
-      this.activeMomentumControlModule = oldMomentumControlModule;
-      
+      setMomentumControlModuleToUse(MomentumControlModuleType.OLD);
+
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
       this.fullRobotModel = fullRobotModel;
@@ -235,7 +240,7 @@ public class MomentumBasedController
 
       for (ContactablePlaneBody contactablePlaneBody : this.listOfAllContactablePlaneBodies)
       {
-//         RigidBody rigidBody = contactablePlaneBody.getRigidBody();
+//       RigidBody rigidBody = contactablePlaneBody.getRigidBody();
          YoPlaneContactState contactState = new YoPlaneContactState(contactablePlaneBody.getPlaneFrame().getName(), contactablePlaneBody.getBodyFrame(),
                                                contactablePlaneBody.getPlaneFrame(), registry);
 
@@ -299,7 +304,7 @@ public class MomentumBasedController
    {
       return feet;
    }
-   
+
    public void getFeetContactStates(ArrayList<PlaneContactState> feetContactStatesToPack)
    {
       for (RobotSide robotSide : RobotSide.values)
@@ -307,7 +312,7 @@ public class MomentumBasedController
          feetContactStatesToPack.add(contactStates.get(feet.get(robotSide)));
       }
    }
-   
+
    public SpatialForceVector getGravitationalWrench()
    {
       return gravitationalWrench;
@@ -698,15 +703,16 @@ public class MomentumBasedController
 
    public void setMomentumControlModuleToUse(MomentumControlModuleType momentumControlModuleToUse)
    {
+      momentumControlModuleInUse.set(momentumControlModuleToUse);
       activeMomentumControlModule = momentumControlModules.get(momentumControlModuleToUse);
-      
+
       for (MomentumControlModule momentumControlModule : momentumControlModules.values())
       {
          if (momentumControlModule != null)
             momentumControlModule.initialize();
       }
    }
-   
+
    public void setDelayTimeBeforeTrustingContacts(double delayTimeBeforeTrustingContacts)
    {
       pointPositionGrabber.setDelayTimeBeforeTrustingContacts(delayTimeBeforeTrustingContacts);
