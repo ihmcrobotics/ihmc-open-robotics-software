@@ -21,7 +21,6 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.kinematics.NumericalInverseKinematicsCalculator;
-import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -43,9 +42,6 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameConvexPolygon2d;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameLineSegment2d;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
 
@@ -61,7 +57,8 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    private final LinkedHashMap<ArmJointName, String> armJointStringNames = new LinkedHashMap<ArmJointName, String>();
    private final SideDependentList<Map<ArmJointName, Double>> armJointLowerLimits = SideDependentList.createListOfHashMaps();
    private final SideDependentList<Map<ArmJointName, Double>> armJointUpperLimits = SideDependentList.createListOfHashMaps();
-
+   private final double fingerJointLimit=1.57079632679;
+   
    private final YoVariableRegistry registry = new YoVariableRegistry("SliderBoardRegistry");
    private final YoVariableRegistry dontRecordRegistry = new YoVariableRegistry("dontRecordRegistry");
 
@@ -152,7 +149,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       q_yaw.addVariableChangedListener(pelvisListener);
       q_pitch.addVariableChangedListener(pelvisListener);
       q_roll.addVariableChangedListener(pelvisListener);
-
+      
       isLeftLegControlRequested.set(true);
 
       isSymmetricModeRequested.addVariableChangedListener(new VariableChangedListener()
@@ -632,7 +629,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
          }
       }
    }
-
+   
    private class SupportBaseControlRequestedListener implements VariableChangedListener
    {
       private int displayState = 0;
