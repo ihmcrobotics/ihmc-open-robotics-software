@@ -240,7 +240,7 @@ public class PosePlaybackSCSBridge
 
          if (previousPose != null)
          {
-            if (pose.epsilonEquals(previousPose, 1e-3))
+            if (pose.epsilonEquals(previousPose, 1e-3, 1.0))
             {
                return;
             }
