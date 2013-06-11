@@ -1,4 +1,4 @@
 #!/bin/bash
 
-source getClasspath.sh
+source getControllerClasspath.sh
 java -classpath "${CLASSPATH}" -Djava.library.path="${MYDIR}/lib" us.ihmc.darpaRoboticsChallenge.gazebo.AtlasROSControllerFactory --networkProcessor --headless --host http://192.168.100.2:11311 $@
