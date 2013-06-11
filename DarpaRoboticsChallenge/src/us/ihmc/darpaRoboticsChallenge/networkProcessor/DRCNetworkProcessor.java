@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import com.martiansoftware.jsap.*;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
@@ -37,17 +38,20 @@ import us.ihmc.utilities.net.ObjectCommunicator;
 public class DRCNetworkProcessor
 {
    private final VideoSettings videoSettings = VideoSettingsFactory.get32kBitSettings();
-   
-   
+
+
    private final ObjectCommunicator fieldComputerClient;
    private final AtomicSettableTimestampProvider timestampProvider = new AtomicSettableTimestampProvider();
    private final DRCNetworkProcessorNetworkingManager networkingManager;
    private final RobotPoseBuffer robotPoseBuffer;
 
-  
+
    private final SDFFullRobotModel fullRobotModel;
    private final DRCRobotJointMap jointMap;
    private final RobotBoundingBoxes robotBoundingBoxes;
+
+   private static String scsMachineIPAddress = DRCConfigParameters.SCS_MACHINE_IP_ADDRESS;
+   private static String rosMasterURI = DRCConfigParameters.ROS_MASTER_URI;
 
    /*
     * This will become a stand-alone application in the final competition. Do
@@ -57,18 +61,18 @@ public class DRCNetworkProcessor
    {
       this(rosCoreURI, null);
    }
-   
+
    public DRCNetworkProcessor(URI rosCoreURI, ObjectCommunicator drcNetworkObjectCommunicator)
    {
       this(drcNetworkObjectCommunicator);
 
       System.out.println("Connecting to ROS");
-      
+
       RosMainNode rosMainNode;
       rosMainNode = new RosMainNode(rosCoreURI, "darpaRoboticsChallange/networkProcessor");
-      
+
       RosNativeNetworkProcessor rosNativeNetworkProcessor;
-      if(RosNativeNetworkProcessor.hasNativeLibrary())
+      if (RosNativeNetworkProcessor.hasNativeLibrary())
       {
          rosNativeNetworkProcessor = RosNativeNetworkProcessor.getInstance(rosCoreURI.toString());
          rosNativeNetworkProcessor.connect();
@@ -78,16 +82,19 @@ public class DRCNetworkProcessor
          rosNativeNetworkProcessor = null;
       }
 
-      
-      CameraDataReceiver cameraDataReceiver = new GazeboCameraReceiver(robotPoseBuffer, videoSettings, rosMainNode, networkingManager, DRCSensorParameters.FIELD_OF_VIEW);
-      LidarDataReceiver lidarDataReceiver = new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, fullRobotModel, robotBoundingBoxes, jointMap, rosNativeNetworkProcessor);
+
+      CameraDataReceiver cameraDataReceiver = new GazeboCameraReceiver(robotPoseBuffer, videoSettings, rosMainNode, networkingManager,
+                                                 DRCSensorParameters.FIELD_OF_VIEW);
+      LidarDataReceiver lidarDataReceiver = new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, fullRobotModel, robotBoundingBoxes,
+                                               jointMap, rosNativeNetworkProcessor);
       new VRCScoreDataReceiver(networkingManager, lidarDataReceiver, rosNativeNetworkProcessor);
       rosMainNode.execute();
-      
-      
-      DrivingProcessorFactory.createCheatingDrivingProcessor(networkingManager.getControllerCommandHandler(), networkingManager.getControllerStateHandler(), cameraDataReceiver, timestampProvider, rosCoreURI.toString());
+
+
+      DrivingProcessorFactory.createCheatingDrivingProcessor(networkingManager.getControllerCommandHandler(), networkingManager.getControllerStateHandler(),
+              cameraDataReceiver, timestampProvider, rosCoreURI.toString());
    }
-   
+
    public DRCNetworkProcessor(LocalObjectCommunicator scsCommunicator, ObjectCommunicator drcNetworkObjectCommunicator)
    {
       this(drcNetworkObjectCommunicator);
@@ -97,28 +104,28 @@ public class DRCNetworkProcessor
 
    private DRCNetworkProcessor(ObjectCommunicator fieldComputerClient)
    {
-      if(fieldComputerClient == null)
+      if (fieldComputerClient == null)
       {
-         this.fieldComputerClient = new KryoObjectClient(DRCConfigParameters.SCS_MACHINE_IP_ADDRESS, DRCConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
-               new DRCNetClassList());
-         ((KryoObjectClient)this.fieldComputerClient).setReconnectAutomatically(true);
+         this.fieldComputerClient = new KryoObjectClient(scsMachineIPAddress,
+                 DRCConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT, new DRCNetClassList());
+         ((KryoObjectClient) this.fieldComputerClient).setReconnectAutomatically(true);
       }
       else
       {
          this.fieldComputerClient = fieldComputerClient;
       }
-     
+
       robotPoseBuffer = new RobotPoseBuffer(this.fieldComputerClient, 1000, timestampProvider);
       networkingManager = new DRCNetworkProcessorNetworkingManager(this.fieldComputerClient, timestampProvider);
-      
-      jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_SANDIA_HANDS, false);  
+
+      jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_SANDIA_HANDS, false);
       JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap, true);
-      
+
       fullRobotModel = loader.createFullRobotModel(jointMap);
       DRCRobotDataReceiver drcRobotDataReceiver = new DRCRobotDataReceiver(DRCRobotModel.ATLAS_SANDIA_HANDS, fullRobotModel);
       this.fieldComputerClient.attachListener(DRCJointConfigurationData.class, drcRobotDataReceiver);
       robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, fullRobotModel);
-      
+
       try
       {
          this.fieldComputerClient.connect();
@@ -129,38 +136,49 @@ public class DRCNetworkProcessor
       }
    }
 
-
-   
-   public static void main(String[] args) throws URISyntaxException
+   public static void main(String[] args) throws URISyntaxException, JSAPException
    {
-      
-      if(args.length >= 1)
+      JSAP jsap = new JSAP();
+      FlaggedOption scsIPFlag =
+         new FlaggedOption("scs-ip").setLongFlag("scs-ip").setShortFlag(JSAP.NO_SHORTFLAG).setRequired(false).setStringParser(JSAP.STRING_PARSER);
+      FlaggedOption rosURIFlag =
+         new FlaggedOption("ros-uri").setLongFlag("ros-uri").setShortFlag(JSAP.NO_SHORTFLAG).setRequired(false).setStringParser(JSAP.STRING_PARSER);
+      Switch simulateController = new Switch("simulate-controller").setShortFlag('d').setLongFlag(JSAP.NO_LONGFLAG);
+
+      jsap.registerParameter(scsIPFlag);
+      jsap.registerParameter(rosURIFlag);
+      jsap.registerParameter(simulateController);
+
+      JSAPResult config = jsap.parse(args);
+
+      if (config.success())
       {
-         if("-d".equals(args[0]))
+         if (config.getString(scsIPFlag.getID()) != null)
+         {
+            scsMachineIPAddress = config.getString(scsIPFlag.getID());
+         }
+
+         if(config.getString(rosURIFlag.getID()) != null)
+         {
+            rosMasterURI = config.getString(rosURIFlag.getID());
+         }
+
+         if (config.getBoolean(simulateController.getID()))
          {
             System.err.println("Simulating DRC Controller");
             ObjectCommunicator objectCommunicator = new LocalObjectCommunicator();
-            
-            String host;
-            if(args.length > 1)
-            {
-               host = args[1];
-            }
-            else
-            {
-               host = DRCConfigParameters.ROS_MASTER_URI;
-            }
-            new DummyController(host, objectCommunicator);
-            new DRCNetworkProcessor(new URI(host), objectCommunicator);
+
+            new DummyController(rosMasterURI, objectCommunicator);
+            new DRCNetworkProcessor(new URI(rosMasterURI), objectCommunicator);
          }
          else
          {
-            new DRCNetworkProcessor(new URI(args[0]));
+            new DRCNetworkProcessor(new URI(rosMasterURI));
          }
       }
       else
       {
-         new DRCNetworkProcessor(new URI(DRCConfigParameters.ROS_MASTER_URI));
+         new DRCNetworkProcessor(new URI(rosMasterURI));
       }
    }
 }
