@@ -61,7 +61,7 @@ public class ImageToOverheadView
 
       // 2D to pixel
       pixel.y = gridHeight - 1 - (int)((x+centerX)/cellSize);
-      pixel.x = (int)((y+centerY)/cellSize);
+      pixel.x = gridWidth-(int)((y+centerY)/cellSize);
    }
 
    public void render( BufferedImage left , Se3_F64 groundToLeft ) {

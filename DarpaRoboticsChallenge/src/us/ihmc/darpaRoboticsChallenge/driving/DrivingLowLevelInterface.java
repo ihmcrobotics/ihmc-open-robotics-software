@@ -8,7 +8,7 @@ import georegression.struct.se.Se3_F64;
  */
 public interface DrivingLowLevelInterface
 {
-   public enum Gear {FORAWRD, REVERSE}
+   public enum Gear {FORWARD, REVERSE}
 
    public void getInCar();
 
