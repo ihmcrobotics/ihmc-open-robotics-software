@@ -36,14 +36,14 @@ public class DRCPerfectSensorReaderFactory implements SensorReaderFactory
       this.groundContactPointBasedWrenchCalculators = groundContactPointBasedWrenchCalculators;
    }
    
-   public void build(SixDoFJoint sixDoFJoint, IMUDefinition[] imuDefinitions)
+   public void build(SixDoFJoint sixDoFJoint, IMUDefinition[] imuDefinitions, boolean addLinearAccelerationSensors)
    {
       final Joint rootJoint = robot.getRootJoints().get(0);
       SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = SCSToInverseDynamicsJointMap.createByName((FloatingJoint) rootJoint, sixDoFJoint);
 
       StateEstimatorSensorDefinitionsFromRobotFactory stateEstimatorSensorDefinitionsFromRobotFactory = new StateEstimatorSensorDefinitionsFromRobotFactory(
             scsToInverseDynamicsJointMap, robot, new ArrayList<IMUMount>(), groundContactPointBasedWrenchCalculators,
-            new ArrayList<KinematicPoint>(), new ArrayList<KinematicPoint>());
+            new ArrayList<KinematicPoint>(), new ArrayList<KinematicPoint>(), addLinearAccelerationSensors);
       this.stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
       
       

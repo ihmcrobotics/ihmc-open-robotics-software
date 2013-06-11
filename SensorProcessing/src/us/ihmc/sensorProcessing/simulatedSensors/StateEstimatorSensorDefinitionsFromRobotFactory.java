@@ -31,7 +31,8 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
    private final StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
 
    public StateEstimatorSensorDefinitionsFromRobotFactory(SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap, Robot robot, 
-           ArrayList<IMUMount> imuMounts, ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators,  ArrayList<KinematicPoint> positionPoints, ArrayList<KinematicPoint> velocityPoints)
+           ArrayList<IMUMount> imuMounts, ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators,  
+           ArrayList<KinematicPoint> positionPoints, ArrayList<KinematicPoint> velocityPoints, boolean addLinearAccelerationSensors)
    {
       this.scsToInverseDynamicsJointMap = scsToInverseDynamicsJointMap;
       this.robot = robot;
@@ -46,7 +47,7 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
       createAndAddOneDoFPositionAndVelocitySensors();
       createAndAddOrientationSensors(imuDefinitions);
       createAndAddAngularVelocitySensors(imuDefinitions);
-      createAndAddLinearAccelerationSensors(imuDefinitions);
+      if (addLinearAccelerationSensors) createAndAddLinearAccelerationSensors(imuDefinitions);
    }
    
    private void createAndAddForceSensorDefinitions(Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitions)

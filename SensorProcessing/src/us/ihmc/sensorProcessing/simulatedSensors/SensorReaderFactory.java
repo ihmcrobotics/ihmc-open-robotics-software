@@ -6,7 +6,7 @@ import us.ihmc.utilities.screwTheory.SixDoFJoint;
 public interface SensorReaderFactory
 {
 
-   public abstract void build(SixDoFJoint sixDoFJoint, IMUDefinition[] imuDefinitions);
+   public abstract void build(SixDoFJoint sixDoFJoint, IMUDefinition[] imuDefinitions, boolean addLinearAccelerationSensors);
 
    public abstract SensorReader getSensorReader();
 
