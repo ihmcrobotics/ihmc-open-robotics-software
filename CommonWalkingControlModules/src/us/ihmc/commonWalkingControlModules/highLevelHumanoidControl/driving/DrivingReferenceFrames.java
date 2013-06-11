@@ -29,7 +29,7 @@ public class DrivingReferenceFrames
       }
    }
 
-   public void setVehicleFrameTransformToWorld(FramePose pose)
+   public void setVehicleFramePoseInWorld(FramePose pose)
    {
       vehicleFrame.updatePose(pose);
    }

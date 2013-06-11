@@ -127,6 +127,11 @@ public class ManipulationControlModule
       parentRegistry.addChild(registry);
    }
 
+   public void setHasBeenInitialized(boolean hasBeenInitialized)
+   {
+      this.hasBeenInitialized.set(hasBeenInitialized);
+   }
+
    private void createFrameVisualizers(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
                                        SideDependentList<ReferenceFrame> framesToVisualize, String listName, boolean enable)
    {
