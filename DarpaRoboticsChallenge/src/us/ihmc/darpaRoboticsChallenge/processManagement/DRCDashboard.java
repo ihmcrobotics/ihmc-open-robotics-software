@@ -856,7 +856,14 @@ public class DRCDashboard
       {
          public void actionPerformed(ActionEvent e)
          {
-            uiSpawner.spawn(DRCOperatorUserInterface.class, new String[] {"-Xms1024m", "-Xmx2048m"}, null);
+            String netProcIP = null;
+            if (userOwnedSim != null)
+            {
+               netProcIP = DRCLocalCloudConfig.getIPAddress(userOwnedSim);
+            }
+
+            uiSpawner.spawn(DRCOperatorUserInterface.class, new String[] {"-Xms1024m", "-Xmx2048m"}, (netProcIP != null) ? new String[] {"--net-proc-ip",
+                    netProcIP} : null);
          }
       });
    }
@@ -1111,8 +1118,10 @@ public class DRCDashboard
 
    private void startLaunchProcess(final LocalCloudMachines gazeboMachine, final String task, final String pluginOption)
    {
-      for(int i = 0; i < 20; i++)
+      for (int i = 0; i < 20; i++)
+      {
          System.out.println();
+      }
 
       startGazebo(gazeboMachine, task, pluginOption);
 
@@ -1140,9 +1149,16 @@ public class DRCDashboard
 
    private void startOperatorUI()
    {
+      String netProcIP = null;
+      if (userOwnedSim != null)
+      {
+         netProcIP = DRCLocalCloudConfig.getIPAddress(userOwnedSim);
+      }
+
       if (operatorUICheckBox.isSelected() &&!uiSpawner.hasRunningProcesses())
       {
-         uiSpawner.spawn(DRCOperatorUserInterface.class, new String[] {"-Xms1024m", "-Xmx2048m"}, null);
+         uiSpawner.spawn(DRCOperatorUserInterface.class, new String[] {"-Xms1024m", "-Xmx2048m"}, (netProcIP != null) ? new String[] {"--net-proc-ip",
+                 netProcIP} : null);
       }
    }
 
@@ -1154,7 +1170,7 @@ public class DRCDashboard
 
    private void launchDemo01(final LocalCloudMachines gazeboMachine, final String task, final String pluginOption)
    {
-      String[] javaArgs = {"-Xms1024m", "-Xmx3000m"}; // {"-Xms1024m", "-Xmx2048m"};
+      String[] javaArgs = {"-Xms1024m", "-Xmx3000m"};    // {"-Xms1024m", "-Xmx2048m"};
       if (gazeboMachine == null)
       {
          scsSpawner.spawn(DRCDemo01.class, javaArgs, null);
