@@ -4,6 +4,8 @@ import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import us.ihmc.utilities.CheckTools;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -25,9 +27,13 @@ public class VehicleStatusManager
    private final DoubleYoVariable steeringWheelAngle = new DoubleYoVariable("steeringWheelAngle", registry);
 
    private final BooleanYoVariable handBrakeEngaged = new BooleanYoVariable("handBrakeEngaged", registry);
+   private final DoubleYoVariable gasPedalPosition = new DoubleYoVariable("gasPedalPosition", registry);
+   private final DoubleYoVariable brakePedalPosition = new DoubleYoVariable("brakePedalPosition", registry);
+
    private final double handBrakeEngagedAngle;
    private final double handBrakeDisengagedAngle;
    private final OneDoFJoint handBrakeJoint;
+
 
    public VehicleStatusManager(YoVariableRegistry parentRegistry, DrivingReferenceFrames drivingReferenceFrames, VehicleModelObjects vehicleModelObjects)
    {
@@ -65,6 +71,24 @@ public class VehicleStatusManager
       this.gear.set(gearName);
    }
 
+   /**
+    * negative means gas pedal is pressed, zero means gas pedal is at its default, unpressed position
+    */
+   public void setGasPedalPosition(double position)
+   {
+      MathTools.checkIfInRange(position, -Double.POSITIVE_INFINITY, 0.0);
+      this.gasPedalPosition.set(position);
+   }
+
+   /**
+    * negative means gas pedal is pressed, zero means gas pedal is at its default, unpressed position
+    */
+   public void setBrakePedalPosition(double position)
+   {
+      MathTools.checkIfInRange(position, -Double.POSITIVE_INFINITY, 0.0);
+      this.brakePedalPosition.set(position);
+   }
+
    public void setHandBrakeEngaged(boolean handBrakeEngaged)
    {
       this.handBrakeEngaged.set(handBrakeEngaged);
@@ -93,5 +117,15 @@ public class VehicleStatusManager
    public double getHandBrakeEngagedAngle()
    {
       return handBrakeEngagedAngle;
+   }
+
+   public boolean isBrakePedalPressed()
+   {
+      return brakePedalPosition.getDoubleValue() < 0.0;
+   }
+
+   public boolean isGasPedalPressed()
+   {
+      return gasPedalPosition.getDoubleValue() < 0.0;
    }
 }
