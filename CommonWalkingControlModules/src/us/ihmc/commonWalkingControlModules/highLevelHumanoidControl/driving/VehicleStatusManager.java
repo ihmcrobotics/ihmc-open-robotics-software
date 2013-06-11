@@ -30,6 +30,8 @@ public class VehicleStatusManager
    private final DoubleYoVariable gasPedalPosition = new DoubleYoVariable("gasPedalPosition", registry);
    private final DoubleYoVariable brakePedalPosition = new DoubleYoVariable("brakePedalPosition", registry);
 
+   private final BooleanYoVariable isRobotHoldingSteeringWheel = new BooleanYoVariable("isRobotHoldingSteeringWheel", registry);
+
    private final double handBrakeEngagedAngle;
    private final double handBrakeDisengagedAngle;
    private final OneDoFJoint handBrakeJoint;
@@ -104,6 +106,11 @@ public class VehicleStatusManager
       this.steeringWheelAngle.set(steeringWheelAngle);
    }
 
+   public void setIsRobotHoldingSteeringWheel(boolean holdingSteeringWheel)
+   {
+      this.isRobotHoldingSteeringWheel.set(holdingSteeringWheel);
+   }
+
    public OneDoFJoint getHandBrakeJoint()
    {
       return handBrakeJoint;
@@ -127,5 +134,10 @@ public class VehicleStatusManager
    public boolean isGasPedalPressed()
    {
       return gasPedalPosition.getDoubleValue() < 0.0;
+   }
+
+   public boolean isRobotHoldingSteeringWheel()
+   {
+      return isRobotHoldingSteeringWheel.getBooleanValue();
    }
 }
