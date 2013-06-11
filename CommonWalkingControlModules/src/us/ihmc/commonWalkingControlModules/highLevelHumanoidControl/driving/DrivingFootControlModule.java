@@ -30,7 +30,7 @@ import java.util.List;
  */
 public class DrivingFootControlModule
 {
-   private final double AVERAGE_VELOCITY = 0.3;
+   private final double AVERAGE_VELOCITY = 1.0;
 
    private final YoVariableRegistry registry;
    private final GeometricJacobian footJacobian;
@@ -47,6 +47,7 @@ public class DrivingFootControlModule
 
    private final PositionTrajectoryGenerator positionTrajectoryGenerator;
    private final YoFramePoint targetPosition;
+   private final DoubleYoVariable footPitch;
 
    private final DoubleYoVariable trajectoryInitializationTime;
    private final DoubleYoVariable time;
@@ -58,9 +59,9 @@ public class DrivingFootControlModule
    private final SpatialAccelerationVector footRollSpatialAccelerationVector;
    private final TaskspaceConstraintData footOrientationTaskspaceConstraintData = new TaskspaceConstraintData();
 
-   private final FrameOrientation desiredOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
-   private final FrameVector desiredAngularVelocity = new FrameVector();
-   private final FrameVector feedForwardAngularAcceleration = new FrameVector();
+   private final FrameOrientation desiredOrientation;
+   private final FrameVector desiredAngularVelocity;
+   private final FrameVector feedForwardAngularAcceleration;
 
    private final TwistCalculator twistCalculator;
    private final Twist currentTwist = new Twist();
@@ -73,6 +74,7 @@ public class DrivingFootControlModule
    private final RigidBody elevator;
 
    private final TaskExecutor taskExecutor = new TaskExecutor();
+   private final double pedalY = 0.02;
 
    public DrivingFootControlModule(RigidBody elevator, ContactablePlaneBody contactablePlaneFoot, MomentumBasedController momentumBasedController,
                                    DrivingReferenceFrames drivingReferenceFrames, DoubleYoVariable yoTime, TwistCalculator twistCalculator, YoVariableRegistry parentRegistry)
@@ -91,8 +93,14 @@ public class DrivingFootControlModule
       this.momentumBasedController = momentumBasedController;
       this.time = yoTime;
       trajectoryInitializationTime = new DoubleYoVariable(toePointName + "InitializationTime", registry);
+      footPitch = new DoubleYoVariable("footPitch", registry);
 
       ReferenceFrame vehicleFrame = drivingReferenceFrames.getVehicleFrame();
+
+      desiredOrientation = new FrameOrientation(vehicleFrame);
+      desiredAngularVelocity = new FrameVector(vehicleFrame);
+      feedForwardAngularAcceleration = new FrameVector(vehicleFrame);
+
       targetPosition = new YoFramePoint(toePointName + "Target", vehicleFrame, registry);
 
       PositionProvider initialPositionProvider = new ConstantPositionProvider(toePoint);
@@ -109,16 +117,22 @@ public class DrivingFootControlModule
 
 
       orientationController = new AxisAngleOrientationController(foot.getName() + "PD", foot.getBodyFixedFrame(), registry);
-      double kPOrientation = 15.0;
-      double kDOrientation = GainCalculator.computeDerivativeGain(kPOrientation, dampingRatio);
-      orientationController.setProportionalGains(kPOrientation, kPOrientation, kPOrientation);
-      orientationController.setDerivativeGains(kDOrientation, kDOrientation, kDOrientation);
+      double kPOrientationYZ = 100.0;
+      double kDOrientationYZ = GainCalculator.computeDerivativeGain(kPOrientationYZ, dampingRatio);
+
+      double kPOrientationX = 200.0;
+      double kDOrientationX = GainCalculator.computeDerivativeGain(kPOrientationX, dampingRatio);
+
+      orientationController.setProportionalGains(kPOrientationX, kPOrientationYZ, kPOrientationYZ);
+      orientationController.setDerivativeGains(kDOrientationX, kDOrientationYZ, kDOrientationYZ);
 
       footOrientationSelectionMatrix = new DenseMatrix64F(3, SpatialMotionVector.SIZE);
       footOrientationSelectionMatrix.zero();
       footOrientationSelectionMatrix.set(0, 0, 1.0);
       footOrientationSelectionMatrix.set(1, 1, 1.0);
       footOrientationSelectionMatrix.set(2, 2, 1.0);
+
+      footPitch.set(0.0);
 
       footRollSpatialAccelerationVector = new SpatialAccelerationVector();
 
@@ -135,13 +149,13 @@ public class DrivingFootControlModule
 
    public void moveToPositionInGasPedalFrame(double z)
    {
-      FramePoint target = new FramePoint(drivingReferenceFrames.getObjectFrame(VehicleObject.GAS_PEDAL), 0.0, 0.0, z);
+      FramePoint target = new FramePoint(drivingReferenceFrames.getObjectFrame(VehicleObject.GAS_PEDAL), 0.0, pedalY, z);
       moveToPosition(target);
    }
 
    public void moveToPositionInBrakePedalFrame(double z)
    {
-      FramePoint target = new FramePoint(drivingReferenceFrames.getObjectFrame(VehicleObject.BRAKE_PEDAL), 0.0, 0.0, z);
+      FramePoint target = new FramePoint(drivingReferenceFrames.getObjectFrame(VehicleObject.BRAKE_PEDAL), 0.0, pedalY, z);
       moveToPosition(target);
    }
 
@@ -175,6 +189,7 @@ public class DrivingFootControlModule
    private void doFootOrientationControl()
    {
       desiredOrientation.set(drivingReferenceFrames.getVehicleFrame());
+      desiredOrientation.setYawPitchRoll(0.0, footPitch.getDoubleValue(), 0.0);
       desiredAngularVelocity.setToZero(toePointFrame);
       feedForwardAngularAcceleration.setToZero(toePointFrame);
 
