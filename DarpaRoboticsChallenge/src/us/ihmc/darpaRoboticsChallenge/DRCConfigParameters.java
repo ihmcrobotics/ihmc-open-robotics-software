@@ -8,29 +8,32 @@ public class DRCConfigParameters
 {
    public static final boolean ALLOW_LAG_SIMULATION = true;
    public static final boolean ENABLE_LAG_SIMULATION_ON_START = false;
+
    static
    {
-      if(ALLOW_LAG_SIMULATION)
+      if (ALLOW_LAG_SIMULATION)
       {
          System.err.println("Warning: Allowing simulation of lag");
       }
    }
-   
-   
+
    public static final boolean USE_COLLISIONS_MESHS_FOR_VISUALIZATION = false;
    public static final boolean SEND_HIGH_SPEED_CONFIGURATION_DATA = false;
-   
-   
-   // TODO: Temporary static variable for testing getting into the car
-   public static final boolean TEST_GETTING_INTO_CAR = false; // true;
-   
-   public static final boolean USE_SLIDER_FOR_POSE_PLAYBACK = false; // true;
-   
-   public static final boolean USE_SUPER_DUPER_HIGH_RESOLUTION_FOR_COMMS = false;
-   
-   public static final boolean USE_GAZEBO_PHYSICS = false;    // TODO: This one is needed just for FlatGroundWalkingTrack in Gazebo...
 
-   public static final boolean USE_PERFECT_SENSORS = false;
+   // TODO: Temporary static variable for testing getting into the car
+   public static final boolean TEST_GETTING_INTO_CAR = false;    // true;
+
+   public static final boolean USE_SLIDER_FOR_POSE_PLAYBACK = false;    // true;
+
+   public static final boolean USE_SUPER_DUPER_HIGH_RESOLUTION_FOR_COMMS = false;
+
+   public static final boolean USE_GAZEBO_PHYSICS = false;    // TODO: This one is
+
+   // needed just for
+   // FlatGroundWalkingTrack
+   // in Gazebo...
+
+   public static final boolean USE_PERFECT_SENSORS = true;
 
    static
    {
@@ -66,20 +69,19 @@ public class DRCConfigParameters
    public static final String CONSTELLATION_FIELD_COMPUTER_1_VPN_IP = "10.0.0.52";
    public static final String CONSTELLATION_FIELD_COMPUTER_2_VPN_IP = "10.0.0.53";
 
-   public static final String GAZEBO_HOST = LOCALHOST;
-   public static final String SCS_MACHINE_IP_ADDRESS = LOCALHOST; //CLOUD_MONSTER_IP;
+   public static final String GAZEBO_HOST = CLOUD_MINION3_IP;
+   public static final String SCS_MACHINE_IP_ADDRESS = LOCALHOST;    // CLOUD_MONSTER_IP;
 
    public static final String OPERATOR_INTERFACE_IP_ADDRESS = LOCALHOST;
-   
+
    public static final String ROS_MASTER_URI = "http://" + GAZEBO_HOST + ":11311";
    public static final int CONTROLLER_TO_UI_TCP_PORT = 4893;
 
    public static final int NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT = 4895;
 
    public static final int NETWORK_PROCESSOR_TO_UI_TCP_PORT = 4897;
-   
-   public static final int NETWORK_PROCESSOR_TO_UI_RAW_PROTOCOL_TCP_PORT = 4898;
 
+   public static final int NETWORK_PROCESSOR_TO_UI_RAW_PROTOCOL_TCP_PORT = 4898;
 
    public static final long ROBOT_JOINT_SERVER_UPDATE_MILLIS = 100;
 
@@ -93,14 +95,17 @@ public class DRCConfigParameters
    public static final double POSITION_NOISE_STD = 0.01;
    public static final double QUATERNION_NOISE_STD = 0.01;
 
-
    // LIDAR:
    public static final double LIDAR_SPINDLE_VELOCITY = 2.5;
 
    public static final boolean STREAM_POLAR_LIDAR = true;
    public static final int LIDAR_UPDATE_RATE_OVERRIDE = 5;
    public static final int LIDAR_SWEEPS_PER_SCAN = 1;
-   public static final int LIDAR_POINTS_PER_SWEEP = 640; //I assume this number will never be 720 in SCS -Gray.
+   public static final int LIDAR_POINTS_PER_SWEEP = 640;    // I assume this
+
+   // number will never
+   // be 720 in SCS
+   // -Gray.
    public static final boolean OVERRIDE_DRC_LIDAR_CONFIG = true;
    public static final float LIDAR_MIN_DISTANCE = 0.2f;
    public static final float LIDAR_MAX_DISTANCE = 10.0f;
@@ -108,12 +113,20 @@ public class DRCConfigParameters
 
    public static final float LIDAR_SWEEP_MAX_YAW = 0.8f;
    public static final float LIDAR_SWEEP_MIN_YAW = -0.8f;
-   public static final float LIDAR_SCAN_MAX_ROLL = 0.0f;    // rolls the LIDAR to simulate a faster update rate.
+   public static final float LIDAR_SCAN_MAX_ROLL = 0.0f;    // rolls the LIDAR to
+
+   // simulate a faster
+   // update rate.
    public static final float LIDAR_SCAN_MIN_ROLL = 0.0f;
    public static final float LIDAR_ANGLE_INCREMENT = (float) Math.toRadians(0.25);
    public static final float LIDAR_TIME_INCREMENT = 0.0f;
    public static final float LIDAR_SCAN_TIME = 0.0f;
-   public static final double LIDAR_NOISE_LEVEL_OVERRIDE = 0.005;    // DRCGazebo will simulate with: 0.005
+   public static final double LIDAR_NOISE_LEVEL_OVERRIDE = 0.005;    // DRCGazebo
+
+   // will
+   // simulate
+   // with:
+   // 0.005
    public static final boolean DEBUG_GAZEBO_LIDAR = false;
 
    // LIDAR Processor
@@ -140,10 +153,9 @@ public class DRCConfigParameters
    public static final double LIDAR_RESOLUTION_SPHERE_INNER_RADIUS = 1.0;
    public static final double LIDAR_RESOLUTION_SPHERE_DISTANCE_FROM_HEAD = 1.0;
 
+   public static final boolean USE_TABS_IN_UI = true;
+
    // Hand Controller
    public static final boolean USE_PURE_POSITION_CONTROL_FOR_HANDS = false;
 
-   
-   public static final int CHEATING_POLARIS_PORT = 1543;
-   public static final String CHEATING_POLARIS_HOST = LOCALHOST;
 }
