@@ -10,6 +10,8 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.taskExecutor.Task;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.taskExecutor.TaskExecutor;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
@@ -50,7 +52,9 @@ public class DrivingFootControlModule
    private final DoubleYoVariable time;
 
    private final AxisAngleOrientationController orientationController;
-//   private final DenseMatrix64F footOrientationSelectionMatrix;
+   private final DenseMatrix64F footOrientationSelectionMatrix;
+   private final DenseMatrix64F footOrientationNullspaceMultipliers = new DenseMatrix64F(0, 1);
+
    private final SpatialAccelerationVector footRollSpatialAccelerationVector;
    private final TaskspaceConstraintData footOrientationTaskspaceConstraintData = new TaskspaceConstraintData();
 
@@ -68,7 +72,7 @@ public class DrivingFootControlModule
    private final RigidBody foot;
    private final RigidBody elevator;
 
-   private final DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 1);
+   private final TaskExecutor taskExecutor = new TaskExecutor();
 
    public DrivingFootControlModule(RigidBody elevator, ContactablePlaneBody contactablePlaneFoot, MomentumBasedController momentumBasedController,
                                    DrivingReferenceFrames drivingReferenceFrames, DoubleYoVariable yoTime, TwistCalculator twistCalculator, YoVariableRegistry parentRegistry)
@@ -110,18 +114,11 @@ public class DrivingFootControlModule
       orientationController.setProportionalGains(kPOrientation, kPOrientation, kPOrientation);
       orientationController.setDerivativeGains(kDOrientation, kDOrientation, kDOrientation);
 
-      FrameVector rollAxis = new FrameVector(contactablePlaneFoot.getPlaneFrame(), 1.0, 0.0, 0.0);
-      FrameVector yawAxis = new FrameVector(contactablePlaneFoot.getPlaneFrame(), 0.0, 0.0, 1.0);
-      rollAxis.changeFrame(foot.getBodyFixedFrame());
-      yawAxis.changeFrame(foot.getBodyFixedFrame());
-
-//      footOrientationSelectionMatrix = new DenseMatrix64F(2, SpatialMotionVector.SIZE);
-//      footOrientationSelectionMatrix.set(0, 0, rollAxis.getX());
-//      footOrientationSelectionMatrix.set(0, 1, rollAxis.getY());
-//      footOrientationSelectionMatrix.set(0, 2, rollAxis.getZ());
-//      footOrientationSelectionMatrix.set(1, 0, yawAxis.getX());
-//      footOrientationSelectionMatrix.set(1, 1, yawAxis.getY());
-//      footOrientationSelectionMatrix.set(1, 2, yawAxis.getZ());
+      footOrientationSelectionMatrix = new DenseMatrix64F(3, SpatialMotionVector.SIZE);
+      footOrientationSelectionMatrix.zero();
+      footOrientationSelectionMatrix.set(0, 0, 1.0);
+      footOrientationSelectionMatrix.set(1, 1, 1.0);
+      footOrientationSelectionMatrix.set(2, 2, 1.0);
 
       footRollSpatialAccelerationVector = new SpatialAccelerationVector();
 
@@ -132,32 +129,35 @@ public class DrivingFootControlModule
 
    public void holdPosition()
    {
-      targetPosition.set(toePoint.changeFrameCopy(targetPosition.getReferenceFrame()));
-      initializeTrajectory();
+      FramePoint target = new FramePoint(toePoint);
+      moveToPosition(target);
    }
 
    public void moveToPositionInGasPedalFrame(double z)
    {
       FramePoint target = new FramePoint(drivingReferenceFrames.getObjectFrame(VehicleObject.GAS_PEDAL), 0.0, 0.0, z);
-      target.changeFrame(targetPosition.getReferenceFrame());
-      targetPosition.set(target);
-      initializeTrajectory();
+      moveToPosition(target);
    }
 
    public void moveToPositionInBrakePedalFrame(double z)
    {
       FramePoint target = new FramePoint(drivingReferenceFrames.getObjectFrame(VehicleObject.BRAKE_PEDAL), 0.0, 0.0, z);
-      target.changeFrame(targetPosition.getReferenceFrame());
-      targetPosition.set(target);
-      initializeTrajectory();
+      moveToPosition(target);
    }
 
    public void doControl()
    {
+      taskExecutor.doControl();
       footJacobian.compute();
       updateCurrentVelocity();
       doToePositionControl();
       doFootOrientationControl();
+   }
+
+   private void moveToPosition(FramePoint target)
+   {
+      Task task = new FootControlTask(target);
+      taskExecutor.submit(task);
    }
 
    private void doToePositionControl()
@@ -183,7 +183,7 @@ public class DrivingFootControlModule
 
       footRollSpatialAccelerationVector.setToZero(foot.getBodyFixedFrame(), elevator.getBodyFixedFrame(), foot.getBodyFixedFrame());
       footRollSpatialAccelerationVector.setAngularPart(output.getVector());
-      footOrientationTaskspaceConstraintData.set(footRollSpatialAccelerationVector); // , nullspaceMultipliers, footOrientationSelectionMatrix);
+      footOrientationTaskspaceConstraintData.set(footRollSpatialAccelerationVector, footOrientationNullspaceMultipliers, footOrientationSelectionMatrix);
       momentumBasedController.setDesiredSpatialAcceleration(footJacobian, footOrientationTaskspaceConstraintData);
    }
 
@@ -197,12 +197,6 @@ public class DrivingFootControlModule
       currentTwist.packVelocityOfPointFixedInBodyFrame(currentVelocity, toePointInBase);
    }
 
-   private void initializeTrajectory()
-   {
-      positionTrajectoryGenerator.initialize();
-      trajectoryInitializationTime.set(time.getDoubleValue());
-   }
-
    private static FramePoint getCenterToePoint(ContactablePlaneBody foot)
    {
       FrameVector forward = new FrameVector(foot.getPlaneFrame(), 1.0, 0.0, 0.0);
@@ -211,5 +205,35 @@ public class DrivingFootControlModule
       FramePoint centerToePoint = FramePoint.average(toePoints);
 
       return centerToePoint;
+   }
+
+   private class FootControlTask implements Task
+   {
+      private final FramePoint targetPosition;
+
+      public FootControlTask(FramePoint targetPosition)
+      {
+         this.targetPosition = targetPosition;
+      }
+
+      public void doTransitionIntoAction()
+      {
+         DrivingFootControlModule.this.targetPosition.set(targetPosition.changeFrameCopy(DrivingFootControlModule.this.targetPosition.getReferenceFrame()));
+         positionTrajectoryGenerator.initialize();
+         trajectoryInitializationTime.set(time.getDoubleValue());
+      }
+
+      public void doAction()
+      {
+      }
+
+      public void doTransitionOutOfAction()
+      {
+      }
+
+      public boolean isDone()
+      {
+         return positionTrajectoryGenerator.isDone();
+      }
    }
 }
