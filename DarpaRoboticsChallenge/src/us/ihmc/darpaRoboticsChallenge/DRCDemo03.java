@@ -11,7 +11,7 @@ import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.VRCTask1InVehicleInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.initialSetup.VRCTask1InVehicleOnlyLHandAndLFootLoaded;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -32,7 +32,7 @@ public class DRCDemo03
                     int simulationDataBufferSize)
    {
       DRCSCSInitialSetup scsInitialSetup;
-      RobotInitialSetup<SDFRobot> robotInitialSetup = new VRCTask1InVehicleInitialSetup(-0.03); // DrivingDRCRobotInitialSetup();
+      RobotInitialSetup<SDFRobot> robotInitialSetup = new VRCTask1InVehicleOnlyLHandAndLFootLoaded(0.0); // new VRCTask1InVehicleInitialSetup(-0.03); // DrivingDRCRobotInitialSetup();
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
 
       environment = new DRCDemoEnvironmentWithBoxAndSteeringWheel(dynamicGraphicObjectsListRegistry);

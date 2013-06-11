@@ -170,7 +170,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       DesiredPelvisPoseProvider pelvisPoseProvider = null;
       DesiredChestOrientationProvider chestOrientationProvider = null;
       DesiredFootStateProvider footLoadBearingProvider = null;
-      VehiclePoseProvider vehiclePoseProvider = null;
+      PelvisPoseWithRespectToVehicleProvider pelvisPoseWithRespectToVehicleProvider = null;
       DesiredThighLoadBearingProvider thighLoadBearingProvider = null;
       DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = null;
       DesiredHighLevelStateProvider highLevelStateProvider = null;
@@ -179,7 +179,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       
       VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepProvider, mapFromFootstepsToTrajectoryParameters,
             headOrientationProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, torusPoseProvider, torusManipulationProvider,
-            chestOrientationProvider, footPoseProvider, footLoadBearingProvider, vehiclePoseProvider, highLevelStateProvider, thighLoadBearingProvider,
+            chestOrientationProvider, footPoseProvider, footLoadBearingProvider, pelvisPoseWithRespectToVehicleProvider, highLevelStateProvider, thighLoadBearingProvider,
             pelvisLoadBearingProvider, fingerStateProvider, reinitializeWalkingController);
 
       VariousWalkingManagers variousWalkingManagers = VariousWalkingManagers.create(momentumBasedController, handControllers, yoTime, variousWalkingProviders,

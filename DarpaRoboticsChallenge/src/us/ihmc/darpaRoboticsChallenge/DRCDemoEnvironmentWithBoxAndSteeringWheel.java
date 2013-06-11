@@ -96,6 +96,8 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
       ContactableStaticCylinderRobot robot = new ContactableStaticCylinderRobot(name, transform, height, radius, YoAppearance.DarkGray());
       environmentRobots.add(robot);
       contactables.add(robot);
+
+      robot.createAvailableContactPoints(1, 30, 0.005, false);
    }
 
    private CombinedTerrainObject createCombinedTerrainObject()

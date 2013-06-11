@@ -41,7 +41,7 @@ public class VariousWalkingProviders
    private final TorusManipulationProvider torusManipulationProvider;
    private final DesiredChestOrientationProvider desiredChestOrientationProvider;
    private final DesiredFootPoseProvider desiredFootPoseProvider;
-   private final VehiclePoseProvider vehiclePoseProvider;
+   private final PelvisPoseWithRespectToVehicleProvider pelvisPoseWithRespectToVehicleProvider;
    private final ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider;
 
    // TODO: Rename DesiredFootStateProvider to DesiredFootLoadBearingProvider, do the same for the packet, etc.
@@ -55,7 +55,7 @@ public class VariousWalkingProviders
          DesiredHeadOrientationProvider desiredHeadOrientationProvider, DesiredPelvisPoseProvider desiredPelvisPoseProvider,
          DesiredHandPoseProvider desiredHandPoseProvider, DesiredHandLoadBearingProvider desiredHandLoadBearingProvider, TorusPoseProvider torusPoseProvider,
          TorusManipulationProvider torusManipulationProvider, DesiredChestOrientationProvider desiredChestOrientationProvider,
-         DesiredFootPoseProvider footPoseProvider, DesiredFootStateProvider footStateProvider, VehiclePoseProvider vehiclePoseProvider,
+         DesiredFootPoseProvider footPoseProvider, DesiredFootStateProvider footStateProvider, PelvisPoseWithRespectToVehicleProvider pelvisPoseWithRespectToVehicleProvider,
          DesiredHighLevelStateProvider desiredHighLevelStateProvider, DesiredThighLoadBearingProvider thighLoadBearingProvider,
          DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider, FingerStateProvider fingerStateProvider,
          ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider)
@@ -70,7 +70,7 @@ public class VariousWalkingProviders
       this.torusManipulationProvider = torusManipulationProvider;
       this.desiredHandPoseProvider = desiredHandPoseProvider;
       this.desiredFootPoseProvider = footPoseProvider;
-      this.vehiclePoseProvider = vehiclePoseProvider;
+      this.pelvisPoseWithRespectToVehicleProvider = pelvisPoseWithRespectToVehicleProvider;
       this.reinitializeWalkingControllerProvider = reinitializeWalkingControllerProvider;
       
       this.desiredHandLoadBearingProvider = desiredHandLoadBearingProvider;
@@ -175,9 +175,9 @@ public class VariousWalkingProviders
       return desiredThighLoadBearingProvider;
    }
 
-   public VehiclePoseProvider getVehiclePoseProvider()
+   public PelvisPoseWithRespectToVehicleProvider getPelvisPoseWithRespectToVehicleProvider()
    {
-      return vehiclePoseProvider;
+      return pelvisPoseWithRespectToVehicleProvider;
    }
 
    public FingerStateProvider getFingerStateProvider()
@@ -215,7 +215,7 @@ public class VariousWalkingProviders
       DesiredPelvisPoseProvider pelvisPoseProvider = new DesiredPelvisPoseProvider();
       DesiredChestOrientationProvider chestOrientationProvider = new DesiredChestOrientationProvider();
       DesiredFootPoseProvider footPoseProvider = new DesiredFootPoseProvider();
-      VehiclePoseProvider vehiclePoseProvider = new VehiclePoseProvider();
+      PelvisPoseWithRespectToVehicleProvider pelvisPoseWithRespectToVehicleProvider = new PelvisPoseWithRespectToVehicleProvider();
       ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider = new ReinitializeWalkingControllerProvider();
 
       DesiredHandLoadBearingProvider handLoadBearingProvider = new DesiredHandLoadBearingProvider();
@@ -237,7 +237,7 @@ public class VariousWalkingProviders
       objectCommunicator.attachListener(TorusManipulationPacket.class, torusManipulationProvider);
       objectCommunicator.attachListener(FootPosePacket.class, footPoseProvider);
       objectCommunicator.attachListener(ChestOrientationPacket.class, chestOrientationProvider);
-      objectCommunicator.attachListener(VehiclePosePacket.class, vehiclePoseProvider);
+      objectCommunicator.attachListener(PelvisPoseWithRespectToVehiclePacket.class, pelvisPoseWithRespectToVehicleProvider);
       objectCommunicator.attachListener(ReinitializeWalkingControllerPacket.class, reinitializeWalkingControllerProvider);
 
       objectCommunicator.attachListener(HandLoadBearingPacket.class, handLoadBearingProvider);
@@ -249,7 +249,7 @@ public class VariousWalkingProviders
 
       VariousWalkingProviders variousProvidersFactory = new VariousWalkingProviders(footstepPathCoordinator, mapFromFootstepsToTrajectoryParameters,
             headOrientationProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, torusPoseProvider, torusManipulationProvider,
-            chestOrientationProvider, footPoseProvider, footLoadBearingProvider, vehiclePoseProvider, highLevelStateProvider, thighLoadBearingProvider,
+            chestOrientationProvider, footPoseProvider, footLoadBearingProvider, pelvisPoseWithRespectToVehicleProvider, highLevelStateProvider, thighLoadBearingProvider,
             pelvisLoadBearingProvider, fingerStateProvider, reinitializeWalkingControllerProvider);
 
       return variousProvidersFactory;
@@ -280,7 +280,7 @@ public class VariousWalkingProviders
       TorusPoseProvider torusPoseProvider = new TorusPoseProvider();
       TorusManipulationProvider torusManipulationProvider = new TorusManipulationProvider();
       DesiredFootPoseProvider footPoseProvider = new DesiredFootPoseProvider();
-      VehiclePoseProvider vehiclePoseProvider = new VehiclePoseProvider();
+      PelvisPoseWithRespectToVehicleProvider pelvisPoseWithRespectToVehicleProvider = new PelvisPoseWithRespectToVehicleProvider();
       ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider = new ReinitializeWalkingControllerProvider();
 
       DesiredHandLoadBearingProvider handLoadBearingProvider = new DesiredHandLoadBearingProvider();
@@ -293,7 +293,7 @@ public class VariousWalkingProviders
                                                            headOrientationProvider, pelvisPoseProvider, handPoseProvider,
                                                            handLoadBearingProvider, torusPoseProvider, torusManipulationProvider,
                                                            chestOrientationProvider, footPoseProvider, footLoadBearingProvider,
-                                                           vehiclePoseProvider, highLevelStateProvider, thighLoadBearingProvider,
+            pelvisPoseWithRespectToVehicleProvider, highLevelStateProvider, thighLoadBearingProvider,
                                                            pelvisLoadBearingProvider, fingerStateProvider, reinitializeWalkingControllerProvider);
 
       return variousProvidersFactory;
@@ -318,7 +318,7 @@ public class VariousWalkingProviders
       DesiredHandPoseProvider handPoseProvider = null;
       DesiredChestOrientationProvider chestOrientationProvider = null;
       DesiredFootPoseProvider footPoseProvider = null;
-      VehiclePoseProvider vehiclePoseProvider = null;
+      PelvisPoseWithRespectToVehicleProvider pelvisPoseWithRespectToVehicleProvider = null;
       ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider = null;
 
       DesiredHandLoadBearingProvider handLoadBearingProvider = null;
@@ -331,7 +331,7 @@ public class VariousWalkingProviders
                                                            headOrientationProvider, pelvisPoseProvider, handPoseProvider,
                                                            handLoadBearingProvider, torusPoseProvider, torusManipulationProvider,
                                                            chestOrientationProvider, footPoseProvider, footLoadBearingProvider,
-                                                           vehiclePoseProvider, highLevelStateProvider, thighLoadBearingProvider,
+            pelvisPoseWithRespectToVehicleProvider, highLevelStateProvider, thighLoadBearingProvider,
                                                            pelvisLoadBearingProvider, fingerStateProvider, reinitializeWalkingControllerProvider);
 
       return variousWalkingProviders;
@@ -363,7 +363,7 @@ public class VariousWalkingProviders
       DesiredPelvisPoseProvider pelvisPoseProvider = null;
       DesiredChestOrientationProvider chestOrientationProvider = null;
       DesiredFootPoseProvider footPoseProvider = null;
-      VehiclePoseProvider vehiclePoseProvider = null;
+      PelvisPoseWithRespectToVehicleProvider pelvisPoseWithRespectToVehicleProvider = null;
       ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider = null;
 
       DesiredHandLoadBearingProvider handLoadBearingProvider = null;
@@ -377,7 +377,7 @@ public class VariousWalkingProviders
                                                            headOrientationProvider, pelvisPoseProvider, handPoseProvider,
                                                            handLoadBearingProvider, torusPoseProvider, torusManipulationProvider,
                                                            chestOrientationProvider, footPoseProvider, footLoadBearingProvider,
-                                                           vehiclePoseProvider, highLevelStateProvider, thighLoadBearingProvider,
+            pelvisPoseWithRespectToVehicleProvider, highLevelStateProvider, thighLoadBearingProvider,
                                                            pelvisLoadBearingProvider, fingerStateProvider, reinitializeWalkingControllerProvider);
 
       return variousWalkingProviders;
