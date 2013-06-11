@@ -49,6 +49,7 @@ import us.ihmc.utilities.screwTheory.TotalWrenchCalculator;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -103,13 +104,13 @@ public class MomentumBasedController
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
    private final DesiredCoMAndAngularAccelerationGrabber desiredCoMAndAngularAccelerationGrabber;
+   private final BooleanYoVariable resetEstimatorPositionsToCurrent = new BooleanYoVariable("resetEstimatorPositionsToCurrent", registry);
    private final PointPositionGrabberInterface pointPositionGrabber;
 
    private MomentumControlModule activeMomentumControlModule;
 
-   public enum MomentumControlModuleType {OPTIMIZATION, OLD}
-
-   ;
+   public enum MomentumControlModuleType {OPTIMIZATION, OLD};
+   
    private final EnumMap<MomentumControlModuleType, MomentumControlModule> momentumControlModules =
       new EnumMap<MomentumBasedController.MomentumControlModuleType, MomentumControlModule>(MomentumControlModuleType.class);
    private final EnumYoVariable<MomentumControlModuleType> momentumControlModuleInUse =
@@ -395,8 +396,15 @@ public class MomentumBasedController
          this.desiredCoMAndAngularAccelerationGrabber.set(inverseDynamicsCalculator.getSpatialAccelerationCalculator(), desiredCentroidalMomentumRate);
 
       if (pointPositionGrabber != null)
+      {
+         if (resetEstimatorPositionsToCurrent.getBooleanValue())
+         {
+            pointPositionGrabber.resetToCurrentLocations(contactStates, planeContactWrenchProcessor.getCops());
+            resetEstimatorPositionsToCurrent.set(false);
+         }
          pointPositionGrabber.set(contactStates, planeContactWrenchProcessor.getCops());
-
+      }
+      
       inverseDynamicsCalculator.compute();
 
       if (processedOutputs != null)
@@ -499,6 +507,9 @@ public class MomentumBasedController
 
    public void initialize()
    {
+      // When you initialize into this controller, reset the estimator positions to current. Otherwise it might be in a bad state 
+      // where the feet are all jacked up. For example, after falling and getting back up.
+      resetEstimatorPositionsToCurrent.set(true);
       inverseDynamicsCalculator.compute();
       activeMomentumControlModule.initialize();
       planeContactWrenchProcessor.initialize();
