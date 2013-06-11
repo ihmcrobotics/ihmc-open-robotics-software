@@ -118,8 +118,8 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
 
    public boolean doToeOffIfPossible()
    {
-      return true; 
-//      return false; //TODO: JEP. Changed to false for now so we can try out the new ICP trajectory stuff. Need to do toe off a little more smoothly.
+//      return true; 
+      return false; //TODO: JEP. Changed to false for now so we can walk down into the mud reliably without falling.
    }
 
    public String[] getDefaultHeadOrientationControlJointNames()
