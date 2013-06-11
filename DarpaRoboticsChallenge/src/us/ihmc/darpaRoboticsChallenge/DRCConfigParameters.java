@@ -33,7 +33,7 @@ public class DRCConfigParameters
    // FlatGroundWalkingTrack
    // in Gazebo...
 
-   public static final boolean USE_PERFECT_SENSORS = true;
+   public static final boolean USE_PERFECT_SENSORS = false;
 
    static
    {
