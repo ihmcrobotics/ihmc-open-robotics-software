@@ -30,7 +30,7 @@ import java.util.List;
  */
 public class DrivingFootControlModule
 {
-   private final double AVERAGE_VELOCITY = 1.0;
+   private final double AVERAGE_VELOCITY = 0.8;
 
    private final YoVariableRegistry registry;
    private final GeometricJacobian footJacobian;
@@ -46,7 +46,8 @@ public class DrivingFootControlModule
    private final FrameVector currentAngularVelocity = new FrameVector();
 
    private final PositionTrajectoryGenerator positionTrajectoryGenerator;
-   private final YoFramePoint targetPosition;
+   private final YoFramePoint initialToePointPosition;
+   private final YoFramePoint finalToePointPosition;
    private final DoubleYoVariable footPitch;
    private final DoubleYoVariable footRoll;
 
@@ -103,10 +104,11 @@ public class DrivingFootControlModule
       desiredAngularVelocity = new FrameVector(vehicleFrame);
       feedForwardAngularAcceleration = new FrameVector(vehicleFrame);
 
-      targetPosition = new YoFramePoint(toePointName + "Target", vehicleFrame, registry);
+      initialToePointPosition = new YoFramePoint(toePointName + "Initial", vehicleFrame, registry);
+      finalToePointPosition = new YoFramePoint(toePointName + "Final", vehicleFrame, registry);
 
-      PositionProvider initialPositionProvider = new ConstantPositionProvider(toePoint);
-      PositionProvider finalPositionProvider = new YoPositionProvider(targetPosition);
+      PositionProvider initialPositionProvider = new YoPositionProvider(initialToePointPosition);
+      PositionProvider finalPositionProvider = new YoPositionProvider(finalToePointPosition);
       DoubleProvider trajectoryTimeProvider = new AverageVelocityTrajectoryTimeProvider(initialPositionProvider, finalPositionProvider, AVERAGE_VELOCITY, 1e-3);
       this.positionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator(toePointName + "Trajectory", vehicleFrame, trajectoryTimeProvider,
               initialPositionProvider, finalPositionProvider, registry);
@@ -160,6 +162,11 @@ public class DrivingFootControlModule
    {
       FramePoint target = new FramePoint(drivingReferenceFrames.getObjectFrame(VehicleObject.BRAKE_PEDAL), 0.0, pedalY, z);
       moveToPosition(target);
+   }
+
+   public void initialize()
+   {
+      initialToePointPosition.set(toePoint.changeFrameCopy(initialToePointPosition.getReferenceFrame()));
    }
 
    public void doControl()
@@ -236,7 +243,7 @@ public class DrivingFootControlModule
 
       public void doTransitionIntoAction()
       {
-         DrivingFootControlModule.this.targetPosition.set(targetPosition.changeFrameCopy(DrivingFootControlModule.this.targetPosition.getReferenceFrame()));
+         DrivingFootControlModule.this.finalToePointPosition.set(targetPosition.changeFrameCopy(DrivingFootControlModule.this.finalToePointPosition.getReferenceFrame()));
          positionTrajectoryGenerator.initialize();
          trajectoryInitializationTime.set(time.getDoubleValue());
       }
@@ -247,6 +254,10 @@ public class DrivingFootControlModule
 
       public void doTransitionOutOfAction()
       {
+         FramePoint currentDesired = new FramePoint();
+         positionTrajectoryGenerator.get(currentDesired);
+         currentDesired.changeFrame(initialToePointPosition.getReferenceFrame());
+         initialToePointPosition.set(currentDesired);
       }
 
       public boolean isDone()
