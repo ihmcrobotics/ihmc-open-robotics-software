@@ -175,7 +175,7 @@ public class MomentumBasedController
       if (stateEstimationDataFromControllerSink != null)
       {
          this.desiredCoMAndAngularAccelerationGrabber = new DesiredCoMAndAngularAccelerationGrabber(stateEstimationDataFromControllerSink, estimationLink,
-                 estimationFrame, totalMass);
+                 estimationFrame, totalMass, registry);
 
          double touchdownTime = 0.12;
          double minCoPDistance = 0.01;
