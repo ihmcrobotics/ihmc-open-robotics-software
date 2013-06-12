@@ -124,7 +124,7 @@ public class DrivingFootControlModule
       double kPOrientationYZ = 100.0;
       double kDOrientationYZ = GainCalculator.computeDerivativeGain(kPOrientationYZ, dampingRatio);
 
-      double kPOrientationX = 50.0;
+      double kPOrientationX = 100.0;
       double kDOrientationX = GainCalculator.computeDerivativeGain(kPOrientationX, dampingRatio);
 
       orientationController.setProportionalGains(kPOrientationX, kPOrientationYZ, kPOrientationYZ);
