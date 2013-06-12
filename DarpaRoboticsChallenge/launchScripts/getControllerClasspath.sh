@@ -22,14 +22,6 @@ else
 fi
 cd $MYDIR
 
-if [ -d $CONFIGFILES ]; then
-        cd $CONFIGFILES
-        svn up
-else
-        svn co  https://bengal.ihmc.us/svn/RobotControl/DarpaRoboticsChallenge/config $CONFIGFILES
-fi
-cd $MYDIR
-
 
 CLASSPATH=$(find $THIRDPARTYJARS $ROSDEPENDENCIES -name \*.jar -printf '%p:')DRCController.jar
 
