@@ -7,6 +7,7 @@ import javax.vecmath.Point2d;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.MathTools;
@@ -32,6 +33,8 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final FourPointSpline1D spline = new FourPointSpline1D(registry);
+   
+   private final DesiredComHeightProvider desiredComHeightProvider;
    
    private final BooleanYoVariable hasBeenInitializedWithNextStep = new BooleanYoVariable("hasBeenInitializedWithNextStep", registry);
    
@@ -60,8 +63,13 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    
    private final BagOfBalls bagOfBalls;
    
-   public LookAheadCoMHeightTrajectoryGenerator(double minimumHeightAboveGround, double nominalHeightAboveGround, double maximumHeightAboveGround, double doubleSupportPercentageIn, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+   public LookAheadCoMHeightTrajectoryGenerator(DesiredComHeightProvider desiredComHeightProvider, double minimumHeightAboveGround, 
+         double nominalHeightAboveGround, double maximumHeightAboveGround, 
+         double doubleSupportPercentageIn, 
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
+      this.desiredComHeightProvider = desiredComHeightProvider;
+      
       setOffsetHeightAboveGround(0.0);
       setMinimumHeightAboveGround(minimumHeightAboveGround);
       setNominalHeightAboveGround(nominalHeightAboveGround);
@@ -541,6 +549,8 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
 
    private void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, Point2d queryPoint)
    {
+      offsetHeightAboveGround.set(desiredComHeightProvider.getComHeightOffset());
+      
 //      if (projectionSegment == null)
 //      {
 //         coMHeightPartialDerivativesDataToPack.setCoMHeight(worldFrame, nominalHeightAboveGround.getDoubleValue());
