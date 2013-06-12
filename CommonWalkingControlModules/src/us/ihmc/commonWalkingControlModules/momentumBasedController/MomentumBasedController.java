@@ -724,6 +724,11 @@ public class MomentumBasedController
       }
    }
 
+   public MomentumControlModuleType getMomentumControlModuleInUse()
+   {
+      return momentumControlModuleInUse.getEnumValue();
+   }
+
    public void setDelayTimeBeforeTrustingContacts(double delayTimeBeforeTrustingContacts)
    {
       pointPositionGrabber.setDelayTimeBeforeTrustingContacts(delayTimeBeforeTrustingContacts);

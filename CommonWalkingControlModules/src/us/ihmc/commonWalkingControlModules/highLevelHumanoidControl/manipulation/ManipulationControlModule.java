@@ -176,7 +176,7 @@ public class ManipulationControlModule
 
       directControlManipulationTaskDispatcher = new DirectControlManipulationTaskDispatcher(fullRobotModel, parameters, handPoseProvider,
               handLoadBearingProvider, fingerStateProvider, handControllers, handPositionControlFrames, individualHandControlModules, pipeline, fingerToroidManipulationState,
-              torusManipulationProvider, registry);
+              torusManipulationProvider, momentumBasedController, registry);
 
 //    HighLevelToroidManipulationState toroidManipulationState = new HighLevelToroidManipulationState(yoTime, fullRobotModel, twistCalculator,
 //                                                                  handPositionControlFrames, handControllers, jacobians, torusPoseProvider,
