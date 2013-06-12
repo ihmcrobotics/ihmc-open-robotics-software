@@ -16,7 +16,6 @@ public enum StraightLinePathType
    private static final double SHUFFLE_STEP_LENGTH = 0.15;
    private static final double SHUFFLE_STEP_WIDTH = 0.3;
    private static final double LEFT_SHUFFLE_ANGLE = -Math.PI / 2;
-   private double stepLengthMultiplier = 1.0;
 
    public String getTypeName()
    {
@@ -117,7 +116,7 @@ public enum StraightLinePathType
       return width;
    }
 
-   public double getStepLength()
+   public double getStepLength(double stepLengthMultiplier)
    {
       double length = Double.NaN;
       switch (this)
@@ -165,13 +164,4 @@ public enum StraightLinePathType
       }
    }
    
-   public void setStepLengthMultiplier(double newStepLengthMultiplier)
-   {
-      this.stepLengthMultiplier = newStepLengthMultiplier;
-   }
-   
-   public double getStepLengthMultiplier()
-   {
-      return this.stepLengthMultiplier;
-   }
 }

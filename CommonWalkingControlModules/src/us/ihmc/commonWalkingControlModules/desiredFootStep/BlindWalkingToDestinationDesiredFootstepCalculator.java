@@ -40,7 +40,7 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
    private final DoubleYoVariable distanceToDestination = new DoubleYoVariable("distanceToDestination", registry);
    private final DoubleYoVariable angleToDestination = new DoubleYoVariable("angleToDestination", registry);
 
-   private final DoubleYoVariable inPlaceWidth = new DoubleYoVariable("inPlaceWidth", registry);
+   private final DoubleYoVariable desiredStepWidth = new DoubleYoVariable("desiredStepWidth", registry);
    private final DoubleYoVariable desiredStepForward = new DoubleYoVariable("desiredStepForward", registry);
    private final DoubleYoVariable desiredStepSideward = new DoubleYoVariable("desiredStepSideward", registry);
    private final DoubleYoVariable maxStepLength = new DoubleYoVariable("maxStepLength", registry);
@@ -145,7 +145,7 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
       FramePoint2d destinationInAnkleFrame = new FramePoint2d(desiredDestination);
       destinationInAnkleFrame.changeFrame(supportAnkleZUpFrame);
        
-      FramePoint2d squaredUpMidpointInAnkleFrame = new FramePoint2d(supportAnkleZUpFrame, 0.0, swingLegSide.negateIfRightSide(inPlaceWidth.getDoubleValue()/2.0));
+      FramePoint2d squaredUpMidpointInAnkleFrame = new FramePoint2d(supportAnkleZUpFrame, 0.0, swingLegSide.negateIfRightSide(desiredStepWidth.getDoubleValue()/2.0));
 
       FrameVector2d midpointToDestination = new FrameVector2d(destinationInAnkleFrame);
       midpointToDestination.sub(squaredUpMidpointInAnkleFrame);
@@ -160,7 +160,7 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
    {   		
       if (distanceToDestination < DISTANCE_TO_DESTINATION_FOR_STEP_IN_PLACE) 
       {
-         return new FrameVector2d(supportAnkleZUpFrame, 0.0, swingLegSide.negateIfRightSide(inPlaceWidth.getDoubleValue()));
+         return new FrameVector2d(supportAnkleZUpFrame, 0.0, swingLegSide.negateIfRightSide(desiredStepWidth.getDoubleValue()));
       }
       
       double absoluteAngleToDestination;
@@ -246,7 +246,7 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
          desiredOffsetFromSquaredUp.scale(maxStepLength.getDoubleValue() / stepLength);
       }
       
-      FrameVector2d desiredOffsetFromAnkle = new FrameVector2d(supportAnkleZUpFrame, desiredOffsetFromSquaredUp.getX(), desiredOffsetFromSquaredUp.getY() + swingLegSide.negateIfRightSide(inPlaceWidth.getDoubleValue()));
+      FrameVector2d desiredOffsetFromAnkle = new FrameVector2d(supportAnkleZUpFrame, desiredOffsetFromSquaredUp.getX(), desiredOffsetFromSquaredUp.getY() + swingLegSide.negateIfRightSide(desiredStepWidth.getDoubleValue()));
 
       if (swingLegSide == RobotSide.LEFT)
       {
@@ -338,9 +338,9 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
       footstepPositions.get(swingLegSide).set(footstepPosition);
    }
 
-   public void setInPlaceWidth(double inPlaceWidth)
+   public void setDesiredStepWidth(double desiredStepWidth)
    {
-      this.inPlaceWidth.set(inPlaceWidth);
+      this.desiredStepWidth.set(desiredStepWidth);
    }
 
    public void setMaxStepLength(double maxStepLength)

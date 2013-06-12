@@ -22,10 +22,12 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 public class FootstepPathCoordinator implements FootstepProvider
 {
    private static final double FOOTSTEP_PATH_SWING_TIME = 0.6;
-   private static final double SLOW_BLIND_WALKING_SWING_TIME = 2.5;
+   private static final double SLOW_BLIND_WALKING_SWING_TIME = 0.8;
+   private static final double BLIND_WALKING_IN_MUD_SWING_TIME = 1.6; //2.5;
    
-   private static final double FOOTSTEP_PATH_TRANSFER_TIME = 0.2;
-   private static final double SLOW_BLIND_WALKING_TRANSFER_TIME = 1.5;
+   private static final double FOOTSTEP_PATH_TRANSFER_TIME = 0.25;
+   private static final double SLOW_BLIND_WALKING_TRANSFER_TIME = 0.35;
+   private static final double BLIND_WALKING_IN_MUD_TRANSFER_TIME = 0.4; //1.5;
    
    private boolean DEBUG = false;
    private final ConcurrentLinkedQueue<Footstep> footstepQueue = new ConcurrentLinkedQueue<Footstep>();
@@ -321,46 +323,89 @@ public class FootstepPathCoordinator implements FootstepProvider
 
       BlindWalkingDirection blindWalkingDirection = blindWalkingPacket.getBlindWalkingDirection();
       BlindWalkingSpeed blindWalkingSpeed = blindWalkingPacket.getBlindWalkingSpeed();
-
+      boolean isInMud = blindWalkingPacket.getIsInMud();
+      
       blindWalkingToDestinationDesiredFootstepCalculator.setBlindWalkingDirection(blindWalkingDirection);
      
       double stepLength; 
+      double stepWidth; 
       double stepSideward;
       double swingTime;
       double transferTime;
       
+      System.out.println("is In Mud = " + isInMud);
       switch (blindWalkingSpeed)
       {
          case SLOW :
          {
-            stepLength = 0.2;
-            stepSideward = 0.1;
-            swingTime = SLOW_BLIND_WALKING_SWING_TIME;
-            transferTime = SLOW_BLIND_WALKING_TRANSFER_TIME;
+            if (isInMud)
+            {
+               stepLength = 0.25; 
+               stepWidth = 0.15;
+               stepSideward = 0.1;
+               swingTime = BLIND_WALKING_IN_MUD_SWING_TIME;
+               transferTime = BLIND_WALKING_IN_MUD_TRANSFER_TIME; 
+            }
+            else
+            {
+               stepLength = 0.2;
+               stepWidth = 0.25;
+               stepSideward = 0.1;
+               swingTime = SLOW_BLIND_WALKING_SWING_TIME;
+               transferTime = SLOW_BLIND_WALKING_TRANSFER_TIME; 
+            }
+
             break;
          }
 
          case MEDIUM :
          {
-            stepLength = 0.35;
-            stepSideward = 0.25;
-            swingTime = FOOTSTEP_PATH_SWING_TIME;
-            transferTime = FOOTSTEP_PATH_TRANSFER_TIME;
+            if (isInMud)
+            {
+               stepLength = 0.35;
+               stepWidth = 0.15;
+               stepSideward = 0.3;
+               swingTime = BLIND_WALKING_IN_MUD_SWING_TIME;
+               transferTime = BLIND_WALKING_IN_MUD_TRANSFER_TIME; 
+            }
+            else
+            {
+               stepLength = 0.35;
+               stepWidth = 0.25;
+               stepSideward = 0.25;
+               swingTime = FOOTSTEP_PATH_SWING_TIME;
+               transferTime = FOOTSTEP_PATH_TRANSFER_TIME;  
+            }
+
             break;
          }
 
          case FAST :
-         {
-            stepLength = 0.5;
-            stepSideward = 0.6;
-            swingTime = FOOTSTEP_PATH_SWING_TIME;
-            transferTime = FOOTSTEP_PATH_TRANSFER_TIME;
+         { 
+            if (isInMud)
+            {
+               stepLength = 0.5;
+               stepWidth = 0.15;
+               stepSideward = 0.5;
+               swingTime = BLIND_WALKING_IN_MUD_SWING_TIME;
+               transferTime = BLIND_WALKING_IN_MUD_TRANSFER_TIME; 
+            }
+            else
+            {
+               stepLength = 0.5;
+               stepWidth = 0.25;
+               stepSideward = 0.6;
+               swingTime = FOOTSTEP_PATH_SWING_TIME;
+               transferTime = FOOTSTEP_PATH_TRANSFER_TIME;
+            }
+
             break;
          }
 
          default :
          {
             stepLength = 0.0;
+            stepWidth = 0.15;
             stepSideward = 0.0;
             swingTime = SLOW_BLIND_WALKING_SWING_TIME;
             transferTime = SLOW_BLIND_WALKING_TRANSFER_TIME;
@@ -369,6 +414,7 @@ public class FootstepPathCoordinator implements FootstepProvider
          }
       }
 
+      blindWalkingToDestinationDesiredFootstepCalculator.setDesiredStepWidth(stepWidth);
       blindWalkingToDestinationDesiredFootstepCalculator.setDesiredStepForward(stepLength);
       blindWalkingToDestinationDesiredFootstepCalculator.setDesiredStepSideward(stepSideward);
       constantSwingTimeCalculator.setSwingTime(swingTime);
