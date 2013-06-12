@@ -75,12 +75,13 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
             server.reset();
          }
 
-         if(networkProcessorSpawner.hasRunningProcesses())
+         if (networkProcessorSpawner.hasRunningProcesses())
          {
             try
             {
-               server.write(new byte[]{UnsignedByteTools.fromInt(0x00)});
-            } catch (DisconnectedException e)
+               server.write(new byte[] {UnsignedByteTools.fromInt(0x00)});
+            }
+            catch (DisconnectedException e)
             {
                server.reset();
             }
@@ -89,8 +90,9 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
          {
             try
             {
-               server.write(new byte[]{UnsignedByteTools.fromInt(0x11)});
-            } catch (DisconnectedException e)
+               server.write(new byte[] {UnsignedByteTools.fromInt(0x11)});
+            }
+            catch (DisconnectedException e)
             {
                server.reset();
             }
