@@ -48,6 +48,7 @@ public class DrivingFootControlModule
    private final PositionTrajectoryGenerator positionTrajectoryGenerator;
    private final YoFramePoint targetPosition;
    private final DoubleYoVariable footPitch;
+   private final DoubleYoVariable footRoll;
 
    private final DoubleYoVariable trajectoryInitializationTime;
    private final DoubleYoVariable time;
@@ -56,7 +57,7 @@ public class DrivingFootControlModule
    private final DenseMatrix64F footOrientationSelectionMatrix;
    private final DenseMatrix64F footOrientationNullspaceMultipliers = new DenseMatrix64F(0, 1);
 
-   private final SpatialAccelerationVector footRollSpatialAccelerationVector;
+   private final SpatialAccelerationVector footOrientationControlSpatialAcceleration;
    private final TaskspaceConstraintData footOrientationTaskspaceConstraintData = new TaskspaceConstraintData();
 
    private final FrameOrientation desiredOrientation;
@@ -94,6 +95,7 @@ public class DrivingFootControlModule
       this.time = yoTime;
       trajectoryInitializationTime = new DoubleYoVariable(toePointName + "InitializationTime", registry);
       footPitch = new DoubleYoVariable("footPitch", registry);
+      footRoll = new DoubleYoVariable("footRoll", registry);
 
       ReferenceFrame vehicleFrame = drivingReferenceFrames.getVehicleFrame();
 
@@ -120,7 +122,7 @@ public class DrivingFootControlModule
       double kPOrientationYZ = 100.0;
       double kDOrientationYZ = GainCalculator.computeDerivativeGain(kPOrientationYZ, dampingRatio);
 
-      double kPOrientationX = 200.0;
+      double kPOrientationX = 50.0;
       double kDOrientationX = GainCalculator.computeDerivativeGain(kPOrientationX, dampingRatio);
 
       orientationController.setProportionalGains(kPOrientationX, kPOrientationYZ, kPOrientationYZ);
@@ -133,8 +135,9 @@ public class DrivingFootControlModule
       footOrientationSelectionMatrix.set(2, 2, 1.0);
 
       footPitch.set(0.0);
+      footRoll.set(-0.3);
 
-      footRollSpatialAccelerationVector = new SpatialAccelerationVector();
+      footOrientationControlSpatialAcceleration = new SpatialAccelerationVector();
 
       this.twistCalculator = twistCalculator;
 
@@ -189,16 +192,16 @@ public class DrivingFootControlModule
    private void doFootOrientationControl()
    {
       desiredOrientation.set(drivingReferenceFrames.getVehicleFrame());
-      desiredOrientation.setYawPitchRoll(0.0, footPitch.getDoubleValue(), 0.0);
+      desiredOrientation.setYawPitchRoll(0.0, footPitch.getDoubleValue(), footRoll.getDoubleValue());
       desiredAngularVelocity.setToZero(toePointFrame);
       feedForwardAngularAcceleration.setToZero(toePointFrame);
 
       FrameVector output = new FrameVector(toePointFrame);
       orientationController.compute(output, desiredOrientation, desiredAngularVelocity, currentAngularVelocity, feedForwardAngularAcceleration);
 
-      footRollSpatialAccelerationVector.setToZero(foot.getBodyFixedFrame(), elevator.getBodyFixedFrame(), foot.getBodyFixedFrame());
-      footRollSpatialAccelerationVector.setAngularPart(output.getVector());
-      footOrientationTaskspaceConstraintData.set(footRollSpatialAccelerationVector, footOrientationNullspaceMultipliers, footOrientationSelectionMatrix);
+      footOrientationControlSpatialAcceleration.setToZero(foot.getBodyFixedFrame(), elevator.getBodyFixedFrame(), foot.getBodyFixedFrame());
+      footOrientationControlSpatialAcceleration.setAngularPart(output.getVector());
+      footOrientationTaskspaceConstraintData.set(footOrientationControlSpatialAcceleration, footOrientationNullspaceMultipliers, footOrientationSelectionMatrix);
       momentumBasedController.setDesiredSpatialAcceleration(footJacobian, footOrientationTaskspaceConstraintData);
    }
 
