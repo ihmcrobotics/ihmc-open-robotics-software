@@ -68,13 +68,13 @@ public class MomentumSolverTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
-   
+
    @After
    public void showMemoryUsageAfterTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
+
    @Test
    public void testFloatingChainWithJointSpaceConstraints()
    {
@@ -100,7 +100,8 @@ public class MomentumSolverTest
 
 
       TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), elevator);
-      MomentumSolverInterface solver = createAndInitializeMomentumOptimizer(elevator, rootJoint, sixDoFJoints, revoluteJoints, DT, centerOfMassFrame, twistCalculator);
+      MomentumSolverInterface solver = createAndInitializeMomentumOptimizer(elevator, rootJoint, sixDoFJoints, revoluteJoints, DT, centerOfMassFrame,
+                                          twistCalculator);
 
       SpatialForceVector desiredMomentumRate = new SpatialForceVector(centerOfMassFrame, RandomTools.generateRandomVector(random),
                                                   RandomTools.generateRandomVector(random));
@@ -150,7 +151,8 @@ public class MomentumSolverTest
       centerOfMassFrame.update();
 
       TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), elevator);
-      MomentumSolverInterface solver = createAndInitializeMomentumOptimizer(elevator, rootJoint, sixDoFJoints, revoluteJoints, DT, centerOfMassFrame, twistCalculator);
+      MomentumSolverInterface solver = createAndInitializeMomentumOptimizer(elevator, rootJoint, sixDoFJoints, revoluteJoints, DT, centerOfMassFrame,
+                                          twistCalculator);
 
       SpatialForceVector desiredMomentumRate = new SpatialForceVector(centerOfMassFrame, RandomTools.generateRandomVector(random),
                                                   RandomTools.generateRandomVector(random));
@@ -199,7 +201,8 @@ public class MomentumSolverTest
       centerOfMassFrame.update();
 
       TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), elevator);
-      MomentumSolverInterface solver = createAndInitializeMomentumOptimizer(elevator, rootJoint, sixDoFJoints, oneDoFJoints, DT, centerOfMassFrame, twistCalculator);
+      MomentumSolverInterface solver = createAndInitializeMomentumOptimizer(elevator, rootJoint, sixDoFJoints, oneDoFJoints, DT, centerOfMassFrame,
+                                          twistCalculator);
 
       // TODO: I'm really confused here. Shouldn't the Jacobian and the Spatial Acceleration have the same frames?
       GeometricJacobian jacobian = new GeometricJacobian(firstBody, secondBody, rootJoint.getFrameAfterJoint());
@@ -261,7 +264,7 @@ public class MomentumSolverTest
 
       TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), elevator);
       MomentumSolverInterface solver = createAndInitializeMomentumOptimizer(elevator, rootJoint, sixDoFJoints, randomFloatingChain.getRevoluteJoints(), DT,
-                                 centerOfMassFrame, twistCalculator);
+                                          centerOfMassFrame, twistCalculator);
 
       SpatialForceVector desiredMomentumRate = new SpatialForceVector(centerOfMassFrame, RandomTools.generateRandomVector(random),
                                                   RandomTools.generateRandomVector(random));
@@ -275,7 +278,7 @@ public class MomentumSolverTest
                                                            endEffector.getBodyFixedFrame(), RandomTools.generateRandomVector(random),
                                                            RandomTools.generateRandomVector(random));
       DenseMatrix64F nullspaceMultiplier = new DenseMatrix64F(0, 1);
-      
+
       TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
       taskspaceConstraintData.set(taskSpaceAcceleration, nullspaceMultiplier);
       solver.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
@@ -316,7 +319,7 @@ public class MomentumSolverTest
 
       TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), elevator);
       MomentumSolverInterface solver = createAndInitializeMomentumOptimizer(elevator, rootJoint, sixDoFJoints, randomFloatingChain.getRevoluteJoints(), DT,
-                                 centerOfMassFrame, twistCalculator);
+                                          centerOfMassFrame, twistCalculator);
 
       SpatialForceVector desiredMomentumRate = new SpatialForceVector(centerOfMassFrame, RandomTools.generateRandomVector(random),
                                                   RandomTools.generateRandomVector(random));
@@ -366,7 +369,7 @@ public class MomentumSolverTest
 
       TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), elevator);
       MomentumSolverInterface solver = createAndInitializeMomentumOptimizer(elevator, rootJoint, sixDoFJoints, randomFloatingChain.getRevoluteJoints(), DT,
-                                 centerOfMassFrame, twistCalculator);
+                                          centerOfMassFrame, twistCalculator);
 
       SpatialForceVector desiredMomentumRate = new SpatialForceVector(centerOfMassFrame, RandomTools.generateRandomVector(random),
                                                   RandomTools.generateRandomVector(random));
@@ -399,9 +402,9 @@ public class MomentumSolverTest
       selectionMatrixTwo.set(1, 4, 1.0);
       selectionMatrixTwo.set(1, 5, 1.0);
       selectionMatrixTwo.set(2, 5, 1.0);
-      
+
       taskspaceConstraintData.set(internalAccelerationTwo, nullspaceMultiplierTwo, selectionMatrixTwo);
-      
+
       solver.setDesiredSpatialAcceleration(jacobianTwo, taskspaceConstraintData);
 
       solver.compute();
@@ -444,7 +447,7 @@ public class MomentumSolverTest
 
       TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), elevator);
       MomentumSolverInterface solver = createAndInitializeMomentumOptimizer(elevator, rootJoint, sixDoFJoints, randomFloatingChain.getRevoluteJoints(), DT,
-                                 centerOfMassFrame, twistCalculator);
+                                          centerOfMassFrame, twistCalculator);
 
       SpatialForceVector desiredMomentumRate = new SpatialForceVector(centerOfMassFrame, RandomTools.generateRandomVector(random),
                                                   RandomTools.generateRandomVector(random));
@@ -476,10 +479,9 @@ public class MomentumSolverTest
 
 
       InverseDynamicsJoint[] pelvisToChestConstrainedJoints = new InverseDynamicsJoint[] {back_mby, back_ubx};
-      
+
       TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
-      taskspaceConstraintData.set(pelvisToChestInternalAcceleration,
-            pelvisToChestNullspaceMultiplier, pelvisToChestSelectionMatrix);
+      taskspaceConstraintData.set(pelvisToChestInternalAcceleration, pelvisToChestNullspaceMultiplier, pelvisToChestSelectionMatrix);
 
       solver.setDesiredSpatialAcceleration(pelvisToChestConstrainedJoints, pelvisToChestJacobian, taskspaceConstraintData);
 
@@ -496,9 +498,8 @@ public class MomentumSolverTest
       elevatorToHeadSelectionMatrix.set(1, 2, 1.0);    // wz (yaw of head)
 
       InverseDynamicsJoint[] elevatorToHeadConstrainedJoints = new InverseDynamicsJoint[] {back_lbz, neck_ay};
-      
-      taskspaceConstraintData.set(elevatorToHeadInternalAcceleration,
-            elevatorToHeadNullspaceMultiplier, elevatorToHeadSelectionMatrix);
+
+      taskspaceConstraintData.set(elevatorToHeadInternalAcceleration, elevatorToHeadNullspaceMultiplier, elevatorToHeadSelectionMatrix);
       solver.setDesiredSpatialAcceleration(elevatorToHeadConstrainedJoints, elevatorToHeadJacobian, taskspaceConstraintData);
 
       solver.compute();
@@ -533,7 +534,8 @@ public class MomentumSolverTest
       centerOfMassFrame.update();
 
       TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), elevator);
-      MomentumSolverInterface solver = createAndInitializeMomentumOptimizer(elevator, rootJoint, sixDoFJoints, oneDoFJoints, DT, centerOfMassFrame, twistCalculator);
+      MomentumSolverInterface solver = createAndInitializeMomentumOptimizer(elevator, rootJoint, sixDoFJoints, oneDoFJoints, DT, centerOfMassFrame,
+                                          twistCalculator);
 
       GeometricJacobian jacobian = new GeometricJacobian(body0, secondBody, rootJoint.getFrameAfterJoint());
 
@@ -583,7 +585,7 @@ public class MomentumSolverTest
       // solve again using the desiredMomentumRate, check if we also get the right pelvis acceleration back again
       solver.solve(desiredMomentumRate);
       checkTaskSpaceAcceleration(rootJoint, twistCalculator, jacobian, spatialAcceleration, 1e-9, false);
-      checkAgainstInverseDynamicsCalculator(rootJoint, desiredMomentumRate, 5e-5);
+      checkAgainstInverseDynamicsCalculator(rootJoint, desiredMomentumRate, 4e-8);
 
       checkAgainstNumericalDifferentiation(rootJoint, sixDoFJoints, oneDoFJoints, DT, desiredMomentumRate, 1e-4);
    }
@@ -608,7 +610,7 @@ public class MomentumSolverTest
 
       TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), elevator);
       MomentumSolverInterface solver = createAndInitializeMomentumOptimizer(elevator, rootJoint, sixDoFJoints, randomFloatingChain.getRevoluteJoints(), DT,
-                                 centerOfMassFrame, twistCalculator);
+                                          centerOfMassFrame, twistCalculator);
 
       SpatialForceVector desiredMomentumRate = new SpatialForceVector(centerOfMassFrame, RandomTools.generateRandomVector(random),
                                                   RandomTools.generateRandomVector(random));
@@ -619,9 +621,10 @@ public class MomentumSolverTest
       GeometricJacobian jacobian = new GeometricJacobian(base, endEffector, endEffector.getBodyFixedFrame());
       FrameVector endEffectorAngularAcceleration = new FrameVector(endEffector.getBodyFixedFrame(), RandomTools.generateRandomVector(random));
       DenseMatrix64F nullspaceMultiplier = new DenseMatrix64F(0, 1);
-      
+
       TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
-      taskspaceConstraintData.setAngularAcceleration(jacobian.getEndEffector().getBodyFixedFrame(), elevator.getBodyFixedFrame(), endEffectorAngularAcceleration, nullspaceMultiplier);
+      taskspaceConstraintData.setAngularAcceleration(jacobian.getEndEffector().getBodyFixedFrame(), elevator.getBodyFixedFrame(),
+              endEffectorAngularAcceleration, nullspaceMultiplier);
 
       solver.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
 
@@ -668,8 +671,8 @@ public class MomentumSolverTest
 //    DampedLeastSquaresSolver jacobianSolver = new DampedLeastSquaresSolver(SpatialMotionVector.SIZE);
 //    jacobianSolver.setAlpha(5e-2);
       LinearSolver<DenseMatrix64F> jacobianSolver = LinearSolverFactory.pseudoInverse(true);
-      MomentumSolverInterface solver = createAndInitializeMomentumOptimizer(elevator, rootJoint, sixDoFJoints, revoluteJoints, DT, centerOfMassFrame, twistCalculator,
-                                 jacobianSolver);
+      MomentumSolverInterface solver = createAndInitializeMomentumOptimizer(elevator, rootJoint, sixDoFJoints, revoluteJoints, DT, centerOfMassFrame,
+                                          twistCalculator, jacobianSolver);
 
       SpatialForceVector desiredMomentumRate = new SpatialForceVector(centerOfMassFrame, RandomTools.generateRandomVector(random),
                                                   RandomTools.generateRandomVector(random));
@@ -689,7 +692,7 @@ public class MomentumSolverTest
       DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(nullity, 1);
       CommonOps.fill(nullspaceMultipliers, 0.0);
       RandomMatrices.setRandom(nullspaceMultipliers, random);
-      
+
       TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
       taskspaceConstraintData.set(taskSpaceAcceleration, nullspaceMultipliers);
       solver.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
