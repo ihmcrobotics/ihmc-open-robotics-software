@@ -23,8 +23,8 @@ public class FootstepToFootstepChecker
    private static double MAXIMUM_DELTA_Y = 0.6;
    private static double MAXIMUM_DELTA_Z = 0.3;
 
-   private static double MAXIMUM_ROLL = Math.toRadians(10.0);
-   private static double MAXIMUM_PITCH = Math.toRadians(10.0);
+   private static double MAXIMUM_ROLL = Math.toRadians(15.0);
+   private static double MAXIMUM_PITCH = Math.toRadians(15.0);
    private static double MAXIMUM_YAW = Math.toRadians(90.0);
 
    public static boolean isFootstepToFootstepChangeLarge(Footstep startingFootstep, Footstep endingFootstep)
@@ -77,6 +77,19 @@ public class FootstepToFootstepChecker
       printIfDebug("pitchSlope = " + pitchSlope);
 
       return pitchSlope;
+   }
+   
+   public static double getFootstepRollSlope(Footstep footstep)
+   {
+      FrameVector frameVector = new FrameVector(footstep.getPoseReferenceFrame(), 0.0, 1.0, 0.0);
+      frameVector.changeFrame(ReferenceFrame.getWorldFrame());
+      printIfDebug("frameVector = " + frameVector);
+
+      double rollSlope = frameVector.getZ();
+      
+      printIfDebug("rollSlope = " + rollSlope);
+
+      return rollSlope;
    }
    
    private static void printIfDebug(String message)
