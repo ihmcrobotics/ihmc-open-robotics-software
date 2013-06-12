@@ -42,21 +42,20 @@ public class PosePlaybackSCSBridge
 {
    private static final String ipAddress = DRCConfigParameters.CLOUD_MINION2_IP;
    private static final double controlDT = 0.005;
-
+   
    private static final boolean promptForTimeDelay = false;
 
    private final PosePlaybackAllJointsController posePlaybackController;
    private final PosePlaybackSender posePlaybackSender;
-   private final PosePlaybackRobotPoseSequence posePlaybackRobotPoseSequence;
-
+   private PosePlaybackRobotPoseSequence posePlaybackRobotPoseSequence;
+   
    private int frameByframePoseNumber;
    private double frameByframeTime;
 
    private final PosePlaybackSmoothPoseInterpolator interpolator;
    private final YoVariableRegistry registry = new YoVariableRegistry("PlaybackPoseSCSBridge");
 
-   // private final BooleanYoVariable plotBalls = new
-   // BooleanYoVariable("plotBalls", registry);
+// private final BooleanYoVariable plotBalls = new BooleanYoVariable("plotBalls", registry);
    private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
    private final YoFramePoint centerOfMassPosition = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint centerOfMassPosition2d = new YoFramePoint("centerOfMass2d", ReferenceFrame.getWorldFrame(), registry);
@@ -64,11 +63,10 @@ public class PosePlaybackSCSBridge
    private final YoFramePoint leftAnklePosition = new YoFramePoint("leftAnklePosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint rightAnklePosition = new YoFramePoint("rightAnklePosition", ReferenceFrame.getWorldFrame(), registry);
    private final SideDependentList<YoFramePoint> anklePositions = new SideDependentList<YoFramePoint>(leftAnklePosition, rightAnklePosition);
-
+   
    private final EnumYoVariable leftPalmPoseClassification = new EnumYoVariable("leftPalmPose", "", registry, PalmPoseClassification.class, true);
    private final EnumYoVariable rightPalmPoseClassification = new EnumYoVariable("rightPalmPose", "", registry, PalmPoseClassification.class, true);
-   private final SideDependentList<EnumYoVariable> palmPoseClassifications = new SideDependentList<EnumYoVariable>(leftPalmPoseClassification,
-                                                                                rightPalmPoseClassification);
+   private final SideDependentList<EnumYoVariable> palmPoseClassifications = new SideDependentList<EnumYoVariable>(leftPalmPoseClassification, rightPalmPoseClassification);
 
    private PosePlaybackRobotPose previousPose;
 
@@ -80,8 +78,8 @@ public class PosePlaybackSCSBridge
 
    private final SideDependentList<DynamicGraphicCoordinateSystem> handCoordinateSystems;
 
-   // private final BagOfBalls balls = new BagOfBalls(500, 0.01,
-   // YoAppearance.AliceBlue(), registry, dynamicGraphicObjectsListRegistry);
+
+// private final BagOfBalls balls = new BagOfBalls(500, 0.01, YoAppearance.AliceBlue(), registry, dynamicGraphicObjectsListRegistry);
 
    public PosePlaybackSCSBridge() throws IOException
    {
@@ -94,12 +92,13 @@ public class PosePlaybackSCSBridge
       VRCTask vrcTask = new VRCTask(VRCTaskName.ONLY_VEHICLE);
       SDFFullRobotModel fullRobotModel = vrcTask.getFullRobotModelFactory().create();
 
+      
       SDFRobot sdfRobot = vrcTask.getRobot();
       ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, vrcTask.getJointMap(), vrcTask.getJointMap().getAnkleHeight());
       SDFPerfectSimulatedSensorReader reader = new SDFPerfectSimulatedSensorReader(sdfRobot, fullRobotModel, referenceFrames);
       ModularRobotController controller = new ModularRobotController("Reader");
       controller.setRawSensorReader(reader);
-
+      
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot);
       scs.setDT(controlDT, 1);
       scs.addYoVariableRegistry(registry);
@@ -110,41 +109,44 @@ public class PosePlaybackSCSBridge
 
       DynamicGraphicPosition leftAnkleViz = new DynamicGraphicPosition("leftAnkleViz", leftAnklePosition, 0.05, YoAppearance.Red());
       DynamicGraphicPosition rightAnkleViz = new DynamicGraphicPosition("rightAnkleViz", rightAnklePosition, 0.05, YoAppearance.Green());
-
+      
       DynamicGraphicPosition leftWristViz = new DynamicGraphicPosition("leftWristViz", leftWristPosition, 0.05, YoAppearance.Red());
       DynamicGraphicPosition rightWristViz = new DynamicGraphicPosition("rightWristViz", rightWristPosition, 0.05, YoAppearance.Green());
 
       DynamicGraphicCoordinateSystem leftFootCoordinateSystem = new DynamicGraphicCoordinateSystem("leftFoot", "", registry, 0.25);
       DynamicGraphicCoordinateSystem rightFootCoordinateSystem = new DynamicGraphicCoordinateSystem("rightFoot", "", registry, 0.25);
       feetCoordinateSystems = new SideDependentList<DynamicGraphicCoordinateSystem>(leftFootCoordinateSystem, rightFootCoordinateSystem);
-
+      
       DynamicGraphicCoordinateSystem leftHandCoordinateSystem = new DynamicGraphicCoordinateSystem("leftHand", "", registry, 0.25);
       DynamicGraphicCoordinateSystem rightHandCoordinateSystem = new DynamicGraphicCoordinateSystem("rightHand", "", registry, 0.25);
       handCoordinateSystems = new SideDependentList<DynamicGraphicCoordinateSystem>(leftHandCoordinateSystem, rightHandCoordinateSystem);
-
+      
+      
+      
       dynamicGraphicObjectsList.add(centerOfMassViz);
       dynamicGraphicObjectsList.add(centerOfMass2dViz);
 
       dynamicGraphicObjectsList.add(leftAnkleViz);
       dynamicGraphicObjectsList.add(rightAnkleViz);
-
+      
       dynamicGraphicObjectsList.add(leftFootCoordinateSystem);
       dynamicGraphicObjectsList.add(rightFootCoordinateSystem);
 
+      
       dynamicGraphicObjectsList.add(leftWristViz);
       dynamicGraphicObjectsList.add(rightWristViz);
-
+      
       dynamicGraphicObjectsList.add(leftHandCoordinateSystem);
       dynamicGraphicObjectsList.add(rightHandCoordinateSystem);
 
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
       dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
 
+      
       SDFFullRobotModel fullRobotModelForSlider = vrcTask.getFullRobotModelFactory().create();
       ReferenceFrames referenceFramesForSlider = new ReferenceFrames(fullRobotModelForSlider, vrcTask.getJointMap(), vrcTask.getJointMap().getAnkleHeight());
-      DRCRobotMidiSliderBoardPositionManipulation sliderBoard = new DRCRobotMidiSliderBoardPositionManipulation(scs, sdfRobot, referenceFramesForSlider,
-                                                                   fullRobotModelForSlider, dynamicGraphicObjectsListRegistry);
-
+      DRCRobotMidiSliderBoardPositionManipulation sliderBoard = new DRCRobotMidiSliderBoardPositionManipulation(scs, sdfRobot, referenceFramesForSlider, fullRobotModelForSlider, dynamicGraphicObjectsListRegistry);
+      
       CaptureSnapshotListener captureSnapshotListener = new CaptureSnapshotListener(sdfRobot, referenceFrames, fullRobotModel, controller, scs);
       sliderBoard.addCaptureSnapshotListener(captureSnapshotListener);
 
@@ -156,16 +158,17 @@ public class PosePlaybackSCSBridge
 
       ClearSequenceListener clearSequenceListener = new ClearSequenceListener();
       sliderBoard.addClearSequenceRequestedListener(clearSequenceListener);
-
+      
       LoadFrameByFrameSequenceListener loadFrameByFrameSequenceListener = new LoadFrameByFrameSequenceListener(sdfRobot, scs);
       sliderBoard.addLoadFrameByFrameSequenceRequestedListener(loadFrameByFrameSequenceListener);
 
       PlayPoseFromFrameByFrameSequenceListener playPoseFromFrameByFrameSequenceListener = new PlayPoseFromFrameByFrameSequenceListener(sdfRobot, scs);
       sliderBoard.addPlayPoseFromFrameByFrameSequenceRequestedListener(playPoseFromFrameByFrameSequenceListener);
-
+      
       ResetToBasePoseListener resetToBasePoseListener = new ResetToBasePoseListener(sdfRobot);
       sliderBoard.addResetToBasePoseRequestedListener(resetToBasePoseListener);
-
+      
+      
       scs.startOnAThread();
 
       CenterOfMassGraphicUpdater centerOfMassGraphicUpdater = new CenterOfMassGraphicUpdater(sdfRobot);
@@ -182,6 +185,8 @@ public class PosePlaybackSCSBridge
          System.err.println("Didn't connect to posePlaybackSender!");
       }
 
+
+
    }
 
    private class CenterOfMassGraphicUpdater implements Runnable
@@ -190,6 +195,7 @@ public class PosePlaybackSCSBridge
 
       private final Point3d comPoint = new Point3d();
       private final Point3d comPoint2d = new Point3d();
+
 
       CenterOfMassGraphicUpdater(SDFRobot sdfRobot)
       {
@@ -205,7 +211,7 @@ public class PosePlaybackSCSBridge
             sdfRobot.computeCenterOfMass(comPoint);
             centerOfMassPosition.set(comPoint);
 
-            // System.out.println(comPoint);
+//            System.out.println(comPoint);
             comPoint2d.set(comPoint.getX(), comPoint.getY(), 0.0);
             centerOfMassPosition2d.set(comPoint2d);
 
@@ -224,8 +230,9 @@ public class PosePlaybackSCSBridge
       private final ReferenceFrames referenceFrames;
       private final ModularRobotController controller;
 
-      public CaptureSnapshotListener(SDFRobot sdfRobot, ReferenceFrames referenceFrames, SDFFullRobotModel fullRobotModel, ModularRobotController controller,
-                                     SimulationConstructionSet scs)
+      public CaptureSnapshotListener(SDFRobot sdfRobot, ReferenceFrames referenceFrames, SDFFullRobotModel fullRobotModel,
+            ModularRobotController controller,
+            SimulationConstructionSet scs)
       {
          this.sdfRobot = sdfRobot;
          this.referenceFrames = referenceFrames;
@@ -247,14 +254,12 @@ public class PosePlaybackSCSBridge
          }
 
          visualizeAppendages();
-
+         
          System.out.println("Adding pose to sequence list: " + pose);
          posePlaybackRobotPoseSequence.addPose(pose);
 
-         // FramePoint location = new
-         // FramePoint(ReferenceFrame.getWorldFrame(), Math.random(),
-         // Math.random(), Math.random());
-         // balls.setBall(location);
+//       FramePoint location = new FramePoint(ReferenceFrame.getWorldFrame(), Math.random(), Math.random(), Math.random());
+//       balls.setBall(location);
 
          double dt = 0.01;
          double morphTime = 1.0;
@@ -271,13 +276,12 @@ public class PosePlaybackSCSBridge
             {
                morphedPose = PosePlaybackRobotPose.morph(previousPose, pose, morphPercentage);
             }
-
-            if (promptForTimeDelay)
+            
+            if(promptForTimeDelay)
             {
                String requestedPlaybackDelay = JOptionPane.showInputDialog("Playback delay before this transition in milliseconds?");
-               double playBackDelayPoseTransition = (requestedPlaybackDelay == "")
-                                                    ? PosePlaybackAtlasDefaultParameters.defaultPlaybackTransitionDelayMillis
-                                                    : Double.parseDouble(requestedPlaybackDelay);
+               double playBackDelayPoseTransition = (requestedPlaybackDelay == "") ? PosePlaybackAtlasDefaultParameters.defaultPlaybackTransitionDelayMillis : Double
+                     .parseDouble(requestedPlaybackDelay);
                pose.setPlaybackDelayBeforePose(playBackDelayPoseTransition);
             }
 
@@ -313,17 +317,17 @@ public class PosePlaybackSCSBridge
             FramePoint anklePosition = new FramePoint(ankleFrame);
             anklePosition.changeFrame(ReferenceFrame.getWorldFrame());
             anklePositions.get(robotSide).set(anklePosition);
-
+            
             ReferenceFrame footFrame = fullRobotModel.getFoot(robotSide).getBodyFixedFrame();
             feetCoordinateSystems.get(robotSide).setToReferenceFrame(footFrame);
-
+            
             ReferenceFrame wristFrame = fullRobotModel.getHand(robotSide).getParentJoint().getFrameAfterJoint();
             FramePoint wristPosition = new FramePoint(wristFrame);
             wristPosition.changeFrame(ReferenceFrame.getWorldFrame());
             wristPositions.get(robotSide).set(wristPosition);
-
-            ReferenceFrame handFrame = fullRobotModel.getHand(robotSide).getBodyFixedFrame();
-
+            
+            ReferenceFrame handFrame = fullRobotModel.getHand(robotSide).getBodyFixedFrame(); 
+            
             FramePose palmPose = new FramePose(handFrame);
             FramePoint palmPositionWithRespectToHandFrame = new FramePoint(handFrame, 0.0, robotSide.negateIfRightSide(0.08), -0.04);
             double yaw = 0.0;
@@ -331,21 +335,20 @@ public class PosePlaybackSCSBridge
             double roll = robotSide.negateIfLeftSide(0.4);
             FrameOrientation palmOrientationWithRespectToHandFrame = new FrameOrientation(handFrame, yaw, pitch, roll);
 
+            
             palmPose.setPosition(palmPositionWithRespectToHandFrame);
             palmPose.setOrientation(palmOrientationWithRespectToHandFrame);
-
+            
             PoseReferenceFrame palmFrame = new PoseReferenceFrame("palmFrame", palmPose);
             palmFrame.update();
-
+            
             handCoordinateSystems.get(robotSide).setToReferenceFrame(palmFrame);
 
             PalmPoseClassification classifcation = PalmPoseClassifier.getClassification(robotSide, handFrame, fullRobotModel.getChest().getBodyFixedFrame());
             palmPoseClassifications.get(robotSide).set(classifcation);
 
-            // PoseReferenceFrame toDisplay =
-            // PalmPoseClassifier.getPoseReferenceFrame(RobotSide.RIGHT,
-            // PalmPoseClassification.PALM_IN);
-            // handCoordinateSystems.get(robotSide).setToReferenceFrame(toDisplay);
+//            PoseReferenceFrame toDisplay = PalmPoseClassifier.getPoseReferenceFrame(RobotSide.RIGHT, PalmPoseClassification.PALM_IN);
+//            handCoordinateSystems.get(robotSide).setToReferenceFrame(toDisplay);
          }
       }
 
@@ -356,7 +359,7 @@ public class PosePlaybackSCSBridge
    {
       private final SDFRobot sdfRobot;
       private final SimulationConstructionSet scs;
-
+ 
       public LoadSequenceListener(SDFRobot sdfRobot, SimulationConstructionSet scs)
       {
          this.sdfRobot = sdfRobot;
@@ -365,9 +368,9 @@ public class PosePlaybackSCSBridge
 
       public void variableChanged(YoVariable yoVariable)
       {
-         if (!((BooleanYoVariable) yoVariable).getBooleanValue())
+         if(!((BooleanYoVariable) yoVariable).getBooleanValue())
             return;
-
+         
          System.out.println("Load Sequence");
 
          JFileChooser chooser = new JFileChooser(new File("PoseSequences"));
@@ -408,31 +411,21 @@ public class PosePlaybackSCSBridge
                {
                   posePlaybackSender.writeData();
                }
-
-               if (interpolator.didLastPoseIncrementSequence() || (poseNumber == 0))
+               if(interpolator.didLastPoseIncrementSequence() || (poseNumber == 0))
                {
                   System.out.println("pose #: " + poseNumber++ + " \t pausing for " + interpolator.getTransitionTimeDelay());
-                  ThreadTools.sleep((long) interpolator.getTransitionTimeDelay());    // 3000 worked for
-
-                  // standing up, 2000
-                  // failed at about
-                  // 33 in standcde,
-                  // 1000 failed at
-                  // about 23 in
-                  // standcde
+//                  ThreadTools.sleep((long) interpolator.getTransitionTimeDelay());//3000 worked for standing up, 2000 failed at about 33 in standcde, 1000 failed at about 23 in standcde
                }
-
                ThreadTools.sleep((long) (controlDT * 1000));
             }
             catch (IOException e)
             {
             }
          }
-
+         
          System.out.println("End of Play back");
       }
    }
-
 
    private class LoadFrameByFrameSequenceListener implements VariableChangedListener
    {
@@ -447,9 +440,9 @@ public class PosePlaybackSCSBridge
 
       public void variableChanged(YoVariable yoVariable)
       {
-         if (!((BooleanYoVariable) yoVariable).getBooleanValue())
+         if(!((BooleanYoVariable) yoVariable).getBooleanValue())
             return;
-
+         
          System.out.println("Load Sequence for Frame by Frame Play Back");
 
          JFileChooser chooser = new JFileChooser(new File("PoseSequences"));
@@ -474,25 +467,23 @@ public class PosePlaybackSCSBridge
          interpolator.startSequencePlayback(posePlaybackRobotPoseSequence, startTime);
          frameByframePoseNumber = 0;
       }
-   }
-
-
+    }
+   
    private class ResetToBasePoseListener implements VariableChangedListener
    {
       private final SDFRobot sdfRobot;
-
+      
       public ResetToBasePoseListener(SDFRobot sdfRobot)
       {
          this.sdfRobot = sdfRobot;
       }
-
+      
       public void variableChanged(YoVariable yoVariable)
       {
          previousPose.setRobotAtPose(sdfRobot);
          posePlaybackController.setPlaybackPose(previousPose);
       }
    }
-
 
    private class PlayPoseFromFrameByFrameSequenceListener implements VariableChangedListener
    {
@@ -507,9 +498,9 @@ public class PosePlaybackSCSBridge
 
       public void variableChanged(YoVariable yoVariable)
       {
-         if (!((BooleanYoVariable) yoVariable).getBooleanValue())
+         if(!((BooleanYoVariable) yoVariable).getBooleanValue())
             return;
-
+         
          while (!interpolator.isDone())
          {
             frameByframeTime = frameByframeTime + controlDT;
@@ -527,55 +518,43 @@ public class PosePlaybackSCSBridge
                {
                   posePlaybackSender.writeData();
                }
-
-               if (interpolator.didLastPoseIncrementSequence() || (frameByframePoseNumber == 0))
+               if(interpolator.didLastPoseIncrementSequence() || (frameByframePoseNumber == 0))
                {
                   System.out.println("pose #: " + frameByframePoseNumber++ + " \t pausing for " + interpolator.getTransitionTimeDelay());
-                  ThreadTools.sleep((long) interpolator.getTransitionTimeDelay());    // 3000 worked for
-
-                  // standing up, 2000
-                  // failed at about
-                  // 33 in standcde,
-                  // 1000 failed at
-                  // about 23 in
-                  // standcde
+                  ThreadTools.sleep((long) interpolator.getTransitionTimeDelay());//3000 worked for standing up, 2000 failed at about 33 in standcde, 1000 failed at about 23 in standcde
                   return;
                }
-
                ThreadTools.sleep((long) (controlDT * 1000));
             }
             catch (IOException e)
             {
             }
          }
-
+         
          System.out.println("End of Play back");
       }
-   }
-
+    }
 
    private class SaveSequenceListener implements VariableChangedListener
    {
       public void variableChanged(YoVariable yoVariable)
       {
-         if (((BooleanYoVariable) yoVariable).getBooleanValue())
+         if(((BooleanYoVariable) yoVariable).getBooleanValue())
          {
             System.out.println("saving file");
-            posePlaybackRobotPoseSequence.promptWriteToFile();
+            posePlaybackRobotPoseSequence.promptWriteToFile();            
          }
       }
    }
 
-
    private class ClearSequenceListener implements VariableChangedListener
    {
-      public void variableChanged(YoVariable yoVariable)
-      {
-         posePlaybackRobotPoseSequence.clear();
-         System.out.println("Clearing Sequence");
-      }
-   }
-
+         public void variableChanged(YoVariable yoVariable)
+         {
+            posePlaybackRobotPoseSequence.clear();
+            System.out.println("Clearing Sequence");
+         }
+    }
 
    public static void main(String[] args) throws IOException
    {
