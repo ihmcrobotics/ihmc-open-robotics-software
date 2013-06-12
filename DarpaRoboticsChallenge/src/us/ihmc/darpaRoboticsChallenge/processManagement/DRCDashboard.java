@@ -1182,7 +1182,7 @@ public class DRCDashboard
 
             if (estimatorCheckBox.isEnabled() && estimatorCheckBox.isSelected())
             {
-               ThreadTools.sleep(6000);
+               ThreadTools.sleep(8000);
                scsSpawner.spawn(DRCDemo01.class, javaArgs, new String[]
                {
                   "--sim", "--env", newTask, "--gazebo", "--gazeboHost", DRCLocalCloudConfig.getIPAddress(gazeboMachine), "--initialize-estimator", "--start",
@@ -1191,7 +1191,7 @@ public class DRCDashboard
             }
             else
             {
-               ThreadTools.sleep(6000);
+               ThreadTools.sleep(8000);
                scsSpawner.spawn(DRCDemo01.class, javaArgs, new String[]
                {
                   "--sim", "--env", newTask, "--gazebo", "--gazeboHost", DRCLocalCloudConfig.getIPAddress(gazeboMachine), "--start",
