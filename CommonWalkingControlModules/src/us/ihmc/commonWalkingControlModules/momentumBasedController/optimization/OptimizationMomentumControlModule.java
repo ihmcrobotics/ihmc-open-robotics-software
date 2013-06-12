@@ -55,7 +55,6 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final MomentumRateOfChangeData momentumRateOfChangeData;
    private final DampedLeastSquaresSolver hardMotionConstraintSolver;
-   private final DenseMatrix64F lambdaZero; // TODO: get rid of this
 
    public OptimizationMomentumControlModule(InverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame, double controlDT,
            InverseDynamicsJoint[] jointsToOptimizeFor, MomentumOptimizationSettings momentumOptimizationSettings, double gravityZ,
@@ -84,11 +83,6 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
       this.hardMotionConstraintSolver = new DampedLeastSquaresSolver(1);
       this.hardMotionConstraintEnforcer = new HardMotionConstraintEnforcer(hardMotionConstraintSolver, registry);
-
-      int nDoF = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
-      lambdaZero = new DenseMatrix64F(nDoF, nDoF);
-//      CommonOps.setIdentity(lambdaZero);
-//      CommonOps.scale(1e-9, lambdaZero);
 
       parentRegistry.addChild(registry);
       reset();
@@ -166,8 +160,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
        * after the hard constraints have been applied. We really need a solver that can handle hard constraints in addition to soft constraints without being
        * too computationally expensive!
        */
-      momentumOptimizerNativeInput.setJointAccelerationRegularization(lambdaZero);
-//      momentumOptimizerNativeInput.setJointAccelerationRegularization(momentumOptimizationSettings.getDampedLeastSquaresFactorMatrix(ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor)));
+      momentumOptimizerNativeInput.setJointAccelerationRegularization(momentumOptimizationSettings.getDampedLeastSquaresFactorMatrix(ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor)));
 
       secondaryMotionConstraintHandler.compute();
       DenseMatrix64F jSecondary = secondaryMotionConstraintHandler.getJacobian();
