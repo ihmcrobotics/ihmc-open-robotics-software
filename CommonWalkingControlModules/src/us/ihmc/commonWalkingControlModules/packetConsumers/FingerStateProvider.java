@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
+import us.ihmc.commonWalkingControlModules.packets.FingerStatePacket;
 import us.ihmc.commonWalkingControlModules.packets.HandStatePacket;
 import us.ihmc.utilities.net.ObjectConsumer;
 
@@ -7,25 +8,25 @@ import us.ihmc.utilities.net.ObjectConsumer;
  * @author twan
  *         Date: 6/7/13
  */
-public class FingerStateProvider implements ObjectConsumer<HandStatePacket>
+public class FingerStateProvider implements ObjectConsumer<FingerStatePacket>
 {
-   private HandStatePacket packet;
-   private boolean isNewHandStateAvailable;
+   private FingerStatePacket packet;
+   private boolean isNewFingerStateAvailable;
 
-   public synchronized void consumeObject(HandStatePacket packet)
+   public synchronized void consumeObject(FingerStatePacket packet)
    {
       this.packet = packet;
-      isNewHandStateAvailable = true;
+      isNewFingerStateAvailable = true;
    }
 
-   public synchronized HandStatePacket getPacket()
+   public synchronized FingerStatePacket getPacket()
    {
-      isNewHandStateAvailable = false;
+      isNewFingerStateAvailable = false;
       return packet;
    }
 
-   public synchronized boolean isNewHandStateAvailable()
+   public synchronized boolean isNewFingerStateAvailable()
    {
-      return isNewHandStateAvailable;
+      return isNewFingerStateAvailable;
    }
 }

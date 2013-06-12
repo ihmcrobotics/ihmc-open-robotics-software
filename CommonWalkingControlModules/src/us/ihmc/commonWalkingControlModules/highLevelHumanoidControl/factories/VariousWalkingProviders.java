@@ -23,6 +23,7 @@ import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.net.ObjectCommunicator;
+import us.ihmc.utilities.net.ObjectConsumer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -222,8 +223,9 @@ public class VariousWalkingProviders
       DesiredFootStateProvider footLoadBearingProvider = new DesiredFootStateProvider();
       DesiredThighLoadBearingProvider thighLoadBearingProvider = new DesiredThighLoadBearingProvider();
       DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = new DesiredPelvisLoadBearingProvider();
-      FingerStateProvider fingerStateProvider = new FingerStateProvider();
 
+      FingerStateProvider fingerStateProvider = new FingerStateProvider();
+      ObjectConsumer<HandStatePacket> handStateToFingerStateConverter = new HandStateToFingerStateConverter(fingerStateProvider);
 
       objectCommunicator.attachListener(FootstepDataList.class, footstepPathConsumer);
       objectCommunicator.attachListener(BlindWalkingPacket.class, blindWalkingPacketConsumer);
@@ -245,7 +247,8 @@ public class VariousWalkingProviders
       objectCommunicator.attachListener(ThighStatePacket.class, thighLoadBearingProvider);
       objectCommunicator.attachListener(BumStatePacket.class, pelvisLoadBearingProvider);
 
-      objectCommunicator.attachListener(HandStatePacket.class, fingerStateProvider);
+      objectCommunicator.attachListener(HandStatePacket.class, handStateToFingerStateConverter);
+      objectCommunicator.attachListener(FingerStatePacket.class, fingerStateProvider);
 
       VariousWalkingProviders variousProvidersFactory = new VariousWalkingProviders(footstepPathCoordinator, mapFromFootstepsToTrajectoryParameters,
             headOrientationProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, torusPoseProvider, torusManipulationProvider,
