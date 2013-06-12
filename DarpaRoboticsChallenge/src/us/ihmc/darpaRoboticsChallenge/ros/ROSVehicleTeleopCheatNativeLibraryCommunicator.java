@@ -17,21 +17,38 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
 {
    private static ROSVehicleTeleopCheatNativeLibraryCommunicator instance = null;
    private static String rosMasterURI;
+
+   private static final String ldLibraryPath = "/opt/ros/fuerte/lib:/opt/ros/groovy/lib:/usr/lib/gazebo-1.8/plugins:/usr/lib/drcsim-2.6/AtlasSimInterface_:/usr/lib/drcsim-2.6/plugins:";
    
    private static boolean hasNativeLibrary;
    static
    {
       try
       {
+         if(isLinux())
+            System.getenv().put("LD_LIBRARY_PATH", ldLibraryPath);
+
          System.loadLibrary("ROSVehicleTeleopCheatNativeLibraryCommunicator");
          hasNativeLibrary = true;
       }
       catch(UnsatisfiedLinkError e)
       {
          System.err.println("Cannot load native ROS library for the vehicle teleop. Falling back to ROSJava, expect poor performance.");
+         if (isLinux())
+         {
+            System.err.println("Running on a Linux system; Library should be loadable.");
+            e.printStackTrace();
+         }
          hasNativeLibrary = false;
       }
       
+   }
+
+   private static boolean isLinux()
+   {
+      String os = System.getProperty("os.name").toLowerCase();
+
+      return (os.contains("nix") || os.contains("nux") || os.contains("aix"));
    }
 
    public static boolean hasNativeLibrary()
