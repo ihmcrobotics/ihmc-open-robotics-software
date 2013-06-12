@@ -138,7 +138,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final DoubleYoVariable stopInDoubleSupporTrajectoryTime = new DoubleYoVariable("stopInDoubleSupporTrajectoryTime", registry);
 
-   private final BooleanYoVariable loopForeverToCheckMemory = new BooleanYoVariable("loopForeverToCheckMemory", registry);
+   private final BooleanYoVariable loopControllerForever = new BooleanYoVariable("loopControllerForever", "For checking memory and profiling", registry);
    private final BooleanYoVariable justFall = new BooleanYoVariable("justFall", registry);
    private final BooleanYoVariable hasMinimumTimePassed = new BooleanYoVariable("hasMinimumTimePassed", registry);
    private final DoubleYoVariable minimumSwingFraction = new DoubleYoVariable("minimumSwingFraction", registry);
@@ -1524,27 +1524,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    public void doMotionControl()
    { 
-      
-      if (loopForeverToCheckMemory.getBooleanValue())
+      if (loopControllerForever.getBooleanValue())
       {
-         int count = 0;
-         int ticksPerPrint = 10000;
-         
-         long timeMillis = System.currentTimeMillis();
          while(true)
          {
             doMotionControlInternal();
-            count++; 
-            if (count > ticksPerPrint)
-            {
-               long newTimeMillis = System.currentTimeMillis();
-
-               double millisecondsPerCall = ((double) (newTimeMillis - timeMillis)) / ((double) ticksPerPrint);
-               System.out.println(millisecondsPerCall + " millisecondsPerCall");
-               
-               timeMillis = newTimeMillis;
-               count = 0;
-            }
          }
       }
       else 
