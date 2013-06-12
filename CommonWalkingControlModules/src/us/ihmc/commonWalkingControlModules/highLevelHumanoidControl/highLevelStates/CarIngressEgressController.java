@@ -264,6 +264,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
       momentumBasedController.setMomentumControlModuleToUse(MOMENTUM_CONTROL_MODULE_TO_USE);
       momentumBasedController.setDelayTimeBeforeTrustingContacts(DELAY_TIME_BEFORE_TRUSTING_CONTACTS);
+      
 
       ChestOrientationManager chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
       double chestKp = 100.0;
@@ -294,17 +295,24 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
       chestTrajectoryStartTime = yoTime.getDoubleValue();
       chestOrientationTrajectoryGenerator.initialize();
+      
+      for (RobotSide robotSide : RobotSide.values)
+         footEndEffectorControlModules.get(feet.get(robotSide)).resetCurrentState();
    }
 
    private void initializeContacts()
    {
       requestedPelvisLoadBearing.set(isContactablePlaneBodyInContact(contactablePelvis));
+      requestedPelvisLoadBearing.notifyVariableChangedListeners();
       requestedPelvisBackLoadBearing.set(isContactablePlaneBodyInContact(contactablePelvisBack));
+      requestedPelvisBackLoadBearing.notifyVariableChangedListeners();
       
       for (RobotSide robotSide : RobotSide.values)
       {
          requestedFootLoadBearing.get(robotSide).set(isContactablePlaneBodyInContact(feet.get(robotSide)));
+         requestedFootLoadBearing.get(robotSide).notifyVariableChangedListeners();
          requestedThighLoadBearing.get(robotSide).set(isContactablePlaneBodyInContact(contactableThighs.get(robotSide)));
+         requestedThighLoadBearing.get(robotSide).notifyVariableChangedListeners();
       }
    }
 
