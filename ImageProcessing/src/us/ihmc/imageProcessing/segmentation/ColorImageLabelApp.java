@@ -12,6 +12,9 @@ import boofcv.struct.image.ImageUInt8;
 import boofcv.struct.image.MultiSpectral;
 
 import javax.swing.*;
+
+import us.ihmc.imageProcessing.configuration.ConfigurationLoader;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -254,7 +257,7 @@ public class ColorImageLabelApp extends JPanel implements ActionListener {
    }
 
    public static void main( String args[] ) {
-      BufferedImage input = UtilImageIO.loadImage("../ImageProcessing/media/drcsim_2_6/left01.png");
+      BufferedImage input = ConfigurationLoader.loadImage("media/drcsim_2_6/left01.png");
 
       ColorImageLabelApp app = new ColorImageLabelApp(input);
       ShowImages.showWindow(app,"Train HSV Classifier");

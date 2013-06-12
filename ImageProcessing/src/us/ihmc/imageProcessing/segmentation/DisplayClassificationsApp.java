@@ -1,15 +1,15 @@
 package us.ihmc.imageProcessing.segmentation;
 
+import java.awt.image.BufferedImage;
+
+import javax.swing.JPanel;
+
+import us.ihmc.imageProcessing.configuration.ConfigurationLoader;
 import boofcv.core.image.ConvertBufferedImage;
 import boofcv.gui.image.ShowImages;
-import boofcv.io.image.UtilImageIO;
-import boofcv.misc.BoofMiscOps;
 import boofcv.struct.image.ImageFloat32;
 import boofcv.struct.image.ImageUInt8;
 import boofcv.struct.image.MultiSpectral;
-
-import javax.swing.*;
-import java.awt.image.BufferedImage;
 
 /**
  * @author Peter Abeles
@@ -43,10 +43,10 @@ public class DisplayClassificationsApp extends JPanel
    }
 
    public static void main( String args[] ) {
-//      BufferedImage input = UtilImageIO.loadImage("../ImageProcessing/media/drcsim_2_6/left000001.png");
-      BufferedImage input = UtilImageIO.loadImage("../ImageProcessing/media/drcsim_2_6/left01.png");
-      Gaussian3D_F64 model = BoofMiscOps.loadXML("../ImageProcessing/models/drcsim_2_6/gaussian_line.xml");
-//      Gaussian3D_F64 model = BoofMiscOps.loadXML("../ImageProcessing/models/drcsim_2_6/gaussian_road.xml");
+//      BufferedImage input = ConfigurationLoader.loadImage("media/drcsim_2_6/left000001.png");
+      BufferedImage input = ConfigurationLoader.loadImage("media/drcsim_2_6/left01.png");
+      Gaussian3D_F64 model = ConfigurationLoader.loadXML("models/drcsim_2_6/gaussian_line.xml");
+//      Gaussian3D_F64 model =ConfigurationLoader.loadXML("models/drcsim_2_6/gaussian_road.xml");
 
       if( model == null )
          throw new RuntimeException("Couldn't load the line");
