@@ -54,7 +54,7 @@ public class HighLevelHumanoidControllerFactoryHelper
          new BlindWalkingToDestinationDesiredFootstepCalculator(referenceFrames.getAnkleZUpReferenceFrames(), referenceFrames.getFootReferenceFrames(),
             bipedFeet, registry);
 
-      desiredFootstepCalculator.setInPlaceWidth(walkingControllerParameters.getInPlaceWidth());
+      desiredFootstepCalculator.setDesiredStepWidth(walkingControllerParameters.getInPlaceWidth());
       desiredFootstepCalculator.setDesiredStepForward(walkingControllerParameters.getDesiredStepForward());
       desiredFootstepCalculator.setMaxStepLength(walkingControllerParameters.getMaxStepLength());
       desiredFootstepCalculator.setMinStepWidth(walkingControllerParameters.getMinStepWidth());
