@@ -167,6 +167,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       FootstepProvider footstepProvider = null;
       HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = null;
       DesiredHeadOrientationProvider headOrientationProvider = null;
+      DesiredComHeightProvider comHeightProvider = null;
       DesiredPelvisPoseProvider pelvisPoseProvider = null;
       DesiredChestOrientationProvider chestOrientationProvider = null;
       DesiredFootStateProvider footLoadBearingProvider = null;
@@ -178,7 +179,8 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       ReinitializeWalkingControllerProvider reinitializeWalkingController = null;
       
       VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepProvider, mapFromFootstepsToTrajectoryParameters,
-            headOrientationProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, torusPoseProvider, torusManipulationProvider,
+            headOrientationProvider, comHeightProvider,
+            pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, torusPoseProvider, torusManipulationProvider,
             chestOrientationProvider, footPoseProvider, footLoadBearingProvider, pelvisPoseWithRespectToVehicleProvider, highLevelStateProvider, thighLoadBearingProvider,
             pelvisLoadBearingProvider, fingerStateProvider, reinitializeWalkingController);
 
