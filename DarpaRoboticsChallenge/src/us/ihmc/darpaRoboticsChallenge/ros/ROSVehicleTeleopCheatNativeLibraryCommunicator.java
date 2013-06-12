@@ -17,17 +17,12 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
 {
    private static ROSVehicleTeleopCheatNativeLibraryCommunicator instance = null;
    private static String rosMasterURI;
-
-   private static final String ldLibraryPath = "/opt/ros/fuerte/lib:/opt/ros/groovy/lib:/usr/lib/gazebo-1.8/plugins:/usr/lib/drcsim-2.6/AtlasSimInterface_:/usr/lib/drcsim-2.6/plugins:";
    
    private static boolean hasNativeLibrary;
    static
    {
       try
       {
-         if(isLinux())
-            System.getenv().put("LD_LIBRARY_PATH", ldLibraryPath);
-
          System.loadLibrary("ROSVehicleTeleopCheatNativeLibraryCommunicator");
          hasNativeLibrary = true;
       }
