@@ -18,13 +18,13 @@ public class MomentumOptimizationSettings
    private final DoubleYoVariable angularMomentumXYWeight = new DoubleYoVariable("angularMomentumXYWeight", registry);
    private final DoubleYoVariable angularMomentumZWeight = new DoubleYoVariable("angularMomentumZWeight", registry);
    private final DoubleYoVariable rhoMin = new DoubleYoVariable("rhoMin", registry);
+   private final DoubleYoVariable lambda = new DoubleYoVariable("lambda", registry);
 
    private final double[] momentumWeightDiagonal = new double[Momentum.SIZE];
    private final DenseMatrix64F C = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
    private double wRhoCylinder;
    private double wPhiCylinder;
    private double wRhoPlane;
-   private double lambda;
 
    private final DenseMatrix64F momentumSubspaceProjector = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
    private final DenseMatrix64F tempMatrix = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
@@ -60,7 +60,7 @@ public class MomentumOptimizationSettings
 
    public void setDampedLeastSquaresFactor(double lambda)
    {
-      this.lambda = lambda;
+      this.lambda.set(lambda);
    }
 
    public void setRhoMin(double rhoMin)
@@ -107,7 +107,7 @@ public class MomentumOptimizationSettings
    {
       DenseMatrix64F ret = new DenseMatrix64F(size, size);
       CommonOps.setIdentity(ret);
-      CommonOps.scale(lambda, ret);
+      CommonOps.scale(lambda.getDoubleValue(), ret);
 
       return ret;
    }
@@ -119,6 +119,6 @@ public class MomentumOptimizationSettings
 
    public double getDampedLeastSquaresFactor()
    {
-      return lambda;
+      return lambda.getDoubleValue();
    }
 }

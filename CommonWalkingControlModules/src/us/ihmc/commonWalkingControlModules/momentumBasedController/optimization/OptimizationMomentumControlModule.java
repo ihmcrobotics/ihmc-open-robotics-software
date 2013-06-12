@@ -4,7 +4,6 @@ import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableCylinderBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
@@ -56,6 +55,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final MomentumRateOfChangeData momentumRateOfChangeData;
    private final DampedLeastSquaresSolver hardMotionConstraintSolver;
+   private final DenseMatrix64F lambdaZero; // TODO: get rid of this
 
    public OptimizationMomentumControlModule(InverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame, double controlDT,
            InverseDynamicsJoint[] jointsToOptimizeFor, MomentumOptimizationSettings momentumOptimizationSettings, double gravityZ,
@@ -84,6 +84,11 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
       this.hardMotionConstraintSolver = new DampedLeastSquaresSolver(1);
       this.hardMotionConstraintEnforcer = new HardMotionConstraintEnforcer(hardMotionConstraintSolver, registry);
+
+      int nDoF = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
+      lambdaZero = new DenseMatrix64F(nDoF, nDoF);
+//      CommonOps.setIdentity(lambdaZero);
+//      CommonOps.scale(1e-9, lambdaZero);
 
       parentRegistry.addChild(registry);
       reset();
@@ -118,7 +123,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
       wrenchMatrixCalculator.setRhoMinScalar(momentumOptimizationSettings.getRhoMinScalar());
 
-      hardMotionConstraintSolver.setAlpha(momentumOptimizationSettings.getDampedLeastSquaresFactor());
+      hardMotionConstraintSolver.setAlpha(0.0); // momentumOptimizationSettings.getDampedLeastSquaresFactor());
       momentumOptimizerNativeInput.reset();
 
       if (HardMotionConstraintEnforcer.TEST_CONSTRAINT_CONSISTENCY)
@@ -155,8 +160,14 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       momentumOptimizerNativeInput.setWrenchEquationRightHandSide(wrenchEquationRightHandSide);
 
       momentumOptimizerNativeInput.setMomentumDotWeight(momentumOptimizationSettings.getMomentumDotWeight(momentumRateOfChangeData.getMomentumSubspace()));
-      momentumOptimizerNativeInput.setJointAccelerationRegularization(
-          momentumOptimizationSettings.getDampedLeastSquaresFactorMatrix(ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor)));
+
+      /*
+       * IMPORTANT: the implementation below doesn't work properly, because lambda is supposed to act on the actual joint accelerations, not on the vector that is left
+       * after the hard constraints have been applied. We really need a solver that can handle hard constraints in addition to soft constraints without being
+       * too computationally expensive!
+       */
+      momentumOptimizerNativeInput.setJointAccelerationRegularization(lambdaZero);
+//      momentumOptimizerNativeInput.setJointAccelerationRegularization(momentumOptimizationSettings.getDampedLeastSquaresFactorMatrix(ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor)));
 
       secondaryMotionConstraintHandler.compute();
       DenseMatrix64F jSecondary = secondaryMotionConstraintHandler.getJacobian();
