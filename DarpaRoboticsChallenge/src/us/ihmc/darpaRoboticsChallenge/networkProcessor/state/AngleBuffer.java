@@ -24,7 +24,7 @@ public class AngleBuffer
       }
    }
    
-   public void addAngle(long timestamp, double angle)
+   public synchronized void addAngle(long timestamp, double angle)
    {
       timestamps[currentIndex] = timestamp;
       angles[currentIndex] = angle;
@@ -47,12 +47,12 @@ public class AngleBuffer
       }
    }
    
-   public boolean isInRange(long timestamp)
+   public synchronized boolean isInRange(long timestamp)
    {
       return ((timestamp >= oldestTimeStamp) && (timestamp <= newestTimestamp));
    }
    
-   public double interpolate(long timestamp)
+   public synchronized double interpolate(long timestamp)
    {
       if(!isInRange(timestamp))
       {
@@ -92,7 +92,7 @@ public class AngleBuffer
    
    }
    
-   public boolean isPending(long timestamp)
+   public synchronized boolean isPending(long timestamp)
    {
       return timestamp > newestTimestamp;
    }
