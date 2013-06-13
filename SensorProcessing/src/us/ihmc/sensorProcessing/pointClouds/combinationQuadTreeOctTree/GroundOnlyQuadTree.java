@@ -24,11 +24,11 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    private int numberOfNodes = 0;
    private int maxNodes = 1;
    private boolean octreeChanged = false;
-   private boolean skipQuadTree = false;
    private Octree octree;
    private LowPassTimingReporter clearingTimer = new LowPassTimingReporter(7);
    private PointToLineUnProjector unProjector = new PointToLineUnProjector();
    private boolean updateOctree = true;
+   private boolean updateQuadtree = true;
 
    public GroundOnlyQuadTree(double minX, double minY, double maxX, double maxY, double resolution, double heightThreshold, int maxNodes)
    {
@@ -79,23 +79,29 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
       return node.getMetaData().getHeight();
    }
 
-   public boolean addPoint(double x, double y, double z)
+   public boolean addPointToQuadTree(double x, double y, double z)
    {
-      if (skipQuadTree)
-      {
-         octreeChanged = false;
-         puntLeaf(new HyperCubeLeaf<GroundAirDescriptor>(new GroundAirDescriptor((float) z, 0.0f), new double[] {x, y}));
-      }
-
+      octreeChanged = false;
+      
       boolean quadTreeChanged;
       quadTreeChanged = this.put(new double[] {x, y}, (float) z);
-
-      return quadTreeChanged || octreeChanged;
+      
+      return quadTreeChanged || octreeChanged;         
    }
-
-   public void setSkipQuadTree(boolean skipQuadTree)
+   
+   public boolean addPoint(double x, double y, double z)
    {
-      this.skipQuadTree = skipQuadTree;
+      octreeChanged = false;
+      
+      if (!updateQuadtree)
+      {
+         puntLeaf(new HyperCubeLeaf<GroundAirDescriptor>(new GroundAirDescriptor((float) z, 0.0f), new double[] {x, y}));
+         return octreeChanged;
+      }
+      else
+      {
+         return addPointToQuadTree(x, y, z);
+      }
    }
 
    public void addLidarRay(Point3d origin, Point3d end)
@@ -458,6 +464,11 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    public void updateOctree(boolean updateOctree)
    {
       this.updateOctree = updateOctree;
+   }
+
+   public void updateQuadtree(boolean updateQuadtree)
+   {
+      this.updateQuadtree  = updateQuadtree;
    }
 
 
