@@ -317,4 +317,14 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
    {
       return 0.173;
    }
+
+   public double getMaximumGasPedalDistance()
+   {
+      return -0.08;
+   }
+
+   public double getMaximumBrakePedalDistance()
+   {
+      return -0.08;
+   }
 }

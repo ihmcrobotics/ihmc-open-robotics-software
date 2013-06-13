@@ -20,6 +20,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerManager;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.DrivingCommandProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.MultiContactTestHumanoidController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CoMBasedMomentumRateOfChangeControlModule;
@@ -179,10 +180,12 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       
       DesiredArmJointAngleProvider armJointAngleProvider = null;
       
+      DrivingCommandProvider drivingCommandProvider = null;
+      
       VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepProvider, mapFromFootstepsToTrajectoryParameters,
             headOrientationProvider, comHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, torusPoseProvider, torusManipulationProvider,
             chestOrientationProvider, footPoseProvider, footLoadBearingProvider, pelvisPoseWithRespectToVehicleProvider, highLevelStateProvider, thighLoadBearingProvider,
-            pelvisLoadBearingProvider, fingerStateProvider, armJointAngleProvider, reinitializeWalkingController);
+            pelvisLoadBearingProvider, fingerStateProvider, armJointAngleProvider, reinitializeWalkingController, drivingCommandProvider);
 
       VariousWalkingManagers variousWalkingManagers = VariousWalkingManagers.create(momentumBasedController, handControllers, yoTime, variousWalkingProviders,
             walkingControllerParameters, registry, dynamicGraphicObjectsListRegistry);
