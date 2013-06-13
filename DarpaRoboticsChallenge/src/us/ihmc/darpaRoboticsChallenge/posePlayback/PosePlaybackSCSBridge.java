@@ -78,6 +78,7 @@ public class PosePlaybackSCSBridge
 
    private final SideDependentList<DynamicGraphicCoordinateSystem> handCoordinateSystems;
 
+   private final PoseSequenceEditorGUI poseSequenceEditorGUI;
 
 // private final BagOfBalls balls = new BagOfBalls(500, 0.01, YoAppearance.AliceBlue(), registry, dynamicGraphicObjectsListRegistry);
 
@@ -168,6 +169,7 @@ public class PosePlaybackSCSBridge
       ResetToBasePoseListener resetToBasePoseListener = new ResetToBasePoseListener(sdfRobot);
       sliderBoard.addResetToBasePoseRequestedListener(resetToBasePoseListener);
       
+      poseSequenceEditorGUI = new PoseSequenceEditorGUI(registry,posePlaybackController,sdfRobot, sliderBoard);
       
       scs.startOnAThread();
 
@@ -185,6 +187,7 @@ public class PosePlaybackSCSBridge
          System.err.println("Didn't connect to posePlaybackSender!");
       }
 
+      poseSequenceEditorGUI.setVisible(true);
 
 
    }
@@ -392,18 +395,20 @@ public class PosePlaybackSCSBridge
          double time = startTime;
 
          interpolator.startSequencePlayback(sequence, startTime);
+         interpolator.setTimeDelayAfterPose(0.0);
          int poseNumber = 0;
 
+         PosePlaybackRobotPose morphedPose = interpolator.getPose(time);
          while (!interpolator.isDone())
          {
             time = time + controlDT;
 
-            PosePlaybackRobotPose morphedPose = interpolator.getPose(time);
+            morphedPose = interpolator.getPose(time);
 
             posePlaybackController.setPlaybackPose(morphedPose);
             scs.setTime(time);
             scs.tickAndUpdate();
-            morphedPose.setRobotAtPose(sdfRobot);
+            //morphedPose.setRobotAtPose(sdfRobot);//don't update scs while playing back and connected to gazebo to avoid slider actuation delays
 
             try
             {
@@ -411,17 +416,20 @@ public class PosePlaybackSCSBridge
                {
                   posePlaybackSender.writeData();
                }
-               if(interpolator.didLastPoseIncrementSequence() || (poseNumber == 0))
-               {
-                  System.out.println("pose #: " + poseNumber++ + " \t pausing for " + interpolator.getTransitionTimeDelay());
-//                  ThreadTools.sleep((long) interpolator.getTransitionTimeDelay());//3000 worked for standing up, 2000 failed at about 33 in standcde, 1000 failed at about 23 in standcde
-               }
-               ThreadTools.sleep((long) (controlDT * 1000));
+               else
+                  morphedPose.setRobotAtPose(sdfRobot);// playing back to scs only if not connected to gazebo to see what's happening
             }
             catch (IOException e)
             {
             }
+            
+            if(interpolator.didLastPoseIncrementSequence() || (poseNumber == 0))
+            {
+               System.out.println("pose #: " + poseNumber++ + " \t pausing for " + interpolator.getNextTransitionTimeDelay());
+            }
+            ThreadTools.sleep((long) (controlDT * 1000));
          }
+         morphedPose.setRobotAtPose(sdfRobot);// make sure scs ends in last pose
          
          System.out.println("End of Play back");
       }
@@ -465,7 +473,11 @@ public class PosePlaybackSCSBridge
          frameByframeTime = startTime;
 
          interpolator.startSequencePlayback(posePlaybackRobotPoseSequence, startTime);
+         interpolator.setTimeDelayAfterPose(0.0);
          frameByframePoseNumber = 0;
+         
+         poseSequenceEditorGUI.setSequence(posePlaybackRobotPoseSequence);
+         poseSequenceEditorGUI.setVisible(true);
       }
     }
    
@@ -480,8 +492,11 @@ public class PosePlaybackSCSBridge
       
       public void variableChanged(YoVariable yoVariable)
       {
-         previousPose.setRobotAtPose(sdfRobot);
-         posePlaybackController.setPlaybackPose(previousPose);
+         if(sdfRobot!=null)
+         {
+            previousPose.setRobotAtPose(sdfRobot);
+            posePlaybackController.setPlaybackPose(previousPose);
+         }
       }
    }
 
@@ -498,8 +513,8 @@ public class PosePlaybackSCSBridge
 
       public void variableChanged(YoVariable yoVariable)
       {
-         if(!((BooleanYoVariable) yoVariable).getBooleanValue())
-            return;
+         //         if(!((BooleanYoVariable) yoVariable).getBooleanValue())
+         //            return;
          
          while (!interpolator.isDone())
          {
@@ -520,7 +535,7 @@ public class PosePlaybackSCSBridge
                }
                if(interpolator.didLastPoseIncrementSequence() || (frameByframePoseNumber == 0))
                {
-                  System.out.println("pose #: " + frameByframePoseNumber++ + " \t pausing for " + interpolator.getTransitionTimeDelay());
+                  System.out.println("pose #: " + frameByframePoseNumber++ + " \t pausing for " + interpolator.getNextTransitionTimeDelay());
                   ThreadTools.sleep((long) interpolator.getTransitionTimeDelay());//3000 worked for standing up, 2000 failed at about 33 in standcde, 1000 failed at about 23 in standcde
                   return;
                }

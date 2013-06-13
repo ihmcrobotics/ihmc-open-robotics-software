@@ -19,6 +19,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.environment.VRCTask;
 import us.ihmc.darpaRoboticsChallenge.environment.VRCTaskName;
+import us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap;
 import us.ihmc.userInterface.input.EscapeKeyActionBinding;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -27,7 +28,7 @@ import com.yobotics.simulationconstructionset.robotController.ModularRobotContro
 
 public class PoseSequenceSelectorPanel extends JPanel 
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("PoseSequenceGUI");
+   private final YoVariableRegistry registry;
    private final PosePlaybackAllJointsController posePlaybackController;
    private final SDFRobot sdfRobot;
    private final DRCRobotMidiSliderBoardPositionManipulation sliderBoard;
@@ -39,12 +40,13 @@ public class PoseSequenceSelectorPanel extends JPanel
    public PoseSequenceSelectorPanel() 
    {
        super(new GridLayout(1,0));
+       registry = new YoVariableRegistry("PoseSequenceGUI");
        
        posePlaybackController = new PosePlaybackAllJointsController(registry);
        VRCTask vrcTask = new VRCTask(VRCTaskName.ONLY_VEHICLE);
        SDFFullRobotModel fullRobotModel = vrcTask.getFullRobotModelFactory().create();
        
-       sdfRobot = vrcTask.getRobot();
+       sdfRobot = vrcTask.getRobot();       
        ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, vrcTask.getJointMap(), vrcTask.getJointMap().getAnkleHeight());
        SDFPerfectSimulatedSensorReader reader = new SDFPerfectSimulatedSensorReader(sdfRobot, fullRobotModel, referenceFrames);
        ModularRobotController controller = new ModularRobotController("Reader");
@@ -64,7 +66,12 @@ public class PoseSequenceSelectorPanel extends JPanel
        tableModel = new DefaultTableModel(columnNames, 0); // new ScriptEditorTableModel();
        table = new JTable(tableModel);
        
-       table.addKeyListener(new KeyListener()
+       tableInit();
+   }
+
+   private void tableInit()
+   {
+      table.addKeyListener(new KeyListener()
        {
          public void keyPressed(KeyEvent e)
          {
@@ -95,26 +102,84 @@ public class PoseSequenceSelectorPanel extends JPanel
        add(scrollPane);
    }
    
+   public PoseSequenceSelectorPanel(YoVariableRegistry registry,PosePlaybackAllJointsController posePlaybackController,SDFRobot sdfRobot,DRCRobotMidiSliderBoardPositionManipulation sliderBoard) 
+   {
+      super(new GridLayout(1,0));
+
+      this.registry=registry;
+      this.posePlaybackController=posePlaybackController;
+      this.sdfRobot=sdfRobot;
+      this.sliderBoard=sliderBoard;
+
+      String[] columnNames = new String[]
+      {
+            "#", "sy", "sp", "sr", "neck", "lhy", "lhr", "lhp", "lk", "lap", "lar", "rhy", "rhr", 
+            "rhp", "rk", "rap", "rar", "lsp", "lsr", "lep", "ler", "lwp", "lwr", 
+            "rsp", "rsr", "rep", "rer", "rwp", "rwr", "pause"
+      };
+      tableModel = new DefaultTableModel(columnNames, 0); // new ScriptEditorTableModel();
+      table = new JTable(tableModel);
+      
+      tableInit();
+    }
+     
    public void setValueAt(Object object, int row, int col) 
    {
       tableModel.setValueAt(object, row, col);
    }
    
-   public void addSequence()
+   public void addSequenceFromFile()
+   {
+      File selectedFile = selectFile();
+
+      if(selectedFile!=null){
+         sequence.appendFromFile(selectedFile);
+         updateTableBasedOnPoseSequence();
+      }
+   }
+
+   public void newSequenceFromFile()
+   {
+      File selectedFile = selectFile();
+
+      if(selectedFile!=null){
+         sequence.clear();
+         sequence.appendFromFile(selectedFile);
+         updateTableBasedOnPoseSequence();
+      }
+   }
+   
+
+   private File selectFile()
    {
       JFileChooser chooser = new JFileChooser(new File("PoseSequences"));
       int approveOption = chooser.showOpenDialog(null);
 
+      File selectedFile;
       if (approveOption != JFileChooser.APPROVE_OPTION)
       {
          System.err.println("Can not load selected file :" + chooser.getName());
-         return;
+         selectedFile = null;
       }
+      else
+         selectedFile = chooser.getSelectedFile();
 
-      File selectedFile = chooser.getSelectedFile();
-
-      sequence.appendFromFile(selectedFile);
+      return selectedFile;
+   }
+   
+   public void addSequence(PosePlaybackRobotPoseSequence seq )
+   {
+      for(PosePlaybackRobotPose pose : seq.getPoseSequence())
+      {
+         sequence.addPose(pose);
+      }
       updateTableBasedOnPoseSequence();
+   }
+   
+   public void setSequence(PosePlaybackRobotPoseSequence seq)
+   {
+      sequence.clear();
+      addSequence(seq );
    }
    
    public void deleteSelectedRows()
@@ -152,7 +217,9 @@ public class PoseSequenceSelectorPanel extends JPanel
       if(selectedRow == -1)
          return;
       
-      sequence.getPoseSequence().set(selectedRow, new PosePlaybackRobotPose(sdfRobot));
+      PosePlaybackRobotPose pose=new PosePlaybackRobotPose(sdfRobot);
+      pose.setPlaybackDelayBeforePose(getTimeDelayFromRow( selectedRow ));
+      sequence.getPoseSequence().set(selectedRow, pose);
       updateTableBasedOnPoseSequence();
    }
    
@@ -233,5 +300,42 @@ public class PoseSequenceSelectorPanel extends JPanel
       }
       
       return timeDelay;
+   }
+
+   public void copyAndInsertRow()
+   {
+      updatePoseSequenceBasedOnTable();
+      
+      int[] selectedRows = table.getSelectedRows();
+      
+      int row=selectedRows[0];
+      sequence.getPoseSequence().add(row, sequence.getPose(row));
+      
+      updateTableBasedOnPoseSequence();
+   }
+
+   public void insertInterpolation()
+   {
+      updatePoseSequenceBasedOnTable();
+      
+      int[] selectedRows = table.getSelectedRows();
+      
+      int row=selectedRows[0];
+      double[] pose1=sequence.getPose(row).getJointAngles();
+      double[] pose2=sequence.getPose(row+1).getJointAngles();
+      double del1=sequence.getPose(row).getPlayBackDelayBeforePose();
+      double del2=sequence.getPose(row+1).getPlayBackDelayBeforePose();
+      double delInterp=(del1+del2)/2;
+      double[] poseInterp=new double[ROSAtlasJointMap.numberOfJoints];
+      for(int i=0;i<ROSAtlasJointMap.numberOfJoints;i++)
+      {
+         poseInterp[i]=(pose1[i]+pose2[i])/2;
+      }
+      
+      PosePlaybackRobotPose interpPose=new PosePlaybackRobotPose(poseInterp, delInterp);
+            
+      sequence.getPoseSequence().add(row+1, interpPose);
+      
+      updateTableBasedOnPoseSequence();
    }
 }

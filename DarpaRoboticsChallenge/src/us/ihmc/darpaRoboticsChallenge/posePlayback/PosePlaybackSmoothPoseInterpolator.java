@@ -54,12 +54,12 @@ public class PosePlaybackSmoothPoseInterpolator
       hasBeganInterpolating = true;
    }
 
-   private void setMorphDuration(double morphDuration)
+   public void setMorphDuration(double morphDuration)
    {
       poseMorphDuration.set(morphDuration);
    }
 
-   private void setTimeDelayAfterPose(double timeDelay)
+   public void setTimeDelayAfterPose(double timeDelay)
    {
       timeDelayAfterPose.set(timeDelay);
    }
@@ -107,6 +107,11 @@ public class PosePlaybackSmoothPoseInterpolator
    public double getTransitionTimeDelay()
    {
       return sequence.getPose(poseSequenceIndex.getIntegerValue()).getPlayBackDelayBeforePose();
+   }
+   
+   public double getNextTransitionTimeDelay()
+   {
+      return sequence.getPose(poseSequenceIndex.getIntegerValue()+1).getPlayBackDelayBeforePose();
    }
    
    public boolean didLastPoseIncrementSequence()
