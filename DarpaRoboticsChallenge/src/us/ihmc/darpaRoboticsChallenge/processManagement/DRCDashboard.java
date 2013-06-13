@@ -11,6 +11,7 @@ import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCROS
 import us.ihmc.darpaRoboticsChallenge.userInterface.DRCOperatorUserInterface;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.gui.IHMCSwingTools;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 
 import javax.swing.*;
@@ -92,35 +93,11 @@ public class DRCDashboard
    {
       sshSimLauncher.start();
 
-      setNativeLookAndFeel();
+      IHMCSwingTools.setNativeLookAndFeel();
 
       instance = this;
 
       initConfig();
-   }
-
-   private void setNativeLookAndFeel()
-   {
-      try
-      {
-         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-      }
-      catch (ClassNotFoundException e)
-      {
-         e.printStackTrace();
-      }
-      catch (InstantiationException e)
-      {
-         e.printStackTrace();
-      }
-      catch (IllegalAccessException e)
-      {
-         e.printStackTrace();
-      }
-      catch (UnsupportedLookAndFeelException e)
-      {
-         e.printStackTrace();
-      }
    }
 
    private void initConfig()
