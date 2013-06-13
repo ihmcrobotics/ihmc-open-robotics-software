@@ -110,4 +110,9 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
    {
       return footstepQueue.size();
    }
+
+   public boolean isBlindWalking()
+   {
+      return false;
+   }
 }

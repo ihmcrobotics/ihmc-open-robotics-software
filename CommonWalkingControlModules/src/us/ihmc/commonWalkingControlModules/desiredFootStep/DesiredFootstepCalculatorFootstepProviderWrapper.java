@@ -78,4 +78,9 @@ public class DesiredFootstepCalculatorFootstepProviderWrapper implements Footste
          return 0;
       }
    }
+   
+   public boolean isBlindWalking()
+   {
+      return true;
+   }
 }
