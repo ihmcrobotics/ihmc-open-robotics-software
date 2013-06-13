@@ -3,8 +3,6 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.vecmath.Tuple3d;
-
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableCylinderBody;
@@ -268,9 +266,9 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       primaryMotionConstraintHandler.setDesiredPointAcceleration(jacobian, bodyFixedPoint, desiredAccelerationWithRespectToBase, Double.POSITIVE_INFINITY);
    }
 
-   public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase, Tuple3d selectionVector)
+   public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase, DenseMatrix64F selectionMatrix)
    {
-      primaryMotionConstraintHandler.setDesiredPointAcceleration(jacobian, bodyFixedPoint, desiredAccelerationWithRespectToBase, selectionVector, Double.POSITIVE_INFINITY);
+      primaryMotionConstraintHandler.setDesiredPointAcceleration(jacobian, bodyFixedPoint, desiredAccelerationWithRespectToBase, selectionMatrix, Double.POSITIVE_INFINITY);
    }
 
    public void setDesiredRateOfChangeOfMomentum(MomentumRateOfChangeData momentumRateOfChangeData)

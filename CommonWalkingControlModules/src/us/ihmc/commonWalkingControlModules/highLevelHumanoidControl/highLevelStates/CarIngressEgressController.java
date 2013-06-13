@@ -5,8 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
@@ -327,7 +325,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       callUpdatables();
       updateLoadBearingStates();
 
-//      doContactPointControl();
+      doContactPointControl();
       doFootControl();
       doArmControl();
       doHeadControl();
@@ -480,10 +478,11 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          GeometricJacobian jacobian = contactJacobians.get(body);
          jacobian.compute();
          FrameVector desiredAcceleration = new FrameVector(jacobian.getBaseFrame(), 0.0, 0.0, 0.0);
-         Vector3d selectionVector = new Vector3d(0.0, 0.0, 1.0);
+         DenseMatrix64F selectionMatrix = new DenseMatrix64F(1, 3);
+         selectionMatrix.set(0, 2, 1.0);
          for (FramePoint contactPoint : body.getContactPoints())
          {
-            momentumBasedController.setDesiredPointAcceleration(jacobian, contactPoint, desiredAcceleration, selectionVector);
+            momentumBasedController.setDesiredPointAcceleration(jacobian, contactPoint, desiredAcceleration, selectionMatrix);
          }
       }
    }
