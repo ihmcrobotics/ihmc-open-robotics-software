@@ -164,6 +164,7 @@ public class ManipulationControlModule
       TorusPoseProvider torusPoseProvider = variousWalkingProviders.getTorusPoseProvider();
       TorusManipulationProvider torusManipulationProvider = variousWalkingProviders.getTorusManipulationProvider();
       FingerStateProvider fingerStateProvider = variousWalkingProviders.getFingerStateProvider();
+      DesiredArmJointAngleProvider armJointAngleProvider = variousWalkingProviders.getDesiredArmJointAngleProvider();
 
 
       individualHandControlModules = createIndividualHandControlModules(yoTime, fullRobotModel, twistCalculator, dynamicGraphicObjectsListRegistry,
@@ -175,8 +176,8 @@ public class ManipulationControlModule
                                                                                      fingerPositionControlFrames, registry, dynamicGraphicObjectsListRegistry);
 
       directControlManipulationTaskDispatcher = new DirectControlManipulationTaskDispatcher(fullRobotModel, parameters, handPoseProvider,
-              handLoadBearingProvider, fingerStateProvider, handControllers, handPositionControlFrames, individualHandControlModules, pipeline, fingerToroidManipulationState,
-              torusManipulationProvider, momentumBasedController, registry);
+              handLoadBearingProvider, fingerStateProvider, armJointAngleProvider, handControllers, handPositionControlFrames, individualHandControlModules,
+              pipeline, fingerToroidManipulationState, torusManipulationProvider, momentumBasedController, registry);
 
 //    HighLevelToroidManipulationState toroidManipulationState = new HighLevelToroidManipulationState(yoTime, fullRobotModel, twistCalculator,
 //                                                                  handPositionControlFrames, handControllers, jacobians, torusPoseProvider,
