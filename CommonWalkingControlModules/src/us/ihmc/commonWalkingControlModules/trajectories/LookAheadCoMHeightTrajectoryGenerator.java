@@ -549,7 +549,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
 
    private void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, Point2d queryPoint)
    {
-      offsetHeightAboveGround.set(desiredComHeightProvider.getComHeightOffset());
+      if (desiredComHeightProvider != null) offsetHeightAboveGround.set(desiredComHeightProvider.getComHeightOffset());
       
 //      if (projectionSegment == null)
 //      {
