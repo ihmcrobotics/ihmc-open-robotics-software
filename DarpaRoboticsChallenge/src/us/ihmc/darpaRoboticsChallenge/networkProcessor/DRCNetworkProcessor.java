@@ -91,14 +91,26 @@ public class DRCNetworkProcessor
       rosMainNode.execute();
 
 
-      DrivingProcessorFactory.createCheatingDrivingProcessor(networkingManager, cameraDataReceiver, timestampProvider, rosCoreURI.toString());
+      if(DRCConfigParameters.USE_DUMMY_DRIVNG)
+      {
+         DrivingProcessorFactory.createCheatingDrivingProcessor(networkingManager, cameraDataReceiver, timestampProvider, rosCoreURI.toString());
+      }
+      else
+      {
+         DrivingProcessorFactory.createDrivingProcessor(networkingManager, cameraDataReceiver, timestampProvider, fieldComputerClient);
+      }
    }
 
    public DRCNetworkProcessor(LocalObjectCommunicator scsCommunicator, ObjectCommunicator drcNetworkObjectCommunicator)
    {
       this(drcNetworkObjectCommunicator);
-      new SCSCameraDataReceiver(robotPoseBuffer, videoSettings, scsCommunicator, networkingManager);
+      CameraDataReceiver cameraDataReceiver = new SCSCameraDataReceiver(robotPoseBuffer, videoSettings, scsCommunicator, networkingManager);
       new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, fullRobotModel, robotBoundingBoxes, jointMap,fieldComputerClient);
+      
+      if(!DRCConfigParameters.USE_DUMMY_DRIVNG)
+      {
+         DrivingProcessorFactory.createDrivingProcessor(networkingManager, cameraDataReceiver, timestampProvider, fieldComputerClient);
+      }
    }
 
    private DRCNetworkProcessor(ObjectCommunicator fieldComputerClient)
