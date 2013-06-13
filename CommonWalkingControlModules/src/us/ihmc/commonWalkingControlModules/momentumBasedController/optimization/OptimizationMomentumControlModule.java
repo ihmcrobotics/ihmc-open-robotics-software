@@ -117,7 +117,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
       wrenchMatrixCalculator.setRhoMinScalar(momentumOptimizationSettings.getRhoMinScalar());
 
-      hardMotionConstraintSolver.setAlpha(0.0); // momentumOptimizationSettings.getDampedLeastSquaresFactor());
+      hardMotionConstraintSolver.setAlpha(momentumOptimizationSettings.getDampedLeastSquaresFactor());
       momentumOptimizerNativeInput.reset();
 
       if (HardMotionConstraintEnforcer.TEST_CONSTRAINT_CONSISTENCY)
