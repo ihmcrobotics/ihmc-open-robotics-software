@@ -67,4 +67,10 @@ public class SwitchableFootstepProvider implements FootstepProvider
       return getFootstepProviderInUse().getNumberOfFootstepsToProvide();
    }
 
+   public boolean isBlindWalking()
+   {
+      FootstepProvider footstepProviderInUse = getFootstepProviderInUse();
+      return footstepProviderInUse.isBlindWalking();
+   }
+
 }

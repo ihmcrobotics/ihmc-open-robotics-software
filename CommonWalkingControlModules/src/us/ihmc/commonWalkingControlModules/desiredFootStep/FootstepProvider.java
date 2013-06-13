@@ -10,7 +10,9 @@ public interface FootstepProvider
 
    public abstract boolean isEmpty();
 
-   public void notifyComplete();
+   public abstract void notifyComplete();
    
-   public int getNumberOfFootstepsToProvide();
+   public abstract int getNumberOfFootstepsToProvide();
+   
+   public abstract boolean isBlindWalking();
 }

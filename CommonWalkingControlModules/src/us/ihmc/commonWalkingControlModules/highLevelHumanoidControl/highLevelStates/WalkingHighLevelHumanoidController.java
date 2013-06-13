@@ -238,6 +238,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private MaximumConstantJerkFinalToeOffAngleComputer maximumConstantJerkFinalToeOffAngleComputer = new MaximumConstantJerkFinalToeOffAngleComputer();  
    private YoVariableDoubleProvider onToesFinalPitchProvider = new YoVariableDoubleProvider("OnToesFinalPitch", registry);
 
+   private final VariousWalkingProviders variousWalkingProviders;
    private final VariousWalkingManagers variousWalkingManagers;
 
    public WalkingHighLevelHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
@@ -260,6 +261,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
      
       super.addUpdatables(icpAndMomentumBasedController.getUpdatables());
 
+      this.variousWalkingProviders = variousWalkingProviders;
       this.variousWalkingManagers = variousWalkingManagers;
       
       setupManagers(variousWalkingManagers);
@@ -1783,7 +1785,18 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          Footstep nextFootstep = upcomingFootstepList.getNextFootstep();
          ReferenceFrame finalSoleFrame = nextFootstep.getSoleReferenceFrame();
 
-         this.stepOnOrOff.set(TwoWaypointTrajectoryUtils.stepOnOrOff(initialSoleFrame, finalSoleFrame));
+         boolean isBlindWalking = variousWalkingProviders.getFootstepProvider().isBlindWalking();
+         
+         if (isBlindWalking)
+         {
+            this.stepOnOrOff.set(false);
+         }
+
+         else
+         {
+            this.stepOnOrOff.set(TwoWaypointTrajectoryUtils.stepOnOrOff(initialSoleFrame, finalSoleFrame));
+         }
+         
          if (stepOnOrOff.getBooleanValue())
          {
             TrajectoryParameters trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(TrajectoryWaypointGenerationMethod.STEP_ON_OR_OFF);

@@ -429,4 +429,10 @@ public class FootstepPathCoordinator implements FootstepProvider
    }
 
    private enum WalkMethod {STOP, FOOTSTEP_PATH, BLIND;}
+
+   public boolean isBlindWalking()
+   {
+      if (walkMethod.getEnumValue() == WalkMethod.BLIND) return true;
+      return false;
+   }
 }
