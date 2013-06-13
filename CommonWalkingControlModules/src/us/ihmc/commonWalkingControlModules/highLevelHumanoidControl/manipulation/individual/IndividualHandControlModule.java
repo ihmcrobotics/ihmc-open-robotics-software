@@ -63,6 +63,8 @@ public class IndividualHandControlModule
    private final TwistCalculator twistCalculator;
    private final FullRobotModel fullRobotModel;
    private final SE3PDGains defaultGains = new SE3PDGains();
+   private final Map<ReferenceFrame, YoSE3ConfigurationProvider> currentDesiredConfigurationProviders = new LinkedHashMap<ReferenceFrame,
+         YoSE3ConfigurationProvider>();
 
    public IndividualHandControlModule(final DoubleYoVariable simulationTime, final RobotSide robotSide, FullRobotModel fullRobotModel,
                                       final TwistCalculator twistCalculator, final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
@@ -236,6 +238,16 @@ public class IndividualHandControlModule
    {
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
+      updateCurrentDesiredConfiguration();
+   }
+
+   private void updateCurrentDesiredConfiguration()
+   {
+      for (ReferenceFrame frameToControlPositionOf : currentDesiredConfigurationProviders.keySet())
+      {
+         FramePose pose = computeDesiredFramePose(frameToControlPositionOf, ReferenceFrame.getWorldFrame());
+         currentDesiredConfigurationProviders.get(frameToControlPositionOf).setPose(pose);
+      }
    }
 
    public boolean isDone()
@@ -258,6 +270,17 @@ public class IndividualHandControlModule
    public void moveInStraightLine(FramePose finalDesiredPose, double time, RigidBody base, ReferenceFrame frameToControlPoseOf, ReferenceFrame trajectoryFrame,
                                   boolean holdObject, SE3PDGains gains)
    {
+      FramePose pose = computeDesiredFramePose(frameToControlPoseOf, trajectoryFrame);
+
+      initialConfigurationProvider.set(pose);
+      finalConfigurationProvider.set(finalDesiredPose);
+      trajectoryTimeProvider.set(time);
+      executeTaskSpaceTrajectory(getOrCreateStraightLinePositionTrajectoryGenerator(trajectoryFrame),
+                                 getOrCreateOrientationInterpolationTrajectoryGenerator(trajectoryFrame), frameToControlPoseOf, base, holdObject, gains);
+   }
+
+   private FramePose computeDesiredFramePose(ReferenceFrame frameToControlPoseOf, ReferenceFrame trajectoryFrame)
+   {
       FramePose pose;
       if (stateMachine.getCurrentState() instanceof TaskspaceHandPositionControlState)
       {
@@ -266,15 +289,11 @@ public class IndividualHandControlModule
       }
       else
       {
-         // start at current actual
+         // FIXME: make this be based on desired joint angles
          pose = new FramePose(frameToControlPoseOf);
+         pose.changeFrame(trajectoryFrame);
       }
-
-      initialConfigurationProvider.set(pose);
-      finalConfigurationProvider.set(finalDesiredPose);
-      trajectoryTimeProvider.set(time);
-      executeTaskSpaceTrajectory(getOrCreateStraightLinePositionTrajectoryGenerator(trajectoryFrame),
-                                 getOrCreateOrientationInterpolationTrajectoryGenerator(trajectoryFrame), frameToControlPoseOf, base, holdObject, gains);
+      return pose;
    }
 
    private FramePose getCurrentDesiredPose(TaskspaceHandPositionControlState taskspaceHandPositionControlState, ReferenceFrame frameToControlPoseOf,
@@ -436,5 +455,17 @@ public class IndividualHandControlModule
       }
 
       return false;
+   }
+
+   public SE3ConfigurationProvider getCurrentDesiredConfigurationProvider(ReferenceFrame frameToControlPositionOf)
+   {
+      YoSE3ConfigurationProvider ret = currentDesiredConfigurationProviders.get(frameToControlPositionOf);
+      if (ret == null)
+      {
+         ret = new YoSE3ConfigurationProvider("currentDesired" + frameToControlPositionOf.getName() + "Configuration", ReferenceFrame.getWorldFrame(), registry);
+         currentDesiredConfigurationProviders.put(frameToControlPositionOf, ret);
+         updateCurrentDesiredConfiguration();
+      }
+      return ret;
    }
 }

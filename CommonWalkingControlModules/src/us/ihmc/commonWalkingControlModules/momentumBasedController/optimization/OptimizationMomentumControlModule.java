@@ -156,11 +156,14 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       momentumOptimizerNativeInput.setMomentumDotWeight(momentumOptimizationSettings.getMomentumDotWeight(momentumRateOfChangeData.getMomentumSubspace()));
 
       /*
+       * TODO:
        * IMPORTANT: the implementation below doesn't work properly, because lambda is supposed to act on the actual joint accelerations, not on the vector that is left
        * after the hard constraints have been applied. We really need a solver that can handle hard constraints in addition to soft constraints without being
        * too computationally expensive!
        */
-      momentumOptimizerNativeInput.setJointAccelerationRegularization(momentumOptimizationSettings.getDampedLeastSquaresFactorMatrix(ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor)));
+      DenseMatrix64F dampedLeastSquaresFactorMatrix = momentumOptimizationSettings.getDampedLeastSquaresFactorMatrix(ScrewTools.computeDegreesOfFreedom
+            (jointsToOptimizeFor));
+      momentumOptimizerNativeInput.setJointAccelerationRegularization(dampedLeastSquaresFactorMatrix);
 
       secondaryMotionConstraintHandler.compute();
       DenseMatrix64F jSecondary = secondaryMotionConstraintHandler.getJacobian();
