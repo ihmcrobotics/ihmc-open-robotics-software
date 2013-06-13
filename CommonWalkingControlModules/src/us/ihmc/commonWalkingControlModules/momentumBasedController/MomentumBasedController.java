@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
@@ -342,6 +343,16 @@ public class MomentumBasedController
       }
 
       activeMomentumControlModule.setDesiredPointAcceleration(rootToEndEffectorJacobian, contactPoint, desiredAcceleration);
+   }
+
+   public void setDesiredPointAcceleration(GeometricJacobian rootToEndEffectorJacobian, FramePoint contactPoint, FrameVector desiredAcceleration, Tuple3d selectionVector)
+   {
+      if (momentumBasedControllerSpy != null)
+      {
+         momentumBasedControllerSpy.setDesiredPointAcceleration(rootToEndEffectorJacobian, contactPoint, desiredAcceleration);
+      }
+
+      activeMomentumControlModule.setDesiredPointAcceleration(rootToEndEffectorJacobian, contactPoint, desiredAcceleration, selectionVector);
    }
 
    // TODO: Temporary method for a big refactor allowing switching between high level behaviors

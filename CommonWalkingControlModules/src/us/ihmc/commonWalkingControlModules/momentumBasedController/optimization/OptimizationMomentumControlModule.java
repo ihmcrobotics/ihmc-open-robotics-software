@@ -1,9 +1,12 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import javax.vecmath.Tuple3d;
+
 import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableCylinderBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
@@ -21,10 +24,17 @@ import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.*;
+import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.SpatialForceVector;
+import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.utilities.screwTheory.Wrench;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 /**
  * @author twan
@@ -256,6 +266,11 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase)
    {
       primaryMotionConstraintHandler.setDesiredPointAcceleration(jacobian, bodyFixedPoint, desiredAccelerationWithRespectToBase, Double.POSITIVE_INFINITY);
+   }
+
+   public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase, Tuple3d selectionVector)
+   {
+      primaryMotionConstraintHandler.setDesiredPointAcceleration(jacobian, bodyFixedPoint, desiredAccelerationWithRespectToBase, selectionVector, Double.POSITIVE_INFINITY);
    }
 
    public void setDesiredRateOfChangeOfMomentum(MomentumRateOfChangeData momentumRateOfChangeData)

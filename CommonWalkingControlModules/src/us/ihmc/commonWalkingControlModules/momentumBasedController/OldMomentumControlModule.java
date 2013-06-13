@@ -5,12 +5,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolver;
-
 import org.ejml.ops.CommonOps;
+
 import us.ihmc.commonWalkingControlModules.WrenchDistributorTools;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableCylinderBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
@@ -21,12 +22,21 @@ import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWren
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributorOutputData;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.*;
+import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.SixDoFJoint;
+import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.utilities.screwTheory.SpatialForceVector;
+import us.ihmc.utilities.screwTheory.TotalMassCalculator;
+import us.ihmc.utilities.screwTheory.TotalWrenchCalculator;
+import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -293,6 +303,11 @@ public class OldMomentumControlModule implements MomentumControlModule
    }
 
    public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase)
+   {
+      throw new NoSuchMethodError();
+   }
+
+   public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase, Tuple3d selectionVector)
    {
       throw new NoSuchMethodError();
    }
