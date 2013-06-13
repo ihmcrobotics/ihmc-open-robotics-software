@@ -36,8 +36,8 @@ public class CirclePositionAndOrientationTrajectoryGeneratorTest
       PositionProvider initialPositionProvider = new ConstantPositionProvider(new FramePoint(frame, RandomTools.generateRandomVector(random)));
       YoVariableRegistry registry = new YoVariableRegistry("reg");
       DoubleProvider desiredRotationAngleProvider = new ConstantDoubleProvider(1.0);
-      double tMax = 1.0;
-      CirclePositionAndOrientationTrajectoryGenerator trajectoryGenerator = new CirclePositionAndOrientationTrajectoryGenerator("test", frame, tMax,
+      DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(1.0);
+      CirclePositionAndOrientationTrajectoryGenerator trajectoryGenerator = new CirclePositionAndOrientationTrajectoryGenerator("test", frame, trajectoryTimeProvider,
                                                                                initialOrientationProvider, initialPositionProvider, registry,
                                                                                desiredRotationAngleProvider);
       trajectoryGenerator.initialize();
@@ -45,8 +45,7 @@ public class CirclePositionAndOrientationTrajectoryGeneratorTest
       // v = omega x r
       checkVEqualsOmegaCrossR(frame, trajectoryGenerator, random);
 
-      checkOrientationAtVariousPoints(trajectoryGenerator, initialOrientationProvider, tMax, frame);
-
+      checkOrientationAtVariousPoints(trajectoryGenerator, initialOrientationProvider, trajectoryTimeProvider.getValue(), frame);
    }
 
    private void checkOrientationAtVariousPoints(CirclePositionAndOrientationTrajectoryGenerator trajectoryGenerator,
