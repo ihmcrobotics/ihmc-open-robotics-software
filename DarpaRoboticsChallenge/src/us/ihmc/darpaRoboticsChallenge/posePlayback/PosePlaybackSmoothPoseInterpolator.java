@@ -1,5 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.posePlayback;
 
+import us.ihmc.utilities.math.TimeTools;
+
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -85,7 +87,6 @@ public class PosePlaybackSmoothPoseInterpolator
 
       if (poseMorphPercentage.getDoubleValue() >= 1.0 && timeIntoPose >= transitionTime(poseTwo))
       {
-         System.out.println("incrementing pose");
          poseSequenceIndex.increment();
          poseStartTime.set(time);
          lastPoseIncrementedSequence = true;
@@ -99,7 +100,8 @@ public class PosePlaybackSmoothPoseInterpolator
    
    private double transitionTime(PosePlaybackRobotPose poseToTransitionInto)
    {
-      return poseMorphDuration.getDoubleValue() + timeDelayAfterPose.getDoubleValue() + poseToTransitionInto.getPlayBackDelayBeforePose();
+      return poseMorphDuration.getDoubleValue() + timeDelayAfterPose.getDoubleValue()
+            + TimeTools.milliSecondsToSeconds((long) poseToTransitionInto.getPlayBackDelayBeforePose());
    }
    
    public double getTransitionTimeDelay()
