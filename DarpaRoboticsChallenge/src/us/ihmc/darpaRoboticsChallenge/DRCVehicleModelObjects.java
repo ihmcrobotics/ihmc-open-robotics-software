@@ -133,43 +133,51 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
             RotationFunctions.setYawPitchRoll(matrix3d, yaw, pitch, roll);
             transform3DfromWorldToParent = new Transform3D(matrix3d, translation, 1.0);
          }
+         Transform3D transform3D = new Transform3D(transform3DfromWorldToParent);
 
-         //transform to parent
-         Transform3D transform3DfromParentToChild;
-         {
-            double roll = -0.690000;
-            double pitch = 0.0;
-            double yaw = -1.570796;
-            Vector3d translation = new Vector3d(0.0, 0.0, 0.0);
-            Matrix3d matrix3d = new Matrix3d();
-            RotationFunctions.setYawPitchRoll(matrix3d, yaw, pitch, roll);
-            transform3DfromParentToChild = new Transform3D(matrix3d, translation, 1.0);
-         }
-
-         Transform3D transform3D = new Transform3D();
-         transform3D.mul(transform3DfromWorldToParent, transform3DfromParentToChild);
-
-         //Rotate to have the Z axis point
-         double xRotation = Math.toRadians(29.0);
          Transform3D finalAdjustment = new Transform3D();
-         finalAdjustment.setEuler(new Vector3d(xRotation, 0.0, 0.0));
-         transform3D.mul(finalAdjustment);
-
-         finalAdjustment = new Transform3D();
-         finalAdjustment.setEuler(new Vector3d(0.0, 0.0, Math.PI/2.0));
-         transform3D.mul(finalAdjustment);
-
-         finalAdjustment = new Transform3D();
-         finalAdjustment.set(new Vector3d(0.03, 0.0, 0.0));
-         transform3D.mul(finalAdjustment);
-
-         finalAdjustment = new Transform3D();
          finalAdjustment.setEuler(new Vector3d(0.0, 0.0, -Math.PI/2.0));
          transform3D.mul(finalAdjustment);
 
-         finalAdjustment = new Transform3D();
-         finalAdjustment.setTranslation(new Vector3d(0.0, -0.0225, 0.0)); // to line up the center better
-         transform3D.mul(finalAdjustment);
+         //transform to parent
+//         Transform3D transform3DfromParentToChild;
+//         {
+//            double roll = -0.690000;
+//            double pitch = 0.0;
+//            double yaw = -1.570796;
+//            Vector3d translation = new Vector3d(0.0, 0.0, 0.0);
+//            Matrix3d matrix3d = new Matrix3d();
+//            RotationFunctions.setYawPitchRoll(matrix3d, yaw, pitch, roll);
+//            transform3DfromParentToChild = new Transform3D(matrix3d, translation, 1.0);
+//         }
+//
+//         Transform3D transform3D = new Transform3D();
+//         transform3D.mul(transform3DfromWorldToParent, transform3DfromParentToChild);
+//
+//         //Rotate to have the Z axis point
+//         double xRotation = Math.toRadians(29.0);
+//         Transform3D finalAdjustment = new Transform3D();
+//         finalAdjustment.setEuler(new Vector3d(xRotation, 0.0, 0.0));
+//         transform3D.mul(finalAdjustment);
+//
+//         finalAdjustment = new Transform3D();
+//         finalAdjustment.setEuler(new Vector3d(0.0, 0.0, Math.PI/2.0));
+//         transform3D.mul(finalAdjustment);
+//
+//         finalAdjustment = new Transform3D();
+//         finalAdjustment.set(new Vector3d(0.03, 0.0, 0.0));
+//         transform3D.mul(finalAdjustment);
+//
+//         finalAdjustment = new Transform3D();
+//         finalAdjustment.setEuler(new Vector3d(0.0, 0.0, -Math.PI/2.0));
+//         transform3D.mul(finalAdjustment);
+//
+//         finalAdjustment = new Transform3D();
+//         finalAdjustment.setTranslation(new Vector3d(0.0, -0.0225, 0.0)); // to line up the center better
+//         transform3D.mul(finalAdjustment);
+
+
+
 
          objectTransforms.put(VehicleObject.STEERING_WHEEL, transform3D);
       }
