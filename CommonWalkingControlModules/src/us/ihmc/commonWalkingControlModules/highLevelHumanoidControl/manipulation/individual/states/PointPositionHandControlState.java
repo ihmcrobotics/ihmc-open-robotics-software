@@ -108,7 +108,7 @@ public class PointPositionHandControlState extends State<IndividualHandControlSt
    {
       this.positionTrajectoryGenerator = positionTrajectoryGenerator;
       this.positionController = positionController;
-      this.pointInBody = pointInBody;
+      this.pointInBody = new FramePoint(pointInBody);
       this.jacobian = jacobian;
    }
 

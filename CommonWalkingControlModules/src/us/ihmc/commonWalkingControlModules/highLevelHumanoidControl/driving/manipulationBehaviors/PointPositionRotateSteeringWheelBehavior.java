@@ -9,11 +9,13 @@ import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.IndividualHandControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.taskExecutor.Task;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.trajectories.*;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.*;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.Wrench;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
@@ -45,14 +47,15 @@ public class PointPositionRotateSteeringWheelBehavior
    private final double kpTangential = 100.0;
    private final double zeta = 1.0;
    private final ReferenceFrame steeringWheelFrame;
-   private final TransformReferenceFrame gainFrame;
+   private final TransformReferenceFrame xTangentialFrame;
    private final DynamicGraphicReferenceFrame gainFrameViz;
+   private final MomentumBasedController momentumBasedController;
 
 
-   public PointPositionRotateSteeringWheelBehavior(RobotSide robotSide, IndividualHandControlModule individualHandControlModule, ReferenceFrame creepyGripHandPositionControlFrame,
-                                      FullRobotModel fullRobotModel, ReferenceFrame steeringWheelFrame, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+   public PointPositionRotateSteeringWheelBehavior(RobotSide robotSide, IndividualHandControlModule individualHandControlModule,
+           ReferenceFrame creepyGripHandPositionControlFrame, FullRobotModel fullRobotModel, ReferenceFrame steeringWheelFrame, MomentumBasedController momentumBasedController,
+           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
-
       this.individualHandControlModule = individualHandControlModule;
       this.creepyGripHandPositionControlFrame = creepyGripHandPositionControlFrame;
       this.robotSide = robotSide;
@@ -64,28 +67,32 @@ public class PointPositionRotateSteeringWheelBehavior
 
       this.steeringWheelFrame = steeringWheelFrame;
 
-      this.gainFrame = new TransformReferenceFrame("rotateSteeringWheelGainFrame", positionController.getBodyFrame());
+      this.xTangentialFrame = new TransformReferenceFrame("rotateSteeringWheelGainFrame", positionController.getBodyFrame());
+
+      this.momentumBasedController = momentumBasedController;
 
       SE3ConfigurationProvider currentDesiredConfigurationProvider =
-            individualHandControlModule.getCurrentDesiredConfigurationProvider(creepyGripHandPositionControlFrame);
+         individualHandControlModule.getCurrentDesiredConfigurationProvider(creepyGripHandPositionControlFrame);
       PositionProvider initialPositionProvider = currentDesiredConfigurationProvider;
-      trajectoryGenerator = new CirclePositionTrajectoryGenerator("rotateSteeringWheelTrajectory", steeringWheelFrame, trajectoryTimeProvider, initialPositionProvider, registry, desiredRotationAngleProvider);
+      trajectoryGenerator = new CirclePositionTrajectoryGenerator("rotateSteeringWheelTrajectory", steeringWheelFrame, trajectoryTimeProvider,
+              initialPositionProvider, registry, desiredRotationAngleProvider);
 
       if (dynamicGraphicObjectsListRegistry != null)
       {
-         gainFrameViz = new DynamicGraphicReferenceFrame(gainFrame, registry, 0.1);
+         gainFrameViz = new DynamicGraphicReferenceFrame(xTangentialFrame, registry, 0.1);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("rotateSteeringWheelBehavior", gainFrameViz);
       }
       else
       {
          gainFrameViz = null;
       }
+
       parentRegistry.addChild(registry);
    }
 
-   public Task getTask(double relativeRotationAngle)
+   public Task getTask(double relativeRotationAngle, double absoluteRotationAngle)
    {
-      return new RotateTask(relativeRotationAngle);
+      return new RotateTask(relativeRotationAngle, absoluteRotationAngle);
    }
 
    public RobotSide getRobotSide()
@@ -95,62 +102,67 @@ public class PointPositionRotateSteeringWheelBehavior
 
    private class RotateTask implements Task
    {
-      private final double rotationAngle;
-      private final FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame());
-      private final FrameVector x = new FrameVector(); // direction of motion
-      private final FrameVector y = new FrameVector(); // radial direction
-      private final FrameVector z = new FrameVector(); // z direction
-      private final FrameVector tempVector = new FrameVector();
+      private final double relativeRotationAngle;
+      private final double absoluteRotationAngle;
+
+      private final FramePoint tempPoint = new FramePoint(ReferenceFrame.getWorldFrame());
+
+      private final FrameVector x = new FrameVector();    // direction of motion
+      private final FrameVector y = new FrameVector();    // radial direction
+      private final FrameVector z = new FrameVector();    // z direction
 
       private final Matrix3d tempMatrix = new Matrix3d();
       private final Matrix3d proportionalGainMatrix = new Matrix3d();
       private final Matrix3d derivativeGainMatrix = new Matrix3d();
       private final FrameOrientation rotationFromGainOrientationToBody = new FrameOrientation(steeringWheelFrame);
       private final Transform3D transform = new Transform3D();
+      private final FrameVector force = new FrameVector();
+      private final Wrench wrench = new Wrench();
 
-      private RotateTask(double rotationAngle)
+      private RotateTask(double relativeRotationAngle, double absoluteRotationAngle)
       {
-         this.rotationAngle = rotationAngle;
+         this.relativeRotationAngle = relativeRotationAngle;
+         this.absoluteRotationAngle = absoluteRotationAngle;
       }
 
       public void doTransitionIntoAction()
       {
-         point.setToZero(creepyGripHandPositionControlFrame);
+         tempPoint.setToZero(creepyGripHandPositionControlFrame);
 
-         double trajectoryTime = Math.abs(rotationAngle / averageAngularVelocity);
+         double trajectoryTime = Math.abs(relativeRotationAngle / averageAngularVelocity);
          trajectoryTimeProvider.set(trajectoryTime);
-         desiredRotationAngleProvider.set(rotationAngle);
-         individualHandControlModule.executePointPositionTrajectory(trajectoryGenerator, positionController, point, jacobian);
+         desiredRotationAngleProvider.set(relativeRotationAngle);
+         individualHandControlModule.executePointPositionTrajectory(trajectoryGenerator, positionController, tempPoint, jacobian);
       }
 
       public void doAction()
       {
-         trajectoryGenerator.packVelocity(tempVector);
+         updateXTangentialFrame();
+         setExternalWrench();
+         updateGains();
+      }
 
-         x.set(steeringWheelFrame, 1.0, 0.0, 0.0);
-         tempMatrix.rotZ(trajectoryGenerator.getAngleFromXAxis() - Math.PI / 2.0);
-         tempMatrix.transform(x.getVector());
+      private void setExternalWrench()
+      {
+         double steeringWheelExternalTorqueMagnitude = 1.0; // from DRCVehiclePlugin.cc, handWheelForce (100 Nm / rad P control, clipped to 1)
+         double steeringWheelExternalTorque = Math.signum(absoluteRotationAngle) * steeringWheelExternalTorqueMagnitude;
 
-         z.set(steeringWheelFrame, 0.0, 0.0, 1.0);
+         tempPoint.setToZero(xTangentialFrame);
+         tempPoint.changeFrame(steeringWheelFrame);
+         double radius = Math.hypot(tempPoint.getX(), tempPoint.getY());
+         double steeringWheelTangentialForce = steeringWheelExternalTorque / radius;
+         force.set(xTangentialFrame, steeringWheelTangentialForce, 0.0, 0.0);
 
-         y.setToZero(steeringWheelFrame);
-         y.cross(z, x);
-         y.normalize();
+         wrench.setToZero(jacobian.getEndEffector().getBodyFixedFrame(), force.getReferenceFrame());
+         wrench.setLinearPart(force.getVector());
+         wrench.changeFrame(jacobian.getEndEffector().getBodyFixedFrame());
+         momentumBasedController.setExternalWrenchToCompensateFor(jacobian.getEndEffector(), wrench);
+      }
 
-         tempMatrix.setColumn(0, x.getVector());
-         tempMatrix.setColumn(1, y.getVector());
-         tempMatrix.setColumn(2, z.getVector());
-
-         rotationFromGainOrientationToBody.set(steeringWheelFrame, tempMatrix);
-         rotationFromGainOrientationToBody.changeFrame(positionController.getBodyFrame());
-
-         // R^B_S
-         rotationFromGainOrientationToBody.getMatrix3d(tempMatrix);
-         transform.set(tempMatrix);
-         gainFrame.updateTransform(transform);
-
-         if (gainFrameViz != null)
-            gainFrameViz.update();
+      private void updateGains()
+      {
+         xTangentialFrame.getTransformToDesiredFrame(transform, positionController.getBodyFrame());
+         transform.get(tempMatrix);
 
          // K^S
          proportionalGainMatrix.setElement(0, 0, kpTangential);
@@ -177,6 +189,34 @@ public class PointPositionRotateSteeringWheelBehavior
          positionController.setDerivativeGains(derivativeGainMatrix);
       }
 
+      private void updateXTangentialFrame()
+      {
+         x.set(steeringWheelFrame, 1.0, 0.0, 0.0);
+         tempMatrix.rotZ(getDesiredAngleFromYAxis());
+         tempMatrix.transform(x.getVector());
+
+         z.set(steeringWheelFrame, 0.0, 0.0, 1.0);
+
+         y.setToZero(steeringWheelFrame);
+         y.cross(z, x);
+         y.normalize();
+
+         tempMatrix.setColumn(0, x.getVector());
+         tempMatrix.setColumn(1, y.getVector());
+         tempMatrix.setColumn(2, z.getVector());
+
+         rotationFromGainOrientationToBody.set(steeringWheelFrame, tempMatrix);
+         rotationFromGainOrientationToBody.changeFrame(positionController.getBodyFrame());
+
+         // R^B_S
+         rotationFromGainOrientationToBody.getMatrix3d(tempMatrix);
+         transform.set(tempMatrix);
+         xTangentialFrame.updateTransform(transform);
+
+         if (gainFrameViz != null)
+            gainFrameViz.update();
+      }
+
       public void doTransitionOutOfAction()
       {
       }
@@ -185,5 +225,10 @@ public class PointPositionRotateSteeringWheelBehavior
       {
          return individualHandControlModule.isDone();
       }
+   }
+
+   private double getDesiredAngleFromYAxis()
+   {
+      return trajectoryGenerator.getAngleFromXAxis() - Math.PI / 2.0;
    }
 }
