@@ -12,9 +12,12 @@ public class PosePlaybackSmoothPoseInterpolator
    private final DoubleYoVariable poseStartTime = new DoubleYoVariable("poseStartTime", registry);
    private final DoubleYoVariable poseMorphPercentage = new DoubleYoVariable("poseMorphPercentage", registry);
    private final DoubleYoVariable poseMorphDuration = new DoubleYoVariable("poseMorphDuration", registry);
+   private final DoubleYoVariable timeDelayAfterPose = new DoubleYoVariable("timeDelayAfterPose", registry);
    private final IntegerYoVariable poseSequenceIndex = new IntegerYoVariable("poseSequenceIndex", registry);
    
    private boolean lastPoseIncrementedSequence = false;
+   private final double defaultPoseMorphDuration = 1.0;
+   private final double defaultTimeDelayAfterPose = 1.0;
 
    private final int numberOfCoefficients = 4;    // Cubic
 
@@ -27,25 +30,36 @@ public class PosePlaybackSmoothPoseInterpolator
    {
       parentRegistry.addChild(registry);
 
-      poseMorphDuration.set(1.0);
+      poseMorphDuration.set(defaultPoseMorphDuration);
    }
 
    public void startSequencePlayback(PosePlaybackRobotPoseSequence sequence, double startTime)
    {
+      startSequencePlayback(sequence, startTime, defaultPoseMorphDuration, defaultTimeDelayAfterPose);
+   }
+
+   public void startSequencePlayback(PosePlaybackRobotPoseSequence sequence, double startTime, double poseMorphDuration, double delayAfterPose)
+   {
       this.sequence = sequence;
 
-      computeMorphDuration();
-      setupPolynomialSpline(startTime, poseMorphDuration.getDoubleValue());
+      setMorphDuration(poseMorphDuration);
+      setTimeDelayAfterPose(delayAfterPose);
+      setupPolynomialSpline(startTime, this.poseMorphDuration.getDoubleValue());
 
       poseStartTime.set(startTime);
       poseSequenceIndex.set(0);
-      
+
       hasBeganInterpolating = true;
    }
 
-   private void computeMorphDuration()
+   private void setMorphDuration(double morphDuration)
    {
-      poseMorphDuration.set(1.0);
+      poseMorphDuration.set(morphDuration);
+   }
+
+   private void setTimeDelayAfterPose(double timeDelay)
+   {
+      timeDelayAfterPose.set(timeDelay);
    }
 
    private void setupPolynomialSpline(double time, double duration)
@@ -69,7 +83,7 @@ public class PosePlaybackSmoothPoseInterpolator
       poseMorphPercentage.set(timeIntoPose / poseMorphDuration.getDoubleValue());
       PosePlaybackRobotPose morphedPose = PosePlaybackRobotPose.morph(poseOne, poseTwo, poseMorphPercentage.getDoubleValue());
 
-      if (poseMorphPercentage.getDoubleValue() >= 1.0 && timeIntoPose >= (2.0 + poseTwo.getPlayBackDelayBeforePose() / 1000.0))
+      if (poseMorphPercentage.getDoubleValue() >= 1.0 && timeIntoPose >= transitionTime(poseTwo))
       {
          System.out.println("incrementing pose");
          poseSequenceIndex.increment();
@@ -81,6 +95,11 @@ public class PosePlaybackSmoothPoseInterpolator
          lastPoseIncrementedSequence = false;
       }
       return morphedPose;
+   }
+   
+   private double transitionTime(PosePlaybackRobotPose poseToTransitionInto)
+   {
+      return poseMorphDuration.getDoubleValue() + timeDelayAfterPose.getDoubleValue() + poseToTransitionInto.getPlayBackDelayBeforePose();
    }
    
    public double getTransitionTimeDelay()
