@@ -337,6 +337,29 @@ public class IndividualHandControlModule
       return pose;
    }
 
+   private FramePose getCurrentDesiredPose(PointPositionHandControlState pointPositionHandControlState, ReferenceFrame frameToControlPoseOf,
+                                           ReferenceFrame trajectoryFrame)
+   {
+      // desired position, actual orientation
+      FramePoint position = pointPositionHandControlState.getDesiredPosition();
+      position.changeFrame(trajectoryFrame);
+
+      FramePose pose = new FramePose(frameToControlPoseOf);
+      pose.changeFrame(trajectoryFrame);
+      pose.setPosition(position);
+
+      Transform3D oldTrackingFrameTransform = new Transform3D();
+      pose.getTransformFromPoseToFrame(oldTrackingFrameTransform);
+      Transform3D transformFromNewTrackingFrameToOldTrackingFrame =
+            frameToControlPoseOf.getTransformToDesiredFrame(pointPositionHandControlState.getFrameToControlPoseOf());
+
+      Transform3D newTrackingFrameTransform = new Transform3D();
+      newTrackingFrameTransform.mul(oldTrackingFrameTransform, transformFromNewTrackingFrameToOldTrackingFrame);
+      pose.set(trajectoryFrame, newTrackingFrameTransform);
+
+      return pose;
+   }
+
    public boolean isInCylindricalLoadBearingState()
    {
       return stateMachine.isCurrentState(IndividualHandControlState.LOAD_BEARING_CYLINDRICAL);

@@ -111,4 +111,16 @@ public class PointPositionHandControlState extends State<IndividualHandControlSt
       this.pointInBody = pointInBody;
       this.jacobian = jacobian;
    }
+
+   public FramePoint getDesiredPosition()
+   {
+      positionTrajectoryGenerator.compute(getTimeInCurrentState());
+      positionTrajectoryGenerator.get(desiredPosition);
+      return desiredPosition;
+   }
+
+   public ReferenceFrame getFrameToControlPoseOf()
+   {
+      return positionController.getBodyFrame();
+   }
 }
