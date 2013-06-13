@@ -23,5 +23,5 @@ fi
 cd $MYDIR
 
 
-CLASSPATH=$(find $THIRDPARTYJARS $ROSDEPENDENCIES -name \*.jar -printf '%p:')DRCController.jar
+CLASSPATH=$(find $THIRDPARTYJARS $ROSDEPENDENCIES -name \*.jar -printf '%p:')CloudJar.jar
 
