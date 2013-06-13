@@ -1,9 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor;
 
-import com.martiansoftware.jsap.FlaggedOption;
-import com.martiansoftware.jsap.JSAP;
-import com.martiansoftware.jsap.JSAPException;
-import com.martiansoftware.jsap.JSAPResult;
+import com.martiansoftware.jsap.*;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
 import us.ihmc.utilities.net.tcpServer.DisconnectedException;
@@ -22,7 +19,7 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
    private static String scsMachineIPAddress = DRCConfigParameters.SCS_MACHINE_IP_ADDRESS;
    private static String rosMasterURI = DRCConfigParameters.ROS_MASTER_URI;
 
-   private String[] javaArgs = new String[] {"-Xms2048m", "-Xmx2048m"};
+   private static String[] javaArgs = new String[] {"-Xms2048m", "-Xmx2048m"};
 
    public DRCNetworkProcessorEnterpriseCloudDispatcherBackend()
    {
@@ -131,8 +128,11 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
       FlaggedOption rosURIFlag =
          new FlaggedOption("ros-uri").setLongFlag("ros-uri").setShortFlag(JSAP.NO_SHORTFLAG).setRequired(false).setStringParser(JSAP.STRING_PARSER);
 
+      Switch largeHeapForProcessor = new Switch("large-heap").setLongFlag("large-heap").setShortFlag('h');
+
       jsap.registerParameter(scsIPFlag);
       jsap.registerParameter(rosURIFlag);
+      jsap.registerParameter(largeHeapForProcessor);
 
       JSAPResult config = jsap.parse(args);
 
@@ -146,6 +146,11 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
          if (config.getString(rosURIFlag.getID()) != null)
          {
             rosMasterURI = config.getString(rosURIFlag.getID());
+         }
+
+         if (config.getBoolean(largeHeapForProcessor.getID()))
+         {
+            javaArgs = new String[] {"-Xms10240m", "-Xmx10240m"};
          }
       }
 
