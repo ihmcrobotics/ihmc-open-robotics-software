@@ -1,19 +1,31 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+
+import javax.vecmath.Tuple3d;
+
 import org.apache.commons.lang.mutable.MutableDouble;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.utilities.CheckTools;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.NullspaceCalculator;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.screwTheory.*;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
+import us.ihmc.utilities.screwTheory.ConvectiveTermCalculator;
+import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.PointJacobian;
+import us.ihmc.utilities.screwTheory.PointJacobianConvectiveTermCalculator;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.utilities.screwTheory.SpatialMotionVector;
+import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 /**
  * @author twan
@@ -65,6 +77,39 @@ public class MotionConstraintHandler
    public void reset()
    {
       motionConstraintIndex = 0;
+   }
+
+   public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase,
+           Tuple3d selectionVector, double weight)
+   {
+      pointJacobian.set(jacobian, bodyFixedPoint);
+      pointJacobian.compute();
+      desiredAccelerationWithRespectToBase.changeFrame(jacobian.getBaseFrame());
+
+      DenseMatrix64F pointJacobianMatrix = pointJacobian.getJacobianMatrix();
+
+      DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 3);
+      selectionMatrix.set(0, 0, selectionVector.x);
+      selectionMatrix.set(1, 1, selectionVector.y);
+      selectionMatrix.set(2, 2, selectionVector.z);
+
+      jBlockCompact.reshape(selectionMatrix.getNumRows(), pointJacobianMatrix.getNumCols());
+
+      
+      DenseMatrix64F jFullBlock = getMatrixFromList(jList, motionConstraintIndex, jBlockCompact.getNumRows(), nDegreesOfFreedom);
+      compactBlockToFullBlock(jacobian.getJointsInOrder(), jBlockCompact, jFullBlock);
+
+      pointJacobianConvectiveTermCalculator.compute(pointJacobian, pPointVelocity);
+      pPointVelocity.scale(-1.0);
+      pPointVelocity.add(desiredAccelerationWithRespectToBase);
+      DenseMatrix64F pBlock = getMatrixFromList(pList, motionConstraintIndex, selectionMatrix.getNumRows(), 1);
+      MatrixTools.setDenseMatrixFromTuple3d(pBlock, pPointVelocity.getVector(), 0, 0);
+      CommonOps.mult(selectionMatrix, new DenseMatrix64F(pBlock), pBlock);
+      
+      MutableDouble weightBlock = getMutableDoubleFromList(weightList, motionConstraintIndex);
+      weightBlock.setValue(weight);
+
+      motionConstraintIndex++;
    }
 
    public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData, double weight)

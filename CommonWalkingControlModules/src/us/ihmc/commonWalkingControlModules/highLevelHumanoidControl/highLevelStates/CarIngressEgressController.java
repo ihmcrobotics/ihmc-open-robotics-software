@@ -5,6 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.vecmath.Vector3d;
+
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
@@ -227,8 +229,6 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          swingPositionTrajectoryGenerators.put(foot, positionTrajectoryGenerator);
          swingOrientationTrajectoryGenerators.put(foot, orientationTrajectoryGenerator);
 
-//       DoubleTrajectoryGenerator onToesTrajectory = createDummyDoubleTrajectoryGenerator();
-
          DoubleProvider onToesInitialPitchProvider = new ConstantDoubleProvider(0.0);
          DoubleProvider onToesInitialPitchVelocityProvider = new ConstantDoubleProvider(0.0);
          DoubleProvider onToesFinalPitchProvider = new ConstantDoubleProvider(Math.PI / 4.0);
@@ -309,14 +309,14 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    {
       requestedPelvisLoadBearing.set(isContactablePlaneBodyInContact(contactablePelvis));
       requestedPelvisLoadBearing.notifyVariableChangedListeners();
-      requestedPelvisBackLoadBearing.set(isContactablePlaneBodyInContact(contactablePelvisBack));
+      requestedPelvisBackLoadBearing.set(false); // Set to false there is no button in the GUI to change it anymore
       requestedPelvisBackLoadBearing.notifyVariableChangedListeners();
       
       for (RobotSide robotSide : RobotSide.values)
       {
          requestedFootLoadBearing.get(robotSide).set(isContactablePlaneBodyInContact(feet.get(robotSide)));
          requestedFootLoadBearing.get(robotSide).notifyVariableChangedListeners();
-         requestedThighLoadBearing.get(robotSide).set(isContactablePlaneBodyInContact(contactableThighs.get(robotSide)));
+         requestedThighLoadBearing.get(robotSide).set(false); // Set to false there is no button in the GUI to change it anymore
          requestedThighLoadBearing.get(robotSide).notifyVariableChangedListeners();
       }
    }
@@ -327,7 +327,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       callUpdatables();
       updateLoadBearingStates();
 
-      doContactPointControl();
+//      doContactPointControl();
       doFootControl();
       doArmControl();
       doHeadControl();
@@ -480,15 +480,21 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          GeometricJacobian jacobian = contactJacobians.get(body);
          jacobian.compute();
          FrameVector desiredAcceleration = new FrameVector(jacobian.getBaseFrame(), 0.0, 0.0, 0.0);
+         Vector3d selectionVector = new Vector3d(0.0, 0.0, 1.0);
          for (FramePoint contactPoint : body.getContactPoints())
          {
-            momentumBasedController.setDesiredPointAcceleration(jacobian, contactPoint, desiredAcceleration);
+            momentumBasedController.setDesiredPointAcceleration(jacobian, contactPoint, desiredAcceleration, selectionVector);
          }
       }
    }
 
    private void addBodyInContact(ContactablePlaneBody contactablePlaneBody)
    {
+      for (int i = 0; i < bodiesInContact.size(); i++)
+      {
+         if (contactablePlaneBody.equals(bodiesInContact.get(i)))
+            return;
+      }
       bodiesInContact.add(contactablePlaneBody);
       RigidBody rigidBody = contactablePlaneBody.getRigidBody();
       contactJacobians.put(contactablePlaneBody, new GeometricJacobian(elevator, rigidBody, elevator.getBodyFixedFrame()));
@@ -585,12 +591,12 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       if (inContact)
       {
          momentumBasedController.setPlaneContactState(contactablePelvis, contactablePelvis.getContactPoints2d(), coefficientOfFrictionForBumAndThighs.getDoubleValue(), null);
-//         addBodyInContact(contactablePelvis);
+         addBodyInContact(contactablePelvis);
       }
       else
       {
          momentumBasedController.setPlaneContactState(contactablePelvis, new ArrayList<FramePoint2d>(), coefficientOfFrictionForBumAndThighs.getDoubleValue(), null);
-//         removeBodyInContact(contactablePelvis);
+         removeBodyInContact(contactablePelvis);
       }
    }
 
