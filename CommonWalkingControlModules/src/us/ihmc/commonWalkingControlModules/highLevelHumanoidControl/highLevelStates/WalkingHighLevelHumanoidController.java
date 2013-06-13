@@ -140,6 +140,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final BooleanYoVariable loopControllerForever = new BooleanYoVariable("loopControllerForever", "For checking memory and profiling", registry);
    private final BooleanYoVariable justFall = new BooleanYoVariable("justFall", registry);
+   
+   private final BooleanYoVariable stepOnOrOff = new BooleanYoVariable("stepOnOrOff", registry);
+
    private final BooleanYoVariable hasMinimumTimePassed = new BooleanYoVariable("hasMinimumTimePassed", registry);
    private final DoubleYoVariable minimumSwingFraction = new DoubleYoVariable("minimumSwingFraction", registry);
    
@@ -1780,7 +1783,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          Footstep nextFootstep = upcomingFootstepList.getNextFootstep();
          ReferenceFrame finalSoleFrame = nextFootstep.getSoleReferenceFrame();
 
-         if (TwoWaypointTrajectoryUtils.stepOnOrOff(initialSoleFrame, finalSoleFrame))
+         this.stepOnOrOff.set(TwoWaypointTrajectoryUtils.stepOnOrOff(initialSoleFrame, finalSoleFrame));
+         if (stepOnOrOff.getBooleanValue())
          {
             TrajectoryParameters trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(TrajectoryWaypointGenerationMethod.STEP_ON_OR_OFF);
             mapFromFootstepsToTrajectoryParameters.put(nextFootstep, trajectoryParameters);
