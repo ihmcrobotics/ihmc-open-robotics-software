@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.EuclideanPositionController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.statemachines.*;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
@@ -16,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.sensors.MassMatrixEstimatingToolRigidBody;
 import us.ihmc.commonWalkingControlModules.trajectories.*;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.*;
@@ -48,12 +50,13 @@ public class IndividualHandControlModule
    private final ConstantPositionTrajectoryGenerator holdPositionInBaseTrajectoryGenerator;
    private final ConstantOrientationTrajectoryGenerator holdOrientationInBaseTrajectoryGenerator;
 
-   private final TaskspaceHandPositionControlState taskspaceHandPositionControlState;
+   private final TaskspaceHandPositionControlState taskSpacePositionControlState;
    private final JointSpaceHandControlControlState jointSpaceHandControlState;
    private final LoadBearingCylindricalHandControlState loadBearingCylindricalState;
    private final ObjectManipulationState objectManipulationState;
    private final LoadBearingPlaneHandControlState loadBearingPlaneFingersBentBackState;
    private final List<TaskspaceHandPositionControlState> taskSpacePositionControlStates = new ArrayList<TaskspaceHandPositionControlState>();
+   private final PointPositionHandControlState pointPositionControlState;
 
    private final EnumYoVariable<IndividualHandControlState> requestedState;
    private final HandControllerInterface handController;
@@ -64,7 +67,7 @@ public class IndividualHandControlModule
    private final FullRobotModel fullRobotModel;
    private final SE3PDGains defaultGains = new SE3PDGains();
    private final Map<ReferenceFrame, YoSE3ConfigurationProvider> currentDesiredConfigurationProviders = new LinkedHashMap<ReferenceFrame,
-         YoSE3ConfigurationProvider>();
+                                                                                                           YoSE3ConfigurationProvider>();
 
    public IndividualHandControlModule(final DoubleYoVariable simulationTime, final RobotSide robotSide, FullRobotModel fullRobotModel,
                                       final TwistCalculator twistCalculator, final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
@@ -133,35 +136,46 @@ public class IndividualHandControlModule
       objectManipulationState = new ObjectManipulationState(IndividualHandControlState.OBJECT_MANIPULATION, robotSide, momentumBasedController, jacobian,
               handController, toolBody, dynamicGraphicObjectsListRegistry, parentRegistry);
 
-      taskspaceHandPositionControlState = new TaskspaceHandPositionControlState(IndividualHandControlState.TASK_SPACE_POSITION, robotSide,
-              momentumBasedController, jacobian, dynamicGraphicObjectsListRegistry, registry);
+      taskSpacePositionControlState = new TaskspaceHandPositionControlState(IndividualHandControlState.TASK_SPACE_POSITION, robotSide, momentumBasedController,
+              jacobian, dynamicGraphicObjectsListRegistry, registry);
 
-      addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, taskspaceHandPositionControlState);
+      pointPositionControlState = new PointPositionHandControlState(momentumBasedController, robotSide, dynamicGraphicObjectsListRegistry, registry);
+
+      addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, taskSpacePositionControlState);
       addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, objectManipulationState);
       addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, jointSpaceHandControlState);
+      addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, pointPositionControlState);
 
-      addRequestedStateTransition(requestedState, false, taskspaceHandPositionControlState, objectManipulationState);
-      addRequestedStateTransition(requestedState, false, taskspaceHandPositionControlState, jointSpaceHandControlState);
-      addRequestedStateTransition(requestedState, false, taskspaceHandPositionControlState, taskspaceHandPositionControlState);
+      addRequestedStateTransition(requestedState, false, taskSpacePositionControlState, objectManipulationState);
+      addRequestedStateTransition(requestedState, false, taskSpacePositionControlState, jointSpaceHandControlState);
+      addRequestedStateTransition(requestedState, false, taskSpacePositionControlState, taskSpacePositionControlState);
+      addRequestedStateTransition(requestedState, false, taskSpacePositionControlState, pointPositionControlState);
 
       addRequestedStateTransition(requestedState, false, objectManipulationState, jointSpaceHandControlState);
-      addRequestedStateTransition(requestedState, false, objectManipulationState, taskspaceHandPositionControlState);
+      addRequestedStateTransition(requestedState, false, objectManipulationState, taskSpacePositionControlState);
       addRequestedStateTransition(requestedState, false, objectManipulationState, objectManipulationState);
+      addRequestedStateTransition(requestedState, false, objectManipulationState, pointPositionControlState);
+
+      addRequestedStateTransition(requestedState, false, pointPositionControlState, jointSpaceHandControlState);
+      addRequestedStateTransition(requestedState, false, pointPositionControlState, taskSpacePositionControlState);
+      addRequestedStateTransition(requestedState, false, pointPositionControlState, objectManipulationState);
+      addRequestedStateTransition(requestedState, false, pointPositionControlState, pointPositionControlState);
 
       addTransitionToCylindricalLoadBearing(requestedState, handController, jointSpaceHandControlState, loadBearingCylindricalState, simulationTime);
-      addTransitionToCylindricalLoadBearing(requestedState, handController, taskspaceHandPositionControlState, loadBearingCylindricalState, simulationTime);
-      addTransitionToLeaveCylindricalLoadBearing(requestedState, handController, loadBearingCylindricalState, taskspaceHandPositionControlState);
+      addTransitionToCylindricalLoadBearing(requestedState, handController, taskSpacePositionControlState, loadBearingCylindricalState, simulationTime);
+      addTransitionToLeaveCylindricalLoadBearing(requestedState, handController, loadBearingCylindricalState, taskSpacePositionControlState);
 
-      addTransitionToPlaneLoadBearingFingersBentBack(requestedState, handController, taskspaceHandPositionControlState, loadBearingPlaneFingersBentBackState);
-      addRequestedStateTransition(requestedState, true, loadBearingPlaneFingersBentBackState, taskspaceHandPositionControlState);
+      addTransitionToPlaneLoadBearingFingersBentBack(requestedState, handController, taskSpacePositionControlState, loadBearingPlaneFingersBentBackState);
+      addRequestedStateTransition(requestedState, true, loadBearingPlaneFingersBentBackState, taskSpacePositionControlState);
 
       stateMachine.addState(jointSpaceHandControlState);
-      stateMachine.addState(taskspaceHandPositionControlState);
+      stateMachine.addState(taskSpacePositionControlState);
       stateMachine.addState(objectManipulationState);
       stateMachine.addState(loadBearingCylindricalState);
       stateMachine.addState(loadBearingPlaneFingersBentBackState);
+      stateMachine.addState(pointPositionControlState);
 
-      taskSpacePositionControlStates.add(taskspaceHandPositionControlState);
+      taskSpacePositionControlStates.add(taskSpacePositionControlState);
       taskSpacePositionControlStates.add(objectManipulationState);
 
       parentRegistry.addChild(registry);
@@ -258,12 +272,20 @@ public class IndividualHandControlModule
    public void executeTaskSpaceTrajectory(PositionTrajectoryGenerator positionTrajectory, OrientationTrajectoryGenerator orientationTrajectory,
            ReferenceFrame frameToControlPoseOf, RigidBody base, boolean estimateMassProperties, SE3PDGains gains)
    {
-      TaskspaceHandPositionControlState state = estimateMassProperties ? objectManipulationState : taskspaceHandPositionControlState;
+      TaskspaceHandPositionControlState state = estimateMassProperties ? objectManipulationState : taskSpacePositionControlState;
       RigidBodySpatialAccelerationControlModule rigidBodySpatialAccelerationControlModule =
          getOrCreateRigidBodySpatialAccelerationControlModule(frameToControlPoseOf);
       rigidBodySpatialAccelerationControlModule.setGains(gains);
       state.setTrajectory(positionTrajectory, orientationTrajectory, base, rigidBodySpatialAccelerationControlModule);
       requestedState.set(state.getStateEnum());
+      stateMachine.checkTransitionConditions();
+   }
+
+   public void executePointPositionTrajectory(PositionTrajectoryGenerator positionTrajectoryGenerator, EuclideanPositionController positionController,
+           FramePoint pointToControlPositionOf, GeometricJacobian jacobian)
+   {
+      pointPositionControlState.setTrajectory(positionTrajectoryGenerator, positionController, pointToControlPositionOf, jacobian);
+      requestedState.set(pointPositionControlState.getStateEnum());
       stateMachine.checkTransitionConditions();
    }
 
@@ -293,6 +315,7 @@ public class IndividualHandControlModule
          pose = new FramePose(frameToControlPoseOf);
          pose.changeFrame(trajectoryFrame);
       }
+
       return pose;
    }
 
@@ -324,7 +347,7 @@ public class IndividualHandControlModule
       if (handController.isClosing())
          requestedState.set(loadBearingCylindricalState.getStateEnum());
       else if (handController.areFingersBendingBack())
-       requestedState.set(loadBearingPlaneFingersBentBackState.getStateEnum());
+         requestedState.set(loadBearingPlaneFingersBentBackState.getStateEnum());
    }
 
    public void executeJointSpaceTrajectory(Map<OneDoFJoint, ? extends DoubleTrajectoryGenerator> trajectories)
@@ -462,10 +485,12 @@ public class IndividualHandControlModule
       YoSE3ConfigurationProvider ret = currentDesiredConfigurationProviders.get(frameToControlPositionOf);
       if (ret == null)
       {
-         ret = new YoSE3ConfigurationProvider("currentDesired" + frameToControlPositionOf.getName() + "Configuration", ReferenceFrame.getWorldFrame(), registry);
+         ret = new YoSE3ConfigurationProvider("currentDesired" + frameToControlPositionOf.getName() + "Configuration", ReferenceFrame.getWorldFrame(),
+                 registry);
          currentDesiredConfigurationProviders.put(frameToControlPositionOf, ret);
          updateCurrentDesiredConfiguration();
       }
+
       return ret;
    }
 }
