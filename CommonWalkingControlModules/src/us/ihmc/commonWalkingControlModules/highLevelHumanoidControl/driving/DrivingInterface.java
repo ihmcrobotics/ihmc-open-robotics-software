@@ -44,7 +44,7 @@ public interface DrivingInterface
     */
    public abstract void setGear(GearName gearName, boolean overrideChecks);
 
-   enum GearName
+   public enum GearName
    {
       FORWARD, NEUTRAL, REVERSE
    }

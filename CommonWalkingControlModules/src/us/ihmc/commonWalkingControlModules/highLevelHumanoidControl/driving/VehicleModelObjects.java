@@ -25,4 +25,8 @@ public interface VehicleModelObjects
    double getSteeringWheelOuterRadius();
 
    double getSteeringWheelInnerRadius();
+   
+   double getMaximumGasPedalDistance();
+   
+   double getMaximumBrakePedalDistance();
 }

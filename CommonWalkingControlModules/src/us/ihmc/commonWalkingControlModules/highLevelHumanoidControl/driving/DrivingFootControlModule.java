@@ -15,6 +15,9 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
+import us.ihmc.packets.LowLevelDrivingAction;
+import us.ihmc.packets.LowLevelDrivingStatus;
+import us.ihmc.utilities.io.streamingData.QueueBasedStreamingDataProducer;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -37,6 +40,8 @@ public class DrivingFootControlModule
    private final FramePoint toePoint;
    private final EuclideanPositionController toePointPositionController;
    private final MomentumBasedController momentumBasedController;
+   
+   private final QueueBasedStreamingDataProducer<LowLevelDrivingStatus> statusProducer;
 
    private final FramePoint desiredPosition = new FramePoint();
    private final FrameVector desiredVelocity = new FrameVector();
@@ -79,8 +84,9 @@ public class DrivingFootControlModule
    private final double pedalY = 0.02;
 
    public DrivingFootControlModule(RigidBody elevator, ContactablePlaneBody contactablePlaneFoot, MomentumBasedController momentumBasedController,
-                                   DrivingReferenceFrames drivingReferenceFrames, DoubleYoVariable yoTime, TwistCalculator twistCalculator, YoVariableRegistry parentRegistry)
+                                   DrivingReferenceFrames drivingReferenceFrames, DoubleYoVariable yoTime, TwistCalculator twistCalculator, YoVariableRegistry parentRegistry, QueueBasedStreamingDataProducer<LowLevelDrivingStatus> statusProducer)
    {
+      this.statusProducer = statusProducer;
       this.foot = contactablePlaneFoot.getRigidBody();
       this.elevator = elevator;
       registry = new YoVariableRegistry(foot.getName() + getClass().getSimpleName());
@@ -145,6 +151,14 @@ public class DrivingFootControlModule
 
       parentRegistry.addChild(registry);
    }
+   
+   public void addTaskCompletedNotifier(LowLevelDrivingAction action)
+   {
+      if(statusProducer != null)
+      {
+         taskExecutor.submit(new NotifyStatusListenerTask<LowLevelDrivingStatus>(statusProducer, new LowLevelDrivingStatus(action, true)));
+      }
+   }
 
    public void holdPosition()
    {
@@ -156,12 +170,14 @@ public class DrivingFootControlModule
    {
       FramePoint target = new FramePoint(drivingReferenceFrames.getObjectFrame(VehicleObject.GAS_PEDAL), 0.0, pedalY, z);
       moveToPosition(target);
+      addTaskCompletedNotifier(LowLevelDrivingAction.GASPEDAL);
    }
 
    public void moveToPositionInBrakePedalFrame(double z)
    {
       FramePoint target = new FramePoint(drivingReferenceFrames.getObjectFrame(VehicleObject.BRAKE_PEDAL), 0.0, pedalY, z);
       moveToPosition(target);
+      addTaskCompletedNotifier(LowLevelDrivingAction.FOOTBRAKE);
    }
 
    public void initialize()
