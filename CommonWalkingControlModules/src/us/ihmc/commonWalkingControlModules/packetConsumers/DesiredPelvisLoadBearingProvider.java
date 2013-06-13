@@ -5,22 +5,27 @@ import us.ihmc.utilities.net.ObjectConsumer;
 
 public class DesiredPelvisLoadBearingProvider implements ObjectConsumer<BumStatePacket>
 {
-   private boolean hasLoadBearingBeenRequested = false;
+   private boolean hasNewLoadBearingState = false;
+   private boolean loadBearingState = false;
    
    public DesiredPelvisLoadBearingProvider()
    {
    }
-   
-   public synchronized boolean checkForNewLoadBearingRequest()
+
+   public synchronized boolean checkForNewLoadBearingState()
    {
-      boolean ret = hasLoadBearingBeenRequested;
-      hasLoadBearingBeenRequested = false;
-      
-      return ret;
+      return hasNewLoadBearingState;
+   }
+
+   public synchronized boolean getDesiredPelvisLoadBearingState()
+   {
+      hasNewLoadBearingState = false;
+      return loadBearingState;
    }
 
    public synchronized void consumeObject(BumStatePacket object)
    {
-      hasLoadBearingBeenRequested = true;
+      hasNewLoadBearingState = true;
+      loadBearingState = object.isLoadBearing();
    }
 }

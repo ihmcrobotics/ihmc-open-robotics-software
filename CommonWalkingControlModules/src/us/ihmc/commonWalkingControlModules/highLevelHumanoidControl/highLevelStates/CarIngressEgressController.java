@@ -5,6 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -42,6 +44,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -104,6 +107,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    private final RigidBody elevator;
    private final List<ContactablePlaneBody> bodiesInContact = new ArrayList<ContactablePlaneBody>();
    private final Map<ContactablePlaneBody, GeometricJacobian> contactJacobians = new LinkedHashMap<ContactablePlaneBody, GeometricJacobian>();
+
+   private final DenseMatrix64F pelvisNullspaceMultipliers = new DenseMatrix64F(0, 1);
 
    private BooleanYoVariable requestedPelvisLoadBearing = new BooleanYoVariable("requestedPelvisLoadBearing", registry);
    private BooleanYoVariable requestedPelvisBackLoadBearing = new BooleanYoVariable("requestedPelvisBackLoadBearing", registry);
@@ -339,9 +344,6 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
    protected void doPelvisControl()
    {
-      if (requestedPelvisLoadBearing.getBooleanValue())
-         return;
-      
       if (pelvisPoseProvider.checkForNewPose())
       {
          double time = yoTime.getDoubleValue() - pelvisTrajectoryStartTime;
@@ -392,7 +394,20 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       pelvisSpatialAcceleration.changeBodyFrameNoRelativeAcceleration(fullRobotModel.getPelvis().getBodyFixedFrame());
       pelvisSpatialAcceleration.changeFrameNoRelativeMotion(fullRobotModel.getPelvis().getBodyFixedFrame());
 
-      pelvisTaskspaceConstraintData.set(pelvisSpatialAcceleration);
+      if (!requestedPelvisLoadBearing.getBooleanValue())
+      {
+         pelvisTaskspaceConstraintData.set(pelvisSpatialAcceleration);
+      }
+      else
+      {
+         DenseMatrix64F selectionMatrix = new DenseMatrix64F(5, SpatialMotionVector.SIZE);
+         for (int i = 0; i < selectionMatrix.getNumRows(); i++)
+         {
+            selectionMatrix.set(i, i, 1.0);
+         }
+         pelvisTaskspaceConstraintData.set(pelvisSpatialAcceleration, pelvisNullspaceMultipliers, selectionMatrix);
+      }
+      
       momentumBasedController.setDesiredSpatialAcceleration(pelvisJacobian, pelvisTaskspaceConstraintData);
 
       desiredOrientation.changeFrame(this.desiredPelvisOrientation.getReferenceFrame());
@@ -505,20 +520,9 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          }
       }
 
-      if (pelvisLoadBearingProvider.checkForNewLoadBearingRequest())
+      if (pelvisLoadBearingProvider.checkForNewLoadBearingState())
       {
-         if (requestedPelvisLoadBearing.getBooleanValue() && requestedPelvisBackLoadBearing.getBooleanValue())
-            requestedPelvisBackLoadBearing.set(false);
-         else if (requestedPelvisLoadBearing.getBooleanValue())
-            requestedPelvisBackLoadBearing.set(true);
-         else
-            requestedPelvisLoadBearing.set(true);
-      }
-      
-      if (pelvisPoseProvider.checkForNewPose())
-      {
-         requestedPelvisLoadBearing.set(false);
-         requestedPelvisBackLoadBearing.set(false);
+          requestedPelvisLoadBearing.set(pelvisLoadBearingProvider.getDesiredPelvisLoadBearingState());
       }
    }
 
@@ -581,12 +585,12 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       if (inContact)
       {
          momentumBasedController.setPlaneContactState(contactablePelvis, contactablePelvis.getContactPoints2d(), coefficientOfFrictionForBumAndThighs.getDoubleValue(), null);
-         addBodyInContact(contactablePelvis);
+//         addBodyInContact(contactablePelvis);
       }
       else
       {
          momentumBasedController.setPlaneContactState(contactablePelvis, new ArrayList<FramePoint2d>(), coefficientOfFrictionForBumAndThighs.getDoubleValue(), null);
-         removeBodyInContact(contactablePelvis);
+//         removeBodyInContact(contactablePelvis);
       }
    }
 
