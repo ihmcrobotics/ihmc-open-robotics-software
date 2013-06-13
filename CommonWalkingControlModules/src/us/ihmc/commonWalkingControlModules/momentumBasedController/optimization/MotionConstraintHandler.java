@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import javax.vecmath.Tuple3d;
-
 import org.apache.commons.lang.mutable.MutableDouble;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -80,18 +78,13 @@ public class MotionConstraintHandler
    }
 
    public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase,
-           Tuple3d selectionVector, double weight)
+           DenseMatrix64F selectionMatrix, double weight)
    {
       pointJacobian.set(jacobian, bodyFixedPoint);
       pointJacobian.compute();
       desiredAccelerationWithRespectToBase.changeFrame(jacobian.getBaseFrame());
 
       DenseMatrix64F pointJacobianMatrix = pointJacobian.getJacobianMatrix();
-
-      DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 3);
-      selectionMatrix.set(0, 0, selectionVector.x);
-      selectionMatrix.set(1, 1, selectionVector.y);
-      selectionMatrix.set(2, 2, selectionVector.z);
 
       jBlockCompact.reshape(selectionMatrix.getNumRows(), pointJacobianMatrix.getNumCols());
 
@@ -103,8 +96,9 @@ public class MotionConstraintHandler
       pPointVelocity.scale(-1.0);
       pPointVelocity.add(desiredAccelerationWithRespectToBase);
       DenseMatrix64F pBlock = getMatrixFromList(pList, motionConstraintIndex, selectionMatrix.getNumRows(), 1);
-      MatrixTools.setDenseMatrixFromTuple3d(pBlock, pPointVelocity.getVector(), 0, 0);
-      CommonOps.mult(selectionMatrix, new DenseMatrix64F(pBlock), pBlock);
+      DenseMatrix64F pPointMatrixVelocity = new DenseMatrix64F(3, 1);
+      MatrixTools.setDenseMatrixFromTuple3d(pPointMatrixVelocity, pPointVelocity.getVector(), 0, 0);
+      CommonOps.mult(selectionMatrix, pPointMatrixVelocity, pBlock);
       
       MutableDouble weightBlock = getMutableDoubleFromList(weightList, motionConstraintIndex);
       weightBlock.setValue(weight);

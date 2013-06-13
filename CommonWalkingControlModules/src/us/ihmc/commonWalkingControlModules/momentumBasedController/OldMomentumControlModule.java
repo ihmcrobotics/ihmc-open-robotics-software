@@ -5,7 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
@@ -307,7 +306,7 @@ public class OldMomentumControlModule implements MomentumControlModule
       throw new NoSuchMethodError();
    }
 
-   public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase, Tuple3d selectionVector)
+   public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase, DenseMatrix64F selectionMatrix)
    {
       throw new NoSuchMethodError();
    }

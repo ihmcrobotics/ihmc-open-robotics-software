@@ -2,8 +2,6 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import java.util.Map;
 
-import javax.vecmath.Tuple3d;
-
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableCylinderBody;
@@ -47,7 +45,7 @@ public interface MomentumControlModule
 
    public abstract void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase);
    
-   public abstract void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase, Tuple3d selectionVector);
+   public abstract void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase, DenseMatrix64F selectionMatrix);
 
    public abstract void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration, double weight);
 
