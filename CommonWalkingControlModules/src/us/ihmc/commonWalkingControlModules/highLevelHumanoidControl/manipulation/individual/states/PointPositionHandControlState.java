@@ -3,10 +3,13 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.EuclideanPositionController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.IndividualHandControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.math.geometry.*;
@@ -22,6 +25,7 @@ public class PointPositionHandControlState extends State<IndividualHandControlSt
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final MomentumBasedController momentumBasedController;
    private final TwistCalculator twistCalculator;
+   private final YoFramePoint yoDesiredPosition;
 
 
    private PositionTrajectoryGenerator positionTrajectoryGenerator;
@@ -49,8 +53,17 @@ public class PointPositionHandControlState extends State<IndividualHandControlSt
       this.momentumBasedController = momentumBasedController;
       this.twistCalculator = momentumBasedController.getTwistCalculator();
 
-      String name = robotSide.getCamelCaseNameForStartOfExpression() + FormattingTools.underscoredToCamelCase(this.stateEnum.toString(), true) + "State";
+      String stateName = FormattingTools.underscoredToCamelCase(this.stateEnum.toString(), true) + "State";
+      String name = robotSide.getCamelCaseNameForStartOfExpression() + stateName;
       registry = new YoVariableRegistry(name);
+      String desiredHandPositionName = robotSide.getCamelCaseNameForStartOfExpression() + "HandDesPointPosition";
+      yoDesiredPosition = new YoFramePoint(desiredHandPositionName, worldFrame, registry);
+
+      if (dynamicGraphicObjectsListRegistry != null)
+      {
+         DynamicGraphicPosition desiredPositionViz = yoDesiredPosition.createDynamicGraphicPosition(desiredHandPositionName, 0.01, YoAppearance.FireBrick());
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(stateName, desiredPositionViz);
+      }
 
       parentRegistry.addChild(registry);
    }
@@ -71,6 +84,9 @@ public class PointPositionHandControlState extends State<IndividualHandControlSt
       pointAcceleration.setToZero(positionController.getBodyFrame());
 
       positionController.compute(pointAcceleration, desiredPosition, desiredVelocity, currentVelocity, desiredAcceleration);
+
+      desiredPosition.changeFrame(worldFrame);
+      yoDesiredPosition.set(desiredPosition);
 
       pointAcceleration.changeFrame(jacobian.getBaseFrame());
 
