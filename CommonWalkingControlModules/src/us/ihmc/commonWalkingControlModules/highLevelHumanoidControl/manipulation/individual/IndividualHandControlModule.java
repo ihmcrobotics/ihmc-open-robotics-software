@@ -309,6 +309,10 @@ public class IndividualHandControlModule
          // start at current desired
          pose = getCurrentDesiredPose((TaskspaceHandPositionControlState) stateMachine.getCurrentState(), frameToControlPoseOf, trajectoryFrame);
       }
+      else if (stateMachine.getCurrentState() instanceof PointPositionHandControlState)
+      {
+         pose = getCurrentDesiredPose((PointPositionHandControlState) stateMachine.getCurrentState(), frameToControlPoseOf, trajectoryFrame);
+      }
       else
       {
          // FIXME: make this be based on desired joint angles
