@@ -36,7 +36,7 @@ public class DRCRobotDrivingControllerParameters extends DRCRobotWalkingControll
    @Override
    public String[] getDefaultChestOrientationControlJointNames()
    {
-      return new String[] {"back_mby"};
+      return new String[] {"back_lbz", "back_mby"};
 //      return new String[] {};
    }
 

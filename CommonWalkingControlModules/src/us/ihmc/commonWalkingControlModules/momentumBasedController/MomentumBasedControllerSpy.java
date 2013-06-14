@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -118,18 +119,23 @@ public class MomentumBasedControllerSpy
 
       if (printMomentumCommands.getBooleanValue())
       {
-         StringBuffer stringBuffer = new StringBuffer();
-         getCommandsIntoStringBufferBrief(stringBuffer);
-         System.out.println("\n\n***** MomentumBasedControllerSpy: *****\n" + stringBuffer);
-
-         stringBuffer = new StringBuffer();
-
-         getCommandsIntoStringBufferVerbose(stringBuffer);
-         System.out.println("\n\n***** MomentumBasedControllerSpy: *****\n" + stringBuffer);
+         printMomentumCommands(System.out);
 
          printMomentumCommands.set(false);
       }
 
+   }
+
+   public void printMomentumCommands(PrintStream printStream)
+   {
+      StringBuffer stringBuffer = new StringBuffer();
+      getCommandsIntoStringBufferBrief(stringBuffer);
+      printStream.println("\n\n***** MomentumBasedControllerSpy: *****\n" + stringBuffer);
+
+      stringBuffer = new StringBuffer();
+
+      getCommandsIntoStringBufferVerbose(stringBuffer);
+      printStream.println("\n\n***** MomentumBasedControllerSpy: *****\n" + stringBuffer);
    }
 
 
@@ -202,7 +208,6 @@ public class MomentumBasedControllerSpy
       stringBuffer.append(rollingContactStateCommands.size() + " RollingContactStateCommands\n");
       stringBuffer.append(cylindricalContactInContactCommands.size() + " CylindricalContactInContactCommands\n");
    }
-
 
    private class ExternalWrenchCommand
    {

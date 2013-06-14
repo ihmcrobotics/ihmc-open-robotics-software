@@ -33,6 +33,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -207,7 +208,14 @@ public class SimpleStanceController implements RobotController
 
    private void setJointAccelerationsAndWrenches()
    {
-      momentumControlModule.compute(contactStates, null, null);
+      try
+      {
+         momentumControlModule.compute(contactStates, null, null);
+      }
+      catch (NoConvergenceException e)
+      {
+         e.printStackTrace();
+      }
 
       Map<RigidBody, Wrench> externalWrenches = momentumControlModule.getExternalWrenches();
 

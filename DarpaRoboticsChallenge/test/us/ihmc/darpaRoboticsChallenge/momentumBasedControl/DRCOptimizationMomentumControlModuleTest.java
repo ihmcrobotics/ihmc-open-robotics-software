@@ -27,6 +27,7 @@ import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.utilities.math.geometry.CenterOfMassReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.*;
@@ -102,7 +103,14 @@ public class DRCOptimizationMomentumControlModuleTest
             momentumControlModule.setDesiredJointAcceleration(inverseDynamicsJoint, vdDesired);
          }
 
-         momentumControlModule.compute(contactStates, null, null);
+         try
+         {
+            momentumControlModule.compute(contactStates, null, null);
+         }
+         catch (NoConvergenceException e)
+         {
+            e.printStackTrace();
+         }
 
          for (InverseDynamicsJoint inverseDynamicsJoint : jointsToOptimizeFor)
          {
@@ -118,7 +126,7 @@ public class DRCOptimizationMomentumControlModuleTest
    }
 
    @Test
-   public void testStandingInDoubleSupport()
+   public void testStandingInDoubleSupport() throws NoConvergenceException
    {
       Random random = new Random(1252515L);
 

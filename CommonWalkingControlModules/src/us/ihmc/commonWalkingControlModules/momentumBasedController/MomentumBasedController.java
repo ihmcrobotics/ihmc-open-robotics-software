@@ -30,6 +30,7 @@ import us.ihmc.commonWalkingControlModules.stateEstimation.PointPositionGrabberI
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
+import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -376,7 +377,16 @@ public class MomentumBasedController
 
       updateMomentumBasedControllerSpy();
 
-      activeMomentumControlModule.compute(this.contactStates, this.cylindricalContactStates, upcomingSupportLeg.getEnumValue());
+      try
+      {
+         activeMomentumControlModule.compute(this.contactStates, this.cylindricalContactStates, upcomingSupportLeg.getEnumValue());
+      }
+      catch (NoConvergenceException e)
+      {
+         if (momentumBasedControllerSpy != null)
+            momentumBasedControllerSpy.printMomentumCommands(System.err);
+         throw new RuntimeException(e);
+      }
 
       SpatialForceVector desiredCentroidalMomentumRate = activeMomentumControlModule.getDesiredCentroidalMomentumRate();
 
