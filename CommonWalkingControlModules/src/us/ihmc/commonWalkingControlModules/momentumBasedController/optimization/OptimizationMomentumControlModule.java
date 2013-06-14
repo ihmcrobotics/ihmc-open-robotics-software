@@ -187,7 +187,15 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       momentumOptimizerNativeInput.setGroundReactionForceRegularization(wrenchMatrixCalculator.getWRho());
       momentumOptimizerNativeInput.setPhiRegularization(wrenchMatrixCalculator.getWPhi());
 
-      optimize(momentumOptimizerNativeInput);
+      NoConvergenceException noConvergenceException = null;
+      try
+      {
+         optimize(momentumOptimizerNativeInput);
+      }
+      catch (NoConvergenceException e)
+      {
+         noConvergenceException = e;
+      }
 
       CVXWithCylinderNativeOutput output = momentumOptimizerNative.getOutput();
 
@@ -200,6 +208,9 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       ScrewTools.setDesiredAccelerations(jointsToOptimizeFor, jointAccelerations);
 
       centroidalMomentumHandler.computeCentroidalMomentumRate(jointsToOptimizeFor, jointAccelerations);
+
+      if (noConvergenceException != null)
+         throw noConvergenceException;
    }
 
    private static LinkedHashMap<RigidBody, PlaneContactState> convertContactStates(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates)
