@@ -7,6 +7,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 public class DRCConfigParameters
 {
    public static final boolean USE_DUMMY_DRIVNG = false;
+   public static final boolean RESTART_FOR_FANCY_CONTROL = true;     // Enable for testing standup
    
    public static final boolean ALLOW_LAG_SIMULATION = true;
    public static final boolean ENABLE_LAG_SIMULATION_ON_START = false;
@@ -71,7 +72,7 @@ public class DRCConfigParameters
    public static final String CONSTELLATION_FIELD_COMPUTER_1_VPN_IP = "10.0.0.52";
    public static final String CONSTELLATION_FIELD_COMPUTER_2_VPN_IP = "10.0.0.53";
 
-   public static final String GAZEBO_HOST = CLOUD_MINION1_IP; //CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP;
+   public static final String GAZEBO_HOST = CLOUD_MINION3_IP; //CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP;
    public static final String SCS_MACHINE_IP_ADDRESS = LOCALHOST; //CONSTELLATION_FIELD_COMPUTER_2_VPN_IP;    // CLOUD_MONSTER_IP;
    public static final String NET_PROC_MACHINE_IP_ADDRESS = LOCALHOST; //CONSTELLATION_FIELD_COMPUTER_1_VPN_IP;    // SCS_MACHINE_IP_ADDRESS;
 
@@ -151,7 +152,7 @@ public class DRCConfigParameters
    public static final double LIDAR_RESOLUTION_SPHERE_OUTER_RESOLUTION = 0.5;
    public static final double LIDAR_RESOLUTION_SPHERE_OUTER_RADIUS = 6.0;
    public static final double LIDAR_RESOLUTION_SPHERE_INNER_RESOLUTION = 0.02;
-   public static final double LIDAR_RESOLUTION_SPHERE_INNER_RADIUS = 1.0;
+   public static final double LIDAR_RESOLUTION_SPHERE_INNER_RADIUS = 1.0;   
    public static final double LIDAR_RESOLUTION_SPHERE_DISTANCE_FROM_HEAD = 1.0;
 
    public static final boolean USE_TABS_IN_UI = true;
@@ -161,5 +162,6 @@ public class DRCConfigParameters
 
    public static final int CHEATING_POLARIS_PORT = 1543;
    public static final String CHEATING_POLARIS_HOST = LOCALHOST;
+
    
 }

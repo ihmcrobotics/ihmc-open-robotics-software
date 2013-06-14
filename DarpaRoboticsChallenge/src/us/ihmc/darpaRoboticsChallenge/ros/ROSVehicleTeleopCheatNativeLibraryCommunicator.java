@@ -135,6 +135,14 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
       vehiclePoseBuffer = setupDoubleBuffer(getVehiclePoseBuffer());
       clockBuffer = setupLongBuffer(getClockBuffer());
       atlasTeleportPoseCommandBuffer = setupDoubleBuffer(getAtlasTeleportPoseBuffer());
+      
+      Runtime.getRuntime().addShutdownHook(new Thread() {
+         @Override
+         public void run()
+         {
+            shutdown();
+         }
+      });
    }
 
    public static ROSVehicleTeleopCheatNativeLibraryCommunicator getInstance(String rosMasterURI)
@@ -340,4 +348,6 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
    private native void sendAtlasTeleportOutOfVehicleCommand(long timestamp, int delay);
 
    private native void enableOutputNative();
+   
+   private native void shutdown();
 }
