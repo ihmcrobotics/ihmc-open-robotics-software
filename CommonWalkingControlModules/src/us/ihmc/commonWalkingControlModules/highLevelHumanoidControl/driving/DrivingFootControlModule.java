@@ -33,7 +33,7 @@ import java.util.List;
  */
 public class DrivingFootControlModule
 {
-   private final double AVERAGE_VELOCITY = 0.8;
+   private final double AVERAGE_VELOCITY = 0.3;
 
    private final YoVariableRegistry registry;
    private final GeometricJacobian footJacobian;
