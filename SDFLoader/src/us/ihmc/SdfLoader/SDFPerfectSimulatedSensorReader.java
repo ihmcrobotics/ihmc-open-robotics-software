@@ -123,7 +123,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader
    private void readAndUpdateRootJointPositionAndOrientation()
    {
       packRootTransform(robot, temporaryRootToWorldTransform);
-      assert (RotationFunctions.isRotationProper(temporaryRootToWorldTransform));
+      RotationFunctions.assertProper(temporaryRootToWorldTransform);
       rootJoint.setPositionAndRotation(temporaryRootToWorldTransform);
    }
 

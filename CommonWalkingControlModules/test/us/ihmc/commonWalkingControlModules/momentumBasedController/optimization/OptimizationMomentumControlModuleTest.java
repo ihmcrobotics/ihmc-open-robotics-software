@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateO
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointWrenchMatrixCalculator;
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.utilities.math.NullspaceCalculator;
 import us.ihmc.utilities.math.geometry.CenterOfMassReferenceFrame;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -45,7 +46,7 @@ public class OptimizationMomentumControlModuleTest
    private final double gravityZ = 9.81;
 
    @Test
-   public void testMomentumAndJointSpaceConstraints()
+   public void testMomentumAndJointSpaceConstraints() throws NoConvergenceException
    {
       Random random = new Random(1223525L);
       Vector3d[] jointAxes = new Vector3d[]
@@ -94,7 +95,7 @@ public class OptimizationMomentumControlModuleTest
    }
 
    @Test
-   public void testMomentumAndTaskSpaceConstraints()
+   public void testMomentumAndTaskSpaceConstraints() throws NoConvergenceException
    {
       Random random = new Random(1223525L);
       Vector3d[] jointAxes = new Vector3d[]
@@ -156,7 +157,7 @@ public class OptimizationMomentumControlModuleTest
    }
 
    @Test
-   public void testMomentumAndPointAccelerationConstraints()
+   public void testMomentumAndPointAccelerationConstraints() throws NoConvergenceException
    {
       Random random = new Random(1223525L);
       Vector3d[] jointAxes = new Vector3d[]
@@ -225,7 +226,7 @@ public class OptimizationMomentumControlModuleTest
    }
 
    @Test
-   public void testSingleRigidBody()
+   public void testSingleRigidBody() throws NoConvergenceException
    {
       Random random = new Random(125152L);
       ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", ReferenceFrame.getWorldFrame(),
@@ -282,7 +283,7 @@ public class OptimizationMomentumControlModuleTest
    }
 
    @Test
-   public void testPrimaryAndSecondaryConstraints()
+   public void testPrimaryAndSecondaryConstraints() throws NoConvergenceException
    {
       Random random = new Random(1223525L);
       Vector3d[] jointAxes = new Vector3d[]
@@ -361,7 +362,7 @@ public class OptimizationMomentumControlModuleTest
    }
 
    @Test
-   public void testNullspaceMultipliers()
+   public void testNullspaceMultipliers() throws NoConvergenceException
    {
       Random random = new Random(2534L);
       Vector3d[] jointAxes = new Vector3d[]

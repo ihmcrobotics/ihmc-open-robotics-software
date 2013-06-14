@@ -137,14 +137,18 @@ public class PointPositionRotateSteeringWheelBehavior
          double trajectoryTime = Math.abs(relativeRotationAngle / averageAngularVelocity);
          trajectoryTimeProvider.set(trajectoryTime);
          desiredRotationAngleProvider.set(relativeRotationAngle);
+         double kp = 100.0;
+         double kd = GainCalculator.computeDerivativeGain(kp, 1.0);
+         positionController.setProportionalGains(kp, kp, kp);
+         positionController.setDerivativeGains(kd, kd, kd);
          individualHandControlModule.executePointPositionTrajectory(trajectoryGenerator, positionController, tempPoint, jacobian);
       }
 
       public void doAction()
       {
-         updateXTangentialFrame();
-         setExternalWrench();
-         updateGains();
+//         updateXTangentialFrame();
+//         setExternalWrench();
+//         updateGains();
       }
 
       private void setExternalWrench()
@@ -205,6 +209,9 @@ public class PointPositionRotateSteeringWheelBehavior
          y.setToZero(steeringWheelFrame);
          y.cross(z, x);
          y.normalize();
+
+         z.cross(x, y);
+         z.normalize(); // should not be necessary, but just to be sure
 
          tempMatrix.setColumn(0, x.getVector());
          tempMatrix.setColumn(1, y.getVector());

@@ -110,7 +110,8 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    }
 
    public void compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates,
-                       Map<ContactableCylinderBody, ? extends CylindricalContactState> cylinderContactStates, RobotSide upcomingSupportLeg)
+                       Map<ContactableCylinderBody, ? extends CylindricalContactState> cylinderContactStates, RobotSide upcomingSupportLeg) throws NoConvergenceException
+
    {
       LinkedHashMap<RigidBody, PlaneContactState> planeContactStates = convertContactStates(contactStates);
       LinkedHashMap<RigidBody, CylindricalContactState> cylinderContactStatesConverted;
@@ -223,7 +224,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       return ret;
    }
 
-   private void optimize(CVXWithCylinderNativeInput momentumOptimizerNativeInput)
+   private void optimize(CVXWithCylinderNativeInput momentumOptimizerNativeInput) throws NoConvergenceException
    {
       try
       {
@@ -241,6 +242,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
          converged.set(false);
          hasNotConvergedInPast.set(true);
+         throw e;
       }
    }
 
