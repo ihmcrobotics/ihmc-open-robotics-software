@@ -89,6 +89,8 @@ public class DRCConfigParameters
 
    public static final int NETWORK_PROCESSOR_CLOUD_DISPATCHER_BACKEND_TCP_PORT = 5000;
 
+   public static final int CONTROLLER_CLOUD_DISPATCHER_BACKEND_TCP_PORT = 5002;
+
    public static final long ROBOT_JOINT_SERVER_UPDATE_MILLIS = 100;
 
    // Video Settings

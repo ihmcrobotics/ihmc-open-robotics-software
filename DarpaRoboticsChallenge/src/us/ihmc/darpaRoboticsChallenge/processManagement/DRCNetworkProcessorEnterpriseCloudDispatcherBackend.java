@@ -1,7 +1,8 @@
-package us.ihmc.darpaRoboticsChallenge.networkProcessor;
+package us.ihmc.darpaRoboticsChallenge.processManagement;
 
 import com.martiansoftware.jsap.*;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
 import us.ihmc.utilities.net.tcpServer.DisconnectedException;
 import us.ihmc.utilities.net.tcpServer.ReconnectingTCPServer;
