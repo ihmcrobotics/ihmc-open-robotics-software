@@ -325,7 +325,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       callUpdatables();
       updateLoadBearingStates();
 
-      doContactPointControl();
+//      doContactPointControl();
       doFootControl();
       doArmControl();
       doHeadControl();
@@ -599,6 +599,22 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       }
    }
 
+   public void setPelvisInContactWithOneContactPoint(boolean inContact)
+   {
+      if (inContact)
+      {
+         ArrayList<FramePoint2d> pelvisContactPoint = new ArrayList<FramePoint2d>();
+         pelvisContactPoint.add(new FramePoint2d(contactablePelvis.getPlaneFrame()));
+         momentumBasedController.setPlaneContactState(contactablePelvis, pelvisContactPoint, coefficientOfFrictionForBumAndThighs.getDoubleValue(), null);
+         addBodyInContact(contactablePelvis);
+      }
+      else
+      {
+         momentumBasedController.setPlaneContactState(contactablePelvis, new ArrayList<FramePoint2d>(), coefficientOfFrictionForBumAndThighs.getDoubleValue(), null);
+         removeBodyInContact(contactablePelvis);
+      }
+   }
+
    public void setPelvisBackInContact(boolean inContact)
    {
       if (inContact)
@@ -685,7 +701,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
             return;
 
          if (v.equals(requestedPelvisLoadBearing))
-            setPelvisInContact(requestedPelvisLoadBearing.getBooleanValue());
+            setPelvisInContactWithOneContactPoint(requestedPelvisLoadBearing.getBooleanValue());
 
          if (v.equals(requestedPelvisBackLoadBearing))
             setPelvisBackInContact(requestedPelvisBackLoadBearing.getBooleanValue());
