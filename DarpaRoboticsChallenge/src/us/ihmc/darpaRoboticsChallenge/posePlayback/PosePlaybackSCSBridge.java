@@ -170,6 +170,7 @@ public class PosePlaybackSCSBridge
       sliderBoard.addResetToBasePoseRequestedListener(resetToBasePoseListener);
       
       poseSequenceEditorGUI = new PoseSequenceEditorGUI(registry,posePlaybackController,sdfRobot, sliderBoard);
+      poseSequenceEditorGUI.setVisible(true);
       
       scs.startOnAThread();
 
@@ -186,8 +187,6 @@ public class PosePlaybackSCSBridge
       {
          System.err.println("Didn't connect to posePlaybackSender!");
       }
-
-      poseSequenceEditorGUI.setVisible(true);
 
 
    }

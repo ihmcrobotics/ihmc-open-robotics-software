@@ -47,7 +47,8 @@ public class PoseSequenceEditorGUI extends JFrame
    
    private class ButtonPanel extends JPanel implements ActionListener 
    { 
-      private JButton selectNewPoseSequence, selectPoseSequence, deleteRow, updateSCS, setRowWithSlider, save,copyAndInsertRow, insertInterpolation; 
+      private JButton selectNewPoseSequence, selectPoseSequence, deleteRow, updateSCS, setRowWithSlider, save, switchSideDependentValues, copyAndInsertRow,
+            insertInterpolation;
       
       public ButtonPanel()
       {
@@ -60,6 +61,7 @@ public class PoseSequenceEditorGUI extends JFrame
          setRowWithSlider = new JButton("Set row with slider");
          save = new JButton("Save");
          copyAndInsertRow = new JButton("Copy/insert row");
+         switchSideDependentValues = new JButton("Switch side dependent values");
          insertInterpolation = new JButton("Insert interpolated row");
          
          buttonPanel.add(selectNewPoseSequence);
@@ -69,6 +71,7 @@ public class PoseSequenceEditorGUI extends JFrame
          buttonPanel.add(deleteRow);
          buttonPanel.add(updateSCS);
          buttonPanel.add(setRowWithSlider);
+         buttonPanel.add(switchSideDependentValues);
          buttonPanel.add(save);
          
          selectNewPoseSequence.addActionListener(this);
@@ -79,6 +82,7 @@ public class PoseSequenceEditorGUI extends JFrame
          updateSCS.addActionListener(this);
          setRowWithSlider.addActionListener(this);
          save.addActionListener(this);
+         switchSideDependentValues.addActionListener(this);
                   
          setLayout(new BorderLayout());
          add(buttonPanel, BorderLayout.SOUTH);
@@ -110,6 +114,9 @@ public class PoseSequenceEditorGUI extends JFrame
          
          else if(e.getSource().equals(insertInterpolation))
             poseSequenceSelectorPanel.insertInterpolation();
+         
+         else if(e.getSource().equals(switchSideDependentValues))
+            poseSequenceSelectorPanel.switchSideDependentValues();
       }
    }
    

@@ -338,4 +338,27 @@ public class PoseSequenceSelectorPanel extends JPanel
       
       updateTableBasedOnPoseSequence();
    }
+
+   public void switchSideDependentValues()
+   {
+      int[] selectedRows = table.getSelectedRows();
+      
+      if(selectedRows.length != 0) // TODO else do it to all rows
+      {
+         for(int row : selectedRows)
+         {
+            PosePlaybackRobotPose pose = sequence.getPoseSequence().get(row);
+            pose.switchSideDependentValues();
+            
+            double[] jointAngles = pose.getJointAngles();
+            System.out.println();
+            for(int i = 0; i < jointAngles.length; i++)
+            {
+               System.out.println(i + " \t" + jointAngles[i]);
+            }
+         }
+      }
+      
+      updateTableBasedOnPoseSequence();
+   }
 }
