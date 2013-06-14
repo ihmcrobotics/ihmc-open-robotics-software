@@ -127,6 +127,11 @@ public class PointPositionRotateSteeringWheelBehavior
 
       public void doTransitionIntoAction()
       {
+//         Transform3D transform3D = creepyGripHandPositionControlFrame.getTransformToDesiredFrame(steeringWheelFrame);
+//         Matrix3d rotationMatrix = new Matrix3d();
+//         transform3D.get(rotationMatrix);
+//         System.out.println(RotationFunctions.getYaw(rotationMatrix) + ", " + RotationFunctions.getPitch(rotationMatrix) + ", " + RotationFunctions.getRoll(rotationMatrix));
+
          tempPoint.setToZero(creepyGripHandPositionControlFrame);
 
          double trajectoryTime = Math.abs(relativeRotationAngle / averageAngularVelocity);
