@@ -24,7 +24,7 @@ public class CommandRecorder
    private ScriptFileSaver scriptFileSaver;
 
 
-   public CommandRecorder(TimestampProvider timestampProvider, NetClassList netClassList)
+   public CommandRecorder(TimestampProvider timestampProvider)
    {
       this.timestampProvider = timestampProvider;
    }
@@ -45,7 +45,7 @@ public class CommandRecorder
             fileAlreadyExists = doesFileAlreadyExists(proposedFilename);
          }
 
-         String path = ScriptEngineSettings.scriptDirectory + "/" + proposedFilename;
+         String path = ScriptEngineSettings.scriptSavingDirectory + "/" + proposedFilename;
 
 
          scriptFileSaver = new ScriptFileSaver(path);
@@ -105,7 +105,7 @@ public class CommandRecorder
 
    private boolean doesFileAlreadyExists(String filename)
    {
-      File directory = new File(ScriptEngineSettings.scriptDirectory);
+      File directory = new File(ScriptEngineSettings.scriptSavingDirectory);
 
       ArrayList<File> files = FileTools.getAllFilesInDirectoryRecursive(directory);
 
