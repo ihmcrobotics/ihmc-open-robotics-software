@@ -53,7 +53,7 @@ public class CommandPlayer implements TimestampListener
       }
       try
       {
-         String fullpath = ScriptEngineSettings.scriptDirectory + filename + ScriptEngineSettings.extension;
+         String fullpath = ScriptEngineSettings.scriptLoadingDirectory + filename + ScriptEngineSettings.extension;
          
          loader = new ScriptFileLoader(fullpath);
          startTime = timestampProvider.getTimestamp();
