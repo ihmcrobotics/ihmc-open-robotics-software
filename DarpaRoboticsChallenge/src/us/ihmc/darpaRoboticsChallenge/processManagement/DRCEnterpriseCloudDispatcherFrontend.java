@@ -179,6 +179,13 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
                break;
 
+            case 0x10 :
+               controllerDisableAll();
+               controllerRunningStatusLabel.setText("<html><body>Controller Status: <span style=\"color:yellow;font-style:italic;"
+                     + "\">Restarting</span></body></html>");
+               repaintFrame();
+               break;
+
             case 0x11 :
                controllerNotRunningButtonConfiguration();
                controllerRunningStatusLabel.setText(
