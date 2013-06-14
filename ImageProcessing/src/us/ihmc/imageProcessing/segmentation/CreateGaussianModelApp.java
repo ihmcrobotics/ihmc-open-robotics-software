@@ -32,10 +32,10 @@ public class CreateGaussianModelApp {
 //
 //      BoofMiscOps.saveXML(model,"gaussian_line_far.xml");
 
-      model = GaussianColorClassifier.train(new FileInputStream("car_color.txt"));
-      model.print();
-
-      BoofMiscOps.saveXML(model,"gaussian_car_color.xml");
+//      model = GaussianColorClassifier.train(new FileInputStream("car_color.txt"));
+//      model.print();
+//
+//      BoofMiscOps.saveXML(model,"gaussian_car_color.xml");
 
 //      model = GaussianColorClassifier.train(new FileInputStream("car_color2.txt"));
 //      model.print();
@@ -57,9 +57,9 @@ public class CreateGaussianModelApp {
 //
 //      BoofMiscOps.saveXML(model,"gaussian_white_start.xml");
 //
-      model = GaussianColorClassifier.train(new FileInputStream("between_lines.txt"));
+      model = GaussianColorClassifier.train(new FileInputStream("car_color.txt"));
       model.print();
 
-      BoofMiscOps.saveXML(model,"gaussian_road_between_lines.xml");
+      BoofMiscOps.saveXML(model,"gaussian_car_color.xml");
    }
 }
