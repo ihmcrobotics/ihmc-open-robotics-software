@@ -4,12 +4,12 @@ import boofcv.alg.color.ColorHsv;
 import boofcv.alg.misc.ImageMiscOps;
 import boofcv.core.image.ConvertBufferedImage;
 import boofcv.gui.image.ShowImages;
+import boofcv.io.image.UtilImageIO;
 import boofcv.misc.BoofMiscOps;
 import boofcv.struct.ImageRectangle;
 import boofcv.struct.image.ImageFloat32;
 import boofcv.struct.image.ImageUInt8;
 import boofcv.struct.image.MultiSpectral;
-import us.ihmc.imageProcessing.configuration.ConfigurationLoader;
 
 import javax.swing.*;
 import java.awt.*;
@@ -254,7 +254,7 @@ public class ColorImageLabelApp extends JPanel implements ActionListener {
    }
 
    public static void main( String args[] ) {
-      BufferedImage input = ConfigurationLoader.loadImage("media/drcsim_2_6/left04.png");
+      BufferedImage input = UtilImageIO.loadImage("../DarpaRoboticsChallenge/log/key_left0193.ppm");
 
       ColorImageLabelApp app = new ColorImageLabelApp(input);
       ShowImages.showWindow(app,"Train HSV Classifier");

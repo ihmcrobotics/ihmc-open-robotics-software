@@ -5,6 +5,7 @@ import boofcv.struct.image.ImageUInt8;
 import boofcv.struct.image.MultiSpectral;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+import org.ejml.ops.MatrixFeatures;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,6 +53,18 @@ public class GaussianColorClassifier {
       }
 
       CommonOps.divide(N, Q);
+
+      // if perfectly gray scale all RGB values will be the same, creating a messed up covariance matrix
+      out.computeInverse();
+      if(MatrixFeatures.hasNaN(out.covarianceInv)) {
+         for( int i = 0; i < 3; i++ ) {
+            for( int j = 0; j < 3; j++ ) {
+               if( i != j )
+                  out.covariance.unsafe_set(i,j,0);
+            }
+         }
+         out.computeInverse();
+      }
 
       return out;
    }
