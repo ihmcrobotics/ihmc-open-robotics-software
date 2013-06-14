@@ -95,7 +95,7 @@ public class OptimizationMomentumControlModuleTest
    }
 
    @Test
-   public void testMomentumAndTaskSpaceConstraints() throws NoConvergenceException
+   public void testMomentumAndTaskSpaceConstraints()
    {
       Random random = new Random(1223525L);
       Vector3d[] jointAxes = new Vector3d[]
@@ -138,7 +138,13 @@ public class OptimizationMomentumControlModuleTest
       taskSpaceConstraintData.set(endEffectorSpatialAcceleration);
       momentumControlModule.setDesiredSpatialAcceleration(jacobian, taskSpaceConstraintData);    // , 10.0);
 
-      momentumControlModule.compute(contactStates, null, null);
+      try
+      {
+         momentumControlModule.compute(contactStates, null, null);
+      } catch (NoConvergenceException e)
+      {
+         // do nothing
+      }
       SpatialForceVector momentumRateOfChangeOut = momentumControlModule.getDesiredCentroidalMomentumRate();
 
       TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), elevator);
@@ -198,7 +204,13 @@ public class OptimizationMomentumControlModuleTest
       momentumControlModule.setDesiredPointAcceleration(jacobian, bodyFixedPoint, desiredPointAcceleration);
 
 
-      momentumControlModule.compute(contactStates, null, null);
+      try
+      {
+         momentumControlModule.compute(contactStates, null, null);
+      } catch (NoConvergenceException e)
+      {
+         // do nothing
+      }
       SpatialForceVector momentumRateOfChangeOut = momentumControlModule.getDesiredCentroidalMomentumRate();
 
       TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), elevator);
@@ -338,7 +350,13 @@ public class OptimizationMomentumControlModuleTest
          momentumControlModule.setDesiredJointAcceleration(revoluteJoint, desiredJointAcceleration, weight);
       }
 
-      momentumControlModule.compute(contactStates, null, null);
+      try
+      {
+         momentumControlModule.compute(contactStates, null, null);
+      } catch (NoConvergenceException e)
+      {
+         // do nothing
+      }
       SpatialForceVector momentumRateOfChangeOut = momentumControlModule.getDesiredCentroidalMomentumRate();
 
       TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), elevator);
