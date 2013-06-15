@@ -20,7 +20,7 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
    private static String scsMachineIPAddress = DRCConfigParameters.SCS_MACHINE_IP_ADDRESS;
    private static String rosMasterURI = DRCConfigParameters.ROS_MASTER_URI;
 
-   private static String[] javaArgs = new String[] {"-Xms2048m", "-Xmx2048m"};
+   private static String[] javaArgs = new String[] { "-Xms2048m", "-Xmx2048m" };
 
    public DRCNetworkProcessorEnterpriseCloudDispatcherBackend()
    {
@@ -46,26 +46,26 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
 
             switch (buffer[0])
             {
-               case 0x00 :
-                  spawnNetworkProcessor();
+            case 0x00:
+               spawnNetworkProcessor();
 
-                  break;
+               break;
 
-               case 0x01 :
-               case 0x10 :
-                  killNetworkProcessor();
+            case 0x01:
+            case 0x10:
+               killNetworkProcessor();
 
-                  break;
+               break;
 
-               case 0x11 :
-                  restartNetworkProcessor();
+            case 0x11:
+               restartNetworkProcessor();
 
-                  break;
+               break;
 
-               default :
-                  System.err.println("Invalid request: " + Integer.toHexString(UnsignedByteTools.toInt(buffer[0])));
+            default:
+               System.err.println("Invalid request: " + Integer.toHexString(UnsignedByteTools.toInt(buffer[0])));
 
-                  break;
+               break;
             }
          }
          catch (DisconnectedException e)
@@ -75,25 +75,11 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
 
          if (networkProcessorSpawner.hasRunningProcesses())
          {
-            try
-            {
-               server.write(new byte[] {UnsignedByteTools.fromInt(0x00)});
-            }
-            catch (DisconnectedException e)
-            {
-               server.reset();
-            }
+
          }
          else
          {
-            try
-            {
-               server.write(new byte[] {UnsignedByteTools.fromInt(0x11)});
-            }
-            catch (DisconnectedException e)
-            {
-               server.reset();
-            }
+
          }
 
          server.reset();
@@ -103,7 +89,18 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
    private void spawnNetworkProcessor()
    {
       if (!networkProcessorSpawner.hasRunningProcesses())
-         networkProcessorSpawner.spawn(DRCNetworkProcessor.class, javaArgs, new String[] {"--ros-uri", rosMasterURI, "--scs-ip", scsMachineIPAddress});
+      {
+         networkProcessorSpawner.spawn(DRCNetworkProcessor.class, javaArgs, new String[] { "--ros-uri", rosMasterURI, "--scs-ip", scsMachineIPAddress });
+
+         try
+         {
+            server.write(new byte[] { UnsignedByteTools.fromInt(0x00) });
+         }
+         catch (DisconnectedException e)
+         {
+            server.reset();
+         }
+      }
       else
          System.err.println("Network processor is already running. Try restarting.");
    }
@@ -111,6 +108,15 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
    private void killNetworkProcessor()
    {
       networkProcessorSpawner.killAll();
+
+      try
+      {
+         server.write(new byte[] { UnsignedByteTools.fromInt(0x11) });
+      }
+      catch (DisconnectedException e)
+      {
+         server.reset();
+      }
    }
 
    private void restartNetworkProcessor()
@@ -124,10 +130,10 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
    {
       JSAP jsap = new JSAP();
 
-      FlaggedOption scsIPFlag =
-         new FlaggedOption("scs-ip").setLongFlag("scs-ip").setShortFlag(JSAP.NO_SHORTFLAG).setRequired(false).setStringParser(JSAP.STRING_PARSER);
-      FlaggedOption rosURIFlag =
-         new FlaggedOption("ros-uri").setLongFlag("ros-uri").setShortFlag(JSAP.NO_SHORTFLAG).setRequired(false).setStringParser(JSAP.STRING_PARSER);
+      FlaggedOption scsIPFlag = new FlaggedOption("scs-ip").setLongFlag("scs-ip").setShortFlag(JSAP.NO_SHORTFLAG).setRequired(false)
+            .setStringParser(JSAP.STRING_PARSER);
+      FlaggedOption rosURIFlag = new FlaggedOption("ros-uri").setLongFlag("ros-uri").setShortFlag(JSAP.NO_SHORTFLAG).setRequired(false)
+            .setStringParser(JSAP.STRING_PARSER);
 
       Switch largeHeapForProcessor = new Switch("large-heap").setLongFlag("large-heap").setShortFlag('h');
 
@@ -151,7 +157,7 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
 
          if (config.getBoolean(largeHeapForProcessor.getID()))
          {
-            javaArgs = new String[] {"-Xms10240m", "-Xmx10240m"};
+            javaArgs = new String[] { "-Xms10240m", "-Xmx10240m" };
          }
       }
 

@@ -15,6 +15,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.concurrent.Semaphore;
 
 public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 {
@@ -40,7 +41,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
    private final JLabel controllerRunningStatusLabel =
          new JLabel("<html><body>Running: <span style=\"color:red;font-style:italic;\">Not Running</span></body></html>", JLabel.CENTER);
    private final JLabel controllerConnectedStatusLabel =
-         new JLabel("<html><body>Connected: <span style=\"color:red;font-style:italic;\">Disconnected</span></body></html>", JLabel.CENTER);
+         new JLabel("<html><body>Connected: <span style=\"color:red;font-style:italic;\">Disconnected</span></body></html>", JLabel.CENTER);   
 
    public DRCEnterpriseCloudDispatcherFrontend()
    {
@@ -110,23 +111,45 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
    public void run()
    {
-      netProcClient.connect();
-      controllerClient.connect();
-
-      netProcNotRunningButtonConfiguration();
-
-      controllerNotRunningButtonConfiguration();
-
-      while (true)
+      new Thread(new Runnable()
+      {         
+         public void run()
+         {      
+            netProcClient.connect();
+            netProcNotRunningButtonConfiguration();
+         }
+      }).start();
+      
+      new Thread(new Runnable()
+      {         
+         public void run()
+         {       
+            controllerClient.connect();
+            controllerNotRunningButtonConfiguration();
+         }
+      }).start();
+      
+      new Thread(new Runnable()
       {
-         processNetProcSocket();
-
-         processControllerSocket();
-      }
+         public void run()
+         {
+            while(true)
+               processNetProcSocket();                
+         }
+      }).start();
+      
+      new Thread(new Runnable()
+      {
+         public void run()
+         {             
+            while(true)
+               processControllerSocket();
+         }
+      }).start();
    }
 
    private void processNetProcSocket()
-   {
+   {      
       try
       {
          netProcClient.read(1);
@@ -160,11 +183,11 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
          netProcClient.reset();
       }
 
-      netProcClient.reset();
+      netProcClient.reset();      
    }
 
    private void processControllerSocket()
-   {
+   {      
       try
       {
          controllerClient.read(1);
@@ -181,7 +204,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
             case 0x10 :
                controllerDisableAll();
-               controllerRunningStatusLabel.setText("<html><body>Controller Status: <span style=\"color:yellow;font-style:italic;"
+               controllerRunningStatusLabel.setText("<html><body>Controller Status: <span style=\"color:gray;font-style:italic;"
                      + "\">Restarting</span></body></html>");
                repaintFrame();
                break;
@@ -205,7 +228,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
          controllerClient.reset();
       }
 
-      controllerClient.reset();
+      controllerClient.reset();      
    }
 
    private void netProcDisableAll()
