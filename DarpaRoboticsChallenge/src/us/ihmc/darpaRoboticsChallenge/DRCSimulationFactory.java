@@ -203,7 +203,7 @@ public class DRCSimulationFactory
       DRCController robotController = new DRCController(initialCoMPositionAndEstimationLinkOrientation, robotInterface.getFullRobotModelFactory(),
             controllerFactory, sensorReaderFactory, drcOutputWriter, handControllerDispatcher, jointMap, lidarControllerInterface, gravity, estimateDT, controlDT,
             networkProccesorCommunicator, robotInterface.getTimeStampProvider(), dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry,
-            registry);
+            registry, null);
 
       final HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, robotController,
             controller, estimationTicksPerControlTick, commonAvatarEnvironmentInterface, simulatedRobot.getAllExternalForcePoints(), robotInitialSetup, scsInitialSetup,
