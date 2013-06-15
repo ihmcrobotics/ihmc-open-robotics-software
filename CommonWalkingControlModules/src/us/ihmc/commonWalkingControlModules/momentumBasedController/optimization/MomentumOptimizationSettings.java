@@ -19,6 +19,9 @@ public class MomentumOptimizationSettings
    private final DoubleYoVariable angularMomentumZWeight = new DoubleYoVariable("angularMomentumZWeight", registry);
    private final DoubleYoVariable rhoMin = new DoubleYoVariable("rhoMin", registry);
    private final DoubleYoVariable lambda = new DoubleYoVariable("lambda", registry);
+   
+   // TODO (Sylvain): Get rid of that boolean (used in OptimizationMomentumControlModule) (used for CarIngressEgressController)
+   private final boolean getContactRegularizationWeightFromContactState;
 
    private final double[] momentumWeightDiagonal = new double[Momentum.SIZE];
    private final DenseMatrix64F C = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
@@ -30,9 +33,21 @@ public class MomentumOptimizationSettings
    private final DenseMatrix64F tempMatrix = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
    private final Momentum tempMomentum = new Momentum(); // just to make sure that the ordering of force and torque are correct
 
+   // TODO (Sylvain): two constructors to limit code change. Get rid of the second. (used for CarIngressEgressController)
    public MomentumOptimizationSettings(YoVariableRegistry parentRegistry)
    {
+      this(false, parentRegistry);
+   }
+
+   public MomentumOptimizationSettings(boolean getContactRegularizationWeightFromContactState, YoVariableRegistry parentRegistry)
+   {
+      this.getContactRegularizationWeightFromContactState = getContactRegularizationWeightFromContactState;
       parentRegistry.addChild(registry);
+   }
+
+   public boolean isContactRegularizationWeightObtainedFromContactState()
+   {
+      return getContactRegularizationWeightFromContactState;
    }
 
    public void setMomentumWeight(double linearMomentumXYWeight, double linearMomentumZWeight, double angularMomentumXYWeight, double angularMomentumZWeight)
