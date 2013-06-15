@@ -26,6 +26,7 @@ public class OccupancyGridPanel extends JPanel
       {
          gray[i] = new Color(i, i, i);
       }
+      gray[255] = Color.RED;
    }
 
    public void autoPreferredSize()
