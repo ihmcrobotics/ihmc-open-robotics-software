@@ -92,6 +92,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
@@ -99,6 +100,7 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateTransition
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionAction;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.CurrentLinearVelocityProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
@@ -137,7 +139,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                                                                          WalkingState.TRANSFER_TO_RIGHT_SUPPORT);
 
    private final DoubleYoVariable stopInDoubleSupporTrajectoryTime = new DoubleYoVariable("stopInDoubleSupporTrajectoryTime", registry);
-
+   private final DoubleYoVariable dwellInSingleSupportDuration = new DoubleYoVariable("dwellInSingleSupportDuration", 
+         "Amount of time to stay in single support after the ICP trajectory is done if you haven't registered a touchdown yet", registry);
+   
    private final BooleanYoVariable loopControllerForever = new BooleanYoVariable("loopControllerForever", "For checking memory and profiling", registry);
    private final BooleanYoVariable justFall = new BooleanYoVariable("justFall", registry);
    
@@ -145,6 +149,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final BooleanYoVariable hasMinimumTimePassed = new BooleanYoVariable("hasMinimumTimePassed", registry);
    private final DoubleYoVariable minimumSwingFraction = new DoubleYoVariable("minimumSwingFraction", registry);
+   
+   private final BooleanYoVariable hasICPPlannerFinished = new BooleanYoVariable("hasICPPlannerFinished", registry);
+   private final DoubleYoVariable timeThatICPPlannerFinished = new DoubleYoVariable("timeThatICPPlannerFinished", registry);
    
    // private final FinalDesiredICPCalculator finalDesiredICPCalculator;
 
@@ -363,6 +370,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       setUpStateMachine();
       readyToGrabNextFootstep.set(true);
 
+      dwellInSingleSupportDuration.set(0.2);
+      
       minOrbitalEnergyForSingleSupport.set(0.007);    // 0.008
       amountToBeInsideSingleSupport.set(0.0);
       amountToBeInsideDoubleSupport.set(0.03);    // 0.02);    // TODO: necessary for stairs...
@@ -1087,6 +1096,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       @Override
       public void doTransitionIntoAction()
       {
+         hasICPPlannerFinished.set(false);
+         
          footSwitches.get(swingSide).reset();
          if (footSwitches.get(swingSide) instanceof HeelSwitch)
             ((HeelSwitch) footSwitches.get(swingSide)).resetHeelSwitch();
@@ -1303,7 +1314,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       {
          RobotSide swingSide = getSupportLeg().getOppositeSide();
          hasMinimumTimePassed.set(hasMinimumTimePassed());
-                  
+         
+         if (!hasICPPlannerFinished.getBooleanValue())
+         {
+            hasICPPlannerFinished.set(instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue()));
+            if (hasICPPlannerFinished.getBooleanValue())
+            {
+               timeThatICPPlannerFinished.set(yoTime.getDoubleValue());
+            }
+         }
+         
          FootSwitchInterface footSwitch = footSwitches.get(swingSide);
 
          // TODO probably make all FootSwitches in this class be HeelSwitches and get rid of instanceof
@@ -1325,14 +1345,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (hasMinimumTimePassed.getBooleanValue() && justFall.getBooleanValue()) return true;
 
-         //Just switch states if icp is done. You had a little extra time and more isn't going to do any good.
-         if (instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue())) return true;
+         //Just switch states if icp is done, plus a little bit more. You had enough time and more isn't going to do any good.
+         if (hasICPPlannerFinished.getBooleanValue() && (yoTime.getDoubleValue() > timeThatICPPlannerFinished.getDoubleValue() + dwellInSingleSupportDuration.getDoubleValue())) return true;
          
          if (walkingControllerParameters.finishSwingWhenTrajectoryDone())
          {
-            boolean trajectoryDone = instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue());    // endEffectorControlModule.isTrajectoryDone();
-
-            return  hasMinimumTimePassed.getBooleanValue() && (trajectoryDone || footSwitchActivated);
+            return  hasMinimumTimePassed.getBooleanValue() && (hasICPPlannerFinished.getBooleanValue() || footSwitchActivated);
          }
          else
          {
@@ -1544,7 +1562,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    
    // FIXME: don't override
    public void doMotionControlInternal()
-   {
+   {      
       momentumBasedController.doPrioritaryControl();
       super.callUpdatables();
 

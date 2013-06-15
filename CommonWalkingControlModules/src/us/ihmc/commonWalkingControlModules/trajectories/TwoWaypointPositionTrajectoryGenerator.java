@@ -61,7 +61,10 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    private final DoubleYoVariable stepTime;
    private final DoubleYoVariable timeIntoStep;
-
+   private final DoubleYoVariable defaultGroundClearance;
+   
+   private final BooleanYoVariable setInitialSwingVelocityToZero;
+   
    private final YoFramePoint desiredPosition;
    private final YoFrameVector desiredVelocity;
    private final YoFrameVector desiredAcceleration;
@@ -95,6 +98,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       registry = new YoVariableRegistry(namePrefix + namePostFix);
       parentRegistry.addChild(registry);
 
+     setInitialSwingVelocityToZero = new BooleanYoVariable(namePrefix + "SetInitialSwingVelocityToZero", registry);
+     setInitialSwingVelocityToZero.set(false);
       if (visualize)
       {
          trajectoryBagOfBalls = new BagOfBalls(numberOfVisualizationMarkers, 0.01, namePrefix + "TrajectoryBagOfBalls", registry,
@@ -128,6 +133,9 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       stepTime = new DoubleYoVariable(namePrefix + "StepTime", registry);
       timeIntoStep = new DoubleYoVariable(namePrefix + "TimeIntoStep", registry);
 
+      defaultGroundClearance = new DoubleYoVariable(namePrefix + "DefaultGroundClearance", registry);
+      defaultGroundClearance.set(SimpleTwoWaypointTrajectoryParameters.getDefaultGroundClearance());
+      
       desiredPosition = new YoFramePoint(namePrefix + "DesiredPosition", referenceFrame, registry);
       desiredVelocity = new YoFrameVector(namePrefix + "DesiredVelocity", referenceFrame, registry);
       desiredAcceleration = new YoFrameVector(namePrefix + "DesiredAcceleration", referenceFrame, registry);
@@ -421,16 +429,22 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    private void setInitialAndFinalTimesPositionsAndVelocities()
    {
-      FramePoint tempPositions = new FramePoint(referenceFrame);
-      FrameVector tempVelocities = new FrameVector(referenceFrame);
+      FramePoint tempPosition = new FramePoint(referenceFrame);
+      FrameVector tempVelocity = new FrameVector(referenceFrame);
       for (int i = 0; i < 2; i++)
       {
-         positionSources[i].get(tempPositions);
-         velocitySources[i].get(tempVelocities);
-         tempPositions.changeFrame(referenceFrame);
-         tempVelocities.changeFrame(referenceFrame);
-         allPositions[endpointIndices[i]].set(tempPositions);
-         allVelocities[endpointIndices[i]].set(tempVelocities);
+         positionSources[i].get(tempPosition);
+         velocitySources[i].get(tempVelocity);
+         
+         if ((i == 0) && setInitialSwingVelocityToZero.getBooleanValue())
+         {
+            tempVelocity.set(0.0, 0.0, 0.0);
+         }
+         
+         tempPosition.changeFrame(referenceFrame);
+         tempVelocity.changeFrame(referenceFrame);
+         allPositions[endpointIndices[i]].set(tempPosition);
+         allVelocities[endpointIndices[i]].set(tempVelocity);
       }
 
       allTimes[endpointIndices[0]].set(0.0);
@@ -455,7 +469,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          break;
 
       default:
-         waypoints = getWaypointsAtGroundClearance(SimpleTwoWaypointTrajectoryParameters.getDefaultGroundClearance());
+         waypoints = getWaypointsAtGroundClearance(defaultGroundClearance.getDoubleValue());
 
          break;
       }
@@ -502,7 +516,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
       for (FramePoint waypoint : waypoints)
       {
-         waypoint.setZ(maxZ + SimpleTwoWaypointTrajectoryParameters.getDefaultGroundClearance());
+         waypoint.setZ(maxZ + defaultGroundClearance.getDoubleValue());
       }
 
       FrameVector planarEndpointOffset = allPositions[endpointIndices[1]].getFrameVectorCopy();
@@ -656,7 +670,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       if (index != 2 || ((boxFrameFinalPosition.getX() > (halfSideLengthsXY.x) == (boxFrameInitialPosition.getX() > (halfSideLengthsXY.x))))
             || ((boxFrameFinalPosition.getY() > (halfSideLengthsXY.y) == (boxFrameInitialPosition.getY() > (halfSideLengthsXY.y)))))
       {         
-         return getWaypointsAtGroundClearance(SimpleTwoWaypointTrajectoryParameters.getDefaultGroundClearance());
+         return getWaypointsAtGroundClearance(defaultGroundClearance.getDoubleValue());
       }
 
       // reorder intersections so closer one to initial position is first

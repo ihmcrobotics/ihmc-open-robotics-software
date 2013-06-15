@@ -15,9 +15,14 @@ public class InstantaneousCapturePointPlannerWithTimeFreezer implements Instanta
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final DoubleYoVariable timeDelay = new DoubleYoVariable("timeDelay", registry);
+   private final DoubleYoVariable icpError = new DoubleYoVariable("icpError", registry);
+   private final DoubleYoVariable maxICPErrorForStartingSwing = new DoubleYoVariable("maxICPErrorForStartingSwing", registry);
+   
+   private final DoubleYoVariable icpDistanceToFreezeLine = new DoubleYoVariable("icpDistanceToFreezeLine", registry);
+   
    private final DoubleYoVariable previousTime = new DoubleYoVariable("previousTime", registry);
    private final DoubleYoVariable freezeTimeFactor = new DoubleYoVariable("freezeTimeFactor", "Set to 0.0 to turn off, 1.0 to completely freeze time", registry);
-   private final double maxFreezeLineICPErrorWithoutTimeFreeze = -0.03; 
+   private final double maxFreezeLineICPErrorWithoutTimeFreeze = 0.03; 
    
    
    private final InstantaneousCapturePointPlanner instantaneousCapturePointPlanner;
@@ -29,6 +34,7 @@ public class InstantaneousCapturePointPlannerWithTimeFreezer implements Instanta
       parentRegistry.addChild(registry);
       timeDelay.set(0.0);
       freezeTimeFactor.set(0.9); 
+      maxICPErrorForStartingSwing.set(0.02); 
    }
    
    public void initializeSingleSupport(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double initialTime)
@@ -61,15 +67,27 @@ public class InstantaneousCapturePointPlannerWithTimeFreezer implements Instanta
    {
       instantaneousCapturePointPlanner.getICPPositionAndVelocity(icpPostionToPack, icpVelocityToPack, ecmpToPack, actualICP, getTimeWithDelay(time));    
 
-      double distance = computeDistanceFromFreezeLine(icpPostionToPack, icpVelocityToPack, actualICP);
+      icpError.set(icpPostionToPack.distance(actualICP));
+      icpDistanceToFreezeLine.set(computeDistanceFromFreezeLine(icpPostionToPack, icpVelocityToPack, actualICP));
 
-      if ((distance < maxFreezeLineICPErrorWithoutTimeFreeze) || (this.isDone(time)))
+      if (this.isDone(time))
       {
-         freezeTime(time);
+         freezeTime(time, 1.0);
+      }
+      else if ((getEstimatedTimeRemainingForState(time) < 0.1) && 
+            (instantaneousCapturePointPlanner.isPerformingICPDoubleSupport()) && 
+            //            (icpError.getDoubleValue() > maxICPErrorForStartingSwing.getDoubleValue()))
+            (icpDistanceToFreezeLine.getDoubleValue() > maxICPErrorForStartingSwing.getDoubleValue()))
+      {
+         freezeTime(time, 1.0);
+      }
+
+      else if ((icpDistanceToFreezeLine.getDoubleValue() > maxFreezeLineICPErrorWithoutTimeFreeze))
+      {
+         freezeTime(time, freezeTimeFactor.getDoubleValue());
       }
       
       previousTime.set(time);
-      
    }
 
    private FrameVector2d normalizedVelocityVector = new FrameVector2d(ReferenceFrame.getWorldFrame());
@@ -88,15 +106,15 @@ public class InstantaneousCapturePointPlannerWithTimeFreezer implements Instanta
       
       deltaICP.setAndChangeFrame(normalizedVelocityVector);
       deltaICP.scale(distance);
-      return distance;
+      return -distance;
    }
 
-   private void freezeTime(double time)
+   private void freezeTime(double time, double freezeTimeFactor)
    {      
       double timeInState = instantaneousCapturePointPlanner.getTimeInState(getTimeWithDelay(time));
       if (timeInState < 0.0) return;
       
-      timeDelay.add(freezeTimeFactor.getDoubleValue() * (time - previousTime.getDoubleValue()));
+      timeDelay.add(freezeTimeFactor * (time - previousTime.getDoubleValue()));
    }
 
    public void reset(double time)
@@ -106,7 +124,7 @@ public class InstantaneousCapturePointPlannerWithTimeFreezer implements Instanta
    }
 
    public boolean isDone(double time)
-   {
+   {      
       if (instantaneousCapturePointPlanner.isPerformingICPDoubleSupport())
       {
          return instantaneousCapturePointPlanner.isDone(getTimeWithDelay(time));

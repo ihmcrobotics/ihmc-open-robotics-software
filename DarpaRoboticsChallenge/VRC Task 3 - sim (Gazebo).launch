@@ -7,6 +7,6 @@
 <listEntry value="1"/>
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="us.ihmc.darpaRoboticsChallenge.DRCDemo01"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="--sim --env VRC1  --gazebo --start IN_VEHICLE_HOLDING_ROLL_CAGE"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="--sim --env VRC3  --gazebo --start DEFAULT"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="DarpaRoboticsChallenge"/>
 </launchConfiguration>
