@@ -9,6 +9,8 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public interface PlaneContactState
 {
+   public static final double DEFAULT_WRHO = 0.002;
+   
    public abstract List<FramePoint> getContactPoints();
    public abstract ReferenceFrame getBodyFrame();
    public abstract boolean inContact();
@@ -17,4 +19,9 @@ public interface PlaneContactState
    public abstract FrameVector getContactNormalFrameVector();
    public abstract double getCoefficientOfFriction();
    public abstract int getNumberOfContactPoints();
+
+   // TODO: Probably get rid of that. Now, it is used for smooth unload/load transitions in the CarIngressEgressController.
+   public void setRhoContactRegularization(double wRho);
+   public double getRhoContactRegularization();
+   public void resetContactRegularization();
 }
