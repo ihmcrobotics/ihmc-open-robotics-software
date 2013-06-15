@@ -46,6 +46,34 @@ public class RosAtlasSettingsSetter
 
    }
 
+   public void setPositionControlDampingParameters()
+   {
+      atlasDampingClient.waitTillConnected();
+
+      SetJointDampingRequest request = atlasDampingClient.getMessage();
+
+      final double[] dampingParameters = new double[ROSAtlasJointMap.numberOfJoints];
+      for (int i = 0; i < dampingParameters.length; i++)
+      {
+         dampingParameters[i] = DRCRobotDampingParameters.getAtlasDampingForPositionControl(i);
+      }
+
+      request.setDampingCoefficients(dampingParameters);
+
+      atlasDampingClient.call(request, new ServiceResponseListener<SetJointDampingResponse>()
+      {
+
+         public void onSuccess(SetJointDampingResponse response)
+         {
+            System.out.println("Set joint damping for Atlas to " + Arrays.toString(dampingParameters) + " "  + response.getStatusMessage());
+         }
+
+         public void onFailure(RemoteException e)
+         {
+            throw new RuntimeException(e);
+         }
+      });
+   }
 
    public void setAtlasDampingParameters()
    {
@@ -66,7 +94,7 @@ public class RosAtlasSettingsSetter
 
          public void onSuccess(SetJointDampingResponse response)
          {
-            System.out.println("Set joint damping for Atlas to " + Arrays.toString(dampingParameters));
+            System.out.println("Set joint damping for Atlas to " + Arrays.toString(dampingParameters) + " "  + response.getStatusMessage());
          }
 
          public void onFailure(RemoteException e)

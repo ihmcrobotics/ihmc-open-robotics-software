@@ -8,6 +8,7 @@ import us.ihmc.robotSide.SideDependentList;
 public class DRCRobotDampingParameters
 {
    private final static double[] atlasDampingParameters = new double[ROSAtlasJointMap.numberOfJoints];
+   private final static double[] atlasPositionControlDampingParameters = new double[ROSAtlasJointMap.numberOfJoints];
 
    private final static SideDependentList<double[]> sandiaDampingParameters = new SideDependentList<double[]>();
    private static final boolean USE_REALLY_HIGH_FINGER_DAMPING=true;
@@ -42,11 +43,40 @@ public class DRCRobotDampingParameters
       atlasDampingParameters[ROSAtlasJointMap.r_arm_uwy] = 0.1;
       atlasDampingParameters[ROSAtlasJointMap.r_arm_mwx] = 0.1;
       
+      atlasPositionControlDampingParameters[ROSAtlasJointMap.back_lbz]  = 10.0;
+      atlasPositionControlDampingParameters[ROSAtlasJointMap.back_mby]  = 10.0;
+      atlasPositionControlDampingParameters[ROSAtlasJointMap.back_ubx]  = 10.0;
+      atlasPositionControlDampingParameters[ROSAtlasJointMap.neck_ay]   = 1.0;
+      atlasPositionControlDampingParameters[ROSAtlasJointMap.l_leg_uhz] = 1.0;
+      atlasPositionControlDampingParameters[ROSAtlasJointMap.l_leg_mhx] = 1.0;
+      atlasPositionControlDampingParameters[ROSAtlasJointMap.l_leg_lhy] = 1.0;
+      atlasPositionControlDampingParameters[ROSAtlasJointMap.l_leg_kny] = 1.0;
+      atlasPositionControlDampingParameters[ROSAtlasJointMap.l_leg_uay] = 10.0;
+      atlasPositionControlDampingParameters[ROSAtlasJointMap.l_leg_lax] = 1.0;
+      atlasPositionControlDampingParameters[ROSAtlasJointMap.r_leg_uhz] = 1.0;
+      atlasPositionControlDampingParameters[ROSAtlasJointMap.r_leg_mhx] = 1.0;
+      atlasPositionControlDampingParameters[ROSAtlasJointMap.r_leg_lhy] = 1.0;
+      atlasPositionControlDampingParameters[ROSAtlasJointMap.r_leg_kny] = 1.0;
+      atlasPositionControlDampingParameters[ROSAtlasJointMap.r_leg_uay] = 10.0;
+      atlasPositionControlDampingParameters[ROSAtlasJointMap.r_leg_lax] = 1.0;
+      atlasPositionControlDampingParameters[ROSAtlasJointMap.l_arm_usy] = 1.0;
+      atlasPositionControlDampingParameters[ROSAtlasJointMap.l_arm_shx] = 1.0;
+      atlasPositionControlDampingParameters[ROSAtlasJointMap.l_arm_ely] = 1.0;
+      atlasPositionControlDampingParameters[ROSAtlasJointMap.l_arm_elx] = 1.0;
+      atlasPositionControlDampingParameters[ROSAtlasJointMap.l_arm_uwy] = 1.0;
+      atlasPositionControlDampingParameters[ROSAtlasJointMap.l_arm_mwx] = 1.0;
+      atlasPositionControlDampingParameters[ROSAtlasJointMap.r_arm_usy] = 1.0;
+      atlasPositionControlDampingParameters[ROSAtlasJointMap.r_arm_shx] = 1.0;
+      atlasPositionControlDampingParameters[ROSAtlasJointMap.r_arm_ely] = 1.0;
+      atlasPositionControlDampingParameters[ROSAtlasJointMap.r_arm_elx] = 1.0;
+      atlasPositionControlDampingParameters[ROSAtlasJointMap.r_arm_uwy] = 1.0;
+      atlasPositionControlDampingParameters[ROSAtlasJointMap.r_arm_mwx] = 1.0;
+      
       for(RobotSide robotSide : RobotSide.values)
       {
          double[] sandiaDampingParametersForSide = new double[ROSSandiaJointMap.numberOfJointsPerHand];
          double standardFingerDamping = USE_REALLY_HIGH_FINGER_DAMPING?5.0:1.0; //1.0;
-         double firstJointDamping = USE_REALLY_HIGH_FINGER_DAMPING?5.0:30.0;
+//         double firstJointDamping = USE_REALLY_HIGH_FINGER_DAMPING?5.0:30.0;
          
          sandiaDampingParametersForSide[ROSSandiaJointMap.f0_j0] = 30.0;
          sandiaDampingParametersForSide[ROSSandiaJointMap.f0_j1] = standardFingerDamping;
@@ -70,6 +100,11 @@ public class DRCRobotDampingParameters
    public static double getAtlasDamping(int i)
    {
       return atlasDampingParameters[i];
+   }
+   
+   public static double getAtlasDampingForPositionControl(int i)
+   {
+      return atlasPositionControlDampingParameters[i];
    }
 
    public static double getSandiaHandDamping(RobotSide robotSide, int i)
