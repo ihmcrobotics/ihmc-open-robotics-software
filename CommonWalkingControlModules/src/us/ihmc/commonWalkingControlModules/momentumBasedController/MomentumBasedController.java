@@ -27,6 +27,7 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenc
 import us.ihmc.commonWalkingControlModules.stateEstimation.DesiredCoMAndAngularAccelerationGrabber;
 import us.ihmc.commonWalkingControlModules.stateEstimation.PointPositionGrabber;
 import us.ihmc.commonWalkingControlModules.stateEstimation.PointPositionGrabberInterface;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylindricalContactState;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
@@ -367,6 +368,27 @@ public class MomentumBasedController
 
       inverseDynamicsCalculator.reset();
       activeMomentumControlModule.reset();
+      
+      resetWeightsForContactRegularization();
+   }
+
+   private void resetWeightsForContactRegularization()
+   {
+      // TODO: get rid of contactStates or planeContactStates. This is confusing.
+      for (PlaneContactState contactState : contactStates.values())
+      {
+         contactState.resetContactRegularization();
+      }
+
+      for (PlaneContactState contactState : planeContactStates.values())
+      {
+         contactState.resetContactRegularization();
+      }
+      
+      for (CylindricalContactState contactState : cylindricalContactStates.values())
+      {
+         contactState.resetContactRegularization();
+      }
    }
 
    // TODO: Temporary method for a big refactor allowing switching between high level behaviors
