@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumContr
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylinderAndPlaneContactMatrixCalculatorAdapter;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylinderAndPlaneContactMatrixCalculatorAdapterwRhowPhiObtainedFromContactStates;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylindricalContactState;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
@@ -79,8 +80,18 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       double wRhoCylinderContacts = momentumOptimizationSettings.getRhoCylinderContactRegularization();
       double wPhiCylinderContacts = momentumOptimizationSettings.getPhiCylinderContactRegularization();
       double wRhoPlaneContacts = momentumOptimizationSettings.getRhoPlaneContactRegularization();
-      this.wrenchMatrixCalculator = new CylinderAndPlaneContactMatrixCalculatorAdapter(centerOfMassFrame, registry, dynamicGraphicObjectsListRegistry, rhoSize,
-              phiSize, wRhoCylinderContacts, wPhiCylinderContacts, wRhoPlaneContacts);
+      
+      if (momentumOptimizationSettings.isContactRegularizationWeightObtainedFromContactState())
+      {
+         //TODO (Sylvain): get rid of that class (used for CarIngressEgressController)
+         this.wrenchMatrixCalculator = new CylinderAndPlaneContactMatrixCalculatorAdapterwRhowPhiObtainedFromContactStates(centerOfMassFrame, registry,
+               dynamicGraphicObjectsListRegistry, rhoSize, phiSize);
+      }
+      else
+      {
+         this.wrenchMatrixCalculator = new CylinderAndPlaneContactMatrixCalculatorAdapter(centerOfMassFrame, registry, dynamicGraphicObjectsListRegistry, rhoSize,
+               phiSize, wRhoCylinderContacts, wPhiCylinderContacts, wRhoPlaneContacts);
+      }
 
       this.momentumOptimizerNative = new CVXWithCylinderNative(ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor), rhoSize, phiSize);
       this.momentumOptimizationSettings = momentumOptimizationSettings;

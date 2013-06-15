@@ -26,17 +26,18 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector
  */
 public class CylinderAndPlaneContactMatrixCalculatorAdapter
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   //TODO (Sylvain): change all variable to private (used for CarIngressEgressController)
+   protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final CylinderAndPlaneContactMatrixCalculator cylinderAndPlaneContactMatrixCalculator;
    private final CylinderAndPlaneContactSpatialForceVectorCalculator cylinderAndPlaneContactSpatialForceVectorCalculator;
-   private final ReferenceFrame centerOfMassFrame;
+   protected final ReferenceFrame centerOfMassFrame;
    private final Map<RigidBody, Wrench> wrenches = new LinkedHashMap<RigidBody, Wrench>();
    private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
-   private final IntegerYoVariable planeContactIndex = new IntegerYoVariable("planeContactIndex", registry);
+   protected final IntegerYoVariable planeContactIndex = new IntegerYoVariable("planeContactIndex", registry);
    private final DoubleYoVariable wRhoCylinderContacts = new DoubleYoVariable("wRhoCylinderContacts", registry);
    private final DoubleYoVariable wPhiCylinderContacts = new DoubleYoVariable("wPhiCylinderContacts", registry);
    private final DoubleYoVariable wRhoPlaneContacts = new DoubleYoVariable("wRhoPlaneContacts", registry);
-   private final DoubleYoVariable rhoMinScalar = new DoubleYoVariable("rhoMinScalarInAdapter", registry);
+   protected final DoubleYoVariable rhoMinScalar = new DoubleYoVariable("rhoMinScalarInAdapter", registry);
 
 
    public CylinderAndPlaneContactMatrixCalculatorAdapter(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry,
@@ -113,8 +114,8 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
    // CONVERSION NASTINESS
    // TODO: clean up
    private final Map<RigidBody, EndEffector> endEffectors = new LinkedHashMap<RigidBody, EndEffector>();
-   private Map<PlaneContactState, EndEffector> previouslyUsedPlaneEndEffectors = new LinkedHashMap<PlaneContactState, EndEffector>();
-   private Map<CylindricalContactState, EndEffector> previouslyUsedCylinderEndEffectors = new LinkedHashMap<CylindricalContactState, EndEffector>();
+   protected Map<PlaneContactState, EndEffector> previouslyUsedPlaneEndEffectors = new LinkedHashMap<PlaneContactState, EndEffector>();
+   protected Map<CylindricalContactState, EndEffector> previouslyUsedCylinderEndEffectors = new LinkedHashMap<CylindricalContactState, EndEffector>();
    private final List<DynamicGraphicObject> endEffectorResultGraphics = new ArrayList<DynamicGraphicObject>();
 
    private void convertToEndEffectorsHack(Map<RigidBody, ? extends PlaneContactState> planeContactStates,
@@ -145,21 +146,19 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
       }
    }
 
-   private EndEffector getOrCreate(PlaneContactState planeContactState)
+   //TODO (Sylvain): change to private (used for CarIngressEgressController)
+   protected EndEffector getOrCreate(PlaneContactState planeContactState)
    {
       if (previouslyUsedPlaneEndEffectors.containsKey(planeContactState))
       {
          EndEffector endEffector = previouslyUsedPlaneEndEffectors.get(planeContactState);
          endEffector.updateFromPlane(planeContactState, wRhoPlaneContacts.getDoubleValue(), rhoMinScalar.getDoubleValue());
-//         endEffector.updateFromPlane(planeContactState, planeContactState.getRhoContactRegularization(), rhoMinScalar.getDoubleValue());
 
          return endEffector;
       }
 
       EndEffector endEffector = EndEffector.fromPlane("" + planeContactIndex.getIntegerValue(), centerOfMassFrame, planeContactState,
                                    wRhoPlaneContacts.getDoubleValue(), rhoMinScalar.getDoubleValue(), registry);
-//      EndEffector endEffector = EndEffector.fromPlane("" + planeContactIndex.getIntegerValue(), centerOfMassFrame, planeContactState,
-//            planeContactState.getRhoContactRegularization(), rhoMinScalar.getDoubleValue(), registry);
       previouslyUsedPlaneEndEffectors.put(planeContactState, endEffector);
       registerEndEffectorGraphic(endEffector);
       planeContactIndex.increment();
@@ -167,21 +166,19 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
       return endEffector;
    }
 
-   private EndEffector getOrCreate(CylindricalContactState cylinder)
+   //TODO (Sylvain): change to private (used for CarIngressEgressController)
+   protected EndEffector getOrCreate(CylindricalContactState cylinder)
    {
       if (previouslyUsedCylinderEndEffectors.containsKey(cylinder))
       {
          EndEffector endEffector = previouslyUsedCylinderEndEffectors.get(cylinder);
          endEffector.updateFromCylinder(cylinder, wRhoCylinderContacts.getDoubleValue(), wPhiCylinderContacts.getDoubleValue());
-//         endEffector.updateFromCylinder(cylinder, cylinder.getRhoContactRegularization(), cylinder.getPhiCylinderContactRegularization());
 
          return endEffector;
       }
 
       EndEffector endEffector = EndEffector.fromCylinder(centerOfMassFrame, cylinder, wRhoCylinderContacts.getDoubleValue(),
                                    wPhiCylinderContacts.getDoubleValue(), registry);
-//      EndEffector endEffector = EndEffector.fromCylinder(centerOfMassFrame, cylinder, cylinder.getRhoContactRegularization(),
-//                                   cylinder.getPhiCylinderContactRegularization(), registry);
       previouslyUsedCylinderEndEffectors.put(cylinder, endEffector);
       registerEndEffectorGraphic(endEffector);
 
@@ -216,19 +213,4 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
    {
       this.rhoMinScalar.set(rhoMinScalar);
    }
-   
-//   public void resetWeightsForContactRegularization(MomentumOptimizationSettings momentumOptimizationSettings)
-//   {
-//      for (PlaneContactState planeContactState : previouslyUsedPlaneEndEffectors.keySet())
-//      {
-//         double wRho = momentumOptimizationSettings.getRhoPlaneContactRegularization();
-//         planeContactState.setRhoContactRegularization(wRho);
-//      }
-//
-//      for (CylindricalContactState cylindricalContactState : previouslyUsedCylinderEndEffectors.keySet())
-//      {
-//         double wRho = momentumOptimizationSettings.getRhoPlaneContactRegularization();
-//         cylindricalContactState.setRhoContactRegularization(wRho);
-//      }
-//   }
 }
