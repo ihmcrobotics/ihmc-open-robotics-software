@@ -229,12 +229,6 @@ public class PoseSequenceSelectorPanel extends JPanel
       sequence.promptWriteToFile();
    }
    
-   private void deleteRow(int row)
-   {
-      ArrayList<PosePlaybackRobotPose> poseSequence = sequence.getPoseSequence();
-      poseSequence.remove(row);
-   }
-      
    private void updateTableBasedOnPoseSequence()
    {      
       tableModel.setRowCount(0);
@@ -308,8 +302,13 @@ public class PoseSequenceSelectorPanel extends JPanel
       
       int[] selectedRows = table.getSelectedRows();
       
+      if(selectedRows.length==0)
+      {
+         System.out.println("No row selected to copy.");
+         return;
+      }
       int row=selectedRows[0];
-      sequence.getPoseSequence().add(row, sequence.getPose(row));
+      sequence.getPoseSequence().add(row, sequence.getPose(row).copy() );
       
       updateTableBasedOnPoseSequence();
    }
@@ -320,6 +319,12 @@ public class PoseSequenceSelectorPanel extends JPanel
       
       int[] selectedRows = table.getSelectedRows();
       
+
+      if(selectedRows.length==0)
+      {
+         System.out.println("No row selected for interpolation.");
+         return;
+      }
       int row=selectedRows[0];
       double[] pose1=sequence.getPose(row).getJointAngles();
       double[] pose2=sequence.getPose(row+1).getJointAngles();
@@ -343,19 +348,12 @@ public class PoseSequenceSelectorPanel extends JPanel
    {
       int[] selectedRows = table.getSelectedRows();
       
-      if(selectedRows.length != 0) // TODO else do it to all rows
+      if(selectedRows.length != 0) 
       {
          for(int row : selectedRows)
          {
             PosePlaybackRobotPose pose = sequence.getPoseSequence().get(row);
             pose.switchSideDependentValues();
-            
-            double[] jointAngles = pose.getJointAngles();
-            System.out.println();
-            for(int i = 0; i < jointAngles.length; i++)
-            {
-               System.out.println(i + " \t" + jointAngles[i]);
-            }
          }
       }
       
