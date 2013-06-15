@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.EuclideanPositionController;
+import com.yobotics.simulationconstructionset.util.PositionController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.statemachines.*;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
@@ -281,7 +281,7 @@ public class IndividualHandControlModule
       stateMachine.checkTransitionConditions();
    }
 
-   public void executePointPositionTrajectory(PositionTrajectoryGenerator positionTrajectoryGenerator, EuclideanPositionController positionController,
+   public void executePointPositionTrajectory(PositionTrajectoryGenerator positionTrajectoryGenerator, PositionController positionController,
            FramePoint pointToControlPositionOf, GeometricJacobian jacobian)
    {
       pointPositionControlState.setTrajectory(positionTrajectoryGenerator, positionController, pointToControlPositionOf, jacobian);
