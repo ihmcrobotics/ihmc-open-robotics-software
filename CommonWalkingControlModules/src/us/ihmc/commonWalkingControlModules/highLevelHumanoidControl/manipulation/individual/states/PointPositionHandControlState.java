@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.EuclideanPositionController;
+import com.yobotics.simulationconstructionset.util.PositionController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
@@ -29,7 +29,7 @@ public class PointPositionHandControlState extends State<IndividualHandControlSt
 
 
    private PositionTrajectoryGenerator positionTrajectoryGenerator;
-   private EuclideanPositionController positionController;
+   private PositionController positionController;
 
    private FramePoint pointInBody;
    private GeometricJacobian jacobian;
@@ -120,7 +120,7 @@ public class PointPositionHandControlState extends State<IndividualHandControlSt
    }
 
    public void setTrajectory(PositionTrajectoryGenerator positionTrajectoryGenerator,
-                             EuclideanPositionController positionController, FramePoint pointInBody, GeometricJacobian jacobian)
+                             PositionController positionController, FramePoint pointInBody, GeometricJacobian jacobian)
    {
       this.positionTrajectoryGenerator = positionTrajectoryGenerator;
       this.positionController = positionController;
