@@ -5,7 +5,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.driving.DrivingInterface;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.driving.DrivingInterface.GearName;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.driving.VehicleModelObjects;
+import us.ihmc.packets.LowLevelDrivingAction;
 import us.ihmc.packets.LowLevelDrivingCommand;
+import us.ihmc.packets.LowLevelDrivingStatus;
 import us.ihmc.utilities.net.ObjectConsumer;
 
 public class DrivingCommandProvider implements ObjectConsumer<LowLevelDrivingCommand>
@@ -15,6 +17,10 @@ public class DrivingCommandProvider implements ObjectConsumer<LowLevelDrivingCom
    
    private double maximumGasPedalDistance;
    private double maximumBrakePedalDistance;
+   
+   private boolean doNothing = false;
+   private double doNothingEndTime = 0;
+   
    
    public void consumeObject(LowLevelDrivingCommand object)
    {
@@ -47,7 +53,7 @@ public class DrivingCommandProvider implements ObjectConsumer<LowLevelDrivingCom
       
    }
 
-   public void doControl()
+   public void doControl(double currentTime)
    {
       LowLevelDrivingCommand command = drivingCommands.poll();
       while(command != null)
@@ -61,8 +67,6 @@ public class DrivingCommandProvider implements ObjectConsumer<LowLevelDrivingCom
          case FOOTBRAKE: 
             drivingInterface.pressBrakePedal(value * maximumBrakePedalDistance);
          break;
-         case DO_NOTHING:
-            break;
          case GASPEDAL:
             drivingInterface.pressGasPedal(value * maximumGasPedalDistance);
             break;
@@ -75,11 +79,24 @@ public class DrivingCommandProvider implements ObjectConsumer<LowLevelDrivingCom
          case STEERING:
             drivingInterface.turnSteeringWheel(value);
             break;
+         case DO_NOTHING:
+            doNothing = true;
+            doNothingEndTime = currentTime + value;
+            break;
          }
          
          command = drivingCommands.poll();
       }
       
+      
+      if(doNothing)
+      {
+         if(currentTime > doNothingEndTime)
+         {
+            doNothing = false;
+            drivingInterface.getStatusProducer().queueDataToSend(new LowLevelDrivingStatus(LowLevelDrivingAction.DO_NOTHING, true));
+         }
+      }
    }
 
    public void setDrivingInterfaceAndVehicleModel(DrivingInterface drivingInterface, VehicleModelObjects vehicleModelObjects)

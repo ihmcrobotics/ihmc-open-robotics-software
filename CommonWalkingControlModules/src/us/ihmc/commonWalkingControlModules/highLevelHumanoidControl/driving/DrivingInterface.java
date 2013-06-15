@@ -1,5 +1,8 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.driving;
 
+import us.ihmc.packets.LowLevelDrivingStatus;
+import us.ihmc.utilities.io.streamingData.QueueBasedStreamingDataProducer;
+
 /**
  *
  *
@@ -44,6 +47,12 @@ public interface DrivingInterface
     */
    public abstract void setGear(GearName gearName, boolean overrideChecks);
 
+   /**
+    * VRC hack for DO_NOTHING command
+    */
+   public abstract QueueBasedStreamingDataProducer<LowLevelDrivingStatus> getStatusProducer();
+   
+   
    public enum GearName
    {
       FORWARD, NEUTRAL, REVERSE
