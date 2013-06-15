@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.driving.manipulationBehaviors;
 
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.EuclideanPositionController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
@@ -7,6 +8,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicRefere
 import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.driving.VehicleModelObjects;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.IndividualHandControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.taskExecutor.Task;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -33,7 +35,7 @@ public class PointPositionRotateSteeringWheelBehavior
 
    private final EuclideanPositionController positionController;
 
-   private final double averageAngularVelocity = 1.0;
+   private final double averageAngularVelocity = 0.7;
 
    private final IndividualHandControlModule individualHandControlModule;
    private final ReferenceFrame creepyGripHandPositionControlFrame;
@@ -42,23 +44,26 @@ public class PointPositionRotateSteeringWheelBehavior
    private final RobotSide robotSide;
    private final GeometricJacobian jacobian;
 
-   private final double kpRadial = 100.0;
-   private final double kpZ = 100.0;
-   private final double kpTangential = 100.0;
+   private final DoubleYoVariable kpRadial = new DoubleYoVariable("steerKpRadial", registry);
+   private final DoubleYoVariable kpZ = new DoubleYoVariable("steerKpZ", registry);
+   private final DoubleYoVariable kpTangential = new DoubleYoVariable("steerKpTangential", registry);
+
    private final double zeta = 1.0;
    private final ReferenceFrame steeringWheelFrame;
    private final TransformReferenceFrame xTangentialFrame;
    private final DynamicGraphicReferenceFrame gainFrameViz;
    private final MomentumBasedController momentumBasedController;
+   private final VehicleModelObjects vehicleModelObjects;
 
 
    public PointPositionRotateSteeringWheelBehavior(RobotSide robotSide, IndividualHandControlModule individualHandControlModule,
-           ReferenceFrame creepyGripHandPositionControlFrame, FullRobotModel fullRobotModel, ReferenceFrame steeringWheelFrame, MomentumBasedController momentumBasedController,
+           ReferenceFrame creepyGripHandPositionControlFrame, FullRobotModel fullRobotModel, ReferenceFrame steeringWheelFrame, MomentumBasedController momentumBasedController, VehicleModelObjects vehicleModelObjects,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.individualHandControlModule = individualHandControlModule;
       this.creepyGripHandPositionControlFrame = creepyGripHandPositionControlFrame;
       this.robotSide = robotSide;
+      this.vehicleModelObjects = vehicleModelObjects;
 
       RigidBody hand = fullRobotModel.getHand(robotSide);
       jacobian = new GeometricJacobian(fullRobotModel.getElevator(), hand, fullRobotModel.getElevator().getBodyFixedFrame());
@@ -73,7 +78,7 @@ public class PointPositionRotateSteeringWheelBehavior
 
       SE3ConfigurationProvider currentDesiredConfigurationProvider =
          individualHandControlModule.getCurrentDesiredConfigurationProvider(creepyGripHandPositionControlFrame);
-      PositionProvider initialPositionProvider = currentDesiredConfigurationProvider;
+      PositionProvider initialPositionProvider = new ProjectToSteeringWheelPositionProvider(currentDesiredConfigurationProvider);
       trajectoryGenerator = new CirclePositionTrajectoryGenerator("rotateSteeringWheelTrajectory", steeringWheelFrame, trajectoryTimeProvider,
               initialPositionProvider, registry, desiredRotationAngleProvider);
 
@@ -86,6 +91,10 @@ public class PointPositionRotateSteeringWheelBehavior
       {
          gainFrameViz = null;
       }
+
+      kpRadial.set(100.0);
+      kpZ.set(100.0);
+      kpTangential.set(100.0);
 
       parentRegistry.addChild(registry);
    }
@@ -138,18 +147,14 @@ public class PointPositionRotateSteeringWheelBehavior
          double trajectoryTime = Math.max(minTrajectoryTime, Math.abs(relativeRotationAngle / averageAngularVelocity));
          trajectoryTimeProvider.set(trajectoryTime);
          desiredRotationAngleProvider.set(relativeRotationAngle);
-         double kp = 100.0;
-         double kd = GainCalculator.computeDerivativeGain(kp, 1.0);
-         positionController.setProportionalGains(kp, kp, kp);
-         positionController.setDerivativeGains(kd, kd, kd);
          individualHandControlModule.executePointPositionTrajectory(trajectoryGenerator, positionController, tempPoint, jacobian);
       }
 
       public void doAction()
       {
-//         updateXTangentialFrame();
-//         setExternalWrench();
-//         updateGains();
+         updateXTangentialFrame();
+         setExternalWrench();
+         updateGains();
       }
 
       private void setExternalWrench()
@@ -175,9 +180,9 @@ public class PointPositionRotateSteeringWheelBehavior
          transform.get(tempMatrix);
 
          // K^S
-         proportionalGainMatrix.setElement(0, 0, kpTangential);
-         proportionalGainMatrix.setElement(1, 1, kpRadial);
-         proportionalGainMatrix.setElement(2, 2, kpZ);
+         proportionalGainMatrix.setElement(0, 0, kpTangential.getDoubleValue());
+         proportionalGainMatrix.setElement(1, 1, kpRadial.getDoubleValue());
+         proportionalGainMatrix.setElement(2, 2, kpZ.getDoubleValue());
 
          // R^B_S * K_S * R^S_B
          proportionalGainMatrix.mul(tempMatrix, proportionalGainMatrix);
@@ -185,9 +190,9 @@ public class PointPositionRotateSteeringWheelBehavior
          positionController.setProportionalGains(proportionalGainMatrix);
 
          // B^S
-         double kdTangential = GainCalculator.computeDerivativeGain(kpTangential, zeta);
-         double kdRadial = GainCalculator.computeDerivativeGain(kpRadial, zeta);
-         double kdZ = GainCalculator.computeDerivativeGain(kpZ, zeta);
+         double kdTangential = GainCalculator.computeDerivativeGain(kpTangential.getDoubleValue(), zeta);
+         double kdRadial = GainCalculator.computeDerivativeGain(kpRadial.getDoubleValue(), zeta);
+         double kdZ = GainCalculator.computeDerivativeGain(kpZ.getDoubleValue(), zeta);
 
          derivativeGainMatrix.setElement(0, 0, kdTangential);
          derivativeGainMatrix.setElement(1, 1, kdRadial);
@@ -201,18 +206,18 @@ public class PointPositionRotateSteeringWheelBehavior
 
       private void updateXTangentialFrame()
       {
-         x.set(steeringWheelFrame, 1.0, 0.0, 0.0);
-         tempMatrix.rotZ(getDesiredAngleFromYAxis());
-         tempMatrix.transform(x.getVector());
-
          z.set(steeringWheelFrame, 0.0, 0.0, 1.0);
 
-         y.setToZero(steeringWheelFrame);
+         tempPoint.setToZero(creepyGripHandPositionControlFrame);
+         tempPoint.changeFrame(steeringWheelFrame);
+         y.setAndChangeFrame(tempPoint);
+
+         x.setToZero(steeringWheelFrame);
+         x.cross(y, z);
+         x.normalize();
+
          y.cross(z, x);
          y.normalize();
-
-         z.cross(x, y);
-         z.normalize(); // should not be necessary, but just to be sure
 
          tempMatrix.setColumn(0, x.getVector());
          tempMatrix.setColumn(1, y.getVector());
@@ -240,8 +245,35 @@ public class PointPositionRotateSteeringWheelBehavior
       }
    }
 
-   private double getDesiredAngleFromYAxis()
+   private class ProjectToSteeringWheelPositionProvider implements PositionProvider
    {
-      return trajectoryGenerator.getAngleFromXAxis() - Math.PI / 2.0;
+      private final PositionProvider basePositionProvider;
+
+      public ProjectToSteeringWheelPositionProvider(PositionProvider basePositionProvider)
+      {
+         this.basePositionProvider = basePositionProvider;
+      }
+
+      public void get(FramePoint positionToPack)
+      {
+         basePositionProvider.get(positionToPack);
+         projectOntoSteeringWheel(positionToPack);
+      }
+
+      private void projectOntoSteeringWheel(FramePoint positionToPack)
+      {
+         positionToPack.changeFrame(steeringWheelFrame);
+
+         double x = positionToPack.getX();
+         double y = positionToPack.getY();
+         double angle = Math.atan2(y, x);
+
+         double newRadius = (vehicleModelObjects.getSteeringWheelInnerRadius() + vehicleModelObjects.getSteeringWheelOuterRadius()) / 2.0;
+         double newX = Math.cos(angle) * newRadius;
+         double newY = Math.sin(angle) * newRadius;
+         double newZ = 0.0;
+
+         positionToPack.set(newX, newY, newZ);
+      }
    }
 }
