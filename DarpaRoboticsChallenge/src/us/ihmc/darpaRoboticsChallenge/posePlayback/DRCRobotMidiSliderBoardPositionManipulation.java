@@ -84,6 +84,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    private final BooleanYoVariable isRightArmControlRequested = new BooleanYoVariable("isRightArmControlRequested", dontRecordRegistry);
 
    private final BooleanYoVariable isSupportBaseControlRequested = new BooleanYoVariable("isSupportBaseControlRequested", dontRecordRegistry);
+   private final BooleanYoVariable isSupportBaseToggleRequested = new BooleanYoVariable("isSupportBaseToggleRequested", dontRecordRegistry);
 
    private final SideDependentList<BooleanYoVariable> isLegControlRequested = new SideDependentList<BooleanYoVariable>(isLeftLegControlRequested,
          isRightLegControlRequested);
@@ -172,6 +173,11 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
       setupSymmetricModeListeners();
 
+      setupSupportPolygonDisplayAndControl(dynamicGraphicObjectsListRegistry);
+   }
+
+   private void setupSupportPolygonDisplayAndControl(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   {
       for (int i = 0; i < baseControlPoints.length; i++)
       {
          baseControlPoints[i] = new YoFramePoint("baseControlPoint" + i, ReferenceFrame.getWorldFrame(), registry);
@@ -183,6 +189,8 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
       SupportBaseControlRequestedListener supportBaseControlRequestedListener = new SupportBaseControlRequestedListener();
       isSupportBaseControlRequested.addVariableChangedListener(supportBaseControlRequestedListener);
+      isSupportBaseToggleRequested.addVariableChangedListener(supportBaseControlRequestedListener);
+      
       addSupportBaseControlGraphics(dynamicGraphicObjectsListRegistry);
    }
 
@@ -401,7 +409,8 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       sliderBoard.setButton(buttonChannel++, isSymmetricModeRequested);
       sliderBoard.setButton(buttonChannel++, isResetToBasePoseRequested);
 
-      buttonChannel = 16;
+      buttonChannel = 15;
+      sliderBoard.setButton(buttonChannel++, isSupportBaseToggleRequested);
       sliderBoard.setButton(buttonChannel++, isSupportBaseControlRequested);
 
       buttonChannel = 17;
@@ -693,8 +702,13 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
       public void variableChanged(YoVariable v)
       {
-         System.out.println("SupportBaseControlRequested");
          setupSlidersForSupportBaseControl();
+         if(v.equals(isSupportBaseToggleRequested))
+            toggleBaseControlPointDisplay();              
+      }
+
+      private void toggleBaseControlPointDisplay()
+      {
          displayState++;
          if (displayState == 6)
             displayState = 0;
