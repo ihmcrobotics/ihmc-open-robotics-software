@@ -24,6 +24,9 @@ public class YoCylindricalContactState implements CylindricalContactState, Modif
    private final DoubleYoVariable gripWeaknessFactor;
    private final DynamicGraphicReferenceFrame cylinderRefererenceFrameGraphic;
 
+   // TODO: Probably get rid of that. Now, it is used for smooth unload/load transitions in the CarIngressEgressController.
+   private final DoubleYoVariable wRho, wPhi;
+
    public YoCylindricalContactState(String namePrefix, ReferenceFrame frameAfterJoint, ReferenceFrame cylinderFrame, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
@@ -42,6 +45,11 @@ public class YoCylindricalContactState implements CylindricalContactState, Modif
       this.gripWeaknessFactor = new DoubleYoVariable(name + "gripWeaknessFactor", registry);
       this.frameAfterJoint = frameAfterJoint;
       this.cylinderFrame = cylinderFrame;
+      
+      this.wRho = new DoubleYoVariable(name + "_wRhoContactRegularization", registry);
+      this.wPhi = new DoubleYoVariable(name + "_wPhiContactRegularization", registry);
+      resetContactRegularization();
+
       parentRegistry.addChild(registry);
       
       
@@ -141,5 +149,31 @@ public class YoCylindricalContactState implements CylindricalContactState, Modif
    public void clear()
    {
       inContact.set(false);
+   }
+
+   public void setRhoContactRegularization(double wRho)
+   {
+      this.wRho.set(wRho);
+   }
+
+   public double getRhoContactRegularization()
+   {
+      return wRho.getDoubleValue();
+   }
+
+   public void setPhiCylinderContactRegularization(double wPhi)
+   {
+      this.wPhi.set(wPhi);
+   }
+
+   public double getPhiCylinderContactRegularization()
+   {
+      return wPhi.getDoubleValue();
+   }
+
+   public void resetContactRegularization()
+   {
+      this.wRho.set(DEFAULT_WRHO);
+      this.wPhi.set(DEFAULT_WPHI);
    }
 }

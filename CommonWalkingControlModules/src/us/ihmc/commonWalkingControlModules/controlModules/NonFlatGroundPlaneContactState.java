@@ -104,4 +104,17 @@ public class NonFlatGroundPlaneContactState implements PlaneContactState
    {
       return contactNormalFrameVector;
    }
+
+   public void setRhoContactRegularization(double wRho)
+   {
+   }
+
+   public double getRhoContactRegularization()
+   {
+      return DEFAULT_WRHO;
+   }
+
+   public void resetContactRegularization()
+   {
+   }
 }
