@@ -134,7 +134,8 @@ public class PointPositionRotateSteeringWheelBehavior
 
          tempPoint.setToZero(creepyGripHandPositionControlFrame);
 
-         double trajectoryTime = Math.abs(relativeRotationAngle / averageAngularVelocity);
+         double minTrajectoryTime = 0.1;
+         double trajectoryTime = Math.max(minTrajectoryTime, Math.abs(relativeRotationAngle / averageAngularVelocity));
          trajectoryTimeProvider.set(trajectoryTime);
          desiredRotationAngleProvider.set(relativeRotationAngle);
          double kp = 100.0;
