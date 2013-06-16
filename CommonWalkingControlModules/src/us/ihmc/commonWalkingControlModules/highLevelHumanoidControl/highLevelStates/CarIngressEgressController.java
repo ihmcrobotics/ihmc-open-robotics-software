@@ -570,16 +570,19 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          if (footPoseProvider.checkForNewPose(robotSide))
          {
             doUnloadingTransition.put(feet.get(robotSide), true);
+            // Cancel loading action if any:
             doLoadingTransition.put(feet.get(robotSide), false);
             // When unloading a foot, relatch where all the other foot positions are. 
             // Otherwise there might be a jump.
             momentumBasedController.requestResetEstimatorPositionsToCurrent();
          }
          
-         if (footLoadBearingProvider.checkForNewLoadBearingRequest(robotSide))
+         // If the foot is already in load bearing state, do nothing:
+         if (footLoadBearingProvider.checkForNewLoadBearingRequest(robotSide) && !requestedFootLoadBearing.get(robotSide).getBooleanValue())
          {
             requestedFootLoadBearing.get(robotSide).set(true);
             doLoadingTransition.put(feet.get(robotSide), true);
+            // Cancel unloading action if any:
             footPoseProvider.getDesiredFootPose(robotSide);
             doUnloadingTransition.put(feet.get(robotSide), false);
          }
