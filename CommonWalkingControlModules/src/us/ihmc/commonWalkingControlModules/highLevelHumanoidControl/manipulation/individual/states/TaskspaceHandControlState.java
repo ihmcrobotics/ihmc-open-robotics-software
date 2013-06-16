@@ -36,7 +36,7 @@ public abstract class TaskspaceHandControlState extends State<IndividualHandCont
    }
 
    @Override
-   public final void doAction()
+   public void doAction()
    {
       SpatialAccelerationVector handAcceleration = computeDesiredSpatialAcceleration();
       taskspaceConstraintData.set(handAcceleration);
