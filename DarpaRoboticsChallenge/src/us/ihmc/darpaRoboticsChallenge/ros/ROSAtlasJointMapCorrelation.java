@@ -1,7 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge.ros;
 
-import javax.swing.JPanel;
-
 public class ROSAtlasJointMapCorrelation extends ROSAtlasJointMap 
 {
    //This class identifies joint angle correlation indices between left and right side joint angles
@@ -41,25 +39,25 @@ public class ROSAtlasJointMapCorrelation extends ROSAtlasJointMap
 
    }
 
-   public final static boolean[] symetricSignChange = new boolean[ROSAtlasJointMap.numberOfJoints];
+   public final static boolean[] symmetricSignChange = new boolean[ROSAtlasJointMap.numberOfJoints];
    //If symetricSignChange[i]==true, then symmetric angles are opposite signs.
    static
    {
-      symetricSignChange[back_lbz] = true;
-      symetricSignChange[back_mby] = false;
-      symetricSignChange[back_ubx] = true;
-      symetricSignChange[neck_ay]  = false;
-      symetricSignChange[l_leg_uhz] = symetricSignChange[r_leg_uhz] = true;
-      symetricSignChange[l_leg_mhx] = symetricSignChange[r_leg_mhx] = true;
-      symetricSignChange[l_leg_lhy] = symetricSignChange[r_leg_lhy] = false;
-      symetricSignChange[l_leg_kny] = symetricSignChange[r_leg_kny] = false;
-      symetricSignChange[l_leg_uay] = symetricSignChange[r_leg_uay] = false;
-      symetricSignChange[l_leg_lax] = symetricSignChange[r_leg_lax] = true;
-      symetricSignChange[l_arm_usy] = symetricSignChange[r_arm_usy] = false;
-      symetricSignChange[l_arm_shx] = symetricSignChange[r_arm_shx] = true;
-      symetricSignChange[l_arm_ely] = symetricSignChange[r_arm_ely] = false;
-      symetricSignChange[l_arm_elx] = symetricSignChange[r_arm_elx] = true;
-      symetricSignChange[l_arm_uwy] = symetricSignChange[r_arm_uwy] = false;
-      symetricSignChange[l_arm_mwx] = symetricSignChange[r_arm_mwx] = true;
+      symmetricSignChange[back_lbz] = true;
+      symmetricSignChange[back_mby] = false;
+      symmetricSignChange[back_ubx] = true;
+      symmetricSignChange[neck_ay]  = false;
+      symmetricSignChange[l_leg_uhz] = symmetricSignChange[r_leg_uhz] = true;
+      symmetricSignChange[l_leg_mhx] = symmetricSignChange[r_leg_mhx] = true;
+      symmetricSignChange[l_leg_lhy] = symmetricSignChange[r_leg_lhy] = false;
+      symmetricSignChange[l_leg_kny] = symmetricSignChange[r_leg_kny] = false;
+      symmetricSignChange[l_leg_uay] = symmetricSignChange[r_leg_uay] = false;
+      symmetricSignChange[l_leg_lax] = symmetricSignChange[r_leg_lax] = true;
+      symmetricSignChange[l_arm_usy] = symmetricSignChange[r_arm_usy] = false;
+      symmetricSignChange[l_arm_shx] = symmetricSignChange[r_arm_shx] = true;
+      symmetricSignChange[l_arm_ely] = symmetricSignChange[r_arm_ely] = false;
+      symmetricSignChange[l_arm_elx] = symmetricSignChange[r_arm_elx] = true;
+      symmetricSignChange[l_arm_uwy] = symmetricSignChange[r_arm_uwy] = false;
+      symmetricSignChange[l_arm_mwx] = symmetricSignChange[r_arm_mwx] = true;
    }
 }
