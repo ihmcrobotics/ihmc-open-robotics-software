@@ -455,6 +455,11 @@ public class MomentumBasedController
       updateYoVariables();
    }
 
+   public void requestResetEstimatorPositionsToCurrent()
+   {
+      this.resetEstimatorPositionsToCurrent.set(true);
+   }
+   
    private void updateMomentumBasedControllerSpy()
    {
       if (momentumBasedControllerSpy != null)
