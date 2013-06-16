@@ -571,6 +571,9 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          {
             doUnloadingTransition.put(feet.get(robotSide), true);
             doLoadingTransition.put(feet.get(robotSide), false);
+            // When unloading a foot, relatch where all the other foot positions are. 
+            // Otherwise there might be a jump.
+            momentumBasedController.requestResetEstimatorPositionsToCurrent();
          }
          
          if (footLoadBearingProvider.checkForNewLoadBearingRequest(robotSide))
