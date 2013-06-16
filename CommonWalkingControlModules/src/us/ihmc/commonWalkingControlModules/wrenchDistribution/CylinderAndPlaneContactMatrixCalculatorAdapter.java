@@ -1,9 +1,12 @@
 package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.ejml.data.DenseMatrix64F;
 
@@ -82,30 +85,54 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
       return cylinderAndPlaneContactMatrixCalculator.getQPhi();
    }
 
-   public void computeMatrices(Map<RigidBody, ? extends PlaneContactState> planeContactStates,
+   public void computeMatrices(LinkedHashMap<RigidBody,Set<PlaneContactState>> planeContactStates,
                                Map<RigidBody, ? extends CylindricalContactState> cylindricalContactStates)
    {
       convertToEndEffectorsHack(planeContactStates, cylindricalContactStates);
 
-      cylinderAndPlaneContactMatrixCalculator.computeMatrices(endEffectors.values());
+      cylinderAndPlaneContactMatrixCalculator.computeMatrices(computeEndEffectorCollection(endEffectors.values()));
+   }
+
+   private Collection<? extends EndEffector> computeEndEffectorCollection(Collection<Set<EndEffector>> values)
+   {
+      List<EndEffector> ret = new ArrayList<EndEffector>();
+      for (Set<EndEffector> set : values)
+      {
+         ret.addAll(set);
+      }
+      return ret;
    }
 
    public Map<RigidBody, Wrench> computeWrenches(DenseMatrix64F rho, DenseMatrix64F phi)
    {
       cylinderAndPlaneContactSpatialForceVectorCalculator.setQRho(cylinderAndPlaneContactMatrixCalculator.getQRho());
       cylinderAndPlaneContactSpatialForceVectorCalculator.setQPhi(cylinderAndPlaneContactMatrixCalculator.getQPhi());
-      cylinderAndPlaneContactSpatialForceVectorCalculator.computeWrenches(endEffectors.values(), rho, phi);
+      cylinderAndPlaneContactSpatialForceVectorCalculator.computeWrenches(computeEndEffectorCollection(endEffectors.values()), rho, phi);
 
       // TODO: garbage:
       wrenches.clear();
 
       for (RigidBody rigidBody : endEffectors.keySet())
       {
-         SpatialForceVector spatialForceVector = cylinderAndPlaneContactSpatialForceVectorCalculator.getSpatialForceVector(endEffectors.get(rigidBody));
-         Wrench wrench = new Wrench(rigidBody.getBodyFixedFrame(), spatialForceVector.getExpressedInFrame(), spatialForceVector.getLinearPartCopy(),
-                                    spatialForceVector.getAngularPartCopy());
-         wrench.changeFrame(rigidBody.getBodyFixedFrame());
-         wrenches.put(rigidBody, wrench);
+         Set<EndEffector> set = endEffectors.get(rigidBody);
+         
+         for (EndEffector endEffector : set)
+         {
+            SpatialForceVector spatialForceVector = cylinderAndPlaneContactSpatialForceVectorCalculator.getSpatialForceVector(endEffector);
+            Wrench newWrench = new Wrench(rigidBody.getBodyFixedFrame(), spatialForceVector.getExpressedInFrame(), spatialForceVector.getLinearPartCopy(),
+                                       spatialForceVector.getAngularPartCopy());
+            newWrench.changeFrame(rigidBody.getBodyFixedFrame());
+            
+            Wrench wrenchInMap = wrenches.get(rigidBody);
+            if (wrenchInMap == null)
+            {
+               wrenches.put(rigidBody, newWrench);
+            }
+            else
+            {
+               wrenchInMap.add(newWrench);
+            }
+         }
       }
 
       return wrenches;
@@ -113,12 +140,12 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
 
    // CONVERSION NASTINESS
    // TODO: clean up
-   private final Map<RigidBody, EndEffector> endEffectors = new LinkedHashMap<RigidBody, EndEffector>();
+   private final Map<RigidBody, Set<EndEffector>> endEffectors = new LinkedHashMap<RigidBody, Set<EndEffector>>();
    protected Map<PlaneContactState, EndEffector> previouslyUsedPlaneEndEffectors = new LinkedHashMap<PlaneContactState, EndEffector>();
    protected Map<CylindricalContactState, EndEffector> previouslyUsedCylinderEndEffectors = new LinkedHashMap<CylindricalContactState, EndEffector>();
    private final List<DynamicGraphicObject> endEffectorResultGraphics = new ArrayList<DynamicGraphicObject>();
 
-   private void convertToEndEffectorsHack(Map<RigidBody, ? extends PlaneContactState> planeContactStates,
+   private void convertToEndEffectorsHack(LinkedHashMap<RigidBody,Set<PlaneContactState>> planeContactStates,
            Map<RigidBody, ? extends CylindricalContactState> cylindricalContactStates)
    {
       endEffectors.clear();
@@ -127,10 +154,21 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
       {
          for (RigidBody rigidBody : planeContactStates.keySet())
          {
-            PlaneContactState planeContactState = planeContactStates.get(rigidBody);
-            if (planeContactState.getNumberOfContactPoints() > 0)
-            {
-               endEffectors.put(rigidBody, getOrCreate(planeContactState));
+            Set<PlaneContactState> set = planeContactStates.get(rigidBody);
+            
+            for (PlaneContactState planeContactState : set)
+            {               
+               if (planeContactState.getNumberOfContactPoints() > 0)
+               {
+                  Set<EndEffector> endEffectorSet = endEffectors.get(rigidBody);
+                  if (endEffectorSet == null)
+                  {
+                     endEffectorSet = new LinkedHashSet<EndEffector>();
+                     endEffectors.put(rigidBody, endEffectorSet);
+                  }
+                  
+                  endEffectorSet.add(getOrCreate(planeContactState));                  
+               }
             }
          }
       }
@@ -141,7 +179,15 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
          {
             CylindricalContactState cylindricalContactState = cylindricalContactStates.get(rigidBody);
             if (cylindricalContactState.isInContact())
-               endEffectors.put(rigidBody, getOrCreate(cylindricalContactState));
+            {
+               Set<EndEffector> endEffectorSet = endEffectors.get(rigidBody);
+               if (endEffectorSet == null)
+               {
+                  endEffectorSet = new LinkedHashSet<EndEffector>();
+                  endEffectors.put(rigidBody, endEffectorSet);
+               }
+               endEffectorSet.add(getOrCreate(cylindricalContactState));
+            }
          }
       }
    }

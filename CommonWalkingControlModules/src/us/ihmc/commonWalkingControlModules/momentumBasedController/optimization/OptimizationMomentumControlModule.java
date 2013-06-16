@@ -1,7 +1,9 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.ejml.data.DenseMatrix64F;
 
@@ -124,7 +126,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
                        Map<ContactableCylinderBody, ? extends CylindricalContactState> cylinderContactStates, RobotSide upcomingSupportLeg) throws NoConvergenceException
 
    {
-      LinkedHashMap<RigidBody, PlaneContactState> planeContactStates = convertContactStates(contactStates);
+      LinkedHashMap<RigidBody, Set<PlaneContactState>> planeContactStates = convertContactStates(contactStates);
       LinkedHashMap<RigidBody, CylindricalContactState> cylinderContactStatesConverted;
       if (cylinderContactStates != null)
       {
@@ -224,12 +226,19 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
          throw noConvergenceException;
    }
 
-   private static LinkedHashMap<RigidBody, PlaneContactState> convertContactStates(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates)
+   private static LinkedHashMap<RigidBody, Set<PlaneContactState>> convertContactStates(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates)
    {
-      LinkedHashMap<RigidBody, PlaneContactState> ret = new LinkedHashMap<RigidBody, PlaneContactState>();
+      LinkedHashMap<RigidBody, Set<PlaneContactState>> ret = new LinkedHashMap<RigidBody, Set<PlaneContactState>>();
       for (ContactablePlaneBody contactablePlaneBody : contactStates.keySet())
       {
-         ret.put(contactablePlaneBody.getRigidBody(), contactStates.get(contactablePlaneBody));
+         RigidBody rigidBody = contactablePlaneBody.getRigidBody();
+         Set<PlaneContactState> set = ret.get(rigidBody);
+         if (set == null)
+         {
+            set = new LinkedHashSet<PlaneContactState>();
+            ret.put(rigidBody, set);
+         }
+         set.add(contactStates.get(contactablePlaneBody));
       }
 
       return ret;
