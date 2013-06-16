@@ -8,6 +8,7 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
@@ -29,10 +30,12 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBear
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.ChangeableConfigurationProvider;
+import us.ihmc.commonWalkingControlModules.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SettableOrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.ThirdOrderPolynomialTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.YoVariableDoubleProvider;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -59,7 +62,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 {
    public final static HighLevelState controllerState = HighLevelState.INGRESS_EGRESS;
    private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OPTIMIZATION;
-   private final static double DELAY_TIME_BEFORE_TRUSTING_CONTACTS = 1.0;
+   private final static double DELAY_TIME_BEFORE_TRUSTING_CONTACTS = 1.1;
 
    private final DesiredFootPoseProvider footPoseProvider;
    private final DesiredFootStateProvider footLoadBearingProvider;
@@ -121,6 +124,16 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    private SideDependentList<BooleanYoVariable> requestedThighLoadBearing = new SideDependentList<BooleanYoVariable>(requestedLeftThighLoadBearing,
                                                                                requestedRightThighLoadBearing);
    private final VariousWalkingManagers variousWalkingManagers;
+   
+   // Parameters for smooth transitions between loading and unloading an end-effector.
+   private final YoVariableDoubleProvider loadBearingTransitionTimeProvider;
+   private final Map<ContactablePlaneBody, DoubleYoVariable> loadBearingTransitionStartTime = new LinkedHashMap<ContactablePlaneBody, DoubleYoVariable>();
+   private final Map<ContactablePlaneBody, BooleanYoVariable> loadingTransitionHasBeenInitiated = new LinkedHashMap<ContactablePlaneBody, BooleanYoVariable>();
+   private final Map<ContactablePlaneBody, BooleanYoVariable> unloadingTransitionHasBeenInitiated = new LinkedHashMap<ContactablePlaneBody, BooleanYoVariable>();
+   private final Map<ContactablePlaneBody, Boolean> doLoadingTransition = new LinkedHashMap<ContactablePlaneBody, Boolean>();
+   private final Map<ContactablePlaneBody, Boolean> doUnloadingTransition = new LinkedHashMap<ContactablePlaneBody, Boolean>();
+   private final Map<ContactablePlaneBody, CubicPolynomialTrajectoryGenerator> smoothLoadingWRhoTrajectoryGenerators = new LinkedHashMap<ContactablePlaneBody, CubicPolynomialTrajectoryGenerator>();
+   private final Map<ContactablePlaneBody, CubicPolynomialTrajectoryGenerator> smoothUnloadingWRhoTrajectoryGenerators = new LinkedHashMap<ContactablePlaneBody, CubicPolynomialTrajectoryGenerator>();
 
    public CarIngressEgressController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
                                      MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
@@ -198,6 +211,49 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       {
          requestedFootLoadBearing.get(robotSide).addVariableChangedListener(loadBearingVariableChangedListener);
          requestedThighLoadBearing.get(robotSide).addVariableChangedListener(loadBearingVariableChangedListener);
+      }
+
+      // Parameters for smooth transitions between loading and unloading an end-effector.
+      loadBearingTransitionTimeProvider = new YoVariableDoubleProvider("loadBearingTransitionTime", registry);
+      loadBearingTransitionTimeProvider.set(1.0);
+      double contactRegularizationWeightToUnloadEndEffector = 20.0 * PlaneContactState.DEFAULT_WRHO;
+
+      setupTrajectoryGeneratorsForSmoothLoadBearingTransitions(contactRegularizationWeightToUnloadEndEffector);
+   }
+
+   private void setupTrajectoryGeneratorsForSmoothLoadBearingTransitions(double contactRegularizationWeightToUnloadEndEffector)
+   {
+      List<ContactablePlaneBody> contactablePlaneBodies = new ArrayList<ContactablePlaneBody>();
+      contactablePlaneBodies.addAll(feet.values());
+      contactablePlaneBodies.addAll(contactableThighs.values());
+//      contactablePlaneBodies.addAll(handPalms.values());
+      contactablePlaneBodies.add(contactablePelvis);
+//      contactablePlaneBodies.add(contactablePelvisBack);
+      
+      DoubleProvider wRhoForPlaneBodyLoaded = new ConstantDoubleProvider(PlaneContactState.DEFAULT_WRHO);
+      DoubleProvider wRhoForPlaneBodyUnloaded = new ConstantDoubleProvider(contactRegularizationWeightToUnloadEndEffector);
+      
+      for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodies)
+      {
+         RigidBody rigidBody = contactablePlaneBody.getRigidBody();
+         String namePrefix = rigidBody.getName();
+         
+         CubicPolynomialTrajectoryGenerator smoothLoadingWRhoTrajectoryGenerator = new CubicPolynomialTrajectoryGenerator(
+               namePrefix + "_UnloadingTrajectory", wRhoForPlaneBodyUnloaded, wRhoForPlaneBodyLoaded, loadBearingTransitionTimeProvider, registry);
+         CubicPolynomialTrajectoryGenerator smoothUnloadingWRhoTrajectoryGenerator = new CubicPolynomialTrajectoryGenerator(
+               namePrefix + "_LoadingTrajectory", wRhoForPlaneBodyLoaded, wRhoForPlaneBodyUnloaded, loadBearingTransitionTimeProvider, registry);
+
+         smoothLoadingWRhoTrajectoryGenerator.initialize();
+         smoothUnloadingWRhoTrajectoryGenerator.initialize();
+         
+         loadBearingTransitionStartTime.put(contactablePlaneBody, new DoubleYoVariable(namePrefix + "_LoadBearingTransitionStartTime", registry));
+         loadingTransitionHasBeenInitiated.put(contactablePlaneBody, new BooleanYoVariable(namePrefix + "_LoadingTransitionHasBeenInitiated", registry));
+         unloadingTransitionHasBeenInitiated.put(contactablePlaneBody, new BooleanYoVariable(namePrefix + "_UnloadingTransitionHasBeenInitiated", registry));
+         smoothLoadingWRhoTrajectoryGenerators.put(contactablePlaneBody, smoothLoadingWRhoTrajectoryGenerator);
+         smoothUnloadingWRhoTrajectoryGenerators.put(contactablePlaneBody, smoothUnloadingWRhoTrajectoryGenerator);
+
+         doLoadingTransition.put(contactablePlaneBody, false);
+         doUnloadingTransition.put(contactablePlaneBody, false);
       }
    }
 
@@ -452,7 +508,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       {
          ContactablePlaneBody foot = feet.get(robotSide);
 
-         if (footPoseProvider.checkForNewPose(robotSide))
+         if (footPoseProvider.checkForNewPose(robotSide) && !requestedFootLoadBearing.get(robotSide).getBooleanValue())
          {
             FramePose oldFootPose = new FramePose(foot.getBodyFrame());
             desiredFootConfigurationProviders.get(foot).get(oldFootPose);
@@ -505,19 +561,28 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       contactJacobians.remove(contactablePlaneBody);
    }
    
+   private boolean desiredPelvisLoadBearingState;
+   
    private void updateLoadBearingStates()
    {
       for (RobotSide robotSide : RobotSide.values)
       {
          if (footPoseProvider.checkForNewPose(robotSide))
          {
-            requestedFootLoadBearing.get(robotSide).set(false);
+            doUnloadingTransition.put(feet.get(robotSide), true);
+            doLoadingTransition.put(feet.get(robotSide), false);
          }
          
          if (footLoadBearingProvider.checkForNewLoadBearingRequest(robotSide))
          {
             requestedFootLoadBearing.get(robotSide).set(true);
+            doLoadingTransition.put(feet.get(robotSide), true);
+            footPoseProvider.getDesiredFootPose(robotSide);
+            doUnloadingTransition.put(feet.get(robotSide), false);
          }
+
+         performSmoothUnloadingTransition(feet.get(robotSide), requestedFootLoadBearing.get(robotSide));
+         performSmoothLoadingTransition(feet.get(robotSide));
          
          if (thighLoadBearingProvider.checkForNewLoadBearingState(robotSide))
          {
@@ -527,8 +592,87 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
       if (pelvisLoadBearingProvider.checkForNewLoadBearingState())
       {
-          requestedPelvisLoadBearing.set(pelvisLoadBearingProvider.getDesiredPelvisLoadBearingState());
+         desiredPelvisLoadBearingState = pelvisLoadBearingProvider.getDesiredPelvisLoadBearingState();
+         if (desiredPelvisLoadBearingState && !requestedPelvisLoadBearing.getBooleanValue()) // Loading
+         {
+            requestedPelvisLoadBearing.set(desiredPelvisLoadBearingState);
+            doLoadingTransition.put(contactablePelvis, true);
+            doUnloadingTransition.put(contactablePelvis, false);
+            
+         }
+         else if (!desiredPelvisLoadBearingState && requestedPelvisLoadBearing.getBooleanValue()) // Unloading
+         {
+            doUnloadingTransition.put(contactablePelvis, true);
+            doLoadingTransition.put(contactablePelvis, false);
+         }
       }
+
+      performSmoothUnloadingTransition(contactablePelvis, requestedPelvisLoadBearing);
+      performSmoothLoadingTransition(contactablePelvis);
+   }
+
+   private void performSmoothUnloadingTransition(ContactablePlaneBody contactablePlaneBody, BooleanYoVariable requestedLoadBearing)
+   {
+      if (!doUnloadingTransition.get(contactablePlaneBody))
+      {
+         unloadingTransitionHasBeenInitiated.get(contactablePlaneBody).set(false);
+         return;
+      }
+      
+      DoubleYoVariable transitionStartTime = loadBearingTransitionStartTime.get(contactablePlaneBody);
+
+      if (!unloadingTransitionHasBeenInitiated.get(contactablePlaneBody).getBooleanValue())
+      {
+         unloadingTransitionHasBeenInitiated.get(contactablePlaneBody).set(true);
+         transitionStartTime.set(yoTime.getDoubleValue());
+      }
+
+      double time = yoTime.getDoubleValue() - transitionStartTime.getDoubleValue();
+
+      if (time >= loadBearingTransitionTimeProvider.getValue())
+      {
+         requestedLoadBearing.set(false);
+         doUnloadingTransition.put(contactablePlaneBody, false);
+         
+         return;
+      }
+
+      CubicPolynomialTrajectoryGenerator smoothUnloadingWRhoTrajectoryGenerator = smoothUnloadingWRhoTrajectoryGenerators.get(contactablePlaneBody);
+
+      smoothUnloadingWRhoTrajectoryGenerator.compute(time);
+      double wRho = smoothUnloadingWRhoTrajectoryGenerator.getValue();
+      momentumBasedController.setPlaneContactState_wRho(contactablePlaneBody, wRho);
+
+   }
+
+   private void performSmoothLoadingTransition(ContactablePlaneBody contactablePlaneBody)
+   {
+      if (!doLoadingTransition.get(contactablePlaneBody))
+      {
+         loadingTransitionHasBeenInitiated.get(contactablePlaneBody).set(false);
+         return;
+      }
+      
+      DoubleYoVariable transitionStartTime = loadBearingTransitionStartTime.get(contactablePlaneBody);
+
+      if (!loadingTransitionHasBeenInitiated.get(contactablePlaneBody).getBooleanValue())
+      {
+         loadingTransitionHasBeenInitiated.get(contactablePlaneBody).set(true);
+         transitionStartTime.set(yoTime.getDoubleValue());
+      }
+
+      double time = yoTime.getDoubleValue() - transitionStartTime.getDoubleValue();
+
+      if (time >= loadBearingTransitionTimeProvider.getValue())
+      {
+         doLoadingTransition.put(contactablePlaneBody, false);
+      }
+
+      CubicPolynomialTrajectoryGenerator smoothLoadingWRhoTrajectoryGenerator = smoothLoadingWRhoTrajectoryGenerators.get(contactablePlaneBody);
+
+      smoothLoadingWRhoTrajectoryGenerator.compute(time);
+      double wRho = smoothLoadingWRhoTrajectoryGenerator.getValue();
+      momentumBasedController.setPlaneContactState_wRho(contactablePlaneBody, wRho);
    }
 
    public boolean isContactablePlaneBodyInContact(ContactablePlaneBody contactablePlaneBody)

@@ -161,12 +161,12 @@ public class YoCylindricalContactState implements CylindricalContactState, Modif
       return wRho.getDoubleValue();
    }
 
-   public void setPhiCylinderContactRegularization(double wPhi)
+   public void setPhiContactRegularization(double wPhi)
    {
       this.wPhi.set(wPhi);
    }
 
-   public double getPhiCylinderContactRegularization()
+   public double getPhiContactRegularization()
    {
       return wPhi.getDoubleValue();
    }
