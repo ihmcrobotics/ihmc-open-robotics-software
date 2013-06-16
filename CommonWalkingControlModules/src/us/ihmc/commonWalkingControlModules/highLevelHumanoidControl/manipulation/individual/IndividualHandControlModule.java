@@ -53,6 +53,7 @@ public class IndividualHandControlModule
    private final TaskspaceHandPositionControlState taskSpacePositionControlState;
    private final JointSpaceHandControlControlState jointSpaceHandControlState;
    private final LoadBearingCylindricalHandControlState loadBearingCylindricalState;
+   private final ProgressiveUnloadingHandControlState progressiveUnloadingHandControlState;
    private final ObjectManipulationState objectManipulationState;
    private final LoadBearingPlaneHandControlState loadBearingPlaneFingersBentBackState;
    private final List<TaskspaceHandPositionControlState> taskSpacePositionControlStates = new ArrayList<TaskspaceHandPositionControlState>();
@@ -127,6 +128,10 @@ public class IndividualHandControlModule
       loadBearingCylindricalState = new LoadBearingCylindricalHandControlState(IndividualHandControlState.LOAD_BEARING_CYLINDRICAL, momentumBasedController,
               jacobian, fullRobotModel.getElevator(), parentRegistry, robotSide);
 
+
+      progressiveUnloadingHandControlState = new ProgressiveUnloadingHandControlState(IndividualHandControlState.UNLOADING_STATE, momentumBasedController,
+              jacobian, fullRobotModel.getElevator(), handController, parentRegistry, robotSide);
+
       loadBearingPlaneFingersBentBackState = new LoadBearingPlaneHandControlState(IndividualHandControlState.LOAD_BEARING_PLANE_FINGERS_BENT_BACK, robotSide,
               momentumBasedController, fullRobotModel.getElevator(), jacobian, handController, registry);
 
@@ -163,7 +168,8 @@ public class IndividualHandControlModule
 
       addTransitionToCylindricalLoadBearing(requestedState, handController, jointSpaceHandControlState, loadBearingCylindricalState, simulationTime);
       addTransitionToCylindricalLoadBearing(requestedState, handController, taskSpacePositionControlState, loadBearingCylindricalState, simulationTime);
-      addTransitionToLeaveCylindricalLoadBearing(requestedState, handController, loadBearingCylindricalState, taskSpacePositionControlState);
+//      addTransitionToLeaveCylindricalLoadBearing(handController, loadBearingCylindricalState, taskSpacePositionControlState);
+      addRequestedStateTransition(requestedState, true, loadBearingCylindricalState, progressiveUnloadingHandControlState, taskSpacePositionControlState);
 
       addTransitionToPlaneLoadBearingFingersBentBack(requestedState, handController, taskSpacePositionControlState, loadBearingPlaneFingersBentBackState);
       addRequestedStateTransition(requestedState, true, loadBearingPlaneFingersBentBackState, taskSpacePositionControlState);
@@ -172,6 +178,7 @@ public class IndividualHandControlModule
       stateMachine.addState(taskSpacePositionControlState);
       stateMachine.addState(objectManipulationState);
       stateMachine.addState(loadBearingCylindricalState);
+      stateMachine.addState(progressiveUnloadingHandControlState);
       stateMachine.addState(loadBearingPlaneFingersBentBackState);
       stateMachine.addState(pointPositionControlState);
 
