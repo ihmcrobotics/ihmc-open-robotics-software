@@ -20,7 +20,7 @@ public interface CylindricalContactState
    // TODO: Probably get rid of that. Now, it is used for smooth unload/load transitions in the CarIngressEgressController.
    public void setRhoContactRegularization(double wRho);
    public double getRhoContactRegularization();
-   public void setPhiCylinderContactRegularization(double wPhi);
-   public double getPhiCylinderContactRegularization();
+   public void setPhiContactRegularization(double wPhi);
+   public double getPhiContactRegularization();
    public void resetContactRegularization();
 }

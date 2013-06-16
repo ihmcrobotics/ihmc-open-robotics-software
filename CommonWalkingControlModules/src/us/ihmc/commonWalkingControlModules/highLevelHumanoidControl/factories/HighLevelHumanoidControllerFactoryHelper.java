@@ -46,6 +46,9 @@ public class HighLevelHumanoidControllerFactoryHelper
    //TODO: JEP: USE_NEW_OPTIMIZATION_MOMENTUM_CONTROL_MODULE has to be false or walking sucks. 
 //   private static final boolean USE_NEW_OPTIMIZATION_MOMENTUM_CONTROL_MODULE = false;
 
+   //TODO (Sylvain): get rid of that boolean (used for CarIngressEgressController)
+   private static final boolean USE_WRHO_WPHI_OF_CONTACT_STATES = true;
+
    public static BlindWalkingToDestinationDesiredFootstepCalculator getBlindWalkingToDestinationDesiredFootstepCalculator(
            WalkingControllerParameters walkingControllerParameters, CommonWalkingReferenceFrames referenceFrames,
            SideDependentList<ContactablePlaneBody> bipedFeet, YoVariableRegistry registry)
@@ -141,7 +144,7 @@ public class HighLevelHumanoidControllerFactoryHelper
       return joints.toArray(new InverseDynamicsJoint[joints.size()]);
    }
 
-/* TODO: Geti rid of the following
+/* TODO: Get rid of the following
    public static MomentumControlModule createMomentumControlModule(WalkingControllerParameters walkingControllerParameters, FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, double gravityZ,
          TwistCalculator twistCalculator, double controlDT, LidarControllerInterface lidarControllerInterface, YoVariableRegistry registry,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
@@ -227,7 +230,7 @@ public class HighLevelHumanoidControllerFactoryHelper
    {
       InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, lidarControllerInterface.getLidarJoint());
 
-      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(registry);
+      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(USE_WRHO_WPHI_OF_CONTACT_STATES, registry);
       momentumOptimizationSettings.setDampedLeastSquaresFactor(5e-2);
       momentumOptimizationSettings.setRhoCylinderContactRegularization(0.002);
       momentumOptimizationSettings.setPhiCylinderContactRegularization(0.002);

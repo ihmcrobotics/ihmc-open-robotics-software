@@ -372,6 +372,7 @@ public class MomentumBasedController
       resetWeightsForContactRegularization();
    }
 
+   //TODO  (Sylvain): get rid of that
    private void resetWeightsForContactRegularization()
    {
       // TODO: get rid of contactStates or planeContactStates. This is confusing.
@@ -774,5 +775,17 @@ public class MomentumBasedController
    public void setDelayTimeBeforeTrustingContacts(double delayTimeBeforeTrustingContacts)
    {
       pointPositionGrabber.setDelayTimeBeforeTrustingContacts(delayTimeBeforeTrustingContacts);
+   }
+   
+   //TODO (Sylvain): get rid of these methods changing wRho & wPhi of contact state
+   public void setPlaneContactState_wRho (ContactablePlaneBody contactablePlaneBody, double wRho)
+   {
+      planeContactStates.get(contactablePlaneBody).setRhoContactRegularization(wRho);
+   }
+
+   public void setCylindricalContactState_wRho_wPhi(ContactableCylinderBody contactableCylinderBody, double wRho, double wPhi)
+   {
+      cylindricalContactStates.get(contactableCylinderBody).setRhoContactRegularization(wRho);
+      cylindricalContactStates.get(contactableCylinderBody).setPhiContactRegularization(wPhi);
    }
 }
