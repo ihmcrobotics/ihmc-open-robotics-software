@@ -57,9 +57,9 @@ public class CreateGaussianModelApp {
 //
 //      BoofMiscOps.saveXML(model,"gaussian_white_start.xml");
 //
-      model = GaussianColorClassifier.train(new FileInputStream("car_color.txt"));
+      model = GaussianColorClassifier.train(new FileInputStream("hood.txt"));
       model.print();
 
-      BoofMiscOps.saveXML(model,"gaussian_car_color.xml");
+      BoofMiscOps.saveXML(model,"gaussian_hood.xml");
    }
 }

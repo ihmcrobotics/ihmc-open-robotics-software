@@ -45,8 +45,8 @@ public class DisplayClassificationsApp extends JPanel
    public static void main( String args[] ) {
 //      BufferedImage input = ConfigurationLoader.loadImage("media/drcsim_2_6/left000001.png");
 //      BufferedImage input = ConfigurationLoader.loadImage("media/drcsim_2_6/left04.png");
-      BufferedImage input = UtilImageIO.loadImage("../DarpaRoboticsChallenge/log/key_left0193.ppm");
-      Gaussian3D_F64 model = BoofMiscOps.loadXML("gaussian_car_color.xml");
+      BufferedImage input = UtilImageIO.loadImage("../ImageProcessing/data/key_left00000.ppm");
+      Gaussian3D_F64 model = BoofMiscOps.loadXML("gaussian_hood.xml");
 //      Gaussian3D_F64 model = ConfigurationLoader.loadXML("models/drcsim_2_6/gaussian_car_color.xml");
 
       if( model == null )

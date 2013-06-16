@@ -254,7 +254,7 @@ public class ColorImageLabelApp extends JPanel implements ActionListener {
    }
 
    public static void main( String args[] ) {
-      BufferedImage input = UtilImageIO.loadImage("../DarpaRoboticsChallenge/log/key_left0193.ppm");
+      BufferedImage input = UtilImageIO.loadImage("../ImageProcessing/data/key_left00000.ppm");
 
       ColorImageLabelApp app = new ColorImageLabelApp(input);
       ShowImages.showWindow(app,"Train HSV Classifier");
