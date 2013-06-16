@@ -16,6 +16,9 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
+import us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap;
+import us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMapCorrelation;
+import us.ihmc.darpaRoboticsChallenge.ros.ROSSandiaJointMap;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
@@ -450,45 +453,45 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
    private void setupSymmetricModeListeners()
    {
+      //main joints
+      for(int thisSideIndex=0;thisSideIndex<ROSAtlasJointMap.numberOfJoints;thisSideIndex++)
+      {
+         int otherSideIndex=ROSAtlasJointMapCorrelation.oppositeSideIndex[thisSideIndex];
+         if( thisSideIndex !=  otherSideIndex)
+         {
+            YoVariable thisVariable         = scs.getVariable("q_" + ROSAtlasJointMap.jointNames[thisSideIndex]);
+            YoVariable oppositeSideVariable = scs.getVariable("q_" + ROSAtlasJointMap.jointNames[otherSideIndex]);
+            boolean setToOppositeSign = ROSAtlasJointMapCorrelation.symmetricSignChange[thisSideIndex];
+            RobotSide robotSide;
+            if(ROSAtlasJointMap.jointNames[thisSideIndex].startsWith("l_"))
+               robotSide=RobotSide.LEFT;
+            else
+               robotSide=RobotSide.RIGHT;               
+            SymmetricModeListener symmetricModeListener = new SymmetricModeListener((DoubleYoVariable) oppositeSideVariable, robotSide, setToOppositeSign);
+            thisVariable.addVariableChangedListener(symmetricModeListener);            
+         }
+      }
+      
+      //fingers
       for (RobotSide robotSide : RobotSide.values)
       {
-         String thisSidePrefix = sideString.get(robotSide);
-         String oppositeSidePrefix = sideString.get(robotSide.getOppositeSide());
-
-         for (LegJointName legJointName : legJointStringNames.keySet())
-         {
-            YoVariable thisVariable         = scs.getVariable(thisSidePrefix     + legJointStringNames.get(legJointName));
-            YoVariable oppositeSideVariable = scs.getVariable(oppositeSidePrefix + legJointStringNames.get(legJointName));
-            boolean setToOppositeSign = (legJointName == LegJointName.HIP_YAW) || (legJointName == LegJointName.ANKLE_ROLL)
-                  || (legJointName == LegJointName.HIP_ROLL);
-            SymmetricModeListener symmetricModeListener = new SymmetricModeListener((DoubleYoVariable) oppositeSideVariable, robotSide, setToOppositeSign);
-            thisVariable.addVariableChangedListener(symmetricModeListener);
-         }
-
-         for (ArmJointName armJointName : armJointStringNames.keySet())
-         {
-            YoVariable thisVariable         = scs.getVariable(thisSidePrefix     + armJointStringNames.get(armJointName));
-            YoVariable oppositeSideVariable = scs.getVariable(oppositeSidePrefix + armJointStringNames.get(armJointName));
-            boolean setToOppositeSign = (armJointName == ArmJointName.WRIST_ROLL) || (armJointName == ArmJointName.ELBOW_ROLL)
-                  || (armJointName == ArmJointName.SHOULDER_ROLL);
-            SymmetricModeListener symmetricModeListener = new SymmetricModeListener((DoubleYoVariable) oppositeSideVariable, robotSide, setToOppositeSign);
-            thisVariable.addVariableChangedListener(symmetricModeListener);
-         }
-
-         thisSidePrefix     = handSideString.get(robotSide);
-         oppositeSidePrefix = handSideString.get(robotSide.getOppositeSide());
+         String thisSidePrefix     = handSideString.get(robotSide);
+         String oppositeSidePrefix = handSideString.get(robotSide.getOppositeSide());
+         boolean setToOppositeSign = false;         
          for (int f = 0; f <= 3; f++)
          {
             for (int j = 0; j <= 2; j++)
             {
                YoVariable thisVariable         = scs.getVariable(thisSidePrefix     + f + "_j" + j);
                YoVariable oppositeSideVariable = scs.getVariable(oppositeSidePrefix + f + "_j" + j);
-               boolean setToOppositeSign = false;
                SymmetricModeListener symmetricModeListener = new SymmetricModeListener((DoubleYoVariable) oppositeSideVariable, robotSide, setToOppositeSign);
                thisVariable.addVariableChangedListener(symmetricModeListener);
             }
          }
       }
+      
+      //TODO setup listeners to move the targets when in cartesian mode. currently just changing joint listeners is unreliable.
+      //TODO do joint symmetry in joint mode and cartesian symmetry about global XZ plane in cartesian mode.
 
    }
 
