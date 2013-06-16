@@ -70,23 +70,10 @@ public class ExternalWrenchHandler
 
    public void computeExternalWrenches(Map<RigidBody, Wrench> groundReactionWrenches)
    {
-      externalWrenches.clear();
-      externalWrenches.putAll(groundReactionWrenches);
+      this.externalWrenches.clear();
 
-      for (RigidBody rigidBody : externalWrenchesToCompensateFor.keySet())
-      {
-         Wrench externalWrenchToCompensateFor = externalWrenchesToCompensateFor.get(rigidBody);
-
-         Wrench externalWrench = externalWrenches.get(rigidBody);
-         if (externalWrench == null)
-         {
-            externalWrenches.put(rigidBody, externalWrenchToCompensateFor);
-         }
-         else
-         {
-            externalWrench.add(externalWrenchToCompensateFor);
-         }
-      }
+      ScrewTools.addExternalWrenches(externalWrenches, groundReactionWrenches);
+      ScrewTools.addExternalWrenches(externalWrenches, externalWrenchesToCompensateFor);
    }
 
    public Map<RigidBody, Wrench> getExternalWrenches()
