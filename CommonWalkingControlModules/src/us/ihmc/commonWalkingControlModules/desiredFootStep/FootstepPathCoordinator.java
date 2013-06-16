@@ -341,7 +341,7 @@ public class FootstepPathCoordinator implements FootstepProvider
             if (isInMud)
             {
                stepLength = 0.25; 
-               stepWidth = 0.15;
+               stepWidth = 0.12;
                stepSideward = 0.1;
                swingTime = BLIND_WALKING_IN_MUD_SWING_TIME;
                transferTime = BLIND_WALKING_IN_MUD_TRANSFER_TIME; 
@@ -363,7 +363,7 @@ public class FootstepPathCoordinator implements FootstepProvider
             if (isInMud)
             {
                stepLength = 0.35;
-               stepWidth = 0.15;
+               stepWidth = 0.12;
                stepSideward = 0.3;
                swingTime = BLIND_WALKING_IN_MUD_SWING_TIME;
                transferTime = BLIND_WALKING_IN_MUD_TRANSFER_TIME; 
@@ -385,7 +385,7 @@ public class FootstepPathCoordinator implements FootstepProvider
             if (isInMud)
             {
                stepLength = 0.5;
-               stepWidth = 0.15;
+               stepWidth = 0.12;
                stepSideward = 0.5;
                swingTime = BLIND_WALKING_IN_MUD_SWING_TIME;
                transferTime = BLIND_WALKING_IN_MUD_TRANSFER_TIME; 
