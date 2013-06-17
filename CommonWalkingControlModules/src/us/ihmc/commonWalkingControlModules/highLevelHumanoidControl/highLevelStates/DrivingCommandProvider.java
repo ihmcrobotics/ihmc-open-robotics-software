@@ -63,7 +63,7 @@ public class DrivingCommandProvider implements ObjectConsumer<LowLevelDrivingCom
          switch(command.getAction())
          {
          case DIRECTION:  
-            drivingInterface.setGear(getGearName(value), false);
+            drivingInterface.setGear(getGearName(value), true);
          break;
          case FOOTBRAKE:
             drivingInterface.pressBrakePedal(computePedalPosition(value, maximumBrakePedalDistance));
@@ -75,7 +75,7 @@ public class DrivingCommandProvider implements ObjectConsumer<LowLevelDrivingCom
             System.err.println("Cannot get in the car using magic");
             break;
          case HANDBRAKE:
-            drivingInterface.setHandBrake(getHandbrakeState(value), false);
+            drivingInterface.setHandBrake(getHandbrakeState(value), true);
             break;
          case STEERING:
             drivingInterface.turnSteeringWheel(value);
