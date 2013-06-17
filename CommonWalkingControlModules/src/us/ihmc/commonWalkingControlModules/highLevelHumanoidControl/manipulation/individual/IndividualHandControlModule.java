@@ -64,8 +64,8 @@ public class IndividualHandControlModule
    private final OneDoFJoint[] oneDoFJoints;
    private final GeometricJacobian jacobian;
    private final String name;
+   private final RobotSide robotSide;
    private final TwistCalculator twistCalculator;
-   private final FullRobotModel fullRobotModel;
    private final SE3PDGains defaultGains = new SE3PDGains();
    private final Map<ReferenceFrame, YoSE3ConfigurationProvider> currentDesiredConfigurationProviders = new LinkedHashMap<ReferenceFrame,
                                                                                                            YoSE3ConfigurationProvider>();
@@ -77,10 +77,10 @@ public class IndividualHandControlModule
    {
       RigidBody endEffector = jacobian.getEndEffector();
 
+      this.robotSide = robotSide;
       name = endEffector.getName() + getClass().getSimpleName();
       registry = new YoVariableRegistry(name);
       this.twistCalculator = twistCalculator;
-      this.fullRobotModel = fullRobotModel;
       this.handController = handController;
 
       defaultGains.set(100.0, 1.0, 100.0, 1.0);
@@ -554,5 +554,10 @@ public class IndividualHandControlModule
       }
 
       return ret;
+   }
+
+   public RobotSide getRobotSide()
+   {
+      return robotSide;
    }
 }
