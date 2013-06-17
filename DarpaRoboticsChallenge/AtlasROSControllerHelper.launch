@@ -7,7 +7,7 @@
 <listEntry value="1"/>
 </listAttribute>
 <mapAttribute key="org.eclipse.debug.core.environmentVariables">
-<mapEntry key="LD_LIBRARY_PATH" value="/usr/lib/gazebo-1.8/plugins:/usr/lib/drcsim-2.6/AtlasSimInterface_:/usr/lib/drcsim-2.6/plugins:/opt/ros/groovy/lib"/>
+<mapEntry key="LD_LIBRARY_PATH" value="/usr/lib/gazebo-1.8/plugins:/usr/lib/drcsim-2.6/AtlasSimInterface_:/usr/lib/drcsim-2.6/plugins:/opt/ros/groovy/lib:/opt/ros/fuerte/lib"/>
 </mapAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="us.ihmc.darpaRoboticsChallenge.gazebo.AtlasROSControllerHelper"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-n"/>
