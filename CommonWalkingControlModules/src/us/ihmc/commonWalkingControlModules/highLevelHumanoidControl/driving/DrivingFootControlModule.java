@@ -183,7 +183,6 @@ public class DrivingFootControlModule
       pedalForceToCompensateFor.setZ(computePedalForceToCompensateFor(z));
 
       moveToPosition(target, pedalForceToCompensateFor);
-      addTaskCompletedNotifier(LowLevelDrivingAction.GASPEDAL);
    }
 
    public void moveToPositionInBrakePedalFrame(double z)
@@ -194,7 +193,6 @@ public class DrivingFootControlModule
       pedalForceToCompensateFor.setZ(computePedalForceToCompensateFor(z));
 
       moveToPosition(target, pedalForceToCompensateFor);
-      addTaskCompletedNotifier(LowLevelDrivingAction.FOOTBRAKE);
    }
 
    private double computePedalForceToCompensateFor(double z)
