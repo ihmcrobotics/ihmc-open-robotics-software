@@ -29,4 +29,6 @@ public interface VehicleModelObjects
    double getMaximumGasPedalDistance();
    
    double getMaximumBrakePedalDistance();
+   
+   double getEmergencyBrakePedalDistance();
 }
