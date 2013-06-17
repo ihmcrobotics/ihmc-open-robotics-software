@@ -19,6 +19,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.GazeboCameraReceiv
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.SCSCameraDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.driving.DrivingProcessorFactory;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.GazeboLidarDataReceiver;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.GeoregressionTransformListenerAndProvider;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.LidarDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.RobotBoundingBoxes;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.SCSLidarDataReceiver;
@@ -81,23 +82,23 @@ public class DRCNetworkProcessor
       {
          rosNativeNetworkProcessor = null;
       }
-
-
+      GeoregressionTransformListenerAndProvider transformForDrivingProviderListener = new GeoregressionTransformListenerAndProvider();
+      
       CameraDataReceiver cameraDataReceiver = new GazeboCameraReceiver(robotPoseBuffer, videoSettings, rosMainNode, networkingManager,
                                                  DRCSensorParameters.FIELD_OF_VIEW);
       LidarDataReceiver lidarDataReceiver = new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, fullRobotModel, robotBoundingBoxes,
-                                               jointMap, fieldComputerClient,rosNativeNetworkProcessor);
+                                               jointMap, fieldComputerClient,rosNativeNetworkProcessor,transformForDrivingProviderListener);
       new VRCScoreDataReceiver(networkingManager, lidarDataReceiver, rosNativeNetworkProcessor);
       rosMainNode.execute();
 
 
       if(DRCConfigParameters.USE_DUMMY_DRIVNG)
       {
-         DrivingProcessorFactory.createCheatingDrivingProcessor(networkingManager, cameraDataReceiver, timestampProvider, rosCoreURI.toString());
+         DrivingProcessorFactory.createCheatingDrivingProcessor(networkingManager, cameraDataReceiver, timestampProvider, rosCoreURI.toString(),transformForDrivingProviderListener);
       }
       else
       {
-         DrivingProcessorFactory.createDrivingProcessor(networkingManager, cameraDataReceiver, timestampProvider, fieldComputerClient);
+         DrivingProcessorFactory.createDrivingProcessor(networkingManager, cameraDataReceiver, timestampProvider, fieldComputerClient,transformForDrivingProviderListener);
       }
    }
 
@@ -105,11 +106,12 @@ public class DRCNetworkProcessor
    {
       this(drcNetworkObjectCommunicator);
       CameraDataReceiver cameraDataReceiver = new SCSCameraDataReceiver(robotPoseBuffer, videoSettings, scsCommunicator, networkingManager);
-      new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, fullRobotModel, robotBoundingBoxes, jointMap,fieldComputerClient);
+      GeoregressionTransformListenerAndProvider transformForDrivingProviderListener = new GeoregressionTransformListenerAndProvider();
+      new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, fullRobotModel, robotBoundingBoxes, jointMap,fieldComputerClient,transformForDrivingProviderListener);
       
       if(!DRCConfigParameters.USE_DUMMY_DRIVNG)
       {
-         DrivingProcessorFactory.createDrivingProcessor(networkingManager, cameraDataReceiver, timestampProvider, fieldComputerClient);
+         DrivingProcessorFactory.createDrivingProcessor(networkingManager, cameraDataReceiver, timestampProvider, fieldComputerClient,transformForDrivingProviderListener);
       }
    }
 
