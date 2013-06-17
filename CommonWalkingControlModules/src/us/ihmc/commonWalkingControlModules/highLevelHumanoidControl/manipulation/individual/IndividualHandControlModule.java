@@ -494,7 +494,7 @@ public class IndividualHandControlModule
       ConstantPositionTrajectoryGenerator ret = holdPositionTrajectoryGenerators.get(referenceFrame);
       if (ret == null)
       {
-         ret = new ConstantPositionTrajectoryGenerator(name + "HoldPosition", referenceFrame,
+         ret = new ConstantPositionTrajectoryGenerator(name + "Constant" + referenceFrame.getName(), referenceFrame,
             initialConfigurationProvider, 0.0, registry);
          holdPositionTrajectoryGenerators.put(referenceFrame, ret);
       }
@@ -507,7 +507,7 @@ public class IndividualHandControlModule
       ConstantOrientationTrajectoryGenerator ret = holdOrientationTrajectoryGenerators.get(referenceFrame);
       if (ret == null)
       {
-         ret = new ConstantOrientationTrajectoryGenerator(name + "HoldOrientation", jacobian.getBaseFrame(),
+         ret = new ConstantOrientationTrajectoryGenerator(name + "Constant" + referenceFrame.getName(), jacobian.getBaseFrame(),
                initialConfigurationProvider, 0.0, registry);
          holdOrientationTrajectoryGenerators.put(referenceFrame, ret);
       }
