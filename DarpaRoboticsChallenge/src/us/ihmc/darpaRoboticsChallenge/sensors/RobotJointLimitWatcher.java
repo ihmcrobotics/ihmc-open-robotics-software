@@ -4,7 +4,10 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableLimitChecker;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
+import org.jmonkeyengine.tralala.Pair;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+
+import java.util.ArrayList;
 
 /**
  * Created with IntelliJ IDEA.
@@ -71,5 +74,18 @@ public class RobotJointLimitWatcher implements RobotController
    public String getDescription()
    {
       return null;  //To change body of implemented methods use File | Settings | File Templates.
+   }
+
+   public ArrayList<Pair<String, YoVariableLimitChecker.Status>> getStatus()
+   {
+      ArrayList<Pair<String, YoVariableLimitChecker.Status>> ret = new ArrayList<Pair<String, YoVariableLimitChecker.Status>>();
+
+      for(int i=0; i<limitCheckers.length; i++)
+      {
+         Pair<String, YoVariableLimitChecker.Status> pair = new Pair<String, YoVariableLimitChecker.Status>(oneDoFJoints[i].getName(), limitCheckers[i].getStatus());
+         ret.add(pair);
+      }
+
+      return ret;
    }
 }
