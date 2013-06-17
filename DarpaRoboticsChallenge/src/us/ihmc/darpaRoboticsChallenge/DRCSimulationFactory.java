@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import java.util.ArrayList;
 
+import javax.media.j3d.Transform3D;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -151,7 +152,7 @@ public class DRCSimulationFactory
       {
          for(OneDegreeOfFreedomJoint sensorJoint : forceTorqueSensorJoints)
          {
-            GazeboForceSensor gazeboForceSensor = new GazeboForceSensor((GazeboRobot) simulatedRobot, sensorJoint);
+            GazeboForceSensor gazeboForceSensor = new GazeboForceSensor((GazeboRobot) simulatedRobot, sensorJoint, registry);
             wrenchProviders.add(gazeboForceSensor);
          }
       }
@@ -214,16 +215,7 @@ public class DRCSimulationFactory
          DRCStateEstimator drcStateEstimator = robotController.getDRCStateEstimator();
          StateEstimatorWithPorts stateEstimator = drcStateEstimator.getStateEstimator();
 
-         Joint estimationJoint;
-         if (EstimationLinkHolder.usingChestLink())
-         {
-            estimationJoint = simulatedRobot.getChestJoint();
-            if (estimationJoint == null) throw new RuntimeException("Couldn't find chest joint!");
-         }
-         else
-         {
-            estimationJoint = simulatedRobot.getPelvisJoint();
-         }
+         Joint estimationJoint = getEstimationJoint(simulatedRobot);
          
          StateEstimatorErrorCalculatorController stateEstimatorErrorCalculatorController = new StateEstimatorErrorCalculatorController(stateEstimator, simulatedRobot, estimationJoint);
          simulatedRobot.setController(stateEstimatorErrorCalculatorController, estimationTicksPerControlTick);
@@ -236,6 +228,21 @@ public class DRCSimulationFactory
 
 
       return humanoidRobotSimulation;
+   }
+
+   private static Joint getEstimationJoint(SDFRobot simulatedRobot)
+   {
+      Joint estimationJoint;
+      if (EstimationLinkHolder.usingChestLink())
+      {
+         estimationJoint = simulatedRobot.getChestJoint();
+         if (estimationJoint == null) throw new RuntimeException("Couldn't find chest joint!");
+      }
+      else
+      {
+         estimationJoint = simulatedRobot.getPelvisJoint();
+      }
+      return estimationJoint;
    }
 
    private static void setupJointDamping(SDFRobot simulatedRobot)
@@ -273,7 +280,11 @@ public class DRCSimulationFactory
       
       simulatedRobot.computeCenterOfMass(initialCoMPosition);
 
-      Quat4d initialEstimationLinkOrientation = simulatedRobot.getRootJointToWorldRotationQuaternion();
+      Joint estimationJoint = getEstimationJoint(simulatedRobot);
+
+      Transform3D estimationLinkTransform3D = estimationJoint.getJointTransform3D();
+      Quat4d initialEstimationLinkOrientation = new Quat4d();
+      estimationLinkTransform3D.get(initialEstimationLinkOrientation);
       return new Pair<Point3d, Quat4d>(initialCoMPosition, initialEstimationLinkOrientation);
    }
 
