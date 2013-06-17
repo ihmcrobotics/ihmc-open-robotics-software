@@ -567,11 +567,20 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    {
       for (RobotSide robotSide : RobotSide.values)
       {
+         ContactablePlaneBody foot = feet.get(robotSide);
          if (footPoseProvider.checkForNewPose(robotSide))
          {
-            doUnloadingTransition.put(feet.get(robotSide), true);
+            if (doUnloadingTransition.get(foot))
+            {
+               doUnloadingTransition.put(feet.get(robotSide), false);
+               requestedFootLoadBearing.get(robotSide).set(false);
+            }
+            else
+            {
+               doUnloadingTransition.put(foot, true);
+            }
             // Cancel loading action if any:
-            doLoadingTransition.put(feet.get(robotSide), false);
+            doLoadingTransition.put(foot, false);
             
             
             // When unloading a foot, relatch where all the other foot positions are. 
@@ -588,14 +597,21 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          if (footLoadBearingProvider.checkForNewLoadBearingRequest(robotSide) && !requestedFootLoadBearing.get(robotSide).getBooleanValue())
          {
             requestedFootLoadBearing.get(robotSide).set(true);
-            doLoadingTransition.put(feet.get(robotSide), true);
+            if (doLoadingTransition.get(foot))
+            {
+               doLoadingTransition.put(foot, true);
+            }
+            else
+            {
+               doLoadingTransition.put(foot, false);
+            }
             // Cancel unloading action if any:
             footPoseProvider.getDesiredFootPose(robotSide);
             doUnloadingTransition.put(feet.get(robotSide), false);
          }
 
-         performSmoothUnloadingTransition(feet.get(robotSide), requestedFootLoadBearing.get(robotSide));
-         performSmoothLoadingTransition(feet.get(robotSide));
+         performSmoothUnloadingTransition(foot, requestedFootLoadBearing.get(robotSide));
+         performSmoothLoadingTransition(foot);
          
          if (thighLoadBearingProvider.checkForNewLoadBearingState(robotSide))
          {
@@ -609,13 +625,28 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          if (desiredPelvisLoadBearingState && !requestedPelvisLoadBearing.getBooleanValue()) // Loading
          {
             requestedPelvisLoadBearing.set(desiredPelvisLoadBearingState);
-            doLoadingTransition.put(contactablePelvis, true);
+            if (doLoadingTransition.get(contactablePelvis))
+            {
+               doLoadingTransition.put(contactablePelvis, false);
+            }
+            else
+            {
+               doLoadingTransition.put(contactablePelvis, true);
+            }
             doUnloadingTransition.put(contactablePelvis, false);
             
          }
          else if (!desiredPelvisLoadBearingState && requestedPelvisLoadBearing.getBooleanValue()) // Unloading
          {
-            doUnloadingTransition.put(contactablePelvis, true);
+            if (doUnloadingTransition.get(contactablePelvis))
+            {
+               doUnloadingTransition.put(contactablePelvis, false);
+               requestedPelvisLoadBearing.set(false);
+            }
+            else
+            {
+               doUnloadingTransition.put(contactablePelvis, true);
+            }
             doLoadingTransition.put(contactablePelvis, false);
          }
       }
