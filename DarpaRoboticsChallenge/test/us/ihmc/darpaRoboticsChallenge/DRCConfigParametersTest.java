@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.PolyvalentHighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 
 public class DRCConfigParametersTest
@@ -24,6 +25,8 @@ public class DRCConfigParametersTest
       assertFalse("Do not check in MomentumBasedController.SPY_ON_MOMENTUM_BASED_CONTROLLER = true!!", MomentumBasedController.SPY_ON_MOMENTUM_BASED_CONTROLLER);
 
       assertTrue("Do not check in MomentumBasedController.DISABLE_SWITCH_TO_FANCY_CONTROL = false!!", DRCConfigParameters.RESTART_FOR_FANCY_CONTROL);
+      
+      assertFalse("Do not check in PolyvalentHighLevelHumanoidControllerFactory.TEST_DRIVING = true!!", PolyvalentHighLevelHumanoidControllerFactory.TEST_DRIVING);
    
    }
 
