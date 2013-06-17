@@ -7,6 +7,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -14,6 +15,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.LidarDataRecorder;
 
 public class CarLocalizerFileWritingUtils
 {
@@ -24,15 +27,17 @@ public class CarLocalizerFileWritingUtils
       {
          throw new RuntimeException("couldn't find data directory");
       }
+
       return new File(url.toURI());
    }
-   
+
 
    public static List<Point3D_F64> readJARResource(String localFileName) throws IOException, URISyntaxException
    {
       InputStream resourceAsStream = CarLocalizerFileWritingUtils.class.getResourceAsStream(localFileName);
       InputStreamReader bufferedInputStrem = new InputStreamReader(resourceAsStream);
-      BufferedReader bufferedReader =  new BufferedReader(bufferedInputStrem);
+      BufferedReader bufferedReader = new BufferedReader(bufferedInputStrem);
+
       return read(bufferedReader);
    }
 
@@ -124,5 +129,32 @@ public class CarLocalizerFileWritingUtils
       reader.close();
 
       return ret;
+   }
+
+
+   public static String[] getFilesInDataDirectory()
+   {
+      FilenameFilter filter = new FilenameFilter()
+      {
+         public boolean accept(File dir, String name)
+         {
+            return name.endsWith(LidarDataRecorder.FILE_EXTENSION) && name.startsWith(LidarDataRecorder.DATA_COLLECTION_FILE_NAME_PREFIX);
+         }
+      };
+      try
+      {
+         String[] files = getCarLocalizerSourceDataDirectory().list(filter);
+
+         return files;
+      }
+      catch (URISyntaxException e)
+      {
+         System.err.println("CarLocalizerFileWritingUtils.getFilesInDataDirectory(): Unable to find files. Returning empty string array.");
+         e.printStackTrace();
+
+         return new String[]
+         {
+         };
+      }
    }
 }

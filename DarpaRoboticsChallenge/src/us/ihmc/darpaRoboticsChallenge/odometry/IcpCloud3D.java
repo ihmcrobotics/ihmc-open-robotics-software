@@ -64,6 +64,9 @@ public class IcpCloud3D {
 
    // fraction of reference points which were matched with dst points
    double fitFraction;
+   // fraction of dst points which were matched with referece points
+   double fractionNearTemplate;
+   int dstPointsWithNearestNeighbors = 0;
 
    /**
     * Constructor in which parameters and internal algorithms are specified
@@ -142,6 +145,7 @@ public class IcpCloud3D {
          src.reset();
          dst.reset();
 
+         dstPointsWithNearestNeighbors=0;
          // find nearest-neighbors
          for( Point3D_F64 p : currentModified.toList() ) {
 
@@ -153,6 +157,7 @@ public class IcpCloud3D {
                usedRef.add(bestMatch.data);
                src.add( bestMatch.data.point );
                dst.add( p );
+               dstPointsWithNearestNeighbors++;
             }
          }
 
@@ -205,12 +210,17 @@ public class IcpCloud3D {
       }
 
       fitFraction = count/(double)ref.size();
+      fractionNearTemplate = (double)dstPointsWithNearestNeighbors/((double)currentModified.size());
    }
 
 
    public double getFitFraction()
    {
       return fitFraction;
+   }
+   public double getFractionNearTemplate()
+   {
+      return fractionNearTemplate;
    }
 
    /**
