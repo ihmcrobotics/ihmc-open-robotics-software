@@ -6,15 +6,15 @@ import us.ihmc.utilities.net.ObjectConsumer;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
-public class PelvisPoseWithRespectToVehicleProvider implements ObjectConsumer<VehiclePosePacket>
+public class VehiclePoseProvider implements ObjectConsumer<VehiclePosePacket>
 {
-   private final Transform3D transformFromPelvisToVehicle = new Transform3D();
+   private final Transform3D transformFromVehicleToWorld = new Transform3D();
    private boolean hasNewPose;
 
    public synchronized void consumeObject(VehiclePosePacket object)
    {
-      transformFromPelvisToVehicle.set(object.getOrientation());
-      transformFromPelvisToVehicle.setTranslation(new Vector3d(object.getPosition()));
+      transformFromVehicleToWorld.set(object.getOrientation());
+      transformFromVehicleToWorld.setTranslation(new Vector3d(object.getPosition()));
 
       hasNewPose = true;
    }
@@ -24,9 +24,9 @@ public class PelvisPoseWithRespectToVehicleProvider implements ObjectConsumer<Ve
       return hasNewPose;
    }
 
-   public synchronized Transform3D getTransformFromPelvisToVehicle()
+   public synchronized Transform3D getTransformFromVehicleToWorld()
    {
       hasNewPose = false;
-      return transformFromPelvisToVehicle;
+      return transformFromVehicleToWorld;
    }
 }
