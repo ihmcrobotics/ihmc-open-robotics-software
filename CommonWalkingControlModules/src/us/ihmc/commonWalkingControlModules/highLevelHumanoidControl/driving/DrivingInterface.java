@@ -57,4 +57,7 @@ public interface DrivingInterface
    {
       FORWARD, NEUTRAL, REVERSE
    }
+
+
+   public abstract void reinitialize();
 }

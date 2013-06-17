@@ -335,4 +335,9 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
    {
       return -0.08;
    }
+
+   public double getEmergencyBrakePedalDistance()
+   {
+      return -0.02;
+   }
 }

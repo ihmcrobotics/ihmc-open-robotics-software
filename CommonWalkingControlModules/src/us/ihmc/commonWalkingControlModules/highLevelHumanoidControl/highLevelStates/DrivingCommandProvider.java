@@ -83,6 +83,9 @@ public class DrivingCommandProvider implements ObjectConsumer<LowLevelDrivingCom
             doNothing = true;
             doNothingEndTime = currentTime + value;
             break;
+         case REINITIALIZE:
+            drivingInterface.reinitialize();
+            break;
          }
          
          command = drivingCommands.poll();
