@@ -86,7 +86,6 @@ public class DrivingFootControlModule
    private final double pedalY = 0.0;
 
    private final FrameVector pedalForceToCompensateFor = new FrameVector();
-   private final DoubleYoVariable pedalForceToCompensateForMagnitude;
    private final IntegerYoVariable nFootTasksRemaining;
 
 
@@ -119,9 +118,6 @@ public class DrivingFootControlModule
 
       initialToePointPosition = new YoFramePoint(toePointName + "Initial", vehicleFrame, registry);
       finalToePointPosition = new YoFramePoint(toePointName + "Final", vehicleFrame, registry);
-
-      pedalForceToCompensateForMagnitude = new DoubleYoVariable("pedalForceToCompensateForMagnitude", registry);
-      pedalForceToCompensateForMagnitude.set(10.0);
 
       PositionProvider initialPositionProvider = new YoPositionProvider(initialToePointPosition);
       PositionProvider finalPositionProvider = new YoPositionProvider(finalToePointPosition);
