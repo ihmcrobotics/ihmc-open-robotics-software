@@ -34,7 +34,7 @@ public class VehicleStatusManager
 
    private final double handBrakeEngagedAngle;
    private final double handBrakeDisengagedAngle;
-   private final OneDoFJoint handBrakeJoint;
+   private final RevoluteJoint handBrakeJoint;
 
 
    public VehicleStatusManager(YoVariableRegistry parentRegistry, DrivingReferenceFrames drivingReferenceFrames, VehicleModelObjects vehicleModelObjects)
@@ -111,7 +111,7 @@ public class VehicleStatusManager
       this.isRobotHoldingSteeringWheel.set(holdingSteeringWheel);
    }
 
-   public OneDoFJoint getHandBrakeJoint()
+   public RevoluteJoint getHandBrakeJoint()
    {
       return handBrakeJoint;
    }

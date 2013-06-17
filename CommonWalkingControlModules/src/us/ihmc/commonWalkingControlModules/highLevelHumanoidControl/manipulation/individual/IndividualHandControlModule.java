@@ -47,8 +47,8 @@ public class IndividualHandControlModule
    private final Map<ReferenceFrame, OrientationInterpolationTrajectoryGenerator> orientationInterpolationWorldTrajectoryGenerators;
    private final YoVariableDoubleProvider trajectoryTimeProvider;
 
-   private final ConstantPositionTrajectoryGenerator holdPositionInBaseTrajectoryGenerator;
-   private final ConstantOrientationTrajectoryGenerator holdOrientationInBaseTrajectoryGenerator;
+   private final Map<ReferenceFrame, ConstantPositionTrajectoryGenerator> holdPositionTrajectoryGenerators;
+   private final Map<ReferenceFrame, ConstantOrientationTrajectoryGenerator> holdOrientationTrajectoryGenerators;
 
    private final TaskspaceHandPositionControlState taskSpacePositionControlState;
    private final JointSpaceHandControlControlState jointSpaceHandControlState;
@@ -120,10 +120,8 @@ public class IndividualHandControlModule
       straightLinePositionWorldTrajectoryGenerators = new LinkedHashMap<ReferenceFrame, StraightLinePositionTrajectoryGenerator>();
       orientationInterpolationWorldTrajectoryGenerators = new LinkedHashMap<ReferenceFrame, OrientationInterpolationTrajectoryGenerator>();
 
-      holdPositionInBaseTrajectoryGenerator = new ConstantPositionTrajectoryGenerator(name + "HoldPosition", jacobian.getBaseFrame(),
-              initialConfigurationProvider, 0.0, registry);
-      holdOrientationInBaseTrajectoryGenerator = new ConstantOrientationTrajectoryGenerator(name + "HoldOrientation", jacobian.getBaseFrame(),
-              initialConfigurationProvider, 0.0, registry);
+      holdPositionTrajectoryGenerators = new LinkedHashMap<ReferenceFrame, ConstantPositionTrajectoryGenerator>();
+      holdOrientationTrajectoryGenerators = new LinkedHashMap<ReferenceFrame, ConstantOrientationTrajectoryGenerator>();
 
       loadBearingCylindricalState = new LoadBearingCylindricalHandControlState(IndividualHandControlState.LOAD_BEARING_CYLINDRICAL, momentumBasedController,
               jacobian, fullRobotModel.getElevator(), parentRegistry, robotSide);
@@ -439,15 +437,19 @@ public class IndividualHandControlModule
 
    public void holdPositionInBase()
    {
-      // NOTE here we make poseToHolinBase in chestFrame, not in the endEffectorFrame. Otherwise the hand will sag.
+      holdPositionInFrame(jacobian.getBaseFrame(), jacobian.getBase(), defaultGains);
+   }
+
+   public void holdPositionInFrame(ReferenceFrame frame, RigidBody base, SE3PDGains gains)
+   {
       ReferenceFrame endEffectorFrame = jacobian.getEndEffectorFrame();
-      FramePose poseToHoldInBase = new FramePose(endEffectorFrame);
-      ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
-      poseToHoldInBase.changeFrame(chestFrame);
-      initialConfigurationProvider.set(poseToHoldInBase);
-      PositionTrajectoryGenerator positionTrajectory = holdPositionInBaseTrajectoryGenerator;
-      OrientationTrajectoryGenerator orientationTrajectory = holdOrientationInBaseTrajectoryGenerator;
-      executeTaskSpaceTrajectory(positionTrajectory, orientationTrajectory, endEffectorFrame, jacobian.getBase(), isHoldingObject(), defaultGains);
+      FramePose pose = new FramePose(endEffectorFrame);
+      pose.changeFrame(frame);
+      initialConfigurationProvider.set(pose);
+      PositionTrajectoryGenerator positionTrajectory = getOrCreateConstantPositionTrajectoryGenerator(frame);
+      OrientationTrajectoryGenerator orientationTrajectory = getOrCreateConstantOrientationTrajectoryGenerator(frame);
+
+      executeTaskSpaceTrajectory(positionTrajectory, orientationTrajectory, endEffectorFrame, base, isHoldingObject(), gains);
    }
 
    private void checkLimitsValid(Map<OneDoFJoint, Double> minJointPositions, Map<OneDoFJoint, Double> maxJointPositions)
@@ -482,6 +484,32 @@ public class IndividualHandControlModule
          ret = new OrientationInterpolationTrajectoryGenerator(name + referenceFrame.getName(), referenceFrame, trajectoryTimeProvider,
                  initialConfigurationProvider, finalConfigurationProvider, registry);
          orientationInterpolationWorldTrajectoryGenerators.put(referenceFrame, ret);
+      }
+
+      return ret;
+   }
+
+   private ConstantPositionTrajectoryGenerator getOrCreateConstantPositionTrajectoryGenerator(ReferenceFrame referenceFrame)
+   {
+      ConstantPositionTrajectoryGenerator ret = holdPositionTrajectoryGenerators.get(referenceFrame);
+      if (ret == null)
+      {
+         ret = new ConstantPositionTrajectoryGenerator(name + "HoldPosition", referenceFrame,
+            initialConfigurationProvider, 0.0, registry);
+         holdPositionTrajectoryGenerators.put(referenceFrame, ret);
+      }
+
+      return ret;
+   }
+
+   private ConstantOrientationTrajectoryGenerator getOrCreateConstantOrientationTrajectoryGenerator(ReferenceFrame referenceFrame)
+   {
+      ConstantOrientationTrajectoryGenerator ret = holdOrientationTrajectoryGenerators.get(referenceFrame);
+      if (ret == null)
+      {
+         ret = new ConstantOrientationTrajectoryGenerator(name + "HoldOrientation", jacobian.getBaseFrame(),
+               initialConfigurationProvider, 0.0, registry);
+         holdOrientationTrajectoryGenerators.put(referenceFrame, ret);
       }
 
       return ret;
