@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.driving;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.AxisAngleOrientationController;
 import com.yobotics.simulationconstructionset.util.EuclideanPositionController;
@@ -18,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTraj
 import us.ihmc.packets.LowLevelDrivingAction;
 import us.ihmc.packets.LowLevelDrivingStatus;
 import us.ihmc.utilities.io.streamingData.QueueBasedStreamingDataProducer;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -81,7 +83,12 @@ public class DrivingFootControlModule
    private final RigidBody elevator;
 
    private final TaskExecutor taskExecutor = new TaskExecutor();
-   private final double pedalY = 0.02;
+   private final double pedalY = 0.0;
+
+   private final FrameVector pedalForceToCompensateFor = new FrameVector();
+   private final DoubleYoVariable pedalForceToCompensateForMagnitude;
+   private final IntegerYoVariable nFootTasksRemaining;
+
 
    public DrivingFootControlModule(RigidBody elevator, ContactablePlaneBody contactablePlaneFoot, MomentumBasedController momentumBasedController,
                                    DrivingReferenceFrames drivingReferenceFrames, DoubleYoVariable yoTime, TwistCalculator twistCalculator, YoVariableRegistry parentRegistry, QueueBasedStreamingDataProducer<LowLevelDrivingStatus> statusProducer)
@@ -113,13 +120,16 @@ public class DrivingFootControlModule
       initialToePointPosition = new YoFramePoint(toePointName + "Initial", vehicleFrame, registry);
       finalToePointPosition = new YoFramePoint(toePointName + "Final", vehicleFrame, registry);
 
+      pedalForceToCompensateForMagnitude = new DoubleYoVariable("pedalForceToCompensateForMagnitude", registry);
+      pedalForceToCompensateForMagnitude.set(10.0);
+
       PositionProvider initialPositionProvider = new YoPositionProvider(initialToePointPosition);
       PositionProvider finalPositionProvider = new YoPositionProvider(finalToePointPosition);
       DoubleProvider trajectoryTimeProvider = new AverageVelocityTrajectoryTimeProvider(initialPositionProvider, finalPositionProvider, AVERAGE_VELOCITY, 1e-3);
       this.positionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator(toePointName + "Trajectory", vehicleFrame, trajectoryTimeProvider,
               initialPositionProvider, finalPositionProvider, registry);
 
-      double kP = 300.0;
+      double kP = 100.0;
       double dampingRatio = 1.0;
       double kD = GainCalculator.computeDerivativeGain(kP, dampingRatio);
       toePointPositionController.setProportionalGains(kP, kP, kP);
@@ -135,6 +145,8 @@ public class DrivingFootControlModule
 
       orientationController.setProportionalGains(kPOrientationX, kPOrientationYZ, kPOrientationYZ);
       orientationController.setDerivativeGains(kDOrientationX, kDOrientationYZ, kDOrientationYZ);
+
+      nFootTasksRemaining = new IntegerYoVariable("nFootTasksRemaining", registry);
 
       footOrientationSelectionMatrix = new DenseMatrix64F(3, SpatialMotionVector.SIZE);
       footOrientationSelectionMatrix.zero();
@@ -163,21 +175,35 @@ public class DrivingFootControlModule
    public void holdPosition()
    {
       FramePoint target = new FramePoint(toePoint);
-      moveToPosition(target);
+      pedalForceToCompensateFor.setToZero(toePointFrame);
+      moveToPosition(target, pedalForceToCompensateFor);
    }
 
    public void moveToPositionInGasPedalFrame(double z)
    {
       FramePoint target = new FramePoint(drivingReferenceFrames.getObjectFrame(VehicleObject.GAS_PEDAL), 0.0, pedalY, z);
-      moveToPosition(target);
+
+      pedalForceToCompensateFor.setToZero(drivingReferenceFrames.getObjectFrame(VehicleObject.GAS_PEDAL));
+      pedalForceToCompensateFor.setZ(computePedalForceToCompensateFor(z));
+
+      moveToPosition(target, pedalForceToCompensateFor);
       addTaskCompletedNotifier(LowLevelDrivingAction.GASPEDAL);
    }
 
    public void moveToPositionInBrakePedalFrame(double z)
    {
       FramePoint target = new FramePoint(drivingReferenceFrames.getObjectFrame(VehicleObject.BRAKE_PEDAL), 0.0, pedalY, z);
-      moveToPosition(target);
+
+      pedalForceToCompensateFor.setToZero(drivingReferenceFrames.getObjectFrame(VehicleObject.BRAKE_PEDAL));
+      pedalForceToCompensateFor.setZ(computePedalForceToCompensateFor(z));
+
+      moveToPosition(target, pedalForceToCompensateFor);
       addTaskCompletedNotifier(LowLevelDrivingAction.FOOTBRAKE);
+   }
+
+   private double computePedalForceToCompensateFor(double z)
+   {
+      return MathTools.clipToMinMax(-800.0 * z, 0.0, 10.0); // from DRCVehiclePlugin.cc
    }
 
    public void initialize()
@@ -194,9 +220,10 @@ public class DrivingFootControlModule
       doFootOrientationControl();
    }
 
-   private void moveToPosition(FramePoint target)
+   private void moveToPosition(FramePoint target, FrameVector forceToCompensateFor)
    {
-      Task task = new FootControlTask(target);
+      Task task = new FootControlTask(target, forceToCompensateFor);
+      nFootTasksRemaining.increment();
       taskExecutor.submit(task);
    }
 
@@ -251,10 +278,13 @@ public class DrivingFootControlModule
    private class FootControlTask implements Task
    {
       private final FramePoint targetPosition;
+      private final FrameVector forceToCompensate;
+      private final Wrench wrench = new Wrench();
 
-      public FootControlTask(FramePoint targetPosition)
+      public FootControlTask(FramePoint targetPosition, FrameVector forceToCompensate)
       {
          this.targetPosition = targetPosition;
+         this.forceToCompensate = new FrameVector(forceToCompensate);
       }
 
       public void doTransitionIntoAction()
@@ -262,10 +292,16 @@ public class DrivingFootControlModule
          DrivingFootControlModule.this.finalToePointPosition.set(targetPosition.changeFrameCopy(DrivingFootControlModule.this.finalToePointPosition.getReferenceFrame()));
          positionTrajectoryGenerator.initialize();
          trajectoryInitializationTime.set(time.getDoubleValue());
+         nFootTasksRemaining.decrement();
       }
 
       public void doAction()
       {
+         wrench.setToZero(foot.getBodyFixedFrame(), toePointFrame);
+         forceToCompensate.changeFrame(toePointFrame);
+         wrench.setLinearPart(forceToCompensate.getVector());
+         wrench.changeFrame(foot.getBodyFixedFrame());
+         momentumBasedController.setExternalWrenchToCompensateFor(foot, wrench);
       }
 
       public void doTransitionOutOfAction()
@@ -278,7 +314,10 @@ public class DrivingFootControlModule
 
       public boolean isDone()
       {
-         return positionTrajectoryGenerator.isDone();
+         // this is so that the TaskExecutor keeps doing our doAction and doesn't transition into a NullTask, where it doesn't set the external wrench to compensate for.
+         boolean newTasksAreAvailable = nFootTasksRemaining.getIntegerValue() > 0;
+
+         return positionTrajectoryGenerator.isDone() && newTasksAreAvailable;
       }
    }
 }

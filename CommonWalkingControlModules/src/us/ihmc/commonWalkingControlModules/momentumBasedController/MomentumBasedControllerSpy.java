@@ -225,7 +225,7 @@ public class MomentumBasedControllerSpy
 
       public String toString()
       {
-         return getStackInformation(stackTrace) + ", ExternalWrenchCommand: " + rigidBody.getName();
+         return getStackInformation(stackTrace) + ", ExternalWrenchCommand: " + wrench;
       }
    }
 
