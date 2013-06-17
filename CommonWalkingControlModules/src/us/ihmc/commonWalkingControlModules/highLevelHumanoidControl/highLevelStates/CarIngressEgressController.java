@@ -572,9 +572,16 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
             doUnloadingTransition.put(feet.get(robotSide), true);
             // Cancel loading action if any:
             doLoadingTransition.put(feet.get(robotSide), false);
+            
+            
             // When unloading a foot, relatch where all the other foot positions are. 
             // Otherwise there might be a jump.
-            momentumBasedController.requestResetEstimatorPositionsToCurrent();
+            
+            // Nope. Don't do it, because if the feet positions are "resisting" the estimator moving z
+            // away due to errors in tracking (desired accelerations don't equal actual accelerations),
+            // then if you reset the positions to current, you get a large jump. So not doing it is the
+            // lesser of two evils.
+//            momentumBasedController.requestResetEstimatorPositionsToCurrent();
          }
          
          // If the foot is already in load bearing state, do nothing:
