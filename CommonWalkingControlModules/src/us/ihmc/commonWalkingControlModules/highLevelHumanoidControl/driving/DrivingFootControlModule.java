@@ -160,39 +160,39 @@ public class DrivingFootControlModule
       parentRegistry.addChild(registry);
    }
    
-   public void addTaskCompletedNotifier(LowLevelDrivingAction action)
-   {
-      if(statusProducer != null)
-      {
-         taskExecutor.submit(new NotifyStatusListenerTask<LowLevelDrivingStatus>(statusProducer, new LowLevelDrivingStatus(action, true)));
-      }
-   }
+//   public void addTaskCompletedNotifier(LowLevelDrivingAction action)
+//   {
+//      if(statusProducer != null)
+//      {
+//         taskExecutor.submit(new NotifyStatusListenerTask<LowLevelDrivingStatus>(statusProducer, new LowLevelDrivingStatus(action, true)));
+//      }
+//   }
 
    public void holdPosition()
    {
       FramePoint target = new FramePoint(toePoint);
       pedalForceToCompensateFor.setToZero(toePointFrame);
-      moveToPosition(target, pedalForceToCompensateFor);
+      moveToPosition(target, pedalForceToCompensateFor, false, null);
    }
 
-   public void moveToPositionInGasPedalFrame(double z)
+   public void moveToPositionInGasPedalFrame(double z, boolean notifyIfDone)
    {
       FramePoint target = new FramePoint(drivingReferenceFrames.getObjectFrame(VehicleObject.GAS_PEDAL), 0.0, pedalY, z);
 
       pedalForceToCompensateFor.setToZero(drivingReferenceFrames.getObjectFrame(VehicleObject.GAS_PEDAL));
       pedalForceToCompensateFor.setZ(computePedalForceToCompensateFor(z));
 
-      moveToPosition(target, pedalForceToCompensateFor);
+      moveToPosition(target, pedalForceToCompensateFor, notifyIfDone, LowLevelDrivingAction.GASPEDAL);
    }
 
-   public void moveToPositionInBrakePedalFrame(double z)
+   public void moveToPositionInBrakePedalFrame(double z, boolean notifyIfDone)
    {
       FramePoint target = new FramePoint(drivingReferenceFrames.getObjectFrame(VehicleObject.BRAKE_PEDAL), 0.0, pedalY, z);
 
       pedalForceToCompensateFor.setToZero(drivingReferenceFrames.getObjectFrame(VehicleObject.BRAKE_PEDAL));
       pedalForceToCompensateFor.setZ(computePedalForceToCompensateFor(z));
 
-      moveToPosition(target, pedalForceToCompensateFor);
+      moveToPosition(target, pedalForceToCompensateFor, notifyIfDone, LowLevelDrivingAction.FOOTBRAKE);
    }
 
    private double computePedalForceToCompensateFor(double z)
@@ -214,9 +214,9 @@ public class DrivingFootControlModule
       doFootOrientationControl();
    }
 
-   private void moveToPosition(FramePoint target, FrameVector forceToCompensateFor)
+   private void moveToPosition(FramePoint target, FrameVector forceToCompensateFor, boolean notifyIfDone, LowLevelDrivingAction action)
    {
-      Task task = new FootControlTask(target, forceToCompensateFor);
+      Task task = new FootControlTask(target, forceToCompensateFor, notifyIfDone, action);
       nFootTasksRemaining.increment();
       taskExecutor.submit(task);
    }
@@ -274,11 +274,15 @@ public class DrivingFootControlModule
       private final FramePoint targetPosition;
       private final FrameVector forceToCompensate;
       private final Wrench wrench = new Wrench();
+      private final LowLevelDrivingAction action;
+      private boolean notifyIfDone; 
 
-      public FootControlTask(FramePoint targetPosition, FrameVector forceToCompensate)
+      public FootControlTask(FramePoint targetPosition, FrameVector forceToCompensate, boolean notifyIfDone, LowLevelDrivingAction action)
       {
          this.targetPosition = targetPosition;
          this.forceToCompensate = new FrameVector(forceToCompensate);
+         this.action = action;
+         this.notifyIfDone = notifyIfDone;
       }
 
       public void doTransitionIntoAction()
@@ -310,6 +314,12 @@ public class DrivingFootControlModule
       {
          // this is so that the TaskExecutor keeps doing our doAction and doesn't transition into a NullTask, where it doesn't set the external wrench to compensate for.
          boolean newTasksAreAvailable = nFootTasksRemaining.getIntegerValue() > 0;
+         
+         if(positionTrajectoryGenerator.isDone() && notifyIfDone)
+         {
+            statusProducer.queueDataToSend(new LowLevelDrivingStatus(action, true));
+            notifyIfDone = false;
+         }
 
          return positionTrajectoryGenerator.isDone() && newTasksAreAvailable;
       }
