@@ -158,7 +158,7 @@ public class DrivingFootControlModule
 
       this.twistCalculator = twistCalculator;
 
-//      taskExecutor.setPrintDebugStatements(true);
+      taskExecutor.setPrintDebugStatements(true);
 
       parentRegistry.addChild(registry);
    }
