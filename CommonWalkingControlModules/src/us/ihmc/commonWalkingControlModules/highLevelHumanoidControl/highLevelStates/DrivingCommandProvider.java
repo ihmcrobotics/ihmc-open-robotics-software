@@ -20,8 +20,9 @@ public class DrivingCommandProvider implements ObjectConsumer<LowLevelDrivingCom
    
    private boolean doNothing = false;
    private double doNothingEndTime = 0;
-   
-   
+   private double clearanceFromPedals;
+
+
    public void consumeObject(LowLevelDrivingCommand object)
    {
       drivingCommands.add(object);
@@ -64,11 +65,11 @@ public class DrivingCommandProvider implements ObjectConsumer<LowLevelDrivingCom
          case DIRECTION:  
             drivingInterface.setGear(getGearName(value), false);
          break;
-         case FOOTBRAKE: 
-            drivingInterface.pressBrakePedal(value * maximumBrakePedalDistance);
+         case FOOTBRAKE:
+            drivingInterface.pressBrakePedal(computePedalPosition(value, maximumBrakePedalDistance));
          break;
          case GASPEDAL:
-            drivingInterface.pressGasPedal(value * maximumGasPedalDistance);
+            drivingInterface.pressGasPedal(computePedalPosition(value, maximumGasPedalDistance));
             break;
          case GET_IN_CAR:
             System.err.println("Cannot get in the car using magic");
@@ -102,11 +103,23 @@ public class DrivingCommandProvider implements ObjectConsumer<LowLevelDrivingCom
       }
    }
 
-   public void setDrivingInterfaceAndVehicleModel(DrivingInterface drivingInterface, VehicleModelObjects vehicleModelObjects)
+   private double computePedalPosition(double value, double maximumPedalDistance)
+   {
+      double position = value * maximumPedalDistance;
+      if (Math.abs(position) < 1e-4)
+         return clearanceFromPedals;
+      else
+      {
+         return position;
+      }
+   }
+
+   public void setDrivingInterfaceAndVehicleModel(DrivingInterface drivingInterface, VehicleModelObjects vehicleModelObjects, double clearanceFromPedals)
    {
       this.drivingInterface = drivingInterface;
       this.maximumGasPedalDistance = vehicleModelObjects.getMaximumGasPedalDistance();
       this.maximumBrakePedalDistance = vehicleModelObjects.getMaximumBrakePedalDistance();
+      this.clearanceFromPedals = clearanceFromPedals;
    }
 
 }
