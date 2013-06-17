@@ -354,7 +354,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       rememberFinalICPFromSingleSupport.set(false);    // true);
       finalDesiredICPInWorld.set(Double.NaN, Double.NaN);
 
-      coefficientOfFriction.set(0.6);    // TODO: tune?
+      coefficientOfFriction.set(0.8); //0.6);    // TODO: tune?
 
       setupLegJacobians(fullRobotModel);
 
