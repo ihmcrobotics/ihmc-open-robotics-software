@@ -23,7 +23,7 @@ import java.io.IOException;
 
 public class DRCDemo03
 {
-   private static final boolean START_NETWORK = false;
+   private static final boolean START_NETWORK = true;
    private static final boolean SHOW_HEIGHTMAP = false;
    private final HumanoidRobotSimulation<SDFRobot> drcSimulation;
    private final DRCDemoEnvironmentWithBoxAndSteeringWheel environment;
