@@ -43,25 +43,8 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseWithRespect
 import us.ihmc.commonWalkingControlModules.packetConsumers.ReinitializeWalkingControllerProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.TorusManipulationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.TorusPoseProvider;
-import us.ihmc.commonWalkingControlModules.packets.ArmJointAnglePacket;
-import us.ihmc.commonWalkingControlModules.packets.BumStatePacket;
-import us.ihmc.commonWalkingControlModules.packets.ComHeightPacket;
-import us.ihmc.commonWalkingControlModules.packets.DesiredHighLevelStateProvider;
-import us.ihmc.commonWalkingControlModules.packets.FingerStatePacket;
-import us.ihmc.commonWalkingControlModules.packets.FootPosePacket;
-import us.ihmc.commonWalkingControlModules.packets.FootStatePacket;
-import us.ihmc.commonWalkingControlModules.packets.HandLoadBearingPacket;
-import us.ihmc.commonWalkingControlModules.packets.HandPosePacket;
-import us.ihmc.commonWalkingControlModules.packets.HandStatePacket;
-import us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket;
-import us.ihmc.commonWalkingControlModules.packets.HighLevelStatePacket;
-import us.ihmc.commonWalkingControlModules.packets.LookAtPacket;
-import us.ihmc.commonWalkingControlModules.packets.PelvisOrientationPacket;
-import us.ihmc.commonWalkingControlModules.packets.PelvisPoseWithRespectToVehiclePacket;
-import us.ihmc.commonWalkingControlModules.packets.ReinitializeWalkingControllerPacket;
-import us.ihmc.commonWalkingControlModules.packets.ThighStatePacket;
-import us.ihmc.commonWalkingControlModules.packets.TorusManipulationPacket;
-import us.ihmc.commonWalkingControlModules.packets.TorusPosePacket;
+import us.ihmc.commonWalkingControlModules.packets.*;
+import us.ihmc.commonWalkingControlModules.packets.VehiclePosePacket;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.terrain.VaryingStairGroundProfile;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
@@ -317,7 +300,7 @@ public class VariousWalkingProviders
       objectCommunicator.attachListener(TorusManipulationPacket.class, torusManipulationProvider);
       objectCommunicator.attachListener(FootPosePacket.class, footPoseProvider);
       objectCommunicator.attachListener(ChestOrientationPacket.class, chestOrientationProvider);
-      objectCommunicator.attachListener(PelvisPoseWithRespectToVehiclePacket.class, pelvisPoseWithRespectToVehicleProvider);
+      objectCommunicator.attachListener(VehiclePosePacket.class, pelvisPoseWithRespectToVehicleProvider);
       objectCommunicator.attachListener(ReinitializeWalkingControllerPacket.class, reinitializeWalkingControllerProvider);
       
       objectCommunicator.attachListener(ArmJointAnglePacket.class, armJointAngleProvider);
