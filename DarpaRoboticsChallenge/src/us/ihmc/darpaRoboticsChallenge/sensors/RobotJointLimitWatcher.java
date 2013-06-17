@@ -24,6 +24,7 @@ public class RobotJointLimitWatcher implements RobotController
 
    private YoVariableLimitChecker[] limitCheckers;
    private OneDoFJoint[] oneDoFJoints;
+
    public RobotJointLimitWatcher(OneDoFJoint[] oneDoFJoints)
    {
       registry = new YoVariableRegistry("JointLimits");
@@ -35,14 +36,16 @@ public class RobotJointLimitWatcher implements RobotController
       limitCheckers = new YoVariableLimitChecker[numberOfJoints];
 
       YoVariableRegistry doNotRegister = new YoVariableRegistry("DoNotRegister");
-      for (int i=0; i<numberOfJoints; i++)
+      for (int i = 0; i < numberOfJoints; i++)
       {
          OneDoFJoint oneDoFJoint = oneDoFJoints[i];
          variablesToTrack[i] = new DoubleYoVariable(oneDoFJoint.getName(), doNotRegister);
 
-         double reductionFactor = 0.99;
-         double lowerLimit = reductionFactor * oneDoFJoint.getJointLimitLower();
-         double upperLimit = reductionFactor * oneDoFJoint.getJointLimitUpper();
+         double thresholdPercentage = 0.02;
+         double range = oneDoFJoint.getJointLimitUpper() - oneDoFJoint.getJointLimitLower();
+         double thresholdAmount = range * thresholdPercentage;
+         double lowerLimit = oneDoFJoint.getJointLimitLower() + thresholdAmount;
+         double upperLimit = oneDoFJoint.getJointLimitUpper() - thresholdAmount;
 
          limitCheckers[i] = new YoVariableLimitChecker(variablesToTrack[i], lowerLimit, upperLimit, registry);
       }
@@ -50,7 +53,7 @@ public class RobotJointLimitWatcher implements RobotController
 
    public void doControl()
    {
-      for(int i=0; i<limitCheckers.length; i++)
+      for (int i = 0; i < limitCheckers.length; i++)
       {
          variablesToTrack[i].set(oneDoFJoints[i].getQ());
          limitCheckers[i].update();
@@ -68,21 +71,22 @@ public class RobotJointLimitWatcher implements RobotController
 
    public String getName()
    {
-      return null;  //To change body of implemented methods use File | Settings | File Templates.
+      return null;    // To change body of implemented methods use File | Settings | File Templates.
    }
 
    public String getDescription()
    {
-      return null;  //To change body of implemented methods use File | Settings | File Templates.
+      return null;    // To change body of implemented methods use File | Settings | File Templates.
    }
 
    public ArrayList<Pair<String, YoVariableLimitChecker.Status>> getStatus()
    {
       ArrayList<Pair<String, YoVariableLimitChecker.Status>> ret = new ArrayList<Pair<String, YoVariableLimitChecker.Status>>();
 
-      for(int i=0; i<limitCheckers.length; i++)
+      for (int i = 0; i < limitCheckers.length; i++)
       {
-         Pair<String, YoVariableLimitChecker.Status> pair = new Pair<String, YoVariableLimitChecker.Status>(oneDoFJoints[i].getName(), limitCheckers[i].getStatus());
+         Pair<String, YoVariableLimitChecker.Status> pair = new Pair<String, YoVariableLimitChecker.Status>(oneDoFJoints[i].getName(),
+                                                               limitCheckers[i].getStatus());
          ret.add(pair);
       }
 
