@@ -793,4 +793,16 @@ public class MomentumBasedController
       cylindricalContactStates.get(contactableCylinderBody).setRhoContactRegularization(wRho);
       cylindricalContactStates.get(contactableCylinderBody).setPhiContactRegularization(wPhi);
    }
+
+   public void setCylindricalContactStateProperties(ContactableCylinderBody contactableCylinderBody, double coefficientOfFriction, double gripStrength,
+         double cylinderRadius, double halfHandWidth, double gripWeaknessFactor, boolean inContact)
+   {
+      cylindricalContactStates.get(contactableCylinderBody).set(coefficientOfFriction, gripStrength, cylinderRadius, halfHandWidth, gripWeaknessFactor,
+            inContact);
+   }
+
+   public void setCylindricalContactStateProperties(ContactableCylinderBody contactableCylinderBody, double coefficientOfFriction, boolean inContact)
+   {
+      cylindricalContactStates.get(contactableCylinderBody).set(coefficientOfFriction, contactableCylinderBody, inContact);
+   }
 }
