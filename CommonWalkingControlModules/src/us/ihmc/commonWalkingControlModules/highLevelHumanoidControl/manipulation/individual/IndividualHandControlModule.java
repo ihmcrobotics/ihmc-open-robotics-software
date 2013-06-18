@@ -199,6 +199,9 @@ public class IndividualHandControlModule
       {
          public boolean checkCondition()
          {
+            if (handControllerInterface == null)
+               return false;
+
             boolean transitionRequested = requestedState.getEnumValue() == toState.getStateEnum();
             boolean ableToBearLoad = handControllerInterface.isAbleToBearLoad();
             boolean initializedClosedHack = time.getDoubleValue() < .01;    // FIXME: get rid of this. Currently necessary for getting into car
