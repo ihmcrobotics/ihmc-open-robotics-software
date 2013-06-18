@@ -10,7 +10,7 @@ public class DRCConfigParameters
    public static final boolean RESTART_FOR_FANCY_CONTROL = true;     // Enable for testing standup
    
    public static final boolean ALLOW_LAG_SIMULATION = true;
-   public static final boolean ENABLE_LAG_SIMULATION_ON_START = false;
+   public static final boolean ENABLE_LAG_SIMULATION_ON_START = true;
 
    static
    {
@@ -72,9 +72,9 @@ public class DRCConfigParameters
    public static final String CONSTELLATION_FIELD_COMPUTER_1_VPN_IP = "10.0.0.52";
    public static final String CONSTELLATION_FIELD_COMPUTER_2_VPN_IP = "10.0.0.53";
 
-   public static final String GAZEBO_HOST = CLOUD_MINION3_IP; //CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP;
-   public static final String SCS_MACHINE_IP_ADDRESS = LOCALHOST; //CONSTELLATION_FIELD_COMPUTER_2_VPN_IP;    // CLOUD_MONSTER_IP;
-   public static final String NET_PROC_MACHINE_IP_ADDRESS = LOCALHOST; //CONSTELLATION_FIELD_COMPUTER_1_VPN_IP;    // SCS_MACHINE_IP_ADDRESS;
+   public static final String GAZEBO_HOST = LOCALHOST; //CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP; //CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP;
+   public static final String SCS_MACHINE_IP_ADDRESS = LOCALHOST; //CONSTELLATION_FIELD_COMPUTER_2_VPN_IP; //CONSTELLATION_FIELD_COMPUTER_2_VPN_IP;    // CLOUD_MONSTER_IP;
+   public static final String NET_PROC_MACHINE_IP_ADDRESS = LOCALHOST; //CONSTELLATION_FIELD_COMPUTER_1_VPN_IP; //CONSTELLATION_FIELD_COMPUTER_1_VPN_IP;    // SCS_MACHINE_IP_ADDRESS;
 
    public static final String OPERATOR_INTERFACE_IP_ADDRESS = LOCALHOST;
 
