@@ -19,6 +19,7 @@ public class DesiredFootPoseProvider implements ObjectConsumer<FootPosePacket>
 {
    private final SideDependentList<FramePose> desiredFootPoses = new SideDependentList<FramePose>();
    private SideDependentList<Boolean> hasNewPose = new SideDependentList<Boolean>();
+   private SideDependentList<Boolean> hasNotConsumedPreviousPose = new SideDependentList<Boolean>();
 
    public DesiredFootPoseProvider()
    {
@@ -26,6 +27,7 @@ public class DesiredFootPoseProvider implements ObjectConsumer<FootPosePacket>
       for (RobotSide robotSide : RobotSide.values)
       {
          hasNewPose.put(robotSide, false);
+         hasNotConsumedPreviousPose.put(robotSide, false);
          // Just initializing to whatever...
          desiredFootPoses.put(robotSide, pose);
       }
@@ -36,9 +38,15 @@ public class DesiredFootPoseProvider implements ObjectConsumer<FootPosePacket>
       return hasNewPose.get(robotSide);
    }
 
+   public synchronized boolean checkIfPreviousPoseNotConsumed(RobotSide robotSide)
+   {
+      return hasNotConsumedPreviousPose.get(robotSide);
+   }
+
    public synchronized FramePose getDesiredFootPose(RobotSide robotSide)
    {
       hasNewPose.put(robotSide, false);
+      hasNotConsumedPreviousPose.put(robotSide, false);
 
       return desiredFootPoses.get(robotSide);
    }
@@ -46,6 +54,10 @@ public class DesiredFootPoseProvider implements ObjectConsumer<FootPosePacket>
    public synchronized void consumeObject(FootPosePacket object)
    {
       RobotSide robotSide = object.getRobotSide();
+      
+      if (hasNewPose.get(robotSide))
+         hasNotConsumedPreviousPose.put(robotSide, true);
+
       hasNewPose.put(robotSide, true);
 
       FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), object.getPosition(), object.getOrientation());
