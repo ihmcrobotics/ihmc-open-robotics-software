@@ -28,9 +28,9 @@ public class DRCConfigParametersTest
       
       assertFalse("Do not check in PolyvalentHighLevelHumanoidControllerFactory.TEST_DRIVING = true!!", PolyvalentHighLevelHumanoidControllerFactory.TEST_DRIVING);
       
-      assertFalse("Do not check in DRCConfigParameters.ALLOW_LAG_SIMULATION = false!!", DRCConfigParameters.ALLOW_LAG_SIMULATION);
+      assertTrue("Do not check in DRCConfigParameters.ALLOW_LAG_SIMULATION = false!!", DRCConfigParameters.ALLOW_LAG_SIMULATION);
       
-      assertFalse("Do not check in DRCConfigParameters.ENABLE_LAG_SIMULATION_ON_START = false!!", DRCConfigParameters.ENABLE_LAG_SIMULATION_ON_START);
+      assertTrue("Do not check in DRCConfigParameters.ENABLE_LAG_SIMULATION_ON_START = false!!", DRCConfigParameters.ENABLE_LAG_SIMULATION_ON_START);
    }
 
 }
