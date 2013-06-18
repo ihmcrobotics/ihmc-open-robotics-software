@@ -116,13 +116,14 @@ public class DrivingCommandProvider implements ObjectConsumer<LowLevelDrivingCom
 
    private double computePedalPosition(double value, double maximumPedalDistance)
    {
-      double position = value * maximumPedalDistance;
-      if (Math.abs(position) < 1e-4)
-         return clearanceFromPedals;
-      else
-      {
-         return position;
-      }
+      double position = value * (maximumPedalDistance - clearanceFromPedals) + clearanceFromPedals;
+//      if (Math.abs(position) < 1e-4)
+//         return clearanceFromPedals;
+//      else
+//      {
+//         return position;
+//      }
+      return position;
    }
 
    public void setDrivingInterfaceAndVehicleModel(DrivingInterface drivingInterface, VehicleModelObjects vehicleModelObjects, double clearanceFromPedals)

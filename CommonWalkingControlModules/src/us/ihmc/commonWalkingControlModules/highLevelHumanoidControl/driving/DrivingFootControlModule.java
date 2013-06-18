@@ -10,6 +10,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.trajectory.*;
 import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
@@ -52,6 +53,9 @@ public class DrivingFootControlModule
    private final FramePoint desiredPosition = new FramePoint();
    private final FrameVector desiredVelocity = new FrameVector();
    private final FrameVector feedForward = new FrameVector();
+
+   private final YoFramePoint desiredPositionYoFramePoint;
+   private final YoFrameVector desiredVelocityYoFrameVector;
 
    private final FrameVector currentVelocity = new FrameVector();
    private final FrameVector currentAngularVelocity = new FrameVector();
@@ -117,6 +121,9 @@ public class DrivingFootControlModule
       footPitch = new DoubleYoVariable("footPitch", registry);
       footRoll = new DoubleYoVariable("footRoll", registry);
 
+      desiredPositionYoFramePoint = new YoFramePoint("desiredFootPointPosition", ReferenceFrame.getWorldFrame(), registry);
+      desiredVelocityYoFrameVector = new YoFrameVector("desiredFootPointVelocity", ReferenceFrame.getWorldFrame(), registry);
+
       ReferenceFrame vehicleFrame = drivingReferenceFrames.getVehicleFrame();
 
 //      desiredOrientation = new FrameOrientation(drivingReferenceFrames.getObjectFrame(VehicleObject.GAS_PEDAL));    // should be the same for brake pedal
@@ -133,7 +140,7 @@ public class DrivingFootControlModule
       PositionProvider finalPositionProvider = new YoPositionProvider(finalToePointPosition);
       averageVelocityProvider = new YoVariableDoubleProvider("drivingFootAverageVelocity", registry);
       DoubleProvider trajectoryTimeProvider = new AverageVelocityTrajectoryTimeProvider(initialPositionProvider, finalPositionProvider,
-                                                 averageVelocityProvider, 1e-3);
+                                                 averageVelocityProvider, 0.1);
       this.positionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator(toePointName + "Trajectory", vehicleFrame, trajectoryTimeProvider,
               initialPositionProvider, finalPositionProvider, registry);
 
@@ -169,7 +176,7 @@ public class DrivingFootControlModule
 
       this.twistCalculator = twistCalculator;
 
-      taskExecutor.setPrintDebugStatements(true);
+//      taskExecutor.setPrintDebugStatements(true);
 
       parentRegistry.addChild(registry);
 
@@ -265,6 +272,12 @@ public class DrivingFootControlModule
       FrameVector output = new FrameVector(toePointFrame);
       toePointPositionController.compute(output, desiredPosition, desiredVelocity, currentVelocity, feedForward);
       momentumBasedController.setDesiredPointAcceleration(footJacobian, toePoint, output);
+
+      desiredPosition.changeFrame(desiredPositionYoFramePoint.getReferenceFrame());
+      desiredPositionYoFramePoint.set(desiredPosition);
+
+      desiredVelocity.changeFrame(desiredVelocityYoFrameVector.getReferenceFrame());
+      desiredVelocityYoFrameVector.set(desiredVelocity);
    }
 
    private void doFootOrientationControl()

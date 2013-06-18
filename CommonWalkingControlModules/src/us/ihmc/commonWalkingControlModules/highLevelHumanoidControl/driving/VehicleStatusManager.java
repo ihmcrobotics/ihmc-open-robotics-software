@@ -31,6 +31,8 @@ public class VehicleStatusManager
    private final DoubleYoVariable brakePedalPosition = new DoubleYoVariable("brakePedalPosition", registry);
 
    private final BooleanYoVariable isRobotHoldingSteeringWheel = new BooleanYoVariable("isRobotHoldingSteeringWheel", registry);
+   private final BooleanYoVariable isFootOverGasPedal = new BooleanYoVariable("isFootOverGasPedal", registry);
+   private final BooleanYoVariable isFootOverBrakePedal = new BooleanYoVariable("isFootOverBrakePedal", registry);
 
    private final double handBrakeEngagedAngle;
    private final double handBrakeDisengagedAngle;
@@ -111,6 +113,16 @@ public class VehicleStatusManager
       this.isRobotHoldingSteeringWheel.set(holdingSteeringWheel);
    }
 
+   public void setIsFootOverBrakePedal(boolean isFootOverBrakePedal)
+   {
+      this.isFootOverBrakePedal.set(isFootOverBrakePedal);
+   }
+
+   public void setIsFootOverGasPedal(boolean isFootOverGasPedal)
+   {
+      this.isFootOverGasPedal.set(isFootOverGasPedal);
+   }
+
    public RevoluteJoint getHandBrakeJoint()
    {
       return handBrakeJoint;
@@ -139,5 +151,15 @@ public class VehicleStatusManager
    public boolean isRobotHoldingSteeringWheel()
    {
       return isRobotHoldingSteeringWheel.getBooleanValue();
+   }
+
+   public boolean isFootOverGasPedal()
+   {
+      return isFootOverGasPedal.getBooleanValue();
+   }
+
+   public boolean isFootOverBrakePedal()
+   {
+      return isFootOverBrakePedal.getBooleanValue();
    }
 }

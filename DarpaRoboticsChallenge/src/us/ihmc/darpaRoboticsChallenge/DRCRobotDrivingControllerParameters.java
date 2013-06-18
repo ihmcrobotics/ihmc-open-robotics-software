@@ -31,6 +31,7 @@ public class DRCRobotDrivingControllerParameters extends DRCRobotWalkingControll
    public String[] getDefaultHeadOrientationControlJointNames()
    {
       return new String[] {"back_ubx", "neck_ay"};
+//      return new String[] {};
    }
 
    @Override
