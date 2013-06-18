@@ -30,7 +30,7 @@ public class DRCConfigParametersTest
       
       assertTrue("Do not check in DRCConfigParameters.ALLOW_LAG_SIMULATION = false!!", DRCConfigParameters.ALLOW_LAG_SIMULATION);
       
-      assertTrue("Do not check in DRCConfigParameters.ENABLE_LAG_SIMULATION_ON_START = false!!", DRCConfigParameters.ENABLE_LAG_SIMULATION_ON_START);
+      assertFalse("Do not check in DRCConfigParameters.ENABLE_LAG_SIMULATION_ON_START = true!!", DRCConfigParameters.ENABLE_LAG_SIMULATION_ON_START);
    }
 
 }
