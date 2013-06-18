@@ -97,10 +97,8 @@ public class RigidBodySpatialAccelerationControlModule
       
       if (limitAccelerations.getBooleanValue())
       {
-         System.out.println("acceleration before = " +  acceleration);
          acceleration.limitLinearPartMagnitude(maximumLinearAccelerationMagnitude.getDoubleValue());
          acceleration.limitAngularPartMagnitude(maximumAngularAccelerationMagnitude.getDoubleValue());
-         System.out.println("acceleration after = " +  acceleration);
       }
       
       acceleration.getExpressedInFrame().checkReferenceFrameMatch(desiredAccelerationLinearViz.getReferenceFrame());
