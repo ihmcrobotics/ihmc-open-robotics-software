@@ -236,13 +236,13 @@ public class PosePlaybackSCSBridge
       {
          PosePlaybackRobotPose pose = new PosePlaybackRobotPose(sdfRobot);
 
-         if (previousPose != null)
-         {
-            if (pose.epsilonEquals(previousPose, 1e-3, 1.0))
-            {
-               return;
-            }
-         }
+//         if (previousPose != null)
+//         {
+//            if (pose.epsilonEquals(previousPose, 1e-3, 1.0))
+//            {
+//               return;
+//            }
+//         }
 
          visualizeAppendages();
 
@@ -254,10 +254,11 @@ public class PosePlaybackSCSBridge
 
          double dt = 0.01;
          double morphTime = 1.0;
+         PosePlaybackRobotPose morphedPose = pose;
          for (double time = 0.0; time < morphTime; time = time + dt)
          {
             double morphPercentage = time / morphTime;
-            PosePlaybackRobotPose morphedPose;
+            
 
             if (previousPose == null)
             {
@@ -276,7 +277,7 @@ public class PosePlaybackSCSBridge
                pose.setPlaybackDelayBeforePose(playBackDelayPoseTransition);
             }
 
-            morphedPose.setRobotAtPose(sdfRobot);
+            
             posePlaybackController.setPlaybackPose(morphedPose);
             scs.setTime(time);
             scs.tickAndUpdate();
@@ -285,12 +286,15 @@ public class PosePlaybackSCSBridge
             {
                if (posePlaybackSender.isConnected())
                   posePlaybackSender.writeData();
+               else
+                  morphedPose.setRobotAtPose(sdfRobot);
                ThreadTools.sleep((long) (dt * 1000));
             }
             catch (IOException e)
             {
             }
          }
+         morphedPose.setRobotAtPose(sdfRobot);
 
          previousPose = pose;
       }
@@ -494,6 +498,7 @@ public class PosePlaybackSCSBridge
          frameByframeTime = frameByframeTime + controlDT;
 
          morphedPose = interpolator.getPose(frameByframeTime);
+         previousPose = morphedPose;
 
          posePlaybackController.setPlaybackPose(morphedPose);
          scs.setTime(frameByframeTime);
@@ -522,7 +527,6 @@ public class PosePlaybackSCSBridge
          ThreadTools.sleep((long) (controlDT * 1000));
       }
       morphedPose.setRobotAtPose(sdfRobot);// make sure scs ends in last pose
-      previousPose = morphedPose;
 
       System.out.println("End of Play back");
    }
