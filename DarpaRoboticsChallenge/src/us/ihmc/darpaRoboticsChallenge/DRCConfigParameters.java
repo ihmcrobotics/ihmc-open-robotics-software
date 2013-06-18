@@ -10,7 +10,7 @@ public class DRCConfigParameters
    public static final boolean RESTART_FOR_FANCY_CONTROL = true;     // Enable for testing standup
    
    public static final boolean ALLOW_LAG_SIMULATION = true;
-   public static final boolean ENABLE_LAG_SIMULATION_ON_START = false;
+   public static final boolean ENABLE_LAG_SIMULATION_ON_START =  false;
 
    static
    {
