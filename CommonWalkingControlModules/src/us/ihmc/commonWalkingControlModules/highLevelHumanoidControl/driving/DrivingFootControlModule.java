@@ -5,12 +5,16 @@ import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.AxisAngleOrientationController;
 import com.yobotics.simulationconstructionset.util.EuclideanPositionController;
+import com.yobotics.simulationconstructionset.util.GainCalculator;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.trajectory.*;
 import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
-import com.yobotics.simulationconstructionset.util.GainCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
+import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.taskExecutor.Task;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.taskExecutor.TaskExecutor;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -28,6 +32,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.*;
 
 import javax.media.j3d.Transform3D;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -41,7 +46,7 @@ public class DrivingFootControlModule
    private final FramePoint toePoint;
    private final EuclideanPositionController toePointPositionController;
    private final MomentumBasedController momentumBasedController;
-   
+
    private final QueueBasedStreamingDataProducer<LowLevelDrivingStatus> statusProducer;
 
    private final FramePoint desiredPosition = new FramePoint();
@@ -79,7 +84,6 @@ public class DrivingFootControlModule
    private final DrivingReferenceFrames drivingReferenceFrames;
 
    private final RigidBody foot;
-   private final RigidBody elevator;
 
    private final TaskExecutor taskExecutor = new TaskExecutor();
    private final double pedalY = 0.0;
@@ -87,17 +91,20 @@ public class DrivingFootControlModule
    private final FrameVector pedalForceToCompensateFor = new FrameVector();
    private final IntegerYoVariable nFootTasksRemaining;
    private final YoVariableDoubleProvider averageVelocityProvider;
+   private final List<DynamicGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<DynamicGraphicReferenceFrame>();
 
 
-   public DrivingFootControlModule(RigidBody elevator, ContactablePlaneBody contactablePlaneFoot, MomentumBasedController momentumBasedController,
-                                   DrivingReferenceFrames drivingReferenceFrames, DoubleYoVariable yoTime, TwistCalculator twistCalculator, YoVariableRegistry parentRegistry, QueueBasedStreamingDataProducer<LowLevelDrivingStatus> statusProducer)
+   public DrivingFootControlModule(FullRobotModel fullRobotModel, ContactablePlaneBody contactablePlaneFoot, MomentumBasedController momentumBasedController,
+                                   DrivingReferenceFrames drivingReferenceFrames, DoubleYoVariable yoTime, TwistCalculator twistCalculator,
+                                   YoVariableRegistry parentRegistry, QueueBasedStreamingDataProducer<LowLevelDrivingStatus> statusProducer,
+                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.statusProducer = statusProducer;
       this.foot = contactablePlaneFoot.getRigidBody();
-      this.elevator = elevator;
       registry = new YoVariableRegistry(foot.getName() + getClass().getSimpleName());
-      footJacobian = new GeometricJacobian(elevator, foot, elevator.getBodyFixedFrame());
+      footJacobian = new GeometricJacobian(fullRobotModel.getElevator(), foot, fullRobotModel.getElevator().getBodyFixedFrame());
       toePoint = getCenterToePoint(contactablePlaneFoot);
+//      toePoint = getLeftFrontToePoint(contactablePlaneFoot);
       String toePointName = foot.getName() + "ToePoint";
       Transform3D transform = new Transform3D();
       transform.set(toePoint.getVectorCopy());
@@ -112,7 +119,10 @@ public class DrivingFootControlModule
 
       ReferenceFrame vehicleFrame = drivingReferenceFrames.getVehicleFrame();
 
+//      desiredOrientation = new FrameOrientation(drivingReferenceFrames.getObjectFrame(VehicleObject.GAS_PEDAL));    // should be the same for brake pedal
+
       desiredOrientation = new FrameOrientation(vehicleFrame);
+
       desiredAngularVelocity = new FrameVector(vehicleFrame);
       feedForwardAngularAcceleration = new FrameVector(vehicleFrame);
 
@@ -122,7 +132,8 @@ public class DrivingFootControlModule
       PositionProvider initialPositionProvider = new YoPositionProvider(initialToePointPosition);
       PositionProvider finalPositionProvider = new YoPositionProvider(finalToePointPosition);
       averageVelocityProvider = new YoVariableDoubleProvider("drivingFootAverageVelocity", registry);
-      DoubleProvider trajectoryTimeProvider = new AverageVelocityTrajectoryTimeProvider(initialPositionProvider, finalPositionProvider, averageVelocityProvider, 1e-3);
+      DoubleProvider trajectoryTimeProvider = new AverageVelocityTrajectoryTimeProvider(initialPositionProvider, finalPositionProvider,
+                                                 averageVelocityProvider, 1e-3);
       this.positionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator(toePointName + "Trajectory", vehicleFrame, trajectoryTimeProvider,
               initialPositionProvider, finalPositionProvider, registry);
 
@@ -161,21 +172,31 @@ public class DrivingFootControlModule
       taskExecutor.setPrintDebugStatements(true);
 
       parentRegistry.addChild(registry);
+
+      if (dynamicGraphicObjectsListRegistry != null)
+      {
+         DynamicGraphicReferenceFrame toePointFrameViz = new DynamicGraphicReferenceFrame(toePointFrame, registry, 0.1);
+         DynamicGraphicObjectsList list = new DynamicGraphicObjectsList("drivingFootControlModule");
+         dynamicGraphicReferenceFrames.add(toePointFrameViz);
+         list.add(toePointFrameViz);
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(list);
+      }
+
    }
-   
-//   public void addTaskCompletedNotifier(LowLevelDrivingAction action)
-//   {
-//      if(statusProducer != null)
-//      {
-//         taskExecutor.submit(new NotifyStatusListenerTask<LowLevelDrivingStatus>(statusProducer, new LowLevelDrivingStatus(action, true)));
-//      }
-//   }
+
+// public void addTaskCompletedNotifier(LowLevelDrivingAction action)
+// {
+//    if(statusProducer != null)
+//    {
+//       taskExecutor.submit(new NotifyStatusListenerTask<LowLevelDrivingStatus>(statusProducer, new LowLevelDrivingStatus(action, true)));
+//    }
+// }
 
    public void holdPosition()
    {
       FramePoint target = new FramePoint(toePoint);
       pedalForceToCompensateFor.setToZero(toePointFrame);
-      double averageVelocity = 1.0; // arbitrary positive number
+      double averageVelocity = 1.0;    // arbitrary positive number
       moveToPosition(target, pedalForceToCompensateFor, averageVelocity, false, null);
    }
 
@@ -201,7 +222,7 @@ public class DrivingFootControlModule
 
    private double computePedalForceToCompensateFor(double z)
    {
-      return MathTools.clipToMinMax(-800.0 * z, 0.0, 10.0); // from DRCVehiclePlugin.cc
+      return MathTools.clipToMinMax(-800.0 * z, 0.0, 10.0);    // from DRCVehiclePlugin.cc
    }
 
    public void initialize()
@@ -211,11 +232,20 @@ public class DrivingFootControlModule
 
    public void doControl()
    {
+      updateVisualizers();
       taskExecutor.doControl();
       footJacobian.compute();
       updateCurrentVelocity();
       doToePositionControl();
       doFootOrientationControl();
+   }
+
+   private void updateVisualizers()
+   {
+      for (DynamicGraphicReferenceFrame dynamicGraphicReferenceFrame : dynamicGraphicReferenceFrames)
+      {
+         dynamicGraphicReferenceFrame.update();
+      }
    }
 
    private void moveToPosition(FramePoint target, FrameVector forceToCompensateFor, double averageVelocity, boolean notifyIfDone, LowLevelDrivingAction action)
@@ -239,6 +269,17 @@ public class DrivingFootControlModule
 
    private void doFootOrientationControl()
    {
+//      Matrix3d rotationMatrix = new Matrix3d();
+//      rotationMatrix.setColumn(0, 0.0, 0.0, -1.0);
+//      rotationMatrix.setColumn(1, -1.0, 0.0, 0.0);
+//      rotationMatrix.setColumn(2, 0.0, 1.0, 0.0);
+//
+//      Matrix3d postRotation = new Matrix3d();
+//      RotationFunctions.setYawPitchRoll(postRotation, 0.0, 0.0, 0.0);
+//      rotationMatrix.mul(postRotation);
+//
+//      desiredOrientation.set(drivingReferenceFrames.getObjectFrame(VehicleObject.GAS_PEDAL), rotationMatrix);
+
       desiredOrientation.set(drivingReferenceFrames.getVehicleFrame());
       desiredOrientation.setYawPitchRoll(0.0, footPitch.getDoubleValue(), footRoll.getDoubleValue());
       desiredAngularVelocity.setToZero(toePointFrame);
@@ -247,9 +288,10 @@ public class DrivingFootControlModule
       FrameVector output = new FrameVector(toePointFrame);
       orientationController.compute(output, desiredOrientation, desiredAngularVelocity, currentAngularVelocity, feedForwardAngularAcceleration);
 
-      footOrientationControlSpatialAcceleration.setToZero(foot.getBodyFixedFrame(), elevator.getBodyFixedFrame(), foot.getBodyFixedFrame());
+      footOrientationControlSpatialAcceleration.setToZero(foot.getBodyFixedFrame(), footJacobian.getBaseFrame(), foot.getBodyFixedFrame());
       footOrientationControlSpatialAcceleration.setAngularPart(output.getVector());
-      footOrientationTaskspaceConstraintData.set(footOrientationControlSpatialAcceleration, footOrientationNullspaceMultipliers, footOrientationSelectionMatrix);
+      footOrientationTaskspaceConstraintData.set(footOrientationControlSpatialAcceleration, footOrientationNullspaceMultipliers,
+              footOrientationSelectionMatrix);
       momentumBasedController.setDesiredSpatialAcceleration(footJacobian, footOrientationTaskspaceConstraintData);
    }
 
@@ -273,16 +315,27 @@ public class DrivingFootControlModule
       return centerToePoint;
    }
 
+   private static FramePoint getLeftFrontToePoint(ContactablePlaneBody foot)
+   {
+      FrameVector forward = new FrameVector(foot.getPlaneFrame(), 1.0, 1.0, 0.0);
+      int nToePoints = 1;
+      List<FramePoint> toePoints = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(foot.getContactPoints(), forward, nToePoints);
+
+      return toePoints.get(0);
+   }
+
    private class FootControlTask implements Task
    {
       private final FramePoint targetPosition;
       private final FrameVector forceToCompensate;
+      private final FrameVector tempVector = new FrameVector();
       private final Wrench wrench = new Wrench();
       private final LowLevelDrivingAction action;
       private final double averageVelocity;
-      private boolean notifyIfDone; 
+      private boolean notifyIfDone;
 
-      public FootControlTask(FramePoint targetPosition, FrameVector forceToCompensate, double averageVelocity, boolean notifyIfDone, LowLevelDrivingAction action)
+      public FootControlTask(FramePoint targetPosition, FrameVector forceToCompensate, double averageVelocity, boolean notifyIfDone,
+                             LowLevelDrivingAction action)
       {
          this.targetPosition = targetPosition;
          this.forceToCompensate = new FrameVector(forceToCompensate);
@@ -294,7 +347,8 @@ public class DrivingFootControlModule
       public void doTransitionIntoAction()
       {
          averageVelocityProvider.set(averageVelocity);
-         DrivingFootControlModule.this.finalToePointPosition.set(targetPosition.changeFrameCopy(DrivingFootControlModule.this.finalToePointPosition.getReferenceFrame()));
+         DrivingFootControlModule.this.finalToePointPosition.set(
+             targetPosition.changeFrameCopy(DrivingFootControlModule.this.finalToePointPosition.getReferenceFrame()));
          positionTrajectoryGenerator.initialize();
          trajectoryInitializationTime.set(time.getDoubleValue());
          nFootTasksRemaining.decrement();
@@ -303,8 +357,9 @@ public class DrivingFootControlModule
       public void doAction()
       {
          wrench.setToZero(foot.getBodyFixedFrame(), toePointFrame);
-         forceToCompensate.changeFrame(toePointFrame);
-         wrench.setLinearPart(forceToCompensate.getVector());
+         tempVector.setAndChangeFrame(forceToCompensate);
+         tempVector.changeFrame(toePointFrame);
+         wrench.setLinearPart(tempVector.getVector());
          wrench.changeFrame(foot.getBodyFixedFrame());
          momentumBasedController.setExternalWrenchToCompensateFor(foot, wrench);
       }
@@ -321,8 +376,8 @@ public class DrivingFootControlModule
       {
          // this is so that the TaskExecutor keeps doing our doAction and doesn't transition into a NullTask, where it doesn't set the external wrench to compensate for.
          boolean newTasksAreAvailable = nFootTasksRemaining.getIntegerValue() > 0;
-         
-         if(positionTrajectoryGenerator.isDone() && notifyIfDone)
+
+         if (positionTrajectoryGenerator.isDone() && notifyIfDone)
          {
             statusProducer.queueDataToSend(new LowLevelDrivingStatus(action, true));
             notifyIfDone = false;
