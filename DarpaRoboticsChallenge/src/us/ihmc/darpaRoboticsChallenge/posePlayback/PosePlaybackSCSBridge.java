@@ -429,6 +429,7 @@ public class PosePlaybackSCSBridge
             ThreadTools.sleep((long) (controlDT * 1000));
          }
          morphedPose.setRobotAtPose(sdfRobot);// make sure scs ends in last pose
+         previousPose = morphedPose;
          
          System.out.println("End of Play back");
       }
@@ -491,7 +492,7 @@ public class PosePlaybackSCSBridge
       
       public void variableChanged(YoVariable yoVariable)
       {
-         if(sdfRobot!=null)
+         if(sdfRobot!=null && previousPose!=null)
          {
             previousPose.setRobotAtPose(sdfRobot);
             posePlaybackController.setPlaybackPose(previousPose);
