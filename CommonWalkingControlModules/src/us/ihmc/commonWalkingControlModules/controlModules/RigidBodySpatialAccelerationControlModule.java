@@ -10,7 +10,10 @@ import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class RigidBodySpatialAccelerationControlModule
 {
@@ -20,7 +23,12 @@ public class RigidBodySpatialAccelerationControlModule
    private final SpatialAccelerationVector acceleration;
    private final RigidBody endEffector;
    private final ReferenceFrame endEffectorFrame;
+   
+   private final YoFrameVector desiredAccelerationLinearViz, desiredAccelerationAngularViz;
 
+   private final DoubleYoVariable maximumLinearAccelerationMagnitude, maximumAngularAccelerationMagnitude;
+   private final BooleanYoVariable limitAccelerations;
+   
    public RigidBodySpatialAccelerationControlModule(String namePrefix, TwistCalculator twistCalculator, RigidBody endEffector, ReferenceFrame endEffectorFrame,
            YoVariableRegistry parentRegistry)
    {
@@ -30,7 +38,31 @@ public class RigidBodySpatialAccelerationControlModule
       this.endEffectorFrame = endEffectorFrame;
       this.se3pdController = new SE3PDController(namePrefix, endEffectorFrame, registry);
       this.acceleration = new SpatialAccelerationVector();
+      
+      desiredAccelerationLinearViz = new YoFrameVector(namePrefix + "LinearAccelViz", endEffectorFrame, registry);
+      desiredAccelerationAngularViz = new YoFrameVector(namePrefix + "AngularAccelViz", endEffectorFrame, registry);
+      
+      maximumLinearAccelerationMagnitude = new DoubleYoVariable(namePrefix + "MaxLinearAccelMagnitude", registry); 
+      maximumAngularAccelerationMagnitude = new DoubleYoVariable(namePrefix + "MaxAngularAccelMagnitude", registry); 
+      limitAccelerations = new BooleanYoVariable(namePrefix + "LimitAccelerations", registry);
+      limitAccelerations.set(false);
+      
       parentRegistry.addChild(registry);
+   }
+   
+   public void setMaximumLinearAccelerationMagnitude(double maximumLinearAccelerationMagnitude)
+   {
+      this.maximumLinearAccelerationMagnitude.set(maximumLinearAccelerationMagnitude);
+   }
+   
+   public void setMaximumAngularAccelerationMagnitude(double maximumAngularAccelerationMagnitude)
+   {
+      this.maximumAngularAccelerationMagnitude.set(maximumAngularAccelerationMagnitude);
+   }
+   
+   public void setLimitAccelerations(boolean limitAccelerations)
+   {
+      this.limitAccelerations.set(limitAccelerations);
    }
 
    public RigidBody getEndEffector()
@@ -61,6 +93,20 @@ public class RigidBodySpatialAccelerationControlModule
       currentTwist.changeFrame(endEffectorFrame);
 
       se3pdController.compute(acceleration, desiredEndEffectorPose, desiredEndEffectorTwist, feedForwardEndEffectorSpatialAcceleration, currentTwist);
+      
+      
+      if (limitAccelerations.getBooleanValue())
+      {
+         System.out.println("acceleration before = " +  acceleration);
+         acceleration.limitLinearPartMagnitude(maximumLinearAccelerationMagnitude.getDoubleValue());
+         acceleration.limitAngularPartMagnitude(maximumAngularAccelerationMagnitude.getDoubleValue());
+         System.out.println("acceleration after = " +  acceleration);
+      }
+      
+      acceleration.getExpressedInFrame().checkReferenceFrameMatch(desiredAccelerationLinearViz.getReferenceFrame());
+
+      desiredAccelerationLinearViz.set(acceleration.getLinearPartCopy());
+      desiredAccelerationAngularViz.set(acceleration.getAngularPartCopy());
    }
 
    public void doPositionControl(FramePoint desiredPosition, FrameOrientation desiredOrientation, FrameVector desiredLinearVelocityOfOrigin,
