@@ -6,6 +6,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
@@ -32,6 +33,9 @@ import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTools;
 
 public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoidControlPattern
 {
@@ -51,6 +55,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
 
    private final ConstantDoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(1.0);
    private final CoMBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule;
+   private final OneDoFJoint[] neckJoints;
 
    public MultiContactTestHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
            CoMBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
@@ -64,6 +69,14 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
 
       this.footPoseProvider = variousWalkingProviders.getDesiredFootPoseProvider();
       this.momentumRateOfChangeControlModule = momentumRateOfChangeControlModule;
+
+      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBody chest = fullRobotModel.getChest();
+
+      GeometricJacobian spineJacobian = new GeometricJacobian(pelvis, chest, chest.getBodyFixedFrame());
+      variousWalkingManagers.getChestOrientationManager().setUp(pelvis, spineJacobian, 100.0, 100.0, 100.0, 20.0, 20.0, 20.0);
+
+      this.neckJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(chest, fullRobotModel.getHead()), OneDoFJoint.class);
 
       setupFootControlModules();
    }
@@ -148,6 +161,14 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       }
 
       super.doFootControl();
+   }
+
+   protected void doHeadControl()
+   {
+      for (OneDoFJoint neckJoint : neckJoints)
+      {
+         momentumBasedController.doPDControl(neckJoint, 100.0, 20.0, 0.0, 0.0);
+      }
    }
 
    public void setFootInContact(RobotSide robotSide, boolean inContact)
