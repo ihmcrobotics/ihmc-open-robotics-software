@@ -145,10 +145,10 @@ public class DrivingFootControlModule
 
 
       orientationController = new AxisAngleOrientationController(foot.getName() + "PD", foot.getBodyFixedFrame(), registry);
-      double kPOrientationYZ = 100.0;
+      double kPOrientationYZ = 50.0;
       double kDOrientationYZ = GainCalculator.computeDerivativeGain(kPOrientationYZ, dampingRatio);
 
-      double kPOrientationX = 300.0;
+      double kPOrientationX = 50.0;
       double kDOrientationX = GainCalculator.computeDerivativeGain(kPOrientationX, dampingRatio);
 
       orientationController.setProportionalGains(kPOrientationX, kPOrientationYZ, kPOrientationYZ);
@@ -162,8 +162,8 @@ public class DrivingFootControlModule
       footOrientationSelectionMatrix.set(1, 1, 1.0);
       footOrientationSelectionMatrix.set(2, 2, 1.0);
 
-      footPitch.set(0.0);
-      footRoll.set(-0.3);
+      footPitch.set(0.3);
+      footRoll.set(0.0);
 
       footOrientationControlSpatialAcceleration = new SpatialAccelerationVector();
 
