@@ -27,7 +27,10 @@ public class DRCConfigParametersTest
       assertTrue("Do not check in MomentumBasedController.DISABLE_SWITCH_TO_FANCY_CONTROL = false!!", DRCConfigParameters.RESTART_FOR_FANCY_CONTROL);
       
       assertFalse("Do not check in PolyvalentHighLevelHumanoidControllerFactory.TEST_DRIVING = true!!", PolyvalentHighLevelHumanoidControllerFactory.TEST_DRIVING);
-   
+      
+      assertFalse("Do not check in DRCConfigParameters.ALLOW_LAG_SIMULATION = true!!", DRCConfigParameters.ALLOW_LAG_SIMULATION);
+      
+      assertFalse("Do not check in DRCConfigParameters.ENABLE_LAG_SIMULATION_ON_START = true!!", DRCConfigParameters.ENABLE_LAG_SIMULATION_ON_START);
    }
 
 }
