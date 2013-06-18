@@ -54,6 +54,17 @@ public class DrivingCommandProvider implements ObjectConsumer<LowLevelDrivingCom
       
    }
 
+   private boolean overrideChecks(double value)
+   {
+      if(value > 1.5 || value < -1.5)
+      {
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
    public void doControl(double currentTime)
    {
       LowLevelDrivingCommand command = drivingCommands.poll();
@@ -63,7 +74,7 @@ public class DrivingCommandProvider implements ObjectConsumer<LowLevelDrivingCom
          switch(command.getAction())
          {
          case DIRECTION:  
-            drivingInterface.setGear(getGearName(value), true);
+            drivingInterface.setGear(getGearName(value), overrideChecks(value));
          break;
          case FOOTBRAKE:
             drivingInterface.pressBrakePedal(computePedalPosition(value, maximumBrakePedalDistance));
@@ -75,7 +86,7 @@ public class DrivingCommandProvider implements ObjectConsumer<LowLevelDrivingCom
             System.err.println("Cannot get in the car using magic");
             break;
          case HANDBRAKE:
-            drivingInterface.setHandBrake(getHandbrakeState(value), true);
+            drivingInterface.setHandBrake(getHandbrakeState(value), overrideChecks(value));
             break;
          case STEERING:
             drivingInterface.turnSteeringWheel(value);
