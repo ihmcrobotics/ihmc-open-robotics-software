@@ -297,7 +297,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       baseForChestOrientationControl = fullRobotModel.getPelvis();
       ChestOrientationManager chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
       String[] chestOrientationControlJointNames = walkingControllerParameters.getDefaultChestOrientationControlJointNames();
-      jacobianForChestOrientationControl = chestOrientationManager.createJacobian(fullRobotModel, baseForChestOrientationControl, chestOrientationControlJointNames);
+      jacobianForChestOrientationControl = chestOrientationManager.createJacobian(fullRobotModel, chestOrientationControlJointNames);
       
       baseForHeadOrientationControl = fullRobotModel.getPelvis();
       HeadOrientationManager headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
@@ -328,7 +328,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       initializeContacts();
 
       FramePose initialDesiredPelvisPose;
-      if (pelvisDesiredsHandler.areDesiredValid())
+      if (pelvisDesiredsHandler.areDesiredsValid())
       {
          System.out.println("desired pelvis pose valid: initializing to desired");
          initialDesiredPelvisPose = pelvisDesiredsHandler.getDesiredPelvisPose();
@@ -348,10 +348,22 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       pelvisPositionTrajectoryGenerator.initialize();
       pelvisOrientationTrajectoryGenerator.initialize();
 
-      FrameOrientation currentChestOrientation = new FrameOrientation(chestPositionControlFrame);
-      currentChestOrientation.changeFrame(worldFrame);
-      initialChestOrientation.setOrientation(currentChestOrientation);
-      desiredChestOrientation.setOrientation(currentChestOrientation);
+
+      FrameOrientation initialDesiredChestOrientation;
+      if (chestOrientationManager.areDesiredsValid())
+      {
+         System.out.println("desired chest orientation valid: initializing to desired");
+         initialDesiredChestOrientation = chestOrientationManager.getDesiredChestOrientation();
+      }
+      else
+      {
+         System.out.println("desired chest orientation invalid: initializing to current");
+         initialDesiredChestOrientation = new FrameOrientation(chestPositionControlFrame);
+      }
+
+      initialDesiredChestOrientation.changeFrame(initialChestOrientation.getReferenceFrame());
+      initialChestOrientation.setOrientation(initialDesiredChestOrientation);
+      desiredChestOrientation.setOrientation(initialDesiredChestOrientation);
 
       chestTrajectoryStartTime = yoTime.getDoubleValue();
       chestOrientationTrajectoryGenerator.initialize();
