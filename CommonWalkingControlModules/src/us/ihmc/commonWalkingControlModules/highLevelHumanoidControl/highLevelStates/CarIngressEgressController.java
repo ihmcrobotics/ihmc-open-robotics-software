@@ -1,17 +1,20 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.VariableChangedListener;
+import com.yobotics.simulationconstructionset.YoVariable;
+import com.yobotics.simulationconstructionset.util.GainCalculator;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
 import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
-import com.yobotics.simulationconstructionset.util.GainCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
+import us.ihmc.commonWalkingControlModules.controlModules.PelvisDesiredsHandler;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule.ConstraintType;
@@ -23,40 +26,20 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController.MomentumControlModuleType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredChestOrientationProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBearingProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
-import us.ihmc.commonWalkingControlModules.trajectories.ChangeableConfigurationProvider;
-import us.ihmc.commonWalkingControlModules.trajectories.CubicPolynomialTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.SettableOrientationProvider;
-import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.ThirdOrderPolynomialTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.YoVariableDoubleProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.*;
+import us.ihmc.commonWalkingControlModules.trajectories.*;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
-import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FramePoint2d;
-import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.*;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.VariableChangedListener;
-import com.yobotics.simulationconstructionset.YoVariable;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class CarIngressEgressController extends AbstractHighLevelHumanoidControlPattern
 {
@@ -135,6 +118,10 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    private final Map<ContactablePlaneBody, CubicPolynomialTrajectoryGenerator> smoothLoadingWRhoTrajectoryGenerators = new LinkedHashMap<ContactablePlaneBody, CubicPolynomialTrajectoryGenerator>();
    private final Map<ContactablePlaneBody, CubicPolynomialTrajectoryGenerator> smoothUnloadingWRhoTrajectoryGenerators = new LinkedHashMap<ContactablePlaneBody, CubicPolynomialTrajectoryGenerator>();
 
+
+   private final PelvisDesiredsHandler pelvisDesiredsHandler;
+
+
    public CarIngressEgressController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
                                      MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
                                      LidarControllerInterface lidarControllerInterface,
@@ -147,13 +134,14 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
       coefficientOfFrictionForBumAndThighs.set(0.0);
       coefficientOfFrictionForFeet.set(0.6);
-      
+
       elevator = fullRobotModel.getElevator();
       contactableThighs = momentumBasedController.getContactablePlaneThighs();
       contactablePelvis = momentumBasedController.getContactablePlanePelvis();
       contactablePelvisBack = momentumBasedController.getContactablePlanePelvisBack();
       
       this.variousWalkingManagers = variousWalkingManagers;
+      this.pelvisDesiredsHandler = variousWalkingManagers.getPelvisDesiredsHandler();
       
       this.pelvisPoseProvider = variousWalkingProviders.getDesiredPelvisPoseProvider();
       this.footPoseProvider = variousWalkingProviders.getDesiredFootPoseProvider();
@@ -339,9 +327,22 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       
       initializeContacts();
 
-      FramePose currentPelvisPose = new FramePose(pelvisPositionControlFrame);
-      initialPelvisConfigurationProvider.set(currentPelvisPose);
-      desiredPelvisConfigurationProvider.set(currentPelvisPose);
+      FramePose initialDesiredPelvisPose;
+      if (pelvisDesiredsHandler.areDesiredValid())
+      {
+         System.out.println("desired pelvis pose valid: initializing to desired");
+         initialDesiredPelvisPose = pelvisDesiredsHandler.getDesiredPelvisPose();
+      }
+      else
+      {
+         System.out.println("desired pelvis pose invalid: initializing to current");
+         FramePose currentPelvisPose = new FramePose(pelvisPositionControlFrame);
+         initialDesiredPelvisPose = currentPelvisPose;
+      }
+
+      initialDesiredPelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
+      initialPelvisConfigurationProvider.set(initialDesiredPelvisPose);
+      desiredPelvisConfigurationProvider.set(initialDesiredPelvisPose);
 
       pelvisTrajectoryStartTime = yoTime.getDoubleValue();
       pelvisPositionTrajectoryGenerator.initialize();
@@ -441,6 +442,9 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
       pelvisController.doPositionControl(desiredPosition, desiredOrientation, desiredVelocity, desiredAngularVelocity, desiredPelvisAcceleration,
                                          desiredAngularAcceleration, fullRobotModel.getElevator());
+
+      pelvisDesiredsHandler.setDesireds(desiredPosition, desiredVelocity, desiredPelvisAcceleration, desiredOrientation, desiredAngularVelocity,
+            desiredAngularAcceleration);
 
       SpatialAccelerationVector pelvisSpatialAcceleration = new SpatialAccelerationVector();
       pelvisController.packAcceleration(pelvisSpatialAcceleration);
