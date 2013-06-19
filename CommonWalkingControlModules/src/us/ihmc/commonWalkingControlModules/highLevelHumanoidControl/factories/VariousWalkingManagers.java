@@ -58,7 +58,7 @@ public class VariousWalkingManagers
 
 
       ChestOrientationControlModule chestOrientationControlModule = setupChestOrientationControlModule(fullRobotModel, twistCalculator, registry);
-      ChestOrientationManager chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestOrientationControlModule);
+      ChestOrientationManager chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestOrientationControlModule, registry);
 
       // Setup arm+hand manipulation state machines
       ManipulationControlModule manipulationControlModule = new ManipulationControlModule(yoTime, fullRobotModel, twistCalculator, walkingControllerParameters,
