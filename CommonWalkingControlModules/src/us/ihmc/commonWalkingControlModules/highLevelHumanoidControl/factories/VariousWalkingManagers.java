@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.configurations.HeadOrientationControl
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
+import us.ihmc.commonWalkingControlModules.controlModules.PelvisDesiredsHandler;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
@@ -27,67 +28,70 @@ public class VariousWalkingManagers
    private final HeadOrientationManager headOrientationManager;
    private final ChestOrientationManager chestOrientationManager;
    private final ManipulationControlModule manipulationControlModule;
+   private final PelvisDesiredsHandler pelvisDesiredsHandler;    // mid competition hack
 
-   public VariousWalkingManagers(HeadOrientationManager headOrientationManager, ChestOrientationManager chestOrientationManager, ManipulationControlModule manipulationControlModule)
+   public VariousWalkingManagers(HeadOrientationManager headOrientationManager, ChestOrientationManager chestOrientationManager,
+                                 ManipulationControlModule manipulationControlModule, PelvisDesiredsHandler pelvisDesiredsHandler)
    {
       this.headOrientationManager = headOrientationManager;
       this.chestOrientationManager = chestOrientationManager;
       this.manipulationControlModule = manipulationControlModule;
+      this.pelvisDesiredsHandler = pelvisDesiredsHandler;
    }
 
    public static VariousWalkingManagers create(MomentumBasedController momentumBasedController, SideDependentList<HandControllerInterface> handControllers,
-         DoubleYoVariable yoTime, VariousWalkingProviders variousWalkingProviders, WalkingControllerParameters walkingControllerParameters,
-         YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           DoubleYoVariable yoTime, VariousWalkingProviders variousWalkingProviders, WalkingControllerParameters walkingControllerParameters,
+           YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
+      double controlDT = momentumBasedController.getControlDT();
 
       DesiredHeadOrientationProvider desiredHeadOrientationProvider = variousWalkingProviders.getDesiredHeadOrientationProvider();
 
-      HeadOrientationControlModule headOrientationControlModule = setupHeadOrientationControlModule(fullRobotModel, twistCalculator, 
-            registry, dynamicGraphicObjectsListRegistry, momentumBasedController, 
-            desiredHeadOrientationProvider, walkingControllerParameters);
+      HeadOrientationControlModule headOrientationControlModule = setupHeadOrientationControlModule(fullRobotModel, twistCalculator, registry,
+                                                                     dynamicGraphicObjectsListRegistry, momentumBasedController,
+                                                                     desiredHeadOrientationProvider, walkingControllerParameters);
 
       HeadOrientationManager headOrientationManager = new HeadOrientationManager(momentumBasedController, headOrientationControlModule,
                                                          desiredHeadOrientationProvider);
 
 
-      ChestOrientationControlModule chestOrientationControlModule = setupChestOrientationControlModule(fullRobotModel, 
-                                                                       twistCalculator, registry);
+      ChestOrientationControlModule chestOrientationControlModule = setupChestOrientationControlModule(fullRobotModel, twistCalculator, registry);
       ChestOrientationManager chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestOrientationControlModule);
 
       // Setup arm+hand manipulation state machines
       ManipulationControlModule manipulationControlModule = new ManipulationControlModule(yoTime, fullRobotModel, twistCalculator, walkingControllerParameters,
-                                                               variousWalkingProviders,
-                                                               dynamicGraphicObjectsListRegistry, handControllers, momentumBasedController, registry);
+                                                               variousWalkingProviders, dynamicGraphicObjectsListRegistry, handControllers,
+                                                               momentumBasedController, registry);
+
+      PelvisDesiredsHandler pelvisDesiredsHandler = new PelvisDesiredsHandler(controlDT, yoTime, registry);
 
 
-
-      VariousWalkingManagers variousWalkingManagers = new VariousWalkingManagers(headOrientationManager, chestOrientationManager, manipulationControlModule);
+      VariousWalkingManagers variousWalkingManagers = new VariousWalkingManagers(headOrientationManager, chestOrientationManager, manipulationControlModule,
+            pelvisDesiredsHandler);
 
       return variousWalkingManagers;
    }
 
-   private static ChestOrientationControlModule setupChestOrientationControlModule(FullRobotModel fullRobotModel,
-           TwistCalculator twistCalculator, YoVariableRegistry registry)
+   private static ChestOrientationControlModule setupChestOrientationControlModule(FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
+           YoVariableRegistry registry)
    {
       RigidBody chest = fullRobotModel.getChest();
       RigidBody pelvis = fullRobotModel.getPelvis();
-      
-      ChestOrientationControlModule chestOrientationControlModule = new ChestOrientationControlModule(pelvis, chest, 
-                                                                       twistCalculator, registry);
+
+      ChestOrientationControlModule chestOrientationControlModule = new ChestOrientationControlModule(pelvis, chest, twistCalculator, registry);
 
       return chestOrientationControlModule;
    }
-   
-   
-   private static HeadOrientationControlModule setupHeadOrientationControlModule(FullRobotModel fullRobotModel, TwistCalculator twistCalculator, YoVariableRegistry registry, 
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, 
-         MomentumBasedController momentumBasedController, DesiredHeadOrientationProvider desiredHeadOrientationProvider, HeadOrientationControllerParameters headOrientationControllerParameters)
-   {      
-      
+
+
+   private static HeadOrientationControlModule setupHeadOrientationControlModule(FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
+           YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, MomentumBasedController momentumBasedController,
+           DesiredHeadOrientationProvider desiredHeadOrientationProvider, HeadOrientationControllerParameters headOrientationControllerParameters)
+   {
       CommonWalkingReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
-     
+
       RigidBody head = fullRobotModel.getHead();
       RigidBody pelvis = fullRobotModel.getPelvis();
       RigidBody elevator = fullRobotModel.getElevator();
@@ -100,8 +104,8 @@ public class VariousWalkingManagers
       else
          headOrientationExpressedInFrame = referenceFrames.getPelvisZUpFrame();
       HeadOrientationControlModule headOrientationControlModule = new HeadOrientationControlModule(pelvis, elevator, head, twistCalculator,
-            headOrientationExpressedInFrame, chestFrame, headOrientationControllerParameters, registry,
-                                                                     dynamicGraphicObjectsListRegistry);
+                                                                     headOrientationExpressedInFrame, chestFrame, headOrientationControllerParameters,
+                                                                     registry, dynamicGraphicObjectsListRegistry);
 
       // Setting initial head pitch
       // This magic number (0.67) is a good default head pitch for getting good LIDAR point coverage of ground by feet
@@ -128,4 +132,8 @@ public class VariousWalkingManagers
       return manipulationControlModule;
    }
 
+   public PelvisDesiredsHandler getPelvisDesiredsHandler()
+   {
+      return pelvisDesiredsHandler;
+   }
 }
