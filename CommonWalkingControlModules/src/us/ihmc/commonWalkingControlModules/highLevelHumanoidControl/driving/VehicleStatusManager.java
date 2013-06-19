@@ -52,9 +52,26 @@ public class VehicleStatusManager
       handBrakeJoint.setJointLimitLower(Math.min(handBrakeEngagedAngle, handBrakeDisengagedAngle));
       handBrakeJoint.setJointLimitLower(Math.max(handBrakeEngagedAngle, handBrakeDisengagedAngle));
 
+      reset();
+
       parentRegistry.addChild(registry);
    }
 
+   public void reset()
+   {
+      setGear(DrivingInterface.GearName.FORWARD);
+      setSteeringWheelAngle(0.0);
+
+      setHandBrakeEngaged(true);
+      
+      setGasPedalPosition(0.0);
+      setBrakePedalPosition(0.0);
+
+      setIsRobotHoldingSteeringWheel(false);
+      setIsFootOverGasPedal(false);
+      setIsFootOverBrakePedal(false);
+   }
+   
    public DrivingInterface.GearName getGear()
    {
       return gear.getEnumValue();
