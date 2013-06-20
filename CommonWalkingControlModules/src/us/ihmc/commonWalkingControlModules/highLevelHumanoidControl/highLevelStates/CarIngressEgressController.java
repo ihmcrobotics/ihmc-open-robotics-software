@@ -349,18 +349,19 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       pelvisOrientationTrajectoryGenerator.initialize();
 
 
-      FrameOrientation initialDesiredChestOrientation;
-      if (chestOrientationManager.areDesiredsValid())
-      {
-         System.out.println("desired chest orientation valid: initializing to desired");
-         initialDesiredChestOrientation = chestOrientationManager.getDesiredChestOrientation();
-      }
-      else
-      {
-         System.out.println("desired chest orientation invalid: initializing to current");
-         initialDesiredChestOrientation = new FrameOrientation(chestPositionControlFrame);
-      }
+//      FrameOrientation initialDesiredChestOrientation;
+//      if (chestOrientationManager.areDesiredsValid())
+//      {
+//         System.out.println("desired chest orientation valid: initializing to desired");
+//         initialDesiredChestOrientation = chestOrientationManager.getDesiredChestOrientation();
+//      }
+//      else
+//      {
+//         System.out.println("desired chest orientation invalid: initializing to current");
+//         initialDesiredChestOrientation = new FrameOrientation(chestPositionControlFrame);
+//      }
 
+      FrameOrientation initialDesiredChestOrientation = new FrameOrientation(chestPositionControlFrame);
       initialDesiredChestOrientation.changeFrame(this.initialDesiredChestOrientation.getReferenceFrame());
       this.initialDesiredChestOrientation.setOrientation(initialDesiredChestOrientation);
       finalDesiredChestOrientation.setOrientation(initialDesiredChestOrientation);
