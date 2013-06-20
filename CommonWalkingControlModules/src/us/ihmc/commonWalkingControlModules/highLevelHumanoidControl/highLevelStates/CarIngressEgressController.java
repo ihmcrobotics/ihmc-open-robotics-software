@@ -64,7 +64,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
    private final DesiredChestOrientationProvider chestOrientationProvider;
    private final ReferenceFrame chestPositionControlFrame;
-   private final SettableOrientationProvider desiredChestOrientation, initialChestOrientation;
+   private final SettableOrientationProvider finalDesiredChestOrientation, initialDesiredChestOrientation;
    private final OrientationInterpolationTrajectoryGenerator chestOrientationTrajectoryGenerator;
    private double chestTrajectoryStartTime = 0.0;
 
@@ -178,10 +178,10 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       // Set up the chest trajectory generator
       this.chestOrientationProvider = variousWalkingProviders.getDesiredChestOrientationProvider();
       chestPositionControlFrame = fullRobotModel.getChest().getParentJoint().getFrameAfterJoint();
-      initialChestOrientation = new SettableOrientationProvider("initialChestOrientation", worldFrame, registry);
-      desiredChestOrientation = new SettableOrientationProvider("desiredChestOrientation", worldFrame, registry);
+      initialDesiredChestOrientation = new SettableOrientationProvider("initialDesiredChest", worldFrame, registry);
+      finalDesiredChestOrientation = new SettableOrientationProvider("finalDesiredChest", worldFrame, registry);
       chestOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("chest", worldFrame, trajectoryTimeProvider,
-            initialChestOrientation, desiredChestOrientation, registry);
+            initialDesiredChestOrientation, finalDesiredChestOrientation, registry);
 
       setupFootControlModules();
 
@@ -361,9 +361,9 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          initialDesiredChestOrientation = new FrameOrientation(chestPositionControlFrame);
       }
 
-      initialDesiredChestOrientation.changeFrame(initialChestOrientation.getReferenceFrame());
-      initialChestOrientation.setOrientation(initialDesiredChestOrientation);
-      desiredChestOrientation.setOrientation(initialDesiredChestOrientation);
+      initialDesiredChestOrientation.changeFrame(this.initialDesiredChestOrientation.getReferenceFrame());
+      this.initialDesiredChestOrientation.setOrientation(initialDesiredChestOrientation);
+      finalDesiredChestOrientation.setOrientation(initialDesiredChestOrientation);
 
       chestTrajectoryStartTime = yoTime.getDoubleValue();
       chestOrientationTrajectoryGenerator.initialize();
@@ -497,9 +497,9 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          chestOrientationTrajectoryGenerator.compute(yoTime.getDoubleValue() - chestTrajectoryStartTime);
          FrameOrientation previousDesiredChestOrientation = new FrameOrientation(chestPositionControlFrame);
          chestOrientationTrajectoryGenerator.get(previousDesiredChestOrientation);
-         initialChestOrientation.setOrientation(previousDesiredChestOrientation);
+         initialDesiredChestOrientation.setOrientation(previousDesiredChestOrientation);
          
-         desiredChestOrientation.setOrientation(chestOrientationProvider.getDesiredChestOrientation());
+         finalDesiredChestOrientation.setOrientation(chestOrientationProvider.getDesiredChestOrientation());
          chestTrajectoryStartTime = yoTime.getDoubleValue();
 
          chestOrientationTrajectoryGenerator.initialize();
