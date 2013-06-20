@@ -1,30 +1,25 @@
 package us.ihmc.commonWalkingControlModules.controlModules.head;
 
 
-import us.ihmc.commonWalkingControlModules.configurations.HeadOrientationControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.DegenerateOrientationControlModule;
-import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
-import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.OriginAndPointFrame;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
-
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameQuaternion;
+import us.ihmc.commonWalkingControlModules.configurations.HeadOrientationControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.DegenerateOrientationControlModule;
+import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.*;
+import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 public class HeadOrientationControlModule extends DegenerateOrientationControlModule
 {
-   private final YoFrameOrientation orientationToTrack;
+   private final YoFrameQuaternion orientationToTrack;
    private final YoFramePoint pointToTrack;
    private final ReferenceFrame chestFrame;
    private final ReferenceFrame headOrientationFrame;
@@ -52,7 +47,7 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
 
       this.chestFrame = chestFrame;
       this.headOrientationFrame = headOrientationFrame;
-      orientationToTrack = new YoFrameOrientation("headOrientationToTrack", headOrientationFrame, registry);
+      orientationToTrack = new YoFrameQuaternion("headOrientationToTrack", headOrientationFrame, registry);
       pointToTrack = new YoFramePoint("headPointToTrack", ReferenceFrame.getWorldFrame(), registry);
       
       if (dynamicGraphicObjectsListRegistry != null)
@@ -88,7 +83,8 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
       {
          case ORIENTATION :
          {
-            frameOrientation = orientationToTrack.getFrameOrientationCopy();
+            frameOrientation = new FrameOrientation(orientationToTrack.getReferenceFrame());
+            orientationToTrack.get(frameOrientation);
 
             break;
          }

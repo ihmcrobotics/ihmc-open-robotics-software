@@ -1,17 +1,13 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.ArrayList;
-import java.util.Random;
-
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Vector3d;
-
+import com.yobotics.simulationconstructionset.*;
+import com.yobotics.simulationconstructionset.robotController.RobotController;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameQuaternion;
+import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.Axis;
@@ -20,31 +16,16 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
-import us.ihmc.utilities.screwTheory.Twist;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
-import us.ihmc.utilities.screwTheory.Wrench;
+import us.ihmc.utilities.screwTheory.*;
 import us.ihmc.utilities.test.JUnitTools;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.FloatingJoint;
-import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.Link;
-import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
-import com.yobotics.simulationconstructionset.PinJoint;
-import com.yobotics.simulationconstructionset.RandomRobotGenerator;
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
-import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
-import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
+import java.util.ArrayList;
+import java.util.Random;
+
+import static org.junit.Assert.assertEquals;
 
 public class InverseDynamicsJointsFromSCSRobotGeneratorTest
 {
@@ -251,8 +232,8 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
 
       private final YoVariableRegistry registry = new YoVariableRegistry("Controller");
       
-      private final YoFrameOrientation lastFrameOrientationID = new YoFrameOrientation("lastFrameID", ReferenceFrame.getWorldFrame(), registry);
-      private final YoFrameOrientation lastFrameOrientation = new YoFrameOrientation("lastFrame", ReferenceFrame.getWorldFrame(), registry);
+      private final YoFrameQuaternion lastFrameOrientationID = new YoFrameQuaternion("lastFrameID", ReferenceFrame.getWorldFrame(), registry);
+      private final YoFrameQuaternion lastFrameOrientation = new YoFrameQuaternion("lastFrame", ReferenceFrame.getWorldFrame(), registry);
 
       private final ArrayList<DoubleYoVariable> tauErrors = new ArrayList<DoubleYoVariable>();
       private final ArrayList<DoubleYoVariable> inverseDynamicsTaus = new ArrayList<DoubleYoVariable>();
@@ -434,7 +415,9 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
 
          Transform3D transformToWorld = new Transform3D();
          lastJoint.getTransformToWorld(transformToWorld);
-         lastFrameOrientation.setRotation(transformToWorld);
+         Matrix3d rotationMatrix = new Matrix3d();
+         transformToWorld.get(rotationMatrix);
+         lastFrameOrientation.set(rotationMatrix);
          
          transformToWorld.invert();
          orientation = orientation.applyTransformCopy(transformToWorld);

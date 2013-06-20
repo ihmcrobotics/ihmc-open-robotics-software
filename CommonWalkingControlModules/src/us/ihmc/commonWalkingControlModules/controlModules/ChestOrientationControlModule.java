@@ -1,9 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameQuaternion;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
-
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -13,19 +12,19 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 public class ChestOrientationControlModule extends DegenerateOrientationControlModule
 {
-   private final YoFrameOrientation desiredOrientation;
+   private final YoFrameQuaternion desiredOrientation;
    private final YoFrameVector desiredAngularVelocity;
    private final YoFrameVector feedForwardAngularAcceleration;
    private final RigidBody chest;
-   
+
    public ChestOrientationControlModule(RigidBody pelvis, RigidBody chest, TwistCalculator twistCalculator,
-           YoVariableRegistry parentRegistry)
+                                        YoVariableRegistry parentRegistry)
    {
       super("chest", new RigidBody[] {}, chest, new GeometricJacobian[]{}, twistCalculator, parentRegistry);
-      
+
       this.chest = chest;
       ReferenceFrame baseFrame = pelvis.getBodyFixedFrame();
-      this.desiredOrientation = new YoFrameOrientation("desiredChestOrientation", baseFrame, registry);
+      this.desiredOrientation = new YoFrameQuaternion("desiredChestOrientation", baseFrame, registry);
       this.desiredAngularVelocity = new YoFrameVector("desiredChestAngularVelocity", baseFrame, registry);
       this.feedForwardAngularAcceleration = new YoFrameVector("desiredChestAngularAcceleration", baseFrame, registry);
    }
@@ -34,10 +33,12 @@ public class ChestOrientationControlModule extends DegenerateOrientationControlM
    {
       return chest;
    }
-   
+
    protected FrameOrientation getDesiredFrameOrientation()
    {
-      return desiredOrientation.getFrameOrientationCopy();
+      FrameOrientation ret = new FrameOrientation(desiredOrientation.getReferenceFrame());
+      desiredOrientation.get(ret);
+      return ret;
    }
 
    protected FrameVector getDesiredAngularVelocity()
@@ -54,10 +55,10 @@ public class ChestOrientationControlModule extends DegenerateOrientationControlM
    {
       desiredOrientation.changeFrame(this.desiredOrientation.getReferenceFrame());
       this.desiredOrientation.set(desiredOrientation);
-      
+
       desiredAngularVelocity.changeFrame(this.desiredAngularVelocity.getReferenceFrame());
       this.desiredAngularVelocity.set(desiredAngularVelocity);
-      
+
       feedForwardAngularAcceleration.changeFrame(this.feedForwardAngularAcceleration.getReferenceFrame());
       this.feedForwardAngularAcceleration.set(feedForwardAngularAcceleration);
    }
