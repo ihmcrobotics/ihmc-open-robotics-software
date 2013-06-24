@@ -1107,44 +1107,31 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
    private void addSupportBaseControlGraphics(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      AppearanceDefinition[] cols = { YoAppearance.Red(), YoAppearance.Green(), YoAppearance.Blue(), YoAppearance.Yellow() };
-      DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("baseControlPoints");
-      for (int i = 0; i < baseControlPoints.length; i++)
-      {
-         DynamicGraphicPosition baseControlPointViz = new DynamicGraphicPosition("baseControlPoint" + i, baseControlPoints[i], 0.01, cols[i]);
-         dynamicGraphicObjectsList.add(baseControlPointViz);
-         baseControlPointsList.add(baseControlPointViz);
+      addSupportBaseGraphics(dynamicGraphicObjectsListRegistry,baseControlPoints,baseControlPointsList,baseControlLinesList,"baseControl",YoAppearance.Green());
 
-         for (int j = i + 1; j < baseControlPoints.length; j++)
-         {
-            DynamicGraphicLineSegment dynamicGraphicLineSegment = new DynamicGraphicLineSegment("baseSupportLine1", baseControlPoints[i], baseControlPoints[j],
-                  1.0, YoAppearance.Green(), false);
-            dynamicGraphicObjectsList.add(dynamicGraphicLineSegment);
-            baseControlLinesList.add(dynamicGraphicLineSegment);
-         }
-      }
-
-      if (dynamicGraphicObjectsListRegistry != null)
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
-      dynamicGraphicObjectsList.hideDynamicGraphicObjects();
    }
 
    private void addSupportBaseControlTargetGraphics(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      AppearanceDefinition[] cols = { YoAppearance.Red(), YoAppearance.Green(), YoAppearance.Blue(), YoAppearance.Yellow() };
-      DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("baseControlPoints");
-      for (int i = 0; i < baseControlTargetPoints.length; i++)
-      {
-         DynamicGraphicPosition baseControlTargetPointViz = new DynamicGraphicPosition("baseControlTargetPoint" + i, baseControlTargetPoints[i], 0.01, cols[i]);
-         dynamicGraphicObjectsList.add(baseControlTargetPointViz);
-         baseControlTargetPointsList.add(baseControlTargetPointViz);
+      addSupportBaseGraphics(dynamicGraphicObjectsListRegistry,baseControlTargetPoints,baseControlTargetPointsList,baseControlTargetLinesList,"baseControlTarget",YoAppearance.Red());
+   }
 
-         for (int j = i + 1; j < baseControlTargetPoints.length; j++)
+   private void addSupportBaseGraphics(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,YoFramePoint[] basePoints, ArrayList<DynamicGraphicObject> basePointsList, ArrayList<DynamicGraphicObject> linesList, String namePrefix,AppearanceDefinition appearance)
+   {
+      AppearanceDefinition[] colors = { YoAppearance.Red(), YoAppearance.Green(), YoAppearance.Blue(), YoAppearance.Yellow() };
+      DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList(namePrefix + "Points");
+      for (int i = 0; i < basePoints.length; i++)
+      {
+         DynamicGraphicPosition baseControlPointViz = new DynamicGraphicPosition(namePrefix + "Point" + i, basePoints[i], 0.01, colors[i]);
+         dynamicGraphicObjectsList.add(baseControlPointViz);
+         basePointsList.add(baseControlPointViz);
+         
+         for (int j = i + 1; j < basePoints.length; j++)
          {
-            DynamicGraphicLineSegment dynamicGraphicLineSegment = new DynamicGraphicLineSegment("baseTargetSupportLine1", baseControlTargetPoints[i], baseControlTargetPoints[j],
-                  1.0, YoAppearance.Red(), false);
+            DynamicGraphicLineSegment dynamicGraphicLineSegment = new DynamicGraphicLineSegment(namePrefix + "SupportLine", basePoints[i], basePoints[j],
+                  1.0, appearance, false);
             dynamicGraphicObjectsList.add(dynamicGraphicLineSegment);
-            baseControlTargetLinesList.add(dynamicGraphicLineSegment);
+            linesList.add(dynamicGraphicLineSegment);
          }
       }
 
