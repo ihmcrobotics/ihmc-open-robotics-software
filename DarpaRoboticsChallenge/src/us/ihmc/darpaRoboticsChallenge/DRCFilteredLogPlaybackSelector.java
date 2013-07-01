@@ -74,7 +74,7 @@ public class DRCFilteredLogPlaybackSelector
    {
       IHMCSwingTools.setNativeLookAndFeel();
 
-      frame = new JFrame("Filterd Log Playback Selector");
+      frame = new JFrame("Filtered Log Playback Selector");
       frame.setSize(350, 100);
       frame.setResizable(false);
       frame.setLocationRelativeTo(null);
@@ -112,7 +112,7 @@ public class DRCFilteredLogPlaybackSelector
    {
       int pid = -1;
       ChannelExec channel = (ChannelExec) session.openChannel("exec");
-      channel.setCommand("ps aux | grep roslaunch | grep -v grep | awk '{ print $2 }'");
+      channel.setCommand("ps aux | grep roscore | grep -v grep | awk '{ print $2 }'");
       channel.setInputStream(null);
       channel.setOutputStream(System.out);
 
