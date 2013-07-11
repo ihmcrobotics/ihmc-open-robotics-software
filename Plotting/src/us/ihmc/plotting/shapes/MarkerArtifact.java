@@ -1,9 +1,10 @@
 package us.ihmc.plotting.shapes;
 
-import us.ihmc.plotting.Artifact;
+import java.awt.Graphics;
 
 import javax.vecmath.Point2d;
-import java.awt.*;
+
+import us.ihmc.plotting.Artifact;
 
 /**
  * Last updated by: mjohnson

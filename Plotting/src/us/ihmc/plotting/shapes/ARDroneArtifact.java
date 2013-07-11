@@ -1,13 +1,13 @@
 package us.ihmc.plotting.shapes;
 
-import us.ihmc.plotting.Artifact;
-import us.ihmc.plotting.PlotterPanel;
-import us.ihmc.plotting.Pose;
-
-import javax.swing.JFrame;
-import javax.vecmath.Point2d;
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
+
+import us.ihmc.plotting.Artifact;
+import us.ihmc.plotting.Pose;
 
 public class ARDroneArtifact extends Artifact
 {
