@@ -1,6 +1,7 @@
 package us.ihmc.plotting.shapes;
 
-import java.awt.*;
+import java.awt.Font;
+import java.awt.Graphics;
 import java.io.PrintWriter;
 
 import us.ihmc.plotting.Artifact;
