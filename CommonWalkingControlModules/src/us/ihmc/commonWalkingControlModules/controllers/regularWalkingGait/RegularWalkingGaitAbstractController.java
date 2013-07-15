@@ -257,28 +257,6 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
    }
 
 
-   protected class BlankState extends State
-   {
-      public BlankState(RegularWalkingState stateName)
-      {
-         super(stateName);
-
-      }
-
-      public void doAction()
-      {
-      }
-
-      public void doTransitionIntoAction()
-      {
-      }
-
-      public void doTransitionOutOfAction()
-      {
-      }
-   }
-
-
    protected class TransferAllLoadToLegForWalkingState extends State
    {
       private final RobotSide upcomingSupportSide;
