@@ -61,7 +61,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
       this(generalizedSDFRobotModel, sdfJointNameMap, useCollisionMeshes, true, true);
    }
 
-   protected SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes,
+   public SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes,
                       boolean enableTorqueVelocityLimits, boolean enableDamping)
    {
       super(generalizedSDFRobotModel.getName());
