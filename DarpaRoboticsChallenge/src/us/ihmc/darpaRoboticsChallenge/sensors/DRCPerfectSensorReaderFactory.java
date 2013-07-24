@@ -18,7 +18,6 @@ import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.IMUMount;
 import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.KinematicPoint;
 
 public class DRCPerfectSensorReaderFactory implements SensorReaderFactory
 {
@@ -42,8 +41,7 @@ public class DRCPerfectSensorReaderFactory implements SensorReaderFactory
       SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = SCSToInverseDynamicsJointMap.createByName((FloatingJoint) rootJoint, sixDoFJoint);
 
       StateEstimatorSensorDefinitionsFromRobotFactory stateEstimatorSensorDefinitionsFromRobotFactory = new StateEstimatorSensorDefinitionsFromRobotFactory(
-            scsToInverseDynamicsJointMap, robot, new ArrayList<IMUMount>(), groundContactPointBasedWrenchCalculators,
-            new ArrayList<KinematicPoint>(), new ArrayList<KinematicPoint>(), addLinearAccelerationSensors);
+            scsToInverseDynamicsJointMap, robot, new ArrayList<IMUMount>(), groundContactPointBasedWrenchCalculators, addLinearAccelerationSensors);
       this.stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
       
       

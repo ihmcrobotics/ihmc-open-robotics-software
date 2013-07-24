@@ -17,7 +17,6 @@ import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.IMUMount;
 import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.KinematicPoint;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -31,8 +30,6 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
    
    private final ArrayList<IMUMount> imuMounts;
    private final ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators;
-   private final ArrayList<KinematicPoint> positionPoints;
-   private final ArrayList<KinematicPoint> velocityPoints;
    
 
    private final SimulatedSensorHolderAndReader simulatedSensorHolderAndReader;
@@ -42,7 +39,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
    
    
    public SimulatedSensorHolderAndReaderFromRobotFactory(Robot robot, SensorNoiseParameters sensorNoiseParameters, double estimateDT,
-         ArrayList<IMUMount> imuMounts, ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators, ArrayList<KinematicPoint> positionPoints, ArrayList<KinematicPoint> velocityPoints, YoVariableRegistry registry)
+         ArrayList<IMUMount> imuMounts, ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators, YoVariableRegistry registry)
    {
       this.registry = registry;
       this.robot = robot;
@@ -52,8 +49,6 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
       this.estimateDT = estimateDT;
       this.imuMounts = imuMounts;
       this.groundContactPointBasedWrenchCalculators = groundContactPointBasedWrenchCalculators;
-      this.positionPoints = positionPoints;
-      this.velocityPoints = velocityPoints;
 
 
    }
@@ -71,7 +66,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
       {
          SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = SCSToInverseDynamicsJointMap.createByName((FloatingJoint) rootJoint, sixDoFJoint);
          StateEstimatorSensorDefinitionsFromRobotFactory stateEstimatorSensorDefinitionsFromRobotFactory = new StateEstimatorSensorDefinitionsFromRobotFactory(
-               scsToInverseDynamicsJointMap, robot, imuMounts, groundContactPointBasedWrenchCalculators, positionPoints, velocityPoints, addLinearAccelerationSensors);
+               scsToInverseDynamicsJointMap, robot, imuMounts, groundContactPointBasedWrenchCalculators, addLinearAccelerationSensors);
          
          this.stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
          this.imuDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getIMUDefinitions();
