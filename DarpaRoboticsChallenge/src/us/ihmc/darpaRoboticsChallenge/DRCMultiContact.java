@@ -23,6 +23,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.MultiContactDRCRobotInitialSe
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 import com.martiansoftware.jsap.JSAPException;
@@ -97,7 +98,8 @@ public class DRCMultiContact
             handContactPointTransforms, handContactPoints, footContactSides, handContactSides, controllerParameters);
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory);
 
-      drcSimulation = DRCSimulationFactory.createSimulation(controllerFactory, environment, robotInterface, robotInitialSetup, scsInitialSetup, guiInitialSetup, null);
+      Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, environment, robotInterface, robotInitialSetup, scsInitialSetup, guiInitialSetup, null);
+      drcSimulation = humanoidSimulation.first();
 
       SimulationConstructionSet simulationConstructionSet = drcSimulation.getSimulationConstructionSet();
 

@@ -16,7 +16,6 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.IMUMount;
-import com.yobotics.simulationconstructionset.KinematicPoint;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.Robot;
 
@@ -32,7 +31,7 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
 
    public StateEstimatorSensorDefinitionsFromRobotFactory(SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap, Robot robot, 
            ArrayList<IMUMount> imuMounts, ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators,  
-           ArrayList<KinematicPoint> positionPoints, ArrayList<KinematicPoint> velocityPoints, boolean addLinearAccelerationSensors)
+           boolean addLinearAccelerationSensors)
    {
       this.scsToInverseDynamicsJointMap = scsToInverseDynamicsJointMap;
       this.robot = robot;

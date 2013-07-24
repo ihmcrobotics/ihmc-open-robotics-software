@@ -57,10 +57,8 @@ public class ComposableStateEstimatorEvaluator
 
 
       
-      SensorReaderFactory simulatedSensorHolderAndReaderFromRobotFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(
-            robot, simulatedSensorNoiseParameters, controlDT, imuMounts, 
-            new ArrayList<WrenchCalculatorInterface>(), robot.getPositionPoints(), robot.getVelocityPoints(), 
-            registry);
+      SensorReaderFactory simulatedSensorHolderAndReaderFromRobotFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(robot,
+            simulatedSensorNoiseParameters, controlDT, imuMounts, new ArrayList<WrenchCalculatorInterface>(), registry);
       
       boolean addLinearAccelerationSensors = true;
       

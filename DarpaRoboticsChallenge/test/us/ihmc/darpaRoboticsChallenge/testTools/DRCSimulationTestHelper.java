@@ -6,17 +6,16 @@ import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
 
-import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.BlindWalkingPacket;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
+import us.ihmc.darpaRoboticsChallenge.DRCController;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCEnvironmentModel;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseSimulation;
-import us.ihmc.darpaRoboticsChallenge.HumanoidRobotSimulation;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.ThreadTools;
@@ -79,10 +78,10 @@ public class DRCSimulationTestHelper
 
    public ScriptedFootstepGenerator createScriptedFootstepGenerator()
    {
-      HumanoidRobotSimulation<SDFRobot> simulationDRCSimulation = drcSimulation.getSimulationDRCSimulation();
+      DRCController controller = drcSimulation.getController();
 
-      ReferenceFrames referenceFrames = simulationDRCSimulation.getController().getControllerReferenceFrames();
-      FullRobotModel fullRobotModel = simulationDRCSimulation.getController().getControllerModel();
+      ReferenceFrames referenceFrames = controller.getControllerReferenceFrames();
+      FullRobotModel fullRobotModel = controller.getControllerModel();
 
       ScriptedFootstepGenerator scriptedFootstepGenerator = new ScriptedFootstepGenerator(referenceFrames, fullRobotModel);
 

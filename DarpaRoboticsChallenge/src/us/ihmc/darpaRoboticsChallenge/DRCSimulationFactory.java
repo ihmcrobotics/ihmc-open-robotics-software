@@ -42,7 +42,6 @@ import us.ihmc.utilities.net.ObjectCommunicator;
 import com.yobotics.simulationconstructionset.GroundContactPoint;
 import com.yobotics.simulationconstructionset.IMUMount;
 import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.KinematicPoint;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
@@ -55,7 +54,7 @@ public class DRCSimulationFactory
 {
    private static final boolean COMPUTE_ESTIMATOR_ERROR = true;
    
-   public static HumanoidRobotSimulation<SDFRobot> createSimulation(ControllerFactory controllerFactory,
+   public static Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> createSimulation(ControllerFactory controllerFactory,
          CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCRobotInterface robotInterface, RobotInitialSetup<SDFRobot> robotInitialSetup,
          ScsInitialSetup scsInitialSetup, GuiInitialSetup guiInitialSetup, ObjectCommunicator networkProccesorCommunicator)
    {
@@ -77,7 +76,6 @@ public class DRCSimulationFactory
 
       SDFRobot simulatedRobot = robotInterface.getRobot();
       YoVariableRegistry registry = simulatedRobot.getRobotsYoVariableRegistry();
-      simulatedRobot.setDynamicIntegrationMethod(scsInitialSetup.getDynamicIntegrationMethod());
       
       setupJointDamping(simulatedRobot);
       
@@ -120,23 +118,6 @@ public class DRCSimulationFactory
          }
       }
 
-      ArrayList<KinematicPoint> positionPoints = new ArrayList<KinematicPoint>();
-      ArrayList<KinematicPoint> velocityPoints = new ArrayList<KinematicPoint>();
-
-      //     TODO: Get the velocity points in a better way!
-      ArrayList<GroundContactPoint> allKinematicPoints = simulatedRobot.getAllGroundContactPoints();
-
-      for (KinematicPoint kinematicPoint : allKinematicPoints)
-      {
-         //          System.out.println("kinematicPoint.getName() = " + kinematicPoint.getName());
-         if (kinematicPoint.getName().equals("gc_l_leg_lax_0") || (kinematicPoint.getName().equals("gc_r_leg_lax_0")))
-         {
-            System.out.println("Adding VelocityPoint " + kinematicPoint.getName());
-
-            positionPoints.add(kinematicPoint);
-            velocityPoints.add(kinematicPoint);
-         }
-      }
 
       ArrayList<OneDegreeOfFreedomJoint> forceTorqueSensorJoints = new ArrayList<OneDegreeOfFreedomJoint>();   
       // TODO: Get from SDF file
@@ -179,7 +160,7 @@ public class DRCSimulationFactory
       else
       {
          SimulatedSensorHolderAndReaderFromRobotFactory simulatedSensorHolderAndReaderFromRobotFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(simulatedRobot,
-               sensorNoiseParameters, estimateDT, imuMounts, wrenchProviders, positionPoints, velocityPoints, registry);
+               sensorNoiseParameters, estimateDT, imuMounts, wrenchProviders, registry);
          controller.addRobotController(new RunnableRunnerController(simulatedSensorHolderAndReaderFromRobotFactory.getSensorReader()));
          sensorReaderFactory = simulatedSensorHolderAndReaderFromRobotFactory;
       }
@@ -206,7 +187,7 @@ public class DRCSimulationFactory
             networkProccesorCommunicator, robotInterface.getTimeStampProvider(), dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry,
             registry, null);
 
-      final HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, robotController,
+      final HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot,
             controller, estimationTicksPerControlTick, commonAvatarEnvironmentInterface, simulatedRobot.getAllExternalForcePoints(), robotInitialSetup, scsInitialSetup,
             guiInitialSetup, guiSetterUpperRegistry, dynamicGraphicObjectsListRegistry);
 
@@ -227,7 +208,7 @@ public class DRCSimulationFactory
       }
 
 
-      return humanoidRobotSimulation;
+      return new Pair<HumanoidRobotSimulation<SDFRobot>, DRCController>(humanoidRobotSimulation, robotController);
    }
 
    private static Joint getEstimationJoint(SDFRobot simulatedRobot)
