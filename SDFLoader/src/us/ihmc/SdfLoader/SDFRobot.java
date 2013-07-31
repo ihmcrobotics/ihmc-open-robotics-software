@@ -61,7 +61,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
       this(generalizedSDFRobotModel, sdfJointNameMap, useCollisionMeshes, true, true);
    }
 
-   public SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes,
+   protected SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes,
                       boolean enableTorqueVelocityLimits, boolean enableDamping)
    {
       super(generalizedSDFRobotModel.getName());
@@ -243,7 +243,6 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
 
 
       String sanitizedJointName = SDFConversionsHelper.sanitizeJointName(joint.getName());
-      System.out.println("Process joint: " + sanitizedJointName);
 
 
       Joint scsJoint;

@@ -74,4 +74,12 @@ public class DRCRobotSDFLoader
       return jaxbSDFLoader;
    }
    
+   public static void main(String[] args)
+   {
+      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_SANDIA_HANDS, false);
+      JaxbSDFLoader loader = loadDRCRobot(jointMap, true);
+      System.out.println(loader.createRobot(jointMap, true).getName());
+      
+   }
+   
 }
