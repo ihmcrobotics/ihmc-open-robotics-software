@@ -1,5 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import javax.swing.JButton;
+
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.NullGraphics3DAdapter;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
@@ -9,11 +11,13 @@ import us.ihmc.projectM.R2Sim02.initialSetup.GuiInitialSetup;
 
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.dataExporter.DataExporter;
 import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
 
 public class DRCGuiInitialSetup implements GuiInitialSetup
 {
    private static final boolean SHOW_ONLY_WRENCH_VISUALIZER = false;
+   private static final boolean SHOW_EXPORT_TORQUE_AND_SPEED = true;
    private boolean isGuiShown = true;
    private boolean is3dGraphicsShown = true;
    private final boolean groundProfileVisible;
@@ -61,6 +65,14 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       {
          scs.hideAllDynamicGraphicObjects();
          scs.setDynamicGraphicObjectsListVisible("wrenchVisualizer", true);
+      }
+      
+      if (SHOW_EXPORT_TORQUE_AND_SPEED)
+      {
+         JButton exportTorqueAndSpeedButton = new JButton("Export Torque And Speed");
+         DataExporter dataExporter = new DataExporter(scs, robot);
+         exportTorqueAndSpeedButton.addActionListener(dataExporter);
+         scs.addButton(exportTorqueAndSpeedButton);
       }
    }
 
