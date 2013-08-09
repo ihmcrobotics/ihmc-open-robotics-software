@@ -57,7 +57,7 @@ public class SandiaHandManualControlUI extends AbstractNodeMain implements Actio
    private ButtonGroup leftOrRight;
    private JRadioButton leftRadioButton, rightRadioButton;
 
-   private JComboBox<SandiaFingerName> fingerComboBox;
+   private JComboBox fingerComboBox;
 
    private JSlider baseJointSlider, firstJointSlider, secondJointSlider;
 
@@ -187,7 +187,7 @@ public class SandiaHandManualControlUI extends AbstractNodeMain implements Actio
 
       fingerLabel = new JLabel("Select Finger:");
 
-      fingerComboBox = new JComboBox<SandiaFingerName>(SandiaFingerName.values());
+      fingerComboBox = new JComboBox(SandiaFingerName.values());
       fingerComboBox.setSelectedIndex(0);
 
       c.gridx = 0;
@@ -251,7 +251,6 @@ public class SandiaHandManualControlUI extends AbstractNodeMain implements Actio
       actionButtonPanel.add(resetButton, c);
    }
 
-   @Override
    public void actionPerformed(ActionEvent event)
    {
       if (((JButton) event.getSource()).getText().contains("Send"))
