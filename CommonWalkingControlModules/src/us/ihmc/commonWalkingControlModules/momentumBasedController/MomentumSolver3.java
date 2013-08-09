@@ -184,7 +184,7 @@ public class MomentumSolver3 implements MomentumSolverInterface
 //      nullspaceMotionConstraintEnforcer.set(n, z);
 //      nullspaceMotionConstraintEnforcer.constrainEquation(Jp, pp);
 
-      equalityConstraintEnforcer.set(Jp, pp);
+      equalityConstraintEnforcer.setConstraint(Jp, pp);
 //      nullspaceMotionConstraintEnforcer.constrainEquation(sTransposeA, b);
       equalityConstraintEnforcer.constrainEquation(sTransposeA, b);
 

@@ -158,7 +158,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
       DenseMatrix64F bOriginal = new DenseMatrix64F(b);
 
-      equalityConstraintEnforcer.set(jPrimary, pPrimary);
+      equalityConstraintEnforcer.setConstraint(jPrimary, pPrimary);
       equalityConstraintEnforcer.constrainEquation(a, b);
 
       momentumOptimizerNativeInput.setCentroidalMomentumMatrix(a);
