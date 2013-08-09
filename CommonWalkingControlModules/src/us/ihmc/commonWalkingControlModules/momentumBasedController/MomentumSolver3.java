@@ -7,7 +7,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolver;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.ops.CommonOps;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.EqualityConstraintEnforcer;
+import us.ihmc.utilities.optimization.EqualityConstraintEnforcer;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionConstraintHandler;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
