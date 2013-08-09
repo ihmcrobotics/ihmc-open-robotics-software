@@ -69,7 +69,7 @@ public class MomentumSolver3 implements MomentumSolverInterface
       this.v = new DenseMatrix64F(nDegreesOfFreedom, 1);
 
 //      nullspaceMotionConstraintEnforcer = new EqualityConstraintEnforcer(LinearSolverFactory.pseudoInverse(true));
-      equalityConstraintEnforcer = new EqualityConstraintEnforcer(LinearSolverFactory.pseudoInverse(true), registry);
+      equalityConstraintEnforcer = new EqualityConstraintEnforcer(LinearSolverFactory.pseudoInverse(true));
 
       solver = LinearSolverFactory.pseudoInverse(true);
 
