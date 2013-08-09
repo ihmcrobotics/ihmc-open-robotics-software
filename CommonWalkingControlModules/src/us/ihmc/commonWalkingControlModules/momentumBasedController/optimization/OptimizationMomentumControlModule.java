@@ -103,7 +103,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       this.momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
 
       this.hardMotionConstraintSolver = new DampedLeastSquaresSolver(1);
-      this.equalityConstraintEnforcer = new EqualityConstraintEnforcer(hardMotionConstraintSolver, registry);
+      this.equalityConstraintEnforcer = new EqualityConstraintEnforcer(hardMotionConstraintSolver);
 
       parentRegistry.addChild(registry);
       reset();
@@ -142,8 +142,8 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       hardMotionConstraintSolver.setAlpha(momentumOptimizationSettings.getDampedLeastSquaresFactor());
       momentumOptimizerNativeInput.reset();
 
-      if (EqualityConstraintEnforcer.TEST_CONSTRAINT_CONSISTENCY)
-         hardMotionConstraintSolver.setAlpha(0.0);
+//      if (EqualityConstraintEnforcer.TEST_CONSTRAINT_CONSISTENCY)
+//         hardMotionConstraintSolver.setAlpha(0.0);
 
       primaryMotionConstraintHandler.compute();
 
