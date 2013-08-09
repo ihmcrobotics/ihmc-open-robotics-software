@@ -4,13 +4,10 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools;
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.data.RowD1Matrix64F;
-import org.ejml.factory.DecompositionFactory;
 import org.ejml.factory.LinearSolver;
 import org.ejml.factory.LinearSolverFactory;
-import org.ejml.factory.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.HardMotionConstraintEnforcer;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.EqualityConstraintEnforcer;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionConstraintHandler;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -45,8 +42,8 @@ public class MomentumSolver3 implements MomentumSolverInterface
 
    private final LinearSolver<DenseMatrix64F> solver;
    private final MotionConstraintHandler motionConstraintHandler;
-//   private final HardMotionConstraintEnforcer nullspaceMotionConstraintEnforcer;
-   private final HardMotionConstraintEnforcer hardMotionConstraintEnforcer;
+//   private final EqualityConstraintEnforcer nullspaceMotionConstraintEnforcer;
+   private final EqualityConstraintEnforcer equalityConstraintEnforcer;
 
    public MomentumSolver3(SixDoFJoint rootJoint, RigidBody elevator, ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator,
                           LinearSolver<DenseMatrix64F> jacobianSolver, double controlDT, YoVariableRegistry parentRegistry)
@@ -71,8 +68,8 @@ public class MomentumSolver3 implements MomentumSolverInterface
       this.b = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
       this.v = new DenseMatrix64F(nDegreesOfFreedom, 1);
 
-//      nullspaceMotionConstraintEnforcer = new HardMotionConstraintEnforcer(LinearSolverFactory.pseudoInverse(true));
-      hardMotionConstraintEnforcer = new HardMotionConstraintEnforcer(LinearSolverFactory.pseudoInverse(true), registry);
+//      nullspaceMotionConstraintEnforcer = new EqualityConstraintEnforcer(LinearSolverFactory.pseudoInverse(true));
+      equalityConstraintEnforcer = new EqualityConstraintEnforcer(LinearSolverFactory.pseudoInverse(true), registry);
 
       solver = LinearSolverFactory.pseudoInverse(true);
 
@@ -187,9 +184,9 @@ public class MomentumSolver3 implements MomentumSolverInterface
 //      nullspaceMotionConstraintEnforcer.set(n, z);
 //      nullspaceMotionConstraintEnforcer.constrainEquation(Jp, pp);
 
-      hardMotionConstraintEnforcer.set(Jp, pp);
+      equalityConstraintEnforcer.set(Jp, pp);
 //      nullspaceMotionConstraintEnforcer.constrainEquation(sTransposeA, b);
-      hardMotionConstraintEnforcer.constrainEquation(sTransposeA, b);
+      equalityConstraintEnforcer.constrainEquation(sTransposeA, b);
 
 
       // APPlusbMinusAJpPluspp
@@ -197,7 +194,7 @@ public class MomentumSolver3 implements MomentumSolverInterface
       solver.setA(sTransposeA);
       solver.solve(b, vdotUnconstrained);
 
-      DenseMatrix64F vdot = hardMotionConstraintEnforcer.constrainResult(vdotUnconstrained);
+      DenseMatrix64F vdot = equalityConstraintEnforcer.constrainResult(vdotUnconstrained);
 //      DenseMatrix64F vdot = nullspaceMotionConstraintEnforcer.constrainResult(vdot);
 
       ScrewTools.setDesiredAccelerations(jointsInOrder, vdot);
