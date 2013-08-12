@@ -32,6 +32,9 @@ public class DRCConfigParameters
 
    public static final boolean USE_GAZEBO_PHYSICS = false;    // TODO: This one is
 
+   
+   public static final boolean USE_HYDRA = false;    // TODO: This one is
+
    // needed just for
    // FlatGroundWalkingTrack
    // in Gazebo...
