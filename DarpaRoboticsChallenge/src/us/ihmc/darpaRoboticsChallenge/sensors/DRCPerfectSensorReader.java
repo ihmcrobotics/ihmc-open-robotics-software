@@ -5,10 +5,10 @@ import java.util.Map.Entry;
 
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.ControllerDispatcher;
-import us.ihmc.sensorProcessing.simulatedSensors.ForceSensorDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
+import us.ihmc.utilities.ForceSensorDefinition;
 import us.ihmc.utilities.math.TimeTools;
 
 import com.yobotics.simulationconstructionset.IntegerYoVariable;

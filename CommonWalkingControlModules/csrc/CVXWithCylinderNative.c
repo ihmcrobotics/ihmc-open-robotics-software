@@ -73,25 +73,25 @@ JNIEXPORT void JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_n
 	setup_indexing();
 	settings.verbose = 0;
 
-	AByteBuffer = (*env)->NewDirectByteBuffer(env, params.A, sizeof(double) * ASize);
-    bByteBuffer = (*env)->NewDirectByteBuffer(env, params.b, sizeof(double) * bSize);
-    CByteBuffer = (*env)->NewDirectByteBuffer(env, params.C, sizeof(double) * CSize);
-    JsByteBuffer = (*env)->NewDirectByteBuffer(env, params.Js, sizeof(double) * JsSize);
-    psByteBuffer = (*env)->NewDirectByteBuffer(env, params.ps, sizeof(double) * psSize);
-    WsByteBuffer = (*env)->NewDirectByteBuffer(env, params.Ws, sizeof(double) * WsSize);
-    LambdaByteBuffer = (*env)->NewDirectByteBuffer(env, params.Lambda, sizeof(double) * LambdaSize);
-    QrhoByteBuffer = (*env)->NewDirectByteBuffer(env, params.Qrho, sizeof(double) * QrhoSize);
-    QphiByteBuffer = (*env)->NewDirectByteBuffer(env, params.Qphi, sizeof(double) * QphiSize);
-    cByteBuffer = (*env)->NewDirectByteBuffer(env, params.c, sizeof(double) * cSize);
-    rhoMinByteBuffer = (*env)->NewDirectByteBuffer(env, params.rhoMin, sizeof(double) * rhoMinSize);
-    phiMinByteBuffer = (*env)->NewDirectByteBuffer(env, params.phiMin, sizeof(double) * phiMinSize);
-    phiMaxByteBuffer = (*env)->NewDirectByteBuffer(env, params.phiMax, sizeof(double) * phiMaxSize);
-    WRhoByteBuffer = (*env)->NewDirectByteBuffer(env, params.WRho, sizeof(double) * WRhoSize);
-    WPhiByteBuffer = (*env)->NewDirectByteBuffer(env, params.WPhi, sizeof(double) * WPhiSize);
+	AByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.A, sizeof(double) * ASize));
+    bByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.b, sizeof(double) * bSize));
+    CByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.C, sizeof(double) * CSize));
+    JsByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.Js, sizeof(double) * JsSize));
+    psByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.ps, sizeof(double) * psSize));
+    WsByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.Ws, sizeof(double) * WsSize));
+    LambdaByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.Lambda, sizeof(double) * LambdaSize));
+    QrhoByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.Qrho, sizeof(double) * QrhoSize));
+    QphiByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.Qphi, sizeof(double) * QphiSize));
+    cByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.c, sizeof(double) * cSize));
+    rhoMinByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.rhoMin, sizeof(double) * rhoMinSize));
+    phiMinByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.phiMin, sizeof(double) * phiMinSize));
+    phiMaxByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.phiMax, sizeof(double) * phiMaxSize));
+    WRhoByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.WRho, sizeof(double) * WRhoSize));
+    WPhiByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.WPhi, sizeof(double) * WPhiSize));
 
-    rhoByteBuffer = (*env)->NewDirectByteBuffer(env, vars.rho, sizeof(double) * rhoSize);
-    phiByteBuffer = (*env)->NewDirectByteBuffer(env, vars.phi, sizeof(double) * phiSize);
-    vdByteBuffer = (*env)->NewDirectByteBuffer(env, vars.vd, sizeof(double) * vdSize);
+    rhoByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, vars.rho, sizeof(double) * rhoSize));
+    phiByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, vars.phi, sizeof(double) * phiSize));
+    vdByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, vars.vd, sizeof(double) * vdSize));
 }
 
 JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative_getABuffer
