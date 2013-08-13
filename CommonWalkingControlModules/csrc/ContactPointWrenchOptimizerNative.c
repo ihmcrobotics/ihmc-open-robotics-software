@@ -39,11 +39,11 @@ JNIEXPORT void JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_n
 	setup_indexing();
 	settings.verbose = 0;
 
-	aByteBuffer = (*env)->NewDirectByteBuffer(env, params.A, sizeof(double) * aSize);
-	wByteBuffer = (*env)->NewDirectByteBuffer(env, params.W, sizeof(double) * wSize);
-	cByteBuffer = (*env)->NewDirectByteBuffer(env, params.C, sizeof(double) * cSize);
-	rhoMinByteBuffer = (*env)->NewDirectByteBuffer(env, params.rhomin, sizeof(double) * rhoSize);
-	rhoByteBuffer = (*env)->NewDirectByteBuffer(env, vars.rho, sizeof(double) * rhoSize);
+	aByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.A, sizeof(double) * aSize));
+	wByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.W, sizeof(double) * wSize));
+	cByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.C, sizeof(double) * cSize));
+	rhoMinByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.rhomin, sizeof(double) * rhoSize));
+	rhoByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, vars.rho, sizeof(double) * rhoSize));
 }
 
 JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ContactPointWrenchOptimizerNative_getABuffer

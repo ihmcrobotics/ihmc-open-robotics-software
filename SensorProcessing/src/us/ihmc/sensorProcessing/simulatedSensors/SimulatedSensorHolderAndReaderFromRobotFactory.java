@@ -10,6 +10,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianOrientationCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianVectorCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.RandomWalkBiasVectorCorruptor;
+import us.ihmc.utilities.ForceSensorDefinition;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;

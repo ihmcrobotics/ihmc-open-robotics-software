@@ -53,15 +53,15 @@ JNIEXPORT void JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_n
 	setup_indexing();
 	settings.verbose = 0;
 
-    CByteBuffer = (*env)->NewDirectByteBuffer(env, params.C, sizeof(double) * CSize);
-    QrhoByteBuffer = (*env)->NewDirectByteBuffer(env, params.Qrho, sizeof(double) * QrhoSize);
-    QphiByteBuffer = (*env)->NewDirectByteBuffer(env, params.Qphi, sizeof(double) * QphiSize);
-    cByteBuffer = (*env)->NewDirectByteBuffer(env, params.c, sizeof(double) * cSize);
-    rhoMinByteBuffer = (*env)->NewDirectByteBuffer(env, params.rhoMin, sizeof(double) * rhoMinSize);
-    phiMinByteBuffer = (*env)->NewDirectByteBuffer(env, params.phiMin, sizeof(double) * phiMinSize);
-    phiMaxByteBuffer = (*env)->NewDirectByteBuffer(env, params.phiMax, sizeof(double) * phiMaxSize);
-    rhoByteBuffer = (*env)->NewDirectByteBuffer(env, vars.rho, sizeof(double) * rhoSize);
-    phiByteBuffer = (*env)->NewDirectByteBuffer(env, vars.phi, sizeof(double) * phiSize);
+    CByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.C, sizeof(double) * CSize));
+    QrhoByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.Qrho, sizeof(double) * QrhoSize));
+    QphiByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.Qphi, sizeof(double) * QphiSize));
+    cByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.c, sizeof(double) * cSize));
+    rhoMinByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.rhoMin, sizeof(double) * rhoMinSize));
+    phiMinByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.phiMin, sizeof(double) * phiMinSize));
+    phiMaxByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.phiMax, sizeof(double) * phiMaxSize));
+    rhoByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, vars.rho, sizeof(double) * rhoSize));
+    phiByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, vars.phi, sizeof(double) * phiSize));
 }
 
 JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CylinderAndPlaneContactForceOptimizerNative_getCBuffer

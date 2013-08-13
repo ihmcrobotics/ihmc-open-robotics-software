@@ -30,9 +30,9 @@ JNIEXPORT void JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_n
 	setup_indexing();
 	settings.verbose = 0;
 
-	phiByteBuffer = (*env)->NewDirectByteBuffer(env, params.Phi, sizeof(double) * phiSize);
-	xiByteBuffer = (*env)->NewDirectByteBuffer(env, params.xi, sizeof(double) * xiSize);
-	rhoByteBuffer = (*env)->NewDirectByteBuffer(env, vars.rho, sizeof(double) * rhoSize);
+	phiByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.Phi, sizeof(double) * phiSize));
+	xiByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.xi, sizeof(double) * xiSize));
+	rhoByteBuffer = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, vars.rho, sizeof(double) * rhoSize));
 }
 
 JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_LeeGoswamiForceOptimizerNative_getPhiBuffer

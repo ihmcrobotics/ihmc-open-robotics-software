@@ -38,14 +38,14 @@ JNIEXPORT void JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_n
 	setup_indexing();
 	settings.verbose = 0;
 
-	psiKBuffer      = (*env)->NewDirectByteBuffer(env, params.Psi_k, sizeof(double) * psiKSize);
-	kappaKBuffer    = (*env)->NewDirectByteBuffer(env, params.kappa_k, sizeof(double) * kappaKSize);
-	etaMinBuffer    = (*env)->NewDirectByteBuffer(env, params.etamin, sizeof(double) * etaMinSize);
-	etaMaxBuffer    = (*env)->NewDirectByteBuffer(env, params.etamax, sizeof(double) * etaMaxSize);
-	etaDBuffer      = (*env)->NewDirectByteBuffer(env, params.eta_d, sizeof(double) * etaDSize);
-	epsilonBuffer   = (*env)->NewDirectByteBuffer(env, params.epsilon, sizeof(double) * epsilonSize);
+	psiKBuffer      = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.Psi_k, sizeof(double) * psiKSize));
+	kappaKBuffer    = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.kappa_k, sizeof(double) * kappaKSize));
+	etaMinBuffer    = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.etamin, sizeof(double) * etaMinSize));
+	etaMaxBuffer    = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.etamax, sizeof(double) * etaMaxSize));
+	etaDBuffer      = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.eta_d, sizeof(double) * etaDSize));
+	epsilonBuffer   = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, params.epsilon, sizeof(double) * epsilonSize));
 
-	etaBuffer       = (*env)->NewDirectByteBuffer(env, vars.eta, sizeof(double) * etaSize);
+	etaBuffer       = (*env)->NewGlobalRef(env, (*env)->NewDirectByteBuffer(env, vars.eta, sizeof(double) * etaSize));
 }
 
 JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_LeeGoswamiCoPAndNormalTorqueOptimizerNative_getPsiKBuffer

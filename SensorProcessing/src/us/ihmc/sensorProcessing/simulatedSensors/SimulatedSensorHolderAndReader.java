@@ -10,6 +10,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
+import us.ihmc.utilities.ForceSensorDefinition;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.maps.ObjectObjectMap;

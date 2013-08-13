@@ -128,6 +128,11 @@ public class SDFFullRobotModel implements FullRobotModel
 
    }
    
+   public String getModelName()
+   {
+      return sdfJointNameMap.getModelName();
+   }
+   
    private void addSensorDefinitions(InverseDynamicsJoint joint, SDFLinkHolder child)
    {
       if (child.getSensors() != null)

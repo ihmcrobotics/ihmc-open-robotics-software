@@ -6,12 +6,12 @@ import java.util.Map.Entry;
 
 import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.sensorProcessing.simulatedSensors.ForceSensorDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.SCSToInverseDynamicsJointMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitionsFromRobotFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.WrenchCalculatorInterface;
+import us.ihmc.utilities.ForceSensorDefinition;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
