@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.controllers.PIDLidarTorqueController;
 import us.ihmc.darpaRoboticsChallenge.controllers.EstimationLinkHolder;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotDampingParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 import us.ihmc.darpaRoboticsChallenge.handControl.SimulatedHandControllerDispatcher;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCSimulationOutputWriter;
@@ -32,7 +33,6 @@ import us.ihmc.sensorProcessing.simulatedSensors.GroundContactPointBasedWrenchCa
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
-import us.ihmc.sensorProcessing.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.RunnableRunnerController;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.StateEstimatorErrorCalculatorController;
@@ -48,6 +48,7 @@ import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
 import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
+import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class DRCSimulationFactory
@@ -121,11 +122,11 @@ public class DRCSimulationFactory
 
       ArrayList<OneDegreeOfFreedomJoint> forceTorqueSensorJoints = new ArrayList<OneDegreeOfFreedomJoint>();   
       // TODO: Get from SDF file
-      forceTorqueSensorJoints.add(simulatedRobot.getOneDoFJoint("l_leg_lax"));
-      forceTorqueSensorJoints.add(simulatedRobot.getOneDoFJoint("r_leg_lax"));
       
-      forceTorqueSensorJoints.add(simulatedRobot.getOneDoFJoint("l_arm_mwx"));
-      forceTorqueSensorJoints.add(simulatedRobot.getOneDoFJoint("r_arm_mwx"));
+      for(String name : DRCRobotParameters.DRC_ROBOT_FORCESENSOR_NAMES)
+      {
+         forceTorqueSensorJoints.add(simulatedRobot.getOneDoFJoint(name));         
+      }
       
       ArrayList<WrenchCalculatorInterface> wrenchProviders = new ArrayList<WrenchCalculatorInterface>();
       

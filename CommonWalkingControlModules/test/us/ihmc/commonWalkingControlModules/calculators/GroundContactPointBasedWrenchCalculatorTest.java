@@ -13,13 +13,13 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
 import us.ihmc.sensorProcessing.simulatedSensors.GroundContactPointBasedWrenchCalculator;
-import us.ihmc.sensorProcessing.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.utilities.Axis;
 
 import com.yobotics.simulationconstructionset.GroundContactPoint;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.Robot;
+import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 
 public class GroundContactPointBasedWrenchCalculatorTest
 {
@@ -53,10 +53,9 @@ public class GroundContactPointBasedWrenchCalculatorTest
       point0.getYoPosition().set(new Point3d(1.0, 1.0, 0.0));
       point1.getYoPosition().set(new Point3d(-1.0, 0.0, 0.0));
       
-      calculator.startComputation();
-      calculator.waitUntilComputationIsDone();
+      calculator.calculate();
       
-      DenseMatrix64F tauXFXAndFZ = calculator.getForceSensorOutputPort().getData();
+      DenseMatrix64F tauXFXAndFZ = calculator.getWrench();
       assertEquals(1.0, tauXFXAndFZ.get(0, 0), epsilon);
       assertEquals(0.0, tauXFXAndFZ.get(3, 0), epsilon);
       assertEquals(1.0, tauXFXAndFZ.get(5, 0), epsilon);
@@ -73,10 +72,9 @@ public class GroundContactPointBasedWrenchCalculatorTest
       point0.getYoPosition().set(new Point3d(0.0, 0.0, 1.0));
       point1.getYoPosition().set(new Point3d(-2.0, -2.0, 1.0));
       
-      calculator.startComputation();
-      calculator.waitUntilComputationIsDone();
+      calculator.calculate();
       
-      DenseMatrix64F wholeWrench = calculator.getForceSensorOutputPort().getData();
+      DenseMatrix64F wholeWrench = calculator.getWrench();
       assertTrue(wholeWrench.getNumRows() == 6);
       assertEquals(wholeWrench.get(0,0), - 2.0, epsilon);
       assertEquals(wholeWrench.get(1,0), - 2.0, epsilon);
