@@ -6,7 +6,6 @@ import java.util.Map.Entry;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.ControllerDispatcher;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
-import us.ihmc.sensorProcessing.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
 import us.ihmc.utilities.ForceSensorDefinition;
 import us.ihmc.utilities.math.TimeTools;
@@ -15,6 +14,7 @@ import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RawSensorReader;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
+import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 
 public class DRCPerfectSensorReader implements SensorReader, RobotController
 {
@@ -101,9 +101,8 @@ public class DRCPerfectSensorReader implements SensorReader, RobotController
          for(Entry<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensorEntry : forceTorqueSensors.entrySet())
          {
             final WrenchCalculatorInterface forceTorqueSensor = forceTorqueSensorEntry.getValue();
-            forceTorqueSensor.startComputation();
-            forceTorqueSensor.waitUntilComputationIsDone();  
-            forceSensorDataHolder.setForceSensorValue(forceTorqueSensorEntry.getKey(), forceTorqueSensor.getForceSensorOutputPort().getData());
+            forceTorqueSensor.calculate();  
+            forceSensorDataHolder.setForceSensorValue(forceTorqueSensorEntry.getKey(), forceTorqueSensor.getWrench());
          }
       }
    }

@@ -19,6 +19,7 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 
 public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
 {
@@ -186,9 +187,8 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
          for(int i = 0; i < forceTorqueSensors.getLength(); i++)
          {
             final WrenchCalculatorInterface forceTorqueSensor = forceTorqueSensors.getSecond(i);
-            forceTorqueSensor.startComputation();
-            forceTorqueSensor.waitUntilComputationIsDone();  
-            forceSensorDataHolder.setForceSensorValue(forceTorqueSensors.getFirst(i), forceTorqueSensor.getForceSensorOutputPort().getData());
+            forceTorqueSensor.calculate();
+            forceSensorDataHolder.setForceSensorValue(forceTorqueSensors.getFirst(i), forceTorqueSensor.getWrench());
          }
       }
       

@@ -21,6 +21,7 @@ import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 
 public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorReaderFactory
 {
