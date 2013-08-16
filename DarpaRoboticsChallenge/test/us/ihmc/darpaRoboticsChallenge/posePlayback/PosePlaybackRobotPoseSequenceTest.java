@@ -57,6 +57,7 @@ public class PosePlaybackRobotPoseSequenceTest
       assertTrue(poseSequencesAreEqual(poseSequenceFirstRead, poseSequenceSecondRead));
    }
    
+   @Test
    private boolean poseSequencesAreEqual(PosePlaybackRobotPoseSequence expected, PosePlaybackRobotPoseSequence actual)
    {
       ArrayList<PosePlaybackRobotPose> expectedPose = expected.getPoseSequence();
