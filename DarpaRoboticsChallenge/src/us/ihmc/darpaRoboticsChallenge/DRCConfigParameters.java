@@ -7,10 +7,10 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 public class DRCConfigParameters
 {
    public static final boolean USE_DUMMY_DRIVNG = false;
-   public static final boolean RESTART_FOR_FANCY_CONTROL = true;     // Enable for testing standup
-   
+   public static final boolean RESTART_FOR_FANCY_CONTROL = true; // Enable for testing standup
+
    public static final boolean ALLOW_LAG_SIMULATION = true;
-   public static final boolean ENABLE_LAG_SIMULATION_ON_START =  false;
+   public static final boolean ENABLE_LAG_SIMULATION_ON_START = false;
 
    static
    {
@@ -24,16 +24,15 @@ public class DRCConfigParameters
    public static final boolean SEND_HIGH_SPEED_CONFIGURATION_DATA = false;
 
    // TODO: Temporary static variable for testing getting into the car
-   public static final boolean TEST_GETTING_INTO_CAR = false;    // true;
+   public static final boolean TEST_GETTING_INTO_CAR = false; // true;
 
-   public static final boolean USE_SLIDER_FOR_POSE_PLAYBACK = false;    // true;
+   public static final boolean USE_SLIDER_FOR_POSE_PLAYBACK = false; // true;
 
    public static final boolean USE_SUPER_DUPER_HIGH_RESOLUTION_FOR_COMMS = false;
 
-   public static final boolean USE_GAZEBO_PHYSICS = false;    // TODO: This one is
+   public static final boolean USE_GAZEBO_PHYSICS = false; // TODO: This one is
 
-   
-   public static final boolean USE_HYDRA = false;    // TODO: This one is
+   public static final boolean USE_HYDRA = false; // TODO: This one is
 
    // needed just for
    // FlatGroundWalkingTrack
@@ -47,7 +46,7 @@ public class DRCConfigParameters
          System.err.println("Warning! Using Perfect Sensors!");
    }
 
-   public static final String[] JOINTS_TO_IGNORE_FOR_GAZEBO = {"hokuyo_joint"};
+   public static final String[] JOINTS_TO_IGNORE_FOR_GAZEBO = { "hokuyo_joint" };
    public static final boolean SHOW_SCS_GUI_FOR_GAZEBO = true;
 
    public static final boolean SHOW_BANDWIDTH_DIALOG = false;
@@ -74,6 +73,9 @@ public class DRCConfigParameters
    public static final String CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP = "10.0.0.51";
    public static final String CONSTELLATION_FIELD_COMPUTER_1_VPN_IP = "10.0.0.52";
    public static final String CONSTELLATION_FIELD_COMPUTER_2_VPN_IP = "10.0.0.53";
+
+   public static final String LEFT_IROBOT_HAND_IP = "192.168.40.38";
+   public static final String RIGHT_IROBOT_HAND_IP = "192.168.40.32";
 
    public static final String GAZEBO_HOST = LOCALHOST; //CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP; //CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP;
    public static final String SCS_MACHINE_IP_ADDRESS = LOCALHOST; //CONSTELLATION_FIELD_COMPUTER_2_VPN_IP; //CONSTELLATION_FIELD_COMPUTER_2_VPN_IP;    // CLOUD_MONSTER_IP;
@@ -120,7 +122,7 @@ public class DRCConfigParameters
 
    public static final float LIDAR_SWEEP_MAX_YAW = 0.8f;
    public static final float LIDAR_SWEEP_MIN_YAW = -0.8f;
-   public static final float LIDAR_SCAN_MAX_ROLL = 0.0f;    // rolls the LIDAR to
+   public static final float LIDAR_SCAN_MAX_ROLL = 0.0f; // rolls the LIDAR to
 
    // simulate a faster
    // update rate.
@@ -128,7 +130,7 @@ public class DRCConfigParameters
    public static final float LIDAR_ANGLE_INCREMENT = (float) Math.toRadians(0.25);
    public static final float LIDAR_TIME_INCREMENT = 0.0f;
    public static final float LIDAR_SCAN_TIME = 0.0f;
-   public static final double LIDAR_NOISE_LEVEL_OVERRIDE = 0.005;    // DRCGazebo
+   public static final double LIDAR_NOISE_LEVEL_OVERRIDE = 0.005; // DRCGazebo
 
    // will
    // simulate
@@ -138,17 +140,17 @@ public class DRCConfigParameters
 
    // LIDAR Processor
    public static final boolean LIDAR_PROCESSOR_TIMING_REPORTING_ON = false;
-   public static final double GRID_RESOLUTION = 0.025;    // in meters
+   public static final double GRID_RESOLUTION = 0.025; // in meters
    public static final double OCTREE_RESOLUTION_WHEN_NOT_USING_RESOLUTION_SPHERE = 0.05;
    public static final float QUADTREE_HEIGHT_THRESHOLD = 0.05f;
    public static final double LIDAR_BLINDNESS_CYLINDAR_SQUARED_RADIUS = 0.1;
    public static final boolean HIDE_THINGS_ABOVE_HEAD_FROM_LIDAR = true;
 
    // Footstep Generator
-   public static final double BOUNDING_BOX_FOR_FOOTSTEP_HEIGHT_FINDING_SIDE_LENGTH =
-      (1 + 0.3) * 2
-      * Math.sqrt(DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD * DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD
-                  + 0.25 * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH);
+   public static final double BOUNDING_BOX_FOR_FOOTSTEP_HEIGHT_FINDING_SIDE_LENGTH = (1 + 0.3)
+         * 2
+         * Math.sqrt(DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD * DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD + 0.25 * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH
+               * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH);
 
    public static final int JOINT_CONFIGURATION_RATE_IN_MS = 10;
 
@@ -157,7 +159,7 @@ public class DRCConfigParameters
    public static final double LIDAR_RESOLUTION_SPHERE_OUTER_RESOLUTION = 0.5;
    public static final double LIDAR_RESOLUTION_SPHERE_OUTER_RADIUS = 6.0;
    public static final double LIDAR_RESOLUTION_SPHERE_INNER_RESOLUTION = 0.02;
-   public static final double LIDAR_RESOLUTION_SPHERE_INNER_RADIUS = 1.0;   
+   public static final double LIDAR_RESOLUTION_SPHERE_INNER_RADIUS = 1.0;
    public static final double LIDAR_RESOLUTION_SPHERE_DISTANCE_FROM_HEAD = 1.0;
 
    public static final boolean USE_TABS_IN_UI = true;
@@ -168,5 +170,4 @@ public class DRCConfigParameters
    public static final int CHEATING_POLARIS_PORT = 1543;
    public static final String CHEATING_POLARIS_HOST = LOCALHOST;
 
-   
 }
