@@ -522,7 +522,10 @@ public class PosePlaybackSCSBridge
          {
             System.out.println("pose #: " + frameByframePoseNumber++ + " \t pausing for " + interpolator.getNextTransitionTimeDelay());
             if (playOnlyOnePose)
+            {
+               morphedPose.setRobotAtPose(sdfRobot);// make sure scs ends in last pose
                return;
+            }
          }
          ThreadTools.sleep((long) (controlDT * 1000));
       }
