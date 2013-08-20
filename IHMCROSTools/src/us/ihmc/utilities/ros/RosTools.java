@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.networkProcessor.ros;
+package us.ihmc.utilities.ros;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;

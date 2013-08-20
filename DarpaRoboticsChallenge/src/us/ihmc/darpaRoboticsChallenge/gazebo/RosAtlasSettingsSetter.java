@@ -8,9 +8,9 @@ import org.ros.node.service.ServiceResponseListener;
 
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotDampingParameters;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosMainNode;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosServiceClient;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosStringPublisher;
+import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.RosServiceClient;
+import us.ihmc.utilities.ros.RosStringPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSSandiaJointMap;
 import us.ihmc.robotSide.RobotSide;

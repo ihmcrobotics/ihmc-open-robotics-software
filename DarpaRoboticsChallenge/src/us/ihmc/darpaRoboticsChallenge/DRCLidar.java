@@ -6,7 +6,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.TimestampProvider;
-import us.ihmc.utilities.polarLidarGeometry.PolarLidarScanParameters;
+import us.ihmc.utilities.lidar.polarLidar.geometry.PolarLidarScanParameters;
 
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.simulatedSensors.FastPolarRayCastLIDAR;

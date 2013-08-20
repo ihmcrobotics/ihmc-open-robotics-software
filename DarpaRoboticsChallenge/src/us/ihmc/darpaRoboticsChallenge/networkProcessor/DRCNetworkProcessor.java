@@ -23,7 +23,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.GeoregressionTransf
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.LidarDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.RobotBoundingBoxes;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.SCSLidarDataReceiver;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosMainNode;
+import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosNativeNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.vrc.VRCScoreDataReceiver;

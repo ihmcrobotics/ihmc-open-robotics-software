@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.networkProcessor.ros;
+package us.ihmc.utilities.ros;
 
 
 public class RosStringPublisher extends RosTopicPublisher<std_msgs.String>

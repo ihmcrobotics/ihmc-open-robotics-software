@@ -21,8 +21,8 @@ import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.polarLidarGeometry.LIDARScanDefinition;
-import us.ihmc.utilities.polarLidarGeometry.PolarLidarScanParameters;
+import us.ihmc.utilities.lidar.polarLidar.geometry.LIDARScanDefinition;
+import us.ihmc.utilities.lidar.polarLidar.geometry.PolarLidarScanParameters;
 import us.ihmc.utilities.screwTheory.RigidBodyInertia;
 
 import javax.media.j3d.Transform3D;

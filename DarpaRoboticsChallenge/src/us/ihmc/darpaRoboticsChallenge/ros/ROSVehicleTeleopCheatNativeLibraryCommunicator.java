@@ -7,7 +7,7 @@ import java.nio.DoubleBuffer;
 import java.nio.LongBuffer;
 import java.util.ArrayList;
 
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosTools;
+import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.darpaRoboticsChallenge.ros.messages.ClockMessage;
 import us.ihmc.darpaRoboticsChallenge.ros.messages.Float64Message;
 import us.ihmc.darpaRoboticsChallenge.ros.messages.Int8Message;

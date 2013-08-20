@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.networkProcessor.ros;
+package us.ihmc.utilities.ros;
 
 
 public abstract class AbstractRosTopicSubscriber<T> implements RosTopicSubscriberInterface<T>

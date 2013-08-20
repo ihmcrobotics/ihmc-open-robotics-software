@@ -12,7 +12,7 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 import org.ros.node.topic.Subscriber;
 
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosTools;
+import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.keyboardAndMouse.RepeatingReleasedEventsFixer;
 
 public class GazeboCameraBenchmarker extends AbstractNodeMain

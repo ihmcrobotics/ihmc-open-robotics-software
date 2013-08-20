@@ -6,7 +6,7 @@ import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Subscriber;
 import sensor_msgs.CompressedImage;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosTools;
+import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.keyboardAndMouse.RepeatingReleasedEventsFixer;
 
 import java.awt.*;
