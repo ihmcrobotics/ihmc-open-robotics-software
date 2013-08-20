@@ -1,8 +1,8 @@
-package us.ihmc.darpaRoboticsChallenge.networkProcessor.ros;
+package us.ihmc.utilities.ros;
 
-import com.yobotics.simulationconstructionset.simulatedSensors.PolarLidarScan;
+import us.ihmc.utilities.lidar.polarLidar.PolarLidarScan;
 import sensor_msgs.LaserScan;
-import us.ihmc.utilities.polarLidarGeometry.PolarLidarScanParameters;
+import us.ihmc.utilities.lidar.polarLidar.geometry.PolarLidarScanParameters;
 
 public abstract class RosLidarSubscriber extends AbstractRosTopicSubscriber<sensor_msgs.LaserScan>
 {

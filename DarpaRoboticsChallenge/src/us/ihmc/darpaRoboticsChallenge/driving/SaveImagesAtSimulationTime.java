@@ -5,7 +5,7 @@ import org.ros.message.MessageListener;
 import org.ros.node.topic.Subscriber;
 import rosgraph_msgs.Clock;
 import sensor_msgs.CompressedImage;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosTools;
+import us.ihmc.utilities.ros.RosTools;
 
 import java.awt.*;
 import java.awt.color.ColorSpace;

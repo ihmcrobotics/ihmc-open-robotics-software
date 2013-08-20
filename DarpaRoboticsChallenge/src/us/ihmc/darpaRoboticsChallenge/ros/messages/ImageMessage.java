@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.ros.messages;
 
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosTools;
+import us.ihmc.utilities.ros.RosTools;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;

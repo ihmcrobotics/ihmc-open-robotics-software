@@ -28,7 +28,7 @@ import org.ros.node.topic.Publisher;
 
 import osrf_msgs.JointCommands;
 import us.ihmc.darpaRoboticsChallenge.handControl.SandiaHandModel.SandiaFingerName;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosTools;
+import us.ihmc.utilities.ros.RosTools;
 
 public class SandiaHandManualControlUI extends AbstractNodeMain implements ActionListener
 {

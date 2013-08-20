@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.networkProcessor.ros;
+package us.ihmc.utilities.ros;
 
 import java.net.URI;
 import java.util.LinkedHashMap;

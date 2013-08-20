@@ -9,7 +9,7 @@ import org.ros.node.topic.Subscriber;
 import rosgraph_msgs.Clock;
 import sensor_msgs.CompressedImage;
 import std_msgs.Int8;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosTools;
+import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.keyboardAndMouse.RepeatingReleasedEventsFixer;
 
