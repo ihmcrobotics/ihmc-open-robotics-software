@@ -56,7 +56,7 @@ public class SwitchableMasterUriProvider implements MasterUriProvider {
     mutex = new Object();
   }
 
-  @Override
+  
   public URI getMasterUri() throws RosRuntimeException {
     MasterUriProvider providerToUse = null;
     ProviderRequest requestToUse = null;
@@ -77,7 +77,7 @@ public class SwitchableMasterUriProvider implements MasterUriProvider {
     }
   }
 
-  @Override
+  
   public URI getMasterUri(long timeout, TimeUnit unit) {
     // We can't really switch providers, but people are willing to wait. It
     // seems appropriate to wait rather than to return immediately.

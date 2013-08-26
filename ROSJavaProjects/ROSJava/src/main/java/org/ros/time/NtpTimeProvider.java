@@ -114,7 +114,7 @@ public class NtpTimeProvider implements TimeProvider {
   public void startPeriodicUpdates(long period, TimeUnit unit) {
     scheduledFuture =
         scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
-          @Override
+          
           public void run() {
             try {
               updateTime();
@@ -134,7 +134,7 @@ public class NtpTimeProvider implements TimeProvider {
     scheduledFuture = null;
   }
 
-  @Override
+  
   public Time getCurrentTime() {
     Time currentTime = wallTimeProvider.getCurrentTime();
     return currentTime.add(Duration.fromMillis(offset));

@@ -41,7 +41,7 @@ public class MessageDefinitionProviderChain implements MessageDefinitionProvider
     messageDefinitionProviders.add(messageDefinitionProvider);
   }
 
-  @Override
+  
   public String get(String messageType) {
     for (MessageDefinitionProvider messageDefinitionProvider : messageDefinitionProviders) {
       if (messageDefinitionProvider.has(messageType)) {
@@ -51,7 +51,7 @@ public class MessageDefinitionProviderChain implements MessageDefinitionProvider
     throw new NoSuchElementException("No message definition available for: " + messageType);
   }
 
-  @Override
+  
   public boolean has(String messageType) {
     for (MessageDefinitionProvider messageDefinitionProvider : messageDefinitionProviders) {
       if (messageDefinitionProvider.has(messageType)) {
@@ -61,7 +61,7 @@ public class MessageDefinitionProviderChain implements MessageDefinitionProvider
     return false;
   }
 
-  @Override
+  
   public Collection<String> getPackages() {
     Set<String> result = Sets.newHashSet();
     for (MessageDefinitionProvider messageDefinitionProvider : messageDefinitionProviders) {
@@ -71,7 +71,7 @@ public class MessageDefinitionProviderChain implements MessageDefinitionProvider
     return result;
   }
 
-  @Override
+  
   public Collection<MessageIdentifier> getMessageIdentifiersByPackage(String pkg) {
     Set<MessageIdentifier> result = Sets.newHashSet();
     for (MessageDefinitionProvider messageDefinitionProvider : messageDefinitionProviders) {

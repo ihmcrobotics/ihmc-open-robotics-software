@@ -59,7 +59,7 @@ class UpdatePublisherRunnable<MessageType> implements Runnable {
     this.publisherIdentifier = publisherIdentifier;
   }
 
-  @Override
+  
   public void run() {
     SlaveClient slaveClient;
     try {

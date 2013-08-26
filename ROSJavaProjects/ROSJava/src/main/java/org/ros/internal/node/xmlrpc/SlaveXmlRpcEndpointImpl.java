@@ -53,31 +53,31 @@ public class SlaveXmlRpcEndpointImpl implements SlaveXmlRpcEndpoint {
     this.slave = slave;
   }
 
-  @Override
+  
   public List<Object> getBusStats(String callerId) {
     return slave.getBusStats(callerId);
   }
 
-  @Override
+  
   public List<Object> getBusInfo(String callerId) {
     List<Object> busInfo = slave.getBusInfo(callerId);
     return Response.newSuccess("bus info", busInfo).toList();
   }
 
-  @Override
+  
   public List<Object> getMasterUri(String callerId) {
     URI uri = slave.getMasterUri();
     return new Response<String>(StatusCode.SUCCESS, "", uri.toString()).toList();
   }
 
-  @Override
+  
   public List<Object> shutdown(String callerId, String message) {
     log.info("Shutdown requested by " + callerId + " with message \"" + message + "\"");
     slave.shutdown();
     return Response.newSuccess("Shutdown successful.", null).toList();
   }
 
-  @Override
+  
   public List<Object> getPid(String callerId) {
     try {
       int pid = slave.getPid();
@@ -87,7 +87,7 @@ public class SlaveXmlRpcEndpointImpl implements SlaveXmlRpcEndpoint {
     }
   }
 
-  @Override
+  
   public List<Object> getSubscriptions(String callerId) {
     Collection<DefaultSubscriber<?>> subscribers = slave.getSubscriptions();
     List<List<String>> subscriptions = Lists.newArrayList();
@@ -97,7 +97,7 @@ public class SlaveXmlRpcEndpointImpl implements SlaveXmlRpcEndpoint {
     return Response.newSuccess("Success", subscriptions).toList();
   }
 
-  @Override
+  
   public List<Object> getPublications(String callerId) {
     Collection<DefaultPublisher<?>> publishers = slave.getPublications();
     List<List<String>> publications = Lists.newArrayList();
@@ -115,57 +115,57 @@ public class SlaveXmlRpcEndpointImpl implements SlaveXmlRpcEndpoint {
         .newError("No subscribers for parameter key \"" + parameterName + "\".", null).toList();
   }
 
-  @Override
+  
   public List<Object> paramUpdate(String callerId, String key, boolean value) {
     return parameterUpdate(key, value);
   }
 
-  @Override
+  
   public List<Object> paramUpdate(String callerId, String key, char value) {
     return parameterUpdate(key, value);
   }
 
-  @Override
+  
   public List<Object> paramUpdate(String callerId, String key, byte value) {
     return parameterUpdate(key, value);
   }
 
-  @Override
+  
   public List<Object> paramUpdate(String callerId, String key, short value) {
     return parameterUpdate(key, value);
   }
 
-  @Override
+  
   public List<Object> paramUpdate(String callerId, String key, int value) {
     return parameterUpdate(key, value);
   }
 
-  @Override
+  
   public List<Object> paramUpdate(String callerId, String key, double value) {
     return parameterUpdate(key, value);
   }
 
-  @Override
+  
   public List<Object> paramUpdate(String callerId, String key, String value) {
     return parameterUpdate(key, value);
   }
 
-  @Override
+  
   public List<Object> paramUpdate(String callerId, String key, List<?> value) {
     return parameterUpdate(key, value);
   }
 
-  @Override
+  
   public List<Object> paramUpdate(String callerId, String key, Vector<?> value) {
     return parameterUpdate(key, value);
   }
 
-  @Override
+  
   public List<Object> paramUpdate(String callerId, String key, Map<?, ?> value) {
     return parameterUpdate(key, value);
   }
 
-  @Override
+  
   public List<Object> publisherUpdate(String callerId, String topicName, Object[] publishers) {
     try {
       ArrayList<URI> publisherUris = new ArrayList<URI>(publishers.length);
@@ -183,7 +183,7 @@ public class SlaveXmlRpcEndpointImpl implements SlaveXmlRpcEndpoint {
     }
   }
 
-  @Override
+  
   public List<Object> requestTopic(String callerId, String topic, Object[] protocols) {
     Set<String> requestedProtocols = Sets.newHashSet();
     for (int i = 0; i < protocols.length; i++) {

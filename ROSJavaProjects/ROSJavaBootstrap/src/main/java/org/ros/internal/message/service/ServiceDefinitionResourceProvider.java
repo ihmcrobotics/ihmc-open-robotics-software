@@ -42,12 +42,12 @@ public class ServiceDefinitionResourceProvider implements MessageDefinitionProvi
     return String.format("/%s/srv/%s.srv", packageAndType[0], packageAndType[1]);
   }
 
-  @Override
+  
   public String get(String serviceType) {
     return stringResourceProvider.get(serviceTypeToResourceName(serviceType));
   }
 
-  @Override
+  
   public boolean has(String serviceType) {
     return stringResourceProvider.has(serviceTypeToResourceName(serviceType));
   }
@@ -57,12 +57,12 @@ public class ServiceDefinitionResourceProvider implements MessageDefinitionProvi
         serviceDefinition);
   }
 
-  @Override
+  
   public Collection<String> getPackages() {
     throw new UnsupportedOperationException();
   }
 
-  @Override
+  
   public Collection<MessageIdentifier> getMessageIdentifiersByPackage(String pkg) {
     throw new UnsupportedOperationException();
   }

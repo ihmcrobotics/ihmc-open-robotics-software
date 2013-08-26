@@ -65,37 +65,37 @@ class RosoutLogger implements Log {
     publisher.publish(logMessage);
   }
 
-  @Override
+  
   public boolean isDebugEnabled() {
     return log.isDebugEnabled();
   }
 
-  @Override
+  
   public boolean isErrorEnabled() {
     return log.isErrorEnabled();
   }
 
-  @Override
+  
   public boolean isFatalEnabled() {
     return log.isFatalEnabled();
   }
 
-  @Override
+  
   public boolean isInfoEnabled() {
     return log.isInfoEnabled();
   }
 
-  @Override
+  
   public boolean isTraceEnabled() {
     return log.isTraceEnabled();
   }
 
-  @Override
+  
   public boolean isWarnEnabled() {
     return log.isWarnEnabled();
   }
 
-  @Override
+  
   public void trace(Object message) {
     log.trace(message);
     if (log.isTraceEnabled() && publisher != null) {
@@ -103,7 +103,7 @@ class RosoutLogger implements Log {
     }
   }
 
-  @Override
+  
   public void trace(Object message, Throwable t) {
     log.trace(message, t);
     if (log.isTraceEnabled() && publisher != null) {
@@ -111,7 +111,7 @@ class RosoutLogger implements Log {
     }
   }
 
-  @Override
+  
   public void debug(Object message) {
     log.debug(message);
     if (log.isDebugEnabled() && publisher != null) {
@@ -119,7 +119,7 @@ class RosoutLogger implements Log {
     }
   }
 
-  @Override
+  
   public void debug(Object message, Throwable t) {
     log.debug(message, t);
     if (log.isDebugEnabled() && publisher != null) {
@@ -127,7 +127,7 @@ class RosoutLogger implements Log {
     }
   }
 
-  @Override
+  
   public void info(Object message) {
     log.info(message);
     if (log.isInfoEnabled() && publisher != null) {
@@ -135,7 +135,7 @@ class RosoutLogger implements Log {
     }
   }
 
-  @Override
+  
   public void info(Object message, Throwable t) {
     log.info(message, t);
     if (log.isInfoEnabled() && publisher != null) {
@@ -143,7 +143,7 @@ class RosoutLogger implements Log {
     }
   }
 
-  @Override
+  
   public void warn(Object message) {
     log.warn(message);
     if (log.isWarnEnabled() && publisher != null) {
@@ -151,7 +151,7 @@ class RosoutLogger implements Log {
     }
   }
 
-  @Override
+  
   public void warn(Object message, Throwable t) {
     log.warn(message, t);
     if (log.isWarnEnabled() && publisher != null) {
@@ -159,7 +159,7 @@ class RosoutLogger implements Log {
     }
   }
 
-  @Override
+  
   public void error(Object message) {
     log.error(message);
     if (log.isErrorEnabled() && publisher != null) {
@@ -167,7 +167,7 @@ class RosoutLogger implements Log {
     }
   }
 
-  @Override
+  
   public void error(Object message, Throwable t) {
     log.error(message, t);
     if (log.isErrorEnabled() && publisher != null) {
@@ -175,7 +175,7 @@ class RosoutLogger implements Log {
     }
   }
 
-  @Override
+  
   public void fatal(Object message) {
     log.fatal(message);
     if (log.isFatalEnabled() && publisher != null) {
@@ -183,7 +183,7 @@ class RosoutLogger implements Log {
     }
   }
 
-  @Override
+  
   public void fatal(Object message, Throwable t) {
     log.fatal(message, t);
     if (log.isFatalEnabled() && publisher != null) {

@@ -50,12 +50,12 @@ public class ParameterTreeIntegrationTest extends RosTest {
   public void setup() throws InterruptedException {
     final CountDownLatch latch = new CountDownLatch(1);
     nodeMainExecutor.execute(new AbstractNodeMain() {
-      @Override
+      
       public GraphName getDefaultNodeName() {
         return GraphName.of("node_name");
       }
 
-      @Override
+      
       public void onStart(ConnectedNode connectedNode) {
         parameters = connectedNode.getParameterTree();
         latch.countDown();
@@ -160,16 +160,16 @@ public class ParameterTreeIntegrationTest extends RosTest {
     final CountDownLatch nodeLatch = new CountDownLatch(1);
     final CountDownLatch parameterLatch = new CountDownLatch(1);
     nodeMainExecutor.execute(new AbstractNodeMain() {
-      @Override
+      
       public GraphName getDefaultNodeName() {
         return GraphName.of("subscriber");
       }
 
-      @Override
+      
       public void onStart(ConnectedNode connectedNode) {
         ParameterTree subscriberParameters = connectedNode.getParameterTree();
         subscriberParameters.addParameterListener("/foo/bar", new ParameterListener() {
-          @Override
+          
           public void onNewValue(Object value) {
             assertEquals(42, value);
             parameterLatch.countDown();

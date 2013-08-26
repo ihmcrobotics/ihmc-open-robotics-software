@@ -73,22 +73,22 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
     this.scheduledExecutorService = scheduledExecutorService;
     listenerGroup = new ListenerGroup<ServiceServerListener<T, S>>(scheduledExecutorService);
     listenerGroup.add(new DefaultServiceServerListener<T, S>() {
-      @Override
+      
       public void onMasterRegistrationSuccess(ServiceServer<T, S> registrant) {
         log.info("Service registered: " + DefaultServiceServer.this);
       }
 
-      @Override
+      
       public void onMasterRegistrationFailure(ServiceServer<T, S> registrant) {
         log.info("Service registration failed: " + DefaultServiceServer.this);
       }
 
-      @Override
+      
       public void onMasterUnregistrationSuccess(ServiceServer<T, S> registrant) {
         log.info("Service unregistered: " + DefaultServiceServer.this);
       }
 
-      @Override
+      
       public void onMasterUnregistrationFailure(ServiceServer<T, S> registrant) {
         log.info("Service unregistration failed: " + DefaultServiceServer.this);
       }
@@ -112,12 +112,12 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
     return connectionHeader.encode();
   }
 
-  @Override
+  
   public URI getUri() {
     return advertiseAddress.toUri("rosrpc");
   }
 
-  @Override
+  
   public GraphName getName() {
     return serviceDeclaration.getName();
   }
@@ -147,7 +147,7 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
   public void signalOnMasterRegistrationSuccess() {
     final ServiceServer<T, S> serviceServer = this;
     listenerGroup.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
-      @Override
+      
       public void run(ServiceServerListener<T, S> listener) {
         listener.onMasterRegistrationSuccess(serviceServer);
       }
@@ -164,7 +164,7 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
   public void signalOnMasterRegistrationFailure() {
     final ServiceServer<T, S> serviceServer = this;
     listenerGroup.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
-      @Override
+      
       public void run(ServiceServerListener<T, S> listener) {
         listener.onMasterRegistrationFailure(serviceServer);
       }
@@ -181,7 +181,7 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
   public void signalOnMasterUnregistrationSuccess() {
     final ServiceServer<T, S> serviceServer = this;
     listenerGroup.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
-      @Override
+      
       public void run(ServiceServerListener<T, S> listener) {
         listener.onMasterUnregistrationSuccess(serviceServer);
       }
@@ -198,24 +198,24 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
   public void signalOnMasterUnregistrationFailure() {
     final ServiceServer<T, S> serviceServer = this;
     listenerGroup.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
-      @Override
+      
       public void run(ServiceServerListener<T, S> listener) {
         listener.onMasterUnregistrationFailure(serviceServer);
       }
     });
   }
 
-  @Override
+  
   public void shutdown() {
     throw new UnsupportedOperationException();
   }
 
-  @Override
+  
   public void addListener(ServiceServerListener<T, S> listener) {
     listenerGroup.add(listener);
   }
 
-  @Override
+  
   public String toString() {
     return "ServiceServer<" + toDeclaration() + ">";
   }

@@ -46,7 +46,7 @@ public class NodeNameResolver extends NameResolver {
    *          name to resolve
    * @return the name resolved relative to the default or private namespace
    */
-  @Override
+  
   public GraphName resolve(GraphName name) {
     GraphName graphName = lookUpRemapping(name);
     if (graphName.isPrivate()) {
@@ -58,7 +58,7 @@ public class NodeNameResolver extends NameResolver {
   /**
    * @see #resolve(GraphName)
    */
-  @Override
+  
   public GraphName resolve(String name) {
     return resolve(GraphName.of(name));
   }

@@ -17,7 +17,6 @@ import java.net.UnknownHostException;
 
 import javax.imageio.ImageIO;
 
-import org.ros.address.InetAddressFactory;
 import org.ros.node.NodeConfiguration;
 
 public class RosTools
@@ -77,7 +76,7 @@ public class RosTools
          InetAddress listenAddress;
          if (inetAddress.isLoopbackAddress())
          {
-            listenAddress = InetAddressFactory.newLoopback();
+            listenAddress = inetAddress;
          }
          else
          {

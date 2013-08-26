@@ -29,12 +29,12 @@ public class MasterRegistrationTest extends RosTest {
   public void testRegisterPublisher() throws InterruptedException {
     publisherListener = CountDownPublisherListener.newDefault();
     nodeMainExecutor.execute(new AbstractNodeMain() {
-      @Override
+      
       public GraphName getDefaultNodeName() {
         return GraphName.of("node");
       }
 
-      @Override
+      
       public void onStart(ConnectedNode connectedNode) {
         publisher = connectedNode.newPublisher("topic", std_msgs.String._TYPE);
         publisher.addListener(publisherListener);
@@ -51,12 +51,12 @@ public class MasterRegistrationTest extends RosTest {
     int port = rosCore.getUri().getPort();
     publisherListener = CountDownPublisherListener.newDefault();
     nodeMainExecutor.execute(new AbstractNodeMain() {
-      @Override
+      
       public GraphName getDefaultNodeName() {
         return GraphName.of("node");
       }
 
-      @Override
+      
       public void onStart(ConnectedNode connectedNode) {
         rosCore.shutdown();
         ((DefaultNode) connectedNode).getRegistrar().setRetryDelay(1, TimeUnit.MILLISECONDS);

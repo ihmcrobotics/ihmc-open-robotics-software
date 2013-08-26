@@ -36,7 +36,7 @@ public class ServiceDefinitionFileProvider extends MessageDefinitionFileProvider
   private static StringFileProvider newStringFileProvider() {
     IOFileFilter extensionFilter = FileFilterUtils.suffixFileFilter(SUFFIX);
     IOFileFilter parentBaseNameFilter = FileFilterUtils.asFileFilter(new FileFilter() {
-      @Override
+      
       public boolean accept(File file) {
         return getParentBaseName(file.getAbsolutePath()).equals(PARENT);
       }

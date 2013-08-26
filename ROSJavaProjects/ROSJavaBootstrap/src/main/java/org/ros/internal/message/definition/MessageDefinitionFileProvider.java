@@ -92,22 +92,22 @@ public class MessageDefinitionFileProvider implements MessageDefinitionProvider 
     stringFileProvider.addDirectory(directory);
   }
 
-  @Override
+  
   public Collection<String> getPackages() {
     return messageIdentifiers.keySet();
   }
 
-  @Override
+  
   public Collection<MessageIdentifier> getMessageIdentifiersByPackage(String pkg) {
     return messageIdentifiers.get(pkg);
   }
 
-  @Override
+  
   public String get(String type) {
     return definitions.get(type);
   }
 
-  @Override
+  
   public boolean has(String type) {
     return definitions.containsKey(type);
   }

@@ -25,7 +25,7 @@ import org.ros.message.MessageSerializer;
  */
 public class DefaultMessageSerializer implements MessageSerializer<Message> {
 
-  @Override
+  
   public void serialize(Message message, ChannelBuffer buffer) {
     for (Field field : message.toRawMessage().getFields()) {
       if (!field.isConstant()) {

@@ -90,22 +90,22 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
     tcpClientManager.addNamedChannelHandler(subscriberHandshakeHandler);
     subscriberListeners = new ListenerGroup<SubscriberListener<T>>(executorService);
     subscriberListeners.add(new DefaultSubscriberListener<T>() {
-      @Override
+      
       public void onMasterRegistrationSuccess(Subscriber<T> registrant) {
         log.info("Subscriber registered: " + DefaultSubscriber.this);
       }
 
-      @Override
+      
       public void onMasterRegistrationFailure(Subscriber<T> registrant) {
         log.info("Subscriber registration failed: " + DefaultSubscriber.this);
       }
 
-      @Override
+      
       public void onMasterUnregistrationSuccess(Subscriber<T> registrant) {
         log.info("Subscriber unregistered: " + DefaultSubscriber.this);
       }
 
-      @Override
+      
       public void onMasterUnregistrationFailure(Subscriber<T> registrant) {
         log.info("Subscriber unregistration failed: " + DefaultSubscriber.this);
       }
@@ -124,17 +124,17 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
     return ProtocolNames.SUPPORTED;
   }
 
-  @Override
+  
   public boolean getLatchMode() {
     return incomingMessageQueue.getLatchMode();
   }
 
-  @Override
+  
   public void addMessageListener(MessageListener<T> messageListener, int limit) {
     incomingMessageQueue.addListener(messageListener, limit);
   }
 
-  @Override
+  
   public void addMessageListener(MessageListener<T> messageListener) {
     addMessageListener(messageListener, 1);
   }
@@ -170,7 +170,7 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
     }
   }
 
-  @Override
+  
   public void shutdown(long timeout, TimeUnit unit) {
     signalOnShutdown(timeout, unit);
     incomingMessageQueue.shutdown();
@@ -178,12 +178,12 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
     subscriberListeners.shutdown();
   }
 
-  @Override
+  
   public void shutdown() {
     shutdown(DEFAULT_SHUTDOWN_TIMEOUT, DEFAULT_SHUTDOWN_TIMEOUT_UNITS);
   }
 
-  @Override
+  
   public void addSubscriberListener(SubscriberListener<T> listener) {
     subscriberListeners.add(listener);
   }
@@ -194,11 +194,11 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
    * <p>
    * Each listener is called in a separate thread.
    */
-  @Override
+  
   public void signalOnMasterRegistrationSuccess() {
     final Subscriber<T> subscriber = this;
     subscriberListeners.signal(new SignalRunnable<SubscriberListener<T>>() {
-      @Override
+      
       public void run(SubscriberListener<T> listener) {
         listener.onMasterRegistrationSuccess(subscriber);
       }
@@ -212,11 +212,11 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
    * <p>
    * Each listener is called in a separate thread.
    */
-  @Override
+  
   public void signalOnMasterRegistrationFailure() {
     final Subscriber<T> subscriber = this;
     subscriberListeners.signal(new SignalRunnable<SubscriberListener<T>>() {
-      @Override
+      
       public void run(SubscriberListener<T> listener) {
         listener.onMasterRegistrationFailure(subscriber);
       }
@@ -229,11 +229,11 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
    * <p>
    * Each listener is called in a separate thread.
    */
-  @Override
+  
   public void signalOnMasterUnregistrationSuccess() {
     final Subscriber<T> subscriber = this;
     subscriberListeners.signal(new SignalRunnable<SubscriberListener<T>>() {
-      @Override
+      
       public void run(SubscriberListener<T> listener) {
         listener.onMasterUnregistrationSuccess(subscriber);
       }
@@ -246,11 +246,11 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
    * <p>
    * Each listener is called in a separate thread.
    */
-  @Override
+  
   public void signalOnMasterUnregistrationFailure() {
     final Subscriber<T> subscriber = this;
     subscriberListeners.signal(new SignalRunnable<SubscriberListener<T>>() {
-      @Override
+      
       public void run(SubscriberListener<T> listener) {
         listener.onMasterUnregistrationFailure(subscriber);
       }
@@ -266,7 +266,7 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
   public void signalOnNewPublisher(final PublisherIdentifier publisherIdentifier) {
     final Subscriber<T> subscriber = this;
     subscriberListeners.signal(new SignalRunnable<SubscriberListener<T>>() {
-      @Override
+      
       public void run(SubscriberListener<T> listener) {
         listener.onNewPublisher(subscriber, publisherIdentifier);
       }
@@ -283,7 +283,7 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
     final Subscriber<T> subscriber = this;
     try {
       subscriberListeners.signal(new SignalRunnable<SubscriberListener<T>>() {
-        @Override
+        
         public void run(SubscriberListener<T> listener) {
           listener.onShutdown(subscriber);
         }
@@ -294,7 +294,7 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
     }
   }
 
-  @Override
+  
   public String toString() {
     return "Subscriber<" + getTopicDeclaration() + ">";
   }

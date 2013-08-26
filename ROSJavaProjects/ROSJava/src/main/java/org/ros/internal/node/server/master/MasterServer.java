@@ -472,7 +472,7 @@ public class MasterServer extends XmlRpcServer implements MasterRegistrationList
     }
   }
 
-  @Override
+  
   public void onNodeReplacement(NodeRegistrationInfo nodeInfo) {
     // A node in the registration manager is being replaced. Contact the node
     // and tell it to shut down.

@@ -27,7 +27,7 @@ import org.ros.internal.message.MessageBuffers;
  */
 public final class ServiceResponseEncoder extends OneToOneEncoder {
 
-  @Override
+  
   protected Object encode(ChannelHandlerContext ctx, Channel channel, Object msg) throws Exception {
     if (msg instanceof ServiceServerResponse) {
       ServiceServerResponse response = (ServiceServerResponse) msg;

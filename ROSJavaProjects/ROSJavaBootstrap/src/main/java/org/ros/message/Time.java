@@ -89,7 +89,7 @@ public class Time implements Comparable<Time> {
     return new Time(secs, nsecs);
   }
 
-  @Override
+  
   public String toString() {
     return secs + ":" + nsecs;
   }
@@ -117,7 +117,7 @@ public class Time implements Comparable<Time> {
     }
   }
 
-  @Override
+  
   public int hashCode() {
     final int prime = 31;
     int result = 1;
@@ -132,7 +132,7 @@ public class Time implements Comparable<Time> {
    * This method does not normalize {@link Time} representations, so fields must match
    * exactly.
    */
-  @Override
+  
   public boolean equals(Object obj) {
     if (this == obj) return true;
     if (obj == null) return false;
@@ -143,7 +143,7 @@ public class Time implements Comparable<Time> {
     return true;
   }
 
-  @Override
+  
   public int compareTo(Time t) {
     if ((secs > t.secs) || ((secs == t.secs) && nsecs > t.nsecs)) {
       return 1;

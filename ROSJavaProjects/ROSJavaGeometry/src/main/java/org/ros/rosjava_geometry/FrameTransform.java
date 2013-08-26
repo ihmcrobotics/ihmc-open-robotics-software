@@ -101,13 +101,13 @@ public class FrameTransform {
     return result;
   }
 
-  @Override
+  
   public String toString() {
     return String.format("FrameTransform<Source: %s, Target: %s, %s, Time: %s>", source, target,
         transform, time);
   }
 
-  @Override
+  
   public int hashCode() {
     final int prime = 31;
     int result = 1;
@@ -118,7 +118,7 @@ public class FrameTransform {
     return result;
   }
 
-  @Override
+  
   public boolean equals(Object obj) {
     if (this == obj)
       return true;

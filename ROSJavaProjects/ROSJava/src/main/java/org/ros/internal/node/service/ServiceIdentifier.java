@@ -45,12 +45,12 @@ public class ServiceIdentifier {
     return uri;
   }
 
-  @Override
+  
   public String toString() {
     return "ServiceIdentifier<" + name + ", " + uri + ">";
   }
 
-  @Override
+  
   public int hashCode() {
     final int prime = 31;
     int result = 1;
@@ -59,7 +59,7 @@ public class ServiceIdentifier {
     return result;
   }
 
-  @Override
+  
   public boolean equals(Object obj) {
     if (this == obj)
       return true;

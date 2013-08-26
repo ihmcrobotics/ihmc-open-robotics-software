@@ -25,7 +25,7 @@ import org.ros.internal.message.RawMessage;
 public class ServiceRequestMessageInterfaceClassProvider implements MessageInterfaceClassProvider {
 
   @SuppressWarnings("unchecked")
-  @Override
+  
   public <T> Class<T> get(String messageType) {
     try {
       String className = messageType.replace("/", ".") + "$Request";

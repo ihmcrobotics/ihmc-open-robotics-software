@@ -66,12 +66,12 @@ public class ServiceDescription extends MessageDeclaration {
     return responseDefinition;
   }
 
-  @Override
+  
   public String toString() {
     return "ServiceDescription<" + getType() + ", " + md5Checksum + ">";
   }
 
-  @Override
+  
   public int hashCode() {
     final int prime = 31;
     int result = super.hashCode();
@@ -79,7 +79,7 @@ public class ServiceDescription extends MessageDeclaration {
     return result;
   }
 
-  @Override
+  
   public boolean equals(Object obj) {
     if (this == obj)
       return true;

@@ -192,17 +192,17 @@ public class CircularBlockingDeque<T> implements Iterable<T> {
    * 
    * @see java.lang.Iterable#iterator()
    */
-  @Override
+  
   public Iterator<T> iterator() {
     return new Iterator<T>() {
       int offset = 0;
 
-      @Override
+      
       public boolean hasNext() {
         return offset < length;
       }
 
-      @Override
+      
       public T next() {
         if (offset == length) {
           throw new NoSuchElementException();
@@ -212,7 +212,7 @@ public class CircularBlockingDeque<T> implements Iterable<T> {
         return entry;
       }
 
-      @Override
+      
       public void remove() {
         throw new UnsupportedOperationException();
       }

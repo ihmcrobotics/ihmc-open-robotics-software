@@ -67,12 +67,12 @@ public class DefaultNodeTest extends RosTest {
     final Holder<InetSocketAddress> holder = Holder.newEmpty();
     NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(host, rosCore.getUri());
     nodeMainExecutor.execute(new AbstractNodeMain() {
-      @Override
+      
       public GraphName getDefaultNodeName() {
         return GraphName.of("node");
       }
 
-      @Override
+      
       public void onStart(ConnectedNode connectedNode) {
         holder.set(((DefaultNode) connectedNode).getAddress());
       }
@@ -116,12 +116,12 @@ public class DefaultNodeTest extends RosTest {
         CountDownSubscriberListener.newDefault();
 
     NodeMain nodeMain = new AbstractNodeMain() {
-      @Override
+      
       public GraphName getDefaultNodeName() {
         return GraphName.of("node");
       }
 
-      @Override
+      
       public void onStart(ConnectedNode connectedNode) {
         Publisher<std_msgs.String> publisher =
             connectedNode.newPublisher("foo", std_msgs.String._TYPE);
@@ -157,12 +157,12 @@ public class DefaultNodeTest extends RosTest {
     final Holder<ConnectedNode> holder = Holder.newEmpty();
     nodeConfiguration.setParentResolver(NameResolver.newFromNamespace("/ns1"));
     nodeMainExecutor.execute(new AbstractNodeMain() {
-      @Override
+      
       public GraphName getDefaultNodeName() {
         return GraphName.of("test_resolver");
       }
 
-      @Override
+      
       public void onStart(ConnectedNode connectedNode) {
         holder.set(connectedNode);
       }
@@ -203,12 +203,12 @@ public class DefaultNodeTest extends RosTest {
     NodeConfiguration nodeConfiguration =
         NodeConfiguration.newPublic(masterUri.getHost(), masterUri);
     nodeMainExecutor.execute(new AbstractNodeMain() {
-      @Override
+      
       public GraphName getDefaultNodeName() {
         return GraphName.of("test_addresses");
       }
 
-      @Override
+      
       public void onStart(ConnectedNode connectedNode) {
         holder.set(connectedNode);
       };

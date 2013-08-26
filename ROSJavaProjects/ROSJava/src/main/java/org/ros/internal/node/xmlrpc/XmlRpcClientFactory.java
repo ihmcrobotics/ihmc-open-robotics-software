@@ -120,7 +120,7 @@ public class XmlRpcClientFactory<T extends org.ros.internal.node.xmlrpc.XmlRpcEn
   public Object newInstance(ClassLoader pClassLoader, final Class<T> pClass,
       final String pRemoteName, final int timeout) {
     return Proxy.newProxyInstance(pClassLoader, new Class[] { pClass }, new InvocationHandler() {
-      @Override
+      
       public Object invoke(Object pProxy, Method pMethod, Object[] pArgs) throws Throwable {
         if (isObjectMethodLocal() && pMethod.getDeclaringClass().equals(Object.class)) {
           return pMethod.invoke(pProxy, pArgs);

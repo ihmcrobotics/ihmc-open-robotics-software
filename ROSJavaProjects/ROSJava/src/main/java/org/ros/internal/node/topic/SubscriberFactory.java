@@ -69,14 +69,14 @@ public class SubscriberFactory {
             DefaultSubscriber.newDefault(nodeIdentifier, topicDeclaration, executorService,
                 messageDeserializer);
         subscriber.addSubscriberListener(new DefaultSubscriberListener<T>() {
-          @Override
+          
           public void onNewPublisher(Subscriber<T> subscriber,
               PublisherIdentifier publisherIdentifier) {
             topicParticipantManager.addSubscriberConnection((DefaultSubscriber<T>) subscriber,
                 publisherIdentifier);
           }
 
-          @Override
+          
           public void onShutdown(Subscriber<T> subscriber) {
             topicParticipantManager.removeSubscriber((DefaultSubscriber<T>) subscriber);
           }

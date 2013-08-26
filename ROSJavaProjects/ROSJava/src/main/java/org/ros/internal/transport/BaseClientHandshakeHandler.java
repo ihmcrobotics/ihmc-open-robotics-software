@@ -45,13 +45,13 @@ public abstract class BaseClientHandshakeHandler extends AbstractNamedChannelHan
     clientHandshakeListeners.add(clientHandshakeListener);
   }
 
-  @Override
+  
   public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
     super.channelConnected(ctx, e);
     e.getChannel().write(clientHandshake.getOutgoingConnectionHeader().encode());
   }
 
-  @Override
+  
   public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
     ChannelBuffer buffer = (ChannelBuffer) e.getMessage();
     ConnectionHeader connectionHeader = ConnectionHeader.decode(buffer);
@@ -80,7 +80,7 @@ public abstract class BaseClientHandshakeHandler extends AbstractNamedChannelHan
 
   private void signalOnSuccess(final ConnectionHeader incommingConnectionHeader) {
     clientHandshakeListeners.signal(new SignalRunnable<ClientHandshakeListener>() {
-      @Override
+      
       public void run(ClientHandshakeListener listener) {
         listener.onSuccess(clientHandshake.getOutgoingConnectionHeader(), incommingConnectionHeader);
       }
@@ -91,7 +91,7 @@ public abstract class BaseClientHandshakeHandler extends AbstractNamedChannelHan
 
   private void signalOnFailure(final String errorMessage) {
     clientHandshakeListeners.signal(new SignalRunnable<ClientHandshakeListener>() {
-      @Override
+      
       public void run(ClientHandshakeListener listener) {
         listener.onFailure(clientHandshake.getOutgoingConnectionHeader(), errorMessage);
       }

@@ -55,7 +55,7 @@ public class Md5Generator {
     final List<String> constants = Lists.newArrayList();
     final List<String> variables = Lists.newArrayList();
     MessageDefinitionVisitor visitor = new MessageDefinitionVisitor() {
-      @Override
+      
       public void variableValue(String type, String name) {
         if (!PrimitiveFieldType.existsFor(type)) {
           type = generate(type);
@@ -63,7 +63,7 @@ public class Md5Generator {
         variables.add(String.format("%s %s\n", type, name));
       }
 
-      @Override
+      
       public void variableList(String type, int size, String name) {
         if (!PrimitiveFieldType.existsFor(type)) {
           String md5Checksum = generate(type);
@@ -77,7 +77,7 @@ public class Md5Generator {
         }
       }
 
-      @Override
+      
       public void constantValue(String type, String name, String value) {
         constants.add(String.format("%s %s=%s\n", type, name, value));
       }

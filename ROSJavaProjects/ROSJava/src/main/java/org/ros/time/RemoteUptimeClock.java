@@ -182,7 +182,7 @@ public class RemoteUptimeClock {
       double errorReductionCoefficientSensitivity, int latencyOutlierFilterSampleSize,
       double latencyOutlierFilterThreshold) {
     return new RemoteUptimeClock(new LocalUptimeProvider() {
-      @Override
+      
       public double getSeconds() {
         return timeProvider.getCurrentTime().toSeconds();
       }

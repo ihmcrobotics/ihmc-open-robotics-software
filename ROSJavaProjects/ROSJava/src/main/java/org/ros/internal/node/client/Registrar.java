@@ -124,16 +124,16 @@ public class Registrar implements TopicParticipantManagerListener, ServiceManage
     return success;
   }
 
-  @Override
+  
   public void onPublisherAdded(final DefaultPublisher<?> publisher) {
     if (DEBUG) {
       log.info("Registering publisher: " + publisher);
     }
     boolean submitted = submit(new Callable<Boolean>() {
-      @Override
+      
       public Boolean call() throws Exception {
         boolean success = callMaster(new Callable<Response<List<URI>>>() {
-          @Override
+          
           public Response<List<URI>> call() throws Exception {
             return masterClient.registerPublisher(publisher.toDeclaration());
           }
@@ -148,7 +148,7 @@ public class Registrar implements TopicParticipantManagerListener, ServiceManage
     });
     if (!submitted) {
       executorService.execute(new Runnable() {
-        @Override
+        
         public void run() {
           publisher.signalOnMasterRegistrationFailure();
         }
@@ -156,16 +156,16 @@ public class Registrar implements TopicParticipantManagerListener, ServiceManage
     }
   }
 
-  @Override
+  
   public void onPublisherRemoved(final DefaultPublisher<?> publisher) {
     if (DEBUG) {
       log.info("Unregistering publisher: " + publisher);
     }
     boolean submitted = submit(new Callable<Boolean>() {
-      @Override
+      
       public Boolean call() throws Exception {
         boolean success = callMaster(new Callable<Response<Integer>>() {
-          @Override
+          
           public Response<Integer> call() throws Exception {
             return masterClient.unregisterPublisher(publisher.getIdentifier());
           }
@@ -180,7 +180,7 @@ public class Registrar implements TopicParticipantManagerListener, ServiceManage
     });
     if (!submitted) {
       executorService.execute(new Runnable() {
-        @Override
+        
         public void run() {
           publisher.signalOnMasterUnregistrationFailure();
         }
@@ -188,17 +188,17 @@ public class Registrar implements TopicParticipantManagerListener, ServiceManage
     }
   }
 
-  @Override
+  
   public void onSubscriberAdded(final DefaultSubscriber<?> subscriber) {
     if (DEBUG) {
       log.info("Registering subscriber: " + subscriber);
     }
     boolean submitted = submit(new Callable<Boolean>() {
-      @Override
+      
       public Boolean call() throws Exception {
         final Holder<Response<List<URI>>> holder = Holder.newEmpty();
         boolean success = callMaster(new Callable<Response<List<URI>>>() {
-          @Override
+          
           public Response<List<URI>> call() throws Exception {
             return holder.set(masterClient.registerSubscriber(nodeIdentifier, subscriber));
           }
@@ -217,7 +217,7 @@ public class Registrar implements TopicParticipantManagerListener, ServiceManage
     });
     if (!submitted) {
       executorService.execute(new Runnable() {
-        @Override
+        
         public void run() {
           subscriber.signalOnMasterRegistrationFailure();
         }
@@ -225,16 +225,16 @@ public class Registrar implements TopicParticipantManagerListener, ServiceManage
     }
   }
 
-  @Override
+  
   public void onSubscriberRemoved(final DefaultSubscriber<?> subscriber) {
     if (DEBUG) {
       log.info("Unregistering subscriber: " + subscriber);
     }
     boolean submitted = submit(new Callable<Boolean>() {
-      @Override
+      
       public Boolean call() throws Exception {
         boolean success = callMaster(new Callable<Response<Integer>>() {
-          @Override
+          
           public Response<Integer> call() throws Exception {
             return masterClient.unregisterSubscriber(nodeIdentifier, subscriber);
           }
@@ -249,7 +249,7 @@ public class Registrar implements TopicParticipantManagerListener, ServiceManage
     });
     if (!submitted) {
       executorService.execute(new Runnable() {
-        @Override
+        
         public void run() {
           subscriber.signalOnMasterUnregistrationFailure();
         }
@@ -257,16 +257,16 @@ public class Registrar implements TopicParticipantManagerListener, ServiceManage
     }
   }
 
-  @Override
+  
   public void onServiceServerAdded(final DefaultServiceServer<?, ?> serviceServer) {
     if (DEBUG) {
       log.info("Registering service: " + serviceServer);
     }
     boolean submitted = submit(new Callable<Boolean>() {
-      @Override
+      
       public Boolean call() throws Exception {
         boolean success = callMaster(new Callable<Response<Void>>() {
-          @Override
+          
           public Response<Void> call() throws Exception {
             return masterClient.registerService(nodeIdentifier, serviceServer);
           }
@@ -281,7 +281,7 @@ public class Registrar implements TopicParticipantManagerListener, ServiceManage
     });
     if (!submitted) {
       executorService.execute(new Runnable() {
-        @Override
+        
         public void run() {
           serviceServer.signalOnMasterRegistrationFailure();
         }
@@ -289,16 +289,16 @@ public class Registrar implements TopicParticipantManagerListener, ServiceManage
     }
   }
 
-  @Override
+  
   public void onServiceServerRemoved(final DefaultServiceServer<?, ?> serviceServer) {
     if (DEBUG) {
       log.info("Unregistering service: " + serviceServer);
     }
     boolean submitted = submit(new Callable<Boolean>() {
-      @Override
+      
       public Boolean call() throws Exception {
         boolean success = callMaster(new Callable<Response<Integer>>() {
-          @Override
+          
           public Response<Integer> call() throws Exception {
             return masterClient.unregisterService(nodeIdentifier, serviceServer);
           }
@@ -313,7 +313,7 @@ public class Registrar implements TopicParticipantManagerListener, ServiceManage
     });
     if (!submitted) {
       executorService.execute(new Runnable() {
-        @Override
+        
         public void run() {
           serviceServer.signalOnMasterUnregistrationFailure();
         }

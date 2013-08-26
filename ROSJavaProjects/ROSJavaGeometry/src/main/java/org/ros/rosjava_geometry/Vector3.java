@@ -138,12 +138,12 @@ public class Vector3 {
     return true;
   }
 
-  @Override
+  
   public String toString() {
     return String.format("Vector3<x: %.4f, y: %.4f, z: %.4f>", x, y, z);
   }
 
-  @Override
+  
   public int hashCode() {
     // Ensure that -0 and 0 are considered equal.
     double x = this.x == 0 ? 0 : this.x;
@@ -161,7 +161,7 @@ public class Vector3 {
     return result;
   }
 
-  @Override
+  
   public boolean equals(Object obj) {
     if (this == obj)
       return true;

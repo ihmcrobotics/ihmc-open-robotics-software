@@ -60,7 +60,7 @@ public class ParameterManager {
         ListenerGroup<ParameterListener> listenerCollection = listeners.get(parameterName);
         numberOfListeners = listenerCollection.size();
         listenerCollection.signal(new SignalRunnable<ParameterListener>() {
-          @Override
+          
           public void run(ParameterListener listener) {
             listener.onNewValue(value);
           }

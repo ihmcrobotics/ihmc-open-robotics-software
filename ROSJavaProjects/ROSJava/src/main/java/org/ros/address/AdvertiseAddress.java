@@ -68,7 +68,7 @@ public class AdvertiseAddress {
 
   public void setStaticPort(final int port) {
     portCallable = new Callable<Integer>() {
-      @Override
+      
       public Integer call() throws Exception {
         return port;
       }
@@ -114,7 +114,7 @@ public class AdvertiseAddress {
     return toInetAddress().isLoopbackAddress();
   }
 
-  @Override
+  
   public String toString() {
     Preconditions.checkNotNull(portCallable);
     try {
@@ -124,7 +124,7 @@ public class AdvertiseAddress {
     }
   }
 
-  @Override
+  
   public int hashCode() {
     Preconditions.checkNotNull(portCallable);
     final int prime = 31;
@@ -138,7 +138,7 @@ public class AdvertiseAddress {
     return result;
   }
 
-  @Override
+  
   public boolean equals(Object obj) {
     Preconditions.checkNotNull(portCallable);
     if (this == obj)

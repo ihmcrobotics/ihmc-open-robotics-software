@@ -58,12 +58,12 @@ public class TopicIntegrationTest extends RosTest {
   @Test
   public void testOnePublisherToOneSubscriber() throws InterruptedException {
     nodeMainExecutor.execute(new AbstractNodeMain() {
-      @Override
+      
       public GraphName getDefaultNodeName() {
         return GraphName.of("publisher");
       }
 
-      @Override
+      
       public void onStart(ConnectedNode connectedNode) {
         Publisher<std_msgs.String> publisher =
             connectedNode.newPublisher("foo", std_msgs.String._TYPE);
@@ -74,17 +74,17 @@ public class TopicIntegrationTest extends RosTest {
 
     final CountDownLatch messageReceived = new CountDownLatch(1);
     nodeMainExecutor.execute(new AbstractNodeMain() {
-      @Override
+      
       public GraphName getDefaultNodeName() {
         return GraphName.of("subscriber");
       }
 
-      @Override
+      
       public void onStart(ConnectedNode connectedNode) {
         Subscriber<std_msgs.String> subscriber =
             connectedNode.newSubscriber("foo", std_msgs.String._TYPE);
         subscriber.addMessageListener(new MessageListener<std_msgs.String>() {
-          @Override
+          
           public void onNewMessage(std_msgs.String message) {
             assertEquals(expectedMessage, message);
             messageReceived.countDown();
@@ -111,18 +111,18 @@ public class TopicIntegrationTest extends RosTest {
         CountDownSubscriberListener.newDefault();
     final CountDownLatch messageReceived = new CountDownLatch(1);
     nodeMainExecutor.execute(new AbstractNodeMain() {
-      @Override
+      
       public GraphName getDefaultNodeName() {
         return GraphName.of("subscriber");
       }
 
-      @Override
+      
       public void onStart(ConnectedNode connectedNode) {
         Subscriber<std_msgs.String> subscriber =
             connectedNode.newSubscriber("foo", std_msgs.String._TYPE);
         subscriber.addSubscriberListener(subscriberListener);
         subscriber.addMessageListener(new MessageListener<std_msgs.String>() {
-          @Override
+          
           public void onNewMessage(std_msgs.String message) {
             assertEquals(expectedMessage, message);
             messageReceived.countDown();
@@ -134,12 +134,12 @@ public class TopicIntegrationTest extends RosTest {
     subscriberListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS);
 
     nodeMainExecutor.execute(new AbstractNodeMain() {
-      @Override
+      
       public GraphName getDefaultNodeName() {
         return GraphName.of("publisher");
       }
 
-      @Override
+      
       public void onStart(ConnectedNode connectedNode) {
         Publisher<std_msgs.String> publisher =
             connectedNode.newPublisher("foo", std_msgs.String._TYPE);
@@ -154,12 +154,12 @@ public class TopicIntegrationTest extends RosTest {
   @Test
   public void testAddDisconnectedPublisher() {
     nodeMainExecutor.execute(new AbstractNodeMain() {
-      @Override
+      
       public GraphName getDefaultNodeName() {
         return GraphName.of("subscriber");
       }
 
-      @Override
+      
       public void onStart(ConnectedNode connectedNode) {
         DefaultSubscriber<std_msgs.String> subscriber =
             (DefaultSubscriber<std_msgs.String>) connectedNode.<std_msgs.String>newSubscriber(
@@ -180,7 +180,7 @@ public class TopicIntegrationTest extends RosTest {
 
     private test_ros.TestHeader lastMessage;
 
-    @Override
+    
     public void onNewMessage(test_ros.TestHeader message) {
       int seq = message.getHeader().getSeq();
       long stamp = message.getHeader().getStamp().totalNsecs();
@@ -203,17 +203,17 @@ public class TopicIntegrationTest extends RosTest {
   @Test
   public void testHeader() throws InterruptedException {
     nodeMainExecutor.execute(new AbstractNodeMain() {
-      @Override
+      
       public GraphName getDefaultNodeName() {
         return GraphName.of("publisher");
       }
 
-      @Override
+      
       public void onStart(final ConnectedNode connectedNode) {
         final Publisher<test_ros.TestHeader> publisher =
             connectedNode.newPublisher("foo", test_ros.TestHeader._TYPE);
         connectedNode.executeCancellableLoop(new CancellableLoop() {
-          @Override
+          
           public void loop() throws InterruptedException {
             test_ros.TestHeader message =
                 connectedNode.getTopicMessageFactory().newFromType(test_ros.TestHeader._TYPE);
@@ -229,12 +229,12 @@ public class TopicIntegrationTest extends RosTest {
 
     final Listener listener = new Listener();
     nodeMainExecutor.execute(new AbstractNodeMain() {
-      @Override
+      
       public GraphName getDefaultNodeName() {
         return GraphName.of("subscriber");
       }
 
-      @Override
+      
       public void onStart(ConnectedNode connectedNode) {
         Subscriber<test_ros.TestHeader> subscriber =
             connectedNode.newSubscriber("foo", test_ros.TestHeader._TYPE);

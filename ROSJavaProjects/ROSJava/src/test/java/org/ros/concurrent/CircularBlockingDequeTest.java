@@ -110,7 +110,7 @@ public class CircularBlockingDequeTest {
     final String expectedString = "Hello, world!";
     final CountDownLatch latch = new CountDownLatch(1);
     executorService.execute(new Runnable() {
-      @Override
+      
       public void run() {
         try {
           assertEquals(expectedString, deque.takeFirst());

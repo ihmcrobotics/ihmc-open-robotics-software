@@ -33,7 +33,7 @@ public class DefaultMessageInterfaceClassProvider implements MessageInterfaceCla
   }
 
   @SuppressWarnings("unchecked")
-  @Override
+  
   public <T> Class<T> get(String messageType) {
     if (cache.containsKey(messageType)) {
       return (Class<T>) cache.get(messageType);

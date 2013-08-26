@@ -41,7 +41,7 @@ class ValueField<T> extends Field {
   }
 
   @SuppressWarnings("unchecked")
-  @Override
+  
   public T getValue() {
     if (value == null) {
       setValue(type.getDefaultValue());
@@ -50,40 +50,40 @@ class ValueField<T> extends Field {
   }
 
   @SuppressWarnings("unchecked")
-  @Override
+  
   public void setValue(Object value) {
     Preconditions.checkNotNull(value);
     Preconditions.checkState(!isConstant);
     this.value = (T) value;
   }
 
-  @Override
+  
   public void serialize(ChannelBuffer buffer) {
     type.serialize(getValue(), buffer);
   }
 
-  @Override
+  
   public void deserialize(ChannelBuffer buffer) {
     Preconditions.checkState(!isConstant);
     setValue(type.<T>deserialize(buffer));
   }
 
-  @Override
+  
   public String getMd5String() {
     return String.format("%s %s\n", type, name);
   }
 
-  @Override
+  
   public String getJavaTypeName() {
     return type.getJavaTypeName();
   }
 
-  @Override
+  
   public String toString() {
     return "ValueField<" + type + ", " + name + ">";
   }
 
-  @Override
+  
   public int hashCode() {
     final int prime = 31;
     int result = super.hashCode();
@@ -91,7 +91,7 @@ class ValueField<T> extends Field {
     return result;
   }
 
-  @Override
+  
   public boolean equals(Object obj) {
     if (this == obj)
       return true;

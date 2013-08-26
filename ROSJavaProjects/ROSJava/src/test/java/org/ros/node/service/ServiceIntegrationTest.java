@@ -46,12 +46,12 @@ public class ServiceIntegrationTest extends RosTest {
     final CountDownServiceServerListener<test_ros.AddTwoIntsRequest, test_ros.AddTwoIntsResponse> countDownServiceServerListener =
         CountDownServiceServerListener.newDefault();
     nodeMainExecutor.execute(new AbstractNodeMain() {
-      @Override
+      
       public GraphName getDefaultNodeName() {
         return GraphName.of("server");
       }
 
-      @Override
+      
       public void onStart(final ConnectedNode connectedNode) {
         ServiceServer<test_ros.AddTwoIntsRequest, test_ros.AddTwoIntsResponse> serviceServer =
             connectedNode
@@ -59,7 +59,7 @@ public class ServiceIntegrationTest extends RosTest {
                     SERVICE_NAME,
                     test_ros.AddTwoInts._TYPE,
                     new ServiceResponseBuilder<test_ros.AddTwoIntsRequest, test_ros.AddTwoIntsResponse>() {
-                      @Override
+                      
                       public void build(test_ros.AddTwoIntsRequest request,
                           test_ros.AddTwoIntsResponse response) {
                         response.setSum(request.getA() + request.getB());
@@ -79,12 +79,12 @@ public class ServiceIntegrationTest extends RosTest {
 
     final CountDownLatch latch = new CountDownLatch(2);
     nodeMainExecutor.execute(new AbstractNodeMain() {
-      @Override
+      
       public GraphName getDefaultNodeName() {
         return GraphName.of("client");
       }
 
-      @Override
+      
       public void onStart(ConnectedNode connectedNode) {
         ServiceClient<test_ros.AddTwoIntsRequest, test_ros.AddTwoIntsResponse> serviceClient;
         try {
@@ -101,13 +101,13 @@ public class ServiceIntegrationTest extends RosTest {
         request.setA(2);
         request.setB(2);
         serviceClient.call(request, new ServiceResponseListener<test_ros.AddTwoIntsResponse>() {
-          @Override
+          
           public void onSuccess(test_ros.AddTwoIntsResponse response) {
             assertEquals(response.getSum(), 4);
             latch.countDown();
           }
 
-          @Override
+          
           public void onFailure(RemoteException e) {
             throw new RuntimeException(e);
           }
@@ -117,13 +117,13 @@ public class ServiceIntegrationTest extends RosTest {
         request.setA(3);
         request.setB(3);
         serviceClient.call(request, new ServiceResponseListener<test_ros.AddTwoIntsResponse>() {
-          @Override
+          
           public void onSuccess(test_ros.AddTwoIntsResponse response) {
             assertEquals(response.getSum(), 6);
             latch.countDown();
           }
 
-          @Override
+          
           public void onFailure(RemoteException e) {
             throw new RuntimeException(e);
           }
@@ -140,12 +140,12 @@ public class ServiceIntegrationTest extends RosTest {
     final CountDownServiceServerListener<test_ros.AddTwoIntsRequest, test_ros.AddTwoIntsResponse> countDownServiceServerListener =
         CountDownServiceServerListener.newDefault();
     nodeMainExecutor.execute(new AbstractNodeMain() {
-      @Override
+      
       public GraphName getDefaultNodeName() {
         return GraphName.of("server");
       }
 
-      @Override
+      
       public void onStart(ConnectedNode connectedNode) {
         ServiceServer<test_ros.AddTwoIntsRequest, test_ros.AddTwoIntsResponse> serviceServer =
             connectedNode
@@ -153,7 +153,7 @@ public class ServiceIntegrationTest extends RosTest {
                     SERVICE_NAME,
                     test_ros.AddTwoInts._TYPE,
                     new ServiceResponseBuilder<test_ros.AddTwoIntsRequest, test_ros.AddTwoIntsResponse>() {
-                      @Override
+                      
                       public void build(test_ros.AddTwoIntsRequest request,
                           test_ros.AddTwoIntsResponse response) throws ServiceException {
                         throw new ServiceException(errorMessage);
@@ -167,12 +167,12 @@ public class ServiceIntegrationTest extends RosTest {
 
     final CountDownLatch latch = new CountDownLatch(1);
     nodeMainExecutor.execute(new AbstractNodeMain() {
-      @Override
+      
       public GraphName getDefaultNodeName() {
         return GraphName.of("client");
       }
 
-      @Override
+      
       public void onStart(ConnectedNode connectedNode) {
         ServiceClient<test_ros.AddTwoIntsRequest, test_ros.AddTwoIntsResponse> serviceClient;
         try {
@@ -182,12 +182,12 @@ public class ServiceIntegrationTest extends RosTest {
         }
         test_ros.AddTwoIntsRequest request = serviceClient.newMessage();
         serviceClient.call(request, new ServiceResponseListener<test_ros.AddTwoIntsResponse>() {
-          @Override
+          
           public void onSuccess(test_ros.AddTwoIntsResponse message) {
             fail();
           }
 
-          @Override
+          
           public void onFailure(RemoteException e) {
             assertEquals(e.getMessage(), errorMessage);
             latch.countDown();

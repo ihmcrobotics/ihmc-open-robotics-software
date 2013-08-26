@@ -42,7 +42,7 @@ public class TcpServerPipelineFactory extends ConnectionTrackingChannelPipelineF
     this.serviceManager = serviceManager;
   }
 
-  @Override
+  
   public ChannelPipeline getPipeline() {
     ChannelPipeline pipeline = super.getPipeline();
     pipeline.addLast(LENGTH_FIELD_PREPENDER, new LengthFieldPrepender(4));

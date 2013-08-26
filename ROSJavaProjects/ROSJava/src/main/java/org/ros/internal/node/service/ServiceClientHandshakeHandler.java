@@ -59,7 +59,7 @@ class ServiceClientHandshakeHandler<T, S> extends BaseClientHandshakeHandler {
     this.executorService = executorService;
   }
 
-  @Override
+  
   protected void onSuccess(ConnectionHeader incommingConnectionHeader, ChannelHandlerContext ctx,
       MessageEvent e) {
     ChannelPipeline pipeline = e.getChannel().getPipeline();
@@ -70,13 +70,13 @@ class ServiceClientHandshakeHandler<T, S> extends BaseClientHandshakeHandler {
         deserializer, executorService));
   }
 
-  @Override
+  
   protected void onFailure(String errorMessage, ChannelHandlerContext ctx, MessageEvent e) {
     log.error("Service client handshake failed: " + errorMessage);
     e.getChannel().close();
   }
 
-  @Override
+  
   public String getName() {
     return "ServiceClientHandshakeHandler";
   }

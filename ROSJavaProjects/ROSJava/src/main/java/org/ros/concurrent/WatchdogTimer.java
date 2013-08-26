@@ -44,7 +44,7 @@ public class WatchdogTimer {
     this.period = period;
     this.unit = unit;
     this.runnable = new Runnable() {
-      @Override
+      
       public void run() {
         try {
           if (!pulsed) {

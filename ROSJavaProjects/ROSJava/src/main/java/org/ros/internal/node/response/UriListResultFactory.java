@@ -32,7 +32,7 @@ import com.google.common.collect.Lists;
  */
 public class UriListResultFactory implements ResultFactory<List<URI>> {
 
-	@Override
+	
 	public List<URI> newFromValue(Object value) {
 		List<Object> values = Arrays.asList((Object[]) value);
 		List<URI> uris = Lists.newArrayList();

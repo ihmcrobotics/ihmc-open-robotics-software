@@ -35,7 +35,7 @@ import java.util.List;
  */
 public class TopicListResultFactory implements ResultFactory<List<TopicDeclaration>> {
 
-  @Override
+  
   public List<TopicDeclaration> newFromValue(Object value) {
     List<TopicDeclaration> descriptions = Lists.newArrayList();
     List<Object> topics = Arrays.asList((Object[]) value);

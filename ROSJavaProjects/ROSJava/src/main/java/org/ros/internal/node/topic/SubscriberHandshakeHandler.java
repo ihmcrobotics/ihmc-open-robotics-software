@@ -52,7 +52,7 @@ class SubscriberHandshakeHandler<T> extends BaseClientHandshakeHandler {
     this.incomingMessageQueue = incomingMessageQueue;
   }
 
-  @Override
+  
   protected void onSuccess(ConnectionHeader incomingConnectionHeader, ChannelHandlerContext ctx,
       MessageEvent e) {
     ChannelPipeline pipeline = e.getChannel().getPipeline();
@@ -65,13 +65,13 @@ class SubscriberHandshakeHandler<T> extends BaseClientHandshakeHandler {
     }
   }
 
-  @Override
+  
   protected void onFailure(String errorMessage, ChannelHandlerContext ctx, MessageEvent e) {
     log.error("Subscriber handshake failed: " + errorMessage);
     e.getChannel().close();
   }
 
-  @Override
+  
   public String getName() {
     return "SubscriberHandshakeHandler";
   }

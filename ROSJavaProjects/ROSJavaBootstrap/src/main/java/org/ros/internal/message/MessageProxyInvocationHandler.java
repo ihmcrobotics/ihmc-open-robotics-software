@@ -33,7 +33,7 @@ public class MessageProxyInvocationHandler implements InvocationHandler {
     this.messageImpl = messageImpl;
   }
 
-  @Override
+  
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     String methodName = method.getName();
     MessageFields mesageFields = messageImpl.getMessageFields();

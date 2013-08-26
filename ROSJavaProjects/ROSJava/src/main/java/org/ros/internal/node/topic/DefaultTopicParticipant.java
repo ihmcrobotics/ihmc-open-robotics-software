@@ -46,12 +46,12 @@ public abstract class DefaultTopicParticipant implements TopicParticipant {
     return topicDeclaration.toList();
   }
 
-  @Override
+  
   public GraphName getTopicName() {
     return topicDeclaration.getName();
   }
 
-  @Override
+  
   public String getTopicMessageType() {
     return topicDeclaration.getMessageType();
   }

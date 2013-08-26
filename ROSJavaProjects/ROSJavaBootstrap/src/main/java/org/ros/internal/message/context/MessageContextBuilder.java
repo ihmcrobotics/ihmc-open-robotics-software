@@ -50,33 +50,33 @@ class MessageContextBuilder implements MessageDefinitionVisitor {
     return fieldType;
   }
 
-  @Override
+  
   public void variableValue(String type, final String name) {
     final FieldType fieldType = getFieldType(type);
     messageContext.addFieldFactory(name, new FieldFactory() {
-      @Override
+      
       public Field create() {
         return fieldType.newVariableValue(name);
       }
     });
   }
 
-  @Override
+  
   public void variableList(String type, final int size, final String name) {
     final FieldType fieldType = getFieldType(type);
     messageContext.addFieldFactory(name, new FieldFactory() {
-      @Override
+      
       public Field create() {
         return fieldType.newVariableList(name, size);
       }
     });
   }
 
-  @Override
+  
   public void constantValue(String type, final String name, final String value) {
     final FieldType fieldType = getFieldType(type);
     messageContext.addFieldFactory(name, new FieldFactory() {
-      @Override
+      
       public Field create() {
         return fieldType.newConstantValue(name, fieldType.parseFromString(value));
       }
