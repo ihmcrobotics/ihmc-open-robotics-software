@@ -46,14 +46,14 @@ public class ListenerGroupTest {
     int numberOfSignals = 10;
     final CountDownLatch latch = new CountDownLatch(numberOfSignals);
     listenerGroup.add(new Runnable() {
-      @Override
+      
       public void run() {
         latch.countDown();
       }
     });
     for (int i = 0; i < numberOfSignals; i++) {
       listenerGroup.signal(new SignalRunnable<Runnable>() {
-        @Override
+        
         public void run(Runnable listener) {
           listener.run();
         }
@@ -68,20 +68,20 @@ public class ListenerGroupTest {
     final CountDownLatch latch1 = new CountDownLatch(numberOfSignals);
     final CountDownLatch latch2 = new CountDownLatch(numberOfSignals);
     listenerGroup.add(new Runnable() {
-      @Override
+      
       public void run() {
         latch1.countDown();
       }
     });
     listenerGroup.add(new Runnable() {
-      @Override
+      
       public void run() {
         latch2.countDown();
       }
     });
     for (int i = 0; i < numberOfSignals; i++) {
       listenerGroup.signal(new SignalRunnable<Runnable>() {
-        @Override
+        
         public void run(Runnable listener) {
           listener.run();
         }
@@ -105,7 +105,7 @@ public class ListenerGroupTest {
     listenerGroup.add(new CountingListener() {
       private AtomicInteger count = new AtomicInteger();
 
-      @Override
+      
       public void run(int count) {
         if (this.count.compareAndSet(count, count + 1)) {
           latch.countDown();
@@ -122,7 +122,7 @@ public class ListenerGroupTest {
     for (int i = 0; i < numberOfSignals; i++) {
       final int count = i;
       listenerGroup.signal(new SignalRunnable<CountingListener>() {
-        @Override
+        
         public void run(CountingListener listener) {
           listener.run(count);
         }

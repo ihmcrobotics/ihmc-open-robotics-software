@@ -47,13 +47,13 @@ public class RemoteUptimeClockTest {
   private RemoteUptimeClock newRemoteUptimeClock() {
     RemoteUptimeClock remoteUptimeClock =
         new RemoteUptimeClock(new LocalUptimeProvider() {
-          @Override
+          
           public double getSeconds() {
             moveTimeForward(delta, drift);
             return localUptime;
           }
         }, new Callable<Double>() {
-          @Override
+          
           public Double call() throws Exception {
             return remoteUptime;
           }

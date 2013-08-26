@@ -56,7 +56,7 @@ public class OutgoingMessageQueue<T> {
   private T latchedMessage;
 
   private final class Writer extends CancellableLoop {
-    @Override
+    
     public void loop() throws InterruptedException {
       T message = deque.takeFirst();
       final ChannelBuffer buffer = messageBufferPool.acquire();
@@ -70,7 +70,7 @@ public class OutgoingMessageQueue<T> {
       // share the same backing array. So, we have to wait until the write
       // operation is complete before returning the buffer to the pool.
       channelGroup.write(buffer).addListener(new ChannelGroupFutureListener() {
-        @Override
+        
         public void operationComplete(ChannelGroupFuture future) throws Exception {
           messageBufferPool.release(buffer);
         }

@@ -36,12 +36,12 @@ public class DefaultNodeFactory implements NodeFactory {
     this.scheduledExecutorService = new SharedScheduledExecutorService(scheduledExecutorService);
   }
 
-  @Override
+  
   public Node newNode(NodeConfiguration nodeConfiguration, Collection<NodeListener> listeners) {
     return new DefaultNode(nodeConfiguration, listeners, scheduledExecutorService);
   }
 
-  @Override
+  
   public Node newNode(NodeConfiguration nodeConfiguration) {
     return newNode(nodeConfiguration, null);
   }

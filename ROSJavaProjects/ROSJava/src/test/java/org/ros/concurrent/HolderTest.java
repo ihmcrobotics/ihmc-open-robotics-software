@@ -69,7 +69,7 @@ public class HolderTest {
     final String message = "Hello, world!";
     ExecutorService executorService = Executors.newCachedThreadPool();
     executorService.execute(new Runnable() {
-      @Override
+      
       public void run() {
         holder.set(message);
       }

@@ -39,7 +39,7 @@ public class ServiceRequestMessageFactory implements MessageFactory {
         new MessageProxyFactory(new DefaultMessageInterfaceClassProvider(), messageFactory);
   }
 
-  @Override
+  
   public <T> T newFromType(String serviceType) {
     ServiceDescription serviceDescription = serviceDescriptionFactory.newFromType(serviceType);
     MessageDeclaration messageDeclaration =

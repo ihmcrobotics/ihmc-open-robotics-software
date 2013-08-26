@@ -37,7 +37,7 @@ public class EventDispatcher<T> extends CancellableLoop {
     events.addLast(signalRunnable);
   }
 
-  @Override
+  
   public void loop() throws InterruptedException {
     SignalRunnable<T> signalRunnable = events.takeFirst();
     signalRunnable.run(listener);

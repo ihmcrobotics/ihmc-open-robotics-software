@@ -56,7 +56,7 @@ public class TcpServerHandshakeHandler extends SimpleChannelHandler {
     this.serviceManager = serviceManager;
   }
 
-  @Override
+  
   public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
     ChannelBuffer incomingBuffer = (ChannelBuffer) e.getMessage();
     ChannelPipeline pipeline = e.getChannel().getPipeline();

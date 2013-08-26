@@ -33,7 +33,6 @@ public class PublicAdvertiseAddressFactory implements AdvertiseAddressFactory {
     this.host = host;
   }
 
-  @Override
   public AdvertiseAddress newDefault() {
     return new AdvertiseAddress(host);
   }

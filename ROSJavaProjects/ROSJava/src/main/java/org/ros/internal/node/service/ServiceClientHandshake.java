@@ -36,7 +36,7 @@ public class ServiceClientHandshake extends BaseClientHandshake {
     super(outgoingConnectionHeader);
   }
 
-  @Override
+  
   public boolean handshake(ConnectionHeader incommingConnectionHeader) {
     if (DEBUG) {
       log.info("Outgoing service client connection header: " + outgoingConnectionHeader);

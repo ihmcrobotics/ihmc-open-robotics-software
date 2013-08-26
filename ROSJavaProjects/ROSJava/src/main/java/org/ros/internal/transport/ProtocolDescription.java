@@ -52,12 +52,12 @@ public class ProtocolDescription {
     return Lists.newArrayList((Object) name, address.getHost(), address.getPort());
   }
 
-  @Override
+  
   public String toString() {
     return "Protocol<" + name + ", " + getAdverstiseAddress() + ">";
   }
 
-  @Override
+  
   public int hashCode() {
     final int prime = 31;
     int result = 1;
@@ -66,7 +66,7 @@ public class ProtocolDescription {
     return result;
   }
 
-  @Override
+  
   public boolean equals(Object obj) {
     if (this == obj)
       return true;

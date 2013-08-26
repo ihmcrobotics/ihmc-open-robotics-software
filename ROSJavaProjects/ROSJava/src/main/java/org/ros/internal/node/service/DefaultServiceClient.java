@@ -54,14 +54,14 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
     private boolean success;
     private String errorMessage;
 
-    @Override
+    
     public void onSuccess(ConnectionHeader outgoingConnectionHeader,
         ConnectionHeader incomingConnectionHeader) {
       success = true;
       latch.countDown();
     }
 
-    @Override
+    
     public void onFailure(ConnectionHeader outgoingConnectionHeader, String errorMessage) {
       this.errorMessage = errorMessage;
       success = false;
@@ -125,7 +125,7 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
     tcpClientManager.addNamedChannelHandler(serviceClientHandshakeHandler);
   }
 
-  @Override
+  
   public void connect(URI uri) {
     Preconditions.checkNotNull(uri, "URI must be specified.");
     Preconditions.checkArgument(uri.getScheme().equals("rosrpc"), "Invalid service URI.");
@@ -142,13 +142,13 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
     }
   }
 
-  @Override
+  
   public void shutdown() {
     Preconditions.checkNotNull(tcpClient, "Not connected.");
     tcpClientManager.shutdown();
   }
 
-  @Override
+  
   public void call(T request, ServiceResponseListener<S> listener) {
     ChannelBuffer buffer = messageBufferPool.acquire();
     serializer.serialize(request, buffer);
@@ -157,17 +157,17 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
     messageBufferPool.release(buffer);
   }
 
-  @Override
+  
   public GraphName getName() {
     return serviceDeclaration.getName();
   }
 
-  @Override
+  
   public String toString() {
     return "ServiceClient<" + serviceDeclaration + ">";
   }
 
-  @Override
+  
   public T newMessage() {
     return messageFactory.newFromType(serviceDeclaration.getType());
   }

@@ -23,19 +23,19 @@ package org.ros.node;
  */
 public abstract class AbstractNodeMain implements NodeMain {
 
-  @Override
+  
   public void onStart(ConnectedNode connectedNode) {
   }
 
-  @Override
+  
   public void onShutdown(Node node) {
   }
 
-  @Override
+  
   public void onShutdownComplete(Node node) {
   }
 
-  @Override
+  
   public void onError(Node node, Throwable throwable) {
   }
 }

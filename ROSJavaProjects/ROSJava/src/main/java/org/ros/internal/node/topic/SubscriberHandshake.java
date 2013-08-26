@@ -41,7 +41,7 @@ public class SubscriberHandshake extends BaseClientHandshake {
         .getField(ConnectionHeaderFields.MD5_CHECKSUM));
   }
 
-  @Override
+  
   public boolean handshake(ConnectionHeader incommingConnectionHeader) {
     if (DEBUG) {
       log.info("Outgoing subscriber connection header: " + outgoingConnectionHeader);

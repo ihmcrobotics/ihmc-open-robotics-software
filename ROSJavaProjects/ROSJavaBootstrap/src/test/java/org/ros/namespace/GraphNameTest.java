@@ -190,7 +190,7 @@ public class GraphNameTest {
         Collections.synchronizedSet(new HashSet<GraphName>());
     for (int i = 0; i < sampleSize; i++) {
       executor.execute(new Runnable() {
-        @Override
+        
         public void run() {
           GraphName name = GraphName.newAnonymous();
           assertTrue(name.toString().startsWith(GraphName.ANONYMOUS_PREFIX));

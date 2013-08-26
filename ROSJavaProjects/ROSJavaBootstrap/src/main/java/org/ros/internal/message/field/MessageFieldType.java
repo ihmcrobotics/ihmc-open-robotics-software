@@ -47,69 +47,69 @@ public class MessageFieldType implements FieldType {
     return messageFactory;
   }
 
-  @Override
+  
   public Field newVariableValue(String name) {
     return ValueField.newVariable(this, name);
   }
 
-  @Override
+  
   public <T> Field newConstantValue(String name, T value) {
     throw new UnsupportedOperationException();
   }
 
-  @Override
+  
   public Field newVariableList(String name, int size) {
     return ListField.newVariable(this, name);
   }
 
-  @Override
+  
   public <T> T getDefaultValue() {
     return getMessageFactory().newFromType(messageIdentifier.getType());
   }
 
-  @Override
+  
   public String getMd5String() {
     return null;
   }
 
-  @Override
+  
   public String getJavaTypeName() {
     return String.format("%s.%s", messageIdentifier.getPackage(), messageIdentifier.getName());
   }
 
-  @Override
+  
   public int getSerializedSize() {
     throw new UnsupportedOperationException();
   }
 
-  @Override
+  
   public String getName() {
     return messageIdentifier.getType();
   }
 
-  @Override
+  
   public <T> void serialize(T value, ChannelBuffer buffer) {
     serializer.serialize((Message) value, buffer);
   }
 
   @SuppressWarnings("unchecked")
-  @Override
+  
   public Message deserialize(ChannelBuffer buffer) {
     return deserializer.deserialize(buffer);
   }
 
   @SuppressWarnings("unchecked")
-  @Override
+  
   public Void parseFromString(String value) {
     throw new UnsupportedOperationException();
   }
 
-  @Override
+  
   public String toString() {
     return "MessageField<" + messageIdentifier + ">";
   }
 
-  @Override
+  
   public int hashCode() {
     final int prime = 31;
     int result = 1;
@@ -117,7 +117,7 @@ public class MessageFieldType implements FieldType {
     return result;
   }
 
-  @Override
+  
   public boolean equals(Object obj) {
     if (this == obj)
       return true;

@@ -25,27 +25,27 @@ import org.ros.internal.node.topic.PublisherIdentifier;
  */
 public class DefaultSubscriberListener<T> implements SubscriberListener<T> {
 
-  @Override
+  
   public void onMasterRegistrationSuccess(Subscriber<T> subscriber) {
   }
 
-  @Override
+  
   public void onMasterRegistrationFailure(Subscriber<T> subscriber) {
   }
 
-  @Override
+  
   public void onMasterUnregistrationSuccess(Subscriber<T> subscriber) {
   }
 
-  @Override
+  
   public void onMasterUnregistrationFailure(Subscriber<T> subscriber) {
   }
 
-  @Override
+  
   public void onNewPublisher(Subscriber<T> subscriber, PublisherIdentifier publisherIdentifier) {
   }
 
-  @Override
+  
   public void onShutdown(Subscriber<T> subscriber) {
   }
 }

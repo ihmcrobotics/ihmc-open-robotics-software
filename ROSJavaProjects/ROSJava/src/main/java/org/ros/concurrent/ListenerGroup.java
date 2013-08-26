@@ -137,7 +137,7 @@ public class ListenerGroup<T> {
     final CountDownLatch latch = new CountDownLatch(copy.size());
     for (EventDispatcher<T> eventDispatcher : copy) {
       eventDispatcher.signal(new SignalRunnable<T>() {
-        @Override
+        
         public void run(T listener) {
           signalRunnable.run(listener);
           latch.countDown();

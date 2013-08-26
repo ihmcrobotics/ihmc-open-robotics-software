@@ -24,7 +24,7 @@ import org.jboss.netty.channel.SimpleChannelHandler;
 public abstract class AbstractNamedChannelHandler extends SimpleChannelHandler implements
     NamedChannelHandler {
 
-  @Override
+  
   public String toString() {
     return String.format("NamedChannelHandler<%s, %s>", getName(), super.toString());
   }

@@ -41,12 +41,12 @@ public class TopicDefinitionResourceProvider implements MessageDefinitionProvide
         messageIdentifier.getName());
   }
 
-  @Override
+  
   public String get(String topicType) {
     return stringResourceProvider.get(topicTypeToResourceName(topicType));
   }
 
-  @Override
+  
   public boolean has(String topicType) {
     return stringResourceProvider.has(topicTypeToResourceName(topicType));
   }
@@ -56,12 +56,12 @@ public class TopicDefinitionResourceProvider implements MessageDefinitionProvide
     stringResourceProvider.addStringToCache(topicTypeToResourceName(topicType), topicDefinition);
   }
 
-  @Override
+  
   public Collection<String> getPackages() {
     throw new UnsupportedOperationException();
   }
 
-  @Override
+  
   public Collection<MessageIdentifier> getMessageIdentifiersByPackage(String pkg) {
     throw new UnsupportedOperationException();
   }

@@ -62,12 +62,12 @@ public class SubscriberIdentifier {
     return topicIdentifier.getName();
   }
 
-  @Override
+  
   public String toString() {
     return "SubscriberIdentifier<" + nodeIdentifier + ", " + topicIdentifier + ">";
   }
 
-  @Override
+  
   public int hashCode() {
     final int prime = 31;
     int result = 1;
@@ -76,7 +76,7 @@ public class SubscriberIdentifier {
     return result;
   }
 
-  @Override
+  
   public boolean equals(Object obj) {
     if (this == obj)
       return true;

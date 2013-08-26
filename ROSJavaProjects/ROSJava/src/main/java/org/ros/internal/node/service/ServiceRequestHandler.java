@@ -83,14 +83,14 @@ class ServiceRequestHandler<T, S> extends SimpleChannelHandler {
     ctx.getChannel().write(response);
   }
 
-  @Override
+  
   public void messageReceived(final ChannelHandlerContext ctx, MessageEvent e) throws Exception {
     // Although the ChannelHandlerContext is explicitly documented as being safe
     // to keep for later use, the MessageEvent is not. So, we make a defensive
     // copy of the ChannelBuffer.
     final ChannelBuffer requestBuffer = ((ChannelBuffer) e.getMessage()).copy();
     executorService.execute(new Runnable() {
-      @Override
+      
       public void run() {
         ServiceServerResponse response = new ServiceServerResponse();
         ChannelBuffer responseBuffer = messageBufferPool.acquire();

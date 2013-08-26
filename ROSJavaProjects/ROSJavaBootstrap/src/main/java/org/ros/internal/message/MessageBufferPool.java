@@ -36,25 +36,25 @@ public class MessageBufferPool {
 
   public MessageBufferPool() {
     pool = new StackObjectPool<ChannelBuffer>(new PoolableObjectFactory<ChannelBuffer>() {
-      @Override
+      
       public ChannelBuffer makeObject() throws Exception {
         return MessageBuffers.dynamicBuffer();
       }
 
-      @Override
+      
       public void destroyObject(ChannelBuffer channelBuffer) throws Exception {
       }
 
-      @Override
+      
       public boolean validateObject(ChannelBuffer channelBuffer) {
         return true;
       }
 
-      @Override
+      
       public void activateObject(ChannelBuffer channelBuffer) throws Exception {
       }
 
-      @Override
+      
       public void passivateObject(ChannelBuffer channelBuffer) throws Exception {
         channelBuffer.clear();
       }

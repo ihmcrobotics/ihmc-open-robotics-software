@@ -36,7 +36,7 @@ class ServiceResponseDecoder<ResponseType> extends
   }
 
   @SuppressWarnings("fallthrough")
-  @Override
+  
   protected Object decode(ChannelHandlerContext ctx, Channel channel, ChannelBuffer buffer,
       ServiceResponseDecoderState state) throws Exception {
     switch (state) {

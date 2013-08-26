@@ -43,7 +43,7 @@ public abstract class CancellableLoop implements Runnable {
     mutex = new Object();
   }
 
-  @Override
+  
   public void run() {
     synchronized (mutex) {
       Preconditions.checkState(!ranOnce, "CancellableLoops cannot be restarted.");

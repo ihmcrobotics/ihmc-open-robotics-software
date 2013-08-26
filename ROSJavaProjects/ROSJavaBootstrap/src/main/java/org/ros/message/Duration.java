@@ -119,12 +119,12 @@ public class Duration implements Comparable<Duration> {
     return totalNsecs() < 0;
   }
 
-  @Override
+  
   public String toString() {
     return secs + ":" + nsecs;
   }
 
-  @Override
+  
   public int hashCode() {
     final int prime = 31;
     int result = 1;
@@ -133,7 +133,7 @@ public class Duration implements Comparable<Duration> {
     return result;
   }
 
-  @Override
+  
   /**
    * Check for equality between Time objects.  
    * equals() does not normalize Time representations, so fields must match exactly.
@@ -153,7 +153,7 @@ public class Duration implements Comparable<Duration> {
     return true;
   }
 
-  @Override
+  
   public int compareTo(Duration d) {
     if ((secs > d.secs) || ((secs == d.secs) && nsecs > d.nsecs)) {
       return 1;

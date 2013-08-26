@@ -31,7 +31,7 @@ import com.google.common.collect.Lists;
 public class TopicTypeListResultFactory implements
 		ResultFactory<List<TopicType>> {
 
-	@Override
+	
 	public List<TopicType> newFromValue(Object value) {
 		List<TopicType> topics = Lists.newArrayList();
 

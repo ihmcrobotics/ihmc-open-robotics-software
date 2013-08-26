@@ -89,7 +89,7 @@ public class MessageDispatcher<T> extends CancellableLoop {
    */
   private SignalRunnable<MessageListener<T>> newSignalRunnable(final LazyMessage<T> lazyMessage) {
     return new SignalRunnable<MessageListener<T>>() {
-      @Override
+      
       public void run(MessageListener<T> messageListener) {
         messageListener.onNewMessage(lazyMessage.get());
       }
@@ -112,7 +112,7 @@ public class MessageDispatcher<T> extends CancellableLoop {
     return latchMode;
   }
 
-  @Override
+  
   public void loop() throws InterruptedException {
     LazyMessage<T> lazyMessage = lazyMessages.takeFirst();
     synchronized (mutex) {
@@ -124,7 +124,7 @@ public class MessageDispatcher<T> extends CancellableLoop {
     }
   }
 
-  @Override
+  
   protected void handleInterruptedException(InterruptedException e) {
     messageListeners.shutdown();
   }

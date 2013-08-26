@@ -60,7 +60,7 @@ public class RetryingExecutorService {
   private boolean running;
 
   private class RetryLoop extends CancellableLoop {
-    @Override
+    
     public void loop() throws InterruptedException {
       Future<Boolean> future = completionService.take();
       final Callable<Boolean> callable = callables.remove(future);
@@ -75,7 +75,7 @@ public class RetryingExecutorService {
           log.info("Retry requested.");
         }
         scheduledExecutorService.schedule(new Runnable() {
-          @Override
+          
           public void run() {
             submit(callable);
           }

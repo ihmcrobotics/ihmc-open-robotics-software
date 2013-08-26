@@ -46,12 +46,12 @@ public class MessageReceiver<T> extends AbstractNamedChannelHandler {
     this.deserializer = deserializer;
   }
 
-  @Override
+  
   public String getName() {
     return "IncomingMessageQueueChannelHandler";
   }
 
-  @Override
+  
   public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
     ChannelBuffer buffer = (ChannelBuffer) e.getMessage();
     if (DEBUG) {

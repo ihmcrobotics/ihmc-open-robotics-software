@@ -45,7 +45,7 @@ public class MessageDefinitionReflectionProvider implements MessageDefinitionPro
     cache = Maps.newConcurrentMap();
   }
 
-  @Override
+  
   public String get(String messageType) {
     String messageDefinition = cache.get(messageType);
     if (messageDefinition == null) {
@@ -61,7 +61,7 @@ public class MessageDefinitionReflectionProvider implements MessageDefinitionPro
     return messageDefinition;
   }
 
-  @Override
+  
   public boolean has(String messageType) {
     try {
       get(messageType);
@@ -71,12 +71,12 @@ public class MessageDefinitionReflectionProvider implements MessageDefinitionPro
     return true;
   }
 
-  @Override
+  
   public Collection<String> getPackages() {
     throw new UnsupportedOperationException();
   }
 
-  @Override
+  
   public Collection<MessageIdentifier> getMessageIdentifiersByPackage(String pkg) {
     throw new UnsupportedOperationException();
   }

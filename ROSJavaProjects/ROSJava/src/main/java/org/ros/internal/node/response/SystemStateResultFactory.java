@@ -36,7 +36,7 @@ import java.util.Set;
  */
 public class SystemStateResultFactory implements ResultFactory<SystemState> {
 
-	@Override
+	
 	public SystemState newFromValue(Object value) {
 		Object[] vals = (Object[]) value;
 

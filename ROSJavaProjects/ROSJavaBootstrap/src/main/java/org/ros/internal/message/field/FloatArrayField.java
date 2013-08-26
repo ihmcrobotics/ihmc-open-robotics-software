@@ -42,18 +42,18 @@ public class FloatArrayField extends Field {
   }
 
   @SuppressWarnings("unchecked")
-  @Override
+  
   public float[] getValue() {
     return value;
   }
 
-  @Override
+  
   public void setValue(Object value) {
     Preconditions.checkArgument(size < 0 || ((float[]) value).length == size);
     this.value = (float[]) value;
   }
 
-  @Override
+  
   public void serialize(ChannelBuffer buffer) {
     if (size < 0) {
       buffer.writeInt(value.length);
@@ -63,7 +63,7 @@ public class FloatArrayField extends Field {
     }
   }
 
-  @Override
+  
   public void deserialize(ChannelBuffer buffer) {
     int currentSize = size;
     if (currentSize < 0) {
@@ -75,22 +75,22 @@ public class FloatArrayField extends Field {
     }
   }
 
-  @Override
+  
   public String getMd5String() {
     return String.format("%s %s\n", type, name);
   }
 
-  @Override
+  
   public String getJavaTypeName() {
     return type.getJavaTypeName() + "[]";
   }
 
-  @Override
+  
   public String toString() {
     return "FloatArrayField<" + type + ", " + name + ">";
   }
 
-  @Override
+  
   public int hashCode() {
     final int prime = 31;
     int result = super.hashCode();
@@ -98,7 +98,7 @@ public class FloatArrayField extends Field {
     return result;
   }
 
-  @Override
+  
   public boolean equals(Object obj) {
     if (this == obj)
       return true;

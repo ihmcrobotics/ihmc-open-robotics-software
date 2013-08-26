@@ -46,7 +46,7 @@ public class RepeatingPublisher<MessageType> {
   private final ScheduledExecutorService executorService;
 
   private final class RepeatingPublisherLoop extends CancellableLoop {
-    @Override
+    
     public void loop() throws InterruptedException {
       publisher.publish(message);
       if (DEBUG) {

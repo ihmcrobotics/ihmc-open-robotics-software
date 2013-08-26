@@ -35,12 +35,12 @@ public class StaticMasterUriProvider implements MasterUriProvider {
     this.uri = uri;
   }
 
-  @Override
+  
   public URI getMasterUri() {
     return uri;
   }
 
-  @Override
+  
   public URI getMasterUri(long timeout, TimeUnit unit) {
     return uri;
   }

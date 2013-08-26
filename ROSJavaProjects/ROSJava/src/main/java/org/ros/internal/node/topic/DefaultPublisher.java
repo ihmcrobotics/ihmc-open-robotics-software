@@ -73,45 +73,45 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
     outgoingMessageQueue = new OutgoingMessageQueue<T>(serializer, executorService);
     listeners = new ListenerGroup<PublisherListener<T>>(executorService);
     listeners.add(new DefaultPublisherListener<T>() {
-      @Override
+      
       public void onMasterRegistrationSuccess(Publisher<T> registrant) {
         log.info("Publisher registered: " + DefaultPublisher.this);
       }
 
-      @Override
+      
       public void onMasterRegistrationFailure(Publisher<T> registrant) {
         log.info("Publisher registration failed: " + DefaultPublisher.this);
       }
 
-      @Override
+      
       public void onMasterUnregistrationSuccess(Publisher<T> registrant) {
         log.info("Publisher unregistered: " + DefaultPublisher.this);
       }
 
-      @Override
+      
       public void onMasterUnregistrationFailure(Publisher<T> registrant) {
         log.info("Publisher unregistration failed: " + DefaultPublisher.this);
       }
     });
   }
 
-  @Override
+  
   public void setLatchMode(boolean enabled) {
     outgoingMessageQueue.setLatchMode(enabled);
   }
 
-  @Override
+  
   public boolean getLatchMode() {
     return outgoingMessageQueue.getLatchMode();
   }
 
-  @Override
+  
   public void shutdown(long timeout, TimeUnit unit) {
     signalOnShutdown(timeout, unit);
     outgoingMessageQueue.shutdown();
   }
 
-  @Override
+  
   public void shutdown() {
     shutdown(DEFAULT_SHUTDOWN_TIMEOUT, DEFAULT_SHUTDOWN_TIMEOUT_UNITS);
   }
@@ -124,22 +124,22 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
     return PublisherDeclaration.newFromNodeIdentifier(nodeIdentifier, getTopicDeclaration());
   }
 
-  @Override
+  
   public boolean hasSubscribers() {
     return outgoingMessageQueue.getNumberOfChannels() > 0;
   }
 
-  @Override
+  
   public int getNumberOfSubscribers() {
     return outgoingMessageQueue.getNumberOfChannels();
   }
 
-  @Override
+  
   public T newMessage() {
     return messageFactory.newFromType(getTopicDeclaration().getMessageType());
   }
 
-  @Override
+  
   public void publish(T message) {
     if (DEBUG) {
       log.info(String.format("Publishing message %s on topic %s.", message, getTopicName()));
@@ -199,7 +199,7 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
     signalOnNewSubscriber(subscriberIdentifer);
   }
 
-  @Override
+  
   public void addListener(PublisherListener<T> listener) {
     listeners.add(listener);
   }
@@ -210,11 +210,11 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
    * <p>
    * Each listener is called in a separate thread.
    */
-  @Override
+  
   public void signalOnMasterRegistrationSuccess() {
     final Publisher<T> publisher = this;
     listeners.signal(new SignalRunnable<PublisherListener<T>>() {
-      @Override
+      
       public void run(PublisherListener<T> listener) {
         listener.onMasterRegistrationSuccess(publisher);
       }
@@ -227,11 +227,11 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
    * <p>
    * Each listener is called in a separate thread.
    */
-  @Override
+  
   public void signalOnMasterRegistrationFailure() {
     final Publisher<T> publisher = this;
     listeners.signal(new SignalRunnable<PublisherListener<T>>() {
-      @Override
+      
       public void run(PublisherListener<T> listener) {
         listener.onMasterRegistrationFailure(publisher);
       }
@@ -244,11 +244,11 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
    * <p>
    * Each listener is called in a separate thread.
    */
-  @Override
+  
   public void signalOnMasterUnregistrationSuccess() {
     final Publisher<T> publisher = this;
     listeners.signal(new SignalRunnable<PublisherListener<T>>() {
-      @Override
+      
       public void run(PublisherListener<T> listener) {
         listener.onMasterUnregistrationSuccess(publisher);
       }
@@ -261,11 +261,11 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
    * <p>
    * Each listener is called in a separate thread.
    */
-  @Override
+  
   public void signalOnMasterUnregistrationFailure() {
     final Publisher<T> publisher = this;
     listeners.signal(new SignalRunnable<PublisherListener<T>>() {
-      @Override
+      
       public void run(PublisherListener<T> listener) {
         listener.onMasterUnregistrationFailure(publisher);
       }
@@ -284,7 +284,7 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
   private void signalOnNewSubscriber(final SubscriberIdentifier subscriberIdentifier) {
     final Publisher<T> publisher = this;
     listeners.signal(new SignalRunnable<PublisherListener<T>>() {
-      @Override
+      
       public void run(PublisherListener<T> listener) {
         listener.onNewSubscriber(publisher, subscriberIdentifier);
       }
@@ -304,7 +304,7 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
     final Publisher<T> publisher = this;
     try {
       listeners.signal(new SignalRunnable<PublisherListener<T>>() {
-        @Override
+        
         public void run(PublisherListener<T> listener) {
           listener.onShutdown(publisher);
         }
@@ -315,7 +315,7 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
     }
   }
 
-  @Override
+  
   public String toString() {
     return "Publisher<" + toDeclaration() + ">";
   }

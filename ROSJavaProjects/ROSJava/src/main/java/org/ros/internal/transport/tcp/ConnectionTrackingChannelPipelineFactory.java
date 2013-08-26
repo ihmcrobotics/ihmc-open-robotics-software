@@ -36,7 +36,7 @@ public class ConnectionTrackingChannelPipelineFactory implements ChannelPipeline
     this.connectionTrackingHandler = new ConnectionTrackingHandler(channelGroup);
   }
 
-  @Override
+  
   public ChannelPipeline getPipeline() {
     ChannelPipeline pipeline = pipeline();
     pipeline.addLast(CONNECTION_TRACKING_HANDLER, connectionTrackingHandler);

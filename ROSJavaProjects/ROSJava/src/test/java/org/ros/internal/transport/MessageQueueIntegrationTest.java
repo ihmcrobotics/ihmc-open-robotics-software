@@ -78,7 +78,7 @@ public class MessageQueueIntegrationTest {
   private std_msgs.String expectedMessage;
 
   private class ServerHandler extends SimpleChannelHandler {
-    @Override
+    
     public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
       if (DEBUG) {
         log.info("Channel connected: " + e.getChannel().toString());
@@ -88,7 +88,7 @@ public class MessageQueueIntegrationTest {
       super.channelConnected(ctx, e);
     }
 
-    @Override
+    
     public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e)
         throws Exception {
       if (DEBUG) {
@@ -97,7 +97,7 @@ public class MessageQueueIntegrationTest {
       super.channelDisconnected(ctx, e);
     }
 
-    @Override
+    
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
       if (DEBUG) {
         log.info("Channel exception: " + e.getChannel().toString());
@@ -136,7 +136,7 @@ public class MessageQueueIntegrationTest {
 
   private void startRepeatingPublisher() {
     executorService.execute(new CancellableLoop() {
-      @Override
+      
       protected void loop() throws InterruptedException {
         outgoingMessageQueue.add(expectedMessage);
         Thread.sleep(100);
@@ -156,7 +156,7 @@ public class MessageQueueIntegrationTest {
     ChannelGroup serverChannelGroup = new DefaultChannelGroup();
     TcpServerPipelineFactory serverPipelineFactory =
         new TcpServerPipelineFactory(serverChannelGroup, topicParticipantManager, serviceManager) {
-          @Override
+          
           public ChannelPipeline getPipeline() {
             ChannelPipeline pipeline = super.getPipeline();
             // We're not interested firstIncomingMessageQueue testing the
@@ -180,7 +180,7 @@ public class MessageQueueIntegrationTest {
       throws InterruptedException {
     final CountDownLatch latch = new CountDownLatch(1);
     incomingMessageQueue.addListener(new MessageListener<std_msgs.String>() {
-      @Override
+      
       public void onNewMessage(std_msgs.String message) {
         assertEquals(message, expectedMessage);
         latch.countDown();

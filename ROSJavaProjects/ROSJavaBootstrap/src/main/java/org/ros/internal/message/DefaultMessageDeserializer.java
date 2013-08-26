@@ -37,7 +37,7 @@ public class DefaultMessageDeserializer<T> implements MessageDeserializer<T> {
   }
 
   @SuppressWarnings("unchecked")
-  @Override
+  
   public T deserialize(ChannelBuffer buffer) {
     Message message = messageFactory.newFromType(messageIdentifier.getType());
     for (Field field : message.toRawMessage().getFields()) {

@@ -86,7 +86,7 @@ public class TcpRosServer {
 
     outgoingChannel = bootstrap.bind(bindAddress.toInetSocketAddress());
     advertiseAddress.setPortCallable(new Callable<Integer>() {
-      @Override
+      
       public Integer call() throws Exception {
         return ((InetSocketAddress) outgoingChannel.getLocalAddress()).getPort();
       }

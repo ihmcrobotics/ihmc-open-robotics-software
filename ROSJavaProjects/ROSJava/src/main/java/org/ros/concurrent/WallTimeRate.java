@@ -31,7 +31,7 @@ public class WallTimeRate implements Rate {
     time = 0;
   }
 
-  @Override
+  
   public void sleep() {
     long delta = System.currentTimeMillis() - time;
     while (delta < delay) {

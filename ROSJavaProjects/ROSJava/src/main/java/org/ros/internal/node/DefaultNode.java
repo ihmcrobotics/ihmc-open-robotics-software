@@ -168,7 +168,7 @@ public class DefaultNode implements ConnectedNode {
     serviceManager.setListener(registrar);
 
     scheduledExecutorService.execute(new Runnable() {
-      @Override
+      
       public void run() {
         start();
       }
@@ -185,7 +185,7 @@ public class DefaultNode implements ConnectedNode {
 
     log = new RosoutLogger(this);
     log.getPublisher().addListener(new DefaultPublisherListener<rosgraph_msgs.Log>() {
-      @Override
+      
       public void onMasterRegistrationSuccess(Publisher<rosgraph_msgs.Log> registrant) {
         latch.countDown();
       }
@@ -203,7 +203,7 @@ public class DefaultNode implements ConnectedNode {
       ClockTopicTimeProvider clockTopicTimeProvider = new ClockTopicTimeProvider(this);
       clockTopicTimeProvider.getSubscriber().addSubscriberListener(
           new DefaultSubscriberListener<rosgraph_msgs.Clock>() {
-            @Override
+            
             public void onMasterRegistrationSuccess(Subscriber<rosgraph_msgs.Clock> subscriber) {
               latch.countDown();
             }
@@ -264,7 +264,7 @@ public class DefaultNode implements ConnectedNode {
         .newServiceRequestDeserializer(serviceType);
   }
 
-  @Override
+  
   public <T> Publisher<T> newPublisher(GraphName topicName, String messageType) {
     GraphName resolvedTopicName = resolveName(topicName);
     TopicDescription topicDescription =
@@ -275,12 +275,12 @@ public class DefaultNode implements ConnectedNode {
     return publisherFactory.newOrExisting(topicDeclaration, serializer);
   }
 
-  @Override
+  
   public <T> Publisher<T> newPublisher(String topicName, String messageType) {
     return newPublisher(GraphName.of(topicName), messageType);
   }
 
-  @Override
+  
   public <T> Subscriber<T> newSubscriber(GraphName topicName, String messageType) {
     GraphName resolvedTopicName = resolveName(topicName);
     TopicDescription topicDescription =
@@ -292,12 +292,12 @@ public class DefaultNode implements ConnectedNode {
     return subscriber;
   }
 
-  @Override
+  
   public <T> Subscriber<T> newSubscriber(String topicName, String messageType) {
     return newSubscriber(GraphName.of(topicName), messageType);
   }
 
-  @Override
+  
   public <T, S> ServiceServer<T, S> newServiceServer(GraphName serviceName, String serviceType,
       ServiceResponseBuilder<T, S> responseBuilder) {
     GraphName resolvedServiceName = resolveName(serviceName);
@@ -313,24 +313,24 @@ public class DefaultNode implements ConnectedNode {
         responseSerializer, nodeConfiguration.getServiceResponseMessageFactory());
   }
 
-  @Override
+  
   public <T, S> ServiceServer<T, S> newServiceServer(String serviceName, String serviceType,
       ServiceResponseBuilder<T, S> responseBuilder) {
     return newServiceServer(GraphName.of(serviceName), serviceType, responseBuilder);
   }
 
   @SuppressWarnings("unchecked")
-  @Override
+  
   public <T, S> ServiceServer<T, S> getServiceServer(GraphName serviceName) {
     return (ServiceServer<T, S>) serviceManager.getServer(serviceName);
   }
 
-  @Override
+  
   public <T, S> ServiceServer<T, S> getServiceServer(String serviceName) {
     return getServiceServer(GraphName.of(serviceName));
   }
 
-  @Override
+  
   public URI lookupServiceUri(GraphName serviceName) {
     Response<URI> response =
         masterClient.lookupService(slaveServer.toNodeIdentifier().getName(),
@@ -342,12 +342,12 @@ public class DefaultNode implements ConnectedNode {
     }
   }
 
-  @Override
+  
   public URI lookupServiceUri(String serviceName) {
     return lookupServiceUri(GraphName.of(serviceName));
   }
 
-  @Override
+  
   public <T, S> ServiceClient<T, S> newServiceClient(GraphName serviceName, String serviceType)
       throws ServiceNotFoundException {
     GraphName resolvedServiceName = resolveName(serviceName);
@@ -366,38 +366,38 @@ public class DefaultNode implements ConnectedNode {
         nodeConfiguration.getServiceRequestMessageFactory());
   }
 
-  @Override
+  
   public <T, S> ServiceClient<T, S> newServiceClient(String serviceName, String serviceType)
       throws ServiceNotFoundException {
     return newServiceClient(GraphName.of(serviceName), serviceType);
   }
 
-  @Override
+  
   public Time getCurrentTime() {
     return timeProvider.getCurrentTime();
   }
 
-  @Override
+  
   public GraphName getName() {
     return nodeName;
   }
 
-  @Override
+  
   public Log getLog() {
     return log;
   }
 
-  @Override
+  
   public GraphName resolveName(GraphName name) {
     return resolver.resolve(name);
   }
 
-  @Override
+  
   public GraphName resolveName(String name) {
     return resolver.resolve(GraphName.of(name));
   }
 
-  @Override
+  
   public void shutdown() {
     signalOnShutdown();
     // NOTE(damonkohler): We don't want to raise potentially spurious
@@ -432,47 +432,47 @@ public class DefaultNode implements ConnectedNode {
     signalOnShutdownComplete();
   }
 
-  @Override
+  
   public URI getMasterUri() {
     return masterUri;
   }
 
-  @Override
+  
   public NodeNameResolver getResolver() {
     return resolver;
   }
 
-  @Override
+  
   public ParameterTree getParameterTree() {
     return parameterTree;
   }
 
-  @Override
+  
   public URI getUri() {
     return slaveServer.getUri();
   }
 
-  @Override
+  
   public MessageSerializationFactory getMessageSerializationFactory() {
     return nodeConfiguration.getMessageSerializationFactory();
   }
 
-  @Override
+  
   public MessageFactory getTopicMessageFactory() {
     return nodeConfiguration.getTopicMessageFactory();
   }
 
-  @Override
+  
   public MessageFactory getServiceRequestMessageFactory() {
     return nodeConfiguration.getServiceRequestMessageFactory();
   }
 
-  @Override
+  
   public MessageFactory getServiceResponseMessageFactory() {
     return nodeConfiguration.getServiceResponseMessageFactory();
   }
 
-  @Override
+  
   public void addListener(NodeListener listener) {
     nodeListeners.add(listener);
   }
@@ -486,7 +486,7 @@ public class DefaultNode implements ConnectedNode {
   private void signalOnError(final Throwable throwable) {
     final Node node = this;
     nodeListeners.signal(new SignalRunnable<NodeListener>() {
-      @Override
+      
       public void run(NodeListener listener) {
         listener.onError(node, throwable);
       }
@@ -501,7 +501,7 @@ public class DefaultNode implements ConnectedNode {
   private void signalOnStart() {
     final ConnectedNode connectedNode = this;
     nodeListeners.signal(new SignalRunnable<NodeListener>() {
-      @Override
+      
       public void run(NodeListener listener) {
         listener.onStart(connectedNode);
       }
@@ -518,7 +518,7 @@ public class DefaultNode implements ConnectedNode {
     final Node node = this;
     try {
       nodeListeners.signal(new SignalRunnable<NodeListener>() {
-        @Override
+        
         public void run(NodeListener listener) {
           listener.onShutdown(node);
         }
@@ -539,7 +539,7 @@ public class DefaultNode implements ConnectedNode {
   private void signalOnShutdownComplete() {
     final Node node = this;
     nodeListeners.signal(new SignalRunnable<NodeListener>() {
-      @Override
+      
       public void run(NodeListener listener) {
         try {
           listener.onShutdownComplete(node);
@@ -555,29 +555,29 @@ public class DefaultNode implements ConnectedNode {
     return slaveServer.getAddress();
   }
 
-  @Override
+  
   public ScheduledExecutorService getScheduledExecutorService() {
     return scheduledExecutorService;
   }
 
-  @Override
+  
   public void executeCancellableLoop(final CancellableLoop cancellableLoop) {
     scheduledExecutorService.execute(cancellableLoop);
     addListener(new NodeListener() {
-      @Override
+      
       public void onStart(ConnectedNode connectedNode) {
       }
 
-      @Override
+      
       public void onShutdown(Node node) {
         cancellableLoop.cancel();
       }
 
-      @Override
+      
       public void onShutdownComplete(Node node) {
       }
 
-      @Override
+      
       public void onError(Node node, Throwable throwable) {
         cancellableLoop.cancel();
       }

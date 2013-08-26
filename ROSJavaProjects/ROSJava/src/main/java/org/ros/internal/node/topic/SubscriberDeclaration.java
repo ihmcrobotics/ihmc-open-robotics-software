@@ -73,12 +73,12 @@ public class SubscriberDeclaration {
     return connectionHeader;
   }
 
-  @Override
+  
   public String toString() {
     return "SubscriberDefinition<" + subscriberIdentifier + ", " + topicDeclaration + ">";
   }
 
-  @Override
+  
   public int hashCode() {
     final int prime = 31;
     int result = 1;
@@ -88,7 +88,7 @@ public class SubscriberDeclaration {
     return result;
   }
 
-  @Override
+  
   public boolean equals(Object obj) {
     if (this == obj)
       return true;

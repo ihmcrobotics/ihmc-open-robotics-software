@@ -48,34 +48,34 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
     parameterServer = new ParameterServer();
   }
 
-  @Override
+  
   public List<Object> getPid(String callerId) {
     return Response.newSuccess("server pid", master.getPid()).toList();
   }
 
-  @Override
+  
   public List<Object> getPublishedTopics(String callerId, String subgraph) {
     return Response.newSuccess("current topics",
         master.getPublishedTopics(GraphName.of(callerId), GraphName.of(subgraph))).toList();
   }
 
-  @Override
+  
   public List<Object> getTopicTypes(String callerId) {
     return Response.newSuccess("topic types", master.getTopicTypes(GraphName.of(callerId)))
         .toList();
   }
 
-  @Override
+  
   public List<Object> getSystemState(String callerId) {
     return Response.newSuccess("current system state", master.getSystemState()).toList();
   }
 
-  @Override
+  
   public List<Object> getUri(String callerId) {
     return Response.newSuccess("Success", master.getUri().toString()).toList();
   }
 
-  @Override
+  
   public List<Object> lookupNode(String callerId, String nodeName) {
     URI nodeSlaveUri = master.lookupNode(GraphName.of(nodeName));
     if (nodeSlaveUri != null) {
@@ -85,7 +85,7 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
     }
   }
 
-  @Override
+  
   public List<Object> registerPublisher(String callerId, String topicName, String topicMessageType,
       String callerSlaveUri) {
     try {
@@ -103,13 +103,13 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
     }
   }
 
-  @Override
+  
   public List<Object> unregisterPublisher(String callerId, String topicName, String callerSlaveUri) {
     boolean result = master.unregisterPublisher(GraphName.of(callerId), GraphName.of(topicName));
     return Response.newSuccess("Success", result ? 1 : 0).toList();
   }
 
-  @Override
+  
   public List<Object> registerSubscriber(String callerId, String topicName,
       String topicMessageType, String callerSlaveUri) {
     try {
@@ -127,14 +127,14 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
     }
   }
 
-  @Override
+  
   public List<Object>
       unregisterSubscriber(String callerId, String topicName, String callerSlaveUri) {
     boolean result = master.unregisterSubscriber(GraphName.of(callerId), GraphName.of(topicName));
     return Response.newSuccess("Success", result ? 1 : 0).toList();
   }
 
-  @Override
+  
   public List<Object> lookupService(String callerId, String serviceName) {
     URI slaveUri = master.lookupService(GraphName.of(serviceName));
     if (slaveUri != null) {
@@ -143,7 +143,7 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
     return Response.newError("No such service.", null).toList();
   }
 
-  @Override
+  
   public List<Object> registerService(String callerId, String serviceName, String serviceUri,
       String callerSlaveUri) {
     try {
@@ -155,7 +155,7 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
     }
   }
 
-  @Override
+  
   public List<Object> unregisterService(String callerId, String serviceName, String serviceUri) {
     try {
       boolean result =
@@ -167,43 +167,43 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
     }
   }
 
-  @Override
+  
   public List<Object> setParam(String callerId, String key, Boolean value) {
     parameterServer.set(GraphName.of(key), value);
     return Response.newSuccess("Success", null).toList();
   }
 
-  @Override
+  
   public List<Object> setParam(String callerId, String key, Integer value) {
     parameterServer.set(GraphName.of(key), value);
     return Response.newSuccess("Success", null).toList();
   }
 
-  @Override
+  
   public List<Object> setParam(String callerId, String key, Double value) {
     parameterServer.set(GraphName.of(key), value);
     return Response.newSuccess("Success", null).toList();
   }
 
-  @Override
+  
   public List<Object> setParam(String callerId, String key, String value) {
     parameterServer.set(GraphName.of(key), value);
     return Response.newSuccess("Success", null).toList();
   }
 
-  @Override
+  
   public List<Object> setParam(String callerId, String key, List<?> value) {
     parameterServer.set(GraphName.of(key), value);
     return Response.newSuccess("Success", null).toList();
   }
 
-  @Override
+  
   public List<Object> setParam(String callerId, String key, Map<?, ?> value) {
     parameterServer.set(GraphName.of(key), value);
     return Response.newSuccess("Success", null).toList();
   }
 
-  @Override
+  
   public List<Object> getParam(String callerId, String key) {
     Object value = parameterServer.get(GraphName.of(key));
     if (value == null) {
@@ -212,12 +212,12 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
     return Response.newSuccess("Success", value).toList();
   }
 
-  @Override
+  
   public List<Object> searchParam(String callerId, String key) {
     throw new UnsupportedOperationException();
   }
 
-  @Override
+  
   public List<Object> subscribeParam(String callerId, String callerSlaveUri, String key) {
     parameterServer.subscribe(GraphName.of(key),
         NodeIdentifier.forNameAndUri(callerId, callerSlaveUri));
@@ -229,23 +229,23 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
     return Response.newSuccess("Success", value).toList();
   }
 
-  @Override
+  
   public List<Object> unsubscribeParam(String callerId, String callerSlaveUri, String key) {
     throw new UnsupportedOperationException();
   }
 
-  @Override
+  
   public List<Object> deleteParam(String callerId, String key) {
     parameterServer.delete(GraphName.of(key));
     return Response.newSuccess("Success", null).toList();
   }
 
-  @Override
+  
   public List<Object> hasParam(String callerId, String key) {
     return Response.newSuccess("Success", parameterServer.has(GraphName.of(key))).toList();
   }
 
-  @Override
+  
   public List<Object> getParamNames(String callerId) {
     Collection<GraphName> names = parameterServer.getNames();
     List<String> stringNames = Lists.newArrayList();

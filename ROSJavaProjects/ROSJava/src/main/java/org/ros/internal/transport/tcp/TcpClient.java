@@ -89,7 +89,7 @@ public class TcpClient {
 
   public Channel connect(String connectionName, SocketAddress socketAddress) {
     TcpClientPipelineFactory tcpClientPipelineFactory = new TcpClientPipelineFactory(channelGroup) {
-      @Override
+      
       public ChannelPipeline getPipeline() {
         ChannelPipeline pipeline = super.getPipeline();
         for (NamedChannelHandler namedChannelHandler : namedChannelHandlers) {

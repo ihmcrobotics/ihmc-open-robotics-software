@@ -59,7 +59,7 @@ public class StringFileProvider
 
       // TODO(damonkohler): Update Apache Commons IO to the latest version.
       @SuppressWarnings("rawtypes")
-      @Override
+      
       protected boolean handleDirectory(File directory, int depth, Collection results) throws IOException
       {
          File canonicalDirectory = directory.getCanonicalFile();
@@ -72,7 +72,7 @@ public class StringFileProvider
       }
 
       @SuppressWarnings("rawtypes")
-      @Override
+      
       protected void handleFile(File file, int depth, Collection results)
       {
          String content;

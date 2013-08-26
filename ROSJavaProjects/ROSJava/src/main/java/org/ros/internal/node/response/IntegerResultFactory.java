@@ -21,7 +21,7 @@ package org.ros.internal.node.response;
  */
 public class IntegerResultFactory implements ResultFactory<Integer> {
   
-  @Override
+  
   public Integer newFromValue(Object value) {
     return (Integer) value;
   }

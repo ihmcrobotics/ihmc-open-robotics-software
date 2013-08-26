@@ -43,12 +43,12 @@ public class NtpTimeProviderTest extends RosTest {
     final CountDownLatch latch = new CountDownLatch(1);
     nodeConfiguration.setTimeProvider(ntpTimeProvider);
     nodeMainExecutor.execute(new AbstractNodeMain() {
-      @Override
+      
       public GraphName getDefaultNodeName() {
         return GraphName.of("node");
       }
 
-      @Override
+      
       public void onStart(ConnectedNode connectedNode) {
         try {
           ntpTimeProvider.updateTime();

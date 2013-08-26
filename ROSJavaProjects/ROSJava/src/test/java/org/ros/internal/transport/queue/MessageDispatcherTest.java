@@ -62,7 +62,7 @@ public class MessageDispatcherTest {
     messageDispatcher.addListener(new MessageListener<std_msgs.Int32>() {
       private AtomicInteger count = new AtomicInteger();
 
-      @Override
+      
       public void onNewMessage(Int32 message) {
         if (this.count.compareAndSet(message.getData(), message.getData() + 1)) {
           latch.countDown();

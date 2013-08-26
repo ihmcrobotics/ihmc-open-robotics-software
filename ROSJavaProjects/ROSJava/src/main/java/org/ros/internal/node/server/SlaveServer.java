@@ -84,7 +84,7 @@ public class SlaveServer extends XmlRpcServer {
   }
 
   // TODO(damonkohler): This should also shut down the Node.
-  @Override
+  
   public void shutdown() {
     super.shutdown();
     tcpRosServer.shutdown();
@@ -143,7 +143,7 @@ public class SlaveServer extends XmlRpcServer {
    * @return PID of this process if available, throws
    *         {@link UnsupportedOperationException} otherwise.
    */
-  @Override
+  
   public int getPid() {
     return Process.getPid();
   }

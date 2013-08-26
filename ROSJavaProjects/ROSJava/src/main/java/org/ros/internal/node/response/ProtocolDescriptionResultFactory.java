@@ -31,7 +31,7 @@ import com.google.common.base.Preconditions;
  */
 public class ProtocolDescriptionResultFactory implements ResultFactory<ProtocolDescription> {
 
-  @Override
+  
   public ProtocolDescription newFromValue(Object value) {
     List<Object> protocolParameters = Arrays.asList((Object[]) value);
     Preconditions.checkState(protocolParameters.size() == 3);

@@ -62,7 +62,7 @@ public class ServiceDeclaration {
     return identifier.getName();
   }
 
-  @Override
+  
   public String toString() {
     return "ServiceDeclaration<" + getName().toString() + ", " + description.toString() + ">";
   }
@@ -75,7 +75,7 @@ public class ServiceDeclaration {
     return identifier.getUri();
   }
 
-  @Override
+  
   public int hashCode() {
     final int prime = 31;
     int result = 1;
@@ -84,7 +84,7 @@ public class ServiceDeclaration {
     return result;
   }
 
-  @Override
+  
   public boolean equals(Object obj) {
     if (this == obj)
       return true;

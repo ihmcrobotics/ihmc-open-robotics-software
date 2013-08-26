@@ -34,12 +34,12 @@ public abstract class BaseClientHandshake implements ClientHandshake {
     this.outgoingConnectionHeader = outgoingConnectionHeader;
   }
 
-  @Override
+  
   public ConnectionHeader getOutgoingConnectionHeader() {
     return outgoingConnectionHeader;
   }
 
-  @Override
+  
   public String getErrorMessage() {
     return errorMessage;
   }

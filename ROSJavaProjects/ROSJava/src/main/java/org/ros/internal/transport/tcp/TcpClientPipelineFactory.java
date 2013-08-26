@@ -33,7 +33,7 @@ public class TcpClientPipelineFactory extends ConnectionTrackingChannelPipelineF
     super(channelGroup);
   }
 
-  @Override
+  
   public ChannelPipeline getPipeline() {
     ChannelPipeline pipeline = super.getPipeline();
     pipeline.addLast(LENGTH_FIELD_PREPENDER, new LengthFieldPrepender(4));

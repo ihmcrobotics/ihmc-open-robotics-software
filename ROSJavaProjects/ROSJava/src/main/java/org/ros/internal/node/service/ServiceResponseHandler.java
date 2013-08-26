@@ -49,14 +49,14 @@ class ServiceResponseHandler<ResponseType> extends SimpleChannelHandler {
     this.executorService = executorService;
   }
 
-  @Override
+  
   public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
     final ServiceResponseListener<ResponseType> listener = responseListeners.poll();
     Preconditions.checkNotNull(listener, "No listener for incoming service response.");
     final ServiceServerResponse response = (ServiceServerResponse) e.getMessage();
     final ChannelBuffer buffer = response.getMessage();
     executorService.execute(new Runnable() {
-      @Override
+      
       public void run() {
         if (response.getErrorCode() == 1) {
           listener.onSuccess(deserializer.deserialize(buffer));

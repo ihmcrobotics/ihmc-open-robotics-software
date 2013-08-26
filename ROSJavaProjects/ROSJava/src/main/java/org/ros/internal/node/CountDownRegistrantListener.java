@@ -66,22 +66,22 @@ public class CountDownRegistrantListener<T> implements RegistrantListener<T> {
     this.masterUnregistrationFailureLatch = masterUnregistrationFailureLatch;
   }
 
-  @Override
+  
   public void onMasterRegistrationSuccess(T registrant) {
     masterRegistrationSuccessLatch.countDown();
   }
 
-  @Override
+  
   public void onMasterRegistrationFailure(T registrant) {
     masterRegistrationFailureLatch.countDown();
   }
 
-  @Override
+  
   public void onMasterUnregistrationSuccess(T registrant) {
     masterUnregistrationSuccessLatch.countDown();
   }
 
-  @Override
+  
   public void onMasterUnregistrationFailure(T registrant) {
     masterUnregistrationFailureLatch.countDown();
   }
