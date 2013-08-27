@@ -30,12 +30,17 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class SensorAndEstimatorAssembler
 {
-   private static final boolean VISUALIZE_CONTROL_FLOW_GRAPH = false;
+   private static final boolean VISUALIZE_CONTROL_FLOW_GRAPH = false; //false;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final ControlFlowGraph controlFlowGraph;
-   private final ComposableOrientationAndCoMEstimatorCreator.ComposableOrientationAndCoMEstimator estimator;
+   
+   // The following are the elements added to the controlFlowGraph:
    private final JointAndIMUSensorDataSource jointSensorDataSource;
+   @SuppressWarnings("unused")
+   private final StateEstimationDataFromControllerSource stateEstimatorDataFromControllerSource;
+   private final JointStateFullRobotModelUpdater jointStateFullRobotModelUpdater;
+   private final ComposableOrientationAndCoMEstimatorCreator.ComposableOrientationAndCoMEstimator estimator;
    
   
    public SensorAndEstimatorAssembler(StateEstimationDataFromControllerSource stateEstimatorDataFromControllerSource,
@@ -43,6 +48,7 @@ public class SensorAndEstimatorAssembler
          Vector3d gravitationalAcceleration, FullInverseDynamicsStructure inverseDynamicsStructure, AfterJointReferenceFrameNameMap estimatorReferenceFrameMap,
          RigidBodyToIndexMap estimatorRigidBodyToIndexMap, double controlDT, YoVariableRegistry parentRegistry)
    {
+      this.stateEstimatorDataFromControllerSource = stateEstimatorDataFromControllerSource;
       SensorConfigurationFactory SensorConfigurationFactory = new SensorConfigurationFactory(sensorNoiseParametersForEstimator, gravitationalAcceleration);
 
       jointSensorDataSource = new JointAndIMUSensorDataSource(stateEstimatorSensorDefinitions);
@@ -61,7 +67,7 @@ public class SensorAndEstimatorAssembler
          SensorConfigurationFactory.createLinearAccelerationSensorConfigurations(jointAndIMUSensorMap.getLinearAccelerationSensors());
 
       controlFlowGraph = new ControlFlowGraph();
-      JointStateFullRobotModelUpdater jointStateFullRobotModelUpdater = new JointStateFullRobotModelUpdater(controlFlowGraph, jointAndIMUSensorMap,
+      jointStateFullRobotModelUpdater = new JointStateFullRobotModelUpdater(controlFlowGraph, jointAndIMUSensorMap,
                                                                            inverseDynamicsStructure);
 
       ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort =
