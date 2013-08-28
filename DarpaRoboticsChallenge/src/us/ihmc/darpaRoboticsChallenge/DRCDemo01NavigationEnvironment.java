@@ -68,13 +68,11 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
    private void setUpPath1Rocks()
    {
-      createCoursePath(8, 90);
       addRocks();
    }
 
    private void setUpPath2SmallCones()
    {
-      createCoursePath(8, 45);
       int numCones = 4;
       float initialOffset = 2.952f;
       float coneSeparation = 1.5f;
@@ -105,9 +103,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    {
       AppearanceDefinition color = YoAppearance.DarkGray();
 
-      createCoursePath(8, 0);
-
-      //float rampHeight = 0.3f;
+      // float rampHeight = 0.3f;
 
       float rampHeight = 0.625f;
 
@@ -129,34 +125,51 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       setUpRamp(11f, 0f, 2.0f, -3.0f, rampHeight, color);
 
       // Do this for a long ramp for testing:
-      //    rampHeight = 1.0f;
-      //    setUpRamp(10.1, 0.0f, 2.0f, 20.0f, rampHeight, color);
+      // rampHeight = 1.0f;
+      // setUpRamp(10.1, 0.0f, 2.0f, 20.0f, rampHeight, color);
    }
 
    private void setUpPath4DRCTrialsTrainingWalkingCourse()
    {
-      AppearanceDefinition color = YoAppearance.Gray();
+      // TODO: Finish course
       double courseAngle = 45.0;
-      createCoursePath(8, courseAngle);
-      int numberOfStepOvers = 3;
-      double heightIncrease = 0.05;
       double startDistance = 4.0;
-      double spacing = 1.0;
+      AppearanceDefinition color = YoAppearance.Gray();
 
-      double barrierWidth = 3.0;
+      final double sectionLength = 2.4;
 
-      for (int i = 0; i < numberOfStepOvers; i++)
+      for (int i = 1; i <= 4; i = i + 2)
       {
-         double[] newPoint = rotateAroundOrigin(startDistance + (i * spacing), 0, courseAngle);
-         setUpWall(newPoint[0], newPoint[1], barrierWidth, 0.15, heightIncrease * (i + 1), courseAngle, color);
+         double rampLength = sectionLength / 4;
+         double rampAngle = Math.toRadians(15);
+         double rampHeight = rampLength * Math.tan(rampAngle);
+         double rampCenter = startDistance + rampLength * (i - 1) + rampLength / 2;
+         double[] newPoint = rotateAroundOrigin(rampCenter, 0, courseAngle);
+         setUpRotatedRamp(newPoint[0], newPoint[1], sectionLength, rampLength, rampHeight, courseAngle, color);
+         
+         double rampDownCenter = startDistance + rampLength * (i) + rampLength / 2;
+         newPoint = rotateAroundOrigin(rampDownCenter, 0, courseAngle);
+         setUpRotatedRamp(newPoint[0], newPoint[1], sectionLength, -rampLength, rampHeight, courseAngle, color);
       }
+
+//    setUpCinderBlock(0,0,16,8,6,0,YoAppearance.DarkGray());
+//
+//    int numberOfStepOvers = 3;
+//    double heightIncrease = 0.05;
+//    double spacing = 1.0;
+//
+//    double barrierWidth = 3.0;
+//
+//    
+//    for (int i = 0; i < numberOfStepOvers; i++)
+//    {
+//        setUpWall(newPoint[0], newPoint[1], barrierWidth, 0.15, heightIncrease * (i + 1), courseAngle, color);
+//    }
    }
 
    private void setUpPath5NarrowDoor()
    {
       AppearanceDefinition color = YoAppearance.DarkGray();
-
-      createCoursePath(8, -90);
 
       // angled Door
       // door1
@@ -177,7 +190,6 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    {
       AppearanceDefinition color = YoAppearance.DarkGray();
       double courseAngle = -135.0;
-      createCoursePath(8, courseAngle);
       int numberOfStepOvers = 8;
       double heightIncrease = 0.05;
       double startDistance = 4.0;
@@ -194,7 +206,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
       for (int i = 0; i < numberOfStepOvers; i++)
       {
-         double[] newPoint = rotateAroundOrigin(startDistance + (i * spacing), (barrierWidth - platformWidth)/2.0 + 0.001, courseAngle);
+         double[] newPoint = rotateAroundOrigin(startDistance + (i * spacing), (barrierWidth - platformWidth) / 2.0 + 0.001, courseAngle);
          setUpWall(newPoint[0], newPoint[1], platformWidth, 0.4 * spacing, heightIncrease * (i + 1) + 0.001, courseAngle, color);
       }
 
@@ -204,7 +216,6 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    {
       AppearanceDefinition color = YoAppearance.DarkGray();
       double courseAngle = 135;
-      createCoursePath(8, courseAngle);
       int numberOfSteps = 3;
       double rise = 0.2;
       double startDistance = 4.0;
@@ -233,7 +244,6 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    {
       AppearanceDefinition color = YoAppearance.DarkGray();
 
-      createCoursePath(8, 180);
       float rampHeight = 0.3f;
 
       // ramp up and landing
@@ -281,7 +291,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
    private void setUpGround()
    {
-      //    AppearanceDefinition app = YoAppearance.Gray();
+      // AppearanceDefinition app = YoAppearance.Gray();
 
       // center
       // setUpCone(0, 0, 1.5, 1.5, FLOOR_THICKNESS, app);
@@ -320,22 +330,6 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
          combinedTerrainObject.getLinkGraphics().addCube(0.125, width, 0.125, color);
          combinedTerrainObject.getLinkGraphics().translate(0, -width / 2, -height);
       }
-   }
-
-
-   private void createCoursePath(double courseLength, double angle)
-   {
-      //
-      //    AppearanceDefinition app = YoAppearance.Gray();
-      //
-      //    double[] startTrackCenter = rotateAroundOrigin(2.1, 0.0, angle);
-      //    // setUpWall(startTrackCenter[0], startTrackCenter[1], 1.5f, 1.6f, FLOOR_THICKNESS, angle, app);
-      //    double[] mainTrackCenter = rotateAroundOrigin((courseLength / 2.0) + 4.25, 0.0f, angle);
-      //    // setUpWall(mainTrackCenter[0], mainTrackCenter[1], 3.0f, courseLength, FLOOR_THICKNESS, angle, app);
-      //    double[] startTrackRoundingCenter = rotateAroundOrigin(4.0, 0.0, angle);
-      //
-      //    //setUpCone(startTrackRoundingCenter[0], startTrackRoundingCenter[1], 1.5, 1.5, FLOOR_THICKNESS, app);
-
    }
 
    private void addRocks()
@@ -443,6 +437,26 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    private void setUpRamp(double x, double y, double width, double length, double height, AppearanceDefinition app)
    {
       combinedTerrainObject.addRamp(x - length / 2, y - width / 2, x + length / 2, y + width / 2, height, app);
+   }
+
+   private void setUpRotatedRamp(double xCenter, double yCenter, double width, double run, double rise, double yawDegreesAboutCenter, AppearanceDefinition app)
+   {
+      combinedTerrainObject.addRotatedRamp(xCenter - run / 2, yCenter - width / 2, xCenter + run / 2, yCenter + width / 2, rise, yawDegreesAboutCenter, app);
+   }
+
+   private void setUpCinderBlock(double x, double y, double width, double length, double height, double yawDegrees, AppearanceDefinition app)
+   {
+      // TODO: FINISH
+      // ramp
+      combinedTerrainObject.addRamp(x - length / 2, y - width / 2, x + length / 2, y + width / 2, height, app);
+
+      // wall
+      Transform3D location = new Transform3D();
+      location.rotZ(Math.toRadians(yawDegrees));
+
+      location.setTranslation(new Vector3d(x, y, height / 2));
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, length, width, height), app);
+      combinedTerrainObject.addTerrainObject(newBox);
    }
 
    public TerrainObject getTerrainObject()
