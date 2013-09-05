@@ -10,6 +10,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
@@ -17,9 +18,8 @@ import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.robotController.RawOutputWriter;
 
-public class SDFFullRobotModelVisualizer implements RawOutputWriter
+public class SDFFullRobotModelVisualizer implements RobotVisualizer
 {
    private final String name;
    private final SDFRobot robot;
@@ -90,7 +90,7 @@ public class SDFFullRobotModelVisualizer implements RawOutputWriter
    
    private final Vector3d tempPosition = new Vector3d();
    private final Quat4d tempOrientation = new Quat4d();
-   public void write()
+   public void update()
    {
       if(!updaterIsRunning.get())
       {
