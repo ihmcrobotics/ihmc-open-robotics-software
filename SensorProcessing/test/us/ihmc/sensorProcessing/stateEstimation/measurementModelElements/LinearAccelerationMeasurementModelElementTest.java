@@ -14,7 +14,7 @@ import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.controlFlow.NullControlFlowElement;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedLinearAccelerationSensor;
-import us.ihmc.sensorProcessing.stateEstimation.CenterOfMassBasedFullRobotModelUpdater;
+import us.ihmc.sensorProcessing.stateEstimation.OrientationAndPositionFullRobotModelUpdater;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.LinearAccelerationMeasurementModelElement;
 import us.ihmc.utilities.RandomTools;
@@ -96,7 +96,7 @@ public class LinearAccelerationMeasurementModelElementTest
       
       inverseDynamicsStructure.updateInternalState();
 
-      Runnable updater = new CenterOfMassBasedFullRobotModelUpdater(inverseDynamicsStructureInputPort, centerOfMassPositionPort,
+      Runnable updater = new OrientationAndPositionFullRobotModelUpdater(inverseDynamicsStructureInputPort, centerOfMassPositionPort,
                             centerOfMassVelocityPort, centerOfMassAccelerationPort, orientationPort, angularVelocityPort, angularAccelerationPort);
 
       centerOfMassPositionPort.setData(new FramePoint(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random)));

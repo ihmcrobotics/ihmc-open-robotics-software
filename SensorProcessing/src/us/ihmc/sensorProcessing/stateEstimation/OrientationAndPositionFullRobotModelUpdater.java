@@ -24,7 +24,7 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 //assumes that twist calculator and spatial acceleration calculator have already been updated with joint positions and velocities
 //TODO: update accelerations
-public class CenterOfMassBasedFullRobotModelUpdater implements Runnable
+public class OrientationAndPositionFullRobotModelUpdater implements Runnable
 {
    private final ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort;
 
@@ -43,7 +43,7 @@ public class CenterOfMassBasedFullRobotModelUpdater implements Runnable
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
 
-   public CenterOfMassBasedFullRobotModelUpdater(ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort,
+   public OrientationAndPositionFullRobotModelUpdater(ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort,
            ControlFlowOutputPort<FramePoint> centerOfMassPositionPort, ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort,
            ControlFlowOutputPort<FrameVector> centerOfMassAccelerationPort, ControlFlowOutputPort<FrameOrientation> orientationPort,
            ControlFlowOutputPort<FrameVector> angularVelocityPort, ControlFlowOutputPort<FrameVector> angularAccelerationPort)

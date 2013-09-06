@@ -15,7 +15,7 @@ import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.controlFlow.NullControlFlowElement;
-import us.ihmc.sensorProcessing.stateEstimation.CenterOfMassBasedFullRobotModelUpdater;
+import us.ihmc.sensorProcessing.stateEstimation.OrientationAndPositionFullRobotModelUpdater;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.PointPositionMeasurementModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
@@ -85,7 +85,7 @@ public class PointPositionMeasurementModelElementTest
       twistCalculator.compute();
       spatialAccelerationCalculator.compute();
 
-      Runnable updater = new CenterOfMassBasedFullRobotModelUpdater(inverseDynamicsStructureInputPort, centerOfMassPositionPort, centerOfMassVelocityPort,
+      Runnable updater = new OrientationAndPositionFullRobotModelUpdater(inverseDynamicsStructureInputPort, centerOfMassPositionPort, centerOfMassVelocityPort,
                             centerOfMassAccelerationPort, orientationPort, angularVelocityPort, angularAccelerationPort);
 
       centerOfMassPositionPort.setData(new FramePoint(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random)));
