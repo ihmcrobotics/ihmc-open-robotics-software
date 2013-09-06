@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.D
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ExternalWrenchCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleDataObject;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylindricalContactState;
@@ -25,7 +26,6 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.EnumYoVariable;
@@ -161,7 +161,7 @@ public class MomentumControlModuleBridge implements MomentumControlModule
       momentumModuleDataObject.setExternalWrenchToCompensateFor(rigidBody, wrench);
    }
 
-   public void compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates,
+   public MomentumModuleSolution compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates,
                        Map<ContactableCylinderBody, ? extends CylindricalContactState> cylinderContactStates, RobotSide upcomingSupportSide)
            throws NoConvergenceException
    {
@@ -172,18 +172,18 @@ public class MomentumControlModuleBridge implements MomentumControlModule
       }
       
       setMomentumModuleDataObject(activeMomentumControlModule, momentumModuleDataObject);
-      activeMomentumControlModule.compute(contactStates, cylinderContactStates, upcomingSupportSide);
+      return activeMomentumControlModule.compute(contactStates, cylinderContactStates, upcomingSupportSide);  
    }
 
-   public SpatialForceVector getDesiredCentroidalMomentumRate()
-   {
-      return activeMomentumControlModule.getDesiredCentroidalMomentumRate();
-   }
-
-   public Map<RigidBody, Wrench> getExternalWrenches()
-   {
-      return activeMomentumControlModule.getExternalWrenches();
-   }
+//   public SpatialForceVector getDesiredCentroidalMomentumRate()
+//   {
+//      return activeMomentumControlModule.getDesiredCentroidalMomentumRate();
+//   }
+//
+//   public Map<RigidBody, Wrench> getExternalWrenches()
+//   {
+//      return activeMomentumControlModule.getExternalWrenches();
+//   }
 
 
 

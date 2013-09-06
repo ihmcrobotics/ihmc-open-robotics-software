@@ -15,6 +15,8 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularConta
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
@@ -103,15 +105,16 @@ public class DRCOptimizationMomentumControlModuleTest
             momentumControlModule.setDesiredJointAcceleration(inverseDynamicsJoint, vdDesired);
          }
 
+         MomentumModuleSolution momentumModuleSolution;
          try
          {
-            momentumControlModule.compute(contactStates, null, null);
+            momentumModuleSolution = momentumControlModule.compute(contactStates, null, null);
          }
-         catch (NoConvergenceException e)
+         catch (MomentumControlModuleException momentumControlModuleException)
          {
-            e.printStackTrace();
+            throw new RuntimeException();
          }
-
+        
          for (InverseDynamicsJoint inverseDynamicsJoint : jointsToOptimizeFor)
          {
             DenseMatrix64F vdDesired = new DenseMatrix64F(inverseDynamicsJoint.getDegreesOfFreedom(), 1);
@@ -119,9 +122,11 @@ public class DRCOptimizationMomentumControlModuleTest
             assertTrue(MatrixFeatures.isConstantVal(vdDesired, 0.0, 1e-5));
          }
 
-         assertWrenchesSumUpToMomentumDot(momentumControlModule.getExternalWrenches().values(), momentumControlModule.getDesiredCentroidalMomentumRate(),
+         Map<RigidBody, Wrench> externalWrenchSolution = momentumModuleSolution.getExternalWrenchSolution();
+
+         assertWrenchesSumUpToMomentumDot(externalWrenchSolution.values(), momentumModuleSolution.getCentroidalMomentumRateSolution(),
                                           gravityZ, mass, centerOfMassFrame, 1e-3);
-         assertWrenchesInFrictionCones(momentumControlModule.getExternalWrenches(), contactStates, coefficientOfFriction);
+         assertWrenchesInFrictionCones(externalWrenchSolution, contactStates, coefficientOfFriction);
       }
    }
 
@@ -182,18 +187,19 @@ public class DRCOptimizationMomentumControlModuleTest
          constrainFeet(elevator, feet, momentumControlModule, taskspaceConstraintDataMap);
          constrainPelvis(random, fullRobotModel, momentumControlModule, taskspaceConstraintDataMap);
 
-         momentumControlModule.compute(contactStates, null, null);
-
-         assertWrenchesSumUpToMomentumDot(momentumControlModule.getExternalWrenches().values(), momentumControlModule.getDesiredCentroidalMomentumRate(),
+         MomentumModuleSolution momentumModuleSolution = momentumControlModule.compute(contactStates, null, null);
+         Map<RigidBody, Wrench> externalWrenchSolution = momentumModuleSolution.getExternalWrenchSolution();
+         
+         assertWrenchesSumUpToMomentumDot(externalWrenchSolution.values(), momentumModuleSolution.getCentroidalMomentumRateSolution(),
                                           gravityZ, mass, centerOfMassFrame, 1e-3);
-         assertWrenchesInFrictionCones(momentumControlModule.getExternalWrenches(), contactStates, coefficientOfFriction);
+         assertWrenchesInFrictionCones(externalWrenchSolution, contactStates, coefficientOfFriction);
 
          for (GeometricJacobian jacobian : taskspaceConstraintDataMap.keySet())
          {
             assertSpatialAccelerationCorrect(jacobian.getBase(), jacobian.getEndEffector(), taskspaceConstraintDataMap.get(jacobian));
          }
 
-         assertRootJointWrenchZero(momentumControlModule.getExternalWrenches(), rootJoint, gravityZ, 1e-2);
+         assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-2);
       }
    }
 
