@@ -167,7 +167,7 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
       rootJointToWorldToPack.mul(tempRootJointFrameToEstimationFrame);
    }
 
-   public ControlFlowOutputPort<FullInverseDynamicsStructure> getFullInverseDynamicsStructureOutputPort()
+   public ControlFlowOutputPort<FullInverseDynamicsStructure> getInverseDynamicsStructureOutputPort()
    {
       return inverseDynamicsStructureOutputPort;
    }
