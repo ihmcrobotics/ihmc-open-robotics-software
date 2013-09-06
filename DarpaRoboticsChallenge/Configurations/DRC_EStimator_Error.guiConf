@@ -1,0 +1,266 @@
+<GraphGroup>
+	<Cols>3</Cols>
+	<Graph>
+		<Variables>root.atlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SensorAndEstimatorAssembler.orientationEstimatorQx,root.atlas.StateEstimatorErrorCalculatorController.StateEstimatorErrorCalculator.perfectOrientationQy</Variables>
+		<GraphConfiguration>
+			<Name>config1</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SensorAndEstimatorAssembler.orientationEstimatorQy,root.atlas.StateEstimatorErrorCalculatorController.StateEstimatorErrorCalculator.perfectOrientationQy</Variables>
+		<GraphConfiguration>
+			<Name>config2</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SensorAndEstimatorAssembler.orientationEstimatorQz,root.atlas.StateEstimatorErrorCalculatorController.StateEstimatorErrorCalculator.perfectOrientationQz</Variables>
+		<GraphConfiguration>
+			<Name>config3</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SensorAndEstimatorAssembler.orientationEstimator.orientationEstimatorOmegaX,root.atlas.StateEstimatorErrorCalculatorController.StateEstimatorErrorCalculator.perfectAngularVelocityX</Variables>
+		<GraphConfiguration>
+			<Name>config4</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SensorAndEstimatorAssembler.orientationEstimator.orientationEstimatorOmegaY,root.atlas.StateEstimatorErrorCalculatorController.StateEstimatorErrorCalculator.perfectAngularVelocityY</Variables>
+		<GraphConfiguration>
+			<Name>config5</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SensorAndEstimatorAssembler.orientationEstimator.orientationEstimatorOmegaZ,root.atlas.StateEstimatorErrorCalculatorController.StateEstimatorErrorCalculator.perfectAngularVelocityZ</Variables>
+		<GraphConfiguration>
+			<Name>config6</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SensorAndEstimatorAssembler.orientationEstimator.orientationEstimatorCoMPositionX,root.atlas.StateEstimatorErrorCalculatorController.StateEstimatorErrorCalculator.perfectCoMPositionX</Variables>
+		<GraphConfiguration>
+			<Name>config7</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SensorAndEstimatorAssembler.orientationEstimator.orientationEstimatorCoMPositionY,root.atlas.StateEstimatorErrorCalculatorController.StateEstimatorErrorCalculator.perfectCoMPositionY</Variables>
+		<GraphConfiguration>
+			<Name>config8</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SensorAndEstimatorAssembler.orientationEstimator.orientationEstimatorCoMPositionZ,root.atlas.StateEstimatorErrorCalculatorController.StateEstimatorErrorCalculator.perfectCoMPositionZ</Variables>
+		<GraphConfiguration>
+			<Name>config9</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SensorAndEstimatorAssembler.orientationEstimator.orientationEstimatorCoMVelocityX,root.atlas.StateEstimatorErrorCalculatorController.StateEstimatorErrorCalculator.perfectCoMVelocityX</Variables>
+		<GraphConfiguration>
+			<Name>config10</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SensorAndEstimatorAssembler.orientationEstimator.orientationEstimatorCoMVelocityY,root.atlas.StateEstimatorErrorCalculatorController.StateEstimatorErrorCalculator.perfectCoMVelocityY</Variables>
+		<GraphConfiguration>
+			<Name>config11</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SensorAndEstimatorAssembler.orientationEstimator.orientationEstimatorCoMVelocityZ,root.atlas.StateEstimatorErrorCalculatorController.StateEstimatorErrorCalculator.perfectCoMVelocityZ</Variables>
+		<GraphConfiguration>
+			<Name>config12</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.StateEstimatorErrorCalculatorController.StateEstimatorErrorCalculator.orientationError</Variables>
+		<GraphConfiguration>
+			<Name>config13</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.StateEstimatorErrorCalculatorController.StateEstimatorErrorCalculator.angularVelocityError</Variables>
+		<GraphConfiguration>
+			<Name>config14</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.StateEstimatorErrorCalculatorController.StateEstimatorErrorCalculator.comVelocityError</Variables>
+		<GraphConfiguration>
+			<Name>config15</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.StateEstimatorErrorCalculatorController.StateEstimatorErrorCalculator.comXYPositionError</Variables>
+		<GraphConfiguration>
+			<Name>config16</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.StateEstimatorErrorCalculatorController.StateEstimatorErrorCalculator.comZPositionError</Variables>
+		<GraphConfiguration>
+			<Name>config17</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables></Variables>
+		<GraphConfiguration>
+			<Name>config18</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+<Entry Boxes>qd_x,qd_wx,q_x,q_y,walk,loopEstimatorForever,loopControllerForever,nominalHeightAboveGround,minimumHeightAboveGround,maximumHeightAboveGround</Entry Boxes>
+
+<Number of ViewPorts>1</Number of ViewPorts>
+ <Main Viewport> 
+<Visible> true</Visible>
+</Main Viewport>
+
+<Graph Array Window Size>0</Graph Array Window Size>
+
+<Extra Panels>
+<Main Viewport>
+Plotter,
+</Main Viewport></Extra Panels>
+
+<Current View>Normal View</Current View>
+ <Canvas 1> 
+ <Camera X>4.3283618964023365</Camera X>
+ <Camera Y>5.466835814386648</Camera Y>
+ <Camera Z>0.8310000086733426</Camera Z>
+ <Dolly data> 
+ <Position X>2.0</Position X>
+ <Position Y>12.0</Position Y>
+ <Position Z>0.0</Position Z>
+<Dolly Booleans>
+<Dolly>false</Dolly>
+<Dolly X>true</Dolly X>
+<Dolly Y>true</Dolly Y>
+<Dolly Z>true</Dolly Z>
+</Dolly Booleans>
+</Dolly data>
+ <Track data> 
+ <Position X>0.0</Position X>
+ <Position Y>0.0</Position Y>
+ <Position Z>0.0</Position Z>
+ <Track Booleans>
+<Track>true</Track>
+<Track X>true</Track X>
+<Track Y>true</Track Y>
+<Track Z>true</Track Z>
+</Track Booleans>
+</Track data>
+<Fix Position>
+<Fix X>0.44102699173516685</Fix X>
+<Fix Y>5.911498170351285</Fix Y>
+<Fix Z>0.6</Fix Z>
+</Fix Position>
+</Canvas 1>
