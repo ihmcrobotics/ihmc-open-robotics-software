@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.WrenchDistributorTools;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableCylinderBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylindricalContactState;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributor;
@@ -131,7 +132,7 @@ public class OldMomentumControlModule implements MomentumControlModule
       externalWrenchesToCompensateFor.clear();
    }
 
-   public void compute(Map<ContactablePlaneBody, ? extends PlaneContactState> planeContactStates,
+   public MomentumModuleSolution compute(Map<ContactablePlaneBody, ? extends PlaneContactState> planeContactStates,
          Map<ContactableCylinderBody, ? extends CylindricalContactState> cylinderContactStates, RobotSide upcomingSupportLeg)
    {
       solver.compute();
@@ -252,6 +253,9 @@ public class OldMomentumControlModule implements MomentumControlModule
       }
 
       solver.solve(desiredCentroidalMomentumRate);
+      MomentumModuleSolution solution = new MomentumModuleSolution(desiredCentroidalMomentumRate, externalWrenches);
+      
+      return solution;
    }
 
    public void resetGroundReactionWrenchFilter()
@@ -292,15 +296,15 @@ public class OldMomentumControlModule implements MomentumControlModule
       this.momentumRateOfChangeData.set(momentumRateOfChangeData);
    }
 
-   public SpatialForceVector getDesiredCentroidalMomentumRate()
-   {
-      return desiredCentroidalMomentumRate;
-   }
-
-   public Map<RigidBody, Wrench> getExternalWrenches()
-   {
-      return externalWrenches;
-   }
+//   public SpatialForceVector getDesiredCentroidalMomentumRate()
+//   {
+//      return desiredCentroidalMomentumRate;
+//   }
+//
+//   public Map<RigidBody, Wrench> getExternalWrenches()
+//   {
+//      return externalWrenches;
+//   }
 
    public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase)
    {

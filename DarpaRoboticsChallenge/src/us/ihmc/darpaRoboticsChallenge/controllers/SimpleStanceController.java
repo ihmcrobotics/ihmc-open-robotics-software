@@ -17,7 +17,9 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CoMBasedMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
@@ -208,16 +210,18 @@ public class SimpleStanceController implements RobotController
 
    private void setJointAccelerationsAndWrenches()
    {
+      MomentumModuleSolution momentumModuleSolution;
       try
       {
-         momentumControlModule.compute(contactStates, null, null);
+         momentumModuleSolution = momentumControlModule.compute(contactStates, null, null);
       }
-      catch (NoConvergenceException e)
+      catch (MomentumControlModuleException momentumControlModuleException)
       {
-         e.printStackTrace();
+         momentumControlModuleException.printStackTrace();
+         momentumModuleSolution = momentumControlModuleException.getMomentumModuleSolution();
       }
 
-      Map<RigidBody, Wrench> externalWrenches = momentumControlModule.getExternalWrenches();
+      Map<RigidBody, Wrench> externalWrenches = momentumModuleSolution.getExternalWrenchSolution();
 
       for (RigidBody rigidBody : externalWrenches.keySet())
       {

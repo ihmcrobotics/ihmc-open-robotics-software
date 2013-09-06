@@ -22,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModuleBridge.MomentumControlModuleType;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
@@ -392,9 +393,10 @@ public class MomentumBasedController
 
       updateMomentumBasedControllerSpy();
 
+      MomentumModuleSolution momentumModuleSolution;
       try
       {
-         momentumControlModuleBridge.compute(this.contactStates, this.cylindricalContactStates, upcomingSupportLeg.getEnumValue());
+         momentumModuleSolution = momentumControlModuleBridge.compute(this.contactStates, this.cylindricalContactStates, upcomingSupportLeg.getEnumValue());
       }
       catch (NoConvergenceException e)
       {
@@ -403,8 +405,8 @@ public class MomentumBasedController
          throw new RuntimeException(e);
       }
 
-      SpatialForceVector desiredCentroidalMomentumRate = momentumControlModuleBridge.getDesiredCentroidalMomentumRate();
-      Map<RigidBody, Wrench> externalWrenches = momentumControlModuleBridge.getExternalWrenches();
+      SpatialForceVector desiredCentroidalMomentumRate = momentumModuleSolution.getCentroidalMomentumRateSolution();
+      Map<RigidBody, Wrench> externalWrenches = momentumModuleSolution.getExternalWrenchSolution();
 
 
       for (RigidBody rigidBody : externalWrenches.keySet())

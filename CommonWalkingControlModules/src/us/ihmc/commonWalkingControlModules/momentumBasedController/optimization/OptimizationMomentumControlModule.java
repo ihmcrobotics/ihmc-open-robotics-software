@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -16,11 +15,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVX
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXWithCylinderNativeOutput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredPointAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredRateOfChangeOfMomentumCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleDataObject;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylinderAndPlaneContactMatrixCalculatorAdapter;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylinderAndPlaneContactMatrixCalculatorAdapterwRhowPhiObtainedFromContactStates;
@@ -129,8 +124,8 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       externalWrenchHandler.reset();
    }
 
-   public void compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates,
-                       Map<ContactableCylinderBody, ? extends CylindricalContactState> cylinderContactStates, RobotSide upcomingSupportLeg) throws NoConvergenceException
+   public MomentumModuleSolution compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates,
+                       Map<ContactableCylinderBody, ? extends CylindricalContactState> cylinderContactStates, RobotSide upcomingSupportLeg) throws MomentumControlModuleException
 
    {
       LinkedHashMap<RigidBody, Set<PlaneContactState>> planeContactStates = convertContactStates(contactStates);
@@ -229,8 +224,16 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
       centroidalMomentumHandler.computeCentroidalMomentumRate(jointsToOptimizeFor, jointAccelerations);
 
+      SpatialForceVector centroidalMomentumRateSolution = centroidalMomentumHandler.getCentroidalMomentumRate();
+      Map<RigidBody, Wrench> externalWrenchSolution = externalWrenchHandler.getExternalWrenches();
+      MomentumModuleSolution momentumModuleSolution = new MomentumModuleSolution(centroidalMomentumRateSolution, externalWrenchSolution);
+      
       if (noConvergenceException != null)
-         throw noConvergenceException;
+      {
+         throw new MomentumControlModuleException(noConvergenceException, momentumModuleSolution);
+      }
+       
+      return momentumModuleSolution;
    }
 
    private static LinkedHashMap<RigidBody, Set<PlaneContactState>> convertContactStates(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates)
@@ -331,14 +334,14 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       secondaryMotionConstraintHandler.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData, weight);
    }
 
-   public SpatialForceVector getDesiredCentroidalMomentumRate()
-   {
-      return centroidalMomentumHandler.getCentroidalMomentumRate();
-   }
-
-   public Map<RigidBody, Wrench> getExternalWrenches()
-   {
-      return externalWrenchHandler.getExternalWrenches();
-   }
+//   public SpatialForceVector getDesiredCentroidalMomentumRate()
+//   {
+//      return centroidalMomentumHandler.getCentroidalMomentumRate();
+//   }
+//
+//   public Map<RigidBody, Wrench> getExternalWrenches()
+//   {
+//      return externalWrenchHandler.getExternalWrenches();
+//   }
    
 }
