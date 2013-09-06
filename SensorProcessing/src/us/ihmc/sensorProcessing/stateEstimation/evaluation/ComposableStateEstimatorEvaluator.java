@@ -27,10 +27,11 @@ import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 
+
 public class ComposableStateEstimatorEvaluator
 {
    private static final boolean SHOW_GUI = true;
-
+   private final boolean assumePerfectIMU = true;
    private final double simDT = 1e-3;
    private final int simTicksPerControlDT = 5;
    private final double controlDT = simDT * simTicksPerControlDT;
@@ -96,7 +97,7 @@ public class ComposableStateEstimatorEvaluator
       SensorAndEstimatorAssembler sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(stateEstimatorDataFromControllerSource, simulatedSensorHolderAndReaderFromRobotFactory.getStateEstimatorSensorDefinitions(),
             sensorNoiseParametersForEstimator, gravitationalAcceleration,
             inverseDynamicsStructure, referenceFrameMap, rigidBodyToIndexMap, controlDT,
-            registry);
+            registry, assumePerfectIMU);
 
       ControlFlowGraph controlFlowGraph = sensorAndEstimatorAssembler.getControlFlowGraph();
       StateEstimatorWithPorts orientationEstimator = sensorAndEstimatorAssembler.getEstimator();

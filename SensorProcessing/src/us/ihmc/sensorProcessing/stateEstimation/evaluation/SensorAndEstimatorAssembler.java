@@ -13,8 +13,10 @@ import us.ihmc.sensorProcessing.simulatedSensors.JointAndIMUSensorMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.ComposableOrientationAndCoMEstimatorCreator;
+import us.ihmc.sensorProcessing.stateEstimation.IMUSelectorAndDataWrapper;
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.JointStateFullRobotModelUpdater;
+import us.ihmc.sensorProcessing.stateEstimation.OrientationStateRobotModelUpdater;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSource;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
@@ -34,19 +36,20 @@ public class SensorAndEstimatorAssembler
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final ControlFlowGraph controlFlowGraph;
-   
+
    // The following are the elements added to the controlFlowGraph:
    private final JointAndIMUSensorDataSource jointSensorDataSource;
    @SuppressWarnings("unused")
    private final StateEstimationDataFromControllerSource stateEstimatorDataFromControllerSource;
    private final JointStateFullRobotModelUpdater jointStateFullRobotModelUpdater;
    private final ComposableOrientationAndCoMEstimatorCreator.ComposableOrientationAndCoMEstimator estimator;
-   
-  
+   private final OrientationStateRobotModelUpdater orientationStateRobotModelUpdater;
+   private final IMUSelectorAndDataWrapper imuSelectorAndDataWrapper;
+
    public SensorAndEstimatorAssembler(StateEstimationDataFromControllerSource stateEstimatorDataFromControllerSource,
          StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorNoiseParameters sensorNoiseParametersForEstimator,
          Vector3d gravitationalAcceleration, FullInverseDynamicsStructure inverseDynamicsStructure, AfterJointReferenceFrameNameMap estimatorReferenceFrameMap,
-         RigidBodyToIndexMap estimatorRigidBodyToIndexMap, double controlDT, YoVariableRegistry parentRegistry)
+         RigidBodyToIndexMap estimatorRigidBodyToIndexMap, double controlDT, YoVariableRegistry parentRegistry, boolean assumePerfectIMU)
    {
       this.stateEstimatorDataFromControllerSource = stateEstimatorDataFromControllerSource;
       SensorConfigurationFactory SensorConfigurationFactory = new SensorConfigurationFactory(sensorNoiseParametersForEstimator, gravitationalAcceleration);
@@ -57,22 +60,42 @@ public class SensorAndEstimatorAssembler
       ReferenceFrame estimationFrame = inverseDynamicsStructure.getEstimationFrame();
 
       // Sensor configurations for estimator
-      Collection<OrientationSensorConfiguration> orientationSensorConfigurations =
-         SensorConfigurationFactory.createOrientationSensorConfigurations(jointAndIMUSensorMap.getOrientationSensors());
+      Collection<OrientationSensorConfiguration> orientationSensorConfigurations = SensorConfigurationFactory
+            .createOrientationSensorConfigurations(jointAndIMUSensorMap.getOrientationSensors());
 
-      Collection<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations =
-         SensorConfigurationFactory.createAngularVelocitySensorConfigurations(jointAndIMUSensorMap.getAngularVelocitySensors());
+      Collection<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations = SensorConfigurationFactory
+            .createAngularVelocitySensorConfigurations(jointAndIMUSensorMap.getAngularVelocitySensors());
 
-      Collection<LinearAccelerationSensorConfiguration> linearAccelerationSensorConfigurations =
-         SensorConfigurationFactory.createLinearAccelerationSensorConfigurations(jointAndIMUSensorMap.getLinearAccelerationSensors());
+      Collection<LinearAccelerationSensorConfiguration> linearAccelerationSensorConfigurations = SensorConfigurationFactory
+            .createLinearAccelerationSensorConfigurations(jointAndIMUSensorMap.getLinearAccelerationSensors());
 
       controlFlowGraph = new ControlFlowGraph();
-      jointStateFullRobotModelUpdater = new JointStateFullRobotModelUpdater(controlFlowGraph, jointAndIMUSensorMap,
-                                                                           inverseDynamicsStructure);
+      jointStateFullRobotModelUpdater = new JointStateFullRobotModelUpdater(controlFlowGraph, jointAndIMUSensorMap, inverseDynamicsStructure);
 
-      ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort =
-         jointStateFullRobotModelUpdater.getInverseDynamicsStructureOutputPort();
+      ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort = null;
 
+      if (assumePerfectIMU)
+      {
+//         try
+//         {
+            imuSelectorAndDataWrapper = new IMUSelectorAndDataWrapper(controlFlowGraph, jointAndIMUSensorMap);
+            orientationStateRobotModelUpdater = new OrientationStateRobotModelUpdater(controlFlowGraph,
+                  jointStateFullRobotModelUpdater.getInverseDynamicsStructureOutputPort(), imuSelectorAndDataWrapper.getOrientationOutputPort(),
+                  imuSelectorAndDataWrapper.getAngularVelocityOutputPort());
+            inverseDynamicsStructureOutputPort = orientationStateRobotModelUpdater.getInverseDynamicsStructureOutputPort();
+//         }
+//         catch (Exception e)
+//         {
+//            e.printStackTrace();
+//         }
+      }
+      else
+      {
+         imuSelectorAndDataWrapper = null;
+         orientationStateRobotModelUpdater = null;
+         inverseDynamicsStructureOutputPort = jointStateFullRobotModelUpdater.getInverseDynamicsStructureOutputPort();
+      }
+      
       double angularAccelerationProcessNoiseStandardDeviation = sensorNoiseParametersForEstimator.getAngularAccelerationProcessNoiseStandardDeviation();
       DenseMatrix64F angularAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(angularAccelerationProcessNoiseStandardDeviation, 3);
 
@@ -81,9 +104,9 @@ public class SensorAndEstimatorAssembler
       double comAccelerationProcessNoiseStandardDeviation = sensorNoiseParametersForEstimator.getComAccelerationProcessNoiseStandardDeviation();
       DenseMatrix64F comAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(comAccelerationProcessNoiseStandardDeviation, 3);
 
-      ComposableOrientationAndCoMEstimatorCreator orientationEstimatorCreator =
-            new ComposableOrientationAndCoMEstimatorCreator(angularAccelerationNoiseCovariance, comAccelerationNoiseCovariance, estimationLink,
-                  inverseDynamicsStructureOutputPort);
+      ComposableOrientationAndCoMEstimatorCreator orientationEstimatorCreator = new ComposableOrientationAndCoMEstimatorCreator(
+            angularAccelerationNoiseCovariance, comAccelerationNoiseCovariance, estimationLink, inverseDynamicsStructureOutputPort, assumePerfectIMU);
+
       orientationEstimatorCreator.addOrientationSensorConfigurations(orientationSensorConfigurations);
       orientationEstimatorCreator.addAngularVelocitySensorConfigurations(angularVelocitySensorConfigurations);
       orientationEstimatorCreator.addLinearAccelerationSensorConfigurations(linearAccelerationSensorConfigurations);
@@ -91,8 +114,8 @@ public class SensorAndEstimatorAssembler
       // TODO: Not sure if we need to do this here:
       inverseDynamicsStructure.updateInternalState();
 
-      estimator = orientationEstimatorCreator.createOrientationEstimator(controlFlowGraph, controlDT,
-            estimationFrame, estimatorReferenceFrameMap, estimatorRigidBodyToIndexMap, registry);
+      estimator = orientationEstimatorCreator.createOrientationEstimator(controlFlowGraph, controlDT, estimationFrame, estimatorReferenceFrameMap,
+            estimatorRigidBodyToIndexMap, registry);
 
       stateEstimatorDataFromControllerSource.connectDesiredAccelerationPorts(controlFlowGraph, estimator);
 
@@ -127,7 +150,7 @@ public class SensorAndEstimatorAssembler
    {
       return estimator;
    }
-   
+
    public JointAndIMUSensorDataSource getJointAndIMUSensorDataSource()
    {
       return jointSensorDataSource;
