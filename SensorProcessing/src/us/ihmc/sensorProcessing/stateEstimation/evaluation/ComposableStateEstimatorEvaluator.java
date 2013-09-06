@@ -31,7 +31,7 @@ import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorI
 public class ComposableStateEstimatorEvaluator
 {
    private static final boolean SHOW_GUI = true;
-   private final boolean assumePerfectIMU = true;
+   private final boolean assumePerfectIMU = false;
    private final double simDT = 1e-3;
    private final int simTicksPerControlDT = 5;
    private final double controlDT = simDT * simTicksPerControlDT;
