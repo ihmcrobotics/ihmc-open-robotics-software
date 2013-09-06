@@ -79,7 +79,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
    private final List<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations = new ArrayList<AngularVelocitySensorConfiguration>();
    private final List<LinearAccelerationSensorConfiguration> linearAccelerationSensorConfigurations = new ArrayList<LinearAccelerationSensorConfiguration>();
    private final boolean assumePerfectIMU;
-   
+
    public ComposableOrientationAndCoMEstimatorCreator(DenseMatrix64F angularAccelerationNoiseCovariance, DenseMatrix64F comAccelerationNoiseCovariance,
          RigidBody orientationEstimationLink, ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort, boolean assumePerfectIMU)
    {
@@ -175,15 +175,16 @@ public class ComposableOrientationAndCoMEstimatorCreator
 
       private final ControlFlowOutputPort<FullInverseDynamicsStructure> updatedInverseDynamicsStructureOutputPort;
       private final OrientationStateRobotModelUpdater orientationStateRobotModelUpdater;
-      private final OrientationAndPositionFullRobotModelUpdater orientationAndPositionFullRobotModelUpdater;
+      //      private final OrientationAndPositionFullRobotModelUpdater orientationAndPositionFullRobotModelUpdater;
       private final PositionStateRobotModelUpdater positionStateRobotModelUpdater;
       private final ReferenceFrame estimationFrame;
       private final boolean originalStateEstimator = true;
       private final boolean assumePerfectIMU;
-      
+
       public ComposableOrientationAndCoMEstimator(String name, double controlDT, ReferenceFrame estimationFrame,
             AfterJointReferenceFrameNameMap estimatorFrameMap, RigidBodyToIndexMap estimatorRigidBodyToIndexMap, ControlFlowGraph controlFlowGraph,
-            ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort, YoVariableRegistry parentRegistry, boolean assumePerfectIMU)
+            ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort, YoVariableRegistry parentRegistry,
+            final boolean assumePerfectIMU)
       {
          super(name, controlDT, parentRegistry);
          this.assumePerfectIMU = assumePerfectIMU;
@@ -212,62 +213,69 @@ public class ComposableOrientationAndCoMEstimatorCreator
          pointVelocityInputPort = createInputPort("pointVelocityInputPort");
          pointVelocityInputPort.setData(new LinkedHashSet<PointVelocityDataObject>());
 
-         addOrientationProcessModelElement();
-         addAngularVelocityProcessModelElement(estimationFrame, desiredAngularAccelerationInputPort);
-         addAngularAccelerationProcessModelElement(estimationFrame, desiredAngularAccelerationInputPort);
+         if (!assumePerfectIMU)
+         {
+            addOrientationProcessModelElement();
+            addAngularVelocityProcessModelElement(estimationFrame, desiredAngularAccelerationInputPort);
+            addAngularAccelerationProcessModelElement(estimationFrame, desiredAngularAccelerationInputPort);
+            addCoMAccelerationProcessModelElement(desiredCenterOfMassAccelerationInputPort);
+         }
 
          addCoMPositionProcessModelElement(controlDT);
          addCoMVelocityProcessModelElement(controlDT, desiredCenterOfMassAccelerationInputPort);
-         addCoMAccelerationProcessModelElement(desiredCenterOfMassAccelerationInputPort);
 
-         for (OrientationSensorConfiguration orientationSensorConfiguration : orientationSensorConfigurations)
+         if (!assumePerfectIMU)
          {
-            addOrientationSensor(estimationFrame, controlFlowGraph, orientationSensorConfiguration);
-         }
+            for (OrientationSensorConfiguration orientationSensorConfiguration : orientationSensorConfigurations)
+            {
+               addOrientationSensor(estimationFrame, controlFlowGraph, orientationSensorConfiguration);
+            }
 
-         for (AngularVelocitySensorConfiguration angularVelocitySensorConfiguration : angularVelocitySensorConfigurations)
-         {
-            addAngularVelocitySensor(estimationFrame, controlFlowGraph, angularVelocitySensorConfiguration);
-         }
+            for (AngularVelocitySensorConfiguration angularVelocitySensorConfiguration : angularVelocitySensorConfigurations)
+            {
+               addAngularVelocitySensor(estimationFrame, controlFlowGraph, angularVelocitySensorConfiguration);
+            }
 
-         for (LinearAccelerationSensorConfiguration linearAccelerationSensorConfiguration : linearAccelerationSensorConfigurations)
-         {
-            addLinearAccelerationSensor(estimationFrame, controlFlowGraph, linearAccelerationSensorConfiguration);
+            for (LinearAccelerationSensorConfiguration linearAccelerationSensorConfiguration : linearAccelerationSensorConfigurations)
+            {
+               addLinearAccelerationSensor(estimationFrame, controlFlowGraph, linearAccelerationSensorConfiguration);
+            }
          }
 
          addAggregatedPointPositionMeasurementModelElement(pointPositionInputPort, estimationFrame, estimatorFrameMap);
          addAggregatedPointVelocityMeasurementModelElement(pointVelocityInputPort, estimationFrame, estimatorFrameMap, estimatorRigidBodyToIndexMap);
 
-         if (originalStateEstimator)
+         if (assumePerfectIMU)
          {
             this.orientationStateRobotModelUpdater = null;
-            this.positionStateRobotModelUpdater = null;
-            this.orientationAndPositionFullRobotModelUpdater = new OrientationAndPositionFullRobotModelUpdater(inverseDynamicsStructureInputPort,
-                  centerOfMassPositionOutputPort, centerOfMassVelocityOutputPort, centerOfMassAccelerationOutputPort, orientationOutputPort,
-                  angularVelocityOutputPort, angularAccelerationOutputPort);
+            this.positionStateRobotModelUpdater = new PositionStateRobotModelUpdater(getInverseDynamicsStructureInputPort(), centerOfMassPositionOutputPort,
+                  centerOfMassVelocityOutputPort);
          }
          else
          {
-            this.orientationStateRobotModelUpdater = new OrientationStateRobotModelUpdater(getInverseDynamicsStructureInputPort(), getOrientationOutputPort(), getAngularVelocityOutputPort());
-            this.positionStateRobotModelUpdater = new PositionStateRobotModelUpdater(getInverseDynamicsStructureInputPort(),centerOfMassPositionOutputPort,centerOfMassVelocityOutputPort);
-            this.orientationAndPositionFullRobotModelUpdater = null;
+            this.orientationStateRobotModelUpdater = new OrientationStateRobotModelUpdater(getInverseDynamicsStructureInputPort(), getOrientationOutputPort(),
+                  getAngularVelocityOutputPort());
+            this.positionStateRobotModelUpdater = new PositionStateRobotModelUpdater(getInverseDynamicsStructureInputPort(), centerOfMassPositionOutputPort,
+                  centerOfMassVelocityOutputPort);
+            //            this.orientationAndPositionFullRobotModelUpdater = new OrientationAndPositionFullRobotModelUpdater(inverseDynamicsStructureInputPort,
+            //                  centerOfMassPositionOutputPort, centerOfMassVelocityOutputPort, centerOfMassAccelerationOutputPort, orientationOutputPort,
+            //                  angularVelocityOutputPort, angularAccelerationOutputPort);
          }
 
          Runnable runnable = new Runnable()
          {
             public void run()
             {
-               if (originalStateEstimator)
+               if (assumePerfectIMU)
                {
-                  orientationAndPositionFullRobotModelUpdater.run();
-                  updatedInverseDynamicsStructureOutputPort.setData(inverseDynamicsStructureInputPort.getData());
+                  positionStateRobotModelUpdater.run();
                }
                else
                {
                   orientationStateRobotModelUpdater.run();
                   positionStateRobotModelUpdater.run();
-                  updatedInverseDynamicsStructureOutputPort.setData(inverseDynamicsStructureInputPort.getData());
                }
+               updatedInverseDynamicsStructureOutputPort.setData(inverseDynamicsStructureInputPort.getData());
             }
          };
          addPostStateChangeRunnable(runnable);
@@ -470,15 +478,8 @@ public class ComposableOrientationAndCoMEstimatorCreator
       public void setEstimatedOrientation(FrameOrientation orientation)
       {
          orientationOutputPort.setData(orientation);
-         if (originalStateEstimator)
-         {
-            orientationAndPositionFullRobotModelUpdater.run();
-         }
-         else
-         {
-            orientationStateRobotModelUpdater.run();
-            positionStateRobotModelUpdater.run();
-         }
+         orientationStateRobotModelUpdater.run();
+         positionStateRobotModelUpdater.run();
          FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureInputPort.getData();
          inverseDynamicsStructure.updateInternalState();
          setUpdatedInverseDynamicsStructureOutputPort(inverseDynamicsStructure);
@@ -487,15 +488,8 @@ public class ComposableOrientationAndCoMEstimatorCreator
       public void setEstimatedAngularVelocity(FrameVector angularVelocity)
       {
          angularVelocityOutputPort.setData(angularVelocity);
-         if (originalStateEstimator)
-         {
-            orientationAndPositionFullRobotModelUpdater.run();
-         }
-         else
-         {
-            orientationStateRobotModelUpdater.run();
-            positionStateRobotModelUpdater.run();
-         }
+         orientationStateRobotModelUpdater.run();
+         positionStateRobotModelUpdater.run();
          FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureInputPort.getData();
          inverseDynamicsStructure.updateInternalState();
          setUpdatedInverseDynamicsStructureOutputPort(inverseDynamicsStructure);
@@ -504,15 +498,8 @@ public class ComposableOrientationAndCoMEstimatorCreator
       public void setEstimatedCoMPosition(FramePoint estimatedCoMPosition)
       {
          centerOfMassPositionOutputPort.setData(estimatedCoMPosition);
-         if (originalStateEstimator)
-         {
-            orientationAndPositionFullRobotModelUpdater.run();
-         }
-         else
-         {
-            orientationStateRobotModelUpdater.run();
-            positionStateRobotModelUpdater.run();
-         }
+         orientationStateRobotModelUpdater.run();
+         positionStateRobotModelUpdater.run();
          FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureInputPort.getData();
          inverseDynamicsStructure.updateInternalState();
          setUpdatedInverseDynamicsStructureOutputPort(inverseDynamicsStructure);
@@ -521,15 +508,8 @@ public class ComposableOrientationAndCoMEstimatorCreator
       public void setEstimatedCoMVelocity(FrameVector estimatedCoMVelocity)
       {
          centerOfMassVelocityOutputPort.setData(estimatedCoMVelocity);
-         if (originalStateEstimator)
-         {
-            orientationAndPositionFullRobotModelUpdater.run();
-         }
-         else
-         {
-            orientationStateRobotModelUpdater.run();
-            positionStateRobotModelUpdater.run();
-         }
+         orientationStateRobotModelUpdater.run();
+         positionStateRobotModelUpdater.run();
          FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureInputPort.getData();
          inverseDynamicsStructure.updateInternalState();
          setUpdatedInverseDynamicsStructureOutputPort(inverseDynamicsStructure);
@@ -607,17 +587,17 @@ public class ComposableOrientationAndCoMEstimatorCreator
       {
          return orientationOutputPort;
       }
-      
+
       public ControlFlowOutputPort<FrameVector> getAngularVelocityOutputPort()
       {
          return angularVelocityOutputPort;
       }
-      
+
       public ControlFlowOutputPort<FullInverseDynamicsStructure> getInverseDynamicsStructureOutputPort()
       {
          return updatedInverseDynamicsStructureOutputPort;
       }
-      
+
       public ControlFlowInputPort<FullInverseDynamicsStructure> getInverseDynamicsStructureInputPort()
       {
          return inverseDynamicsStructureInputPort;
