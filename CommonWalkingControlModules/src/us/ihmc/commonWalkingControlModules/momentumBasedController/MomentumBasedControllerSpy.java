@@ -4,10 +4,18 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableCylinderBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableRollingBody;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredPointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredRateOfChangeOfMomentumCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ExternalWrenchCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.StackTraceRecorder;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -28,18 +36,18 @@ public class MomentumBasedControllerSpy
 
    private final IntegerYoVariable numberOfExternalWrenchCommands = new IntegerYoVariable("numExternalWrenchCommands", registry);
    private final IntegerYoVariable numberOfDesiredPointAccelerationCommands = new IntegerYoVariable("numDesiredPointAccelerationCommands", registry);
-   private final IntegerYoVariable numberOfOneDoFJointAccelerationCommands = new IntegerYoVariable("numOneDoFJointAccelerationCommands", registry);
+   private final IntegerYoVariable numberOfDesiredJointAccelerationCommands = new IntegerYoVariable("numDesiredJointAccelerationCommands", registry);
    private final IntegerYoVariable numberOfDesiredRateOfChangeOfMomentumCommands = new IntegerYoVariable("numDesiredRateOfChangeOfMomentumCommands", registry);
    private final IntegerYoVariable numberOfDesiredSpatialAccelerationCommands = new IntegerYoVariable("numDesiredSpatialAccelerationCommands", registry);
    private final IntegerYoVariable numberOfPlaneContactStateCommand = new IntegerYoVariable("numPlaneContactStateCommand", registry);
    private final IntegerYoVariable numberOfRollingContactStateCommand = new IntegerYoVariable("numRollingContactStateCommand", registry);
    private final IntegerYoVariable numberOfCylindricalContactInContactCommand = new IntegerYoVariable("numCylindricalContactInContactCommand", registry);
 
-   private final ArrayList<ExternalWrenchCommand> externalWrenchCommands = new ArrayList<ExternalWrenchCommand>();
-   private final ArrayList<DesiredPointAccelerationCommand> desiredPointAccelerationCommands = new ArrayList<DesiredPointAccelerationCommand>();
-   private final ArrayList<OneDoFJointAccelerationCommand> oneDoFJointAccelerationCommands = new ArrayList<OneDoFJointAccelerationCommand>();
-   private final ArrayList<DesiredRateOfChangeOfMomentumCommand> desiredRateOfChangeOfMomentumCommands = new ArrayList<DesiredRateOfChangeOfMomentumCommand>();
-   private final ArrayList<DesiredSpatialAccelerationCommand> desiredSpatialAccelerationCommands = new ArrayList<DesiredSpatialAccelerationCommand>();
+   private final ArrayList<StackTraceRecorder<ExternalWrenchCommand>> externalWrenchCommands = new ArrayList<StackTraceRecorder<ExternalWrenchCommand>>();
+   private final ArrayList<StackTraceRecorder<DesiredPointAccelerationCommand>> desiredPointAccelerationCommands = new ArrayList<StackTraceRecorder<DesiredPointAccelerationCommand>>();
+   private final ArrayList<StackTraceRecorder<DesiredJointAccelerationCommand>> desiredJointAccelerationCommands = new ArrayList<StackTraceRecorder<DesiredJointAccelerationCommand>>();
+   private final ArrayList<StackTraceRecorder<DesiredRateOfChangeOfMomentumCommand>> desiredRateOfChangeOfMomentumCommands = new ArrayList<StackTraceRecorder<DesiredRateOfChangeOfMomentumCommand>>();
+   private final ArrayList<StackTraceRecorder<DesiredSpatialAccelerationCommand>> desiredSpatialAccelerationCommands = new ArrayList<StackTraceRecorder<DesiredSpatialAccelerationCommand>>();
    private final ArrayList<PlaneContactStateCommand> planeContactStateCommands = new ArrayList<PlaneContactStateCommand>();
    private final ArrayList<RollingContactStateCommand> rollingContactStateCommands = new ArrayList<RollingContactStateCommand>();
    private final ArrayList<CylindricalContactInContactCommand> cylindricalContactInContactCommands = new ArrayList<CylindricalContactInContactCommand>();
@@ -52,32 +60,32 @@ public class MomentumBasedControllerSpy
    public void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench)
    {
       ExternalWrenchCommand externalWrenchCommand = new ExternalWrenchCommand(rigidBody, wrench);
-      externalWrenchCommands.add(externalWrenchCommand);
+      externalWrenchCommands.add(new StackTraceRecorder<ExternalWrenchCommand>(externalWrenchCommand));
    }
 
    public void setDesiredPointAcceleration(GeometricJacobian rootToEndEffectorJacobian, FramePoint contactPoint, FrameVector desiredAcceleration)
    {
       DesiredPointAccelerationCommand desiredPointAccelerationCommand = new DesiredPointAccelerationCommand(rootToEndEffectorJacobian, contactPoint,
                                                                            desiredAcceleration);
-      desiredPointAccelerationCommands.add(desiredPointAccelerationCommand);
+      desiredPointAccelerationCommands.add(new StackTraceRecorder<DesiredPointAccelerationCommand>(desiredPointAccelerationCommand));
    }
-
-   public void setOneDoFJointAcceleration(OneDoFJoint joint, double desiredAcceleration)
+   
+   public void setDesiredJointAcceleration(OneDoFJoint joint, DenseMatrix64F jointAcceleration)
    {
-      OneDoFJointAccelerationCommand oneDoFJointAccelerationCommand = new OneDoFJointAccelerationCommand(joint, desiredAcceleration);
-      oneDoFJointAccelerationCommands.add(oneDoFJointAccelerationCommand);
+      DesiredJointAccelerationCommand desiredJointAccelerationCommand = new DesiredJointAccelerationCommand(joint, jointAcceleration);
+      desiredJointAccelerationCommands.add(new StackTraceRecorder<DesiredJointAccelerationCommand>(desiredJointAccelerationCommand));
    }
 
    public void setDesiredRateOfChangeOfMomentum(MomentumRateOfChangeData momentumRateOfChangeData)
    {
       DesiredRateOfChangeOfMomentumCommand desiredRateOfChangeOfMomentumCommand = new DesiredRateOfChangeOfMomentumCommand(momentumRateOfChangeData);
-      desiredRateOfChangeOfMomentumCommands.add(desiredRateOfChangeOfMomentumCommand);
+      desiredRateOfChangeOfMomentumCommands.add(new StackTraceRecorder<DesiredRateOfChangeOfMomentumCommand>(desiredRateOfChangeOfMomentumCommand));
    }
 
    public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
    {
       DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand = new DesiredSpatialAccelerationCommand(jacobian, taskspaceConstraintData);
-      desiredSpatialAccelerationCommands.add(desiredSpatialAccelerationCommand);
+      desiredSpatialAccelerationCommands.add(new StackTraceRecorder<DesiredSpatialAccelerationCommand>(desiredSpatialAccelerationCommand));
    }
 
    public void setPlaneContactState(ContactablePlaneBody contactableBody, List<FramePoint2d> contactPoints, double coefficientOfFriction,
@@ -105,7 +113,7 @@ public class MomentumBasedControllerSpy
    {
       externalWrenchCommands.clear();
       desiredPointAccelerationCommands.clear();
-      oneDoFJointAccelerationCommands.clear();
+      desiredJointAccelerationCommands.clear();
       desiredRateOfChangeOfMomentumCommands.clear();
       desiredSpatialAccelerationCommands.clear();
 
@@ -142,27 +150,27 @@ public class MomentumBasedControllerSpy
 
    private void getCommandsIntoStringBufferVerbose(StringBuffer stringBuffer)
    {
-      for (ExternalWrenchCommand externalWrenchCommand : externalWrenchCommands)
+      for (StackTraceRecorder<ExternalWrenchCommand> externalWrenchCommand : externalWrenchCommands)
       {
          stringBuffer.append(externalWrenchCommand + "\n");
       }
 
-      for (DesiredPointAccelerationCommand desiredPointAccelerationCommand : desiredPointAccelerationCommands)
+      for (StackTraceRecorder<DesiredPointAccelerationCommand> desiredPointAccelerationCommand : desiredPointAccelerationCommands)
       {
          stringBuffer.append(desiredPointAccelerationCommand + "\n");
       }
 
-      for (OneDoFJointAccelerationCommand oneDoFJointAccelerationCommand : oneDoFJointAccelerationCommands)
+      for (StackTraceRecorder<DesiredJointAccelerationCommand> desiredJointAccelerationCommand : desiredJointAccelerationCommands)
       {
-         stringBuffer.append(oneDoFJointAccelerationCommand + "\n");
+         stringBuffer.append(desiredJointAccelerationCommand + "\n");
       }
 
-      for (DesiredRateOfChangeOfMomentumCommand desiredRateOfChangeOfMomentumCommand : desiredRateOfChangeOfMomentumCommands)
+      for (StackTraceRecorder<DesiredRateOfChangeOfMomentumCommand> desiredRateOfChangeOfMomentumCommand : desiredRateOfChangeOfMomentumCommands)
       {
          stringBuffer.append(desiredRateOfChangeOfMomentumCommand + "\n");
       }
 
-      for (DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand : desiredSpatialAccelerationCommands)
+      for (StackTraceRecorder<DesiredSpatialAccelerationCommand> desiredSpatialAccelerationCommand : desiredSpatialAccelerationCommands)
       {
          stringBuffer.append(desiredSpatialAccelerationCommand + "\n");
       }
@@ -188,7 +196,7 @@ public class MomentumBasedControllerSpy
    {
       numberOfExternalWrenchCommands.set(externalWrenchCommands.size());
       numberOfDesiredPointAccelerationCommands.set(desiredPointAccelerationCommands.size());
-      numberOfOneDoFJointAccelerationCommands.set(oneDoFJointAccelerationCommands.size());
+      numberOfDesiredJointAccelerationCommands.set(desiredJointAccelerationCommands.size());
       numberOfDesiredRateOfChangeOfMomentumCommands.set(desiredRateOfChangeOfMomentumCommands.size());
       numberOfDesiredSpatialAccelerationCommands.set(desiredSpatialAccelerationCommands.size());
 
@@ -201,122 +209,13 @@ public class MomentumBasedControllerSpy
    {
       stringBuffer.append(externalWrenchCommands.size() + " ExternalWrenchCommands\n");
       stringBuffer.append(desiredPointAccelerationCommands.size() + " DesiredPointAccelerationCommands\n");
-      stringBuffer.append(oneDoFJointAccelerationCommands.size() + " OneDoFJointAccelerationCommands\n");
+      stringBuffer.append(desiredJointAccelerationCommands.size() + " DesiredJointAccelerationCommands\n");
       stringBuffer.append(desiredRateOfChangeOfMomentumCommands.size() + " DesiredRateOfChangeOfMomentumCommands\n");
       stringBuffer.append(desiredSpatialAccelerationCommands.size() + " DesiredSpatialAccelerationCommands\n");
 
       stringBuffer.append(planeContactStateCommands.size() + " PlaneContactStateCommands\n");
       stringBuffer.append(rollingContactStateCommands.size() + " RollingContactStateCommands\n");
       stringBuffer.append(cylindricalContactInContactCommands.size() + " CylindricalContactInContactCommands\n");
-   }
-
-   private class ExternalWrenchCommand
-   {
-      private final RigidBody rigidBody;
-      private final Wrench wrench;
-      private final StackTraceElement[] stackTrace;
-
-      public ExternalWrenchCommand(RigidBody rigidBody, Wrench wrench)
-      {
-         this.rigidBody = rigidBody;
-         this.wrench = wrench;
-
-         this.stackTrace = Thread.currentThread().getStackTrace();
-      }
-
-      public String toString()
-      {
-         return getStackInformation(stackTrace) + ", ExternalWrenchCommand: " + wrench;
-      }
-   }
-
-
-   private class DesiredPointAccelerationCommand
-   {
-      private final GeometricJacobian rootToEndEffectorJacobian;
-      private final FramePoint contactPoint;
-      private final FrameVector desiredAcceleration;
-
-      private final StackTraceElement[] stackTrace;
-
-      public DesiredPointAccelerationCommand(GeometricJacobian rootToEndEffectorJacobian, FramePoint contactPoint, FrameVector desiredAcceleration)
-      {
-         this.rootToEndEffectorJacobian = rootToEndEffectorJacobian;
-         this.contactPoint = contactPoint;
-         this.desiredAcceleration = desiredAcceleration;
-
-         this.stackTrace = Thread.currentThread().getStackTrace();
-      }
-
-      public String toString()
-      {
-         return getStackInformation(stackTrace) + ", DesiredPointAccelerationCommand: rootToEndEffectorJacobian = " + rootToEndEffectorJacobian;
-      }
-   }
-
-
-   private class OneDoFJointAccelerationCommand
-   {
-      private final OneDoFJoint joint;
-      private final double desiredAcceleration;
-      private final StackTraceElement[] stackTrace;
-
-      public OneDoFJointAccelerationCommand(OneDoFJoint joint, double desiredAcceleration)
-      {
-         this.joint = joint;
-         this.desiredAcceleration = desiredAcceleration;
-
-         this.stackTrace = Thread.currentThread().getStackTrace();
-      }
-
-      public String toString()
-      {
-         return getStackInformation(stackTrace) + ", OneDoFJointAccelerationCommand: " + joint.getName();
-      }
-
-   }
-
-
-   private class DesiredRateOfChangeOfMomentumCommand
-   {
-      private final MomentumRateOfChangeData momentumRateOfChangeData;
-      private final StackTraceElement[] stackTrace;
-
-      public DesiredRateOfChangeOfMomentumCommand(MomentumRateOfChangeData momentumRateOfChangeData)
-      {
-         this.momentumRateOfChangeData = momentumRateOfChangeData;
-
-         this.stackTrace = Thread.currentThread().getStackTrace();
-      }
-
-      public String toString()
-      {
-         return getStackInformation(stackTrace) + ", DesiredRateOfChangeOfMomentumCommand: MomentumSubspace = "
-                + momentumRateOfChangeData.getMomentumSubspace();
-      }
-   }
-
-
-   private class DesiredSpatialAccelerationCommand
-   {
-      private final GeometricJacobian jacobian;
-      private final TaskspaceConstraintData taskspaceConstraintData;
-      private final StackTraceElement[] stackTrace;
-
-      public DesiredSpatialAccelerationCommand(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
-      {
-         this.jacobian = jacobian;
-         this.taskspaceConstraintData = taskspaceConstraintData;
-
-         this.stackTrace = Thread.currentThread().getStackTrace();
-      }
-
-      public String toString()
-      {
-         return getStackInformation(stackTrace) + ", DesiredSpatialAccelerationCommand: GeometricJacobian = " + jacobian.getShortInfo() + ", taskspaceConstraintData = "
-                + taskspaceConstraintData;
-      }
-
    }
 
    private class PlaneContactStateCommand
@@ -403,5 +302,7 @@ public class MomentumBasedControllerSpy
 
       return "+++ " + className + "." + methodName + "(): Line " + lineNumber;
    }
+
+  
 
 }

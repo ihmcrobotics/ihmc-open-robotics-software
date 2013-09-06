@@ -513,15 +513,15 @@ public class MomentumBasedController
 
    public void setOneDoFJointAcceleration(OneDoFJoint joint, double desiredAcceleration)
    {
-      if (momentumBasedControllerSpy != null)
-      {
-         momentumBasedControllerSpy.setOneDoFJointAcceleration(joint, desiredAcceleration);
-      }
-
       DenseMatrix64F jointAcceleration = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
       jointAcceleration.set(0, 0, desiredAcceleration);
+
+      if (momentumBasedControllerSpy != null)
+      {
+         momentumBasedControllerSpy.setDesiredJointAcceleration(joint, jointAcceleration);
+      }
+
       momentumControlModuleBridge.setDesiredJointAcceleration(joint, jointAcceleration);
-  
    }
 
    private void updateYoVariables()

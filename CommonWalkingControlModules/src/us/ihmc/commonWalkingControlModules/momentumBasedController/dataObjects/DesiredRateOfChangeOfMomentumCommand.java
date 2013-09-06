@@ -9,20 +9,14 @@ public class DesiredRateOfChangeOfMomentumCommand
    {
       this.momentumRateOfChangeData = momentumRateOfChangeData;
    }
-   
-   
 
    public MomentumRateOfChangeData getMomentumRateOfChangeData()
    {
       return momentumRateOfChangeData;
    }
 
-
-
    public String toString()
    {
-      return "DesiredRateOfChangeOfMomentumCommand: MomentumSubspace = "
-            + momentumRateOfChangeData.getMomentumSubspace();
+      return "DesiredRateOfChangeOfMomentumCommand: MomentumSubspace = " + momentumRateOfChangeData.getMomentumSubspace();
    }
 }
-
