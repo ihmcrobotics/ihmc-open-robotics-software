@@ -14,25 +14,19 @@ public class ExternalWrenchCommand
       this.wrench = wrench;
    }
 
-   
-   
    public RigidBody getRigidBody()
    {
       return rigidBody;
    }
-
-
 
    public Wrench getWrench()
    {
       return wrench;
    }
 
-
-
    public String toString()
    {
       return "ExternalWrenchCommand: " + wrench;
    }
-
 }
+

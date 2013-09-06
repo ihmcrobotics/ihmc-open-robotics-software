@@ -50,5 +50,5 @@ public class DesiredPointAccelerationCommand
    {
       return "DesiredPointAccelerationCommand: rootToEndEffectorJacobian = " + rootToEndEffectorJacobian;
    }
-
 }
+
