@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -14,8 +15,13 @@ import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVX
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXWithCylinderNativeInput;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXWithCylinderNativeOutput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModule;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredPointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredRateOfChangeOfMomentumCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleDataObject;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylinderAndPlaneContactMatrixCalculatorAdapter;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylinderAndPlaneContactMatrixCalculatorAdapterwRhowPhiObtainedFromContactStates;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylindricalContactState;
@@ -334,4 +340,5 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    {
       return externalWrenchHandler.getExternalWrenches();
    }
+   
 }

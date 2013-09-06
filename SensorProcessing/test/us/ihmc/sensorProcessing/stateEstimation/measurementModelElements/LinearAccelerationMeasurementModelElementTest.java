@@ -53,7 +53,7 @@ public class LinearAccelerationMeasurementModelElementTest
       ControlFlowElement controlFlowElement = new NullControlFlowElement();
 
       FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, estimationLink, rootJoint);
-      ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort = new ControlFlowInputPort<FullInverseDynamicsStructure>(controlFlowElement);
+      ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort = new ControlFlowInputPort<FullInverseDynamicsStructure>("inverseDynamicsStructureInputPort", controlFlowElement);
       inverseDynamicsStructureInputPort.setData(inverseDynamicsStructure);
       
 //      TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), elevator);
@@ -78,7 +78,7 @@ public class LinearAccelerationMeasurementModelElementTest
 
       ControlFlowOutputPort<FrameVector> biasPort = new ControlFlowOutputPort<FrameVector>("biasPort", controlFlowElement);
 
-      ControlFlowInputPort<Vector3d> linearAccelerationMeasurementInputPort = new ControlFlowInputPort<Vector3d>(controlFlowElement);
+      ControlFlowInputPort<Vector3d> linearAccelerationMeasurementInputPort = new ControlFlowInputPort<Vector3d>("linearAccelerationMeasurementInputPort", controlFlowElement);
       double gZ = -9.81;
       Vector3d gravitationalAcceleration = new Vector3d(0.0, 0.0, -gZ);
 

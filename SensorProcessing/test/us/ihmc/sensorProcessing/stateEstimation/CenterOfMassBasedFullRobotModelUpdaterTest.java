@@ -63,7 +63,7 @@ public class CenterOfMassBasedFullRobotModelUpdaterTest
 
       FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, estimationLink, rootJoint);
       ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort =
-         new ControlFlowInputPort<FullInverseDynamicsStructure>(controlFlowElement);
+         new ControlFlowInputPort<FullInverseDynamicsStructure>("inverseDynamicsStructureInputPort", controlFlowElement);
       inverseDynamicsStructureInputPort.setData(inverseDynamicsStructure);
 
       TwistCalculator twistCalculator = inverseDynamicsStructure.getTwistCalculator();

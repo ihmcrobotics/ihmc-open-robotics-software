@@ -57,7 +57,7 @@ public class PointPositionMeasurementModelElementTest
 
       FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, estimationLink, rootJoint);
       ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort =
-         new ControlFlowInputPort<FullInverseDynamicsStructure>(controlFlowElement);
+         new ControlFlowInputPort<FullInverseDynamicsStructure>("inverseDynamicsStructureInputPort", controlFlowElement);
       inverseDynamicsStructureInputPort.setData(inverseDynamicsStructure);
 
       TwistCalculator twistCalculator = inverseDynamicsStructure.getTwistCalculator();
@@ -67,7 +67,7 @@ public class PointPositionMeasurementModelElementTest
       YoVariableRegistry registry = new YoVariableRegistry(name);
 
       AfterJointReferenceFrameNameMap referenceFrameMap = new AfterJointReferenceFrameNameMap(elevator);
-      ControlFlowInputPort<PointPositionDataObject> pointPositionMeasurementInputPort = new ControlFlowInputPort<PointPositionDataObject>(controlFlowElement);
+      ControlFlowInputPort<PointPositionDataObject> pointPositionMeasurementInputPort = new ControlFlowInputPort<PointPositionDataObject>("pointPositionMeasurementInputPort", controlFlowElement);
 
       ControlFlowOutputPort<FramePoint> centerOfMassPositionPort = new ControlFlowOutputPort<FramePoint>("centerOfMassPositionPort", controlFlowElement);
       ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort = new ControlFlowOutputPort<FrameVector>("centerOfMassVelocityPort", controlFlowElement);
