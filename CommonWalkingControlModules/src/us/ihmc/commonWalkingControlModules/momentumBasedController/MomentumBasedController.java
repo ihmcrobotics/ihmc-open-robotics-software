@@ -324,7 +324,8 @@ public class MomentumBasedController
          momentumBasedControllerSpy.setExternalWrenchToCompensateFor(rigidBody, wrench);
       }
 
-      momentumControlModuleBridge.getActiveMomentumControlModule().setExternalWrenchToCompensateFor(rigidBody, wrench);
+//      momentumControlModuleBridge.getActiveMomentumControlModule().setExternalWrenchToCompensateFor(rigidBody, wrench);
+      momentumControlModuleBridge.setExternalWrenchToCompensateFor(rigidBody, wrench);
    }
 
    public void setDesiredPointAcceleration(GeometricJacobian rootToEndEffectorJacobian, FramePoint contactPoint, FrameVector desiredAcceleration)
@@ -334,7 +335,7 @@ public class MomentumBasedController
          momentumBasedControllerSpy.setDesiredPointAcceleration(rootToEndEffectorJacobian, contactPoint, desiredAcceleration);
       }
 
-      momentumControlModuleBridge.getActiveMomentumControlModule().setDesiredPointAcceleration(rootToEndEffectorJacobian, contactPoint, desiredAcceleration);
+      momentumControlModuleBridge.setDesiredPointAcceleration(rootToEndEffectorJacobian, contactPoint, desiredAcceleration);
    }
 
    public void setDesiredPointAcceleration(GeometricJacobian rootToEndEffectorJacobian, FramePoint contactPoint, FrameVector desiredAcceleration, DenseMatrix64F selectionMatrix)
@@ -344,7 +345,7 @@ public class MomentumBasedController
          momentumBasedControllerSpy.setDesiredPointAcceleration(rootToEndEffectorJacobian, contactPoint, desiredAcceleration);
       }
 
-      momentumControlModuleBridge.getActiveMomentumControlModule().setDesiredPointAcceleration(rootToEndEffectorJacobian, contactPoint, desiredAcceleration, selectionMatrix);
+      momentumControlModuleBridge.setDesiredPointAcceleration(rootToEndEffectorJacobian, contactPoint, desiredAcceleration, selectionMatrix);
    }
 
    // TODO: Temporary method for a big refactor allowing switching between high level behaviors
@@ -358,7 +359,7 @@ public class MomentumBasedController
       callUpdatables();
 
       inverseDynamicsCalculator.reset();
-      momentumControlModuleBridge.getActiveMomentumControlModule().reset();
+      momentumControlModuleBridge.reset();
       
       resetWeightsForContactRegularization();
    }
@@ -393,7 +394,7 @@ public class MomentumBasedController
 
       try
       {
-         momentumControlModuleBridge.getActiveMomentumControlModule().compute(this.contactStates, this.cylindricalContactStates, upcomingSupportLeg.getEnumValue());
+         momentumControlModuleBridge.compute(this.contactStates, this.cylindricalContactStates, upcomingSupportLeg.getEnumValue());
       }
       catch (NoConvergenceException e)
       {
@@ -402,9 +403,8 @@ public class MomentumBasedController
          throw new RuntimeException(e);
       }
 
-      SpatialForceVector desiredCentroidalMomentumRate = momentumControlModuleBridge.getActiveMomentumControlModule().getDesiredCentroidalMomentumRate();
-
-      Map<RigidBody, Wrench> externalWrenches = momentumControlModuleBridge.getActiveMomentumControlModule().getExternalWrenches();
+      SpatialForceVector desiredCentroidalMomentumRate = momentumControlModuleBridge.getDesiredCentroidalMomentumRate();
+      Map<RigidBody, Wrench> externalWrenches = momentumControlModuleBridge.getExternalWrenches();
 
 
       for (RigidBody rigidBody : externalWrenches.keySet())
@@ -518,8 +518,7 @@ public class MomentumBasedController
 
       DenseMatrix64F jointAcceleration = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
       jointAcceleration.set(0, 0, desiredAcceleration);
-      momentumControlModuleBridge.getActiveMomentumControlModule().setDesiredJointAcceleration(joint, jointAcceleration);
-//      activeMomentumControlModule.setDesiredJointAcceleration(joint, jointAcceleration);
+      momentumControlModuleBridge.setDesiredJointAcceleration(joint, jointAcceleration);
   
    }
 
@@ -552,7 +551,7 @@ public class MomentumBasedController
       // where the feet are all jacked up. For example, after falling and getting back up.
       resetEstimatorPositionsToCurrent.set(true);
       inverseDynamicsCalculator.compute();
-      momentumControlModuleBridge.getActiveMomentumControlModule().initialize();
+      momentumControlModuleBridge.initialize();
       planeContactWrenchProcessor.initialize();
       callUpdatables();
    }
@@ -611,7 +610,7 @@ public class MomentumBasedController
          momentumBasedControllerSpy.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
       }
 
-      momentumControlModuleBridge.getActiveMomentumControlModule().setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
+      momentumControlModuleBridge.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
    }
 
    public void setDesiredRateOfChangeOfMomentum(MomentumRateOfChangeData momentumRateOfChangeData)
@@ -621,7 +620,7 @@ public class MomentumBasedController
          momentumBasedControllerSpy.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
       }
 
-      momentumControlModuleBridge.getActiveMomentumControlModule().setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
+      momentumControlModuleBridge.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
    }
 
    public ReferenceFrame getPelvisZUpFrame()
@@ -677,7 +676,7 @@ public class MomentumBasedController
 
    public boolean isUsingOptimizationMomentumControlModule()
    {
-      return (momentumControlModuleBridge.getActiveMomentumControlModule() instanceof OptimizationMomentumControlModule);
+      return momentumControlModuleBridge.isUsingOptimizationMomentumControlModule();
    }
 
    public FrameVector getAdmissibleDesiredGroundReactionForceCopy()
@@ -756,12 +755,6 @@ public class MomentumBasedController
    public void setMomentumControlModuleToUse(MomentumControlModuleType momentumControlModuleToUse)
    {
       momentumControlModuleBridge.setMomentumControlModuleToUse(momentumControlModuleToUse);
-   }
-
-   public MomentumControlModuleType getMomentumControlModuleInUse()
-   {
-      return momentumControlModuleBridge.getMomentumControlModuleInUse();
-//      return momentumControlModuleInUse.getEnumValue();
    }
 
    public void setDelayTimeBeforeTrustingContacts(double delayTimeBeforeTrustingContacts)
