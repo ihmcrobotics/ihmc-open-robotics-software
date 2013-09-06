@@ -6,7 +6,8 @@ import com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionToo
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.data.RowD1Matrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeData;
+
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.*;

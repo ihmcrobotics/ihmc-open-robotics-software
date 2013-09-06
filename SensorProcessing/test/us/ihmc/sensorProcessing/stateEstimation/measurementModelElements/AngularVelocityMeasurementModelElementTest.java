@@ -47,10 +47,10 @@ public class AngularVelocityMeasurementModelElementTest
 
       ControlFlowOutputPort<FrameVector> angularVelocityStatePort = new ControlFlowOutputPort<FrameVector>("angularVelocityStatePort", controlFlowElement);
       ControlFlowOutputPort<FrameVector> biasStatePort = new ControlFlowOutputPort<FrameVector>("biasStatePort", controlFlowElement);
-      ControlFlowInputPort<Vector3d> angularVelocityMeasurementInputPort = new ControlFlowInputPort<Vector3d>(controlFlowElement);
+      ControlFlowInputPort<Vector3d> angularVelocityMeasurementInputPort = new ControlFlowInputPort<Vector3d>("angularVelocityMeasurementInputPort", controlFlowElement);
       
       
-      ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort = new ControlFlowInputPort<FullInverseDynamicsStructure>(controlFlowElement);
+      ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort = new ControlFlowInputPort<FullInverseDynamicsStructure>("inverseDynamicsStructureInputPort", controlFlowElement);
       
       FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, randomFloatingChain.getRootJoint().getSuccessor(), randomFloatingChain.getRootJoint());
       inverseDynamicsStructureInputPort.setData(inverseDynamicsStructure);

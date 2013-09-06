@@ -46,7 +46,7 @@ public class OrientationMeasurementModelElementTest
       ControlFlowElement controlFlowElement = new NullControlFlowElement();
 
       final ControlFlowOutputPort<FrameOrientation> orientationPort = new ControlFlowOutputPort<FrameOrientation>("orientationPort", controlFlowElement);
-      ControlFlowInputPort<Matrix3d> orientationMeasurementInputPort = new ControlFlowInputPort<Matrix3d>(controlFlowElement);
+      ControlFlowInputPort<Matrix3d> orientationMeasurementInputPort = new ControlFlowInputPort<Matrix3d>("orientationMeasurementInputPort", controlFlowElement);
       String name = "test";
       YoVariableRegistry registry = new YoVariableRegistry(name);
 
