@@ -1,5 +1,6 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -24,13 +25,14 @@ public class JointStateFullRobotModelUpdater extends AbstractControlFlowElement
 
    private final ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort;
 
-   public JointStateFullRobotModelUpdater(ControlFlowGraph controlFlowGraph, JointAndIMUSensorMap sensorMap, FullInverseDynamicsStructure inverseDynamicsStructure)
+   public JointStateFullRobotModelUpdater(ControlFlowGraph controlFlowGraph, JointAndIMUSensorMap sensorMap,
+         FullInverseDynamicsStructure inverseDynamicsStructure)
    {
       this(controlFlowGraph, sensorMap.getJointPositionSensors(), sensorMap.getJointVelocitySensors(), inverseDynamicsStructure);
    }
 
    public JointStateFullRobotModelUpdater(ControlFlowGraph controlFlowGraph, Map<OneDoFJoint, ControlFlowOutputPort<double[]>> jointPositionSensors,
-           Map<OneDoFJoint, ControlFlowOutputPort<double[]>> jointVelocitySensors, FullInverseDynamicsStructure inverseDynamicsStructure)
+         Map<OneDoFJoint, ControlFlowOutputPort<double[]>> jointVelocitySensors, FullInverseDynamicsStructure inverseDynamicsStructure)
    {
       InverseDynamicsJoint[] joints = ScrewTools.computeJointsInOrder(inverseDynamicsStructure.getTwistCalculator().getRootBody());
       this.oneDoFJoints = ScrewTools.filterJoints(joints, OneDoFJoint.class);
@@ -60,8 +62,6 @@ public class JointStateFullRobotModelUpdater extends AbstractControlFlowElement
          velocitySensorInputPorts.put(oneDoFJoint, velocitySensorInputPort);
          controlFlowGraph.connectElements(velocitySensorOutputPort, velocitySensorInputPort);
       }
-
-
    }
 
    public void startComputation()
@@ -81,14 +81,14 @@ public class JointStateFullRobotModelUpdater extends AbstractControlFlowElement
 
       // TODO: Does it make sense to do this yet if the orientation of the pelvis isn't known yet?
       FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureOutputPort.getData();
-            
+
       TwistCalculator twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       SpatialAccelerationCalculator spatialAccelerationCalculator = inverseDynamicsStructure.getSpatialAccelerationCalculator();
 
       twistCalculator.getRootBody().updateFramesRecursively();
       twistCalculator.compute();
       spatialAccelerationCalculator.compute();
-      
+
       inverseDynamicsStructureOutputPort.setData(inverseDynamicsStructure);
    }
 

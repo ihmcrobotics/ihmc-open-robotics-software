@@ -69,7 +69,7 @@ public class CenterOfMassBasedFullRobotModelUpdaterTest
       TwistCalculator twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       SpatialAccelerationCalculator spatialAccelerationCalculator = inverseDynamicsStructure.getSpatialAccelerationCalculator();
 
-      CenterOfMassBasedFullRobotModelUpdater fullRobotModelUpdater = new CenterOfMassBasedFullRobotModelUpdater(inverseDynamicsStructureInputPort,
+      OrientationAndPositionFullRobotModelUpdater fullRobotModelUpdater = new OrientationAndPositionFullRobotModelUpdater(inverseDynamicsStructureInputPort,
                                                                         centerOfMassPositionPort, centerOfMassVelocityPort, centerOfMassAccelerationPort,
                                                                         orientationPort, angularVelocityPort, angularAccelerationPort);
 

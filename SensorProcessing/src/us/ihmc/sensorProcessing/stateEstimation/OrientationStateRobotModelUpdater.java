@@ -3,11 +3,13 @@ package us.ihmc.sensorProcessing.stateEstimation;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 
+import us.ihmc.controlFlow.AbstractControlFlowElement;
+import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.controlFlow.ControlFlowPort;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
-import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -15,26 +17,40 @@ import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
-//assumes that twist calculator and spatial acceleration calculator have already been updated with joint positions and velocities
-//TODO: update accelerations
-public class OrientationStateFullRobotModelUpdater implements Runnable
+public class OrientationStateRobotModelUpdater extends AbstractControlFlowElement implements Runnable
 {
    private final ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort;
-
-   private final ControlFlowOutputPort<FrameOrientation> orientationPort;
-   private final ControlFlowOutputPort<FrameVector> angularVelocityPort;
-
+   private final ControlFlowPort<FrameOrientation> orientationPort;
+   private final ControlFlowPort<FrameVector> angularVelocityPort;
+   private final ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   public OrientationStateFullRobotModelUpdater(ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort,
-         ControlFlowOutputPort<FramePoint> centerOfMassPositionPort, ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort,
-         ControlFlowOutputPort<FrameVector> centerOfMassAccelerationPort, ControlFlowOutputPort<FrameOrientation> orientationPort,
-         ControlFlowOutputPort<FrameVector> angularVelocityPort, ControlFlowOutputPort<FrameVector> angularAccelerationPort)
+   //Constructor in case of use as ControlFlowElement
+   public OrientationStateRobotModelUpdater(ControlFlowGraph controlFlowGraph,
+         ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort, ControlFlowOutputPort<FrameOrientation> orientationOutputPort,
+         ControlFlowOutputPort<FrameVector> angularVelocityOutputPort)
+   {
+      this.orientationPort = createInputPort("orientationInputPort");
+      this.angularVelocityPort = createInputPort("angularVelocityInputPort");
+      this.inverseDynamicsStructureInputPort = createInputPort("inverseDynamicsStructureInputPort");
+      this.inverseDynamicsStructureOutputPort = createOutputPort("inverseDynamicsStructureOutputPort");
+
+      controlFlowGraph.connectElements(inverseDynamicsStructureOutputPort, inverseDynamicsStructureInputPort);
+      controlFlowGraph.connectElements(orientationOutputPort, (ControlFlowInputPort<FrameOrientation>) orientationPort);
+      controlFlowGraph.connectElements(angularVelocityOutputPort, (ControlFlowInputPort<FrameVector>) angularVelocityPort);
+
+      this.inverseDynamicsStructureInputPort.setData(inverseDynamicsStructureOutputPort.getData());
+      this.inverseDynamicsStructureOutputPort.setData(inverseDynamicsStructureOutputPort.getData());
+   }
+
+   // Constructor in case of use as Runnable
+   public OrientationStateRobotModelUpdater(ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort,
+         ControlFlowOutputPort<FrameOrientation> orientationPort, ControlFlowOutputPort<FrameVector> angularVelocityPort)
    {
       this.inverseDynamicsStructureInputPort = inverseDynamicsStructureInputPort;
+      this.inverseDynamicsStructureOutputPort = null;
       this.orientationPort = orientationPort;
       this.angularVelocityPort = angularVelocityPort;
-
    }
 
    public void run()
@@ -46,28 +62,34 @@ public class OrientationStateFullRobotModelUpdater implements Runnable
       updateRootJointRotation(inverseDynamicsStructure.getRootJoint(), orientationPort.getData(), estimationFrame);
       rootJoint.getFrameAfterJoint().update();
 
-      // update rootJoint angular velocity (not the total twist, forget about linear velocity for now)
       TwistCalculator twistCalculator = inverseDynamicsStructure.getTwistCalculator();
-      updateRootJointTwist(twistCalculator, angularVelocityPort.getData());
+      updateRootJointTwistAngularPart(twistCalculator, rootJoint, angularVelocityPort.getData());
       twistCalculator.compute();
+   }
+
+   public void startComputation()
+   {
+      run();
+      inverseDynamicsStructureOutputPort.setData(inverseDynamicsStructureInputPort.getData());
+   }
+
+   public void waitUntilComputationIsDone()
+   {
+      // empty
    }
 
    private final FrameVector tempRootJointAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
    private final Twist tempRootJointTwist = new Twist();
 
-   private void updateRootJointTwist(TwistCalculator twistCalculator, FrameVector estimationLinkAngularVelocity)
+   private void updateRootJointTwistAngularPart(TwistCalculator twistCalculator, SixDoFJoint rootJoint, FrameVector estimationLinkAngularVelocity)
    {
-      FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureInputPort.getData();
-      SixDoFJoint rootJoint = inverseDynamicsStructure.getRootJoint();
-
       computeRootJointAngularVelocity(twistCalculator, tempRootJointAngularVelocity, estimationLinkAngularVelocity);
-      computeRootJointTwistAngularVelocityOnly(rootJoint, tempRootJointTwist, tempRootJointAngularVelocity);
+      computeRootJointTwistAngularPart(rootJoint, tempRootJointTwist, tempRootJointAngularVelocity);
       rootJoint.setJointTwist(tempRootJointTwist);
    }
 
    private final Twist tempRootToEstimationTwist = new Twist();
    private final FrameVector tempRootToEstimationAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
-//   private final FrameVector tempCrossTerm = new FrameVector(ReferenceFrame.getWorldFrame());
    private final FrameVector tempEstimationLinkAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
 
    private void computeRootJointAngularVelocity(TwistCalculator twistCalculator, FrameVector rootJointAngularVelocityToPack,
@@ -75,7 +97,6 @@ public class OrientationStateFullRobotModelUpdater implements Runnable
    {
       FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureInputPort.getData();
       SixDoFJoint rootJoint = inverseDynamicsStructure.getRootJoint();
-//      ReferenceFrame estimationFrame = inverseDynamicsStructure.getEstimationFrame();
       RigidBody estimationLink = inverseDynamicsStructure.getEstimationLink();
 
       tempEstimationLinkAngularVelocity.setAndChangeFrame(angularVelocityEstimationLink);
@@ -99,7 +120,7 @@ public class OrientationStateFullRobotModelUpdater implements Runnable
    private final Twist tempRootJointTwistExisting = new Twist();
    private final FrameVector tempRootJointTwistExistingLinearPart = new FrameVector();
 
-   private void computeRootJointTwistAngularVelocityOnly(SixDoFJoint rootJoint, Twist rootJointTwistToPack, FrameVector rootJointAngularVelocity)
+   private void computeRootJointTwistAngularPart(SixDoFJoint rootJoint, Twist rootJointTwistToPack, FrameVector rootJointAngularVelocity)
    {
       rootJointAngularVelocity.checkReferenceFrameMatch(rootJoint.getFrameAfterJoint());
 
@@ -144,5 +165,10 @@ public class OrientationStateFullRobotModelUpdater implements Runnable
       // H_{root}^{w} = H_{estimation}^{w} * H_{root}^{estimation}
       rootJointToWorldToPack.set(estimationLinkTransform);
       rootJointToWorldToPack.mul(tempRootJointFrameToEstimationFrame);
+   }
+
+   public ControlFlowOutputPort<FullInverseDynamicsStructure> getFullInverseDynamicsStructureOutputPort()
+   {
+      return inverseDynamicsStructureOutputPort;
    }
 }
