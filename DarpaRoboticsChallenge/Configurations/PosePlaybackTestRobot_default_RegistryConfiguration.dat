@@ -1,0 +1,6 @@
+root*false*false
+root.PosePlaybackTestRobot*false*false
+root.Receiver*false*false
+root.Receiver.PosePlaybackController*false*false
+root.Sender*false*false
+root.Sender.PosePlaybackController*false*false

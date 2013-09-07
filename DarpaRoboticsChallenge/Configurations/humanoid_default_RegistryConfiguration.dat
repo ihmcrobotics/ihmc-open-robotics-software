@@ -1,0 +1,6 @@
+root*false*false
+root.humanoid*false*false
+root.humanoid.LinearGroundContactModel*false*false
+root.Steer*false*false
+root.Steer.ContactController*false*false
+root.Steer.ContactController.simpleContactSimpleStickSlipContactModel*false*false

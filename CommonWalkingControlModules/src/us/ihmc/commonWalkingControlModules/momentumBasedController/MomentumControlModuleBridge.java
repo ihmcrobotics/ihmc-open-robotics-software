@@ -36,6 +36,8 @@ public class MomentumControlModuleBridge implements MomentumControlModule
    private final YoVariableRegistry registry = new YoVariableRegistry("MomentumControlModuleBridge");
 
    private static final boolean TRY_BOTH_AND_COMPARE = false;
+   private final MomentumModuleSolutionComparer momentumModuleSolutionComparer;
+
    public enum MomentumControlModuleType 
    {
       OPTIMIZATION, OLD;
@@ -58,6 +60,9 @@ public class MomentumControlModuleBridge implements MomentumControlModule
    public MomentumControlModuleBridge(MomentumControlModule optimizationMomentumControlModule, MomentumControlModule oldMomentumControlModule,
                                       YoVariableRegistry parentRegistry)
    {
+      if (TRY_BOTH_AND_COMPARE) momentumModuleSolutionComparer = new MomentumModuleSolutionComparer();
+      else momentumModuleSolutionComparer = null;
+      
       this.momentumControlModules.put(MomentumControlModuleType.OPTIMIZATION, optimizationMomentumControlModule);
       this.momentumControlModules.put(MomentumControlModuleType.OLD, oldMomentumControlModule);
 
@@ -165,27 +170,28 @@ public class MomentumControlModuleBridge implements MomentumControlModule
                        Map<ContactableCylinderBody, ? extends CylindricalContactState> cylinderContactStates, RobotSide upcomingSupportSide)
            throws NoConvergenceException
    {
+      MomentumModuleSolution inactiveSolution = null;
+      
       if (TRY_BOTH_AND_COMPARE)
       {
          setMomentumModuleDataObject(inactiveMomentumControlModule, momentumModuleDataObject);
-         inactiveMomentumControlModule.compute(contactStates, cylinderContactStates, upcomingSupportSide);
+         inactiveSolution = inactiveMomentumControlModule.compute(contactStates, cylinderContactStates, upcomingSupportSide);
+      
+         momentumModuleSolutionComparer.setMomentumModuleDataObject(momentumModuleDataObject);
+         momentumModuleSolutionComparer.setFirstSolution("Inactive Solution", inactiveSolution);
       }
       
       setMomentumModuleDataObject(activeMomentumControlModule, momentumModuleDataObject);
-      return activeMomentumControlModule.compute(contactStates, cylinderContactStates, upcomingSupportSide);  
+      MomentumModuleSolution activeSolution =  activeMomentumControlModule.compute(contactStates, cylinderContactStates, upcomingSupportSide);  
+  
+      if (TRY_BOTH_AND_COMPARE)
+      {
+         momentumModuleSolutionComparer.setSecondSolution("Active Solution", activeSolution);
+         momentumModuleSolutionComparer.displayComparison();
+      }
+      
+      return activeSolution;
    }
-
-//   public SpatialForceVector getDesiredCentroidalMomentumRate()
-//   {
-//      return activeMomentumControlModule.getDesiredCentroidalMomentumRate();
-//   }
-//
-//   public Map<RigidBody, Wrench> getExternalWrenches()
-//   {
-//      return activeMomentumControlModule.getExternalWrenches();
-//   }
-
-
 
    private static void setMomentumModuleDataObject(MomentumControlModule momentumControlModule, MomentumModuleDataObject momentumModuleDataObject)
    {
