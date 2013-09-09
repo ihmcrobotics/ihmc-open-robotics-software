@@ -85,7 +85,7 @@ public class PointVelocityMeasurementModelElementTest
       PointVelocityMeasurementModelElement modelElement = new PointVelocityMeasurementModelElement(name, pointVelocityMeasurementInputPort,
                                                              centerOfMassPositionPort, centerOfMassVelocityPort, orientationPort, angularVelocityPort,
                                                              estimationFrame, inverseDynamicsStructureInputPort,
-                                                             referenceFrameMap, rigidBodyToIndexMap, registry);
+                                                             referenceFrameMap, rigidBodyToIndexMap, false, registry);
 
       randomFloatingChain.setRandomPositionsAndVelocities(random);
       twistCalculator.compute();
