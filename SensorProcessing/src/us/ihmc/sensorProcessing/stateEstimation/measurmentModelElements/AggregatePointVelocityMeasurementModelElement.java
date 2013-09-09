@@ -37,7 +37,6 @@ public class AggregatePointVelocityMeasurementModelElement implements Measuremen
    private final ControlFlowOutputPort<FrameOrientation> orientationPort;
    private final ControlFlowOutputPort<FrameVector> angularVelocityPort;
 
-
    private final ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort;
    private final AfterJointReferenceFrameNameMap referenceFrameNameMap;
    private final RigidBodyToIndexMap rigidBodyToIndexMap;
@@ -51,14 +50,14 @@ public class AggregatePointVelocityMeasurementModelElement implements Measuremen
    private final DenseMatrix64F singlePointCovariance = new DenseMatrix64F(PointVelocityMeasurementModelElement.SIZE,
                                                            PointVelocityMeasurementModelElement.SIZE);
 
+   private final boolean assumePerfectIMU;
    private int nElementsInUse;
 
-
    public AggregatePointVelocityMeasurementModelElement(ControlFlowInputPort<Set<PointVelocityDataObject>> inputPort,
-         ControlFlowOutputPort<FramePoint> centerOfMassPositionPort, ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort,
-         ControlFlowOutputPort<FrameOrientation> orientationPort, ControlFlowOutputPort<FrameVector> angularVelocityPort,
-         ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort, AfterJointReferenceFrameNameMap referenceFrameNameMap,
-         RigidBodyToIndexMap rigidBodyToIndexMap, ReferenceFrame estimationFrame)
+           ControlFlowOutputPort<FramePoint> centerOfMassPositionPort, ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort,
+           ControlFlowOutputPort<FrameOrientation> orientationPort, ControlFlowOutputPort<FrameVector> angularVelocityPort,
+           ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort, AfterJointReferenceFrameNameMap referenceFrameNameMap,
+           RigidBodyToIndexMap rigidBodyToIndexMap, ReferenceFrame estimationFrame, boolean assumePerfectIMU)
    {
       this.inputPort = inputPort;
       this.centerOfMassPositionPort = centerOfMassPositionPort;
@@ -69,11 +68,16 @@ public class AggregatePointVelocityMeasurementModelElement implements Measuremen
       this.referenceFrameNameMap = referenceFrameNameMap;
       this.rigidBodyToIndexMap = rigidBodyToIndexMap;
       this.estimationFrame = estimationFrame;
+      this.assumePerfectIMU = assumePerfectIMU;
 
       statePorts.add(centerOfMassPositionPort);
       statePorts.add(centerOfMassVelocityPort);
-      statePorts.add(orientationPort);
-      statePorts.add(angularVelocityPort);
+
+      if (!assumePerfectIMU)
+      {
+         statePorts.add(orientationPort);
+         statePorts.add(angularVelocityPort);
+      }
 
       for (ControlFlowOutputPort<?> statePort : statePorts)
       {
@@ -89,11 +93,13 @@ public class AggregatePointVelocityMeasurementModelElement implements Measuremen
       for (int i = elementPool.size(); i < nElementsInUse; i++)
       {
          String name = "pointVelocity" + i;
-         ControlFlowInputPort<PointVelocityDataObject> pointVelocityMeasurementInputPort = new ControlFlowInputPort<PointVelocityDataObject>("pointVelocityMeasurementInputPort", null);
+         ControlFlowInputPort<PointVelocityDataObject> pointVelocityMeasurementInputPort =
+            new ControlFlowInputPort<PointVelocityDataObject>("pointVelocityMeasurementInputPort", null);
 
          PointVelocityMeasurementModelElement element = new PointVelocityMeasurementModelElement(name, pointVelocityMeasurementInputPort,
                                                            centerOfMassPositionPort, centerOfMassVelocityPort, orientationPort, angularVelocityPort,
-                                                           estimationFrame, inverseDynamicsStructureInputPort, referenceFrameNameMap, rigidBodyToIndexMap, registry);
+                                                           estimationFrame, inverseDynamicsStructureInputPort, referenceFrameNameMap, rigidBodyToIndexMap,
+                                                           assumePerfectIMU, registry);
 
          element.setNoiseCovariance(singlePointCovariance);
          elementPool.add(element);

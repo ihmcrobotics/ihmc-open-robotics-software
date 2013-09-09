@@ -1,5 +1,8 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
+import java.util.Map;
+import java.util.Set;
+
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -13,7 +16,7 @@ import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
-public class IMUSelectorAndDataWrapper extends AbstractControlFlowElement
+public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
 {
 
    private final ControlFlowInputPort<Matrix3d> orientationInputPort;
@@ -28,14 +31,19 @@ public class IMUSelectorAndDataWrapper extends AbstractControlFlowElement
    private final FrameOrientation orientationLinkOfIMU;
    private final FrameVector angularVelocityLinkOfIMU;
 
-   public IMUSelectorAndDataWrapper(ControlFlowGraph controlFlowGraph, JointAndIMUSensorMap jointAndIMUSensorMap) // throws Exception
+   public IMUSelectorAndDataConverter(ControlFlowGraph controlFlowGraph, JointAndIMUSensorMap jointAndIMUSensorMap) // throws Exception
    {
-//      if (jointAndIMUSensorMap.getOrientationSensors().size() != 1)
-//      {
-//         throw new Exception("Please select the IMU you trust and assume to be perfect in " + getClass());
-//      }
-
-      IMUDefinition selectedIMU = jointAndIMUSensorMap.getOrientationSensors().entrySet().iterator().next().getKey();
+      Map<IMUDefinition, ControlFlowOutputPort<Matrix3d>> orientationSensors = jointAndIMUSensorMap.getOrientationSensors();
+      Set<IMUDefinition> imuDefinitions = orientationSensors.keySet();
+      if (imuDefinitions.size() != 1) throw new RuntimeException("We are assuming there is only 1 IMU for right now..");
+      
+      IMUDefinition selectedIMU = null;
+      for (IMUDefinition imuDefinition : imuDefinitions)
+      {
+         //TODO: Make sure we take the imu we want. This will just take the last one in the list.
+         selectedIMU = imuDefinition;
+      }
+      
       ControlFlowOutputPort<Matrix3d> orientationSensorOutputPort = jointAndIMUSensorMap.getOrientationSensorPort(selectedIMU);
       ControlFlowOutputPort<Vector3d> angularVelocitySensorOutputPort = jointAndIMUSensorMap.getAngularVelocitySensorPort(selectedIMU);
       this.orientationInputPort = createInputPort("orientationInputPort");
@@ -48,12 +56,11 @@ public class IMUSelectorAndDataWrapper extends AbstractControlFlowElement
       this.angularVelocityOutputPort = createOutputPort("angularVelocityOutputPort");
 
       // initialize ports and data, put data on ports for first time
-      this.orientationIMUInOutputFrame = null;
-      this.angularVelocityIMUInOutputFrame = null;
       this.desiredOutputFrame = ReferenceFrame.getWorldFrame();
+      orientationIMUInOutputFrame = new FrameOrientation(desiredOutputFrame);
+      angularVelocityIMUInOutputFrame = new FrameVector(desiredOutputFrame);
       orientationLinkOfIMU = new FrameOrientation(selectedIMU.getRigidBody().getBodyFixedFrame());
       angularVelocityLinkOfIMU = new FrameVector(selectedIMU.getRigidBody().getBodyFixedFrame());
-      convertRawDataAndSetOnOutputPort(desiredOutputFrame, orientationSensorOutputPort.getData(), angularVelocitySensorOutputPort.getData());
    }
 
    public void startComputation()

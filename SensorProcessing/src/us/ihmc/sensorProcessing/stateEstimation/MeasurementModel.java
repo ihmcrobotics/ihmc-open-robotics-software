@@ -31,6 +31,8 @@ public class MeasurementModel
    {
       this.measurementModelElements = measurementModelElements;
       this.stateStartIndices = stateStartIndices;
+      if (this.stateStartIndices == null) throw new RuntimeException("stateStartIndices == null");
+      
       this.stateMatrixSize = stateMatrixSize;
       reshapeMatrices(); // TODO: get rid of this
    }
@@ -55,7 +57,12 @@ public class MeasurementModel
 
          for (ControlFlowOutputPort<?> statePort : measurementModelElement.getStatePorts())
          {
-            int stateStartIndex = stateStartIndices.get(statePort);
+            Integer stateStartIndexInteger = stateStartIndices.get(statePort);
+            if (stateStartIndexInteger == null) throw new RuntimeException("Cannot find state port " + statePort + " for MeasurementModelElement " + measurementModelElement);
+
+            int stateStartIndex = stateStartIndexInteger;
+            
+            
             DenseMatrix64F outputMatrixBlock = measurementModelElement.getOutputMatrixBlock(statePort);
             CommonOps.insert(outputMatrixBlock, H, measurementStartIndex, stateStartIndex);
          }

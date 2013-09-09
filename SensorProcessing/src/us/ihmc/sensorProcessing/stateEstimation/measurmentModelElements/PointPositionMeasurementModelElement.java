@@ -39,29 +39,35 @@ public class PointPositionMeasurementModelElement extends AbstractMeasurementMod
 
    private final AfterJointReferenceFrameNameMap referenceFrameMap;
 
+   private final boolean assumePerfectIMU;
+   
    public PointPositionMeasurementModelElement(String name, ControlFlowInputPort<PointPositionDataObject> pointPositionMeasurementInputPort,
          ControlFlowOutputPort<FramePoint> centerOfMassPositionPort, ControlFlowOutputPort<FrameOrientation> orientationPort, ReferenceFrame estimationFrame,
-         AfterJointReferenceFrameNameMap referenceFrameMap, YoVariableRegistry registry)
+         AfterJointReferenceFrameNameMap referenceFrameMap, boolean assumePerfectIMU, YoVariableRegistry registry)
    {
       super(SIZE, name, registry);
 
       this.centerOfMassPositionPort = centerOfMassPositionPort;
+      
       this.orientationPort = orientationPort;
-
+      this.assumePerfectIMU = assumePerfectIMU;
+      if (assumePerfectIMU && orientationPort != null) throw new RuntimeException();
+      if (!assumePerfectIMU && orientationPort == null) throw new RuntimeException();
+      
       this.pointPositionMeasurementInputPort = pointPositionMeasurementInputPort;
 
       this.estimationFrame = estimationFrame;
       this.referenceFrameMap = referenceFrameMap;
 
       outputMatrixBlocks.put(centerOfMassPositionPort, new DenseMatrix64F(SIZE, SIZE));
-      outputMatrixBlocks.put(orientationPort, new DenseMatrix64F(SIZE, SIZE));
+      if (!assumePerfectIMU) outputMatrixBlocks.put(orientationPort, new DenseMatrix64F(SIZE, SIZE));
 
       computeCenterOfMassPositionStateOutputBlock();
    }
 
    public void computeMatrixBlocks()
    {
-      computeOrientationStateOutputBlock();
+      if (!assumePerfectIMU) computeOrientationStateOutputBlock();
    }
 
    private void computeCenterOfMassPositionStateOutputBlock()

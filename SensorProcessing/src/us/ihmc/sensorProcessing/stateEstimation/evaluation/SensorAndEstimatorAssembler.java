@@ -76,18 +76,18 @@ public class SensorAndEstimatorAssembler
 
       if (assumePerfectIMU)
       {
-//         try
-//         {
-            imuSelectorAndDataWrapper = new IMUSelectorAndDataWrapper(controlFlowGraph, jointAndIMUSensorMap);
-            orientationStateRobotModelUpdater = new OrientationStateRobotModelUpdater(controlFlowGraph,
-                  jointStateFullRobotModelUpdater.getInverseDynamicsStructureOutputPort(), imuSelectorAndDataWrapper.getOrientationOutputPort(),
-                  imuSelectorAndDataWrapper.getAngularVelocityOutputPort());
-            inverseDynamicsStructureOutputPort = orientationStateRobotModelUpdater.getInverseDynamicsStructureOutputPort();
-//         }
-//         catch (Exception e)
-//         {
-//            e.printStackTrace();
-//         }
+         //         try
+         //         {
+         imuSelectorAndDataWrapper = new IMUSelectorAndDataWrapper(controlFlowGraph, jointAndIMUSensorMap);
+         orientationStateRobotModelUpdater = new OrientationStateRobotModelUpdater(controlFlowGraph,
+               jointStateFullRobotModelUpdater.getInverseDynamicsStructureOutputPort(), imuSelectorAndDataWrapper.getOrientationOutputPort(),
+               imuSelectorAndDataWrapper.getAngularVelocityOutputPort());
+         inverseDynamicsStructureOutputPort = orientationStateRobotModelUpdater.getInverseDynamicsStructureOutputPort();
+         //         }
+         //         catch (Exception e)
+         //         {
+         //            e.printStackTrace();
+         //         }
       }
       else
       {
@@ -95,7 +95,7 @@ public class SensorAndEstimatorAssembler
          orientationStateRobotModelUpdater = null;
          inverseDynamicsStructureOutputPort = jointStateFullRobotModelUpdater.getInverseDynamicsStructureOutputPort();
       }
-      
+
       double angularAccelerationProcessNoiseStandardDeviation = sensorNoiseParametersForEstimator.getAngularAccelerationProcessNoiseStandardDeviation();
       DenseMatrix64F angularAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(angularAccelerationProcessNoiseStandardDeviation, 3);
 
@@ -104,22 +104,26 @@ public class SensorAndEstimatorAssembler
       double comAccelerationProcessNoiseStandardDeviation = sensorNoiseParametersForEstimator.getComAccelerationProcessNoiseStandardDeviation();
       DenseMatrix64F comAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(comAccelerationProcessNoiseStandardDeviation, 3);
 
-      ComposableOrientationAndCoMEstimatorCreator orientationEstimatorCreator = new ComposableOrientationAndCoMEstimatorCreator(
+      ComposableOrientationAndCoMEstimatorCreator orientationAndCoMEstimatorCreator = new ComposableOrientationAndCoMEstimatorCreator(
             angularAccelerationNoiseCovariance, comAccelerationNoiseCovariance, estimationLink, inverseDynamicsStructureOutputPort, assumePerfectIMU);
 
-      orientationEstimatorCreator.addOrientationSensorConfigurations(orientationSensorConfigurations);
-      orientationEstimatorCreator.addAngularVelocitySensorConfigurations(angularVelocitySensorConfigurations);
-      orientationEstimatorCreator.addLinearAccelerationSensorConfigurations(linearAccelerationSensorConfigurations);
+      if (!assumePerfectIMU)
+      {
+         orientationAndCoMEstimatorCreator.addOrientationSensorConfigurations(orientationSensorConfigurations);
+         orientationAndCoMEstimatorCreator.addAngularVelocitySensorConfigurations(angularVelocitySensorConfigurations);
+         orientationAndCoMEstimatorCreator.addLinearAccelerationSensorConfigurations(linearAccelerationSensorConfigurations);
+      }
+      
 
       // TODO: Not sure if we need to do this here:
       inverseDynamicsStructure.updateInternalState();
 
-      estimator = orientationEstimatorCreator.createOrientationEstimator(controlFlowGraph, controlDT, estimationFrame, estimatorReferenceFrameMap,
+      estimator = orientationAndCoMEstimatorCreator.createOrientationAndCoMEstimator(controlFlowGraph, controlDT, estimationFrame, estimatorReferenceFrameMap,
             estimatorRigidBodyToIndexMap, registry);
-
+      
       stateEstimatorDataFromControllerSource.connectDesiredAccelerationPorts(controlFlowGraph, estimator);
-
       estimator.initialize();
+
       parentRegistry.addChild(registry);
 
       controlFlowGraph.initializeAfterConnections();

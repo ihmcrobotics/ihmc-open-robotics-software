@@ -33,22 +33,28 @@ public class AggregatePointPositionMeasurementModelElement implements Measuremen
    private final DenseMatrix64F residual = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F singlePointCovariance = new DenseMatrix64F(PointPositionMeasurementModelElement.SIZE, PointPositionMeasurementModelElement.SIZE);
 
+   private final boolean assumePerfectIMU;
    private int nElementsInUse;
 
 
    public AggregatePointPositionMeasurementModelElement(ControlFlowInputPort<Set<PointPositionDataObject>> inputPort,
          ControlFlowOutputPort<FramePoint> centerOfMassPositionPort, ControlFlowOutputPort<FrameOrientation> orientationPort, ReferenceFrame estimationFrame,
-         AfterJointReferenceFrameNameMap referenceFrameMap)
+         AfterJointReferenceFrameNameMap referenceFrameMap, boolean assumePerfectIMU)
    {
       this.inputPort = inputPort;
       this.centerOfMassPositionPort = centerOfMassPositionPort;
       this.orientationPort = orientationPort;
       this.estimationFrame = estimationFrame;
       this.referenceFrameMap = referenceFrameMap;
+      this.assumePerfectIMU = assumePerfectIMU;
 
       statePorts.add(centerOfMassPositionPort);
-      statePorts.add(orientationPort);
-
+      
+      if(!assumePerfectIMU)
+      {
+         statePorts.add(orientationPort);
+      }
+      
       for (ControlFlowOutputPort<?> statePort : statePorts)
       {
          outputMatrixBlocks.put(statePort, new DenseMatrix64F(1, 1));
@@ -65,7 +71,7 @@ public class AggregatePointPositionMeasurementModelElement implements Measuremen
          String name = "pointPosition" + i;
          ControlFlowInputPort<PointPositionDataObject> pointPositionMeasurementInputPort = new ControlFlowInputPort<PointPositionDataObject>("pointPositionMeasurementInputPort", null);
          PointPositionMeasurementModelElement element = new PointPositionMeasurementModelElement(name, pointPositionMeasurementInputPort,
-                                                           centerOfMassPositionPort, orientationPort, estimationFrame, referenceFrameMap, registry);
+                                                           centerOfMassPositionPort, orientationPort, estimationFrame, referenceFrameMap, assumePerfectIMU, registry);
          element.setNoiseCovariance(singlePointCovariance);
          elementPool.add(element);
       }
