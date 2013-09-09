@@ -229,7 +229,7 @@ public class YoKalmanFilter implements KalmanFilter
       {
          updateKalmanGainMatrixK();
       }
-
+      
       updateAPosterioriState(x, y, K);
       storeInYoVariablesVector(x, yoX);
 

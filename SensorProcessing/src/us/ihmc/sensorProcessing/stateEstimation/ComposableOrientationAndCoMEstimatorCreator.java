@@ -181,7 +181,6 @@ public class ComposableOrientationAndCoMEstimatorCreator
       // private final OrientationAndPositionFullRobotModelUpdater orientationAndPositionFullRobotModelUpdater;
       private final PositionStateRobotModelUpdater positionStateRobotModelUpdater;
       private final ReferenceFrame estimationFrame;
-      private final boolean originalStateEstimator = true;
       private final boolean assumePerfectIMU;
 
       public ComposableOrientationAndCoMEstimator(String name, double controlDT, ReferenceFrame estimationFrame,
@@ -197,10 +196,20 @@ public class ComposableOrientationAndCoMEstimatorCreator
          controlFlowGraph.connectElements(inverseDynamicsStructureOutputPort, inverseDynamicsStructureInputPort);
 
          inverseDynamicsStructureInputPort.setData(inverseDynamicsStructureOutputPort.getData());
-
-         orientationOutputPort = new YoFrameQuaternionControlFlowOutputPort(this, name, ReferenceFrame.getWorldFrame(), registry);
-         angularVelocityOutputPort = new YoFrameVectorControlFlowOutputPort(this, name + "Omega", estimationFrame, registry);
-         angularAccelerationOutputPort = new YoFrameVectorControlFlowOutputPort(this, name + "AngularAcceleration", estimationFrame, registry);
+         
+         if (!assumePerfectIMU)
+         {
+        	 orientationOutputPort = new YoFrameQuaternionControlFlowOutputPort(this, name, ReferenceFrame.getWorldFrame(), registry);
+        	 angularVelocityOutputPort = new YoFrameVectorControlFlowOutputPort(this, name + "Omega", estimationFrame, registry);
+             angularAccelerationOutputPort = new YoFrameVectorControlFlowOutputPort(this, name + "AngularAcceleration", estimationFrame, registry);
+         }
+         else
+         {
+        	 orientationOutputPort = null;
+        	 angularVelocityOutputPort = null;
+        	 angularAccelerationOutputPort = null;
+         }
+         
          centerOfMassPositionOutputPort = new YoFramePointControlFlowOutputPort(this, name + "CoMPosition", ReferenceFrame.getWorldFrame(), registry);
          centerOfMassVelocityOutputPort = new YoFrameVectorControlFlowOutputPort(this, name + "CoMVelocity", ReferenceFrame.getWorldFrame(), registry);
          centerOfMassAccelerationOutputPort = new YoFrameVectorControlFlowOutputPort(this, name + "CoMAcceleration", ReferenceFrame.getWorldFrame(), registry);
@@ -215,8 +224,6 @@ public class ComposableOrientationAndCoMEstimatorCreator
 
          pointVelocityInputPort = createInputPort("pointVelocityInputPort");
          pointVelocityInputPort.setData(new LinkedHashSet<PointVelocityDataObject>());
-
-
 
          if (!assumePerfectIMU)
          {
@@ -268,13 +275,13 @@ public class ComposableOrientationAndCoMEstimatorCreator
          {
             public void run()
             {
-               if (assumePerfectIMU)
+               if (!assumePerfectIMU)
                {
+                   orientationStateRobotModelUpdater.run();
                   positionStateRobotModelUpdater.run();
                }
                else
                {
-                  orientationStateRobotModelUpdater.run();
                   positionStateRobotModelUpdater.run();
                }
 
@@ -283,15 +290,16 @@ public class ComposableOrientationAndCoMEstimatorCreator
          };
          addPostStateChangeRunnable(runnable);
       }
-
+      // not
       private void addOrientationProcessModelElement()
       {
          ProcessModelElement processModelElement = new OrientationProcessModelElement(angularVelocityOutputPort, orientationOutputPort, "orientation",
                                                       registry);
          addProcessModelElement(orientationOutputPort, processModelElement);
+         
 
       }
-
+   // not
       private void addAngularVelocityProcessModelElement(ReferenceFrame estimationFrame, ControlFlowInputPort<FrameVector> angularAccelerationInputPort)
       {
          AngularVelocityProcessModelElement processModelElement = new AngularVelocityProcessModelElement(estimationFrame, angularVelocityOutputPort,
@@ -300,7 +308,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
          processModelElement.setProcessNoiseCovarianceBlock(angularAccelerationNoiseCovariance);
          addProcessModelElement(angularVelocityOutputPort, processModelElement);
       }
-
+   // not
       private void addAngularAccelerationProcessModelElement(ReferenceFrame estimationFrame, ControlFlowInputPort<FrameVector> angularAccelerationInputPort)
       {
          AngularAccelerationProcessModelElement processModelElement = new AngularAccelerationProcessModelElement("angularAcceleration", estimationFrame,
@@ -353,7 +361,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
          processModelElement.setProcessNoiseCovarianceBlock(comAccelerationNoiseCovariance);
          addProcessModelElement(centerOfMassAccelerationOutputPort, processModelElement);
       }
-
+   // not
       private void addOrientationSensor(ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph,
                                         OrientationSensorConfiguration orientationSensorConfiguration)
       {
@@ -372,7 +380,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
 
          controlFlowGraph.connectElements(orientationSensorConfiguration.getOutputPort(), orientationMeasurementPort);
       }
-
+   // not
       private void addAngularVelocitySensor(ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph,
               AngularVelocitySensorConfiguration angularVelocitySensorConfiguration)
       {
@@ -400,7 +408,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
          addMeasurementModelElement(angularVelocityMeasurementModel);
          controlFlowGraph.connectElements(angularVelocitySensorConfiguration.getOutputPort(), angularVelocityMeasurementPort);
       }
-
+   // not
       private void addLinearAccelerationSensor(ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph,
               LinearAccelerationSensorConfiguration linearAccelerationSensorConfiguration)
       {
@@ -517,7 +525,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
       public void setEstimatedCoMPosition(FramePoint estimatedCoMPosition)
       {
          centerOfMassPositionOutputPort.setData(estimatedCoMPosition);
-         if (assumePerfectIMU)
+         if (!assumePerfectIMU)
          {
             orientationStateRobotModelUpdater.run();
          }
@@ -530,7 +538,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
       public void setEstimatedCoMVelocity(FrameVector estimatedCoMVelocity)
       {
          centerOfMassVelocityOutputPort.setData(estimatedCoMVelocity);
-         if (assumePerfectIMU)
+         if (!assumePerfectIMU)
          {
             orientationStateRobotModelUpdater.run();
          }
