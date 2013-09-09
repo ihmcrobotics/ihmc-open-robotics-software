@@ -29,6 +29,8 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
 
    private final ControlFlowOutputPort<FramePoint> centerOfMassPositionPort;
    private final ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort;
+   
+   private final boolean assumePerfectIMU;
    private final ControlFlowOutputPort<FrameOrientation> orientationPort;
    private final ControlFlowOutputPort<FrameVector> angularVelocityPort;
 
@@ -57,10 +59,12 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
          ControlFlowOutputPort<FramePoint> centerOfMassPositionPort, ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort,
          ControlFlowOutputPort<FrameOrientation> orientationPort, ControlFlowOutputPort<FrameVector> angularVelocityPort, ReferenceFrame estimationFrame,
          ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort, AfterJointReferenceFrameNameMap referenceFrameNameMap,
-         RigidBodyToIndexMap estimatorRigidBodyToIndexMap, YoVariableRegistry registry)
+         RigidBodyToIndexMap estimatorRigidBodyToIndexMap, boolean assumePerfectIMU, YoVariableRegistry registry)
    {
       super(SIZE, name, registry);
 
+      this.assumePerfectIMU = assumePerfectIMU;
+      
       this.centerOfMassPositionPort = centerOfMassPositionPort;
       this.centerOfMassVelocityPort = centerOfMassVelocityPort;
       this.orientationPort = orientationPort;
@@ -77,9 +81,13 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
 
       outputMatrixBlocks.put(centerOfMassPositionPort, new DenseMatrix64F(SIZE, SIZE));
       outputMatrixBlocks.put(centerOfMassVelocityPort, new DenseMatrix64F(SIZE, SIZE));
-      outputMatrixBlocks.put(orientationPort, new DenseMatrix64F(SIZE, SIZE));
-      outputMatrixBlocks.put(angularVelocityPort, new DenseMatrix64F(SIZE, SIZE));
-
+      
+      if (!assumePerfectIMU)
+      {
+         outputMatrixBlocks.put(orientationPort, new DenseMatrix64F(SIZE, SIZE));
+         outputMatrixBlocks.put(angularVelocityPort, new DenseMatrix64F(SIZE, SIZE));
+      }
+      
       computeCenterOfMassVelocityStateOutputBlock();
    }
 
@@ -92,8 +100,12 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
    {
       estimationFrame.getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
       tempTransform.get(rotationFromEstimationToWorld);
-      computeOrientationStateOutputBlock(rotationFromEstimationToWorld);
-      computeAngularVelocityStateOutputBlock(rotationFromEstimationToWorld);
+      
+      if (!assumePerfectIMU)
+      {
+         computeOrientationStateOutputBlock(rotationFromEstimationToWorld);
+         computeAngularVelocityStateOutputBlock(rotationFromEstimationToWorld);
+      }
    }
 
    private void computeCenterOfMassVelocityStateOutputBlock()
