@@ -69,6 +69,8 @@ public class MeasurementModel
          DenseMatrix64F measurementCovarianceBlock = measurementModelElement.getMeasurementCovarianceMatrixBlock();
          CommonOps.insert(measurementCovarianceBlock, R, measurementStartIndex, measurementStartIndex);
       }
+      
+//      if (H.getNumRows() == 0) throw new RuntimeException("H.getNumRows() == 0");
    }
 
    public DenseMatrix64F computeResidual()

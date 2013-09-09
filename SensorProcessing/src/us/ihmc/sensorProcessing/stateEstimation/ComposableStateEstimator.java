@@ -126,8 +126,12 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
       protected void updateAPosterioriState(DenseMatrix64F x, DenseMatrix64F y, DenseMatrix64F K)
       {
          DenseMatrix64F residual = measurementModel.computeResidual();
-         MatrixVectorMult.mult(K, residual, correction);
-         processModel.correctState(correction);
+         //int outputMatrixSize = measurementModel.getOutputMatrixSize();
+         if (K.getNumElements() != 0)
+         {
+        	 MatrixVectorMult.mult(K, residual, correction);
+        	 processModel.correctState(correction);
+         }
          runPostStateChangeRunnables();
       }
    }
