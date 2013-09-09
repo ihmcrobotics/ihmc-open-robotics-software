@@ -45,6 +45,15 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    private static final int ROCKS_PER_ROW = 4;
    private static final boolean DIFFICULT_STEPPING_STONES = false;    // for path 8, if true creates an extension to the path with harder steps
 
+   private static final AppearanceDefinition cinderBlockAppearance = YoAppearance.DarkGray();
+   private static final double cinderBlockLength = 0.40;    // 40 cm (approx 16 in, just less than 16in)
+   private static final double cinderBlockWidth = cinderBlockLength / 2;
+   private static final double cinderBlockHeight = 0.15;    // 15 cm (approx 6 in, less than 6 in, but consistent with other cm measurements)
+   private static final double cinderBlockTiltDegrees = 15;
+   private static final double cinderBlockTiltRadians = Math.toRadians(cinderBlockTiltDegrees);
+
+   enum BLOCKTYPE {FLAT, FLATSKEW, UPRIGHTSKEW, ANGLED};
+
    private boolean addLimboBar = false;
 
    // private static final double FLOOR_THICKNESS = 0.001;
@@ -52,10 +61,12 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    public DRCDemo01NavigationEnvironment()
    {
       combinedTerrainObject = new CombinedTerrainObject("Rocks with a wall");
+
       setUpPath1Rocks();
       setUpPath2SmallCones();
       setUpPath3RampsWithLargeBlocks();
       setUpPath4DRCTrialsTrainingWalkingCourse();
+
       setUpPath5NarrowDoor();
       setUpPath6Barriers();
       setUpPath7Stairs();
@@ -108,20 +119,20 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       float rampHeight = 0.625f;
 
       setUpRamp(5.0f, 0.0f, 2.0f, 3.0f, rampHeight, color);
-      setUpWall(7.0f, 0.0f, .5f, 1.0f, rampHeight, 0, color);
+      setUpWall(new double[] {7.0f, 0.0f}, .5f, 1.0f, rampHeight, 0, color);
 
-      setUpWall(7.75f, 0.0f, 2f, .5f, rampHeight, 0, color);
-      setUpWall(8.5f, 0f, .5f, .75f, rampHeight - 0.1, 0, color);
+      setUpWall(new double[] {7.75f, 0.0f}, 2f, .5f, rampHeight, 0, color);
+      setUpWall(new double[] {8.5f, 0f}, .5f, .75f, rampHeight - 0.1, 0, color);
 
-      setUpWall(8.5f, .75f, .5f, .75f, rampHeight, 0, color);
+      setUpWall(new double[] {8.5f, .75f}, .5f, .75f, rampHeight, 0, color);
 
-      setUpWall(8.5f, -0.66f, .25f, 1f, rampHeight, 0, color);
+      setUpWall(new double[] {8.5f, -0.66f}, .25f, 1f, rampHeight, 0, color);
 
-      setUpWall(8.5f, -1.045f, .25f, 1f, rampHeight, 0, color);
+      setUpWall(new double[] {8.5f, -1.045f}, .25f, 1f, rampHeight, 0, color);
 
 
 
-      setUpWall(9.25f, 0f, 2.0f, 0.5f, rampHeight, 0, color);
+      setUpWall(new double[] {9.25f, 0f}, 2.0f, 0.5f, rampHeight, 0, color);
       setUpRamp(11f, 0f, 2.0f, -3.0f, rampHeight, color);
 
       // Do this for a long ramp for testing:
@@ -131,40 +142,384 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
    private void setUpPath4DRCTrialsTrainingWalkingCourse()
    {
-      // TODO: Finish course
       double courseAngle = 45.0;
       double startDistance = 4.0;
       AppearanceDefinition color = YoAppearance.Gray();
 
-      final double sectionLength = 2.4;
+      final double sectionLength = 2.4384;    // 8 ft
 
-      for (int i = 1; i <= 4; i = i + 2)
+      // need basics:
+      // basic ramp
+      // basic block (height parameter: # block layers, 1-2 typ)
+      // square block (two basic blocks side by side, height parameter: # block layers, 0-4 typ)
+      // diagonal block-flat (# of square block base supports, 1 typ, e.g. 1 square block under)
+      // diagonal block-upright (# of square block base supports, 0 and 1 typ)
+      // slanted block (square block on ramp, with # of square block support layers: 0-3 typ)
+
+
+      // 1. Flat terrain: Pavers and Astroturf. Do nothing, but space out others farther.
+
+      // 2. Ramps (Pitch Ramps 15degrees)
+      int numberOfRamps=2;
+      setUpMultipleUpDownRamps(courseAngle, startDistance, numberOfRamps, sectionLength, color);
+      
+      // 3. Tripping Hazards
+      // Diagonal 2x4s and 4x4s
+      // From the picture layout:
+      // first half has 2x4s(1.5x3.5) flat at 45deg angles spaced about 2ft apart (horiz and vert) (5 total)
+      // second half has 4x4s(3.5x3.5) at 45 deg angles spaced 4ft apart (3 total)
+      // I chose to do a worse case scenario where 2x4 and 4x4 are actually 2x4 and 4x4 (not standard sizes)
+      int[] numberOfStepOvers = {5, 3};
+      startDistance = setUpTripHazards(courseAngle, startDistance, numberOfStepOvers, sectionLength, color);
+
+      // 4. Hurdles
+      // 15cm (6 in) and 30 cm (12 in)
+      // From the picture layout:
+      // 1st section: midway (centered at 2ft) blocks layed straight across, 6 on bottom layer, 3 on top directly aligned on others. In other layout, 5 on top not directly over bottom.
+      // 2nd section: midway (centered at 2ft from start of second section, 45deg zig zag pattern, two high. 8 on bottom, 4 directly on top or 7 overlapped.
+      startDistance += sectionLength + sectionLength / 4;
+      setUpStraightHurdles(courseAngle, startDistance, new int[] {6, 5});
+
+      startDistance += sectionLength / 2;
+      setUpZigZagHurdles(courseAngle, startDistance, new int[] {8, 7});
+
+      startDistance += sectionLength / 4;
+
+      // 5. Footfalls and Holes
+      //    80 cm (32 in) and 40 cm (16 in) squares
+      // 6. Ascend Flat Top Steps
+      // 7. Descend Flat Top Steps
+      // 8. Ascend Pitch/Roll 15 deg Top Steps
+      // 9. Descend Pitch/Roll 15 deg Top Steps
+      // TODO: Finish course
+      setUpCinderBlockField(courseAngle, startDistance);
+
+      // 10. Step-Over Obstacles
+
+   }
+
+   private void setUpCinderBlockField(double courseAngle, double startDistance)
+   {
+      int nBlocksWide = 6;
+      int nBlocksLong = 31;
+    
+      double[][] blockAngle = new double[nBlocksLong][nBlocksWide];
+      int[][] blockHeight = new int[nBlocksLong][nBlocksWide];
+      BLOCKTYPE[][] blockType = new BLOCKTYPE[nBlocksLong][nBlocksWide];
+      for (int i = 0; i < nBlocksLong; i++)
       {
-         double rampLength = sectionLength / 4;
+         for (int j = 0; j < nBlocksWide; j++)
+         {
+            blockHeight[i][j] = -1;    // (int) Math.round(Math.random()*4-1);
+            blockAngle[i][j] = 0;    // (int) Math.round(Math.random()*3)*45;
+            blockType[i][j] = BLOCKTYPE.FLAT;
+         }
+      }
+
+      blockHeight = new int[][]
+      {
+         {
+            0, 0, -1, -1, 0, 0
+         },    // 5. Footfalls and Holes
+         {
+            0, 0, -1, -1, 0, 0
+         },
+         {
+            -1, -1, 0, 0, -1, -1
+         },
+         {
+            -1, 0, 0, 0, 0, -1
+         },
+         {
+            0, -1, 0, -1, 0, 0
+         },
+         {
+            1, 0, -1, 0, -1, 0
+         },
+         {
+            0, 1, 0, -1, 0, -1
+         },    // 6.7. Ascend/Descend Flat Top Steps
+         {
+            2, 0, 1, 0, 1, -1
+         },
+         {
+            3, 2, 0, 1, 0, 1
+         },
+         {
+            2, 3, 2, 0, 1, -1
+         },
+         {
+            1, 2, 3, 2, 0, 1
+         },
+         {
+            1, 1, 2, 3, 2, 0
+         },
+         {
+            1, 1, 1, 2, 3, 2
+         },
+         {
+            0, 0, 1, 1, 2, 3
+         },
+         {
+            0, 0, 0, 1, 1, 2
+         },
+         {
+            0, 0, 0, 0, 1, 1
+         },
+         {
+            0, 0, 0, 0, 0, 1
+         },
+         {
+            0, 0, 0, 0, 0, 0
+         },
+         {
+            0, 0, 0, 0, 0, 0
+         },    // 8.9. Ascend/descend Pitch/Roll 15 deg Top Steps
+         {
+            1, 0, 1, 0, 1, 0
+         },    // 1 angled...
+         {
+            0, 1, 0, 1, 0, 1
+         },
+         {
+            0, 0, 0, 0, 1, 2
+         },
+         {
+            0, 0, 0, 1, 2, 3
+         },
+         {
+            0, 0, 1, 2, 3, 2
+         },
+         {
+            0, 1, 2, 3, 2, 1
+         },
+         {
+            1, 2, 3, 2, 1, 0
+         },
+         {
+            2, 3, 2, 1, 0, 0
+         },
+         {
+            3, 2, 1, 0, 0, 0
+         },
+         {
+            2, 1, 0, 0, 0, 0
+         },
+         {
+            1, 0, 0, 0, 0, 0
+         },
+         {
+            0, 0, 0, 0, 0, 0
+         }
+      };
+
+      int[] full90Diags =
+      {
+         -1, -3, -5, 1, 7, 8, 9, 13, 15, 17, 19, 21, 23
+      };
+      int[] alternating0_90DiagsAndUprightSkewed =
+      {
+         10, 12, 14, 16, 18, 20, 22
+      };
+
+      
+      for (int i = 0; i < full90Diags.length; i++)
+      {
+         for (int j = Math.max(0, -full90Diags[i]); j < nBlocksWide; j++)
+         {
+            int col = j;
+            int row = full90Diags[i] + col;
+            if (row < nBlocksLong)
+               blockAngle[row][col] = 90;
+         }
+      }
+
+      for (int i = 0; i < alternating0_90DiagsAndUprightSkewed.length; i++)
+      {
+         for (int j = 0; j < nBlocksWide; j++)
+         {
+            int col = j;
+            int row = alternating0_90DiagsAndUprightSkewed[i] + col;
+            blockType[row][col] = BLOCKTYPE.UPRIGHTSKEW;
+            if (j % 2 == 1)
+               blockAngle[row][col] = 90;
+         }
+      }
+
+      final int flatSkewedRow=19;
+      for(int col=0;col<nBlocksWide-1;col++)
+      {
+         boolean evenCol = col % 2 == 0;
+         int row=flatSkewedRow + (evenCol?0:1);
+         blockType[row][col] = BLOCKTYPE.FLATSKEW;
+         if(evenCol)
+            blockAngle[row][col] = 90;
+         else
+            blockAngle[row][col] = 0;
+      }
+
+      final int NORTH = -90;
+      final int SOUTH = 90;
+      final int WEST = 0;
+      final int EAST = 180;
+      final int startAngled = 19;
+      for (int i = startAngled; i < nBlocksLong; i++)
+      {
+         for (int j = Math.max(0, startAngled + (nBlocksWide - 1) - i); j < nBlocksWide; j++)
+         {
+            boolean evenRow = (i - startAngled) % 2 == 0;
+            boolean evenCol = j % 2 == 0;
+            blockType[i][j] = BLOCKTYPE.ANGLED;
+            if (evenRow)
+            {
+               if (evenCol)
+                  blockAngle[i][j] = WEST;
+               else
+                  blockAngle[i][j] = NORTH;
+            }
+            else
+            {
+               if (evenCol)
+                  blockAngle[i][j] = SOUTH;
+               else
+                  blockAngle[i][j] = EAST;
+            }
+         }
+      }
+
+
+      startDistance += cinderBlockLength / 2;
+
+      for (int i = 0; i < nBlocksLong; i++)
+      {
+         for (int j = 0; j < nBlocksWide; j++)
+         {
+            double xCenter = startDistance + i * cinderBlockLength;
+            double yCenter = (nBlocksWide * cinderBlockLength) / 2 - j * cinderBlockLength;
+            double[] point = {xCenter, yCenter};
+            double[] rotatedPoint = rotateAroundOrigin(point, courseAngle);
+            int h = blockHeight[i][j];
+            double deg = blockAngle[i][j] + courseAngle;
+            switch (blockType[i][j])
+            {
+               case FLAT :
+                  setUpCinderBlockSquare(rotatedPoint, h, deg);
+
+                  break;
+
+               case FLATSKEW :
+                  setUpFlatSkewedBlockSquare(rotatedPoint, h, deg);
+
+                  break;
+
+               case UPRIGHTSKEW :
+                  setUpSkewedUprightBlockSquare(rotatedPoint, h, deg);
+
+                  break;
+
+               case ANGLED :
+                  setUpRampBlock(rotatedPoint, h, deg);
+
+                  break;
+            }
+         }
+      }
+   }
+
+   private void setUpMultipleUpDownRamps(double courseAngle, double startDistance, int numberOfRamps, final double sectionLength, AppearanceDefinition color)
+   {
+      for (int i = 1; i <= 2*numberOfRamps; i = i + 2)
+      {
+         double rampLength = sectionLength / (numberOfRamps*2);
          double rampAngle = Math.toRadians(15);
          double rampHeight = rampLength * Math.tan(rampAngle);
          double rampCenter = startDistance + rampLength * (i - 1) + rampLength / 2;
-         double[] newPoint = rotateAroundOrigin(rampCenter, 0, courseAngle);
+         double[] newPoint = rotateAroundOrigin(new double[] {rampCenter, 0}, courseAngle);
          setUpRotatedRamp(newPoint[0], newPoint[1], sectionLength, rampLength, rampHeight, courseAngle, color);
-         
+
          double rampDownCenter = startDistance + rampLength * (i) + rampLength / 2;
-         newPoint = rotateAroundOrigin(rampDownCenter, 0, courseAngle);
+         newPoint = rotateAroundOrigin(new double[] {rampDownCenter, 0}, courseAngle);
          setUpRotatedRamp(newPoint[0], newPoint[1], sectionLength, -rampLength, rampHeight, courseAngle, color);
       }
+   }
 
-//    setUpCinderBlock(0,0,16,8,6,0,YoAppearance.DarkGray());
-//
-//    int numberOfStepOvers = 3;
-//    double heightIncrease = 0.05;
-//    double spacing = 1.0;
-//
-//    double barrierWidth = 3.0;
-//
-//    
-//    for (int i = 0; i < numberOfStepOvers; i++)
-//    {
-//        setUpWall(newPoint[0], newPoint[1], barrierWidth, 0.15, heightIncrease * (i + 1), courseAngle, color);
-//    }
+   private double setUpTripHazards(double courseAngle, double startDistance, int[] numberOfStepOvers, final double sectionLength, AppearanceDefinition color)
+   {
+      double[] stepHeight = {0.0508, 0.1016};
+      double[] stepWidth = {0.1016, 0.1016};
+      double[] degreesOffset = {45, -45};
+
+      startDistance += sectionLength;
+
+      for (int i = 0; i < numberOfStepOvers.length; i++)
+      {
+         for (int j = 0; j < numberOfStepOvers[i]; j++)
+         {
+            double stepLength;
+            if (Math.abs(degreesOffset[i]) < Math.toDegrees(Math.atan(sectionLength / (sectionLength / 2))))
+               stepLength = (sectionLength / 2) / Math.cos(Math.toRadians(degreesOffset[i]));
+            else
+               stepLength = (sectionLength) / Math.sin(Math.toRadians(degreesOffset[i]));
+            double[] point = {startDistance + sectionLength / 4 + sectionLength / 2 * i, -sectionLength / 2 + j * sectionLength / (numberOfStepOvers[i] - 1)};
+            double[] newPoint = rotateAroundOrigin(point, courseAngle);
+            setUpWall(newPoint, stepWidth[i], stepLength, stepHeight[i], courseAngle + degreesOffset[i], color);
+         }
+      }
+      return startDistance;
+   }
+
+   private void setUpStraightHurdles(double courseAngle, double startDistance, int[] numberStraightHurdles)
+   {
+      for (int i = 0; i < numberStraightHurdles.length; i++)
+      {
+         for (int j = 0; j < numberStraightHurdles[i]; j++)
+         {
+            double[] point = {startDistance, -(numberStraightHurdles[i] * cinderBlockLength) / 2 + j * cinderBlockLength};
+            double[] newPoint = rotateAroundOrigin(point, courseAngle);
+            setUpCinderBlock(newPoint, i, courseAngle + 90);
+         }
+      }
+   }
+
+   private void setUpZigZagHurdles(double courseAngle, double startDistance, int[] numberZigZagHurdles)
+   {
+      double xOffset = cinderBlockLength / 4 * Math.cos(Math.toRadians(45));
+      double yOffset = cinderBlockLength * Math.cos(Math.toRadians(45));
+
+      for (int i = 0; i < numberZigZagHurdles.length; i++)
+      {
+         int start45sign=Math.round((float) numberZigZagHurdles[i]/2.0+.25)%2==0?1:-1;//start45 when n=3,4,7,8,11,12,...
+         int startXsign=Math.round(((float) numberZigZagHurdles[i]+1.)/2.0+.25)%2==0?-1:1;//start x+ when n=1, 4,5, 8,9, ...
+         for (int j = 0; j < numberZigZagHurdles[i]; j++)
+         {
+            int evenBlockSign = (j % 2 == 0) ? 1 : -1;
+            double signedXOffset = xOffset * evenBlockSign * startXsign;
+            double signedAngleOffset = 45 * evenBlockSign * start45sign;
+            double[] point = {startDistance + signedXOffset, ((numberZigZagHurdles[i] - 1) * yOffset) / 2 - j * yOffset};
+            double[] newPoint = rotateAroundOrigin(point, courseAngle);
+            setUpCinderBlock(newPoint, i, courseAngle + signedAngleOffset);
+         }
+      }
+   }
+
+   private void setUpRampBlock(double[] point, int h, double deg)
+   {
+      setUpRampBlock(point[0], point[1], h, deg);
+   }
+
+   private void setUpSkewedUprightBlockSquare(double[] point, int h, double deg)
+   {
+      setUpSkewedUprightBlockSquare(point[0], point[1], h, deg);
+   }
+
+   private void setUpFlatSkewedBlockSquare(double[] point, int h, double deg)
+   {
+      setUpFlatSkewedBlockSquare(point[0], point[1], h, deg);
+   }
+
+   private void setUpCinderBlockSquare(double[] point, int h, double deg)
+   {
+      setUpCinderBlockSquare(point[0], point[1], h, deg);
    }
 
    private void setUpPath5NarrowDoor()
@@ -173,16 +528,16 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
       // angled Door
       // door1
-      setUpWall(0.769f, -9.293f, 0.973f, 0.157f, 2.5f, -115.0f, color);
+      setUpWall(new double[] {0.769f, -9.293f}, 0.973f, 0.157f, 2.5f, -115.0f, color);
 
       // door2
-      setUpWall(-.642f, -8.635f, 0.973f, 0.157f, 2.54f, -115.0f, color);
+      setUpWall(new double[] {-.642f, -8.635f}, 0.973f, 0.157f, 2.54f, -115.0f, color);
 
       // box2
-      setUpWall(-0.485f, -6.573f, 0.5f, 0.5f, 1.0f, -45, color);
+      setUpWall(new double[] {-0.485f, -6.573f}, 0.5f, 0.5f, 1.0f, -45, color);
 
       // box1
-      setUpWall(0.515f, -4.972f, 0.5f, 0.5f, 1.0f, -110.0f, color);
+      setUpWall(new double[] {0.515f, -4.972f}, 0.5f, 0.5f, 1.0f, -110.0f, color);
 
    }
 
@@ -200,14 +555,14 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
       for (int i = 0; i < numberOfStepOvers; i++)
       {
-         double[] newPoint = rotateAroundOrigin(startDistance + (i * spacing), 0, courseAngle);
-         setUpWall(newPoint[0], newPoint[1], barrierWidth, 0.15, heightIncrease * (i + 1), courseAngle, color);
+         double[] newPoint = rotateAroundOrigin(new double[] {startDistance + (i * spacing), 0}, courseAngle);
+         setUpWall(newPoint, barrierWidth, 0.15, heightIncrease * (i + 1), courseAngle, color);
       }
 
       for (int i = 0; i < numberOfStepOvers; i++)
       {
-         double[] newPoint = rotateAroundOrigin(startDistance + (i * spacing), (barrierWidth - platformWidth) / 2.0 + 0.001, courseAngle);
-         setUpWall(newPoint[0], newPoint[1], platformWidth, 0.4 * spacing, heightIncrease * (i + 1) + 0.001, courseAngle, color);
+         double[] newPoint = rotateAroundOrigin(new double[] {startDistance + (i * spacing), (barrierWidth - platformWidth) / 2.0 + 0.001}, courseAngle);
+         setUpWall(newPoint, platformWidth, 0.4 * spacing, heightIncrease * (i + 1) + 0.001, courseAngle, color);
       }
 
    }
@@ -223,20 +578,20 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
       for (int i = 0; i < numberOfSteps; i++)
       {
-         double[] newPoint = rotateAroundOrigin(startDistance + (i * run), 0, courseAngle);
-         setUpWall(newPoint[0], newPoint[1], 3.0, run, rise * (i + 1), courseAngle, color);
+         double[] newPoint = rotateAroundOrigin(new double[] {startDistance + (i * run), 0}, courseAngle);
+         setUpWall(newPoint, 3.0, run, rise * (i + 1), courseAngle, color);
       }
 
       {
-         double[] newPoint = rotateAroundOrigin(startDistance + (numberOfSteps * run), 0, courseAngle);
-         setUpWall(newPoint[0], newPoint[1], 3.0, run, rise * (numberOfSteps - 1 + 1), courseAngle, color);
+         double[] newPoint = rotateAroundOrigin(new double[] {startDistance + (numberOfSteps * run), 0}, courseAngle);
+         setUpWall(newPoint, 3.0, run, rise * (numberOfSteps - 1 + 1), courseAngle, color);
       }
 
       for (int i = 1; i < numberOfSteps + 1; i++)
       {
          double offset = numberOfSteps * run;
-         double[] newPoint = rotateAroundOrigin(offset + startDistance + (i * run), 0, courseAngle);
-         setUpWall(newPoint[0], newPoint[1], 3.0, run, rise * (-i + numberOfSteps + 1), courseAngle, color);
+         double[] newPoint = rotateAroundOrigin(new double[] {offset + startDistance + (i * run), 0}, courseAngle);
+         setUpWall(newPoint, 3.0, run, rise * (-i + numberOfSteps + 1), courseAngle, color);
       }
    }
 
@@ -248,35 +603,35 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
       // ramp up and landing
       setUpRamp(-5.0f, 0.0f, 3.0f, -3.0f, rampHeight, color);
-      setUpWall(-7.0f, 0.0f, 3.0f, 1.0f, rampHeight, 0, color);
+      setUpWall(new double[] {-7.0f, 0.0f}, 3.0f, 1.0f, rampHeight, 0, color);
 
       // simple stepping stones, centered at x=-0.75m
-      setUpWall(-7.75f, -0.5f, 0.5f, 0.5f, rampHeight, 0, color);
-      setUpWall(-8.25f, -1.0f, 0.5f, 0.5f, rampHeight, 0, color);
-      setUpWall(-8.75f, -0.5f, 0.5f, 0.5f, rampHeight, 0, color);
-      setUpWall(-9.25f, -1.0f, 0.5f, 0.5f, rampHeight, 0, color);
-      setUpWall(-8.75f, -0.5f, 0.5f, 0.5f, rampHeight, 0, color);
-      setUpWall(-9.25f, -1.0f, 0.5f, 0.5f, rampHeight, 0, color);
-      setUpWall(-9.75f, -0.5f, 0.5f, 0.5f, rampHeight, 0, color);
+      setUpWall(new double[] {-7.75f, -0.5f}, 0.5f, 0.5f, rampHeight, 0, color);
+      setUpWall(new double[] {-8.25f, -1.0f}, 0.5f, 0.5f, rampHeight, 0, color);
+      setUpWall(new double[] {-8.75f, -0.5f}, 0.5f, 0.5f, rampHeight, 0, color);
+      setUpWall(new double[] {-9.25f, -1.0f}, 0.5f, 0.5f, rampHeight, 0, color);
+      setUpWall(new double[] {-8.75f, -0.5f}, 0.5f, 0.5f, rampHeight, 0, color);
+      setUpWall(new double[] {-9.25f, -1.0f}, 0.5f, 0.5f, rampHeight, 0, color);
+      setUpWall(new double[] {-9.75f, -0.5f}, 0.5f, 0.5f, rampHeight, 0, color);
 
       // qualification stepping stones, centered along x=0.75m
-      setUpWall(-8.0f, 1.0f, 0.5f, 0.5f, rampHeight, 0, color);
-      setUpWall(-8.5f, 0.5f, 0.5f, 0.5f, rampHeight, 0, color);
-      setUpWall(-9.3f, 1.0f, 0.5f, 0.5f, rampHeight, 0, color);
+      setUpWall(new double[] {-8.0f, 1.0f}, 0.5f, 0.5f, rampHeight, 0, color);
+      setUpWall(new double[] {-8.5f, 0.5f}, 0.5f, 0.5f, rampHeight, 0, color);
+      setUpWall(new double[] {-9.3f, 1.0f}, 0.5f, 0.5f, rampHeight, 0, color);
 
       // middle landing
-      setUpWall(-10.5f, 0.0f, 3.0f, 1.0f, rampHeight, 0, color);
+      setUpWall(new double[] {-10.5f, 0.0f}, 3.0f, 1.0f, rampHeight, 0, color);
 
       if (DIFFICULT_STEPPING_STONES)
       {
          // more difficult stepping stones
-         setUpWall(-11.6f, -0.35f, 0.5f, 0.5f, rampHeight, 0, color);
-         setUpWall(-12.2f, 0.35f, 0.5f, 0.5f, rampHeight, 0, color);
-         setUpWall(-13.1f, 0.15f, 0.5f, 0.5f, rampHeight, 0, color);
-         setUpWall(-14f, 0.95f, 0.5f, 0.5f, rampHeight, 0, color);
+         setUpWall(new double[] {-11.6f, -0.35f}, 0.5f, 0.5f, rampHeight, 0, color);
+         setUpWall(new double[] {-12.2f, 0.35f}, 0.5f, 0.5f, rampHeight, 0, color);
+         setUpWall(new double[] {-13.1f, 0.15f}, 0.5f, 0.5f, rampHeight, 0, color);
+         setUpWall(new double[] {-14f, 0.95f}, 0.5f, 0.5f, rampHeight, 0, color);
 
          // landing and ramp down
-         setUpWall(-15.5f, 0.5f, 2.0f, 1.0f, rampHeight, 0, color);
+         setUpWall(new double[] {-15.5f, 0.5f}, 2.0f, 1.0f, rampHeight, 0, color);
          setUpRamp(-17.5f, 0.5f, 2.0f, 3.0f, rampHeight, color);
       }
       else
@@ -323,8 +678,8 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
          double width = 1.5;
          AppearanceDefinition color = YoAppearance.DarkGray();
 
-         setUpWall(1, width / 2, 0.125, 0.125, height, 0, color);
-         setUpWall(1, -width / 2, 0.125, 0.125, height, 0, color);
+         setUpWall(new double[] {1, width / 2}, 0.125, 0.125, height, 0, color);
+         setUpWall(new double[] {1, -width / 2}, 0.125, 0.125, height, 0, color);
 
          combinedTerrainObject.getLinkGraphics().translate(0, width / 2, height);
          combinedTerrainObject.getLinkGraphics().addCube(0.125, width, 0.125, color);
@@ -347,11 +702,14 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       }
    }
 
-   private double[] rotateAroundOrigin(double x, double y, double angdeg)
+   private double[] rotateAroundOrigin(double[] xy, double angdeg)
    {
+      double x = xy[0];
+      double y = xy[1];
       double[] newPoint = new double[2];
-      newPoint[0] = x * Math.cos(Math.toRadians(angdeg)) - y * Math.sin(Math.toRadians(angdeg));
-      newPoint[1] = y * Math.cos(Math.toRadians(angdeg)) + x * Math.sin(Math.toRadians(angdeg));
+      double angRad = Math.toRadians(angdeg);
+      newPoint[0] = x * Math.cos(angRad) - y * Math.sin(angRad);
+      newPoint[1] = y * Math.cos(angRad) + x * Math.sin(angRad);
 
       return newPoint;
    }
@@ -419,8 +777,10 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       this.combinedTerrainObject.addTerrainObject(rock);
    }
 
-   private void setUpWall(double x, double y, double width, double length, double height, double yawDegrees, AppearanceDefinition app)
+   private void setUpWall(double[] xy, double width, double length, double height, double yawDegrees, AppearanceDefinition app)
    {
+      double x = xy[0];
+      double y = xy[1];
       Transform3D location = new Transform3D();
       location.rotZ(Math.toRadians(yawDegrees));
 
@@ -444,20 +804,141 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       combinedTerrainObject.addRotatedRamp(xCenter - run / 2, yCenter - width / 2, xCenter + run / 2, yCenter + width / 2, rise, yawDegreesAboutCenter, app);
    }
 
-   private void setUpCinderBlock(double x, double y, double width, double length, double height, double yawDegrees, AppearanceDefinition app)
+   // need basics:
+   // basic ramp
+   // basic block (height parameter: # block layers, 1-2 typ)
+   // square block (two basic blocks side by side, height parameter: # block layers, 0-4 typ)
+   // diagonal block-flat (# of square block base supports, 1 typ, e.g. 1 square block under)
+   // diagonal block-upright (# of square block base supports, 0 and 1 typ)
+   // slanted block (square block on ramp, with # of square block support layers: 0-3 typ)
+
+   private void setUpCinderBlock(double xCenter, double yCenter, int numberFlatSupports, double yawDegrees)
    {
-      // TODO: FINISH
-      // ramp
-      combinedTerrainObject.addRamp(x - length / 2, y - width / 2, x + length / 2, y + width / 2, height, app);
+      double[] centerPoint = {xCenter, yCenter};
+      setUpCinderBlock(centerPoint, numberFlatSupports, yawDegrees);
+   }
+
+   private void setUpCinderBlock(double[] centerPoint, int numberFlatSupports, double yawDegrees)
+   {
+      if (numberFlatSupports < 0)
+         return;
+
+      AppearanceDefinition app = cinderBlockAppearance;
+
+      double xCenter = centerPoint[0];
+      double yCenter = centerPoint[1];
 
       // wall
       Transform3D location = new Transform3D();
       location.rotZ(Math.toRadians(yawDegrees));
 
-      location.setTranslation(new Vector3d(x, y, height / 2));
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, length, width, height), app);
+      location.setTranslation(new Vector3d(xCenter, yCenter, cinderBlockHeight / 2 + numberFlatSupports * cinderBlockHeight));
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, cinderBlockLength, cinderBlockWidth, cinderBlockHeight), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
+
+   private void setUpSlopedCinderBlock(double xCenter, double yCenter, int numberFlatSupports, double yawDegrees)
+   {
+      if (numberFlatSupports < 0)
+         return;
+
+      AppearanceDefinition app = cinderBlockAppearance;
+
+      Transform3D location = new Transform3D();
+      location.rotZ(Math.toRadians(yawDegrees));
+
+      Transform3D tilt = new Transform3D();
+      tilt.rotY(-cinderBlockTiltRadians);
+      location.mul(tilt);
+
+      double zCenter = (cinderBlockHeight * Math.cos(cinderBlockTiltRadians) + cinderBlockLength * Math.sin(cinderBlockTiltRadians)) / 2;
+      location.setTranslation(new Vector3d(xCenter, yCenter, zCenter + numberFlatSupports * cinderBlockHeight));
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, cinderBlockLength, cinderBlockWidth, cinderBlockHeight), app);
+      combinedTerrainObject.addTerrainObject(newBox);
+   }
+
+   private void setUpCinderBlockSquare(double xCenter, double yCenter, int numberFlatSupports, double yawDegrees)
+   {
+      double xOffset = 0, yOffset = cinderBlockWidth / 2;
+      double[] xyRotated1 = rotateAroundOrigin(new double[] {xOffset, yOffset}, yawDegrees);
+      double[] xyRotated2 = rotateAroundOrigin(new double[] {xOffset, -yOffset}, yawDegrees);
+
+      setUpCinderBlock(xCenter + xyRotated1[0], yCenter + xyRotated1[1], numberFlatSupports, yawDegrees);
+      setUpCinderBlock(xCenter + xyRotated2[0], yCenter + xyRotated2[1], numberFlatSupports, yawDegrees);
+
+      if (numberFlatSupports > 0)
+         setUpCinderBlockSquare(xCenter, yCenter, numberFlatSupports - 1, yawDegrees + 90);
+   }
+
+   private void setUpFlatSkewedBlockSquare(double xCenter, double yCenter, int numberFlatSupports, double yawDegrees)
+   {
+      setUpCinderBlockSquare(xCenter, yCenter, numberFlatSupports - 1, yawDegrees);
+      setUpCinderBlock(xCenter, yCenter, numberFlatSupports, yawDegrees - 45);
+   }
+
+   private void setUpCinderBlockUpright(double xCenter, double yCenter, int numberFlatSupports, double yawDegrees)
+   {
+      if (numberFlatSupports < 0)
+         return;
+
+      AppearanceDefinition app = cinderBlockAppearance;
+
+      // wall
+      Transform3D location = new Transform3D();
+      Transform3D setUpright = new Transform3D();
+
+      location.rotZ(Math.toRadians(yawDegrees));
+      setUpright.rotX(Math.toRadians(90));
+      location.mul(setUpright);
+
+      location.setTranslation(new Vector3d(xCenter, yCenter, cinderBlockWidth / 2 + numberFlatSupports * cinderBlockHeight));
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, cinderBlockLength, cinderBlockWidth, cinderBlockHeight), app);
+      combinedTerrainObject.addTerrainObject(newBox);
+   }
+
+   private void setUpSkewedUprightBlockSquare(double xCenter, double yCenter, int numberFlatSupports, double yawDegrees)
+   {
+      setUpCinderBlockSquare(xCenter, yCenter, numberFlatSupports - 1, yawDegrees);
+      setUpCinderBlockUpright(xCenter, yCenter, numberFlatSupports, yawDegrees - 45);
+   }
+
+   private void setUpRampBlock(double xCenter, double yCenter, int numberFlatSupports, double yawDegrees)
+   {
+      if (numberFlatSupports < 0)
+         return;
+
+      setUpCinderBlockSquare(xCenter, yCenter, numberFlatSupports - 1, yawDegrees);
+
+
+      // double rampRun = cinderBlockLength * Math.cos(cinderBlockTiltRadians);
+      double rampRise = cinderBlockLength * Math.sin(cinderBlockTiltRadians);
+
+      // double xRampOffset = (cinderBlockLength - rampRun) / 2, yRampOffset = 0;
+      // double[] xyRampRotatedOffset = rotateAroundOrigin(xRampOffset, yRampOffset, yawDegrees);
+      // double xRampCenter = xCenter + xyRampRotatedOffset[0];
+      // double yRampCenter = yCenter + xyRampRotatedOffset[1];
+      // TO DO: set ramp elevation
+      // setUpRotatedRamp(xRampCenter, yRampCenter, 2 * cinderBlockWidth, rampRun, rampRise, yawDegrees, cinderBlockAppearance);
+
+      // Create a block instead. Ramp3d only has collision surface of ramp itself. And setUpRotateRamp() can't change height yet.
+      // A block however has all the needed collision surfaces, even if it overlaps the block above it.
+      Transform3D blockSupportLocation = new Transform3D();
+      blockSupportLocation.rotZ(Math.toRadians(yawDegrees));
+      double[] xySupportRotatedOffset = rotateAroundOrigin(new double[] {(cinderBlockLength - rampRise) / 2, 0}, yawDegrees);
+      blockSupportLocation.setTranslation(new Vector3d(xCenter + xySupportRotatedOffset[0], yCenter + xySupportRotatedOffset[1],
+              rampRise / 2 + numberFlatSupports * cinderBlockHeight));
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(blockSupportLocation, rampRise, cinderBlockLength, rampRise),
+                                            cinderBlockAppearance);
+      combinedTerrainObject.addTerrainObject(newBox);
+
+
+      double xOffset = 0, yOffset = cinderBlockWidth / 2;
+      double[] xyRotated1 = rotateAroundOrigin(new double[] {xOffset, yOffset}, yawDegrees);
+      double[] xyRotated2 = rotateAroundOrigin(new double[] {xOffset, -yOffset}, yawDegrees);
+      setUpSlopedCinderBlock(xCenter + xyRotated1[0], yCenter + xyRotated1[1], numberFlatSupports, yawDegrees);
+      setUpSlopedCinderBlock(xCenter + xyRotated2[0], yCenter + xyRotated2[1], numberFlatSupports, yawDegrees);
+   }
+
 
    public TerrainObject getTerrainObject()
    {
