@@ -11,22 +11,42 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.M
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.Wrench;
 
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
+
 public class MomentumModuleSolutionComparer
 {
+   private static final boolean printComparison = false;
+   
    private MomentumModuleDataObject momentumModuleDataObject;
 
-   private SpatialForceVector firstCentroidalMomentumRate, secondCentroidalMomentumRate;
-   private ArrayList<Pair<String, Wrench>> firstExternalWrenches = new ArrayList<Pair<String,Wrench>>();
-   private ArrayList<Pair<String, Wrench>> secondExternalWrenches = new ArrayList<Pair<String,Wrench>>();
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   
+   private final YoFrameVector desiredLinearMomentumRate, optimizationLinearMomentumRate, oldLinearMomentumRate;
+   private final YoFrameVector desiredAngularMomentumRate, optimizationAngularMomentumRate, oldAngularMomentumRate;
    
    
-   public MomentumModuleSolutionComparer()
+   private SpatialForceVector optimizationCentroidalMomentumRate, oldCentroidalMomentumRate;
+   private ArrayList<Pair<String, Wrench>> optimizationExternalWrenches = new ArrayList<Pair<String,Wrench>>();
+   private ArrayList<Pair<String, Wrench>> oldExternalWrenches = new ArrayList<Pair<String,Wrench>>();
+   
+   
+   public MomentumModuleSolutionComparer(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry)
    {
+      parentRegistry.addChild(registry);
       
+      desiredLinearMomentumRate = new YoFrameVector("desiredLinearMomentumRate", centerOfMassFrame, registry);
+      optimizationLinearMomentumRate = new YoFrameVector("optimizationLinearMomentumRate", centerOfMassFrame, registry);
+      oldLinearMomentumRate = new YoFrameVector("oldLinearMomentumRate", centerOfMassFrame, registry);
+      
+      desiredAngularMomentumRate = new YoFrameVector("desiredAngularMomentumRate", centerOfMassFrame, registry);
+      optimizationAngularMomentumRate = new YoFrameVector("optimizationAngularMomentumRate", centerOfMassFrame, registry);
+      oldAngularMomentumRate = new YoFrameVector("oldAngularMomentumRate", centerOfMassFrame, registry);
    }
    
    public void setMomentumModuleDataObject(MomentumModuleDataObject momentumModuleDataObject)
@@ -34,20 +54,20 @@ public class MomentumModuleSolutionComparer
      this.momentumModuleDataObject = momentumModuleDataObject;  
    }
    
-   public void setFirstSolution(String string, MomentumModuleSolution firstSolution)
+   public void setOptimizationSolution(String string, MomentumModuleSolution optimizationSolution)
    {
-      SpatialForceVector centroidalMomentumRateSolution = firstSolution.getCentroidalMomentumRateSolution();
-      Map<RigidBody, Wrench> externalWrenchSolution = firstSolution.getExternalWrenchSolution();
+      SpatialForceVector centroidalMomentumRateSolution = optimizationSolution.getCentroidalMomentumRateSolution();
+      Map<RigidBody, Wrench> externalWrenchSolution = optimizationSolution.getExternalWrenchSolution();
       
-      firstCentroidalMomentumRate = new SpatialForceVector(centroidalMomentumRateSolution);
+      optimizationCentroidalMomentumRate = new SpatialForceVector(centroidalMomentumRateSolution);
    }
 
-   public void setSecondSolution(String string, MomentumModuleSolution secondSolution)
+   public void setOldSolution(String string, MomentumModuleSolution oldSolution)
    {
-      SpatialForceVector centroidalMomentumRateSolution = secondSolution.getCentroidalMomentumRateSolution();
-      Map<RigidBody, Wrench> externalWrenchSolution = secondSolution.getExternalWrenchSolution();
+      SpatialForceVector centroidalMomentumRateSolution = oldSolution.getCentroidalMomentumRateSolution();
+      Map<RigidBody, Wrench> externalWrenchSolution = oldSolution.getExternalWrenchSolution();
       
-      secondCentroidalMomentumRate = new SpatialForceVector(centroidalMomentumRateSolution);
+      oldCentroidalMomentumRate = new SpatialForceVector(centroidalMomentumRateSolution);
    }
 
    public void displayComparison()
@@ -58,26 +78,27 @@ public class MomentumModuleSolutionComparer
       DenseMatrix64F momentumMultipliers = momentumRateOfChangeData.getMomentumMultipliers();
       DenseMatrix64F momentumSubspace = momentumRateOfChangeData.getMomentumSubspace();
       
-      System.out.println("momentumMultipliers = " + momentumMultipliers);
-      System.out.println("momentumSubspace = " + momentumSubspace);
+      if (printComparison) System.out.println("momentumMultipliers = " + momentumMultipliers);
+      if (printComparison) System.out.println("momentumSubspace = " + momentumSubspace);
 
-      FrameVector firstAngularMomentumRate = firstCentroidalMomentumRate.getAngularPartAsFrameVectorCopy();
-      FrameVector secondAngularMomentumRate = secondCentroidalMomentumRate.getAngularPartAsFrameVectorCopy();
+      desiredLinearMomentumRate.set(momentumMultipliers.get(0), momentumMultipliers.get(1), momentumMultipliers.get(2));
       
-      FrameVector firstLinearMomentumRate = firstCentroidalMomentumRate.getLinearPartAsFrameVectorCopy();
-      FrameVector secondLinearMomentumRate = secondCentroidalMomentumRate.getLinearPartAsFrameVectorCopy();
+      optimizationLinearMomentumRate.set(optimizationCentroidalMomentumRate.getLinearPartAsFrameVectorCopy());
+      oldLinearMomentumRate.set(oldCentroidalMomentumRate.getLinearPartAsFrameVectorCopy());
+      optimizationAngularMomentumRate.set(optimizationCentroidalMomentumRate.getAngularPartAsFrameVectorCopy());
+      oldAngularMomentumRate.set(oldCentroidalMomentumRate.getAngularPartAsFrameVectorCopy());
 
-      FrameVector angularMomentumRateDifference = new FrameVector(firstAngularMomentumRate);
-      angularMomentumRateDifference.sub(secondAngularMomentumRate);
+      FrameVector angularMomentumRateDifference = new FrameVector(optimizationAngularMomentumRate.getFrameVectorCopy());
+      angularMomentumRateDifference.sub(oldAngularMomentumRate.getFrameVectorCopy());
       
-      FrameVector linearMomentumRateDifference = new FrameVector(firstLinearMomentumRate);
-      linearMomentumRateDifference.sub(secondLinearMomentumRate);
+      FrameVector linearMomentumRateDifference = optimizationLinearMomentumRate.getFrameVectorCopy();
+      linearMomentumRateDifference.sub(oldLinearMomentumRate.getFrameVectorCopy());
       
-      System.out.println("First CentroidalMomentumRate = " + firstCentroidalMomentumRate);
-      System.out.println("Second CentroidalMomentumRate = " + secondCentroidalMomentumRate);
+      if (printComparison) System.out.println("Optimization CentroidalMomentumRate = " + optimizationCentroidalMomentumRate);
+      if (printComparison) System.out.println("Old CentroidalMomentumRate = " + oldCentroidalMomentumRate);
       
-      System.out.println("\nangularMomentumRateDifference = " + angularMomentumRateDifference);
-      System.out.println("linearMomentumRateDifference = " + linearMomentumRateDifference);
+      if (printComparison) System.out.println("\nangularMomentumRateDifference = " + angularMomentumRateDifference);
+      if (printComparison) System.out.println("linearMomentumRateDifference = " + linearMomentumRateDifference);
 
    }
 
