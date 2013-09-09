@@ -132,14 +132,15 @@ public class MomentumBasedController
                                   ArrayList<Updatable> updatables, StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      momentumControlModuleBridge = new MomentumControlModuleBridge(optimizationMomentumControlModule, oldMomentumControlModule, registry);
+      centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
+
+      momentumControlModuleBridge = new MomentumControlModuleBridge(optimizationMomentumControlModule, oldMomentumControlModule, centerOfMassFrame, registry);
       
       if (SPY_ON_MOMENTUM_BASED_CONTROLLER)
          momentumBasedControllerSpy = new MomentumBasedControllerSpy(registry);
       else
          momentumBasedControllerSpy = null;
 
-      centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 

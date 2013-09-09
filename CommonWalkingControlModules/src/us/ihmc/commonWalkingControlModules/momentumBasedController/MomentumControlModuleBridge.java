@@ -17,17 +17,21 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.E
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleDataObject;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleSolverListener;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleSolverVisualizer;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylindricalContactState;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Wrench;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
@@ -35,6 +39,7 @@ public class MomentumControlModuleBridge implements MomentumControlModule
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("MomentumControlModuleBridge");
 
+   private static final boolean LISTEN_IN_ON_SOLVER = false;
    private static final boolean TRY_BOTH_AND_COMPARE = false;
    private final MomentumModuleSolutionComparer momentumModuleSolutionComparer;
 
@@ -53,14 +58,22 @@ public class MomentumControlModuleBridge implements MomentumControlModule
    private final EnumYoVariable<MomentumControlModuleType> momentumControlModuleInUse =
       new EnumYoVariable<MomentumControlModuleType>("momentumControlModuleInUse", registry, MomentumControlModuleType.class);
 
+   private final BooleanYoVariable swapMomentumControlModuleInUse = new BooleanYoVariable("swapMomentumControlModuleInUse", registry);
+   
    private MomentumControlModule activeMomentumControlModule, inactiveMomentumControlModule;
 
    private final MomentumModuleDataObject momentumModuleDataObject = new MomentumModuleDataObject();
 
-   public MomentumControlModuleBridge(MomentumControlModule optimizationMomentumControlModule, MomentumControlModule oldMomentumControlModule,
-                                      YoVariableRegistry parentRegistry)
+   public MomentumControlModuleBridge(OptimizationMomentumControlModule optimizationMomentumControlModule, MomentumControlModule oldMomentumControlModule,
+                                      ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry)
    {
-      if (TRY_BOTH_AND_COMPARE) momentumModuleSolutionComparer = new MomentumModuleSolutionComparer();
+      if (LISTEN_IN_ON_SOLVER) 
+      {
+         MomentumControlModuleSolverListener momentumControlModuleSolverListener = new MomentumControlModuleSolverVisualizer(registry);
+         optimizationMomentumControlModule.setMomentumControlModuleSolverListener(momentumControlModuleSolverListener);
+      }
+      
+      if (TRY_BOTH_AND_COMPARE) momentumModuleSolutionComparer = new MomentumModuleSolutionComparer(centerOfMassFrame, registry);
       else momentumModuleSolutionComparer = null;
       
       this.momentumControlModules.put(MomentumControlModuleType.OPTIMIZATION, optimizationMomentumControlModule);
@@ -72,6 +85,11 @@ public class MomentumControlModuleBridge implements MomentumControlModule
       parentRegistry.addChild(registry);
    }
 
+   public void swapMomentumControlModuleToUse()
+   {
+      setMomentumControlModuleToUse(momentumControlModuleInUse.getEnumValue().getOther());
+   }
+   
    public void setMomentumControlModuleToUse(MomentumControlModuleType momentumControlModuleToUse)
    {
       momentumControlModuleInUse.set(momentumControlModuleToUse);
@@ -106,6 +124,12 @@ public class MomentumControlModuleBridge implements MomentumControlModule
 
    public void reset()
    {
+      if (swapMomentumControlModuleInUse.getBooleanValue())
+      {
+         swapMomentumControlModuleInUse.set(false);
+         swapMomentumControlModuleToUse();
+      }
+      
       activeMomentumControlModule.reset();
       momentumModuleDataObject.reset();
       
@@ -178,15 +202,18 @@ public class MomentumControlModuleBridge implements MomentumControlModule
          inactiveSolution = inactiveMomentumControlModule.compute(contactStates, cylinderContactStates, upcomingSupportSide);
       
          momentumModuleSolutionComparer.setMomentumModuleDataObject(momentumModuleDataObject);
-         momentumModuleSolutionComparer.setFirstSolution("Inactive Solution", inactiveSolution);
+         if (this.isUsingOptimizationMomentumControlModule()) momentumModuleSolutionComparer.setOldSolution("Old Solution", inactiveSolution);
+         else momentumModuleSolutionComparer.setOptimizationSolution("Optimization Solution", inactiveSolution);
       }
       
       setMomentumModuleDataObject(activeMomentumControlModule, momentumModuleDataObject);
-      MomentumModuleSolution activeSolution =  activeMomentumControlModule.compute(contactStates, cylinderContactStates, upcomingSupportSide);  
+      MomentumModuleSolution activeSolution = activeMomentumControlModule.compute(contactStates, cylinderContactStates, upcomingSupportSide);  
   
       if (TRY_BOTH_AND_COMPARE)
       {
-         momentumModuleSolutionComparer.setSecondSolution("Active Solution", activeSolution);
+         if (this.isUsingOptimizationMomentumControlModule()) momentumModuleSolutionComparer.setOptimizationSolution("Optimization Solution", activeSolution);
+         else momentumModuleSolutionComparer.setOldSolution("Old Solution", activeSolution);
+         
          momentumModuleSolutionComparer.displayComparison();
       }
       
