@@ -13,7 +13,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.JointAndIMUSensorMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.ComposableOrientationAndCoMEstimatorCreator;
-import us.ihmc.sensorProcessing.stateEstimation.IMUSelectorAndDataWrapper;
+import us.ihmc.sensorProcessing.stateEstimation.IMUSelectorAndDataConverter;
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.JointStateFullRobotModelUpdater;
 import us.ihmc.sensorProcessing.stateEstimation.OrientationStateRobotModelUpdater;
@@ -44,7 +44,7 @@ public class SensorAndEstimatorAssembler
    private final JointStateFullRobotModelUpdater jointStateFullRobotModelUpdater;
    private final ComposableOrientationAndCoMEstimatorCreator.ComposableOrientationAndCoMEstimator estimator;
    private final OrientationStateRobotModelUpdater orientationStateRobotModelUpdater;
-   private final IMUSelectorAndDataWrapper imuSelectorAndDataWrapper;
+   private final IMUSelectorAndDataConverter imuSelectorAndDataWrapper;
 
    public SensorAndEstimatorAssembler(StateEstimationDataFromControllerSource stateEstimatorDataFromControllerSource,
          StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorNoiseParameters sensorNoiseParametersForEstimator,
@@ -78,7 +78,7 @@ public class SensorAndEstimatorAssembler
       {
          //         try
          //         {
-         imuSelectorAndDataWrapper = new IMUSelectorAndDataWrapper(controlFlowGraph, jointAndIMUSensorMap);
+         imuSelectorAndDataWrapper = new IMUSelectorAndDataConverter(controlFlowGraph, jointAndIMUSensorMap);
          orientationStateRobotModelUpdater = new OrientationStateRobotModelUpdater(controlFlowGraph,
                jointStateFullRobotModelUpdater.getInverseDynamicsStructureOutputPort(), imuSelectorAndDataWrapper.getOrientationOutputPort(),
                imuSelectorAndDataWrapper.getAngularVelocityOutputPort());
