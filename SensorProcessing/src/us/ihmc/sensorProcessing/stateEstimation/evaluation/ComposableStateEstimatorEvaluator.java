@@ -111,7 +111,7 @@ public class ComposableStateEstimatorEvaluator
       ControlFlowGraphExecutorController controlFlowGraphExecutorController = new ControlFlowGraphExecutorController(controlFlowGraph);
       
       StateEstimatorErrorCalculatorController composableStateEstimatorEvaluatorController =
-         new StateEstimatorErrorCalculatorController(orientationEstimator, robot, estimationJoint);
+         new StateEstimatorErrorCalculatorController(orientationEstimator, robot, estimationJoint, assumePerfectIMU);
       
       
       robot.setController(desiredCoMAccelerationsFromRobotStealerController, simTicksPerControlDT);
