@@ -271,17 +271,27 @@ public class ComposableOrientationAndCoMEstimatorCreator
                     centerOfMassVelocityOutputPort);
          }
 
+         
          Runnable runnable = new Runnable()
          {
             public void run()
             {
                if (!assumePerfectIMU)
                {
+//            	   ReferenceFrame refFrame = orientationOutputPort.getData().getReferenceFrame();
+                  
+            	   
                    orientationStateRobotModelUpdater.run();
                   positionStateRobotModelUpdater.run();
                }
                else
                {
+//            	   double[] yawPitchRoll = orientationOutputPort.getData().getYawPitchRoll();
+//                   double yaw = yawPitchRoll[0];
+//                   double pitch = yawPitchRoll[1];
+//                   double roll = yawPitchRoll[2];
+//                   System.out.println("yaw: " + yaw + "pitch: " + pitch + "roll: " + roll );
+            	   
                   positionStateRobotModelUpdater.run();
                }
 
@@ -368,17 +378,17 @@ public class ComposableOrientationAndCoMEstimatorCreator
          ReferenceFrame measurementFrame = orientationSensorConfiguration.getMeasurementFrame();
          ControlFlowInputPort<Matrix3d> measurementInputPort = createInputPort("orientationMeasurementInputPort");
 
-         ControlFlowInputPort<Matrix3d> orientationMeasurementPort = measurementInputPort;
+         ControlFlowInputPort<Matrix3d> orientationMeasurementInputPort = measurementInputPort;
          String name = orientationSensorConfiguration.getName();
          DenseMatrix64F orientationNoiseCovariance = orientationSensorConfiguration.getOrientationNoiseCovariance();
 
          OrientationMeasurementModelElement orientationMeasurementModel = new OrientationMeasurementModelElement(orientationOutputPort,
-                                                                             orientationMeasurementPort, estimationFrame, measurementFrame, name, registry);
+                                                                             orientationMeasurementInputPort, estimationFrame, measurementFrame, name, registry);
          orientationMeasurementModel.setNoiseCovariance(orientationNoiseCovariance);
 
          addMeasurementModelElement(orientationMeasurementModel);
 
-         controlFlowGraph.connectElements(orientationSensorConfiguration.getOutputPort(), orientationMeasurementPort);
+         controlFlowGraph.connectElements(orientationSensorConfiguration.getOutputPort(), orientationMeasurementInputPort);
       }
    // not
       private void addAngularVelocitySensor(ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph,

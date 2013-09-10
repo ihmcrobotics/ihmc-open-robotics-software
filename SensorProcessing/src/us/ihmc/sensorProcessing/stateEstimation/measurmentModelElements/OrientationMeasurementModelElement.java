@@ -73,6 +73,7 @@ public class OrientationMeasurementModelElement extends AbstractMeasurementModel
    }
 
    private final FrameOrientation tempMeasuredOrientationFrameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
+   
    public DenseMatrix64F computeResidual()
    {
       orientationStatePort.getData().getQuaternion(estimatedOrientationQuaternion);

@@ -22,8 +22,7 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
    private final ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort;
    private final ControlFlowPort<FrameOrientation> orientationPort;
    private final ControlFlowPort<FrameVector> angularVelocityPort;
-   private final ControlFlowOutputPort<FrameOrientation> orientationOutputPort;
-   private final ControlFlowOutputPort<FrameVector> angularVelocityOutputPort;
+
    private final ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -42,10 +41,7 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
       controlFlowGraph.connectElements(angularVelocityOutputPort, (ControlFlowInputPort<FrameVector>) angularVelocityPort);
 
       this.inverseDynamicsStructureInputPort.setData(inverseDynamicsStructureOutputPort.getData());
-      this.inverseDynamicsStructureOutputPort.setData(inverseDynamicsStructureOutputPort.getData());
-
-      this.orientationOutputPort = createOutputPort("orientationOutputPort");
-      this.angularVelocityOutputPort = createOutputPort("angularVelocityOutputPort");
+      this.inverseDynamicsStructureOutputPort.setData(inverseDynamicsStructureInputPort.getData());
    }
 
    // Constructor in case of use as Runnable
@@ -56,8 +52,6 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
       this.inverseDynamicsStructureOutputPort = null;
       this.orientationPort = orientationPort;
       this.angularVelocityPort = angularVelocityPort;
-      this.orientationOutputPort = null;
-      this.angularVelocityOutputPort = null;
    }
 
    public void run()
@@ -78,9 +72,6 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
    {
       run();
       inverseDynamicsStructureOutputPort.setData(inverseDynamicsStructureInputPort.getData());
-      // just passing on data for these ports
-      orientationOutputPort.setData(orientationPort.getData());
-      angularVelocityOutputPort.setData(angularVelocityPort.getData());
    }
 
    public void waitUntilComputationIsDone()
