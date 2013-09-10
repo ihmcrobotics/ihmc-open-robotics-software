@@ -20,6 +20,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameQuaternion;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
+
 public class StateEstimatorErrorCalculator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -39,15 +40,15 @@ public class StateEstimatorErrorCalculator
 
    private final YoFramePoint perfectCoMPosition = new YoFramePoint("perfectCoMPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector perfectCoMVelocity = new YoFrameVector("perfectCoMVelocity", ReferenceFrame.getWorldFrame(), registry);
-   
+   private final boolean assumePerfectIMU;
 
-   public StateEstimatorErrorCalculator(Robot robot, Joint estimationJoint, StateEstimator orientationEstimator,
+   public StateEstimatorErrorCalculator(Robot robot, Joint estimationJoint, StateEstimator orientationEstimator, boolean assumePerfectIMU,
            YoVariableRegistry parentRegistry)
    {
       this.robot = robot;
       this.estimationJoint = estimationJoint;
       this.orientationEstimator = orientationEstimator;
-
+      this.assumePerfectIMU = assumePerfectIMU;
       parentRegistry.addChild(registry);
    }
 
@@ -141,8 +142,11 @@ public class StateEstimatorErrorCalculator
 
    public void computeErrors()
    {
-      computeOrientationError();
-      computeAngularVelocityError();
+	   if(!assumePerfectIMU)
+	   {
+		   computeOrientationError();
+		   computeAngularVelocityError();
+	   }
       computeCoMPositionError();
       computeCoMVelocityError();
    }

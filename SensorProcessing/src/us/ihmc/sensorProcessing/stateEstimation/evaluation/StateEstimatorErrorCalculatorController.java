@@ -17,12 +17,12 @@ public class StateEstimatorErrorCalculatorController implements RobotController
    private final StateEstimatorErrorCalculator composableStateEstimatorEvaluatorErrorCalculator;
 
    public StateEstimatorErrorCalculatorController(StateEstimator orientationEstimator,
-           Robot robot, Joint estimationJoint)
+           Robot robot, Joint estimationJoint, boolean assumePerfectIMU)
    {      
       this.gravitationalAcceleration = new Vector3d();
       robot.getGravity(gravitationalAcceleration);
 
-      this.composableStateEstimatorEvaluatorErrorCalculator = new StateEstimatorErrorCalculator(robot, estimationJoint, orientationEstimator, registry);
+      this.composableStateEstimatorEvaluatorErrorCalculator = new StateEstimatorErrorCalculator(robot, estimationJoint, orientationEstimator, assumePerfectIMU, registry);
    }
 
 

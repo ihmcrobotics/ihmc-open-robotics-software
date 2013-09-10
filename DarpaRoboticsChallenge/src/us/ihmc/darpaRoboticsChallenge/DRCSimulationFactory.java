@@ -199,7 +199,7 @@ public class DRCSimulationFactory
 
          Joint estimationJoint = getEstimationJoint(simulatedRobot);
          
-         StateEstimatorErrorCalculatorController stateEstimatorErrorCalculatorController = new StateEstimatorErrorCalculatorController(stateEstimator, simulatedRobot, estimationJoint);
+         StateEstimatorErrorCalculatorController stateEstimatorErrorCalculatorController = new StateEstimatorErrorCalculatorController(stateEstimator, simulatedRobot, estimationJoint, DRCConfigParameters.ASSUME_PERFECT_IMU);
          simulatedRobot.setController(stateEstimatorErrorCalculatorController, estimationTicksPerControlTick);
       }
       
