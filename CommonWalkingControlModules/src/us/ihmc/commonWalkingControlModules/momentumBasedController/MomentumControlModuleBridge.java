@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Map;
 
-import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableCylinderBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
@@ -17,17 +15,14 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.E
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleDataObject;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.gui.MomentumModuleGUI;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleSolverListener;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleSolverVisualizer;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylindricalContactState;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
-import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Wrench;
 
@@ -41,7 +36,10 @@ public class MomentumControlModuleBridge implements MomentumControlModule
 
    private static final boolean LISTEN_IN_ON_SOLVER = false;
    private static final boolean TRY_BOTH_AND_COMPARE = false;
+   private static final boolean SHOW_MOMENTUM_MODULE_GUI = false;
+   
    private final MomentumModuleSolutionComparer momentumModuleSolutionComparer;
+   private final MomentumModuleGUI momentumModuleGUI;
 
    public enum MomentumControlModuleType 
    {
@@ -67,6 +65,15 @@ public class MomentumControlModuleBridge implements MomentumControlModule
    public MomentumControlModuleBridge(OptimizationMomentumControlModule optimizationMomentumControlModule, MomentumControlModule oldMomentumControlModule,
                                       ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry)
    {
+      if (SHOW_MOMENTUM_MODULE_GUI)
+      {
+         momentumModuleGUI = new MomentumModuleGUI();
+      }
+      else 
+      {
+         momentumModuleGUI = null;
+      }
+         
       if (LISTEN_IN_ON_SOLVER) 
       {
          MomentumControlModuleSolverListener momentumControlModuleSolverListener = new MomentumControlModuleSolverVisualizer(registry);
@@ -116,6 +123,11 @@ public class MomentumControlModuleBridge implements MomentumControlModule
    {
       activeMomentumControlModule.initialize();
 
+      if (SHOW_MOMENTUM_MODULE_GUI)
+      {
+         momentumModuleGUI.initialize();
+      }
+      
       if (TRY_BOTH_AND_COMPARE)
       {
          inactiveMomentumControlModule.initialize();
@@ -132,6 +144,11 @@ public class MomentumControlModuleBridge implements MomentumControlModule
       
       activeMomentumControlModule.reset();
       momentumModuleDataObject.reset();
+      
+      if (SHOW_MOMENTUM_MODULE_GUI)
+      {
+         momentumModuleGUI.reset();
+      }
       
       if (TRY_BOTH_AND_COMPARE)
       {
@@ -154,35 +171,19 @@ public class MomentumControlModuleBridge implements MomentumControlModule
       momentumModuleDataObject.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
    }
 
-   public void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration)
+   public void setDesiredJointAcceleration(DesiredJointAccelerationCommand desiredJointAccelerationCommand)
    {
-      momentumModuleDataObject.setDesiredJointAcceleration(joint, jointAcceleration);
+      momentumModuleDataObject.setDesiredJointAcceleration(desiredJointAccelerationCommand);
    }
 
-   public void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration, double weight)
+   public void setDesiredSpatialAcceleration(DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand)
    {
-      momentumModuleDataObject.setDesiredJointAcceleration(joint, jointAcceleration, weight);
+      momentumModuleDataObject.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);
    }
-
-   public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
+   
+   public void setDesiredPointAcceleration(DesiredPointAccelerationCommand desiredPointAccelerationCommand)
    {
-      momentumModuleDataObject.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
-   }
-
-   public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData, double weight)
-   {
-      momentumModuleDataObject.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData, weight);
-   }
-
-   public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase)
-   {
-      momentumModuleDataObject.setDesiredPointAcceleration(jacobian, bodyFixedPoint, desiredAccelerationWithRespectToBase);
-   }
-
-   public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase,
-           DenseMatrix64F selectionMatrix)
-   {
-      momentumModuleDataObject.setDesiredPointAcceleration(jacobian, bodyFixedPoint, desiredAccelerationWithRespectToBase, selectionMatrix);
+      momentumModuleDataObject.setDesiredPointAcceleration(desiredPointAccelerationCommand);
    }
 
    public void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench)
@@ -209,6 +210,11 @@ public class MomentumControlModuleBridge implements MomentumControlModule
       setMomentumModuleDataObject(activeMomentumControlModule, momentumModuleDataObject);
       MomentumModuleSolution activeSolution = activeMomentumControlModule.compute(contactStates, cylinderContactStates, upcomingSupportSide);  
   
+      if (SHOW_MOMENTUM_MODULE_GUI)
+      {
+         momentumModuleGUI.setDesiredsAndSolution(momentumModuleDataObject, activeSolution);
+      }
+      
       if (TRY_BOTH_AND_COMPARE)
       {
          if (this.isUsingOptimizationMomentumControlModule()) momentumModuleSolutionComparer.setOptimizationSolution("Optimization Solution", activeSolution);
@@ -252,9 +258,7 @@ public class MomentumControlModuleBridge implements MomentumControlModule
       {
          setExternalWrenchToCompensateFor(momentumControlModule, externalWrenchCommand);
       }
-
    }
-
 
 
    private static void setDesiredRateOfChangeOfMomentum(MomentumControlModule momentumControlModule,
@@ -265,49 +269,19 @@ public class MomentumControlModuleBridge implements MomentumControlModule
 
    private static void setDesiredJointAcceleration(MomentumControlModule momentumControlModule, DesiredJointAccelerationCommand desiredJointAccelerationCommand)
    {
-      if (desiredJointAccelerationCommand.getHasWeight())
-      {
-         momentumControlModule.setDesiredJointAcceleration(desiredJointAccelerationCommand.getJoint(),
-                 desiredJointAccelerationCommand.getDesiredAcceleration(), desiredJointAccelerationCommand.getWeight());
-      }
-      else
-      {
-         momentumControlModule.setDesiredJointAcceleration(desiredJointAccelerationCommand.getJoint(),
-                 desiredJointAccelerationCommand.getDesiredAcceleration());
-      }
+      momentumControlModule.setDesiredJointAcceleration(desiredJointAccelerationCommand);
    }
 
    private static void setDesiredSpatialAcceleration(MomentumControlModule momentumControlModule,
            DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand)
    {
-      if (desiredSpatialAccelerationCommand.getHasWeight())
-      {
-         momentumControlModule.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand.getJacobian(),
-                 desiredSpatialAccelerationCommand.getTaskspaceConstraintData(), desiredSpatialAccelerationCommand.getWeight());
-      }
-      else
-      {
-         momentumControlModule.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand.getJacobian(),
-                 desiredSpatialAccelerationCommand.getTaskspaceConstraintData());
-      }
+      momentumControlModule.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);
    }
 
 
    private static void setDesiredPointAcceleration(MomentumControlModule momentumControlModule, DesiredPointAccelerationCommand desiredPointAccelerationCommand)
    {
-      DenseMatrix64F selectionMatrix = desiredPointAccelerationCommand.getSelectionMatrix();
-
-      if (selectionMatrix != null)
-      {
-         momentumControlModule.setDesiredPointAcceleration(desiredPointAccelerationCommand.getRootToEndEffectorJacobian(),
-                 desiredPointAccelerationCommand.getContactPoint(), desiredPointAccelerationCommand.getDesiredAcceleration(), selectionMatrix);
-      }
-
-      else
-      {
-         momentumControlModule.setDesiredPointAcceleration(desiredPointAccelerationCommand.getRootToEndEffectorJacobian(),
-                 desiredPointAccelerationCommand.getContactPoint(), desiredPointAccelerationCommand.getDesiredAcceleration());
-      }
+      momentumControlModule.setDesiredPointAcceleration(desiredPointAccelerationCommand);
    }
 
    private static void setExternalWrenchToCompensateFor(MomentumControlModule momentumControlModule, ExternalWrenchCommand externalWrenchCommand)

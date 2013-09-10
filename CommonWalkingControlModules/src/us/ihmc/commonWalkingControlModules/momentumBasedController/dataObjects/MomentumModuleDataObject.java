@@ -4,11 +4,9 @@ import java.util.ArrayList;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Wrench;
 
@@ -53,39 +51,22 @@ public class MomentumModuleDataObject
       desiredRateOfChangeOfMomentumCommands.add(command);
    }
 
-   public void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration)
+   public void setDesiredJointAcceleration(DesiredJointAccelerationCommand desiredJointAccelerationCommand)
    {
-      DesiredJointAccelerationCommand command = new DesiredJointAccelerationCommand(joint, jointAcceleration);
-      desiredJointAccelerationCommands.add(command);
-   }
-   
-   public void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration, double weight)
-   {
-      DesiredJointAccelerationCommand command = new DesiredJointAccelerationCommand(joint, jointAcceleration, weight);
+      DesiredJointAccelerationCommand command = new DesiredJointAccelerationCommand(desiredJointAccelerationCommand);
       desiredJointAccelerationCommands.add(command);
    }
 
-   public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
+   public void setDesiredSpatialAcceleration(DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand)
    {
-      DesiredSpatialAccelerationCommand command = new DesiredSpatialAccelerationCommand(jacobian, taskspaceConstraintData);
+      DesiredSpatialAccelerationCommand command = new DesiredSpatialAccelerationCommand(desiredSpatialAccelerationCommand);
       desiredSpatialAccelerationCommands.add(command);
    }
    
-   public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData, double weight)
-   {
-      DesiredSpatialAccelerationCommand command = new DesiredSpatialAccelerationCommand(jacobian, taskspaceConstraintData, weight);
-      desiredSpatialAccelerationCommands.add(command);
-   }
 
-   public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase)
+   public void setDesiredPointAcceleration(DesiredPointAccelerationCommand desiredPointAccelerationCommand)
    {
-      DesiredPointAccelerationCommand command = new DesiredPointAccelerationCommand(jacobian, bodyFixedPoint, desiredAccelerationWithRespectToBase);
-      desiredPointAccelerationCommands.add(command);
-   }
-   
-   public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase, DenseMatrix64F selectionMatrix)
-   {
-      DesiredPointAccelerationCommand command = new DesiredPointAccelerationCommand(jacobian, bodyFixedPoint, desiredAccelerationWithRespectToBase, selectionMatrix);
+      DesiredPointAccelerationCommand command = new DesiredPointAccelerationCommand(desiredPointAccelerationCommand);
       desiredPointAccelerationCommands.add(command);
    }
    
@@ -119,5 +100,7 @@ public class MomentumModuleDataObject
    {
       return externalWrenchCommands;
    }
+
+  
    
 }

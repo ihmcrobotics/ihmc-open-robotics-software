@@ -106,7 +106,7 @@ public class MotionConstraintHandler
       motionConstraintIndex++;
    }
 
-   public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData, double weight)
+   public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData, double weight) //, DenseMatrix64F jMatrixToPack, DenseMatrix64F pVectorToPack)
    {
       // (S * J) * vdot = S * (Tdot - Jdot * v)
 
@@ -174,11 +174,16 @@ public class MotionConstraintHandler
          DenseMatrix64F jFullBlock = getMatrixFromList(jList, motionConstraintIndex, jBlockCompact.getNumRows(), nDegreesOfFreedom);
          compactBlockToFullBlock(baseToEndEffectorJacobian.getJointsInOrder(), jBlockCompact, jFullBlock);
 
+//         if (jMatrixToPack != null) jMatrixToPack.setReshape(jFullBlock);
+
+         
          DenseMatrix64F pBlock = getMatrixFromList(pList, motionConstraintIndex, selectionMatrix.getNumRows(), 1);
          taskSpaceAcceleration.packMatrix(taskSpaceAccelerationMatrix, 0);
          CommonOps.mult(selectionMatrix, taskSpaceAccelerationMatrix, pBlock);
          CommonOps.multAdd(-1.0, selectionMatrix, convectiveTermMatrix, pBlock);
 
+//         if (pVectorToPack != null) pVectorToPack.setReshape(pBlock);
+         
          MutableDouble weightBlock = getMutableDoubleFromList(weightList, motionConstraintIndex);
          weightBlock.setValue(weight);
 
@@ -256,6 +261,13 @@ public class MotionConstraintHandler
    {
       assembleEquation(jList, pList, motionConstraintIndex, j, p);
       assembleWeightMatrix(weightList, jList, motionConstraintIndex, w);
+   }
+   
+   public void getMotionConstraintJMatrixPVectorAndWeight(int motionConstraintIndex, DenseMatrix64F jToPack, DenseMatrix64F pToPack, MutableDouble wToPack)
+   {
+      jToPack.setReshape(jList.get(motionConstraintIndex));
+      pToPack.setReshape(pList.get(motionConstraintIndex));
+      wToPack.setValue(weightList.get(motionConstraintIndex));
    }
 
    private void assembleEquation(List<DenseMatrix64F> matrixList, List<DenseMatrix64F> vectorList, int size, DenseMatrix64F matrix, DenseMatrix64F vector)
