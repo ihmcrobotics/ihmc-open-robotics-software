@@ -19,7 +19,7 @@ public class DesiredSpatialAccelerationCommand
       this.jacobian = jacobian;
       this.taskspaceConstraintData = taskspaceConstraintData;
       this.hasWeight = false;
-      this.weight = Double.NaN;
+      this.weight = Double.POSITIVE_INFINITY;
    }
 
    public DesiredSpatialAccelerationCommand(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData, double weight)

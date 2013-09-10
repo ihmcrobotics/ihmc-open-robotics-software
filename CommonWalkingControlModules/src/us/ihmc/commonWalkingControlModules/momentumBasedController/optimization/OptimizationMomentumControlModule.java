@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumContr
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredPointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredRateOfChangeOfMomentumCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
@@ -113,6 +114,16 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       parentRegistry.addChild(registry);
       reset();
    }
+   
+   public void setPrimaryMotionConstraintListener(MotionConstraintListener motionConstraintListener)
+   {
+      primaryMotionConstraintHandler.setMotionConstraintListener(motionConstraintListener);
+   }
+   
+   public void setSecondaryMotionConstraintListener(MotionConstraintListener motionConstraintListener)
+   {
+      secondaryMotionConstraintHandler.setMotionConstraintListener(motionConstraintListener);
+   }
 
    public void initialize()
    {
@@ -131,6 +142,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    
    public void setMomentumControlModuleSolverListener(MomentumControlModuleSolverListener momentumControlModuleSolverListener)
    {
+      if (this.momentumControlModuleSolverListener != null) throw new RuntimeException("MomentumControlModuleSolverListener is already set!");
       this.momentumControlModuleSolverListener = momentumControlModuleSolverListener;
    }
 
@@ -343,35 +355,29 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    public void setDesiredJointAcceleration(DesiredJointAccelerationCommand desiredJointAccelerationCommand)
    {
       boolean hasWeight = desiredJointAccelerationCommand.getHasWeight();
-      InverseDynamicsJoint joint = desiredJointAccelerationCommand.getJoint();
-      DenseMatrix64F desiredAcceleration = desiredJointAccelerationCommand.getDesiredAcceleration();
+
       
       if (hasWeight)
       {
          double weight = desiredJointAccelerationCommand.getWeight();
          
-         secondaryMotionConstraintHandler.setDesiredJointAcceleration(joint, desiredAcceleration, weight);
+         secondaryMotionConstraintHandler.setDesiredJointAcceleration(desiredJointAccelerationCommand);
       }
       else
       {
-         primaryMotionConstraintHandler.setDesiredJointAcceleration(joint, desiredAcceleration, Double.POSITIVE_INFINITY);    // weight is arbitrary, actually
+         primaryMotionConstraintHandler.setDesiredJointAcceleration(desiredJointAccelerationCommand);    // weight is arbitrary, actually
       }
    }
 
    public void setDesiredSpatialAcceleration(DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand)
    {
-      GeometricJacobian jacobian = desiredSpatialAccelerationCommand.getJacobian();
-      TaskspaceConstraintData taskspaceConstraintData = desiredSpatialAccelerationCommand.getTaskspaceConstraintData();
-      boolean hasWeight = desiredSpatialAccelerationCommand.getHasWeight();
-      
-      if (hasWeight)
+      if (desiredSpatialAccelerationCommand.getHasWeight())
       {
-         double weight = desiredSpatialAccelerationCommand.getWeight();
-         secondaryMotionConstraintHandler.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData, weight);
+         secondaryMotionConstraintHandler.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);
       }
       else
       {
-         primaryMotionConstraintHandler.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData, Double.POSITIVE_INFINITY);    // weight is arbitrary,
+         primaryMotionConstraintHandler.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);    // weight is arbitrary,
       }
    }
   
@@ -392,9 +398,9 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       }
    }
    
-   public void setDesiredRateOfChangeOfMomentum(MomentumRateOfChangeData momentumRateOfChangeData)
+   public void setDesiredRateOfChangeOfMomentum(DesiredRateOfChangeOfMomentumCommand desiredRateOfChangeOfMomentumCommand)
    {
-      this.momentumRateOfChangeData.set(momentumRateOfChangeData);
+      this.momentumRateOfChangeData.set(desiredRateOfChangeOfMomentumCommand.getMomentumRateOfChangeData());
    }
 
    public void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench)

@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.M
 import us.ihmc.commonWalkingControlModules.momentumBasedController.gui.MomentumModuleGUI;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleSolverListener;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleSolverVisualizer;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionConstraintListener;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylindricalContactState;
 import us.ihmc.robotSide.RobotSide;
@@ -61,6 +62,7 @@ public class MomentumControlModuleBridge implements MomentumControlModule
    private MomentumControlModule activeMomentumControlModule, inactiveMomentumControlModule;
 
    private final MomentumModuleDataObject momentumModuleDataObject = new MomentumModuleDataObject();
+   private final AllMomentumModuleListener allMomentumModuleListener;
 
    public MomentumControlModuleBridge(OptimizationMomentumControlModule optimizationMomentumControlModule, MomentumControlModule oldMomentumControlModule,
                                       ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry)
@@ -68,6 +70,11 @@ public class MomentumControlModuleBridge implements MomentumControlModule
       if (SHOW_MOMENTUM_MODULE_GUI)
       {
          momentumModuleGUI = new MomentumModuleGUI();
+         
+         allMomentumModuleListener = new AllMomentumModuleListener();
+         
+         optimizationMomentumControlModule.setPrimaryMotionConstraintListener(allMomentumModuleListener);
+         optimizationMomentumControlModule.setSecondaryMotionConstraintListener(allMomentumModuleListener);    
       }
       else 
       {
@@ -166,24 +173,28 @@ public class MomentumControlModuleBridge implements MomentumControlModule
       }
    }
 
-   public void setDesiredRateOfChangeOfMomentum(MomentumRateOfChangeData momentumRateOfChangeData)
+   public void setDesiredRateOfChangeOfMomentum(DesiredRateOfChangeOfMomentumCommand desiredRateOfChangeOfMomentumCommand)
    {
-      momentumModuleDataObject.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
+      momentumModuleDataObject.setDesiredRateOfChangeOfMomentum(desiredRateOfChangeOfMomentumCommand);
+      if (allMomentumModuleListener != null) allMomentumModuleListener.desiredRateOfChangeOfMomentumWasSet(desiredRateOfChangeOfMomentumCommand);
    }
 
    public void setDesiredJointAcceleration(DesiredJointAccelerationCommand desiredJointAccelerationCommand)
    {
       momentumModuleDataObject.setDesiredJointAcceleration(desiredJointAccelerationCommand);
+      if (allMomentumModuleListener != null) allMomentumModuleListener.desiredJointAccelerationWasSet(desiredJointAccelerationCommand);
    }
 
    public void setDesiredSpatialAcceleration(DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand)
    {
       momentumModuleDataObject.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);
+      if (allMomentumModuleListener != null) allMomentumModuleListener.desiredSpatialAccelerationWasSet(desiredSpatialAccelerationCommand);
    }
    
    public void setDesiredPointAcceleration(DesiredPointAccelerationCommand desiredPointAccelerationCommand)
    {
       momentumModuleDataObject.setDesiredPointAcceleration(desiredPointAccelerationCommand);
+      if (allMomentumModuleListener != null) allMomentumModuleListener.desiredPointAccelerationWasSet(desiredPointAccelerationCommand);
    }
 
    public void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench)
@@ -264,7 +275,7 @@ public class MomentumControlModuleBridge implements MomentumControlModule
    private static void setDesiredRateOfChangeOfMomentum(MomentumControlModule momentumControlModule,
            DesiredRateOfChangeOfMomentumCommand desiredRateOfChangeOfMomentumCommand)
    {
-      momentumControlModule.setDesiredRateOfChangeOfMomentum(desiredRateOfChangeOfMomentumCommand.getMomentumRateOfChangeData());
+      momentumControlModule.setDesiredRateOfChangeOfMomentum(desiredRateOfChangeOfMomentumCommand);
    }
 
    private static void setDesiredJointAcceleration(MomentumControlModule momentumControlModule, DesiredJointAccelerationCommand desiredJointAccelerationCommand)

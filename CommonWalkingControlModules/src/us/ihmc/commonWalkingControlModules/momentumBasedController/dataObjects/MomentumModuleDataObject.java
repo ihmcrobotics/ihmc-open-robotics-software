@@ -45,9 +45,9 @@ public class MomentumModuleDataObject
    }
 
 
-   public void setDesiredRateOfChangeOfMomentum(MomentumRateOfChangeData momentumRateOfChangeData)
+   public void setDesiredRateOfChangeOfMomentum(DesiredRateOfChangeOfMomentumCommand desiredRateOfChangeOfMomentumCommand)
    {
-      DesiredRateOfChangeOfMomentumCommand command = new DesiredRateOfChangeOfMomentumCommand(momentumRateOfChangeData);
+      DesiredRateOfChangeOfMomentumCommand command = new DesiredRateOfChangeOfMomentumCommand(desiredRateOfChangeOfMomentumCommand);
       desiredRateOfChangeOfMomentumCommands.add(command);
    }
 
