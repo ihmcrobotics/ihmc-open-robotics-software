@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +21,9 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModuleBridge.MomentumControlModuleType;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredPointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
@@ -330,26 +332,6 @@ public class MomentumBasedController
       momentumControlModuleBridge.setExternalWrenchToCompensateFor(rigidBody, wrench);
    }
 
-   public void setDesiredPointAcceleration(GeometricJacobian rootToEndEffectorJacobian, FramePoint contactPoint, FrameVector desiredAcceleration)
-   {
-      if (momentumBasedControllerSpy != null)
-      {
-         momentumBasedControllerSpy.setDesiredPointAcceleration(rootToEndEffectorJacobian, contactPoint, desiredAcceleration);
-      }
-
-      momentumControlModuleBridge.setDesiredPointAcceleration(rootToEndEffectorJacobian, contactPoint, desiredAcceleration);
-   }
-
-   public void setDesiredPointAcceleration(GeometricJacobian rootToEndEffectorJacobian, FramePoint contactPoint, FrameVector desiredAcceleration, DenseMatrix64F selectionMatrix)
-   {
-      if (momentumBasedControllerSpy != null)
-      {
-         momentumBasedControllerSpy.setDesiredPointAcceleration(rootToEndEffectorJacobian, contactPoint, desiredAcceleration);
-      }
-
-      momentumControlModuleBridge.setDesiredPointAcceleration(rootToEndEffectorJacobian, contactPoint, desiredAcceleration, selectionMatrix);
-   }
-
    // TODO: Temporary method for a big refactor allowing switching between high level behaviors
    public void doPrioritaryControl()
    {
@@ -522,7 +504,8 @@ public class MomentumBasedController
          momentumBasedControllerSpy.setDesiredJointAcceleration(joint, jointAcceleration);
       }
 
-      momentumControlModuleBridge.setDesiredJointAcceleration(joint, jointAcceleration);
+      DesiredJointAccelerationCommand desiredJointAccelerationCommand = new DesiredJointAccelerationCommand(joint, jointAcceleration);
+      momentumControlModuleBridge.setDesiredJointAcceleration(desiredJointAccelerationCommand);
    }
 
    private void updateYoVariables()
@@ -613,7 +596,30 @@ public class MomentumBasedController
          momentumBasedControllerSpy.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
       }
 
-      momentumControlModuleBridge.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
+      DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand = new DesiredSpatialAccelerationCommand(jacobian, taskspaceConstraintData);
+      momentumControlModuleBridge.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);
+   }
+   
+   public void setDesiredPointAcceleration(GeometricJacobian rootToEndEffectorJacobian, FramePoint contactPoint, FrameVector desiredAcceleration)
+   {
+      if (momentumBasedControllerSpy != null)
+      {
+         momentumBasedControllerSpy.setDesiredPointAcceleration(rootToEndEffectorJacobian, contactPoint, desiredAcceleration);
+      }
+
+      DesiredPointAccelerationCommand desiredPointAccelerationCommand = new DesiredPointAccelerationCommand(rootToEndEffectorJacobian, contactPoint, desiredAcceleration);
+      momentumControlModuleBridge.setDesiredPointAcceleration(desiredPointAccelerationCommand);
+   }
+
+   public void setDesiredPointAcceleration(GeometricJacobian rootToEndEffectorJacobian, FramePoint contactPoint, FrameVector desiredAcceleration, DenseMatrix64F selectionMatrix)
+   {
+      if (momentumBasedControllerSpy != null)
+      {
+         momentumBasedControllerSpy.setDesiredPointAcceleration(rootToEndEffectorJacobian, contactPoint, desiredAcceleration);
+      }
+
+      DesiredPointAccelerationCommand desiredPointAccelerationCommand = new DesiredPointAccelerationCommand(rootToEndEffectorJacobian, contactPoint, desiredAcceleration, selectionMatrix);
+      momentumControlModuleBridge.setDesiredPointAcceleration(desiredPointAccelerationCommand);
    }
 
    public void setDesiredRateOfChangeOfMomentum(MomentumRateOfChangeData momentumRateOfChangeData)

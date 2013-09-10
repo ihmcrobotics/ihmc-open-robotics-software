@@ -29,6 +29,16 @@ public class DesiredJointAccelerationCommand
    }
      
 
+   public DesiredJointAccelerationCommand(DesiredJointAccelerationCommand command)
+   {
+      this.joint = command.joint;
+      this.hasWeight = command.hasWeight;
+      this.weight = command.weight;
+      
+      //TODO: Do copy here?
+      this.desiredAcceleration = command.desiredAcceleration;
+   }
+
    public boolean getHasWeight()
    {
       return hasWeight;
@@ -52,6 +62,14 @@ public class DesiredJointAccelerationCommand
    public String toString()
    {
       return "OneDoFJointAccelerationCommand: " + joint.getName();
+   }
+   
+   public void computeAchievedJointAcceleration(DenseMatrix64F achievedAcceleration)
+   {
+      achievedAcceleration.reshape(desiredAcceleration.getNumRows(), desiredAcceleration.getNumCols());
+      joint.packDesiredAccelerationMatrix(achievedAcceleration, 0);
+      
+//      System.out.println("Desired = " + desiredAcceleration + ", achieved = " + achievedAcceleration);
    }
 
 }

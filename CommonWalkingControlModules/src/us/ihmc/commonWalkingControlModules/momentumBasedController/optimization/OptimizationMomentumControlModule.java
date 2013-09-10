@@ -15,6 +15,9 @@ import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVX
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXWithCylinderNativeOutput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredPointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylinderAndPlaneContactMatrixCalculatorAdapter;
@@ -271,7 +274,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
       SpatialForceVector centroidalMomentumRateSolution = centroidalMomentumHandler.getCentroidalMomentumRate();
       Map<RigidBody, Wrench> externalWrenchSolution = externalWrenchHandler.getExternalWrenches();
-      MomentumModuleSolution momentumModuleSolution = new MomentumModuleSolution(centroidalMomentumRateSolution, externalWrenchSolution);
+      MomentumModuleSolution momentumModuleSolution = new MomentumModuleSolution(jointsToOptimizeFor, jointAccelerations, centroidalMomentumRateSolution, externalWrenchSolution);
       
       if (noConvergenceException != null)
       {
@@ -337,28 +340,58 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       // empty for now
    }
 
-   public void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration)
+   public void setDesiredJointAcceleration(DesiredJointAccelerationCommand desiredJointAccelerationCommand)
    {
-      primaryMotionConstraintHandler.setDesiredJointAcceleration(joint, jointAcceleration, Double.POSITIVE_INFINITY);    // weight is arbitrary, actually
+      boolean hasWeight = desiredJointAccelerationCommand.getHasWeight();
+      InverseDynamicsJoint joint = desiredJointAccelerationCommand.getJoint();
+      DenseMatrix64F desiredAcceleration = desiredJointAccelerationCommand.getDesiredAcceleration();
+      
+      if (hasWeight)
+      {
+         double weight = desiredJointAccelerationCommand.getWeight();
+         
+         secondaryMotionConstraintHandler.setDesiredJointAcceleration(joint, desiredAcceleration, weight);
+      }
+      else
+      {
+         primaryMotionConstraintHandler.setDesiredJointAcceleration(joint, desiredAcceleration, Double.POSITIVE_INFINITY);    // weight is arbitrary, actually
+      }
    }
 
-   public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
+   public void setDesiredSpatialAcceleration(DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand)
    {
-      primaryMotionConstraintHandler.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData, Double.POSITIVE_INFINITY);    // weight is arbitrary,
-
-      // actually
+      GeometricJacobian jacobian = desiredSpatialAccelerationCommand.getJacobian();
+      TaskspaceConstraintData taskspaceConstraintData = desiredSpatialAccelerationCommand.getTaskspaceConstraintData();
+      boolean hasWeight = desiredSpatialAccelerationCommand.getHasWeight();
+      
+      if (hasWeight)
+      {
+         double weight = desiredSpatialAccelerationCommand.getWeight();
+         secondaryMotionConstraintHandler.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData, weight);
+      }
+      else
+      {
+         primaryMotionConstraintHandler.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData, Double.POSITIVE_INFINITY);    // weight is arbitrary,
+      }
    }
-
-   public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase)
+  
+   public void setDesiredPointAcceleration(DesiredPointAccelerationCommand desiredPointAccelerationCommand)
    {
-      primaryMotionConstraintHandler.setDesiredPointAcceleration(jacobian, bodyFixedPoint, desiredAccelerationWithRespectToBase, Double.POSITIVE_INFINITY);
+      GeometricJacobian rootToEndEffectorJacobian = desiredPointAccelerationCommand.getRootToEndEffectorJacobian();
+      FramePoint bodyFixedPoint = desiredPointAccelerationCommand.getContactPoint();
+      FrameVector desiredAccelerationWithRespectToBase = desiredPointAccelerationCommand.getDesiredAcceleration();
+      DenseMatrix64F selectionMatrix = desiredPointAccelerationCommand.getSelectionMatrix();
+      
+      if (selectionMatrix != null)
+      {
+         primaryMotionConstraintHandler.setDesiredPointAcceleration(rootToEndEffectorJacobian, bodyFixedPoint, desiredAccelerationWithRespectToBase, selectionMatrix, Double.POSITIVE_INFINITY);
+      }
+      else
+      {
+         primaryMotionConstraintHandler.setDesiredPointAcceleration(rootToEndEffectorJacobian, bodyFixedPoint, desiredAccelerationWithRespectToBase, Double.POSITIVE_INFINITY);
+      }
    }
-
-   public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase, DenseMatrix64F selectionMatrix)
-   {
-      primaryMotionConstraintHandler.setDesiredPointAcceleration(jacobian, bodyFixedPoint, desiredAccelerationWithRespectToBase, selectionMatrix, Double.POSITIVE_INFINITY);
-   }
-
+   
    public void setDesiredRateOfChangeOfMomentum(MomentumRateOfChangeData momentumRateOfChangeData)
    {
       this.momentumRateOfChangeData.set(momentumRateOfChangeData);
@@ -368,16 +401,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    {
       externalWrenchHandler.setExternalWrenchToCompensateFor(rigidBody, wrench);
    }
-
-   public void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration, double weight)
-   {
-      secondaryMotionConstraintHandler.setDesiredJointAcceleration(joint, jointAcceleration, weight);
-   }
-
-   public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData, double weight)
-   {
-      secondaryMotionConstraintHandler.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData, weight);
-   }
+   
 
 //   public SpatialForceVector getDesiredCentroidalMomentumRate()
 //   {

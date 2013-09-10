@@ -15,6 +15,8 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularConta
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -102,7 +104,10 @@ public class DRCOptimizationMomentumControlModuleTest
          for (InverseDynamicsJoint inverseDynamicsJoint : jointsToOptimizeFor)
          {
             DenseMatrix64F vdDesired = new DenseMatrix64F(inverseDynamicsJoint.getDegreesOfFreedom(), 1);
-            momentumControlModule.setDesiredJointAcceleration(inverseDynamicsJoint, vdDesired);
+            
+            
+            DesiredJointAccelerationCommand desiredJointAccelerationCommand = new DesiredJointAccelerationCommand(inverseDynamicsJoint, vdDesired);
+            momentumControlModule.setDesiredJointAcceleration(desiredJointAccelerationCommand);
          }
 
          MomentumModuleSolution momentumModuleSolution;
@@ -251,7 +256,9 @@ public class DRCOptimizationMomentumControlModuleTest
       DenseMatrix64F orientationSelectionMatrix = new DenseMatrix64F(3, Momentum.SIZE);
       CommonOps.setIdentity(orientationSelectionMatrix);
       pelvisTaskspaceConstraintData.set(pelvisSpatialAcceleration, pelvisNullspaceMultipliers, orientationSelectionMatrix);
-      momentumControlModule.setDesiredSpatialAcceleration(rootJointJacobian, pelvisTaskspaceConstraintData);
+      
+      DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand = new DesiredSpatialAccelerationCommand(rootJointJacobian, pelvisTaskspaceConstraintData);
+      momentumControlModule.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);
       taskspaceConstraintDataMap.put(rootJointJacobian, pelvisTaskspaceConstraintData);
    }
 
@@ -266,7 +273,9 @@ public class DRCOptimizationMomentumControlModuleTest
          SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector(foot.getBodyFixedFrame(), elevator.getBodyFixedFrame(),
                                                             foot.getBodyFixedFrame());
          taskspaceConstraintData.set(spatialAcceleration);
-         momentumControlModule.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
+         
+         DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand = new DesiredSpatialAccelerationCommand(jacobian, taskspaceConstraintData);
+         momentumControlModule.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);
          taskspaceConstraintDataMap.put(jacobian, taskspaceConstraintData);
       }
    }

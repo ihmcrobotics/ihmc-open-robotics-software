@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredRateOfChangeOfMomentumCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleDataObject;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
@@ -12,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.M
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.Wrench;
@@ -21,7 +23,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class MomentumModuleSolutionComparer
 {
-   private static final boolean printComparison = false;
+   private static final boolean printComparison = true;
    
    private MomentumModuleDataObject momentumModuleDataObject;
 
@@ -72,6 +74,7 @@ public class MomentumModuleSolutionComparer
 
    public void displayComparison()
    {
+      // Rate of change of momentum
       ArrayList<DesiredRateOfChangeOfMomentumCommand> desiredRateOfChangeOfMomentumCommands = momentumModuleDataObject.getDesiredRateOfChangeOfMomentumCommands();
       DesiredRateOfChangeOfMomentumCommand desiredRateOfChangeOfMomentumCommand = desiredRateOfChangeOfMomentumCommands.get(0);
       MomentumRateOfChangeData momentumRateOfChangeData = desiredRateOfChangeOfMomentumCommand.getMomentumRateOfChangeData();
@@ -100,6 +103,19 @@ public class MomentumModuleSolutionComparer
       if (printComparison) System.out.println("\nangularMomentumRateDifference = " + angularMomentumRateDifference);
       if (printComparison) System.out.println("linearMomentumRateDifference = " + linearMomentumRateDifference);
 
+      
+      ArrayList<DesiredJointAccelerationCommand> desiredJointAccelerationCommands = momentumModuleDataObject.getDesiredJointAccelerationCommands(); 
+      for (DesiredJointAccelerationCommand desiredJointAccelerationCommand : desiredJointAccelerationCommands)
+      {
+         DenseMatrix64F desiredAcceleration = desiredJointAccelerationCommand.getDesiredAcceleration();
+         InverseDynamicsJoint joint = desiredJointAccelerationCommand.getJoint();
+         
+         DenseMatrix64F achievedAcceleration = new DenseMatrix64F(1, 1);
+         desiredJointAccelerationCommand.computeAchievedJointAcceleration(achievedAcceleration);
+         
+         if (printComparison) System.out.println(joint.getName() + ": " + desiredAcceleration + ", " + achievedAcceleration);
+      }
+      
    }
 
    

@@ -1,10 +1,12 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 
 public class DesiredPointAccelerationCommand
 {
@@ -26,6 +28,14 @@ public class DesiredPointAccelerationCommand
       this(jacobian, bodyFixedPoint, desiredAccelerationWithRespectToBase, null);
    }
    
+   public DesiredPointAccelerationCommand(DesiredPointAccelerationCommand desiredPointAccelerationCommand)
+   {
+      this.rootToEndEffectorJacobian = desiredPointAccelerationCommand.rootToEndEffectorJacobian;
+      this.contactPoint = desiredPointAccelerationCommand.contactPoint;
+      this.desiredAcceleration = desiredPointAccelerationCommand.desiredAcceleration;
+      this.selectionMatrix = desiredPointAccelerationCommand.selectionMatrix;
+   }
+
    public GeometricJacobian getRootToEndEffectorJacobian()
    {
       return rootToEndEffectorJacobian;
@@ -49,6 +59,25 @@ public class DesiredPointAccelerationCommand
    public String toString()
    {
       return "DesiredPointAccelerationCommand: rootToEndEffectorJacobian = " + rootToEndEffectorJacobian;
+   }
+   
+   public void computeAchievedPointAcceleration(DenseMatrix64F achievedSpatialAcceleration)
+   {
+      DenseMatrix64F jacobianMatrix = rootToEndEffectorJacobian.getJacobianMatrix();
+      InverseDynamicsJoint[] jointsInOrder = rootToEndEffectorJacobian.getJointsInOrder();
+      
+      DenseMatrix64F jointAccelerations = new DenseMatrix64F(rootToEndEffectorJacobian.getNumberOfColumns(), 1);
+      
+      int index = 0;
+      for (int i=0; i<jointsInOrder.length; i++)
+      {
+         InverseDynamicsJoint joint = jointsInOrder[i];
+         
+         jointsInOrder[i].packDesiredAccelerationMatrix(jointAccelerations, index);
+         index = index + joint.getDegreesOfFreedom();
+      }
+      
+      CommonOps.mult(jacobianMatrix, jointAccelerations, achievedSpatialAcceleration);
    }
 }
 

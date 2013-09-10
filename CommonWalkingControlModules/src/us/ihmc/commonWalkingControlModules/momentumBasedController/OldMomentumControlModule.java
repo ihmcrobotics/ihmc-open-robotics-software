@@ -15,6 +15,9 @@ import us.ihmc.commonWalkingControlModules.WrenchDistributorTools;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableCylinderBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredPointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylindricalContactState;
@@ -253,7 +256,8 @@ public class OldMomentumControlModule implements MomentumControlModule
       }
 
       solver.solve(desiredCentroidalMomentumRate);
-      MomentumModuleSolution solution = new MomentumModuleSolution(desiredCentroidalMomentumRate, externalWrenches);
+      //TODO: Add the joint accelerations to the solution, or not?
+      MomentumModuleSolution solution = new MomentumModuleSolution(null, null, desiredCentroidalMomentumRate, externalWrenches);
       
       return solution;
    }
@@ -263,12 +267,23 @@ public class OldMomentumControlModule implements MomentumControlModule
       groundReactionWrenchFilterResetRequest.set(true);
    }
 
-   public void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration)
+   public void setDesiredJointAcceleration(DesiredJointAccelerationCommand desiredJointAccelerationCommand)
    {
-      solver.setDesiredJointAcceleration(joint, jointAcceleration);
+      solver.setDesiredJointAcceleration(desiredJointAccelerationCommand.getJoint(), desiredJointAccelerationCommand.getDesiredAcceleration());
    }
 
-   public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
+//   public void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration, double weight)
+//   {
+//      throw new NoSuchMethodError();
+//   }
+   
+   
+   public void setDesiredSpatialAcceleration(DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand)
+   {
+      setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand.getJacobian(), desiredSpatialAccelerationCommand.getTaskspaceConstraintData());
+   }
+
+   private void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
    {
       InverseDynamicsJoint[] jointsInOrder = jacobian.getJointsInOrder();
       if (Arrays.asList(jointsInOrder).contains(rootJoint))
@@ -283,6 +298,11 @@ public class OldMomentumControlModule implements MomentumControlModule
          solver.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
       }
    }
+   
+//   public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData, double weight)
+//   {
+//      throw new NoSuchMethodError();
+//   }
 
    public void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench)
    {
@@ -296,35 +316,12 @@ public class OldMomentumControlModule implements MomentumControlModule
       this.momentumRateOfChangeData.set(momentumRateOfChangeData);
    }
 
-//   public SpatialForceVector getDesiredCentroidalMomentumRate()
-//   {
-//      return desiredCentroidalMomentumRate;
-//   }
-//
-//   public Map<RigidBody, Wrench> getExternalWrenches()
-//   {
-//      return externalWrenches;
-//   }
 
-   public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase)
+   public void setDesiredPointAcceleration(DesiredPointAccelerationCommand desiredPointAccelerationCommand)
    {
       throw new NoSuchMethodError();
    }
 
-   public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase, DenseMatrix64F selectionMatrix)
-   {
-      throw new NoSuchMethodError();
-   }
-
-   public void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration, double weight)
-   {
-      throw new NoSuchMethodError();
-   }
-
-   public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData, double weight)
-   {
-      throw new NoSuchMethodError();
-   }
 
    private static class RootJointAccelerationData
    {

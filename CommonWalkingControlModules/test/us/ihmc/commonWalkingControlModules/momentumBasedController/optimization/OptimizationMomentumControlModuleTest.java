@@ -1,15 +1,37 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlTestTools.assertRootJointWrenchZero;
+import static us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlTestTools.assertWrenchesInFrictionCones;
+import static us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlTestTools.assertWrenchesSumUpToMomentumDot;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Vector3d;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.EjmlUnitTests;
 import org.ejml.ops.MatrixFeatures;
 import org.ejml.ops.RandomMatrices;
 import org.junit.Test;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.*;
+
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.MomentumOptimizerNative;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredPointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointWrenchMatrixCalculator;
@@ -20,18 +42,24 @@ import us.ihmc.utilities.math.geometry.CenterOfMassReferenceFrame;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.*;
+import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.RevoluteJoint;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTestTools;
+import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.SixDoFJoint;
+import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
+import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.utilities.screwTheory.SpatialForceVector;
+import us.ihmc.utilities.screwTheory.TotalMassCalculator;
+import us.ihmc.utilities.screwTheory.TotalWrenchCalculator;
+import us.ihmc.utilities.screwTheory.Twist;
+import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.utilities.test.JUnitTools;
 
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Vector3d;
-import java.util.*;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlTestTools.assertRootJointWrenchZero;
-import static us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlTestTools.assertWrenchesInFrictionCones;
-import static us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlTestTools.assertWrenchesSumUpToMomentumDot;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 /**
  * @author twan
@@ -139,7 +167,9 @@ public class OptimizationMomentumControlModuleTest
       endEffectorSpatialAcceleration.setAngularPart(RandomTools.generateRandomVector(random));
       endEffectorSpatialAcceleration.setLinearPart(RandomTools.generateRandomVector(random));
       taskSpaceConstraintData.set(endEffectorSpatialAcceleration);
-      momentumControlModule.setDesiredSpatialAcceleration(jacobian, taskSpaceConstraintData);    // , 10.0);
+      
+      DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand = new DesiredSpatialAccelerationCommand(jacobian, taskSpaceConstraintData); // , 10.0);
+      momentumControlModule.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);    
       
       MomentumModuleSolution momentumModuleSolution; 
       try
@@ -206,7 +236,9 @@ public class OptimizationMomentumControlModuleTest
 
       FramePoint bodyFixedPoint = new FramePoint(endEffector.getBodyFixedFrame(), RandomTools.generateRandomVector(random));
       FrameVector desiredPointAcceleration = new FrameVector(base.getBodyFixedFrame(), RandomTools.generateRandomVector(random));
-      momentumControlModule.setDesiredPointAcceleration(jacobian, bodyFixedPoint, desiredPointAcceleration);
+      
+      DesiredPointAccelerationCommand desiredPointAccelerationCommand = new DesiredPointAccelerationCommand(jacobian, bodyFixedPoint, desiredPointAcceleration);
+      momentumControlModule.setDesiredPointAcceleration(desiredPointAccelerationCommand);
 
       MomentumModuleSolution momentumModuleSolution;
       try
@@ -344,7 +376,9 @@ public class OptimizationMomentumControlModuleTest
       endEffectorSpatialAcceleration.setAngularPart(RandomTools.generateRandomVector(random));
       endEffectorSpatialAcceleration.setLinearPart(RandomTools.generateRandomVector(random));
       taskSpaceConstraintData.set(endEffectorSpatialAcceleration);
-      momentumControlModule.setDesiredSpatialAcceleration(jacobian, taskSpaceConstraintData);    // , 10.0);
+      
+      DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand = new DesiredSpatialAccelerationCommand(jacobian, taskSpaceConstraintData);    // , 10.0);
+      momentumControlModule.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);
 
       Map<RevoluteJoint, Double> desiredJointAccelerations = new HashMap<RevoluteJoint, Double>();
       desiredJointAccelerations.put(randomFloatingChain.getRevoluteJoints().get(3), random.nextDouble());
@@ -355,7 +389,9 @@ public class OptimizationMomentumControlModuleTest
          DenseMatrix64F desiredJointAcceleration = new DenseMatrix64F(1, 1);
          desiredJointAcceleration.set(0, 0, desiredJointAccelerations.get(revoluteJoint));
          double weight = 1.0;
-         momentumControlModule.setDesiredJointAcceleration(revoluteJoint, desiredJointAcceleration, weight);
+         
+         DesiredJointAccelerationCommand desiredJointAccelerationCommand = new DesiredJointAccelerationCommand(revoluteJoint, desiredJointAcceleration, weight);
+         momentumControlModule.setDesiredJointAcceleration(desiredJointAccelerationCommand);
       }
 
       MomentumModuleSolution momentumModuleSolution;
@@ -453,8 +489,9 @@ public class OptimizationMomentumControlModuleTest
 
       TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
       taskspaceConstraintData.set(taskSpaceAcceleration, nullspaceMultipliers);
-      momentumControlModule.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
-
+      
+      DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand = new DesiredSpatialAccelerationCommand(jacobian, taskspaceConstraintData);
+      momentumControlModule.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);
 
       MomentumModuleSolution momentumModuleSolution = momentumControlModule.compute(contactStates, null, null);
 
@@ -522,7 +559,9 @@ public class OptimizationMomentumControlModuleTest
       {
          DenseMatrix64F jointAcceleration = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
          RandomMatrices.setRandom(jointAcceleration, random);
-         momentumControlModule.setDesiredJointAcceleration(joint, jointAcceleration);
+         
+         DesiredJointAccelerationCommand desiredJointAccelerationCommand = new DesiredJointAccelerationCommand(joint, jointAcceleration);
+         momentumControlModule.setDesiredJointAcceleration(desiredJointAccelerationCommand);
          CommonOps.insert(jointAcceleration, desiredJointAccelerations, index, 0);
          index += joint.getDegreesOfFreedom();
       }
