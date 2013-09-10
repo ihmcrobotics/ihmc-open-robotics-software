@@ -44,7 +44,7 @@ public class SensorAndEstimatorAssembler
    private final JointStateFullRobotModelUpdater jointStateFullRobotModelUpdater;
    private final ComposableOrientationAndCoMEstimatorCreator.ComposableOrientationAndCoMEstimator estimator;
    private final OrientationStateRobotModelUpdater orientationStateRobotModelUpdater;
-   private final IMUSelectorAndDataConverter imuSelectorAndDataWrapper;
+   private final IMUSelectorAndDataConverter imuSelectorAndDataConverter;
 
    public SensorAndEstimatorAssembler(StateEstimationDataFromControllerSource stateEstimatorDataFromControllerSource,
          StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorNoiseParameters sensorNoiseParametersForEstimator,
@@ -63,6 +63,7 @@ public class SensorAndEstimatorAssembler
       Collection<OrientationSensorConfiguration> orientationSensorConfigurations = SensorConfigurationFactory
             .createOrientationSensorConfigurations(jointAndIMUSensorMap.getOrientationSensors());
 
+      
       Collection<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations = SensorConfigurationFactory
             .createAngularVelocitySensorConfigurations(jointAndIMUSensorMap.getAngularVelocitySensors());
 
@@ -74,26 +75,23 @@ public class SensorAndEstimatorAssembler
 
       ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort = null;
 
-      if (assumePerfectIMU)
+     
+      if (!assumePerfectIMU)
       {
-         //         try
-         //         {
-         imuSelectorAndDataWrapper = new IMUSelectorAndDataConverter(controlFlowGraph, jointAndIMUSensorMap);
-         orientationStateRobotModelUpdater = new OrientationStateRobotModelUpdater(controlFlowGraph,
-               jointStateFullRobotModelUpdater.getInverseDynamicsStructureOutputPort(), imuSelectorAndDataWrapper.getOrientationOutputPort(),
-               imuSelectorAndDataWrapper.getAngularVelocityOutputPort());
-         inverseDynamicsStructureOutputPort = orientationStateRobotModelUpdater.getInverseDynamicsStructureOutputPort();
-         //         }
-         //         catch (Exception e)
-         //         {
-         //            e.printStackTrace();
-         //         }
+    	  imuSelectorAndDataConverter = null;
+    	  orientationStateRobotModelUpdater = null;
+    	  inverseDynamicsStructureOutputPort = jointStateFullRobotModelUpdater.getInverseDynamicsStructureOutputPort();
       }
       else
       {
-         imuSelectorAndDataWrapper = null;
-         orientationStateRobotModelUpdater = null;
-         inverseDynamicsStructureOutputPort = jointStateFullRobotModelUpdater.getInverseDynamicsStructureOutputPort();
+    	  
+         imuSelectorAndDataConverter = new IMUSelectorAndDataConverter(controlFlowGraph, orientationSensorConfigurations, angularVelocitySensorConfigurations, jointStateFullRobotModelUpdater.getInverseDynamicsStructureOutputPort());
+         
+         orientationStateRobotModelUpdater = new OrientationStateRobotModelUpdater(controlFlowGraph,
+        		 imuSelectorAndDataConverter.getInverseDynamicsStructureOutputPort(), imuSelectorAndDataConverter.getOrientationOutputPort(),
+        		 imuSelectorAndDataConverter.getAngularVelocityOutputPort());
+         
+         inverseDynamicsStructureOutputPort = orientationStateRobotModelUpdater.getInverseDynamicsStructureOutputPort();
       }
 
       double angularAccelerationProcessNoiseStandardDeviation = sensorNoiseParametersForEstimator.getAngularAccelerationProcessNoiseStandardDeviation();
