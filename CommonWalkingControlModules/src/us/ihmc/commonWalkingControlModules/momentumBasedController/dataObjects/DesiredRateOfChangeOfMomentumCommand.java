@@ -10,6 +10,11 @@ public class DesiredRateOfChangeOfMomentumCommand
       this.momentumRateOfChangeData = momentumRateOfChangeData;
    }
 
+   public DesiredRateOfChangeOfMomentumCommand(DesiredRateOfChangeOfMomentumCommand desiredRateOfChangeOfMomentumCommand)
+   {
+      this.momentumRateOfChangeData = desiredRateOfChangeOfMomentumCommand.momentumRateOfChangeData;
+   }
+
    public MomentumRateOfChangeData getMomentumRateOfChangeData()
    {
       return momentumRateOfChangeData;

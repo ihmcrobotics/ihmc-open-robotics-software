@@ -17,7 +17,7 @@ public class DesiredJointAccelerationCommand
       this.joint = joint;
       this.desiredAcceleration = desiredAcceleration;
       this.hasWeight = false;
-      this.weight = Double.NaN;
+      this.weight = Double.POSITIVE_INFINITY;
    }
 
    public DesiredJointAccelerationCommand(InverseDynamicsJoint joint, DenseMatrix64F desiredAcceleration, double weight)
