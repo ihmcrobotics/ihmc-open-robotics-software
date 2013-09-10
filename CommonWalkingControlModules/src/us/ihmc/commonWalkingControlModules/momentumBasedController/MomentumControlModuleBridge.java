@@ -79,6 +79,7 @@ public class MomentumControlModuleBridge implements MomentumControlModule
       else 
       {
          momentumModuleGUI = null;
+         allMomentumModuleListener = null;
       }
          
       if (LISTEN_IN_ON_SOLVER) 
