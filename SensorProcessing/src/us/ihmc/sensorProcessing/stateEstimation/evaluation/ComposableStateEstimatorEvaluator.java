@@ -96,8 +96,8 @@ public class ComposableStateEstimatorEvaluator
       
       SensorAndEstimatorAssembler sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(stateEstimatorDataFromControllerSource, simulatedSensorHolderAndReaderFromRobotFactory.getStateEstimatorSensorDefinitions(),
             sensorNoiseParametersForEstimator, gravitationalAcceleration,
-            inverseDynamicsStructure, referenceFrameMap, rigidBodyToIndexMap, controlDT,
-            registry, assumePerfectIMU);
+            inverseDynamicsStructure, referenceFrameMap, rigidBodyToIndexMap, controlDT, assumePerfectIMU,
+            registry);
 
       ControlFlowGraph controlFlowGraph = sensorAndEstimatorAssembler.getControlFlowGraph();
       StateEstimatorWithPorts orientationEstimator = sensorAndEstimatorAssembler.getEstimator();

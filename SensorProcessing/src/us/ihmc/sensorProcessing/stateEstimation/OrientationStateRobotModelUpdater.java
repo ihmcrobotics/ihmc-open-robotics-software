@@ -26,7 +26,7 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
    private final ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   // Constructor in case of use as ControlFlowElement
+   // Constructor in case of use as a ControlFlowElement
    public OrientationStateRobotModelUpdater(ControlFlowGraph controlFlowGraph,
            ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort,
            ControlFlowOutputPort<FrameOrientation> orientationOutputPort, ControlFlowOutputPort<FrameVector> angularVelocityOutputPort)
@@ -44,7 +44,7 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
       this.inverseDynamicsStructureOutputPort.setData(inverseDynamicsStructureInputPort.getData());
    }
 
-   // Constructor in case of use as Runnable
+   // Constructor in case of use as a Runnable
    public OrientationStateRobotModelUpdater(ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort,
            ControlFlowOutputPort<FrameOrientation> orientationPort, ControlFlowOutputPort<FrameVector> angularVelocityPort)
    {
