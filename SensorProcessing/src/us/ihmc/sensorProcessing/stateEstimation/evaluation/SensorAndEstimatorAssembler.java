@@ -83,7 +83,7 @@ public class SensorAndEstimatorAssembler
       }
       else
       {
-         imuSelectorAndDataConverter = new IMUSelectorAndDataConverter(controlFlowGraph, orientationSensorConfigurations, angularVelocitySensorConfigurations, jointStateFullRobotModelUpdater.getInverseDynamicsStructureOutputPort());
+         imuSelectorAndDataConverter = new IMUSelectorAndDataConverter(controlFlowGraph, orientationSensorConfigurations, angularVelocitySensorConfigurations, jointStateFullRobotModelUpdater.getInverseDynamicsStructureOutputPort(), registry);
        
          orientationStateRobotModelUpdater = new OrientationStateRobotModelUpdater(controlFlowGraph,
         		 imuSelectorAndDataConverter.getInverseDynamicsStructureOutputPort(), imuSelectorAndDataConverter.getOrientationOutputPort(),
