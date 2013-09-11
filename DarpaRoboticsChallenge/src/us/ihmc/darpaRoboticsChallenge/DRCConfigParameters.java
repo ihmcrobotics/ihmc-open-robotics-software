@@ -67,6 +67,7 @@ public class DRCConfigParameters
    public static final String CLOUD_MINION4_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMINION_4);
    public static final String CLOUD_MINION5_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMINION_5);
    public static final String CLOUD_MINION6_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMINION_6);
+   public static final String CLOUD_MINION8_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMINION_8);
    public static final String CLOUD_MONSTER_JR_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMONSTER_JR);
    public static final String CLOUD_MONSTER_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMONSTER);
 
@@ -77,9 +78,9 @@ public class DRCConfigParameters
    public static final String LEFT_IROBOT_HAND_IP = "192.168.40.38";
    public static final String RIGHT_IROBOT_HAND_IP = "192.168.40.32";
 
-   public static final String GAZEBO_HOST = LOCALHOST; //CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP; //CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP;
+   public static final String GAZEBO_HOST = CLOUD_MINION8_IP; //CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP; //CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP;
    public static final String SCS_MACHINE_IP_ADDRESS = LOCALHOST; //CONSTELLATION_FIELD_COMPUTER_2_VPN_IP; //CONSTELLATION_FIELD_COMPUTER_2_VPN_IP;    // CLOUD_MONSTER_IP;
-   public static final String NET_PROC_MACHINE_IP_ADDRESS = LOCALHOST; //CONSTELLATION_FIELD_COMPUTER_1_VPN_IP; //CONSTELLATION_FIELD_COMPUTER_1_VPN_IP;    // SCS_MACHINE_IP_ADDRESS;
+   public static final String NET_PROC_MACHINE_IP_ADDRESS = CLOUD_MINION8_IP; //CONSTELLATION_FIELD_COMPUTER_1_VPN_IP; //CONSTELLATION_FIELD_COMPUTER_1_VPN_IP;    // SCS_MACHINE_IP_ADDRESS;
 
    public static final String OPERATOR_INTERFACE_IP_ADDRESS = LOCALHOST;
 
