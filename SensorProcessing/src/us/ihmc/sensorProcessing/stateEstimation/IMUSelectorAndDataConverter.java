@@ -10,6 +10,8 @@ import us.ihmc.controlFlow.AbstractControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.sensorProcessing.controlFlowPorts.YoFrameQuaternionControlFlowOutputPort;
+import us.ihmc.sensorProcessing.controlFlowPorts.YoFrameVectorControlFlowOutputPort;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.OrientationSensorConfiguration;
@@ -19,6 +21,9 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
+
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 
 public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
 {
@@ -37,11 +42,13 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
 
    private final ReferenceFrame estimationFrame;
    private final ReferenceFrame orientationMeasurementFrame;
-   private final ReferenceFrame angularVelocityMeasurementFrame;
+   
+   private final YoFrameOrientation orientationFrame;
+   private final YoVariableRegistry registry;
 
    public IMUSelectorAndDataConverter(ControlFlowGraph controlFlowGraph, Collection<OrientationSensorConfiguration> orientationSensorConfigurations,
                                       Collection<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations,
-                                      ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort)    // throws Exception
+                                      ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort, YoVariableRegistry registry)
    {
       OrientationSensorConfiguration selectedOrientationSensorConfiguration = null;
       if ((orientationSensorConfigurations.size() != 1) || (angularVelocitySensorConfigurations.size() != 1))
@@ -60,6 +67,9 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
       {
          selectedAngularVelocitySensorConfiguration = angularVelocitySensorConfiguration;
       }
+      
+      this.registry = registry;
+      this.orientationFrame = new YoFrameOrientation("orientationFrameIMU", ReferenceFrame.getWorldFrame(), registry);
 
       ControlFlowOutputPort<Matrix3d> orientationSensorOutputPort = selectedOrientationSensorConfiguration.getOutputPort();
       ControlFlowOutputPort<Vector3d> angularVelocitySensorOutputPort = selectedAngularVelocitySensorConfiguration.getOutputPort();
@@ -72,8 +82,12 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
       controlFlowGraph.connectElements(angularVelocitySensorOutputPort, angularVelocityInputPort);
       controlFlowGraph.connectElements(inverseDynamicsStructureOutputPort, inverseDynamicsStructureInputPort);
 
-      this.orientationOutputPort = createOutputPort("orientationOutputPort");
-      this.angularVelocityOutputPort = createOutputPort("angularVelocityOutputPort");
+//      this.orientationOutputPort = createOutputPort("orientationOutputPort");
+      this.orientationOutputPort = new YoFrameQuaternionControlFlowOutputPort(this, "orientationOutput", ReferenceFrame.getWorldFrame(), registry);
+      registerOutputPort(orientationOutputPort);
+//      this.angularVelocityOutputPort = createOutputPort("angularVelocityOutputPort");
+      this.angularVelocityOutputPort = new YoFrameVectorControlFlowOutputPort(this, "angularVelocityOutput", ReferenceFrame.getWorldFrame(), registry);
+      registerOutputPort(angularVelocityOutputPort);
       this.inverseDynamicsStructureOutputPort = createOutputPort("inverseDynamicsStructureOutputPort");
 
       this.estimationLink = inverseDynamicsStructureOutputPort.getData().getEstimationLink();
@@ -81,7 +95,6 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
 
       this.orientationMeasurementFrame = selectedOrientationSensorConfiguration.getMeasurementFrame();
       this.angularVelocityMeasurementLink = selectedAngularVelocitySensorConfiguration.getAngularVelocityMeasurementLink();
-      this.angularVelocityMeasurementFrame = selectedAngularVelocitySensorConfiguration.getMeasurementFrame();
 
       this.desiredOutputFrame = ReferenceFrame.getWorldFrame();
 
@@ -91,7 +104,7 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
 
    public void startComputation()
    {
-      convertRawDataAndSetOnOutputPort(desiredOutputFrame, orientationInputPort.getData(), angularVelocityInputPort.getData());
+      convertRawDataAndSetOnOutputPort(desiredOutputFrame);//, orientationInputPort.getData(), angularVelocityInputPort.getData());
    }
 
    private final FrameOrientation tempOrientationMeasurementFrame = new FrameOrientation(ReferenceFrame.getWorldFrame());
@@ -108,20 +121,25 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
    private final Transform3D transformOrientationMeasFrameToEstFrame = new Transform3D();
    private final FrameVector relativeAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
    
+//   private final Quat4d orientationQuaternion = new Quat4d();
+   
+   
 
-   private void convertRawDataAndSetOnOutputPort(ReferenceFrame desiredOutputFrame, Matrix3d rawOrientationData, Vector3d rawAngularVelocityData)
+   private void convertRawDataAndSetOnOutputPort(ReferenceFrame desiredOutputFrame)//, Matrix3d rawOrientationData, Vector3d rawAngularVelocityData)
    {
       // Orientation part
       tempOrientationMeasurementFrame.set(ReferenceFrame.getWorldFrame(), orientationInputPort.getData());
 
       estimationFrame.getTransformToDesiredFrame(transformOrientationMeasFrameToEstFrame, orientationMeasurementFrame);
       
+      transformOrientationMeasFrameToEstFrame.invert();
       tempOrientationEstimationFrame.set(tempOrientationMeasurementFrame.applyTransformCopy(transformOrientationMeasFrameToEstFrame));
       
       // set on port
       orientationOutputPort.setData(tempOrientationEstimationFrame);
+      orientationFrame.set(tempOrientationEstimationFrame);
       
-      // Angular velocity part
+      // Angular velocity: using vectors
       Vector3d measuredAngularVelocityVector3d = angularVelocityInputPort.getData();
       TwistCalculator twistCalculator = inverseDynamicsStructureInputPort.getData().getTwistCalculator();
       
@@ -131,13 +149,10 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
       
       tempAngularVelocityMeasurementLink.set(ReferenceFrame.getWorldFrame(), measuredAngularVelocityVector3d);  
       tempAngularVelocityMeasurementLink.changeFrame(estimationFrame);
-      tempAngularVelocityMeasurementLink.add(relativeAngularVelocity);
-      
-      tempAngularVelocityEstimationLink.setAndChangeFrame(tempAngularVelocityMeasurementLink);
+      relativeAngularVelocity.add(tempAngularVelocityMeasurementLink);
+      tempAngularVelocityEstimationLink.setAndChangeFrame(relativeAngularVelocity);
       tempAngularVelocityEstimationLink.changeFrame(desiredOutputFrame);
-      
-      // set on port
-      angularVelocityOutputPort.setData(tempAngularVelocityEstimationLink);
+       angularVelocityOutputPort.setData(tempAngularVelocityEstimationLink);
    }
 
    public void convertOrientationMeasurementLinkAToLinkB()
@@ -148,7 +163,6 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
 
    public void waitUntilComputationIsDone()
    {
-      // empty
    }
 
    public ControlFlowOutputPort<FrameOrientation> getOrientationOutputPort()
@@ -164,6 +178,11 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
    public ControlFlowOutputPort<FullInverseDynamicsStructure> getInverseDynamicsStructureOutputPort()
    {
       return inverseDynamicsStructureOutputPort;
+   }
+   
+   public YoVariableRegistry getRegistry()
+   {
+      return registry;
    }
 
 }
