@@ -20,6 +20,7 @@ import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
+import com.yobotics.simulationconstructionset.util.ground.RotatableCinderBlockTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
 
@@ -833,7 +834,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       location.rotZ(Math.toRadians(yawDegrees));
 
       location.setTranslation(new Vector3d(xCenter, yCenter, cinderBlockHeight / 2 + numberFlatSupports * cinderBlockHeight));
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, cinderBlockLength, cinderBlockWidth, cinderBlockHeight), app);
+      RotatableCinderBlockTerrainObject newBox = new RotatableCinderBlockTerrainObject(new Box3d(location, cinderBlockLength, cinderBlockWidth, cinderBlockHeight), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
 
@@ -853,7 +854,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
       double zCenter = (cinderBlockHeight * Math.cos(cinderBlockTiltRadians) + cinderBlockLength * Math.sin(cinderBlockTiltRadians)) / 2;
       location.setTranslation(new Vector3d(xCenter, yCenter, zCenter + numberFlatSupports * cinderBlockHeight));
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, cinderBlockLength, cinderBlockWidth, cinderBlockHeight), app);
+      RotatableCinderBlockTerrainObject newBox = new RotatableCinderBlockTerrainObject(new Box3d(location, cinderBlockLength, cinderBlockWidth, cinderBlockHeight), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
 
@@ -892,7 +893,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       location.mul(setUpright);
 
       location.setTranslation(new Vector3d(xCenter, yCenter, cinderBlockWidth / 2 + numberFlatSupports * cinderBlockHeight));
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, cinderBlockLength, cinderBlockWidth, cinderBlockHeight), app);
+      RotatableCinderBlockTerrainObject newBox = new RotatableCinderBlockTerrainObject(new Box3d(location, cinderBlockLength, cinderBlockWidth, cinderBlockHeight), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
 
