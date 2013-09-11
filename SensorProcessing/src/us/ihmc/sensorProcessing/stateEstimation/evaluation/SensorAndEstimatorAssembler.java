@@ -49,7 +49,7 @@ public class SensorAndEstimatorAssembler
    public SensorAndEstimatorAssembler(StateEstimationDataFromControllerSource stateEstimatorDataFromControllerSource,
          StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorNoiseParameters sensorNoiseParametersForEstimator,
          Vector3d gravitationalAcceleration, FullInverseDynamicsStructure inverseDynamicsStructure, AfterJointReferenceFrameNameMap estimatorReferenceFrameMap,
-         RigidBodyToIndexMap estimatorRigidBodyToIndexMap, double controlDT, YoVariableRegistry parentRegistry, boolean assumePerfectIMU)
+         RigidBodyToIndexMap estimatorRigidBodyToIndexMap, double controlDT, boolean assumePerfectIMU, YoVariableRegistry parentRegistry)
    {
       this.stateEstimatorDataFromControllerSource = stateEstimatorDataFromControllerSource;
       SensorConfigurationFactory SensorConfigurationFactory = new SensorConfigurationFactory(sensorNoiseParametersForEstimator, gravitationalAcceleration);
@@ -74,7 +74,6 @@ public class SensorAndEstimatorAssembler
       jointStateFullRobotModelUpdater = new JointStateFullRobotModelUpdater(controlFlowGraph, jointAndIMUSensorMap, inverseDynamicsStructure);
 
       ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort = null;
-
      
       if (!assumePerfectIMU)
       {
@@ -84,9 +83,8 @@ public class SensorAndEstimatorAssembler
       }
       else
       {
-    	  
          imuSelectorAndDataConverter = new IMUSelectorAndDataConverter(controlFlowGraph, orientationSensorConfigurations, angularVelocitySensorConfigurations, jointStateFullRobotModelUpdater.getInverseDynamicsStructureOutputPort());
-         
+       
          orientationStateRobotModelUpdater = new OrientationStateRobotModelUpdater(controlFlowGraph,
         		 imuSelectorAndDataConverter.getInverseDynamicsStructureOutputPort(), imuSelectorAndDataConverter.getOrientationOutputPort(),
         		 imuSelectorAndDataConverter.getAngularVelocityOutputPort());
@@ -112,7 +110,6 @@ public class SensorAndEstimatorAssembler
          orientationAndCoMEstimatorCreator.addLinearAccelerationSensorConfigurations(linearAccelerationSensorConfigurations);
       }
       
-
       // TODO: Not sure if we need to do this here:
       inverseDynamicsStructure.updateInternalState();
 

@@ -35,28 +35,19 @@ public class PositionStateRobotModelUpdater implements Runnable
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    public PositionStateRobotModelUpdater(ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort,
-         ControlFlowOutputPort<FramePoint> centerOfMassPositionOutputPort, ControlFlowOutputPort<FrameVector> centerOfMassVelocityOutputPort)
+           ControlFlowOutputPort<FramePoint> centerOfMassPositionOutputPort, ControlFlowOutputPort<FrameVector> centerOfMassVelocityOutputPort)
    {
-//      this.centerOfMassPositionInputPort = createInputPort("centerOfMassPositionInputPort");
-//      this.centerOfMassVelocityInputPort = createInputPort("centerOfMassVelocityInputPort");
-//      this.inverseDynamicsStructureInputPort = createInputPort("inverseDynamicsStructureInputPort");
-//      this.fullUpdatedInverseDynamicsStructureOutputPort = createOutputPort("fullUpdatedInverseDynamicsStructureOutputPort");
-//      controlFlowGraph.connectElements(centerOfMassPositionOutputPort, centerOfMassPositionInputPort);
-//      controlFlowGraph.connectElements(centerOfMassVelocityOutputPort, centerOfMassVelocityInputPort);
-//      controlFlowGraph.connectElements(inverseDynamicsStructureOutputPort, inverseDynamicsStructureInputPort);
-
       this.inverseDynamicsStructureInputPort = inverseDynamicsStructureInputPort;
       this.centerOfMassPositionOutputPort = centerOfMassPositionOutputPort;
       this.centerOfMassVelocityOutputPort = centerOfMassVelocityOutputPort;
-      
+
       FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureInputPort.getData();
       RigidBody elevator = inverseDynamicsStructure.getElevator();
       SixDoFJoint rootJoint = inverseDynamicsStructure.getRootJoint();
       this.centerOfMassCalculator = new CenterOfMassCalculator(elevator, rootJoint.getFrameAfterJoint());
       this.centerOfMassJacobianBody = new CenterOfMassJacobian(ScrewTools.computeSupportAndSubtreeSuccessors(elevator),
-            ScrewTools.computeSubtreeJoints(rootJoint.getSuccessor()), rootJoint.getFrameAfterJoint());
+              ScrewTools.computeSubtreeJoints(rootJoint.getSuccessor()), rootJoint.getFrameAfterJoint());
    }
-
 
    public void run()
    {
@@ -97,7 +88,7 @@ public class PositionStateRobotModelUpdater implements Runnable
    private final FrameVector tempCenterOfMassVelocityWorld = new FrameVector(ReferenceFrame.getWorldFrame());
 
    private void computeRootJointLinearVelocity(FrameVector centerOfMassVelocityWorld, FrameVector rootJointVelocityToPack,
-         FrameVector rootJointAngularVelocity, SixDoFJoint rootJoint)
+           FrameVector rootJointAngularVelocity, SixDoFJoint rootJoint)
    {
       tempCenterOfMassVelocityWorld.setAndChangeFrame(centerOfMassVelocityWorld);
       ReferenceFrame rootJointFrame = rootJoint.getFrameAfterJoint();
@@ -137,7 +128,7 @@ public class PositionStateRobotModelUpdater implements Runnable
       rootJointLinearVelocity.checkReferenceFrameMatch(rootJoint.getFrameAfterJoint());
 
       rootJointTwistToPack.set(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint(),
-            rootJointLinearVelocity.getVector(), tempRootJointTwistExistingAngularPart.getVector());
+                               rootJointLinearVelocity.getVector(), tempRootJointTwistExistingAngularPart.getVector());
    }
 
    private final FramePoint tempCenterOfMassPositionState = new FramePoint(ReferenceFrame.getWorldFrame());
@@ -163,7 +154,7 @@ public class PositionStateRobotModelUpdater implements Runnable
    private final Vector3d tempEstimationLinkPositionVector3d = new Vector3d();
 
    private void computeEstimationLinkToWorldTransform(ReferenceFrame estimationFrame, Transform3D estimationLinkToWorldToPack, FramePoint centerOfMassWorld,
-         FrameOrientation estimationLinkOrientation)
+           FrameOrientation estimationLinkOrientation)
    {
       // r^{estimation}
       tempCenterOfMassBody.setToZero(estimationFrame);
@@ -190,7 +181,7 @@ public class PositionStateRobotModelUpdater implements Runnable
    private final Transform3D tempRootJointFrameToEstimationFrame = new Transform3D();
 
    private void computeRootJointToWorldTransform(SixDoFJoint rootJoint, ReferenceFrame estimationFrame, Transform3D rootJointToWorldToPack,
-         Transform3D estimationLinkTransform)
+           Transform3D estimationLinkTransform)
    {
       // H_{root}^{estimation}
       rootJoint.getFrameAfterJoint().getTransformToDesiredFrame(tempRootJointFrameToEstimationFrame, estimationFrame);
@@ -199,6 +190,6 @@ public class PositionStateRobotModelUpdater implements Runnable
       rootJointToWorldToPack.set(estimationLinkTransform);
       rootJointToWorldToPack.mul(tempRootJointFrameToEstimationFrame);
    }
- 
+
 
 }
