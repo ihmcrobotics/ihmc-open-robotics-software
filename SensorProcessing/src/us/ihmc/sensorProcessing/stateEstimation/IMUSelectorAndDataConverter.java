@@ -4,7 +4,6 @@ import java.util.Collection;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.controlFlow.AbstractControlFlowElement;
@@ -109,34 +108,20 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
    private final Transform3D transformOrientationMeasFrameToEstFrame = new Transform3D();
    private final FrameVector relativeAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
    
-   private final Quat4d orientationQuaternion = new Quat4d();
-   
-   
 
    private void convertRawDataAndSetOnOutputPort(ReferenceFrame desiredOutputFrame, Matrix3d rawOrientationData, Vector3d rawAngularVelocityData)
    {
-      // Orientation: using Transforms
-
-      // get IMU orientation with respect to world, assuming axes IMU are aligned with pelvis axes
+      // Orientation part
       tempOrientationMeasurementFrame.set(ReferenceFrame.getWorldFrame(), orientationInputPort.getData());
 
-      // convert to orientation of the estimation link, expressed in worldframe, so it is compatible with the output of the estimator when assuming non-perfect IMU
-      orientationMeasurementFrame.getTransformToDesiredFrame(transformOrientationMeasFrameToEstFrame, estimationFrame);
+      estimationFrame.getTransformToDesiredFrame(transformOrientationMeasFrameToEstFrame, orientationMeasurementFrame);
+      
       tempOrientationEstimationFrame.set(tempOrientationMeasurementFrame.applyTransformCopy(transformOrientationMeasFrameToEstFrame));
-
+      
       // set on port
       orientationOutputPort.setData(tempOrientationEstimationFrame);
       
-   // Orientation: using quaternions
-//      orientationInputPort.getData().getQuaternion(orientationQuaternion);
-
-//      orientationOfMeasurementFrameInEstimationFrame.set(measurementFrame);
-//      orientationOfMeasurementFrameInEstimationFrame.changeFrame(estimationFrame);
-//      orientationOfMeasurementFrameInEstimationFrame.getQuaternion(measurmentFrameToEstimationFrame);
-//      
-      
-
-      // Angular velocity: using vectors
+      // Angular velocity part
       Vector3d measuredAngularVelocityVector3d = angularVelocityInputPort.getData();
       TwistCalculator twistCalculator = inverseDynamicsStructureInputPort.getData().getTwistCalculator();
       
@@ -147,32 +132,19 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
       tempAngularVelocityMeasurementLink.set(ReferenceFrame.getWorldFrame(), measuredAngularVelocityVector3d);  
       tempAngularVelocityMeasurementLink.changeFrame(estimationFrame);
       tempAngularVelocityMeasurementLink.add(relativeAngularVelocity);
+      
       tempAngularVelocityEstimationLink.setAndChangeFrame(tempAngularVelocityMeasurementLink);
+      tempAngularVelocityEstimationLink.changeFrame(desiredOutputFrame);
       
-//      tempAngularVelocityEstimationLink.changeFrame(desiredOutputFrame);
-      
-       angularVelocityOutputPort.setData(tempAngularVelocityEstimationLink);
-
-      
-//      // Angular velocity: using Twists
-//      // get IMU angular velocity with respect to world, assuming axes IMU are aligned with pelvis axes
-//      Vector3d tempLinearVelocityVector3d = new Vector3d(0.0, 0.0, 0.0);
-//
-//      tempTwistAngularVelocityMeasurementLink.set(angularVelocityMeasurementFrame, ReferenceFrame.getWorldFrame(), angularVelocityMeasurementFrame,
-//              tempLinearVelocityVector3d, measuredAngularVelocityVector3d);
-//      tempRelativeTwistOrientationMeasFrameToEstFrame.changeFrame(angularVelocityMeasurementFrame);
-//      tempTwistAngularVelocityMeasurementLink.add(tempRelativeTwistOrientationMeasFrameToEstFrame);
-//      tempTwistAngularVelocityEstimationLink.set(tempTwistAngularVelocityMeasurementLink);
-//
-//      tempTwistAngularVelocityMeasurementLink.packAngularPart(tempAngularVelocityEstimationLink);
-//      tempAngularVelocityEstimationLink.changeFrame(ReferenceFrame.getWorldFrame());
-//
-//      // set on port
-//      angularVelocityOutputPort.setData(tempAngularVelocityEstimationLink);
-
+      // set on port
+      angularVelocityOutputPort.setData(tempAngularVelocityEstimationLink);
    }
 
-
+   public void convertOrientationMeasurementLinkAToLinkB()
+   {
+	   
+   }
+   
 
    public void waitUntilComputationIsDone()
    {
