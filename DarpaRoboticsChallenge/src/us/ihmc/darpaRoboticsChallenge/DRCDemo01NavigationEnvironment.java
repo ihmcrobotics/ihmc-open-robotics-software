@@ -67,6 +67,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       setUpPath2SmallCones();
       setUpPath3RampsWithLargeBlocks();
       setUpPath4DRCTrialsTrainingWalkingCourse();
+      setUpPathDRCTrialsLadder();
 
       setUpPath5NarrowDoor();
       setUpPath6Barriers();
@@ -76,6 +77,86 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       setUpGround();
 
       conditionallyAddLimboBar();
+   }
+
+   private void setUpPathDRCTrialsLadder()
+   {
+      final double courseAngle=3*45./2;
+      final double courseStartDistance=7;
+      AppearanceDefinition app=YoAppearance.Beige();
+      
+      final double stepTread=0.1524;
+      final double stepWidth=0.812;
+      final double stepThickness=0.0381;
+      final double stepRise=0.3048;
+      final double stepRun=0.17597;
+      final int nStairs=9;
+      
+      final double landingRun=0.61;
+      final double stairSupportThickness=0.0508;
+      final double stairSupportWidth=0.132;
+      
+      final double railingDiameter=stairSupportThickness;
+      final double topRailingHeight=1.067;
+      final int nTopRailingCrossBars=4;      
+      final double stairRailSupportLength=0.5715;
+      final int nStairRailSupports=5;
+      final boolean extendRailsToGround=true;
+      final double stairRailSupportStartHeight=railingDiameter;
+      final double stairRailSupportEndHeight=2.438;
+      
+      final double stairSlope=Math.atan(stepRise/stepRun);
+      
+      //steps
+      double[] centerPointLocal={courseStartDistance+stepTread/2,0};
+      double [] centerPoint;
+      double stairTopHeight=0;
+      for(int i=0;i<nStairs-1;i++)
+      {
+         centerPointLocal[0]+=stepRun;
+         stairTopHeight+=stepRise;
+         centerPoint=rotateAroundOrigin(centerPointLocal, courseAngle);
+         setUpFloatingStair(centerPoint, stepWidth, stepTread, stepThickness, stairTopHeight, courseAngle,app);
+      }
+      centerPointLocal[0]+=stepRun-stepTread/2+landingRun/2;
+      double topLandingCenter=centerPointLocal[0];
+      stairTopHeight+=stepRise;
+      centerPoint=rotateAroundOrigin(centerPointLocal, courseAngle);
+      setUpFloatingStair(centerPoint, stepWidth, landingRun, stepThickness, stairTopHeight, courseAngle,app);
+      
+      //side supports
+      double sinStairSlope = Math.sin(stairSlope);
+      double cosStairSlope = Math.cos(stairSlope);
+      double supportLength=stairTopHeight/sinStairSlope;
+      double distanceFromLowerSupportCornerToGroundStepLowerBackCorner = (stairSupportWidth*cosStairSlope-stepThickness)/sinStairSlope;
+      double distanceFromSupportGroundCornerToLeadingGroundStepEdge = stairSupportWidth*sinStairSlope + 
+            distanceFromLowerSupportCornerToGroundStepLowerBackCorner*cosStairSlope - stepTread;
+      centerPointLocal[0]=courseStartDistance + supportLength/2*cosStairSlope + stairSupportWidth/2*sinStairSlope -distanceFromSupportGroundCornerToLeadingGroundStepEdge;
+      double zCenter=supportLength/2*sinStairSlope - stairSupportWidth/2*cosStairSlope;
+      centerPointLocal[1]=stepWidth/2+stairSupportThickness/2;
+      centerPoint=rotateAroundOrigin(centerPointLocal, courseAngle);           
+      setUpSlopedBox(centerPoint[0], centerPoint[1], zCenter, supportLength, stairSupportThickness, stairSupportWidth, stairSlope, courseAngle, app);      
+      
+      centerPointLocal[1]=-centerPointLocal[1];
+      centerPoint=rotateAroundOrigin(centerPointLocal, courseAngle);           
+      setUpSlopedBox(centerPoint[0], centerPoint[1], zCenter, supportLength, stairSupportThickness, stairSupportWidth, stairSlope, courseAngle, app);
+      
+      double topSupportLength=landingRun+distanceFromSupportGroundCornerToLeadingGroundStepEdge;
+      centerPointLocal[0]=topLandingCenter-distanceFromSupportGroundCornerToLeadingGroundStepEdge/2;
+      zCenter=stairTopHeight-stairSupportWidth/2;
+      centerPoint=rotateAroundOrigin(centerPointLocal, courseAngle);           
+      setUpSlopedBox(centerPoint[0], centerPoint[1], zCenter, topSupportLength, stairSupportThickness, stairSupportWidth, 0, courseAngle, app);
+     
+      centerPointLocal[1]=-centerPointLocal[1];
+      centerPoint=rotateAroundOrigin(centerPointLocal, courseAngle);           
+      setUpSlopedBox(centerPoint[0], centerPoint[1], zCenter, topSupportLength, stairSupportThickness, stairSupportWidth, 0, courseAngle, app);
+      
+      // TODO finish making ladder
+      //top railing
+      
+      //stair railing
+      
+     
    }
 
    private void setUpPath1Rocks()
@@ -192,11 +273,12 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       // 7. Descend Flat Top Steps
       // 8. Ascend Pitch/Roll 15 deg Top Steps
       // 9. Descend Pitch/Roll 15 deg Top Steps
-      // TODO: Finish course
       setUpCinderBlockField(courseAngle, startDistance);
 
       // 10. Step-Over Obstacles
-
+      // TODO: Finish course (step 10)
+      // TODO: add holes to cinder blocks
+      
    }
 
    private void setUpCinderBlockField(double courseAngle, double startDistance)
@@ -790,6 +872,18 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       combinedTerrainObject.addTerrainObject(newBox);
    }
 
+   private void setUpFloatingStair(double[] centerPoint, double width, double tread, double thickness, double stairTopHeight, double yawDegrees, AppearanceDefinition app)
+   {
+      double xCenter = centerPoint[0];
+      double yCenter = centerPoint[1];
+      Transform3D location = new Transform3D();
+      location.rotZ(Math.toRadians(yawDegrees));
+
+      location.setTranslation(new Vector3d(xCenter, yCenter, stairTopHeight - thickness / 2));
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, tread, width, thickness), app);
+      combinedTerrainObject.addTerrainObject(newBox);
+   }
+
    private void setUpCone(double x, double y, double bottomWidth, double topWidth, double height, AppearanceDefinition app)
    {
       combinedTerrainObject.addCone(x, y, bottomWidth, topWidth, height, app);
@@ -835,6 +929,20 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
       location.setTranslation(new Vector3d(xCenter, yCenter, cinderBlockHeight / 2 + numberFlatSupports * cinderBlockHeight));
       RotatableCinderBlockTerrainObject newBox = new RotatableCinderBlockTerrainObject(new Box3d(location, cinderBlockLength, cinderBlockWidth, cinderBlockHeight), app);
+      combinedTerrainObject.addTerrainObject(newBox);
+   }
+
+   private void setUpSlopedBox(double xCenter, double yCenter, double zCenter, double xLength, double yLength, double zLength, double slopeRadians, double yawDegrees, AppearanceDefinition app)
+   {
+      Transform3D location = new Transform3D();
+      location.rotZ(Math.toRadians(yawDegrees));
+
+      Transform3D tilt = new Transform3D();
+      tilt.rotY(-slopeRadians);
+      location.mul(tilt);
+
+      location.setTranslation(new Vector3d(xCenter, yCenter, zCenter));
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, xLength, yLength, zLength), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
 
