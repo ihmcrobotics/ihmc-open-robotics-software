@@ -32,11 +32,14 @@ public class JointAccelerationSolutionJPanel extends JPanel
       this.jointAccelerationsSolution.setReshape(jointAccelerationsSolution);
       this.jointsToOptimizeFor.clear(); 
       
-       for (InverseDynamicsJoint jointToOptimizeFor : jointsToOptimizeFor)
-       {
-          this.jointsToOptimizeFor.add(jointToOptimizeFor);
-       }
-       
+      if (jointsToOptimizeFor != null)
+      {
+         for (InverseDynamicsJoint jointToOptimizeFor : jointsToOptimizeFor)
+         {
+            this.jointsToOptimizeFor.add(jointToOptimizeFor);
+         }
+      }
+      
        this.repaint();
    }
 
