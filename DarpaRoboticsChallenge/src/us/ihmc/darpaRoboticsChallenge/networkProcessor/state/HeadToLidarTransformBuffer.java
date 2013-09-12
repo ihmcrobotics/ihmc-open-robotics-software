@@ -26,12 +26,34 @@ public class HeadToLidarTransformBuffer
       }
    }
 
-   public synchronized void addTransform(long timestamp, Transform3D transform3D)
+   public synchronized void addRawTransformAndTimestamp(long timestamp, Transform3D transform3D)
    {
       transforms[currentIndex].setTimeStamp(timestamp);
       transforms[currentIndex].setTransform3D(transform3D);
 
       newestTimestamp = timestamp;
+      currentIndex++;
+
+      if (currentIndex >= size)
+      {
+         currentIndex = 0;
+      }
+
+      if (transforms[currentIndex].getTimeStamp() == Long.MIN_VALUE)
+      {
+         oldestTimeStamp = newestTimestamp;
+      }
+      else
+      {
+         oldestTimeStamp = transforms[currentIndex].getTimeStamp();
+      }
+   }
+
+   public synchronized void addTimeStampedTransform(TimeStampedTransform3D timeStampedTransform3D)
+   {
+      transforms[currentIndex] = timeStampedTransform3D;
+
+      newestTimestamp = timeStampedTransform3D.getTimeStamp();
       currentIndex++;
 
       if (currentIndex >= size)
