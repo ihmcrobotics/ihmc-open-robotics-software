@@ -23,7 +23,6 @@ import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 
 public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
 {
@@ -103,59 +102,56 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
 
    public void startComputation()
    {
-      convertRawDataAndSetOnOutputPort(desiredOutputFrame);//, orientationInputPort.getData(), angularVelocityInputPort.getData());
+      convertOrientationAndSetOnOutputPort();      
+      convertAngularVelocityAndSetOnOutputPort();   
    }
 
-   private final FrameOrientation tempOrientationMeasurementFrame = new FrameOrientation(ReferenceFrame.getWorldFrame());
    private final FrameOrientation tempOrientationEstimationFrame = new FrameOrientation(ReferenceFrame.getWorldFrame());
 
    private final FrameVector tempAngularVelocityMeasurementLink = new FrameVector();
    private final FrameVector tempAngularVelocityEstimationLink = new FrameVector();
    private final Twist tempRelativeTwistOrientationMeasFrameToEstFrame = new Twist();
 
-   private final Transform3D transformOrientationMeasFrameToEstFrame = new Transform3D();
+   private final Transform3D transformFromEstimationFrameToIMUFrame = new Transform3D();
    private final FrameVector relativeAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
-   
-//   private final Quat4d orientationQuaternion = new Quat4d();
-   
-   
 
-   private void convertRawDataAndSetOnOutputPort(ReferenceFrame desiredOutputFrame)//, Matrix3d rawOrientationData, Vector3d rawAngularVelocityData)
+   private final Transform3D transformFromIMUToWorld = new Transform3D();
+   private final Transform3D transformFromEstimationToWorld = new Transform3D();
+   private final Matrix3d rotationFromEstimationToWorld = new Matrix3d();
+   
+   private void convertOrientationAndSetOnOutputPort()
    {
-      // Orientation part
-      tempOrientationMeasurementFrame.set(ReferenceFrame.getWorldFrame(), orientationInputPort.getData());
+      Matrix3d rotationFromIMUToWorld = orientationInputPort.getData();
+      transformFromIMUToWorld.set(rotationFromIMUToWorld);
 
-      estimationFrame.getTransformToDesiredFrame(transformOrientationMeasFrameToEstFrame, orientationMeasurementFrame);
-      
-      transformOrientationMeasFrameToEstFrame.invert();
-      tempOrientationEstimationFrame.set(tempOrientationMeasurementFrame.applyTransformCopy(transformOrientationMeasFrameToEstFrame));
-      
+      estimationFrame.getTransformToDesiredFrame(transformFromEstimationFrameToIMUFrame, orientationMeasurementFrame);
+      transformFromEstimationToWorld.mul(transformFromIMUToWorld, transformFromEstimationFrameToIMUFrame);
+
+      transformFromEstimationToWorld.get(rotationFromEstimationToWorld);
+      tempOrientationEstimationFrame.set(ReferenceFrame.getWorldFrame(), rotationFromEstimationToWorld);
       // set on port
       orientationOutputPort.setData(tempOrientationEstimationFrame);
-      
-      // Angular velocity: using vectors
+   }
+   
+   private void convertAngularVelocityAndSetOnOutputPort()
+   {
       Vector3d measuredAngularVelocityVector3d = angularVelocityInputPort.getData();
       TwistCalculator twistCalculator = inverseDynamicsStructureInputPort.getData().getTwistCalculator();
-      
+
       twistCalculator.packRelativeTwist(tempRelativeTwistOrientationMeasFrameToEstFrame, angularVelocityMeasurementLink, estimationLink);
       tempRelativeTwistOrientationMeasFrameToEstFrame.packAngularPart(relativeAngularVelocity);
       relativeAngularVelocity.changeFrame(estimationFrame);
-      
+
       tempAngularVelocityMeasurementLink.set(angularVelocityMeasurementFrame, measuredAngularVelocityVector3d); 
-//      System.out.println("Real orientation of IMU link: \n" +  tempAngularVelocityMeasurementLink.getVector() + " in frame " + tempAngularVelocityMeasurementLink.getReferenceFrame());
+      //      System.out.println("Real orientation of IMU link: \n" +  tempAngularVelocityMeasurementLink.getVector() + " in frame " + tempAngularVelocityMeasurementLink.getReferenceFrame());
       tempAngularVelocityMeasurementLink.changeFrame(estimationFrame);
       relativeAngularVelocity.add(tempAngularVelocityMeasurementLink);
-      
+
       tempAngularVelocityEstimationLink.setAndChangeFrame(relativeAngularVelocity); // just a copy for clarity
 
       angularVelocityOutputPort.setData(tempAngularVelocityEstimationLink);
    }
 
-   public void convertOrientationMeasurementLinkAToLinkB()
-   {
-	   
-   }
-   
 
    public void waitUntilComputationIsDone()
    {
