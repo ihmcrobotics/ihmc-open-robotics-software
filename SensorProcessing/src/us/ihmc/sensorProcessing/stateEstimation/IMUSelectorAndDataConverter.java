@@ -34,8 +34,6 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
    private final ControlFlowOutputPort<FrameVector> angularVelocityOutputPort;
    private final ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort;
 
-   private final ReferenceFrame desiredOutputFrame;
-
    private final RigidBody estimationLink;
    private final RigidBody angularVelocityMeasurementLink;
 
@@ -87,13 +85,11 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
       this.angularVelocityMeasurementLink = selectedAngularVelocitySensorConfiguration.getAngularVelocityMeasurementLink();
       this.angularVelocityMeasurementFrame = selectedAngularVelocitySensorConfiguration.getMeasurementFrame();
       
-      this.desiredOutputFrame = ReferenceFrame.getWorldFrame();
-      
       this.inverseDynamicsStructureOutputPort = createOutputPort("inverseDynamicsStructureOutputPort");
       this.inverseDynamicsStructureInputPort.setData(inverseDynamicsStructureOutputPort.getData());
       this.inverseDynamicsStructureOutputPort.setData(inverseDynamicsStructureInputPort.getData());
       
-      this.orientationOutputPort = new YoFrameQuaternionControlFlowOutputPort(this, "orientationOutput", desiredOutputFrame, registry);
+      this.orientationOutputPort = new YoFrameQuaternionControlFlowOutputPort(this, "orientationOutput", ReferenceFrame.getWorldFrame(), registry);
       registerOutputPort(orientationOutputPort);
       this.angularVelocityOutputPort = new YoFrameVectorControlFlowOutputPort(this, "angularVelocityOutput", estimationFrame, registry);
       registerOutputPort(angularVelocityOutputPort);
@@ -121,15 +117,14 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
    
    private void convertOrientationAndSetOnOutputPort()
    {
-      Matrix3d rotationFromIMUToWorld = orientationInputPort.getData();
-      transformFromIMUToWorld.set(rotationFromIMUToWorld);
+      transformFromIMUToWorld.set(orientationInputPort.getData());
 
       estimationFrame.getTransformToDesiredFrame(transformFromEstimationFrameToIMUFrame, orientationMeasurementFrame);
+      
       transformFromEstimationToWorld.mul(transformFromIMUToWorld, transformFromEstimationFrameToIMUFrame);
-
       transformFromEstimationToWorld.get(rotationFromEstimationToWorld);
       tempOrientationEstimationFrame.set(ReferenceFrame.getWorldFrame(), rotationFromEstimationToWorld);
-      // set on port
+      
       orientationOutputPort.setData(tempOrientationEstimationFrame);
    }
    
@@ -143,7 +138,6 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
       relativeAngularVelocity.changeFrame(estimationFrame);
 
       tempAngularVelocityMeasurementLink.set(angularVelocityMeasurementFrame, measuredAngularVelocityVector3d); 
-      //      System.out.println("Real orientation of IMU link: \n" +  tempAngularVelocityMeasurementLink.getVector() + " in frame " + tempAngularVelocityMeasurementLink.getReferenceFrame());
       tempAngularVelocityMeasurementLink.changeFrame(estimationFrame);
       relativeAngularVelocity.add(tempAngularVelocityMeasurementLink);
 

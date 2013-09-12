@@ -33,7 +33,7 @@ import java.util.Set;
 
 public class ComposableOrientationEstimatorCreator
 {
-   private static final int VECTOR3D_LENGTH = 3;
+//   private static final int VECTOR3D_LENGTH = 3;
 
    private final RigidBody orientationEstimationLink;
    private final ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort;

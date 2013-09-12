@@ -19,8 +19,6 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 public class OrientationStateRobotModelUpdater extends AbstractControlFlowElement implements Runnable
 {
-//   private static final boolean ASSUME_ESTIMATION_LINK_IS_ON_ROOT = true;
- 
    private final ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort;
    private final ControlFlowPort<FrameOrientation> orientationPort;
    private final ControlFlowPort<FrameVector> angularVelocityPort;
@@ -63,14 +61,13 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
 
       ReferenceFrame estimationFrame = inverseDynamicsStructure.getEstimationFrame();
       updateRootJointRotation(inverseDynamicsStructure.getRootJoint(), orientationPort.getData(), estimationFrame);
+
       rootJoint.getFrameAfterJoint().update();
 
       TwistCalculator twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       updateRootJointTwistAngularPart(twistCalculator, rootJoint, angularVelocityPort.getData());
       rootJoint.getFrameAfterJoint().update();
       twistCalculator.compute();
-      
-//      System.out.println("Frame " + angularVelocityPort.getData().getReferenceFrame());
    }
 
    public void startComputation()
@@ -81,32 +78,18 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
 
    public void waitUntilComputationIsDone()
    {
-      // empty
    }
 
    private final FrameVector tempRootJointAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
    private final Twist tempRootJointTwist = new Twist();
 
    private void updateRootJointTwistAngularPart(TwistCalculator twistCalculator, SixDoFJoint rootJoint, FrameVector estimationLinkAngularVelocity)
-   { 
-//	   System.out.println("Direct on port: \n" + angularVelocityPort.getData().getVector() + " in frame " + angularVelocityPort.getData().getReferenceFrame());
-	   
-//      if (ASSUME_ESTIMATION_LINK_IS_ON_ROOT)
-//      {
-//         rootJoint.packJointTwist(tempRootJointTwist);
-//         tempRootJointTwist.setAngularPart(estimationLinkAngularVelocity.getVector());
-//         rootJoint.setJointTwist(tempRootJointTwist);
-//      }
+   {
+      rootJoint.packJointTwist(tempRootJointTwist);
+      computeRootJointAngularVelocity(twistCalculator, tempRootJointAngularVelocity, estimationLinkAngularVelocity);
 
-	   rootJoint.packJointTwist(tempRootJointTwist);
-       computeRootJointAngularVelocity(twistCalculator, tempRootJointAngularVelocity, estimationLinkAngularVelocity);
-//       System.out.println("After calculation: \n" + tempRootJointAngularVelocity.getVector() + " in frame " + tempRootJointAngularVelocity.getReferenceFrame() + "\n");
-       tempRootJointTwist.setAngularPart(tempRootJointAngularVelocity.getVector());
-       rootJoint.setJointTwist(tempRootJointTwist);
-//      } OLD STUFF, not needed anymore I think, the above method is easier
-//         computeRootJointTwistAngularPart(rootJoint, tempRootJointTwist, tempRootJointAngularVelocity);
-//         rootJoint.setJointTwist(tempRootJointTwist);
-//      }
+      tempRootJointTwist.setAngularPart(tempRootJointAngularVelocity.getVector());
+      rootJoint.setJointTwist(tempRootJointTwist);
    }
 
    private final Twist tempRootToEstimationTwist = new Twist();
@@ -138,34 +121,19 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
       rootJointAngularVelocityToPack.add(tempEstimationLinkAngularVelocity, tempRootToEstimationAngularVelocity);
    }
 
-   private final Twist tempRootJointTwistExisting = new Twist();
-   private final FrameVector tempRootJointTwistExistingLinearPart = new FrameVector();
-
-   private void computeRootJointTwistAngularPart(SixDoFJoint rootJoint, Twist rootJointTwistToPack, FrameVector rootJointAngularVelocity)
-   {
-      rootJointAngularVelocity.checkReferenceFrameMatch(rootJoint.getFrameAfterJoint());
-
-      rootJoint.packJointTwist(tempRootJointTwistExisting);
-      tempRootJointTwistExisting.checkReferenceFramesMatch(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint());
-      tempRootJointTwistExisting.packLinearPart(tempRootJointTwistExistingLinearPart);
-
-      rootJointTwistToPack.set(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint(),
-                               tempRootJointTwistExistingLinearPart.getVector(), rootJointAngularVelocity.getVector());
-   }
-
-   private final FrameOrientation tempOrientationState = new FrameOrientation(ReferenceFrame.getWorldFrame());
+   private final FrameOrientation tempOrientationEstimatinLink = new FrameOrientation(ReferenceFrame.getWorldFrame());    // worldframe just for initializing
    private final Transform3D tempEstimationLinkToWorld = new Transform3D();
    private final Transform3D tempRootJointToWorld = new Transform3D();
 
    private void updateRootJointRotation(SixDoFJoint rootJoint, FrameOrientation estimationLinkOrientation, ReferenceFrame estimationFrame)
    {
-      tempOrientationState.setAndChangeFrame(estimationLinkOrientation);
+      tempOrientationEstimatinLink.setAndChangeFrame(estimationLinkOrientation);
 
-//      System.out.println(estimationLinkOrientation, estimationLinkOrientation.getReferenceFrame());
-      computeEstimationLinkToWorldTransform(tempEstimationLinkToWorld, tempOrientationState);
+      computeEstimationLinkToWorldTransform(tempEstimationLinkToWorld, tempOrientationEstimatinLink);
       computeRootJointToWorldTransform(rootJoint, estimationFrame, tempRootJointToWorld, tempEstimationLinkToWorld);
       Matrix3d rootJointRotation = new Matrix3d();
       tempRootJointToWorld.get(rootJointRotation);
+
       rootJoint.setRotation(rootJointRotation);
    }
 
@@ -188,6 +156,21 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
       rootJointToWorldToPack.set(estimationLinkTransform);
       rootJointToWorldToPack.mul(tempRootJointFrameToEstimationFrame);
    }
+
+// private final Twist tempRootJointTwistExisting = new Twist();
+// private final FrameVector tempRootJointTwistExistingLinearPart = new FrameVector();
+
+// private void computeRootJointTwistAngularPart(SixDoFJoint rootJoint, Twist rootJointTwistToPack, FrameVector rootJointAngularVelocity)
+// {
+//    rootJointAngularVelocity.checkReferenceFrameMatch(rootJoint.getFrameAfterJoint());
+//
+//    rootJoint.packJointTwist(tempRootJointTwistExisting);
+//    tempRootJointTwistExisting.checkReferenceFramesMatch(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint());
+//    tempRootJointTwistExisting.packLinearPart(tempRootJointTwistExistingLinearPart);
+//
+//    rootJointTwistToPack.set(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint(),
+//                             tempRootJointTwistExistingLinearPart.getVector(), rootJointAngularVelocity.getVector());
+// }
 
    public ControlFlowOutputPort<FullInverseDynamicsStructure> getInverseDynamicsStructureOutputPort()
    {

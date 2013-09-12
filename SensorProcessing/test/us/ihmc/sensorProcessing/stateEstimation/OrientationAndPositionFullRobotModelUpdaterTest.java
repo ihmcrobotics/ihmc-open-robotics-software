@@ -31,7 +31,7 @@ import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.test.JUnitTools;
 
-public class CenterOfMassBasedFullRobotModelUpdaterTest
+public class OrientationAndPositionFullRobotModelUpdaterTest
 {
    private static final boolean TEST_EFFICIENCY = false;
 

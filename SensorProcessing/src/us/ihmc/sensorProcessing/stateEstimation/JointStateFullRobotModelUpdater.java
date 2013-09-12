@@ -1,6 +1,5 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -26,15 +25,15 @@ public class JointStateFullRobotModelUpdater extends AbstractControlFlowElement
    private final ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort;
 
    public JointStateFullRobotModelUpdater(ControlFlowGraph controlFlowGraph, JointAndIMUSensorMap sensorMap,
-         FullInverseDynamicsStructure inverseDynamicsStructure)
+           FullInverseDynamicsStructure inverseDynamicsStructure)
    {
       this(controlFlowGraph, sensorMap.getJointPositionSensors(), sensorMap.getJointVelocitySensors(), inverseDynamicsStructure);
    }
 
    public JointStateFullRobotModelUpdater(ControlFlowGraph controlFlowGraph, Map<OneDoFJoint, ControlFlowOutputPort<double[]>> jointPositionSensors,
-         Map<OneDoFJoint, ControlFlowOutputPort<double[]>> jointVelocitySensors, FullInverseDynamicsStructure inverseDynamicsStructure)
+           Map<OneDoFJoint, ControlFlowOutputPort<double[]>> jointVelocitySensors, FullInverseDynamicsStructure inverseDynamicsStructure)
    {
-      InverseDynamicsJoint[] joints = ScrewTools.computeJointsInOrder(inverseDynamicsStructure.getTwistCalculator().getRootBody());
+      InverseDynamicsJoint[] joints = ScrewTools.computeSupportAndSubtreeJoints(inverseDynamicsStructure.getRootJoint().getSuccessor());
       this.oneDoFJoints = ScrewTools.filterJoints(joints, OneDoFJoint.class);
 
       this.inverseDynamicsStructureOutputPort = createOutputPort("inverseDynamicsStructureOutputPort");
