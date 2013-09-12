@@ -275,7 +275,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       
       if (momentumControlModuleSolverListener != null)
       {
-         momentumControlModuleSolverListener.setJointAccelerationSolution(new DenseMatrix64F(jointAccelerations));
+         momentumControlModuleSolverListener.setJointAccelerationSolution(jointsToOptimizeFor, new DenseMatrix64F(jointAccelerations));
          momentumControlModuleSolverListener.setOptimizationValue(output.getOptVal());
          momentumControlModuleSolverListener.reviewSolution();
       }

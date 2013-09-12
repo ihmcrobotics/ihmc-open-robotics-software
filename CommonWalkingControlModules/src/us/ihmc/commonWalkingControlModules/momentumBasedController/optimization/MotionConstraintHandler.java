@@ -230,7 +230,7 @@ public class MotionConstraintHandler
          MutableDouble weightBlock = getMutableDoubleFromList(weightList, motionConstraintIndex);
          weightBlock.setValue(weight);
 
-         reportSpatialAccelerationMotionContraint(null, motionConstraintIndex, jFullBlock, jBlockCompact, pBlock, weightBlock);
+         reportSpatialAccelerationMotionContraint(desiredSpatialAccelerationCommand, motionConstraintIndex, jFullBlock, jBlockCompact, pBlock, weightBlock);
 
          motionConstraintIndex++;
       }

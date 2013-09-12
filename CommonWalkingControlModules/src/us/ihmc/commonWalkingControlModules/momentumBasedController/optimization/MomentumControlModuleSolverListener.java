@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+
 public interface MomentumControlModuleSolverListener
 {
    public abstract void setCentroidalMomentumMatrix(DenseMatrix64F a);
@@ -16,7 +18,7 @@ public interface MomentumControlModuleSolverListener
    public abstract void setSecondaryMotionConstraintPVector(DenseMatrix64F pSecondary);
    public abstract void setSecondaryMotionConstraintWeightMatrix(DenseMatrix64F weightMatrixSecondary);
    
-   public abstract void setJointAccelerationSolution(DenseMatrix64F jointAccelerations);
+   public abstract void setJointAccelerationSolution(InverseDynamicsJoint[] jointsToOptimizeFor, DenseMatrix64F jointAccelerations);
    public abstract void setOptimizationValue(double optimizationValue);
    public abstract void reviewSolution();
 }

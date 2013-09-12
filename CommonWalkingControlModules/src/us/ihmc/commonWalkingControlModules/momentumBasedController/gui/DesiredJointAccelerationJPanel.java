@@ -9,17 +9,18 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommandAndMotionConstraint;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 
 public class DesiredJointAccelerationJPanel extends JPanel
 {
    private static final long serialVersionUID = -7632993267486553349L;
-   private DesiredJointAccelerationCommand desiredJointAccelerationCommand;
    
    private InverseDynamicsJoint joint;
    
    private DenseMatrix64F desiredAcceleration = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F achievedAcceleration = new DenseMatrix64F(1);
+   private DenseMatrix64F achievedJointAcceleration = new DenseMatrix64F(1, 1);
+   
    private final DenseMatrix64F errorAcceleration = new DenseMatrix64F(1);
    
    private final NumberFormat numberFormat;
@@ -32,22 +33,22 @@ public class DesiredJointAccelerationJPanel extends JPanel
       this.numberFormat.setGroupingUsed(false);
    }
    
-   public void setDesiredJointAccelerationCommand(DesiredJointAccelerationCommand desiredJointAccelerationCommand)
-   {
-      this.desiredJointAccelerationCommand = desiredJointAccelerationCommand;
+   public synchronized void setDesiredJointAccelerationCommand(DesiredJointAccelerationCommandAndMotionConstraint desiredJointAccelerationCommandAndMotionConstraint)
+   {      
+      DesiredJointAccelerationCommand desiredJointAccelerationCommand = desiredJointAccelerationCommandAndMotionConstraint.getDesiredJointAccelerationCommand();
       
       joint = desiredJointAccelerationCommand.getJoint();
       desiredAcceleration.setReshape(desiredJointAccelerationCommand.getDesiredAcceleration());
       
-      desiredJointAccelerationCommand.computeAchievedJointAcceleration(achievedAcceleration);
+      achievedJointAcceleration.setReshape(desiredJointAccelerationCommandAndMotionConstraint.getAchievedJointAcceleration());
       
       errorAcceleration.setReshape(desiredAcceleration);
-      CommonOps.sub(achievedAcceleration, desiredAcceleration, errorAcceleration);
+      CommonOps.sub(achievedJointAcceleration, desiredAcceleration, errorAcceleration);
       
       this.repaint();
    }
 
-   public void paintComponent(Graphics graphics)
+   public synchronized void paintComponent(Graphics graphics)
    {
       if (joint == null) 
          graphics.drawString("Empty", 40, 12); 
@@ -55,14 +56,14 @@ public class DesiredJointAccelerationJPanel extends JPanel
       else
       {
          graphics.drawString(joint.getName(), 10, 12); 
-         graphics.drawString(toPrettyString(desiredAcceleration), 100, 12); 
-         graphics.drawString(toPrettyString(achievedAcceleration), 200, 12); 
+         graphics.drawString(toPrettyString(numberFormat, desiredAcceleration), 100, 12); 
+         graphics.drawString(toPrettyString(numberFormat, achievedJointAcceleration), 200, 12); 
          
-         graphics.drawString(toPrettyString(errorAcceleration), 300, 12); 
+         graphics.drawString(toPrettyString(numberFormat, errorAcceleration), 300, 12); 
       }
    }
    
-   public String toPrettyString(DenseMatrix64F columnMatrix)
+   public static String toPrettyString(NumberFormat numberFormat, DenseMatrix64F columnMatrix)
    {
       String ret = "(";
       

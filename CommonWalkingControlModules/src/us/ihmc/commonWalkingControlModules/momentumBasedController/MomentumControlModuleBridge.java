@@ -69,12 +69,13 @@ public class MomentumControlModuleBridge implements MomentumControlModule
    {
       if (SHOW_MOMENTUM_MODULE_GUI)
       {
-         momentumModuleGUI = new MomentumModuleGUI();
+         momentumModuleGUI = new MomentumModuleGUI(registry);
          
          allMomentumModuleListener = new AllMomentumModuleListener();
          
          optimizationMomentumControlModule.setPrimaryMotionConstraintListener(allMomentumModuleListener);
-         optimizationMomentumControlModule.setSecondaryMotionConstraintListener(allMomentumModuleListener);    
+         optimizationMomentumControlModule.setSecondaryMotionConstraintListener(allMomentumModuleListener); 
+         optimizationMomentumControlModule.setMomentumControlModuleSolverListener(allMomentumModuleListener);
       }
       else 
       {
@@ -155,6 +156,7 @@ public class MomentumControlModuleBridge implements MomentumControlModule
       
       if (SHOW_MOMENTUM_MODULE_GUI)
       {
+         allMomentumModuleListener.reset();
          momentumModuleGUI.reset();
       }
       
@@ -224,7 +226,8 @@ public class MomentumControlModuleBridge implements MomentumControlModule
   
       if (SHOW_MOMENTUM_MODULE_GUI)
       {
-         momentumModuleGUI.setDesiredsAndSolution(momentumModuleDataObject, activeSolution);
+         momentumModuleGUI.update(allMomentumModuleListener);
+//         momentumModuleGUI.setDesiredsAndSolution(momentumModuleDataObject, activeSolution);
       }
       
       if (TRY_BOTH_AND_COMPARE)

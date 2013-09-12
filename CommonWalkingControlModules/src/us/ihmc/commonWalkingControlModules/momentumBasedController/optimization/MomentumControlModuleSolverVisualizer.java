@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
@@ -67,7 +69,7 @@ public class MomentumControlModuleSolverVisualizer implements MomentumControlMod
       if (printForViz) System.out.println("SecondaryMotionConstraintWeightMatrix = " + weightMatrixSecondary);
    }
 
-   public void setJointAccelerationSolution(DenseMatrix64F jointAccelerations)
+   public void setJointAccelerationSolution(InverseDynamicsJoint[] jointsToOptimizeFor, DenseMatrix64F jointAccelerations)
    {      
       this.jointAccelerations = jointAccelerations;
       if (printForViz) System.out.println("JointAccelerationSolution = " + jointAccelerations);
@@ -123,6 +125,7 @@ public class MomentumControlModuleSolverVisualizer implements MomentumControlMod
       
       return maxValue;
    }
+
    
    
 

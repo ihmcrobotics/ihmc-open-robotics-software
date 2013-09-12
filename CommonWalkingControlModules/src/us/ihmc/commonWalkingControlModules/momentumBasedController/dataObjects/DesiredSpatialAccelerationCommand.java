@@ -63,24 +63,5 @@ public class DesiredSpatialAccelerationCommand
    {
       return "DesiredSpatialAccelerationCommand: GeometricJacobian = " + jacobian.getShortInfo() + ", taskspaceConstraintData = " + taskspaceConstraintData;
    }
-   
-   public void computeAchievedSpatialAcceleration(DenseMatrix64F achievedSpatialAcceleration)
-   {
-      DenseMatrix64F jacobianMatrix = jacobian.getJacobianMatrix();
-      InverseDynamicsJoint[] jointsInOrder = jacobian.getJointsInOrder();
-      
-      DenseMatrix64F jointAccelerations = new DenseMatrix64F(jacobian.getNumberOfColumns(), 1);
-      
-      int index = 0;
-      for (int i=0; i<jointsInOrder.length; i++)
-      {
-         InverseDynamicsJoint joint = jointsInOrder[i];
-         
-         jointsInOrder[i].packDesiredAccelerationMatrix(jointAccelerations, index);
-         index = index + joint.getDegreesOfFreedom();
-      }
-      
-      CommonOps.mult(jacobianMatrix, jointAccelerations, achievedSpatialAcceleration);
-   }
 
 }

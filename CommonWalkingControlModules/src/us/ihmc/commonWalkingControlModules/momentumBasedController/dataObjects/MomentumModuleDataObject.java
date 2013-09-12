@@ -47,27 +47,27 @@ public class MomentumModuleDataObject
 
    public void setDesiredRateOfChangeOfMomentum(DesiredRateOfChangeOfMomentumCommand desiredRateOfChangeOfMomentumCommand)
    {
-      DesiredRateOfChangeOfMomentumCommand command = new DesiredRateOfChangeOfMomentumCommand(desiredRateOfChangeOfMomentumCommand);
-      desiredRateOfChangeOfMomentumCommands.add(command);
+//      DesiredRateOfChangeOfMomentumCommand command = new DesiredRateOfChangeOfMomentumCommand(desiredRateOfChangeOfMomentumCommand);
+      desiredRateOfChangeOfMomentumCommands.add(desiredRateOfChangeOfMomentumCommand);
    }
 
    public void setDesiredJointAcceleration(DesiredJointAccelerationCommand desiredJointAccelerationCommand)
    {
-      DesiredJointAccelerationCommand command = new DesiredJointAccelerationCommand(desiredJointAccelerationCommand);
-      desiredJointAccelerationCommands.add(command);
+//      DesiredJointAccelerationCommand command = new DesiredJointAccelerationCommand(desiredJointAccelerationCommand);
+      desiredJointAccelerationCommands.add(desiredJointAccelerationCommand);
    }
 
    public void setDesiredSpatialAcceleration(DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand)
    {
-      DesiredSpatialAccelerationCommand command = new DesiredSpatialAccelerationCommand(desiredSpatialAccelerationCommand);
-      desiredSpatialAccelerationCommands.add(command);
+//      DesiredSpatialAccelerationCommand command = new DesiredSpatialAccelerationCommand(desiredSpatialAccelerationCommand);
+      desiredSpatialAccelerationCommands.add(desiredSpatialAccelerationCommand);
    }
    
 
    public void setDesiredPointAcceleration(DesiredPointAccelerationCommand desiredPointAccelerationCommand)
    {
-      DesiredPointAccelerationCommand command = new DesiredPointAccelerationCommand(desiredPointAccelerationCommand);
-      desiredPointAccelerationCommands.add(command);
+//      DesiredPointAccelerationCommand command = new DesiredPointAccelerationCommand(desiredPointAccelerationCommand);
+      desiredPointAccelerationCommands.add(desiredPointAccelerationCommand);
    }
    
    public void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench)

@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.gui;
 
-import java.awt.GridLayout;
+import java.awt.Graphics;
 import java.util.ArrayList;
 
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommandAndMotionConstraint;
 
 public class DesiredJointAccelerationMultipleJPanel extends AbstractMultipleReusableJPanel<DesiredJointAccelerationJPanel>
 {
@@ -18,24 +18,29 @@ public class DesiredJointAccelerationMultipleJPanel extends AbstractMultipleReus
       this.repaint();
    }
 
-   public void setDesiredJointAccelerations(ArrayList<DesiredJointAccelerationCommand> desiredJointAccelerationCommands)
+   public synchronized void setDesiredJointAccelerations(ArrayList<DesiredJointAccelerationCommandAndMotionConstraint> desiredJointAccelerationCommandAndMotionConstraints)
    {
-      rearrangePanelsIfNecessary(desiredJointAccelerationCommands.size());
+      rearrangePanelsIfNecessary(desiredJointAccelerationCommandAndMotionConstraints.size());
 
-      for (int i = 0; i < desiredJointAccelerationCommands.size(); i++)
+      for (int i = 0; i < desiredJointAccelerationCommandAndMotionConstraints.size(); i++)
       {
-         DesiredJointAccelerationCommand desiredJointAccelerationCommand = desiredJointAccelerationCommands.get(i);
+         DesiredJointAccelerationCommandAndMotionConstraint desiredJointAccelerationCommandAndMotionConstraint = desiredJointAccelerationCommandAndMotionConstraints.get(i);
+         
          DesiredJointAccelerationJPanel desiredJointAccelerationJPanel = getJPanel(i);
-
-         desiredJointAccelerationJPanel.setDesiredJointAccelerationCommand(desiredJointAccelerationCommand);
+         desiredJointAccelerationJPanel.setDesiredJointAccelerationCommand(desiredJointAccelerationCommandAndMotionConstraint);
       }
 
       this.repaint();
    }
 
-   @Override
    public DesiredJointAccelerationJPanel constructNewJPanel()
    {
       return new DesiredJointAccelerationJPanel();
    }
+
+   public synchronized void paintComponent(Graphics g)
+   {
+      super.paintComponent(g);
+   }
+
 }
