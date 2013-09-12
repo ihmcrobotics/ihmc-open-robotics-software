@@ -12,6 +12,6 @@ public interface DesiredMomentumModuleCommandListener
    public abstract void desiredJointAccelerationWasSet(DesiredJointAccelerationCommand desiredJointAccelerationCommand);
    public abstract void desiredSpatialAccelerationWasSet(DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand);
    public abstract void desiredPointAccelerationWasSet(DesiredPointAccelerationCommand desiredPointAccelerationCommand);
-
+   public abstract void reset();
    
 }

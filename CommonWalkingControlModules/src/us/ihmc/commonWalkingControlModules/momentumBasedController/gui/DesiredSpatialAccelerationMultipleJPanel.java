@@ -1,10 +1,10 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.gui;
 
 
-import java.awt.GridLayout;
+import java.awt.Graphics;
 import java.util.ArrayList;
 
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommandAndMotionConstraint;
 
 public class DesiredSpatialAccelerationMultipleJPanel extends AbstractMultipleReusableJPanel<DesiredSpatialAccelerationJPanel>
 {
@@ -19,25 +19,31 @@ public class DesiredSpatialAccelerationMultipleJPanel extends AbstractMultipleRe
       this.repaint();
    }
 
-   public void setDesiredSpatialAccelerations(ArrayList<DesiredSpatialAccelerationCommand> desiredSpatialAccelerationCommands)
+   public synchronized void setDesiredSpatialAccelerations(ArrayList<DesiredSpatialAccelerationCommandAndMotionConstraint> desiredSpatialAccelerationCommandAndMotionConstraints)
    {
-      rearrangePanelsIfNecessary(desiredSpatialAccelerationCommands.size());
+      rearrangePanelsIfNecessary(desiredSpatialAccelerationCommandAndMotionConstraints.size());
 
-      for (int i = 0; i < desiredSpatialAccelerationCommands.size(); i++)
+      for (int i = 0; i < desiredSpatialAccelerationCommandAndMotionConstraints.size(); i++)
       {
-         DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand = desiredSpatialAccelerationCommands.get(i);
+         DesiredSpatialAccelerationCommandAndMotionConstraint desiredSpatialAccelerationCommandAndMotionConstraint = desiredSpatialAccelerationCommandAndMotionConstraints.get(i);
+         
          DesiredSpatialAccelerationJPanel desiredJointAccelerationJPanel = getJPanel(i);
 
-         desiredJointAccelerationJPanel.setDesiredJointAccelerationCommand(desiredSpatialAccelerationCommand);
+         desiredJointAccelerationJPanel.setDesiredSpatialAccelerationCommand(desiredSpatialAccelerationCommandAndMotionConstraint);
       }
 
       this.repaint();
    }
 
-   @Override
    public DesiredSpatialAccelerationJPanel constructNewJPanel()
    {
       return new DesiredSpatialAccelerationJPanel();
    }
+
+   public synchronized void paintComponent(Graphics g)
+   {
+      super.paintComponent(g);
+   }
+
 }
 

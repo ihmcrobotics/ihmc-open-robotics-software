@@ -104,17 +104,17 @@ public class MomentumModuleSolutionComparer
       if (printComparison) System.out.println("linearMomentumRateDifference = " + linearMomentumRateDifference);
 
       
-      ArrayList<DesiredJointAccelerationCommand> desiredJointAccelerationCommands = momentumModuleDataObject.getDesiredJointAccelerationCommands(); 
-      for (DesiredJointAccelerationCommand desiredJointAccelerationCommand : desiredJointAccelerationCommands)
-      {
-         DenseMatrix64F desiredAcceleration = desiredJointAccelerationCommand.getDesiredAcceleration();
-         InverseDynamicsJoint joint = desiredJointAccelerationCommand.getJoint();
-         
-         DenseMatrix64F achievedAcceleration = new DenseMatrix64F(1, 1);
-         desiredJointAccelerationCommand.computeAchievedJointAcceleration(achievedAcceleration);
-         
-         if (printComparison) System.out.println(joint.getName() + ": " + desiredAcceleration + ", " + achievedAcceleration);
-      }
+//      ArrayList<DesiredJointAccelerationCommand> desiredJointAccelerationCommands = momentumModuleDataObject.getDesiredJointAccelerationCommands(); 
+//      for (DesiredJointAccelerationCommand desiredJointAccelerationCommand : desiredJointAccelerationCommands)
+//      {
+//         DenseMatrix64F desiredAcceleration = desiredJointAccelerationCommand.getDesiredAcceleration();
+//         InverseDynamicsJoint joint = desiredJointAccelerationCommand.getJoint();
+//         
+//         DenseMatrix64F achievedAcceleration = new DenseMatrix64F(1, 1);
+////         desiredJointAccelerationCommand.computeAchievedJointAcceleration(achievedAcceleration);
+//         
+//         if (printComparison) System.out.println(joint.getName() + ": " + desiredAcceleration + ", " + achievedAcceleration);
+//      }
       
    }
 
