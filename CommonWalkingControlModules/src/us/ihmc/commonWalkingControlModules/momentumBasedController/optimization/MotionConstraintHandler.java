@@ -51,6 +51,7 @@ public class MotionConstraintHandler
    private final DenseMatrix64F w = new DenseMatrix64F(1, 1);
 
    private final DenseMatrix64F jBlockCompact = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F nCompactBlock = new DenseMatrix64F(1, 1);
 
    private final ConvectiveTermCalculator convectiveTermCalculator = new ConvectiveTermCalculator();
    private final PointJacobian pointJacobian = new PointJacobian();
@@ -182,6 +183,7 @@ public class MotionConstraintHandler
          DenseMatrix64F baseToEndEffectorJacobianMatrix = baseToEndEffectorJacobian.getJacobianMatrix();
          DenseMatrix64F jacobianMatrix = jacobian.getJacobianMatrix();
 
+         //TODO: Is this all done correctly here? What does it actually do? Shouldn't the weight block be set too?
 
          int nullity = nullspaceMultipliers.getNumRows();
          if (nullity > 0)
@@ -191,27 +193,12 @@ public class MotionConstraintHandler
 
             ////
             
-            DenseMatrix64F sJ = new DenseMatrix64F(1, 1); //TODO: Garbage...
-            NullspaceCalculator nullspaceCalculator = new NullspaceCalculator(SpatialMotionVector.SIZE, true); //TODO: Garbage...
-
-            sJ.reshape(selectionMatrix.getNumRows(), jacobianMatrix.getNumCols());
-            CommonOps.mult(selectionMatrix, jacobianMatrix, sJ);
-            nullspaceCalculator.setMatrix(sJ, nullity);
-            DenseMatrix64F nullspace = nullspaceCalculator.getNullspace();
-
-            DenseMatrix64F iMinusNNT = computeIMinusNNT(nullspace);
-            CommonOps.mult(iMinusNNT, baseToEndEffectorJacobianMatrix, jBlockCompact);
-
-            DenseMatrix64F nCompactBlock = new DenseMatrix64F(1, 1); //TODO: Garbage...
-
-            nCompactBlock.reshape(nullspace.getNumCols(), nullspace.getNumRows());
-            CommonOps.transpose(nullspace, nCompactBlock);
-            compactBlockToFullBlock(jacobian.getJointsInOrder(), nCompactBlock, nFullBLock);
-
-            zBlock.set(nullspaceMultipliers);
+            computeConstraintBlocksForSingularityEscape(selectionMatrix, nullspaceMultipliers, baseToEndEffectorJacobianMatrix, jacobianMatrix, zBlock,
+                  nCompactBlock, jBlockCompact);
             
             ///
-            //TODO: Is this all done correctly here? What does it actually do? Shouldn't the weight block be set too?
+            
+            compactBlockToFullBlock(jacobian.getJointsInOrder(), nCompactBlock, nFullBLock);
             reportNullSpaceMultiplierForSpatialAccelerationMotionContraint(desiredSpatialAccelerationCommand, motionConstraintIndex, nFullBLock, nCompactBlock, zBlock, null);
 
             motionConstraintIndex++;
@@ -242,7 +229,27 @@ public class MotionConstraintHandler
       }
    }
 
-   private DenseMatrix64F computeIMinusNNT(DenseMatrix64F nullspace)
+   private static void computeConstraintBlocksForSingularityEscape(DenseMatrix64F selectionMatrix, DenseMatrix64F nullspaceMultipliers,
+         DenseMatrix64F baseToEndEffectorJacobianMatrix, DenseMatrix64F jacobianMatrix, DenseMatrix64F zBlock, DenseMatrix64F nCompactBlock, DenseMatrix64F jBlockCompact)
+   {
+      DenseMatrix64F sJ = new DenseMatrix64F(1, 1); //TODO: Garbage...
+      NullspaceCalculator nullspaceCalculator = new NullspaceCalculator(SpatialMotionVector.SIZE, true); //TODO: Garbage...
+
+      sJ.reshape(selectionMatrix.getNumRows(), jacobianMatrix.getNumCols());
+      CommonOps.mult(selectionMatrix, jacobianMatrix, sJ);
+      nullspaceCalculator.setMatrix(sJ, nullspaceMultipliers.getNumRows());
+      DenseMatrix64F nullspace = nullspaceCalculator.getNullspace();
+
+      DenseMatrix64F iMinusNNT = computeIMinusNNT(nullspace);
+      CommonOps.mult(iMinusNNT, baseToEndEffectorJacobianMatrix, jBlockCompact);
+
+      nCompactBlock.reshape(nullspace.getNumCols(), nullspace.getNumRows());
+      CommonOps.transpose(nullspace, nCompactBlock);
+
+      zBlock.set(nullspaceMultipliers);
+   }
+
+   private static DenseMatrix64F computeIMinusNNT(DenseMatrix64F nullspace)
    {
       DenseMatrix64F iMinusNNT = new DenseMatrix64F(1, 1);    // TODO: make field
       iMinusNNT.reshape(nullspace.getNumRows(), nullspace.getNumRows());
