@@ -43,7 +43,7 @@ public abstract class AbstractMultipleReusableJPanel<E extends JPanel> extends J
       }
       else if (numberOfDesiredJPanels < numberJPanelsInUse)
       {
-         int numberExtraWeNeedToTakeAway = numberOfDesiredJPanels - numberJPanelsInUse;
+         int numberExtraWeNeedToTakeAway = numberJPanelsInUse - numberOfDesiredJPanels;
 
          printIfDebug("Removing " + numberExtraWeNeedToTakeAway + " extra panels.");
 

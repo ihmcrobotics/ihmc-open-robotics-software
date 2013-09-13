@@ -135,6 +135,16 @@ public class MotionConstraintHandler
       }
    }
    
+   private void reportNullSpaceMultiplierForSpatialAccelerationMotionContraint(DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand, int motionConstraintIndex, DenseMatrix64F jFullBlock, DenseMatrix64F jBlockCompact, DenseMatrix64F pBlock, MutableDouble weightBlock)
+   {
+      if (motionConstraintListener != null)
+      {
+         motionConstraintListener.nullSpaceMultiplierForSpatialAccelerationMotionContraintWasAdded(desiredSpatialAccelerationCommand, motionConstraintIndex, jFullBlock, jBlockCompact, pBlock, weightBlock);
+      }
+   }
+   
+   
+   
    private void reportPointAccelerationMotionContraint(DesiredPointAccelerationCommand desiredPointAccelerationCommand, int motionConstraintIndex, DenseMatrix64F jFullBlock, DenseMatrix64F jBlockCompact, DenseMatrix64F pBlock, MutableDouble weightBlock)
    {
       if (motionConstraintListener != null)
@@ -202,7 +212,7 @@ public class MotionConstraintHandler
             zBlock.set(nullspaceMultipliers);
 
             //TODO: Is this all done correctly here? What does it actually do? Shouldn't the weight block be set too?
-            reportSpatialAccelerationMotionContraint(null, motionConstraintIndex, nFullBLock, nCompactBlock, zBlock, null);
+            reportNullSpaceMultiplierForSpatialAccelerationMotionContraint(desiredSpatialAccelerationCommand, motionConstraintIndex, nFullBLock, nCompactBlock, zBlock, null);
 
             motionConstraintIndex++;
          }
