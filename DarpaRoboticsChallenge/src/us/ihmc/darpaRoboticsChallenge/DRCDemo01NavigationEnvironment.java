@@ -96,15 +96,6 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       final double stairSupportThickness=0.0508;
       final double stairSupportWidth=0.132;
       
-      final double railingDiameter=stairSupportThickness;
-      final double topRailingHeight=1.067;
-      final int nTopRailingCrossBars=4;      
-      final double stairRailSupportLength=0.5715;
-      final int nStairRailSupports=5;
-      final boolean extendRailsToGround=true;
-      final double stairRailSupportStartHeight=railingDiameter;
-      final double stairRailSupportEndHeight=2.438;
-      
       final double stairSlope=Math.atan(stepRise/stepRun);
       
       //steps
@@ -151,12 +142,91 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       centerPoint=rotateAroundOrigin(centerPointLocal, courseAngle);           
       setUpSlopedBox(centerPoint[0], centerPoint[1], zCenter, topSupportLength, stairSupportThickness, stairSupportWidth, 0, courseAngle, app);
       
-      // TODO finish making ladder
-      //top railing
+      final double railingDiameter=stairSupportThickness;
+      final double topRailingHeight=1.067;
+      final int nTopRailingCrossBars=4;      
+      final double stairRailSupportLength=0.5715;
+      final int nStairRailSupports=5;
+      final boolean extendRailsToGround=true;
+      final double stairRailSupportStartHeight=railingDiameter;
+      final double stairRailSupportEndHeight=2.438;
+
+      double railingSupportAngle = stairSlope+Math.PI/2;
+      double xCenterOffset=stairRailSupportLength/2*Math.cos(railingSupportAngle);
+      double zCenterOffset=stairRailSupportLength/2*Math.sin(railingSupportAngle);
       
-      //stair railing
+      for(int ySign=-1;ySign<=1;ySign+=2)
+      {
+         centerPointLocal[1]=ySign*(stepWidth/2+railingDiameter/2);
+         for(int xSign = -1; xSign<=2; xSign+=2)
+         {
+            //vertical supports for railing on top landing
+            centerPointLocal[0]=topLandingCenter+xSign*(landingRun/2-railingDiameter/2);            
+            centerPoint=rotateAroundOrigin(centerPointLocal, courseAngle);   
+            setUpSlopedCylinder(centerPoint[0], centerPoint[1], stairTopHeight+topRailingHeight/2, topRailingHeight, railingDiameter/2, Math.PI/2, 0, app);
+         }
+         
+         //horizontal railing on top landing
+         centerPointLocal[0]=topLandingCenter;
+         centerPoint=rotateAroundOrigin(centerPointLocal, courseAngle);
+         for(int n=0;n<nTopRailingCrossBars;n++)
+         {
+            setUpSlopedCylinder(centerPoint[0], centerPoint[1], stairTopHeight+topRailingHeight/(nTopRailingCrossBars)*(n+1), landingRun, railingDiameter/2, 0, courseAngle, app);
+         }
+         
+         //stairs railing supports
+         for(int n=0;n<nStairRailSupports;n++)
+         {
+            double zBase=stairRailSupportStartHeight+n*(stairRailSupportEndHeight-stairRailSupportStartHeight)/(nStairRailSupports-1);
+            double xBase=zBase/Math.tan(stairSlope)-distanceFromSupportGroundCornerToLeadingGroundStepEdge+courseStartDistance;
+            centerPointLocal[0]=xBase+xCenterOffset;  
+            zCenter=zBase+ zCenterOffset;
+            centerPoint=rotateAroundOrigin(centerPointLocal, courseAngle); 
+            setUpSlopedCylinder(centerPoint[0], centerPoint[1], zCenter, stairRailSupportLength, railingDiameter/2, railingSupportAngle, courseAngle, app);         
+         }
+         
+         //stair railing
+         double x0Railing=centerPointLocal[0]+xCenterOffset;
+         double z0Railing=zCenter+zCenterOffset;
+         double vxRailing=cosStairSlope;
+         double vzRailing=sinStairSlope;
       
-     
+         double xEnd=topLandingCenter-(landingRun/2-railingDiameter/2);
+         double zEnd=z0Railing+vzRailing*(xEnd-x0Railing)/vxRailing;
+         if(zEnd>stairTopHeight+topRailingHeight)
+         {
+            zEnd=stairTopHeight+topRailingHeight;//top of stair railing won't meet top of top railing, but close enough for now
+            xEnd=x0Railing+vxRailing*(zEnd-z0Railing)/vzRailing;
+            
+            //Extend top rail
+            centerPointLocal[0]=(topLandingCenter-landingRun/2+xEnd)/2;
+            centerPoint=rotateAroundOrigin(centerPointLocal, courseAngle); 
+            setUpSlopedCylinder(centerPoint[0], centerPoint[1], zEnd, topLandingCenter-landingRun/2-xEnd, railingDiameter/2, 0, courseAngle, app);         
+         }
+         
+         double zStart;
+         double xStart;
+         if(extendRailsToGround)
+         {
+            zStart=0;
+            xStart=x0Railing+vxRailing*(zStart-z0Railing)/vzRailing;
+         }
+         else
+         {
+            zStart=stairRailSupportStartHeight+2*zCenterOffset;
+            xStart=stairRailSupportStartHeight/Math.tan(stairSlope)-distanceFromSupportGroundCornerToLeadingGroundStepEdge+courseStartDistance;
+            
+            zStart-=railingDiameter/2*sinStairSlope;
+            xStart-=railingDiameter/2*cosStairSlope;
+         }
+         centerPointLocal[0]=(xStart+xEnd)/2;
+         centerPoint=rotateAroundOrigin(centerPointLocal, courseAngle); 
+         setUpSlopedCylinder(centerPoint[0], centerPoint[1], (zStart+zEnd)/2, Math.sqrt((xEnd-xStart)*(xEnd-xStart)+(zEnd-zStart)*(zEnd-zStart)), railingDiameter/2, stairSlope, courseAngle, app);         
+
+         
+      }
+            
+      
    }
 
    private void setUpPath1Rocks()
@@ -943,6 +1013,21 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
       location.setTranslation(new Vector3d(xCenter, yCenter, zCenter));
       RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, xLength, yLength, zLength), app);
+      combinedTerrainObject.addTerrainObject(newBox);
+   }
+
+   private void setUpSlopedCylinder(double xCenter, double yCenter, double zCenter, double length, double radius, double slopeRadians, double yawDegrees, AppearanceDefinition app)
+   {
+      Transform3D location = new Transform3D();
+      location.rotZ(Math.toRadians(yawDegrees));
+
+      Transform3D tilt = new Transform3D();
+      tilt.rotY(-slopeRadians);
+      location.mul(tilt);
+
+      location.setTranslation(new Vector3d(xCenter, yCenter, zCenter));
+      //TODO: Change this from a box to a cylinder
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, length, radius*2, radius*2), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
 
