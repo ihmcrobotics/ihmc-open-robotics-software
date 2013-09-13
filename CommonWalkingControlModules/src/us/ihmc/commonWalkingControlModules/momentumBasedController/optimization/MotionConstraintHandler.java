@@ -14,7 +14,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.D
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
 import us.ihmc.utilities.CheckTools;
 import us.ihmc.utilities.math.MatrixTools;
-import us.ihmc.utilities.math.NullspaceCalculator;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.screwTheory.ConvectiveTermCalculator;
@@ -25,7 +24,6 @@ import us.ihmc.utilities.screwTheory.PointJacobianConvectiveTermCalculator;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
-import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 /**
@@ -61,7 +59,8 @@ public class MotionConstraintHandler
    private final PointJacobianConvectiveTermCalculator pointJacobianConvectiveTermCalculator;
 
    private MotionConstraintListener motionConstraintListener;
-   
+   private final MotionConstraintSingularityEscapeHandler motionConstraintSingularityEscapeHandler = new MotionConstraintSingularityEscapeHandler();
+
    public MotionConstraintHandler(InverseDynamicsJoint[] jointsInOrder, TwistCalculator twistCalculator)
    {
       this.jointsInOrder = jointsInOrder;
@@ -190,13 +189,10 @@ public class MotionConstraintHandler
          {
             DenseMatrix64F zBlock = getMatrixFromList(pList, motionConstraintIndex, nullity, 1);
             DenseMatrix64F nFullBLock = getMatrixFromList(jList, motionConstraintIndex, nullity, nDegreesOfFreedom);
-
-            ////
             
-            computeConstraintBlocksForSingularityEscape(selectionMatrix, nullspaceMultipliers, baseToEndEffectorJacobianMatrix, jacobianMatrix, zBlock,
+            // Handle singularity escape:
+            motionConstraintSingularityEscapeHandler.computeConstraintBlocksForSingularityEscape(selectionMatrix, nullspaceMultipliers, baseToEndEffectorJacobianMatrix, jacobianMatrix, zBlock,
                   nCompactBlock, jBlockCompact);
-            
-            ///
             
             compactBlockToFullBlock(jacobian.getJointsInOrder(), nCompactBlock, nFullBLock);
             reportNullSpaceMultiplierForSpatialAccelerationMotionContraint(desiredSpatialAccelerationCommand, motionConstraintIndex, nFullBLock, nCompactBlock, zBlock, null);
@@ -229,35 +225,6 @@ public class MotionConstraintHandler
       }
    }
 
-   private static void computeConstraintBlocksForSingularityEscape(DenseMatrix64F selectionMatrix, DenseMatrix64F nullspaceMultipliers,
-         DenseMatrix64F baseToEndEffectorJacobianMatrix, DenseMatrix64F jacobianMatrix, DenseMatrix64F zBlock, DenseMatrix64F nCompactBlock, DenseMatrix64F jBlockCompact)
-   {
-      DenseMatrix64F sJ = new DenseMatrix64F(1, 1); //TODO: Garbage...
-      NullspaceCalculator nullspaceCalculator = new NullspaceCalculator(SpatialMotionVector.SIZE, true); //TODO: Garbage...
-
-      sJ.reshape(selectionMatrix.getNumRows(), jacobianMatrix.getNumCols());
-      CommonOps.mult(selectionMatrix, jacobianMatrix, sJ);
-      nullspaceCalculator.setMatrix(sJ, nullspaceMultipliers.getNumRows());
-      DenseMatrix64F nullspace = nullspaceCalculator.getNullspace();
-
-      DenseMatrix64F iMinusNNT = computeIMinusNNT(nullspace);
-      CommonOps.mult(iMinusNNT, baseToEndEffectorJacobianMatrix, jBlockCompact);
-
-      nCompactBlock.reshape(nullspace.getNumCols(), nullspace.getNumRows());
-      CommonOps.transpose(nullspace, nCompactBlock);
-
-      zBlock.set(nullspaceMultipliers);
-   }
-
-   private static DenseMatrix64F computeIMinusNNT(DenseMatrix64F nullspace)
-   {
-      DenseMatrix64F iMinusNNT = new DenseMatrix64F(1, 1);    // TODO: make field
-      iMinusNNT.reshape(nullspace.getNumRows(), nullspace.getNumRows());
-      CommonOps.multOuter(nullspace, iMinusNNT);
-      CommonOps.scale(-1.0, iMinusNNT);
-      MatrixTools.addDiagonal(iMinusNNT, 1.0);
-      return iMinusNNT;
-   }
 
    private void compactBlockToFullBlock(InverseDynamicsJoint[] joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullBlock)
    {
