@@ -18,25 +18,39 @@ public class MomentumModuleGUI
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private JFrame jFrame;
+   private JFrame jFrameOne, jFrameTwo;
    private final DesiredJointAccelerationMultipleJPanel desiredJointAccelerationMultipleJPanel;  
-   private final DesiredSpatialAccelerationMultipleJPanel desiredSpatialAccelerationMultipleJPanel;  
+   
+   private final DesiredSpatialAccelerationMultipleJPanel desiredSpatialAccelerationMultipleJPanel; 
+   private final DesiredSpatialAccelerationMultipleJPanel desiredNullspaceForSpatialAccelerationMultipleJPanel; 
+   
    private final JointAccelerationSolutionJPanel jointAccelerationSolutionJPanel;  
-
+   private final MotionConstraintJMatrixJPanel motionConstraintJMatrixJPanel;
+   
    public MomentumModuleGUI(YoVariableRegistry parentRegistry)
    {
-      jFrame = new JFrame("MomentumModuleGUI");
+      jFrameOne = new JFrame("MomentumModuleGUI Frame 1");
+      jFrameTwo = new JFrame("MomentumModuleGUI Frame2");
       desiredJointAccelerationMultipleJPanel = new DesiredJointAccelerationMultipleJPanel();
       desiredSpatialAccelerationMultipleJPanel = new DesiredSpatialAccelerationMultipleJPanel();
+      desiredNullspaceForSpatialAccelerationMultipleJPanel = new DesiredSpatialAccelerationMultipleJPanel();
       jointAccelerationSolutionJPanel = new JointAccelerationSolutionJPanel();
+      motionConstraintJMatrixJPanel = new MotionConstraintJMatrixJPanel();
       
-      jFrame.getContentPane().setLayout(new GridLayout(3, 1));
-      jFrame.getContentPane().add(desiredJointAccelerationMultipleJPanel);
-      jFrame.getContentPane().add(desiredSpatialAccelerationMultipleJPanel);
-      jFrame.getContentPane().add(jointAccelerationSolutionJPanel);
+      jFrameOne.getContentPane().setLayout(new GridLayout(2, 2));
+      jFrameOne.getContentPane().add(desiredJointAccelerationMultipleJPanel);
+      jFrameOne.getContentPane().add(desiredSpatialAccelerationMultipleJPanel);
+      jFrameOne.getContentPane().add(desiredNullspaceForSpatialAccelerationMultipleJPanel);
+      jFrameOne.getContentPane().add(jointAccelerationSolutionJPanel);
       
-      jFrame.setSize(1400, 1000);
-      jFrame.setVisible(true);
+      jFrameOne.setSize(1400, 1000);
+      jFrameOne.setVisible(true);
+      
+      jFrameTwo.getContentPane().setLayout(new GridLayout(1, 1));
+      jFrameTwo.getContentPane().add(motionConstraintJMatrixJPanel);
+      
+      jFrameTwo.setSize(1400, 1000);
+      jFrameTwo.setVisible(true);
       
       parentRegistry.addChild(registry);
    }
@@ -58,10 +72,14 @@ public class MomentumModuleGUI
       ArrayList<DesiredSpatialAccelerationCommandAndMotionConstraint> desiredSpatialAccelerationCommandAndMotionConstraints = allMomentumModuleListener.getDesiredSpatialAccelerationCommandAndMotionConstraints();
       desiredSpatialAccelerationMultipleJPanel.setDesiredSpatialAccelerations(desiredSpatialAccelerationCommandAndMotionConstraints);
    
-      
+      ArrayList<DesiredSpatialAccelerationCommandAndMotionConstraint> desiredSpatialAccelerationCommandAndNullspaceMotionConstraints = allMomentumModuleListener.getDesiredSpatialAccelerationCommandAndNullspaceMotionConstraints();
+      desiredNullspaceForSpatialAccelerationMultipleJPanel.setDesiredSpatialAccelerations(desiredSpatialAccelerationCommandAndNullspaceMotionConstraints);
+         
       InverseDynamicsJoint[] jointsToOptimizeFor = allMomentumModuleListener.getJointsToOptimizeFor();
       DenseMatrix64F jointAccelerationsSolution = allMomentumModuleListener.getJointAccelerationsSolution();
       jointAccelerationSolutionJPanel.setJointAccelerationSolution(jointsToOptimizeFor, jointAccelerationsSolution);
+      
+      motionConstraintJMatrixJPanel.setMotionConstraintJMatrix(allMomentumModuleListener.getPrimaryMotionConstraintJMatrix());
    }
 
    public void reset()

@@ -70,8 +70,7 @@ public class MomentumControlModuleBridge implements MomentumControlModule
       if (SHOW_MOMENTUM_MODULE_GUI)
       {
          momentumModuleGUI = new MomentumModuleGUI(registry);
-         
-         allMomentumModuleListener = new AllMomentumModuleListener();
+         allMomentumModuleListener = new AllMomentumModuleListener(registry);
          
          optimizationMomentumControlModule.setPrimaryMotionConstraintListener(allMomentumModuleListener);
          optimizationMomentumControlModule.setSecondaryMotionConstraintListener(allMomentumModuleListener); 
