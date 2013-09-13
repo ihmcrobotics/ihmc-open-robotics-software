@@ -22,6 +22,7 @@ public class HeadToLidarTransformBuffer
 
       for(int i = 0; i < size; i++)
       {
+         transforms[i] = new TimeStampedTransform3D();
          transforms[i].setTimeStamp(Long.MIN_VALUE);
       }
    }
@@ -51,7 +52,8 @@ public class HeadToLidarTransformBuffer
 
    public synchronized void addTimeStampedTransform(TimeStampedTransform3D timeStampedTransform3D)
    {
-      transforms[currentIndex] = timeStampedTransform3D;
+      transforms[currentIndex].setTransform3D(timeStampedTransform3D.getTransform3D());
+      transforms[currentIndex].setTimeStamp(timeStampedTransform3D.getTimeStamp());
 
       newestTimestamp = timeStampedTransform3D.getTimeStamp();
       currentIndex++;
