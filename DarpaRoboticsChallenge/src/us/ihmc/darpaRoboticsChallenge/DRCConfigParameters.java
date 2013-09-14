@@ -111,6 +111,7 @@ public class DRCConfigParameters
    public static final boolean ASSUME_PERFECT_IMU = false; // assume perfect orientation, angular velocity and linear acceleration output from IMU
 
    // LIDAR:
+   public static final boolean USE_ROS_FOR_MULTISENSE_TRANSFORMS = false;
    public static final double LIDAR_SPINDLE_VELOCITY = 2.5;
 
    public static final boolean STREAM_POLAR_LIDAR = true;
