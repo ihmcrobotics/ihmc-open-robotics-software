@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.gui;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -19,7 +18,6 @@ public class JointAccelerationSolutionJPanel extends JPanel
 
    private final NumberFormat numberFormat;
 
-   private final DenseMatrix64F jointAccelerationsSolution = new DenseMatrix64F(1, 1);
    private ArrayList<InverseDynamicsJoint> jointsToOptimizeFor = new ArrayList<InverseDynamicsJoint>();
    private final TableTools tableTools;
    private final DefaultTableModel model;
@@ -92,8 +90,9 @@ public class JointAccelerationSolutionJPanel extends JPanel
 
    private void writeJointInfoToTable(int rowCount, String jointName, String JointData)
    {
-      model.setValueAt(" " + jointName, rowCount + 1, 0);
-      model.setValueAt(" " + JointData, rowCount + 1, 1);
+      String prefix = " ";
+      model.setValueAt(prefix + jointName, rowCount + 1, 0);
+      model.setValueAt(prefix + JointData, rowCount + 1, 1);
    }
 
 }

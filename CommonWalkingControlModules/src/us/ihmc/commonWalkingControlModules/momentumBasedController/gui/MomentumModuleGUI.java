@@ -41,7 +41,8 @@ public class MomentumModuleGUI
       jFrame.setVisible(true);
       jFrame.setLocationRelativeTo(null);
       jFrame.setResizable(false);
-      showOnScreen(2, jFrame);
+      int showOnScreenNumber = 1;
+      showOnScreen(showOnScreenNumber, jFrame);
       
       parentRegistry.addChild(registry);
    }
