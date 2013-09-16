@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
@@ -39,6 +41,7 @@ public class MomentumModuleGUI
       jFrame.setVisible(true);
       jFrame.setLocationRelativeTo(null);
       jFrame.setResizable(false);
+      showOnScreen(2, jFrame);
       
       parentRegistry.addChild(registry);
    }
@@ -78,4 +81,16 @@ public class MomentumModuleGUI
       // TODO Auto-generated method stub
       
    }
+   
+   public static void showOnScreen( int screen, JFrame frame ) {
+      GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+      GraphicsDevice[] gd = ge.getScreenDevices();
+      if( screen > -1 && screen < gd.length ) {
+          frame.setLocation(gd[screen].getDefaultConfiguration().getBounds().x + 10, frame.getY());
+      } else if( gd.length > 0 ) {
+          frame.setLocation(gd[0].getDefaultConfiguration().getBounds().x + 10, frame.getY());
+      } else {
+          throw new RuntimeException( "No Screens Found" );
+      }
+  }
 }

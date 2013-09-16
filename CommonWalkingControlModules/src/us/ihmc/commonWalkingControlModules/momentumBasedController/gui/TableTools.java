@@ -53,7 +53,11 @@ public class TableTools
    public void setPreferredWidth(int columnNumber, int prefferedWidth)
    {
          jTable.getColumnModel().getColumn(columnNumber).setPreferredWidth(prefferedWidth);
-      
+   }
+   
+   public void setRowCount(int rowCount)
+   {
+      model.setRowCount(rowCount);
    }
    
    

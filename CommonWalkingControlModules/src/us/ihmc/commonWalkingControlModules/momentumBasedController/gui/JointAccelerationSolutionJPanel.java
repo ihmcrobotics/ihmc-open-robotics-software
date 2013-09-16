@@ -62,7 +62,6 @@ public class JointAccelerationSolutionJPanel extends JPanel
          {
             double acceleration = jointAccelerationsSolution.get(index + j, 0);
             writeJointInfoToTable(i + j + counter, joint.getName(), numberFormat.format(acceleration));
-            System.out.println(" FINAL CHECK~!!!!!                                      " + joint.getName() + " = " + numberFormat.format(acceleration));
          }
 
          index += numDofs;
