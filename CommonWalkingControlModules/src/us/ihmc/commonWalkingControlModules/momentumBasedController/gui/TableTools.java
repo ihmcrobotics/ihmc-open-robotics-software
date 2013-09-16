@@ -1,18 +1,12 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.gui;
 
 import java.awt.Color;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 
 import javax.swing.JTable;
 import javax.swing.UIManager;
 import javax.swing.border.MatteBorder;
 import javax.swing.table.DefaultTableModel;
-
-import org.ejml.data.DenseMatrix64F;
-
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommandAndMotionConstraint;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 
 
 public class TableTools
@@ -31,9 +25,10 @@ public class TableTools
    {
       model.setColumnCount(columnHeader.size());
       model.setRowCount(rowCount + 1);
+      String prefix = " ";
       for(int i = 0; i<columnHeader.size() ; i++)
       {
-         model.setValueAt(" " + columnHeader.get(i), 0, i);
+         model.setValueAt(prefix + columnHeader.get(i), 0, i);
          jTable.getColumnModel().getColumn(i).setPreferredWidth(1350/columnHeader.size());
       }
       
@@ -59,9 +54,12 @@ public class TableTools
    {
       model.setRowCount(rowCount);
    }
+   public void addRows(int addRows)
+   {
+      model.setRowCount(model.getRowCount() + addRows);
+   }
    
-   
-   
+    
    
   
 
