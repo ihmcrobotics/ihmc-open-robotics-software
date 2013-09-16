@@ -40,7 +40,7 @@ public class DesiredJointAccelerationMultipleJPanel extends AbstractMultipleReus
 
    public synchronized void setDesiredJointAccelerations(ArrayList<DesiredJointAccelerationCommandAndMotionConstraint> desiredJointAccelerationCommandAndMotionConstraints)
    {
-
+     
       for (int i = 0; i < desiredJointAccelerationCommandAndMotionConstraints.size(); i++)
       {
          DesiredJointAccelerationCommandAndMotionConstraint desiredJointAccelerationCommandAndMotionConstraint = desiredJointAccelerationCommandAndMotionConstraints.get(i);
