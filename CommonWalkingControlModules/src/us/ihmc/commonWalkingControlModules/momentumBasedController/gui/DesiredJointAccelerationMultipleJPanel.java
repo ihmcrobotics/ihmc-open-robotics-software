@@ -55,10 +55,10 @@ public class DesiredJointAccelerationMultipleJPanel extends AbstractMultipleReus
    
    private void writeDataToJointTable(int rowCount, DesiredJointAccelerationJPanel desiredJointAccelerationJPanel)
    {
-      model.setValueAt(desiredJointAccelerationJPanel.getJointName(), rowCount + 1, 0);
-      model.setValueAt(desiredJointAccelerationJPanel.getDesiredAcceleration(), rowCount + 1, 1);
-      model.setValueAt(desiredJointAccelerationJPanel.getAchievedJointAcceleration(), rowCount + 1, 2);
-      model.setValueAt(desiredJointAccelerationJPanel.getErrorAcceleration(), rowCount + 1, 3);
+      model.setValueAt(" " + desiredJointAccelerationJPanel.getJointName(), rowCount + 1, 0);
+      model.setValueAt(" " + desiredJointAccelerationJPanel.getDesiredAcceleration(), rowCount + 1, 1);
+      model.setValueAt(" " + desiredJointAccelerationJPanel.getAchievedJointAcceleration(), rowCount + 1, 2);
+      model.setValueAt(" " + desiredJointAccelerationJPanel.getErrorAcceleration(), rowCount + 1, 3);
    }
 
    public DesiredJointAccelerationJPanel constructNewJPanel()
