@@ -56,12 +56,12 @@ public class DesiredSpatialAccelerationMultipleJPanel extends AbstractMultipleRe
 
    private void writeDataToJointTable(int rowCount, DesiredSpatialAccelerationJPanel desiredJointAccelerationJPanel)
    {
-      model.setValueAt(desiredJointAccelerationJPanel.getBodyName(), rowCount + 1, 0);
-      model.setValueAt(desiredJointAccelerationJPanel.getBaseName(), rowCount + 1, 1);
-      model.setValueAt(desiredJointAccelerationJPanel.getDesiredSpatialAcceleration(), rowCount + 1, 2);
-      model.setValueAt(desiredJointAccelerationJPanel.getDesiredSpatialAcceleration2(), rowCount + 1, 3);
-      model.setValueAt(desiredJointAccelerationJPanel.getAchievedSpatialAcceleration(), rowCount + 1, 4);
-      model.setValueAt(desiredJointAccelerationJPanel.getErrorSpatialAcceleration(), rowCount + 1, 5);
+      model.setValueAt(" " + desiredJointAccelerationJPanel.getBodyName(), rowCount + 1, 0);
+      model.setValueAt(" " + desiredJointAccelerationJPanel.getBaseName(), rowCount + 1, 1);
+      model.setValueAt(" " + desiredJointAccelerationJPanel.getDesiredSpatialAcceleration(), rowCount + 1, 2);
+      model.setValueAt(" " + desiredJointAccelerationJPanel.getDesiredSpatialAcceleration2(), rowCount + 1, 3);
+      model.setValueAt(" " + desiredJointAccelerationJPanel.getAchievedSpatialAcceleration(), rowCount + 1, 4);
+      model.setValueAt(" " + desiredJointAccelerationJPanel.getErrorSpatialAcceleration(), rowCount + 1, 5);
    }
    
    public DesiredSpatialAccelerationJPanel constructNewJPanel()

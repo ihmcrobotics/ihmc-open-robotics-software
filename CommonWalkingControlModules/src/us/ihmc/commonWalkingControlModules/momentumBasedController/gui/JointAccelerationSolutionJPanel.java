@@ -33,7 +33,7 @@ public class JointAccelerationSolutionJPanel extends JPanel
       this.numberFormat.setGroupingUsed(false);
       this.tableTools = new TableTools();
       ArrayList<String> columnHeader = new ArrayList<String>();
-      columnHeader.add("jointName");
+      columnHeader.add("JointName");
       columnHeader.add("Acceleration");
       jointTable = tableTools.createJTableModelForDesiredJointAcceleration(columnHeader, 34);
       this.model = tableTools.getModel();
@@ -93,8 +93,8 @@ public class JointAccelerationSolutionJPanel extends JPanel
 
    private void writeJointInfoToTable(int rowCount, String jointName, String JointData)
    {
-      model.setValueAt(jointName, rowCount + 1, 0);
-      model.setValueAt(JointData, rowCount + 1, 1);
+      model.setValueAt(" " + jointName, rowCount + 1, 0);
+      model.setValueAt(" " + JointData, rowCount + 1, 1);
    }
 
 }
