@@ -1,10 +1,13 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.gui;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 
 import javax.swing.JPanel;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 
 import org.ejml.data.DenseMatrix64F;
 
@@ -13,25 +16,33 @@ import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 public class JointAccelerationSolutionJPanel extends JPanel
 {
    private static final long serialVersionUID = -7632993267486553349L;
-      
+
    private final NumberFormat numberFormat;
 
    private final DenseMatrix64F jointAccelerationsSolution = new DenseMatrix64F(1, 1);
-   private ArrayList<InverseDynamicsJoint> jointsToOptimizeFor = new ArrayList<InverseDynamicsJoint>(); 
-   
+   private ArrayList<InverseDynamicsJoint> jointsToOptimizeFor = new ArrayList<InverseDynamicsJoint>();
+   private final TableTools tableTools;
+   private final DefaultTableModel model;
+   private final JTable jointTable;
+
    public JointAccelerationSolutionJPanel()
    {
       this.numberFormat = NumberFormat.getInstance();
       this.numberFormat.setMaximumFractionDigits(3);
       this.numberFormat.setMinimumFractionDigits(1);
       this.numberFormat.setGroupingUsed(false);
+      this.tableTools = new TableTools();
+      ArrayList<String> columnHeader = new ArrayList<String>();
+      columnHeader.add("jointName");
+      columnHeader.add("Acceleration");
+      jointTable = tableTools.createJTableModelForDesiredJointAcceleration(columnHeader, 34);
+      this.model = tableTools.getModel();
    }
-   
+
    public synchronized void setJointAccelerationSolution(InverseDynamicsJoint[] jointsToOptimizeFor, DenseMatrix64F jointAccelerationsSolution)
    {
-      this.jointAccelerationsSolution.setReshape(jointAccelerationsSolution);
-      this.jointsToOptimizeFor.clear(); 
-      
+      this.jointsToOptimizeFor.clear();
+
       if (jointsToOptimizeFor != null)
       {
          for (InverseDynamicsJoint jointToOptimizeFor : jointsToOptimizeFor)
@@ -39,56 +50,51 @@ public class JointAccelerationSolutionJPanel extends JPanel
             this.jointsToOptimizeFor.add(jointToOptimizeFor);
          }
       }
-      
-       this.repaint();
-   }
 
+      int index = 0;
+      int counter = 0;
+      for (int i = 0; i < this.jointsToOptimizeFor.size(); i++)
+      {
+         InverseDynamicsJoint joint = this.jointsToOptimizeFor.get(i);
+         int numDofs = joint.getDegreesOfFreedom();
+
+         for (int j = 0; j < numDofs; j++)
+         {
+            double acceleration = jointAccelerationsSolution.get(index + j, 0);
+            writeJointInfoToTable(i + j + counter, joint.getName(), numberFormat.format(acceleration));
+            System.out.println(" FINAL CHECK~!!!!!                                      " + joint.getName() + " = " + numberFormat.format(acceleration));
+         }
+
+         index += numDofs;
+         counter += numDofs - 1;
+      }
+   }
 
    public synchronized void paintComponent(Graphics graphics)
    {
-      int index = 0;
-      int yPixels = 12;
-      
-      for (int i = 0; i<jointsToOptimizeFor.size(); i++)
-      {
-         int xPixels = 12;
-
-         InverseDynamicsJoint joint = jointsToOptimizeFor.get(i);
-         int numDofs = joint.getDegreesOfFreedom();
-
-         graphics.drawString(joint.getName(), xPixels, yPixels);
-         xPixels = xPixels + 140;
-         
-         for (int j=0; j<numDofs; j++)
-         {
-            double acceleration = jointAccelerationsSolution.get(index + j, 0);
-            graphics.drawString(numberFormat.format(acceleration), xPixels, yPixels);
-            xPixels = xPixels + 60;
-         }
-         
-         yPixels = yPixels + 12;
-         index = index + numDofs;
-      }
+      add(jointTable);
    }
-   
+
    public String toPrettyString(DenseMatrix64F columnMatrix)
    {
       String ret = "(";
-      
+
       int numRows = columnMatrix.getNumRows();
-      for (int i=0; i<numRows; i++)
+      for (int i = 0; i < numRows; i++)
       {
          ret = ret + numberFormat.format(columnMatrix.get(i, 0));
-         if (i < numRows - 1) ret = ret + ", ";
+         if (i < numRows - 1)
+            ret = ret + ", ";
       }
-      
+
       ret = ret + ")";
       return ret;
    }
 
-
-
+   private void writeJointInfoToTable(int rowCount, String jointName, String JointData)
+   {
+      model.setValueAt(jointName, rowCount + 1, 0);
+      model.setValueAt(JointData, rowCount + 1, 1);
+   }
 
 }
-
-

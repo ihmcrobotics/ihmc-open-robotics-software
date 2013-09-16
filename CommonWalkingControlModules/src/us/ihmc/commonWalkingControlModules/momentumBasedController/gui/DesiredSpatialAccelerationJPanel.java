@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.gui;
 
-import java.awt.Graphics;
 import java.text.NumberFormat;
 
 import javax.swing.JPanel;
@@ -56,20 +55,35 @@ public class DesiredSpatialAccelerationJPanel extends JPanel
       this.repaint();
    }
 
-   public synchronized void paintComponent(Graphics graphics)
+   public String getBodyName()
    {
-      graphics.drawString(bodyName, 10, 12); 
-      graphics.drawString(baseName, 100, 12); 
-      graphics.drawString(toPrettyString(desiredSpatialAcceleration), 200, 12); 
-      graphics.drawString(toPrettyString(desiredSpatialAcceleration2), 550, 12); 
-      graphics.drawString(toPrettyString(achievedSpatialAcceleration), 800, 12); 
-
-      graphics.drawString(toPrettyString(errorSpatialAcceleration), 1100, 12); 
+      return bodyName;
    }
+   public String getBaseName()
+   {
+      return baseName;
+   }
+   public String getDesiredSpatialAcceleration()
+   {
+      return toPrettyString(desiredSpatialAcceleration);
+   }
+   public String getDesiredSpatialAcceleration2()
+   {
+      return toPrettyString(desiredSpatialAcceleration2);
+   }
+   public String getAchievedSpatialAcceleration()
+   {
+      return toPrettyString(achievedSpatialAcceleration);
+   }
+   public String getErrorSpatialAcceleration()
+   {
+      return toPrettyString(errorSpatialAcceleration);
+   }
+   
    
    public String toPrettyString(DenseMatrix64F columnMatrix)
    {
-      String ret = "(";
+      String ret = " ";
       
       int numRows = columnMatrix.getNumRows();
       for (int i=0; i<numRows; i++)
@@ -78,7 +92,7 @@ public class DesiredSpatialAccelerationJPanel extends JPanel
          if (i < numRows - 1) ret = ret + ", ";
       }
       
-      ret = ret + ")";
+      ret = ret + "";
       return ret;
    }
 

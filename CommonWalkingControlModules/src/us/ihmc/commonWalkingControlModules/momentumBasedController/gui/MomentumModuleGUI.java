@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.gui;
 
-import java.awt.GridLayout;
+import java.awt.BorderLayout;
+import java.awt.Component;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
@@ -18,39 +19,26 @@ public class MomentumModuleGUI
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private JFrame jFrameOne, jFrameTwo;
+   private JFrame jFrame;
    private final DesiredJointAccelerationMultipleJPanel desiredJointAccelerationMultipleJPanel;  
-   
-   private final DesiredSpatialAccelerationMultipleJPanel desiredSpatialAccelerationMultipleJPanel; 
-   private final DesiredSpatialAccelerationMultipleJPanel desiredNullspaceForSpatialAccelerationMultipleJPanel; 
-   
+   private final DesiredSpatialAccelerationMultipleJPanel desiredSpatialAccelerationMultipleJPanel;  
    private final JointAccelerationSolutionJPanel jointAccelerationSolutionJPanel;  
-   private final MotionConstraintJMatrixJPanel motionConstraintJMatrixJPanel;
-   
+
    public MomentumModuleGUI(YoVariableRegistry parentRegistry)
    {
-      jFrameOne = new JFrame("MomentumModuleGUI Frame 1");
-      jFrameTwo = new JFrame("MomentumModuleGUI Frame2");
+      jFrame = new JFrame("MomentumModuleGUI");
       desiredJointAccelerationMultipleJPanel = new DesiredJointAccelerationMultipleJPanel();
       desiredSpatialAccelerationMultipleJPanel = new DesiredSpatialAccelerationMultipleJPanel();
-      desiredNullspaceForSpatialAccelerationMultipleJPanel = new DesiredSpatialAccelerationMultipleJPanel();
       jointAccelerationSolutionJPanel = new JointAccelerationSolutionJPanel();
-      motionConstraintJMatrixJPanel = new MotionConstraintJMatrixJPanel();
       
-      jFrameOne.getContentPane().setLayout(new GridLayout(2, 2));
-      jFrameOne.getContentPane().add(desiredJointAccelerationMultipleJPanel);
-      jFrameOne.getContentPane().add(desiredSpatialAccelerationMultipleJPanel);
-      jFrameOne.getContentPane().add(desiredNullspaceForSpatialAccelerationMultipleJPanel);
-      jFrameOne.getContentPane().add(jointAccelerationSolutionJPanel);
+      jFrame.getContentPane().add(desiredJointAccelerationMultipleJPanel, BorderLayout.NORTH);
+      jFrame.getContentPane().add(desiredSpatialAccelerationMultipleJPanel, BorderLayout.CENTER);
+      jFrame.getContentPane().add(jointAccelerationSolutionJPanel, BorderLayout.SOUTH);
       
-      jFrameOne.setSize(1400, 1000);
-      jFrameOne.setVisible(true);
-      
-      jFrameTwo.getContentPane().setLayout(new GridLayout(1, 1));
-      jFrameTwo.getContentPane().add(motionConstraintJMatrixJPanel);
-      
-      jFrameTwo.setSize(1400, 1000);
-      jFrameTwo.setVisible(true);
+      jFrame.setSize(1400, 942);
+      jFrame.setVisible(true);
+      jFrame.setLocationRelativeTo(null);
+      jFrame.setResizable(false);
       
       parentRegistry.addChild(registry);
    }
@@ -72,14 +60,11 @@ public class MomentumModuleGUI
       ArrayList<DesiredSpatialAccelerationCommandAndMotionConstraint> desiredSpatialAccelerationCommandAndMotionConstraints = allMomentumModuleListener.getDesiredSpatialAccelerationCommandAndMotionConstraints();
       desiredSpatialAccelerationMultipleJPanel.setDesiredSpatialAccelerations(desiredSpatialAccelerationCommandAndMotionConstraints);
    
-      ArrayList<DesiredSpatialAccelerationCommandAndMotionConstraint> desiredSpatialAccelerationCommandAndNullspaceMotionConstraints = allMomentumModuleListener.getDesiredSpatialAccelerationCommandAndNullspaceMotionConstraints();
-      desiredNullspaceForSpatialAccelerationMultipleJPanel.setDesiredSpatialAccelerations(desiredSpatialAccelerationCommandAndNullspaceMotionConstraints);
-         
+      
       InverseDynamicsJoint[] jointsToOptimizeFor = allMomentumModuleListener.getJointsToOptimizeFor();
       DenseMatrix64F jointAccelerationsSolution = allMomentumModuleListener.getJointAccelerationsSolution();
       jointAccelerationSolutionJPanel.setJointAccelerationSolution(jointsToOptimizeFor, jointAccelerationsSolution);
-      
-      motionConstraintJMatrixJPanel.setMotionConstraintJMatrix(allMomentumModuleListener.getPrimaryMotionConstraintJMatrix());
+      System.out.println(" frame height = " + jFrame.getHeight());
    }
 
    public void reset()
