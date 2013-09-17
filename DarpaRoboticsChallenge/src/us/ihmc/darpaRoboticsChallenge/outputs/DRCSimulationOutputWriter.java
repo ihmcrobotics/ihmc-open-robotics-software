@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.outputs;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotDampingParameters;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap;
 import us.ihmc.utilities.Pair;
@@ -15,12 +16,14 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
 {
    
    private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
+   private final RobotVisualizer robotVisualizer;
    
    double[] prevError;
-   public DRCSimulationOutputWriter(SDFRobot robot, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public DRCSimulationOutputWriter(SDFRobot robot, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, RobotVisualizer robotVisualizer)
    {
       super(robot);
       this.dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistry;
+      this.robotVisualizer = robotVisualizer;
    }
 
    public void writeAfterController(long timestamp)
@@ -30,7 +33,10 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
 
    public void writeAfterEstimator()
    {
-      // Nothing to do here
+      if (robotVisualizer != null)
+      {
+         robotVisualizer.update();
+      }
    }
 
    public void writeAfterSimulationTick()
@@ -70,6 +76,12 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
       }
       
       prevError = new double[revoluteJoints.size()];
+      
+
+      if(robotVisualizer != null)
+      {
+         robotVisualizer.setFullRobotModel(fullRobotModel);
+      }
       
    }
 
