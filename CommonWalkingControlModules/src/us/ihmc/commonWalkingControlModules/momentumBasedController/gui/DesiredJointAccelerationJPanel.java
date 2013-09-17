@@ -56,20 +56,21 @@ public class DesiredJointAccelerationJPanel extends JPanel
       return joint.getName();
    }
    
-   public String getDesiredAcceleration()
+   public String getDesiredAccelerationAsString()
    {
       return toPrettyString(numberFormat, desiredAcceleration);
    }
    
-   public String getAchievedJointAcceleration()
+   public String getAchievedJointAccelerationAsString()
    {
       return toPrettyString(numberFormat, achievedJointAcceleration);
    }
    
-   public String getErrorAcceleration()
+   public String getErrorAccelerationAsString()
    {
       return toPrettyString(numberFormat, errorAcceleration);
    }
+   
    
    public static String toPrettyString(NumberFormat numberFormat, DenseMatrix64F columnMatrix)
    {
