@@ -54,7 +54,7 @@ public class ContactPointVisualizer
       int i = 0;
       for (PlaneContactState contactState : contactStates)
       {
-         for (FramePoint framePoint : contactState.getContactPoints())
+         for (FramePoint framePoint : contactState.getContactFramePoints())
          {
             framePoint = new FramePoint(framePoint);
             framePoint.changeFrame(ReferenceFrame.getWorldFrame());

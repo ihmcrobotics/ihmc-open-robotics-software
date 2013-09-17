@@ -84,10 +84,9 @@ public class MomentumBasedController
    private final List<ContactablePlaneBody> listOfAllContactablePlaneBodies;
    private final List<ContactableCylinderBody> listOfAllContactableCylinderBodies;
 
-   // Creating a Map that will contain all of the YoPlaneContactState and YoRollingContactState to pass to the MomentumControlModule compute method
-   private final Map<ContactablePlaneBody, PlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, PlaneContactState>();
-   private final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> planeContactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
-   private final LinkedHashMap<ContactableCylinderBody, YoCylindricalContactState> cylindricalContactStates = new LinkedHashMap<ContactableCylinderBody,
+   private final Map<ContactablePlaneBody, PlaneContactState> planeContactStates = new LinkedHashMap<ContactablePlaneBody, PlaneContactState>();
+   private final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> yoPlaneContactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
+   private final LinkedHashMap<ContactableCylinderBody, YoCylindricalContactState> yoCylindricalContactStates = new LinkedHashMap<ContactableCylinderBody,
                                                                                                                  YoCylindricalContactState>();
    private final List<ModifiableContactState> modifiableContactStates = new ArrayList<ModifiableContactState>();
 
@@ -244,7 +243,7 @@ public class MomentumBasedController
                                                contactablePlaneBody.getPlaneFrame(), registry);
 
 //       contactState.set(contactablePlaneBody.getContactPoints2d(), coefficientOfFriction);    // initialize with flat 'feet'
-         planeContactStates.put(contactablePlaneBody, contactState);
+         yoPlaneContactStates.put(contactablePlaneBody, contactState);
       }
 
       InverseDynamicsJoint[] joints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
@@ -256,9 +255,9 @@ public class MomentumBasedController
          }
       }
 
-      for (ContactablePlaneBody contactablePlaneBody : planeContactStates.keySet())
+      for (ContactablePlaneBody contactablePlaneBody : yoPlaneContactStates.keySet())
       {
-         contactStates.put(contactablePlaneBody, planeContactStates.get(contactablePlaneBody));
+         planeContactStates.put(contactablePlaneBody, yoPlaneContactStates.get(contactablePlaneBody));
       }
 
 
@@ -279,11 +278,11 @@ public class MomentumBasedController
                                                                 rigidBody.getParentJoint().getFrameAfterJoint(), contactableCylinderBody.getCylinderFrame(),
                                                                 registry, dynamicGraphicObjectsListRegistry);
          cylindricalContactState.set(coefficientOfFriction, contactableCylinderBody, false);
-         cylindricalContactStates.put(contactableCylinderBody, cylindricalContactState);
+         yoCylindricalContactStates.put(contactableCylinderBody, cylindricalContactState);
       }
 
-      modifiableContactStates.addAll(planeContactStates.values());
-      modifiableContactStates.addAll(cylindricalContactStates.values());
+      modifiableContactStates.addAll(yoPlaneContactStates.values());
+      modifiableContactStates.addAll(yoCylindricalContactStates.values());
 
       this.planeContactWrenchProcessor = new PlaneContactWrenchProcessor(this.listOfAllContactablePlaneBodies, dynamicGraphicObjectsListRegistry, registry);
 
@@ -308,7 +307,7 @@ public class MomentumBasedController
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         feetContactStatesToPack.add(contactStates.get(feet.get(robotSide)));
+         feetContactStatesToPack.add(planeContactStates.get(feet.get(robotSide)));
       }
    }
 
@@ -353,17 +352,17 @@ public class MomentumBasedController
    private void resetWeightsForContactRegularization()
    {
       // TODO: get rid of contactStates or planeContactStates. This is confusing.
-      for (PlaneContactState contactState : contactStates.values())
-      {
-         contactState.resetContactRegularization();
-      }
-
       for (PlaneContactState contactState : planeContactStates.values())
       {
          contactState.resetContactRegularization();
       }
+
+      for (PlaneContactState contactState : yoPlaneContactStates.values())
+      {
+         contactState.resetContactRegularization();
+      }
       
-      for (CylindricalContactState contactState : cylindricalContactStates.values())
+      for (CylindricalContactState contactState : yoCylindricalContactStates.values())
       {
          contactState.resetContactRegularization();
       }
@@ -373,14 +372,14 @@ public class MomentumBasedController
    public void doSecondaryControl()
    {
       if (contactPointVisualizer != null)
-         contactPointVisualizer.update(this.contactStates.values());
+         contactPointVisualizer.update(this.planeContactStates.values());
 
       updateMomentumBasedControllerSpy();
 
       MomentumModuleSolution momentumModuleSolution;
       try
       {
-         momentumModuleSolution = momentumControlModuleBridge.compute(this.contactStates, this.cylindricalContactStates, upcomingSupportLeg.getEnumValue());
+         momentumModuleSolution = momentumControlModuleBridge.compute(this.planeContactStates, this.yoCylindricalContactStates, upcomingSupportLeg.getEnumValue());
       }
       catch (NoConvergenceException e)
       {
@@ -419,10 +418,10 @@ public class MomentumBasedController
       {
          if (resetEstimatorPositionsToCurrent.getBooleanValue())
          {
-            pointPositionGrabber.resetToCurrentLocations(contactStates, planeContactWrenchProcessor.getCops());
+            pointPositionGrabber.resetToCurrentLocations(planeContactStates, planeContactWrenchProcessor.getCops());
             resetEstimatorPositionsToCurrent.set(false);
          }
-         pointPositionGrabber.set(contactStates, planeContactWrenchProcessor.getCops());
+         pointPositionGrabber.set(planeContactStates, planeContactWrenchProcessor.getCops());
       }
       
       inverseDynamicsCalculator.compute();
@@ -441,19 +440,19 @@ public class MomentumBasedController
    {
       if (momentumBasedControllerSpy != null)
       {
-         for (ContactablePlaneBody contactablePlaneBody : planeContactStates.keySet())
+         for (ContactablePlaneBody contactablePlaneBody : yoPlaneContactStates.keySet())
          {
-            YoPlaneContactState contactState = planeContactStates.get(contactablePlaneBody);
+            YoPlaneContactState contactState = yoPlaneContactStates.get(contactablePlaneBody);
             if (contactState.inContact())
             {
-               momentumBasedControllerSpy.setPlaneContactState(contactablePlaneBody, contactState.getContactPoints2d(),
+               momentumBasedControllerSpy.setPlaneContactState(contactablePlaneBody, contactState.getContactFramePoints2d(),
                        contactState.getCoefficientOfFriction(), contactState.getContactNormalFrameVector());
             }
          }
 
-         for (ContactableCylinderBody contactableCylinderBody : cylindricalContactStates.keySet())
+         for (ContactableCylinderBody contactableCylinderBody : yoCylindricalContactStates.keySet())
          {
-            YoCylindricalContactState contactState = cylindricalContactStates.get(contactableCylinderBody);
+            YoCylindricalContactState contactState = yoCylindricalContactStates.get(contactableCylinderBody);
             if (contactState.isInContact())
                momentumBasedControllerSpy.setCylindricalContactInContact(contactableCylinderBody, contactState.isInContact());
          }
@@ -567,7 +566,7 @@ public class MomentumBasedController
    public void setPlaneContactState(ContactablePlaneBody contactableBody, List<FramePoint2d> contactPoints, double coefficientOfFriction,
                                     FrameVector normalContactVector)
    {
-      YoPlaneContactState yoPlaneContactState = planeContactStates.get(contactableBody);
+      YoPlaneContactState yoPlaneContactState = yoPlaneContactStates.get(contactableBody);
 
       if (normalContactVector == null)
       {
@@ -581,7 +580,7 @@ public class MomentumBasedController
 
    public void setCylindricalContactInContact(ContactableCylinderBody contactableCylinderBody, boolean setInContact)
    {
-      YoCylindricalContactState yoCylindricalContactState = cylindricalContactStates.get(contactableCylinderBody);
+      YoCylindricalContactState yoCylindricalContactState = yoCylindricalContactStates.get(contactableCylinderBody);
       yoCylindricalContactState.setInContact(setInContact);
    }
 
@@ -732,17 +731,17 @@ public class MomentumBasedController
 
    public List<FramePoint> getContactPoints(ContactablePlaneBody contactablePlaneBody)
    {
-      return contactStates.get(contactablePlaneBody).getContactPoints();
+      return planeContactStates.get(contactablePlaneBody).getContactFramePoints();
    }
 
    public PlaneContactState getContactState(ContactablePlaneBody contactablePlaneBody)
    {
-      return contactStates.get(contactablePlaneBody);
+      return planeContactStates.get(contactablePlaneBody);
    }
 
    public Collection<PlaneContactState> getPlaneContactStates()
    {
-      return contactStates.values();
+      return planeContactStates.values();
    }
 
    public void clearContacts()
@@ -776,24 +775,24 @@ public class MomentumBasedController
    //TODO (Sylvain): get rid of these methods changing wRho & wPhi of contact state
    public void setPlaneContactState_wRho (ContactablePlaneBody contactablePlaneBody, double wRho)
    {
-      planeContactStates.get(contactablePlaneBody).setRhoContactRegularization(wRho);
+      yoPlaneContactStates.get(contactablePlaneBody).setRhoContactRegularization(wRho);
    }
 
    public void setCylindricalContactState_wRho_wPhi(ContactableCylinderBody contactableCylinderBody, double wRho, double wPhi)
    {
-      cylindricalContactStates.get(contactableCylinderBody).setRhoContactRegularization(wRho);
-      cylindricalContactStates.get(contactableCylinderBody).setPhiContactRegularization(wPhi);
+      yoCylindricalContactStates.get(contactableCylinderBody).setRhoContactRegularization(wRho);
+      yoCylindricalContactStates.get(contactableCylinderBody).setPhiContactRegularization(wPhi);
    }
 
    public void setCylindricalContactStateProperties(ContactableCylinderBody contactableCylinderBody, double coefficientOfFriction, double gripStrength,
          double cylinderRadius, double halfHandWidth, double gripWeaknessFactor, boolean inContact)
    {
-      cylindricalContactStates.get(contactableCylinderBody).set(coefficientOfFriction, gripStrength, cylinderRadius, halfHandWidth, gripWeaknessFactor,
+      yoCylindricalContactStates.get(contactableCylinderBody).set(coefficientOfFriction, gripStrength, cylinderRadius, halfHandWidth, gripWeaknessFactor,
             inContact);
    }
 
    public void setCylindricalContactStateProperties(ContactableCylinderBody contactableCylinderBody, double coefficientOfFriction, boolean inContact)
    {
-      cylindricalContactStates.get(contactableCylinderBody).set(coefficientOfFriction, contactableCylinderBody, inContact);
+      yoCylindricalContactStates.get(contactableCylinderBody).set(coefficientOfFriction, contactableCylinderBody, inContact);
    }
 }
