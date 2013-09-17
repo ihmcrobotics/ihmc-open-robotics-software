@@ -77,7 +77,7 @@ public class ContactPointWrenchMatrixCalculator
       int column = 0;
       for (PlaneContactState contactState : contactStates)
       {
-         List<FramePoint2d> contactPoints2d = contactState.getContactPoints2d();
+         List<FramePoint2d> contactPoints2d = contactState.getContactFramePoints2d();
          WrenchDistributorTools.getSupportVectors(normalizedSupportVectors, contactState.getCoefficientOfFriction(), contactState.getPlaneFrame()); // TODO: use normal
 
          for (FramePoint2d contactPoint2d : contactPoints2d)

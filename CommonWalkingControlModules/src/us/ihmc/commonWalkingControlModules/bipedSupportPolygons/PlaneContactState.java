@@ -11,12 +11,13 @@ public interface PlaneContactState
 {
    public static final double DEFAULT_WRHO = 0.001;
    
-   public abstract List<FramePoint> getContactPoints();
    public abstract ReferenceFrame getBodyFrame();
-   public abstract boolean inContact();
    public abstract ReferenceFrame getPlaneFrame();
-   public abstract List<FramePoint2d> getContactPoints2d();
+   public abstract boolean inContact();
    public abstract FrameVector getContactNormalFrameVector();
+   public abstract List<? extends ContactPoint> getContactPoints();
+   public abstract List<FramePoint> getContactFramePoints();
+   public abstract List<FramePoint2d> getContactFramePoints2d();
    public abstract double getCoefficientOfFriction();
    public abstract int getNumberOfContactPoints();
 

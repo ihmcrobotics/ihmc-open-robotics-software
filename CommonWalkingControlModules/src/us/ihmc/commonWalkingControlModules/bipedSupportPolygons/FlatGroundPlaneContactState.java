@@ -15,8 +15,9 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class FlatGroundPlaneContactState implements PlaneContactState
 {
-   private final ArrayList<FramePoint> contactPoints;
-   private final ArrayList<FramePoint2d> contactPoints2d;
+   private final ArrayList<FramePoint> contactFramePoints;
+   private final ArrayList<FramePoint2d> contactFramePoints2d;
+   private final List<ContactPoint> contactPoints;
    private final double coefficientOfFriction;
    private final FrameVector contactNormalFrameVector;
 
@@ -38,22 +39,29 @@ public class FlatGroundPlaneContactState implements PlaneContactState
 
    public FlatGroundPlaneContactState(double[][] contactPointLocations, double coefficientOfFriction)
    {
-      contactPoints = new ArrayList<FramePoint>();
-      contactPoints2d = new ArrayList<FramePoint2d>();
-
+      contactFramePoints = new ArrayList<FramePoint>();
+      contactFramePoints2d = new ArrayList<FramePoint2d>();
+      
       for (double[] contactPointLocation : contactPointLocations)
       {
-         contactPoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), contactPointLocation[0], contactPointLocation[1], 0.0));
-         contactPoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), contactPointLocation[0], contactPointLocation[1]));
+         contactFramePoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), contactPointLocation[0], contactPointLocation[1], 0.0));
+         contactFramePoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), contactPointLocation[0], contactPointLocation[1]));
       }
       this.coefficientOfFriction = coefficientOfFriction;
       this.contactNormalFrameVector = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
+      
+      contactPoints = new ArrayList<ContactPoint>();
+      for (int i = 0; i < contactFramePoints2d.size(); i++)
+      {
+         ContactPoint contactPoint = new ContactPoint(contactFramePoints2d.get(i));
+         contactPoints.add(contactPoint);
+      }
    }
 
    public FlatGroundPlaneContactState(double footLength, double footWidth, Point3d midfootLocation, double coefficientOfFriction)
    {
-      contactPoints = new ArrayList<FramePoint>();
-      contactPoints2d = new ArrayList<FramePoint2d>();
+      contactFramePoints = new ArrayList<FramePoint>();
+      contactFramePoints2d = new ArrayList<FramePoint2d>();
 
       Point3d frontLeft = new Point3d(midfootLocation);
       frontLeft.setX(frontLeft.getX() + footLength / 2.0);
@@ -71,19 +79,26 @@ public class FlatGroundPlaneContactState implements PlaneContactState
       backRight.setX(backRight.getX() - footLength / 2.0);
       backRight.setY(backRight.getY() - footWidth / 2.0);
 
-      contactPoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), frontLeft));
-      contactPoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), frontRight));
-      contactPoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), backRight));
-      contactPoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), backLeft));
+      contactFramePoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), frontLeft));
+      contactFramePoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), frontRight));
+      contactFramePoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), backRight));
+      contactFramePoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), backLeft));
 
-      contactPoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), projectToXY(frontLeft)));
-      contactPoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), projectToXY(frontRight)));
-      contactPoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), projectToXY(backRight)));
-      contactPoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), projectToXY(backLeft)));
+      contactFramePoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), projectToXY(frontLeft)));
+      contactFramePoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), projectToXY(frontRight)));
+      contactFramePoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), projectToXY(backRight)));
+      contactFramePoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), projectToXY(backLeft)));
       
       this.coefficientOfFriction = coefficientOfFriction;
       
       this.contactNormalFrameVector = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
+      
+      contactPoints = new ArrayList<ContactPoint>();
+      for (int i = 0; i < contactFramePoints2d.size(); i++)
+      {
+         ContactPoint contactPoint = new ContactPoint(contactFramePoints2d.get(i));
+         contactPoints.add(contactPoint);
+      }
    }
 
    private Point2d projectToXY(Point3d point)
@@ -96,14 +111,14 @@ public class FlatGroundPlaneContactState implements PlaneContactState
       return true;
    }
 
-   public List<FramePoint> getContactPoints()
+   public List<FramePoint> getContactFramePoints()
    {
-      return contactPoints;
+      return contactFramePoints;
    }
 
-   public List<FramePoint2d> getContactPoints2d()
+   public List<FramePoint2d> getContactFramePoints2d()
    {
-      return contactPoints2d;
+      return contactFramePoints2d;
    }
 
    public ReferenceFrame getBodyFrame()
@@ -119,7 +134,7 @@ public class FlatGroundPlaneContactState implements PlaneContactState
 
    public String toString()
    {
-      return contactPoints2d.toString();
+      return contactFramePoints2d.toString();
    }
 
    public double getCoefficientOfFriction()
@@ -129,7 +144,7 @@ public class FlatGroundPlaneContactState implements PlaneContactState
 
    public int getNumberOfContactPoints()
    {
-      return contactPoints2d.size();
+      return contactFramePoints2d.size();
    }
 
    public FrameVector getContactNormalFrameVector()
@@ -148,5 +163,10 @@ public class FlatGroundPlaneContactState implements PlaneContactState
 
    public void resetContactRegularization()
    {
+   }
+
+   public List<ContactPoint> getContactPoints()
+   {
+      return contactPoints;
    }
 }

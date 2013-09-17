@@ -70,7 +70,7 @@ public class EndEffector
    {
       EndEffector ret = new EndEffector(nameSuffix, centerOfMassFrame, plane.getBodyFrame(), registry);
       OptimizerPlaneContactModel model = new OptimizerPlaneContactModel();
-      model.setup(plane.getCoefficientOfFriction(), plane.getContactPoints(), plane.getBodyFrame(), wRho, rhoMin);
+      model.setup(plane.getCoefficientOfFriction(), plane.getContactFramePoints(), plane.getBodyFrame(), wRho, rhoMin);
       ret.setContactModel(model);
       ret.setLoadBearing(plane.inContact());
 
@@ -90,7 +90,7 @@ public class EndEffector
    {
       referenceFrame.checkReferenceFrameMatch(plane.getBodyFrame());
       OptimizerPlaneContactModel optimizerPlaneContactModel = (OptimizerPlaneContactModel) this.getContactModel();
-      optimizerPlaneContactModel.setup(plane.getCoefficientOfFriction(), plane.getContactPoints(), plane.getBodyFrame(), wRho, rhoMin);
+      optimizerPlaneContactModel.setup(plane.getCoefficientOfFriction(), plane.getContactFramePoints(), plane.getBodyFrame(), wRho, rhoMin);
       this.setLoadBearing(plane.inContact());
    }
 

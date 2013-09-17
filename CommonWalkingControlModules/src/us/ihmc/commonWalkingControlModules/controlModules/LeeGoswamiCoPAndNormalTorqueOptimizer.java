@@ -138,7 +138,7 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizer
          double normalForce = force.getZ();
          double tauMax = rotationalCoefficientsOfFriction.get(contactState) * normalForce;
 
-         List<FramePoint2d> contactPoints = contactState.getContactPoints2d();
+         List<FramePoint2d> contactPoints = contactState.getContactFramePoints2d();
          double xMin = Double.POSITIVE_INFINITY;
          double xMax = Double.NEGATIVE_INFINITY;
          double yMin = Double.POSITIVE_INFINITY;

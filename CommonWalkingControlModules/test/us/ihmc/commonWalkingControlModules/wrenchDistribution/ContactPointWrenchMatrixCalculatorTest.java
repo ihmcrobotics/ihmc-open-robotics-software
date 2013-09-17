@@ -138,7 +138,7 @@ public class ContactPointWrenchMatrixCalculatorTest
          FramePoint2d cop = new FramePoint2d(planeFrame);
          centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(cop, wrench, planeFrame);
 
-         FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(contactState.getContactPoints2d());
+         FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(contactState.getContactFramePoints2d());
          assertTrue(supportPolygon.isPointInside(cop));
       }
    }
