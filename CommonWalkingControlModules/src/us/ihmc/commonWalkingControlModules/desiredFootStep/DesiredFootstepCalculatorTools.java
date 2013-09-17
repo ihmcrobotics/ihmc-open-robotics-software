@@ -159,6 +159,20 @@ public class DesiredFootstepCalculatorTools
       return ret;
    }
 
+   public static int[] findMaximumPointIndexesInDirection(List<FramePoint> framePoints, FrameVector searchDirection, int nPoints)
+   {
+      List<FramePoint> maximumPoints = computeMaximumPointsInDirection(framePoints, searchDirection, nPoints);
+      
+      int[] indexes = new int[nPoints];
+      
+      for (int i = 0; i < nPoints; i++)
+      {
+         indexes[i] = framePoints.indexOf(maximumPoints.get(i));
+      }
+
+      return indexes;
+   }
+
    private static class SearchDirectionFramePointComparator implements Comparator<FramePoint>
    {
       private final FrameVector searchDirection;

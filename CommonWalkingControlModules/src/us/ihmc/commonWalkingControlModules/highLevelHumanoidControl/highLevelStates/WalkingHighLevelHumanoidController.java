@@ -1706,44 +1706,40 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private void setOnToesContactState(ContactablePlaneBody contactableBody)
    {
+      boolean[] contactPointStatesForWalkingOnToes = getContactPointStatesForWalkingOnEdge(contactableBody, ConstraintType.TOES);
+      momentumBasedController.setPlaneContactState(contactableBody, contactPointStatesForWalkingOnToes);
+      
+      //TODO stop passing lists of points in contact
       List<FramePoint> contactPoints = getContactPointsForWalkingOnEdge(contactableBody, ConstraintType.TOES);
       List<FramePoint2d> contactPoints2d = getContactPoints2d(contactableBody, contactPoints);
-      setContactState(contactableBody, contactPoints2d, ConstraintType.TOES);
+      updateEndEffectorControlModule(contactableBody, contactPoints2d, ConstraintType.TOES);
    }
 
    private void setOnHeelContactState(ContactablePlaneBody contactableBody)
    {
+      boolean[] contactPointStatesForWalkingOnHeels = getContactPointStatesForWalkingOnEdge(contactableBody, ConstraintType.HEEL);
+      momentumBasedController.setPlaneContactState(contactableBody, contactPointStatesForWalkingOnHeels);
+
+      //TODO stop passing lists of points in contact
       List<FramePoint> contactPoints = getContactPointsForWalkingOnEdge(contactableBody, ConstraintType.HEEL);
       List<FramePoint2d> contactPoints2d = getContactPoints2d(contactableBody, contactPoints);
-      setContactState(contactableBody, contactPoints2d, ConstraintType.HEEL);
+      updateEndEffectorControlModule(contactableBody, contactPoints2d, ConstraintType.HEEL);
    }
 
    private void setFlatFootContactState(ContactablePlaneBody contactableBody)
    {
-      setContactState(contactableBody, contactableBody.getContactPoints2d(), ConstraintType.FULL);
+      momentumBasedController.setPlaneContactStateFullyConstrained(contactableBody);
+      //TODO stop passing lists of points in contact
+      updateEndEffectorControlModule(contactableBody, contactableBody.getContactPoints2d(), ConstraintType.FULL);
    }
 
    private void setContactStateForSwing(ContactablePlaneBody contactableBody)
    {
-      setContactState(contactableBody, new ArrayList<FramePoint2d>(), ConstraintType.UNCONSTRAINED);
-   }
-
-   private void setContactState(ContactablePlaneBody contactableBody, List<FramePoint2d> contactPoints, ConstraintType constraintType)
-   {
-      if (contactPoints.size() == 0)
-      {
-         footEndEffectorControlModules.get(contactableBody).doSingularityEscapeBeforeTransitionToNextState();
-      }
+      footEndEffectorControlModules.get(contactableBody).doSingularityEscapeBeforeTransitionToNextState();
       
-      //TODO: If we know the surface normal here, use it.
-      FrameVector normalContactVector = null;
-      momentumBasedController.setPlaneContactState(contactableBody, contactPoints, coefficientOfFriction.getDoubleValue(), normalContactVector);
-      updateEndEffectorControlModule(contactableBody, contactPoints, constraintType);
-
-//      if (contactPoints.size() < oldNumberOfContactPoints)
-//      {
-//         // resetGroundReactionWrenchFilter();    // so that we don't end up with CoPs outside of the base of support
-//      }
+      momentumBasedController.setPlaneContactStateFree(contactableBody);
+      //TODO stop passing lists of points in contact
+      updateEndEffectorControlModule(contactableBody, new ArrayList<FramePoint2d>(), ConstraintType.UNCONSTRAINED);
    }
 
    private List<FramePoint2d> getContactPoints2d(ContactablePlaneBody contactableBody, List<FramePoint> contactPoints)
@@ -1765,6 +1761,24 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          direction.scale(-1.0);
 
       return DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactableBody.getContactPoints(), direction, 2);
+   }
+
+   private boolean[] getContactPointStatesForWalkingOnEdge(ContactablePlaneBody contactableBody, ConstraintType constraintType)
+   {
+      FrameVector direction = new FrameVector(contactableBody.getBodyFrame(), 1.0, 0.0, 0.0);
+      if (constraintType == ConstraintType.HEEL)
+         direction.scale(-1.0);
+
+      int[] indexOfPointsInContact = DesiredFootstepCalculatorTools.findMaximumPointIndexesInDirection(contactableBody.getContactPoints(), direction, 2);
+      
+      boolean[] contactPointStates = new boolean[contactableBody.getTotalNumberOfContactPoints()];
+      
+      for (int i = 0; i < indexOfPointsInContact.length; i++)
+      {
+         contactPointStates[indexOfPointsInContact[i]] = true;
+      }
+      
+      return contactPointStates;
    }
 
    private void updateEndEffectorControlModule(ContactablePlaneBody contactablePlaneBody, List<FramePoint2d> contactPoints, ConstraintType constraintType)

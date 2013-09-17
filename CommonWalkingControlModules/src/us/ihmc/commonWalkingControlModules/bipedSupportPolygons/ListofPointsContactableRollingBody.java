@@ -25,6 +25,7 @@ public class ListofPointsContactableRollingBody implements ContactableRollingBod
    // Origin of the cylinder in the body frame
    private final FramePoint originInBodyFrame;
    private final String name;
+   private final int totalNumberOfContactPoints;
 
    public ListofPointsContactableRollingBody(String name, RigidBody rigidBody, ReferenceFrame bodyFrame, double cylinderRadius, FramePoint originInBodyFrame,
          List<Double> contactPositionOnCylinderEdge, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry)
@@ -41,6 +42,8 @@ public class ListofPointsContactableRollingBody implements ContactableRollingBod
                + ") does not match the body frame (" + bodyFrame + ")");
       }
       this.originInBodyFrame = originInBodyFrame;
+      
+      totalNumberOfContactPoints = contactPoints.size();
    }
 
    public String getName()
@@ -96,5 +99,10 @@ public class ListofPointsContactableRollingBody implements ContactableRollingBod
    public double getCylinderRadius()
    {
       return cylinderRadius;
+   }
+
+   public int getTotalNumberOfContactPoints()
+   {
+      return totalNumberOfContactPoints;
    }
 }
