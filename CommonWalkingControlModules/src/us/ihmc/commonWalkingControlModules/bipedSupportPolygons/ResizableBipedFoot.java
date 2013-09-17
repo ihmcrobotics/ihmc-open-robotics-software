@@ -42,6 +42,8 @@ public class ResizableBipedFoot implements BipedFootInterface
 
    private final FramePoint insideToePoint, outsideToePoint, insideHeelPoint, outsideHeelPoint;
 
+   private final int totalNumberOfContactPoints;
+
    // Constructor:
    public ResizableBipedFoot(RigidBody body, ReferenceFrame ankleZUpFrame, ReferenceFrame soleFrame, RobotSide robotSide,
                              ArrayList<Point3d> clockwiseToePoints, ArrayList<Point3d> clockwiseHeelPoints, double maxToePointsBack,
@@ -145,6 +147,8 @@ public class ResizableBipedFoot implements BipedFootInterface
       {
          yoVariableRegistry.addChild(registry);
       }
+      
+      totalNumberOfContactPoints = toePoints.size() + heelPoints.size();
    }
 
    public String getName()
@@ -563,5 +567,11 @@ public class ResizableBipedFoot implements BipedFootInterface
    public boolean inContact()
    {
       throw new RuntimeException();
+   }
+   
+
+   public int getTotalNumberOfContactPoints()
+   {
+      return totalNumberOfContactPoints;
    }
 }

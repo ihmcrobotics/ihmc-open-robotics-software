@@ -293,8 +293,9 @@ public class DRCOptimizationMomentumControlModuleTest
       LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
       for (ContactablePlaneBody contactablePlaneBody : feet)
       {
-         YoPlaneContactState contactState = new YoPlaneContactState(contactablePlaneBody.getName() + "ContactState", contactablePlaneBody.getBodyFrame(),
-                                               contactablePlaneBody.getPlaneFrame(), registry);
+         String contactStateName = contactablePlaneBody.getName() + "ContactState";
+         YoPlaneContactState contactState = new YoPlaneContactState(contactStateName, contactablePlaneBody.getBodyFrame(),
+                                               contactablePlaneBody.getPlaneFrame(), contactablePlaneBody.getContactPoints2d(), coefficientOfFriction, registry);
          contactState.set(contactablePlaneBody.getContactPoints2d(), coefficientOfFriction);
          contactStates.put(contactablePlaneBody, contactState);
       }

@@ -240,7 +240,7 @@ public class MomentumBasedController
       {
 //       RigidBody rigidBody = contactablePlaneBody.getRigidBody();
          YoPlaneContactState contactState = new YoPlaneContactState(contactablePlaneBody.getPlaneFrame().getName(), contactablePlaneBody.getBodyFrame(),
-                                               contactablePlaneBody.getPlaneFrame(), registry);
+                                               contactablePlaneBody.getPlaneFrame(), contactablePlaneBody.getContactPoints2d(), coefficientOfFriction, registry);
 
 //       contactState.set(contactablePlaneBody.getContactPoints2d(), coefficientOfFriction);    // initialize with flat 'feet'
          yoPlaneContactStates.put(contactablePlaneBody, contactState);
@@ -562,7 +562,7 @@ public class MomentumBasedController
       return planeContactWrenchProcessor.getCops().get(contactablePlaneBody);
    }
 
-
+   @Deprecated
    public void setPlaneContactState(ContactablePlaneBody contactableBody, List<FramePoint2d> contactPoints, double coefficientOfFriction,
                                     FrameVector normalContactVector)
    {
@@ -577,7 +577,22 @@ public class MomentumBasedController
          yoPlaneContactState.set(contactPoints, coefficientOfFriction, normalContactVector);
       }
    }
+   
+   public void setPlaneContactState(ContactablePlaneBody contactableBody, boolean[] newContactPointStates)
+   {
+      yoPlaneContactStates.get(contactableBody).setContactPointsInContact(newContactPointStates);
+   }
+   
+   public void setPlaneContactStateFullyConstrained(ContactablePlaneBody contactableBody)
+   {
+      yoPlaneContactStates.get(contactableBody).setFullyConstrained();
+   }
 
+   public void setPlaneContactStateFree(ContactablePlaneBody contactableBody)
+   {
+      yoPlaneContactStates.get(contactableBody).clear();
+   }
+   
    public void setCylindricalContactInContact(ContactableCylinderBody contactableCylinderBody, boolean setInContact)
    {
       YoCylindricalContactState yoCylindricalContactState = yoCylindricalContactStates.get(contactableCylinderBody);

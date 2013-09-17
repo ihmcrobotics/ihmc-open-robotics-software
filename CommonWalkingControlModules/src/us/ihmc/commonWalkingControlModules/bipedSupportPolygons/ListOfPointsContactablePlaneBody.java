@@ -16,12 +16,15 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
    private final RigidBody rigidBody;
    private final ReferenceFrame soleFrame;
    private final List<Point2d> contactPoints = new ArrayList<Point2d>();
+   private final int totalNumberOfContactPoints;
 
    public ListOfPointsContactablePlaneBody(RigidBody rigidBody, ReferenceFrame soleFrame, List<Point2d> contactPointsInSoleFrame)
    {
       this.rigidBody = rigidBody;
       this.soleFrame = soleFrame;
       this.contactPoints.addAll(contactPointsInSoleFrame);
+      
+      totalNumberOfContactPoints = contactPoints.size();
    }
 
    public RigidBody getRigidBody()
@@ -74,6 +77,11 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
    public boolean inContact()
    {
       throw new RuntimeException();
+   }
+
+   public int getTotalNumberOfContactPoints()
+   {
+      return totalNumberOfContactPoints;
    }
 
 }
