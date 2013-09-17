@@ -61,7 +61,7 @@ public class DRCDemo03
             initialBehavior);
 
       Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, environment, robotInterface, robotInitialSetup, scsInitialSetup,
-              guiInitialSetup, drcNetworkProcessorServer);
+              guiInitialSetup, drcNetworkProcessorServer, null);
       drcSimulation = humanoidSimulation.first();
 
       SimulationConstructionSet simulationConstructionSet = drcSimulation.getSimulationConstructionSet();

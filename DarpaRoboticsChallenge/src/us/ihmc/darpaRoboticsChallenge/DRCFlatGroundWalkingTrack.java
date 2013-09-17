@@ -1,5 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import us.ihmc.GazeboStateCommunicator.yoVariableCommunicator.YoVariableServer;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
@@ -7,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Fl
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCSimDRCRobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.remote.RemoteAtlasVisualizer;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.utilities.Pair;
 
@@ -51,8 +53,9 @@ public class DRCFlatGroundWalkingTrack
          highLevelHumanoidControllerFactory.setupForCheatingUsingGroundHeightAtForFootstepProvider(scsInitialSetup.getGroundProfile());
       }
 
+      YoVariableServer robotVisualizer = new YoVariableServer(robotInterface.getRobot().getRobotsYoVariableRegistry(), RemoteAtlasVisualizer.defaultPort);
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.USE_GAZEBO_PHYSICS);
-      Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, null, robotInterface, robotInitialSetup, scsInitialSetup, guiInitialSetup, null);
+      Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, null, robotInterface, robotInitialSetup, scsInitialSetup, guiInitialSetup, null, robotVisualizer);
       drcSimulation = humanoidSimulation.first();
 
       // add other registries
@@ -68,6 +71,8 @@ public class DRCFlatGroundWalkingTrack
       {
          drcSimulation.start(null);
       }
+      
+      robotVisualizer.start();
    }
 
    public SimulationConstructionSet getSimulationConstructionSet()

@@ -98,7 +98,7 @@ public class DRCMultiContact
             handContactPointTransforms, handContactPoints, footContactSides, handContactSides, controllerParameters);
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory);
 
-      Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, environment, robotInterface, robotInitialSetup, scsInitialSetup, guiInitialSetup, null);
+      Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, environment, robotInterface, robotInitialSetup, scsInitialSetup, guiInitialSetup, null, null);
       drcSimulation = humanoidSimulation.first();
 
       SimulationConstructionSet simulationConstructionSet = drcSimulation.getSimulationConstructionSet();
