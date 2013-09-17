@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import javax.media.j3d.Transform3D;
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
@@ -19,6 +20,7 @@ import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject;
+import com.yobotics.simulationconstructionset.util.ground.CylinderTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.RotatableCinderBlockTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
@@ -68,7 +70,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       setUpPath3RampsWithLargeBlocks();
       setUpPath4DRCTrialsTrainingWalkingCourse();
       setUpPathDRCTrialsLadder();
-
+      
       setUpPath5NarrowDoor();
       setUpPath6Barriers();
       setUpPath7Stairs();
@@ -347,7 +349,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
       // 10. Step-Over Obstacles
       // TODO: Finish course (step 10)
-      // TODO: add holes to cinder blocks
+      
       
    }
 
@@ -1016,19 +1018,18 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       combinedTerrainObject.addTerrainObject(newBox);
    }
 
-   private void setUpSlopedCylinder(double xCenter, double yCenter, double zCenter, double length, double radius, double slopeRadians, double yawDegrees, AppearanceDefinition app)
+   private void setUpSlopedCylinder(double xCenter, double yCenter, double zCenter, double xLength, double radius, double slopeRadians, double yawDegrees, AppearanceDefinition app)
    {
       Transform3D location = new Transform3D();
       location.rotZ(Math.toRadians(yawDegrees));
 
-      Transform3D tilt = new Transform3D();
-      tilt.rotY(-slopeRadians);
-      location.mul(tilt);
+      Transform3D tiltZToXThenToSlope = new Transform3D();
+      tiltZToXThenToSlope.rotY(-slopeRadians+Math.PI/2);
+      location.mul(tiltZToXThenToSlope);
 
       location.setTranslation(new Vector3d(xCenter, yCenter, zCenter));
-      //TODO: Change this from a box to a cylinder
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, length, radius*2, radius*2), app);
-      combinedTerrainObject.addTerrainObject(newBox);
+      CylinderTerrainObject newCylinder = new CylinderTerrainObject(location, xLength, radius, app);         
+      combinedTerrainObject.addTerrainObject(newCylinder);
    }
 
    private void setUpSlopedCinderBlock(double xCenter, double yCenter, int numberFlatSupports, double yawDegrees)
@@ -1104,18 +1105,8 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       setUpCinderBlockSquare(xCenter, yCenter, numberFlatSupports - 1, yawDegrees);
 
 
-      // double rampRun = cinderBlockLength * Math.cos(cinderBlockTiltRadians);
       double rampRise = cinderBlockLength * Math.sin(cinderBlockTiltRadians);
 
-      // double xRampOffset = (cinderBlockLength - rampRun) / 2, yRampOffset = 0;
-      // double[] xyRampRotatedOffset = rotateAroundOrigin(xRampOffset, yRampOffset, yawDegrees);
-      // double xRampCenter = xCenter + xyRampRotatedOffset[0];
-      // double yRampCenter = yCenter + xyRampRotatedOffset[1];
-      // TO DO: set ramp elevation
-      // setUpRotatedRamp(xRampCenter, yRampCenter, 2 * cinderBlockWidth, rampRun, rampRise, yawDegrees, cinderBlockAppearance);
-
-      // Create a block instead. Ramp3d only has collision surface of ramp itself. And setUpRotateRamp() can't change height yet.
-      // A block however has all the needed collision surfaces, even if it overlaps the block above it.
       Transform3D blockSupportLocation = new Transform3D();
       blockSupportLocation.rotZ(Math.toRadians(yawDegrees));
       double[] xySupportRotatedOffset = rotateAroundOrigin(new double[] {(cinderBlockLength - rampRise) / 2, 0}, yawDegrees);
