@@ -1,34 +1,34 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.state;
 
 
-public class AngleBuffer
+public class AngleBuffer implements PendableBuffer
 {
    private final int size;
-   
+
    private long[] timestamps;
    private double[] angles;
-   
+
    private int currentIndex;
    private long oldestTimeStamp;
    private long newestTimestamp;
-   
+
    public AngleBuffer(int size)
    {
       this.size = size;
       timestamps = new long[size];
       angles = new double[size];
-      
-      for(int i = 0; i < size; i++)
+
+      for (int i = 0; i < size; i++)
       {
          timestamps[i] = Long.MIN_VALUE;
       }
    }
-   
+
    public synchronized void addAngle(long timestamp, double angle)
    {
       timestamps[currentIndex] = timestamp;
       angles[currentIndex] = angle;
-      
+
       newestTimestamp = timestamp;
       currentIndex++;
 
@@ -46,28 +46,28 @@ public class AngleBuffer
          oldestTimeStamp = timestamps[currentIndex];
       }
    }
-   
+
    public synchronized boolean isInRange(long timestamp)
    {
       return ((timestamp >= oldestTimeStamp) && (timestamp <= newestTimestamp));
    }
-   
+
    public synchronized double interpolate(long timestamp)
    {
-      if(!isInRange(timestamp))
+      if (!isInRange(timestamp))
       {
          return 0.0;
       }
-      
+
       for (int i = currentIndex - 1; i >= -size + currentIndex; i--)
       {
          int index = (i < 0) ? size + i : i;
 
-         if(timestamps[index] == timestamp)
+         if (timestamps[index] == timestamp)
          {
             return angles[index];
          }
-         else if(timestamps[index] < timestamp)
+         else if (timestamps[index] < timestamp)
          {
             long floor = timestamps[index];
             double floorAngle = angles[index];
@@ -77,21 +77,22 @@ public class AngleBuffer
             {
                index = 0;
             }
-            
+
             long ceiling = timestamps[index];
             double ceilingAngle = angles[index];
-            
-            
+
+
             double percentage = ((double) (timestamp - floor)) / ((double) (ceiling - floor));
-            
-            return floorAngle + percentage * (ceilingAngle - floorAngle);   
+
+            return floorAngle + percentage * (ceilingAngle - floorAngle);
          }
-         
+
       }
+
       return 0.0;
-   
+
    }
-   
+
    public synchronized boolean isPending(long timestamp)
    {
       return timestamp > newestTimestamp;

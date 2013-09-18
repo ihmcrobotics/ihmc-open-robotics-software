@@ -4,12 +4,10 @@ import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
 
 import javax.media.j3d.Transform3D;
 
-public class HeadToLidarTransformBuffer
+public class HeadToLidarTransformBuffer implements PendableBuffer
 {
    private final int size;
-
    private TimeStampedTransform3D[] transforms;
-
    private int currentIndex;
    private long oldestTimeStamp;
    private long newestTimestamp;
@@ -17,10 +15,9 @@ public class HeadToLidarTransformBuffer
    public HeadToLidarTransformBuffer(int size)
    {
       this.size = size;
-
       transforms = new TimeStampedTransform3D[size];
 
-      for(int i = 0; i < size; i++)
+      for (int i = 0; i < size; i++)
       {
          transforms[i] = new TimeStampedTransform3D();
          transforms[i].setTimeStamp(Long.MIN_VALUE);
@@ -31,7 +28,6 @@ public class HeadToLidarTransformBuffer
    {
       transforms[currentIndex].setTimeStamp(timestamp);
       transforms[currentIndex].setTransform3D(transform3D);
-
       newestTimestamp = timestamp;
       currentIndex++;
 
@@ -54,7 +50,6 @@ public class HeadToLidarTransformBuffer
    {
       transforms[currentIndex].setTransform3D(timeStampedTransform3D.getTransform3D());
       transforms[currentIndex].setTimeStamp(timeStampedTransform3D.getTimeStamp());
-
       newestTimestamp = timeStampedTransform3D.getTimeStamp();
       currentIndex++;
 
@@ -81,13 +76,15 @@ public class HeadToLidarTransformBuffer
    public synchronized TimeStampedTransform3D interpolate(long timestamp)
    {
       if (!isInRange(timestamp))
+      {
          return null;
+      }
 
       for (int i = currentIndex - 1; i >= -size + currentIndex; i--)
       {
          int index = (i < 0) ? size + i : i;
-
          TimeStampedTransform3D floorData = transforms[index];
+
          if (floorData == null)
          {
             break;
@@ -100,6 +97,7 @@ public class HeadToLidarTransformBuffer
          else if (floorData.getTimeStamp() < timestamp)
          {
             long floor = floorData.getTimeStamp();
+
             index++;
 
             if (index >= size)
@@ -109,7 +107,6 @@ public class HeadToLidarTransformBuffer
 
             TimeStampedTransform3D ceilingData = transforms[index];
             long ceiling = ceilingData.getTimeStamp();
-
             double percentage = ((double) (timestamp - floor)) / ((double) (ceiling - floor));
 
             return floorData.interpolateTo(ceilingData, percentage);
