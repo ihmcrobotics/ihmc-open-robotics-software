@@ -76,7 +76,6 @@ public class ContactPointWrenchMatrixCalculatorTest
             }
 
             YoPlaneContactState contactState = new YoPlaneContactState("contactState" + contactNumber++, frameAfterJoint, planeFrame, contactPoints, coefficientOfFriction, registry);
-            contactState.set(contactPoints, coefficientOfFriction);
             contactStates.put(body, contactState);
          }
 
@@ -138,7 +137,7 @@ public class ContactPointWrenchMatrixCalculatorTest
          FramePoint2d cop = new FramePoint2d(planeFrame);
          centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(cop, wrench, planeFrame);
 
-         FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(contactState.getContactFramePoints2d());
+         FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(contactState.getCopyOfContactFramePoints2dInContact());
          assertTrue(supportPolygon.isPointInside(cop));
       }
    }

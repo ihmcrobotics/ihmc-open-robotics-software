@@ -110,7 +110,7 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
       {
          PlaneContactState contactState = contactStates.get(robotSide);
          
-         List<FramePoint> contactPoints = contactState.getContactFramePoints();
+         List<FramePoint> contactPoints = contactState.getCopyOfContactFramePointsInContact();
          ArrayList<FramePoint2d> projectionsOnGround = new ArrayList<FramePoint2d>();
          
          for (FramePoint framePoint : contactPoints)

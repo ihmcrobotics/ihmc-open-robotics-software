@@ -15,21 +15,19 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 
 public class YoRollingContactState implements PlaneContactState, ModifiableContactState
 {
-   private final String namePrefix;
    private final YoVariableRegistry registry;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame updatableContactFrame;
-   private final List<YoFramePoint2d> contactFramePoints = new ArrayList<YoFramePoint2d>();
-   private final List<YoContactPoint> contactPoints = new ArrayList<YoContactPoint>();
+   private final Transform3D transformFromContactFrameToBodyFrame = new Transform3D();
    private final BooleanYoVariable inContact;
    private final DoubleYoVariable coefficientOfFriction;
-   private final Transform3D transformFromContactFrameToBodyFrame = new Transform3D();
-   private final ContactableRollingBody contactableCylinderBody;
    private final FrameVector contactNormalFrameVector;
+   private final List<YoContactPoint> contactPoints = new ArrayList<YoContactPoint>();
+   private final ContactableRollingBody contactableCylinderBody;
+   private final int totalNumberOfContactPoints;
 
    // TODO: Probably get rid of that. Now, it is used for smooth unload/load transitions in the CarIngressEgressController.
    private final DoubleYoVariable wRho;
@@ -37,7 +35,6 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
    // Class enabling to update the contact points of a contactable rolling body as it is rolling on the ground or on another contactable surface
    public YoRollingContactState(String namePrefix, ContactableRollingBody contactableCylinderBody, List<FramePoint2d> contactFramePoints, YoVariableRegistry parentRegistry)
    {
-      this.namePrefix = namePrefix;
       // The rolling contactable body
       this.contactableCylinderBody = contactableCylinderBody;
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
@@ -54,8 +51,6 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
          }
       };
       
-      setContactPointsInContact(contactableCylinderBody.getContactPoints2d());
-      
       updateContactPoints();
       
       parentRegistry.addChild(registry);
@@ -65,43 +60,58 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
       wRho = new DoubleYoVariable(namePrefix + "_wRhoContactRegularization", registry);
       resetContactRegularization();
 
+      FramePoint2d tempFramePoint = new FramePoint2d(updatableContactFrame);
+      
       for (int i = 0; i < contactFramePoints.size(); i++)
       {
-         YoContactPoint contactPoint = new YoContactPoint(namePrefix, i, contactFramePoints.get(i), parentRegistry);
+         tempFramePoint.setAndChangeFrame(contactFramePoints.get(i));
+         tempFramePoint.changeFrame(updatableContactFrame);
+         YoContactPoint contactPoint = new YoContactPoint(namePrefix, i, tempFramePoint, parentRegistry);
          contactPoints.add(contactPoint);
       }
+
+      totalNumberOfContactPoints = contactPoints.size();
    }
 
-   public void setContactPointsInContact(List<FramePoint2d> contactFramePoints)
+   public void setContactPointsInContact(boolean[] inContact)
    {
-      createYoFramePoints(contactFramePoints);
+      if (inContact.length != totalNumberOfContactPoints)
+         throw new RuntimeException("Arrays should be of same length!");
 
-      FramePoint2d temp = new FramePoint2d(updatableContactFrame);
-      inContact.set(false);
-
-      for (int i = 0; i < this.contactFramePoints.size(); i++)
+      this.inContact.set(false);
+      
+      for (int i = 0; i < inContact.length; i++)
       {
-         YoFramePoint2d contactPoint = this.contactFramePoints.get(i);
-         if (i < contactFramePoints.size())
+         contactPoints.get(i).setInContact(inContact[i]);
+         
+         if (inContact[i])
          {
-            FramePoint2d point = contactFramePoints.get(i);
-            temp.setAndChangeFrame(point);
-            temp.changeFrame(updatableContactFrame);
-            contactPoint.set(temp);
-            inContact.set(true);
-         }
-         else
-         {
-            invalidateContactPoint(contactPoint);
+            this.inContact.set(true);
          }
       }
    }
 
-   private void invalidateContactPoint(YoFramePoint2d contactPoint)
+   public void setContactPointInContact(int contactPointIndex, boolean inContact)
    {
-      contactPoint.set(Double.NaN, Double.NaN);
-   }
+      contactPoints.get(contactPointIndex).setInContact(inContact);
 
+      if (inContact)
+      {
+         this.inContact.set(true);
+      }
+      else
+      {
+         this.inContact.set(false);
+         for (int i = 0; i < totalNumberOfContactPoints; i++)
+         {
+            if (contactPoints.get(i).isInContact())
+            {
+               this.inContact.set(true);
+            }
+         }
+      }
+   }
+   
    public void setCoefficientOfFriction(double coefficientOfFriction)
    {
       if (coefficientOfFriction < 0.0)
@@ -135,15 +145,34 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
       updatableContactFrame.update();
    }
    
-   public List<FramePoint2d> getContactFramePoints2d()
+   public List<FramePoint> getCopyOfContactFramePointsInContact()
    {
-      List<FramePoint2d> ret = new ArrayList<FramePoint2d>(contactFramePoints.size());
-      for (int i = 0; i < contactFramePoints.size(); i++)
+      List<FramePoint> ret = new ArrayList<FramePoint>(totalNumberOfContactPoints);
+
+      for (int i = 0; i < totalNumberOfContactPoints; i++)
       {
-         YoFramePoint2d contactPoint = contactFramePoints.get(i);
-         if (!contactPoint .containsNaN())
+         YoContactPoint contactPoint = contactPoints.get(i);
+
+         if (contactPoint.isInContact())
          {
-            ret.add(contactPoint.getFramePoint2dCopy());
+            FramePoint2d framePoint2d = contactPoint.getPosition2d();
+            FramePoint framePoint = new FramePoint(framePoint2d.getReferenceFrame(), framePoint2d.getX(), framePoint2d.getY(), 0.0);
+            ret.add(framePoint);
+         }
+      }
+
+      return ret;
+   }
+
+   public List<FramePoint2d> getCopyOfContactFramePoints2dInContact()
+   {
+      List<FramePoint2d> ret = new ArrayList<FramePoint2d>(totalNumberOfContactPoints);
+      for (int i = 0; i < totalNumberOfContactPoints; i++)
+      {
+         YoContactPoint contactPoint = contactPoints.get(i);
+         if (contactPoint.isInContact())
+         {
+            ret.add(new FramePoint2d(contactPoint.getPosition2d()));
          }
       }
 
@@ -153,31 +182,6 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
    public ReferenceFrame getBodyFrame()
    {
       return contactableCylinderBody.getBodyFrame();
-   }
-
-   private void createYoFramePoints(List<? extends FramePoint2d> contactPoints)
-   {
-      int oldSize = this.contactFramePoints.size();
-      int newSize = contactPoints.size();
-      for (int i = oldSize; i < newSize; i++)
-      {
-         this.contactFramePoints.add(new YoFramePoint2d(namePrefix + "Contact" + i, "", updatableContactFrame, registry));
-      }
-   }
-
-   public List<FramePoint> getContactFramePoints()
-   {
-      List<FramePoint> ret = new ArrayList<FramePoint>(contactFramePoints.size());
-      for (int i = 0; i < contactFramePoints.size(); i++)
-      {
-         YoFramePoint2d contactPoint = contactFramePoints.get(i);
-         if (!contactPoint.containsNaN())
-         {
-            ret.add(new FramePoint(contactPoint.getReferenceFrame(), contactPoint.getX(), contactPoint.getY(), 0.0));
-         }
-      }
-
-      return ret;
    }
 
    public ReferenceFrame getPlaneFrame()
@@ -195,15 +199,17 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
       return coefficientOfFriction.getDoubleValue();
    }
 
-   public int getNumberOfContactPoints()
+   public int getNumberOfContactPointsInContact()
    {
-      int ret = 0;
-      for (YoFramePoint2d contactPoint : contactFramePoints)
+      int numberOfContactPointsInContact = 0;
+      
+      for (int i = 0; i < totalNumberOfContactPoints; i++)
       {
-         if (!contactPoint.containsNaN())
-            ret++;
+         if (contactPoints.get(i).isInContact())
+            numberOfContactPointsInContact++;
       }
-      return ret;
+      
+      return numberOfContactPointsInContact;
    }
 
    public FrameVector getContactNormalFrameVector()
@@ -213,10 +219,22 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
 
    public void clear()
    {
-      for (YoFramePoint2d contactPoint : contactFramePoints)
+      for (int i = 0; i < totalNumberOfContactPoints; i++)
       {
-         invalidateContactPoint(contactPoint);
+         contactPoints.get(i).setInContact(false);
       }
+
+      inContact.set(false);
+   }
+   
+   public void setFullyConstrained()
+   {
+      for (int i = 0; i < totalNumberOfContactPoints; i++)
+      {
+         contactPoints.get(i).setInContact(true);
+      }
+      
+      inContact.set(true);
    }
 
    public void setRhoContactRegularization(double wRho)
@@ -237,5 +255,10 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
    public List<YoContactPoint> getContactPoints()
    {
       return contactPoints;
+   }
+
+   public int getTotalNumberOfContactPoints()
+   {
+      return totalNumberOfContactPoints;
    }
 }

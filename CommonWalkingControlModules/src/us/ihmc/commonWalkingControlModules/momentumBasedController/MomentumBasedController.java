@@ -84,7 +84,6 @@ public class MomentumBasedController
    private final List<ContactablePlaneBody> listOfAllContactablePlaneBodies;
    private final List<ContactableCylinderBody> listOfAllContactableCylinderBodies;
 
-   private final Map<ContactablePlaneBody, PlaneContactState> planeContactStates = new LinkedHashMap<ContactablePlaneBody, PlaneContactState>();
    private final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> yoPlaneContactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
    private final LinkedHashMap<ContactableCylinderBody, YoCylindricalContactState> yoCylindricalContactStates = new LinkedHashMap<ContactableCylinderBody,
                                                                                                                  YoCylindricalContactState>();
@@ -255,12 +254,6 @@ public class MomentumBasedController
          }
       }
 
-      for (ContactablePlaneBody contactablePlaneBody : yoPlaneContactStates.keySet())
-      {
-         planeContactStates.put(contactablePlaneBody, yoPlaneContactStates.get(contactablePlaneBody));
-      }
-
-
       this.listOfAllContactableCylinderBodies = new ArrayList<ContactableCylinderBody>();
 
       if (graspingHands != null)
@@ -307,7 +300,7 @@ public class MomentumBasedController
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         feetContactStatesToPack.add(planeContactStates.get(feet.get(robotSide)));
+         feetContactStatesToPack.add(yoPlaneContactStates.get(feet.get(robotSide)));
       }
    }
 
@@ -352,7 +345,7 @@ public class MomentumBasedController
    private void resetWeightsForContactRegularization()
    {
       // TODO: get rid of contactStates or planeContactStates. This is confusing.
-      for (PlaneContactState contactState : planeContactStates.values())
+      for (PlaneContactState contactState : yoPlaneContactStates.values())
       {
          contactState.resetContactRegularization();
       }
@@ -372,14 +365,14 @@ public class MomentumBasedController
    public void doSecondaryControl()
    {
       if (contactPointVisualizer != null)
-         contactPointVisualizer.update(this.planeContactStates.values());
+         contactPointVisualizer.update(this.yoPlaneContactStates.values());
 
       updateMomentumBasedControllerSpy();
 
       MomentumModuleSolution momentumModuleSolution;
       try
       {
-         momentumModuleSolution = momentumControlModuleBridge.compute(this.planeContactStates, this.yoCylindricalContactStates, upcomingSupportLeg.getEnumValue());
+         momentumModuleSolution = momentumControlModuleBridge.compute(this.yoPlaneContactStates, this.yoCylindricalContactStates, upcomingSupportLeg.getEnumValue());
       }
       catch (NoConvergenceException e)
       {
@@ -418,10 +411,10 @@ public class MomentumBasedController
       {
          if (resetEstimatorPositionsToCurrent.getBooleanValue())
          {
-            pointPositionGrabber.resetToCurrentLocations(planeContactStates, planeContactWrenchProcessor.getCops());
+            pointPositionGrabber.resetToCurrentLocations(yoPlaneContactStates, planeContactWrenchProcessor.getCops());
             resetEstimatorPositionsToCurrent.set(false);
          }
-         pointPositionGrabber.set(planeContactStates, planeContactWrenchProcessor.getCops());
+         pointPositionGrabber.set(yoPlaneContactStates, planeContactWrenchProcessor.getCops());
       }
       
       inverseDynamicsCalculator.compute();
@@ -445,7 +438,7 @@ public class MomentumBasedController
             YoPlaneContactState contactState = yoPlaneContactStates.get(contactablePlaneBody);
             if (contactState.inContact())
             {
-               momentumBasedControllerSpy.setPlaneContactState(contactablePlaneBody, contactState.getContactFramePoints2d(),
+               momentumBasedControllerSpy.setPlaneContactState(contactablePlaneBody, contactState.getCopyOfContactFramePoints2dInContact(),
                        contactState.getCoefficientOfFriction(), contactState.getContactNormalFrameVector());
             }
          }
@@ -745,17 +738,17 @@ public class MomentumBasedController
 
    public List<FramePoint> getContactPoints(ContactablePlaneBody contactablePlaneBody)
    {
-      return planeContactStates.get(contactablePlaneBody).getContactFramePoints();
+      return yoPlaneContactStates.get(contactablePlaneBody).getCopyOfContactFramePointsInContact();
    }
 
    public PlaneContactState getContactState(ContactablePlaneBody contactablePlaneBody)
    {
-      return planeContactStates.get(contactablePlaneBody);
+      return yoPlaneContactStates.get(contactablePlaneBody);
    }
 
-   public Collection<PlaneContactState> getPlaneContactStates()
+   public Collection<? extends PlaneContactState> getPlaneContactStates()
    {
-      return planeContactStates.values();
+      return yoPlaneContactStates.values();
    }
 
    public void clearContacts()
