@@ -102,7 +102,7 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizer
 
          MatrixTools.vectorToSkewSymmetricMatrix(skew, force.getVector());
 
-         Transform3D transform = contactState.getBodyFrame().getTransformToDesiredFrame(centerOfMassFrame);
+         Transform3D transform = contactState.getFrameAfterParentJoint().getTransformToDesiredFrame(centerOfMassFrame);
          transform.get(tempMatrix);
          DenseMatrix64F rotationMatrix = new DenseMatrix64F(VECTOR3D_LENGTH, VECTOR3D_LENGTH);
          MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, rotationMatrix);
@@ -114,7 +114,7 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizer
          startIndex += MatrixTools.denseMatrixToArrayColumnMajor(rotationMatrix, 0, 2, rotationMatrix.getNumRows(), 1, psik, startIndex);    // last column of R
 
          // update kappaK
-         ankle.setToZero(contactState.getBodyFrame());
+         ankle.setToZero(contactState.getFrameAfterParentJoint());
          ankle.changeFrame(contactState.getPlaneFrame());
          double ankleHeight = ankle.getZ();
 

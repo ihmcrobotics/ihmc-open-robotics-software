@@ -40,7 +40,7 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.inContact = new BooleanYoVariable(namePrefix + "InContact", registry);
       this.coefficientOfFriction = new DoubleYoVariable(namePrefix + "CoefficientOfFriction", registry);
-      this.updatableContactFrame = new ReferenceFrame(namePrefix + "ContactFrame", getBodyFrame())
+      this.updatableContactFrame = new ReferenceFrame(namePrefix + "ContactFrame", getFrameAfterParentJoint())
       {
          private static final long serialVersionUID = 6993243554111815201L;
 
@@ -125,7 +125,7 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
       // The contact reference frame is updated such as:
       // 1- it remains tangential to the contactable cylindrical body,
       // 2- it remains under the contactable cylindrical body (at the lowest height)
-      Transform3D transformFromRigiBodyToWorld = getBodyFrame().getTransformToDesiredFrame(worldFrame );
+      Transform3D transformFromRigiBodyToWorld = getFrameAfterParentJoint().getTransformToDesiredFrame(worldFrame );
       Matrix3d rotationFromRigiBodyToWorld = new Matrix3d();
       transformFromRigiBodyToWorld.get(rotationFromRigiBodyToWorld);
 
@@ -179,7 +179,7 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
       return ret;
    }
 
-   public ReferenceFrame getBodyFrame()
+   public ReferenceFrame getFrameAfterParentJoint()
    {
       return contactableCylinderBody.getBodyFrame();
    }

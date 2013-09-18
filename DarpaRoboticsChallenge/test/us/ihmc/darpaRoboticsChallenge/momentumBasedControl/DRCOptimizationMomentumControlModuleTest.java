@@ -294,7 +294,7 @@ public class DRCOptimizationMomentumControlModuleTest
       for (ContactablePlaneBody contactablePlaneBody : feet)
       {
          String contactStateName = contactablePlaneBody.getName() + "ContactState";
-         YoPlaneContactState contactState = new YoPlaneContactState(contactStateName, contactablePlaneBody.getBodyFrame(),
+         YoPlaneContactState contactState = new YoPlaneContactState(contactStateName, contactablePlaneBody.getRigidBody(),
                                                contactablePlaneBody.getPlaneFrame(), contactablePlaneBody.getContactPoints2d(), coefficientOfFriction, registry);
          contactStates.put(contactablePlaneBody, contactState);
       }

@@ -153,7 +153,7 @@ public class LeeGoswamiForceOptimizer
          force.setToZero(centerOfMassFrame);
          MatrixTools.denseMatrixToVector3d(forceMatrix, force.getVector(), 0, 0);
 
-         ankle.setToZero(contactState.getBodyFrame());
+         ankle.setToZero(contactState.getFrameAfterParentJoint());
          ankle.changeFrame(force.getReferenceFrame());
 
          torque.setToZero(force.getReferenceFrame());
@@ -196,7 +196,7 @@ public class LeeGoswamiForceOptimizer
    // TODO: garbage
    private static DenseMatrix64F computeDeltaBlock(PlaneContactState contactState, DenseMatrix64F betaBlock, ReferenceFrame centerOfMassFrame, double wk)
    {
-      FramePoint ankle = new FramePoint(contactState.getBodyFrame());
+      FramePoint ankle = new FramePoint(contactState.getFrameAfterParentJoint());
       ankle.changeFrame(centerOfMassFrame);
 
       DenseMatrix64F skew = new DenseMatrix64F(VECTOR3D_LENGTH, VECTOR3D_LENGTH);

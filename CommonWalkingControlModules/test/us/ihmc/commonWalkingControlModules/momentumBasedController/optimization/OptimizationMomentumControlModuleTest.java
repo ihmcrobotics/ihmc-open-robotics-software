@@ -586,7 +586,7 @@ public class OptimizationMomentumControlModuleTest
    {
       ReferenceFrame soleFrame = endEffector.getBodyFixedFrame();
       ContactablePlaneBody contactablePlaneBody = new RectangularContactableBody(endEffector, soleFrame, 1.0, -2.0, 3.0, -4.0);
-      YoPlaneContactState contactState = new YoPlaneContactState("testContactState", endEffector.getParentJoint().getFrameAfterJoint(), soleFrame, contactablePlaneBody.getContactPoints2d(),
+      YoPlaneContactState contactState = new YoPlaneContactState("testContactState", endEffector, soleFrame, contactablePlaneBody.getContactPoints2d(),
                                             coefficientOfFriction, new YoVariableRegistry("bla"));
       contactStates.put(contactablePlaneBody, contactState);
    }

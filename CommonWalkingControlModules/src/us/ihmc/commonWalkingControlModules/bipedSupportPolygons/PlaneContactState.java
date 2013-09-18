@@ -10,8 +10,8 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 public interface PlaneContactState
 {
    public static final double DEFAULT_WRHO = 0.001;
-   
-   public abstract ReferenceFrame getBodyFrame();
+
+   public abstract ReferenceFrame getFrameAfterParentJoint();
    public abstract ReferenceFrame getPlaneFrame();
    public abstract boolean inContact();
    public abstract FrameVector getContactNormalFrameVector();
