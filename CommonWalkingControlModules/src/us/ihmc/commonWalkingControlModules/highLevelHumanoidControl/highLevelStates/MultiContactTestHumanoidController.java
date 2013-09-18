@@ -193,19 +193,19 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       {
          // TODO: If we know the surface normal here, use it.
          FrameVector normalContactVector = null;
-         momentumBasedController.setPlaneContactState(handPalm, handPalm.getContactPoints2d(), coefficientOfFriction.getDoubleValue(), normalContactVector);
+         momentumBasedController.setPlaneContactStateFullyConstrained(handPalm, coefficientOfFriction.getDoubleValue(), normalContactVector);
       }
       else
       {
-         FrameVector normalContactVector = null;
-         momentumBasedController.setPlaneContactState(handPalm, new ArrayList<FramePoint2d>(), coefficientOfFriction.getDoubleValue(), normalContactVector);
+         momentumBasedController.setPlaneContactStateFree(handPalm);
       }
    }
 
    private void setFlatFootContactState(ContactablePlaneBody contactableBody)
    {
       FrameVector normalContactVector = new FrameVector(contactableBody.getPlaneFrame(), 0.0, 0.0, 1.0);
-      setContactState(contactableBody, contactableBody.getContactPoints2d(), ConstraintType.FULL, normalContactVector);
+      momentumBasedController.setPlaneContactStateFullyConstrained(contactableBody, coefficientOfFriction.getDoubleValue(), normalContactVector);
+      updateEndEffectorControlModule(contactableBody, contactableBody.getContactPoints2d(), ConstraintType.FULL);
    }
 
    private void setContactStateForSwing(ContactablePlaneBody contactableBody)
@@ -214,25 +214,15 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       ReferenceFrame footFrame = footEndEffectorControlModules.get(contactableBody).getEndEffectorFrame();
       desiredConfigurationProviders.get(contactableBody).set(new FramePose(footFrame));
 
-      FrameVector normalContactVector = new FrameVector(contactableBody.getPlaneFrame(), 0.0, 0.0, 1.0);
-      setContactState(contactableBody, new ArrayList<FramePoint2d>(), ConstraintType.UNCONSTRAINED, normalContactVector);
-   }
+      footEndEffectorControlModules.get(contactableBody).doSingularityEscapeBeforeTransitionToNextState();
 
-   private void setContactState(ContactablePlaneBody contactableBody, List<FramePoint2d> contactPoints, ConstraintType constraintType,
-                                FrameVector normalContactVector)
-   {
-      if (contactPoints.size() == 0)
-      {
-         footEndEffectorControlModules.get(contactableBody).doSingularityEscapeBeforeTransitionToNextState();
-      }
-
-      momentumBasedController.setPlaneContactState(contactableBody, contactPoints, coefficientOfFriction.getDoubleValue(), normalContactVector);
-
-      updateEndEffectorControlModule(contactableBody, contactPoints, constraintType);
+      momentumBasedController.setPlaneContactStateFree(contactableBody);
+      updateEndEffectorControlModule(contactableBody, new ArrayList<FramePoint2d>(), ConstraintType.UNCONSTRAINED);
    }
 
    private void updateEndEffectorControlModule(ContactablePlaneBody contactablePlaneBody, List<FramePoint2d> contactPoints, ConstraintType constraintType)
    {
+      //TODO stop passing lists of points in contact
       footEndEffectorControlModules.get(contactablePlaneBody).setContactPoints(contactPoints, constraintType);
    }
 }

@@ -410,12 +410,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactablePlaneBody bipedFoot = feet.get(robotSide);
-         
+
          //TODO: If we know the surface normal here, use it.
-         FrameVector normalContactVector = null;
-         momentumBasedController.setPlaneContactState(bipedFoot, bipedFoot.getContactPoints2d(), coefficientOfFriction.getDoubleValue(), normalContactVector);
+         momentumBasedController.setPlaneContactStateFullyConstrained(bipedFoot, coefficientOfFriction.getDoubleValue(), null);
          
-//         ContactablePlaneBody bipedFoot = feet.get(robotSide);
 //         contactStates.get(bipedFoot).set(bipedFoot.getContactPoints2d(), coefficientOfFriction.getDoubleValue());    // flat feet
          String sideString = robotSide.getCamelCaseNameForStartOfExpression();
 
@@ -1754,6 +1752,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       return contactPoints2d;
    }
 
+   @Deprecated
    private List<FramePoint> getContactPointsForWalkingOnEdge(ContactablePlaneBody contactableBody, ConstraintType constraintType)
    {
       FrameVector direction = new FrameVector(contactableBody.getBodyFrame(), 1.0, 0.0, 0.0);

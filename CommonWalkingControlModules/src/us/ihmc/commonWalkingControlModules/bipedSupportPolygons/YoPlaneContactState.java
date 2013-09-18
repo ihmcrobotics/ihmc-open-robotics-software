@@ -60,6 +60,8 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
          contactPoints.add(contactPoint);
       }
       
+      createFramePoints(contactFramePoints);
+      
       totalNumberOfContactPoints = contactPoints.size();
    }
 
@@ -68,17 +70,22 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       this.coefficientOfFriction.set(coefficientOfFriction);
    }
    
-   public void setContactNormal(FrameVector normalContactVector)
+   public void setContactNormalVector(FrameVector normalContactVector)
    {
-      this.contactNormalFrameVector.set(normalContactVector);
+      if (normalContactVector == null)
+      {
+         this.contactNormalFrameVector.set(0.0, 0.0, 1.0);
+      }
+      else
+      {
+         this.contactNormalFrameVector.set(normalContactVector);
+      }
    }
    
    @Deprecated
    public void set(List<FramePoint2d> contactFramePoints, double coefficientOfFriction, FrameVector normalContactVector)
    {
       this.contactNormalFrameVector.set(normalContactVector);
-
-      createYoFramePoints(contactFramePoints);
 
       FramePoint2d temp = new FramePoint2d(planeFrame);
       inContact.set(false);
@@ -212,7 +219,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    }
 
    @Deprecated
-   private void createYoFramePoints(List<? extends FramePoint2d> contactPoints)
+   private void createFramePoints(List<? extends FramePoint2d> contactPoints)
    {
       int oldSize = this.contactFramePoints.size();
       int newSize = contactPoints.size();
