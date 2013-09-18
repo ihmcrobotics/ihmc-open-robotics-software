@@ -37,7 +37,6 @@ public class SDFAppearance extends YoAppearanceTransparency
       return resourceDirectories;
    }
 
-   @Override
    public Color3f getColor()
    {
      throw new NotImplementedException();

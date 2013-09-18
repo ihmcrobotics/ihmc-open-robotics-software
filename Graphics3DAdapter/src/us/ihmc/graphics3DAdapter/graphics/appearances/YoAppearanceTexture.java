@@ -36,7 +36,6 @@ public class YoAppearanceTexture extends YoAppearanceTransparency
       return bufferedImage;
    }
 
-   @Override
    public Color3f getColor()
    {
       throw new NotImplementedException();
