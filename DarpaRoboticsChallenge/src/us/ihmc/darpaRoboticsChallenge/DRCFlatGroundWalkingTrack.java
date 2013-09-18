@@ -38,7 +38,7 @@ public class DRCFlatGroundWalkingTrack
 
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
       if (guiInitialSetup.isGuiShown())
-         dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+         dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry(false);
       else
          dynamicGraphicObjectsListRegistry = null;
       YoVariableRegistry registry = new YoVariableRegistry("adjustableParabolicTrajectoryDemoSimRegistry");
@@ -53,14 +53,12 @@ public class DRCFlatGroundWalkingTrack
          highLevelHumanoidControllerFactory.setupForCheatingUsingGroundHeightAtForFootstepProvider(scsInitialSetup.getGroundProfile());
       }
 
-      YoVariableServer robotVisualizer = new YoVariableServer(robotInterface.getRobot().getRobotsYoVariableRegistry(), RemoteAtlasVisualizer.defaultPort);
+      YoVariableServer robotVisualizer = new YoVariableServer(robotInterface.getRobot().getRobotsYoVariableRegistry(), RemoteAtlasVisualizer.defaultPort, dynamicGraphicObjectsListRegistry);
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.USE_GAZEBO_PHYSICS);
-      Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, null, robotInterface, robotInitialSetup, scsInitialSetup, guiInitialSetup, null, robotVisualizer);
+      Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, null, robotInterface, robotInitialSetup, scsInitialSetup, guiInitialSetup, null, robotVisualizer, dynamicGraphicObjectsListRegistry);
       drcSimulation = humanoidSimulation.first();
 
       // add other registries
-      if (dynamicGraphicObjectsListRegistry != null)
-         drcSimulation.addAdditionalDynamicGraphicObjectsListRegistries(dynamicGraphicObjectsListRegistry);
       drcSimulation.addAdditionalYoVariableRegistriesToSCS(registry);
 
       if (automaticSimulationRunner != null)

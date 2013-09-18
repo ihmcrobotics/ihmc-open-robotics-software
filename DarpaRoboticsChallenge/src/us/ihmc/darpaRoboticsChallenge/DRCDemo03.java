@@ -60,8 +60,9 @@ public class DRCDemo03
 
             initialBehavior);
 
+      
       Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, environment, robotInterface, robotInitialSetup, scsInitialSetup,
-              guiInitialSetup, drcNetworkProcessorServer, null);
+              guiInitialSetup, drcNetworkProcessorServer, null, dynamicGraphicObjectsListRegistry);
       drcSimulation = humanoidSimulation.first();
 
       SimulationConstructionSet simulationConstructionSet = drcSimulation.getSimulationConstructionSet();
@@ -82,10 +83,6 @@ public class DRCDemo03
          }
       }
 
-
-
-      // add other registries
-      drcSimulation.addAdditionalDynamicGraphicObjectsListRegistries(dynamicGraphicObjectsListRegistry);
 
       simulationConstructionSet.setCameraPosition(6.0, -2.0, 4.5);
       simulationConstructionSet.setCameraFix(-0.44, -0.17, 0.75);

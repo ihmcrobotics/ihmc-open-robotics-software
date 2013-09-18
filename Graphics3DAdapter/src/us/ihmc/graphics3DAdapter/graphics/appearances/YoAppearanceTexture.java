@@ -3,6 +3,10 @@ package us.ihmc.graphics3DAdapter.graphics.appearances;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 
+import javax.vecmath.Color3f;
+
+import org.apache.commons.lang.NotImplementedException;
+
 public class YoAppearanceTexture extends YoAppearanceTransparency
 {
    private final URL fileURL;
@@ -30,6 +34,12 @@ public class YoAppearanceTexture extends YoAppearanceTransparency
    public BufferedImage getBufferedImage()
    {
       return bufferedImage;
+   }
+
+   @Override
+   public Color3f getColor()
+   {
+      throw new NotImplementedException();
    }
 
 }
