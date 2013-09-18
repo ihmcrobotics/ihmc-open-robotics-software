@@ -2,6 +2,11 @@ package us.ihmc.graphics3DAdapter.graphics.appearances;
 
 import java.util.ArrayList;
 
+import javax.vecmath.Color3f;
+
+import org.apache.commons.lang.NotImplementedException;
+
+
 public class SDFAppearance extends YoAppearanceTransparency
 {
    private final ArrayList<String> uri;
@@ -30,5 +35,11 @@ public class SDFAppearance extends YoAppearanceTransparency
    public ArrayList<String> getResourceDirectories()
    {
       return resourceDirectories;
+   }
+
+   @Override
+   public Color3f getColor()
+   {
+     throw new NotImplementedException();
    }
 }

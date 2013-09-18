@@ -58,15 +58,10 @@ public class DRCSimulationFactory
    
    public static Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> createSimulation(ControllerFactory controllerFactory,
          CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCRobotInterface robotInterface, RobotInitialSetup<SDFRobot> robotInitialSetup,
-         ScsInitialSetup scsInitialSetup, GuiInitialSetup guiInitialSetup, ObjectCommunicator networkProccesorCommunicator, RobotVisualizer robotVisualizer)
+         ScsInitialSetup scsInitialSetup, GuiInitialSetup guiInitialSetup, ObjectCommunicator networkProccesorCommunicator, RobotVisualizer robotVisualizer, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       GUISetterUpperRegistry guiSetterUpperRegistry = new GUISetterUpperRegistry();
 
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
-      if (guiInitialSetup.isGuiShown())
-         dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry(false);
-      else
-         dynamicGraphicObjectsListRegistry = null;
 
       DRCRobotJointMap jointMap = robotInterface.getJointMap();
 
