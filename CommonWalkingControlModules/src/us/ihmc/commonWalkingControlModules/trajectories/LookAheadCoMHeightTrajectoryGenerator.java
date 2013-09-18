@@ -598,7 +598,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
 
    private FramePoint[] getContactStateCenters(List<PlaneContactState> contactStates, Footstep nextFootstep)
    {
-      ReferenceFrame bodyFrame0 = contactStates.get(0).getBodyFrame();
+      ReferenceFrame bodyFrame0 = contactStates.get(0).getFrameAfterParentJoint();
 //      contactFrameZero.setToReferenceFrame(bodyFrame0);
       
       FramePoint contactFramePosition0 = new FramePoint(bodyFrame0);
@@ -607,7 +607,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       if (nextFootstep == null)
       {
          if (contactStates.size() != 2) throw new RuntimeException("contactStates.size() != 2");
-         ReferenceFrame bodyFrame1 = contactStates.get(1).getBodyFrame();
+         ReferenceFrame bodyFrame1 = contactStates.get(1).getFrameAfterParentJoint();
 //         contactFrameOne.setToReferenceFrame(bodyFrame1);
 
          contactFramePosition1 = new FramePoint(bodyFrame1);

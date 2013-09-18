@@ -7,6 +7,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.RigidBody;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -16,7 +17,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 public class YoPlaneContactState implements PlaneContactState, ModifiableContactState
 {
    private final YoVariableRegistry registry;
-   private final ReferenceFrame bodyFrame;
+   private final ReferenceFrame frameAfterParentJoint;
    private final ReferenceFrame planeFrame;
    private final BooleanYoVariable inContact;
    private final DoubleYoVariable coefficientOfFriction;
@@ -27,14 +28,14 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    // TODO: Probably get rid of that. Now, it is used for smooth unload/load transitions in the CarIngressEgressController.
    private final DoubleYoVariable wRho;
 
-   public YoPlaneContactState(String namePrefix, ReferenceFrame bodyFrame, ReferenceFrame planeFrame, List<FramePoint2d> contactFramePoints,
+   public YoPlaneContactState(String namePrefix, RigidBody rigidBody, ReferenceFrame planeFrame, List<FramePoint2d> contactFramePoints,
          double coefficientOfFriction, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.inContact = new BooleanYoVariable(namePrefix + "InContact", registry);
       this.coefficientOfFriction = new DoubleYoVariable(namePrefix + "CoefficientOfFriction", registry);
       this.coefficientOfFriction.set(coefficientOfFriction);
-      this.bodyFrame = bodyFrame;
+      this.frameAfterParentJoint = rigidBody.getParentJoint().getFrameAfterJoint();
       this.planeFrame = planeFrame;
       
       parentRegistry.addChild(registry);
@@ -101,9 +102,11 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    public List<FramePoint2d> getCopyOfContactFramePoints2dInContact()
    {
       List<FramePoint2d> ret = new ArrayList<FramePoint2d>(totalNumberOfContactPoints);
+      
       for (int i = 0; i < totalNumberOfContactPoints; i++)
       {
          YoContactPoint contactPoint = contactPoints.get(i);
+         
          if (contactPoint.isInContact())
          {
             ret.add(new FramePoint2d(contactPoint.getPosition2d()));
@@ -157,9 +160,9 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       return totalNumberOfContactPoints;
    }
 
-   public ReferenceFrame getBodyFrame()
+   public ReferenceFrame getFrameAfterParentJoint()
    {
-      return bodyFrame;
+      return frameAfterParentJoint;
    }
 
    public ReferenceFrame getPlaneFrame()

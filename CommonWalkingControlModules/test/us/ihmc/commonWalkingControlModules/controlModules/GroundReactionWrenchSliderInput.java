@@ -3,6 +3,9 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylindricalContactState;
@@ -14,6 +17,9 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.TranslationReferenceFrame;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 
 import com.yobotics.simulationconstructionset.Robot;
@@ -90,7 +96,11 @@ public class GroundReactionWrenchSliderInput
          contactPoints.add(new FramePoint2d(planeFrame, -footLength / 2.0, -footWidth / 2.0));
          contactPoints.add(new FramePoint2d(planeFrame, -footLength / 2.0, footWidth / 2.0));
 
-         YoPlaneContactState yoPlaneContactState = new YoPlaneContactState("contact" + i, planeFrame, planeFrame, contactPoints, coefficientOfFriction, registry);
+         RigidBody rigidBody1 = new RigidBody("blop1", worldFrame);
+         InverseDynamicsJoint joint = ScrewTools.addRevoluteJoint("blopJoint", rigidBody1, new Vector3d(), new Vector3d(1, 0, 0));
+         RigidBody rigibBody2 = ScrewTools.addRigidBody("blop2", joint, new Matrix3d(), 0.0, new Vector3d());
+         
+         YoPlaneContactState yoPlaneContactState = new YoPlaneContactState("contact" + i, rigibBody2, planeFrame, contactPoints, coefficientOfFriction, registry);
 
          contactStates.add(yoPlaneContactState);
          inputData.addPlaneContact(yoPlaneContactState);

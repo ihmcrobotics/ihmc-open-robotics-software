@@ -126,7 +126,7 @@ public class FlatGroundPlaneContactState implements PlaneContactState
       return contactFramePoints2d;
    }
 
-   public ReferenceFrame getBodyFrame()
+   public ReferenceFrame getFrameAfterParentJoint()
    {
       return ReferenceFrame.getWorldFrame();
    }

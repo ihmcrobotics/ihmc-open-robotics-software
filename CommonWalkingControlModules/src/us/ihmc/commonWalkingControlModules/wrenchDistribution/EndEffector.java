@@ -68,9 +68,9 @@ public class EndEffector
 
    public static EndEffector fromPlane(String nameSuffix, ReferenceFrame centerOfMassFrame, PlaneContactState plane, double wRho, double rhoMin, YoVariableRegistry registry)
    {
-      EndEffector ret = new EndEffector(nameSuffix, centerOfMassFrame, plane.getBodyFrame(), registry);
+      EndEffector ret = new EndEffector(nameSuffix, centerOfMassFrame, plane.getFrameAfterParentJoint(), registry);
       OptimizerPlaneContactModel model = new OptimizerPlaneContactModel();
-      model.setup(plane.getCoefficientOfFriction(), plane.getCopyOfContactFramePointsInContact(), plane.getBodyFrame(), wRho, rhoMin);
+      model.setup(plane.getCoefficientOfFriction(), plane.getCopyOfContactFramePointsInContact(), plane.getFrameAfterParentJoint(), wRho, rhoMin);
       ret.setContactModel(model);
       ret.setLoadBearing(plane.inContact());
 
@@ -88,9 +88,9 @@ public class EndEffector
 
    public void updateFromPlane(PlaneContactState plane, double wRho, double rhoMin)
    {
-      referenceFrame.checkReferenceFrameMatch(plane.getBodyFrame());
+      referenceFrame.checkReferenceFrameMatch(plane.getFrameAfterParentJoint());
       OptimizerPlaneContactModel optimizerPlaneContactModel = (OptimizerPlaneContactModel) this.getContactModel();
-      optimizerPlaneContactModel.setup(plane.getCoefficientOfFriction(), plane.getCopyOfContactFramePointsInContact(), plane.getBodyFrame(), wRho, rhoMin);
+      optimizerPlaneContactModel.setup(plane.getCoefficientOfFriction(), plane.getCopyOfContactFramePointsInContact(), plane.getFrameAfterParentJoint(), wRho, rhoMin);
       this.setLoadBearing(plane.inContact());
    }
 

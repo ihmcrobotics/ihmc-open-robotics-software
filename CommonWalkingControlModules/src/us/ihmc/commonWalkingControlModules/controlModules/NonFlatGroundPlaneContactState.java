@@ -82,7 +82,7 @@ public class NonFlatGroundPlaneContactState implements PlaneContactState
       return contactFramePoints;
    }
 
-   public ReferenceFrame getBodyFrame()
+   public ReferenceFrame getFrameAfterParentJoint()
    {
       return planeFrame;
    }

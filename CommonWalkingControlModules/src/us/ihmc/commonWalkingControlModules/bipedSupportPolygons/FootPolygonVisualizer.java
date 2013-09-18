@@ -37,7 +37,7 @@ public class FootPolygonVisualizer implements Updatable
          int colorIndex = 0;
          for (PlaneContactState contactState : contactStates)
          {
-            String contactStateName = contactState.getBodyFrame().getName(); // TODO: give contactStates a name
+            String contactStateName = contactState.getFrameAfterParentJoint().getName(); // TODO: give contactStates a name
             YoFrameConvexPolygon2d yoFootPolygon = new YoFrameConvexPolygon2d(contactStateName, "", ReferenceFrame.getWorldFrame(), 30, registry);
             yoFootPolygons.put(contactState, yoFootPolygon);
             Color color = colors.get(colorIndex++);

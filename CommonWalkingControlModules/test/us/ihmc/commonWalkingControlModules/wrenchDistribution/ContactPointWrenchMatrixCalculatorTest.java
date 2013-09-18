@@ -65,7 +65,6 @@ public class ContactPointWrenchMatrixCalculatorTest
 
          for (RigidBody body : bodies)
          {
-            ReferenceFrame frameAfterJoint = body.getParentJoint().getFrameAfterJoint();
             ReferenceFrame planeFrame = body.getBodyFixedFrame();
 
             List<FramePoint2d> contactPoints = new ArrayList<FramePoint2d>();
@@ -75,7 +74,7 @@ public class ContactPointWrenchMatrixCalculatorTest
                contactPoints.add(contactPoint);
             }
 
-            YoPlaneContactState contactState = new YoPlaneContactState("contactState" + contactNumber++, frameAfterJoint, planeFrame, contactPoints, coefficientOfFriction, registry);
+            YoPlaneContactState contactState = new YoPlaneContactState("contactState" + contactNumber++, body, planeFrame, contactPoints, coefficientOfFriction, registry);
             contactStates.put(body, contactState);
          }
 
