@@ -11,7 +11,6 @@ public class YoAppearanceTransparent extends YoAppearanceTransparency
       setTransparency(1.0);
    }
 
-   @Override
    public Color3f getColor()
    {
       throw new NotImplementedException();

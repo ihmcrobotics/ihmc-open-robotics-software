@@ -70,7 +70,6 @@ public class YoAppearanceMaterial extends YoAppearanceTransparency
       
    }
 
-   @Override
    public Color3f getColor()
    {
       return diffuseColor;
