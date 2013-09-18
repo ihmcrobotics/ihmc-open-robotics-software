@@ -58,7 +58,7 @@ public class ContactPointWrenchMatrixCalculator
       int index = 0;
       for (PlaneContactState contactState : contactStates)
       {
-         for (int i = 0; i < contactState.getNumberOfContactPoints(); i++)
+         for (int i = 0; i < contactState.getNumberOfContactPointsInContact(); i++)
          {
             for (int j = 0; j < normalizedSupportVectors.size(); j++)
             {
@@ -77,7 +77,7 @@ public class ContactPointWrenchMatrixCalculator
       int column = 0;
       for (PlaneContactState contactState : contactStates)
       {
-         List<FramePoint2d> contactPoints2d = contactState.getContactFramePoints2d();
+         List<FramePoint2d> contactPoints2d = contactState.getCopyOfContactFramePoints2dInContact();
          WrenchDistributorTools.getSupportVectors(normalizedSupportVectors, contactState.getCoefficientOfFriction(), contactState.getPlaneFrame()); // TODO: use normal
 
          for (FramePoint2d contactPoint2d : contactPoints2d)
@@ -113,7 +113,7 @@ public class ContactPointWrenchMatrixCalculator
       {
          PlaneContactState contactState = contactStates.get(rigidBody);
 
-         int nColumns = contactState.getNumberOfContactPoints() * normalizedSupportVectors.size();
+         int nColumns = contactState.getNumberOfContactPointsInContact() * normalizedSupportVectors.size();
          if (nColumns > 0)
          {
             qBlock.reshape(Wrench.SIZE, nColumns);

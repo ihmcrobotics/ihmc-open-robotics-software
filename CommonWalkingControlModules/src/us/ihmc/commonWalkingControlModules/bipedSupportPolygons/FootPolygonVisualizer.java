@@ -58,7 +58,7 @@ public class FootPolygonVisualizer implements Updatable
          YoFrameConvexPolygon2d yoFootPolygon = yoFootPolygons.get(contactState);
          if (yoFootPolygon != null)
          {
-            List<FramePoint> contactPoints = contactState.getContactFramePoints();
+            List<FramePoint> contactPoints = contactState.getCopyOfContactFramePointsInContact();
             if (contactPoints.size() > 0)
                yoFootPolygon.setFrameConvexPolygon2d(FrameConvexPolygon2d.constructByProjectionOntoXYPlane(contactPoints, yoFootPolygon.getReferenceFrame()));
             else

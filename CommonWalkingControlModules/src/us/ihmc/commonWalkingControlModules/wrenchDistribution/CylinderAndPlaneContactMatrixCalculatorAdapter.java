@@ -158,7 +158,7 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
             
             for (PlaneContactState planeContactState : set)
             {               
-               if (planeContactState.getNumberOfContactPoints() > 0)
+               if (planeContactState.getNumberOfContactPointsInContact() > 0)
                {
                   Set<EndEffector> endEffectorSet = endEffectors.get(rigidBody);
                   if (endEffectorSet == null)

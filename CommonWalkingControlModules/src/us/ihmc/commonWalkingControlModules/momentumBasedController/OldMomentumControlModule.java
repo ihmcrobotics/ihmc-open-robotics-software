@@ -173,7 +173,7 @@ public class OldMomentumControlModule implements MomentumControlModule
 
       for (PlaneContactState contactState : planeContactStates.values())
       {
-         List<FramePoint> footContactPoints = contactState.getContactFramePoints();
+         List<FramePoint> footContactPoints = contactState.getCopyOfContactFramePointsInContact();
 
          if (footContactPoints.size() > 0)
          {
@@ -199,7 +199,7 @@ public class OldMomentumControlModule implements MomentumControlModule
          RigidBody rigidBody = contactablePlaneBody.getRigidBody();
 
          PlaneContactState contactState = planeContactStates.get(contactablePlaneBody);
-         List<FramePoint> footContactPoints = contactState.getContactFramePoints();
+         List<FramePoint> footContactPoints = contactState.getCopyOfContactFramePointsInContact();
 
          if (footContactPoints.size() > 0)
          {

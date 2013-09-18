@@ -22,6 +22,7 @@ public class NonFlatGroundPlaneContactState implements PlaneContactState
    private final ReferenceFrame planeFrame;
    private final double coefficientOfFriction;
    private final FrameVector contactNormalFrameVector;
+   private final int totalNumberOfContactPoints;
 
    public NonFlatGroundPlaneContactState(double footLength, double footWidth, Point3d midfootLocation, Vector3d normalToContactPlane,
            double coefficientOfFriction)
@@ -67,6 +68,8 @@ public class NonFlatGroundPlaneContactState implements PlaneContactState
          ContactPoint contactPoint = new ContactPoint(contactFramePoints2d.get(i));
          contactPoints.add(contactPoint);
       }
+
+      totalNumberOfContactPoints = contactPoints.size();
    }
 
    private Point2d projectToXY(Point3d point)
@@ -74,7 +77,7 @@ public class NonFlatGroundPlaneContactState implements PlaneContactState
       return new Point2d(point.getX(), point.getY());
    }
 
-   public List<FramePoint> getContactFramePoints()
+   public List<FramePoint> getCopyOfContactFramePointsInContact()
    {
       return contactFramePoints;
    }
@@ -94,7 +97,7 @@ public class NonFlatGroundPlaneContactState implements PlaneContactState
       return planeFrame;
    }
 
-   public List<FramePoint2d> getContactFramePoints2d()
+   public List<FramePoint2d> getCopyOfContactFramePoints2dInContact()
    {
       return contactFramePoints2d;
    }
@@ -104,7 +107,7 @@ public class NonFlatGroundPlaneContactState implements PlaneContactState
       return coefficientOfFriction;
    }
 
-   public int getNumberOfContactPoints()
+   public int getNumberOfContactPointsInContact()
    {
       return contactFramePoints.size();
    }
@@ -130,5 +133,10 @@ public class NonFlatGroundPlaneContactState implements PlaneContactState
    public List<ContactPoint> getContactPoints()
    {
       return contactPoints;
+   }
+
+   public int getTotalNumberOfContactPoints()
+   {
+      return totalNumberOfContactPoints;
    }
 }

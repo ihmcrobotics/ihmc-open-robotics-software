@@ -15,40 +15,32 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class YoPlaneContactState implements PlaneContactState, ModifiableContactState
 {
-   private final String namePrefix;
    private final YoVariableRegistry registry;
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame planeFrame;
-   private final List<FramePoint2d> contactFramePoints = new ArrayList<FramePoint2d>();
    private final BooleanYoVariable inContact;
    private final DoubleYoVariable coefficientOfFriction;
    private final YoFrameVector contactNormalFrameVector;
-   
    private final int totalNumberOfContactPoints;
-
    private final List<YoContactPoint> contactPoints;
    
    // TODO: Probably get rid of that. Now, it is used for smooth unload/load transitions in the CarIngressEgressController.
    private final DoubleYoVariable wRho;
 
-   @Deprecated
-   public YoPlaneContactState(String namePrefix, ReferenceFrame frameAfterJoint, ReferenceFrame planeFrame, double coefficientOfFriction, YoVariableRegistry parentRegistry)
-   {
-      this(namePrefix, frameAfterJoint, planeFrame, new ArrayList<FramePoint2d>(), coefficientOfFriction, parentRegistry);
-   }
-
    public YoPlaneContactState(String namePrefix, ReferenceFrame bodyFrame, ReferenceFrame planeFrame, List<FramePoint2d> contactFramePoints,
          double coefficientOfFriction, YoVariableRegistry parentRegistry)
    {
-      this.namePrefix = namePrefix;
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.inContact = new BooleanYoVariable(namePrefix + "InContact", registry);
       this.coefficientOfFriction = new DoubleYoVariable(namePrefix + "CoefficientOfFriction", registry);
       this.coefficientOfFriction.set(coefficientOfFriction);
       this.bodyFrame = bodyFrame;
       this.planeFrame = planeFrame;
+      
       parentRegistry.addChild(registry);
+      
       this.contactNormalFrameVector = new YoFrameVector(namePrefix + "ContactNormalFrameVector", planeFrame, registry);
+      this.contactNormalFrameVector.set(0.0, 0.0, 1.0);
       
       wRho = new DoubleYoVariable(namePrefix + "_wRhoContactRegularization", registry);
       resetContactRegularization();
@@ -57,10 +49,10 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       for (int i = 0; i < contactFramePoints.size(); i++)
       {
          YoContactPoint contactPoint = new YoContactPoint(namePrefix, i, contactFramePoints.get(i), parentRegistry);
+         contactPoint.setInContact(true);
          contactPoints.add(contactPoint);
       }
-      
-      createFramePoints(contactFramePoints);
+      inContact.set(true);
       
       totalNumberOfContactPoints = contactPoints.size();
    }
@@ -81,91 +73,20 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
          this.contactNormalFrameVector.set(normalContactVector);
       }
    }
-   
-   @Deprecated
-   public void set(List<FramePoint2d> contactFramePoints, double coefficientOfFriction, FrameVector normalContactVector)
-   {
-      this.contactNormalFrameVector.set(normalContactVector);
-
-      FramePoint2d temp = new FramePoint2d(planeFrame);
-      inContact.set(false);
-
-      for (int i = 0; i < this.contactFramePoints.size(); i++)
-      {
-         FramePoint2d contactPoint = this.contactFramePoints.get(i);
-         if (i < contactFramePoints.size())
-         {
-            FramePoint2d point = contactFramePoints.get(i);
-            temp.setAndChangeFrame(point);
-            temp.changeFrame(planeFrame);
-            contactPoint.set(temp);
-            inContact.set(true);
-         }
-         else
-            invalidateContactPoint(contactPoint);
-      }
-
-      if (coefficientOfFriction < 0.0)
-         throw new RuntimeException("Coefficient of friction is negative: " + coefficientOfFriction);
-      this.coefficientOfFriction.set(coefficientOfFriction);
-   }
-
-   @Deprecated
-   public void set(List<FramePoint2d> contactPoints, double coefficientOfFriction)
-   {
-      set(contactPoints, coefficientOfFriction, new FrameVector(planeFrame, 0.0, 0.0, 1.0));
-   }
-
-   @Deprecated
-   private void invalidateContactPoint(FramePoint2d contactPoint)
-   {
-      contactPoint.set(Double.NaN, Double.NaN);
-   }
 
    public List<YoContactPoint> getContactPoints()
    {
       return contactPoints;
    }
    
-   @Deprecated
-   public List<FramePoint2d> getContactFramePoints2d()
+   public List<FramePoint> getCopyOfContactFramePointsInContact()
    {
-      List<FramePoint2d> ret = new ArrayList<FramePoint2d>(contactFramePoints.size());
-      for (FramePoint2d contactPoint : contactFramePoints)
-      {
-         if (!contactPoint.containsNaN())
-         {
-            ret.add(new FramePoint2d(contactPoint));
-         }
-      }
+      List<FramePoint> ret = new ArrayList<FramePoint>(totalNumberOfContactPoints);
 
-      return ret;
-   }
-
-   public void setContactPointsInContact(boolean[] inContact)
-   {
-      if (inContact.length != contactPoints.size())
-         throw new RuntimeException("Arrays should be of same length!");
-      
-      for (int i = 0; i < inContact.length; i++)
-      {
-         setContactPointInContact(i, inContact[i]);
-      }
-   }
-
-   public void setContactPointInContact(int contactPointIndex, boolean inContact)
-   {
-      contactPoints.get(contactPointIndex).setInContact(inContact);
-   }
-   
-   public List<FramePoint> getFramePointCopyListInContact()
-   {
-      List<FramePoint> ret = new ArrayList<FramePoint>(getNumberOfPointsInContact());
-      
-      for (int i = 0; i < contactPoints.size(); i++)
+      for (int i = 0; i < totalNumberOfContactPoints; i++)
       {
          YoContactPoint contactPoint = contactPoints.get(i);
-         
+
          if (contactPoint.isInContact())
          {
             FramePoint2d framePoint2d = contactPoint.getPosition2d();
@@ -176,38 +97,61 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
 
       return ret;
    }
-
-   public List<FramePoint2d> getFramePoint2dListInContact()
+   
+   public List<FramePoint2d> getCopyOfContactFramePoints2dInContact()
    {
-      List<FramePoint2d> ret = new ArrayList<FramePoint2d>(getNumberOfPointsInContact());
-      
-      for (int i = 0; i < contactPoints.size(); i++)
+      List<FramePoint2d> ret = new ArrayList<FramePoint2d>(totalNumberOfContactPoints);
+      for (int i = 0; i < totalNumberOfContactPoints; i++)
       {
          YoContactPoint contactPoint = contactPoints.get(i);
-         
          if (contactPoint.isInContact())
          {
-            FramePoint2d framePoint2d = new FramePoint2d(contactPoint.getPosition2d());
-            ret.add(framePoint2d);
+            ret.add(new FramePoint2d(contactPoint.getPosition2d()));
          }
       }
 
       return ret;
    }
-   
-   public int getNumberOfPointsInContact()
+
+   public void setContactPointsInContact(boolean[] inContact)
    {
-      int numberOfPointsInContact = 0;
+      if (inContact.length != totalNumberOfContactPoints)
+         throw new RuntimeException("Arrays should be of same length!");
+
+      this.inContact.set(false);
       
-      for (int i = 0; i < contactPoints.size(); i++)
+      for (int i = 0; i < inContact.length; i++)
       {
-         if (contactPoints.get(i).isInContact())
-            numberOfPointsInContact++;
+         contactPoints.get(i).setInContact(inContact[i]);
+         
+         if (inContact[i])
+         {
+            this.inContact.set(true);
+         }
       }
-      
-      return numberOfPointsInContact;
    }
 
+   public void setContactPointInContact(int contactPointIndex, boolean inContact)
+   {
+      contactPoints.get(contactPointIndex).setInContact(inContact);
+
+      if (inContact)
+      {
+         this.inContact.set(true);
+      }
+      else
+      {
+         this.inContact.set(false);
+         for (int i = 0; i < totalNumberOfContactPoints; i++)
+         {
+            if (contactPoints.get(i).isInContact())
+            {
+               this.inContact.set(true);
+            }
+         }
+      }
+   }
+   
    public int getTotalNumberOfContactPoints()
    {
       return totalNumberOfContactPoints;
@@ -216,32 +160,6 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    public ReferenceFrame getBodyFrame()
    {
       return bodyFrame;
-   }
-
-   @Deprecated
-   private void createFramePoints(List<? extends FramePoint2d> contactPoints)
-   {
-      int oldSize = this.contactFramePoints.size();
-      int newSize = contactPoints.size();
-      for (int i = oldSize; i < newSize; i++)
-      {
-         this.contactFramePoints.add(new FramePoint2d(planeFrame));
-      }
-   }
-
-   @Deprecated
-   public List<FramePoint> getContactFramePoints()
-   {
-      List<FramePoint> ret = new ArrayList<FramePoint>(contactFramePoints.size());
-      for (FramePoint2d contactPoint : contactFramePoints)
-      {
-         if (!contactPoint.containsNaN())
-         {
-            ret.add(new FramePoint(contactPoint.getReferenceFrame(), contactPoint.getX(), contactPoint.getY(), 0.0));
-         }
-      }
-
-      return ret;
    }
 
    public ReferenceFrame getPlaneFrame()
@@ -259,16 +177,17 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       return coefficientOfFriction.getDoubleValue();
    }
 
-   @Deprecated
-   public int getNumberOfContactPoints()
+   public int getNumberOfContactPointsInContact()
    {
-      int ret = 0;
-      for (FramePoint2d contactPoint : contactFramePoints)
+      int numberOfContactPointsInContact = 0;
+      
+      for (int i = 0; i < totalNumberOfContactPoints; i++)
       {
-         if (!contactPoint.containsNaN())
-            ret++;
+         if (contactPoints.get(i).isInContact())
+            numberOfContactPointsInContact++;
       }
-      return ret;
+      
+      return numberOfContactPointsInContact;
    }
 
    public FrameVector getContactNormalFrameVector()
@@ -278,12 +197,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
 
    public void clear()
    {
-      for (FramePoint2d contactPoint : contactFramePoints)
-      {
-         invalidateContactPoint(contactPoint);
-      }
-      
-      for (int i = 0; i < contactPoints.size(); i++)
+      for (int i = 0; i < totalNumberOfContactPoints; i++)
       {
          contactPoints.get(i).setInContact(false);
       }
@@ -293,10 +207,9 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    
    public void setFullyConstrained()
    {
-      for (int i = 0; i < contactPoints.size(); i++)
+      for (int i = 0; i < totalNumberOfContactPoints; i++)
       {
          contactPoints.get(i).setInContact(true);
-         contactFramePoints.set(i, new FramePoint2d(contactPoints.get(i).getPosition2d()));
       }
       
       inContact.set(true);

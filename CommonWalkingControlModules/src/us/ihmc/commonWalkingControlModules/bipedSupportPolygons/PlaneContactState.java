@@ -15,10 +15,11 @@ public interface PlaneContactState
    public abstract ReferenceFrame getPlaneFrame();
    public abstract boolean inContact();
    public abstract FrameVector getContactNormalFrameVector();
-   public abstract List<FramePoint> getContactFramePoints();
-   public abstract List<FramePoint2d> getContactFramePoints2d();
+   public abstract List<FramePoint> getCopyOfContactFramePointsInContact();
+   public abstract List<FramePoint2d> getCopyOfContactFramePoints2dInContact();
    public abstract double getCoefficientOfFriction();
-   public abstract int getNumberOfContactPoints();
+   public abstract int getNumberOfContactPointsInContact();
+   public abstract int getTotalNumberOfContactPoints(); 
    
    public abstract List<? extends ContactPoint> getContactPoints();
 

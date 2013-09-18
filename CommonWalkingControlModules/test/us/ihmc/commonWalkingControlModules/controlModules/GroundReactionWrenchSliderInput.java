@@ -91,7 +91,6 @@ public class GroundReactionWrenchSliderInput
          contactPoints.add(new FramePoint2d(planeFrame, -footLength / 2.0, footWidth / 2.0));
 
          YoPlaneContactState yoPlaneContactState = new YoPlaneContactState("contact" + i, planeFrame, planeFrame, contactPoints, coefficientOfFriction, registry);
-         yoPlaneContactState.set(contactPoints, coefficientOfFriction);
 
          contactStates.add(yoPlaneContactState);
          inputData.addPlaneContact(yoPlaneContactState);

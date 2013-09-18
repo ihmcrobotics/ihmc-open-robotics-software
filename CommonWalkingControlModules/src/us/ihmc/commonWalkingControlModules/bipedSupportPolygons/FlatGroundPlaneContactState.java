@@ -20,6 +20,7 @@ public class FlatGroundPlaneContactState implements PlaneContactState
    private final List<ContactPoint> contactPoints;
    private final double coefficientOfFriction;
    private final FrameVector contactNormalFrameVector;
+   private final int totalNumberOfContactPoints;
 
    public static FlatGroundPlaneContactState createRandomFlatGroundContactState(Random random, boolean leftSide, double coefficientOfFriction)
    {
@@ -56,6 +57,8 @@ public class FlatGroundPlaneContactState implements PlaneContactState
          ContactPoint contactPoint = new ContactPoint(contactFramePoints2d.get(i));
          contactPoints.add(contactPoint);
       }
+
+      totalNumberOfContactPoints = contactPoints.size();
    }
 
    public FlatGroundPlaneContactState(double footLength, double footWidth, Point3d midfootLocation, double coefficientOfFriction)
@@ -99,6 +102,8 @@ public class FlatGroundPlaneContactState implements PlaneContactState
          ContactPoint contactPoint = new ContactPoint(contactFramePoints2d.get(i));
          contactPoints.add(contactPoint);
       }
+
+      totalNumberOfContactPoints = contactPoints.size();
    }
 
    private Point2d projectToXY(Point3d point)
@@ -111,12 +116,12 @@ public class FlatGroundPlaneContactState implements PlaneContactState
       return true;
    }
 
-   public List<FramePoint> getContactFramePoints()
+   public List<FramePoint> getCopyOfContactFramePointsInContact()
    {
       return contactFramePoints;
    }
 
-   public List<FramePoint2d> getContactFramePoints2d()
+   public List<FramePoint2d> getCopyOfContactFramePoints2dInContact()
    {
       return contactFramePoints2d;
    }
@@ -142,7 +147,7 @@ public class FlatGroundPlaneContactState implements PlaneContactState
       return coefficientOfFriction;
    }
 
-   public int getNumberOfContactPoints()
+   public int getNumberOfContactPointsInContact()
    {
       return contactFramePoints2d.size();
    }
@@ -168,5 +173,10 @@ public class FlatGroundPlaneContactState implements PlaneContactState
    public List<ContactPoint> getContactPoints()
    {
       return contactPoints;
+   }
+
+   public int getTotalNumberOfContactPoints()
+   {
+      return totalNumberOfContactPoints;
    }
 }
