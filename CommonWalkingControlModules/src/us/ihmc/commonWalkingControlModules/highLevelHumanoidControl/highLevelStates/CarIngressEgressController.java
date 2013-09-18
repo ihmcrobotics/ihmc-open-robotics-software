@@ -769,12 +769,11 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       {
          // TODO: If we know the surface normal here, use it.
          FrameVector normalContactVector = null;
-         momentumBasedController.setPlaneContactState(handPalm, handPalm.getContactPoints2d(), coefficientOfFriction.getDoubleValue(), normalContactVector);
+         momentumBasedController.setPlaneContactStateFullyConstrained(handPalm, coefficientOfFriction.getDoubleValue(), normalContactVector);
       }
       else
       {
-         FrameVector normalContactVector = null;
-         momentumBasedController.setPlaneContactState(handPalm, new ArrayList<FramePoint2d>(), coefficientOfFriction.getDoubleValue(), normalContactVector);
+         momentumBasedController.setPlaneContactStateFree(handPalm);
       }
    }
 
@@ -783,12 +782,12 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       ContactablePlaneBody thigh = contactableThighs.get(robotSide);
       if (inContact)
       {
-         momentumBasedController.setPlaneContactState(thigh, thigh.getContactPoints2d(), coefficientOfFrictionForBumAndThighs.getDoubleValue(), null);
+         momentumBasedController.setPlaneContactStateFullyConstrained(thigh, coefficientOfFrictionForBumAndThighs.getDoubleValue(), null);
          addBodyInContact(thigh);
       }
       else
       {
-         momentumBasedController.setPlaneContactState(thigh, new ArrayList<FramePoint2d>(), coefficientOfFrictionForBumAndThighs.getDoubleValue(), null);
+         momentumBasedController.setPlaneContactStateFree(thigh);
          removeBodyInContact(thigh);
       }
    }
@@ -797,28 +796,12 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    {
       if (inContact)
       {
-         momentumBasedController.setPlaneContactState(contactablePelvis, contactablePelvis.getContactPoints2d(), coefficientOfFrictionForBumAndThighs.getDoubleValue(), null);
+         momentumBasedController.setPlaneContactStateFullyConstrained(contactablePelvis, coefficientOfFrictionForBumAndThighs.getDoubleValue(), null);
          addBodyInContact(contactablePelvis);
       }
       else
       {
-         momentumBasedController.setPlaneContactState(contactablePelvis, new ArrayList<FramePoint2d>(), coefficientOfFrictionForBumAndThighs.getDoubleValue(), null);
-         removeBodyInContact(contactablePelvis);
-      }
-   }
-
-   public void setPelvisInContactWithOneContactPoint(boolean inContact)
-   {
-      if (inContact)
-      {
-         ArrayList<FramePoint2d> pelvisContactPoint = new ArrayList<FramePoint2d>();
-         pelvisContactPoint.add(new FramePoint2d(contactablePelvis.getPlaneFrame()));
-         momentumBasedController.setPlaneContactState(contactablePelvis, pelvisContactPoint, coefficientOfFrictionForBumAndThighs.getDoubleValue(), null);
-         addBodyInContact(contactablePelvis);
-      }
-      else
-      {
-         momentumBasedController.setPlaneContactState(contactablePelvis, new ArrayList<FramePoint2d>(), coefficientOfFrictionForBumAndThighs.getDoubleValue(), null);
+         momentumBasedController.setPlaneContactStateFree(contactablePelvis);
          removeBodyInContact(contactablePelvis);
       }
    }
@@ -827,12 +810,12 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    {
       if (inContact)
       {
-         momentumBasedController.setPlaneContactState(contactablePelvisBack, contactablePelvisBack.getContactPoints2d(), coefficientOfFrictionForBumAndThighs.getDoubleValue(), null);
+         momentumBasedController.setPlaneContactStateFullyConstrained(contactablePelvisBack, coefficientOfFrictionForBumAndThighs.getDoubleValue(), null);
          addBodyInContact(contactablePelvisBack);
       }
       else
       {
-         momentumBasedController.setPlaneContactState(contactablePelvisBack, new ArrayList<FramePoint2d>(), coefficientOfFrictionForBumAndThighs.getDoubleValue(), null);
+         momentumBasedController.setPlaneContactStateFree(contactablePelvisBack);
          removeBodyInContact(contactablePelvisBack);
       }
    }
@@ -842,13 +825,17 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       FrameVector normalContactVector = new FrameVector(worldFrame, 0.0, 0.0, 1.0);
       List<FramePoint> contactPoints = getContactPointsAccordingToFootConstraint(contactableBody, ConstraintType.TOES);
       List<FramePoint2d> contactPoints2d = getContactPoints2d(contactableBody, contactPoints);
-      setFootContactState(contactableBody, contactPoints2d, ConstraintType.TOES, normalContactVector);
+      
+      boolean[] newContactPointStates = getContactPointStatesForWalkingOnEdge(contactableBody, ConstraintType.TOES);
+      momentumBasedController.setPlaneContactState(contactableBody, newContactPointStates, normalContactVector);
+      updateFootEndEffectorControlModule(contactableBody, contactPoints2d, ConstraintType.TOES);
    }
 
    private void setFlatFootContactState(ContactablePlaneBody contactableBody)
    {
       FrameVector normalContactVector = new FrameVector(contactableBody.getPlaneFrame(), 0.0, 0.0, 1.0);
-      setFootContactState(contactableBody, contactableBody.getContactPoints2d(), ConstraintType.FULL, normalContactVector);
+      momentumBasedController.setPlaneContactStateFullyConstrained(contactableBody, coefficientOfFriction.getDoubleValue(), normalContactVector);
+      updateFootEndEffectorControlModule(contactableBody, contactableBody.getContactPoints2d(), ConstraintType.FULL);
    }
 
    private void setContactStateForSwing(ContactablePlaneBody contactableBody)
@@ -857,8 +844,27 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       ReferenceFrame footFrame = footEndEffectorControlModules.get(contactableBody).getEndEffectorFrame();
       desiredFootConfigurationProviders.get(contactableBody).set(new FramePose(footFrame));
 
-      FrameVector normalContactVector = new FrameVector(contactableBody.getPlaneFrame(), 0.0, 0.0, 1.0);
-      setFootContactState(contactableBody, new ArrayList<FramePoint2d>(), ConstraintType.UNCONSTRAINED, normalContactVector);
+      footEndEffectorControlModules.get(contactableBody).doSingularityEscapeBeforeTransitionToNextState();
+      momentumBasedController.setPlaneContactStateFree(contactableBody);
+      updateFootEndEffectorControlModule(contactableBody, new ArrayList<FramePoint2d>(), ConstraintType.UNCONSTRAINED);
+   }
+
+   private boolean[] getContactPointStatesForWalkingOnEdge(ContactablePlaneBody contactableBody, ConstraintType constraintType)
+   {
+      FrameVector direction = new FrameVector(contactableBody.getBodyFrame(), 1.0, 0.0, 0.0);
+      if (constraintType == ConstraintType.HEEL)
+         direction.scale(-1.0);
+
+      int[] indexOfPointsInContact = DesiredFootstepCalculatorTools.findMaximumPointIndexesInDirection(contactableBody.getContactPoints(), direction, 2);
+      
+      boolean[] contactPointStates = new boolean[contactableBody.getTotalNumberOfContactPoints()];
+      
+      for (int i = 0; i < indexOfPointsInContact.length; i++)
+      {
+         contactPointStates[indexOfPointsInContact[i]] = true;
+      }
+      
+      return contactPointStates;
    }
 
    private List<FramePoint> getContactPointsAccordingToFootConstraint(ContactablePlaneBody contactableBody, ConstraintType constraintType)
@@ -882,21 +888,9 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       return contactPoints2d;
    }
 
-   private void setFootContactState(ContactablePlaneBody contactableBody, List<FramePoint2d> contactPoints, ConstraintType constraintType,
-                                FrameVector normalContactVector)
-   {
-      if (contactPoints.size() == 0)
-      {
-         footEndEffectorControlModules.get(contactableBody).doSingularityEscapeBeforeTransitionToNextState();
-      }
-
-      momentumBasedController.setPlaneContactState(contactableBody, contactPoints, coefficientOfFrictionForFeet.getDoubleValue(), normalContactVector);
-
-      updateFootEndEffectorControlModule(contactableBody, contactPoints, constraintType);
-   }
-
    private void updateFootEndEffectorControlModule(ContactablePlaneBody contactablePlaneBody, List<FramePoint2d> contactPoints, ConstraintType constraintType)
    {
+      //TODO stop passing lists of points in contact
       footEndEffectorControlModules.get(contactablePlaneBody).setContactPoints(contactPoints, constraintType);
    }
 
@@ -909,7 +903,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
             return;
 
          if (v.equals(requestedPelvisLoadBearing))
-            setPelvisInContactWithOneContactPoint(requestedPelvisLoadBearing.getBooleanValue());
+            setPelvisInContact(requestedPelvisLoadBearing.getBooleanValue());
 
          if (v.equals(requestedPelvisBackLoadBearing))
             setPelvisBackInContact(requestedPelvisBackLoadBearing.getBooleanValue());

@@ -562,30 +562,29 @@ public class MomentumBasedController
       return planeContactWrenchProcessor.getCops().get(contactablePlaneBody);
    }
 
-   @Deprecated
-   public void setPlaneContactState(ContactablePlaneBody contactableBody, List<FramePoint2d> contactPoints, double coefficientOfFriction,
-                                    FrameVector normalContactVector)
-   {
-      YoPlaneContactState yoPlaneContactState = yoPlaneContactStates.get(contactableBody);
-
-      if (normalContactVector == null)
-      {
-         yoPlaneContactState.set(contactPoints, coefficientOfFriction);
-      }
-      else
-      {
-         yoPlaneContactState.set(contactPoints, coefficientOfFriction, normalContactVector);
-      }
-   }
-   
    public void setPlaneContactState(ContactablePlaneBody contactableBody, boolean[] newContactPointStates)
    {
       yoPlaneContactStates.get(contactableBody).setContactPointsInContact(newContactPointStates);
    }
-   
+
+   public void setPlaneContactState(ContactablePlaneBody contactableBody, boolean[] newContactPointStates, FrameVector normalContactVector)
+   {
+      YoPlaneContactState yoPlaneContactState = yoPlaneContactStates.get(contactableBody);
+      yoPlaneContactState.setContactPointsInContact(newContactPointStates);
+      yoPlaneContactState.setContactNormalVector(normalContactVector);
+   }
+
    public void setPlaneContactStateFullyConstrained(ContactablePlaneBody contactableBody)
    {
       yoPlaneContactStates.get(contactableBody).setFullyConstrained();
+   }
+
+   public void setPlaneContactStateFullyConstrained(ContactablePlaneBody contactableBody, double coefficientOfFriction, FrameVector normalContactVector)
+   {
+      YoPlaneContactState yoPlaneContactState = yoPlaneContactStates.get(contactableBody);
+      yoPlaneContactState.setFullyConstrained();
+      yoPlaneContactState.setCoefficientOfFriction(coefficientOfFriction);
+      yoPlaneContactState.setContactNormalVector(normalContactVector);
    }
 
    public void setPlaneContactStateFree(ContactablePlaneBody contactableBody)
