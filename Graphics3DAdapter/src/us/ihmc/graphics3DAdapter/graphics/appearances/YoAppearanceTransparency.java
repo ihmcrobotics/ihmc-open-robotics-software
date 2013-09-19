@@ -1,5 +1,9 @@
 package us.ihmc.graphics3DAdapter.graphics.appearances;
 
+import javax.vecmath.Color3f;
+
+import org.apache.commons.lang.NotImplementedException;
+
 public abstract class YoAppearanceTransparency implements AppearanceDefinition
 {
    private double transparency = 0.0;
@@ -12,5 +16,10 @@ public abstract class YoAppearanceTransparency implements AppearanceDefinition
    public void setTransparency(double transparency)
    {
       this.transparency = transparency;
+   }
+
+   public Color3f getColor()
+   {
+      throw new NotImplementedException();
    }
 }
