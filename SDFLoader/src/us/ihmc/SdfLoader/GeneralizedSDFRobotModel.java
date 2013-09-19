@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 
 import javax.media.j3d.Transform3D;
 
-import us.ihmc.SdfLoader.xmlDescription.Collision;
 import us.ihmc.SdfLoader.xmlDescription.SDFJoint;
 import us.ihmc.SdfLoader.xmlDescription.SDFLink;
 import us.ihmc.SdfLoader.xmlDescription.SDFModel;
@@ -102,7 +101,12 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
    {
       return name;
    }
-
+   
+   public SDFJointHolder getJointHolder(String name)
+   {
+      return joints.get(name);
+   }
+   
    public ArrayList<String> getResourceDirectories()
    {
       return resourceDirectories;
