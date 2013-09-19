@@ -26,6 +26,7 @@ import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.TranslationReferenceFrame;
+import us.ihmc.utilities.screwTheory.RigidBody;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
@@ -168,12 +169,15 @@ public class SplineBasedCoMHeightTrajectoryGeneratorTest
    {
       List<PlaneContactState> contactStates = new ArrayList<PlaneContactState>();
       Footstep nextFootstep = null;
-      contactStates.add(new NonFlatGroundPlaneContactState(0.2, 0.1, contactFramePosition0, new Vector3d(0.0, 0.0, 1.0), 1e-7));
+      
+      RigidBody rigidBody1 = new RigidBody("yop1", ReferenceFrame.getWorldFrame());
+      contactStates.add(new NonFlatGroundPlaneContactState(0.2, 0.1, contactFramePosition0, new Vector3d(0.0, 0.0, 1.0), 1e-7, rigidBody1));
 
       if (doubleSupport)
       {
          // leave nextFootstep as null
-         contactStates.add(new NonFlatGroundPlaneContactState(0.2, 0.1, contactFramePosition1, new Vector3d(0.0, 0.0, 1.0), 1e-7));
+         RigidBody rigidBody2 = new RigidBody("yop2", ReferenceFrame.getWorldFrame());
+         contactStates.add(new NonFlatGroundPlaneContactState(0.2, 0.1, contactFramePosition1, new Vector3d(0.0, 0.0, 1.0), 1e-7, rigidBody2));
       }
       else
       {

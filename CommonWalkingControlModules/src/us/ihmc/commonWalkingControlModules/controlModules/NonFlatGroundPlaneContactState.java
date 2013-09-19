@@ -13,9 +13,11 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.RigidBody;
 
 public class NonFlatGroundPlaneContactState implements PlaneContactState
 {
+   private final RigidBody rigidBody;
    private final ArrayList<FramePoint> contactFramePoints;
    private final ArrayList<FramePoint2d> contactFramePoints2d;
    private final List<ContactPoint> contactPoints;
@@ -25,8 +27,9 @@ public class NonFlatGroundPlaneContactState implements PlaneContactState
    private final int totalNumberOfContactPoints;
 
    public NonFlatGroundPlaneContactState(double footLength, double footWidth, Point3d midfootLocation, Vector3d normalToContactPlane,
-           double coefficientOfFriction)
+           double coefficientOfFriction, RigidBody rigidBody)
    {
+      this.rigidBody = rigidBody;
       contactFramePoints = new ArrayList<FramePoint>();
       contactFramePoints2d = new ArrayList<FramePoint2d>();
       planeFrame = ReferenceFrame.constructReferenceFrameFromPointAndZAxis("planeFrame", new FramePoint(ReferenceFrame.getWorldFrame(), midfootLocation),
@@ -65,7 +68,7 @@ public class NonFlatGroundPlaneContactState implements PlaneContactState
       contactPoints = new ArrayList<ContactPoint>();
       for (int i = 0; i < contactFramePoints2d.size(); i++)
       {
-         ContactPoint contactPoint = new ContactPoint(contactFramePoints2d.get(i));
+         ContactPoint contactPoint = new ContactPoint(contactFramePoints2d.get(i), this);
          contactPoints.add(contactPoint);
       }
 
@@ -138,5 +141,10 @@ public class NonFlatGroundPlaneContactState implements PlaneContactState
    public int getTotalNumberOfContactPoints()
    {
       return totalNumberOfContactPoints;
+   }
+
+   public RigidBody getRigidBody()
+   {
+      return rigidBody;
    }
 }

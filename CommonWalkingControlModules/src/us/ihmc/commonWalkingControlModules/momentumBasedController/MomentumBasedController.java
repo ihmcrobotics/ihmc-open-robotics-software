@@ -168,24 +168,6 @@ public class MomentumBasedController
 
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
 
-      if (stateEstimationDataFromControllerSink != null)
-      {
-         this.desiredCoMAndAngularAccelerationGrabber = new DesiredCoMAndAngularAccelerationGrabber(stateEstimationDataFromControllerSink, estimationLink,
-                 estimationFrame, totalMass, registry);
-
-         double touchdownTime = 0.12;
-         double minCoPDistance = 0.01;
-
-//       this.pointPositionGrabber = new SingleReferenceFramePointPositionGrabber(stateEstimationDataFromControllerSink, registry, controlDT, touchdownTime, minCoPDistance);
-         this.pointPositionGrabber = new PointPositionGrabber(stateEstimationDataFromControllerSink, registry, controlDT, touchdownTime, minCoPDistance);
-         setDelayTimeBeforeTrustingContacts(touchdownTime);
-      }
-      else
-      {
-         this.desiredCoMAndAngularAccelerationGrabber = null;
-         this.pointPositionGrabber = null;
-      }
-
       gravitationalWrench = new SpatialForceVector(centerOfMassFrame, new Vector3d(0.0, 0.0, totalMass * gravityZ), new Vector3d());
 
 
@@ -243,6 +225,24 @@ public class MomentumBasedController
          yoPlaneContactStates.put(contactablePlaneBody, contactState);
       }
 
+      if (stateEstimationDataFromControllerSink != null)
+      {
+         this.desiredCoMAndAngularAccelerationGrabber = new DesiredCoMAndAngularAccelerationGrabber(stateEstimationDataFromControllerSink, estimationLink,
+                 estimationFrame, totalMass, registry);
+
+         double touchdownTime = 0.12;
+         double minCoPDistance = 0.01;
+
+//       this.pointPositionGrabber = new SingleReferenceFramePointPositionGrabber(stateEstimationDataFromControllerSink, registry, controlDT, touchdownTime, minCoPDistance);
+         this.pointPositionGrabber = new PointPositionGrabber(stateEstimationDataFromControllerSink, yoPlaneContactStates, registry, controlDT, touchdownTime, minCoPDistance);
+         setDelayTimeBeforeTrustingContacts(touchdownTime);
+      }
+      else
+      {
+         this.desiredCoMAndAngularAccelerationGrabber = null;
+         this.pointPositionGrabber = null;
+      }
+
       InverseDynamicsJoint[] joints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
       for (InverseDynamicsJoint joint : joints)
       {
@@ -264,7 +264,7 @@ public class MomentumBasedController
       {
          RigidBody rigidBody = contactableCylinderBody.getRigidBody();
 
-         // YoCylindricalContactState: used to enable load bearing with hands while grasping a cylinder
+         // YoCylindricalContactState: used to enable load bearing with hands by grasping a cylinder
          YoCylindricalContactState cylindricalContactState = new YoCylindricalContactState(rigidBody.getName(),
                                                                 rigidBody.getParentJoint().getFrameAfterJoint(), contactableCylinderBody.getCylinderFrame(),
                                                                 registry, dynamicGraphicObjectsListRegistry);
