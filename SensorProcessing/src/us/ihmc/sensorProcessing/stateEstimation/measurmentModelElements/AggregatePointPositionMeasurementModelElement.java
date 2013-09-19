@@ -66,6 +66,14 @@ public class AggregatePointPositionMeasurementModelElement implements Measuremen
       Set<PointPositionDataObject> pointPositionDataObjects = inputPort.getData();
       nElementsInUse = pointPositionDataObjects.size();
 
+      for (PointPositionDataObject pointPositionDataObject : pointPositionDataObjects)
+      {
+         if (!pointPositionDataObject.isPointPositionValid())
+         {
+            nElementsInUse--;
+         }
+      }
+
       for (int i = elementPool.size(); i < nElementsInUse; i++)
       {
          String name = "pointPosition" + i;
@@ -82,6 +90,9 @@ public class AggregatePointPositionMeasurementModelElement implements Measuremen
       int elementIndex = 0;
       for (PointPositionDataObject pointPositionDataObject : pointPositionDataObjects)
       {
+         if (!pointPositionDataObject.isPointPositionValid())
+            continue;
+         
          PointPositionMeasurementModelElement element = elementPool.get(elementIndex);
          element.getPointPositionMeasurementInputPort().setData(pointPositionDataObject);
          element.computeMatrixBlocks();

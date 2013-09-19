@@ -68,7 +68,8 @@ public class YoPointPositionDataObjectListOutputPortTest
          ReferenceFrame frame = frames.get(referenceFrameIndex);
          FramePoint measurementPointInBodyFrame = new FramePoint(frame, RandomTools.generateRandomVector(random));
          FramePoint measurementPointInWorldFrame = new FramePoint(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random));
-         pointPositionDataObject.set(measurementPointInBodyFrame, measurementPointInWorldFrame);
+         boolean isPointPositionValid = true;
+         pointPositionDataObject.set(measurementPointInBodyFrame, measurementPointInWorldFrame, isPointPositionValid);
 
          dataIn.add(pointPositionDataObject);
       }
