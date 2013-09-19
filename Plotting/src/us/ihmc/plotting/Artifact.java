@@ -16,6 +16,7 @@ public abstract class Artifact implements Plottable, Serializable
    private boolean drawHistory = false;
    private boolean recordHistory = false;
    
+
    public Artifact(String id)
    {
       this.id = id;
@@ -104,8 +105,15 @@ public abstract class Artifact implements Plottable, Serializable
       this.isVisible = isVisible;
    }
 
+   public String getName() {
+      return getID();
+   }
+   
    public String toString()
    {
       return getID();
    }
+   
+
+   
 }
