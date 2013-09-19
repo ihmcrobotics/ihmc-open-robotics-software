@@ -122,7 +122,8 @@ public class PointPositionMeasurementModelElementTest
    {
       FramePoint pointInWorld = point.changeFrameCopy(ReferenceFrame.getWorldFrame());
       PointPositionDataObject pointPositionDataObject = new PointPositionDataObject();
-      pointPositionDataObject.set(point, pointInWorld);
+      boolean isPointPositionValid = true;
+      pointPositionDataObject.set(point, pointInWorld, isPointPositionValid);
       pointPositionMeasurementInputPort.setData(pointPositionDataObject);
    }
 }

@@ -25,7 +25,7 @@ public class YoPointPositionDataObject extends PointPositionDataObject
    }
 
    @Override
-   public void set(FramePoint measurementPointInBodyFrame, FramePoint positionOfMeasurementPointInWorldFrame)
+   public void set(FramePoint measurementPointInBodyFrame, FramePoint positionOfMeasurementPointInWorldFrame, boolean isPointPositionValid)
    {
       throw new RuntimeException("Should not get here");
    }
@@ -59,6 +59,7 @@ public class YoPointPositionDataObject extends PointPositionDataObject
          throw new RuntimeException("Frame name does not match, desired: " + bodyFixedReferenceFrameName + ", expected: "
                + other.bodyFixedReferenceFrameName);  
       }
+      isPointPositionValid = other.isPointPositionValid;
       yoMeasurementPointInBodyFrame.set(other.measurementPointInBodyFrame);
       yoMeasurementPointInWorldFrame.set(other.positionOfMeasurementPointInWorldFrame);
    }  

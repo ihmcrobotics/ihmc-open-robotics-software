@@ -8,11 +8,14 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 public class PointPositionDataObject
 {
    protected String bodyFixedReferenceFrameName;
+   protected boolean isPointPositionValid = true;
    protected final Point3d measurementPointInBodyFrame = new Point3d();
    protected final Point3d positionOfMeasurementPointInWorldFrame = new Point3d();
 
-   public void set(FramePoint measurementPointInBodyFrame, FramePoint positionOfMeasurementPointInWorldFrame)
+   public void set(FramePoint measurementPointInBodyFrame, FramePoint positionOfMeasurementPointInWorldFrame, boolean isPointPositionValid)
    {
+      this.isPointPositionValid = isPointPositionValid;
+      
       bodyFixedReferenceFrameName = measurementPointInBodyFrame.getReferenceFrame().getName();
       positionOfMeasurementPointInWorldFrame.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
@@ -32,6 +35,7 @@ public class PointPositionDataObject
 
    public void set(PointPositionDataObject other)
    {  
+      isPointPositionValid = other.isPointPositionValid;
       bodyFixedReferenceFrameName = other.bodyFixedReferenceFrameName;
       measurementPointInBodyFrame.set(other.measurementPointInBodyFrame);
       positionOfMeasurementPointInWorldFrame.set(other.positionOfMeasurementPointInWorldFrame);
@@ -42,13 +46,19 @@ public class PointPositionDataObject
       if (bodyFixedReferenceFrameName != other.bodyFixedReferenceFrameName)
          return false;
 
+      boolean validStateEqual = isPointPositionValid == other.isPointPositionValid;
       boolean bodyPointsEqual = getMeasurementPointInBodyFrame().epsilonEquals(other.getMeasurementPointInBodyFrame(), epsilon);
       boolean worldPointsEqual = getMeasurementPointInWorldFrame().epsilonEquals(other.getMeasurementPointInWorldFrame(), epsilon);
-      return bodyPointsEqual && worldPointsEqual;
+      return validStateEqual && bodyPointsEqual && worldPointsEqual;
    }
 
    public String getBodyFixedReferenceFrameName()
    {
       return bodyFixedReferenceFrameName;
+   }
+
+   public boolean isPointPositionValid()
+   {
+      return isPointPositionValid;
    }
 }
