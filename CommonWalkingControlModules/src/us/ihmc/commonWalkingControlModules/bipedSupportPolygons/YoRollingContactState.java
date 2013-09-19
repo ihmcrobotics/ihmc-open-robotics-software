@@ -11,6 +11,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.RigidBody;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -18,6 +19,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class YoRollingContactState implements PlaneContactState, ModifiableContactState
 {
+   private final RigidBody rigidBody;
    private final YoVariableRegistry registry;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame updatableContactFrame;
@@ -37,6 +39,7 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
    {
       // The rolling contactable body
       this.contactableCylinderBody = contactableCylinderBody;
+      this.rigidBody = contactableCylinderBody.getRigidBody();
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.inContact = new BooleanYoVariable(namePrefix + "InContact", registry);
       this.coefficientOfFriction = new DoubleYoVariable(namePrefix + "CoefficientOfFriction", registry);
@@ -66,7 +69,7 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
       {
          tempFramePoint.setAndChangeFrame(contactFramePoints.get(i));
          tempFramePoint.changeFrame(updatableContactFrame);
-         YoContactPoint contactPoint = new YoContactPoint(namePrefix, i, tempFramePoint, parentRegistry);
+         YoContactPoint contactPoint = new YoContactPoint(namePrefix, i, tempFramePoint, this, parentRegistry);
          contactPoints.add(contactPoint);
       }
 
@@ -181,7 +184,7 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
 
    public ReferenceFrame getFrameAfterParentJoint()
    {
-      return contactableCylinderBody.getBodyFrame();
+      return rigidBody.getParentJoint().getFrameAfterJoint();
    }
 
    public ReferenceFrame getPlaneFrame()
@@ -260,5 +263,10 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
    public int getTotalNumberOfContactPoints()
    {
       return totalNumberOfContactPoints;
+   }
+
+   public RigidBody getRigidBody()
+   {
+      return rigidBody;
    }
 }

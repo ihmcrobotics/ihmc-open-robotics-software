@@ -12,9 +12,11 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.RigidBody;
 
 public class FlatGroundPlaneContactState implements PlaneContactState
 {
+   private final RigidBody rigidBody;
    private final ArrayList<FramePoint> contactFramePoints;
    private final ArrayList<FramePoint2d> contactFramePoints2d;
    private final List<ContactPoint> contactPoints;
@@ -22,7 +24,7 @@ public class FlatGroundPlaneContactState implements PlaneContactState
    private final FrameVector contactNormalFrameVector;
    private final int totalNumberOfContactPoints;
 
-   public static FlatGroundPlaneContactState createRandomFlatGroundContactState(Random random, boolean leftSide, double coefficientOfFriction)
+   public static FlatGroundPlaneContactState createRandomFlatGroundContactState(Random random, boolean leftSide, double coefficientOfFriction, RigidBody rigidBody)
    {
       double footLength = RandomTools.generateRandomDouble(random, 0.1, 0.3);
       double footWidth = RandomTools.generateRandomDouble(random, 0.1, 0.2);
@@ -33,13 +35,15 @@ public class FlatGroundPlaneContactState implements PlaneContactState
       if (!leftSide)
          midfootLocation.setY(-midfootLocation.getY());
 
-      FlatGroundPlaneContactState flatGroundPlaneContactState = new FlatGroundPlaneContactState(footLength, footWidth, midfootLocation, coefficientOfFriction);
+      FlatGroundPlaneContactState flatGroundPlaneContactState = new FlatGroundPlaneContactState(footLength, footWidth, midfootLocation, coefficientOfFriction, rigidBody);
 
       return flatGroundPlaneContactState;
    }
 
-   public FlatGroundPlaneContactState(double[][] contactPointLocations, double coefficientOfFriction)
+   public FlatGroundPlaneContactState(double[][] contactPointLocations, double coefficientOfFriction, RigidBody rigidBody)
    {
+      this.rigidBody = rigidBody;
+      
       contactFramePoints = new ArrayList<FramePoint>();
       contactFramePoints2d = new ArrayList<FramePoint2d>();
       
@@ -54,15 +58,17 @@ public class FlatGroundPlaneContactState implements PlaneContactState
       contactPoints = new ArrayList<ContactPoint>();
       for (int i = 0; i < contactFramePoints2d.size(); i++)
       {
-         ContactPoint contactPoint = new ContactPoint(contactFramePoints2d.get(i));
+         ContactPoint contactPoint = new ContactPoint(contactFramePoints2d.get(i), this);
          contactPoints.add(contactPoint);
       }
 
       totalNumberOfContactPoints = contactPoints.size();
    }
 
-   public FlatGroundPlaneContactState(double footLength, double footWidth, Point3d midfootLocation, double coefficientOfFriction)
+   public FlatGroundPlaneContactState(double footLength, double footWidth, Point3d midfootLocation, double coefficientOfFriction, RigidBody rigidBody)
    {
+      this.rigidBody = rigidBody;
+      
       contactFramePoints = new ArrayList<FramePoint>();
       contactFramePoints2d = new ArrayList<FramePoint2d>();
 
@@ -99,7 +105,7 @@ public class FlatGroundPlaneContactState implements PlaneContactState
       contactPoints = new ArrayList<ContactPoint>();
       for (int i = 0; i < contactFramePoints2d.size(); i++)
       {
-         ContactPoint contactPoint = new ContactPoint(contactFramePoints2d.get(i));
+         ContactPoint contactPoint = new ContactPoint(contactFramePoints2d.get(i), this);
          contactPoints.add(contactPoint);
       }
 
@@ -178,5 +184,10 @@ public class FlatGroundPlaneContactState implements PlaneContactState
    public int getTotalNumberOfContactPoints()
    {
       return totalNumberOfContactPoints;
+   }
+
+   public RigidBody getRigidBody()
+   {
+      return rigidBody;
    }
 }

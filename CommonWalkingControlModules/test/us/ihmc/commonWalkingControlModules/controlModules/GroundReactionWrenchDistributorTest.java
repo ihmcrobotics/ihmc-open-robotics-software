@@ -41,6 +41,7 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.Wrench;
 
@@ -398,10 +399,12 @@ public class GroundReactionWrenchDistributorTest
       double footLength = 0.3;
       double footWidth = 0.15;
       Point3d leftMidfootLocation = new Point3d(0.0, 0.5, 0.0);
-      FlatGroundPlaneContactState leftFootContactState = new FlatGroundPlaneContactState(footLength, footWidth, leftMidfootLocation, coefficientOfFriction);
+      RigidBody leftFoot = new RigidBody("leftFoot", ReferenceFrame.getWorldFrame());
+      FlatGroundPlaneContactState leftFootContactState = new FlatGroundPlaneContactState(footLength, footWidth, leftMidfootLocation, coefficientOfFriction, leftFoot);
 
       Point3d rightMidfootLocation = new Point3d(0.0, -0.5, 0.0);
-      FlatGroundPlaneContactState rightFootContactState = new FlatGroundPlaneContactState(footLength, footWidth, rightMidfootLocation, coefficientOfFriction);
+      RigidBody rightFoot = new RigidBody("rightFoot", ReferenceFrame.getWorldFrame());
+      FlatGroundPlaneContactState rightFootContactState = new FlatGroundPlaneContactState(footLength, footWidth, rightMidfootLocation, coefficientOfFriction, rightFoot);
 
       simpleTwoFootTest(centerOfMassFrame, distributor, parentRegistry, leftFootContactState, rightFootContactState, coefficientOfFriction, epsilon);
    }
@@ -417,13 +420,13 @@ public class GroundReactionWrenchDistributorTest
       double halfHandWidth = 0.025;
       double gripWeaknessFactor = 0.2;
 
-
-
       Point3d leftMidfootLocation = new Point3d(0.0, 0.5, 0.0);
-      FlatGroundPlaneContactState leftFootContactState = new FlatGroundPlaneContactState(footLength, footWidth, leftMidfootLocation, coefficientOfFriction);
+      RigidBody leftFoot = new RigidBody("leftFoot", ReferenceFrame.getWorldFrame());
+      FlatGroundPlaneContactState leftFootContactState = new FlatGroundPlaneContactState(footLength, footWidth, leftMidfootLocation, coefficientOfFriction, leftFoot);
 
       Point3d rightMidfootLocation = new Point3d(0.0, -0.5, 0.0);
-      FlatGroundPlaneContactState rightFootContactState = new FlatGroundPlaneContactState(footLength, footWidth, rightMidfootLocation, coefficientOfFriction);
+      RigidBody rightFoot = new RigidBody("rightFoot", ReferenceFrame.getWorldFrame());
+      FlatGroundPlaneContactState rightFootContactState = new FlatGroundPlaneContactState(footLength, footWidth, rightMidfootLocation, coefficientOfFriction, rightFoot);
 
 
       Transform3D leftHandFrameAfterJointTransformInWorld = new Transform3D();    // RandomTools.generateRandomTransform(random)
@@ -478,10 +481,12 @@ public class GroundReactionWrenchDistributorTest
 
       
       Point3d leftMidfootLocation = new Point3d(0.0, 0.5, 0.0);
-      FlatGroundPlaneContactState leftFootContactState = new FlatGroundPlaneContactState(footLength, footWidth, leftMidfootLocation, coefficientOfFriction);
+      RigidBody leftFoot = new RigidBody("leftFoot", ReferenceFrame.getWorldFrame());
+      FlatGroundPlaneContactState leftFootContactState = new FlatGroundPlaneContactState(footLength, footWidth, leftMidfootLocation, coefficientOfFriction, leftFoot);
 
       Point3d rightMidfootLocation = new Point3d(0.0, -0.5, 0.0);
-      FlatGroundPlaneContactState rightFootContactState = new FlatGroundPlaneContactState(footLength, footWidth, rightMidfootLocation, coefficientOfFriction);
+      RigidBody rightFoot = new RigidBody("rightFoot", ReferenceFrame.getWorldFrame());
+      FlatGroundPlaneContactState rightFootContactState = new FlatGroundPlaneContactState(footLength, footWidth, rightMidfootLocation, coefficientOfFriction, rightFoot);
 
 
       Transform3D leftHandFrameAfterJointTransformInWorld = RandomTools.generateRandomTransform(random);
@@ -575,8 +580,10 @@ public class GroundReactionWrenchDistributorTest
       SpatialForceVector desiredNetSpatialForceVector = new SpatialForceVector(centerOfMassFrame, linearPart, angularPart);
 
       double coefficientOfFriction = 0.87;
-      FlatGroundPlaneContactState contactStateOne = new FlatGroundPlaneContactState(contactPointLocationsOne, coefficientOfFriction);
-      FlatGroundPlaneContactState contactStateTwo = new FlatGroundPlaneContactState(contactPointLocationsTwo, coefficientOfFriction);
+      RigidBody bodyOne = new RigidBody("bodyOne", ReferenceFrame.getWorldFrame());
+      RigidBody bodyTwo = new RigidBody("bodyTwo", ReferenceFrame.getWorldFrame());
+      FlatGroundPlaneContactState contactStateOne = new FlatGroundPlaneContactState(contactPointLocationsOne, coefficientOfFriction, bodyOne);
+      FlatGroundPlaneContactState contactStateTwo = new FlatGroundPlaneContactState(contactPointLocationsTwo, coefficientOfFriction, bodyTwo);
 
       ArrayList<PlaneContactState> contactStates = new ArrayList<PlaneContactState>();
 
@@ -667,9 +674,10 @@ public class GroundReactionWrenchDistributorTest
       {
          contactStates.clear();
 
-         FlatGroundPlaneContactState leftFootContactState = FlatGroundPlaneContactState.createRandomFlatGroundContactState(random, true, coefficientOfFriction);
-         FlatGroundPlaneContactState rightFootContactState = FlatGroundPlaneContactState.createRandomFlatGroundContactState(random, false,
-                                                                coefficientOfFriction);
+         RigidBody leftFoot = new RigidBody("leftFoot", ReferenceFrame.getWorldFrame());
+         FlatGroundPlaneContactState leftFootContactState = FlatGroundPlaneContactState.createRandomFlatGroundContactState(random, true, coefficientOfFriction, leftFoot);
+         RigidBody rightFoot = new RigidBody("rightFoot", ReferenceFrame.getWorldFrame());
+         FlatGroundPlaneContactState rightFootContactState = FlatGroundPlaneContactState.createRandomFlatGroundContactState(random, false, coefficientOfFriction, rightFoot);
 
          contactStates.add(leftFootContactState);
          contactStates.add(rightFootContactState);
@@ -735,14 +743,16 @@ public class GroundReactionWrenchDistributorTest
       Point3d leftMidfootLocation = new Point3d(0.0, 0.5, 0.0);
       Vector3d leftNormalToContactPlane = new Vector3d(0.1, 0.0, 1.0);
       leftNormalToContactPlane.normalize();
+      RigidBody leftFoot = new RigidBody("leftFoot", ReferenceFrame.getWorldFrame());
       NonFlatGroundPlaneContactState leftFootContactState = new NonFlatGroundPlaneContactState(footLength, footWidth, leftMidfootLocation,
-                                                               leftNormalToContactPlane, coefficientOfFriction);
+                                                               leftNormalToContactPlane, coefficientOfFriction, leftFoot);
 
       Point3d rightMidfootLocation = new Point3d(0.0, -0.5, 0.0);
       Vector3d rightNormalToContactPlane = new Vector3d(-0.1, 0.0, 1.0);
       rightNormalToContactPlane.normalize();
+      RigidBody rightFoot = new RigidBody("rightFoot", ReferenceFrame.getWorldFrame());
       NonFlatGroundPlaneContactState rightFootContactState = new NonFlatGroundPlaneContactState(footLength, footWidth, rightMidfootLocation,
-                                                                rightNormalToContactPlane, coefficientOfFriction);
+                                                                rightNormalToContactPlane, coefficientOfFriction, rightFoot);
 
       simpleTwoFootTest(centerOfMassFrame, distributor, parentRegistry, leftFootContactState, rightFootContactState, coefficientOfFriction, 1e-5);
    }

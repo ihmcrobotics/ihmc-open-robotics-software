@@ -16,8 +16,9 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class YoPlaneContactState implements PlaneContactState, ModifiableContactState
 {
+   private static final double THRESHOLD = 1e-7;
    private final YoVariableRegistry registry;
-   private final ReferenceFrame frameAfterParentJoint;
+   private final RigidBody rigidBody;
    private final ReferenceFrame planeFrame;
    private final BooleanYoVariable inContact;
    private final DoubleYoVariable coefficientOfFriction;
@@ -35,7 +36,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       this.inContact = new BooleanYoVariable(namePrefix + "InContact", registry);
       this.coefficientOfFriction = new DoubleYoVariable(namePrefix + "CoefficientOfFriction", registry);
       this.coefficientOfFriction.set(coefficientOfFriction);
-      this.frameAfterParentJoint = rigidBody.getParentJoint().getFrameAfterJoint();
+      this.rigidBody = rigidBody;
       this.planeFrame = planeFrame;
       
       parentRegistry.addChild(registry);
@@ -49,7 +50,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       contactPoints = new ArrayList<YoContactPoint>(contactFramePoints.size());
       for (int i = 0; i < contactFramePoints.size(); i++)
       {
-         YoContactPoint contactPoint = new YoContactPoint(namePrefix, i, contactFramePoints.get(i), parentRegistry);
+         YoContactPoint contactPoint = new YoContactPoint(namePrefix, i, contactFramePoints.get(i), this, parentRegistry);
          contactPoint.setInContact(true);
          contactPoints.add(contactPoint);
       }
@@ -115,6 +116,18 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
 
       return ret;
    }
+   
+   public YoContactPoint findContactPoint(FramePoint2d contactPointPosition2d)
+   {
+      for (int i = 0; i < contactPoints.size(); i++)
+      {
+         YoContactPoint contactPoint = contactPoints.get(i);
+         if (contactPoint.getPosition2d().epsilonEquals(contactPointPosition2d, THRESHOLD))
+            return contactPoint;
+      }
+      
+      return null;
+   }
 
    public void setContactPointsInContact(boolean[] inContact)
    {
@@ -162,7 +175,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
 
    public ReferenceFrame getFrameAfterParentJoint()
    {
-      return frameAfterParentJoint;
+      return rigidBody.getParentJoint().getFrameAfterJoint();
    }
 
    public ReferenceFrame getPlaneFrame()
@@ -231,5 +244,10 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    public void resetContactRegularization()
    {
       wRho.set(DEFAULT_WRHO);
+   }
+
+   public RigidBody getRigidBody()
+   {
+      return rigidBody;
    }
 }
