@@ -31,6 +31,7 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
@@ -139,8 +140,11 @@ public class HighLevelHumanoidControllerFactoryHelper
          joints.removeAll(fingerJoints);
       }
 
-      joints.remove(lidarJoint);
-
+      if (lidarJoint != null)
+      {
+         joints.remove(lidarJoint);
+      }
+      
       return joints.toArray(new InverseDynamicsJoint[joints.size()]);
    }
 
@@ -228,7 +232,10 @@ public class HighLevelHumanoidControllerFactoryHelper
          CommonWalkingReferenceFrames referenceFrames, double gravityZ, TwistCalculator twistCalculator, double controlDT,
          LidarControllerInterface lidarControllerInterface, YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, lidarControllerInterface.getLidarJoint());
+      OneDoFJoint lidarJoint = null;
+      if (lidarControllerInterface != null) lidarJoint = lidarControllerInterface.getLidarJoint();
+      
+      InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, lidarJoint);
 
       MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(USE_WRHO_WPHI_OF_CONTACT_STATES, registry);
       momentumOptimizationSettings.setDampedLeastSquaresFactor(5e-2);

@@ -47,10 +47,10 @@ public class MomentumControlModuleBridge implements MomentumControlModule
 
    public enum MomentumControlModuleType 
    {
-      OPTIMIZATION; //, OLD;
+      OPTIMIZATION, OLD;
       public MomentumControlModuleType getOther()
       {
-         if (this == OPTIMIZATION) return OPTIMIZATION; //OLD;
+         if (this == OPTIMIZATION) return OLD;
          return OPTIMIZATION;
       }
    };
@@ -96,7 +96,7 @@ public class MomentumControlModuleBridge implements MomentumControlModule
       else momentumModuleSolutionComparer = null;
       
       this.momentumControlModules.put(MomentumControlModuleType.OPTIMIZATION, optimizationMomentumControlModule);
-//      this.momentumControlModules.put(MomentumControlModuleType.OLD, oldMomentumControlModule);
+      this.momentumControlModules.put(MomentumControlModuleType.OLD, oldMomentumControlModule);
 
       // By default use OptimizationMomentumControlModule, can be changed via setMomentumControlModuleToUse method
 //      setMomentumControlModuleToUse(MomentumControlModuleType.OLD);
