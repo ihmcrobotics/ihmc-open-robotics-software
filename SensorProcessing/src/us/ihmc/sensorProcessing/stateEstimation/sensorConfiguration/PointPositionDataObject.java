@@ -61,4 +61,9 @@ public class PointPositionDataObject
    {
       return isPointPositionValid;
    }
+
+   public void invalidatePointPosition()
+   {
+      isPointPositionValid = false;
+   }
 }

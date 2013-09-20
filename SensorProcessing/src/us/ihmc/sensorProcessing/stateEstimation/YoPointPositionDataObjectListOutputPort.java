@@ -2,9 +2,8 @@ package us.ihmc.sensorProcessing.stateEstimation;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
@@ -20,7 +19,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
  * @author twan
  *         Date: 4/27/13
  */
-public class YoPointPositionDataObjectListOutputPort extends ControlFlowOutputPort<Set<PointPositionDataObject>>
+public class YoPointPositionDataObjectListOutputPort extends ControlFlowOutputPort<List<PointPositionDataObject>>
 {
    private final YoVariableRegistry registry;
    private final ArrayList<YoPointPositionDataObject> yoPointPositionDataObjects = new ArrayList<YoPointPositionDataObject>();
@@ -31,15 +30,15 @@ public class YoPointPositionDataObjectListOutputPort extends ControlFlowOutputPo
    public YoPointPositionDataObjectListOutputPort(ControlFlowElement controlFlowElement, String namePrefix, AfterJointReferenceFrameNameMap referenceFrameMap, YoVariableRegistry registry)
    {
       super(namePrefix, controlFlowElement);
-      super.setData(new LinkedHashSet<PointPositionDataObject>());
+      super.setData(new ArrayList<PointPositionDataObject>());
       this.namePrefix = namePrefix;
       this.registry = registry;
       this.referenceFrameMap = referenceFrameMap;
    }
 
-   public Set<PointPositionDataObject> getData()
+   public List<PointPositionDataObject> getData()
    {
-      Set<PointPositionDataObject> data = super.getData();
+      List<PointPositionDataObject> data = super.getData();
       data.clear();
 
       for(int i = 0; i <  yoPointPositionDataObjects.size(); i++)
@@ -52,11 +51,11 @@ public class YoPointPositionDataObjectListOutputPort extends ControlFlowOutputPo
       return data;
    }
 
-   public void setData(Set<PointPositionDataObject> data)
+   public void setData(List<PointPositionDataObject> data)
    {
-      for (BooleanYoVariable validVariable : validMap.values())
+      for (YoPointPositionDataObject yoPointPositionDataObject : yoPointPositionDataObjects)
       {
-         validVariable.set(false);
+         validMap.get(yoPointPositionDataObject).set(false);
       }
 
       for (PointPositionDataObject pointPositionDataObject : data)

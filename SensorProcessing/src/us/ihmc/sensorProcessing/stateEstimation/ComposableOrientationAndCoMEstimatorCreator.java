@@ -164,7 +164,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
       private final ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort;
       private final ControlFlowInputPort<FrameVector> desiredCenterOfMassAccelerationInputPort;
       private final ControlFlowInputPort<FrameVector> desiredAngularAccelerationInputPort;
-      private final ControlFlowInputPort<Set<PointPositionDataObject>> pointPositionInputPort;
+      private final ControlFlowInputPort<List<PointPositionDataObject>> pointPositionInputPort;
       private final ControlFlowInputPort<Set<PointVelocityDataObject>> pointVelocityInputPort;
 
       private final ControlFlowOutputPort<FrameOrientation> orientationOutputPort;
@@ -199,7 +199,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
          desiredAngularAccelerationInputPort = createInputPort("desiredAngularAccelerationInputPort");
          desiredCenterOfMassAccelerationInputPort = createInputPort("desiredCenterOfMassAccelerationInputPort");
          pointPositionInputPort = createInputPort("pointPositionInputPort");
-         pointPositionInputPort.setData(new LinkedHashSet<PointPositionDataObject>());
+         pointPositionInputPort.setData(new ArrayList<PointPositionDataObject>());
          pointVelocityInputPort = createInputPort("pointVelocityInputPort");
          pointVelocityInputPort.setData(new LinkedHashSet<PointVelocityDataObject>());
 
@@ -429,7 +429,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
          controlFlowGraph.connectElements(linearAccelerationSensorConfiguration.getOutputPort(), linearAccelerationMeasurementInputPort);
       }
 
-      private void addAggregatedPointPositionMeasurementModelElement(ControlFlowInputPort<Set<PointPositionDataObject>> pointPositionInputPort,
+      private void addAggregatedPointPositionMeasurementModelElement(ControlFlowInputPort<List<PointPositionDataObject>> pointPositionInputPort,
               ReferenceFrame estimationFrame, AfterJointReferenceFrameNameMap estimatorFrameMap)
       {
          AggregatePointPositionMeasurementModelElement element = new AggregatePointPositionMeasurementModelElement(pointPositionInputPort,
@@ -589,7 +589,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
          return desiredCenterOfMassAccelerationInputPort;
       }
 
-      public ControlFlowInputPort<Set<PointPositionDataObject>> getPointPositionInputPort()
+      public ControlFlowInputPort<List<PointPositionDataObject>> getPointPositionInputPort()
       {
          return pointPositionInputPort;
       }

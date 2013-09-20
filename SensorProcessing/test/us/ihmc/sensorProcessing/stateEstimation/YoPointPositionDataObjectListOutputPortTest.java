@@ -46,9 +46,9 @@ public class YoPointPositionDataObjectListOutputPortTest
 
       for (int i = 0; i < nTests; i++)
       {
-         Set<PointPositionDataObject> dataIn = createData(random, frames, nDataMax);
+         List<PointPositionDataObject> dataIn = createData(random, frames, nDataMax);
          outputPort.setData(dataIn);
-         Set<PointPositionDataObject> dataOut = outputPort.getData();
+         List<PointPositionDataObject> dataOut = outputPort.getData();
          verify(dataIn, dataOut);
       }
 
@@ -56,9 +56,9 @@ public class YoPointPositionDataObjectListOutputPortTest
       assertTrue(numberOfYoPointPositionDataObjects < nFrames * nDataMax);
    }
 
-   private Set<PointPositionDataObject> createData(Random random, List<ReferenceFrame> frames, int nDataMax)
+   private List<PointPositionDataObject> createData(Random random, List<ReferenceFrame> frames, int nDataMax)
    {
-      Set<PointPositionDataObject> dataIn = new LinkedHashSet<PointPositionDataObject>();
+      List<PointPositionDataObject> dataIn = new ArrayList<PointPositionDataObject>();
 
       int nData = random.nextInt(nDataMax);
       for (int j = 0; j < nData; j++)
@@ -76,7 +76,7 @@ public class YoPointPositionDataObjectListOutputPortTest
       return dataIn;
    }
 
-   private void verify(Set<PointPositionDataObject> dataIn, Set<PointPositionDataObject> dataOut)
+   private void verify(List<PointPositionDataObject> dataIn, List<PointPositionDataObject> dataOut)
    {
       if (dataIn.size() != dataOut.size())
          fail();
