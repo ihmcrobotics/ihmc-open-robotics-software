@@ -20,6 +20,8 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 
 public class DRCFlatGroundWalkingTrack
 {
+   private static final boolean START_YOVARIABLE_SERVER = false; 
+   
    private final HumanoidRobotSimulation<SDFRobot> drcSimulation;
 
    public DRCFlatGroundWalkingTrack(DRCRobotWalkingControllerParameters drcControlParameters, DRCRobotInterface robotInterface,
@@ -53,7 +55,13 @@ public class DRCFlatGroundWalkingTrack
          highLevelHumanoidControllerFactory.setupForCheatingUsingGroundHeightAtForFootstepProvider(scsInitialSetup.getGroundProfile());
       }
 
-      YoVariableServer robotVisualizer = new YoVariableServer(robotInterface.getRobot().getRobotsYoVariableRegistry(), RemoteAtlasVisualizer.defaultPort, dynamicGraphicObjectsListRegistry);
+      YoVariableServer robotVisualizer = null;
+      
+      if (START_YOVARIABLE_SERVER)
+      {
+         robotVisualizer = new YoVariableServer(robotInterface.getRobot().getRobotsYoVariableRegistry(), RemoteAtlasVisualizer.defaultPort, dynamicGraphicObjectsListRegistry);
+      }
+      
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.USE_GAZEBO_PHYSICS);
       Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, null, robotInterface, robotInitialSetup, scsInitialSetup, guiInitialSetup, null, robotVisualizer, dynamicGraphicObjectsListRegistry);
       drcSimulation = humanoidSimulation.first();
@@ -70,7 +78,10 @@ public class DRCFlatGroundWalkingTrack
          drcSimulation.start(null);
       }
       
-      robotVisualizer.start();
+      if (robotVisualizer != null)
+      {
+         robotVisualizer.start();
+      }
    }
 
    public SimulationConstructionSet getSimulationConstructionSet()
