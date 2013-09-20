@@ -36,7 +36,7 @@ import us.ihmc.commonWalkingControlModules.stateEstimation.PointPositionGrabberI
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylindricalContactState;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromController;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -130,7 +130,7 @@ public class MomentumBasedController
                                   SideDependentList<ContactablePlaneBody> thighs, ContactablePlaneBody pelvis, ContactablePlaneBody pelvisBack,
                                   double controlDT, ProcessedOutputsInterface processedOutputs,
                                   OptimizationMomentumControlModule optimizationMomentumControlModule, OldMomentumControlModule oldMomentumControlModule,
-                                  ArrayList<Updatable> updatables, StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink,
+                                  ArrayList<Updatable> updatables, StateEstimationDataFromController stateEstimationDataFromControllerSink,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
@@ -233,7 +233,7 @@ public class MomentumBasedController
          double touchdownTime = 0.12;
          double minCoPDistance = 0.01;
 
-//       this.pointPositionGrabber = new SingleReferenceFramePointPositionGrabber(stateEstimationDataFromControllerSink, registry, controlDT, touchdownTime, minCoPDistance);
+//       this.pointPositionGrabber = new SingleReferenceFramePointPositionGrabber(stateEstimationDataFromController, registry, controlDT, touchdownTime, minCoPDistance);
          this.pointPositionGrabber = new PointPositionGrabber(stateEstimationDataFromControllerSink, yoPlaneContactStates, registry, controlDT, touchdownTime, minCoPDistance);
          setDelayTimeBeforeTrustingContacts(touchdownTime);
       }

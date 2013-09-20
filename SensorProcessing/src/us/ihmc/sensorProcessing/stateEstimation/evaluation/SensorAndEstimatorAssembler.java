@@ -17,7 +17,7 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSelectorAndDataConverter;
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.JointStateFullRobotModelUpdater;
 import us.ihmc.sensorProcessing.stateEstimation.OrientationStateRobotModelUpdater;
-import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSource;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromController;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.LinearAccelerationSensorConfiguration;
@@ -40,13 +40,13 @@ public class SensorAndEstimatorAssembler
    // The following are the elements added to the controlFlowGraph:
    private final JointAndIMUSensorDataSource jointSensorDataSource;
    @SuppressWarnings("unused")
-   private final StateEstimationDataFromControllerSource stateEstimatorDataFromControllerSource;
+   private final StateEstimationDataFromController stateEstimatorDataFromControllerSource;
    private final JointStateFullRobotModelUpdater jointStateFullRobotModelUpdater;
    private final ComposableOrientationAndCoMEstimatorCreator.ComposableOrientationAndCoMEstimator estimator;
    private final OrientationStateRobotModelUpdater orientationStateRobotModelUpdater;
    private final IMUSelectorAndDataConverter imuSelectorAndDataConverter;
 
-   public SensorAndEstimatorAssembler(StateEstimationDataFromControllerSource stateEstimatorDataFromControllerSource,
+   public SensorAndEstimatorAssembler(StateEstimationDataFromController stateEstimatorDataFromControllerSource,
          StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorNoiseParameters sensorNoiseParametersForEstimator,
          Vector3d gravitationalAcceleration, FullInverseDynamicsStructure inverseDynamicsStructure, AfterJointReferenceFrameNameMap estimatorReferenceFrameMap,
          RigidBodyToIndexMap estimatorRigidBodyToIndexMap, double controlDT, boolean assumePerfectIMU, YoVariableRegistry parentRegistry)

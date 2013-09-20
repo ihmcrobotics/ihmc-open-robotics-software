@@ -35,7 +35,7 @@ import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointGroundReactionWrenchDistributor;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromController;
 import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
@@ -82,7 +82,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
                                  TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian, SideDependentList<ContactablePlaneBody> feet,
                                  double controlDT, SideDependentList<FootSwitchInterface> footSwitches,
                                  SideDependentList<HandControllerInterface> handControllers, LidarControllerInterface lidarControllerInterface,
-                                 StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink,
+                                 StateEstimationDataFromController stateEstimationDataFromControllerSink,
                                  DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry,
                                  GUISetterUpperRegistry guiSetterUpperRegistry, ProcessedOutputsInterface processedOutputs)
    {

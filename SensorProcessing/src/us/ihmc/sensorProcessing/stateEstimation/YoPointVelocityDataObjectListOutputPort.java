@@ -7,7 +7,6 @@ import java.util.Map;
 
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.sensorProcessing.stateEstimation.evaluation.RigidBodyToIndexMap;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.YoPointVelocityDataObject;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -22,7 +21,6 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
  */
 public class YoPointVelocityDataObjectListOutputPort extends ControlFlowOutputPort<List<PointVelocityDataObject>>
 {
-   private final RigidBodyToIndexMap estimatorRigidBodyToIndexMap;
    private final AfterJointReferenceFrameNameMap referenceFrameNameMap;
    
    private final YoVariableRegistry registry;
@@ -30,12 +28,11 @@ public class YoPointVelocityDataObjectListOutputPort extends ControlFlowOutputPo
    private final Map<YoPointVelocityDataObject, BooleanYoVariable> validMap = new LinkedHashMap<YoPointVelocityDataObject, BooleanYoVariable>();
    private final String namePrefix;
 
-   public YoPointVelocityDataObjectListOutputPort(RigidBodyToIndexMap estimatorRigidBodyToIndexMap, AfterJointReferenceFrameNameMap referenceFrameNameMap,
+   public YoPointVelocityDataObjectListOutputPort(AfterJointReferenceFrameNameMap referenceFrameNameMap,
          ControlFlowElement controlFlowElement, String namePrefix, YoVariableRegistry registry)
    {
       super(namePrefix, controlFlowElement);
       
-      this.estimatorRigidBodyToIndexMap = estimatorRigidBodyToIndexMap;
       this.referenceFrameNameMap = referenceFrameNameMap;
       super.setData(new ArrayList<PointVelocityDataObject>());
       this.namePrefix = namePrefix;
@@ -85,7 +82,7 @@ public class YoPointVelocityDataObjectListOutputPort extends ControlFlowOutputPo
          if (yoPointVelocityDataObjectToUse == null)
          {
             int index = yoPointVelocityDataObjects.size();
-            yoPointVelocityDataObjectToUse = new YoPointVelocityDataObject(estimatorRigidBodyToIndexMap, namePrefix + index, referenceFrame, registry);
+            yoPointVelocityDataObjectToUse = new YoPointVelocityDataObject(namePrefix + index, referenceFrame, registry);
             yoPointVelocityDataObjects.add(yoPointVelocityDataObjectToUse);
             validMap.put(yoPointVelocityDataObjectToUse, new BooleanYoVariable(namePrefix + "Valid" + index, registry));
          }
