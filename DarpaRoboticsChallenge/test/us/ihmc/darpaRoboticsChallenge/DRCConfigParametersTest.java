@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.PolyvalentHighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.darpaRoboticsChallenge.controllers.DRCControllerDispatcher;
 
 public class DRCConfigParametersTest
 {
@@ -31,6 +32,9 @@ public class DRCConfigParametersTest
       assertTrue("Do not check in DRCConfigParameters.ALLOW_LAG_SIMULATION = false!!", DRCConfigParameters.ALLOW_LAG_SIMULATION);
       
       assertFalse("Do not check in DRCConfigParameters.ENABLE_LAG_SIMULATION_ON_START = true!!", DRCConfigParameters.ENABLE_LAG_SIMULATION_ON_START);
+  
+      assertFalse("Do not check in DRCControllerDispatcher.RUN_SINGLE_THREADED = true!!", DRCControllerDispatcher.RUN_SINGLE_THREADED);
+      
    }
 
 }

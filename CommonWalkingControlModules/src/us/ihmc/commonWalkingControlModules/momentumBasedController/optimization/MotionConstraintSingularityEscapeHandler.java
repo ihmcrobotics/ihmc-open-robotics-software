@@ -14,7 +14,7 @@ public class MotionConstraintSingularityEscapeHandler
    private final NullspaceCalculator nullspaceCalculator = new NullspaceCalculator(SpatialMotionVector.SIZE, true);
    private static final boolean DEBUG = false;
 
-   private final boolean DO_IMinusNNTStuff = true; //false;
+   private final boolean DO_IMinusNNTStuff = false;
    
    public MotionConstraintSingularityEscapeHandler()
    {

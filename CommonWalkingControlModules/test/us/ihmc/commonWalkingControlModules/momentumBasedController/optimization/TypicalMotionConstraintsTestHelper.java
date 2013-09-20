@@ -21,6 +21,7 @@ public class TypicalMotionConstraintsTestHelper
    
    private final DenseMatrix64F combinedUMatrix, combinedWMatrix, combinedVTransposeMatrix;
    
+   private final double[] singularValuesOfCombinedConstraints;
    private final double minimumSingularValueOfCombinedConstraints;
    
    private final DenseMatrix64F combinedSolution;
@@ -85,7 +86,7 @@ public class TypicalMotionConstraintsTestHelper
       
       Pair<DenseMatrix64F[], double[]> svd = computeSVD(combinedConstraintsAndDesiredMomentum);
       DenseMatrix64F[] matrices = svd.first();
-      double[] singularValues = svd.second();
+      singularValuesOfCombinedConstraints = svd.second();
       
       combinedUMatrix = matrices[0];
       combinedWMatrix = matrices[1];
@@ -93,7 +94,7 @@ public class TypicalMotionConstraintsTestHelper
 
 //      System.out.println("matrixW for combinedConstraintsAndDesiredMomentum = " + combinedWMatrix);
       
-      minimumSingularValueOfCombinedConstraints = findMinimum(singularValues);
+      minimumSingularValueOfCombinedConstraints = findMinimum(singularValuesOfCombinedConstraints);
 
       if (combinedConstraintsAndDesiredMomentum.getNumRows() == combinedConstraintsAndDesiredMomentum.getNumCols())
       {
@@ -104,6 +105,11 @@ public class TypicalMotionConstraintsTestHelper
       {
          combinedSolution = null;
       }
+   }
+
+   public double[] getSingularValuesOfCombinedConstraints()
+   {
+      return singularValuesOfCombinedConstraints;
    }
 
    public double getMinimumSingularValueOfCombinedConstraints()

@@ -244,15 +244,15 @@ public class MotionConstraintHandler
             
             DenseMatrix64F nullSpaceMatrixNTranspose = new DenseMatrix64F(nullity, matrixVTranspose.getNumCols());
             CommonOps.extract(matrixVTranspose, matrixVTranspose.getNumRows() - nullity, matrixVTranspose.getNumRows(), 0, matrixVTranspose.getNumCols(), nullSpaceMatrixNTranspose, 0, 0);  
-            System.out.println("nullSpaceMatrixNTranspose = " + nullSpaceMatrixNTranspose);
+//            System.out.println("nullSpaceMatrixNTranspose = " + nullSpaceMatrixNTranspose);
             NullspaceCalculator.makeLargestComponentInEachColumnPositive(nullSpaceMatrixNTranspose);
-            System.out.println("nullSpaceMatrixNTranspose = " + nullSpaceMatrixNTranspose);
+//            System.out.println("nullSpaceMatrixNTranspose = " + nullSpaceMatrixNTranspose);
 
             //TODO: Fix the null space stuff. Verify that the three things added are correct. Figure out why qdd is way off from desired.
             CommonOps.extract(matrixCTransposeJ, 0, matrixCTransposeJ.getNumRows(), 0, matrixCTransposeJ.getNumCols(), jBlockCompact, 0, 0);
             CommonOps.extract(nullSpaceMatrixNTranspose, 0, nullSpaceMatrixNTranspose.getNumRows(), 0, nullSpaceMatrixNTranspose.getNumCols(), jBlockCompact, matrixCTransposeJ.getNumRows(), 6);  //Hack 6
             
-            System.out.println("jBlockCompact = " + jBlockCompact);
+//            System.out.println("jBlockCompact = " + jBlockCompact);
             
 //            jBlockCompact.set(5, 8, -0.5);
 //            jBlockCompact.set(5, 9, 1.0);

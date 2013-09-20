@@ -40,17 +40,17 @@ public class MomentumControlModuleBridge implements MomentumControlModule
 
    private static final boolean LISTEN_IN_ON_SOLVER = false;
    private static final boolean TRY_BOTH_AND_COMPARE = false;
-   private static final boolean SHOW_MOMENTUM_MODULE_GUI = false;
+   private static final boolean SHOW_MOMENTUM_MODULE_GUI =  false;
    
    private final MomentumModuleSolutionComparer momentumModuleSolutionComparer;
    private final MomentumModuleGUI momentumModuleGUI;
 
    public enum MomentumControlModuleType 
    {
-      OPTIMIZATION, OLD;
+      OPTIMIZATION; //, OLD;
       public MomentumControlModuleType getOther()
       {
-         if (this == OPTIMIZATION) return OLD;
+         if (this == OPTIMIZATION) return OPTIMIZATION; //OLD;
          return OPTIMIZATION;
       }
    };
@@ -96,11 +96,11 @@ public class MomentumControlModuleBridge implements MomentumControlModule
       else momentumModuleSolutionComparer = null;
       
       this.momentumControlModules.put(MomentumControlModuleType.OPTIMIZATION, optimizationMomentumControlModule);
-      this.momentumControlModules.put(MomentumControlModuleType.OLD, oldMomentumControlModule);
+//      this.momentumControlModules.put(MomentumControlModuleType.OLD, oldMomentumControlModule);
 
-      // By default use OldMomentumControlModule, can be changed via setMomentumControlModuleToUse method
-      setMomentumControlModuleToUse(MomentumControlModuleType.OLD);
-//      setMomentumControlModuleToUse(MomentumControlModuleType.OPTIMIZATION);
+      // By default use OptimizationMomentumControlModule, can be changed via setMomentumControlModuleToUse method
+//      setMomentumControlModuleToUse(MomentumControlModuleType.OLD);
+      setMomentumControlModuleToUse(MomentumControlModuleType.OPTIMIZATION);
 
       parentRegistry.addChild(registry);
    }

@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
@@ -56,7 +56,7 @@ public class SingularValueExplorationAndExamplesTest
    }
    
    @Test
-   public void foo()
+   public void showIMinusNNTransposeJDoesntMakeSense()
    {
       
 // To make this not singular, get rid of row 1 (0.001) 2 (0.001) 3 (0.554) 4 (0.973) or 5 (0.463)  NOT: 6, 7
@@ -95,12 +95,44 @@ public class SingularValueExplorationAndExamplesTest
       System.out.println("matrixJ = " + matrixJ);
       System.out.println("matrixU = " + matrixU);
       System.out.println("matrixW = " + matrixW);
-      System.out.println("matrixV = " + matrixVTranspose);
+      System.out.println("matrixVTranspose = " + matrixVTranspose);
       
       DenseMatrix64F matrixJReconstructed = reconstructMatrix(matrixU, matrixW, matrixVTranspose);
       System.out.println("matrixJReconstructed = " + matrixJReconstructed);
 
       JUnitTools.assertMatrixEquals(matrixJ, matrixJReconstructed, 1e-7);
+      
+      // Extract Nullspace:
+
+      DenseMatrix64F matrixNTranspose = new DenseMatrix64F(1, matrixVTranspose.getNumCols());
+      CommonOps.extract(matrixVTranspose, matrixVTranspose.getNumRows()-1, matrixVTranspose.getNumRows(), 0, matrixVTranspose.getNumCols(), matrixNTranspose, 0, 0);
+      
+      System.out.println("matrixNTranspose = " + matrixNTranspose);
+
+      DenseMatrix64F identity = CommonOps.identity(matrixNTranspose.getNumCols());
+      DenseMatrix64F matrixNNTranspose = new DenseMatrix64F(matrixNTranspose.getNumCols(), matrixNTranspose.getNumCols());
+      CommonOps.multInner(matrixNTranspose, matrixNNTranspose);
+      
+      System.out.println("matrixNNTranspose = " + matrixNNTranspose);
+
+      DenseMatrix64F iMinusNNTranspose = new DenseMatrix64F(matrixNNTranspose.getNumRows(), matrixNNTranspose.getNumCols());
+      CommonOps.sub(identity, matrixNNTranspose, iMinusNNTranspose);
+      
+      System.out.println("iMinusNNTranspose = " + iMinusNNTranspose);
+
+      DenseMatrix64F matrixJPrime = new DenseMatrix64F(matrixJ.getNumRows(), matrixJ.getNumCols());
+
+      try
+      {
+         CommonOps.mult(iMinusNNTranspose, matrixJ, matrixJPrime);
+         System.out.println("matrixJPrime = " + matrixJPrime);
+         fail("Dimensions don't even match!");
+      }
+      catch(Exception e)
+      {
+         
+      }
+
    }
 
    private DenseMatrix64F reconstructMatrix(DenseMatrix64F matrixU, DenseMatrix64F matrixW, DenseMatrix64F matrixV)

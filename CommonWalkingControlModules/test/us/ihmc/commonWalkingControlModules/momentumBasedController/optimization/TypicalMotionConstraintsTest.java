@@ -333,18 +333,34 @@ public class TypicalMotionConstraintsTest
 //            {0.0, 1.0}, 
 //            {0.0, 0.0}}; 
       
+//      double[][] momentumSubspaceData = new double[][]{
+//            {0.0}, 
+//            {0.0}, 
+//            {0.0}, 
+//            {0.0}, 
+//            {0.0}, 
+//            {0.0}};
+      
       double[][] momentumSubspaceData = new double[][]{
-            {0.0}, 
-            {0.0}, 
-            {0.0}, 
-            {0.0}, 
-            {0.0}, 
-            {0.0}};
+            {0.0, 0.0, 0.0}, 
+            {0.0, 0.0, 0.0}, 
+            {0.0, 0.0, 0.0}, 
+            {1.0, 0.0, 0.0}, 
+            {0.0, 1.0, 0.0}, 
+            {0.0, 0.0, 1.0}};
       DenseMatrix64F momentumSubspace = new DenseMatrix64F(momentumSubspaceData);
       
       
       TypicalMotionConstraintsTestHelper helper = new TypicalMotionConstraintsTestHelper(JPrimaryMotionConstraintsData, pPrimaryMotionConstraintsData, centroidalMomentumAMatrixData, momentumDotEquationRightHandSideData, momentumSubspaceData);
       
+      double[] singularValuesOfCombinedConstraints = helper.getSingularValuesOfCombinedConstraints();
+      System.out.println("singularValuesOfCombinedConstraints = ");
+      for (int i=0; i<singularValuesOfCombinedConstraints.length; i++)
+      {
+         System.out.print("  " + singularValuesOfCombinedConstraints[i]);
+      }
+      System.out.println();
+
       double minimumSingularValueOfCombinedConstraints = helper.getMinimumSingularValueOfCombinedConstraints();
       System.out.println("minimumSingularValueOfCombinedConstraints = " + minimumSingularValueOfCombinedConstraints);
       
