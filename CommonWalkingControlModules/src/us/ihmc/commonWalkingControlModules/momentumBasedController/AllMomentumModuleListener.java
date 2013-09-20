@@ -4,8 +4,6 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import javax.vecmath.Vector3d;
-
 import org.apache.commons.lang.mutable.MutableDouble;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
@@ -20,19 +18,26 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.D
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommandAndMotionConstraint;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleDataObject;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MotionConstraintBlocks;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.DesiredMomentumModuleCommandListener;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleSolverListener;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionConstraintListener;
+import us.ihmc.utilities.math.MatrixTools;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.utilities.screwTheory.SpatialForceVector;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class AllMomentumModuleListener implements MotionConstraintListener, DesiredMomentumModuleCommandListener, MomentumControlModuleSolverListener
 {
+   private static final boolean PRINT_MOTION_CONSTRAINTS = false; //true;
+   
    private final HashMap<Object, MotionConstraintBlocks> motionConstraintBlocksMap = new HashMap<Object, MotionConstraintBlocks>();
    private final HashMap<Object, MotionConstraintBlocks> nullspaceMotionConstraintBlocks = new HashMap<Object, MotionConstraintBlocks>();
    
@@ -54,8 +59,6 @@ public class AllMomentumModuleListener implements MotionConstraintListener, Desi
    // Solution
    private DenseMatrix64F jointAccelerationsSolution = new DenseMatrix64F(1, 1);
    private InverseDynamicsJoint[] jointsToOptimizeFor;
-
-   private double optimizationValue;
 
    // Analysis
    private final ArrayList<DesiredJointAccelerationCommandAndMotionConstraint> desiredJointAccelerationCommandAndMotionConstraints =
@@ -83,6 +86,17 @@ public class AllMomentumModuleListener implements MotionConstraintListener, Desi
    
    private final IntegerYoVariable numberRowsInPrimaryMotionConstraints = new IntegerYoVariable("numberRowsInPrimaryMotionConstraints", registry);
    
+   private final YoFrameVector desiredLinearMomentumRate = new YoFrameVector("desiredLinearMomentumRate", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector achievedLinearMomentumRate = new YoFrameVector("achievedLinearMomentumRate", null, registry);
+
+   private final YoFrameVector desiredAngularMomentumRate = new YoFrameVector("desiredAngularMomentumRate", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector achievedAngularMomentumRate = new YoFrameVector("achievedAngularMomentumRate", null, registry);
+
+   
+   private final DoubleYoVariable centroidalMomentumSmallestSingularValue = new DoubleYoVariable("centroidalMomentumSmallestSingularValue", registry);
+   private final DoubleYoVariable optimizationValue = new DoubleYoVariable("optimizationValue", registry);
+
+   
    private final NumberFormat numberFormat;
    
    public AllMomentumModuleListener(YoVariableRegistry parentRegistry)
@@ -103,11 +117,21 @@ public class AllMomentumModuleListener implements MotionConstraintListener, Desi
       MotionConstraintBlocks motionConstraintBlocks = new MotionConstraintBlocks(motionConstraintIndex, jFullBlock, jBlockCompact, pBlock, weight);
       motionConstraintBlocksMap.put(desiredJointAccelerationCommand, motionConstraintBlocks);
 
-//      System.out.println("---Joint Acceleration motion constraint was added: index = " + motionConstraintIndex + ", jFullBlock = " + jFullBlock
-//                         + ", jBlockCompact = " + jBlockCompact + ", pBlock = " + pBlock);
-//      System.out.println("---motionConstraintBlocksMap.size() = " + motionConstraintBlocksMap.size());
-
+      if (PRINT_MOTION_CONSTRAINTS)
+      {
+         String frameName = desiredJointAccelerationCommand.getJoint().getName();
+         
+         System.out.println();
+         MatrixTools.printJavaForConstruction(frameName + "JointAccelerationJMatrix", jFullBlock);
+         MatrixTools.printJavaForConstruction(frameName + "JointAccelerationPVector", pBlock);
+         
+//         System.out.println("---Joint Acceleration motion constraint was added: index = " + motionConstraintIndex + ", jFullBlock = " + jFullBlock
+//               + ", jBlockCompact = " + jBlockCompact + ", pBlock = " + pBlock);
+//         System.out.println("---motionConstraintBlocksMap.size() = " + motionConstraintBlocksMap.size());
+      }
    }
+   
+  
 
    public void spatialAccelerationMotionConstraintWasAdded(DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand, int motionConstraintIndex,
            DenseMatrix64F jFullBlock, DenseMatrix64F jBlockCompact, DenseMatrix64F pBlock, MutableDouble weightBlock)
@@ -117,9 +141,18 @@ public class AllMomentumModuleListener implements MotionConstraintListener, Desi
       MotionConstraintBlocks motionConstraintBlocks = new MotionConstraintBlocks(motionConstraintIndex, jFullBlock, jBlockCompact, pBlock, weight);
       motionConstraintBlocksMap.put(desiredSpatialAccelerationCommand, motionConstraintBlocks);
 
-      System.out.println("---Spatial Acceleration motion constraint was added: index = " + motionConstraintIndex + ", jFullBlock = " + jFullBlock
-                         + ", jBlockCompact = " + jBlockCompact + ", pBlock = " + pBlock);
-      System.out.println("---motionConstraintBlocksMap.size() = " + motionConstraintBlocksMap.size());
+      if (PRINT_MOTION_CONSTRAINTS)
+      {
+         String frameName = desiredSpatialAccelerationCommand.getTaskspaceConstraintData().getSpatialAcceleration().getBodyFrame().getName();
+        
+         System.out.println();
+         MatrixTools.printJavaForConstruction(frameName + "SpatialAccelerationJMatrix", jFullBlock);
+         MatrixTools.printJavaForConstruction(frameName + "SpatialAccelerationPVector", pBlock);
+         
+//         System.out.println("---Spatial Acceleration motion constraint was added: index = " + motionConstraintIndex + ", jFullBlock = " + jFullBlock
+//               + ", jBlockCompact = " + jBlockCompact + ", pBlock = " + pBlock);
+//         System.out.println("---motionConstraintBlocksMap.size() = " + motionConstraintBlocksMap.size());
+      }
    }
    
    public void nullSpaceMultiplierForSpatialAccelerationMotionContraintWasAdded(DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand,
@@ -128,14 +161,22 @@ public class AllMomentumModuleListener implements MotionConstraintListener, Desi
       double weight = extractWeight(weightBlock);
       MotionConstraintBlocks motionConstraintBlocks = new MotionConstraintBlocks(motionConstraintIndex, jFullBlock, jBlockCompact, pBlock, weight);
       nullspaceMotionConstraintBlocks.put(desiredSpatialAccelerationCommand, motionConstraintBlocks);
-      
-      //TODO: Figure out how to record this since it will have the same desiredSpatialAccelerationCommand as its associated desiredSpatialAccelerationCommand.
-            motionConstraintBlocksMap.put(desiredSpatialAccelerationCommand, motionConstraintBlocks);
 
-      
-      System.out.println("---Null Space MultiplierFor Spatial Acceleration motion constraint was added: index = " + motionConstraintIndex + ", jFullBlock = " + jFullBlock
-            + ", jBlockCompact = " + jBlockCompact + ", pBlock = " + pBlock);
-      System.out.println("---motionConstraintBlocksMap.size() = " + motionConstraintBlocksMap.size());
+      //TODO: Figure out how to record this since it will have the same desiredSpatialAccelerationCommand as its associated desiredSpatialAccelerationCommand.
+      motionConstraintBlocksMap.put(desiredSpatialAccelerationCommand, motionConstraintBlocks);
+
+      if (PRINT_MOTION_CONSTRAINTS)
+      {
+         String frameName = desiredSpatialAccelerationCommand.getTaskspaceConstraintData().getSpatialAcceleration().getBodyFrame().getName();
+         
+         System.out.println();
+         MatrixTools.printJavaForConstruction(frameName + "NullSpaceJMatrix", jFullBlock);
+         MatrixTools.printJavaForConstruction(frameName + "NullSpacePVector", pBlock);
+         
+//         System.out.println("---Null Space MultiplierFor Spatial Acceleration motion constraint was added: index = " + motionConstraintIndex + ", jFullBlock = " + jFullBlock
+//               + ", jBlockCompact = " + jBlockCompact + ", pBlock = " + pBlock);
+//         System.out.println("---motionConstraintBlocksMap.size() = " + motionConstraintBlocksMap.size());
+      }
    }
   
 
@@ -147,9 +188,18 @@ public class AllMomentumModuleListener implements MotionConstraintListener, Desi
       MotionConstraintBlocks motionConstraintBlocks = new MotionConstraintBlocks(motionConstraintIndex, jFullBlock, jBlockCompact, pBlock, weight);
       motionConstraintBlocksMap.put(desiredPointAccelerationCommand, motionConstraintBlocks);
 
-//      System.out.println("---Point Acceleration motion constraint was added: index = " + motionConstraintIndex + ", jFullBlock = " + jFullBlock
-//                         + ", jBlockCompact = " + jBlockCompact + ", pBlock = " + pBlock);
-//      System.out.println("---motionConstraintBlocksMap.size() = " + motionConstraintBlocksMap.size());
+      if (PRINT_MOTION_CONSTRAINTS)
+      {
+         String frameName = desiredPointAccelerationCommand.getRootToEndEffectorJacobian().getBaseFrame().getName();
+
+         System.out.println();
+         MatrixTools.printJavaForConstruction(frameName + "PointAccelerationJMatrix", jFullBlock);
+         MatrixTools.printJavaForConstruction(frameName + "PointAccelerationPVector", pBlock);
+         
+//         System.out.println("---Point Acceleration motion constraint was added: index = " + motionConstraintIndex + ", jFullBlock = " + jFullBlock
+//               + ", jBlockCompact = " + jBlockCompact + ", pBlock = " + pBlock);
+//         System.out.println("---motionConstraintBlocksMap.size() = " + motionConstraintBlocksMap.size());
+      }
 
    }
 
@@ -164,6 +214,13 @@ public class AllMomentumModuleListener implements MotionConstraintListener, Desi
    public void desiredRateOfChangeOfMomentumWasSet(DesiredRateOfChangeOfMomentumCommand desiredRateOfChangeOfMomentumCommand)
    {
       desiredRateOfChangeOfMomentumCommands.add(desiredRateOfChangeOfMomentumCommand);
+
+      MomentumRateOfChangeData momentumRateOfChangeData = desiredRateOfChangeOfMomentumCommand.getMomentumRateOfChangeData();
+      DenseMatrix64F momentumMultipliers = momentumRateOfChangeData.getMomentumMultipliers();
+      DenseMatrix64F momentumSubspace = momentumRateOfChangeData.getMomentumSubspace();
+      
+      //TODO: Display these in GUI.
+      desiredLinearMomentumRate.set(momentumMultipliers.get(0), momentumMultipliers.get(1), momentumMultipliers.get(2));
 
 //      System.out.println("desiredRateOfChangeOfMomentum was set: " + desiredRateOfChangeOfMomentumCommand);
    }
@@ -208,20 +265,47 @@ public class AllMomentumModuleListener implements MotionConstraintListener, Desi
 
    }
 
-   public void setCentroidalMomentumMatrix(DenseMatrix64F a)
-   {
-      // TODO Auto-generated method stub
-
+   public void setCentroidalMomentumMatrix(DenseMatrix64F centroidalMomentumAMatrix, DenseMatrix64F momentumDotEquationRightHandSide, DenseMatrix64F momentumSubspace)
+   { 
+      if (PRINT_MOTION_CONSTRAINTS)
+      {
+         System.out.println();
+         MatrixTools.printJavaForConstruction("centroidalMomentumAMatrix", centroidalMomentumAMatrix);
+         
+         System.out.println();
+         MatrixTools.printJavaForConstruction("momentumDotEquationRightHandSide", momentumDotEquationRightHandSide);
+         
+         System.out.println();
+         MatrixTools.printJavaForConstruction("momentumSubspace", momentumSubspace);
+      }
+      
+      SingularValueDecomposition<DenseMatrix64F> svd = DecompositionFactory.svd(centroidalMomentumAMatrix.getNumRows(), centroidalMomentumAMatrix.getNumCols(), true, true, false);
+      svd.decompose(centroidalMomentumAMatrix);
+      
+      double[] singularValues = svd.getSingularValues();
+      centroidalMomentumSmallestSingularValue.set(getMinimumAbsoluteValue(singularValues));
    }
-
-   public void setMomentumDotEquationRightHandSide(DenseMatrix64F b)
+   
+   private double getMinimumAbsoluteValue(double[] singularValues)
    {
-      // TODO Auto-generated method stub
-
+      double smallestValue = Double.POSITIVE_INFINITY;
+      
+      for (int i=0; i<singularValues.length; i++)
+      {
+         if (singularValues[i] < smallestValue) smallestValue = singularValues[i];
+      } 
+      
+      return smallestValue;
    }
 
    public void setPrimaryMotionConstraintJMatrix(DenseMatrix64F jPrimary)
    {
+      if (PRINT_MOTION_CONSTRAINTS)
+      {
+         System.out.println();
+         MatrixTools.printJavaForConstruction("JPrimaryMotionConstraints", jPrimary);
+      }
+      
 //      System.out.println("!!! PrimaryMotionConstraintJMatrix = " + jPrimary);
             
       jPrimaryMotionConstraint.setReshape(jPrimary);
@@ -240,7 +324,6 @@ public class AllMomentumModuleListener implements MotionConstraintListener, Desi
       double minSingularValue = Double.POSITIVE_INFINITY;
       for (int i=0; i<singularValues.length; i++)
       {
-         
          double singularValue = singularValues[i];
 //         System.out.print(singularValue + " ");
          
@@ -253,6 +336,12 @@ public class AllMomentumModuleListener implements MotionConstraintListener, Desi
 
    public void setPrimaryMotionConstraintPVector(DenseMatrix64F pPrimary)
    {
+      if (PRINT_MOTION_CONSTRAINTS)
+      {
+         System.out.println();
+         MatrixTools.printJavaForConstruction("pPrimaryMotionConstraints", pPrimary);
+      }
+      
 //      System.out.println("!!! PrimaryMotionConstraintPMatrix = " + pPrimary);
 
       pPrimaryMotionConstraint.setReshape(pPrimary);
@@ -301,9 +390,17 @@ public class AllMomentumModuleListener implements MotionConstraintListener, Desi
 
    public void setOptimizationValue(double optimizationValue)
    {
-      this.optimizationValue = optimizationValue;
+      this.optimizationValue.set(optimizationValue);
    }
 
+   public void momentumModuleSolutionWasComputed(MomentumModuleSolution momentumModuleSolution)
+   {
+      SpatialForceVector centroidalMomentumRateSolution = momentumModuleSolution.getCentroidalMomentumRateSolution();
+      
+      achievedAngularMomentumRate.set(centroidalMomentumRateSolution.getAngularPartCopy());
+      achievedLinearMomentumRate.set(centroidalMomentumRateSolution.getLinearPartCopy());
+   }
+   
    public void reviewSolution()
    {
 //      System.out.println("\nmotionConstraintBlocksMap.size() = " + motionConstraintBlocksMap.size());
@@ -433,5 +530,7 @@ public class AllMomentumModuleListener implements MotionConstraintListener, Desi
    {
       return jPrimaryMotionConstraint;
    }
+
+   
 
 }

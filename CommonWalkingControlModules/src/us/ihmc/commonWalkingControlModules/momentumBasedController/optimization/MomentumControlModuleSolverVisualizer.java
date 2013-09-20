@@ -16,7 +16,7 @@ public class MomentumControlModuleSolverVisualizer implements MomentumControlMod
    
    private final DoubleYoVariable largestCheckJQEqualsZeroNumber = new DoubleYoVariable("largestCheckJQEqualsZeroNumber", registry);
    
-   private DenseMatrix64F centroidalMomentumMatrix, momentumDotEquationRightHandSide;
+   private DenseMatrix64F centroidalMomentumMatrix, momentumDotEquationRightHandSide, momentumSubspace;
    private DenseMatrix64F jPrimary, pPrimary, primaryMotionConstraintCheck, checkJQEqualsZeroAfterSetConstraint;
    private DenseMatrix64F jSecondary, pSecondary, weightMatrixSecondary;
    private DenseMatrix64F jointAccelerations;
@@ -27,17 +27,18 @@ public class MomentumControlModuleSolverVisualizer implements MomentumControlMod
       parentRegistry.addChild(registry);
    }
    
-   public void setCentroidalMomentumMatrix(DenseMatrix64F a)
+   public void setCentroidalMomentumMatrix(DenseMatrix64F centroidalMomentumMatrix, DenseMatrix64F momentumDotEquationRightHandSide, DenseMatrix64F momentumSubspace)
    {
-      centroidalMomentumMatrix = a;
-     if (printForViz) System.out.println("CentroidalMomentumMatrix = " + a);
+     this.centroidalMomentumMatrix = centroidalMomentumMatrix;
+     if (printForViz) System.out.println("CentroidalMomentumMatrix = " + centroidalMomentumMatrix);
+     
+     this.momentumDotEquationRightHandSide = momentumDotEquationRightHandSide;
+     if (printForViz) System.out.println("MomentumDotEquationRightHandSide = " + momentumDotEquationRightHandSide);
+     
+     this.momentumSubspace = momentumSubspace;
+     if (printForViz) System.out.println("momentumSubspace = " + momentumSubspace);
    }
 
-   public void setMomentumDotEquationRightHandSide(DenseMatrix64F b)
-   {
-      momentumDotEquationRightHandSide = b;
-      if (printForViz) System.out.println("MomentumDotEquationRightHandSide = " + b);
-   }
 
    public void setPrimaryMotionConstraintJMatrix(DenseMatrix64F jPrimary)
    {
