@@ -14,6 +14,8 @@ public class MotionConstraintSingularityEscapeHandler
    private final NullspaceCalculator nullspaceCalculator = new NullspaceCalculator(SpatialMotionVector.SIZE, true);
    private static final boolean DEBUG = false;
 
+   private final boolean DO_IMinusNNTStuff = true; //false;
+   
    public MotionConstraintSingularityEscapeHandler()
    {
    }
@@ -27,23 +29,49 @@ public class MotionConstraintSingularityEscapeHandler
       nullspaceCalculator.setMatrix(sJ, nullspaceMultipliers.getNumRows());
       DenseMatrix64F nullspace = nullspaceCalculator.getNullspace();
 
-      DenseMatrix64F iMinusNNT = computeIMinusNNT(nullspace);
-      CommonOps.mult(iMinusNNT, baseToEndEffectorJacobianMatrix, jBlockCompact);
+      if (DEBUG)
+      {
+         System.out.println("selectionMatrix = " + selectionMatrix);
+         System.out.println("jacobianMatrix = " + jacobianMatrix);
+         System.out.println("sJ = " + sJ);
+         System.out.println("nullspace = " + sJ);
+      }
+      
+      if (DO_IMinusNNTStuff)
+      {
+         DenseMatrix64F iMinusNNT = computeIMinusNNT(nullspace);
+         CommonOps.mult(iMinusNNT, baseToEndEffectorJacobianMatrix, jBlockCompact);
+      }
+      else
+      {
+         jBlockCompact.set(baseToEndEffectorJacobianMatrix);
+      }
+
 
       nCompactBlock.reshape(nullspace.getNumCols(), nullspace.getNumRows());
       CommonOps.transpose(nullspace, nCompactBlock);
 
       zBlock.set(nullspaceMultipliers);
       
-      if (DEBUG )
+      if (DEBUG)
       {
+         System.out.println("iMinusNNT = " + iMinusNNT);
          System.out.println("jBlockCompact = " + jBlockCompact);
          System.out.println("nCompactBlock = " + nCompactBlock);
          System.out.println("zBlock = " + zBlock);
          
          DenseMatrix64F jBlockCompactUnaltered = new DenseMatrix64F(selectionMatrix.getNumRows(), baseToEndEffectorJacobianMatrix.getNumCols());
-         CommonOps.mult(selectionMatrix, baseToEndEffectorJacobianMatrix, jBlockCompact);
+         CommonOps.mult(selectionMatrix, baseToEndEffectorJacobianMatrix, jBlockCompactUnaltered);
          System.out.println("jBlockCompactUnaltered = " + jBlockCompactUnaltered);
+         
+         // jBlockCompact times nCompactBlock should be zero:
+         DenseMatrix64F jBlockEnd = CommonOps.extract(jBlockCompact, 0, jBlockCompact.getNumRows(), jBlockCompact.getNumCols() - nCompactBlock.getNumCols(), jBlockCompact.getNumCols());
+         
+         DenseMatrix64F jBlockTimesNullspaceBlock = new DenseMatrix64F(jBlockEnd.getNumRows(), nCompactBlock.getNumRows());
+         CommonOps.multTransB(jBlockEnd, nCompactBlock, jBlockTimesNullspaceBlock);
+         
+         System.out.println("jBlockTimesNullspaceBlock (should be zero) = " + jBlockTimesNullspaceBlock);
+         
       }
    }
 

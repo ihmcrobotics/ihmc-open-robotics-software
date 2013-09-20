@@ -62,4 +62,14 @@ public class MomentumRateOfChangeData
       this.momentumSubspace.setReshape(other.momentumSubspace);
       this.momentumMultipliers.setReshape(other.momentumMultipliers);
    }
+
+   public void setMomentumMultipliers(DenseMatrix64F momentumMultipliers)
+   {
+      this.momentumMultipliers.setReshape(momentumMultipliers);
+   }
+
+   public void setMomentumSubspace(DenseMatrix64F momentumSubspace)
+   {
+      this.momentumSubspace.setReshape(momentumSubspace);
+   }
 }

@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects;
 
 public class DesiredRateOfChangeOfMomentumCommand
 {
-   private final MomentumRateOfChangeData momentumRateOfChangeData;
+   private MomentumRateOfChangeData momentumRateOfChangeData;
 
    public DesiredRateOfChangeOfMomentumCommand(MomentumRateOfChangeData momentumRateOfChangeData)
    {
@@ -23,5 +23,10 @@ public class DesiredRateOfChangeOfMomentumCommand
    public String toString()
    {
       return "DesiredRateOfChangeOfMomentumCommand: MomentumSubspace = " + momentumRateOfChangeData.getMomentumSubspace();
+   }
+
+   public void setMomentumRateOfChangeData(MomentumRateOfChangeData momentumRateOfChangeData)
+   {
+      this.momentumRateOfChangeData = momentumRateOfChangeData;
    }
 }

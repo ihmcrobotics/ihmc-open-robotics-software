@@ -83,7 +83,7 @@ public class DRCFlatGroundWalkingTest
       boolean useVelocityAndHeadingScript = false;
       boolean cheatWithGroundHeightAtForFootstep = true;
 
-      if (checkNothingChanged) maximumWalkTime = 5.0;
+      if (checkNothingChanged) maximumWalkTime = 3.0;
       
       DRCRobotWalkingControllerParameters drcControlParameters = new DRCRobotWalkingControllerParameters();
 //      drcControlParameters.setNominalHeightAboveAnkle(drcControlParameters.nominalHeightAboveAnkle() - 0.03);    // Need to do this or the leg goes straight and the robot falls.

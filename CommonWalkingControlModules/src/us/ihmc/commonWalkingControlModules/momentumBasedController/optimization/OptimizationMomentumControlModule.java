@@ -192,8 +192,8 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
       if (momentumControlModuleSolverListener != null)
       {
-         momentumControlModuleSolverListener.setCentroidalMomentumMatrix(new DenseMatrix64F(a));
-         momentumControlModuleSolverListener.setMomentumDotEquationRightHandSide(new DenseMatrix64F(b));
+         DenseMatrix64F momentumSubspace = new DenseMatrix64F(momentumRateOfChangeData.getMomentumSubspace());
+         momentumControlModuleSolverListener.setCentroidalMomentumMatrix(new DenseMatrix64F(a), new DenseMatrix64F(b), momentumSubspace);
          
          DenseMatrix64F checkJQEqualsZeroAfterSetConstraint = equalityConstraintEnforcer.checkJQEqualsZeroAfterSetConstraint();
          momentumControlModuleSolverListener.setCheckJQEqualsZeroAfterSetConstraint(new DenseMatrix64F(checkJQEqualsZeroAfterSetConstraint));

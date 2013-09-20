@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Map;
 
+import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableCylinderBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
@@ -30,6 +32,7 @@ import us.ihmc.utilities.screwTheory.Wrench;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class MomentumControlModuleBridge implements MomentumControlModule
 {
@@ -58,6 +61,7 @@ public class MomentumControlModuleBridge implements MomentumControlModule
       new EnumYoVariable<MomentumControlModuleType>("momentumControlModuleInUse", registry, MomentumControlModuleType.class);
 
    private final BooleanYoVariable swapMomentumControlModuleInUse = new BooleanYoVariable("swapMomentumControlModuleInUse", registry);
+   private final BooleanYoVariable ignoreZDDot = new BooleanYoVariable("ignoreZDDot", registry);
    
    private MomentumControlModule activeMomentumControlModule, inactiveMomentumControlModule;
 
@@ -95,7 +99,8 @@ public class MomentumControlModuleBridge implements MomentumControlModule
       this.momentumControlModules.put(MomentumControlModuleType.OLD, oldMomentumControlModule);
 
       // By default use OldMomentumControlModule, can be changed via setMomentumControlModuleToUse method
-      setMomentumControlModuleToUse(MomentumControlModuleType.OLD);
+//      setMomentumControlModuleToUse(MomentumControlModuleType.OLD);
+      setMomentumControlModuleToUse(MomentumControlModuleType.OPTIMIZATION);
 
       parentRegistry.addChild(registry);
    }
@@ -177,6 +182,32 @@ public class MomentumControlModuleBridge implements MomentumControlModule
 
    public void setDesiredRateOfChangeOfMomentum(DesiredRateOfChangeOfMomentumCommand desiredRateOfChangeOfMomentumCommand)
    {
+      MomentumRateOfChangeData momentumRateOfChangeData = desiredRateOfChangeOfMomentumCommand.getMomentumRateOfChangeData();
+      DenseMatrix64F momentumMultipliers = momentumRateOfChangeData.getMomentumMultipliers();
+      DenseMatrix64F momentumSubspace = momentumRateOfChangeData.getMomentumSubspace();
+      
+//      System.out.println("momentumMultipliers = " + momentumMultipliers);
+//      System.out.println("momentumSubspace = " + momentumSubspace);
+      
+      if (ignoreZDDot.getBooleanValue())
+      {
+         DenseMatrix64F newMomentumMultipliers = new DenseMatrix64F(2, 1);
+         newMomentumMultipliers.set(0, 0, momentumMultipliers.get(0, 0));
+         newMomentumMultipliers.set(1, 0, momentumMultipliers.get(1, 0));
+         
+         DenseMatrix64F newMomentumSubspace = new DenseMatrix64F(6, 2);
+         newMomentumSubspace.set(3, 0, 1.0);
+         newMomentumSubspace.set(4, 1, 1.0);
+         
+//         System.out.println("newMomentumMultipliers = " + newMomentumMultipliers);
+//         System.out.println("newMomentumSubspace = " + newMomentumSubspace);
+         
+         momentumRateOfChangeData.setMomentumMultipliers(newMomentumMultipliers);
+         momentumRateOfChangeData.setMomentumSubspace(newMomentumSubspace);
+         
+         desiredRateOfChangeOfMomentumCommand.setMomentumRateOfChangeData(momentumRateOfChangeData);
+      }
+      
       momentumModuleDataObject.setDesiredRateOfChangeOfMomentum(desiredRateOfChangeOfMomentumCommand);
       if (allMomentumModuleListener != null) allMomentumModuleListener.desiredRateOfChangeOfMomentumWasSet(desiredRateOfChangeOfMomentumCommand);
    }
@@ -223,6 +254,11 @@ public class MomentumControlModuleBridge implements MomentumControlModule
       setMomentumModuleDataObject(activeMomentumControlModule, momentumModuleDataObject);
       MomentumModuleSolution activeSolution = activeMomentumControlModule.compute(contactStates, cylinderContactStates, upcomingSupportSide);  
   
+      if (allMomentumModuleListener != null)
+      {
+         allMomentumModuleListener.momentumModuleSolutionWasComputed(activeSolution);
+      }
+      
       if (SHOW_MOMENTUM_MODULE_GUI)
       {
          momentumModuleGUI.update(allMomentumModuleListener);
@@ -236,6 +272,7 @@ public class MomentumControlModuleBridge implements MomentumControlModule
          
          momentumModuleSolutionComparer.displayComparison();
       }
+
       
       return activeSolution;
    }

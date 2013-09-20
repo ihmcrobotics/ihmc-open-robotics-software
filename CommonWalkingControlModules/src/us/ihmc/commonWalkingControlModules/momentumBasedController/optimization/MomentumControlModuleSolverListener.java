@@ -6,8 +6,7 @@ import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 
 public interface MomentumControlModuleSolverListener
 {
-   public abstract void setCentroidalMomentumMatrix(DenseMatrix64F a);
-   public abstract void setMomentumDotEquationRightHandSide(DenseMatrix64F b);
+   public abstract void setCentroidalMomentumMatrix(DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F momentumSubspace);
 
    public abstract void setPrimaryMotionConstraintJMatrix(DenseMatrix64F jPrimary);
    public abstract void setPrimaryMotionConstraintPVector(DenseMatrix64F pPrimary);

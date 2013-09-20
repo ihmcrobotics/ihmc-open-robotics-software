@@ -6,7 +6,10 @@ import java.util.List;
 
 import org.apache.commons.lang.mutable.MutableDouble;
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.factory.DecompositionFactory;
+import org.ejml.factory.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
+import org.ejml.ops.SingularOps;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
@@ -14,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.D
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
 import us.ihmc.utilities.CheckTools;
 import us.ihmc.utilities.math.MatrixTools;
+import us.ihmc.utilities.math.NullspaceCalculator;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.screwTheory.ConvectiveTermCalculator;
@@ -152,6 +156,146 @@ public class MotionConstraintHandler
 
    public void setDesiredSpatialAcceleration(DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand) 
    {
+//      setDesiredSpatialAccelerationOld(desiredSpatialAccelerationCommand);
+      setDesiredSpatialAccelerationNew(desiredSpatialAccelerationCommand);
+   }
+   
+   public void setDesiredSpatialAccelerationNew(DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand) 
+   {
+      // (S * J) * vdot = S * (Tdot - Jdot * v)
+      GeometricJacobian jacobian = desiredSpatialAccelerationCommand.getJacobian();
+      TaskspaceConstraintData taskspaceConstraintData = desiredSpatialAccelerationCommand.getTaskspaceConstraintData();
+      double weight = desiredSpatialAccelerationCommand.getWeight();
+      
+      SpatialAccelerationVector taskSpaceAcceleration = taskspaceConstraintData.getSpatialAcceleration();
+      DenseMatrix64F selectionMatrix = taskspaceConstraintData.getSelectionMatrix();
+      DenseMatrix64F nullspaceMultipliers = taskspaceConstraintData.getNullspaceMultipliers();
+
+      if (selectionMatrix.getNumRows() > 0)
+      {
+         RigidBody base = getBase(taskSpaceAcceleration);
+         RigidBody endEffector = getEndEffector(taskSpaceAcceleration);
+
+         // TODO: inefficient
+         GeometricJacobian baseToEndEffectorJacobian = new GeometricJacobian(base, endEffector, taskSpaceAcceleration.getExpressedInFrame());    // FIXME: garbage, repeated computation
+         baseToEndEffectorJacobian.compute();
+
+         // TODO: inefficient
+         convectiveTermCalculator.computeJacobianDerivativeTerm(baseToEndEffectorJacobian, convectiveTerm);
+         convectiveTerm.getBodyFrame().checkReferenceFrameMatch(taskSpaceAcceleration.getBodyFrame());
+         convectiveTerm.getExpressedInFrame().checkReferenceFrameMatch(taskSpaceAcceleration.getExpressedInFrame());
+         convectiveTerm.packMatrix(convectiveTermMatrix, 0);
+         
+         jBlockCompact.reshape(selectionMatrix.getNumRows(), baseToEndEffectorJacobian.getNumberOfColumns());
+
+
+         DenseMatrix64F baseToEndEffectorJacobianMatrix = new DenseMatrix64F(baseToEndEffectorJacobian.getJacobianMatrix()); //TODO: Garbage
+         DenseMatrix64F jacobianMatrix = new DenseMatrix64F(jacobian.getJacobianMatrix()); //TODO: Garbage
+
+         int nullity = nullspaceMultipliers.getNumRows();
+         if (nullity > 0)
+         {
+            // Take the singular value decomposition of the leg Jacobian to find the approximate nullspace.
+            
+            SingularValueDecomposition<DenseMatrix64F> svd = DecompositionFactory.svd(jacobianMatrix.getNumRows(), jacobianMatrix.getNumCols(), true, true, false);
+            svd.decompose(jacobianMatrix);
+            
+            DenseMatrix64F matrixUTranspose = new DenseMatrix64F(jacobianMatrix.getNumRows(), jacobianMatrix.getNumRows());
+            DenseMatrix64F matrixW = new DenseMatrix64F(jacobianMatrix.getNumRows(), jacobianMatrix.getNumCols());
+            DenseMatrix64F matrixVTranspose = new DenseMatrix64F(jacobianMatrix.getNumCols(), jacobianMatrix.getNumCols());
+            svd.getU(matrixUTranspose, true);
+            svd.getW(matrixW);
+            svd.getV(matrixVTranspose, true); 
+            
+            SingularOps.descendingOrder(matrixUTranspose, true, matrixW, matrixVTranspose, true);
+            
+//            DenseMatrix64F matrixCTranspose = new DenseMatrix64F(jacobianMatrix.getNumCols() - nullity, jacobianMatrix.getNumRows());
+            DenseMatrix64F matrixCTranspose = CommonOps.extract(matrixUTranspose, 0, jacobianMatrix.getNumCols() - nullity, 0, jacobianMatrix.getNumRows());
+            
+            DenseMatrix64F matrixCTransposeJ = new DenseMatrix64F(matrixCTranspose.getNumRows(), baseToEndEffectorJacobianMatrix.getNumCols());
+            CommonOps.mult(matrixCTranspose, baseToEndEffectorJacobianMatrix, matrixCTransposeJ);
+            
+            taskSpaceAcceleration.packMatrix(taskSpaceAccelerationMatrix, 0);
+            
+            DenseMatrix64F temp = new DenseMatrix64F(selectionMatrix.getNumRows(), 1);
+            CommonOps.mult(selectionMatrix, taskSpaceAccelerationMatrix, temp);
+            CommonOps.multAdd(-1.0, selectionMatrix, convectiveTermMatrix, temp);
+
+            DenseMatrix64F cTransposeP = new DenseMatrix64F(matrixCTranspose.getNumRows(), temp.getNumCols());
+            CommonOps.mult(matrixCTranspose, temp, cTransposeP);
+            
+            DenseMatrix64F pBlock = getMatrixFromList(pList, motionConstraintIndex, selectionMatrix.getNumRows(), 1);
+            CommonOps.extract(cTransposeP, 0, cTransposeP.getNumRows(), 0, cTransposeP.getNumCols(), pBlock, 0, 0);
+            CommonOps.extract(nullspaceMultipliers, 0, nullspaceMultipliers.getNumRows(), 0, nullspaceMultipliers.getNumCols(), pBlock, cTransposeP.getNumRows(), 0);
+
+            
+            //TODO: Figure out how to deal with selection matrix here.
+//            DenseMatrix64F selectionMatrixTimesCTransposeJ = new DenseMatrix64F(selectionMatrix.getNumRows(), matrixCTransposeJ.getNumCols());
+//            CommonOps.mult(selectionMatrix, matrixCTransposeJ, selectionMatrixTimesCTransposeJ);
+
+         
+            for (int i=0; i<jBlockCompact.getNumRows(); i++)
+            {
+               for (int j=0; j<jBlockCompact.getNumCols(); j++)
+               {
+                  jBlockCompact.set(i, j, 0.0);
+               }
+            }
+            
+            DenseMatrix64F nullSpaceMatrixNTranspose = new DenseMatrix64F(nullity, matrixVTranspose.getNumCols());
+            CommonOps.extract(matrixVTranspose, matrixVTranspose.getNumRows() - nullity, matrixVTranspose.getNumRows(), 0, matrixVTranspose.getNumCols(), nullSpaceMatrixNTranspose, 0, 0);  
+            System.out.println("nullSpaceMatrixNTranspose = " + nullSpaceMatrixNTranspose);
+            NullspaceCalculator.makeLargestComponentInEachColumnPositive(nullSpaceMatrixNTranspose);
+            System.out.println("nullSpaceMatrixNTranspose = " + nullSpaceMatrixNTranspose);
+
+            //TODO: Fix the null space stuff. Verify that the three things added are correct. Figure out why qdd is way off from desired.
+            CommonOps.extract(matrixCTransposeJ, 0, matrixCTransposeJ.getNumRows(), 0, matrixCTransposeJ.getNumCols(), jBlockCompact, 0, 0);
+            CommonOps.extract(nullSpaceMatrixNTranspose, 0, nullSpaceMatrixNTranspose.getNumRows(), 0, nullSpaceMatrixNTranspose.getNumCols(), jBlockCompact, matrixCTransposeJ.getNumRows(), 6);  //Hack 6
+            
+            System.out.println("jBlockCompact = " + jBlockCompact);
+            
+//            jBlockCompact.set(5, 8, -0.5);
+//            jBlockCompact.set(5, 9, 1.0);
+//            jBlockCompact.set(5, 10, -0.5);
+            
+//            System.out.println("jBlockCompact = " + jBlockCompact);
+            
+            
+            DenseMatrix64F jFullBlock = getMatrixFromList(jList, motionConstraintIndex, jBlockCompact.getNumRows(), nDegreesOfFreedom);
+            compactBlockToFullBlock(baseToEndEffectorJacobian.getJointsInOrder(), jBlockCompact, jFullBlock);
+            
+            MutableDouble weightBlock = getMutableDoubleFromList(weightList, motionConstraintIndex);
+            weightBlock.setValue(weight);
+
+            reportSpatialAccelerationMotionContraint(desiredSpatialAccelerationCommand, motionConstraintIndex, jFullBlock, jBlockCompact, pBlock, weightBlock);
+
+            motionConstraintIndex++;
+         }
+         else
+         {
+            CommonOps.mult(selectionMatrix, baseToEndEffectorJacobianMatrix, jBlockCompact);
+            
+            DenseMatrix64F pBlock = getMatrixFromList(pList, motionConstraintIndex, selectionMatrix.getNumRows(), 1);
+            taskSpaceAcceleration.packMatrix(taskSpaceAccelerationMatrix, 0);
+            CommonOps.mult(selectionMatrix, taskSpaceAccelerationMatrix, pBlock);
+            CommonOps.multAdd(-1.0, selectionMatrix, convectiveTermMatrix, pBlock);
+            
+            DenseMatrix64F jFullBlock = getMatrixFromList(jList, motionConstraintIndex, jBlockCompact.getNumRows(), nDegreesOfFreedom);
+            compactBlockToFullBlock(baseToEndEffectorJacobian.getJointsInOrder(), jBlockCompact, jFullBlock);
+            
+            MutableDouble weightBlock = getMutableDoubleFromList(weightList, motionConstraintIndex);
+            weightBlock.setValue(weight);
+
+            reportSpatialAccelerationMotionContraint(desiredSpatialAccelerationCommand, motionConstraintIndex, jFullBlock, jBlockCompact, pBlock, weightBlock);
+
+            motionConstraintIndex++;
+         }
+      }
+   }
+   
+   
+   public void setDesiredSpatialAccelerationOld(DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand) 
+   {
       // (S * J) * vdot = S * (Tdot - Jdot * v)
       GeometricJacobian jacobian = desiredSpatialAccelerationCommand.getJacobian();
       TaskspaceConstraintData taskspaceConstraintData = desiredSpatialAccelerationCommand.getTaskspaceConstraintData();
@@ -194,6 +338,9 @@ public class MotionConstraintHandler
             motionConstraintSingularityEscapeHandler.computeConstraintBlocksForSingularityEscape(selectionMatrix, nullspaceMultipliers, baseToEndEffectorJacobianMatrix, jacobianMatrix, zBlock,
                   nCompactBlock, jBlockCompact);
             
+            
+//            System.out.println("Singularity escape. nCompactBlock = " + nCompactBlock);
+//            System.out.println("Singularity escape. zBlock = " + zBlock);
             compactBlockToFullBlock(jacobian.getJointsInOrder(), nCompactBlock, nFullBLock);
             reportNullSpaceMultiplierForSpatialAccelerationMotionContraint(desiredSpatialAccelerationCommand, motionConstraintIndex, nFullBLock, nCompactBlock, zBlock, null);
 
