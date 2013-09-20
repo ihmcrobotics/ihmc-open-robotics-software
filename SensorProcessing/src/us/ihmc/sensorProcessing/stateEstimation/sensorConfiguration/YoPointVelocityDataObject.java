@@ -3,13 +3,11 @@ package us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.sensorProcessing.stateEstimation.evaluation.RigidBodyToIndexMap;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 
-import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
@@ -20,18 +18,18 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
  */
 public class YoPointVelocityDataObject extends PointVelocityDataObject
 {
-   private final RigidBodyToIndexMap estimatorRigidBodyToIndexMap;
-   
-   private final IntegerYoVariable yoRigidBodyIndex;
    private final YoFramePoint yoMeasurementPointInBodyFrame;
    private final YoFrameVector yoVelocityOfMeasurementPointInWorldFrame;
 
-   public YoPointVelocityDataObject(RigidBodyToIndexMap estimatorRigidBodyToIndexMap, 
-         String namePrefix, ReferenceFrame frame, YoVariableRegistry registry)
+   public YoPointVelocityDataObject(String namePrefix, RigidBody body, YoVariableRegistry registry)
    {
-      this.estimatorRigidBodyToIndexMap = estimatorRigidBodyToIndexMap;
+      this(namePrefix, body.getParentJoint().getFrameAfterJoint(), registry);
+      rigidBodyName = body.getName();
+   }
+
+   public YoPointVelocityDataObject(String namePrefix, ReferenceFrame frame, YoVariableRegistry registry)
+   {
       bodyFixedReferenceFrameName = frame.getName();
-      yoRigidBodyIndex = new IntegerYoVariable(namePrefix + "RigidBodyIndex", registry);
       yoMeasurementPointInBodyFrame = new YoFramePoint(namePrefix + "PointBody", frame, registry);
       yoVelocityOfMeasurementPointInWorldFrame = new YoFrameVector(namePrefix + "PointVelocityWorld", ReferenceFrame.getWorldFrame(), registry);
    }
@@ -39,14 +37,19 @@ public class YoPointVelocityDataObject extends PointVelocityDataObject
    @Override
    public void set(RigidBody rigidBody, FramePoint measurementPointInBodyFrame, FrameVector velocityOfMeasurementPointInWorldFrame, boolean isPointVelocityValid)
    {
-     throw new RuntimeException("Should not get here");
-   }
+      if (!this.rigidBodyName.isEmpty() && !this.rigidBodyName.equals(rigidBody.getName()))
+      {
+         throw new RuntimeException("Rigid body name does not match, desired: " + rigidBodyName + ", expected: " + rigidBody.getName());
+      }
+         
+      this.rigidBodyName = rigidBody.getName();
+      this.bodyFixedReferenceFrameName = measurementPointInBodyFrame.getReferenceFrame().getName();
+      this.isPointVelocityValid = isPointVelocityValid;
+      measurementPointInBodyFrame.getPoint(this.measurementPointInBodyFrame);
+      velocityOfMeasurementPointInWorldFrame.getVector(this.velocityOfMeasurementPointInWorldFrame);
 
-   @Override
-   public String getRigidBodyName()
-   {
-      rigidBodyName = estimatorRigidBodyToIndexMap.getNameByIndex(yoRigidBodyIndex.getIntegerValue());
-      return rigidBodyName; 
+      yoMeasurementPointInBodyFrame.set(measurementPointInBodyFrame);
+      yoVelocityOfMeasurementPointInWorldFrame.set(velocityOfMeasurementPointInWorldFrame);
    }
 
    @Override
@@ -79,9 +82,9 @@ public class YoPointVelocityDataObject extends PointVelocityDataObject
                + other.bodyFixedReferenceFrameName);  
       }
       
+      rigidBodyName = other.rigidBodyName;
       isPointVelocityValid = other.isPointVelocityValid;
       yoMeasurementPointInBodyFrame.set(other.measurementPointInBodyFrame);
       yoVelocityOfMeasurementPointInWorldFrame.set(other.velocityOfMeasurementPointInWorldFrame);
-      yoRigidBodyIndex.set(estimatorRigidBodyToIndexMap.getIndexByName(other.rigidBodyName));
    }
 }

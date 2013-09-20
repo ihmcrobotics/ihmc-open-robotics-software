@@ -4,6 +4,7 @@ import javax.vecmath.Point3d;
 
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.RigidBody;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
@@ -17,6 +18,11 @@ public class YoPointPositionDataObject extends PointPositionDataObject
    private final YoFramePoint yoMeasurementPointInBodyFrame;
    private final YoFramePoint yoMeasurementPointInWorldFrame;
 
+   public YoPointPositionDataObject(String namePrefix, RigidBody body, YoVariableRegistry registry)
+   {
+      this(namePrefix, body.getParentJoint().getFrameAfterJoint(), registry);
+   }
+
    public YoPointPositionDataObject(String namePrefix, ReferenceFrame frame, YoVariableRegistry registry)
    {
       bodyFixedReferenceFrameName = frame.getName();
@@ -27,7 +33,14 @@ public class YoPointPositionDataObject extends PointPositionDataObject
    @Override
    public void set(FramePoint measurementPointInBodyFrame, FramePoint positionOfMeasurementPointInWorldFrame, boolean isPointPositionValid)
    {
-      throw new RuntimeException("Should not get here");
+      bodyFixedReferenceFrameName = measurementPointInBodyFrame.getReferenceFrame().getName();
+      this.isPointPositionValid = isPointPositionValid;
+      
+      measurementPointInBodyFrame.getPoint(this.measurementPointInBodyFrame);
+      positionOfMeasurementPointInWorldFrame.getPoint(this.positionOfMeasurementPointInWorldFrame);
+
+      yoMeasurementPointInBodyFrame.set(measurementPointInBodyFrame);
+      yoMeasurementPointInWorldFrame.set(positionOfMeasurementPointInWorldFrame);
    }
 
    @Override

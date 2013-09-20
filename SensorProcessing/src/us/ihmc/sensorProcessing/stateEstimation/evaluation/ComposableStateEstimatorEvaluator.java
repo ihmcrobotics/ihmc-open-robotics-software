@@ -13,8 +13,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAccelerationsFromRobotStealerController;
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
-import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
-import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSource;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromController;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -91,8 +90,8 @@ public class ComposableStateEstimatorEvaluator
       RigidBodyToIndexMap rigidBodyToIndexMap = new RigidBodyToIndexMap(inverseDynamicsStructure.getElevator());
 
       AfterJointReferenceFrameNameMap referenceFrameMap = new AfterJointReferenceFrameNameMap(inverseDynamicsStructure.getElevator());
-      final StateEstimationDataFromControllerSource stateEstimatorDataFromControllerSource = new StateEstimationDataFromControllerSource(rigidBodyToIndexMap, estimationFrame, referenceFrameMap, registry);
-      final StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink = new StateEstimationDataFromControllerSink(estimationFrame);
+      final StateEstimationDataFromController stateEstimatorDataFromControllerSource = new StateEstimationDataFromController(estimationFrame);
+      final StateEstimationDataFromController stateEstimationDataFromControllerSink = new StateEstimationDataFromController(estimationFrame);
       
       SensorAndEstimatorAssembler sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(stateEstimatorDataFromControllerSource, simulatedSensorHolderAndReaderFromRobotFactory.getStateEstimatorSensorDefinitions(),
             sensorNoiseParametersForEstimator, gravitationalAcceleration,

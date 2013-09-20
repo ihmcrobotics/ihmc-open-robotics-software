@@ -15,7 +15,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.sensors.ForceSensorData;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
-import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromControllerSink;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromController;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -47,7 +47,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
            CommonWalkingReferenceFrames referenceFrames, double controlDT, DoubleYoVariable yoTime,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, GUISetterUpperRegistry guiSetterUpperRegistry, TwistCalculator twistCalculator,
            CenterOfMassJacobian centerOfMassJacobian, ForceSensorDataHolder forceSensorDataHolder, SideDependentList<HandControllerInterface> handControllers,
-           LidarControllerInterface lidarControllerInterface, StateEstimationDataFromControllerSink stateEstimationDataFromControllerSink)
+           LidarControllerInterface lidarControllerInterface, StateEstimationDataFromController stateEstimationDataFromControllerSink)
    {
       double footForward = DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD;
       double footBack = DRCRobotParameters.DRC_ROBOT_FOOT_BACK;
