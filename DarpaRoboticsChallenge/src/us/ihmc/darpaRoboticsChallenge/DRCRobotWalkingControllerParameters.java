@@ -151,10 +151,15 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
       return false;
    }
 
-   // USE THESE FOR TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
-   private double minimumHeightAboveGround = 0.68;                                       
-   private double nominalHeightAboveGround = 0.76; 
-   private double maximumHeightAboveGround = 0.82; 
+// USE THESE FOR DRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
+   private double minimumHeightAboveGround = 0.785;                                       
+   private double nominalHeightAboveGround = 0.865; 
+   private double maximumHeightAboveGround = 0.925; 
+   
+//   // USE THESE FOR VRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
+//   private double minimumHeightAboveGround = 0.68;                                       
+//   private double nominalHeightAboveGround = 0.76; 
+//   private double maximumHeightAboveGround = 0.82; 
 
 //   // USE THESE FOR IMPROVING WALKING, BUT DONT CHECK THEM IN UNTIL IT IMPROVED WALKING THROUGH MUD.
 //   private double minimumHeightAboveGround = 0.68;                                       
