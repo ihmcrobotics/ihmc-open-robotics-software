@@ -21,7 +21,7 @@ public class AggregatePointPositionMeasurementModelElement implements Measuremen
 {
    private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final List<PointPositionMeasurementModelElement> elementPool = new ArrayList<PointPositionMeasurementModelElement>();
-   private final ControlFlowInputPort<Set<PointPositionDataObject>> inputPort;
+   private final ControlFlowInputPort<List<PointPositionDataObject>> inputPort;
    private final ControlFlowOutputPort<FramePoint> centerOfMassPositionPort;
    private final ControlFlowOutputPort<FrameOrientation> orientationPort;
    private final ReferenceFrame estimationFrame;
@@ -37,7 +37,7 @@ public class AggregatePointPositionMeasurementModelElement implements Measuremen
    private int nElementsInUse;
 
 
-   public AggregatePointPositionMeasurementModelElement(ControlFlowInputPort<Set<PointPositionDataObject>> inputPort,
+   public AggregatePointPositionMeasurementModelElement(ControlFlowInputPort<List<PointPositionDataObject>> inputPort,
          ControlFlowOutputPort<FramePoint> centerOfMassPositionPort, ControlFlowOutputPort<FrameOrientation> orientationPort, ReferenceFrame estimationFrame,
          AfterJointReferenceFrameNameMap referenceFrameMap, boolean assumePerfectIMU)
    {
@@ -63,7 +63,7 @@ public class AggregatePointPositionMeasurementModelElement implements Measuremen
 
    public void computeMatrixBlocks()
    {
-      Set<PointPositionDataObject> pointPositionDataObjects = inputPort.getData();
+      List<PointPositionDataObject> pointPositionDataObjects = inputPort.getData();
       nElementsInUse = pointPositionDataObjects.size();
 
       for (PointPositionDataObject pointPositionDataObject : pointPositionDataObjects)
@@ -72,7 +72,9 @@ public class AggregatePointPositionMeasurementModelElement implements Measuremen
          {
             nElementsInUse--;
          }
+         System.out.println("TEEEEEST: " + pointPositionDataObject.isPointPositionValid());
       }
+      
 
       for (int i = elementPool.size(); i < nElementsInUse; i++)
       {

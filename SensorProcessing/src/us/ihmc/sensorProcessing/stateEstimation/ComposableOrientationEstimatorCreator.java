@@ -272,7 +272,7 @@ public class ComposableOrientationEstimatorCreator
          return null;
       }
 
-      public ControlFlowInputPort<Set<PointPositionDataObject>> getPointPositionInputPort()
+      public ControlFlowInputPort<List<PointPositionDataObject>> getPointPositionInputPort()
       {
          return null;
       }
