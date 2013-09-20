@@ -6,12 +6,14 @@ import java.util.List;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 
+import us.ihmc.utilities.dataStructures.hyperCubeTree.ConstantResolutionProvider;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.HyperCubeLeaf;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.HyperCubeTree;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.LineSegmentSearchVolume;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.Octree;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.OneDimensionalBounds;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.RecursableHyperTreeNode;
+import us.ihmc.utilities.dataStructures.hyperCubeTree.ResolutionProvider;
 import us.ihmc.utilities.math.dataStructures.HeightMap;
 import us.ihmc.utilities.math.geometry.InclusionFunction;
 import us.ihmc.utilities.math.geometry.PointToLineUnProjector;
@@ -19,7 +21,7 @@ import us.ihmc.utilities.test.LowPassTimingReporter;
 
 public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, GroundOnlyQuadTreeData> implements HeightMap
 {
-   private final double constantResolution;
+   private final ResolutionProvider constantResolution;
    private final double heightThreshold;
    private int numberOfNodes = 0;
    private int maxNodes = 1;
@@ -32,11 +34,17 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
 
    public GroundOnlyQuadTree(double minX, double minY, double maxX, double maxY, double resolution, double heightThreshold, int maxNodes)
    {
+      this(toBounds(minX, maxX, minY, maxY), new ConstantResolutionProvider(resolution), heightThreshold, maxNodes);
+
+   }
+   
+   public GroundOnlyQuadTree(double minX, double minY, double maxX, double maxY, ResolutionProvider resolution, double heightThreshold, int maxNodes)
+   {
       this(toBounds(minX, maxX, minY, maxY), resolution, heightThreshold, maxNodes);
 
    }
 
-   private GroundOnlyQuadTree(OneDimensionalBounds[] bounds, double resolution, double heightThreshold, int maxNodes)
+   private GroundOnlyQuadTree(OneDimensionalBounds[] bounds, ResolutionProvider resolution, double heightThreshold, int maxNodes)
    {
       super(bounds);
       this.constantResolution = resolution;
@@ -52,7 +60,7 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    {
       HyperCubeLeaf<GroundAirDescriptor> hyperCubeLeaf = this.get(new double[] {x, y});
       RecursableHyperTreeNode<GroundAirDescriptor, GroundOnlyQuadTreeData> node = this.getLeafNodeAtLocation(new double[] {x, y});
-      
+
       if (hyperCubeLeaf == null)
          return getMetaDataHeight(node);
       if (hyperCubeLeaf.getValue() == null)
@@ -62,10 +70,10 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
 
       return hyperCubeLeaf.getValue().getHeight();
    }
-   
+
    public boolean containsPoint(double x, double y)
    {
-      return !Double.isNaN(heightAtPoint(x,y));
+      return !Double.isNaN(heightAtPoint(x, y));
    }
 
    public double getMetaDataHeight(RecursableHyperTreeNode<GroundAirDescriptor, GroundOnlyQuadTreeData> node)
@@ -73,6 +81,7 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
       if (node.getMetaData() == null)
       {
          System.err.println("GroundOnlyQuadTree: node has null metadata");
+
          return Double.NaN;
       }
 
@@ -82,20 +91,21 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    public boolean addPointToQuadTree(double x, double y, double z)
    {
       octreeChanged = false;
-      
+
       boolean quadTreeChanged;
       quadTreeChanged = this.put(new double[] {x, y}, (float) z);
-      
-      return quadTreeChanged || octreeChanged;         
+
+      return quadTreeChanged || octreeChanged;
    }
-   
+
    public boolean addPoint(double x, double y, double z)
    {
       octreeChanged = false;
-      
+
       if (!updateQuadtree)
       {
          puntLeaf(new HyperCubeLeaf<GroundAirDescriptor>(new GroundAirDescriptor((float) z, 0.0f), new double[] {x, y}));
+
          return octreeChanged;
       }
       else
@@ -307,7 +317,7 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
 
    public List<Point3d> getAllPointsWithinArea(double xCenter, double yCenter, double xExtent, double yExtent)
    {
-      return getAllPointsUsingGrid(xCenter, yCenter, xExtent, yExtent, constantResolution);
+      return getAllPointsUsingGrid(xCenter, yCenter, xExtent, yExtent, constantResolution.getMinResolution());
    }
 
    public List<Point3d> getAllPointsUsingGrid(double centerX, double centerY, double extentX, double extentY, double resolution)
@@ -333,9 +343,9 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    {
       ArrayList<Point3d> points = new ArrayList<Point3d>();
 
-      for (double x = xCenter - xExtent * 0.5; x <= xCenter + xExtent * 0.5; x += constantResolution)
+      for (double x = xCenter - xExtent * 0.5; x <= xCenter + xExtent * 0.5; x += constantResolution.getMinResolution())
       {
-         for (double y = yCenter - yExtent * 0.5; y <= yCenter + yExtent * 0.5; y += constantResolution)
+         for (double y = yCenter - yExtent * 0.5; y <= yCenter + yExtent * 0.5; y += constantResolution.getMinResolution())
          {
             double height = this.heightAtPoint(x, y);
             if (!Double.isNaN(height))
@@ -357,7 +367,7 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
 
       for (int i = 0; i < node.getDimensionality(); i++)
       {
-         if (node.getBounds(i).size() <= constantResolution)
+         if (node.getBounds(i).size() <= constantResolution.getResolution(node.getMidpoint()))
             return false;
       }
 
@@ -468,7 +478,7 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
 
    public void updateQuadtree(boolean updateQuadtree)
    {
-      this.updateQuadtree  = updateQuadtree;
+      this.updateQuadtree = updateQuadtree;
    }
 
 
