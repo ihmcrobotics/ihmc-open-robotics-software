@@ -14,9 +14,8 @@ public class PointPositionDataObject
 
    public void set(FramePoint measurementPointInBodyFrame, FramePoint positionOfMeasurementPointInWorldFrame, boolean isPointPositionValid)
    {
-      this.isPointPositionValid = isPointPositionValid;
-      
       bodyFixedReferenceFrameName = measurementPointInBodyFrame.getReferenceFrame().getName();
+      this.isPointPositionValid = isPointPositionValid;
       positionOfMeasurementPointInWorldFrame.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
       measurementPointInBodyFrame.getPoint(this.measurementPointInBodyFrame);
@@ -35,8 +34,8 @@ public class PointPositionDataObject
 
    public void set(PointPositionDataObject other)
    {  
-      isPointPositionValid = other.isPointPositionValid;
       bodyFixedReferenceFrameName = other.bodyFixedReferenceFrameName;
+      isPointPositionValid = other.isPointPositionValid;
       measurementPointInBodyFrame.set(other.measurementPointInBodyFrame);
       positionOfMeasurementPointInWorldFrame.set(other.positionOfMeasurementPointInWorldFrame);
    }

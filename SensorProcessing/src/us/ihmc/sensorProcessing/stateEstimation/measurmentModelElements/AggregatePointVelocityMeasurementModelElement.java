@@ -31,7 +31,7 @@ public class AggregatePointVelocityMeasurementModelElement implements Measuremen
 {
    private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final List<PointVelocityMeasurementModelElement> elementPool = new ArrayList<PointVelocityMeasurementModelElement>();
-   private final ControlFlowInputPort<Set<PointVelocityDataObject>> inputPort;
+   private final ControlFlowInputPort<List<PointVelocityDataObject>> inputPort;
    private final ControlFlowOutputPort<FramePoint> centerOfMassPositionPort;
    private final ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort;
    private final ControlFlowOutputPort<FrameOrientation> orientationPort;
@@ -53,7 +53,7 @@ public class AggregatePointVelocityMeasurementModelElement implements Measuremen
    private final boolean assumePerfectIMU;
    private int nElementsInUse;
 
-   public AggregatePointVelocityMeasurementModelElement(ControlFlowInputPort<Set<PointVelocityDataObject>> inputPort,
+   public AggregatePointVelocityMeasurementModelElement(ControlFlowInputPort<List<PointVelocityDataObject>> inputPort,
            ControlFlowOutputPort<FramePoint> centerOfMassPositionPort, ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort,
            ControlFlowOutputPort<FrameOrientation> orientationPort, ControlFlowOutputPort<FrameVector> angularVelocityPort,
            ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort, AfterJointReferenceFrameNameMap referenceFrameNameMap,
@@ -87,8 +87,16 @@ public class AggregatePointVelocityMeasurementModelElement implements Measuremen
 
    public void computeMatrixBlocks()
    {
-      Set<PointVelocityDataObject> pointVelocityDataObjects = inputPort.getData();
+      List<PointVelocityDataObject> pointVelocityDataObjects = inputPort.getData();
       nElementsInUse = pointVelocityDataObjects.size();
+
+      for (PointVelocityDataObject pointVelocityDataObject : pointVelocityDataObjects)
+      {
+         if (!pointVelocityDataObject.isPointVelocityValid())
+         {
+            nElementsInUse--;
+         }
+      }
 
       for (int i = elementPool.size(); i < nElementsInUse; i++)
       {
@@ -111,6 +119,9 @@ public class AggregatePointVelocityMeasurementModelElement implements Measuremen
       int elementIndex = 0;
       for (PointVelocityDataObject pointVelocityDataObject : pointVelocityDataObjects)
       {
+         if (!pointVelocityDataObject.isPointVelocityValid())
+            continue;
+         
          PointVelocityMeasurementModelElement element = elementPool.get(elementIndex);
          element.getPointVelocityMeasurementInputPort().setData(pointVelocityDataObject);
          element.computeMatrixBlocks();

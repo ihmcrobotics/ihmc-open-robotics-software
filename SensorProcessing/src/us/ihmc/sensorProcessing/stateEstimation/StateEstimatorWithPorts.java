@@ -1,7 +1,6 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
 import java.util.List;
-import java.util.Set;
 
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowInputPort;
@@ -15,5 +14,5 @@ public interface StateEstimatorWithPorts extends StateEstimator
    public abstract ControlFlowInputPort<FrameVector> getDesiredAngularAccelerationInputPort();
    public abstract ControlFlowInputPort<FrameVector> getDesiredCenterOfMassAccelerationInputPort();
    public abstract ControlFlowInputPort<List<PointPositionDataObject>> getPointPositionInputPort();
-   public abstract ControlFlowInputPort<Set<PointVelocityDataObject>> getPointVelocityInputPort();
+   public abstract ControlFlowInputPort<List<PointVelocityDataObject>> getPointVelocityInputPort();
 }

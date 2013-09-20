@@ -2,9 +2,8 @@ package us.ihmc.sensorProcessing.stateEstimation;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
@@ -21,7 +20,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
  * @author twan
  *         Date: 4/27/13
  */
-public class YoPointVelocityDataObjectListOutputPort extends ControlFlowOutputPort<Set<PointVelocityDataObject>>
+public class YoPointVelocityDataObjectListOutputPort extends ControlFlowOutputPort<List<PointVelocityDataObject>>
 {
    private final RigidBodyToIndexMap estimatorRigidBodyToIndexMap;
    private final AfterJointReferenceFrameNameMap referenceFrameNameMap;
@@ -38,14 +37,14 @@ public class YoPointVelocityDataObjectListOutputPort extends ControlFlowOutputPo
       
       this.estimatorRigidBodyToIndexMap = estimatorRigidBodyToIndexMap;
       this.referenceFrameNameMap = referenceFrameNameMap;
-      super.setData(new LinkedHashSet<PointVelocityDataObject>());
+      super.setData(new ArrayList<PointVelocityDataObject>());
       this.namePrefix = namePrefix;
       this.registry = registry;
    }
 
-   public Set<PointVelocityDataObject> getData()
+   public List<PointVelocityDataObject> getData()
    {
-      Set<PointVelocityDataObject> data = super.getData();
+      List<PointVelocityDataObject> data = super.getData();
       data.clear();
 
       for (YoPointVelocityDataObject yoPointVelocityDataObject : yoPointVelocityDataObjects)
@@ -57,11 +56,11 @@ public class YoPointVelocityDataObjectListOutputPort extends ControlFlowOutputPo
       return data;
    }
 
-   public void setData(Set<PointVelocityDataObject> data)
+   public void setData(List<PointVelocityDataObject> data)
    {
-      for (BooleanYoVariable validVariable : validMap.values())
+      for (YoPointVelocityDataObject yoPointVelocityDataObject : yoPointVelocityDataObjects)
       {
-         validVariable.set(false);
+         validMap.get(yoPointVelocityDataObject).set(false);
       }
 
       for (PointVelocityDataObject pointVelocityDataObject : data)
@@ -72,7 +71,6 @@ public class YoPointVelocityDataObjectListOutputPort extends ControlFlowOutputPo
 
          for(int i = 0; i <  yoPointVelocityDataObjects.size(); i++)
          {
-            
             YoPointVelocityDataObject yoPointVelocityDataObject = yoPointVelocityDataObjects.get(i);
             boolean frameOK = yoPointVelocityDataObject.getReferenceFrame() == referenceFrame;
             boolean isAvailable = !validMap.get(yoPointVelocityDataObject).getBooleanValue();

@@ -72,7 +72,6 @@ public class AggregatePointPositionMeasurementModelElement implements Measuremen
          {
             nElementsInUse--;
          }
-//         System.out.println("TEEEEEST: " + pointPositionDataObject.isPointPositionValid());
       }
       
 
