@@ -75,7 +75,7 @@ public class DRCObstacleCourseSteppingStonesTest
       FootstepDataList footstepDataList = createFootstepsForWalkingOverEasySteppingStones(scriptedFootstepGenerator);
       drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
 
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(15.0);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(13.0);
 
       drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();

@@ -112,7 +112,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private boolean VISUALIZE = true;
 
    private final static HighLevelState controllerState = HighLevelState.WALKING;
-   private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OLD;
+   private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OPTIMIZATION;
+
    private final static double DELAY_TIME_BEFORE_TRUSTING_CONTACTS = 0.12;
    
    private final double PELVIS_YAW_INITIALIZATION_TIME = 1.5;
@@ -477,7 +478,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(bipedFoot, jacobian, swingPositionTrajectoryGenerator,
                                                                 heelPitchTrajectoryGenerator, swingOrientationTrajectoryGenerator,
                                                                 onToesPitchTrajectoryGenerator, momentumBasedController, registry);
-         endEffectorControlModule.setParameters(3e-2, 500.0);
+         double singularityEscapeNullspaceMultiplier = 200.0;
+         double minJacobianDeterminantForSingularityEscape = 0.03;
+         endEffectorControlModule.setParameters(minJacobianDeterminantForSingularityEscape, singularityEscapeNullspaceMultiplier);
          footEndEffectorControlModules.put(bipedFoot, endEffectorControlModule);
       }
    }
