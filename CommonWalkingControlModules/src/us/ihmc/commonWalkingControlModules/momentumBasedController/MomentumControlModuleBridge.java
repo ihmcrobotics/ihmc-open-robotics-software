@@ -99,8 +99,8 @@ public class MomentumControlModuleBridge implements MomentumControlModule
       this.momentumControlModules.put(MomentumControlModuleType.OLD, oldMomentumControlModule);
 
       // By default use OldMomentumControlModule, can be changed via setMomentumControlModuleToUse method
-//      setMomentumControlModuleToUse(MomentumControlModuleType.OLD);
-      setMomentumControlModuleToUse(MomentumControlModuleType.OPTIMIZATION);
+      setMomentumControlModuleToUse(MomentumControlModuleType.OLD);
+//      setMomentumControlModuleToUse(MomentumControlModuleType.OPTIMIZATION);
 
       parentRegistry.addChild(registry);
    }
