@@ -10,6 +10,7 @@
 <mapEntry key="LD_LIBRARY_PATH" value="/usr/lib/gazebo-1.8/plugins:/usr/lib/drcsim-2.6/AtlasSimInterface_:/usr/lib/drcsim-2.6/plugins:/opt/ros/groovy/lib"/>
 </mapAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="us.ihmc.darpaRoboticsChallenge.gazebo.AtlasROSControllerFactory"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-n"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="DarpaRoboticsChallenge"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-XX:+UseSerialGC -Xmx2048m -Xms2048m -XX:NewSize=1536m -XX:MaxNewSize=1536m -verbosegc"/>
 <stringAttribute key="yk-options" value="&#10;additional-options2=onexit\=snapshot&#10;startup=6&#10;"/>

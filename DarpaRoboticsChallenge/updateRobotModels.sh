@@ -1,7 +1,7 @@
 #!/bin/sh
 
-drcsimPath=/usr/share/drcsim-2.6
-gazeboPath=/usr/share/gazebo-1.8
+drcsimPath=/usr/share/drcsim-3.0
+gazeboPath=/usr/share/gazebo-1.9
 
 modelPath=src/us/ihmc/darpaRoboticsChallenge/models/GFE/
 cp -r $drcsimPath/gazebo_models/ $modelPath
@@ -13,8 +13,12 @@ cp -r $drcsimPath/media $modelPath/drcsim
 
 cp $modelPath/gazebo/media/materials/textures/road1.jpg ../SDFLoader/src/us/ihmc/SdfLoader/models
 
-gzsdf print $modelPath/gazebo_models/atlas_description/atlas/atlas.urdf > $modelPath/atlas.sdf
-gzsdf print $modelPath/gazebo_models/atlas_description/atlas_sandia_hands/atlas_sandia_hands.urdf > $modelPath/atlas_sandia_hands.sdf
+#gzsdf print $modelPath/gazebo_models/atlas_description/atlas/atlas.urdf > $modelPath/atlas.sdf
+#gzsdf print $modelPath/gazebo_models/atlas_description/atlas_sandia_hands/atlas_sandia_hands.urdf > $modelPath/atlas_sandia_hands.sdf
+#gzsdf print $modelPath/gazebo_models/atlas_description/atlas_irobot_hands/atlas_irobot_hands.urdf > $modelPath/atlas_irobot_hands.sdf
+
+gzsdf print $modelPath/gazebo_models/atlas_description/atlas_v3/atlas_v3.urdf > $modelPath/atlas.sdf
+gzsdf print $modelPath/gazebo_models/atlas_description/atlas_v3_sandia_hands/atlas_v3_sandia_hands.urdf > $modelPath/atlas_sandia_hands.sdf
 gzsdf print $modelPath/gazebo_models/atlas_description/atlas_irobot_hands/atlas_irobot_hands.urdf > $modelPath/atlas_irobot_hands.sdf
 
 gzsdf print $modelPath/worlds/vrc_task_1.world > $modelPath/vrcTask1World.sdf
