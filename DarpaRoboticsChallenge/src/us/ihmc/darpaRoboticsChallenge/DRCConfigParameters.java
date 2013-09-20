@@ -116,7 +116,7 @@ public class DRCConfigParameters
 
    // LIDAR:
    public static final boolean USE_ROS_FOR_MULTISENSE_TRANSFORMS = false;
-   public static final boolean USE_REAL_ROBOT_MULTISENSE_NAMESPACES = false;
+   public static final boolean USING_REAL_HEAD = false;
    public static final double LIDAR_SPINDLE_VELOCITY = 2.5;
 
    public static final boolean STREAM_POLAR_LIDAR = true;
