@@ -54,7 +54,8 @@ public class SimulatedPointVelocitySensorFromRobot extends SimulatedSensor<Tuple
       measurementPointInBodyFrame.set(bodyFrame, kinematicPoint.getOffsetCopy());
       velocityOfMeasurementPointInWorldFrame.set(ReferenceFrame.getWorldFrame(), pointVelocity);
       
-      pointVelocityDataObject.set(rigidBody, measurementPointInBodyFrame, velocityOfMeasurementPointInWorldFrame);
+      boolean isPointVelocityValid = true;
+      pointVelocityDataObject.set(rigidBody, measurementPointInBodyFrame, velocityOfMeasurementPointInWorldFrame, isPointVelocityValid);
       pointVelocityOutputPort.setData(pointVelocityDataObject);
    }
 

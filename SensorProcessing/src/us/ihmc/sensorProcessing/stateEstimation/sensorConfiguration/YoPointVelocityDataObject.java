@@ -37,7 +37,7 @@ public class YoPointVelocityDataObject extends PointVelocityDataObject
    }
 
    @Override
-   public void set(RigidBody rigidBody, FramePoint measurementPointInBodyFrame, FrameVector velocityOfMeasurementPointInWorldFrame)
+   public void set(RigidBody rigidBody, FramePoint measurementPointInBodyFrame, FrameVector velocityOfMeasurementPointInWorldFrame, boolean isPointVelocityValid)
    {
      throw new RuntimeException("Should not get here");
    }
@@ -78,6 +78,8 @@ public class YoPointVelocityDataObject extends PointVelocityDataObject
          throw new RuntimeException("Frame name does not match, desired: " + bodyFixedReferenceFrameName + ", expected: "
                + other.bodyFixedReferenceFrameName);  
       }
+      
+      isPointVelocityValid = other.isPointVelocityValid;
       yoMeasurementPointInBodyFrame.set(other.measurementPointInBodyFrame);
       yoVelocityOfMeasurementPointInWorldFrame.set(other.velocityOfMeasurementPointInWorldFrame);
       yoRigidBodyIndex.set(estimatorRigidBodyToIndexMap.getIndexByName(other.rigidBodyName));

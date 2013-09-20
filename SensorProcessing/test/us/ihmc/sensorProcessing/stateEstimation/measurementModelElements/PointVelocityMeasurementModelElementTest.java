@@ -140,7 +140,8 @@ public class PointVelocityMeasurementModelElementTest
       velocityOfMeasurementPointInWorldFrame.changeFrame(ReferenceFrame.getWorldFrame());
       
       PointVelocityDataObject pointVelocityDataObject = new PointVelocityDataObject();
-      pointVelocityDataObject.set(stationaryPointLink, measurementPointInBodyFrame, velocityOfMeasurementPointInWorldFrame);
+      boolean isPointVelocityValid = true;
+      pointVelocityDataObject.set(stationaryPointLink, measurementPointInBodyFrame, velocityOfMeasurementPointInWorldFrame, isPointVelocityValid);
    
       pointVelocityMeasurementInputPort.setData(pointVelocityDataObject);
    }

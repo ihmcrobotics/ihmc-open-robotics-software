@@ -1,7 +1,14 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
+
 import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
@@ -24,12 +31,7 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class ComposableOrientationEstimatorCreator
 {
@@ -277,7 +279,7 @@ public class ComposableOrientationEstimatorCreator
          return null;
       }
       
-      public ControlFlowInputPort<Set<PointVelocityDataObject>> getPointVelocityInputPort()
+      public ControlFlowInputPort<List<PointVelocityDataObject>> getPointVelocityInputPort()
       {
          return null;
       }

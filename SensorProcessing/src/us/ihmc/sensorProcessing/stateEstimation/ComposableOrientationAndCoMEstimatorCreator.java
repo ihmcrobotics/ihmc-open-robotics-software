@@ -2,9 +2,7 @@ package us.ihmc.sensorProcessing.stateEstimation;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -165,7 +163,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
       private final ControlFlowInputPort<FrameVector> desiredCenterOfMassAccelerationInputPort;
       private final ControlFlowInputPort<FrameVector> desiredAngularAccelerationInputPort;
       private final ControlFlowInputPort<List<PointPositionDataObject>> pointPositionInputPort;
-      private final ControlFlowInputPort<Set<PointVelocityDataObject>> pointVelocityInputPort;
+      private final ControlFlowInputPort<List<PointVelocityDataObject>> pointVelocityInputPort;
 
       private final ControlFlowOutputPort<FrameOrientation> orientationOutputPort;
       private final ControlFlowOutputPort<FrameVector> angularVelocityOutputPort;
@@ -201,7 +199,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
          pointPositionInputPort = createInputPort("pointPositionInputPort");
          pointPositionInputPort.setData(new ArrayList<PointPositionDataObject>());
          pointVelocityInputPort = createInputPort("pointVelocityInputPort");
-         pointVelocityInputPort.setData(new LinkedHashSet<PointVelocityDataObject>());
+         pointVelocityInputPort.setData(new ArrayList<PointVelocityDataObject>());
 
          this.updatedInverseDynamicsStructureOutputPort = createOutputPort("updatedInverseDynamicsStructureOutputPort");
          centerOfMassPositionOutputPort = new YoFramePointControlFlowOutputPort(this, name + "CoMPosition", ReferenceFrame.getWorldFrame(), registry);
@@ -269,7 +267,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
                {
                   positionStateRobotModelUpdater.run();
                }
-
+               
                updatedInverseDynamicsStructureOutputPort.setData(inverseDynamicsStructureInputPort.getData());
             }
          };
@@ -443,7 +441,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
          addMeasurementModelElement(element);
       }
 
-      private void addAggregatedPointVelocityMeasurementModelElement(ControlFlowInputPort<Set<PointVelocityDataObject>> pointVelocityInputPort,
+      private void addAggregatedPointVelocityMeasurementModelElement(ControlFlowInputPort<List<PointVelocityDataObject>> pointVelocityInputPort,
               ReferenceFrame estimationFrame, AfterJointReferenceFrameNameMap estimatorFrameMap, RigidBodyToIndexMap rigidBodyToIndexMap)
       {
          AggregatePointVelocityMeasurementModelElement element = new AggregatePointVelocityMeasurementModelElement(pointVelocityInputPort,
@@ -594,7 +592,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
          return pointPositionInputPort;
       }
 
-      public ControlFlowInputPort<Set<PointVelocityDataObject>> getPointVelocityInputPort()
+      public ControlFlowInputPort<List<PointVelocityDataObject>> getPointVelocityInputPort()
       {
          return pointVelocityInputPort;
       }

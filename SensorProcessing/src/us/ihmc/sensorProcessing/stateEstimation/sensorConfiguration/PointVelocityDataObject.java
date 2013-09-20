@@ -11,13 +11,15 @@ public class PointVelocityDataObject
 {
    protected String rigidBodyName;
    protected String bodyFixedReferenceFrameName;
+   protected boolean isPointVelocityValid = true;
    protected final Point3d measurementPointInBodyFrame = new Point3d();
    protected final Vector3d velocityOfMeasurementPointInWorldFrame = new Vector3d();
 
-   public void set(RigidBody rigidBody, FramePoint measurementPointInBodyFrame, FrameVector velocityOfMeasurementPointInWorldFrame)
+   public void set(RigidBody rigidBody, FramePoint measurementPointInBodyFrame, FrameVector velocityOfMeasurementPointInWorldFrame, boolean isPointVelocityValid)
    {
       this.rigidBodyName = rigidBody.getName();
       this.bodyFixedReferenceFrameName = measurementPointInBodyFrame.getReferenceFrame().getName();
+      this.isPointVelocityValid = isPointVelocityValid;
       measurementPointInBodyFrame.getPoint(this.measurementPointInBodyFrame);
       velocityOfMeasurementPointInWorldFrame.getVector(this.velocityOfMeasurementPointInWorldFrame);
    }
@@ -41,6 +43,7 @@ public class PointVelocityDataObject
    {
       this.rigidBodyName = other.rigidBodyName;
       this.bodyFixedReferenceFrameName = other.bodyFixedReferenceFrameName;
+      this.isPointVelocityValid = other.isPointVelocityValid;
       this.measurementPointInBodyFrame.set(other.measurementPointInBodyFrame);
       this.velocityOfMeasurementPointInWorldFrame.set(other.velocityOfMeasurementPointInWorldFrame);
    }
@@ -50,10 +53,11 @@ public class PointVelocityDataObject
       if (this.bodyFixedReferenceFrameName != other.bodyFixedReferenceFrameName)
          return false;
 
+      boolean validStateEqual = isPointVelocityValid == other.isPointVelocityValid;
       boolean rigidBodyEqual = other.rigidBodyName == this.rigidBodyName;
       boolean bodyPointsEqual = getMeasurementPointInBodyFrame().epsilonEquals(other.getMeasurementPointInBodyFrame(), epsilon);
       boolean worldVelocitiesEqual = getVelocityOfMeasurementPointInWorldFrame().epsilonEquals(other.getVelocityOfMeasurementPointInWorldFrame(), epsilon);
-      return rigidBodyEqual && bodyPointsEqual && worldVelocitiesEqual;
+      return validStateEqual && rigidBodyEqual && bodyPointsEqual && worldVelocitiesEqual;
    }
 
    public String getBodyFixedReferenceFrameName()
@@ -61,4 +65,13 @@ public class PointVelocityDataObject
       return bodyFixedReferenceFrameName;
    }
 
+   public boolean isPointVelocityValid()
+   {
+      return isPointVelocityValid;
+   }
+
+   public void invalidatePointVelocity()
+   {
+      isPointVelocityValid = false;
+   }
 }
