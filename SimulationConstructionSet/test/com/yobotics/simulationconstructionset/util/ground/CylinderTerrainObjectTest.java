@@ -20,11 +20,19 @@ public class CylinderTerrainObjectTest
    double height;
    double radius;
    double errEpsilon = 1e-14;
+   double testDelta = .0001;
    
    CylinderTerrainObject slopedRotatedCylinder;
    double angleAxisDownRadians;
    double angleAxisFromXRadians;
    
+   Vector3d translatedCenter=new Vector3d(5, 3, 1.5);    
+   CylinderTerrainObject translatedVerticalCylinder;
+   CylinderTerrainObject translatedHorizontalCylinder;
+   
+   double tallHeight;
+   CylinderTerrainObject rot90TallHorizontalCylinder;
+   CylinderTerrainObject translatedRot90TallHorizontalCylinder;
    
    @Before
    public void setup()
@@ -35,14 +43,141 @@ public class CylinderTerrainObjectTest
       height=2.0;
       radius=1.0;
       verticalCylinder = new CylinderTerrainObject(center,slopeDegrees,yawDegrees, height, radius, app);
+      translatedVerticalCylinder = new CylinderTerrainObject(translatedCenter,slopeDegrees,yawDegrees, height, radius, app);
       slopeDegrees=90.0;
       horizontalCylinder = new CylinderTerrainObject(center,slopeDegrees,yawDegrees, height, radius, app);
+      translatedHorizontalCylinder = new CylinderTerrainObject(translatedCenter,slopeDegrees,yawDegrees, height, radius, app);
       slopeDegrees = 45.0;
       yawDegrees = 30.0;
       angleAxisDownRadians=Math.toRadians(slopeDegrees);
       angleAxisFromXRadians = Math.toRadians(yawDegrees);
       slopedRotatedCylinder =  new CylinderTerrainObject(center,slopeDegrees,yawDegrees, height, radius, app);
       
+      slopeDegrees = 90.0;
+      yawDegrees = 90.0;
+      tallHeight = 2*height;
+      rot90TallHorizontalCylinder = new CylinderTerrainObject(center,slopeDegrees,yawDegrees, tallHeight, radius, app);
+      translatedRot90TallHorizontalCylinder = new CylinderTerrainObject(translatedCenter,slopeDegrees,yawDegrees, tallHeight, radius, app);
+   }
+   
+   @Test
+   public void testHeightAtTranslatedRot90TallHorizontalCylinderJustInsideAndOutside()
+   {
+      
+      double expectedHeight = radius+translatedCenter.z;
+      double expectedMiss = 0.0;
+      double[] signY = {0,  -1, 1};
+      boolean[] isEdge = {false, true, true};
+      
+      for(int i=0;i<signY.length;i++)
+      {
+            double testX=0.0 + +translatedCenter.x;
+            double testY=signY[i]*(tallHeight/2-testDelta) + +translatedCenter.y;
+            double testZ=expectedHeight+1.0;
+            
+            assertEquals(expectedHeight,translatedRot90TallHorizontalCylinder.heightAt(testX, testY, testZ),errEpsilon);
+
+            if(isEdge[i])
+            {
+               testY=signY[i]*(tallHeight/2+testDelta)+translatedCenter.y;
+               assertEquals(expectedMiss,translatedRot90TallHorizontalCylinder.heightAt(testX, testY, testZ),errEpsilon);
+            }
+      }
+   }
+      
+   @Test
+   public void testHeightAtRot90TallHorizontalCylinderJustInsideAndOutside()
+   {
+      
+      double expectedHeight = radius;
+      double expectedMiss = 0.0;
+      double[] signY = {0,  -1, 1};
+      boolean[] isEdge = {false, true, true};
+      
+      for(int i=0;i<signY.length;i++)
+      {
+            double testX=0.0;
+            double testY=signY[i]*(tallHeight/2-testDelta);
+            double testZ=expectedHeight+1.0;
+            
+            assertEquals(expectedHeight,rot90TallHorizontalCylinder.heightAt(testX, testY, testZ),errEpsilon);
+
+            if(isEdge[i])
+            {
+               testY=signY[i]*(tallHeight/2+testDelta);
+               assertEquals(expectedMiss,rot90TallHorizontalCylinder.heightAt(testX, testY, testZ),errEpsilon);
+            }
+      }
+   }
+      
+   @Test
+   public void testHeightAtTranslatedVerticalCylinderJustInside()
+   {
+      
+      double expectedHeight = translatedCenter.z+height/2;
+      double[] signX = {-1,  0, 1, 0};
+      double[] signY = {0,  -1, 0, 1};
+      
+      for(int i=0;i<signX.length;i++)
+      {
+            double testX=signX[i]*(radius-testDelta)+translatedCenter.x;
+            double testY=signY[i]*(radius-testDelta)+translatedCenter.y;
+            double testZ=expectedHeight+1.0;
+            
+            assertEquals(expectedHeight,translatedVerticalCylinder.heightAt(testX, testY, testZ),errEpsilon);
+      }
+   }
+   
+   @Test
+   public void testHeightAtTranslatedHorizontalCylinderJustInside()
+   {
+      
+      double expectedHeight = translatedCenter.z+radius;
+      double[] signX = {-1,  0, 1};
+      
+      for(int i=0;i<signX.length;i++)
+      {
+            double testX=signX[i]*(height/2-testDelta)+translatedCenter.x;
+            double testY=translatedCenter.y;
+            double testZ=expectedHeight+1.0;
+            
+            assertEquals(expectedHeight,translatedHorizontalCylinder.heightAt(testX, testY, testZ),errEpsilon);
+      }
+   }
+   
+   @Test
+   public void testHeightAtTranslatedVerticalCylinderJustOutside()
+   {
+      
+      double expectedHeight = 0;
+      double[] signX = {-1,  0, 1, 0};
+      double[] signY = {0,  -1, 0, 1};
+      
+      for(int i=0;i<signX.length;i++)
+      {
+            double testX=signX[i]*(radius+testDelta)+translatedCenter.x;
+            double testY=signY[i]*(radius+testDelta)+translatedCenter.y;
+            double testZ=expectedHeight+1.0;
+            
+            assertEquals(expectedHeight,translatedVerticalCylinder.heightAt(testX, testY, testZ),errEpsilon);
+      }
+   }
+   
+   @Test
+   public void testHeightAtTranslatedHorizontalCylinderJustOutside()
+   {
+      
+      double expectedHeight = 0;
+      double[] signX = {-1, 1};
+      
+      for(int i=0;i<signX.length;i++)
+      {
+            double testX=signX[i]*(height/2+testDelta)+translatedCenter.x;
+            double testY=translatedCenter.y;
+            double testZ=expectedHeight+1.0;
+            
+            assertEquals(expectedHeight,translatedHorizontalCylinder.heightAt(testX, testY, testZ),errEpsilon);
+      }
    }
    
    @Test
