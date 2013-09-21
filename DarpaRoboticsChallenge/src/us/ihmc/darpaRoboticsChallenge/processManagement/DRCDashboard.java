@@ -28,6 +28,7 @@ import java.util.TimerTask;
 
 public class DRCDashboard
 {
+   private final boolean DEBUG_REMOTE_APPLICATION = true;
    private static DRCDashboard instance;
 
    private GridBagConstraints c;
@@ -1141,7 +1142,12 @@ public class DRCDashboard
 
    private void launchDemo01(final LocalCloudMachines gazeboMachine, final String task, final String pluginOption)
    {
-      String[] javaArgs = {"-Xms1024m", "-Xmx3000m"};    // {"-Xms1024m", "-Xmx2048m"};
+      String[] javaArgs;
+      if(DEBUG_REMOTE_APPLICATION)
+         javaArgs = new String[] {"-Xms1024m", "-Xmx3000m", "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,address=\"8000\""};    // {"-Xms1024m", "-Xmx2048m"};
+      else
+         javaArgs = new String[] {"-Xms1024m", "-Xmx3000m"};    // {"-Xms1024m", "-Xmx2048m"};
+      
       if (gazeboMachine == null)
       {
          scsSpawner.spawn(DRCDemo01.class, javaArgs, null);

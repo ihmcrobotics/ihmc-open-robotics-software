@@ -58,7 +58,6 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    enum BLOCKTYPE {FLAT, FLATSKEW, UPRIGHTSKEW, ANGLED};
 
    private boolean addLimboBar = false;
-
    // private static final double FLOOR_THICKNESS = 0.001;
 
    public DRCDemo01NavigationEnvironment()
@@ -79,6 +78,8 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       setUpGround();
 
       conditionallyAddLimboBar();
+
+      // testRotatableRampsSetupForGraphicsAndCollision();
    }
 
    private void setUpPathDRCTrialsLadder()
@@ -294,9 +295,48 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       // setUpRamp(10.1, 0.0f, 2.0f, 20.0f, rampHeight, color);
    }
 
+   private void testRotatableRampsSetupForGraphicsAndCollision()
+   {
+      double courseAngleDeg = 45.0;
+      double startDistance = 4.0;
+      AppearanceDefinition color = YoAppearance.Red();
+
+      final double sectionLength = 2.4384;    // 8 ft
+      int numberOfRamps=2;
+      setUpMultipleUpDownRamps(courseAngleDeg, startDistance, numberOfRamps, sectionLength, color);
+
+      courseAngleDeg = 90.0;
+      startDistance = 4.0;
+      color = YoAppearance.Orange();
+
+      setUpMultipleUpDownRamps(courseAngleDeg, startDistance, numberOfRamps, sectionLength, color);
+
+      color = YoAppearance.Gray();
+      float rampHeight = 0.625f;
+
+      setUpRamp(5.0f, 0.0f, 2.0f, 3.0f, rampHeight, color);
+      
+      //      setUpGround();
+      //45,200
+      //Ground
+      URL fileURL = DRCDemo01NavigationEnvironment.class.getResource("Textures/ground2.png");
+      YoAppearanceTexture texture = new YoAppearanceTexture(fileURL);
+      double width2=10;
+      double width1=width2/2;
+      Transform3D location = new Transform3D();
+      location.setTranslation(new Vector3d(width1/2, width1/2, -0.5));
+      Transform3D location2 = new Transform3D(location);
+      //location2.setTranslation(new Vector3d(0, 0, -2));
+
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, width1, width1, 1), texture);
+      combinedTerrainObject.addTerrainObject(newBox);
+      RotatableBoxTerrainObject newBox2 = new RotatableBoxTerrainObject(new Box3d(location2, width2, width2, 1), texture);
+      combinedTerrainObject.addTerrainObject(newBox2);
+   }
+
    private void setUpPath4DRCTrialsTrainingWalkingCourse()
    {
-      double courseAngle = 45.0;
+      double courseAngleDeg = 45.0;
       double startDistance = 4.0;
       AppearanceDefinition color = YoAppearance.Gray();
 
@@ -315,7 +355,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
       // 2. Ramps (Pitch Ramps 15degrees)
       int numberOfRamps=2;
-      setUpMultipleUpDownRamps(courseAngle, startDistance, numberOfRamps, sectionLength, color);
+      setUpMultipleUpDownRamps(courseAngleDeg, startDistance, numberOfRamps, sectionLength, color);
       
       // 3. Tripping Hazards
       // Diagonal 2x4s and 4x4s
@@ -324,7 +364,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       // second half has 4x4s(3.5x3.5) at 45 deg angles spaced 4ft apart (3 total)
       // I chose to do a worse case scenario where 2x4 and 4x4 are actually 2x4 and 4x4 (not standard sizes)
       int[] numberOfStepOvers = {5, 3};
-      startDistance = setUpTripHazards(courseAngle, startDistance, numberOfStepOvers, sectionLength, color);
+      startDistance = setUpTripHazards(courseAngleDeg, startDistance, numberOfStepOvers, sectionLength, color);
 
       // 4. Hurdles
       // 15cm (6 in) and 30 cm (12 in)
@@ -332,10 +372,10 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       // 1st section: midway (centered at 2ft) blocks layed straight across, 6 on bottom layer, 3 on top directly aligned on others. In other layout, 5 on top not directly over bottom.
       // 2nd section: midway (centered at 2ft from start of second section, 45deg zig zag pattern, two high. 8 on bottom, 4 directly on top or 7 overlapped.
       startDistance += sectionLength + sectionLength / 4;
-      setUpStraightHurdles(courseAngle, startDistance, new int[] {6, 5});
+      setUpStraightHurdles(courseAngleDeg, startDistance, new int[] {6, 5});
 
       startDistance += sectionLength / 2;
-      setUpZigZagHurdles(courseAngle, startDistance, new int[] {8, 7});
+      setUpZigZagHurdles(courseAngleDeg, startDistance, new int[] {8, 7});
 
       startDistance += sectionLength / 4;
 
@@ -345,12 +385,44 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       // 7. Descend Flat Top Steps
       // 8. Ascend Pitch/Roll 15 deg Top Steps
       // 9. Descend Pitch/Roll 15 deg Top Steps
-      setUpCinderBlockField(courseAngle, startDistance);
-
+      setUpCinderBlockField(courseAngleDeg, startDistance);
+      startDistance += sectionLength*5;
+      
       // 10. Step-Over Obstacles
+      setUpStepOverObstacles(courseAngleDeg, startDistance, color, sectionLength);
+      
+   }
+
+   private void setUpStepOverObstacles(double courseAngleDeg, double startDistance, AppearanceDefinition color, final double sectionLength)
+   {
       // TODO: Finish course (step 10)
+      double[] point = {startDistance + sectionLength*0.75, sectionLength*0.25};
+      double[] newPoint = rotateAroundOrigin(point, courseAngleDeg);
+      double cylinderLength=cinderBlockLength*3.5;
+      double cylinderRadius=cinderBlockWidth*1.5;
+      setUpSlopedCylinder( newPoint[0],  newPoint[1],  0.0,  cylinderLength,  cylinderRadius,  0.0,  courseAngleDeg + 45,  color);
       
+      point = new double[]{startDistance + sectionLength*0.75 - 0.3, -sectionLength*0.25 - 0.1};
+      newPoint = rotateAroundOrigin(point, courseAngleDeg);
+      double trussLength=cinderBlockLength*3.5;
+      double trussSide=cinderBlockWidth*1.8;
+      setUpSlopedBox(newPoint[0],  newPoint[1], trussSide/2.0, trussLength, trussSide, trussSide, 0.0, courseAngleDeg - 45, color);
       
+      point = new double[]{startDistance + sectionLength*0.75/2, sectionLength/4};
+      newPoint = rotateAroundOrigin(point, courseAngleDeg);
+      double beamHorizontalLength=sectionLength*0.75;
+      double beamVerticalHeight=cylinderRadius;
+      double beamLength=Math.sqrt(beamHorizontalLength*beamHorizontalLength+beamVerticalHeight*beamVerticalHeight);
+      double beamSlopeRad=Math.atan(beamVerticalHeight/beamHorizontalLength);
+      double beamZLength=0.09;
+      setUpSlopedBox(newPoint[0],  newPoint[1], beamVerticalHeight/2.0 + beamZLength/2, beamLength, 0.04, beamZLength, beamSlopeRad, courseAngleDeg, color);
+      
+      point = new double[]{startDistance + sectionLength*0.75/2, -sectionLength/6};
+      newPoint = rotateAroundOrigin(point, courseAngleDeg);
+      beamVerticalHeight=trussSide + cinderBlockWidth;
+      beamLength=Math.sqrt(beamHorizontalLength*beamHorizontalLength+beamVerticalHeight*beamVerticalHeight);
+      beamSlopeRad=Math.atan(beamVerticalHeight/beamHorizontalLength);
+      setUpSlopedBox(newPoint[0],  newPoint[1], beamVerticalHeight/2.0 + beamZLength/2, beamLength, 0.04, beamZLength, beamSlopeRad, courseAngleDeg, color);
    }
 
    private void setUpCinderBlockField(double courseAngle, double startDistance)
@@ -550,7 +622,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
          for (int j = 0; j < nBlocksWide; j++)
          {
             double xCenter = startDistance + i * cinderBlockLength;
-            double yCenter = (nBlocksWide * cinderBlockLength) / 2 - j * cinderBlockLength;
+            double yCenter = (nBlocksWide * cinderBlockLength) / 2 - j * cinderBlockLength - cinderBlockLength/2;
             double[] point = {xCenter, yCenter};
             double[] rotatedPoint = rotateAroundOrigin(point, courseAngle);
             int h = blockHeight[i][j];
@@ -581,7 +653,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       }
    }
 
-   private void setUpMultipleUpDownRamps(double courseAngle, double startDistance, int numberOfRamps, final double sectionLength, AppearanceDefinition color)
+   private void setUpMultipleUpDownRamps(double courseAngleDegrees, double startDistance, int numberOfRamps, final double sectionLength, AppearanceDefinition color)
    {
       for (int i = 1; i <= 2*numberOfRamps; i = i + 2)
       {
@@ -589,12 +661,12 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
          double rampAngle = Math.toRadians(15);
          double rampHeight = rampLength * Math.tan(rampAngle);
          double rampCenter = startDistance + rampLength * (i - 1) + rampLength / 2;
-         double[] newPoint = rotateAroundOrigin(new double[] {rampCenter, 0}, courseAngle);
-         setUpRotatedRamp(newPoint[0], newPoint[1], sectionLength, rampLength, rampHeight, courseAngle, color);
+         double[] newPoint = rotateAroundOrigin(new double[] {rampCenter, 0}, courseAngleDegrees);
+         setUpRotatedRamp(newPoint[0], newPoint[1], sectionLength, rampLength, rampHeight, courseAngleDegrees, color);
 
          double rampDownCenter = startDistance + rampLength * (i) + rampLength / 2;
-         newPoint = rotateAroundOrigin(new double[] {rampDownCenter, 0}, courseAngle);
-         setUpRotatedRamp(newPoint[0], newPoint[1], sectionLength, -rampLength, rampHeight, courseAngle, color);
+         newPoint = rotateAroundOrigin(new double[] {rampDownCenter, 0}, courseAngleDegrees);
+         setUpRotatedRamp(newPoint[0], newPoint[1], sectionLength, -rampLength, rampHeight, courseAngleDegrees, color);
       }
    }
 
@@ -629,7 +701,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       {
          for (int j = 0; j < numberStraightHurdles[i]; j++)
          {
-            double[] point = {startDistance, -(numberStraightHurdles[i] * cinderBlockLength) / 2 + j * cinderBlockLength};
+            double[] point = {startDistance, -(numberStraightHurdles[i] * cinderBlockLength) / 2 + j * cinderBlockLength + cinderBlockLength/2};
             double[] newPoint = rotateAroundOrigin(point, courseAngle);
             setUpCinderBlock(newPoint, i, courseAngle + 90);
          }
@@ -799,31 +871,6 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       // setUpRamp(10.1, 0.0f, 2.0f, 20.0f, rampHeight, color);
    }
 
-   private void setUpGround()
-   {
-      // AppearanceDefinition app = YoAppearance.Gray();
-
-      // center
-      // setUpCone(0, 0, 1.5, 1.5, FLOOR_THICKNESS, app);
-
-      // filler
-
-      // setUpCone(0, 0, 12.5, 14.5, 0.0001, app);
-
-      // setUpCone(0, 0, 10, 12, 0.005, YoAppearance.Brown());
-
-      URL fileURL = DRCDemo01NavigationEnvironment.class.getResource("Textures/ground2.png");
-      YoAppearanceTexture texture = new YoAppearanceTexture(fileURL);
-
-      Transform3D location = new Transform3D();
-      location.setTranslation(new Vector3d(0, 0, -0.5));
-
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, 45, 45, 1), texture);
-      combinedTerrainObject.addTerrainObject(newBox);
-      RotatableBoxTerrainObject newBox2 = new RotatableBoxTerrainObject(new Box3d(location, 200, 200, 0.75), YoAppearance.DarkGray());
-      combinedTerrainObject.addTerrainObject(newBox2);
-
-   }
 
    private void conditionallyAddLimboBar()
    {
@@ -968,7 +1015,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
    private void setUpRotatedRamp(double xCenter, double yCenter, double width, double run, double rise, double yawDegreesAboutCenter, AppearanceDefinition app)
    {
-      combinedTerrainObject.addRotatedRamp(xCenter - run / 2, yCenter - width / 2, xCenter + run / 2, yCenter + width / 2, rise, yawDegreesAboutCenter, app);
+      combinedTerrainObject.addRotatedRamp(xCenter, yCenter, run, width, rise, yawDegreesAboutCenter, app);
    }
 
    // need basics:
@@ -1124,6 +1171,20 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       setUpSlopedCinderBlock(xCenter + xyRotated2[0], yCenter + xyRotated2[1], numberFlatSupports, yawDegrees);
    }
 
+   private void setUpGround()
+   {
+      URL fileURL = DRCDemo01NavigationEnvironment.class.getResource("Textures/ground2.png");
+      YoAppearanceTexture texture = new YoAppearanceTexture(fileURL);
+
+      Transform3D location = new Transform3D();
+      location.setTranslation(new Vector3d(0, 0, -0.5));
+
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, 45, 45, 1), texture);
+      combinedTerrainObject.addTerrainObject(newBox);
+      RotatableBoxTerrainObject newBox2 = new RotatableBoxTerrainObject(new Box3d(location, 200, 200, 0.75), YoAppearance.DarkGray());
+      combinedTerrainObject.addTerrainObject(newBox2);
+
+   }
 
    public TerrainObject getTerrainObject()
    {
