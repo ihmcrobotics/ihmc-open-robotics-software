@@ -2,8 +2,8 @@ package us.ihmc.sensorProcessing.stateEstimation;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -109,7 +109,7 @@ public class MeasurementModel
       for(int i = 0; i <  measurementModelElements.size(); i++)
       {
          MeasurementModelElement measurementModelElement = measurementModelElements.get(i);
-         Set<ControlFlowOutputPort<?>> measurementModelElementStates = measurementModelElement.getStatePorts();
+         List<ControlFlowOutputPort<?>> measurementModelElementStates = measurementModelElement.getStatePorts();
          for (ControlFlowOutputPort<?> statePort : measurementModelElementStates)
          {
             DenseMatrix64F outputMatrixBlock = measurementModelElement.getOutputMatrixBlock(statePort);

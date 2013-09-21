@@ -2,10 +2,8 @@ package us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -42,7 +40,7 @@ public class AggregatePointVelocityMeasurementModelElement implements Measuremen
    private final RigidBodyToIndexMap rigidBodyToIndexMap;
 
    private final ReferenceFrame estimationFrame;
-   private final Set<ControlFlowOutputPort<?>> statePorts = new LinkedHashSet<ControlFlowOutputPort<?>>();
+   private final List<ControlFlowOutputPort<?>> statePorts = new ArrayList<ControlFlowOutputPort<?>>();
 
    private final Map<ControlFlowOutputPort<?>, DenseMatrix64F> outputMatrixBlocks = new LinkedHashMap<ControlFlowOutputPort<?>, DenseMatrix64F>();
    private final DenseMatrix64F measurementCovarianceMatrixBlock = new DenseMatrix64F(1, 1);
@@ -180,7 +178,7 @@ public class AggregatePointVelocityMeasurementModelElement implements Measuremen
       return residual;
    }
 
-   public Set<ControlFlowOutputPort<?>> getStatePorts()
+   public List<ControlFlowOutputPort<?>> getStatePorts()
    {
       return statePorts;
    }
