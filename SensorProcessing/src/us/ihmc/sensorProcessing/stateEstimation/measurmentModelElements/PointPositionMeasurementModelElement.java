@@ -59,9 +59,11 @@ public class PointPositionMeasurementModelElement extends AbstractMeasurementMod
       this.estimationFrame = estimationFrame;
       this.referenceFrameMap = referenceFrameMap;
 
-      outputMatrixBlocks.put(centerOfMassPositionPort, new DenseMatrix64F(SIZE, SIZE));
-      if (!assumePerfectIMU) outputMatrixBlocks.put(orientationPort, new DenseMatrix64F(SIZE, SIZE));
-
+      if(assumePerfectIMU)
+         initialize(SIZE, centerOfMassPositionPort);
+      else
+         initialize(SIZE, centerOfMassPositionPort, orientationPort);
+      
       computeCenterOfMassPositionStateOutputBlock();
    }
 
@@ -72,7 +74,7 @@ public class PointPositionMeasurementModelElement extends AbstractMeasurementMod
 
    private void computeCenterOfMassPositionStateOutputBlock()
    {
-      CommonOps.setIdentity(outputMatrixBlocks.get(centerOfMassPositionPort));
+      CommonOps.setIdentity(getOutputMatrixBlock(centerOfMassPositionPort));
    }
    
    private final FramePoint tempCenterOfMassPosition = new FramePoint();
@@ -94,7 +96,7 @@ public class PointPositionMeasurementModelElement extends AbstractMeasurementMod
 
       MatrixTools.toTildeForm(tempMatrix, tempFramePoint.getPoint());
       tempMatrix.mul(rotationFromEstimationToWorld, tempMatrix);
-      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, outputMatrixBlocks.get(orientationPort));
+      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, getOutputMatrixBlock(orientationPort));
    }
 
    public DenseMatrix64F computeResidual()

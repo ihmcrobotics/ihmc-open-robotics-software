@@ -58,8 +58,7 @@ public class AngularVelocityMeasurementModelElement extends AbstractMeasurementM
       this.inverseDynamicsStructureInputPort = inverseDynamicsStructureInputPort;
       this.angularVelocityResidual = new FrameVector(measurementFrame);
 
-      outputMatrixBlocks.put(angularVelocityStatePort, new DenseMatrix64F(SIZE, SIZE));
-      outputMatrixBlocks.put(biasStatePort, new DenseMatrix64F(SIZE, SIZE));
+      initialize(SIZE, angularVelocityStatePort, biasStatePort);
 
       computeAngularVelocityStateOutputBlock();
       computeBiasStateOutputBlock();
@@ -69,12 +68,12 @@ public class AngularVelocityMeasurementModelElement extends AbstractMeasurementM
    {
       estimationFrame.getTransformToDesiredFrame(tempTransform, measurementFrame);
       tempTransform.get(tempMatrix);
-      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, outputMatrixBlocks.get(angularVelocityStatePort));
+      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, getOutputMatrixBlock(angularVelocityStatePort));
    }
 
    private void computeBiasStateOutputBlock()
    {
-      CommonOps.setIdentity(outputMatrixBlocks.get(biasStatePort));
+      CommonOps.setIdentity(getOutputMatrixBlock(biasStatePort));
    }
 
    public void computeMatrixBlocks()

@@ -1,8 +1,13 @@
 package us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
@@ -11,7 +16,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.AfterJointReferenceFrameNameMap;
 
-import java.util.*;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 /**
  * @author twan
@@ -26,7 +31,7 @@ public class AggregatePointPositionMeasurementModelElement implements Measuremen
    private final ControlFlowOutputPort<FrameOrientation> orientationPort;
    private final ReferenceFrame estimationFrame;
    private final AfterJointReferenceFrameNameMap referenceFrameMap;
-   private final Set<ControlFlowOutputPort<?>> statePorts = new LinkedHashSet<ControlFlowOutputPort<?>>();
+   private final List<ControlFlowOutputPort<?>> statePorts = new ArrayList<ControlFlowOutputPort<?>>();
 
    private final Map<ControlFlowOutputPort<?>, DenseMatrix64F> outputMatrixBlocks = new LinkedHashMap<ControlFlowOutputPort<?>, DenseMatrix64F>();
    private final DenseMatrix64F measurementCovarianceMatrixBlock = new DenseMatrix64F(1, 1);
@@ -150,7 +155,7 @@ public class AggregatePointPositionMeasurementModelElement implements Measuremen
       return residual;
    }
 
-   public Set<ControlFlowOutputPort<?>> getStatePorts()
+   public List<ControlFlowOutputPort<?>> getStatePorts()
    {
       return statePorts;
    }

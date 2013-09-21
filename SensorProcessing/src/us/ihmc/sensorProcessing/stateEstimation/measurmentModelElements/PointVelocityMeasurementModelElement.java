@@ -79,14 +79,10 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
       this.referenceFrameNameMap = referenceFrameNameMap;
       this.estimatorRigidBodyToIndexMap = estimatorRigidBodyToIndexMap;
 
-      outputMatrixBlocks.put(centerOfMassPositionPort, new DenseMatrix64F(SIZE, SIZE));
-      outputMatrixBlocks.put(centerOfMassVelocityPort, new DenseMatrix64F(SIZE, SIZE));
-      
-      if (!assumePerfectIMU)
-      {
-         outputMatrixBlocks.put(orientationPort, new DenseMatrix64F(SIZE, SIZE));
-         outputMatrixBlocks.put(angularVelocityPort, new DenseMatrix64F(SIZE, SIZE));
-      }
+      if (assumePerfectIMU)
+         initialize(SIZE, centerOfMassPositionPort, centerOfMassVelocityPort);
+      else
+         initialize(SIZE, centerOfMassPositionPort, centerOfMassVelocityPort, orientationPort, angularVelocityPort);
       
       computeCenterOfMassVelocityStateOutputBlock();
    }
@@ -110,7 +106,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
 
    private void computeCenterOfMassVelocityStateOutputBlock()
    {
-      CommonOps.setIdentity(outputMatrixBlocks.get(centerOfMassVelocityPort));
+      CommonOps.setIdentity(getOutputMatrixBlock(centerOfMassVelocityPort));
    }
 
    private final FramePoint tempCenterOfMassPosition = new FramePoint();
@@ -128,7 +124,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
 
       MatrixTools.toTildeForm(tempMatrix, tempFramePoint.getPoint());
       tempMatrix.mul(rotationFromPelvisToWorld, tempMatrix);
-      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, outputMatrixBlocks.get(angularVelocityPort));
+      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, getOutputMatrixBlock(angularVelocityPort));
    }
 
    private final FrameVector tempCenterOfMassVelocity = new FrameVector();
@@ -144,7 +140,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
 
       MatrixTools.toTildeForm(tempMatrix, tempFrameVector.getVector());
       tempMatrix.mul(rotationFromPelvisToWorld, tempMatrix);
-      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, outputMatrixBlocks.get(orientationPort));
+      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, getOutputMatrixBlock(orientationPort));
    }
 
    public DenseMatrix64F computeResidual()

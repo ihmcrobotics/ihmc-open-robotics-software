@@ -57,11 +57,6 @@ public class StateEstimationDataFromController extends AbstractControlFlowElemen
       pointVelocityOutputPort.setData(pointVelocityDataObjects);
    }
    
-   public ReferenceFrame getAngularAccelerationEstimationFrame()
-   {
-      return angularAccelerationEstimationFrame;
-   }
-
    public void setDesiredCenterOfMassAcceleration(FrameVector desiredCenterOfMassAcceleration)
    {
       checkReferenceFrameMatchByName(centerOfMassAccelerationFrame, desiredCenterOfMassAcceleration.getReferenceFrame());
@@ -126,12 +121,12 @@ public class StateEstimationDataFromController extends AbstractControlFlowElemen
       }
    }
 
-   public FrameVector getDesiredAngularAcceleration()
+   private FrameVector getDesiredAngularAcceleration()
    {
       return desiredAngularAcceleration;
    }
 
-   public FrameVector getDesiredCenterOfMassAcceleration()
+   private FrameVector getDesiredCenterOfMassAcceleration()
    {
       return desiredCenterOfMassAcceleration;
    }
@@ -146,12 +141,12 @@ public class StateEstimationDataFromController extends AbstractControlFlowElemen
       setOrAddObjectToList(currentIndexInPointVelocityList++, pointVelocityDataObjects, value);
    }
 
-   public List<PointPositionDataObject> getPointPositionDataObjects()
+   private List<PointPositionDataObject> getPointPositionDataObjects()
    {
       return pointPositionDataObjects;
    }
    
-   public List<PointVelocityDataObject> getPointVelocityDataObjects()
+   private List<PointVelocityDataObject> getPointVelocityDataObjects()
    {
       return pointVelocityDataObjects;
    }
@@ -179,12 +174,12 @@ public class StateEstimationDataFromController extends AbstractControlFlowElemen
       controlFlowGraph.connectElements(pointVelocityOutputPort, pointVelocityInputPort);
    }
 
-   public void set(StateEstimationDataFromController stateEstimationDataFromControllerSink)
+   public void set(StateEstimationDataFromController stateEstimationDataFromController)
    {
-      setDesiredCenterOfMassAcceleration(stateEstimationDataFromControllerSink.getDesiredCenterOfMassAcceleration());
-      setDesiredAngularAcceleration(stateEstimationDataFromControllerSink.getDesiredAngularAcceleration());
-      setPointPositionMeasurements(stateEstimationDataFromControllerSink.getPointPositionDataObjects());
-      setPointVelocityMeasurements(stateEstimationDataFromControllerSink.getPointVelocityDataObjects());
+      setDesiredCenterOfMassAcceleration(stateEstimationDataFromController.getDesiredCenterOfMassAcceleration());
+      setDesiredAngularAcceleration(stateEstimationDataFromController.getDesiredAngularAcceleration());
+      setPointPositionMeasurements(stateEstimationDataFromController.getPointPositionDataObjects());
+      setPointVelocityMeasurements(stateEstimationDataFromController.getPointVelocityDataObjects());
    }
 
    private void extendPointPositionDataObjectList(int newSize)

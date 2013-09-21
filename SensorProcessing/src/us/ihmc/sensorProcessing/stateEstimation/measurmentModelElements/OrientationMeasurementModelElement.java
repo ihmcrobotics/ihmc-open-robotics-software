@@ -53,13 +53,14 @@ public class OrientationMeasurementModelElement extends AbstractMeasurementModel
       this.estimationFrame = estimationFrame;
       this.measurementFrame = measurementFrame;
 
-      outputMatrixBlocks.put(orientationStatePort, new DenseMatrix64F(SIZE, SIZE));
+      initialize(SIZE, orientationStatePort);
+      
       computeOrientationStateOutputBlock();
    }
 
    private void computeOrientationStateOutputBlock()
    {
-      DenseMatrix64F orientationStateOutputBlock = outputMatrixBlocks.get(orientationStatePort);
+      DenseMatrix64F orientationStateOutputBlock = getOutputMatrixBlock(orientationStatePort);
       CommonOps.setIdentity(orientationStateOutputBlock);
    }
 
@@ -68,7 +69,7 @@ public class OrientationMeasurementModelElement extends AbstractMeasurementModel
       estimationFrame.getTransformToDesiredFrame(tempTransform, measurementFrame);
       tempTransform.get(tempMatrix3d);
       
-      DenseMatrix64F orientationStateOutputBlock = outputMatrixBlocks.get(orientationStatePort);  
+      DenseMatrix64F orientationStateOutputBlock = getOutputMatrixBlock(orientationStatePort);  
       MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix3d, orientationStateOutputBlock);
    }
 

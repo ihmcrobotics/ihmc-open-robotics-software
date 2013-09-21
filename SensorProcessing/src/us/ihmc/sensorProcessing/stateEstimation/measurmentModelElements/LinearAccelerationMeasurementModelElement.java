@@ -115,12 +115,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
 
       gravitationalAcceleration.setZ(gZ);
 
-      outputMatrixBlocks.put(centerOfMassVelocityPort, new DenseMatrix64F(SIZE, SIZE));
-      outputMatrixBlocks.put(centerOfMassAccelerationPort, new DenseMatrix64F(SIZE, SIZE));
-      outputMatrixBlocks.put(orientationPort, new DenseMatrix64F(SIZE, SIZE));
-      outputMatrixBlocks.put(angularVelocityPort, new DenseMatrix64F(SIZE, SIZE));
-      outputMatrixBlocks.put(angularAccelerationPort, new DenseMatrix64F(SIZE, SIZE));
-      outputMatrixBlocks.put(biasPort, new DenseMatrix64F(SIZE, SIZE));
+      initialize(SIZE, centerOfMassVelocityPort, centerOfMassAccelerationPort, orientationPort, angularVelocityPort, angularAccelerationPort, biasPort);
 
       computeBiasBlock();
    }
@@ -287,7 +282,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
       phiJP.mul(rotationFromEstimationToWorld, tempMatrix);
 
       jacobianAssembler.assembleMeasurementJacobian(tempMatrix, phiJPhi, phiJOmega, phiJV, phiJOmegad, phiJVd, phiJP);
-      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, outputMatrixBlocks.get(orientationPort));
+      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, getOutputMatrixBlock(orientationPort));
    }
 
    private void computeAngularVelocityBlock(Matrix3d rotationFromEstimationToWorld, Twist twistOfMeasurementWithRespectToEstimation, FramePoint rP,
@@ -337,20 +332,20 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
       omegaJVd.sub(tempMatrix);
 
       jacobianAssembler.assembleMeasurementJacobian(tempMatrix, null, omegaJOmega, omegaJV, omegaJOmegad, omegaJVd, null);
-      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, outputMatrixBlocks.get(angularVelocityPort));
+      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, getOutputMatrixBlock(angularVelocityPort));
    }
 
    private void computeCenterOfMassVelocityBlock()
    {
       tempMatrix.setZero();
-      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, outputMatrixBlocks.get(centerOfMassVelocityPort));
+      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, getOutputMatrixBlock(centerOfMassVelocityPort));
    }
 
    private void computeCenterOfMassAccelerationBlock()
    {
       ReferenceFrame.getWorldFrame().getTransformToDesiredFrame(tempTransform, measurementFrame);
       tempTransform.get(tempMatrix);
-      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, outputMatrixBlocks.get(centerOfMassAccelerationPort));
+      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, getOutputMatrixBlock(centerOfMassAccelerationPort));
    }
 
    private void computeAngularAccelerationBlock(Matrix3d rotationFromEstimationToMeasurement)
@@ -374,12 +369,12 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
       // R_{p}^{i} \tilde{r^{p} - p_{i}^{p}}
       tempMatrix.mul(rotationFromEstimationToMeasurement, tempMatrix);
 
-      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, outputMatrixBlocks.get(angularAccelerationPort));
+      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, getOutputMatrixBlock(angularAccelerationPort));
    }
 
    private void computeBiasBlock()
    {
-      CommonOps.setIdentity(outputMatrixBlocks.get(biasPort));
+      CommonOps.setIdentity(getOutputMatrixBlock(biasPort));
    }
    
    public DenseMatrix64F computeResidual()
