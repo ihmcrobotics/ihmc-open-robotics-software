@@ -40,7 +40,7 @@ public class MomentumControlModuleBridge implements MomentumControlModule
 
    private static final boolean LISTEN_IN_ON_SOLVER = false;
    private static final boolean TRY_BOTH_AND_COMPARE = false;
-   private static final boolean SHOW_MOMENTUM_MODULE_GUI =  false;
+   private static final boolean SHOW_MOMENTUM_MODULE_GUI =  false; //true;
    
    private final MomentumModuleSolutionComparer momentumModuleSolutionComparer;
    private final MomentumModuleGUI momentumModuleGUI;
@@ -191,6 +191,9 @@ public class MomentumControlModuleBridge implements MomentumControlModule
       
       if (ignoreZDDot.getBooleanValue())
       {
+//         DenseMatrix64F newMomentumMultipliers = new DenseMatrix64F(momentumMultipliers);
+//         DenseMatrix64F newMomentumSubspace = new DenseMatrix64F(momentumSubspace);
+
          DenseMatrix64F newMomentumMultipliers = new DenseMatrix64F(2, 1);
          newMomentumMultipliers.set(0, 0, momentumMultipliers.get(0, 0));
          newMomentumMultipliers.set(1, 0, momentumMultipliers.get(1, 0));

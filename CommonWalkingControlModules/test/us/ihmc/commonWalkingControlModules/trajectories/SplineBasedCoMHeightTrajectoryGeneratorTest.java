@@ -188,7 +188,7 @@ public class SplineBasedCoMHeightTrajectoryGeneratorTest
       CoMHeightPartialDerivativesData coMHeightPartialDerivativesData = new CoMHeightPartialDerivativesData();
       ContactStatesAndUpcomingFootstepData centerOfMassHeightInputData = new ContactStatesAndUpcomingFootstepData();
 
-      centerOfMassHeightInputData.set(null, null, nextFootstep, contactStates);
+      centerOfMassHeightInputData.set(null, null, null, nextFootstep, contactStates);
 
       CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator = new SplineBasedHeightTrajectoryGenerator(nominalCoMHeight, null, registry);
       centerOfMassHeightTrajectoryGenerator.initialize(null, null, nextFootstep, contactStates);
@@ -197,7 +197,7 @@ public class SplineBasedCoMHeightTrajectoryGeneratorTest
 
       for (int i = 0; i < coMQueries.length; i++)
       {
-         centerOfMassHeightInputData.setCenterOfMassFrame(createCenterOfMassFrame(coMQueries[i]));
+         centerOfMassHeightInputData.setCenterOfMassAndPelvisZUpFrames(createCenterOfMassFrame(coMQueries[i]), null);
          centerOfMassHeightTrajectoryGenerator.solve(coMHeightPartialDerivativesData, centerOfMassHeightInputData);
 
          coMHeightPartialDerivativesData.getCoMHeight(centerOfMassHeightPoint);

@@ -102,7 +102,7 @@ public class VariousWalkingManagers
       if (desiredHeadOrientationProvider != null)
          headOrientationExpressedInFrame = desiredHeadOrientationProvider.getHeadOrientationExpressedInFrame();
       else
-         headOrientationExpressedInFrame = referenceFrames.getPelvisZUpFrame();
+         headOrientationExpressedInFrame = referenceFrames.getPelvisZUpFrame(); // ReferenceFrame.getWorldFrame(); //
       HeadOrientationControlModule headOrientationControlModule = new HeadOrientationControlModule(pelvis, elevator, head, twistCalculator,
                                                                      headOrientationExpressedInFrame, chestFrame, headOrientationControllerParameters,
                                                                      registry, dynamicGraphicObjectsListRegistry);

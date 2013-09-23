@@ -145,7 +145,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final BooleanYoVariable justFall = new BooleanYoVariable("justFall", registry);
    
    private final BooleanYoVariable stepOnOrOff = new BooleanYoVariable("stepOnOrOff", registry);
-
+   private final BooleanYoVariable controlPelvisHeightInsteadOfCoMHeight = new BooleanYoVariable("controlPelvisHeightInsteadOfCoMHeight", registry);
+   
    private final BooleanYoVariable hasMinimumTimePassed = new BooleanYoVariable("hasMinimumTimePassed", registry);
    private final DoubleYoVariable minimumSwingFraction = new DoubleYoVariable("minimumSwingFraction", registry);
    
@@ -163,7 +164,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable amountToBeInsideSingleSupport = new DoubleYoVariable("amountToBeInsideSingleSupport", registry);
    private final DoubleYoVariable amountToBeInsideDoubleSupport = new DoubleYoVariable("amountToBeInsideDoubleSupport", registry);
 
+   private final DoubleYoVariable userDesiredPelvisYaw = new DoubleYoVariable("userDesiredPelvisYaw", registry);
    private final DoubleYoVariable userDesiredPelvisPitch = new DoubleYoVariable("userDesiredPelvisPitch", registry);
+   private final DoubleYoVariable userDesiredPelvisRoll = new DoubleYoVariable("userDesiredPelvisRoll", registry);
+   
    private final SettableOrientationProvider initialPelvisOrientationProvider;
    private final SettableOrientationProvider finalPelvisOrientationProvider;
    private final OrientationTrajectoryGenerator pelvisOrientationTrajectoryGenerator;
@@ -402,6 +406,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       controllerInitializationTime = new DoubleYoVariable("controllerInitializationTime", registry);
       alreadyBeenInDoubleSupportOnce = new BooleanYoVariable("alreadyBeenInDoubleSupportOnce", registry);
 
+      controlPelvisHeightInsteadOfCoMHeight.set(false);
    }
 
 
@@ -583,7 +588,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       FrameOrientation initialDesiredPelvisOrientation = new FrameOrientation(referenceFrames.getAnkleZUpFrame(getUpcomingSupportLeg()));
       initialDesiredPelvisOrientation.changeFrame(worldFrame);
       double yaw = initialDesiredPelvisOrientation.getYawPitchRoll()[0];
-      initialDesiredPelvisOrientation.setYawPitchRoll(yaw, userDesiredPelvisPitch.getDoubleValue(), 0.0);
+      initialDesiredPelvisOrientation.setYawPitchRoll(yaw, userDesiredPelvisPitch.getDoubleValue(), userDesiredPelvisRoll.getDoubleValue());
       desiredPelvisOrientation.set(initialDesiredPelvisOrientation);
       finalPelvisOrientationProvider.setOrientation(initialDesiredPelvisOrientation);    // yes, final. To make sure that the first swing phase has the right initial
 
@@ -694,7 +699,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (((yoTime.getDoubleValue() - controllerInitializationTime.getDoubleValue()) < PELVIS_YAW_INITIALIZATION_TIME)
                  &&!alreadyBeenInDoubleSupportOnce.getBooleanValue())
          {
-            setDesiredPelvisYawToAverageOfFeetOnStartupOnly();
+            setDesiredPelvisYawToAverageOfFeetOnStartupOnly(transferToSide);
          }
 
          // keep desired pelvis orientation as it is
@@ -999,7 +1004,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    }
 
 
-   private void setDesiredPelvisYawToAverageOfFeetOnStartupOnly()
+   private void setDesiredPelvisYawToAverageOfFeetOnStartupOnly(RobotSide transferToSide)
    {
       FrameOrientation averageOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
       averageOrientationCalculator.computeAverageOrientation(averageOrientation, feet.get(RobotSide.LEFT).getPlaneFrame(),
@@ -1007,7 +1012,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       double[] yawPitchRoll = averageOrientation.getYawPitchRoll();
 
-      averageOrientation.setYawPitchRoll(yawPitchRoll[0], userDesiredPelvisPitch.getDoubleValue(), 0.0);
+      double yawOffset = 0.0;
+      if (transferToSide != null)
+         yawOffset = transferToSide.negateIfLeftSide(userDesiredPelvisYaw.getDoubleValue());
+      
+      averageOrientation.setYawPitchRoll(yawPitchRoll[0] + yawOffset, userDesiredPelvisPitch.getDoubleValue(), userDesiredPelvisRoll.getDoubleValue());
       desiredPelvisOrientation.set(averageOrientation);
    }
 
@@ -1175,7 +1184,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          initialPelvisOrientationProvider.setOrientation(orientation);
 
          FrameOrientation finalPelvisOrientation = nextFootstep.getOrientationInFrame(worldFrame);
-         finalPelvisOrientation.setYawPitchRoll(finalPelvisOrientation.getYawPitchRoll()[0], userDesiredPelvisPitch.getDoubleValue(), 0.0);
+         finalPelvisOrientation.setYawPitchRoll(finalPelvisOrientation.getYawPitchRoll()[0] + swingSide.negateIfLeftSide(userDesiredPelvisYaw.getDoubleValue()), userDesiredPelvisPitch.getDoubleValue(), userDesiredPelvisRoll.getDoubleValue());
          finalPelvisOrientationProvider.setOrientation(finalPelvisOrientation);
          pelvisOrientationTrajectoryGenerator.initialize();
 
@@ -1631,7 +1640,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       ReferenceFrame frame = worldFrame;
 
-      centerOfMassHeightInputData.setCenterOfMassFrame(momentumBasedController.getCenterOfMassFrame());
+      centerOfMassHeightInputData.setCenterOfMassAndPelvisZUpFrames(momentumBasedController.getCenterOfMassFrame(), momentumBasedController.getPelvisZUpFrame());
 
       List<? extends PlaneContactState> contactStatesList = getContactStatesList();
 
@@ -1680,7 +1689,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       double zCurrent = comPosition.getZ();
       double zdCurrent = comVelocity.getZ();
-
+      
+      if (controlPelvisHeightInsteadOfCoMHeight.getBooleanValue())
+      {
+         FramePoint pelvisPosition = new FramePoint(referenceFrames.getPelvisFrame());
+         pelvisPosition.changeFrame(frame);
+         zCurrent = pelvisPosition.getZ(); 
+         
+         zdCurrent = comVelocity.getZ(); // Just use com velocity for now for damping...
+      }
+      
       double zddDesired = centerOfMassHeightController.compute(zCurrent, zDesired, zdCurrent, zdDesired) + zddFeedForward;
 
       double epsilon = 1e-12;

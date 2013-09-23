@@ -11,7 +11,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 public class ContactStatesAndUpcomingFootstepData
 {
    private RobotSide supportLeg;
-   private ReferenceFrame centerOfMassFrame;
+   private ReferenceFrame centerOfMassFrame, pelvisZUpFrame;
    private Footstep upcomingFootstep;
    private final ArrayList<PlaneContactState> contactStates = new ArrayList<PlaneContactState>();
    
@@ -34,10 +34,16 @@ public class ContactStatesAndUpcomingFootstepData
    {
       return centerOfMassFrame;
    }
+   
+   public ReferenceFrame getPelvisZUpFrame()
+   {
+      return pelvisZUpFrame;
+   }
 
-   public void setCenterOfMassFrame(ReferenceFrame centerOfMassFrame)
+   public void setCenterOfMassAndPelvisZUpFrames(ReferenceFrame centerOfMassFrame, ReferenceFrame pelvisZUpFrame)
    {
       this.centerOfMassFrame = centerOfMassFrame;
+      this.pelvisZUpFrame = pelvisZUpFrame;
    }
 
    public Footstep getUpcomingFootstep()
@@ -61,9 +67,9 @@ public class ContactStatesAndUpcomingFootstepData
       this.contactStates.addAll(contactStates);
    }
 
-   public void set(ReferenceFrame centerOfMassFrame, RobotSide supportLeg, Footstep upcomingFootstep, List<PlaneContactState> contactStates)
+   public void set(ReferenceFrame centerOfMassFrame, ReferenceFrame pelvisFrame, RobotSide supportLeg, Footstep upcomingFootstep, List<PlaneContactState> contactStates)
    {
-      this.setCenterOfMassFrame(centerOfMassFrame);
+      this.setCenterOfMassAndPelvisZUpFrames(centerOfMassFrame, pelvisFrame);
       this.setSupportLeg(supportLeg);
       this.setUpcomingFootstep(upcomingFootstep);
       this.setContactStates(contactStates);
