@@ -120,6 +120,9 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
    {
       FramePoint centerOfMass = new FramePoint(centerOfMassFrame);
       FramePoint cmp3d = WrenchDistributorTools.computePseudoCMP3d(centerOfMass, cmp2d, fZ, totalMass, capturePointInputPort.getData().getOmega0());
+      
+      visualizer.setPseudoCMP(cmp3d);
+      
       FrameVector ret = WrenchDistributorTools.computeForce(centerOfMass, cmp3d, fZ);
       ret.changeFrame(centerOfMassFrame);
 

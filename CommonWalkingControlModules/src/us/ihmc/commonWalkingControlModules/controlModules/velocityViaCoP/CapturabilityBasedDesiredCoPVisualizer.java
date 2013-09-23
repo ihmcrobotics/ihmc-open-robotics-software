@@ -27,7 +27,8 @@ public class CapturabilityBasedDesiredCoPVisualizer
    private final YoFramePoint desiredCapturePoint = new YoFramePoint("desiredCapturePoint", "", world, registry);
    private final YoFrameLineSegment2d guideLine = new YoFrameLineSegment2d("guideLine", "", world, registry);
    private final YoFramePoint desiredCMP = new YoFramePoint("desiredCMP", "", world, registry);
-
+   private final YoFramePoint pseudoCMP = new YoFramePoint("pseudoCMP", "", world, registry);
+   
    public CapturabilityBasedDesiredCoPVisualizer(YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       DynamicGraphicObjectsList dynamicGraphicObjectList = new DynamicGraphicObjectsList("CapturabilityBasedDesiredCoPVisualizer");
@@ -44,7 +45,8 @@ public class CapturabilityBasedDesiredCoPVisualizer
          dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
       }
       desiredCMP.setToNaN();
-
+      pseudoCMP.setToNaN();
+      
       parentRegistry.addChild(registry);
    }
 
@@ -62,6 +64,11 @@ public class CapturabilityBasedDesiredCoPVisualizer
                                                 DynamicGraphicPosition.GraphicType.CROSS);
       dynamicGraphicObjectList.add(desiredCMPViz);
       artifactList.add(desiredCMPViz.createArtifact());
+      
+      DynamicGraphicPosition pseudoCMPViz = pseudoCMP.createDynamicGraphicPosition("Pseudo CMP", 0.012, YoAppearance.Purple(),
+            DynamicGraphicPosition.GraphicType.CROSS);
+      dynamicGraphicObjectList.add(pseudoCMPViz);
+      artifactList.add(pseudoCMPViz.createArtifact());
    }
 
    private void addDesiredCapturePointViz(DynamicGraphicObjectsList dynamicGraphicObjectList, ArtifactList artifactList)
@@ -113,5 +120,11 @@ public class CapturabilityBasedDesiredCoPVisualizer
    {
       desiredCMP.changeFrame(this.desiredCMP.getReferenceFrame());
       this.desiredCMP.set(desiredCMP.getX(), desiredCMP.getY(), 0.0);
+   }
+
+   public void setPseudoCMP(FramePoint pseudoCMP)
+   {
+      pseudoCMP.changeFrame(this.pseudoCMP.getReferenceFrame());
+      this.pseudoCMP.set(pseudoCMP);
    }
 }
