@@ -20,7 +20,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 
 public class DRCFlatGroundWalkingTrack
 {
-   private static final boolean START_YOVARIABLE_SERVER = false; 
+   private static final boolean START_YOVARIABLE_SERVER = true; 
    
    private final HumanoidRobotSimulation<SDFRobot> drcSimulation;
 
