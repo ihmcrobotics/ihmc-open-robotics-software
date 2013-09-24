@@ -31,11 +31,11 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
       // Do not write here, because it will set the robot's torques while the simulation is running
    }
 
-   public void writeAfterEstimator()
+   public void writeAfterEstimator(long timestamp)
    {
       if (robotVisualizer != null)
       {
-         robotVisualizer.update();
+         robotVisualizer.update(timestamp);
       }
    }
 

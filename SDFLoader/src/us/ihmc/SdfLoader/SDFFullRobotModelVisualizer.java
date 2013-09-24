@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -91,7 +90,7 @@ public class SDFFullRobotModelVisualizer implements RobotVisualizer
    
    private final Vector3d tempPosition = new Vector3d();
    private final Quat4d tempOrientation = new Quat4d();
-   public void update()
+   public void update(long timestamp)
    {
       if(!updaterIsRunning.get())
       {
