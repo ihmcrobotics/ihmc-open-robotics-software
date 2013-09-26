@@ -39,8 +39,9 @@ public class DRCConfigParameters
    public static final boolean USE_HYDRA = false;
    public static final boolean USE_FISHEYE = false;
 
-
-
+   public static final boolean LIMIT_CONTROLLER_OUTPUT_TORQUES = false;
+   // Limit the controller to use only a certain percentage of maximum torque that the robot can provide
+   public static final double MAX_TORQUE_TO_USE_IN_PERCENT = 0.98;
 
    public static final boolean USE_PERFECT_SENSORS = false;
 
