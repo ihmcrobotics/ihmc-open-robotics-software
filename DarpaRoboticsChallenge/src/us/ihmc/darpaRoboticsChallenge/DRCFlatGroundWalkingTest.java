@@ -261,7 +261,7 @@ public class DRCFlatGroundWalkingTest
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
 
       DRCRobotModel robotModel = DRCRobotModel.getDefaultRobotModel();
-      double timePerRecordTick = 0.005;
+      double timePerRecordTick = DRCConfigParameters.CONTROL_DT;
       int simulationDataBufferSize = 16000;
 
       RobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(0.0);

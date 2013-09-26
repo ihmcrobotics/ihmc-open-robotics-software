@@ -136,7 +136,7 @@ public class DRCDemo03
 
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false);
 
-      double timePerRecordTick = 0.005;
+      double timePerRecordTick = DRCConfigParameters.CONTROL_DT;
       int simulationDataBufferSize = 16000;
       String ipAddress = null;
       int portNumber = -1;

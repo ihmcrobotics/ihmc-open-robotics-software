@@ -49,12 +49,19 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class ComposableOrientationAndCoMEstimatorCreator
 {
-   // These are tuned for PointPositionGrabber:
-   private static final double pointVelocityXYMeasurementStandardDeviation = 6.0;
-   private static final double pointVelocityZMeasurementStandardDeviation = 6.0;
+// These are tuned for PointPositionGrabber when estimator runs at 3msec loop rate:
+   private static final double pointVelocityXYMeasurementStandardDeviation = 2.0;
+   private static final double pointVelocityZMeasurementStandardDeviation = 2.0;
 
-   private static final double pointPositionXYMeasurementStandardDeviation = 0.3;
-   private static final double pointPositionZMeasurementStandardDeviation = 0.3;
+   private static final double pointPositionXYMeasurementStandardDeviation = 0.1;
+   private static final double pointPositionZMeasurementStandardDeviation = 0.1;
+   
+//   // These are tuned for PointPositionGrabber when estimator runs at 1msec loop rate:
+//   private static final double pointVelocityXYMeasurementStandardDeviation = 6.0;
+//   private static final double pointVelocityZMeasurementStandardDeviation = 6.0;
+//
+//   private static final double pointPositionXYMeasurementStandardDeviation = 0.3;
+//   private static final double pointPositionZMeasurementStandardDeviation = 0.3;
 
    // These are tuned for SingleReferenceFramePointPositionGrabber:
    // private static final double pointVelocityXYMeasurementStandardDeviation = 1.5;

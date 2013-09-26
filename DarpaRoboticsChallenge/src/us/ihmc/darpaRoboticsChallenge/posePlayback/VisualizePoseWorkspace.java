@@ -6,6 +6,7 @@ import java.io.IOException;
 import javax.swing.JFileChooser;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.environment.VRCTask;
 import us.ihmc.darpaRoboticsChallenge.environment.VRCTaskName;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -181,7 +182,7 @@ public class VisualizePoseWorkspace
 
          double startTime = 0.0;
          double time = startTime;
-         double dt = 0.005;
+         double dt = DRCConfigParameters.CONTROL_DT;
 
          interpolator.startSequencePlayback(sequence, startTime);
 

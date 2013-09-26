@@ -111,7 +111,7 @@ public class DRCFlatGroundWalkingTrack
       DRCRobotWalkingControllerParameters drcControlParameters = new DRCRobotWalkingControllerParameters();
 
       new DRCFlatGroundWalkingTrack(drcControlParameters, robotInterface, robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript,
-                                    automaticSimulationRunner, 0.005, 16000, cheatWithGroundHeightAtForFootstep);
+                                    automaticSimulationRunner, DRCConfigParameters.CONTROL_DT, 16000, cheatWithGroundHeightAtForFootstep);
    }
 
 
