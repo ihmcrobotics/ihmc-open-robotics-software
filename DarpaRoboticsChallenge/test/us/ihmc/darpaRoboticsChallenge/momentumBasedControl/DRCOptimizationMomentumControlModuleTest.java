@@ -22,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
+import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -167,7 +168,7 @@ public class DRCOptimizationMomentumControlModuleTest
       OneDoFJoint lidarJoint = fullRobotModel.getOneDoFJointByName(jointMap.getLidarJointName());
       InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, lidarJoint);
 
-      double controlDT = 0.005;
+      double controlDT = DRCConfigParameters.CONTROL_DT;
       MomentumOptimizationSettings optimizationSettings = createOptimizationSettings(0.0, 0.0, 1e-5, 0.0, 0.0);
       double gravityZ = 9.81;
       TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), rootJoint.getSuccessor());

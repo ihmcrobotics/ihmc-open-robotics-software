@@ -136,7 +136,7 @@ public class DRCMultiContact
 
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, true);
 
-      double timePerRecordTick = 0.005;
+      double timePerRecordTick = DRCConfigParameters.CONTROL_DT;
       int simulationDataBufferSize = 16000;
       new DRCMultiContact(DRCRobotModel.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, guiInitialSetup, automaticSimulationRunner, timePerRecordTick,
                           simulationDataBufferSize);

@@ -41,7 +41,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 public class PosePlaybackSCSBridge
 {
    private static final String ipAddress = DRCConfigParameters.CLOUD_MINION2_IP;
-   private static final double controlDT = 0.005;
+   private static final double controlDT = DRCConfigParameters.CONTROL_DT;
 
    private static final boolean promptForTimeDelay = false;
 
