@@ -55,7 +55,8 @@ public class DRCConfigParameters
 
    public static final boolean SHOW_BANDWIDTH_DIALOG = false;
 
-   public static final double ESTIMATE_DT = 0.001;
+   public static final double ESTIMATE_DT = 0.003;
+   public static final double CONTROL_DT = 0.006;
 
    // Set whether or not to use GFE Robot Model
    public static final boolean USE_GFE_ROBOT_MODEL = true;
