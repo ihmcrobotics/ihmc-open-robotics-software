@@ -100,7 +100,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 
    public double getControlDT()
    {
-      return 0.005;
+      return 0.006;
    }
 
 }
