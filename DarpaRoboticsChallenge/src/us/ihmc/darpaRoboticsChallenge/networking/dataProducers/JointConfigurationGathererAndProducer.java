@@ -15,6 +15,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.net.ObjectCommunicator;
+import us.ihmc.utilities.remote.serialization.JointConfigurationData;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
@@ -35,7 +36,7 @@ public class JointConfigurationGathererAndProducer
    private final Vector3d rootTranslation = new Vector3d();
    private final Quat4d rootOrientation = new Quat4d();
 
-   private final SideDependentList<ConcurrentCopier<double[]>> handAngles = new SideDependentList<>();
+   private final SideDependentList<ConcurrentCopier<double[]>> handAngles = new SideDependentList<ConcurrentCopier<double[]>>();
    private final ConcurrentRingBuffer<DRCJointConfigurationData> stateRingBuffer;
 
    public JointConfigurationGathererAndProducer(ObjectCommunicator objectCommunicator, SDFFullRobotModel estimatorModel,
@@ -81,7 +82,7 @@ public class JointConfigurationGathererAndProducer
             }
          };
 
-         handAngles.set(robotSide, new ConcurrentCopier<>(handAngleBuilder));
+         handAngles.set(robotSide, new ConcurrentCopier<double[]>(handAngleBuilder));
       }
 
       // Setup ring buffer
@@ -92,7 +93,7 @@ public class JointConfigurationGathererAndProducer
             return new DRCJointConfigurationData();
          }
       };
-      stateRingBuffer = new ConcurrentRingBuffer<>(jointConfigurationBuilder, 8);
+      stateRingBuffer = new ConcurrentRingBuffer<DRCJointConfigurationData>(jointConfigurationBuilder, 8);
 
       // Start thread
       new Thread(new JointConfigurationWorker()).start();
