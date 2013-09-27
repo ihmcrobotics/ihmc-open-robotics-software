@@ -40,6 +40,7 @@ public class DRCConfigParameters
    public static final boolean USE_FISHEYE = false;
 
    public static final boolean LIMIT_CONTROLLER_OUTPUT_TORQUES = false;
+
    // Limit the controller to use only a certain percentage of maximum torque that the robot can provide
    public static final double MAX_TORQUE_TO_USE_IN_PERCENT = 0.98;
 
@@ -124,14 +125,28 @@ public class DRCConfigParameters
    public static final boolean STREAM_POLAR_LIDAR = true;
    public static final int LIDAR_UPDATE_RATE_OVERRIDE = 5;
    public static final int LIDAR_SWEEPS_PER_SCAN = 1;
-   public static final int LIDAR_POINTS_PER_SWEEP = 640;    // I assume this number will never be 720 in SCS -Gray.
+
+   public static final int LIDAR_POINTS_PER_SWEEP;
+
+   static
+   {
+      if (DRCConfigParameters.USING_REAL_HEAD)
+      {
+         LIDAR_POINTS_PER_SWEEP = 1081;
+      }
+      else
+      {
+         LIDAR_POINTS_PER_SWEEP = 720;
+      }
+   }
+
    public static final boolean OVERRIDE_DRC_LIDAR_CONFIG = true;
    public static final float LIDAR_MIN_DISTANCE = 0.2f;
-   public static final float LIDAR_MAX_DISTANCE = 10.0f;
+   public static final float LIDAR_MAX_DISTANCE = 30.0f;
    public static final float LIDAR_NEAR_SCAN_MAX_DISTANCE = 3.0f;
 
-   public static final float LIDAR_SWEEP_MAX_YAW = 0.8f;
-   public static final float LIDAR_SWEEP_MIN_YAW = -0.8f;
+   public static final float LIDAR_SWEEP_MAX_YAW = 2.356194f;
+   public static final float LIDAR_SWEEP_MIN_YAW = -2.356194f;
    public static final float LIDAR_SCAN_MAX_ROLL = 0.0f;    // rolls the LIDAR to
 
    // simulate a faster
@@ -166,10 +181,10 @@ public class DRCConfigParameters
 
    // Resolution Sphere
    public static final boolean USE_RESOLUTION_SPHERE = true;
-   public static final double LIDAR_RESOLUTION_SPHERE_OUTER_RESOLUTION = 0.5;
-   public static final double LIDAR_RESOLUTION_SPHERE_OUTER_RADIUS = 6.0;
-   public static final double LIDAR_RESOLUTION_SPHERE_INNER_RESOLUTION = 0.02;
-   public static final double LIDAR_RESOLUTION_SPHERE_INNER_RADIUS = 1.0;
+   public static final double LIDAR_RESOLUTION_SPHERE_OUTER_RESOLUTION = 0.05;
+   public static final double LIDAR_RESOLUTION_SPHERE_OUTER_RADIUS = 30.0;
+   public static final double LIDAR_RESOLUTION_SPHERE_INNER_RESOLUTION = 0.03;
+   public static final double LIDAR_RESOLUTION_SPHERE_INNER_RADIUS = 10.0;
    public static final double LIDAR_RESOLUTION_SPHERE_DISTANCE_FROM_HEAD = 1.0;
 
    public static final boolean USE_TABS_IN_UI = true;
