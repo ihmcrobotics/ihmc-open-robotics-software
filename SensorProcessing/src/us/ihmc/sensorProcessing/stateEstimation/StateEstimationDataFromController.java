@@ -9,6 +9,7 @@ import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
+import us.ihmc.utilities.GenericCRC32;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -215,6 +216,24 @@ public class StateEstimationDataFromController extends AbstractControlFlowElemen
          list.set(i, object);
       else
          list.add(object);
+   }
+   
+   public void calculateChecksum(GenericCRC32 checksum)
+   {
+      checksum.update(desiredCenterOfMassAccelerationOutputPort.getData().getVector());
+      checksum.update(desiredAngularAccelerationOutputPort.getData().getVector());
+      
+      List<PointPositionDataObject> pointPositions = pointPositionOutputPort.getData();
+      for(int i = 0; i < pointPositions.size(); i++)
+      {
+         pointPositions.get(i).calculateChecksum(checksum);
+      }
+      
+      List<PointVelocityDataObject> pointVelocities = pointVelocityOutputPort.getData();
+      for(int i = 0; i < pointVelocities.size(); i++)
+      {
+         pointVelocities.get(i).calculateChecksum(checksum);
+      }
    }
 }
 
