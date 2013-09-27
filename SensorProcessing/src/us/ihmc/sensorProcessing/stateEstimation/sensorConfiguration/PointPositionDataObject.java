@@ -2,6 +2,7 @@ package us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration;
 
 import javax.vecmath.Point3d;
 
+import us.ihmc.utilities.GenericCRC32;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -64,5 +65,13 @@ public class PointPositionDataObject
    public void invalidatePointPosition()
    {
       isPointPositionValid = false;
+   }
+
+   public void calculateChecksum(GenericCRC32 checksum)
+   {
+      checksum.update(isPointPositionValid);
+      checksum.update(bodyFixedReferenceFrameName);
+      checksum.update(measurementPointInBodyFrame);
+      checksum.update(positionOfMeasurementPointInWorldFrame);
    }
 }

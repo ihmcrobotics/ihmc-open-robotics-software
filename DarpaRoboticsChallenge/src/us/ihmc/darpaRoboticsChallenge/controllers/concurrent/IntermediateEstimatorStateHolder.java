@@ -6,14 +6,23 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModelFactory;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.utilities.ForceSensorDefinition;
+import us.ihmc.utilities.GenericCRC32;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJointStateChecksum;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJointStateCopier;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
 public class IntermediateEstimatorStateHolder
 {
-
+   private final GenericCRC32 estimatorChecksumCalculator = new GenericCRC32();
+   private final GenericCRC32 controllerChecksumCalculator = new GenericCRC32();
+   
+   private long estimatorTick;
    private long timestamp;
+   private long checksum;
+
+   private final InverseDynamicsJointStateChecksum estimatorChecksum; 
+   private final InverseDynamicsJointStateChecksum controllerChecksum; 
    
    private final InverseDynamicsJointStateCopier estimatorToIntermediateCopier;
    private final InverseDynamicsJointStateCopier intermediateToControllerCopier;
@@ -29,6 +38,9 @@ public class IntermediateEstimatorStateHolder
       FullRobotModel intermediateModel = intermediateFactory.create();
       RigidBody intermediateRootBody = intermediateModel.getElevator();
 
+      estimatorChecksum = new InverseDynamicsJointStateChecksum(estimatorRootBody, estimatorChecksumCalculator);
+      controllerChecksum = new InverseDynamicsJointStateChecksum(controllerRootBody, controllerChecksumCalculator);
+      
       estimatorToIntermediateCopier = new InverseDynamicsJointStateCopier(estimatorRootBody, intermediateRootBody);
       intermediateToControllerCopier = new InverseDynamicsJointStateCopier(intermediateRootBody, controllerRootBody);
 
@@ -42,18 +54,54 @@ public class IntermediateEstimatorStateHolder
    {
    }
 
-   public void setFromEstimatorModel(long timestamp)
+   public void setFromEstimatorModel(long timestamp, long estimatorTick)
    {
       this.timestamp = timestamp;
+      this.estimatorTick = estimatorTick;
+      
+      checksum = calculateEstimatorChecksum();
       estimatorToIntermediateCopier.copy();
       intermediateForceSensorDataHolder.set(estimatorForceSensorDataHolder);
    }
 
-   public long getIntoControllerModel()
+   public void getIntoControllerModel()
    {
       intermediateToControllerCopier.copy();
       controllerForceSensorDataHolder.set(intermediateForceSensorDataHolder);
+   }
+   
+   public long getTimestamp()
+   {
       return timestamp;
+   }
+   
+   public long getEstimatorTick()
+   {
+      return estimatorTick;
+   }
+   
+   private long calculateEstimatorChecksum()
+   {
+      estimatorChecksumCalculator.reset();
+      estimatorChecksum.calculate();
+      estimatorForceSensorDataHolder.calculateChecksum(estimatorChecksumCalculator);
+      return estimatorChecksumCalculator.getValue();
+   }
+   
+   private long calculateControllerChecksum()
+   {
+      controllerChecksumCalculator.reset();
+      controllerChecksum.calculate();
+      controllerForceSensorDataHolder.calculateChecksum(controllerChecksumCalculator);
+      return controllerChecksumCalculator.getValue();
+   }
+   
+   public void validate()
+   {
+      if(checksum != calculateControllerChecksum())
+      {
+         throw new RuntimeException("Controller checksum doesn't match estimator checksum.");
+      }
    }
 
    public static class Builder implements us.ihmc.concurrent.Builder<IntermediateEstimatorStateHolder>

@@ -4,13 +4,23 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.darpaRoboticsChallenge.controllers.EstimationLinkHolder;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromController;
+import us.ihmc.utilities.GenericCRC32;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJointDesiredAccelerationChecksum;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJointDesiredAccelerationCopier;
 
 public class IntermediateControllerStateHolder
 {
+   private final GenericCRC32 estimatorChecksumCalculator = new GenericCRC32();
+   private final GenericCRC32 controllerChecksumCalculator = new GenericCRC32();
+   private long checksum;
+   
    private final InverseDynamicsJointDesiredAccelerationCopier controllerToIntermediateCopier;
    private final InverseDynamicsJointDesiredAccelerationCopier intermediateToEstimatorCopier;
 
+   private final InverseDynamicsJointDesiredAccelerationChecksum controllerChecksum;
+   private final InverseDynamicsJointDesiredAccelerationChecksum estimatorChecksum;
+   
+   
    private final StateEstimationDataFromController stateEstimationDataFromControllerSink;
    private final StateEstimationDataFromController stateEstimationDataFromControllerIntermediate;
    private final StateEstimationDataFromController stateEstimationDataFromControllerSource;
@@ -23,6 +33,9 @@ public class IntermediateControllerStateHolder
 
       controllerToIntermediateCopier = new InverseDynamicsJointDesiredAccelerationCopier(controllerModel.getElevator(), intermediateModel.getElevator());
       intermediateToEstimatorCopier = new InverseDynamicsJointDesiredAccelerationCopier(intermediateModel.getElevator(), estimatorModel.getElevator());
+      
+      controllerChecksum = new InverseDynamicsJointDesiredAccelerationChecksum(controllerModel.getElevator(), controllerChecksumCalculator);
+      estimatorChecksum = new InverseDynamicsJointDesiredAccelerationChecksum(estimatorModel.getElevator(), estimatorChecksumCalculator);
 
       this.stateEstimationDataFromControllerSink = stateEstimationDataFromControllerSink;
       this.stateEstimationDataFromControllerIntermediate = new StateEstimationDataFromController(EstimationLinkHolder.getEstimationFrame(intermediateModel));
@@ -31,6 +44,7 @@ public class IntermediateControllerStateHolder
 
    public void setFromController()
    {
+      checksum = calculateControllerChecksum();
       controllerToIntermediateCopier.copy();
       stateEstimationDataFromControllerIntermediate.set(stateEstimationDataFromControllerSink);
    }
@@ -39,6 +53,30 @@ public class IntermediateControllerStateHolder
    {
       intermediateToEstimatorCopier.copy();
       stateEstimationDataFromControllerSource.set(stateEstimationDataFromControllerIntermediate);
+   }
+   
+   private long calculateControllerChecksum()
+   {
+      controllerChecksumCalculator.reset();
+      controllerChecksum.calculate();
+      stateEstimationDataFromControllerSink.calculateChecksum(controllerChecksumCalculator);
+      return controllerChecksumCalculator.getValue();
+   }
+   
+   private long calculateEstimatorChecksum()
+   {
+      estimatorChecksumCalculator.reset();
+      estimatorChecksum.calculate();
+      stateEstimationDataFromControllerSource.calculateChecksum(estimatorChecksumCalculator);
+      return estimatorChecksumCalculator.getValue();
+   }
+   
+   public void validate()
+   {
+      if(checksum != calculateEstimatorChecksum())
+      {
+         throw new RuntimeException("Checksum doesn't match expected");
+      }
    }
 
    public static class Builder implements us.ihmc.concurrent.Builder<IntermediateControllerStateHolder>
