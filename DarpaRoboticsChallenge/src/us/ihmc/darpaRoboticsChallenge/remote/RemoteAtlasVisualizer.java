@@ -33,7 +33,7 @@ public class RemoteAtlasVisualizer
 
    public static void main(String[] args) throws JSAPException
    {
-      int bufferSize=32768;
+      int bufferSize = 8196;
       JSAP jsap = new JSAP();
       
       FlaggedOption hostOption = new FlaggedOption("host").setStringParser(JSAP.STRING_PARSER).setRequired(false).setLongFlag("host").setShortFlag('L').setDefault(
