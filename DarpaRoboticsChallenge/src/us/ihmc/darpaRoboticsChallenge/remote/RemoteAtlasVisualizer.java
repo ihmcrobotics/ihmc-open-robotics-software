@@ -18,14 +18,14 @@ public class RemoteAtlasVisualizer
    public static final String defaultHost = "localhost";
    public static final int defaultPort = 5555;
    
-   public RemoteAtlasVisualizer(String host, int port)
+   public RemoteAtlasVisualizer(String host, int port, int bufferSize)
    {
       System.out.println("Connecting to host " + host);
       
       DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_SANDIA_HANDS, false);
       JaxbSDFLoader robotLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       SDFRobot robot = robotLoader.createRobot(jointMap, false);
-      SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new SCSYoVariablesUpdatedListener(robot);
+      SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new SCSYoVariablesUpdatedListener(robot, bufferSize);
       
       YoVariableClient client = new YoVariableClient(host, port, scsYoVariablesUpdatedListener, "remote");
       client.start();
@@ -33,6 +33,7 @@ public class RemoteAtlasVisualizer
 
    public static void main(String[] args) throws JSAPException
    {
+      int bufferSize=32768;
       JSAP jsap = new JSAP();
       
       FlaggedOption hostOption = new FlaggedOption("host").setStringParser(JSAP.STRING_PARSER).setRequired(false).setLongFlag("host").setShortFlag('L').setDefault(
@@ -50,7 +51,7 @@ public class RemoteAtlasVisualizer
          String host = config.getString("host");
          int port = config.getInt("port");
          
-         new RemoteAtlasVisualizer(host, port);         
+         new RemoteAtlasVisualizer(host, port, bufferSize);         
       }
       else
       {
