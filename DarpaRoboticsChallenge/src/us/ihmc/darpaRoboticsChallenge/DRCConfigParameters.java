@@ -144,7 +144,7 @@ public class DRCConfigParameters
 
    public static final boolean OVERRIDE_DRC_LIDAR_CONFIG = true;
    public static final float LIDAR_MIN_DISTANCE = 0.2f;
-   public static final float LIDAR_MAX_DISTANCE = 30.0f;
+   public static final float LIDAR_MAX_DISTANCE = 20.0f;
    public static final float LIDAR_NEAR_SCAN_MAX_DISTANCE = 3.0f;
 
    public static final float LIDAR_SWEEP_MAX_YAW = 2.356194f;
@@ -183,10 +183,10 @@ public class DRCConfigParameters
 
    // Resolution Sphere
    public static final boolean USE_RESOLUTION_SPHERE = true;
-   public static final double LIDAR_RESOLUTION_SPHERE_OUTER_RESOLUTION = 0.05;
-   public static final double LIDAR_RESOLUTION_SPHERE_OUTER_RADIUS = 30.0;
-   public static final double LIDAR_RESOLUTION_SPHERE_INNER_RESOLUTION = 0.03;
-   public static final double LIDAR_RESOLUTION_SPHERE_INNER_RADIUS = 10.0;
+   public static final double LIDAR_RESOLUTION_SPHERE_OUTER_RESOLUTION = 0.10;
+   public static final double LIDAR_RESOLUTION_SPHERE_OUTER_RADIUS = 16.0;
+   public static final double LIDAR_RESOLUTION_SPHERE_INNER_RESOLUTION = 0.05;
+   public static final double LIDAR_RESOLUTION_SPHERE_INNER_RADIUS = 8.0;
    public static final double LIDAR_RESOLUTION_SPHERE_DISTANCE_FROM_HEAD = 1.0;
 
    public static final boolean USE_TABS_IN_UI = true;
