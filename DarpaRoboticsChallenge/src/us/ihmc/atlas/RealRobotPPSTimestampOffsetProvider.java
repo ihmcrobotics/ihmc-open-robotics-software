@@ -1,23 +1,27 @@
 package us.ihmc.atlas;
 
+import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+
 import org.zeromq.ZMQ;
+
 import std_msgs.Time;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosMultisensePPSSubscriber;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-
 public class RealRobotPPSTimestampOffsetProvider implements PPSTimestampOffsetProvider
 {
-   private static final String MULTISENSE_SL_PPS_TOPIC = "multisense_sl/pps";
+   private static final String MULTISENSE_SL_PPS_TOPIC = "/multisense_sl/pps";
    private RosMultisensePPSSubscriber ppsSubscriber;
-   private long currentTimeStampOffset = 0;
+   private final AtomicLong currentTimeStampOffset = new AtomicLong(0);
    private ZMQ.Socket requester;
 
    private final byte[] requestPayload = {PPSRequestType.GET_NEW_PPS_TIMESTAMP};
    private final ByteBuffer responseBuffer = ByteBuffer.allocate(8);
+   
+   private final AtomicBoolean offsetIsDetermined = new AtomicBoolean(false);
 
    public RealRobotPPSTimestampOffsetProvider()
    {
@@ -33,7 +37,8 @@ public class RealRobotPPSTimestampOffsetProvider implements PPSTimestampOffsetPr
          @Override
          public void onNewMessage(Time message)
          {
-            currentTimeStampOffset = requestNewestRobotTimestamp() - message.getData().totalNsecs();
+            currentTimeStampOffset.set(requestNewestRobotTimestamp() - message.getData().totalNsecs());
+            offsetIsDetermined.set(true);
          }
       };
    }
@@ -52,21 +57,26 @@ public class RealRobotPPSTimestampOffsetProvider implements PPSTimestampOffsetPr
 
    public long getCurrentTimestampOffset()
    {
-      return currentTimeStampOffset;
+      return currentTimeStampOffset.get();
    }
 
    public long ajustTimeStampToRobotClock(long timeStamp)
    {
-      return timeStamp + currentTimeStampOffset;
+      return timeStamp + currentTimeStampOffset.get();
    }
 
+   
    public long requestNewestRobotTimestamp()
    {
       requester.send(requestPayload, 0);
-      responseBuffer.put(requester.recv());
       responseBuffer.rewind();
-      responseBuffer.order(ByteOrder.BIG_ENDIAN);
-      return responseBuffer.getLong();
+      responseBuffer.put(requester.recv());
+      return responseBuffer.getLong(0);
+   }
+
+   public boolean offsetIsDetermined()
+   {
+      return offsetIsDetermined.get();
    }
 
 }
