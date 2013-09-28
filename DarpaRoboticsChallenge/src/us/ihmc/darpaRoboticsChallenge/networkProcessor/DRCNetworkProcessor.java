@@ -90,9 +90,9 @@ public class DRCNetworkProcessor
       GeoregressionTransformListenerAndProvider transformForDrivingProviderListener = new GeoregressionTransformListenerAndProvider();
 
       CameraDataReceiver cameraDataReceiver = new GazeboCameraReceiver(robotPoseBuffer, videoSettings, rosMainNode, networkingManager,
-                                                 DRCSensorParameters.FIELD_OF_VIEW);
+                                                 DRCSensorParameters.FIELD_OF_VIEW, ppsTimestampOffsetProvider);
       LidarDataReceiver lidarDataReceiver = new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, fullRobotModel, robotBoundingBoxes,
-                                               jointMap, fieldComputerClient, rosNativeNetworkProcessor, transformForDrivingProviderListener);
+                                               jointMap, fieldComputerClient, rosNativeNetworkProcessor, transformForDrivingProviderListener, ppsTimestampOffsetProvider);
       new VRCScoreDataReceiver(networkingManager, lidarDataReceiver, rosNativeNetworkProcessor);
 
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);

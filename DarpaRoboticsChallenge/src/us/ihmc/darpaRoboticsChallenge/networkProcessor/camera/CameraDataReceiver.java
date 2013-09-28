@@ -8,6 +8,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.atlas.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.driving.DRCStereoListener;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.messages.controller.RobotPoseData;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
@@ -30,10 +31,14 @@ public abstract class CameraDataReceiver
    private final Point3d cameraPosition = new Point3d();
    private final Quat4d cameraOrientation = new Quat4d();
    private final Vector3d tempVector = new Vector3d();
+
+   private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    
-   public CameraDataReceiver(RobotPoseBuffer robotPoseBuffer, VideoSettings videoSettings, final DRCNetworkProcessorNetworkingManager networkingManager)
+   public CameraDataReceiver(RobotPoseBuffer robotPoseBuffer, VideoSettings videoSettings, final DRCNetworkProcessorNetworkingManager networkingManager, PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
    {
       this.robotPoseBuffer = robotPoseBuffer;
+      this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
+
       final DRCNetworkProcessorControllerStateHandler controllerStateHandler = networkingManager.getControllerStateHandler();
       
       ObjectCommunicator videoConsumer = new ObjectCommunicator()
@@ -83,9 +88,9 @@ public abstract class CameraDataReceiver
       {
          stereoListeners.get(i).leftImage(bufferedImage, timeStamp, fov);
       }
-      
-      
-      RobotPoseData robotPoseData = robotPoseBuffer.floorEntry(timeStamp);
+
+      RobotPoseData robotPoseData = robotPoseBuffer.floorEntry(ppsTimestampOffsetProvider.ajustTimeStampToRobotClock(timeStamp));
+
       if(robotPoseData == null)
       {
          return;

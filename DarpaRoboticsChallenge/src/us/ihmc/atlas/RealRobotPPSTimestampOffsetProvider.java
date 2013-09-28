@@ -55,6 +55,11 @@ public class RealRobotPPSTimestampOffsetProvider implements PPSTimestampOffsetPr
       return currentTimeStampOffset;
    }
 
+   public long ajustTimeStampToRobotClock(long timeStamp)
+   {
+      return timeStamp + currentTimeStampOffset;
+   }
+
    public long requestNewestRobotTimestamp()
    {
       requester.send(requestPayload, 0);
@@ -63,4 +68,5 @@ public class RealRobotPPSTimestampOffsetProvider implements PPSTimestampOffsetPr
       responseBuffer.order(ByteOrder.BIG_ENDIAN);
       return responseBuffer.getLong();
    }
+
 }
