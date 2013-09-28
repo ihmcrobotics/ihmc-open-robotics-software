@@ -85,7 +85,7 @@ public class DRCConfigParameters
    public static final String LEFT_IROBOT_HAND_IP = "192.168.40.38";
    public static final String RIGHT_IROBOT_HAND_IP = "192.168.40.32";
 
-   public static final String GAZEBO_HOST = LOCALHOST;    // CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP; //CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP;
+   public static final String GAZEBO_HOST = "10.66.171.41";    // CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP; //CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP;
    public static final String SCS_MACHINE_IP_ADDRESS = LOCALHOST;    // CONSTELLATION_FIELD_COMPUTER_2_VPN_IP; //CONSTELLATION_FIELD_COMPUTER_2_VPN_IP;    // CLOUD_MONSTER_IP;
    public static final String NET_PROC_MACHINE_IP_ADDRESS = LOCALHOST;    // CONSTELLATION_FIELD_COMPUTER_1_VPN_IP; //CONSTELLATION_FIELD_COMPUTER_1_VPN_IP;    // SCS_MACHINE_IP_ADDRESS;
 
@@ -120,8 +120,8 @@ public class DRCConfigParameters
    public static final boolean ASSUME_PERFECT_IMU = false;    // assume perfect orientation, angular velocity and linear acceleration output from IMU
 
    // LIDAR:
-   public static final boolean USE_ROS_FOR_MULTISENSE_TRANSFORMS = false;
-   public static final boolean USING_REAL_HEAD = false;
+   public static final boolean USE_ROS_FOR_MULTISENSE_TRANSFORMS = true;
+   public static final boolean USING_REAL_HEAD = true;
    public static final double LIDAR_SPINDLE_VELOCITY = 2.5;
 
    public static final boolean STREAM_POLAR_LIDAR = true;

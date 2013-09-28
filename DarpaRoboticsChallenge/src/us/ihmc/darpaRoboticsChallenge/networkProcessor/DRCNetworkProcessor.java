@@ -115,10 +115,10 @@ public class DRCNetworkProcessor
    public DRCNetworkProcessor(LocalObjectCommunicator scsCommunicator, ObjectCommunicator drcNetworkObjectCommunicator)
    {
       this(drcNetworkObjectCommunicator);
-      CameraDataReceiver cameraDataReceiver = new SCSCameraDataReceiver(robotPoseBuffer, videoSettings, scsCommunicator, networkingManager);
+      CameraDataReceiver cameraDataReceiver = new SCSCameraDataReceiver(robotPoseBuffer, videoSettings, scsCommunicator, networkingManager, ppsTimestampOffsetProvider);
       GeoregressionTransformListenerAndProvider transformForDrivingProviderListener = new GeoregressionTransformListenerAndProvider();
       new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, fullRobotModel, robotBoundingBoxes, jointMap, fieldComputerClient,
-                               transformForDrivingProviderListener);
+                               transformForDrivingProviderListener, ppsTimestampOffsetProvider);
 
       if (!DRCConfigParameters.USE_DUMMY_DRIVNG)
       {
