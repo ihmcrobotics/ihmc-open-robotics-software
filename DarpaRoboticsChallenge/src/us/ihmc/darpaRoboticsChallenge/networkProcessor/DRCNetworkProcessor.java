@@ -7,6 +7,9 @@ import java.net.URISyntaxException;
 import com.martiansoftware.jsap.*;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.atlas.AlwaysZeroOffsetPPSTimestampOffsetProvider;
+import us.ihmc.atlas.PPSTimestampOffsetProvider;
+import us.ihmc.atlas.RealRobotPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
@@ -46,6 +49,7 @@ public class DRCNetworkProcessor
    private final DRCNetworkProcessorNetworkingManager networkingManager;
    private final RobotPoseBuffer robotPoseBuffer;
 
+   private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
 
    private final SDFFullRobotModel fullRobotModel;
    private final DRCRobotJointMap jointMap;
@@ -82,23 +86,29 @@ public class DRCNetworkProcessor
       {
          rosNativeNetworkProcessor = null;
       }
+
       GeoregressionTransformListenerAndProvider transformForDrivingProviderListener = new GeoregressionTransformListenerAndProvider();
-      
+
       CameraDataReceiver cameraDataReceiver = new GazeboCameraReceiver(robotPoseBuffer, videoSettings, rosMainNode, networkingManager,
                                                  DRCSensorParameters.FIELD_OF_VIEW);
       LidarDataReceiver lidarDataReceiver = new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, fullRobotModel, robotBoundingBoxes,
-                                               jointMap, fieldComputerClient,rosNativeNetworkProcessor,transformForDrivingProviderListener);
+                                               jointMap, fieldComputerClient, rosNativeNetworkProcessor, transformForDrivingProviderListener);
       new VRCScoreDataReceiver(networkingManager, lidarDataReceiver, rosNativeNetworkProcessor);
+
+      ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
+
       rosMainNode.execute();
 
 
-      if(DRCConfigParameters.USE_DUMMY_DRIVNG)
+      if (DRCConfigParameters.USE_DUMMY_DRIVNG)
       {
-         DrivingProcessorFactory.createCheatingDrivingProcessor(networkingManager, cameraDataReceiver, timestampProvider, rosCoreURI.toString(),transformForDrivingProviderListener);
+         DrivingProcessorFactory.createCheatingDrivingProcessor(networkingManager, cameraDataReceiver, timestampProvider, rosCoreURI.toString(),
+                 transformForDrivingProviderListener);
       }
       else
       {
-         DrivingProcessorFactory.createDrivingProcessor(networkingManager, cameraDataReceiver, timestampProvider, fieldComputerClient,transformForDrivingProviderListener);
+         DrivingProcessorFactory.createDrivingProcessor(networkingManager, cameraDataReceiver, timestampProvider, fieldComputerClient,
+                 transformForDrivingProviderListener);
       }
    }
 
@@ -107,11 +117,13 @@ public class DRCNetworkProcessor
       this(drcNetworkObjectCommunicator);
       CameraDataReceiver cameraDataReceiver = new SCSCameraDataReceiver(robotPoseBuffer, videoSettings, scsCommunicator, networkingManager);
       GeoregressionTransformListenerAndProvider transformForDrivingProviderListener = new GeoregressionTransformListenerAndProvider();
-      new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, fullRobotModel, robotBoundingBoxes, jointMap,fieldComputerClient,transformForDrivingProviderListener);
-      
-      if(!DRCConfigParameters.USE_DUMMY_DRIVNG)
+      new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, fullRobotModel, robotBoundingBoxes, jointMap, fieldComputerClient,
+                               transformForDrivingProviderListener);
+
+      if (!DRCConfigParameters.USE_DUMMY_DRIVNG)
       {
-         DrivingProcessorFactory.createDrivingProcessor(networkingManager, cameraDataReceiver, timestampProvider, fieldComputerClient,transformForDrivingProviderListener);
+         DrivingProcessorFactory.createDrivingProcessor(networkingManager, cameraDataReceiver, timestampProvider, fieldComputerClient,
+                 transformForDrivingProviderListener);
       }
    }
 
@@ -119,8 +131,8 @@ public class DRCNetworkProcessor
    {
       if (fieldComputerClient == null)
       {
-         this.fieldComputerClient = new KryoObjectClient(scsMachineIPAddress,
-                 DRCConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT, new DRCNetClassList());
+         this.fieldComputerClient = new KryoObjectClient(scsMachineIPAddress, DRCConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
+                 new DRCNetClassList());
          ((KryoObjectClient) this.fieldComputerClient).setReconnectAutomatically(true);
       }
       else
@@ -138,6 +150,15 @@ public class DRCNetworkProcessor
       DRCRobotDataReceiver drcRobotDataReceiver = new DRCRobotDataReceiver(DRCRobotModel.ATLAS_SANDIA_HANDS, fullRobotModel);
       this.fieldComputerClient.attachListener(DRCJointConfigurationData.class, drcRobotDataReceiver);
       robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, fullRobotModel);
+
+      if (DRCConfigParameters.USING_REAL_HEAD)
+      {
+         ppsTimestampOffsetProvider = new RealRobotPPSTimestampOffsetProvider();
+      }
+      else
+      {
+         ppsTimestampOffsetProvider = new AlwaysZeroOffsetPPSTimestampOffsetProvider();
+      }
 
       try
       {
@@ -171,7 +192,7 @@ public class DRCNetworkProcessor
             scsMachineIPAddress = config.getString(scsIPFlag.getID());
          }
 
-         if(config.getString(rosURIFlag.getID()) != null)
+         if (config.getString(rosURIFlag.getID()) != null)
          {
             rosMasterURI = config.getString(rosURIFlag.getID());
          }
