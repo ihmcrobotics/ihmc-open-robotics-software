@@ -24,4 +24,9 @@ public class AlwaysZeroOffsetPPSTimestampOffsetProvider implements PPSTimestampO
    {
       return;
    }
+
+   public boolean offsetIsDetermined()
+   {
+      return true;
+   }
 }
