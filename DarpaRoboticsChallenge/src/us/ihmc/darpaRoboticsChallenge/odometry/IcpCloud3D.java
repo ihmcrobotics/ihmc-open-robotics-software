@@ -7,7 +7,7 @@ import georegression.fitting.se.MotionSe3PointSVD_F64;
 import georegression.geometry.RotationMatrixGenerator;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.se.Se3_F64;
-import georegression.struct.so.Rodrigues;
+import georegression.struct.so.Rodrigues_F64;
 import georegression.transform.se.SePointOps_F64;
 import org.ddogleg.nn.FactoryNearestNeighbor;
 import org.ddogleg.nn.NearestNeighbor;
@@ -60,7 +60,7 @@ public class IcpCloud3D {
    Se3_F64 total = new Se3_F64();
 
    // used to check for convergence
-   Rodrigues rod = new Rodrigues();
+   Rodrigues_F64 rod = new Rodrigues_F64();
 
    // fraction of reference points which were matched with dst points
    double fitFraction;

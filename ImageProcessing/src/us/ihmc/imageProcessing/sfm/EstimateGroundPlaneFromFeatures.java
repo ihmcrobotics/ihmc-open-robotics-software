@@ -138,7 +138,7 @@ public class EstimateGroundPlaneFromFeatures
       if( !robustH.process(matches) )
          return false;
 
-      DenseMatrix64F Hd = UtilHomography.convert(robustH.getModel(), (DenseMatrix64F) null);
+      DenseMatrix64F Hd = UtilHomography.convert(robustH.getModelParameters(), (DenseMatrix64F) null);
       selectBest.process(Hd,true);
 
       return true;
