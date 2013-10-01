@@ -19,7 +19,6 @@ import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Peter Abeles
@@ -68,9 +67,17 @@ public class TestEstimateGroundPlaneFromFeatures
 
          GeometryMath_F64.mult(R, X, XX);
 
-         matchA.grow().set(PerspectiveOps.renderPixel(l2l,K,XX));
-         matchB.grow().set(PerspectiveOps.renderPixel(l2r, K, XX));
+         Point2D_F64 pa = PerspectiveOps.renderPixel(l2l,K,XX);
+         Point2D_F64 pb = PerspectiveOps.renderPixel(l2r,K,XX);
+
+         if( pa != null && pb != null ) {
+            matchA.grow().set(pa);
+            matchB.grow().set(pb);
+         }
       }
+
+      // make sure most of the points were visible
+      assertTrue(matchA.size>90);
 
       groundAlg.process(matchA.toList(),matchB.toList());
 
