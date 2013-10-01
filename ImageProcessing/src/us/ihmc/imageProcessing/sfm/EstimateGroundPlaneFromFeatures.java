@@ -7,6 +7,7 @@ import boofcv.alg.sfm.robust.DistanceHomographySq;
 import boofcv.struct.FastQueue;
 import boofcv.struct.calib.StereoParameters;
 import boofcv.struct.geo.AssociatedPair;
+import georegression.fitting.homography.ModelManagerHomography2D_F64;
 import georegression.struct.homo.Homography2D_F64;
 import georegression.struct.homo.UtilHomography;
 import georegression.struct.point.Point2D_F64;
@@ -66,8 +67,9 @@ public class EstimateGroundPlaneFromFeatures
 
       // Input will be normalized coordinates, but error will be in pixels
       DistanceHomographySq errorMetric = new DistanceHomographySq();
+      ModelManagerHomography2D_F64 manager = new ModelManagerHomography2D_F64();
 
-      robustH = new Ransac<Homography2D_F64, AssociatedPair>(123123,null,new Foo(F),errorMetric,500,0.2*0.2);
+      robustH = new Ransac<Homography2D_F64, AssociatedPair>(123123,manager,new Foo(F),errorMetric,500,0.2*0.2);
    }
 
    private static class Foo implements ModelGenerator<Homography2D_F64,AssociatedPair> {
