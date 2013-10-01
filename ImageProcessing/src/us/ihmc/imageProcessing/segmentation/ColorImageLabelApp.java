@@ -73,9 +73,7 @@ public class ColorImageLabelApp extends JPanel implements ActionListener {
       hsv = new MultiSpectral<ImageFloat32>(ImageFloat32.class,w,h,3);
 
       MultiSpectral<ImageFloat32> inputMS = new MultiSpectral<ImageFloat32>(ImageFloat32.class,w,h,3);
-      ConvertBufferedImage.convertFrom(input, inputMS);
-      // Ensure the the bands are in RGB order
-      ConvertBufferedImage.orderBandsIntoRGB(inputMS, input);
+      ConvertBufferedImage.convertFrom(input, inputMS, true);
       ColorHsv.rgbToHsv_F32(inputMS, hsv);
 
       hsv = inputMS;

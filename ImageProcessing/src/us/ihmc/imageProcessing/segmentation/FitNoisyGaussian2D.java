@@ -1,9 +1,9 @@
 package us.ihmc.imageProcessing.segmentation;
 
-import boofcv.struct.FastQueue;
-import boofcv.struct.GrowQueue_F64;
 import georegression.struct.point.Point2D_F64;
 import org.ddogleg.sorting.QuickSelectArray;
+import org.ddogleg.struct.FastQueue;
+import org.ddogleg.struct.GrowQueue_F64;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CovarianceOps;
 

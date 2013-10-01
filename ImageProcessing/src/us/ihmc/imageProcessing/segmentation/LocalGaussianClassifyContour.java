@@ -2,11 +2,11 @@ package us.ihmc.imageProcessing.segmentation;
 
 import boofcv.alg.filter.binary.Contour;
 import boofcv.alg.misc.ImageMiscOps;
-import boofcv.struct.FastQueue;
 import boofcv.struct.image.ImageFloat32;
 import boofcv.struct.image.ImageUInt8;
 import boofcv.struct.image.MultiSpectral;
 import georegression.struct.point.Point2D_I32;
+import org.ddogleg.struct.FastQueue;
 
 import java.util.List;
 

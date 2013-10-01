@@ -1,12 +1,8 @@
 package us.ihmc.imageProcessing.segmentation;
 
-import boofcv.alg.filter.binary.Contour;
-import boofcv.struct.FastQueue;
 import boofcv.struct.PointIndex_I32;
 import georegression.struct.point.Point2D_I32;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.ddogleg.struct.FastQueue;
 
 /**
  * @author Peter Abeles
