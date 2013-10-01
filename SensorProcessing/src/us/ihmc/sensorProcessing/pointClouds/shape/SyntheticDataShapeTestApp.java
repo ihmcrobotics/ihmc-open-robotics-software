@@ -102,7 +102,6 @@ public class SyntheticDataShapeTestApp extends SimpleApplication
 
       PointCloud generator = new PointCloud(assetManager);
 
-
       try
       {
          rootNode.attachChild(generator.generatePointCloudGraph(points, colors));
