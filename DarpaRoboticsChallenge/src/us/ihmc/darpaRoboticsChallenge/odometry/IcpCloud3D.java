@@ -1,6 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge.odometry;
 
-import boofcv.struct.FastQueue;
 import boofcv.struct.FastQueueArray_F64;
 import georegression.fitting.MotionTransformPoint;
 import georegression.fitting.se.MotionSe3PointSVD_F64;
@@ -12,6 +11,7 @@ import georegression.transform.se.SePointOps_F64;
 import org.ddogleg.nn.FactoryNearestNeighbor;
 import org.ddogleg.nn.NearestNeighbor;
 import org.ddogleg.nn.NnData;
+import org.ddogleg.struct.FastQueue;
 
 import java.util.ArrayList;
 import java.util.List;

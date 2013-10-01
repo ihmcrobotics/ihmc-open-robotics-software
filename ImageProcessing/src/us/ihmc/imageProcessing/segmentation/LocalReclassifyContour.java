@@ -1,14 +1,16 @@
 package us.ihmc.imageProcessing.segmentation;
 
 import boofcv.alg.filter.binary.Contour;
-import boofcv.alg.filter.binary.LinearContourLabelChang2004;
 import boofcv.alg.misc.ImageMiscOps;
 import boofcv.misc.BoofMiscOps;
-import boofcv.struct.FastQueue;
 import boofcv.struct.ImageRectangle;
-import boofcv.struct.image.*;
+import boofcv.struct.image.Color3_F32;
+import boofcv.struct.image.ImageFloat32;
+import boofcv.struct.image.ImageUInt8;
+import boofcv.struct.image.MultiSpectral;
 import georegression.geometry.UtilPoint3D_F32;
 import georegression.struct.point.Point2D_I32;
+import org.ddogleg.struct.FastQueue;
 
 import java.util.List;
 

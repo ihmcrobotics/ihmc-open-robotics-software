@@ -2,6 +2,8 @@ package us.ihmc.imageProcessing.sfm.d2.wrappers;
 
 import boofcv.abst.sfm.d3.MonocularPlaneVisualOdometry;
 import boofcv.alg.sfm.overhead.OverheadView;
+import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.calib.MonoPlaneParameters;
 import boofcv.struct.calib.StereoParameters;
 import boofcv.struct.image.ImageFloat32;
 import boofcv.struct.image.MultiSpectral;
@@ -17,6 +19,9 @@ public class Mono_to_CarMotion2D implements EstimateCarMotion2D
 {
    MonocularPlaneVisualOdometry<ImageFloat32> alg;
 
+   MonoPlaneParameters param = new MonoPlaneParameters();
+
+
    Se3_F64 groundToCamera;
 
    Se3_F64 groundToWorld = new Se3_F64();
@@ -29,12 +34,16 @@ public class Mono_to_CarMotion2D implements EstimateCarMotion2D
 
    public void setParameters(StereoParameters config)
    {
-      alg.setIntrinsic(config.left);
+      this.param.intrinsic = config.getLeft();
+      if( param.planeToCamera != null )
+         alg.setCalibration(param);
    }
 
    public void setGroundToCamera(Se3_F64 groundToCamera)
    {
-      alg.setExtrinsic(groundToCamera);
+      this.param.planeToCamera = groundToCamera;
+      if( param.intrinsic != null )
+         alg.setCalibration(param);
       this.groundToCamera = groundToCamera;
    }
 

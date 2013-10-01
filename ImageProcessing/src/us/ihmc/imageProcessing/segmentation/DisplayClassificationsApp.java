@@ -24,8 +24,7 @@ public class DisplayClassificationsApp extends JPanel
       binary.reshape(image.getWidth(),image.getHeight());
       colorRGB.reshape(image.getWidth(),image.getHeight());
 
-      ConvertBufferedImage.convertFrom(image, colorRGB);
-      ConvertBufferedImage.orderBandsIntoRGB(colorRGB, image);
+      ConvertBufferedImage.convertFrom(image, colorRGB, true);
 
       GaussianColorClassifier.classify(colorRGB,model,12,binary);
 

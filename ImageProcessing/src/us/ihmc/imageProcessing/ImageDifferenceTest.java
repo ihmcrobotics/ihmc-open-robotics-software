@@ -1,8 +1,5 @@
 package us.ihmc.imageProcessing;
 
-import boofcv.alg.filter.binary.BinaryImageOps;
-import boofcv.alg.filter.binary.Contour;
-import boofcv.alg.filter.binary.LinearContourLabelChang2004;
 import boofcv.alg.misc.PixelMath;
 import boofcv.core.image.ConvertBufferedImage;
 import boofcv.gui.binary.VisualizeBinaryData;
@@ -10,20 +7,13 @@ import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
 import boofcv.io.image.SimpleImageSequence;
 import boofcv.io.wrapper.xuggler.XugglerSimplified;
-import boofcv.misc.BoofMiscOps;
-import boofcv.struct.FastQueue;
-import boofcv.struct.GrowQueue_I32;
-import boofcv.struct.image.*;
-import georegression.struct.line.LineSegment2D_I32;
-import georegression.struct.point.Point2D_I32;
-import us.ihmc.imageProcessing.segmentation.*;
+import boofcv.struct.image.ImageDataType;
+import boofcv.struct.image.ImageFloat32;
+import boofcv.struct.image.ImageUInt8;
 
-import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Peter Abeles

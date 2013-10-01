@@ -4,7 +4,6 @@ import boofcv.alg.geo.MultiViewOps;
 import boofcv.alg.geo.PerspectiveOps;
 import boofcv.alg.geo.h.HomographyInducedStereo3Pts;
 import boofcv.alg.sfm.robust.DistanceHomographySq;
-import boofcv.struct.FastQueue;
 import boofcv.struct.calib.StereoParameters;
 import boofcv.struct.geo.AssociatedPair;
 import georegression.fitting.homography.ModelManagerHomography2D_F64;
@@ -16,6 +15,7 @@ import georegression.struct.se.Se3_F64;
 import org.ddogleg.fitting.modelset.ModelGenerator;
 import org.ddogleg.fitting.modelset.ModelMatcher;
 import org.ddogleg.fitting.modelset.ransac.Ransac;
+import org.ddogleg.struct.FastQueue;
 import org.ejml.data.DenseMatrix64F;
 
 import java.util.List;
