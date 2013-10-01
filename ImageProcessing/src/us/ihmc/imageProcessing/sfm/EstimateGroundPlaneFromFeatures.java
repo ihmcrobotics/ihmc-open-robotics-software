@@ -67,7 +67,7 @@ public class EstimateGroundPlaneFromFeatures
       // Input will be normalized coordinates, but error will be in pixels
       DistanceHomographySq errorMetric = new DistanceHomographySq();
 
-      robustH = new Ransac<Homography2D_F64, AssociatedPair>(123123,new Foo(F),errorMetric,500,0.2*0.2);
+      robustH = new Ransac<Homography2D_F64, AssociatedPair>(123123,null,new Foo(F),errorMetric,500,0.2*0.2);
    }
 
    private static class Foo implements ModelGenerator<Homography2D_F64,AssociatedPair> {
