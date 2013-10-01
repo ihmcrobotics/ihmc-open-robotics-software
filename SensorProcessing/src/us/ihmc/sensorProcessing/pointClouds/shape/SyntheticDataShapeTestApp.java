@@ -8,13 +8,11 @@ import bubo.ptcloud.wrapper.ConfigMergeShapes;
 import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
 import com.jme3.app.SimpleApplication;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector3f;
 import georegression.struct.plane.PlaneNormal3D_F64;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.shapes.Cylinder3D_F64;
 import georegression.struct.shapes.Sphere3D_F64;
-
-import com.jme3.app.*;
-import com.jme3.math.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,9 +41,9 @@ public class SyntheticDataShapeTestApp extends SimpleApplication
     {
         List<Point3D_F64> cloud = createCloudOfPoints();
 
-        ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(100,0.2,0.1,0.1);
-        configRansac.minModelAccept = 10;
-        configRansac.octreeSplit = 20;
+        ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(100,0.3,0.1,0.05);
+        configRansac.minModelAccept = 100;
+        configRansac.octreeSplit = 100;
 
         ConfigSurfaceNormals configSurface = new ConfigSurfaceNormals(6,20,3);
         ConfigMergeShapes configMerge = new ConfigMergeShapes(0.6,0.9);
@@ -56,6 +54,10 @@ public class SyntheticDataShapeTestApp extends SimpleApplication
 
         List<PointCloudShapeFinder.Shape> found = shapeFinder.getFound();
 
+        List<Point3D_F64> unmatched = new ArrayList<Point3D_F64>();
+        shapeFinder.getUnmatched(unmatched);
+
+        System.out.println("Unmatched points "+unmatched.size());
         System.out.println("total shapes found: "+found.size());
         int total = 0;
         for( PointCloudShapeFinder.Shape s : found ) {
@@ -143,6 +145,14 @@ public class SyntheticDataShapeTestApp extends SimpleApplication
             cloud.add(p);
         }
 
+        // noise
+        for( int i = 0; i < 1000; i++ ) {
+            double x = 14.0*(rand.nextDouble()-0.5);
+            double y = 14.0*(rand.nextDouble()-0.5);
+            double z = 14.0*(rand.nextDouble()-0.5);
+
+            cloud.add(new Point3D_F64(x,y,z));
+        }
 
 
         return  cloud;
