@@ -3,9 +3,13 @@ package us.ihmc.darpaRoboticsChallenge;
 import javax.media.j3d.Transform3D;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.concurrent.Builder;
+import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.messages.controller.RobotPoseData;
-import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.JointConfigurationGathererAndProducer;
+import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.DRCJointConfigurationData;
+import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.JointConfigurationGatherer;
+import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.TimestampProvider;
@@ -15,35 +19,67 @@ import com.yobotics.simulationconstructionset.robotController.RawOutputWriter;
 
 public class DRCPoseCommunicator implements RawOutputWriter
 {
+   private final int WORKER_SLEEP_TIME_MILLIS = 1;
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ReferenceFrame lidarFrame;
    private final ReferenceFrame cameraFrame;
    private final ReferenceFrame rootFrame;
-   
+
    private final Transform3D rootTransform = new Transform3D();
    private final Transform3D cameraTransform = new Transform3D();
    private final Transform3D lidarTransform = new Transform3D();
-   
+
    private final ObjectCommunicator networkProcessorCommunicator;
-   private final JointConfigurationGathererAndProducer jointConfigurationGathererAndProducer;
+   private final JointConfigurationGatherer jointConfigurationGathererAndProducer;
    private final TimestampProvider timeProvider;
-   
-   public DRCPoseCommunicator(SDFFullRobotModel estimatorModel, JointConfigurationGathererAndProducer jointConfigurationGathererAndProducer, DRCRobotJointMap jointMap, ObjectCommunicator networkProcessorCommunicator, TimestampProvider timestampProvider)
+
+   private final ConcurrentRingBuffer<State> stateRingBuffer;
+
+   public DRCPoseCommunicator(SDFFullRobotModel estimatorModel, JointConfigurationGatherer jointConfigurationGathererAndProducer,
+         DRCRobotJointMap jointMap, ObjectCommunicator networkProcessorCommunicator, TimestampProvider timestampProvider)
    {
       this.networkProcessorCommunicator = networkProcessorCommunicator;
       this.jointConfigurationGathererAndProducer = jointConfigurationGathererAndProducer;
       this.timeProvider = timestampProvider;
-      
+
       lidarFrame = estimatorModel.getLidarBaseFrame(jointMap.getLidarSensorName());
       cameraFrame = estimatorModel.getCameraFrame(jointMap.getLeftCameraName());
       rootFrame = estimatorModel.getRootJoint().getFrameAfterJoint();
+
+      stateRingBuffer = new ConcurrentRingBuffer<State>(State.builder, 8);
+
+      startWriterThread();
    }
-   
-   
+
+   // this thread reads from the stateRingBuffer and pushes the data out to the objectConsumer
+   private void startWriterThread()
+   {
+      new Thread(new Runnable()
+      {
+         public void run()
+         {
+            while (true)
+            {
+               if (stateRingBuffer.poll())
+               {
+                  State state;
+                  while ((state = stateRingBuffer.read()) != null)
+                  {
+                     networkProcessorCommunicator.consumeObject(state.poseData);
+                     networkProcessorCommunicator.consumeObject(state.jointData);
+                  }
+                  stateRingBuffer.flush();
+               }
+
+               ThreadTools.sleep(WORKER_SLEEP_TIME_MILLIS);
+            }
+         }
+      }).start();
+   }
+
    public void initialize()
    {
-      // TODO Auto-generated method stub
-
    }
 
    public YoVariableRegistry getYoVariableRegistry()
@@ -61,17 +97,44 @@ public class DRCPoseCommunicator implements RawOutputWriter
       return getName();
    }
 
+   // puts the state data into the ring buffer for the output thread
    public void write()
    {
       rootFrame.getTransformToDesiredFrame(rootTransform, ReferenceFrame.getWorldFrame());
       cameraFrame.getTransformToDesiredFrame(cameraTransform, ReferenceFrame.getWorldFrame());
       lidarFrame.getTransformToDesiredFrame(lidarTransform, ReferenceFrame.getWorldFrame());
-    
-      long timestamp = timeProvider.getTimestamp();
-      RobotPoseData robotPoseData = new RobotPoseData(timestamp,  rootTransform, cameraTransform, lidarTransform);
-      networkProcessorCommunicator.consumeObject(robotPoseData);
+
+      State state = stateRingBuffer.next();
+      if (state == null)
+      {
+         return;
+      }
       
-      jointConfigurationGathererAndProducer.updateEstimatorJoints(timestamp);
+      long timestamp = timeProvider.getTimestamp();
+      jointConfigurationGathererAndProducer.packEstimatorJoints(timestamp, state.jointData);
+      state.poseData.setAll(timestamp, rootTransform, cameraTransform, lidarTransform);
+
+      stateRingBuffer.commit();
    }
 
+   //this object is just a glorified tuple
+   private static class State
+   {
+      public final RobotPoseData poseData;
+      public final DRCJointConfigurationData jointData;
+
+      public static final Builder<State> builder = new Builder<State>()
+      {
+         public State newInstance()
+         {
+            return new State();
+         }
+      };
+
+      public State()
+      {
+         poseData = new RobotPoseData();
+         jointData = new DRCJointConfigurationData();
+      }
+   }
 }
