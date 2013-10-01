@@ -12,7 +12,6 @@ import georegression.struct.plane.PlaneNormal3D_F64;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.shapes.Cylinder3D_F64;
 import georegression.struct.shapes.Sphere3D_F64;
-import us.ihmc.userInterface.visualizer.PointCloud;
 
 import com.jme3.app.*;
 import com.jme3.math.*;
