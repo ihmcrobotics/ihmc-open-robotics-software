@@ -21,13 +21,10 @@ import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
-public class JointConfigurationGathererAndProducer
+public class JointConfigurationGatherer
 {
-   private final int WORKER_SLEEP_TIME_MILLIS = 1;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-
-   private final ObjectCommunicator objectCommunicator;
 
    private final OneDoFJoint[] atlasJoints;
    private final SideDependentList<FingerJoint[]> handJoints = new SideDependentList<FingerJoint[]>();
@@ -37,14 +34,12 @@ public class JointConfigurationGathererAndProducer
    private final Quat4d rootOrientation = new Quat4d();
 
    private final SideDependentList<ConcurrentCopier<double[]>> handAngles = new SideDependentList<ConcurrentCopier<double[]>>();
-   private final ConcurrentRingBuffer<DRCJointConfigurationData> stateRingBuffer;
 
-   public JointConfigurationGathererAndProducer(ObjectCommunicator objectCommunicator, SDFFullRobotModel estimatorModel,
-         SideDependentList<SandiaHandModel> handModels, YoVariableRegistry parentRegistry)
+   public JointConfigurationGatherer(SDFFullRobotModel estimatorModel, SideDependentList<SandiaHandModel> handModels,
+         YoVariableRegistry parentRegistry)
    {
 
       parentRegistry.addChild(registry);
-      this.objectCommunicator = objectCommunicator;
       this.rootJoint = estimatorModel.getRootJoint();
 
       // Setup Atlas Joints
@@ -84,30 +79,15 @@ public class JointConfigurationGathererAndProducer
 
          handAngles.set(robotSide, new ConcurrentCopier<double[]>(handAngleBuilder));
       }
-
-      // Setup ring buffer
-      Builder<DRCJointConfigurationData> jointConfigurationBuilder = new Builder<DRCJointConfigurationData>()
-      {
-         public DRCJointConfigurationData newInstance()
-         {
-            return new DRCJointConfigurationData();
-         }
-      };
-      stateRingBuffer = new ConcurrentRingBuffer<DRCJointConfigurationData>(jointConfigurationBuilder, 8);
-
-      // Start thread
-      new Thread(new JointConfigurationWorker()).start();
    }
 
-   
    // upon receiving new atlas joint data, pulls the latest hand states and fills a
    // DRCJointConfigurationData object on the ConcurrentRingBuffer
-   public void updateEstimatorJoints(long timestamp)
+   public void packEstimatorJoints(long timestamp, DRCJointConfigurationData jointConfigurationData)
    {
       rootJoint.packTranslation(rootTranslation);
       rootJoint.packRotation(rootOrientation);
 
-      DRCJointConfigurationData jointConfigurationData = stateRingBuffer.next();
       if (jointConfigurationData == null)
       {
          return;
@@ -130,8 +110,6 @@ public class JointConfigurationGathererAndProducer
       jointConfigurationData.setRootTranslation(rootTranslation);
       jointConfigurationData.setRootOrientation(rootOrientation);
       jointConfigurationData.setSimTime(timestamp);
-
-      stateRingBuffer.commit();
    }
 
    // uses ConcurrentCopier to keep the latest hand joint state for each hand
@@ -144,27 +122,5 @@ public class JointConfigurationGathererAndProducer
          sideHandAngles[i] = sideHandJoints[i].getQ();
       }
       handAngles.get(robotSide).commit();
-   }
-
-   // feeds the RingBuffer into the objectCommunicator
-   private class JointConfigurationWorker implements Runnable
-   {
-      public void run()
-      {
-         while (true)
-         {
-            if (stateRingBuffer.poll())
-            {
-               DRCJointConfigurationData state;
-               while ((state = stateRingBuffer.read()) != null)
-               {
-                  objectCommunicator.consumeObject(state);
-               }
-               stateRingBuffer.flush();
-            }
-
-            ThreadTools.sleep(WORKER_SLEEP_TIME_MILLIS);
-         }
-      }
    }
 }
