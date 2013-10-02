@@ -59,7 +59,7 @@ public class DRCFlatGroundWalkingTrack
       
       if (START_YOVARIABLE_SERVER)
       {
-         robotVisualizer = new YoVariableServer(robotInterface.getRobot().getRobotsYoVariableRegistry(), RemoteAtlasVisualizer.defaultPort, dynamicGraphicObjectsListRegistry);
+         robotVisualizer = new YoVariableServer(robotInterface.getRobot().getRobotsYoVariableRegistry(), RemoteAtlasVisualizer.defaultPort, DRCConfigParameters.ESTIMATE_DT, dynamicGraphicObjectsListRegistry);
       }
       
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.USE_GAZEBO_PHYSICS);
