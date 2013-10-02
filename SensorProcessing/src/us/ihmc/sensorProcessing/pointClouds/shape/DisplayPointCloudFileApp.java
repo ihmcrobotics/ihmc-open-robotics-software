@@ -6,7 +6,9 @@ import bubo.io.text.ReadCsvObjectSmart;
 import com.jme3.app.SimpleApplication;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Node;
 import georegression.struct.point.Point3D_F64;
+import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -55,11 +57,15 @@ public class DisplayPointCloudFileApp extends SimpleApplication
       }
 
 
+      Node zUpNode = new Node();
+      zUpNode.setLocalRotation(JMEGeometryUtils.getRotationFromJMEToZupCoordinates());
+
       PointCloud generator = new PointCloud(assetManager);
 
       try
       {
-         rootNode.attachChild(generator.generatePointCloudGraph(points, colors));
+         rootNode.attachChild(zUpNode);
+         zUpNode.attachChild(generator.generatePointCloudGraph(points, colors));
       }
       catch (Exception e)
       {
