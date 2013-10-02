@@ -1,19 +1,21 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
+import bubo.io.serialization.DataDefinition;
+import bubo.io.serialization.SerializationDefinitionManager;
+import bubo.io.text.ReadCsvObjectSmart;
 import bubo.ptcloud.FactoryPointCloudShape;
 import bubo.ptcloud.PointCloudShapeFinder;
 import bubo.ptcloud.alg.ConfigSchnabel2007;
-import bubo.ptcloud.tools.PointCloudShapeTools;
 import bubo.ptcloud.wrapper.ConfigMergeShapes;
 import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
 import com.jme3.app.SimpleApplication;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
-import georegression.struct.plane.PlaneNormal3D_F64;
 import georegression.struct.point.Point3D_F64;
-import georegression.struct.shapes.Cylinder3D_F64;
-import georegression.struct.shapes.Sphere3D_F64;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -21,31 +23,33 @@ import java.util.Random;
 /**
  * @author Peter Abeles
  */
-public class SyntheticDataShapeTestApp extends SimpleApplication
+public class ShapesFromPointCloudFileApp extends SimpleApplication
 {
    Random rand = new Random(234);
 
-   Sphere3D_F64 truthSphere = new Sphere3D_F64(2, 2, 10, 3);
-   Cylinder3D_F64 truthCylinder = new Cylinder3D_F64(0, 1, 3, -1, 1, 0.5, 1);
-   PlaneNormal3D_F64 truthPlane = new PlaneNormal3D_F64(2, 2, 10, 0, 1, 0);
-
+   public String fileName;
 
    public static void main(String[] args)
    {
-      SyntheticDataShapeTestApp test1 = new SyntheticDataShapeTestApp();
+      ShapesFromPointCloudFileApp test1 = new ShapesFromPointCloudFileApp("/home/pja/Downloads/output.txt");
       test1.start();
+   }
+
+   public ShapesFromPointCloudFileApp(String fileName)
+   {
+      this.fileName = fileName;
    }
 
    @Override
    public void simpleInitApp()
    {
-      List<Point3D_F64> cloud = createCloudOfPoints();
+      List<Point3D_F64> cloud = readPointCloud(1000000);
 
-      ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(100, 0.3, 0.1, 0.05);
-      configRansac.minModelAccept = 100;
-      configRansac.octreeSplit = 100;
+      ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(100, 0.3, 0.1, 0.1);
+      configRansac.minModelAccept = 200;
+      configRansac.octreeSplit = 300;
 
-      ConfigSurfaceNormals configSurface = new ConfigSurfaceNormals(6, 20, 3);
+      ConfigSurfaceNormals configSurface = new ConfigSurfaceNormals(10, 30, Double.MAX_VALUE);
       ConfigMergeShapes configMerge = new ConfigMergeShapes(0.6, 0.9);
 
       PointCloudShapeFinder shapeFinder = FactoryPointCloudShape.ransacOctree(configSurface, configRansac, configMerge);
@@ -118,51 +122,31 @@ public class SyntheticDataShapeTestApp extends SimpleApplication
       flyCam.setMoveSpeed(25);
    }
 
-   private List<Point3D_F64> createCloudOfPoints()
+   private List<Point3D_F64> readPointCloud( int maxLines )
    {
       List<Point3D_F64> cloud = new ArrayList<Point3D_F64>();
+      SerializationDefinitionManager manager = new SerializationDefinitionManager();
+      manager.addDefinition(new DataDefinition("point3d",Point3D_F64.class,"x","y","z"));
 
-      for (int i = 0; i < 300; i++)
+      try
       {
-         double phi = 2.0 * Math.PI * rand.nextDouble();
-         double theta = 2.0 * Math.PI * rand.nextDouble();
+         FileInputStream in = new FileInputStream(fileName);
+         ReadCsvObjectSmart<Point3D_F64> reader = new ReadCsvObjectSmart<Point3D_F64>(in,manager,"point3d");
 
-         Point3D_F64 p = PointCloudShapeTools.createPt(truthSphere, phi, theta);
 
-         cloud.add(p);
-      }
+         Point3D_F64 pt = new Point3D_F64();
+         int count = 0;
+         while(  reader.nextObject(pt) != null && count++ < maxLines) {
+            cloud.add(pt.copy());
+         }
 
-      for (int i = 0; i < 300; i++)
+      } catch (FileNotFoundException e)
       {
-         double z = 2.0 * rand.nextDouble();
-         double theta = 2.0 * Math.PI * rand.nextDouble();
-
-         Point3D_F64 p = PointCloudShapeTools.createPt(truthCylinder, z, theta);
-
-         cloud.add(p);
-      }
-
-      for (int i = 0; i < 1000; i++)
+         throw new RuntimeException(e);
+      } catch (IOException e)
       {
-         double x = 7.0 * (rand.nextDouble() - 0.5);
-         double y = 7.0 * (rand.nextDouble() - 0.5);
-
-         Point3D_F64 p = PointCloudShapeTools.createPt(truthPlane, x, y);
-
-         cloud.add(p);
+         throw new RuntimeException(e);
       }
-
-      // noise
-      for (int i = 0; i < 1000; i++)
-      {
-         double x = 14.0 * (rand.nextDouble() - 0.5);
-         double y = 14.0 * (rand.nextDouble() - 0.5);
-         double z = 14.0 * (rand.nextDouble() - 0.5);
-
-         cloud.add(new Point3D_F64(x, y, z));
-      }
-
-
       return cloud;
    }
 }
