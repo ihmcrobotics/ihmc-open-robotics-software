@@ -9,6 +9,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.atlas.PPSTimestampOffsetProvider;
+import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.driving.DRCStereoListener;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.messages.controller.RobotPoseData;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
@@ -98,7 +99,7 @@ public abstract class CameraDataReceiver
       
       robotPoseData.getCameraPose().get(cameraOrientation, tempVector);
       cameraPosition.set(tempVector);
-      compressedVideoDataServer.updateImage(bufferedImage, timeStamp, cameraPosition, cameraOrientation, fov);
+      compressedVideoDataServer.updateImage(bufferedImage, timeStamp, cameraPosition, cameraOrientation, fov, DRCConfigParameters.MULTISENSE_LEFT_CAMERA);
       
       
    }
