@@ -32,7 +32,7 @@ public class JPanelCameraStreamer extends JPanel implements VideoStreamer, Camer
       updateImage(bufferedImage);
    }
    
-   public synchronized void updateImage(BufferedImage bufferedImage, long timeStamp, Point3d cameraPosition, Quat4d cameraOrientation, double fov)
+   public synchronized void updateImage(BufferedImage bufferedImage, long timeStamp, Point3d cameraPosition, Quat4d cameraOrientation, double fov, int cameraSourceId)
    {
       updateImage(bufferedImage);
    }
