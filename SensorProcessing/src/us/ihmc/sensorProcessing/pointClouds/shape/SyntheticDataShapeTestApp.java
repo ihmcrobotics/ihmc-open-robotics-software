@@ -1,14 +1,5 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
-import bubo.ptcloud.FactoryPointCloudShape;
-import bubo.ptcloud.PointCloudShapeFinder;
-import bubo.ptcloud.alg.ConfigSchnabel2007;
-import bubo.ptcloud.tools.PointCloudShapeTools;
-import bubo.ptcloud.wrapper.ConfigMergeShapes;
-import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
-import com.jme3.app.SimpleApplication;
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.Vector3f;
 import georegression.struct.plane.PlaneNormal3D_F64;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.shapes.Cylinder3D_F64;
@@ -17,6 +8,19 @@ import georegression.struct.shapes.Sphere3D_F64;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
+import bubo.ptcloud.FactoryPointCloudShape;
+import bubo.ptcloud.PointCloudShapeFinder;
+import bubo.ptcloud.alg.ConfigSchnabel2007;
+import bubo.ptcloud.tools.PointCloudShapeTools;
+import bubo.ptcloud.wrapper.ConfigMergeShapes;
+import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
+
+import com.jme3.app.SimpleApplication;
+import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector3f;
+import com.jme3.scene.Node;
 
 /**
  * @author Peter Abeles
@@ -28,6 +32,8 @@ public class SyntheticDataShapeTestApp extends SimpleApplication
    Sphere3D_F64 truthSphere = new Sphere3D_F64(2, 2, 10, 3);
    Cylinder3D_F64 truthCylinder = new Cylinder3D_F64(0, 1, 3, -1, 1, 0.5, 1);
    PlaneNormal3D_F64 truthPlane = new PlaneNormal3D_F64(2, 2, 10, 0, 1, 0);
+   
+   Node zUpNode = new Node();
 
 
    public static void main(String[] args)
@@ -39,6 +45,8 @@ public class SyntheticDataShapeTestApp extends SimpleApplication
    @Override
    public void simpleInitApp()
    {
+      zUpNode.setLocalRotation(JMEGeometryUtils.getRotationFromJMEToZupCoordinates());
+
       List<Point3D_F64> cloud = createCloudOfPoints();
 
       ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(100, 0.3, 0.1, 0.05);
@@ -104,7 +112,8 @@ public class SyntheticDataShapeTestApp extends SimpleApplication
 
       try
       {
-         rootNode.attachChild(generator.generatePointCloudGraph(points, colors));
+         rootNode.attachChild(zUpNode);
+         zUpNode.attachChild(generator.generatePointCloudGraph(points, colors));
       }
       catch (Exception e)
       {
