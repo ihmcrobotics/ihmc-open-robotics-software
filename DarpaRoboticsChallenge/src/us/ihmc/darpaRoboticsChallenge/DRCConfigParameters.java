@@ -66,6 +66,14 @@ public class DRCConfigParameters
    // Convenience field
    public static final boolean USE_R2_ROBOT_MODEL = !USE_GFE_ROBOT_MODEL;
 
+   // Video Source IDs
+   public static final int MULTISENSE_LEFT_CAMERA = 1;
+   public static final int MULTISENSE_RIGHT_CAMERA = 2;
+   public static final int FISHEYE_LEFT_CAMERA = 3;
+   public static final int FISHEYE_RIGHT_CAMERA = 4;
+   public static final int REAR_CAMERA = 5;
+   public static final int VIDEO_FRAME = 6;
+   
    // Networking
    public static final String LOCALHOST = "localhost";
    public static final String CLOUD_MINION1_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMINION_1);

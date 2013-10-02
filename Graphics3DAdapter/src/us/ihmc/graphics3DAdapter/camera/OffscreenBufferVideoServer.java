@@ -46,9 +46,9 @@ public class OffscreenBufferVideoServer
    private class CameraUpdater implements CameraStreamer
    {
 
-      public void updateImage(BufferedImage bufferedImage, long timeStamp, Point3d cameraPosition, Quat4d cameraOrientation, double fov)
+      public void updateImage(BufferedImage bufferedImage, long timeStamp, Point3d cameraPosition, Quat4d cameraOrientation, double fov, int cameraSourceId)
       {
-         videoDataServer.updateImage(bufferedImage, timeStamp, cameraPosition, cameraOrientation, fov);
+         videoDataServer.updateImage(bufferedImage, timeStamp, cameraPosition, cameraOrientation, fov, cameraSourceId);
       }
 
       public Point3d getCameraPosition()
