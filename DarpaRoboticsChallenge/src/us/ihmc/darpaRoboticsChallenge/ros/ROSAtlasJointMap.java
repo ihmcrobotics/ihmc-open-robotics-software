@@ -4,6 +4,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 public class ROSAtlasJointMap
@@ -46,8 +48,6 @@ public class ROSAtlasJointMap
    
    public final static int numberOfJoints = r_arm_mwx + 1; 
    
-   
-
    public static String[] jointNames = new String[numberOfJoints];
    static
    {
@@ -90,6 +90,75 @@ public class ROSAtlasJointMap
       }
    }
    
+   public static final SideDependentList<String[]> forcedSideDependentJointNames = new SideDependentList<String[]>();
+   static
+   {
+	  String[] jointNamesRight = new String[numberOfJoints];
+	  jointNamesRight[back_lbz] = jointNames[back_lbz];
+	  jointNamesRight[back_mby] = jointNames[back_mby];
+	  jointNamesRight[back_ubx] = jointNames[back_ubx];
+	  jointNamesRight[neck_ay] = jointNames[neck_ay];
+	  jointNamesRight[l_leg_uhz] = jointNames[r_leg_uhz];
+	  jointNamesRight[l_leg_mhx] = jointNames[r_leg_mhx];
+	  jointNamesRight[l_leg_lhy] = jointNames[r_leg_lhy];
+	  jointNamesRight[l_leg_kny] = jointNames[r_leg_kny];
+	  jointNamesRight[l_leg_uay] = jointNames[r_leg_uay];
+	  jointNamesRight[l_leg_lax] = jointNames[r_leg_lax];
+	  jointNamesRight[r_leg_uhz] = jointNames[r_leg_uhz];
+	  jointNamesRight[r_leg_mhx] = jointNames[r_leg_mhx];
+	  jointNamesRight[r_leg_lhy] = jointNames[r_leg_lhy];
+	  jointNamesRight[r_leg_kny] = jointNames[r_leg_kny];
+	  jointNamesRight[r_leg_uay] = jointNames[r_leg_uay];
+	  jointNamesRight[r_leg_lax] = jointNames[r_leg_lax];
+	  jointNamesRight[l_arm_usy] = jointNames[r_arm_usy];
+	  jointNamesRight[l_arm_shx] = jointNames[r_arm_shx];
+	  jointNamesRight[l_arm_ely] = jointNames[r_arm_ely];
+	  jointNamesRight[l_arm_elx] = jointNames[r_arm_elx];
+	  jointNamesRight[l_arm_uwy] = jointNames[r_arm_uwy];
+	  jointNamesRight[l_arm_mwx] = jointNames[r_arm_mwx];
+	  jointNamesRight[r_arm_usy] = jointNames[r_arm_usy];
+	  jointNamesRight[r_arm_shx] = jointNames[r_arm_shx];
+	  jointNamesRight[r_arm_ely] = jointNames[r_arm_ely];
+	  jointNamesRight[r_arm_elx] = jointNames[r_arm_elx];
+	  jointNamesRight[r_arm_uwy] = jointNames[r_arm_uwy];
+	  jointNamesRight[r_arm_mwx] = jointNames[r_arm_mwx];
+	  
+	  forcedSideDependentJointNames.put(RobotSide.RIGHT, jointNamesRight);
+	
+	  String[] jointNamesLeft = new String[numberOfJoints];
+	  jointNamesLeft[back_lbz] = jointNames[back_lbz];
+	  jointNamesLeft[back_mby] = jointNames[back_mby];
+	  jointNamesLeft[back_ubx] = jointNames[back_ubx];
+	  jointNamesLeft[neck_ay] = jointNames[neck_ay];
+	  jointNamesLeft[l_leg_uhz] = jointNames[l_leg_uhz];
+	  jointNamesLeft[l_leg_mhx] = jointNames[l_leg_mhx];
+	  jointNamesLeft[l_leg_lhy] = jointNames[l_leg_lhy];
+	  jointNamesLeft[l_leg_kny] = jointNames[l_leg_kny];
+	  jointNamesLeft[l_leg_uay] = jointNames[l_leg_uay];
+	  jointNamesLeft[l_leg_lax] = jointNames[l_leg_lax];
+	  jointNamesLeft[r_leg_uhz] = jointNames[l_leg_uhz];
+	  jointNamesLeft[r_leg_mhx] = jointNames[l_leg_mhx];
+	  jointNamesLeft[r_leg_lhy] = jointNames[l_leg_lhy];
+	  jointNamesLeft[r_leg_kny] = jointNames[l_leg_kny];
+	  jointNamesLeft[r_leg_uay] = jointNames[l_leg_uay];
+	  jointNamesLeft[r_leg_lax] = jointNames[l_leg_lax];
+	  jointNamesLeft[l_arm_usy] = jointNames[l_arm_usy];
+	  jointNamesLeft[l_arm_shx] = jointNames[l_arm_shx];
+	  jointNamesLeft[l_arm_ely] = jointNames[l_arm_ely];
+	  jointNamesLeft[l_arm_elx] = jointNames[l_arm_elx];
+	  jointNamesLeft[l_arm_uwy] = jointNames[l_arm_uwy];
+	  jointNamesLeft[l_arm_mwx] = jointNames[l_arm_mwx];
+	  jointNamesLeft[r_arm_usy] = jointNames[l_arm_usy];
+	  jointNamesLeft[r_arm_shx] = jointNames[l_arm_shx];
+	  jointNamesLeft[r_arm_ely] = jointNames[l_arm_ely];
+	  jointNamesLeft[r_arm_elx] = jointNames[l_arm_elx];
+	  jointNamesLeft[r_arm_uwy] = jointNames[l_arm_uwy];
+	  jointNamesLeft[r_arm_mwx] = jointNames[l_arm_mwx];
+	  
+	  forcedSideDependentJointNames.put(RobotSide.LEFT, jointNamesLeft);
+   }
+   
+   
    public static OneDoFJoint[] getJointMap(Map<String, OneDoFJoint> jointsByName)
    {
       OneDoFJoint[] joints = new OneDoFJoint[numberOfJoints];
@@ -124,6 +193,11 @@ public class ROSAtlasJointMap
    public static String getRightHandForceSensorName()
    {
       return "r_arm_mwx";
+   }
+
+   public static String getHokuyoJointName()
+   {
+      return "hokuyo_joint";
    }
 
    public static String[] getForceSensors()

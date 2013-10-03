@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.*;
 
 public class MultiContactDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot>
 {
@@ -17,26 +18,25 @@ public class MultiContactDRCRobotInitialSetup implements RobotInitialSetup<SDFRo
       // arms
       for (RobotSide robotSide : RobotSide.values)
       {
-         String sideFirstLetterLowerCase = robotSide.getSideNameFirstLetter().toLowerCase();
-
-         robot.getOneDoFJoint(sideFirstLetterLowerCase + "_arm_usy").setQ(defaultArmPosition.get(robotSide).get(ArmJointName.SHOULDER_PITCH));
-         robot.getOneDoFJoint(sideFirstLetterLowerCase + "_arm_shx").setQ(defaultArmPosition.get(robotSide).get(ArmJointName.SHOULDER_ROLL));
-         robot.getOneDoFJoint(sideFirstLetterLowerCase + "_arm_ely").setQ(defaultArmPosition.get(robotSide).get(ArmJointName.ELBOW_PITCH));
-         robot.getOneDoFJoint(sideFirstLetterLowerCase + "_arm_elx").setQ(defaultArmPosition.get(robotSide).get(ArmJointName.ELBOW_ROLL));
-         robot.getOneDoFJoint(sideFirstLetterLowerCase + "_arm_uwy").setQ(defaultArmPosition.get(robotSide).get(ArmJointName.WRIST_PITCH));
-         robot.getOneDoFJoint(sideFirstLetterLowerCase + "_arm_mwx").setQ(defaultArmPosition.get(robotSide).get(ArmJointName.WRIST_ROLL));
+         String[] forcedSideJointNames = forcedSideDependentJointNames.get(robotSide);
+         robot.getOneDoFJoint(forcedSideJointNames[l_arm_usy]).setQ(defaultArmPosition.get(robotSide).get(ArmJointName.SHOULDER_PITCH));
+         robot.getOneDoFJoint(forcedSideJointNames[l_arm_shx]).setQ(defaultArmPosition.get(robotSide).get(ArmJointName.SHOULDER_ROLL));
+         robot.getOneDoFJoint(forcedSideJointNames[l_arm_ely]).setQ(defaultArmPosition.get(robotSide).get(ArmJointName.ELBOW_PITCH));
+         robot.getOneDoFJoint(forcedSideJointNames[l_arm_elx]).setQ(defaultArmPosition.get(robotSide).get(ArmJointName.ELBOW_ROLL));
+         robot.getOneDoFJoint(forcedSideJointNames[l_arm_uwy]).setQ(defaultArmPosition.get(robotSide).get(ArmJointName.WRIST_PITCH));
+         robot.getOneDoFJoint(forcedSideJointNames[l_arm_mwx]).setQ(defaultArmPosition.get(robotSide).get(ArmJointName.WRIST_ROLL));
       }
 
       // left leg
-      robot.getOneDoFJoint("l_leg_uhz").setQ(0.4);
-      robot.getOneDoFJoint("l_leg_mhx").setQ(0.4);
-      robot.getOneDoFJoint("l_leg_lhy").setQ(0.3);
-      robot.getOneDoFJoint("l_leg_kny").setQ(0.8);
+      robot.getOneDoFJoint(jointNames[l_leg_uhz]).setQ(0.4);
+      robot.getOneDoFJoint(jointNames[l_leg_mhx]).setQ(0.4);
+      robot.getOneDoFJoint(jointNames[l_leg_lhy]).setQ(0.3);
+      robot.getOneDoFJoint(jointNames[l_leg_kny]).setQ(0.8);
 
       // right leg
-      robot.getOneDoFJoint("r_leg_mhx").setQ(-0.4);
-      robot.getOneDoFJoint("r_leg_lhy").setQ(0.3);
-      robot.getOneDoFJoint("r_leg_kny").setQ(0.4);
+      robot.getOneDoFJoint(jointNames[r_leg_mhx]).setQ(-0.4);
+      robot.getOneDoFJoint(jointNames[r_leg_lhy]).setQ(0.3);
+      robot.getOneDoFJoint(jointNames[r_leg_kny]).setQ(0.4);
    }
 
    public static SideDependentList<EnumMap<ArmJointName, Double>> getDefaultArmPositionForMultiContactSimulation()

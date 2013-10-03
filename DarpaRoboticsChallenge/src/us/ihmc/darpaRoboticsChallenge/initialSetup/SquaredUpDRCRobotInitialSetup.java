@@ -5,6 +5,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.*;
 
 public class SquaredUpDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot>
 {
@@ -33,23 +34,23 @@ public class SquaredUpDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot
    {
       // Avoid singularities at startup
 
-      //      robot.getOneDoFJoint("l_arm_ely").setQ(1.57);
-//      robot.getOneDoFJoint("l_arm_elx").setQ(1.57);
+      //      robot.getOneDoFJoint(jointNames[l_arm_ely]).setQ(1.57);
+//      robot.getOneDoFJoint(jointNames[l_arm_elx]).setQ(1.57);
 //
-//      robot.getOneDoFJoint("r_arm_ely").setQ(1.57);
-//      robot.getOneDoFJoint("r_arm_elx").setQ(-1.57);
+//      robot.getOneDoFJoint(jointNames[r_arm_ely]).setQ(1.57);
+//      robot.getOneDoFJoint(jointNames[r_arm_elx]).setQ(-1.57);
    }
 
    protected void setLegJointPositions(SDFRobot robot)
    {
-      robot.getOneDoFJoint("l_leg_lhy").setQ(-0.4);
-      robot.getOneDoFJoint("r_leg_lhy").setQ(-0.4);
+      robot.getOneDoFJoint(jointNames[l_leg_lhy]).setQ(-0.4);
+      robot.getOneDoFJoint(jointNames[r_leg_lhy]).setQ(-0.4);
 
-      robot.getOneDoFJoint("l_leg_kny").setQ(0.8);
-      robot.getOneDoFJoint("r_leg_kny").setQ(0.8);
+      robot.getOneDoFJoint(jointNames[l_leg_kny]).setQ(0.8);
+      robot.getOneDoFJoint(jointNames[r_leg_kny]).setQ(0.8);
 
-      robot.getOneDoFJoint("l_leg_uay").setQ(-0.4);
-      robot.getOneDoFJoint("r_leg_uay").setQ(-0.4);
+      robot.getOneDoFJoint(jointNames[l_leg_uay]).setQ(-0.4);
+      robot.getOneDoFJoint(jointNames[r_leg_uay]).setQ(-0.4);
    }
 
    protected void setPositionInWorld(SDFRobot robot)

@@ -15,6 +15,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.*;
 
 
 public class DRCRobotWalkingControllerParameters implements WalkingControllerParameters
@@ -125,25 +126,25 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    public String[] getDefaultHeadOrientationControlJointNames()
    {
       // Get rid of back_ubx to prevent hip roll jumps.
-//      return new String[] {"back_lbz", "back_ubx", "neck_ay"}; // Pelvis will jump around with these setting.
-      return new String[] {"back_lbz", "neck_ay"}; 
-//      return new String[] {"neck_ay"};
+//      return new String[] {jointNames[back_lbz], jointNames[back_ubx], jointNames[neck_ay]}; // Pelvis will jump around with these setting.
+      return new String[] {jointNames[back_lbz], jointNames[neck_ay]}; 
+//      return new String[] {jointNames[neck_ay]};
    }
    
    public String[] getAllowableHeadOrientationControlJointNames()
    {
-      return new String[] {"back_lbz", "back_ubx", "neck_ay"}; 
+      return new String[] {jointNames[back_lbz], jointNames[back_ubx], jointNames[neck_ay]}; 
    }
 
    public String[] getDefaultChestOrientationControlJointNames()
    {
-      //    return new String[] {"back_mby"};
+      //    return new String[] {jointNames[back_mby]};
       return new String[]{};
    }
 
    public String[] getAllowableChestOrientationControlJointNames()
    {
-      return new String[] {"back_mby"};
+      return new String[] {jointNames[back_mby]};
    }
 
    public boolean checkOrbitalEnergyCondition()
@@ -218,7 +219,7 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
 
    public String getJointNameForExtendedPitchRange()
    {
-      return "back_mby";
+      return jointNames[back_mby];
    }
 
 

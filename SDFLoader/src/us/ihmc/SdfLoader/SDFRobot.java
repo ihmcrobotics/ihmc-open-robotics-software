@@ -675,12 +675,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
       rootJoint.getAngularVelocityInBody(vectorToPack);
    }
 
-   public Joint getChestJoint()
-   {
-      return getJoint("back_ubx");
-   }
-
-   private Joint getJoint(String jointName)
+   public Joint getJoint(String jointName)
    {
       return getJointRecursively(this.getRootJoints(), jointName);
    }
