@@ -53,7 +53,7 @@ public class PointCloud
       mat.getAdditionalRenderState().setPointSprite(true);
       mat.getAdditionalRenderState().setBlendMode(BlendMode.Off);
       mat.setBoolean("PointSprite", true);
-      mat.setFloat("Quadratic", 10.0f);
+      mat.setFloat("Quadratic", 7.0f);
 
       Mesh m = new Mesh();
       m.setMode(Mode.Points);

@@ -11,6 +11,8 @@ import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
 import com.jme3.app.SimpleApplication;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Node;
+
 import georegression.struct.point.Point3D_F64;
 
 import java.io.FileInputStream;
@@ -19,6 +21,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 
 /**
  * @author Peter Abeles
@@ -31,7 +35,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication
 
    public static void main(String[] args)
    {
-      ShapesFromPointCloudFileApp test1 = new ShapesFromPointCloudFileApp("/home/pja/Downloads/output.txt");
+      ShapesFromPointCloudFileApp test1 = new ShapesFromPointCloudFileApp("../SensorProcessing/output.txt");
       test1.start();
    }
 
@@ -106,9 +110,13 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication
 
       PointCloud generator = new PointCloud(assetManager);
 
+      Node zup = new Node();
+      zup.setLocalRotation(JMEGeometryUtils.getRotationFromJMEToZupCoordinates());
+
       try
       {
-         rootNode.attachChild(generator.generatePointCloudGraph(points, colors));
+         rootNode.attachChild(zup);
+         zup.attachChild(generator.generatePointCloudGraph(points, colors));
       }
       catch (Exception e)
       {
@@ -119,7 +127,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication
       cam.setLocation(new Vector3f(0, 0, -5));
       cam.lookAtDirection(Vector3f.UNIT_Z, Vector3f.UNIT_Y);
       cam.update();
-      flyCam.setMoveSpeed(25);
+      flyCam.setMoveSpeed(15);
    }
 
    private List<Point3D_F64> readPointCloud( int maxLines )
