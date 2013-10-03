@@ -17,6 +17,7 @@ import us.ihmc.utilities.net.TimestampProvider;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RawOutputWriter;
 
+// fills a ring buffer with pose and joint data and in a worker thread passes it to the appropriate consumer 
 public class DRCPoseCommunicator implements RawOutputWriter
 {
    private final int WORKER_SLEEP_TIME_MILLIS = 1;
