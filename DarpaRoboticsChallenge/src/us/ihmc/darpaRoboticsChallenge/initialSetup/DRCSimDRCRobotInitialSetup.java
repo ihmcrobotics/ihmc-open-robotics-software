@@ -9,6 +9,7 @@ import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.*;
 
 import com.yobotics.simulationconstructionset.GroundContactPoint;
 
@@ -35,35 +36,35 @@ public class DRCSimDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot>
    {
       // Avoid singularities at startup
            
-      robot.getOneDoFJoint("l_leg_uhz").setQ(0.0);
-      robot.getOneDoFJoint("l_leg_mhx").setQ(0.062);
-      robot.getOneDoFJoint("l_leg_lhy").setQ(-0.233);
-      robot.getOneDoFJoint("l_leg_kny").setQ(0.518);
-      robot.getOneDoFJoint("l_leg_uay").setQ(-0.276);
-      robot.getOneDoFJoint("l_leg_lax").setQ(-0.062);
+      robot.getOneDoFJoint(jointNames[l_leg_uhz]).setQ(0.0);
+      robot.getOneDoFJoint(jointNames[l_leg_mhx]).setQ(0.062);
+      robot.getOneDoFJoint(jointNames[l_leg_lhy]).setQ(-0.233);
+      robot.getOneDoFJoint(jointNames[l_leg_kny]).setQ(0.518);
+      robot.getOneDoFJoint(jointNames[l_leg_uay]).setQ(-0.276);
+      robot.getOneDoFJoint(jointNames[l_leg_lax]).setQ(-0.062);
       
       
-      robot.getOneDoFJoint("r_leg_uhz").setQ(0.0);
-      robot.getOneDoFJoint("r_leg_mhx").setQ(-0.062);
-      robot.getOneDoFJoint("r_leg_lhy").setQ(-0.233);
-      robot.getOneDoFJoint("r_leg_kny").setQ(0.518);
-      robot.getOneDoFJoint("r_leg_uay").setQ(-0.276);
-      robot.getOneDoFJoint("r_leg_lax").setQ(0.062);
+      robot.getOneDoFJoint(jointNames[r_leg_uhz]).setQ(0.0);
+      robot.getOneDoFJoint(jointNames[r_leg_mhx]).setQ(-0.062);
+      robot.getOneDoFJoint(jointNames[r_leg_lhy]).setQ(-0.233);
+      robot.getOneDoFJoint(jointNames[r_leg_kny]).setQ(0.518);
+      robot.getOneDoFJoint(jointNames[r_leg_uay]).setQ(-0.276);
+      robot.getOneDoFJoint(jointNames[r_leg_lax]).setQ(0.062);
 
       
-      robot.getOneDoFJoint("l_arm_usy").setQ(0.300);
-      robot.getOneDoFJoint("l_arm_shx").setQ(-1.30);
-      robot.getOneDoFJoint("l_arm_ely").setQ(2.00);
-      robot.getOneDoFJoint("l_arm_elx").setQ(0.498);
-      robot.getOneDoFJoint("l_arm_uwy").setQ(0.000);
-      robot.getOneDoFJoint("l_arm_mwx").setQ(-0.004);
+      robot.getOneDoFJoint(jointNames[l_arm_usy]).setQ(0.300);
+      robot.getOneDoFJoint(jointNames[l_arm_shx]).setQ(-1.30);
+      robot.getOneDoFJoint(jointNames[l_arm_ely]).setQ(2.00);
+      robot.getOneDoFJoint(jointNames[l_arm_elx]).setQ(0.498);
+      robot.getOneDoFJoint(jointNames[l_arm_uwy]).setQ(0.000);
+      robot.getOneDoFJoint(jointNames[l_arm_mwx]).setQ(-0.004);
       
-      robot.getOneDoFJoint("r_arm_usy").setQ(0.300);
-      robot.getOneDoFJoint("r_arm_shx").setQ(1.30);
-      robot.getOneDoFJoint("r_arm_ely").setQ(2.00);
-      robot.getOneDoFJoint("r_arm_elx").setQ(-0.498);
-      robot.getOneDoFJoint("r_arm_uwy").setQ(0.000);
-      robot.getOneDoFJoint("r_arm_mwx").setQ(0.004);
+      robot.getOneDoFJoint(jointNames[r_arm_usy]).setQ(0.300);
+      robot.getOneDoFJoint(jointNames[r_arm_shx]).setQ(1.30);
+      robot.getOneDoFJoint(jointNames[r_arm_ely]).setQ(2.00);
+      robot.getOneDoFJoint(jointNames[r_arm_elx]).setQ(-0.498);
+      robot.getOneDoFJoint(jointNames[r_arm_uwy]).setQ(0.000);
+      robot.getOneDoFJoint(jointNames[r_arm_mwx]).setQ(0.004);
       
       robot.update();
       robot.getRootJointToWorldTransform(rootToWorld);

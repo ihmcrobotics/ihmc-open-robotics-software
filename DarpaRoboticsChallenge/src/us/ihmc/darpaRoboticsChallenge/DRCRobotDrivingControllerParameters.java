@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.*;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -30,13 +31,13 @@ public class DRCRobotDrivingControllerParameters extends DRCRobotWalkingControll
    @Override
    public String[] getDefaultHeadOrientationControlJointNames()
    {
-      return new String[] {"neck_ay"};
+      return new String[] {jointNames[neck_ay]};
    }
 
    @Override
    public String[] getDefaultChestOrientationControlJointNames()
    {
-      return new String[] {"back_lbz", "back_ubx", "back_mby"};
+      return new String[] {jointNames[back_lbz], jointNames[back_ubx], jointNames[back_mby]};
    }
 
    @Override

@@ -227,7 +227,7 @@ public class DRCSimulationFactory
       Joint estimationJoint;
       if (EstimationLinkHolder.usingChestLink())
       {
-         estimationJoint = simulatedRobot.getChestJoint();
+         estimationJoint = simulatedRobot.getJoint(ROSAtlasJointMap.jointNames[ROSAtlasJointMap.back_ubx]);
          if (estimationJoint == null)
             throw new RuntimeException("Couldn't find chest joint!");
       }

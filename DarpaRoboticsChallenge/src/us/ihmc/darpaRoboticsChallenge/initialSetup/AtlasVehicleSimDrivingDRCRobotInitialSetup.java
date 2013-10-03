@@ -5,6 +5,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.*;
 
 public class AtlasVehicleSimDrivingDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot>
 {
@@ -26,27 +27,27 @@ public class AtlasVehicleSimDrivingDRCRobotInitialSetup implements RobotInitialS
       double kneeBend = 1.22; //Math.PI / 2.0;
 
       // Avoid singularities at startup
-      robot.getOneDoFJoint("l_arm_shx").setQ(-1.57);
+      robot.getOneDoFJoint(jointNames[l_arm_shx]).setQ(-1.57);
 
-      robot.getOneDoFJoint("r_arm_shx").setQ(1.57);
+      robot.getOneDoFJoint(jointNames[r_arm_shx]).setQ(1.57);
 
-      robot.getOneDoFJoint("l_arm_ely").setQ(1.57);
-      robot.getOneDoFJoint("l_arm_elx").setQ(1.57);
+      robot.getOneDoFJoint(jointNames[l_arm_ely]).setQ(1.57);
+      robot.getOneDoFJoint(jointNames[l_arm_elx]).setQ(1.57);
 
-      robot.getOneDoFJoint("r_arm_ely").setQ(1.57);
-      robot.getOneDoFJoint("r_arm_elx").setQ(-1.57);
+      robot.getOneDoFJoint(jointNames[r_arm_ely]).setQ(1.57);
+      robot.getOneDoFJoint(jointNames[r_arm_elx]).setQ(-1.57);
 
-      robot.getOneDoFJoint("l_arm_uwy").setQ(0);
-      robot.getOneDoFJoint("r_arm_uwy").setQ(0);
+      robot.getOneDoFJoint(jointNames[l_arm_uwy]).setQ(0);
+      robot.getOneDoFJoint(jointNames[r_arm_uwy]).setQ(0);
 
-      robot.getOneDoFJoint("l_leg_lhy").setQ(hipBend + thighPitch);
-      robot.getOneDoFJoint("r_leg_lhy").setQ(hipBend + thighPitch);
+      robot.getOneDoFJoint(jointNames[l_leg_lhy]).setQ(hipBend + thighPitch);
+      robot.getOneDoFJoint(jointNames[r_leg_lhy]).setQ(hipBend + thighPitch);
 
-      robot.getOneDoFJoint("l_leg_kny").setQ(kneeBend);
-      robot.getOneDoFJoint("r_leg_kny").setQ(kneeBend);
+      robot.getOneDoFJoint(jointNames[l_leg_kny]).setQ(kneeBend);
+      robot.getOneDoFJoint(jointNames[r_leg_kny]).setQ(kneeBend);
 
-      robot.getOneDoFJoint("l_leg_uay").setQ(thighPitch - .3);  //0.087 + thighPitch);
-      robot.getOneDoFJoint("r_leg_uay").setQ(thighPitch - .3); //0.087 + thighPitch);
+      robot.getOneDoFJoint(jointNames[l_leg_uay]).setQ(thighPitch - .3);  //0.087 + thighPitch);
+      robot.getOneDoFJoint(jointNames[r_leg_uay]).setQ(thighPitch - .3); //0.087 + thighPitch);
 
       offset.setX(0.7);
       offset.setY(-0.07);

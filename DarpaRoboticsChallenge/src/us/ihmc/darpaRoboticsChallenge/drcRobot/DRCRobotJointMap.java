@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.RobotSpecificJointNames;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.*;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
@@ -76,27 +77,28 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
 
       for (RobotSide robotSide : RobotSide.values)
       {
+         String[] forcedSideJointNames = forcedSideDependentJointNames.get(robotSide);
+         legJointNames.put(forcedSideJointNames[l_leg_uhz], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_YAW));
+         legJointNames.put(forcedSideJointNames[l_leg_mhx], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_ROLL));
+         legJointNames.put(forcedSideJointNames[l_leg_lhy], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_PITCH));
+         legJointNames.put(forcedSideJointNames[l_leg_kny], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.KNEE));
+         legJointNames.put(forcedSideJointNames[l_leg_uay], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_PITCH));
+         legJointNames.put(forcedSideJointNames[l_leg_lax], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_ROLL));
+
+
+         armJointNames.put(forcedSideJointNames[l_arm_usy], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.SHOULDER_PITCH));
+         armJointNames.put(forcedSideJointNames[l_arm_shx], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.SHOULDER_ROLL));
+         armJointNames.put(forcedSideJointNames[l_arm_ely], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.ELBOW_PITCH));
+         armJointNames.put(forcedSideJointNames[l_arm_elx], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.ELBOW_ROLL));
+         armJointNames.put(forcedSideJointNames[l_arm_uwy], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.WRIST_PITCH));
+         armJointNames.put(forcedSideJointNames[l_arm_mwx], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.WRIST_ROLL));
+
          String prefix = getRobotSidePrefix(robotSide);
-
-         legJointNames.put(prefix + "leg_uhz", new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_YAW));
-         legJointNames.put(prefix + "leg_mhx", new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_ROLL));
-         legJointNames.put(prefix + "leg_lhy", new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_PITCH));
-         legJointNames.put(prefix + "leg_kny", new Pair<RobotSide, LegJointName>(robotSide, LegJointName.KNEE));
-         legJointNames.put(prefix + "leg_uay", new Pair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_PITCH));
-         legJointNames.put(prefix + "leg_lax", new Pair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_ROLL));
-
-
-         armJointNames.put(prefix + "arm_usy", new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.SHOULDER_PITCH));
-         armJointNames.put(prefix + "arm_shx", new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.SHOULDER_ROLL));
-         armJointNames.put(prefix + "arm_ely", new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.ELBOW_PITCH));
-         armJointNames.put(prefix + "arm_elx", new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.ELBOW_ROLL));
-         armJointNames.put(prefix + "arm_uwy", new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.WRIST_PITCH));
-         armJointNames.put(prefix + "arm_mwx", new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.WRIST_ROLL));
 
          limbNames.put(prefix + "hand", new Pair<RobotSide, LimbName>(robotSide, LimbName.ARM));
          limbNames.put(prefix + "foot", new Pair<RobotSide, LimbName>(robotSide, LimbName.LEG));
 
-         jointBeforeFeetNames.put(robotSide, prefix + "leg_lax");
+         jointBeforeFeetNames.put(robotSide, forcedSideJointNames[l_leg_lax]);
 
          footGroundContactPoints.put(robotSide, new ArrayList<Pair<String, Vector3d>>());
          handGroundContactPoints.put(robotSide, new ArrayList<Pair<String, Vector3d>>());
@@ -105,7 +107,7 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
          for (Vector3d footv3d : DRCRobotParameters.DRC_ROBOT_GROUND_CONTACT_POINT_OFFSET_FROM_FOOT)
          {
             // add ankle joint contact points on each corner of the foot
-            footGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(prefix + "leg_lax", footv3d));
+            footGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(forcedSideJointNames[l_leg_lax], footv3d));
          }
 
          if (selectedModel == DRCRobotModel.ATLAS_SANDIA_HANDS && addLoadsOfContactPoints)
@@ -201,9 +203,9 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
          }
       }
 
-      spineJointNames.put("back_lbz", SpineJointName.SPINE_YAW);
-      spineJointNames.put("back_mby", SpineJointName.SPINE_PITCH);
-      spineJointNames.put("back_ubx", SpineJointName.SPINE_ROLL);
+      spineJointNames.put(jointNames[back_lbz], SpineJointName.SPINE_YAW);
+      spineJointNames.put(jointNames[back_mby], SpineJointName.SPINE_PITCH);
+      spineJointNames.put(jointNames[back_ubx], SpineJointName.SPINE_ROLL);
 
       neckJointNames.put("neck_ay", NeckJointName.LOWER_NECK_PITCH);
 
@@ -241,17 +243,17 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
 
    public String getNameOfJointBeforeHand(RobotSide robotSide)
    {
-      return getRobotSidePrefix(robotSide) + "arm_mwx";
+      return forcedSideDependentJointNames.get(robotSide)[l_arm_mwx];
    }
 
    public String getNameOfJointBeforeThigh(RobotSide robotSide)
    {
-      return getRobotSidePrefix(robotSide) + "leg_lhy";
+      return forcedSideDependentJointNames.get(robotSide)[l_leg_lhy];
    }
 
    public String getNameOfJointBeforeChest()
    {
-      return "back_ubx";
+      return jointNames[back_ubx];
    }
 
    private String getRobotSidePrefix(RobotSide robotSide)
