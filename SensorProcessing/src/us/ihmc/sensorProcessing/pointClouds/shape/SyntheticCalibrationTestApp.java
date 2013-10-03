@@ -15,10 +15,8 @@ import bubo.ptcloud.FactoryPointCloudShape;
 import bubo.ptcloud.PointCloudShapeFinder;
 import bubo.ptcloud.PointCloudShapeFinder.Shape;
 import bubo.ptcloud.alg.ConfigSchnabel2007;
-import bubo.ptcloud.tools.PointCloudShapeTools;
 import bubo.ptcloud.wrapper.ConfigMergeShapes;
 import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
-import cern.colt.Arrays;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.math.ColorRGBA;
