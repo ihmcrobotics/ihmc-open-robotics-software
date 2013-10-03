@@ -21,6 +21,7 @@ import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
+// collects Atlas joint positions and Hand positions and packs them together
 public class JointConfigurationGatherer
 {
 
