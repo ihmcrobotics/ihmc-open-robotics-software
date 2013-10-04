@@ -1,5 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.networking.dataProducers;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.vecmath.Quat4d;
@@ -8,14 +9,9 @@ import javax.vecmath.Vector3d;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentCopier;
-import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.darpaRoboticsChallenge.handControl.FingerJoint;
-import us.ihmc.darpaRoboticsChallenge.handControl.SandiaHandModel;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.net.ObjectCommunicator;
-import us.ihmc.utilities.remote.serialization.JointConfigurationData;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
@@ -36,7 +32,7 @@ public class JointConfigurationGatherer
 
    private final SideDependentList<ConcurrentCopier<double[]>> handAngles = new SideDependentList<ConcurrentCopier<double[]>>();
 
-   public JointConfigurationGatherer(SDFFullRobotModel estimatorModel, SideDependentList<SandiaHandModel> handModels,
+   public JointConfigurationGatherer(SDFFullRobotModel estimatorModel, SideDependentList<ArrayList<FingerJoint>> handModels,
          YoVariableRegistry parentRegistry)
    {
 
@@ -56,7 +52,7 @@ public class JointConfigurationGatherer
       for (RobotSide robotSide : RobotSide.values)
       {
          HashMap<String, FingerJoint> jointsByName = new HashMap<String, FingerJoint>();
-         for (FingerJoint joint : handModels.get(robotSide).getHandJoints())
+         for (FingerJoint joint : handModels.get(robotSide))
          {
             jointsByName.put(joint.getName(), joint);
          }
