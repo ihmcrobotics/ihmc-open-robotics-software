@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.Cyl
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
@@ -160,8 +161,10 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
       leftFootContactPoints.add(new FramePoint(leftFootPlaneFrame, -footLengthBackward, footHalfWidth, 0));
       leftFootContactPoints.add(new FramePoint(leftFootPlaneFrame, -footLengthBackward, -footHalfWidth, 0));
       endEffectorsWithDefinedContactModels.add(leftFoot);
+      
+      FrameVector normalContactVector = new FrameVector(leftFootPlaneFrame, 0.0, 0.0, 1.0);
 
-      planeContactModel.setup(0.3, leftFootContactPoints, leftFootFrame, Double.NaN, 0.15); // TODO: don't use NaN. Currently not being used for anything though
+      planeContactModel.setup(0.3, leftFootContactPoints, normalContactVector, leftFootFrame, Double.NaN, 0.15); // TODO: don't use NaN. Currently not being used for anything though
    }
 
    public void addFootAtPose(List<EndEffector> endEffectorsWithDefinedContactModels, String name, FramePose pose)
@@ -182,7 +185,9 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
       contactPoints.add(new FramePoint(leftFootPlaneFrame, -footLengthBackward, -footHalfWidth, 0));
       endEffectorsWithDefinedContactModels.add(leftFoot);
 
-      planeContactModel.setup(0.3, contactPoints, footFrame, Double.NaN, 0.15); // TODO: don't use NaN. Currently not being used for anything though
+      FrameVector normalContactVector = new FrameVector(leftFootPlaneFrame, 0.0, 0.0, 1.0);
+
+      planeContactModel.setup(0.3, contactPoints, normalContactVector, footFrame, Double.NaN, 0.15); // TODO: don't use NaN. Currently not being used for anything though
 
       footFrame.updatePose(pose);
    }
