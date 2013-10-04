@@ -87,12 +87,12 @@ public class DRCNetworkProcessor
          rosNativeNetworkProcessor = null;
       }
 
-      GeoregressionTransformListenerAndProvider transformForDrivingProviderListener = new GeoregressionTransformListenerAndProvider();
+//      GeoregressionTransformListenerAndProvider transformForDrivingProviderListener = new GeoregressionTransformListenerAndProvider();
 
       CameraDataReceiver cameraDataReceiver = new GazeboCameraReceiver(robotPoseBuffer, videoSettings, rosMainNode, networkingManager,
                                                  DRCSensorParameters.FIELD_OF_VIEW, ppsTimestampOffsetProvider);
       LidarDataReceiver lidarDataReceiver = new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, fullRobotModel, robotBoundingBoxes,
-                                               jointMap, fieldComputerClient, rosNativeNetworkProcessor, transformForDrivingProviderListener, ppsTimestampOffsetProvider);
+                                               jointMap, fieldComputerClient, rosNativeNetworkProcessor, ppsTimestampOffsetProvider);
       new VRCScoreDataReceiver(networkingManager, lidarDataReceiver, rosNativeNetworkProcessor);
 
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
@@ -100,31 +100,25 @@ public class DRCNetworkProcessor
       rosMainNode.execute();
 
 
-      if (DRCConfigParameters.USE_DUMMY_DRIVNG)
-      {
-         DrivingProcessorFactory.createCheatingDrivingProcessor(networkingManager, cameraDataReceiver, timestampProvider, rosCoreURI.toString(),
-                 transformForDrivingProviderListener);
-      }
-      else
-      {
-         DrivingProcessorFactory.createDrivingProcessor(networkingManager, cameraDataReceiver, timestampProvider, fieldComputerClient,
-                 transformForDrivingProviderListener);
-      }
+//      if (DRCConfigParameters.USE_DUMMY_DRIVNG)
+//      {
+//         DrivingProcessorFactory.createCheatingDrivingProcessor(networkingManager, cameraDataReceiver, timestampProvider, rosCoreURI.toString(),
+//                 transformForDrivingProviderListener);
+//      }
+//      else
+//      {
+//         DrivingProcessorFactory.createDrivingProcessor(networkingManager, cameraDataReceiver, timestampProvider, fieldComputerClient,
+//                 transformForDrivingProviderListener);
+//      }
    }
 
    public DRCNetworkProcessor(LocalObjectCommunicator scsCommunicator, ObjectCommunicator drcNetworkObjectCommunicator)
    {
       this(drcNetworkObjectCommunicator);
       CameraDataReceiver cameraDataReceiver = new SCSCameraDataReceiver(robotPoseBuffer, videoSettings, scsCommunicator, networkingManager, ppsTimestampOffsetProvider);
-      GeoregressionTransformListenerAndProvider transformForDrivingProviderListener = new GeoregressionTransformListenerAndProvider();
       new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, fullRobotModel, robotBoundingBoxes, jointMap, fieldComputerClient,
-                               transformForDrivingProviderListener, ppsTimestampOffsetProvider);
+                               ppsTimestampOffsetProvider);
 
-      if (!DRCConfigParameters.USE_DUMMY_DRIVNG)
-      {
-         DrivingProcessorFactory.createDrivingProcessor(networkingManager, cameraDataReceiver, timestampProvider, fieldComputerClient,
-                 transformForDrivingProviderListener);
-      }
    }
 
    private DRCNetworkProcessor(ObjectCommunicator fieldComputerClient)
