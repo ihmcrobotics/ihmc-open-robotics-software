@@ -25,6 +25,7 @@ public class NonFlatGroundPlaneContactState implements PlaneContactState
    private final double coefficientOfFriction;
    private final FrameVector contactNormalFrameVector;
    private final int totalNumberOfContactPoints;
+   private boolean inContact;
 
    public NonFlatGroundPlaneContactState(double footLength, double footWidth, Point3d midfootLocation, Vector3d normalToContactPlane,
            double coefficientOfFriction, RigidBody rigidBody)
@@ -69,9 +70,12 @@ public class NonFlatGroundPlaneContactState implements PlaneContactState
       for (int i = 0; i < contactFramePoints2d.size(); i++)
       {
          ContactPoint contactPoint = new ContactPoint(contactFramePoints2d.get(i), this);
+         contactPoint.setInContact(true);
          contactPoints.add(contactPoint);
       }
-
+      
+      inContact = true;
+      
       totalNumberOfContactPoints = contactPoints.size();
    }
 
@@ -92,7 +96,7 @@ public class NonFlatGroundPlaneContactState implements PlaneContactState
 
    public boolean inContact()
    {
-      return true;
+      return inContact;
    }
 
    public ReferenceFrame getPlaneFrame()
