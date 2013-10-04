@@ -1,10 +1,7 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
 import georegression.metric.Intersection3D_F64;
-import georegression.struct.line.LineGeneral2D_F64;
-import georegression.struct.line.LineParametric2D_F64;
 import georegression.struct.line.LineParametric3D_F64;
-import georegression.struct.plane.PlaneGeneral3D_F32;
 import georegression.struct.plane.PlaneGeneral3D_F64;
 import georegression.struct.plane.PlaneNormal3D_F64;
 import georegression.struct.point.Point3D_F64;
@@ -16,15 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.commons.collections.FastArrayList;
-
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 import bubo.ptcloud.CloudShapeTypes;
 import bubo.ptcloud.FactoryPointCloudShape;
 import bubo.ptcloud.PointCloudShapeFinder;
 import bubo.ptcloud.PointCloudShapeFinder.Shape;
 import bubo.ptcloud.alg.ConfigSchnabel2007;
-import bubo.ptcloud.alg.ShapeDescription;
 import bubo.ptcloud.wrapper.ConfigMergeShapes;
 import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
 
@@ -32,7 +26,6 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
-import com.vividsolutions.jts.operation.union.PointGeometryUnion;
 
 /**
  * @author Alex Lesman
@@ -129,7 +122,7 @@ public class SyntheticCalibrationTestApp extends SimpleApplication
    }
    
    private void orient(PointCloudShapeFinder shapeFinder) {
-      ArrayList<PlaneGeneral3D_F64> planes = new ArrayList<>();
+      ArrayList<PlaneGeneral3D_F64> planes = new ArrayList<PlaneGeneral3D_F64>();
       
       for (Shape shape : shapeFinder.getFound()) {
          System.out.println(shape.type);
