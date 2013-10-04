@@ -116,6 +116,9 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
 
 		for (int i = 0; i < numberOfPointsInContact; i++)
 		{
+			FramePoint framePoint = contactPoints.get(i);
+			framePoint.changeFrame(contactFrame);
+			
 			for (int j = 0; j < VECTORS; j++)
 			{
 				int rhoPosition = i * VECTORS + j;
@@ -140,8 +143,6 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
 				tempTransformLinearPart.transform(tempLinearPart);
 				tempLinearPart.normalize();
 
-				FramePoint framePoint = contactPoints.get(i);
-				framePoint.changeFrame(contactFrame);
 				tempArm.set(framePoint.getX() * tempArm.x, framePoint.getY() * tempArm.y, framePoint.getZ() * tempArm.z);
 				tempForceVector.setUsingArm(contactFrame, tempLinearPart, tempArm);
 				tempForceVector.changeFrame(endEffectorFrame);

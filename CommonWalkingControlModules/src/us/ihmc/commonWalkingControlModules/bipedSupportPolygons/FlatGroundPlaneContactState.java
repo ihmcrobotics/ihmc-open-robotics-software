@@ -23,6 +23,7 @@ public class FlatGroundPlaneContactState implements PlaneContactState
    private final double coefficientOfFriction;
    private final FrameVector contactNormalFrameVector;
    private final int totalNumberOfContactPoints;
+   private boolean inContact;
 
    public static FlatGroundPlaneContactState createRandomFlatGroundContactState(Random random, boolean leftSide, double coefficientOfFriction, RigidBody rigidBody)
    {
@@ -36,7 +37,7 @@ public class FlatGroundPlaneContactState implements PlaneContactState
          midfootLocation.setY(-midfootLocation.getY());
 
       FlatGroundPlaneContactState flatGroundPlaneContactState = new FlatGroundPlaneContactState(footLength, footWidth, midfootLocation, coefficientOfFriction, rigidBody);
-
+      
       return flatGroundPlaneContactState;
    }
 
@@ -59,9 +60,12 @@ public class FlatGroundPlaneContactState implements PlaneContactState
       for (int i = 0; i < contactFramePoints2d.size(); i++)
       {
          ContactPoint contactPoint = new ContactPoint(contactFramePoints2d.get(i), this);
+         contactPoint.setInContact(true);
          contactPoints.add(contactPoint);
       }
-
+      
+      inContact = true;
+      
       totalNumberOfContactPoints = contactPoints.size();
    }
 
@@ -106,9 +110,12 @@ public class FlatGroundPlaneContactState implements PlaneContactState
       for (int i = 0; i < contactFramePoints2d.size(); i++)
       {
          ContactPoint contactPoint = new ContactPoint(contactFramePoints2d.get(i), this);
+         contactPoint.setInContact(true);
          contactPoints.add(contactPoint);
       }
-
+      
+      inContact = true;
+      
       totalNumberOfContactPoints = contactPoints.size();
    }
 
@@ -119,7 +126,17 @@ public class FlatGroundPlaneContactState implements PlaneContactState
 
    public boolean inContact()
    {
-      return true;
+      return inContact;
+   }
+
+   public void setFullyConstrained()
+   {
+      for (int i = 0; i < totalNumberOfContactPoints; i++)
+      {
+         contactPoints.get(i).setInContact(true);
+      }
+      
+      inContact = true;
    }
 
    public List<FramePoint> getCopyOfContactFramePointsInContact()
