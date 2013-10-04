@@ -57,7 +57,7 @@ public class ReflectionSimulationComparerTest
 
       Collection<Field> differingFields = comparer.getDifferingFields();
       
-      assertEquals(3, differingFields.size());
+      assertEquals(4, differingFields.size());
       for (Field field : differingFields)
       {
         String fieldName = field.getName();
