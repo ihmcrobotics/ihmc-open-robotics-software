@@ -15,8 +15,6 @@ public class SandiaHandModel
 
       THUMB, INDEX, MIDDLE, RING;
 
-      public final static SandiaFingerName[] values = values();
-
       public final static SandiaFingerName[] fingers = { INDEX, MIDDLE, RING };
 
       public int getNumber()
