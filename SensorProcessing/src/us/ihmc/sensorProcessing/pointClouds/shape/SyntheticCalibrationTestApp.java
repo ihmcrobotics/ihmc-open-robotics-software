@@ -1,5 +1,15 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
+import bubo.ptcloud.CloudShapeTypes;
+import bubo.ptcloud.FactoryPointCloudShape;
+import bubo.ptcloud.PointCloudShapeFinder;
+import bubo.ptcloud.alg.ConfigSchnabel2007;
+import bubo.ptcloud.wrapper.ConfigMergeShapes;
+import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
+import com.jme3.app.SimpleApplication;
+import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector3f;
+import com.jme3.scene.Node;
 import georegression.metric.Intersection3D_F64;
 import georegression.struct.line.LineParametric3D_F64;
 import georegression.struct.plane.PlaneGeneral3D_F64;
@@ -8,24 +18,11 @@ import georegression.struct.point.Point3D_F64;
 import georegression.struct.point.Vector3D_F64;
 import georegression.struct.shapes.Cylinder3D_F64;
 import georegression.struct.shapes.Sphere3D_F64;
+import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
-import bubo.ptcloud.CloudShapeTypes;
-import bubo.ptcloud.FactoryPointCloudShape;
-import bubo.ptcloud.PointCloudShapeFinder;
-import bubo.ptcloud.PointCloudShapeFinder.Shape;
-import bubo.ptcloud.alg.ConfigSchnabel2007;
-import bubo.ptcloud.wrapper.ConfigMergeShapes;
-import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
-
-import com.jme3.app.SimpleApplication;
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.Vector3f;
-import com.jme3.scene.Node;
 
 /**
  * @author Alex Lesman
@@ -102,7 +99,7 @@ public class SyntheticCalibrationTestApp extends SimpleApplication
 
       List<Point3D_F64> cloud = createBoxCloud(new Point3D_F64(0, 0, 0), -1, .05);
 
-      ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(100, 0.5, 0.1, 0.05, CloudShapeTypes.PLANE);
+      ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(100, 0.8, 0.1, 0.05, CloudShapeTypes.PLANE);
       configRansac.minModelAccept = 300;
       configRansac.octreeSplit = 300;
       configRansac.ransacExtension = 200;
@@ -124,7 +121,7 @@ public class SyntheticCalibrationTestApp extends SimpleApplication
    private void orient(PointCloudShapeFinder shapeFinder) {
       ArrayList<PlaneGeneral3D_F64> planes = new ArrayList<PlaneGeneral3D_F64>();
       
-      for (Shape shape : shapeFinder.getFound()) {
+      for (PointCloudShapeFinder.Shape shape : shapeFinder.getFound()) {
          System.out.println(shape.type);
          if (shape.type == CloudShapeTypes.PLANE) 
             planes.add((PlaneGeneral3D_F64)shape.parameters);
@@ -153,7 +150,7 @@ public class SyntheticCalibrationTestApp extends SimpleApplication
       System.out.println("total shapes found: " + found.size());
       int total = 0;
 
-      Shape unShape = new Shape();
+      PointCloudShapeFinder.Shape unShape = new PointCloudShapeFinder.Shape();
       unShape.points = unmatched;
       found.add(unShape);
 

@@ -3,6 +3,7 @@ package us.ihmc.sensorProcessing.pointClouds.shape;
 import bubo.io.serialization.DataDefinition;
 import bubo.io.serialization.SerializationDefinitionManager;
 import bubo.io.text.ReadCsvObjectSmart;
+import bubo.ptcloud.CloudShapeTypes;
 import bubo.ptcloud.FactoryPointCloudShape;
 import bubo.ptcloud.PointCloudShapeFinder;
 import bubo.ptcloud.alg.ConfigSchnabel2007;
@@ -12,8 +13,8 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
-
 import georegression.struct.point.Point3D_F64;
+import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -21,8 +22,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 
 /**
  * @author Peter Abeles
@@ -47,11 +46,13 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication
    @Override
    public void simpleInitApp()
    {
-      List<Point3D_F64> cloud = readPointCloud(1000000);
+      List<Point3D_F64> cloud = readPointCloud(10000000);
 
-      ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(100, 0.3, 0.1, 0.1);
+      ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(100, 0.8, 0.15, 0.15, CloudShapeTypes.PLANE);
       configRansac.minModelAccept = 200;
       configRansac.octreeSplit = 300;
+//      configRansac.maximumAllowedIterations = 5000;
+      configRansac.ransacExtension = 20;
 
       ConfigSurfaceNormals configSurface = new ConfigSurfaceNormals(10, 30, Double.MAX_VALUE);
       ConfigMergeShapes configMerge = new ConfigMergeShapes(0.6, 0.9);
