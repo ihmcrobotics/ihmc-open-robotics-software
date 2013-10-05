@@ -10,7 +10,6 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCSimDRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.remote.RemoteAtlasVisualizer;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.robotDataCommunication.YoVariableServer;
-import us.ihmc.robotDataCommunication.logger.YoVariableLoggerDispatcher;
 import us.ihmc.utilities.Pair;
 
 import com.martiansoftware.jsap.JSAPException;
@@ -61,7 +60,6 @@ public class DRCFlatGroundWalkingTrack
       if (START_YOVARIABLE_SERVER)
       {
          robotVisualizer = new YoVariableServer(robotInterface.getRobot().getRobotsYoVariableRegistry(), RemoteAtlasVisualizer.defaultPort, DRCConfigParameters.ESTIMATE_DT, dynamicGraphicObjectsListRegistry);
-         YoVariableLoggerDispatcher.requestLogSession("localhost", getClass().getSimpleName());
       }
       
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.USE_GAZEBO_PHYSICS);
@@ -85,7 +83,6 @@ public class DRCFlatGroundWalkingTrack
       if (robotVisualizer != null)
       {
          robotVisualizer.start();
-         
       }
    }
 

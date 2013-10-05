@@ -11,7 +11,7 @@ import com.martiansoftware.jsap.Switch;
 public class YoVariableLoggerOptions
 {
    public final static String defaultLogDirectory = System.getProperty("user.home") + "/robotLogs";
-   public final static String defaultBmdCapturePath ="lib/bin/bmdcapture"; 
+   public final static String defaultBmdCapturePath ="bin/bmdcapture"; 
    public final static String defaultAvConvPath = "/usr/local/bin/ffmpeg";
    public final static String defaultVideoCodec = "mjpeg";
    public final static int defaultVideoQuality = 5;
