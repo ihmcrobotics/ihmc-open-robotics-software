@@ -26,9 +26,10 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
 	private double wRho;
 	private final DenseMatrix64F[] rhoQ = new DenseMatrix64F[MAX_RHO_SIZE];
 	private SpatialForceVector tempForceVector= new SpatialForceVector();
-	private Matrix3d tempTransformLinearPart = new Matrix3d();
-	private Vector3d tempLinearPart = new Vector3d();
-	private Vector3d tempArm = new Vector3d();
+	private final Matrix3d tempTransformLinearPart = new Matrix3d();
+	private final Vector3d tempLinearPart = new Vector3d();
+	private final Vector3d tempArm = new Vector3d();
+	private final FramePoint tempFramePoint = new FramePoint();
 
 
 	public OptimizerPlaneContactModel()
@@ -58,15 +59,17 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
 			throw new RuntimeException("Unhandled number of contact points: " + numberOfPointsInContact);
 		}
 
-		for (int i = 0; i < numberOfPointsInContact; i++)
+		int i = -1;
+		
+		for (ContactPoint contactPoint : plane.getContactPoints())
 		{
-			ContactPoint contactPoint = plane.getContactPoints().get(i);
-			
 			if (!contactPoint.isInContact())
-				continue;
+			   continue;
 			
-			FramePoint framePoint = contactPoint.getPosition();
-			framePoint.changeFrame(contactFrame);
+			i++;
+			
+			tempFramePoint.setAndChangeFrame(contactPoint.getPosition());
+			tempFramePoint.changeFrame(contactFrame);
 			
 			for (int j = 0; j < VECTORS; j++)
 			{
@@ -92,7 +95,7 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
 				tempTransformLinearPart.transform(tempLinearPart);
 				tempLinearPart.normalize();
 
-				tempArm.set(framePoint.getX() * tempArm.x, framePoint.getY() * tempArm.y, framePoint.getZ() * tempArm.z);
+				tempArm.set(tempFramePoint.getX() * tempArm.x, tempFramePoint.getY() * tempArm.y, tempFramePoint.getZ() * tempArm.z);
 				tempForceVector.setUsingArm(contactFrame, tempLinearPart, tempArm);
 				tempForceVector.changeFrame(plane.getFrameAfterParentJoint());
 
@@ -116,8 +119,8 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
 
 		for (int i = 0; i < numberOfPointsInContact; i++)
 		{
-			FramePoint framePoint = contactPoints.get(i);
-			framePoint.changeFrame(contactFrame);
+		   tempFramePoint.setAndChangeFrame(contactPoints.get(i));
+		   tempFramePoint.changeFrame(contactFrame);
 			
 			for (int j = 0; j < VECTORS; j++)
 			{
@@ -143,7 +146,7 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
 				tempTransformLinearPart.transform(tempLinearPart);
 				tempLinearPart.normalize();
 
-				tempArm.set(framePoint.getX() * tempArm.x, framePoint.getY() * tempArm.y, framePoint.getZ() * tempArm.z);
+				tempArm.set(tempFramePoint.getX() * tempArm.x, tempFramePoint.getY() * tempArm.y, tempFramePoint.getZ() * tempArm.z);
 				tempForceVector.setUsingArm(contactFrame, tempLinearPart, tempArm);
 				tempForceVector.changeFrame(endEffectorFrame);
 
