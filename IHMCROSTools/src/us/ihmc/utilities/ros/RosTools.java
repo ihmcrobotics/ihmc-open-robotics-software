@@ -10,14 +10,14 @@ import java.awt.image.WritableRaster;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.UnknownHostException;
 
 import javax.imageio.ImageIO;
 
 import org.ros.node.NodeConfiguration;
+
+import us.ihmc.utilities.net.NetworkTools;
 
 public class RosTools
 {
@@ -68,66 +68,9 @@ public class RosTools
       return ret;
    }
 
-   public static InetAddress getMyIP(URI master)
-   {
-      try
-      {
-         InetAddress inetAddress = InetAddress.getByName(master.getHost());
-         InetAddress listenAddress;
-         if (inetAddress.isLoopbackAddress())
-         {
-            listenAddress = inetAddress;
-         }
-         else
-         {
-            Socket testSocket = new Socket(master.getHost(), master.getPort());
-            listenAddress = testSocket.getLocalAddress();
-            testSocket.close();
-            /*
-             * At first the following code looks like a better solution, however
-             * InetAddress.isReachable does not work without being a super user.
-             */
-
-            //            // Find first local address the master host is reachable from
-            //            final Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
-            //            
-            //            while(networkInterfaces.hasMoreElements()) {
-            //               NetworkInterface iface = networkInterfaces.nextElement();
-            //               
-            //               if(iface.isLoopback())
-            //               {
-            //                  continue;
-            //               }
-            //               
-            //               if(inetAddress.isReachable(iface, 0, 100))
-            //               {
-            //                  for(InterfaceAddress ifaceAddr : iface.getInterfaceAddresses())
-            //                  {
-            //                     if(ifaceAddr.getAddress().getAddress().length == 4)
-            //                     {
-            //                        listenAddress = ifaceAddr.getAddress();
-            //                     }
-            //                  }
-            //               }
-            //             }
-
-         }
-         return listenAddress;
-      }
-      catch (UnknownHostException e)
-      {
-         throw new RuntimeException("Invalid hostname: " + master.getHost());
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException("Cannot connect to ROS\n" + e.getMessage());
-      }
-      
-   }
-   
    public static NodeConfiguration createNodeConfiguration(URI master)
    {
-      InetAddress listenAddress = getMyIP(master);
+      InetAddress listenAddress = NetworkTools.getMyIP(master);
       
 
       NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(listenAddress.getHostAddress(), master);
@@ -140,7 +83,7 @@ public class RosTools
    {
       try
       {
-         return getMyIP(new URI(rosMasterURI));
+         return NetworkTools.getMyIP(new URI(rosMasterURI));
       }
       catch (URISyntaxException e)
       {

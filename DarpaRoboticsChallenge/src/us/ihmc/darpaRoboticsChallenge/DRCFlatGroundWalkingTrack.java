@@ -1,6 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import us.ihmc.GazeboStateCommunicator.yoVariableCommunicator.YoVariableServer;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
@@ -10,6 +9,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCSimDRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.remote.RemoteAtlasVisualizer;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
+import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.utilities.Pair;
 
 import com.martiansoftware.jsap.JSAPException;

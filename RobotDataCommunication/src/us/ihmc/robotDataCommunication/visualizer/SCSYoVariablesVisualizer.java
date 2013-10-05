@@ -1,39 +1,30 @@
-package us.ihmc.darpaRoboticsChallenge.remote;
+package us.ihmc.robotDataCommunication.visualizer;
 
-import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.robotDataCommunication.YoVariableClient;
-import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesUpdatedListener;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 
-public class RemoteAtlasVisualizer
+public class SCSYoVariablesVisualizer
 {
    public static final String defaultHost = "localhost";
    public static final int defaultPort = 5555;
    
-   public RemoteAtlasVisualizer(String host, int port, int bufferSize)
+   public SCSYoVariablesVisualizer(String host, int port, int bufferSize)
    {
       System.out.println("Connecting to host " + host);
       
-      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_SANDIA_HANDS, false);
-      JaxbSDFLoader robotLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
-      SDFRobot robot = robotLoader.createRobot(jointMap, false);
-      SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new SCSYoVariablesUpdatedListener(robot, bufferSize);
-      
+      SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new SCSYoVariablesUpdatedListener(bufferSize);
+
       YoVariableClient client = new YoVariableClient(host, port, scsYoVariablesUpdatedListener, "remote");
       client.start();
    }
 
    public static void main(String[] args) throws JSAPException
    {
-      int bufferSize = 8196;
+      int bufferSize=32768;
       JSAP jsap = new JSAP();
       
       FlaggedOption hostOption = new FlaggedOption("host").setStringParser(JSAP.STRING_PARSER).setRequired(false).setLongFlag("host").setShortFlag('L').setDefault(
@@ -51,12 +42,12 @@ public class RemoteAtlasVisualizer
          String host = config.getString("host");
          int port = config.getInt("port");
          
-         new RemoteAtlasVisualizer(host, port, bufferSize);         
+         new SCSYoVariablesVisualizer(host, port, bufferSize);         
       }
       else
       {
          System.err.println();
-         System.err.println("Usage: java " + RemoteAtlasVisualizer.class.getName());
+         System.err.println("Usage: java " + SCSYoVariablesUpdatedListener.class.getName());
          System.err.println("                " + jsap.getUsage());
          System.err.println();
          System.exit(1);
