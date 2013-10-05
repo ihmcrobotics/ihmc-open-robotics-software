@@ -20,7 +20,8 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 {
    public static final String propertyFile = "robotData.log";
-   private static final long timeout = 1000; 
+   private static final long connectTimeout = 30000;
+   private static final long disconnectTimeout = 1000; 
    private static final String handshakeFilename = "handshake.proto";
    private static final String dataFilename = "robotData.bin";
    
@@ -119,14 +120,17 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
          }         
       }
       
-      try
+      if(!options.getDisableVideo())
       {
-         videoDataLogger = new VideoDataLogger(directory, logProperties, options);
-      }
-      catch (IOException e)
-      {
-         System.err.println("Cannot start video data logger");
-         e.printStackTrace();
+         try
+         {
+            videoDataLogger = new VideoDataLogger(directory, logProperties, options);
+         }
+         catch (IOException e)
+         {
+            System.err.println("Cannot start video data logger");
+            e.printStackTrace();
+         }   
       }
    }
 
@@ -168,12 +172,20 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 
    public void receiveTimedOut(long timeoutInMillis)
    {
+      totalTimeout += timeoutInMillis;
       if(connected)
       {
-         totalTimeout += timeoutInMillis;
-         if(totalTimeout > timeout)
+         if(totalTimeout > disconnectTimeout)
          {
             System.out.println("Connection lost, closing client.");
+            yoVariableClient.close();
+         }
+      }
+      else
+      {
+         if(totalTimeout > connectTimeout)
+         {
+            System.out.println("Cannot connect to client, closing");
             yoVariableClient.close();
          }
       }

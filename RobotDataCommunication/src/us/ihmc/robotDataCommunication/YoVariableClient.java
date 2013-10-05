@@ -1,5 +1,8 @@
 package us.ihmc.robotDataCommunication;
 
+import java.io.IOException;
+import java.net.SocketTimeoutException;
+
 
 
 public class YoVariableClient
@@ -33,15 +36,26 @@ public class YoVariableClient
       listener.setYoVariableClient(this);
    }
 
+   public void start()
+   {
+      try
+      {
+         start(-1);
+      }
+      catch (SocketTimeoutException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
 
-   public synchronized void start()
+   public synchronized void start(long timeout) throws SocketTimeoutException
    {
       if (started)
       {
          throw new RuntimeException("Client already started");
       }
 
-      yoVariableHandshakeClient.connect();
+      yoVariableHandshakeClient.connect(timeout);
       listener.setRegistry(yoVariableHandshakeClient.getRootRegistry());
       listener.setJointStates(yoVariableHandshakeClient.getJointStates());
       listener.registerDynamicGraphicObjectListsRegistry(yoVariableHandshakeClient.getDynamicGraphicObjectsListRegistry());
