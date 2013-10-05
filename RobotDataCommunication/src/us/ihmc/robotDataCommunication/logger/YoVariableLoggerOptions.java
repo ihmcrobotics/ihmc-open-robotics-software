@@ -6,11 +6,12 @@ import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 import com.martiansoftware.jsap.Parameter;
 import com.martiansoftware.jsap.SimpleJSAP;
+import com.martiansoftware.jsap.Switch;
 
 public class YoVariableLoggerOptions
 {
-   public final static String defaultLogDirectory = "~/robotLogs";
-   public final static String defaultBmdCapturePath ="/Users/jsmith/workspace/GazeboStateCommunicator/external/bmdtools/bmdcapture"; 
+   public final static String defaultLogDirectory = System.getProperty("user.home") + "/robotLogs";
+   public final static String defaultBmdCapturePath ="lib/bin/bmdcapture"; 
    public final static String defaultAvConvPath = "/usr/local/bin/ffmpeg";
    public final static String defaultVideoCodec = "mjpeg";
    public final static int defaultVideoQuality = 5;
@@ -23,6 +24,7 @@ public class YoVariableLoggerOptions
    private String videoCodec = defaultVideoCodec;
    private int videoQuality = defaultVideoQuality;
 
+   private boolean disableVideo = false;
 
    
    public static YoVariableLoggerOptions parse(String[] args) throws JSAPException
@@ -30,6 +32,7 @@ public class YoVariableLoggerOptions
       SimpleJSAP jsap = new SimpleJSAP("YoVariabeLogger", "Logs YoVariables and video from a robot", 
             new Parameter[]
             {
+               new Switch("disableVideo", 'n', "noVideo", "Disable video recording"),
                new FlaggedOption("logDirectory", JSAP.STRING_PARSER, YoVariableLoggerOptions.defaultLogDirectory, JSAP.NOT_REQUIRED, 'd', "directory", "Directory where to save log files"),
                new FlaggedOption("bmdCapturePath", JSAP.STRING_PARSER, YoVariableLoggerOptions.defaultBmdCapturePath, JSAP.NOT_REQUIRED, 'b', "bmdcapture", "Full path of bmdcapture"),
                new FlaggedOption("avconvPath", JSAP.STRING_PARSER, YoVariableLoggerOptions.defaultAvConvPath, JSAP.NOT_REQUIRED, 'a', "avconv", "Full path of avconv"),
@@ -45,7 +48,8 @@ public class YoVariableLoggerOptions
       options.setBmdCapturePath(config.getString("bmdCapturePath"));
       options.setAvconvPath(config.getString("avconvPath"));
       options.setVideoCodec(config.getString("videoCodec"));
-      options.setVideoQuality(config.getInt("videoQUality"));
+      options.setVideoQuality(config.getInt("videoQuality"));
+      options.setDisableVideo(config.getBoolean("disableVideo"));
       
       return options;
    }
@@ -98,5 +102,15 @@ public class YoVariableLoggerOptions
    public void setVideoQuality(int videoQuality)
    {
       this.videoQuality = videoQuality;
+   }
+
+   public boolean getDisableVideo()
+   {
+      return disableVideo;
+   }
+
+   public void setDisableVideo(boolean disableVideo)
+   {
+      this.disableVideo = disableVideo;
    }
 }

@@ -2,6 +2,7 @@ package us.ihmc.robotDataCommunication.logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -12,6 +13,7 @@ public class YoVariableLogger
 {
    public static final String defaultHost = "192.168.6.202";
    public static final int defaultPort = 5555;
+   public static final long timeout = 30000;
    
    
    private final YoVariableClient client;
@@ -34,7 +36,15 @@ public class YoVariableLogger
      
       YoVariableLoggerListener logger = new YoVariableLoggerListener(directory, options);
       client = new YoVariableClient(host, port, logger, "");
-      client.start();
+      try
+      {
+         client.start(timeout);
+      }
+      catch(SocketTimeoutException e)
+      {
+         directory.delete();
+         throw e;
+      }
    }
    
    
