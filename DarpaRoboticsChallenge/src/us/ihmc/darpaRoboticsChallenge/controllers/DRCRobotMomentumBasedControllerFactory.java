@@ -1,5 +1,10 @@
 package us.ihmc.darpaRoboticsChallenge.controllers;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import us.ihmc.atlas.AtlasJointIdMap;
+import us.ihmc.atlas.AtlasJointPDGains;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
@@ -19,6 +24,7 @@ import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromController;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
@@ -73,11 +79,18 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 
       double gravityZ = 9.81;
 
+      Map<OneDoFJoint, Double> initialPositionControlKpGains = new HashMap<OneDoFJoint, Double>();
+      Map<OneDoFJoint, Double> initialPositionControlKdGains = new HashMap<OneDoFJoint, Double>();
+      
+      AtlasJointPDGains.createMaps(fullRobotModel, initialPositionControlKpGains, initialPositionControlKdGains);
+      
+      
       RobotController highLevelHumanoidController = highLevelHumanoidControllerFactory.create(estimationLink, estimationFrame, fullRobotModel,
-                                                               referenceFrames, null, yoTime, gravityZ, twistCalculator, centerOfMassJacobian, bipedFeet,
-                                                               controlDT, footSwitches, handControllers, lidarControllerInterface,
-                                                               stateEstimationDataFromControllerSink, dynamicGraphicObjectsListRegistry, specificRegistry,
-                                                               guiSetterUpperRegistry, null);
+            initialPositionControlKpGains, initialPositionControlKdGains, 
+            referenceFrames, null, yoTime, gravityZ, twistCalculator, centerOfMassJacobian, bipedFeet,
+            controlDT, footSwitches, handControllers, lidarControllerInterface,
+            stateEstimationDataFromControllerSink, dynamicGraphicObjectsListRegistry, specificRegistry,
+            guiSetterUpperRegistry, null);
       highLevelHumanoidController.getYoVariableRegistry().addChild(specificRegistry);
 
 
