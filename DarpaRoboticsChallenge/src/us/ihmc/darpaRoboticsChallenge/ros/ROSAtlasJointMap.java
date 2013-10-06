@@ -14,102 +14,70 @@ public class ROSAtlasJointMap
     * Copied from
     *    https://bitbucket.org/osrf/drcsim/raw/default/ros/atlas_msgs/msg/AtlasState.msg
     */
-	public final static boolean ISATLASV3NAMING = false;
    
-   public final static int back_lbz  = 0;
-   public final static int back_mby  = 1;
-   public final static int back_ubx  = 2;
-   public final static int neck_ay   = 3;
-   public final static int l_leg_uhz = 4;
-   public final static int l_leg_mhx = 5;
-   public final static int l_leg_lhy = 6;
+   public final static int back_bkz  = 0;
+   public final static int back_bky  = 1;
+   public final static int back_bkx  = 2;
+   public final static int neck_ry   = 3;
+   public final static int l_leg_hpz = 4;
+   public final static int l_leg_hpx = 5;
+   public final static int l_leg_hpy = 6;
    public final static int l_leg_kny = 7;
-   public final static int l_leg_uay = 8;
-   public final static int l_leg_lax = 9;
-   public final static int r_leg_uhz = 10;
-   public final static int r_leg_mhx = 11;
-   public final static int r_leg_lhy = 12;
+   public final static int l_leg_aky = 8;
+   public final static int l_leg_akx = 9;
+   public final static int r_leg_hpz = 10;
+   public final static int r_leg_hpx = 11;
+   public final static int r_leg_hpy = 12;
    public final static int r_leg_kny = 13;
-   public final static int r_leg_uay = 14;
-   public final static int r_leg_lax = 15;
-   public final static int l_arm_usy = 16;
+   public final static int r_leg_aky = 14;
+   public final static int r_leg_akx = 15;
+   public final static int l_arm_shy = 16;
    public final static int l_arm_shx = 17;
    public final static int l_arm_ely = 18;
    public final static int l_arm_elx = 19;
-   public final static int l_arm_uwy = 20;
-   public final static int l_arm_mwx = 21;
-   public final static int r_arm_usy = 22;
+   public final static int l_arm_wry = 20;
+   public final static int l_arm_wrx = 21;
+   public final static int r_arm_shy = 22;
    public final static int r_arm_shx = 23;
    public final static int r_arm_ely = 24;
    public final static int r_arm_elx = 25;
-   public final static int r_arm_uwy = 26;
-   public final static int r_arm_mwx = 27;
+   public final static int r_arm_wry = 26;
+   public final static int r_arm_wrx = 27;
    
-   public final static int numberOfJoints = r_arm_mwx + 1; 
+   public final static int numberOfJoints = r_arm_wrx + 1; 
    
    public static String[] jointNames = new String[numberOfJoints];
    static
    {	
-		if (ISATLASV3NAMING) {
-			jointNames[back_lbz] = "back_bkz";
-			jointNames[back_mby] = "back_bky";
-			jointNames[back_ubx] = "back_bkx";
-			jointNames[neck_ay] = "neck_ry";
-			jointNames[l_leg_uhz] = "l_leg_hpz";
-			jointNames[l_leg_mhx] = "l_leg_hpx";
-			jointNames[l_leg_lhy] = "l_leg_hpy";
+	
+			jointNames[back_bkz] = "back_bkz";
+			jointNames[back_bky] = "back_bky";
+			jointNames[back_bkx] = "back_bkx";
+			jointNames[neck_ry] = "neck_ry";
+			jointNames[l_leg_hpz] = "l_leg_hpz";
+			jointNames[l_leg_hpx] = "l_leg_hpx";
+			jointNames[l_leg_hpy] = "l_leg_hpy";
 			jointNames[l_leg_kny] = "l_leg_kny";
-			jointNames[l_leg_uay] = "l_leg_aky";
-			jointNames[l_leg_lax] = "l_leg_akx";
-			jointNames[r_leg_uhz] = "r_leg_hpz";
-			jointNames[r_leg_mhx] = "r_leg_hpx";
-			jointNames[r_leg_lhy] = "r_leg_hpy";
+			jointNames[l_leg_aky] = "l_leg_aky";
+			jointNames[l_leg_akx] = "l_leg_akx";
+			jointNames[r_leg_hpz] = "r_leg_hpz";
+			jointNames[r_leg_hpx] = "r_leg_hpx";
+			jointNames[r_leg_hpy] = "r_leg_hpy";
 			jointNames[r_leg_kny] = "r_leg_kny";
-			jointNames[r_leg_uay] = "r_leg_aky";
-			jointNames[r_leg_lax] = "r_leg_akx";
-			jointNames[l_arm_usy] = "l_arm_shy";
+			jointNames[r_leg_aky] = "r_leg_aky";
+			jointNames[r_leg_akx] = "r_leg_akx";
+			jointNames[l_arm_shy] = "l_arm_shy";
 			jointNames[l_arm_shx] = "l_arm_shx";
 			jointNames[l_arm_ely] = "l_arm_ely";
 			jointNames[l_arm_elx] = "l_arm_elx";
-			jointNames[l_arm_uwy] = "l_arm_wry";
-			jointNames[l_arm_mwx] = "l_arm_wrx";
-			jointNames[r_arm_usy] = "r_arm_shy";
+			jointNames[l_arm_wry] = "l_arm_wry";
+			jointNames[l_arm_wrx] = "l_arm_wrx";
+			jointNames[r_arm_shy] = "r_arm_shy";
 			jointNames[r_arm_shx] = "r_arm_shx";
 			jointNames[r_arm_ely] = "r_arm_ely";
 			jointNames[r_arm_elx] = "r_arm_elx";
-			jointNames[r_arm_uwy] = "r_arm_wry";
-			jointNames[r_arm_mwx] = "r_arm_wrx";
-		} else {
-
-			jointNames[back_lbz] = "back_lbz";
-			jointNames[back_mby] = "back_mby";
-			jointNames[back_ubx] = "back_ubx";
-			jointNames[neck_ay] = "neck_ay";
-			jointNames[l_leg_uhz] = "l_leg_uhz";
-			jointNames[l_leg_mhx] = "l_leg_mhx";
-			jointNames[l_leg_lhy] = "l_leg_lhy";
-			jointNames[l_leg_kny] = "l_leg_kny";
-			jointNames[l_leg_uay] = "l_leg_uay";
-			jointNames[l_leg_lax] = "l_leg_lax";
-			jointNames[r_leg_uhz] = "r_leg_uhz";
-			jointNames[r_leg_mhx] = "r_leg_mhx";
-			jointNames[r_leg_lhy] = "r_leg_lhy";
-			jointNames[r_leg_kny] = "r_leg_kny";
-			jointNames[r_leg_uay] = "r_leg_uay";
-			jointNames[r_leg_lax] = "r_leg_lax";
-			jointNames[l_arm_usy] = "l_arm_usy";
-			jointNames[l_arm_shx] = "l_arm_shx";
-			jointNames[l_arm_ely] = "l_arm_ely";
-			jointNames[l_arm_elx] = "l_arm_elx";
-			jointNames[l_arm_uwy] = "l_arm_uwy";
-			jointNames[l_arm_mwx] = "l_arm_mwx";
-			jointNames[r_arm_usy] = "r_arm_usy";
-			jointNames[r_arm_shx] = "r_arm_shx";
-			jointNames[r_arm_ely] = "r_arm_ely";
-			jointNames[r_arm_elx] = "r_arm_elx";
-			jointNames[r_arm_uwy] = "r_arm_uwy";
-			jointNames[r_arm_mwx] = "r_arm_mwx";
-		}
+			jointNames[r_arm_wry] = "r_arm_wry";
+			jointNames[r_arm_wrx] = "r_arm_wrx";
    }
    
    public static LinkedHashMap<String, Integer> nameToIndexMap = new LinkedHashMap<String, Integer>();
@@ -125,66 +93,66 @@ public class ROSAtlasJointMap
    static
    {
 	  String[] jointNamesRight = new String[numberOfJoints];
-	  jointNamesRight[back_lbz] = jointNames[back_lbz];
-	  jointNamesRight[back_mby] = jointNames[back_mby];
-	  jointNamesRight[back_ubx] = jointNames[back_ubx];
-	  jointNamesRight[neck_ay] = jointNames[neck_ay];
-	  jointNamesRight[l_leg_uhz] = jointNames[r_leg_uhz];
-	  jointNamesRight[l_leg_mhx] = jointNames[r_leg_mhx];
-	  jointNamesRight[l_leg_lhy] = jointNames[r_leg_lhy];
+	  jointNamesRight[back_bkz] = jointNames[back_bkz];
+	  jointNamesRight[back_bky] = jointNames[back_bky];
+	  jointNamesRight[back_bkx] = jointNames[back_bkx];
+	  jointNamesRight[neck_ry] = jointNames[neck_ry];
+	  jointNamesRight[l_leg_hpz] = jointNames[r_leg_hpz];
+	  jointNamesRight[l_leg_hpx] = jointNames[r_leg_hpx];
+	  jointNamesRight[l_leg_hpy] = jointNames[r_leg_hpy];
 	  jointNamesRight[l_leg_kny] = jointNames[r_leg_kny];
-	  jointNamesRight[l_leg_uay] = jointNames[r_leg_uay];
-	  jointNamesRight[l_leg_lax] = jointNames[r_leg_lax];
-	  jointNamesRight[r_leg_uhz] = jointNames[r_leg_uhz];
-	  jointNamesRight[r_leg_mhx] = jointNames[r_leg_mhx];
-	  jointNamesRight[r_leg_lhy] = jointNames[r_leg_lhy];
+	  jointNamesRight[l_leg_aky] = jointNames[r_leg_aky];
+	  jointNamesRight[l_leg_akx] = jointNames[r_leg_akx];
+	  jointNamesRight[r_leg_hpz] = jointNames[r_leg_hpz];
+	  jointNamesRight[r_leg_hpx] = jointNames[r_leg_hpx];
+	  jointNamesRight[r_leg_hpy] = jointNames[r_leg_hpy];
 	  jointNamesRight[r_leg_kny] = jointNames[r_leg_kny];
-	  jointNamesRight[r_leg_uay] = jointNames[r_leg_uay];
-	  jointNamesRight[r_leg_lax] = jointNames[r_leg_lax];
-	  jointNamesRight[l_arm_usy] = jointNames[r_arm_usy];
+	  jointNamesRight[r_leg_aky] = jointNames[r_leg_aky];
+	  jointNamesRight[r_leg_akx] = jointNames[r_leg_akx];
+	  jointNamesRight[l_arm_shy] = jointNames[r_arm_shy];
 	  jointNamesRight[l_arm_shx] = jointNames[r_arm_shx];
 	  jointNamesRight[l_arm_ely] = jointNames[r_arm_ely];
 	  jointNamesRight[l_arm_elx] = jointNames[r_arm_elx];
-	  jointNamesRight[l_arm_uwy] = jointNames[r_arm_uwy];
-	  jointNamesRight[l_arm_mwx] = jointNames[r_arm_mwx];
-	  jointNamesRight[r_arm_usy] = jointNames[r_arm_usy];
+	  jointNamesRight[l_arm_wry] = jointNames[r_arm_wry];
+	  jointNamesRight[l_arm_wrx] = jointNames[r_arm_wrx];
+	  jointNamesRight[r_arm_shy] = jointNames[r_arm_shy];
 	  jointNamesRight[r_arm_shx] = jointNames[r_arm_shx];
 	  jointNamesRight[r_arm_ely] = jointNames[r_arm_ely];
 	  jointNamesRight[r_arm_elx] = jointNames[r_arm_elx];
-	  jointNamesRight[r_arm_uwy] = jointNames[r_arm_uwy];
-	  jointNamesRight[r_arm_mwx] = jointNames[r_arm_mwx];
+	  jointNamesRight[r_arm_wry] = jointNames[r_arm_wry];
+	  jointNamesRight[r_arm_wrx] = jointNames[r_arm_wrx];
 	  
 	  forcedSideDependentJointNames.put(RobotSide.RIGHT, jointNamesRight);
 	
 	  String[] jointNamesLeft = new String[numberOfJoints];
-	  jointNamesLeft[back_lbz] = jointNames[back_lbz];
-	  jointNamesLeft[back_mby] = jointNames[back_mby];
-	  jointNamesLeft[back_ubx] = jointNames[back_ubx];
-	  jointNamesLeft[neck_ay] = jointNames[neck_ay];
-	  jointNamesLeft[l_leg_uhz] = jointNames[l_leg_uhz];
-	  jointNamesLeft[l_leg_mhx] = jointNames[l_leg_mhx];
-	  jointNamesLeft[l_leg_lhy] = jointNames[l_leg_lhy];
+	  jointNamesLeft[back_bkz] = jointNames[back_bkz];
+	  jointNamesLeft[back_bky] = jointNames[back_bky];
+	  jointNamesLeft[back_bkx] = jointNames[back_bkx];
+	  jointNamesLeft[neck_ry] = jointNames[neck_ry];
+	  jointNamesLeft[l_leg_hpz] = jointNames[l_leg_hpz];
+	  jointNamesLeft[l_leg_hpx] = jointNames[l_leg_hpx];
+	  jointNamesLeft[l_leg_hpy] = jointNames[l_leg_hpy];
 	  jointNamesLeft[l_leg_kny] = jointNames[l_leg_kny];
-	  jointNamesLeft[l_leg_uay] = jointNames[l_leg_uay];
-	  jointNamesLeft[l_leg_lax] = jointNames[l_leg_lax];
-	  jointNamesLeft[r_leg_uhz] = jointNames[l_leg_uhz];
-	  jointNamesLeft[r_leg_mhx] = jointNames[l_leg_mhx];
-	  jointNamesLeft[r_leg_lhy] = jointNames[l_leg_lhy];
+	  jointNamesLeft[l_leg_aky] = jointNames[l_leg_aky];
+	  jointNamesLeft[l_leg_akx] = jointNames[l_leg_akx];
+	  jointNamesLeft[r_leg_hpz] = jointNames[l_leg_hpz];
+	  jointNamesLeft[r_leg_hpx] = jointNames[l_leg_hpx];
+	  jointNamesLeft[r_leg_hpy] = jointNames[l_leg_hpy];
 	  jointNamesLeft[r_leg_kny] = jointNames[l_leg_kny];
-	  jointNamesLeft[r_leg_uay] = jointNames[l_leg_uay];
-	  jointNamesLeft[r_leg_lax] = jointNames[l_leg_lax];
-	  jointNamesLeft[l_arm_usy] = jointNames[l_arm_usy];
+	  jointNamesLeft[r_leg_aky] = jointNames[l_leg_aky];
+	  jointNamesLeft[r_leg_akx] = jointNames[l_leg_akx];
+	  jointNamesLeft[l_arm_shy] = jointNames[l_arm_shy];
 	  jointNamesLeft[l_arm_shx] = jointNames[l_arm_shx];
 	  jointNamesLeft[l_arm_ely] = jointNames[l_arm_ely];
 	  jointNamesLeft[l_arm_elx] = jointNames[l_arm_elx];
-	  jointNamesLeft[l_arm_uwy] = jointNames[l_arm_uwy];
-	  jointNamesLeft[l_arm_mwx] = jointNames[l_arm_mwx];
-	  jointNamesLeft[r_arm_usy] = jointNames[l_arm_usy];
+	  jointNamesLeft[l_arm_wry] = jointNames[l_arm_wry];
+	  jointNamesLeft[l_arm_wrx] = jointNames[l_arm_wrx];
+	  jointNamesLeft[r_arm_shy] = jointNames[l_arm_shy];
 	  jointNamesLeft[r_arm_shx] = jointNames[l_arm_shx];
 	  jointNamesLeft[r_arm_ely] = jointNames[l_arm_ely];
 	  jointNamesLeft[r_arm_elx] = jointNames[l_arm_elx];
-	  jointNamesLeft[r_arm_uwy] = jointNames[l_arm_uwy];
-	  jointNamesLeft[r_arm_mwx] = jointNames[l_arm_mwx];
+	  jointNamesLeft[r_arm_wry] = jointNames[l_arm_wry];
+	  jointNamesLeft[r_arm_wrx] = jointNames[l_arm_wrx];
 	  
 	  forcedSideDependentJointNames.put(RobotSide.LEFT, jointNamesLeft);
    }
@@ -208,22 +176,22 @@ public class ROSAtlasJointMap
 
    public static String getLeftFootForceSensorName()
    {
-      return jointNames[l_leg_lax];
+      return jointNames[l_leg_akx];
    }
 
    public static String getRightFootForceSensorName()
    {
-      return jointNames[r_leg_lax];
+      return jointNames[r_leg_akx];
    }
 
    public static String getLeftHandForceSensorName()
    {
-      return jointNames[l_arm_mwx];
+      return jointNames[l_arm_wrx];
    }
 
    public static String getRightHandForceSensorName()
    {
-      return jointNames[r_arm_mwx];
+      return jointNames[r_arm_wrx];
    }
 
    public static String getHokuyoJointName()

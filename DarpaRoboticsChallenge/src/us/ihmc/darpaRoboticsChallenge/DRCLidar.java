@@ -64,7 +64,7 @@ public class DRCLidar
             }
             if (PRINT_ALL_POSSIBLE_JOINT_NAMES)
                System.out.println("DRCLidar availiable joints: " + sdfRobotSimulation.getRobot().getOneDoFJoints());
-            OneDegreeOfFreedomJoint neckJoint = sdfRobotSimulation.getRobot().getOneDoFJoint("neck_ay");
+            OneDegreeOfFreedomJoint neckJoint = sdfRobotSimulation.getRobot().getOneDoFJoint("neck_ry");
             polarLidar.setSimulationNeckJoint(neckJoint);
             polarLidar.setLidarDaemonParameters(updateParameters);
             SimulatedLIDARSensorNoiseParameters noiseParameters = new SimulatedLIDARSensorNoiseParameters();

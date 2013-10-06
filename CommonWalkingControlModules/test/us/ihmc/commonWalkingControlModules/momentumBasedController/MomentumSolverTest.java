@@ -430,7 +430,7 @@ public class MomentumSolverTest
       Vector3d[] jointAxes = new Vector3d[]
       {
          Z, Y, X,
-         Y    // back_lbz, back_mby, back_ubx, neck_ay
+         Y    // back_bkz, back_bky, back_bkx, neck_ry
       };
 
       RandomFloatingChain randomFloatingChain = new RandomFloatingChain(random, jointAxes);
@@ -455,17 +455,17 @@ public class MomentumSolverTest
       List<RevoluteJoint> revoluteJoints = randomFloatingChain.getRevoluteJoints();
       RigidBody baseRigidBody = rootJoint.getPredecessor();
 
-      InverseDynamicsJoint back_lbz = revoluteJoints.get(0);
-      InverseDynamicsJoint back_mby = revoluteJoints.get(1);
-      InverseDynamicsJoint back_ubx = revoluteJoints.get(2);
-      InverseDynamicsJoint neck_ay = revoluteJoints.get(3);
+      InverseDynamicsJoint back_bkz = revoluteJoints.get(0);
+      InverseDynamicsJoint back_bky = revoluteJoints.get(1);
+      InverseDynamicsJoint back_bkx = revoluteJoints.get(2);
+      InverseDynamicsJoint neck_ry = revoluteJoints.get(3);
 
-      RigidBody pelvisRigidBody = back_lbz.getPredecessor();
-      RigidBody chestRigidBody = neck_ay.getPredecessor();
-      RigidBody headRigidBody = neck_ay.getSuccessor();
+      RigidBody pelvisRigidBody = back_bkz.getPredecessor();
+      RigidBody chestRigidBody = neck_ry.getPredecessor();
+      RigidBody headRigidBody = neck_ry.getSuccessor();
 
       // Constrain pitch and roll acceleration of the chest with respect to the pelvis,
-      // using back_mdy and back_ubx
+      // using back_mdy and back_bkx
 
       GeometricJacobian pelvisToChestJacobian = new GeometricJacobian(pelvisRigidBody, chestRigidBody, chestRigidBody.getBodyFixedFrame());
       SpatialAccelerationVector pelvisToChestInternalAcceleration = new SpatialAccelerationVector(chestRigidBody.getBodyFixedFrame(),
@@ -478,7 +478,7 @@ public class MomentumSolverTest
       pelvisToChestSelectionMatrix.set(1, 1, 1.0);    // wy (pitch of chest)
 
 
-      InverseDynamicsJoint[] pelvisToChestConstrainedJoints = new InverseDynamicsJoint[] {back_mby, back_ubx};
+      InverseDynamicsJoint[] pelvisToChestConstrainedJoints = new InverseDynamicsJoint[] {back_bky, back_bkx};
 
       TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
       taskspaceConstraintData.set(pelvisToChestInternalAcceleration, pelvisToChestNullspaceMultiplier, pelvisToChestSelectionMatrix);
@@ -486,7 +486,7 @@ public class MomentumSolverTest
       solver.setDesiredSpatialAcceleration(pelvisToChestConstrainedJoints, pelvisToChestJacobian, taskspaceConstraintData);
 
       // Constrain pitch and yaw acceleration of the head with respect to the elevator
-      // using neck_ay and back_lbz
+      // using neck_ry and back_bkz
       GeometricJacobian elevatorToHeadJacobian = new GeometricJacobian(pelvisRigidBody, headRigidBody, headRigidBody.getBodyFixedFrame());
       SpatialAccelerationVector elevatorToHeadInternalAcceleration = new SpatialAccelerationVector(headRigidBody.getBodyFixedFrame(),
                                                                         baseRigidBody.getBodyFixedFrame(), headRigidBody.getBodyFixedFrame(),
@@ -497,7 +497,7 @@ public class MomentumSolverTest
       elevatorToHeadSelectionMatrix.set(0, 1, 1.0);    // wy (pitch of head)
       elevatorToHeadSelectionMatrix.set(1, 2, 1.0);    // wz (yaw of head)
 
-      InverseDynamicsJoint[] elevatorToHeadConstrainedJoints = new InverseDynamicsJoint[] {back_lbz, neck_ay};
+      InverseDynamicsJoint[] elevatorToHeadConstrainedJoints = new InverseDynamicsJoint[] {back_bkz, neck_ry};
 
       taskspaceConstraintData.set(elevatorToHeadInternalAcceleration, elevatorToHeadNullspaceMultiplier, elevatorToHeadSelectionMatrix);
       solver.setDesiredSpatialAcceleration(elevatorToHeadConstrainedJoints, elevatorToHeadJacobian, taskspaceConstraintData);
