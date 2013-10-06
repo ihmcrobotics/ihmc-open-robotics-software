@@ -39,7 +39,7 @@ public class YoVariableLogPlaybackRobot extends SDFRobot implements SimulationRe
 
    private final int numberOfEntries;
    private final long initialTimestamp;
-   private final long finalTimestamp;
+   private final long finalTimestamp = 0;
    
    public YoVariableLogPlaybackRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap,
          List<JointState<? extends Joint>> jointStates, List<YoVariable> variables, FileChannel logChannel, SimulationConstructionSet scs)
@@ -68,9 +68,9 @@ public class YoVariableLogPlaybackRobot extends SDFRobot implements SimulationRe
          logChannel.read(logLine);
          initialTimestamp = logLine.getLong(0);
          logLine.clear();
-         logChannel.position((numberOfEntries) * bufferSize);
-         logChannel.read(logLine);
-         finalTimestamp = logLine.getLong(0);
+//         logChannel.position((numberOfEntries) * bufferSize);
+//         logChannel.read(logLine);
+//         finalTimestamp = logLine.getLong(0);
          logLine.clear();
          logChannel.position(0);
       }
