@@ -104,7 +104,7 @@ public class SandiaHandModel
       addFingerJoints(prefix + "f2", SandiaFingerName.RING);
 
       this.wristForceSensor = forceSensorDataForController;
-      wristJoint = fullRobotModel.getOneDoFJointByName(robotSide.getShortLowerCaseName() + "_arm_mwx");
+      wristJoint = fullRobotModel.getOneDoFJointByName(robotSide.getShortLowerCaseName() + "_arm_wrx");
    }
 
    private FingerJoint addFingerJoint(String name)

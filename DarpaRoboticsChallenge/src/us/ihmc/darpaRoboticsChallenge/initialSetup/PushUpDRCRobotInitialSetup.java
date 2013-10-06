@@ -17,14 +17,14 @@ public class PushUpDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot>
       robot.getOneDoFJoint("r_arm_ely").setQ(handRotation);
       robot.getOneDoFJoint("r_arm_elx").setQ(-elbowBend);
 
-      robot.getOneDoFJoint("l_arm_uwy").setQ(-handRotation);
-      robot.getOneDoFJoint("r_arm_uwy").setQ(-handRotation);
+      robot.getOneDoFJoint("l_arm_wry").setQ(-handRotation);
+      robot.getOneDoFJoint("r_arm_wry").setQ(-handRotation);
       
-      robot.getOneDoFJoint("l_arm_mwx").setQ(bodyPitch);
-      robot.getOneDoFJoint("r_arm_mwx").setQ(-bodyPitch);
+      robot.getOneDoFJoint("l_arm_wrx").setQ(bodyPitch);
+      robot.getOneDoFJoint("r_arm_wrx").setQ(-bodyPitch);
       
-      robot.getOneDoFJoint("l_leg_uay").setQ(-0.3);
-      robot.getOneDoFJoint("r_leg_uay").setQ(-0.3);
+      robot.getOneDoFJoint("l_leg_aky").setQ(-0.3);
+      robot.getOneDoFJoint("r_leg_aky").setQ(-0.3);
 
       robot.setOrientation(0.0, bodyPitch , 0.0);
    }

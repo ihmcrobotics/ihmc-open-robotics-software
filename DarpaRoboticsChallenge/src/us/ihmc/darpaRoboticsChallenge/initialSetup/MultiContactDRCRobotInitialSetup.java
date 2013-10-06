@@ -19,23 +19,23 @@ public class MultiContactDRCRobotInitialSetup implements RobotInitialSetup<SDFRo
       for (RobotSide robotSide : RobotSide.values)
       {
          String[] forcedSideJointNames = forcedSideDependentJointNames.get(robotSide);
-         robot.getOneDoFJoint(forcedSideJointNames[l_arm_usy]).setQ(defaultArmPosition.get(robotSide).get(ArmJointName.SHOULDER_PITCH));
+         robot.getOneDoFJoint(forcedSideJointNames[l_arm_shy]).setQ(defaultArmPosition.get(robotSide).get(ArmJointName.SHOULDER_PITCH));
          robot.getOneDoFJoint(forcedSideJointNames[l_arm_shx]).setQ(defaultArmPosition.get(robotSide).get(ArmJointName.SHOULDER_ROLL));
          robot.getOneDoFJoint(forcedSideJointNames[l_arm_ely]).setQ(defaultArmPosition.get(robotSide).get(ArmJointName.ELBOW_PITCH));
          robot.getOneDoFJoint(forcedSideJointNames[l_arm_elx]).setQ(defaultArmPosition.get(robotSide).get(ArmJointName.ELBOW_ROLL));
-         robot.getOneDoFJoint(forcedSideJointNames[l_arm_uwy]).setQ(defaultArmPosition.get(robotSide).get(ArmJointName.WRIST_PITCH));
-         robot.getOneDoFJoint(forcedSideJointNames[l_arm_mwx]).setQ(defaultArmPosition.get(robotSide).get(ArmJointName.WRIST_ROLL));
+         robot.getOneDoFJoint(forcedSideJointNames[l_arm_wry]).setQ(defaultArmPosition.get(robotSide).get(ArmJointName.WRIST_PITCH));
+         robot.getOneDoFJoint(forcedSideJointNames[l_arm_wrx]).setQ(defaultArmPosition.get(robotSide).get(ArmJointName.WRIST_ROLL));
       }
 
       // left leg
-      robot.getOneDoFJoint(jointNames[l_leg_uhz]).setQ(0.4);
-      robot.getOneDoFJoint(jointNames[l_leg_mhx]).setQ(0.4);
-      robot.getOneDoFJoint(jointNames[l_leg_lhy]).setQ(0.3);
+      robot.getOneDoFJoint(jointNames[l_leg_hpz]).setQ(0.4);
+      robot.getOneDoFJoint(jointNames[l_leg_hpx]).setQ(0.4);
+      robot.getOneDoFJoint(jointNames[l_leg_hpy]).setQ(0.3);
       robot.getOneDoFJoint(jointNames[l_leg_kny]).setQ(0.8);
 
       // right leg
-      robot.getOneDoFJoint(jointNames[r_leg_mhx]).setQ(-0.4);
-      robot.getOneDoFJoint(jointNames[r_leg_lhy]).setQ(0.3);
+      robot.getOneDoFJoint(jointNames[r_leg_hpx]).setQ(-0.4);
+      robot.getOneDoFJoint(jointNames[r_leg_hpy]).setQ(0.3);
       robot.getOneDoFJoint(jointNames[r_leg_kny]).setQ(0.4);
    }
 

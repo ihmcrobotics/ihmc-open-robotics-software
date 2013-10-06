@@ -8,34 +8,34 @@ public class ROSAtlasJointMapCorrelation extends ROSAtlasJointMap
    public final static int[] oppositeSideIndex = new int[ROSAtlasJointMap.numberOfJoints];
    static
    {
-      oppositeSideIndex[back_lbz] = back_lbz;
-      oppositeSideIndex[back_mby] = back_mby;
-      oppositeSideIndex[back_ubx] = back_ubx;
-      oppositeSideIndex[neck_ay]  = neck_ay;
-      oppositeSideIndex[l_leg_uhz] = r_leg_uhz;
-      oppositeSideIndex[l_leg_mhx] = r_leg_mhx;
-      oppositeSideIndex[l_leg_lhy] = r_leg_lhy;
+      oppositeSideIndex[back_bkz] = back_bkz;
+      oppositeSideIndex[back_bky] = back_bky;
+      oppositeSideIndex[back_bkx] = back_bkx;
+      oppositeSideIndex[neck_ry]  = neck_ry;
+      oppositeSideIndex[l_leg_hpz] = r_leg_hpz;
+      oppositeSideIndex[l_leg_hpx] = r_leg_hpx;
+      oppositeSideIndex[l_leg_hpy] = r_leg_hpy;
       oppositeSideIndex[l_leg_kny] = r_leg_kny;
-      oppositeSideIndex[l_leg_uay] = r_leg_uay;
-      oppositeSideIndex[l_leg_lax] = r_leg_lax;
-      oppositeSideIndex[r_leg_uhz] = l_leg_uhz;
-      oppositeSideIndex[r_leg_mhx] = l_leg_mhx;
-      oppositeSideIndex[r_leg_lhy] = l_leg_lhy;
+      oppositeSideIndex[l_leg_aky] = r_leg_aky;
+      oppositeSideIndex[l_leg_akx] = r_leg_akx;
+      oppositeSideIndex[r_leg_hpz] = l_leg_hpz;
+      oppositeSideIndex[r_leg_hpx] = l_leg_hpx;
+      oppositeSideIndex[r_leg_hpy] = l_leg_hpy;
       oppositeSideIndex[r_leg_kny] = l_leg_kny;
-      oppositeSideIndex[r_leg_uay] = l_leg_uay;
-      oppositeSideIndex[r_leg_lax] = l_leg_lax;
-      oppositeSideIndex[l_arm_usy] = r_arm_usy;
+      oppositeSideIndex[r_leg_aky] = l_leg_aky;
+      oppositeSideIndex[r_leg_akx] = l_leg_akx;
+      oppositeSideIndex[l_arm_shy] = r_arm_shy;
       oppositeSideIndex[l_arm_shx] = r_arm_shx;
       oppositeSideIndex[l_arm_ely] = r_arm_ely;
       oppositeSideIndex[l_arm_elx] = r_arm_elx;
-      oppositeSideIndex[l_arm_uwy] = r_arm_uwy;
-      oppositeSideIndex[l_arm_mwx] = r_arm_mwx;
-      oppositeSideIndex[r_arm_usy] = l_arm_usy;
+      oppositeSideIndex[l_arm_wry] = r_arm_wry;
+      oppositeSideIndex[l_arm_wrx] = r_arm_wrx;
+      oppositeSideIndex[r_arm_shy] = l_arm_shy;
       oppositeSideIndex[r_arm_shx] = l_arm_shx;
       oppositeSideIndex[r_arm_ely] = l_arm_ely;
       oppositeSideIndex[r_arm_elx] = l_arm_elx;
-      oppositeSideIndex[r_arm_uwy] = l_arm_uwy;
-      oppositeSideIndex[r_arm_mwx] = l_arm_mwx;
+      oppositeSideIndex[r_arm_wry] = l_arm_wry;
+      oppositeSideIndex[r_arm_wrx] = l_arm_wrx;
 
    }
 
@@ -43,21 +43,21 @@ public class ROSAtlasJointMapCorrelation extends ROSAtlasJointMap
    //If symetricSignChange[i]==true, then symmetric angles are opposite signs.
    static
    {
-      symmetricSignChange[back_lbz] = true;
-      symmetricSignChange[back_mby] = false;
-      symmetricSignChange[back_ubx] = true;
-      symmetricSignChange[neck_ay]  = false;
-      symmetricSignChange[l_leg_uhz] = symmetricSignChange[r_leg_uhz] = true;
-      symmetricSignChange[l_leg_mhx] = symmetricSignChange[r_leg_mhx] = true;
-      symmetricSignChange[l_leg_lhy] = symmetricSignChange[r_leg_lhy] = false;
+      symmetricSignChange[back_bkz] = true;
+      symmetricSignChange[back_bky] = false;
+      symmetricSignChange[back_bkx] = true;
+      symmetricSignChange[neck_ry]  = false;
+      symmetricSignChange[l_leg_hpz] = symmetricSignChange[r_leg_hpz] = true;
+      symmetricSignChange[l_leg_hpx] = symmetricSignChange[r_leg_hpx] = true;
+      symmetricSignChange[l_leg_hpy] = symmetricSignChange[r_leg_hpy] = false;
       symmetricSignChange[l_leg_kny] = symmetricSignChange[r_leg_kny] = false;
-      symmetricSignChange[l_leg_uay] = symmetricSignChange[r_leg_uay] = false;
-      symmetricSignChange[l_leg_lax] = symmetricSignChange[r_leg_lax] = true;
-      symmetricSignChange[l_arm_usy] = symmetricSignChange[r_arm_usy] = false;
+      symmetricSignChange[l_leg_aky] = symmetricSignChange[r_leg_aky] = false;
+      symmetricSignChange[l_leg_akx] = symmetricSignChange[r_leg_akx] = true;
+      symmetricSignChange[l_arm_shy] = symmetricSignChange[r_arm_shy] = false;
       symmetricSignChange[l_arm_shx] = symmetricSignChange[r_arm_shx] = true;
       symmetricSignChange[l_arm_ely] = symmetricSignChange[r_arm_ely] = false;
       symmetricSignChange[l_arm_elx] = symmetricSignChange[r_arm_elx] = true;
-      symmetricSignChange[l_arm_uwy] = symmetricSignChange[r_arm_uwy] = false;
-      symmetricSignChange[l_arm_mwx] = symmetricSignChange[r_arm_mwx] = true;
+      symmetricSignChange[l_arm_wry] = symmetricSignChange[r_arm_wry] = false;
+      symmetricSignChange[l_arm_wrx] = symmetricSignChange[r_arm_wrx] = true;
    }
 }

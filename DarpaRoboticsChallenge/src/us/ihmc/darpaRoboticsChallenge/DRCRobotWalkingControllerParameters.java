@@ -125,26 +125,26 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
 
    public String[] getDefaultHeadOrientationControlJointNames()
    {
-      // Get rid of back_ubx to prevent hip roll jumps.
-//      return new String[] {jointNames[back_lbz], jointNames[back_ubx], jointNames[neck_ay]}; // Pelvis will jump around with these setting.
-      return new String[] {jointNames[back_lbz], jointNames[neck_ay]}; 
-//      return new String[] {jointNames[neck_ay]};
+      // Get rid of back_bkx to prevent hip roll jumps.
+//      return new String[] {jointNames[back_bkz], jointNames[back_bkx], jointNames[neck_ry]}; // Pelvis will jump around with these setting.
+      return new String[] {jointNames[back_bkz], jointNames[neck_ry]}; 
+//      return new String[] {jointNames[neck_ry]};
    }
    
    public String[] getAllowableHeadOrientationControlJointNames()
    {
-      return new String[] {jointNames[back_lbz], jointNames[back_ubx], jointNames[neck_ay]}; 
+      return new String[] {jointNames[back_bkz], jointNames[back_bkx], jointNames[neck_ry]}; 
    }
 
    public String[] getDefaultChestOrientationControlJointNames()
    {
-      //    return new String[] {jointNames[back_mby]};
+      //    return new String[] {jointNames[back_bky]};
       return new String[]{};
    }
 
    public String[] getAllowableChestOrientationControlJointNames()
    {
-      return new String[] {jointNames[back_mby]};
+      return new String[] {jointNames[back_bky]};
    }
 
    public boolean checkOrbitalEnergyCondition()
@@ -219,7 +219,7 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
 
    public String getJointNameForExtendedPitchRange()
    {
-      return jointNames[back_mby];
+      return jointNames[back_bky];
    }
 
 

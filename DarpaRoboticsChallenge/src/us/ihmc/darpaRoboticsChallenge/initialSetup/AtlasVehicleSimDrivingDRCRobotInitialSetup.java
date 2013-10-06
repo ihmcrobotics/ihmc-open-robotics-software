@@ -37,17 +37,17 @@ public class AtlasVehicleSimDrivingDRCRobotInitialSetup implements RobotInitialS
       robot.getOneDoFJoint(jointNames[r_arm_ely]).setQ(1.57);
       robot.getOneDoFJoint(jointNames[r_arm_elx]).setQ(-1.57);
 
-      robot.getOneDoFJoint(jointNames[l_arm_uwy]).setQ(0);
-      robot.getOneDoFJoint(jointNames[r_arm_uwy]).setQ(0);
+      robot.getOneDoFJoint(jointNames[l_arm_wry]).setQ(0);
+      robot.getOneDoFJoint(jointNames[r_arm_wry]).setQ(0);
 
-      robot.getOneDoFJoint(jointNames[l_leg_lhy]).setQ(hipBend + thighPitch);
-      robot.getOneDoFJoint(jointNames[r_leg_lhy]).setQ(hipBend + thighPitch);
+      robot.getOneDoFJoint(jointNames[l_leg_hpy]).setQ(hipBend + thighPitch);
+      robot.getOneDoFJoint(jointNames[r_leg_hpy]).setQ(hipBend + thighPitch);
 
       robot.getOneDoFJoint(jointNames[l_leg_kny]).setQ(kneeBend);
       robot.getOneDoFJoint(jointNames[r_leg_kny]).setQ(kneeBend);
 
-      robot.getOneDoFJoint(jointNames[l_leg_uay]).setQ(thighPitch - .3);  //0.087 + thighPitch);
-      robot.getOneDoFJoint(jointNames[r_leg_uay]).setQ(thighPitch - .3); //0.087 + thighPitch);
+      robot.getOneDoFJoint(jointNames[l_leg_aky]).setQ(thighPitch - .3);  //0.087 + thighPitch);
+      robot.getOneDoFJoint(jointNames[r_leg_aky]).setQ(thighPitch - .3); //0.087 + thighPitch);
 
       offset.setX(0.7);
       offset.setY(-0.07);

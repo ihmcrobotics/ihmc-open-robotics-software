@@ -50,13 +50,13 @@ public class SquaredUpDRCRobotInitialSetupGettingIntoTheCar implements RobotInit
       for (RobotSide robotSide : RobotSide.values)
       {
          String prefix = FormattingTools.lowerCaseFirstLetter(robotSide.getSideNameFirstLetter());
-         robot.getOneDoFJoint(prefix + "_leg_lhy").setQ(legInitialJointPositions.get(LegJointName.HIP_PITCH));
+         robot.getOneDoFJoint(prefix + "_leg_hpy").setQ(legInitialJointPositions.get(LegJointName.HIP_PITCH));
          robot.getOneDoFJoint(prefix + "_leg_kny").setQ(legInitialJointPositions.get(LegJointName.KNEE));
-         robot.getOneDoFJoint(prefix + "_leg_uay").setQ(legInitialJointPositions.get(LegJointName.ANKLE_PITCH));
+         robot.getOneDoFJoint(prefix + "_leg_aky").setQ(legInitialJointPositions.get(LegJointName.ANKLE_PITCH));
 
-         robot.getOneDoFJoint(prefix + "_arm_uwy").setQ(armInitialJointPositions.get(robotSide).get(ArmJointName.WRIST_PITCH));
-         robot.getOneDoFJoint(prefix + "_arm_mwx").setQ(armInitialJointPositions.get(robotSide).get(ArmJointName.WRIST_ROLL));
-         robot.getOneDoFJoint(prefix + "_arm_usy").setQ(armInitialJointPositions.get(robotSide).get(ArmJointName.SHOULDER_PITCH));
+         robot.getOneDoFJoint(prefix + "_arm_wry").setQ(armInitialJointPositions.get(robotSide).get(ArmJointName.WRIST_PITCH));
+         robot.getOneDoFJoint(prefix + "_arm_wrx").setQ(armInitialJointPositions.get(robotSide).get(ArmJointName.WRIST_ROLL));
+         robot.getOneDoFJoint(prefix + "_arm_shy").setQ(armInitialJointPositions.get(robotSide).get(ArmJointName.SHOULDER_PITCH));
          robot.getOneDoFJoint(prefix + "_arm_shx").setQ(armInitialJointPositions.get(robotSide).get(ArmJointName.SHOULDER_ROLL));
          robot.getOneDoFJoint(prefix + "_arm_ely").setQ(armInitialJointPositions.get(robotSide).get(ArmJointName.ELBOW_PITCH));
          robot.getOneDoFJoint(prefix + "_arm_elx").setQ(armInitialJointPositions.get(robotSide).get(ArmJointName.ELBOW_ROLL));

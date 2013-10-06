@@ -648,7 +648,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
          sliderBoard.setSlider(sliderChannel++, spineJointStringNames.get(spineJointName), scs, spineJointLowerLimits.get(spineJointName),
                spineJointUpperLimits.get(spineJointName));
       //neck
-      sliderBoard.setSlider(sliderChannel++, "q_neck_ay", scs, -0.610865, 1.134460);
+      sliderBoard.setSlider(sliderChannel++, "q_neck_ry", scs, -0.610865, 1.134460);
    }
 
    private void setupSlidersForSupportBaseControl()

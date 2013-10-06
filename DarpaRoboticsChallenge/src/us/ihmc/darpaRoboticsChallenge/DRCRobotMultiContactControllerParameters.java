@@ -8,13 +8,13 @@ public class DRCRobotMultiContactControllerParameters extends DRCRobotWalkingCon
    @Override
    public String[] getDefaultHeadOrientationControlJointNames()
    {
-      return new String[] {jointNames[neck_ay]}; 
+      return new String[] {jointNames[neck_ry]}; 
    }
 
    @Override
    public String[] getDefaultChestOrientationControlJointNames()
    {
-      return new String[] {jointNames[back_lbz], jointNames[back_ubx], jointNames[back_mby]};
+      return new String[] {jointNames[back_bkz], jointNames[back_bkx], jointNames[back_bky]};
    }
 
    @Override

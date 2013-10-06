@@ -78,27 +78,27 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
       for (RobotSide robotSide : RobotSide.values)
       {
          String[] forcedSideJointNames = forcedSideDependentJointNames.get(robotSide);
-         legJointNames.put(forcedSideJointNames[l_leg_uhz], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_YAW));
-         legJointNames.put(forcedSideJointNames[l_leg_mhx], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_ROLL));
-         legJointNames.put(forcedSideJointNames[l_leg_lhy], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_PITCH));
+         legJointNames.put(forcedSideJointNames[l_leg_hpz], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_YAW));
+         legJointNames.put(forcedSideJointNames[l_leg_hpx], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_ROLL));
+         legJointNames.put(forcedSideJointNames[l_leg_hpy], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_PITCH));
          legJointNames.put(forcedSideJointNames[l_leg_kny], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.KNEE));
-         legJointNames.put(forcedSideJointNames[l_leg_uay], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_PITCH));
-         legJointNames.put(forcedSideJointNames[l_leg_lax], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_ROLL));
+         legJointNames.put(forcedSideJointNames[l_leg_aky], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_PITCH));
+         legJointNames.put(forcedSideJointNames[l_leg_akx], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_ROLL));
 
 
-         armJointNames.put(forcedSideJointNames[l_arm_usy], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.SHOULDER_PITCH));
+         armJointNames.put(forcedSideJointNames[l_arm_shy], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.SHOULDER_PITCH));
          armJointNames.put(forcedSideJointNames[l_arm_shx], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.SHOULDER_ROLL));
          armJointNames.put(forcedSideJointNames[l_arm_ely], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.ELBOW_PITCH));
          armJointNames.put(forcedSideJointNames[l_arm_elx], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.ELBOW_ROLL));
-         armJointNames.put(forcedSideJointNames[l_arm_uwy], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.WRIST_PITCH));
-         armJointNames.put(forcedSideJointNames[l_arm_mwx], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.WRIST_ROLL));
+         armJointNames.put(forcedSideJointNames[l_arm_wry], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.WRIST_PITCH));
+         armJointNames.put(forcedSideJointNames[l_arm_wrx], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.WRIST_ROLL));
 
          String prefix = getRobotSidePrefix(robotSide);
 
          limbNames.put(prefix + "hand", new Pair<RobotSide, LimbName>(robotSide, LimbName.ARM));
          limbNames.put(prefix + "foot", new Pair<RobotSide, LimbName>(robotSide, LimbName.LEG));
 
-         jointBeforeFeetNames.put(robotSide, forcedSideJointNames[l_leg_lax]);
+         jointBeforeFeetNames.put(robotSide, forcedSideJointNames[l_leg_akx]);
 
          footGroundContactPoints.put(robotSide, new ArrayList<Pair<String, Vector3d>>());
          handGroundContactPoints.put(robotSide, new ArrayList<Pair<String, Vector3d>>());
@@ -107,7 +107,7 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
          for (Vector3d footv3d : DRCRobotParameters.DRC_ROBOT_GROUND_CONTACT_POINT_OFFSET_FROM_FOOT)
          {
             // add ankle joint contact points on each corner of the foot
-            footGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(forcedSideJointNames[l_leg_lax], footv3d));
+            footGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(forcedSideJointNames[l_leg_akx], footv3d));
          }
 
          if (selectedModel == DRCRobotModel.ATLAS_SANDIA_HANDS && addLoadsOfContactPoints)
@@ -203,11 +203,11 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
          }
       }
 
-      spineJointNames.put(jointNames[back_lbz], SpineJointName.SPINE_YAW);
-      spineJointNames.put(jointNames[back_mby], SpineJointName.SPINE_PITCH);
-      spineJointNames.put(jointNames[back_ubx], SpineJointName.SPINE_ROLL);
+      spineJointNames.put(jointNames[back_bkz], SpineJointName.SPINE_YAW);
+      spineJointNames.put(jointNames[back_bky], SpineJointName.SPINE_PITCH);
+      spineJointNames.put(jointNames[back_bkx], SpineJointName.SPINE_ROLL);
 
-      neckJointNames.put("neck_ay", NeckJointName.LOWER_NECK_PITCH);
+      neckJointNames.put("neck_ry", NeckJointName.LOWER_NECK_PITCH);
 
 
       for (String legJoint : legJointNames.keySet())
@@ -243,17 +243,17 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
 
    public String getNameOfJointBeforeHand(RobotSide robotSide)
    {
-      return forcedSideDependentJointNames.get(robotSide)[l_arm_mwx];
+      return forcedSideDependentJointNames.get(robotSide)[l_arm_wrx];
    }
 
    public String getNameOfJointBeforeThigh(RobotSide robotSide)
    {
-      return forcedSideDependentJointNames.get(robotSide)[l_leg_lhy];
+      return forcedSideDependentJointNames.get(robotSide)[l_leg_hpy];
    }
 
    public String getNameOfJointBeforeChest()
    {
-      return jointNames[back_ubx];
+      return jointNames[back_bkx];
    }
 
    private String getRobotSidePrefix(RobotSide robotSide)
