@@ -120,8 +120,7 @@ public class HeadToLidarTransformBuffer implements PendableBuffer
    {
       return timestamp > newestTimestamp;
    }
-   
-   @Override
+
    public long newestTimestamp()
    {
       return newestTimestamp;
