@@ -3,10 +3,11 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+
 public interface SensorReaderFactory
 {
-
-   public abstract void build(SixDoFJoint sixDoFJoint, IMUDefinition[] imuDefinitions, boolean addLinearAccelerationSensors);
+   public abstract void build(SixDoFJoint sixDoFJoint, IMUDefinition[] imuDefinitions, boolean addLinearAccelerationSensors, YoVariableRegistry parentRegistry);
 
    public abstract SensorReader getSensorReader();
 

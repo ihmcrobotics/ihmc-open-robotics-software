@@ -71,10 +71,13 @@ public class JointStateFullRobotModelUpdater extends AbstractControlFlowElement
             throw new RuntimeException();
 
          ControlFlowInputPort<double[]> positionSensorPort = positionSensorInputPorts.get(joint);
-         double[] positionSensorData = positionSensorPort.getData();
+         ControlFlowInputPort<double[]> velocitySensorPort = velocitySensorInputPorts.get(joint);
 
-         joint.setQ(positionSensorData[0]);
-         joint.setQd(velocitySensorInputPorts.get(joint).getData()[0]);
+         double positionSensorData = positionSensorPort.getData()[0];
+         double velocitySensorData = velocitySensorPort.getData()[0];
+
+         joint.setQ(positionSensorData);
+         joint.setQd(velocitySensorData);
          joint.setQdd(joint.getQddDesired());
       }
 

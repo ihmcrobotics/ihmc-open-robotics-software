@@ -55,7 +55,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
 
    }
 
-   public void build(SixDoFJoint sixDoFJoint, IMUDefinition[] imuDefinition, boolean addLinearAccelerationSensors)
+   public void build(SixDoFJoint sixDoFJoint, IMUDefinition[] imuDefinition, boolean addLinearAccelerationSensors, YoVariableRegistry parentRegistry)
    {
       ArrayList<Joint> rootJoints = robot.getRootJoints();
       if (rootJoints.size() > 1)
