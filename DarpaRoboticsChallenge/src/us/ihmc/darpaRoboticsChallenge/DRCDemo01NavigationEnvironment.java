@@ -480,25 +480,10 @@ public class DRCDemo01NavigationEnvironment implements
 
 		double sectionLength = 1.83; // 6 ft
 		double sectionWidth = 2.43; // 8 ft
-
-		// cinder blocks
-		startDistance += sectionLength;
-		setUpStraightHurdles(courseAngleDeg, startDistance, new int[] { 6 });
-		// sides to show boundaries, and virtual start and end lines:
 		double borderWidth = 0.1;
-		double xCenter = startDistance;
-		double yCenter = 0;
-		double[] point = { xCenter, 0 };
+
+		double[] point = {0, 0};
 		double[] rotatedPoint;
-		for (int side = -1; side <= 1; side += 2) {
-			yCenter = side * (sectionWidth / 2 + borderWidth / 2);
-			point[1] = yCenter;
-			rotatedPoint = rotateAroundOrigin(point, courseAngleDeg);
-			setUpSlopedBox(rotatedPoint[0], rotatedPoint[1], borderWidth / 2,
-					sectionLength * 2, borderWidth, borderWidth, 0,
-					courseAngleDeg, color);
-		}
-		startDistance += sectionLength;
 
 		// Setup Door
 		sectionLength = 1.22; // 4 ft
@@ -506,32 +491,29 @@ public class DRCDemo01NavigationEnvironment implements
 									// p37 initial task description dims
 		double doorHeight = 2; // 82 inches.
 		startDistance += sectionLength;
-		xCenter = startDistance;
-		point[0] = xCenter;
+		point[0] = startDistance;
 		double doorCenter = 0;
 		double doorJamWidth = 0.05;
 		for (int courseSide = -1; courseSide <= 1; courseSide += 2) {
 			doorCenter = courseSide
 					* (sectionWidth / 2 - doorWidth / 2 - doorJamWidth);
 			for (int doorSide = -1; doorSide <= 1; doorSide += 2) {
-				yCenter = doorSide * (doorWidth / 2 + borderWidth / 2)
+				point[1] = doorSide * (doorWidth / 2 + borderWidth / 2)
 						+ doorCenter;
-				point[1] = yCenter;
+				point[1] = point[1];
 				rotatedPoint = rotateAroundOrigin(point, courseAngleDeg);
 				setUpSlopedBox(rotatedPoint[0], rotatedPoint[1],
 						doorHeight / 2, borderWidth, borderWidth, doorHeight,
 						0, courseAngleDeg, color);
 			}
-			yCenter = doorCenter;
-			point[1] = yCenter;
+			point[1] = doorCenter;
 			rotatedPoint = rotateAroundOrigin(point, courseAngleDeg);
 			setUpSlopedBox(rotatedPoint[0], rotatedPoint[1], doorHeight
 					+ borderWidth / 2, borderWidth,
 					doorWidth + 2 * borderWidth, borderWidth, 0,
 					courseAngleDeg, color);
 		}
-		yCenter = 0;
-		point[1] = yCenter;
+		point[1] = 0;
 		rotatedPoint = rotateAroundOrigin(point, courseAngleDeg);
 		setUpSlopedBox(rotatedPoint[0], rotatedPoint[1],
 				(doorHeight + borderWidth) / 2, borderWidth,
@@ -539,8 +521,7 @@ public class DRCDemo01NavigationEnvironment implements
 				doorHeight + borderWidth, 0, courseAngleDeg, color);
 		// setup borders
 		for (int side = -1; side <= 1; side += 2) {
-			yCenter = side * (sectionWidth / 2 + borderWidth / 2);
-			point[1] = yCenter;
+			point[1] = side * (sectionWidth / 2 + borderWidth / 2);
 			rotatedPoint = rotateAroundOrigin(point, courseAngleDeg);
 			setUpSlopedBox(rotatedPoint[0], rotatedPoint[1],
 					(doorHeight + borderWidth) / 2, sectionLength * 2,
@@ -548,6 +529,22 @@ public class DRCDemo01NavigationEnvironment implements
 					color);
 		}
 		startDistance += sectionLength;
+
+		// cinder blocks
+		startDistance += sectionLength;
+		setUpStraightHurdles(courseAngleDeg, startDistance, new int[] { 6 });
+		// sides to show boundaries, and virtual start and end lines:
+		point[0]=startDistance;
+		for (int side = -1; side <= 1; side += 2) {
+			point[1] = side * (sectionWidth / 2 + borderWidth / 2);
+			point[1] = point[1];
+			rotatedPoint = rotateAroundOrigin(point, courseAngleDeg);
+			setUpSlopedBox(rotatedPoint[0], rotatedPoint[1], borderWidth / 2,
+					sectionLength * 2, borderWidth, borderWidth, 0,
+					courseAngleDeg, color);
+		}
+		startDistance += sectionLength;
+
 
 		// valve (graphics only)
 		startDistance += sectionLength;
