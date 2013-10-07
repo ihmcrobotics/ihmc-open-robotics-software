@@ -17,6 +17,7 @@ import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.IMUMount;
 import com.yobotics.simulationconstructionset.Joint;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 
 public class DRCPerfectSensorReaderFactory implements SensorReaderFactory
@@ -35,7 +36,7 @@ public class DRCPerfectSensorReaderFactory implements SensorReaderFactory
       this.groundContactPointBasedWrenchCalculators = groundContactPointBasedWrenchCalculators;
    }
    
-   public void build(SixDoFJoint sixDoFJoint, IMUDefinition[] imuDefinitions, boolean addLinearAccelerationSensors)
+   public void build(SixDoFJoint sixDoFJoint, IMUDefinition[] imuDefinitions, boolean addLinearAccelerationSensors, YoVariableRegistry parentRegistry)
    {
       final Joint rootJoint = robot.getRootJoints().get(0);
       SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = SCSToInverseDynamicsJointMap.createByName((FloatingJoint) rootJoint, sixDoFJoint);
