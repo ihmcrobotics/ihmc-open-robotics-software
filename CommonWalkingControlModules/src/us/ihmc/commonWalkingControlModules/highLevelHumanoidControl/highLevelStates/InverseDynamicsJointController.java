@@ -1,37 +1,44 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 
 public class InverseDynamicsJointController extends State<HighLevelState>
 {
-//   private final ReferenceFrame centerOfMassFrame;
    private final TwistCalculator twistCalculator;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
    
+   private final RigidBody chest;
+   
    private final InverseDynamicsJoint[] allJoints;
+   private final Wrench gravityWrench;
    
    public InverseDynamicsJointController(FullRobotModel fullRobotModel, TwistCalculator twistCalculator, double gravityZ, CommonWalkingReferenceFrames referenceFrames)
    {
       super(HighLevelState.INVERSE_DYNAMICS_JOINT_CONTROL);
       
-//      centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       this.twistCalculator = twistCalculator;
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
    
-//      RigidBody elevator = fullRobotModel.getElevator();
-//      double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
+      RigidBody elevator = fullRobotModel.getElevator();
+      double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
 
       
       allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
-//      gravitationalWrench = new SpatialForceVector(centerOfMassFrame, new Vector3d(0.0, 0.0, totalMass * gravityZ), new Vector3d());
-      
+      chest = fullRobotModel.getChest();
+      gravityWrench = new Wrench(chest.getBodyFixedFrame(), ReferenceFrame.getWorldFrame(), new Vector3d(0.0, 0.0, totalMass * gravityZ), new Vector3d());
       
    }
 
@@ -43,6 +50,8 @@ public class InverseDynamicsJointController extends State<HighLevelState>
       {
          joint.setDesiredAccelerationToZero();
       }
+      
+      inverseDynamicsCalculator.setExternalWrench(chest, gravityWrench);
       
       twistCalculator.compute();
       inverseDynamicsCalculator.compute();
