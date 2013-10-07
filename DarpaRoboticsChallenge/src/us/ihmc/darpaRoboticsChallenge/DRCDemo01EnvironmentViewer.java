@@ -67,8 +67,13 @@ public class DRCDemo01EnvironmentViewer
 //      scs.setCameraFix(3.5,1.5,0);
 //      scs.setCameraPosition(-3, -7, 3);
 //      scs.setCameraFix(4,4,0);
+      //look at end of walking obstacle course
       scs.setCameraFix(17,17,0);
       scs.setCameraPosition(10, 24, 20);
+      
+      //look at trials qualification course
+      scs.setCameraFix(5,-5,0);
+      scs.setCameraPosition(0, -10, 20);
       
 
 
