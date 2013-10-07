@@ -1,5 +1,6 @@
 package us.ihmc.robotDataCommunication.logger;
 
+import java.awt.BorderLayout;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -82,7 +83,12 @@ public class YoVariableLogVisualizer
       scs.attachPlaybackListener(player);
       scs.attachSimulationRewoundListener(player);
       
-      new YoVariableLogVisualizerGUI(player, robot, scs);
+      scs.getStandardSimulationGUI().addJComponentToMainPanel( new YoVariableLogVisualizerGUI(player, robot, scs), BorderLayout.SOUTH);
+
+      
+     
+      
+      
       
       new Thread(scs).start();
    }
