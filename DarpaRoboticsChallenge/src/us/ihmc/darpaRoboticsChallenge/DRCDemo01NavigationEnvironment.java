@@ -501,30 +501,45 @@ public class DRCDemo01NavigationEnvironment implements
 		
 		//Setup Door
 		sectionLength = 1.22; //4 ft
-		sectionWidth = 0.80; //32 inches (rounded down to 90cm according to p37 initial task description dims
+		double doorWidth = 0.80; //32 inches (rounded down to 90cm according to p37 initial task description dims
 		double doorHeight = 2;	//82 inches.
 		startDistance += sectionLength;
 		xCenter=startDistance;
 		point[0]=xCenter;
-		for(int side=-1;side<=1;side+=2)
-		{
-			yCenter=side*(sectionWidth/2+borderWidth/2);
+		double doorCenter=0;
+		double doorJamWidth=0.05;
+		for (int courseSide = -1; courseSide <= 1; courseSide += 2) {
+			doorCenter = courseSide*(sectionWidth/2-doorWidth/2-doorJamWidth);
+			for (int doorSide = -1; doorSide <= 1; doorSide += 2) {				
+				yCenter = doorSide * (doorWidth / 2 + borderWidth / 2) + doorCenter;
+				point[1] = yCenter;
+				rotatedPoint = rotateAroundOrigin(point, courseAngleDeg);
+				setUpSlopedBox(rotatedPoint[0], rotatedPoint[1], doorHeight / 2, 
+						borderWidth, borderWidth, doorHeight,
+						0, courseAngleDeg, color);
+			}
+			yCenter=doorCenter;
 			point[1] = yCenter ;
 			rotatedPoint = rotateAroundOrigin(point, courseAngleDeg);
-			setUpSlopedBox(rotatedPoint[0], rotatedPoint[1], doorHeight/2, borderWidth, borderWidth, doorHeight, 0, courseAngleDeg, color);
+			setUpSlopedBox(rotatedPoint[0], rotatedPoint[1], doorHeight+borderWidth/2, 
+					borderWidth, doorWidth+2*borderWidth, borderWidth, 
+					0, courseAngleDeg, color);
 		}
 		yCenter=0;
 		point[1] = yCenter ;
 		rotatedPoint = rotateAroundOrigin(point, courseAngleDeg);
-		setUpSlopedBox(rotatedPoint[0], rotatedPoint[1], doorHeight+borderWidth/2, borderWidth, sectionWidth+2*borderWidth, borderWidth, 0, courseAngleDeg, color);
+		setUpSlopedBox(rotatedPoint[0], rotatedPoint[1], (doorHeight+borderWidth)/2, 
+				borderWidth, Math.abs(doorCenter)*2-doorWidth-2*borderWidth, doorHeight+borderWidth,
+				0, courseAngleDeg, color);
 		//setup borders
-		sectionWidth+=0.1;
 		for(int side=-1;side<=1;side+=2)
 		{
 			yCenter=side*(sectionWidth/2+borderWidth/2);
 			point[1] = yCenter ;
 			rotatedPoint = rotateAroundOrigin(point, courseAngleDeg);
-			setUpSlopedBox(rotatedPoint[0], rotatedPoint[1], borderWidth/2, sectionLength*2, borderWidth, borderWidth, 0, courseAngleDeg, color);
+			setUpSlopedBox(rotatedPoint[0], rotatedPoint[1], (doorHeight+borderWidth)/2, 
+					sectionLength*2, borderWidth, doorHeight+borderWidth,
+					0, courseAngleDeg, color);
 		}
 		startDistance += sectionLength;
 
