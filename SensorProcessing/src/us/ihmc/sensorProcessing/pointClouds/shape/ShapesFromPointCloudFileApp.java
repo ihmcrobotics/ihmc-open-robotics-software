@@ -6,6 +6,9 @@ import bubo.io.text.ReadCsvObjectSmart;
 import bubo.ptcloud.CloudShapeTypes;
 import bubo.ptcloud.FactoryPointCloudShape;
 import bubo.ptcloud.PointCloudShapeFinder;
+import bubo.ptcloud.alg.CheckShapeCylinderRadius;
+import bubo.ptcloud.alg.CheckShapeParameters;
+import bubo.ptcloud.alg.CheckShapeSphere3DRadius;
 import bubo.ptcloud.alg.ConfigSchnabel2007;
 import bubo.ptcloud.wrapper.ConfigMergeShapes;
 import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
@@ -48,7 +51,10 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication
    {
       List<Point3D_F64> cloud = readPointCloud(10000000);
 
-      ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(100, 0.8, 0.15, 0.15, CloudShapeTypes.PLANE);
+      CheckShapeParameters checks[] = new CheckShapeParameters[]{null,new CheckShapeCylinderRadius(0.4),new CheckShapeSphere3DRadius(0.4)};
+      CloudShapeTypes shapeTypes[] = new CloudShapeTypes[]{CloudShapeTypes.PLANE,CloudShapeTypes.CYLINDER,CloudShapeTypes.SPHERE};
+
+      ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(100, 0.8, 0.15, 0.15, checks,shapeTypes);
       configRansac.minModelAccept = 200;
       configRansac.octreeSplit = 300;
 //      configRansac.maximumAllowedIterations = 5000;

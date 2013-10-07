@@ -47,7 +47,7 @@ public class SyntheticDataShapeTestApp extends SimpleApplication
 
       List<Point3D_F64> cloud = createCloudOfPoints();
 
-      ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(100, 0.8, 0.1, 0.05);
+      ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(100, 0.8, 0.1, 0.05,null,null);
       configRansac.minModelAccept = 100;
       configRansac.octreeSplit = 100;
 
