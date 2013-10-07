@@ -495,6 +495,7 @@ public class DRCDemo01NavigationEnvironment implements
 		double doorCenter = 0;
 		double doorJamWidth = 0.05;
 		for (int courseSide = -1; courseSide <= 1; courseSide += 2) {
+			//Door posts
 			doorCenter = courseSide
 					* (sectionWidth / 2 - doorWidth / 2 - doorJamWidth);
 			for (int doorSide = -1; doorSide <= 1; doorSide += 2) {
@@ -506,20 +507,22 @@ public class DRCDemo01NavigationEnvironment implements
 						doorHeight / 2, borderWidth, borderWidth, doorHeight,
 						0, courseAngleDeg, color);
 			}
-			point[1] = doorCenter;
-			rotatedPoint = rotateAroundOrigin(point, courseAngleDeg);
-			setUpSlopedBox(rotatedPoint[0], rotatedPoint[1], doorHeight
-					+ borderWidth / 2, borderWidth,
-					doorWidth + 2 * borderWidth, borderWidth, 0,
-					courseAngleDeg, color);
+//			//Door overhead
+//			point[1] = doorCenter;
+//			rotatedPoint = rotateAroundOrigin(point, courseAngleDeg);
+//			setUpSlopedBox(rotatedPoint[0], rotatedPoint[1], doorHeight
+//					+ borderWidth / 2, borderWidth,
+//					doorWidth + 2 * borderWidth, borderWidth, 0,
+//					courseAngleDeg, color);
 		}
+		//Walls
 		point[1] = 0;
 		rotatedPoint = rotateAroundOrigin(point, courseAngleDeg);
 		setUpSlopedBox(rotatedPoint[0], rotatedPoint[1],
 				(doorHeight + borderWidth) / 2, borderWidth,
 				Math.abs(doorCenter) * 2 - doorWidth - 2 * borderWidth,
 				doorHeight + borderWidth, 0, courseAngleDeg, color);
-		// setup borders
+		// setup side walls
 		for (int side = -1; side <= 1; side += 2) {
 			point[1] = side * (sectionWidth / 2 + borderWidth / 2);
 			rotatedPoint = rotateAroundOrigin(point, courseAngleDeg);
