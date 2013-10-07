@@ -100,7 +100,7 @@ public class SyntheticCalibrationTestApp extends SimpleApplication
       List<Point3D_F64> cloud = createBoxCloud(new Point3D_F64(0, 0, 0), -1, .05);
 
       CloudShapeTypes shapeTypes[] = new CloudShapeTypes[]{CloudShapeTypes.PLANE};
-      ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(100, 0.8, 0.1, 0.05,null,shapeTypes);
+      ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(100, 0.8, 0.1, 0.05,shapeTypes);
       configRansac.minModelAccept = 300;
       configRansac.octreeSplit = 300;
       configRansac.ransacExtension = 200;
