@@ -88,7 +88,7 @@ public class DRCDemo01NavigationEnvironment implements
 		combinedTerrainObject = new CombinedTerrainObject("Rocks with a wall");
 
 		setUpPath1Rocks();
-//		setUpPath2SmallCones();
+		// setUpPath2SmallCones();
 		setUpPath3RampsWithLargeBlocks();
 		setUpPath4DRCTrialsTrainingWalkingCourse();
 		setUpPathDRCTrialsLadder();
@@ -479,72 +479,99 @@ public class DRCDemo01NavigationEnvironment implements
 		AppearanceDefinition color = YoAppearance.Gray();
 
 		double sectionLength = 1.83; // 6 ft
-		double sectionWidth = 2.43; //8 ft
+		double sectionWidth = 2.43; // 8 ft
 
-		//cinder blocks
+		// cinder blocks
 		startDistance += sectionLength;
 		setUpStraightHurdles(courseAngleDeg, startDistance, new int[] { 6 });
-		//sides to show boundaries, and virtual start and end lines:
-		double borderWidth=0.1;
-		double xCenter=startDistance;
-		double yCenter=0;
-		double[] point={xCenter,0};
+		// sides to show boundaries, and virtual start and end lines:
+		double borderWidth = 0.1;
+		double xCenter = startDistance;
+		double yCenter = 0;
+		double[] point = { xCenter, 0 };
 		double[] rotatedPoint;
-		for(int side=-1;side<=1;side+=2)
-		{
-			yCenter=side*(sectionWidth/2+borderWidth/2);
-			point[1] = yCenter ;
+		for (int side = -1; side <= 1; side += 2) {
+			yCenter = side * (sectionWidth / 2 + borderWidth / 2);
+			point[1] = yCenter;
 			rotatedPoint = rotateAroundOrigin(point, courseAngleDeg);
-			setUpSlopedBox(rotatedPoint[0], rotatedPoint[1], borderWidth/2, sectionLength*2, borderWidth, borderWidth, 0, courseAngleDeg, color);
+			setUpSlopedBox(rotatedPoint[0], rotatedPoint[1], borderWidth / 2,
+					sectionLength * 2, borderWidth, borderWidth, 0,
+					courseAngleDeg, color);
 		}
 		startDistance += sectionLength;
-		
-		//Setup Door
-		sectionLength = 1.22; //4 ft
-		double doorWidth = 0.80; //32 inches (rounded down to 90cm according to p37 initial task description dims
-		double doorHeight = 2;	//82 inches.
+
+		// Setup Door
+		sectionLength = 1.22; // 4 ft
+		double doorWidth = 0.80; // 32 inches (rounded down to 90cm according to
+									// p37 initial task description dims
+		double doorHeight = 2; // 82 inches.
 		startDistance += sectionLength;
-		xCenter=startDistance;
-		point[0]=xCenter;
-		double doorCenter=0;
-		double doorJamWidth=0.05;
+		xCenter = startDistance;
+		point[0] = xCenter;
+		double doorCenter = 0;
+		double doorJamWidth = 0.05;
 		for (int courseSide = -1; courseSide <= 1; courseSide += 2) {
-			doorCenter = courseSide*(sectionWidth/2-doorWidth/2-doorJamWidth);
-			for (int doorSide = -1; doorSide <= 1; doorSide += 2) {				
-				yCenter = doorSide * (doorWidth / 2 + borderWidth / 2) + doorCenter;
+			doorCenter = courseSide
+					* (sectionWidth / 2 - doorWidth / 2 - doorJamWidth);
+			for (int doorSide = -1; doorSide <= 1; doorSide += 2) {
+				yCenter = doorSide * (doorWidth / 2 + borderWidth / 2)
+						+ doorCenter;
 				point[1] = yCenter;
 				rotatedPoint = rotateAroundOrigin(point, courseAngleDeg);
-				setUpSlopedBox(rotatedPoint[0], rotatedPoint[1], doorHeight / 2, 
-						borderWidth, borderWidth, doorHeight,
+				setUpSlopedBox(rotatedPoint[0], rotatedPoint[1],
+						doorHeight / 2, borderWidth, borderWidth, doorHeight,
 						0, courseAngleDeg, color);
 			}
-			yCenter=doorCenter;
-			point[1] = yCenter ;
+			yCenter = doorCenter;
+			point[1] = yCenter;
 			rotatedPoint = rotateAroundOrigin(point, courseAngleDeg);
-			setUpSlopedBox(rotatedPoint[0], rotatedPoint[1], doorHeight+borderWidth/2, 
-					borderWidth, doorWidth+2*borderWidth, borderWidth, 
-					0, courseAngleDeg, color);
+			setUpSlopedBox(rotatedPoint[0], rotatedPoint[1], doorHeight
+					+ borderWidth / 2, borderWidth,
+					doorWidth + 2 * borderWidth, borderWidth, 0,
+					courseAngleDeg, color);
 		}
-		yCenter=0;
-		point[1] = yCenter ;
+		yCenter = 0;
+		point[1] = yCenter;
 		rotatedPoint = rotateAroundOrigin(point, courseAngleDeg);
-		setUpSlopedBox(rotatedPoint[0], rotatedPoint[1], (doorHeight+borderWidth)/2, 
-				borderWidth, Math.abs(doorCenter)*2-doorWidth-2*borderWidth, doorHeight+borderWidth,
-				0, courseAngleDeg, color);
-		//setup borders
-		for(int side=-1;side<=1;side+=2)
-		{
-			yCenter=side*(sectionWidth/2+borderWidth/2);
-			point[1] = yCenter ;
+		setUpSlopedBox(rotatedPoint[0], rotatedPoint[1],
+				(doorHeight + borderWidth) / 2, borderWidth,
+				Math.abs(doorCenter) * 2 - doorWidth - 2 * borderWidth,
+				doorHeight + borderWidth, 0, courseAngleDeg, color);
+		// setup borders
+		for (int side = -1; side <= 1; side += 2) {
+			yCenter = side * (sectionWidth / 2 + borderWidth / 2);
+			point[1] = yCenter;
 			rotatedPoint = rotateAroundOrigin(point, courseAngleDeg);
-			setUpSlopedBox(rotatedPoint[0], rotatedPoint[1], (doorHeight+borderWidth)/2, 
-					sectionLength*2, borderWidth, doorHeight+borderWidth,
-					0, courseAngleDeg, color);
+			setUpSlopedBox(rotatedPoint[0], rotatedPoint[1],
+					(doorHeight + borderWidth) / 2, sectionLength * 2,
+					borderWidth, doorHeight + borderWidth, 0, courseAngleDeg,
+					color);
 		}
 		startDistance += sectionLength;
 
-//		setUpSlopedBox
+		// valve (graphics only)
+		startDistance += sectionLength;
 
+		for (int i = 0; i < 20; i++) {
+			Graphics3DObject linkGraphics = new Graphics3DObject();
+			//Vector3d translation = new Vector3d(-1.0, 0, startDistance);// startDistance);
+			Vector3d translation = new Vector3d(
+					-Math.random()*doorHeight, 
+					Math.random()*sectionWidth - sectionWidth/2, 
+					startDistance);// startDistance);
+
+			linkGraphics.rotate(Math.PI / 2, Axis.Y);
+			linkGraphics.rotate(Math.toRadians(-courseAngleDeg), Axis.X);
+			linkGraphics.translate(translation);
+
+			double outsideRadius = 0.12 + Math.random()*0.09-0.045;
+			double gripRadius = 0.039 + Math.random()*0.06-0.03;
+			linkGraphics.addArcTorus(0, Math.PI * 2, outsideRadius, gripRadius,
+					YoAppearance.randomColor(random));
+			
+
+			combinedTerrainObject.addStaticLinkGraphics(linkGraphics);// new
+		}
 	}
 
 	private void setUpStepOverObstacles(double courseAngleDeg,
@@ -564,41 +591,42 @@ public class DRCDemo01NavigationEnvironment implements
 		newPoint = rotateAroundOrigin(point, courseAngleDeg);
 		double trussLength = 1.5;
 		double trussSide = 0.3;
-		// setUpSlopedBox(newPoint[0], newPoint[1], trussSide/2.0, trussLength,
-		// trussSide, trussSide, 0.0, courseAngleDeg - 45, color);
+		setUpSlopedBox(newPoint[0], newPoint[1], trussSide / 2.0, trussLength,
+				trussSide, trussSide, 0.0, courseAngleDeg - 45, color);
 
-		// ///
-
-		// Transform3D transform = box.getTransformCopy();
-
-		// Vector3d extraTranslationDueToStupidConvention = new Vector3d(0.0,
-		// 0.0, -box.getDimension(Direction.Z) / 2.0);
-		// Transform3D postTranslation = new Transform3D();
-		// postTranslation.set(extraTranslationDueToStupidConvention);
-
-		// transform.mul(postTranslation);
+		// // ///
 		//
-		// Matrix3d rotation = new Matrix3d();
-		// transform.get(rotation);
-
-		Vector3d translation = new Vector3d(newPoint[0], newPoint[1],
-				trussSide / 2.0);
-
-		Graphics3DObject linkGraphics = combinedTerrainObject.getLinkGraphics();// new
-																				// Graphics3DObject();
-
-		linkGraphics.translate(translation);
-		linkGraphics.rotate(courseAngleDeg - 45, Axis.Z);
-
-		// Vector3d veftor = new Vector3d(box.getDimension(Direction.X),
-		// box.getDimension(Direction.Y), box.getDimension(Direction.Z));
-		// // Vector3d veftor = new Vector3d(0.1,0.2,0.3);
+		// // Transform3D transform = box.getTransformCopy();
 		//
-		// linkGraphics.scale(veftor);
-
-		linkGraphics.addModelFile(getClass().getResource("truss.dae"));
-
-		// ///
+		// // Vector3d extraTranslationDueToStupidConvention = new Vector3d(0.0,
+		// // 0.0, -box.getDimension(Direction.Z) / 2.0);
+		// // Transform3D postTranslation = new Transform3D();
+		// // postTranslation.set(extraTranslationDueToStupidConvention);
+		//
+		// // transform.mul(postTranslation);
+		// //
+		// // Matrix3d rotation = new Matrix3d();
+		// // transform.get(rotation);
+		//
+		// Vector3d translation = new Vector3d(newPoint[0], newPoint[1],
+		// trussSide / 2.0);
+		//
+		// Graphics3DObject linkGraphics =
+		// combinedTerrainObject.getLinkGraphics();// new
+		// // Graphics3DObject();
+		//
+		// linkGraphics.translate(translation);
+		// linkGraphics.rotate(courseAngleDeg - 45, Axis.Z);
+		//
+		// // Vector3d veftor = new Vector3d(box.getDimension(Direction.X),
+		// // box.getDimension(Direction.Y), box.getDimension(Direction.Z));
+		// // // Vector3d veftor = new Vector3d(0.1,0.2,0.3);
+		// //
+		// // linkGraphics.scale(veftor);
+		//
+		// linkGraphics.addModelFile(getClass().getResource("truss.dae"));
+		//
+		// // ///
 
 		point = new double[] { startDistance + sectionLength * 0.75 / 2,
 				sectionLength / 4 };
