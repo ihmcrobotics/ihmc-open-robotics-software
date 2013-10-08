@@ -50,10 +50,11 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
    private Random rand = new Random(234);
 
    public String fileName;
-
+   private List<Point3D_F64> ransacCloud;
    private Node boundsNode = new Node("meshBounds");
    private float boxExtent = 0.5f;
    private Node zUp = new Node();
+   private Node pointCloudNode = new Node();
    private float translateSpeed = 0.1f;
 
 
@@ -72,19 +73,140 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
    public void simpleInitApp()
    {
       inputManager.addRawInputListener(this);
-      List<Point3D_F64> cloud = readPointCloud(10000000);
+      
+      zUp.setLocalRotation(JMEGeometryUtils.getRotationFromJMEToZupCoordinates());
 
-      CloudShapeTypes shapeTypes[] = new CloudShapeTypes[]{CloudShapeTypes.PLANE,CloudShapeTypes.CYLINDER,CloudShapeTypes.SPHERE};
+      rootNode.attachChild(zUp);
+      zUp.attachChild(pointCloudNode);
+      
+      List<Point3D_F64> cloud = readPointCloud(10000000,new Vector3f(-99999.0f,-99999.0f,-99999.0f),new Vector3f(99999.0f,99999.0f,99999.0f));
+      displayView(cloud);
+      
+      cam.setFrustumPerspective(45.0f, ((float) cam.getWidth()) / ((float) cam.getHeight()), 0.05f, 100.0f);
+      cam.setLocation(new Vector3f(0, 0, -5));
+      cam.lookAtDirection(Vector3f.UNIT_Z, Vector3f.UNIT_Y);
+      cam.update();
+      flyCam.setMoveSpeed(15);
+      setupBoxNode();
 
-      ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(100, 0.8, 0.15, 0.15,shapeTypes);
+//     CloudShapeTypes shapeTypes[] = new CloudShapeTypes[]{CloudShapeTypes.PLANE,CloudShapeTypes.CYLINDER,CloudShapeTypes.SPHERE};
+//
+//      ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(100, 0.6, 0.05, 0.05,shapeTypes);
+//     configRansac.randomSeed = 2342342;
+//
+//      configRansac.minModelAccept = 200;
+//      configRansac.octreeSplit = 300;
+//zUpNode
+//      configRansac.maximumAllowedIterations = 500;
+//      configRansac.ransacExtension = 5;
+//
+//      configRansac.models.get(1).modelCheck = new CheckShapeCylinderRadius(0.2);
+//      configRansac.models.get(2).modelCheck = new CheckShapeSphere3DRadius(0.2);
+//
+//
+//      ConfigSurfaceNormals configSurface = new ConfigSurfaceNormals(10, 30, Double.MAX_VALUE);
+//      ConfigMergeShapes configMerge = new ConfigMergeShapes(0.6, 0.9);
+//
+//      PointCloudShapeFinder shapeFinder = FactoryPointCloudShape.ransacOctree(configSurface, configRansac, configMerge);
+//
+//      shapeFinder.process(cloud, null);
+//
+//      List<PointCloudShapeFinder.Shape> found = shapeFinder.getFound();
+//
+//      List<Point3D_F64> unmatched = new ArrayList<Point3D_F64>();
+//      shapeFinder.getUnmatched(unmatched);
+//
+//      System.out.println("Unmatched points " + unmatched.size());
+//      System.out.println("total shapes found: " + found.size());
+//      int total = 0;
+//      for (PointCloudShapeFinder.Shape s : found)
+//      {
+//         System.out.println("  " + s.type + "  points = " + s.points.size());
+//         System.out.println("           " + s.parameters);
+//         total += s.points.size();
+//      }
+//
+//      Vector3f[zUpNode] points = new Vector3f[total];
+//      ColorRGBA[] colors = new ColorRGBA[total];
+//
+//      int index = 0;
+//      for (PointCloudShapeFinder.Shape s : found)
+//      {
+//         float r = rand.nextFloat();
+//         float g = rand.nextFloat();
+//         float b = rand.nextFloat();
+//
+//         // make sure it is bright enough to see
+//         float n = (r + g + b) / 3.0f;
+//
+//         if (n < 0.5f)
+//         {
+//            r *= 0.5f / n;
+//            g *= 0.5f / n;
+//            b *= 0.5f / n;
+//         }
+//
+//
+//         ColorRGBA color = new ColorRGBA(r, g, b, 1.0f);
+//         System.out.println(" color " + r + " " + g + " " + b);
+//
+//         for (Point3D_F64 p : s.points)
+//         {
+//            points[index] = new Vector3f((float) p.x, (float) p.y, (float) p.z);
+//            colors[index] = color;
+//            index++;
+//         }
+//      }
+//
+//
+//      PointCloud generator = new PointCloud(assetManager);
+//
+//      zUp.setLocalRotation(JMEGeometryUtils.getRotationFromJMEToZupCoordinates());
+//
+//      try
+//      {
+//         rootNode.attachChild(zUp);
+//         zUp.attachChild(generator.generatePointCloudGraph(points, colors));
+//      }
+//      catch (Exception e)
+//      {
+//         this.handleError(e.getMessage(), e);
+//      }
+//
+//      cam.setFrustumPerspective(45.0f, ((float) cam.getWidth()) / ((float) cam.getHeight()), 0.05f, 100.0f);
+//      cam.setLocation(new Vector3f(0, 0, -5));
+//      cam.lookAtDirection(Vector3f.UNIT_Z, Vector3f.UNIT_Y);
+//      cam.update();
+//      flyCam.setMoveSpeed(15);
+//
+//      setupBoxNode();
+//
+//      fpp = new FilterPostProcessor(assetManager);
+//
+//      CartoonEdgeFilter f = new CartoonEdgeFilter();
+//      fpp.addFilter(f);
+//
+//      getViewPort().addProcessor(fpp);
+//
+
+
+   }
+   private void ransacRun(List<Point3D_F64> cloud){
+	   
+     CloudShapeTypes shapeTypes[] = new CloudShapeTypes[]{CloudShapeTypes.PLANE,CloudShapeTypes.CYLINDER,CloudShapeTypes.SPHERE};
+
+      ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(100, 0.6, 0.05, 0.05,shapeTypes);
+     configRansac.randomSeed = 2342342;
+
       configRansac.minModelAccept = 200;
       configRansac.octreeSplit = 300;
 
-//    configRansac.maximumAllowedIterations = 5000;
-      configRansac.ransacExtension = 20;
+      configRansac.maximumAllowedIterations = 500;
+      configRansac.ransacExtension = 5;
 
       configRansac.models.get(1).modelCheck = new CheckShapeCylinderRadius(0.2);
       configRansac.models.get(2).modelCheck = new CheckShapeSphere3DRadius(0.2);
+
 
       ConfigSurfaceNormals configSurface = new ConfigSurfaceNormals(10, 30, Double.MAX_VALUE);
       ConfigMergeShapes configMerge = new ConfigMergeShapes(0.6, 0.9);
@@ -107,7 +229,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
          System.out.println("           " + s.parameters);
          total += s.points.size();
       }
-
+      pointCloudNode.detachAllChildren();
       Vector3f[] points = new Vector3f[total];
       ColorRGBA[] colors = new ColorRGBA[total];
 
@@ -143,34 +265,47 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
 
       PointCloud generator = new PointCloud(assetManager);
 
-      zUp.setLocalRotation(JMEGeometryUtils.getRotationFromJMEToZupCoordinates());
-
       try
       {
-         rootNode.attachChild(zUp);
-         zUp.attachChild(generator.generatePointCloudGraph(points, colors));
+        pointCloudNode.attachChild(generator.generatePointCloudGraph(points, colors));
       }
       catch (Exception e)
       {
          this.handleError(e.getMessage(), e);
       }
 
-      cam.setFrustumPerspective(45.0f, ((float) cam.getWidth()) / ((float) cam.getHeight()), 0.05f, 100.0f);
-      cam.setLocation(new Vector3f(0, 0, -5));
-      cam.lookAtDirection(Vector3f.UNIT_Z, Vector3f.UNIT_Y);
-      cam.update();
-      flyCam.setMoveSpeed(15);
+   	   
+   }
+   private void displayView(List<Point3D_F64> cloud){
+	   pointCloudNode.detachAllChildren();
+	     System.out.println("total points: " + cloud.size());
 
-      setupBoxNode();
+	      Vector3f[] points = new Vector3f[cloud.size()];
+	      ColorRGBA[] colors = new ColorRGBA[cloud.size()];
 
-      fpp = new FilterPostProcessor(assetManager);
+	      ColorRGBA color = new ColorRGBA(1, 0, 0, 1.0f);
+	      int index = 0;
+	      for (Point3D_F64 p : cloud )
+	      {
+	         points[index] = new Vector3f((float) p.x, (float) p.y, (float) p.z);
+	         colors[index] = color;
+	         index++;
+	      }
 
-      CartoonEdgeFilter f = new CartoonEdgeFilter();
-      fpp.addFilter(f);
-
-      getViewPort().addProcessor(fpp);
 
 
+	      PointCloud generator = new PointCloud(assetManager);
+
+	      try
+	      {
+	        
+	    	  pointCloudNode.attachChild(generator.generatePointCloudGraph(points, colors));
+	         
+	      }
+	      catch (Exception e)
+	      {
+	         this.handleError(e.getMessage(), e);
+	      }
 
    }
 
@@ -190,7 +325,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
 
    }
 
-   private List<Point3D_F64> readPointCloud(int maxLines)
+   private List<Point3D_F64> readPointCloud(int maxLines, Vector3f min, Vector3f max)
    {
       List<Point3D_F64> cloud = new ArrayList<Point3D_F64>();
       SerializationDefinitionManager manager = new SerializationDefinitionManager();
@@ -206,7 +341,8 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
          int count = 0;
          while ((reader.nextObject(pt) != null) && (count++ < maxLines))
          {
-            cloud.add(pt.copy());
+        	if(pt.x >= min.x && pt.y>=min.y && pt.z>=min.z && pt.x<=max.x && pt.y<=max.y && pt.z<=max.z) 
+        		cloud.add(pt.copy());
          }
 
       }
@@ -221,7 +357,12 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
 
       return cloud;
    }
-
+   private List<Point3D_F64> getBoundedCloud(){
+	   Vector3f current =  boundsNode.getLocalTranslation();
+       Vector3f max = new Vector3f(current.x+boxExtent,current.y+boxExtent,current.z+boxExtent);
+       Vector3f min = new Vector3f(current.x-boxExtent,current.y-boxExtent,current.z-boxExtent);
+       return readPointCloud(10000000,min,max);
+   }
    @Override
    public void beginInput()
    {
@@ -304,7 +445,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
             boundsNode.setLocalTranslation(current);
          }
       }
-      else
+      else 
       {
          if (evt.getKeyCode() == 23)
          {
@@ -351,10 +492,14 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       }
 
       if (evt.getKeyCode() == 28)
-      {
-         System.out.println(boundsNode.getLocalTranslation());
-         System.out.println(boxExtent);
+      {    	  
+          ransacCloud=getBoundedCloud();
+          displayView( ransacCloud);
+      }
 
+      if (evt.getKeyCode() == 19)
+      {
+    	  ransacRun(ransacCloud);
       }
 
    }
