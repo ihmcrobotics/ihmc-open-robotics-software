@@ -6,32 +6,24 @@ import bubo.io.text.ReadCsvObjectSmart;
 import bubo.ptcloud.CloudShapeTypes;
 import bubo.ptcloud.FactoryPointCloudShape;
 import bubo.ptcloud.PointCloudShapeFinder;
-import bubo.ptcloud.alg.CheckShapeCylinderRadius;
-import bubo.ptcloud.alg.CheckShapeSphere3DRadius;
 import bubo.ptcloud.alg.ConfigSchnabel2007;
+import bubo.ptcloud.shape.CheckShapeCylinderRadius;
+import bubo.ptcloud.shape.CheckShapeSphere3DRadius;
 import bubo.ptcloud.wrapper.ConfigMergeShapes;
 import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
 import com.jme3.app.SimpleApplication;
-import com.jme3.bounding.BoundingBox;
 import com.jme3.input.RawInputListener;
-import com.jme3.input.event.JoyAxisEvent;
-import com.jme3.input.event.JoyButtonEvent;
-import com.jme3.input.event.KeyInputEvent;
-import com.jme3.input.event.MouseButtonEvent;
-import com.jme3.input.event.MouseMotionEvent;
-import com.jme3.input.event.TouchEvent;
+import com.jme3.input.event.*;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.post.FilterPostProcessor;
-import com.jme3.post.filters.CartoonEdgeFilter;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.shape.Box;
-
 import georegression.struct.point.Point3D_F64;
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 
@@ -195,7 +187,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
 	   
      CloudShapeTypes shapeTypes[] = new CloudShapeTypes[]{CloudShapeTypes.PLANE,CloudShapeTypes.CYLINDER,CloudShapeTypes.SPHERE};
 
-      ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(100, 0.6, 0.05, 0.05,shapeTypes);
+      ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(100, 0.6, 0.05,shapeTypes);
      configRansac.randomSeed = 2342342;
 
       configRansac.minModelAccept = 200;
