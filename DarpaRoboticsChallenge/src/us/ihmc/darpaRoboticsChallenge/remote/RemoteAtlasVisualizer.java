@@ -1,19 +1,16 @@
 package us.ihmc.darpaRoboticsChallenge.remote;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.visualization.SliderBoardControllerListener;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.robotDataCommunication.YoVariableClient;
-import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesUpdatedListener;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
-import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 
 public class RemoteAtlasVisualizer
 {
@@ -24,9 +21,9 @@ public class RemoteAtlasVisualizer
    {
       System.out.println("Connecting to host " + host);
       
-      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_SANDIA_HANDS, false);
+      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_NO_HANDS, false);
       JaxbSDFLoader robotLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
-      SDFRobot robot = robotLoader.createRobot(jointMap, false);
+//      SDFRobot robot = robotLoader.createRobot(jointMap, false);
       SliderBoardControllerListener scsYoVariablesUpdatedListener = new SliderBoardControllerListener(robotLoader, jointMap, bufferSize);
 
       YoVariableClient client = new YoVariableClient(host, port, scsYoVariablesUpdatedListener, "remote");
