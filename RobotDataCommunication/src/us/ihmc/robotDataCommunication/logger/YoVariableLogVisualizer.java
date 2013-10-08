@@ -7,12 +7,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 
+import javax.swing.Action;
 import javax.swing.JFileChooser;
+import javax.swing.JTable;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.robotDataCommunication.VisualizerUtils;
 import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
+import us.ihmc.utilities.SwingUtils;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
@@ -28,6 +31,8 @@ public class YoVariableLogVisualizer
       this.jointNameMap = jointNameMap;
       
       final JFileChooser fileChooser = new JFileChooser(new File(YoVariableLoggerOptions.defaultLogDirectory));
+      sortByDateHack(fileChooser);  
+      
       fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
       int returnValue = fileChooser.showOpenDialog(null);
       if(returnValue == JFileChooser.APPROVE_OPTION)
@@ -39,6 +44,19 @@ public class YoVariableLogVisualizer
          System.err.println("No file selected, closing.");
       }
       
+   }
+
+   private void sortByDateHack(final JFileChooser fileChooser)
+   {
+      
+      // Found this hack on http://stackoverflow.com/questions/16429779/start-a-jfilechooser-with-files-ordered-by-date
+      Action details = fileChooser.getActionMap().get("viewTypeDetails");
+      details.actionPerformed(null);
+
+      //  Find the JTable on the file chooser panel and manually do the sort
+
+      JTable table = SwingUtils.getDescendantsOfType(JTable.class, fileChooser).get(0);
+      table.getRowSorter().toggleSortOrder(2); table.getRowSorter().toggleSortOrder(2);
    }
 
    private void readLogFile(File selectedFile) throws IOException
