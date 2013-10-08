@@ -12,9 +12,26 @@ import bubo.ptcloud.alg.ConfigSchnabel2007;
 import bubo.ptcloud.wrapper.ConfigMergeShapes;
 import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
 import com.jme3.app.SimpleApplication;
+import com.jme3.bounding.BoundingBox;
+import com.jme3.input.RawInputListener;
+import com.jme3.input.event.JoyAxisEvent;
+import com.jme3.input.event.JoyButtonEvent;
+import com.jme3.input.event.KeyInputEvent;
+import com.jme3.input.event.MouseButtonEvent;
+import com.jme3.input.event.MouseMotionEvent;
+import com.jme3.input.event.TouchEvent;
+import com.jme3.material.Material;
+import com.jme3.material.RenderState;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
+import com.jme3.post.FilterPostProcessor;
+import com.jme3.post.filters.CartoonEdgeFilter;
+import com.jme3.renderer.queue.RenderQueue.Bucket;
+import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial.CullHint;
+import com.jme3.scene.shape.Box;
+
 import georegression.struct.point.Point3D_F64;
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 
@@ -28,11 +45,17 @@ import java.util.Random;
 /**
  * @author Peter Abeles
  */
-public class ShapesFromPointCloudFileApp extends SimpleApplication
+public class ShapesFromPointCloudFileApp extends SimpleApplication implements RawInputListener
 {
-   Random rand = new Random(234);
+   private Random rand = new Random(234);
 
    public String fileName;
+
+   private Node boundsNode = new Node("meshBounds");
+   private float boxExtent = 0.5f;
+   private Node zUp = new Node();
+   private float translateSpeed = 0.1f;
+
 
    public static void main(String[] args)
    {
@@ -48,6 +71,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication
    @Override
    public void simpleInitApp()
    {
+      inputManager.addRawInputListener(this);
       List<Point3D_F64> cloud = readPointCloud(10000000);
 
       CloudShapeTypes shapeTypes[] = new CloudShapeTypes[]{CloudShapeTypes.PLANE,CloudShapeTypes.CYLINDER,CloudShapeTypes.SPHERE};
@@ -55,7 +79,8 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication
       ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(100, 0.8, 0.15, 0.15,shapeTypes);
       configRansac.minModelAccept = 200;
       configRansac.octreeSplit = 300;
-//      configRansac.maximumAllowedIterations = 5000;
+
+//    configRansac.maximumAllowedIterations = 5000;
       configRansac.ransacExtension = 20;
 
       configRansac.models.get(1).modelCheck = new CheckShapeCylinderRadius(0.2);
@@ -118,13 +143,12 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication
 
       PointCloud generator = new PointCloud(assetManager);
 
-      Node zup = new Node();
-      zup.setLocalRotation(JMEGeometryUtils.getRotationFromJMEToZupCoordinates());
+      zUp.setLocalRotation(JMEGeometryUtils.getRotationFromJMEToZupCoordinates());
 
       try
       {
-         rootNode.attachChild(zup);
-         zup.attachChild(generator.generatePointCloudGraph(points, colors));
+         rootNode.attachChild(zUp);
+         zUp.attachChild(generator.generatePointCloudGraph(points, colors));
       }
       catch (Exception e)
       {
@@ -136,33 +160,209 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication
       cam.lookAtDirection(Vector3f.UNIT_Z, Vector3f.UNIT_Y);
       cam.update();
       flyCam.setMoveSpeed(15);
+
+      setupBoxNode();
+
+      fpp = new FilterPostProcessor(assetManager);
+
+      CartoonEdgeFilter f = new CartoonEdgeFilter();
+      fpp.addFilter(f);
+
+      getViewPort().addProcessor(fpp);
+
+
+
    }
 
-   private List<Point3D_F64> readPointCloud( int maxLines )
+   private void setupBoxNode()
+   {
+      Box box = new Box(boxExtent, boxExtent, boxExtent);
+      Geometry geometryBox = new Geometry("boxMesh", box);
+
+      Material objectMaterial = new Material(getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+      objectMaterial.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.AlphaAdditive);
+      objectMaterial.setColor("Color", new ColorRGBA(0, 0, 1, 0.5f));
+      geometryBox.setMaterial(objectMaterial);
+      geometryBox.setQueueBucket(Bucket.Transparent);
+
+      boundsNode.attachChild(geometryBox);
+      zUp.attachChild(boundsNode);
+
+   }
+
+   private List<Point3D_F64> readPointCloud(int maxLines)
    {
       List<Point3D_F64> cloud = new ArrayList<Point3D_F64>();
       SerializationDefinitionManager manager = new SerializationDefinitionManager();
-      manager.addDefinition(new DataDefinition("point3d",Point3D_F64.class,"x","y","z"));
+      manager.addDefinition(new DataDefinition("point3d", Point3D_F64.class, "x", "y", "z"));
 
       try
       {
          FileInputStream in = new FileInputStream(fileName);
-         ReadCsvObjectSmart<Point3D_F64> reader = new ReadCsvObjectSmart<Point3D_F64>(in,manager,"point3d");
+         ReadCsvObjectSmart<Point3D_F64> reader = new ReadCsvObjectSmart<Point3D_F64>(in, manager, "point3d");
 
 
          Point3D_F64 pt = new Point3D_F64();
          int count = 0;
-         while(  reader.nextObject(pt) != null && count++ < maxLines) {
+         while ((reader.nextObject(pt) != null) && (count++ < maxLines))
+         {
             cloud.add(pt.copy());
          }
 
-      } catch (FileNotFoundException e)
-      {
-         throw new RuntimeException(e);
-      } catch (IOException e)
+      }
+      catch (FileNotFoundException e)
       {
          throw new RuntimeException(e);
       }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+
       return cloud;
+   }
+
+   @Override
+   public void beginInput()
+   {
+      // TODO Auto-generated method stub
+
+   }
+
+   @Override
+   public void endInput()
+   {
+      // TODO Auto-generated method stub
+
+   }
+
+   @Override
+   public void onJoyAxisEvent(JoyAxisEvent evt)
+   {
+      // TODO Auto-generated method stub
+
+   }
+
+   @Override
+   public void onJoyButtonEvent(JoyButtonEvent evt)
+   {
+      // TODO Auto-generated method stub
+
+   }
+
+   @Override
+   public void onMouseMotionEvent(MouseMotionEvent evt)
+   {
+      // TODO Auto-generated method stub
+
+   }
+
+   @Override
+   public void onMouseButtonEvent(MouseButtonEvent evt)
+   {
+      // TODO Auto-generated method stub
+
+   }
+
+   private boolean ctrlPressed = false;
+   private boolean boxHidden = false;
+   private FilterPostProcessor fpp;
+
+   @Override
+   public void onKeyEvent(KeyInputEvent evt)
+   {
+      Material objectMaterial = new Material(getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+
+//    objectMaterial.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.AlphaAdditive);
+      objectMaterial.setColor("Color", new ColorRGBA(0, 0, 1, 0.5f));
+      boundsNode.setMaterial(objectMaterial);
+      boundsNode.setQueueBucket(Bucket.Transparent);
+
+
+
+      translateSpeed = 0.05f;
+
+      // up 200 left 203 right 205 down 208
+      if ((evt.getKeyCode() == 29) || (evt.getKeyCode() == 157))
+      {
+         ctrlPressed = evt.isPressed();
+      }
+
+
+      if (ctrlPressed)
+      {
+         if (evt.getKeyCode() == 23)
+         {
+            Vector3f current = boundsNode.getLocalTranslation().clone();
+            current.z += translateSpeed;
+            boundsNode.setLocalTranslation(current);
+         }
+         else if (evt.getKeyCode() == 37)
+         {
+            Vector3f current = boundsNode.getLocalTranslation().clone();
+            current.z -= translateSpeed;
+            boundsNode.setLocalTranslation(current);
+         }
+      }
+      else
+      {
+         if (evt.getKeyCode() == 23)
+         {
+            Vector3f current = boundsNode.getLocalTranslation().clone();
+            current.x += translateSpeed;
+            boundsNode.setLocalTranslation(current);
+         }
+         else if (evt.getKeyCode() == 37)
+         {
+            Vector3f current = boundsNode.getLocalTranslation().clone();
+            current.x -= translateSpeed;
+            boundsNode.setLocalTranslation(current);
+         }
+      }
+
+      if (evt.getKeyCode() == 36)
+      {
+         Vector3f current = boundsNode.getLocalTranslation().clone();
+         current.y += translateSpeed;
+         boundsNode.setLocalTranslation(current);
+      }
+      else if (evt.getKeyCode() == 38)
+      {
+         Vector3f current = boundsNode.getLocalTranslation().clone();
+         current.y -= translateSpeed;
+         boundsNode.setLocalTranslation(current);
+      }
+
+      if (evt.getKeyCode() == 13)
+      {
+         if (evt.isPressed())
+         {
+            if (boxHidden)
+            {
+               boxHidden = false;
+               boundsNode.setCullHint(CullHint.Dynamic);
+            }
+            else
+            {
+               boxHidden = true;
+               boundsNode.setCullHint(CullHint.Always);
+            }
+         }
+      }
+
+      if (evt.getKeyCode() == 28)
+      {
+         System.out.println(boundsNode.getLocalTranslation());
+         System.out.println(boxExtent);
+
+      }
+
+   }
+
+   @Override
+   public void onTouchEvent(TouchEvent evt)
+   {
+      // TODO Auto-generated method stub
+
    }
 }

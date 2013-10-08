@@ -15,6 +15,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Mesh.Mode;
+import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.util.BufferUtils;
 
@@ -51,9 +52,9 @@ public class PointCloud
 
       Material mat = new Material(assetManager, "Common/MatDefs/Misc/Particle.j3md");
       mat.getAdditionalRenderState().setPointSprite(true);
-      mat.getAdditionalRenderState().setBlendMode(BlendMode.Off);
+//      mat.getAdditionalRenderState().setBlendMode(BlendMode.AlphaAdditive);
       mat.setBoolean("PointSprite", true);
-      mat.setFloat("Quadratic", 7.0f);
+      mat.setFloat("Quadratic", 0.75f);
 
       Mesh m = new Mesh();
       m.setMode(Mode.Points);
@@ -64,8 +65,10 @@ public class PointCloud
       m.updateBound();
 
       Geometry g = new Geometry("Point Cloud", m);
-      g.setShadowMode(ShadowMode.Off);
-      g.setQueueBucket(Bucket.Opaque);
+//      g.setShadowMode(ShadowMode.CastAndReceive);
+      g.setQueueBucket(Bucket.Transparent);
+//      g.setCullHint(CullHint.Dynamic);
+
       g.setMaterial(mat);
       g.updateModelBound();
 
