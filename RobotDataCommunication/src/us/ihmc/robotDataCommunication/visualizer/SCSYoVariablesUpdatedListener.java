@@ -1,6 +1,8 @@
 package us.ihmc.robotDataCommunication.visualizer;
 
 
+import gnu.trove.map.hash.TObjectDoubleHashMap;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.nio.ByteBuffer;
@@ -18,6 +20,7 @@ import us.ihmc.robotDataCommunication.jointState.JointState;
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
@@ -29,6 +32,8 @@ public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener
    private final Robot robot;
    private final ArrayList<JointUpdater> jointUpdaters = new ArrayList<JointUpdater>();
    private boolean recording = true;
+   
+   private final TObjectDoubleHashMap<String> buttons = new TObjectDoubleHashMap<String>();
 
    public SCSYoVariablesUpdatedListener(int bufferSize)
    {
@@ -48,6 +53,24 @@ public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener
 
    public void start()
    {
+      for(String yoVariableName : buttons.keySet())
+      {
+         final YoVariable var = registry.getVariable(yoVariableName);
+         final JButton button = new JButton(yoVariableName);
+         final double newValue = buttons.get(yoVariableName);
+         scs.addButton(button);
+         button.addActionListener(new ActionListener()
+         {
+            
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+               var.setValueFromDouble(newValue);
+            }
+         });
+         
+      }
+      
       new Thread(scs).start();
    }
 
@@ -104,8 +127,15 @@ public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener
             client.close();
          }
       });
+      
+      
    }
 
+   public void addButton(String yoVariableName, double newValue)
+   {
+      buttons.put(yoVariableName, newValue);
+   }
+   
    public void receivedHandshake(YoProtoHandshake handshake)
    {
       // Ignore
