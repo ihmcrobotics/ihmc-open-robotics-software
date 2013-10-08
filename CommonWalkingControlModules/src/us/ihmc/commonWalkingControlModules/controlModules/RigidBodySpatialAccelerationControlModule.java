@@ -30,13 +30,19 @@ public class RigidBodySpatialAccelerationControlModule
    private final BooleanYoVariable limitAccelerations;
    
    public RigidBodySpatialAccelerationControlModule(String namePrefix, TwistCalculator twistCalculator, RigidBody endEffector, ReferenceFrame endEffectorFrame,
-           YoVariableRegistry parentRegistry)
+         YoVariableRegistry parentRegistry)
+   {
+      this(namePrefix, twistCalculator, endEffector, endEffectorFrame, false, parentRegistry);
+   }
+   
+   public RigidBodySpatialAccelerationControlModule(String namePrefix, TwistCalculator twistCalculator, RigidBody endEffector, ReferenceFrame endEffectorFrame,
+           boolean visualize, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.twistCalculator = twistCalculator;
       this.endEffector = endEffector;
       this.endEffectorFrame = endEffectorFrame;
-      this.se3pdController = new SE3PDController(namePrefix, endEffectorFrame, registry);
+      this.se3pdController = new SE3PDController(namePrefix, endEffectorFrame, visualize, registry);
       this.acceleration = new SpatialAccelerationVector();
       
       desiredAccelerationLinearViz = new YoFrameVector(namePrefix + "LinearAccelViz", endEffectorFrame, registry);
