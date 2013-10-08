@@ -1,6 +1,5 @@
 package us.ihmc.robotDataCommunication;
 
-import java.io.IOException;
 import java.net.SocketTimeoutException;
 
 

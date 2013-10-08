@@ -25,7 +25,7 @@ public class RemoteAtlasVisualizer
       JaxbSDFLoader robotLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
 //      SDFRobot robot = robotLoader.createRobot(jointMap, false);
       SliderBoardControllerListener scsYoVariablesUpdatedListener = new SliderBoardControllerListener(robotLoader, jointMap, bufferSize);
-
+      scsYoVariablesUpdatedListener.addButton("requestStop", 1.0);    
       YoVariableClient client = new YoVariableClient(host, port, scsYoVariablesUpdatedListener, "remote");
       client.start();
    }
