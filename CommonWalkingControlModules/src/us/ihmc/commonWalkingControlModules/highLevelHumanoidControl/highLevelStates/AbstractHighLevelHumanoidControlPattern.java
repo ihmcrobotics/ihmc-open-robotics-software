@@ -55,7 +55,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
    private final DesiredHeadOrientationProvider desiredHeadOrientationProvider;
 
    protected final ChestOrientationManager chestOrientationManager;
-   private final HeadOrientationManager headOrientationManager;
+   protected final HeadOrientationManager headOrientationManager;
    protected final ManipulationControlModule manipulationControlModule;
 
    private final LidarControllerInterface lidarControllerInterface;

@@ -137,8 +137,18 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    private final Map<ContactablePlaneBody, CubicPolynomialTrajectoryGenerator> smoothUnloadingWRhoTrajectoryGenerators = new LinkedHashMap<ContactablePlaneBody, CubicPolynomialTrajectoryGenerator>();
 
 
-   private final PelvisDesiredsHandler pelvisDesiredsHandler;
-
+   private final PelvisDesiredsHandler pelvisDesiredsHandler; 
+   private final DoubleYoVariable carIngressPelvisPositionKp = new DoubleYoVariable("carIngressPelvisPositionKp", registry);
+   private final DoubleYoVariable carIngressPelvisPositionZeta = new DoubleYoVariable("carIngressPelvisPositionZeta", registry);
+   private final DoubleYoVariable carIngressPelvisOrientationKp = new DoubleYoVariable("carIngressPelvisOrientationKp", registry);
+   private final DoubleYoVariable carIngressPelvisOrientationZeta = new DoubleYoVariable("carIngressPelvisOrientationZeta", registry);
+   
+   private final DoubleYoVariable carIngressChestOrientationKp = new DoubleYoVariable("carIngressChestOrientationKp", registry);
+   private final DoubleYoVariable carIngressChestOrientationZeta = new DoubleYoVariable("carIngressChestOrientationZeta", registry);
+   
+   private final DoubleYoVariable carIngressHeadOrientationKp = new DoubleYoVariable("carIngressHeadOrientationKp", registry);
+   private final DoubleYoVariable carIngressHeadOrientationZeta = new DoubleYoVariable("carIngressHeadOrientationZeta", registry);
+   
 
    public CarIngressEgressController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
                                      MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
@@ -169,19 +179,20 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       
       // Setup the pelvis trajectory generator
       pelvisPositionControlFrame = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint();
+      boolean visualize = true;
       this.pelvisController = new RigidBodySpatialAccelerationControlModule("pelvis", twistCalculator, fullRobotModel.getPelvis(), pelvisPositionControlFrame,
-              registry);
+              visualize, registry);
 
-      double kPelvisPosition = 100.0;
-      double dPelvisPosition = GainCalculator.computeDerivativeGain(kPelvisPosition, 1.0);
-      pelvisController.setPositionProportionalGains(kPelvisPosition, kPelvisPosition, kPelvisPosition);
-      pelvisController.setPositionDerivativeGains(dPelvisPosition, dPelvisPosition, dPelvisPosition);
-
-      double kPelvisOrientation = 100.0;
-      double dPelvisOrientation = GainCalculator.computeDerivativeGain(kPelvisOrientation, 1.0);
-      pelvisController.setOrientationProportionalGains(kPelvisOrientation, kPelvisOrientation, kPelvisOrientation);
-      pelvisController.setOrientationDerivativeGains(dPelvisOrientation, dPelvisOrientation, dPelvisOrientation);
-
+      carIngressPelvisPositionKp.set(100.0);
+      carIngressPelvisPositionZeta.set(1.0);
+      carIngressPelvisOrientationKp.set(100.0);
+      carIngressPelvisOrientationZeta.set(1.0);
+      
+      VariableChangedListener pelvisGainsChangedListener = createPelvisGainsChangedListener();
+      
+      
+      pelvisGainsChangedListener.variableChanged(null);
+      
 
       pelvisJacobian = new GeometricJacobian(fullRobotModel.getElevator(), fullRobotModel.getPelvis(), fullRobotModel.getPelvis().getBodyFixedFrame());
 
@@ -227,6 +238,68 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       setupTrajectoryGeneratorsForSmoothLoadBearingTransitions(contactRegularizationWeightToUnloadEndEffector);
    }
 
+   private VariableChangedListener createPelvisGainsChangedListener()
+   {
+      VariableChangedListener ret = new VariableChangedListener()
+      {
+         public void variableChanged(YoVariable v)
+         {
+            double kPelvisPosition = carIngressPelvisPositionKp.getDoubleValue();
+            double dPelvisPosition = GainCalculator.computeDerivativeGain(kPelvisPosition, carIngressPelvisPositionZeta.getDoubleValue());
+            pelvisController.setPositionProportionalGains(kPelvisPosition , kPelvisPosition, kPelvisPosition);
+            pelvisController.setPositionDerivativeGains(dPelvisPosition, dPelvisPosition, dPelvisPosition);
+
+            double kPelvisOrientation = carIngressPelvisOrientationKp.getDoubleValue();
+            double dPelvisOrientation = GainCalculator.computeDerivativeGain(kPelvisOrientation, carIngressPelvisOrientationZeta.getDoubleValue());
+            pelvisController.setOrientationProportionalGains(kPelvisOrientation, kPelvisOrientation, kPelvisOrientation);
+            pelvisController.setOrientationDerivativeGains(dPelvisOrientation, dPelvisOrientation, dPelvisOrientation);   
+         }};
+      
+         carIngressPelvisPositionKp.addVariableChangedListener(ret);
+         carIngressPelvisPositionZeta.addVariableChangedListener(ret);
+         carIngressPelvisOrientationKp.addVariableChangedListener(ret);
+         carIngressPelvisOrientationZeta.addVariableChangedListener(ret);
+         
+      return ret;
+   }
+   
+   private VariableChangedListener createChestGainsChangedListener()
+   {
+      VariableChangedListener ret = new VariableChangedListener()
+      {
+         public void variableChanged(YoVariable v)
+         {
+            double chestKp = carIngressChestOrientationKp.getDoubleValue();
+            double chestZeta = carIngressChestOrientationZeta.getDoubleValue();
+            double chestKd = GainCalculator.computeDerivativeGain(chestKp, chestZeta);
+            chestOrientationManager.setControlGains(chestKp, chestKd); 
+         }};
+         
+         carIngressChestOrientationKp.addVariableChangedListener(ret);
+         carIngressChestOrientationZeta.addVariableChangedListener(ret);
+      
+      return ret;
+   }
+   
+   private VariableChangedListener createHeadGainsChangedListener()
+   {
+      VariableChangedListener ret = new VariableChangedListener()
+      {
+         public void variableChanged(YoVariable v)
+         {
+            double headKp = carIngressHeadOrientationKp.getDoubleValue();
+            double headZeta = carIngressHeadOrientationZeta.getDoubleValue();
+            double headKd = GainCalculator.computeDerivativeGain(headKp, headZeta);
+            headOrientationManager.setControlGains(headKp, headKd); 
+         }};
+         
+         carIngressHeadOrientationKp.addVariableChangedListener(ret);
+         carIngressHeadOrientationZeta.addVariableChangedListener(ret);
+      
+      return ret;
+   }
+
+   
    private void setupTrajectoryGeneratorsForSmoothLoadBearingTransitions(double contactRegularizationWeightToUnloadEndEffector)
    {
       List<ContactablePlaneBody> contactablePlaneBodies = new ArrayList<ContactablePlaneBody>();
@@ -330,18 +403,17 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       momentumBasedController.setMomentumControlModuleToUse(MOMENTUM_CONTROL_MODULE_TO_USE);
       momentumBasedController.setDelayTimeBeforeTrustingContacts(DELAY_TIME_BEFORE_TRUSTING_CONTACTS);
       
-
-      ChestOrientationManager chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
-      double chestKp = 100.0;
-      double chestZeta = 1.0;
-      double chestKd = GainCalculator.computeDerivativeGain(chestKp, chestZeta);
-      chestOrientationManager.setUp(baseForChestOrientationControl, jacobianForChestOrientationControl, chestKp, chestKp, chestKp, chestKd, chestKd, chestKd);
+      chestOrientationManager.setUp(baseForChestOrientationControl, jacobianForChestOrientationControl);
+      carIngressChestOrientationKp.set(100.0);
+      carIngressChestOrientationZeta.set(1.0);
+      VariableChangedListener chestGainsChangedListener = createChestGainsChangedListener();
+      chestGainsChangedListener.variableChanged(null);
       
-      HeadOrientationManager headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
-      double headKp = 40.0;
-      double headZeta = 1.0;
-      double headKd = GainCalculator.computeDerivativeGain(headKp, headZeta);
-      headOrientationManager.setUp(baseForHeadOrientationControl, jacobianForHeadOrientationControl, headKp, headKp, headKp, headKd, headKd, headKd);
+      headOrientationManager.setUp(baseForHeadOrientationControl, jacobianForHeadOrientationControl);
+      carIngressHeadOrientationKp.set(40.0);
+      carIngressHeadOrientationZeta.set(1.0);
+      VariableChangedListener headGainsChangedListener = createHeadGainsChangedListener();
+      headGainsChangedListener.variableChanged(null);
       
       initializeContacts();
 
@@ -391,6 +463,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          footEndEffectorControlModules.get(feet.get(robotSide)).resetCurrentState();
    }
 
+   
    private void initializeContacts()
    {
       requestedPelvisLoadBearing.set(isContactablePlaneBodyInContact(contactablePelvis));
