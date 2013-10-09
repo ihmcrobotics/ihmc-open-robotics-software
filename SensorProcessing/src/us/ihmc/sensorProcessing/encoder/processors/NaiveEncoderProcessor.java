@@ -7,7 +7,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 public class NaiveEncoderProcessor extends AbstractEncoderProcessor
 {
    private final IntegerYoVariable previousPosition;
-   private final DoubleYoVariable previousTime;
+   private final DoubleYoVariable previousTime, dx, dt;
 
    public NaiveEncoderProcessor(String name, IntegerYoVariable rawTicks, DoubleYoVariable time, double distancePerTick, YoVariableRegistry registry)
    {
@@ -15,6 +15,9 @@ public class NaiveEncoderProcessor extends AbstractEncoderProcessor
 
       this.previousPosition = new IntegerYoVariable(name + "PrevPos", registry);
       this.previousTime = new DoubleYoVariable(name + "PrevTime", registry);
+      
+      this.dx = new DoubleYoVariable(name + "DX", registry);
+      this.dt = new DoubleYoVariable(name + "DT", registry);
    }
    
    public void initialize()
@@ -29,6 +32,9 @@ public class NaiveEncoderProcessor extends AbstractEncoderProcessor
       double dx = rawTicks.getIntegerValue() - previousPosition.getIntegerValue();
       double dt = time.getDoubleValue() - previousTime.getDoubleValue();
       processedTickRate.set(dx / dt);
+      
+      this.dx.set(dx);
+      this.dt.set(dt);
 
       previousPosition.set(rawTicks.getIntegerValue());
       previousTime.set(time.getDoubleValue());
