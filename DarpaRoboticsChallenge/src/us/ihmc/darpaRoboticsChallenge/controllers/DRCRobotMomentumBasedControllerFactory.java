@@ -77,7 +77,13 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       }
 
       SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(bipedFeet, forceSensorDataHolder, dynamicGraphicObjectsListRegistry, specificRegistry);
-      ForceSensorDataVisualizer forceSensorDataVisualizer = new  ForceSensorDataVisualizer(fullRobotModel, forceSensorDataHolder, dynamicGraphicObjectsListRegistry, specificRegistry);
+      ForceSensorDataVisualizer forceSensorDataVisualizer;
+
+      if (dynamicGraphicObjectsListRegistry == null)
+         forceSensorDataVisualizer = null;
+      else
+         forceSensorDataVisualizer = new  ForceSensorDataVisualizer(fullRobotModel, forceSensorDataHolder, dynamicGraphicObjectsListRegistry, specificRegistry);
+
       double gravityZ = 9.81;
 
       Map<OneDoFJoint, Double> initialPositionControlKpGains = new HashMap<OneDoFJoint, Double>();
