@@ -203,7 +203,7 @@ public class ShapeTranslator
    public Node generateCylinder(Vector3f start, Vector3f end, float radius, ColorRGBA color)
    {
       float length = start.distance(end);
-      Cylinder c = new Cylinder(10, 10, radius, length);
+      Cylinder c = new Cylinder(10, 10, radius, length, true);
       Material mat = new Material(ui.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
       mat.setColor("Color", color);
 
