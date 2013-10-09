@@ -47,11 +47,11 @@ public class SyntheticDataShapeTestApp extends SimpleApplication
 
       List<Point3D_F64> cloud = createCloudOfPoints();
 
-      ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(100, 0.8, 0.2,null,null);
+      ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(20, 0.8, 0.1);
       configRansac.minModelAccept = 100;
       configRansac.octreeSplit = 100;
 
-      ConfigSurfaceNormals configSurface = new ConfigSurfaceNormals(6, 20, 3);
+      ConfigSurfaceNormals configSurface = new ConfigSurfaceNormals(15, 20, 3);
       ConfigMergeShapes configMerge = new ConfigMergeShapes(0.6, 0.9);
 
       PointCloudShapeFinder shapeFinder = FactoryPointCloudShape.ransacOctree(configSurface, configRansac, configMerge);

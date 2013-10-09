@@ -1,15 +1,5 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
-import georegression.struct.point.Point3D_F64;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 import bubo.io.serialization.DataDefinition;
 import bubo.io.serialization.SerializationDefinitionManager;
 import bubo.io.text.ReadCsvObjectSmart;
@@ -21,15 +11,9 @@ import bubo.ptcloud.shape.CheckShapeCylinderRadius;
 import bubo.ptcloud.shape.CheckShapeSphere3DRadius;
 import bubo.ptcloud.wrapper.ConfigMergeShapes;
 import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
-
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.RawInputListener;
-import com.jme3.input.event.JoyAxisEvent;
-import com.jme3.input.event.JoyButtonEvent;
-import com.jme3.input.event.KeyInputEvent;
-import com.jme3.input.event.MouseButtonEvent;
-import com.jme3.input.event.MouseMotionEvent;
-import com.jme3.input.event.TouchEvent;
+import com.jme3.input.event.*;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
 import com.jme3.math.ColorRGBA;
@@ -40,6 +24,15 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.shape.Box;
+import georegression.struct.point.Point3D_F64;
+import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 /**
  * @author Peter Abeles
@@ -88,6 +81,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       cam.lookAtDirection(Vector3f.UNIT_Z, Vector3f.UNIT_Y);
       cam.update();
       flyCam.setMoveSpeed(15);
+      flyCam.setDragToRotate(true);
       setupBoxNode();
 
 //    CloudShapeTypes shapeTypes[] = new CloudShapeTypes[]{CloudShapeTypes.PLANE,CloudShapeTypes.CYLINDER,CloudShapeTypes.SPHERE};
