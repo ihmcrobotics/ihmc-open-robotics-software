@@ -32,7 +32,7 @@ public class TestPointCloud extends SimpleApplication
 
       try
       {
-         rootNode.attachChild(generator.generatePointCloudGraph(points, colors));
+         rootNode.attachChild(generator.generatePointCloudGraph(points, colors,0.75f));
       }
       catch (Exception e)
       {

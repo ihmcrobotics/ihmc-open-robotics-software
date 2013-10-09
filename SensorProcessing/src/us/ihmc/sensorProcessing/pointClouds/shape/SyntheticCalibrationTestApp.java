@@ -199,7 +199,7 @@ public class SyntheticCalibrationTestApp extends SimpleApplication
       try
       {
          rootNode.attachChild(zUpNode);
-         zUpNode.attachChild(generator.generatePointCloudGraph(points, colors));
+         zUpNode.attachChild(generator.generatePointCloudGraph(points, colors,0.75f));
       }
       catch (Exception e)
       {
