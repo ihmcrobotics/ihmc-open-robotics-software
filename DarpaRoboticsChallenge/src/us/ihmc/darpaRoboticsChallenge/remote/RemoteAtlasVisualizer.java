@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.remote;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
+import us.ihmc.atlas.visualization.GainControllerSliderBoard;
 import us.ihmc.atlas.visualization.SliderBoardControllerListener;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
@@ -24,7 +25,7 @@ public class RemoteAtlasVisualizer
       DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_NO_HANDS, false);
       JaxbSDFLoader robotLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
 //      SDFRobot robot = robotLoader.createRobot(jointMap, false);
-      SliderBoardControllerListener scsYoVariablesUpdatedListener = new SliderBoardControllerListener(robotLoader, jointMap, bufferSize);
+      SliderBoardControllerListener scsYoVariablesUpdatedListener = new SliderBoardControllerListener(robotLoader, jointMap, bufferSize, GainControllerSliderBoard.getFactory());
       scsYoVariablesUpdatedListener.addButton("requestStop", 1.0);    
       YoVariableClient client = new YoVariableClient(host, port, scsYoVariablesUpdatedListener, "remote");
       client.start();
