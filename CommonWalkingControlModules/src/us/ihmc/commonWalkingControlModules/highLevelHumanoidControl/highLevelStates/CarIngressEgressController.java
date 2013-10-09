@@ -236,6 +236,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       double contactRegularizationWeightToUnloadEndEffector = 20.0 * PlaneContactState.DEFAULT_WRHO;
 
       setupTrajectoryGeneratorsForSmoothLoadBearingTransitions(contactRegularizationWeightToUnloadEndEffector);
+      
+      initialize();
    }
 
    private VariableChangedListener createPelvisGainsChangedListener()
