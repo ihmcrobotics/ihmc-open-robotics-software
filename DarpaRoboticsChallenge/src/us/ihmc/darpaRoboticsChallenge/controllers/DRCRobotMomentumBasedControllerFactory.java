@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
+import us.ihmc.commonWalkingControlModules.visualizer.ForceSensorDataVisualizer;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 import us.ihmc.darpaRoboticsChallenge.sensors.WrenchBasedFootSwitch;
@@ -76,7 +77,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       }
 
       SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(bipedFeet, forceSensorDataHolder, dynamicGraphicObjectsListRegistry, specificRegistry);
-
+      ForceSensorDataVisualizer forceSensorDataVisualizer = new  ForceSensorDataVisualizer(fullRobotModel, forceSensorDataHolder, dynamicGraphicObjectsListRegistry, specificRegistry);
       double gravityZ = 9.81;
 
       Map<OneDoFJoint, Double> initialPositionControlKpGains = new HashMap<OneDoFJoint, Double>();
@@ -90,7 +91,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
             referenceFrames, null, yoTime, gravityZ, twistCalculator, centerOfMassJacobian, bipedFeet,
             controlDT, footSwitches, handControllers, lidarControllerInterface,
             stateEstimationDataFromControllerSink, dynamicGraphicObjectsListRegistry, specificRegistry,
-            guiSetterUpperRegistry, null);
+            guiSetterUpperRegistry, null, forceSensorDataVisualizer);
       highLevelHumanoidController.getYoVariableRegistry().addChild(specificRegistry);
 
 

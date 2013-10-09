@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -15,7 +16,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableCylin
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ModifiableContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.WrenchVisualizer;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoCylindricalContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
@@ -33,6 +33,7 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenc
 import us.ihmc.commonWalkingControlModules.stateEstimation.DesiredCoMAndAngularAccelerationGrabber;
 import us.ihmc.commonWalkingControlModules.stateEstimation.PointPositionGrabber;
 import us.ihmc.commonWalkingControlModules.stateEstimation.PointPositionGrabberInterface;
+import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylindricalContactState;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -280,7 +281,8 @@ public class MomentumBasedController
       if (dynamicGraphicObjectsListRegistry != null)
       {
          contactPointVisualizer = new ContactPointVisualizer(20, dynamicGraphicObjectsListRegistry, registry);
-         wrenchVisualizer = new WrenchVisualizer(7, dynamicGraphicObjectsListRegistry, registry);
+         List<RigidBody> rigidBodies = Arrays.asList(ScrewTools.computeSupportAndSubtreeSuccessors(fullRobotModel.getRootJoint().getSuccessor()));
+         wrenchVisualizer = new WrenchVisualizer("Desired", rigidBodies, dynamicGraphicObjectsListRegistry, registry);
       }
       else
       {
@@ -390,7 +392,7 @@ public class MomentumBasedController
 
       planeContactWrenchProcessor.compute(externalWrenches);
       if (wrenchVisualizer != null)
-         wrenchVisualizer.visualize(externalWrenches.values());
+         wrenchVisualizer.visualize(externalWrenches);
 
       SpatialForceVector totalGroundReactionWrench = new SpatialForceVector(centerOfMassFrame);
       Wrench admissibleGroundReactionWrench = TotalWrenchCalculator.computeTotalWrench(externalWrenches.values(),
