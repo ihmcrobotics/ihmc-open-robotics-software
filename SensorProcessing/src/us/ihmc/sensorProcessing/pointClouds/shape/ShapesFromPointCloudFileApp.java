@@ -1,5 +1,6 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
+import bubo.ptcloud.wrapper.ConfigRemoveFalseShapes;
 import georegression.struct.point.Point3D_F64;
 
 import java.io.FileInputStream;
@@ -216,21 +217,21 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
 
             CloudShapeTypes shapeTypes[] = new CloudShapeTypes[] {CloudShapeTypes.PLANE, CloudShapeTypes.CYLINDER, CloudShapeTypes.SPHERE};
 
-            ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(100, 0.6, 0.05, shapeTypes);
+            ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(20, 0.8, 0.03, shapeTypes);
             configRansac.randomSeed = 2342342;
 
-            configRansac.minModelAccept = 200;
-            configRansac.octreeSplit = 300;
+            configRansac.minModelAccept = 100;
+            configRansac.octreeSplit = 25;
 
-            configRansac.maximumAllowedIterations = 500;
-            configRansac.ransacExtension = 5;
+            configRansac.maximumAllowedIterations = 1000;
+            configRansac.ransacExtension = 25;
 
             configRansac.models.get(1).modelCheck = new CheckShapeCylinderRadius(0.2);
             configRansac.models.get(2).modelCheck = new CheckShapeSphere3DRadius(0.2);
 
 
             ConfigSurfaceNormals configSurface = new ConfigSurfaceNormals(10, 30, Double.MAX_VALUE);
-            ConfigMergeShapes configMerge = new ConfigMergeShapes(0.6, 0.9);
+            ConfigRemoveFalseShapes configMerge = new ConfigRemoveFalseShapes(0.7);
 
             PointCloudShapeFinder shapeFinder = FactoryPointCloudShape.ransacOctree(configSurface, configRansac, configMerge);
 

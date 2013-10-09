@@ -5,6 +5,7 @@ import bubo.ptcloud.PointCloudShapeFinder;
 import bubo.ptcloud.alg.ConfigSchnabel2007;
 import bubo.ptcloud.tools.PointCloudShapeTools;
 import bubo.ptcloud.wrapper.ConfigMergeShapes;
+import bubo.ptcloud.wrapper.ConfigRemoveFalseShapes;
 import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
 import com.jme3.app.SimpleApplication;
 import com.jme3.math.ColorRGBA;
@@ -52,7 +53,7 @@ public class SyntheticDataShapeTestApp extends SimpleApplication
       configRansac.octreeSplit = 100;
 
       ConfigSurfaceNormals configSurface = new ConfigSurfaceNormals(15, 20, 3);
-      ConfigMergeShapes configMerge = new ConfigMergeShapes(0.6, 0.9);
+      ConfigRemoveFalseShapes configMerge = new ConfigRemoveFalseShapes(0.6);
 
       PointCloudShapeFinder shapeFinder = FactoryPointCloudShape.ransacOctree(configSurface, configRansac, configMerge);
 
