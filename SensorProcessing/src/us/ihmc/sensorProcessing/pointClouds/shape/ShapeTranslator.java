@@ -11,6 +11,8 @@ import bubo.ptcloud.alg.BoundPlaneRectangle;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.material.Material;
+import com.jme3.material.RenderState;
+import com.jme3.material.RenderState.BlendMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
@@ -36,6 +38,8 @@ public class ShapeTranslator
 
    public void translateShape(Shape s, ColorRGBA color, Node nodeToAddTo)
    {
+      color.a = 0.5f;
+
       System.out.println("type " + s.type);
 
       if (s.type.equals(CloudShapeTypes.CYLINDER))
@@ -143,9 +147,11 @@ public class ShapeTranslator
          plane1.updateBound();
 
          Geometry geo = new Geometry("OurMesh", plane1);    // using our custom mesh object
-         Material mat = new Material(ui.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-         mat.setColor("Color", color);
-         geo.setMaterial(mat);
+         Material objectMaterial = new Material(ui.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+         objectMaterial.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
+         objectMaterial.setColor("Color", color);
+         geo.setMaterial(objectMaterial);
+         geo.setQueueBucket(Bucket.Transparent);
          geo.setShadowMode(ShadowMode.CastAndReceive);
 
          plane.attachChild(geo);
@@ -179,22 +185,18 @@ public class ShapeTranslator
          plane1.updateBound();
 
          Geometry geo = new Geometry("OurMesh", plane1);    // using our custom mesh object
-         Material mat = new Material(ui.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-         mat.setColor("Color", color);
-         geo.setMaterial(mat);
+         Material objectMaterial = new Material(ui.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+         objectMaterial.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
+         objectMaterial.setColor("Color", color);
+         geo.setMaterial(objectMaterial);
+         geo.setQueueBucket(Bucket.Transparent);
          geo.setShadowMode(ShadowMode.CastAndReceive);
 
          plane.attachChild(geo);
 
       }
 
-
-      Material objectMaterial = new Material(ui.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-      objectMaterial.setColor("Color", color);
       plane.setShadowMode(ShadowMode.CastAndReceive);
-      plane.setCullHint(CullHint.Dynamic);
-      plane.setMaterial(objectMaterial);
-      plane.setQueueBucket(Bucket.Opaque);
 
       return plane;
 
@@ -204,14 +206,20 @@ public class ShapeTranslator
    {
       float length = start.distance(end);
       Cylinder c = new Cylinder(10, 10, radius, length, true);
-      Material mat = new Material(ui.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-      mat.setColor("Color", color);
+
 
       Geometry g = new Geometry("cyl", c);
       g.setLocalTranslation(0, 0, length / 2.0f);
+
+      Material objectMaterial = new Material(ui.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+      objectMaterial.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
+      objectMaterial.setColor("Color", color);
+      g.setMaterial(objectMaterial);
+      g.setQueueBucket(Bucket.Transparent);
+      g.setShadowMode(ShadowMode.CastAndReceive);
+
       Node cylNode = new Node();
       cylNode.attachChild(g);
-      cylNode.setMaterial(mat);
 
       cylNode.setLocalTranslation(start);
 
@@ -223,13 +231,16 @@ public class ShapeTranslator
    public Node generateSphere(Vector3f center, float radius, ColorRGBA color)
    {
       Sphere s = new Sphere(10, 10, radius);
-      Material mat = new Material(ui.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-      mat.setColor("Color", color);
 
       Geometry g = new Geometry("cyl", s);
+      Material objectMaterial = new Material(ui.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+      objectMaterial.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
+      objectMaterial.setColor("Color", color);
+      g.setMaterial(objectMaterial);
+      g.setQueueBucket(Bucket.Transparent);
+      g.setShadowMode(ShadowMode.CastAndReceive);
       Node sphereNode = new Node();
       sphereNode.attachChild(g);
-      sphereNode.setMaterial(mat);
 
       sphereNode.setLocalTranslation(center);
 

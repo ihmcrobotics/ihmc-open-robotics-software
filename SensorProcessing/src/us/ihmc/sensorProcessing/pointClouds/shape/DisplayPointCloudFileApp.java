@@ -1,21 +1,27 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
-import bubo.io.serialization.DataDefinition;
-import bubo.io.serialization.SerializationDefinitionManager;
-import bubo.io.text.ReadCsvObjectSmart;
-import com.jme3.app.SimpleApplication;
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.Vector3f;
-import com.jme3.scene.Node;
 import georegression.struct.point.Point3D_F64;
-import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 
+import java.awt.Color;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import org.jfree.chart.plot.RainbowPalette;
+import org.w3c.dom.css.RGBColor;
+
+import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
+import bubo.io.serialization.DataDefinition;
+import bubo.io.serialization.SerializationDefinitionManager;
+import bubo.io.text.ReadCsvObjectSmart;
+
+import com.jme3.app.SimpleApplication;
+import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector3f;
+import com.jme3.scene.Node;
 
 /**
  * @author Peter Abeles
@@ -37,6 +43,12 @@ public class DisplayPointCloudFileApp extends SimpleApplication
       this.fileName = fileName;
    }
 
+   private ColorRGBA generateColors(float value, float colorRange)
+   {
+      Color color = Color.getHSBColor((value%colorRange) / colorRange, 0.85f, 1.0f);
+      return new ColorRGBA(color.getRed() / 255.0f, color.getGreen() / 255.0f, color.getBlue() / 255.0f, 1.0f);
+   }
+
    @Override
    public void simpleInitApp()
    {
@@ -46,11 +58,10 @@ public class DisplayPointCloudFileApp extends SimpleApplication
 
       Vector3f[] points = new Vector3f[cloud.size()];
       ColorRGBA[] colors = new ColorRGBA[cloud.size()];
-
-      ColorRGBA color = new ColorRGBA(1, 0, 0, 1.0f);
       int index = 0;
-      for (Point3D_F64 p : cloud )
+      for (Point3D_F64 p : cloud)
       {
+         ColorRGBA color = generateColors(new Float(p.z), 0.25f);
          points[index] = new Vector3f((float) p.x, (float) p.y, (float) p.z);
          colors[index] = color;
          index++;
@@ -65,7 +76,7 @@ public class DisplayPointCloudFileApp extends SimpleApplication
       try
       {
          rootNode.attachChild(zUpNode);
-         zUpNode.attachChild(generator.generatePointCloudGraph(points, colors));
+         zUpNode.attachChild(generator.generatePointCloudGraph(points, colors,0.75f));
       }
       catch (Exception e)
       {
@@ -76,34 +87,38 @@ public class DisplayPointCloudFileApp extends SimpleApplication
       cam.setLocation(new Vector3f(0, 0, -5));
       cam.lookAtDirection(Vector3f.UNIT_Z, Vector3f.UNIT_Y);
       cam.update();
-      flyCam.setMoveSpeed(25);
+      flyCam.setMoveSpeed(10);
    }
 
-   private List<Point3D_F64> readPointCloud( int maxLines )
+   private List<Point3D_F64> readPointCloud(int maxLines)
    {
       List<Point3D_F64> cloud = new ArrayList<Point3D_F64>();
       SerializationDefinitionManager manager = new SerializationDefinitionManager();
-      manager.addDefinition(new DataDefinition("point3d",Point3D_F64.class,"x","y","z"));
+      manager.addDefinition(new DataDefinition("point3d", Point3D_F64.class, "x", "y", "z"));
 
       try
       {
          FileInputStream in = new FileInputStream(fileName);
-         ReadCsvObjectSmart<Point3D_F64> reader = new ReadCsvObjectSmart<Point3D_F64>(in,manager,"point3d");
+         ReadCsvObjectSmart<Point3D_F64> reader = new ReadCsvObjectSmart<Point3D_F64>(in, manager, "point3d");
 
 
          Point3D_F64 pt = new Point3D_F64();
          int count = 0;
-         while(  reader.nextObject(pt) != null && count++ < maxLines) {
+         while ((reader.nextObject(pt) != null) && (count++ < maxLines))
+         {
             cloud.add(pt.copy());
          }
 
-      } catch (FileNotFoundException e)
-      {
-         throw new RuntimeException(e);
-      } catch (IOException e)
+      }
+      catch (FileNotFoundException e)
       {
          throw new RuntimeException(e);
       }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+
       return cloud;
    }
 }
