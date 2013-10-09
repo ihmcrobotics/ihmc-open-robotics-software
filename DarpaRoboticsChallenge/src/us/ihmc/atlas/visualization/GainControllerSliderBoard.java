@@ -6,7 +6,8 @@ import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 
-public class GainControllerSliderBoard extends SliderBoard {
+public class GainControllerSliderBoard
+{
 
    public GainControllerSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel)
    {
@@ -28,24 +29,27 @@ public class GainControllerSliderBoard extends SliderBoard {
       sliderBoardConfigurationManager.setSlider(4, "carIngressHeadOrientationKp", registry, 0.0, 100.0);
       sliderBoardConfigurationManager.setKnob  (4, "carIngressHeadOrientationZeta", registry, 0.0, 1.0);
 
-      sliderBoardConfigurationManager.setSlider(5, "kpAllArmJointsLeft", registry, 0.0, 100.0);
-      sliderBoardConfigurationManager.setKnob  (5, "zetaAllArmJointsLeft", registry, 0.0, 1.0);
+      sliderBoardConfigurationManager.setSlider(5, "kpAllArmJointsL", registry, 0.0, 100.0);
+      sliderBoardConfigurationManager.setKnob  (5, "zetaAllArmJointsL", registry, 0.0, 1.0);
 
-      sliderBoardConfigurationManager.setSlider(6, "kpAllArmJointsRight", registry, 0.0, 100.0);
-      sliderBoardConfigurationManager.setKnob  (6, "zetaAllArmJointsRight", registry, 0.0, 1.0);
+      sliderBoardConfigurationManager.setSlider(6, "kpAllArmJointsR", registry, 0.0, 100.0);
+      sliderBoardConfigurationManager.setKnob  (6, "zetaAllArmJointsR", registry, 0.0, 1.0);
 
       
       //sliderBoardConfigurationManager.saveConfiguration(this.getClass().getSimpleName());
       //sliderBoardConfigurationManager.loadConfiguration(this.getClass().getSimpleName());
    }
    
-   public static SliderBoardFactory factory = new SliderBoardFactory() {
+   private static final SliderBoardFactory factory = new SliderBoardFactory() {
 	
 		@Override
-		public SliderBoard makeSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel) {
-			   return new GainControllerSliderBoard( scs,  registry,  generalizedSDFRobotModel);
+		public void makeSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel) {
+			   new GainControllerSliderBoard( scs,  registry,  generalizedSDFRobotModel);
 		}
    };
    
-   
+   public static SliderBoardFactory getFactory()
+   {
+      return factory;
+   }
 }

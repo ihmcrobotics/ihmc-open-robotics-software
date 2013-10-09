@@ -85,7 +85,7 @@ public class JointPDHighLevelHumanoidController extends State<HighLevelState>
          DoubleYoVariable desiredPosition = q_dJoints.get(joint);
 
 //         YoFunctionGenerator functionGenerator = functionGenerators.get(joint);
-//         desiredPosition.set(functionGenerator.getValue());
+         //desiredPosition.set(functionGenerator.getValue());
          
          double kp = kpJoints.get(joint).getDoubleValue() * gainScaling.getDoubleValue();
          double kd = kdJoints.get(joint).getDoubleValue() * gainScaling.getDoubleValue();
