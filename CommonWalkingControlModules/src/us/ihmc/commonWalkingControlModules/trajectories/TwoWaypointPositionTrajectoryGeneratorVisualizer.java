@@ -28,6 +28,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParametersProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.VectorProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.YoVariableDoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.YoVelocityProvider;
 
 public class TwoWaypointPositionTrajectoryGeneratorVisualizer
