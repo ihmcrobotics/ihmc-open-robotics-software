@@ -52,7 +52,8 @@ public class PointCloud
 
       Material mat = new Material(assetManager, "Common/MatDefs/Misc/Particle.j3md");
       mat.getAdditionalRenderState().setPointSprite(true);
-//      mat.getAdditionalRenderState().setBlendMode(BlendMode.AlphaAdditive);
+
+//    mat.getAdditionalRenderState().setBlendMode(BlendMode.AlphaAdditive);
       mat.setBoolean("PointSprite", true);
       mat.setFloat("Quadratic", 0.75f);
 
@@ -65,9 +66,9 @@ public class PointCloud
       m.updateBound();
 
       Geometry g = new Geometry("Point Cloud", m);
-//      g.setShadowMode(ShadowMode.CastAndReceive);
+      g.setShadowMode(ShadowMode.CastAndReceive);
       g.setQueueBucket(Bucket.Transparent);
-//      g.setCullHint(CullHint.Dynamic);
+      g.setCullHint(CullHint.Dynamic);
 
       g.setMaterial(mat);
       g.updateModelBound();
