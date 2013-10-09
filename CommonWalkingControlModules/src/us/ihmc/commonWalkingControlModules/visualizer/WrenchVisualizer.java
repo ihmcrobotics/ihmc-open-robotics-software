@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -42,6 +43,12 @@ public class WrenchVisualizer
 
    public WrenchVisualizer(String name, List<RigidBody> rigidBodies, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
+      this(name, rigidBodies, dynamicGraphicObjectsListRegistry, parentRegistry, YoAppearance.OrangeRed(), YoAppearance.CornflowerBlue());
+   }
+   
+   public WrenchVisualizer(String name, List<RigidBody> rigidBodies, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry, 
+         AppearanceDefinition forceAppearance, AppearanceDefinition torqueAppearance)
+   {
       DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList(name);
 
       this.rigidBodies = rigidBodies;
@@ -58,12 +65,12 @@ public class WrenchVisualizer
          pointsOfApplication.put(rigidBody, pointOfApplication);
 
          DynamicGraphicVector forceVisualizer = new DynamicGraphicVector(prefix + "ForceViz", pointOfApplication, force, FORCE_VECTOR_SCALE,
-                                                   YoAppearance.OrangeRed(), true);
+                                                  forceAppearance, true);
          forceVisualizers.put(rigidBody, forceVisualizer);
          dynamicGraphicObjectsList.add(forceVisualizer);
 
          DynamicGraphicVector torqueVisualizer = new DynamicGraphicVector(prefix + "TorqueViz", pointOfApplication, torque, TORQUE_VECTOR_SCALE,
-                                                    YoAppearance.CornflowerBlue(), true);
+                                                    torqueAppearance, true);
          torqueVisualizers.put(rigidBody, torqueVisualizer);
          dynamicGraphicObjectsList.add(torqueVisualizer);
       }
@@ -72,6 +79,8 @@ public class WrenchVisualizer
 
       parentRegistry.addChild(registry);
    }
+
+
 
    public void visualize(Map<RigidBody, Wrench> wrenches)
    {
