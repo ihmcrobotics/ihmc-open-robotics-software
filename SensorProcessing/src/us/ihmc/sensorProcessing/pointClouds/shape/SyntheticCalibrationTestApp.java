@@ -5,6 +5,7 @@ import bubo.ptcloud.FactoryPointCloudShape;
 import bubo.ptcloud.PointCloudShapeFinder;
 import bubo.ptcloud.alg.ConfigSchnabel2007;
 import bubo.ptcloud.wrapper.ConfigMergeShapes;
+import bubo.ptcloud.wrapper.ConfigRemoveFalseShapes;
 import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
 import com.jme3.app.SimpleApplication;
 import com.jme3.math.ColorRGBA;
@@ -107,7 +108,7 @@ public class SyntheticCalibrationTestApp extends SimpleApplication
       configRansac.maximumAllowedIterations *= 2;
 
       ConfigSurfaceNormals configSurface = new ConfigSurfaceNormals(6, 20, 3);
-      ConfigMergeShapes configMerge = new ConfigMergeShapes(0.6, 0.9);
+      ConfigRemoveFalseShapes configMerge = new ConfigRemoveFalseShapes(0.6);
 
       PointCloudShapeFinder shapeFinder = FactoryPointCloudShape.ransacOctree(configSurface, configRansac, configMerge);
 
