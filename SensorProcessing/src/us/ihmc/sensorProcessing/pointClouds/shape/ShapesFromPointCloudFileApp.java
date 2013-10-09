@@ -355,42 +355,42 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
        Vector3f min = new Vector3f(current.x-boxExtent,current.y-boxExtent,current.z-boxExtent);
        return readPointCloud(10000000,min,max);
    }
-   @Override
+   
    public void beginInput()
    {
       // TODO Auto-generated method stub
 
    }
 
-   @Override
+   
    public void endInput()
    {
       // TODO Auto-generated method stub
 
    }
 
-   @Override
+   
    public void onJoyAxisEvent(JoyAxisEvent evt)
    {
       // TODO Auto-generated method stub
 
    }
 
-   @Override
+   
    public void onJoyButtonEvent(JoyButtonEvent evt)
    {
       // TODO Auto-generated method stub
 
    }
 
-   @Override
+   
    public void onMouseMotionEvent(MouseMotionEvent evt)
    {
       // TODO Auto-generated method stub
 
    }
 
-   @Override
+  
    public void onMouseButtonEvent(MouseButtonEvent evt)
    {
       // TODO Auto-generated method stub
@@ -401,7 +401,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
    private boolean boxHidden = false;
    private FilterPostProcessor fpp;
 
-   @Override
+   
    public void onKeyEvent(KeyInputEvent evt)
    {
       Material objectMaterial = new Material(getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
@@ -496,7 +496,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
 
    }
 
-   @Override
+   
    public void onTouchEvent(TouchEvent evt)
    {
       // TODO Auto-generated method stub
