@@ -23,6 +23,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParamete
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParametersProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.VectorProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.YoVariableDoubleProvider;
 
 public class TwoWaypointPositionTrajectoryGeneratorTest {
 
