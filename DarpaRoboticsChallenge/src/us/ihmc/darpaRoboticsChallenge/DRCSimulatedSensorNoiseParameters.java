@@ -124,6 +124,8 @@ public class DRCSimulatedSensorNoiseParameters
    
    public static SensorNoiseParameters createNoiseParametersForEstimatorJerryTuningApril30()
    {
+      // Tuned for 1msec estimator loop rate.
+
       SensorNoiseParameters sensorNoiseParameters = new SensorNoiseParameters();
 
       sensorNoiseParameters.setComAccelerationProcessNoiseStandardDeviation(1.0); //1.0); //0.3);
@@ -131,6 +133,26 @@ public class DRCSimulatedSensorNoiseParameters
       
       sensorNoiseParameters.setOrientationMeasurementStandardDeviation(0.001);
       sensorNoiseParameters.setAngularVelocityMeasurementStandardDeviation(0.001);
+      sensorNoiseParameters.setLinearAccelerationMeasurementStandardDeviation(1e4); //1e4); //0.01); //1.0); //1.0); //0.1); //0.1);
+
+      sensorNoiseParameters.setAngularVelocityBiasProcessNoiseStandardDeviation(1e-6);
+      sensorNoiseParameters.setLinearAccelerationBiasProcessNoiseStandardDeviation(0.001); //1e-6); //0.02); //1e-3);
+
+      return sensorNoiseParameters;
+   }
+   
+   
+   public static SensorNoiseParameters createNoiseParametersForEstimatorJerryTuningSeptember2013()
+   {
+      // Tuned for 3msec estimator loop rate.
+      
+      SensorNoiseParameters sensorNoiseParameters = new SensorNoiseParameters();
+
+      sensorNoiseParameters.setComAccelerationProcessNoiseStandardDeviation(1.0); //1.0); //0.3);
+      sensorNoiseParameters.setAngularAccelerationProcessNoiseStandardDeviation(1.0); //1e3); //0.3);
+      
+      sensorNoiseParameters.setOrientationMeasurementStandardDeviation(0.0001);
+      sensorNoiseParameters.setAngularVelocityMeasurementStandardDeviation(0.0001);
       sensorNoiseParameters.setLinearAccelerationMeasurementStandardDeviation(1e4); //1e4); //0.01); //1.0); //1.0); //0.1); //0.1);
 
       sensorNoiseParameters.setAngularVelocityBiasProcessNoiseStandardDeviation(1e-6);
