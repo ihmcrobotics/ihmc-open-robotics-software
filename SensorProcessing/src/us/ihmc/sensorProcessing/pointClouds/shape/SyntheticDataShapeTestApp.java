@@ -47,7 +47,7 @@ public class SyntheticDataShapeTestApp extends SimpleApplication
 
       List<Point3D_F64> cloud = createCloudOfPoints();
 
-      ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(100, 0.8, 0.1,null,null);
+      ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(100, 0.8, 0.2,null,null);
       configRansac.minModelAccept = 100;
       configRansac.octreeSplit = 100;
 
@@ -129,32 +129,47 @@ public class SyntheticDataShapeTestApp extends SimpleApplication
    {
       List<Point3D_F64> cloud = new ArrayList<Point3D_F64>();
 
-      for (int i = 0; i < 300; i++)
+      int N = 10000;
+      double sigma = 0.03;
+      
+      for (int i = 0; i < N; i++)
       {
          double phi = 2.0 * Math.PI * rand.nextDouble();
          double theta = 2.0 * Math.PI * rand.nextDouble();
 
          Point3D_F64 p = PointCloudShapeTools.createPt(truthSphere, phi, theta);
 
+         p.x += rand.nextGaussian()*sigma;
+         p.y += rand.nextGaussian()*sigma;
+         p.z += rand.nextGaussian()*sigma;
+         
          cloud.add(p);
       }
 
-      for (int i = 0; i < 300; i++)
+      for (int i = 0; i < N; i++)
       {
          double z = 2.0 * rand.nextDouble();
          double theta = 2.0 * Math.PI * rand.nextDouble();
 
          Point3D_F64 p = PointCloudShapeTools.createPt(truthCylinder, z, theta);
 
+         p.x += rand.nextGaussian()*sigma;
+         p.y += rand.nextGaussian()*sigma;
+         p.z += rand.nextGaussian()*sigma;
+         
          cloud.add(p);
       }
 
-      for (int i = 0; i < 1000; i++)
+      for (int i = 0; i < N; i++)
       {
          double x = 7.0 * (rand.nextDouble() - 0.5);
          double y = 7.0 * (rand.nextDouble() - 0.5);
 
          Point3D_F64 p = PointCloudShapeTools.createPt(truthPlane, x, y);
+
+         p.x += rand.nextGaussian()*sigma;
+         p.y += rand.nextGaussian()*sigma;
+         p.z += rand.nextGaussian()*sigma;
 
          cloud.add(p);
       }
