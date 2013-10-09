@@ -178,7 +178,6 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       });
       Thread ransac = new Thread(new Runnable()
       {
-         @Override
          public void run()
          {
             // TODO Auto-generated method stub
@@ -549,7 +548,6 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       calculatingBounds = true;
       Thread boundsThread = new Thread(new Runnable()
       {
-         @Override
          public void run()
          {
             ransacCloud = getBoundedCloud();
