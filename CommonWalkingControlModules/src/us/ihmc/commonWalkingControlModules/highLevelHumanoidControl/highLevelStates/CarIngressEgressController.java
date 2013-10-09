@@ -30,11 +30,9 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBear
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.ChangeableConfigurationProvider;
-import us.ihmc.commonWalkingControlModules.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SettableOrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.ThirdOrderPolynomialTrajectoryGenerator;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -55,8 +53,10 @@ import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.util.GainCalculator;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.CubicPolynomialTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
+import com.yobotics.simulationconstructionset.util.trajectory.ThirdOrderPolynomialTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.YoVariableDoubleProvider;
 
 public class CarIngressEgressController extends AbstractHighLevelHumanoidControlPattern

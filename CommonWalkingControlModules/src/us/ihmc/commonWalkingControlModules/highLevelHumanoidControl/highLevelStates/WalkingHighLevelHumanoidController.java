@@ -57,7 +57,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.OrientationTrajectoryGen
 import us.ihmc.commonWalkingControlModules.trajectories.SettableOrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.SimpleTwoWaypointTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
-import us.ihmc.commonWalkingControlModules.trajectories.ThirdOrderPolynomialTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.TransferTimeCalculationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointTrajectoryUtils;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -101,6 +100,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.QuinticPolynomialTrajectoryGenerator;
+import com.yobotics.simulationconstructionset.util.trajectory.ThirdOrderPolynomialTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParametersProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypointGenerationMethod;
