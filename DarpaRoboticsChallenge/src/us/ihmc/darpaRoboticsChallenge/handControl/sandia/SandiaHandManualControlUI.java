@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.handControl;
+package us.ihmc.darpaRoboticsChallenge.handControl.sandia;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -27,7 +27,7 @@ import org.ros.node.NodeMainExecutor;
 import org.ros.node.topic.Publisher;
 
 import osrf_msgs.JointCommands;
-import us.ihmc.darpaRoboticsChallenge.handControl.SandiaHandModel.SandiaFingerName;
+import us.ihmc.darpaRoboticsChallenge.handControl.sandia.SandiaHandModel.SandiaFingerName;
 import us.ihmc.utilities.ros.RosTools;
 
 public class SandiaHandManualControlUI extends AbstractNodeMain implements ActionListener
