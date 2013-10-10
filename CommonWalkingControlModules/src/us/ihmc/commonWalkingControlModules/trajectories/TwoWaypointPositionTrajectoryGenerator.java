@@ -3,8 +3,6 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -703,5 +701,12 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       }
 
       return waypoints;
+   }
+
+   public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   {
+      get(positionToPack);
+      packVelocity(velocityToPack);
+      packAcceleration(accelerationToPack);
    }
 }

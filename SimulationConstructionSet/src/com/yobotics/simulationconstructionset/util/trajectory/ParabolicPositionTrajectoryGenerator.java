@@ -43,9 +43,7 @@ public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryG
    {
       timeIntoStep.add(deltaT);
       compute(timeIntoStep.getDoubleValue());
-      get(positionToPack);
-      packVelocity(velocityToPack);
-      packAcceleration(accelerationToPack);
+      packLinearData(positionToPack, velocityToPack, accelerationToPack);
    }
 
    public void updateFinalDesiredPosition(FramePoint finalDesiredPosition)
@@ -138,5 +136,12 @@ public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryG
    {
       timeIntoStep.set(time);
       minimumJerkTrajectory.computeTrajectory(time);
+   }
+
+   public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   {
+      get(positionToPack);
+      packVelocity(velocityToPack);
+      packAcceleration(accelerationToPack);
    }
 }
