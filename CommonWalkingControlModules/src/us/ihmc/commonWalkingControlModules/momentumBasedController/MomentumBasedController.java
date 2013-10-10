@@ -432,7 +432,7 @@ public class MomentumBasedController
             if (contactState.inContact())
             {
                momentumBasedControllerSpy.setPlaneContactState(contactablePlaneBody, contactState.getCopyOfContactFramePoints2dInContact(),
-                     contactState.getCoefficientOfFriction(), contactState.getContactNormalFrameVector());
+                     contactState.getCoefficientOfFriction(), contactState.getContactNormalFrameVectorCopy());
             }
          }
 

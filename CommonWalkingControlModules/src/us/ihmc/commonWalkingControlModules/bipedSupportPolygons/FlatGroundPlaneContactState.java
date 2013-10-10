@@ -175,9 +175,14 @@ public class FlatGroundPlaneContactState implements PlaneContactState
       return contactFramePoints2d.size();
    }
 
-   public FrameVector getContactNormalFrameVector()
+   public FrameVector getContactNormalFrameVectorCopy()
    {
-      return contactNormalFrameVector;
+      return new FrameVector(contactNormalFrameVector);
+   }
+   
+   public void getContactNormalFrameVector(FrameVector frameVectorToPack)
+   {
+	   frameVectorToPack.setAndChangeFrame(contactNormalFrameVector);
    }
 
    public void setRhoContactRegularization(double wRho)

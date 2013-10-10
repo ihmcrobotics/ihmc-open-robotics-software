@@ -30,7 +30,7 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
 	private final Vector3d tempLinearPart = new Vector3d();
 	private final Vector3d tempArm = new Vector3d();
 	private final FramePoint tempFramePoint = new FramePoint();
-
+	private final FrameVector tempContactNormalVector = new FrameVector();
 
 	public OptimizerPlaneContactModel()
 	{
@@ -51,8 +51,8 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
 		
 		this.mu = plane.getCoefficientOfFriction();
 		numberOfPointsInContact = plane.getNumberOfContactPointsInContact();
-		FrameVector normalContactVector = plane.getContactNormalFrameVector();
-		ReferenceFrame contactFrame = normalContactVector.getReferenceFrame();
+		plane.getContactNormalFrameVector(tempContactNormalVector);
+		ReferenceFrame contactFrame = tempContactNormalVector.getReferenceFrame();
 
 		if (numberOfPointsInContact > MAXPOINTS)
 		{
@@ -78,7 +78,7 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
 				double angle = j * ANGLE_INCREMENT;
 				double cosAngleMu = Math.cos(angle) * mu;
 				double sinAngleMu = Math.sin(angle) * mu;
-				normalContactVector.getVector(tempLinearPart);
+				tempContactNormalVector.getVector(tempLinearPart);
 				tempLinearPart.normalize();
 				tempArm.set(1.0, 1.0, 1.0);
 				tempArm.sub(tempLinearPart);
