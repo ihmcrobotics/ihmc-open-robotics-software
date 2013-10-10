@@ -55,7 +55,7 @@ public class LoadCloudWithPoses extends SimpleApplication
    @Override
    public void simpleInitApp()
    {
-      List<Point3D_F64>[] clouds = loadPointCloud(1);
+      List<Point3D_F64>[] clouds = loadPointCloud(810, 1);
       render(clouds);
    }
 
@@ -105,7 +105,7 @@ public class LoadCloudWithPoses extends SimpleApplication
       flyCam.setMoveSpeed(25);
    }
 
-   private List<Point3D_F64>[] loadPointCloud(int maxScans)
+   private List<Point3D_F64>[] loadPointCloud(int maxScans, int mod)
    {
       List<Point3D_F64>[] clouds = new ArrayList[3];
       for (int i = 0; i < clouds.length; i++)
@@ -132,8 +132,15 @@ public class LoadCloudWithPoses extends SimpleApplication
             doubles[i] = Float.valueOf(allMatches.get(i));
 
          int i = 0;
-         while (i < doubles.length - 1000 && i+1 < (maxScans*(1081+32)))
+         int scans = 0;
+         while (scans < maxScans && i < doubles.length - 1000)
          {
+            scans++;
+
+            if (scans % mod != 0)
+               continue;
+
+            
             double[] mx = new double[16];
             for (int j = 0; j < 16; j++)
                mx[j] = doubles[i++];
@@ -148,7 +155,7 @@ public class LoadCloudWithPoses extends SimpleApplication
             for (int j = 0; j < pointsPerSweep; j++)
             {
                distance = (float) doubles[i++];
-               if (distance > 29 || distance < .2)
+               if (j > .9995*pointsPerSweep || distance > 29 || distance < .2)
                   continue;
 
                point = param.getPoint(distance, j);
@@ -157,11 +164,11 @@ public class LoadCloudWithPoses extends SimpleApplication
 
                point = param.getPoint(distance, j);
                end.transform(point);
-               clouds[1].add(new Point3D_F64(point.x, point.y, point.z));
+               //clouds[1].add(new Point3D_F64(point.x, point.y, point.z));
 
                point = param.getPoint(distance, j);
                TransformInterpolationCalculator.computeInterpolation(start, end, j / (double) pointsPerSweep).transform(point);
-               clouds[2].add(new Point3D_F64(point.x, point.y, point.z));
+               //clouds[2].add(new Point3D_F64(point.x, point.y, point.z));
             }
          }
       }
