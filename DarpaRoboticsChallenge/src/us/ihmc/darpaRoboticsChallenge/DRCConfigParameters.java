@@ -95,6 +95,7 @@ public class DRCConfigParameters
 
    public static final String LOG_HOST = "192.168.6.203";
    public static final String GAZEBO_HOST = "10.66.171.41";    // CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP; //CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP;
+
    public static final String SCS_MACHINE_IP_ADDRESS = LOCALHOST;    // CONSTELLATION_FIELD_COMPUTER_2_VPN_IP; //CONSTELLATION_FIELD_COMPUTER_2_VPN_IP;    // CLOUD_MONSTER_IP;
    public static final String NET_PROC_MACHINE_IP_ADDRESS = LOCALHOST;    // CONSTELLATION_FIELD_COMPUTER_1_VPN_IP; //CONSTELLATION_FIELD_COMPUTER_1_VPN_IP;    // SCS_MACHINE_IP_ADDRESS;
 
@@ -216,9 +217,9 @@ public class DRCConfigParameters
    public static final double LINEAR_ACCELERATION_FILTER_FREQ_HZ = sameFrequency;
 
    // State Estimator Filter Parameters
-   public static final double pointVelocityXYMeasurementStandardDeviation = 2.0;
-   public static final double pointVelocityZMeasurementStandardDeviation = 2.0;
+   public static final double pointVelocityXYMeasurementStandardDeviation = 2.0; //8.0; //2.0;
+   public static final double pointVelocityZMeasurementStandardDeviation = 2.0; //8.0; //2.0;
 
-   public static final double pointPositionXYMeasurementStandardDeviation = 0.1;
-   public static final double pointPositionZMeasurementStandardDeviation = 0.1;
+   public static final double pointPositionXYMeasurementStandardDeviation = 0.1; //0.4; //0.1;
+   public static final double pointPositionZMeasurementStandardDeviation = 0.1; //0.4; //0.1;
 }

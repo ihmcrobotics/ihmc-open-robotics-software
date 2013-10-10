@@ -343,6 +343,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       this.upcomingFootstepList = new UpcomingFootstepList(footstepProvider, registry);
 
+    //TODO: Extract gains out.
       this.centerOfMassHeightController = new PDController("comHeight", registry);
       centerOfMassHeightController.setProportionalGain(40.0);
       double zeta = 1.0;
@@ -579,6 +580,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       ChestOrientationManager chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
       chestOrientationManager.turnOff();
 
+    //TODO: Extract gains out.
       HeadOrientationManager headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
       double headKp = 40.0;
       double headZeta = 1.0;

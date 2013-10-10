@@ -1,7 +1,7 @@
 <GraphGroup>
 	<Cols>1</Cols>
 	<Graph>
-		<Variables>root.remoteroot.AtlasSliderBoardController.joint_r_leg_kny.joint_r_leg_kny_f,root.remoteroot.AtlasSliderBoardController.joint_r_leg_kny.joint_r_leg_kny_ff_const</Variables>
+		<Variables>root.remoteroot.AtlasControlThread.pump_supply_pressure</Variables>
 		<GraphConfiguration>
 			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remoteroot.AtlasSliderBoardController.joint_r_leg_kny.joint_r_leg_kny_q</Variables>
+		<Variables>root.remoteroot.AtlasSliderBoardController.rightFoot_my</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remoteroot.AtlasSliderBoardController.joint_r_leg_kny.joint_r_leg_kny_qd</Variables>
+		<Variables>root.remoteroot.AtlasSliderBoardController.rightFoot_mx</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -37,7 +37,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remoteroot.AtlasSliderBoardController.joint_r_leg_kny.joint_r_leg_knyYoFunGen.joint_r_leg_knyAmp,root.remoteroot.AtlasSliderBoardController.joint_r_leg_kny.joint_r_leg_knyYoFunGen.joint_r_leg_knyFreq</Variables>
+		<Variables>root.remoteroot.AtlasSliderBoardController.currentJoint_q,root.remoteroot.AtlasSliderBoardController.currentJoint_q_d</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -49,7 +49,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remoteroot.AtlasSliderBoardController.joint_r_leg_kny.joint_r_leg_kny2YoFunGen.joint_r_leg_kny2Amp,root.remoteroot.AtlasSliderBoardController.joint_r_leg_kny.joint_r_leg_kny2YoFunGen.joint_r_leg_kny2Freq,root.remoteroot.AtlasControlThread.pump_supply_pressure</Variables>
+		<Variables>root.remoteroot.AtlasSliderBoardController.currentJoint_qd,root.remoteroot.AtlasSliderBoardController.currentJoint_qd_d</Variables>
 		<GraphConfiguration>
 			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -61,7 +61,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remoteroot.AtlasSliderBoardController.joint_r_leg_kny.joint_r_leg_kny_f_d,root.remoteroot.AtlasSliderBoardController.joint_r_leg_kny.joint_r_leg_kny_f</Variables>
+		<Variables>root.remoteroot.AtlasSliderBoardController.currentJoint_f</Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -72,32 +72,8 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
-	<Graph>
-		<Variables>root.remoteroot.AtlasSliderBoardController.rightFoot_my</Variables>
-		<GraphConfiguration>
-			<Name>config7</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remoteroot.AtlasSliderBoardController.rightFoot_mx</Variables>
-		<GraphConfiguration>
-			<Name>config8</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
 </GraphGroup>
-<Entry Boxes>requestedBehavior,selectedJoint,joint_back_bkz_k_f_p,joint_back_bkz_ff_qd</Entry Boxes>
+<Entry Boxes>requestedBehavior,selectedJoint</Entry Boxes>
 
 <Number of ViewPorts>1</Number of ViewPorts>
  <Main Viewport> 
@@ -113,9 +89,9 @@
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>4.9754893420301</Camera X>
- <Camera Y>-3.3619629560634494</Camera Y>
- <Camera Z>0.2810785529287845</Camera Z>
+ <Camera X>0.0</Camera X>
+ <Camera Y>-6.0</Camera Y>
+ <Camera Z>1.0</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>

@@ -86,8 +86,7 @@ public class MomentumBasedController
    private final List<ContactableCylinderBody> listOfAllContactableCylinderBodies;
 
    private final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> yoPlaneContactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
-   private final LinkedHashMap<ContactableCylinderBody, YoCylindricalContactState> yoCylindricalContactStates = new LinkedHashMap<ContactableCylinderBody,
-                                                                                                                 YoCylindricalContactState>();
+   private final LinkedHashMap<ContactableCylinderBody, YoCylindricalContactState> yoCylindricalContactStates = new LinkedHashMap<ContactableCylinderBody, YoCylindricalContactState>();
    private final List<ModifiableContactState> modifiableContactStates = new ArrayList<ModifiableContactState>();
 
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
@@ -114,10 +113,10 @@ public class MomentumBasedController
    private final BooleanYoVariable resetEstimatorPositionsToCurrent = new BooleanYoVariable("resetEstimatorPositionsToCurrent", registry);
    private final PointPositionGrabberInterface pointPositionGrabber;
 
-   private final MomentumControlModuleBridge momentumControlModuleBridge; 
-   
+   private final MomentumControlModuleBridge momentumControlModuleBridge;
+
    private final SpatialForceVector gravitationalWrench;
-   private final EnumYoVariable<RobotSide> upcomingSupportLeg = EnumYoVariable.create("upcomingSupportLeg", "", RobotSide.class, registry, true);    // FIXME: not general enough; this should not be here
+   private final EnumYoVariable<RobotSide> upcomingSupportLeg = EnumYoVariable.create("upcomingSupportLeg", "", RobotSide.class, registry, true); // FIXME: not general enough; this should not be here
 
    private final PlaneContactWrenchProcessor planeContactWrenchProcessor;
    private final MomentumBasedControllerSpy momentumBasedControllerSpy;
@@ -125,24 +124,22 @@ public class MomentumBasedController
    private final WrenchVisualizer wrenchVisualizer;
 
    public MomentumBasedController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
-                                  CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime,
-                                  double gravityZ, TwistCalculator twistCalculator, SideDependentList<ContactablePlaneBody> feet,
-                                  SideDependentList<ContactablePlaneBody> handsWithFingersBentBack, SideDependentList<ContactableCylinderBody> graspingHands,
-                                  SideDependentList<ContactablePlaneBody> thighs, ContactablePlaneBody pelvis, ContactablePlaneBody pelvisBack,
-                                  double controlDT, ProcessedOutputsInterface processedOutputs,
-                                  OptimizationMomentumControlModule optimizationMomentumControlModule, OldMomentumControlModule oldMomentumControlModule,
-                                  ArrayList<Updatable> updatables, StateEstimationDataFromController stateEstimationDataFromControllerSink,
-                                  DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime, double gravityZ,
+         TwistCalculator twistCalculator, SideDependentList<ContactablePlaneBody> feet, SideDependentList<ContactablePlaneBody> handsWithFingersBentBack,
+         SideDependentList<ContactableCylinderBody> graspingHands, SideDependentList<ContactablePlaneBody> thighs, ContactablePlaneBody pelvis,
+         ContactablePlaneBody pelvisBack, double controlDT, ProcessedOutputsInterface processedOutputs,
+         OptimizationMomentumControlModule optimizationMomentumControlModule, OldMomentumControlModule oldMomentumControlModule,
+         ArrayList<Updatable> updatables, StateEstimationDataFromController stateEstimationDataFromControllerSink,
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
       momentumControlModuleBridge = new MomentumControlModuleBridge(optimizationMomentumControlModule, oldMomentumControlModule, centerOfMassFrame, registry);
-      
+
       if (SPY_ON_MOMENTUM_BASED_CONTROLLER)
          momentumBasedControllerSpy = new MomentumBasedControllerSpy(registry);
       else
          momentumBasedControllerSpy = null;
-
 
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
@@ -157,7 +154,7 @@ public class MomentumBasedController
       // Initialize the contactable bodies
       this.feet = feet;
       this.handsWithFingersBentBack = handsWithFingersBentBack;
-      this.graspingHands = graspingHands;    // Cylindrical contact used to bear load while grasping a cylinder
+      this.graspingHands = graspingHands; // Cylindrical contact used to bear load while grasping a cylinder
       this.thighs = thighs;
       this.pelvis = pelvis;
       this.pelvisBack = pelvisBack;
@@ -171,13 +168,11 @@ public class MomentumBasedController
 
       gravitationalWrench = new SpatialForceVector(centerOfMassFrame, new Vector3d(0.0, 0.0, totalMass * gravityZ), new Vector3d());
 
-
       ReferenceFrame pelvisFrame = referenceFrames.getPelvisFrame();
       this.finalDesiredPelvisLinearAcceleration = new YoFrameVector("finalDesiredPelvisLinearAcceleration", "", pelvisFrame, registry);
       this.finalDesiredPelvisAngularAcceleration = new YoFrameVector("finalDesiredPelvisAngularAcceleration", "", pelvisFrame, registry);
       this.desiredPelvisForce = new YoFrameVector("desiredPelvisForce", "", centerOfMassFrame, registry);
       this.desiredPelvisTorque = new YoFrameVector("desiredPelvisTorque", "", centerOfMassFrame, registry);
-
 
       this.admissibleDesiredGroundReactionTorque = new YoFrameVector("admissibleDesiredGroundReactionTorque", centerOfMassFrame, registry);
       this.admissibleDesiredGroundReactionForce = new YoFrameVector("admissibleDesiredGroundReactionForce", centerOfMassFrame, registry);
@@ -185,14 +180,12 @@ public class MomentumBasedController
       this.groundReactionTorqueCheck = new YoFrameVector("groundReactionTorqueCheck", centerOfMassFrame, registry);
       this.groundReactionForceCheck = new YoFrameVector("groundReactionForceCheck", centerOfMassFrame, registry);
 
-
       if (updatables != null)
       {
          this.updatables.addAll(updatables);
       }
 
-
-      double coefficientOfFriction = 1.0;    // TODO: magic number...
+      double coefficientOfFriction = 1.0; // TODO: magic number...
 
       // TODO: get rid of the null checks
       this.listOfAllContactablePlaneBodies = new ArrayList<ContactablePlaneBody>();
@@ -222,20 +215,21 @@ public class MomentumBasedController
       {
          RigidBody rigidBody = contactablePlaneBody.getRigidBody();
          YoPlaneContactState contactState = new YoPlaneContactState(contactablePlaneBody.getPlaneFrame().getName(), rigidBody,
-                                               contactablePlaneBody.getPlaneFrame(), contactablePlaneBody.getContactPoints2d(), coefficientOfFriction, registry);
+               contactablePlaneBody.getPlaneFrame(), contactablePlaneBody.getContactPoints2d(), coefficientOfFriction, registry);
          yoPlaneContactStates.put(contactablePlaneBody, contactState);
       }
 
       if (stateEstimationDataFromControllerSink != null)
       {
          this.desiredCoMAndAngularAccelerationGrabber = new DesiredCoMAndAngularAccelerationGrabber(stateEstimationDataFromControllerSink, estimationLink,
-                 estimationFrame, totalMass, registry);
+               estimationFrame, totalMass, registry);
 
          double touchdownTime = 0.12;
          double minCoPDistance = 0.01;
 
-//       this.pointPositionGrabber = new SingleReferenceFramePointPositionGrabber(stateEstimationDataFromController, registry, controlDT, touchdownTime, minCoPDistance);
-         this.pointPositionGrabber = new PointPositionGrabber(stateEstimationDataFromControllerSink, yoPlaneContactStates, registry, controlDT, touchdownTime, minCoPDistance);
+         //       this.pointPositionGrabber = new SingleReferenceFramePointPositionGrabber(stateEstimationDataFromController, registry, controlDT, touchdownTime, minCoPDistance);
+         this.pointPositionGrabber = new PointPositionGrabber(stateEstimationDataFromControllerSink, yoPlaneContactStates, registry, controlDT, touchdownTime,
+               minCoPDistance);
          setDelayTimeBeforeTrustingContacts(touchdownTime);
       }
       else
@@ -260,15 +254,14 @@ public class MomentumBasedController
          this.listOfAllContactableCylinderBodies.addAll(graspingHands.values());
       }
 
-//    coefficientOfFriction = 0.0;
+      //    coefficientOfFriction = 0.0;
       for (ContactableCylinderBody contactableCylinderBody : this.listOfAllContactableCylinderBodies)
       {
          RigidBody rigidBody = contactableCylinderBody.getRigidBody();
 
          // YoCylindricalContactState: used to enable load bearing with hands by grasping a cylinder
          YoCylindricalContactState cylindricalContactState = new YoCylindricalContactState(rigidBody.getName(),
-                                                                rigidBody.getParentJoint().getFrameAfterJoint(), contactableCylinderBody.getCylinderFrame(),
-                                                                registry, dynamicGraphicObjectsListRegistry);
+               rigidBody.getParentJoint().getFrameAfterJoint(), contactableCylinderBody.getCylinderFrame(), registry, dynamicGraphicObjectsListRegistry);
          cylindricalContactState.set(coefficientOfFriction, contactableCylinderBody, false);
          yoCylindricalContactStates.put(contactableCylinderBody, cylindricalContactState);
       }
@@ -321,7 +314,7 @@ public class MomentumBasedController
          momentumBasedControllerSpy.setExternalWrenchToCompensateFor(rigidBody, wrench);
       }
 
-//      momentumControlModuleBridge.getActiveMomentumControlModule().setExternalWrenchToCompensateFor(rigidBody, wrench);
+      //      momentumControlModuleBridge.getActiveMomentumControlModule().setExternalWrenchToCompensateFor(rigidBody, wrench);
       momentumControlModuleBridge.setExternalWrenchToCompensateFor(rigidBody, wrench);
    }
 
@@ -337,7 +330,7 @@ public class MomentumBasedController
 
       inverseDynamicsCalculator.reset();
       momentumControlModuleBridge.reset();
-      
+
       resetWeightsForContactRegularization();
    }
 
@@ -354,7 +347,7 @@ public class MomentumBasedController
       {
          contactState.resetContactRegularization();
       }
-      
+
       for (CylindricalContactState contactState : yoCylindricalContactStates.values())
       {
          contactState.resetContactRegularization();
@@ -372,7 +365,8 @@ public class MomentumBasedController
       MomentumModuleSolution momentumModuleSolution;
       try
       {
-         momentumModuleSolution = momentumControlModuleBridge.compute(this.yoPlaneContactStates, this.yoCylindricalContactStates, upcomingSupportLeg.getEnumValue());
+         momentumModuleSolution = momentumControlModuleBridge.compute(this.yoPlaneContactStates, this.yoCylindricalContactStates,
+               upcomingSupportLeg.getEnumValue());
       }
       catch (NoConvergenceException e)
       {
@@ -383,7 +377,6 @@ public class MomentumBasedController
 
       SpatialForceVector desiredCentroidalMomentumRate = momentumModuleSolution.getCentroidalMomentumRateSolution();
       Map<RigidBody, Wrench> externalWrenches = momentumModuleSolution.getExternalWrenchSolution();
-
 
       for (RigidBody rigidBody : externalWrenches.keySet())
       {
@@ -396,7 +389,7 @@ public class MomentumBasedController
 
       SpatialForceVector totalGroundReactionWrench = new SpatialForceVector(centerOfMassFrame);
       Wrench admissibleGroundReactionWrench = TotalWrenchCalculator.computeTotalWrench(externalWrenches.values(),
-                                                 totalGroundReactionWrench.getExpressedInFrame());
+            totalGroundReactionWrench.getExpressedInFrame());
       admissibleDesiredGroundReactionTorque.set(admissibleGroundReactionWrench.getAngularPartCopy());
       admissibleDesiredGroundReactionForce.set(admissibleGroundReactionWrench.getLinearPartCopy());
 
@@ -416,7 +409,7 @@ public class MomentumBasedController
          }
          pointPositionGrabber.set(yoPlaneContactStates, planeContactWrenchProcessor.getCops());
       }
-      
+
       inverseDynamicsCalculator.compute();
 
       if (processedOutputs != null)
@@ -428,7 +421,7 @@ public class MomentumBasedController
    {
       this.resetEstimatorPositionsToCurrent.set(true);
    }
-   
+
    private void updateMomentumBasedControllerSpy()
    {
       if (momentumBasedControllerSpy != null)
@@ -439,7 +432,7 @@ public class MomentumBasedController
             if (contactState.inContact())
             {
                momentumBasedControllerSpy.setPlaneContactState(contactablePlaneBody, contactState.getCopyOfContactFramePoints2dInContact(),
-                       contactState.getCoefficientOfFriction(), contactState.getContactNormalFrameVector());
+                     contactState.getCoefficientOfFriction(), contactState.getContactNormalFrameVector());
             }
          }
 
@@ -584,7 +577,7 @@ public class MomentumBasedController
    {
       yoPlaneContactStates.get(contactableBody).clear();
    }
-   
+
    public void setCylindricalContactInContact(ContactableCylinderBody contactableCylinderBody, boolean setInContact)
    {
       YoCylindricalContactState yoCylindricalContactState = yoCylindricalContactStates.get(contactableCylinderBody);
@@ -606,7 +599,7 @@ public class MomentumBasedController
       DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand = new DesiredSpatialAccelerationCommand(jacobian, taskspaceConstraintData);
       momentumControlModuleBridge.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);
    }
-   
+
    public void setDesiredPointAcceleration(GeometricJacobian rootToEndEffectorJacobian, FramePoint contactPoint, FrameVector desiredAcceleration)
    {
       if (momentumBasedControllerSpy != null)
@@ -614,18 +607,21 @@ public class MomentumBasedController
          momentumBasedControllerSpy.setDesiredPointAcceleration(rootToEndEffectorJacobian, contactPoint, desiredAcceleration);
       }
 
-      DesiredPointAccelerationCommand desiredPointAccelerationCommand = new DesiredPointAccelerationCommand(rootToEndEffectorJacobian, contactPoint, desiredAcceleration);
+      DesiredPointAccelerationCommand desiredPointAccelerationCommand = new DesiredPointAccelerationCommand(rootToEndEffectorJacobian, contactPoint,
+            desiredAcceleration);
       momentumControlModuleBridge.setDesiredPointAcceleration(desiredPointAccelerationCommand);
    }
 
-   public void setDesiredPointAcceleration(GeometricJacobian rootToEndEffectorJacobian, FramePoint contactPoint, FrameVector desiredAcceleration, DenseMatrix64F selectionMatrix)
+   public void setDesiredPointAcceleration(GeometricJacobian rootToEndEffectorJacobian, FramePoint contactPoint, FrameVector desiredAcceleration,
+         DenseMatrix64F selectionMatrix)
    {
       if (momentumBasedControllerSpy != null)
       {
          momentumBasedControllerSpy.setDesiredPointAcceleration(rootToEndEffectorJacobian, contactPoint, desiredAcceleration);
       }
 
-      DesiredPointAccelerationCommand desiredPointAccelerationCommand = new DesiredPointAccelerationCommand(rootToEndEffectorJacobian, contactPoint, desiredAcceleration, selectionMatrix);
+      DesiredPointAccelerationCommand desiredPointAccelerationCommand = new DesiredPointAccelerationCommand(rootToEndEffectorJacobian, contactPoint,
+            desiredAcceleration, selectionMatrix);
       momentumControlModuleBridge.setDesiredPointAcceleration(desiredPointAccelerationCommand);
    }
 
@@ -689,7 +685,6 @@ public class MomentumBasedController
    {
       return centerOfMassJacobian;
    }
-
 
    public boolean isUsingOptimizationMomentumControlModule()
    {
@@ -778,9 +773,9 @@ public class MomentumBasedController
    {
       pointPositionGrabber.setDelayTimeBeforeTrustingContacts(delayTimeBeforeTrustingContacts);
    }
-   
+
    //TODO (Sylvain): get rid of these methods changing wRho & wPhi of contact state
-   public void setPlaneContactState_wRho (ContactablePlaneBody contactablePlaneBody, double wRho)
+   public void setPlaneContactState_wRho(ContactablePlaneBody contactablePlaneBody, double wRho)
    {
       yoPlaneContactStates.get(contactablePlaneBody).setRhoContactRegularization(wRho);
    }

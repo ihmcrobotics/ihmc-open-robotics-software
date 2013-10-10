@@ -1,0 +1,330 @@
+<GraphGroup>
+	<Cols>2</Cols>
+	<Graph>
+		<Variables>root.remoteatlas.AtlasControlThread.air_sump_pressure</Variables>
+		<GraphConfiguration>
+			<Name>config23</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remoteatlas.DRCControllerDispatcher.leadEstimatorTicks,root.remoteatlas.DRCControllerDispatcher.laggedEstimatorTicks</Variables>
+		<GraphConfiguration>
+			<Name>config24</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.highLevelState</Variables>
+		<GraphConfiguration>
+			<Name>config25</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.q_l_leg_kny</Variables>
+		<GraphConfiguration>
+			<Name>config26</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remoteatlas.AtlasSensorReader.filt_qd_r_leg_kny,root.atlas.qd_r_leg_kny,root.remoteatlas.AtlasSensorReader.raw_qd_r_leg_kny</Variables>
+		<GraphConfiguration>
+			<Name>config27</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.JointPDHighLevelHumanoidController.hl_l_leg_knyYoFunGen.hl_l_leg_knyKRateForExponentialChirp,root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.JointPDHighLevelHumanoidController.hl_l_leg_knyYoFunGen.hl_l_leg_knyChirpFrequencyMax,root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.JointPDHighLevelHumanoidController.hl_l_leg_knyYoFunGen.hl_l_leg_knyChirpFrequency,root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.JointPDHighLevelHumanoidController.hl_l_leg_knyYoFunGen.hl_l_leg_knyChirpUpAndDown</Variables>
+		<GraphConfiguration>
+			<Name>config28</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.JointPDHighLevelHumanoidController.hl_l_leg_knyYoFunGen.hl_l_leg_knyChirpRate</Variables>
+		<GraphConfiguration>
+			<Name>config29</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.JointPDHighLevelHumanoidController.hl_l_leg_knyYoFunGen.hl_l_leg_knyAmp</Variables>
+		<GraphConfiguration>
+			<Name>config30</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.JointPDHighLevelHumanoidController.hl_l_leg_knyYoFunGen.hl_l_leg_knyTimeInCurrentMode</Variables>
+		<GraphConfiguration>
+			<Name>config31</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.JointPDHighLevelHumanoidController.hl_l_leg_hpyYoFunGen.hl_l_leg_hpyChirpRate</Variables>
+		<GraphConfiguration>
+			<Name>config32</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.JointPDHighLevelHumanoidController.hl_l_leg_hpyYoFunGen.hl_l_leg_hpyChirpFrequencyMax</Variables>
+		<GraphConfiguration>
+			<Name>config33</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remoteatlas.AtlasDispatcherThread.ll_l_leg_hpy.ll_l_leg_hpy_a_k_f_p</Variables>
+		<GraphConfiguration>
+			<Name>config34</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+<Entry Boxes>requestedBehavior,hl_gainScaling,requestedHighLevelState,transitionToFullControl,hl_l_leg_knyMode,requestStop,ll_back_bkx_a_k_f_p,ll_back_bkx_a_ff_qd,alphaQD,jointPositionAlpha,jointVelocityAlpha,hl_r_leg_kny_k_q_p,hl_r_leg_kny_k_qd_p,hl_r_leg_knyMode,pelvisAlphaPosVel,pelvisAlphaAngleVel,headPelvisAlphaAngleVel,chestPelvisAlphaAngleVel</Entry Boxes>
+
+<Number of ViewPorts>1</Number of ViewPorts>
+ <Main Viewport> 
+<Visible> true</Visible>
+</Main Viewport>
+
+<Graph Array Window Size>1</Graph Array Window Size><Graph Array Window1>
+<GraphGroup>
+	<Cols>1</Cols>
+	<Graph>
+		<Variables>root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.ChestOrientationControlModule.chestPelvisAxisAngleOrientationController.chestPelvisOrientationError,root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.HeadOrientationControlModule.headPelvisAxisAngleOrientationController.headPelvisOrientationError,root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.CarIngressEgressController.pelvisRigidBodySpatialAccelerationControlModule.pelvisAxisAngleOrientationController.pelvisOrientationError</Variables>
+		<GraphConfiguration>
+			<Name>config35</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.CarIngressEgressController.pelvisRigidBodySpatialAccelerationControlModule.pelvisEuclideanPositionController.pelvisDesiredPositionX,root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.CarIngressEgressController.pelvisRigidBodySpatialAccelerationControlModule.pelvisEuclideanPositionController.pelvisCurrentPositionX</Variables>
+		<GraphConfiguration>
+			<Name>config36</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.CarIngressEgressController.pelvisRigidBodySpatialAccelerationControlModule.pelvisEuclideanPositionController.pelvisDesiredPositionY,root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.CarIngressEgressController.pelvisRigidBodySpatialAccelerationControlModule.pelvisEuclideanPositionController.pelvisCurrentPositionY</Variables>
+		<GraphConfiguration>
+			<Name>config37</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.CarIngressEgressController.pelvisRigidBodySpatialAccelerationControlModule.pelvisEuclideanPositionController.pelvisDesiredPositionZ,root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.CarIngressEgressController.pelvisRigidBodySpatialAccelerationControlModule.pelvisEuclideanPositionController.pelvisCurrentPositionZ</Variables>
+		<GraphConfiguration>
+			<Name>config38</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.CarIngressEgressController.pelvisRigidBodySpatialAccelerationControlModule.pelvisEuclideanPositionController.pelvisAlphaPosVel,root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.CarIngressEgressController.pelvisRigidBodySpatialAccelerationControlModule.pelvisAxisAngleOrientationController.pelvisAlphaAngleVel,root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.ChestOrientationControlModule.chestPelvisAxisAngleOrientationController.chestPelvisAlphaAngleVel,root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.HeadOrientationControlModule.headPelvisAxisAngleOrientationController.headPelvisAlphaAngleVel,root.remoteatlas.AtlasSensorReader.jointPositionAlpha,root.remoteatlas.AtlasSensorReader.jointVelocityAlpha</Variables>
+		<GraphConfiguration>
+			<Name>config39</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.CarIngressEgressController.carIngressPelvisPositionKp,root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.CarIngressEgressController.carIngressPelvisOrientationKp,root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.CarIngressEgressController.carIngressChestOrientationKp,root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.CarIngressEgressController.carIngressHeadOrientationKp</Variables>
+		<GraphConfiguration>
+			<Name>config40</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.CarIngressEgressController.carIngressPelvisPositionZeta,root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.CarIngressEgressController.carIngressPelvisOrientationZeta,root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.CarIngressEgressController.carIngressChestOrientationZeta,root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.CarIngressEgressController.carIngressHeadOrientationZeta</Variables>
+		<GraphConfiguration>
+			<Name>config41</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.ManipulationControlModule.l_handIndividualHandControlModule.l_handJointSpaceState.kpAllArmJointsL,root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.ManipulationControlModule.r_handIndividualHandControlModule.r_handJointSpaceState.kpAllArmJointsR</Variables>
+		<GraphConfiguration>
+			<Name>config42</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.ManipulationControlModule.l_handIndividualHandControlModule.l_handJointSpaceState.zetaAllArmJointsL,root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.ManipulationControlModule.r_handIndividualHandControlModule.r_handJointSpaceState.zetaAllArmJointsR</Variables>
+		<GraphConfiguration>
+			<Name>config43</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remoteatlas.AtlasDispatcherThread.ll_l_leg_kny.ll_l_leg_kny_f_d,root.remoteatlas.AtlasDispatcherThread.ll_l_leg_kny.ll_l_leg_kny_f</Variables>
+		<GraphConfiguration>
+			<Name>config44</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables></Variables>
+		<GraphConfiguration>
+			<Name>config45</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window1>
+
+<Extra Panels>
+<Main Viewport>
+Plotter,
+</Main Viewport></Extra Panels>
+
+<Current View>Normal View</Current View>
+ <Canvas 1> 
+ <Camera X>-0.5015550968048307</Camera X>
+ <Camera Y>5.852051920311592</Camera Y>
+ <Camera Z>-0.7356629054889638</Camera Z>
+ <Dolly data> 
+ <Position X>2.0</Position X>
+ <Position Y>12.0</Position Y>
+ <Position Z>0.0</Position Z>
+<Dolly Booleans>
+<Dolly>false</Dolly>
+<Dolly X>true</Dolly X>
+<Dolly Y>true</Dolly Y>
+<Dolly Z>true</Dolly Z>
+</Dolly Booleans>
+</Dolly data>
+ <Track data> 
+ <Position X>0.0</Position X>
+ <Position Y>0.0</Position Y>
+ <Position Z>0.0</Position Z>
+ <Track Booleans>
+<Track>false</Track>
+<Track X>true</Track X>
+<Track Y>true</Track Y>
+<Track Z>false</Track Z>
+</Track Booleans>
+</Track data>
+<Fix Position>
+<Fix X>-0.3434358689078551</Fix X>
+<Fix Y>-0.1454037715673513</Fix Y>
+<Fix Z>-0.3288170701679243</Fix Z>
+</Fix Position>
+</Canvas 1>
