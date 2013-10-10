@@ -12,6 +12,7 @@ public class FingerJoint
    private double qdDesired;
    
    private double kp;
+   private double ki;
    private double kd;
    
    private double damping = Double.NaN;
@@ -107,4 +108,13 @@ public class FingerJoint
       this.damping = damping;
    }
 
+   public double getKi()
+   {
+      return ki;
+   }
+
+   public void setKi(double ki)
+   {
+      this.ki = ki;
+   }
 }
