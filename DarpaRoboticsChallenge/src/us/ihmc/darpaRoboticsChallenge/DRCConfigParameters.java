@@ -205,5 +205,15 @@ public class DRCConfigParameters
 
    public static final int CHEATING_POLARIS_PORT = 1543;
    public static final String CHEATING_POLARIS_HOST = LOCALHOST;
+   
+   // Filter Parameters
+   public static final double JOINT_POSITION_FILTER_FREQ_HZ = Double.POSITIVE_INFINITY;
+   public static final double JOINT_VELOCITY_FILTER_FREQ_HZ = Double.POSITIVE_INFINITY;
 
+   // State Estimator Filter Parameters
+   public static final double pointVelocityXYMeasurementStandardDeviation = 2.0;
+   public static final double pointVelocityZMeasurementStandardDeviation = 2.0;
+
+   public static final double pointPositionXYMeasurementStandardDeviation = 0.1;
+   public static final double pointPositionZMeasurementStandardDeviation = 0.1;
 }
