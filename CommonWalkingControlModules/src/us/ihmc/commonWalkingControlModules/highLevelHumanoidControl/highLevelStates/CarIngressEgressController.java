@@ -17,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffecto
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -39,7 +38,6 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -891,20 +889,12 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
    private void setOnToesContactState(ContactablePlaneBody contactableBody)
    {
-      FrameVector normalContactVector = new FrameVector(worldFrame, 0.0, 0.0, 1.0);
-      List<FramePoint> contactPoints = getContactPointsAccordingToFootConstraint(contactableBody, ConstraintType.TOES);
-      List<FramePoint2d> contactPoints2d = getContactPoints2d(contactableBody, contactPoints);
-      
-      boolean[] newContactPointStates = getContactPointStatesForWalkingOnEdge(contactableBody, ConstraintType.TOES);
-      momentumBasedController.setPlaneContactState(contactableBody, newContactPointStates, normalContactVector);
-      updateFootEndEffectorControlModule(contactableBody, contactPoints2d, ConstraintType.TOES);
+      footEndEffectorControlModules.get(contactableBody).setContactState(ConstraintType.TOES);
    }
 
    private void setFlatFootContactState(ContactablePlaneBody contactableBody)
    {
-      FrameVector normalContactVector = new FrameVector(contactableBody.getPlaneFrame(), 0.0, 0.0, 1.0);
-      momentumBasedController.setPlaneContactStateFullyConstrained(contactableBody, coefficientOfFriction.getDoubleValue(), normalContactVector);
-      updateFootEndEffectorControlModule(contactableBody, contactableBody.getContactPoints2d(), ConstraintType.FULL);
+      footEndEffectorControlModules.get(contactableBody).setContactState(ConstraintType.FULL);
    }
 
    private void setContactStateForSwing(ContactablePlaneBody contactableBody)
@@ -914,55 +904,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       desiredFootConfigurationProviders.get(contactableBody).set(new FramePose(footFrame));
 
       footEndEffectorControlModules.get(contactableBody).doSingularityEscapeBeforeTransitionToNextState();
-      momentumBasedController.setPlaneContactStateFree(contactableBody);
-      updateFootEndEffectorControlModule(contactableBody, new ArrayList<FramePoint2d>(), ConstraintType.UNCONSTRAINED);
+      footEndEffectorControlModules.get(contactableBody).setContactState(ConstraintType.UNCONSTRAINED);
    }
-
-   private boolean[] getContactPointStatesForWalkingOnEdge(ContactablePlaneBody contactableBody, ConstraintType constraintType)
-   {
-      FrameVector direction = new FrameVector(contactableBody.getBodyFrame(), 1.0, 0.0, 0.0);
-      if (constraintType == ConstraintType.HEEL)
-         direction.scale(-1.0);
-
-      int[] indexOfPointsInContact = DesiredFootstepCalculatorTools.findMaximumPointIndexesInDirection(contactableBody.getContactPoints(), direction, 2);
-      
-      boolean[] contactPointStates = new boolean[contactableBody.getTotalNumberOfContactPoints()];
-      
-      for (int i = 0; i < indexOfPointsInContact.length; i++)
-      {
-         contactPointStates[indexOfPointsInContact[i]] = true;
-      }
-      
-      return contactPointStates;
-   }
-
-   private List<FramePoint> getContactPointsAccordingToFootConstraint(ContactablePlaneBody contactableBody, ConstraintType constraintType)
-   {
-      FrameVector direction = new FrameVector(contactableBody.getBodyFrame(), 1.0, 0.0, 0.0);
-      if (constraintType == ConstraintType.HEEL)
-         direction.scale(-1.0);
-
-      return DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactableBody.getContactPoints(), direction, 2);
-   }
-
-   private List<FramePoint2d> getContactPoints2d(ContactablePlaneBody contactableBody, List<FramePoint> contactPoints)
-   {
-      List<FramePoint2d> contactPoints2d = new ArrayList<FramePoint2d>(contactPoints.size());
-      for (FramePoint contactPoint : contactPoints)
-      {
-         contactPoint.changeFrame(contactableBody.getPlaneFrame());
-         contactPoints2d.add(contactPoint.toFramePoint2d());
-      }
-
-      return contactPoints2d;
-   }
-
-   private void updateFootEndEffectorControlModule(ContactablePlaneBody contactablePlaneBody, List<FramePoint2d> contactPoints, ConstraintType constraintType)
-   {
-      //TODO stop passing lists of points in contact
-      footEndEffectorControlModules.get(contactablePlaneBody).setContactPoints(contactPoints, constraintType);
-   }
-
 
    private class LoadBearingVariableChangedListener implements VariableChangedListener
    {

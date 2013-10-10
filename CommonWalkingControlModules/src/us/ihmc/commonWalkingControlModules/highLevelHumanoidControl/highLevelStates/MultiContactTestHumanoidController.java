@@ -1,8 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -25,7 +23,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.WrapperForPositionAndOri
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -202,9 +199,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
 
    private void setFlatFootContactState(ContactablePlaneBody contactableBody)
    {
-      FrameVector normalContactVector = new FrameVector(contactableBody.getPlaneFrame(), 0.0, 0.0, 1.0);
-      momentumBasedController.setPlaneContactStateFullyConstrained(contactableBody, coefficientOfFriction.getDoubleValue(), normalContactVector);
-      updateEndEffectorControlModule(contactableBody, contactableBody.getContactPoints2d(), ConstraintType.FULL);
+      footEndEffectorControlModules.get(contactableBody).setContactState(ConstraintType.FULL);
    }
 
    private void setContactStateForSwing(ContactablePlaneBody contactableBody)
@@ -214,14 +209,6 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       desiredConfigurationProviders.get(contactableBody).set(new FramePose(footFrame));
 
       footEndEffectorControlModules.get(contactableBody).doSingularityEscapeBeforeTransitionToNextState();
-
-      momentumBasedController.setPlaneContactStateFree(contactableBody);
-      updateEndEffectorControlModule(contactableBody, new ArrayList<FramePoint2d>(), ConstraintType.UNCONSTRAINED);
-   }
-
-   private void updateEndEffectorControlModule(ContactablePlaneBody contactablePlaneBody, List<FramePoint2d> contactPoints, ConstraintType constraintType)
-   {
-      //TODO stop passing lists of points in contact
-      footEndEffectorControlModules.get(contactablePlaneBody).setContactPoints(contactPoints, constraintType);
+      footEndEffectorControlModules.get(contactableBody).setContactState(ConstraintType.UNCONSTRAINED);
    }
 }
