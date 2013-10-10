@@ -31,8 +31,10 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProv
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.ChangeableConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SettableOrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.WrapperForPositionAndOrientationTrajectoryGenerators;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -358,6 +360,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(bodyName, worldFrame,
                                                                                          footTrajectoryTimeProvider, initialConfigurationProvider,
                                                                                          desiredConfigurationProvider, registry);
+         
+         PoseTrajectoryGenerator poseTrajectoryGenerator = new WrapperForPositionAndOrientationTrajectoryGenerators(positionTrajectoryGenerator, orientationTrajectoryGenerator);
 
          initialFootConfigurationProviders.put(foot, initialConfigurationProvider);
          desiredFootConfigurationProviders.put(foot, desiredConfigurationProvider);
@@ -371,11 +375,9 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          DoubleTrajectoryGenerator onToesTrajectory = new ThirdOrderPolynomialTrajectoryGenerator(sideString + bodyName, onToesInitialPitchProvider,
                                                          onToesInitialPitchVelocityProvider, onToesFinalPitchProvider, trajectoryTimeProvider, registry);
 
-
-         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(foot, jacobian, positionTrajectoryGenerator, null,
-                                                                orientationTrajectoryGenerator, onToesTrajectory, momentumBasedController, registry);
+         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(foot, jacobian, poseTrajectoryGenerator, null,
+                                                                onToesTrajectory, momentumBasedController, registry);
          footEndEffectorControlModules.put(foot, endEffectorControlModule);
-
       }
    }
 
