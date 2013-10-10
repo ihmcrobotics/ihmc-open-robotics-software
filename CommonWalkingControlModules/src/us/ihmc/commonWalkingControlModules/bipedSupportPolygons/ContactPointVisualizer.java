@@ -59,7 +59,7 @@ public class ContactPointVisualizer
             framePoint = new FramePoint(framePoint);
             framePoint.changeFrame(ReferenceFrame.getWorldFrame());
             contactPointsWorld.get(i).set(framePoint);
-            FrameVector normalVector = new FrameVector(contactState.getContactNormalFrameVector());
+            FrameVector normalVector = new FrameVector(contactState.getContactNormalFrameVectorCopy());
             normalVector.changeFrame(ReferenceFrame.getWorldFrame());
             normalVector.scale(normalVectorScale);
             normalVectors.get(i).set(normalVector);

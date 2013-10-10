@@ -215,11 +215,16 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
       return numberOfContactPointsInContact;
    }
 
-   public FrameVector getContactNormalFrameVector()
+   public FrameVector getContactNormalFrameVectorCopy()
    {
-      return contactNormalFrameVector;
+      return new FrameVector(contactNormalFrameVector);
    }
 
+   public void getContactNormalFrameVector(FrameVector frameVectorToPack)
+   {
+	   frameVectorToPack.setAndChangeFrame(contactNormalFrameVector);
+   }
+   
    public void clear()
    {
       for (int i = 0; i < totalNumberOfContactPoints; i++)

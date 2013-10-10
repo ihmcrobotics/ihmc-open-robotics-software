@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -12,7 +14,6 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class YoPlaneContactState implements PlaneContactState, ModifiableContactState
 {
@@ -22,7 +23,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    private final ReferenceFrame planeFrame;
    private final BooleanYoVariable inContact;
    private final DoubleYoVariable coefficientOfFriction;
-   private final YoFrameVector contactNormalFrameVector;
+   private final FrameVector contactNormalFrameVector;
    private final int totalNumberOfContactPoints;
    private final List<YoContactPoint> contactPoints;
    
@@ -41,8 +42,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       
       parentRegistry.addChild(registry);
       
-      this.contactNormalFrameVector = new YoFrameVector(namePrefix + "ContactNormalFrameVector", planeFrame, registry);
-      this.contactNormalFrameVector.set(0.0, 0.0, 1.0);
+      this.contactNormalFrameVector = new FrameVector(planeFrame, 0.0, 0.0, 1.0);
       
       wRho = new DoubleYoVariable(namePrefix + "_wRhoContactRegularization", registry);
       resetContactRegularization();
@@ -68,11 +68,11 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    {
       if (normalContactVector == null)
       {
-         this.contactNormalFrameVector.set(0.0, 0.0, 1.0);
+         this.contactNormalFrameVector.setAndChangeFrame(planeFrame, new Vector3d(0.0, 0.0, 1.0));
       }
       else
       {
-         this.contactNormalFrameVector.set(normalContactVector);
+         this.contactNormalFrameVector.setAndChangeFrame(normalContactVector);
       }
    }
 
@@ -110,7 +110,8 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
          
          if (contactPoint.isInContact())
          {
-            ret.add(new FramePoint2d(contactPoint.getPosition2d()));
+            FramePoint2d framePoint2d = new FramePoint2d(contactPoint.getPosition2d());
+            ret.add(framePoint2d);
          }
       }
 
@@ -206,9 +207,14 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       return numberOfContactPointsInContact;
    }
 
-   public FrameVector getContactNormalFrameVector()
+   public FrameVector getContactNormalFrameVectorCopy()
    {
-      return contactNormalFrameVector.getFrameVectorCopy();
+      return new FrameVector(contactNormalFrameVector);
+   }
+
+   public void getContactNormalFrameVector(FrameVector frameVectorToPack)
+   {
+	   frameVectorToPack.setAndChangeFrame(contactNormalFrameVector);
    }
 
    public void clear()
