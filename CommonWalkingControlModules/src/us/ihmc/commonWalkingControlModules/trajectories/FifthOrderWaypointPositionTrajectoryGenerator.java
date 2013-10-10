@@ -236,4 +236,11 @@ public class FifthOrderWaypointPositionTrajectoryGenerator implements PositionTr
          finalParameterd = finalDesiredVelocity.length() / finalDirection.length();
       timeSpline.setCubic(0.0, stepTime, 0.0, initialParameterd, 1.0, finalParameterd);
    }
+
+   public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   {
+      get(positionToPack);
+      packVelocity(velocityToPack);
+      packAcceleration(accelerationToPack);
+   }
 }

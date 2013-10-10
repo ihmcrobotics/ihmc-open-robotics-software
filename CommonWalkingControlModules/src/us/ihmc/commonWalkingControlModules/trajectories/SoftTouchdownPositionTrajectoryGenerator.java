@@ -106,4 +106,11 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
    {
       desiredAcceleration.getFrameVectorAndChangeFrameOfPackedVector(accelerationToPack);
    }
+
+   public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   {
+      get(positionToPack);
+      packVelocity(velocityToPack);
+      packAcceleration(accelerationToPack);
+   }
 }
