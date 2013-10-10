@@ -43,7 +43,7 @@ public class LoadCloudWithPoses extends SimpleApplication
 
    public static void main(String[] args)
    {
-      LoadCloudWithPoses test1 = new LoadCloudWithPoses("D:\\lidarLog_2.txt");
+      LoadCloudWithPoses test1 = new LoadCloudWithPoses("D:\\lidarLog_5_1.txt");
       test1.start();
    }
 
@@ -55,7 +55,7 @@ public class LoadCloudWithPoses extends SimpleApplication
    @Override
    public void simpleInitApp()
    {
-      List<Point3D_F64>[] clouds = loadPointCloud(10000000);
+      List<Point3D_F64>[] clouds = loadPointCloud(1);
       render(clouds);
    }
 
@@ -71,11 +71,10 @@ public class LoadCloudWithPoses extends SimpleApplication
       ColorRGBA[] colors = new ColorRGBA[total];
 
       int index = 0;
-      for (int i = 0; i<clouds.length; i++)
+      for (int i = 0; i < clouds.length; i++)
       {
-         
-         int c = Color.HSBtoRGB((i/(float)clouds.length), 1.0f, 0.95f);
-         ColorRGBA color = new ColorRGBA(((c>>16) & 0xFF)/256.0f, ((c>>8) & 0xFF)/256.0f, ((c>>0) & 0xFF)/256.0f, 1.0f);
+         int c = Color.HSBtoRGB((i / (float) clouds.length), 1.0f, i == 2 ? 1.0f : 1.0f);
+         ColorRGBA color = new ColorRGBA(((c >> 16) & 0xFF) / 256.0f, ((c >> 8) & 0xFF) / 256.0f, ((c >> 0) & 0xFF) / 256.0f, 1.0f);
 
          for (Point3D_F64 p : clouds[i])
          {
@@ -105,49 +104,53 @@ public class LoadCloudWithPoses extends SimpleApplication
       cam.update();
       flyCam.setMoveSpeed(25);
    }
-   
-   private List<Point3D_F64>[] loadPointCloud(int maxPoints)
+
+   private List<Point3D_F64>[] loadPointCloud(int maxScans)
    {
       List<Point3D_F64>[] clouds = new ArrayList[3];
-      for (int i = 0; i<clouds.length; i++)
+      for (int i = 0; i < clouds.length; i++)
          clouds[i] = new ArrayList<Point3D_F64>();
 
       try
       {
          int pointsPerSweep = 1081;
          String file = new Scanner(new BufferedReader(new FileReader(fileName))).useDelimiter("\\Z").next();
-         PolarLidarScanParameters param = new PolarLidarScanParameters(false, pointsPerSweep, 1,  2.356194f, -2.356194f, 0, 0, 0, 0, 0, 0, 0);
-         
+         PolarLidarScanParameters param = new PolarLidarScanParameters(false, pointsPerSweep, 1, 2.356194f, -2.356194f, 0, 0, 0, 0, 0, 0, 0);
+
          Transform3D start, end;
          Point3d point;
          float distance;
-            
+
          List<String> allMatches = new ArrayList<String>();
-         Matcher m = Pattern.compile("-?[0-9]+.[0-9]+").matcher(file);
-         while (m.find()) {
-           allMatches.add(m.group());
+         Matcher m = Pattern.compile("-?[0-9]+.[0-9]+(E-[0-9])?").matcher(file);
+         while (m.find())
+         {
+            allMatches.add(m.group());
          }
          double[] doubles = new double[allMatches.size()];
          for (int i = 0; i < doubles.length; i++)
             doubles[i] = Float.valueOf(allMatches.get(i));
-         
+
          int i = 0;
-         while (i < doubles.length-1000 && i < maxPoints) {            
+         while (i < doubles.length - 1000 && i+1 < (maxScans*(1081+32)))
+         {
             double[] mx = new double[16];
-            for (int j = 0; j<16; j++)
+            for (int j = 0; j < 16; j++)
                mx[j] = doubles[i++];
             start = new Transform3D(mx);
             
+
             mx = new double[16];
-            for (int j = 0; j<16; j++)
+            for (int j = 0; j < 16; j++)
                mx[j] = doubles[i++];
             end = new Transform3D(mx);
 
-            for (int j = 0; j<pointsPerSweep; j++) {
-               distance = (float)doubles[i++];
-               if (distance > 30 || distance < .2)
+            for (int j = 0; j < pointsPerSweep; j++)
+            {
+               distance = (float) doubles[i++];
+               if (distance > 29 || distance < .2)
                   continue;
-               
+
                point = param.getPoint(distance, j);
                start.transform(point);
                clouds[0].add(new Point3D_F64(point.x, point.y, point.z));
@@ -155,15 +158,14 @@ public class LoadCloudWithPoses extends SimpleApplication
                point = param.getPoint(distance, j);
                end.transform(point);
                clouds[1].add(new Point3D_F64(point.x, point.y, point.z));
-               
-               point = param.getPoint(distance, j);
-               TransformInterpolationCalculator.computeInterpolation(start, end, j/(double)pointsPerSweep).transform(point);
-               clouds[2].add(new Point3D_F64(point.x, point.y, point.z));
-               
-            }            
-         }
 
-      } catch (FileNotFoundException e)
+               point = param.getPoint(distance, j);
+               TransformInterpolationCalculator.computeInterpolation(start, end, j / (double) pointsPerSweep).transform(point);
+               clouds[2].add(new Point3D_F64(point.x, point.y, point.z));
+            }
+         }
+      }
+      catch (FileNotFoundException e)
       {
          throw new RuntimeException(e);
       }
