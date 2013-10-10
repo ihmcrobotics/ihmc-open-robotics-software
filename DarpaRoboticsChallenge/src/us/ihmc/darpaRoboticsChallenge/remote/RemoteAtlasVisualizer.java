@@ -15,7 +15,7 @@ import com.martiansoftware.jsap.JSAPResult;
 
 public class RemoteAtlasVisualizer
 {
-   public static final String defaultHost = "10.66.171.20";
+   public static final String defaultHost = "localhost";//"10.66.171.20";
    public static final int defaultPort = 5555;
    
    public RemoteAtlasVisualizer(String host, int port, int bufferSize)
