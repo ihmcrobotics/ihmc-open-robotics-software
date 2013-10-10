@@ -1582,13 +1582,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       momentumBasedController.doPrioritaryControl();
       super.callUpdatables();
 
-      for (ContactablePlaneBody contactablePlaneBody : footEndEffectorControlModules.keySet())
-      {
-         EndEffectorControlModule endEffectorControlModule = footEndEffectorControlModules.get(contactablePlaneBody);
-         FramePoint2d cop = momentumBasedController.getCoP(contactablePlaneBody);
-         endEffectorControlModule.setCenterOfPressure(cop);
-      }
-
       icpAndMomentumBasedController.computeCapturePoint();
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
