@@ -24,6 +24,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.scene.shape.Cylinder;
+import com.jme3.scene.shape.Line;
 import com.jme3.scene.shape.Sphere;
 import com.jme3.util.BufferUtils;
 
@@ -116,6 +117,29 @@ public class ShapeTranslator
             System.out.println("NOT RIGHT NUMBER OF POINTS IN PLANE");
       }
    }
+   
+   
+   public Node drawLine(Vector3f start, Vector3f end)
+   {
+	   Node lineNode = new Node();
+	   Line line = new Line(start,end);
+	   line.setLineWidth(5);
+	   Geometry lineGeometry = new Geometry("line", line);
+	   
+	   Material objectMaterial = new Material(ui.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+       objectMaterial.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
+       objectMaterial.setColor("Color", ColorRGBA.White);
+       lineGeometry.setMaterial(objectMaterial);
+       lineGeometry.setQueueBucket(Bucket.Opaque);
+       
+       lineNode.attachChild(lineGeometry);
+       return lineNode;
+	   
+	   
+	   
+	   
+   }
+   
 
    private Node generatePlane(Point3D_F64 p1, Point3D_F64 p2, Point3D_F64 p3, Point3D_F64 p4, ColorRGBA color)
    {
