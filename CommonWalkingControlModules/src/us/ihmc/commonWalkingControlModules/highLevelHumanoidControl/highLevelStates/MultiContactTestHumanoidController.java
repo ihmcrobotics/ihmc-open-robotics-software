@@ -153,10 +153,6 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
             desiredConfigurationProviders.get(foot).set(newFootPose);
             footEndEffectorControlModules.get(foot).resetCurrentState();
          }
-
-         EndEffectorControlModule endEffectorControlModule = footEndEffectorControlModules.get(foot);
-         FramePoint2d cop = momentumBasedController.getCoP(foot);
-         endEffectorControlModule.setCenterOfPressure(cop);
       }
 
       super.doFootControl();
