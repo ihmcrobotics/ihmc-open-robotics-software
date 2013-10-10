@@ -122,6 +122,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       this.lidarControllerInterface = lidarControllerInterface;
       this.walkingControllerParameters = walkingControllerParameters;
 
+    //TODO: Extract gains out.
       kJointPositionControl.set(100.0);
       zetaJointPositionControl.set(1.0);
       coefficientOfFriction.set(1.0);    // 0.6);//
