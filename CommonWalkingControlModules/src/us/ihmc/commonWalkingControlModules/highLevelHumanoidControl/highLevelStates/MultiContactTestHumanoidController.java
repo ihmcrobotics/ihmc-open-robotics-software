@@ -19,7 +19,9 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvid
 import us.ihmc.commonWalkingControlModules.trajectories.ChangeableConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.WrapperForPositionAndOrientationTrajectoryGenerators;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -102,15 +104,16 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
                                                                                          trajectoryTimeProvider, currentConfigurationProvider,
                                                                                          desiredConfigurationProvider, registry);
 
+         PoseTrajectoryGenerator poseTrajectoryGenerator = new WrapperForPositionAndOrientationTrajectoryGenerators(positionTrajectoryGenerator, orientationTrajectoryGenerator);
+
          desiredConfigurationProviders.put(foot, desiredConfigurationProvider);
          swingPositionTrajectoryGenerators.put(foot, positionTrajectoryGenerator);
          swingOrientationTrajectoryGenerators.put(foot, orientationTrajectoryGenerator);
 
 
-         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(foot, jacobian, positionTrajectoryGenerator, null,
-                                                                orientationTrajectoryGenerator, null, momentumBasedController, registry);
+         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(foot, jacobian, poseTrajectoryGenerator, null,
+                                                                null, momentumBasedController, registry);
          footEndEffectorControlModules.put(foot, endEffectorControlModule);
-
       }
    }
 

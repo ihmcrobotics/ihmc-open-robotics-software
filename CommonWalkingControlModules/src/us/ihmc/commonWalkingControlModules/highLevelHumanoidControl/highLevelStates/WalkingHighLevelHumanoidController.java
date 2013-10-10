@@ -54,11 +54,13 @@ import us.ihmc.commonWalkingControlModules.trajectories.MaximumConstantJerkFinal
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SettableOrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.SimpleTwoWaypointTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.TransferTimeCalculationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointTrajectoryUtils;
+import us.ihmc.commonWalkingControlModules.trajectories.WrapperForPositionAndOrientationTrajectoryGenerators;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -434,17 +436,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          OrientationTrajectoryGenerator swingOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(sideString
                                                                                  + "SwingFootOrientation", worldFrame, swingTimeCalculationProvider,
                                                                                     initialOrientationProvider, finalFootOrientationProvider, registry);
-
+         
+         PoseTrajectoryGenerator swingPoseTrajectoryGenerator = new WrapperForPositionAndOrientationTrajectoryGenerators(swingPositionTrajectoryGenerator, swingOrientationTrajectoryGenerator);
+         
          YoVariableDoubleProvider onToesInitialPitchProvider = new YoVariableDoubleProvider(sideString + "OnToesInitialPitch", registry);
          
  
          DoubleProvider onToesInitialPitchVelocityProvider = new ConstantDoubleProvider(0.0);
-         
 
          DoubleTrajectoryGenerator onToesPitchTrajectoryGenerator; 
 
-         
-         
          if (replaceQuinticToeOffSplineByCubicSpline)
          {
                onToesFinalPitchProvider.set(maximumConstantJerkFinalToeOffAngleComputer.getMaximumFeasibleConstantJerkFinalToeOffAngle
@@ -481,9 +482,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          
 
          GeometricJacobian jacobian = legJacobians.get(robotSide);
-         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(bipedFoot, jacobian, swingPositionTrajectoryGenerator,
-                                                                heelPitchTrajectoryGenerator, swingOrientationTrajectoryGenerator,
-                                                                onToesPitchTrajectoryGenerator, momentumBasedController, registry);
+         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(bipedFoot, jacobian, swingPoseTrajectoryGenerator,
+                                                                heelPitchTrajectoryGenerator, onToesPitchTrajectoryGenerator, momentumBasedController, registry);
          double singularityEscapeNullspaceMultiplier = 200.0;
          double minJacobianDeterminantForSingularityEscape = 0.03;
          endEffectorControlModule.setParameters(minJacobianDeterminantForSingularityEscape, singularityEscapeNullspaceMultiplier);
