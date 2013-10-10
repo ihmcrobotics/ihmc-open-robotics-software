@@ -207,8 +207,13 @@ public class DRCConfigParameters
    public static final String CHEATING_POLARIS_HOST = LOCALHOST;
    
    // Filter Parameters
-   public static final double JOINT_POSITION_FILTER_FREQ_HZ = Double.POSITIVE_INFINITY;
-   public static final double JOINT_VELOCITY_FILTER_FREQ_HZ = Double.POSITIVE_INFINITY;
+   public static final double  sameFrequency = Double.POSITIVE_INFINITY;
+   
+   public static final double JOINT_POSITION_FILTER_FREQ_HZ = sameFrequency;
+   public static final double JOINT_VELOCITY_FILTER_FREQ_HZ = sameFrequency;
+   public static final double ORIENTATION_FILTER_FREQ_HZ = sameFrequency;
+   public static final double ANGULAR_VELOCITY_FILTER_FREQ_HZ = sameFrequency;
+   public static final double LINEAR_ACCELERATION_FILTER_FREQ_HZ = sameFrequency;
 
    // State Estimator Filter Parameters
    public static final double pointVelocityXYMeasurementStandardDeviation = 2.0;

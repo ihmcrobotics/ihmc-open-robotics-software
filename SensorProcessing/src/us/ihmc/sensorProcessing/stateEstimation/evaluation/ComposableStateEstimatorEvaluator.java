@@ -97,7 +97,11 @@ public class ComposableStateEstimatorEvaluator
       
       double jointPositionFilterFrequencyInHertz = 12.0;
       double jointVelocityFilterFrequencyInHertz = 12.0;
-      SensorFilterParameters sensorFilterParameters = new SensorFilterParameters(jointPositionFilterFrequencyInHertz, jointVelocityFilterFrequencyInHertz, controlDT);
+      double orientationFilterFrequencyInHertz = 12.0;
+      double angularVelocityFilterFrequencyInHertz = 12.0;
+      double linearAccelerationFilterFrequencyInHertz = 12.0;
+      SensorFilterParameters sensorFilterParameters = new SensorFilterParameters(jointPositionFilterFrequencyInHertz, jointVelocityFilterFrequencyInHertz,
+            orientationFilterFrequencyInHertz, angularVelocityFilterFrequencyInHertz, linearAccelerationFilterFrequencyInHertz, controlDT);
 
       double pointVelocityXYMeasurementStandardDeviation = 2.0;
       double pointPositionZMeasurementStandardDeviation = 0.1;
