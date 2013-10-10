@@ -273,7 +273,7 @@ public class MomentumBasedController
 
       if (dynamicGraphicObjectsListRegistry != null)
       {
-         contactPointVisualizer = new ContactPointVisualizer(20, dynamicGraphicObjectsListRegistry, registry);
+         contactPointVisualizer = new ContactPointVisualizer(this.yoPlaneContactStates.values(), dynamicGraphicObjectsListRegistry, registry);
          List<RigidBody> rigidBodies = Arrays.asList(ScrewTools.computeSupportAndSubtreeSuccessors(fullRobotModel.getRootJoint().getSuccessor()));
          wrenchVisualizer = new WrenchVisualizer("Desired", rigidBodies, dynamicGraphicObjectsListRegistry, registry);
       }
@@ -358,7 +358,7 @@ public class MomentumBasedController
    public void doSecondaryControl()
    {
       if (contactPointVisualizer != null)
-         contactPointVisualizer.update(this.yoPlaneContactStates.values());
+         contactPointVisualizer.update();
 
       updateMomentumBasedControllerSpy();
 

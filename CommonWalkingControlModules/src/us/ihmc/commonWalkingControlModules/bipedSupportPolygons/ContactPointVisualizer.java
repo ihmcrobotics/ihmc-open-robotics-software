@@ -21,26 +21,36 @@ import java.util.List;
  */
 public class ContactPointVisualizer
 {
+   private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final List<YoFramePoint> contactPointsWorld = new ArrayList<YoFramePoint>();
    private final List<DynamicGraphicPosition> dynamicGraphicPositions = new ArrayList<DynamicGraphicPosition>();
    private final List<DynamicGraphicVector> dynamicGraphicVectors = new ArrayList<DynamicGraphicVector>();
    private final List<YoFrameVector> normalVectors = new ArrayList<YoFrameVector>();
    private final double normalVectorScale = 0.1;
+   private final int maxNumberOfDynamicGraphicPositions;
+   private final Collection<? extends PlaneContactState> contactStates;
 
-   public ContactPointVisualizer(int maxNumberOfDynamicGraphicPositions, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-                                 YoVariableRegistry parentRegistry)
+   public ContactPointVisualizer(Collection<? extends PlaneContactState> contactStates, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+         YoVariableRegistry parentRegistry)
    {
+      this.contactStates = contactStates;
+      int totalNumberOfContactPoints = 0;
+      for (PlaneContactState contactState : contactStates)
+         totalNumberOfContactPoints += contactState.getTotalNumberOfContactPoints();
+
+      maxNumberOfDynamicGraphicPositions = totalNumberOfContactPoints;
+
       for (int i = 0; i < maxNumberOfDynamicGraphicPositions; i++)
       {
-         YoFramePoint contactPointWorld = new YoFramePoint("contactPoint" + i, ReferenceFrame.getWorldFrame(), this.registry);
+         YoFramePoint contactPointWorld = new YoFramePoint("contactPoint" + i, worldFrame, this.registry);
          contactPointsWorld.add(contactPointWorld);
-         DynamicGraphicPosition dynamicGraphicPosition = contactPointWorld.createDynamicGraphicPosition("contactViz" + i, 0.01,
-               YoAppearance.Crimson());
+         DynamicGraphicPosition dynamicGraphicPosition = contactPointWorld.createDynamicGraphicPosition("contactViz" + i, 0.01, YoAppearance.Crimson());
          dynamicGraphicPositions.add(dynamicGraphicPosition);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("contactPoints", dynamicGraphicPosition);
 
-         YoFrameVector normalVector = new YoFrameVector("contactNormal" + i, ReferenceFrame.getWorldFrame(), registry);
+         YoFrameVector normalVector = new YoFrameVector("contactNormal" + i, worldFrame, registry);
          normalVectors.add(normalVector);
          DynamicGraphicVector dynamicGraphicVector = new DynamicGraphicVector("contactNormalViz" + i, contactPointWorld, normalVector, YoAppearance.Crimson());
          dynamicGraphicVectors.add(dynamicGraphicVector);
@@ -49,37 +59,46 @@ public class ContactPointVisualizer
       parentRegistry.addChild(registry);
    }
 
-   public void update(Collection<? extends PlaneContactState> contactStates)
+   private final FramePoint tempFramePoint = new FramePoint(worldFrame);
+   private final FrameVector tempFrameVector = new FrameVector(worldFrame);
+
+   public void update()
    {
       int i = 0;
       for (PlaneContactState contactState : contactStates)
       {
-         for (FramePoint framePoint : contactState.getCopyOfContactFramePointsInContact())
+         contactState.getContactNormalFrameVector(tempFrameVector);
+         tempFrameVector.changeFrame(worldFrame);
+         tempFrameVector.scale(normalVectorScale);
+
+         for (ContactPoint contactPoint : contactState.getContactPoints())
          {
-            framePoint = new FramePoint(framePoint);
-            framePoint.changeFrame(ReferenceFrame.getWorldFrame());
-            contactPointsWorld.get(i).set(framePoint);
-            FrameVector normalVector = new FrameVector(contactState.getContactNormalFrameVectorCopy());
-            normalVector.changeFrame(ReferenceFrame.getWorldFrame());
-            normalVector.scale(normalVectorScale);
-            normalVectors.get(i).set(normalVector);
-
-            dynamicGraphicPositions.get(i).showGraphicObject();
-            dynamicGraphicVectors.get(i).showGraphicObject();
-
-            dynamicGraphicPositions.get(i).update();
-            dynamicGraphicVectors.get(i).update();
-            i++;
+            updateContactPointDynamicGraphicObjects(i++, contactPoint);
          }
       }
+   }
 
-      for (int j = i; j < dynamicGraphicPositions.size(); j++)
+   private void updateContactPointDynamicGraphicObjects(int i, ContactPoint contactPoint)
+   {
+      if (contactPoint.isInContact())
       {
-         contactPointsWorld.get(j).setToNaN();
-         normalVectors.get(j).set(Double.NaN, Double.NaN, Double.NaN);
-         dynamicGraphicPositions.get(j).hideGraphicObject();
-         dynamicGraphicVectors.get(j).hideGraphicObject();
+         tempFramePoint.setAndChangeFrame(contactPoint.getPosition());
+         tempFramePoint.changeFrame(worldFrame);
+         contactPointsWorld.get(i).set(tempFramePoint);
+         normalVectors.get(i).set(tempFrameVector);
+
+         dynamicGraphicPositions.get(i).showGraphicObject();
+         dynamicGraphicVectors.get(i).showGraphicObject();
+      }
+      else
+      {
+         contactPointsWorld.get(i).setToNaN();
+         normalVectors.get(i).set(Double.NaN, Double.NaN, Double.NaN);
+         dynamicGraphicPositions.get(i).hideGraphicObject();
+         dynamicGraphicVectors.get(i).hideGraphicObject();
       }
 
+      dynamicGraphicPositions.get(i).update();
+      dynamicGraphicVectors.get(i).update();
    }
 }
