@@ -74,7 +74,7 @@ public class LoadCloudWithPoses extends SimpleApplication
       for (int i = 0; i<clouds.length; i++)
       {
          
-         int c = Color.HSBtoRGB((i/(float)clouds.length), 1.0f, 1.0f);
+         int c = Color.HSBtoRGB((i/(float)clouds.length), 1.0f, 0.95f);
          ColorRGBA color = new ColorRGBA(((c>>16) & 0xFF)/256.0f, ((c>>8) & 0xFF)/256.0f, ((c>>0) & 0xFF)/256.0f, 1.0f);
 
          for (Point3D_F64 p : clouds[i])
@@ -92,7 +92,7 @@ public class LoadCloudWithPoses extends SimpleApplication
       try
       {
          rootNode.attachChild(zUpNode);
-         zUpNode.attachChild(generator.generatePointCloudGraph(points, colors));
+         zUpNode.attachChild(generator.generatePointCloudGraph(points, colors, 1.0f));
       }
       catch (Exception e)
       {
