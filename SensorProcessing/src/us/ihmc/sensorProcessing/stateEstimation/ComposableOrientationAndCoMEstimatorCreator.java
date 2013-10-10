@@ -49,33 +49,13 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class ComposableOrientationAndCoMEstimatorCreator
 {
-// These are tuned for PointPositionGrabber when estimator runs at 3msec loop rate:
-   private static final double pointVelocityXYMeasurementStandardDeviation = 2.0;
-   private static final double pointVelocityZMeasurementStandardDeviation = 2.0;
-
-   private static final double pointPositionXYMeasurementStandardDeviation = 0.1;
-   private static final double pointPositionZMeasurementStandardDeviation = 0.1;
-   
-//   // These are tuned for PointPositionGrabber when estimator runs at 1msec loop rate:
-//   private static final double pointVelocityXYMeasurementStandardDeviation = 6.0;
-//   private static final double pointVelocityZMeasurementStandardDeviation = 6.0;
-//
-//   private static final double pointPositionXYMeasurementStandardDeviation = 0.3;
-//   private static final double pointPositionZMeasurementStandardDeviation = 0.3;
-
-   // These are tuned for SingleReferenceFramePointPositionGrabber:
-   // private static final double pointVelocityXYMeasurementStandardDeviation = 1.5;
-   // private static final double pointVelocityZMeasurementStandardDeviation = 1.5;
-
-   // private static final double pointPositionXYMeasurementStandardDeviation = 0.1;
-   // private static final double pointPositionZMeasurementStandardDeviation = 0.1;
-
    private static final boolean USE_DISCRETE_COM_PROCESS_MODEL_ELEMENTS = true;
 
    private final RigidBody orientationEstimationLink;
 
    private final ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort;
 
+   private final PointMeasurementNoiseParameters pointMeasurementNoiseParameters;
    private final DenseMatrix64F angularAccelerationNoiseCovariance;
    private final DenseMatrix64F comAccelerationNoiseCovariance;
 
@@ -84,10 +64,12 @@ public class ComposableOrientationAndCoMEstimatorCreator
    private final List<LinearAccelerationSensorConfiguration> linearAccelerationSensorConfigurations = new ArrayList<LinearAccelerationSensorConfiguration>();
    private final boolean assumePerfectIMU;
 
-   public ComposableOrientationAndCoMEstimatorCreator(DenseMatrix64F angularAccelerationNoiseCovariance, DenseMatrix64F comAccelerationNoiseCovariance,
+   public ComposableOrientationAndCoMEstimatorCreator(PointMeasurementNoiseParameters pointMeasurementNoiseParameters,
+         DenseMatrix64F angularAccelerationNoiseCovariance, DenseMatrix64F comAccelerationNoiseCovariance,
            RigidBody orientationEstimationLink, ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort,
            boolean assumePerfectIMU)
    {
+      this.pointMeasurementNoiseParameters = pointMeasurementNoiseParameters;
       this.angularAccelerationNoiseCovariance = angularAccelerationNoiseCovariance;
       this.comAccelerationNoiseCovariance = comAccelerationNoiseCovariance;
       this.orientationEstimationLink = orientationEstimationLink;
@@ -190,7 +172,8 @@ public class ComposableOrientationAndCoMEstimatorCreator
 
       public ComposableOrientationAndCoMEstimator(String name, double controlDT, ReferenceFrame estimationFrame,
               AfterJointReferenceFrameNameMap estimatorFrameMap, RigidBodyToIndexMap estimatorRigidBodyToIndexMap, ControlFlowGraph controlFlowGraph,
-              ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort, YoVariableRegistry parentRegistry,
+              ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort, 
+              YoVariableRegistry parentRegistry,
               final boolean assumePerfectIMU)
       {
          super(name, controlDT, parentRegistry);
@@ -258,8 +241,8 @@ public class ComposableOrientationAndCoMEstimatorCreator
          addCoMVelocityProcessModelElement(controlDT, desiredCenterOfMassAccelerationInputPort);
          addCoMAccelerationProcessModelElement(desiredCenterOfMassAccelerationInputPort);
 
-         addAggregatedPointPositionMeasurementModelElement(pointPositionInputPort, estimationFrame, estimatorFrameMap);
-         addAggregatedPointVelocityMeasurementModelElement(pointVelocityInputPort, estimationFrame, estimatorFrameMap, estimatorRigidBodyToIndexMap);
+         addAggregatedPointPositionMeasurementModelElement(pointPositionInputPort, estimationFrame, estimatorFrameMap, pointMeasurementNoiseParameters);
+         addAggregatedPointVelocityMeasurementModelElement(pointVelocityInputPort, estimationFrame, estimatorFrameMap, estimatorRigidBodyToIndexMap, pointMeasurementNoiseParameters);
 
          Runnable runnable = new Runnable()
          {
@@ -435,21 +418,23 @@ public class ComposableOrientationAndCoMEstimatorCreator
       }
 
       private void addAggregatedPointPositionMeasurementModelElement(ControlFlowInputPort<List<PointPositionDataObject>> pointPositionInputPort,
-              ReferenceFrame estimationFrame, AfterJointReferenceFrameNameMap estimatorFrameMap)
+              ReferenceFrame estimationFrame, AfterJointReferenceFrameNameMap estimatorFrameMap, PointMeasurementNoiseParameters pointMeasurementNoiseParameters)
       {
          AggregatePointPositionMeasurementModelElement element = new AggregatePointPositionMeasurementModelElement(pointPositionInputPort,
                                                                     centerOfMassPositionOutputPort, orientationOutputPort, estimationFrame, estimatorFrameMap,
                                                                     assumePerfectIMU);
 
          // DenseMatrix64F covariance = createDiagonalCovarianceMatrix(pointPositionMeasurementStandardDeviation, 3);
-         DenseMatrix64F covariance = createCovarianceMatrix(pointPositionXYMeasurementStandardDeviation, pointPositionZMeasurementStandardDeviation, 3);
+         DenseMatrix64F covariance = createCovarianceMatrix(pointMeasurementNoiseParameters.getPointPositionXYMeasurementStandardDeviation(), 
+               pointMeasurementNoiseParameters.getPointPositionZMeasurementStandardDeviation(), 3);
 
          element.setNoiseCovariance(covariance);
          addMeasurementModelElement(element);
       }
 
       private void addAggregatedPointVelocityMeasurementModelElement(ControlFlowInputPort<List<PointVelocityDataObject>> pointVelocityInputPort,
-              ReferenceFrame estimationFrame, AfterJointReferenceFrameNameMap estimatorFrameMap, RigidBodyToIndexMap rigidBodyToIndexMap)
+              ReferenceFrame estimationFrame, AfterJointReferenceFrameNameMap estimatorFrameMap, RigidBodyToIndexMap rigidBodyToIndexMap, 
+              PointMeasurementNoiseParameters pointMeasurementNoiseParameters)
       {
          AggregatePointVelocityMeasurementModelElement element = new AggregatePointVelocityMeasurementModelElement(pointVelocityInputPort,
                                                                     centerOfMassPositionOutputPort, centerOfMassVelocityOutputPort, orientationOutputPort,
@@ -457,7 +442,8 @@ public class ComposableOrientationAndCoMEstimatorCreator
                                                                     rigidBodyToIndexMap, estimationFrame, assumePerfectIMU);
 
          // DenseMatrix64F covariance = createDiagonalCovarianceMatrix(pointVelocityMeasurementStandardDeviation, 3);
-         DenseMatrix64F covariance = createCovarianceMatrix(pointVelocityXYMeasurementStandardDeviation, pointVelocityZMeasurementStandardDeviation, 3);
+         DenseMatrix64F covariance = createCovarianceMatrix(pointMeasurementNoiseParameters.getPointVelocityXYMeasurementStandardDeviation(), 
+               pointMeasurementNoiseParameters.getPointVelocityZMeasurementStandardDeviation(), 3);
 
          element.setNoiseCovariance(covariance);
          addMeasurementModelElement(element);
