@@ -24,11 +24,15 @@ public class YoVariableLogVisualizer
 {
    private final JaxbSDFLoader loader;
    private final SDFJointNameMap jointNameMap;
+   private final String timeVariableName;
+   private final int bufferSize;
    
-   public YoVariableLogVisualizer(JaxbSDFLoader loader, SDFJointNameMap jointNameMap) throws IOException
+   public YoVariableLogVisualizer(JaxbSDFLoader loader, SDFJointNameMap jointNameMap, String timeVariableName, int bufferSize) throws IOException
    {
+      this.bufferSize = bufferSize;
       this.loader = loader;
       this.jointNameMap = jointNameMap;
+      this.timeVariableName = timeVariableName;
       
       final JFileChooser fileChooser = new JFileChooser(new File(YoVariableLoggerOptions.defaultLogDirectory));
       sortByDateHack(fileChooser);  
@@ -37,7 +41,7 @@ public class YoVariableLogVisualizer
       int returnValue = fileChooser.showOpenDialog(null);
       if(returnValue == JFileChooser.APPROVE_OPTION)
       {
-         readLogFile(fileChooser.getSelectedFile());
+         readLogFile(fileChooser.getSelectedFile()); 
       }
       else
       {
@@ -85,9 +89,10 @@ public class YoVariableLogVisualizer
       final FileChannel logChannel = new FileInputStream(logdata).getChannel();
       
       
-      
-      SimulationConstructionSet scs = new SimulationConstructionSet();
+      SimulationConstructionSet scs = new SimulationConstructionSet(true, bufferSize);
+      scs.setTimeVariableName(timeVariableName);
       YoVariableLogPlaybackRobot robot = new YoVariableLogPlaybackRobot(loader.getGeneralizedSDFRobotModel(jointNameMap.getModelName()),jointNameMap, parser.getJointStates(), parser.getYoVariablesList(), logChannel, scs);
+      
       scs.setDT(parser.getDt(), 1);
       scs.setPlaybackDesiredFrameRate(0.04);
       
