@@ -57,12 +57,12 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
 
    public MultiContactTestHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
            CoMBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
-           RootJointAngularAccelerationControlModule rootJointAccelerationControlModule, MomentumBasedController momentumBasedController,
+           MomentumBasedController momentumBasedController,
            WalkingControllerParameters walkingControllerParameters, 
            LidarControllerInterface lidarControllerInterface,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      super(variousWalkingProviders, variousWalkingManagers, rootJointAccelerationControlModule, momentumBasedController, walkingControllerParameters,
+      super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters,
             lidarControllerInterface, dynamicGraphicObjectsListRegistry, controllerState);
 
       this.footPoseProvider = variousWalkingProviders.getDesiredFootPoseProvider();

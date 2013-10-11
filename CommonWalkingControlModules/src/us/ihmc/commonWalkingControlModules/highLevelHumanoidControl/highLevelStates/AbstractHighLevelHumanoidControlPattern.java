@@ -1,12 +1,10 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.GainCalculator;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameQuaternion;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
-import com.yobotics.simulationconstructionset.util.statemachines.State;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableCylinderBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -31,12 +29,22 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.*;
+import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.TwistCalculator;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.VariableChangedListener;
+import com.yobotics.simulationconstructionset.YoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.GainCalculator;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameQuaternion;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
+import com.yobotics.simulationconstructionset.util.statemachines.State;
 
 public abstract class AbstractHighLevelHumanoidControlPattern extends State<HighLevelState>
 {
@@ -89,9 +97,11 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
    private final VariousWalkingProviders variousWalkingProviders;
    private final VariousWalkingManagers variousWalkingManagers;
    
+   private final DoubleYoVariable kpPelvisOrientation = new DoubleYoVariable("kpPelvisOrientation", registry);
+   private final DoubleYoVariable zetaPelvisOrientation = new DoubleYoVariable("zetaPelvisOrientation", registry);
+
    public AbstractHighLevelHumanoidControlPattern(VariousWalkingProviders variousWalkingProviders, 
          VariousWalkingManagers variousWalkingManagers,
-           RootJointAngularAccelerationControlModule rootJointAccelerationControlModule, 
            MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters, 
            LidarControllerInterface lidarControllerInterface,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, HighLevelState controllerState)
@@ -139,12 +149,36 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
       jointForExtendedNeckPitchRange = setupJointForExtendedNeckPitchRange();
       
-      this.rootJointAccelerationControlModule = rootJointAccelerationControlModule;
-
+      /////////////////////////////////////////////////////////////////////////////////////////////
+      // Setup the RootJointAngularAccelerationControlModule for PelvisOrientation control ////////
+      kpPelvisOrientation.set(walkingControllerParameters.getKpPelvisOrientation()); 
+      zetaPelvisOrientation.set(walkingControllerParameters.getZetaPelvisOrientation());
+      rootJointAccelerationControlModule = new RootJointAngularAccelerationControlModule(momentumBasedController, registry);
+      VariableChangedListener pelvisOrientationGainsChangedListener = createPelvisOrientationGainsChangedListener();
+      pelvisOrientationGainsChangedListener.variableChanged(null);
+      
       // Setup joint constraints
       positionControlJoints = setupJointConstraints();
    }
    
+
+   private VariableChangedListener createPelvisOrientationGainsChangedListener()
+   {
+      VariableChangedListener listener = new VariableChangedListener(){
+
+         public void variableChanged(YoVariable v)
+         {
+            double dPelvisOrientation = GainCalculator.computeDerivativeGain(kpPelvisOrientation.getDoubleValue(), zetaPelvisOrientation.getDoubleValue());
+            rootJointAccelerationControlModule.setProportionalGains(kpPelvisOrientation.getDoubleValue(), kpPelvisOrientation.getDoubleValue(), kpPelvisOrientation.getDoubleValue());
+            rootJointAccelerationControlModule.setDerivativeGains(dPelvisOrientation, dPelvisOrientation, dPelvisOrientation);
+         }};
+   
+         kpPelvisOrientation.addVariableChangedListener(listener);
+         zetaPelvisOrientation.addVariableChangedListener(listener);
+         
+         return listener;
+   }
+
 
    protected void setupLegJacobians(FullRobotModel fullRobotModel)
    {

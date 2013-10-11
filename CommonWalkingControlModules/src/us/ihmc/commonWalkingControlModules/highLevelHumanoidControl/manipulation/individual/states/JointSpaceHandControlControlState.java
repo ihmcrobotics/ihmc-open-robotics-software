@@ -1,19 +1,28 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.PDController;
-import com.yobotics.simulationconstructionset.util.statemachines.State;
-import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.GainCalculator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.IndividualHandControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.FormattingTools;
-import us.ihmc.utilities.screwTheory.*;
+import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.utilities.screwTheory.RevoluteJoint;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTools;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.VariableChangedListener;
+import com.yobotics.simulationconstructionset.YoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.GainCalculator;
+import com.yobotics.simulationconstructionset.util.PDController;
+import com.yobotics.simulationconstructionset.util.statemachines.State;
+import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
 
 
 public class JointSpaceHandControlControlState extends State<IndividualHandControlState>
@@ -30,7 +39,7 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
    private final MomentumBasedController momentumBasedController;
 
    public JointSpaceHandControlControlState(IndividualHandControlState stateEnum, RobotSide robotSide, GeometricJacobian jacobian,
-           MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry, double moveTime)
+           MomentumBasedController momentumBasedController, ArmControllerParameters armControllerParameters, YoVariableRegistry parentRegistry, double moveTime)
    {
       super(stateEnum);
 
@@ -41,13 +50,13 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
       moveTimeArmJoint.set(moveTime);
 
       kpAllArmJoints = new DoubleYoVariable("kpAllArmJoints" + robotSide, registry);
-      kpAllArmJoints.set(120.0);
+      kpAllArmJoints.set(armControllerParameters.getKpAllArmJoints());
 
       zetaAllArmJoints = new DoubleYoVariable("zetaAllArmJoints" + robotSide, registry);
-      zetaAllArmJoints.set(1.0);
+      zetaAllArmJoints.set(armControllerParameters.getZetaAllArmJoints());
 
       kdAllArmJoints = new DoubleYoVariable("kdAllArmJoints" + robotSide, registry);
-      updateDerivativeGain();
+      setupVariableListener();
 
       trajectories = new LinkedHashMap<OneDoFJoint, DoubleTrajectoryGenerator>();
       pdControllers = new LinkedHashMap<OneDoFJoint, PDController>();
@@ -67,14 +76,25 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
       parentRegistry.addChild(registry);
    }
 
-   private void updateDerivativeGain()
+   private void setupVariableListener()
    {
-      kdAllArmJoints.set(GainCalculator.computeDerivativeGain(kpAllArmJoints.getDoubleValue(), zetaAllArmJoints.getDoubleValue()));
+      VariableChangedListener listener = new VariableChangedListener()
+      {
+         public void variableChanged(YoVariable v)
+         {
+            kdAllArmJoints.set(GainCalculator.computeDerivativeGain(kpAllArmJoints.getDoubleValue(), zetaAllArmJoints.getDoubleValue()));            
+         }
+      };
+
+      kpAllArmJoints.addVariableChangedListener(listener);
+      kdAllArmJoints.addVariableChangedListener(listener);
+      
+      listener.variableChanged(null);
    }
 
    private void setDesiredJointAccelerations()
    {
-      updateDerivativeGain();
+      setupVariableListener();
 
       for (OneDoFJoint joint : oneDoFJoints)
       {

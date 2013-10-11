@@ -155,7 +155,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
                                      LidarControllerInterface lidarControllerInterface,
                                      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      super(variousWalkingProviders, variousWalkingManagers, null, momentumBasedController, walkingControllerParameters,
+      super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters,
             lidarControllerInterface, dynamicGraphicObjectsListRegistry, controllerState);
 
       setupManagers(variousWalkingManagers);

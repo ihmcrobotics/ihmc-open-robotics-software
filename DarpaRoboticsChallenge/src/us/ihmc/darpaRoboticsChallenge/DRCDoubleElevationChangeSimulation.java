@@ -34,8 +34,9 @@ public class DRCDoubleElevationChangeSimulation
       boolean cheatWithGroundHeightAtForFootstep = false;
 
       DRCRobotWalkingControllerParameters drcControlParameters = new DRCRobotWalkingControllerParameters();
+      DRCRobotArmControllerParameters armControllerParameters = new DRCRobotArmControllerParameters();
       
-      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(drcControlParameters, robotInterface, 
+      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(drcControlParameters, armControllerParameters, robotInterface, 
             robotInitialSetup, guiInitialSetup, scsInitialSetup, 
             useVelocityAndHeadingScript, automaticSimulationRunner, DRCConfigParameters.CONTROL_DT, 16000,
             cheatWithGroundHeightAtForFootstep);
