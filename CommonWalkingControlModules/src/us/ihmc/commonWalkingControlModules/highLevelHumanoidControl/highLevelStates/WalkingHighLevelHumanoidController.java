@@ -83,6 +83,8 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
+import com.yobotics.simulationconstructionset.VariableChangedListener;
+import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.util.GainCalculator;
 import com.yobotics.simulationconstructionset.util.PDController;
 import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter;
@@ -253,6 +255,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final VariousWalkingProviders variousWalkingProviders;
    private final VariousWalkingManagers variousWalkingManagers;
 
+   private final DoubleYoVariable walkingHeadOrientationKp = new DoubleYoVariable("walkingHeadOrientationKp", registry);
+   private final DoubleYoVariable walkingHeadOrientationZeta = new DoubleYoVariable("walkingHeadOrientationZeta", registry);
+   
+   
    public WalkingHighLevelHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          SideDependentList<FootSwitchInterface> footSwitches,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, 
@@ -582,10 +588,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
     //TODO: Extract gains out.
       HeadOrientationManager headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
-      double headKp = 40.0;
-      double headZeta = 1.0;
-      double headKd = GainCalculator.computeDerivativeGain(headKp, headZeta);
-      headOrientationManager.setUp(baseForHeadOrientationControl, jacobianForHeadOrientationControl, headKp, headKp, headKp, headKd, headKd, headKd);
+
+      headOrientationManager.setUp(baseForHeadOrientationControl, jacobianForHeadOrientationControl);
+      walkingHeadOrientationKp.set(40.0);
+      walkingHeadOrientationZeta.set(1.0);
+      VariableChangedListener headGainsChangedListener = createHeadGainsChangedListener();
+      headGainsChangedListener.variableChanged(null);
+      
+      
       
       FrameOrientation initialDesiredPelvisOrientation = new FrameOrientation(referenceFrames.getAnkleZUpFrame(getUpcomingSupportLeg()));
       initialDesiredPelvisOrientation.changeFrame(worldFrame);
@@ -599,6 +609,24 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       stateMachine.setCurrentState(WalkingState.DOUBLE_SUPPORT);
 
+   }
+   
+   private VariableChangedListener createHeadGainsChangedListener()
+   {
+      VariableChangedListener ret = new VariableChangedListener()
+      {
+         public void variableChanged(YoVariable v)
+         {
+            double headKp = walkingHeadOrientationKp.getDoubleValue();
+            double headZeta = walkingHeadOrientationZeta.getDoubleValue();
+            double headKd = GainCalculator.computeDerivativeGain(headKp, headZeta);
+            headOrientationManager.setControlGains(headKp, headKd); 
+         }};
+         
+         walkingHeadOrientationKp.addVariableChangedListener(ret);
+         walkingHeadOrientationZeta.addVariableChangedListener(ret);
+      
+      return ret;
    }
 
    private void initializeContacts()
