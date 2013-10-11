@@ -1,36 +1,26 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
-import bubo.io.serialization.DataDefinition;
-import bubo.io.serialization.SerializationDefinitionManager;
-import bubo.io.text.ReadCsvObjectSmart;
-import bubo.ptcloud.PointCloudShapeFinder;
-import cern.colt.Arrays;
-
 import com.jme3.app.SimpleApplication;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
-
 import georegression.struct.point.Point3D_F64;
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 import us.ihmc.utilities.kinematics.TransformInterpolationCalculator;
 import us.ihmc.utilities.lidar.polarLidar.geometry.PolarLidarScanParameters;
 
-import java.awt.Color;
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Point3d;
+import java.awt.*;
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Point3d;
 
 /**
  * @author Peter Abeles
