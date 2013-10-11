@@ -22,10 +22,13 @@ public class ICPProportionalController
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final FrameVector2d tempControl = new FrameVector2d(worldFrame);
    private final YoFrameVector2d icpError = new YoFrameVector2d("icpError", "", worldFrame, registry);
+   
    private final YoFrameVector2d feedbackPart = new YoFrameVector2d("feedbackPart", "", worldFrame, registry);
+   
    private final DoubleYoVariable alphaFeedBack = new DoubleYoVariable("alphaFeedBack", registry);
-   private final AlphaFilteredYoFrameVector2d filteredFeedback = AlphaFilteredYoFrameVector2d.createAlphaFilteredYoFrameVector2d("filteredFeedback", "",
-                                                                    registry, alphaFeedBack, feedbackPart);
+   private final YoFrameVector2d rawCMPOutput = new YoFrameVector2d("rawCMPOutput", "", worldFrame, registry);
+   private final AlphaFilteredYoFrameVector2d filteredCMPOutput = AlphaFilteredYoFrameVector2d.createAlphaFilteredYoFrameVector2d("filteredCMPOutput", "",
+                                                                    registry, alphaFeedBack, rawCMPOutput);
    private final double controlDT;
    private final DoubleYoVariable captureKpParallelToMotion = new DoubleYoVariable("captureKpParallel", registry);
    private final DoubleYoVariable captureKpOrthogonalToMotion = new DoubleYoVariable("captureKpOrthogonal", registry);
@@ -40,7 +43,7 @@ public class ICPProportionalController
 
    public void reset()
    {
-      filteredFeedback.reset();
+      filteredCMPOutput.reset();
    }
 
    public FramePoint2d doProportionalControl(FramePoint2d capturePoint, FramePoint2d desiredCapturePoint, FrameVector2d desiredCapturePointVelocity,
@@ -74,10 +77,12 @@ public class ICPProportionalController
       }
 
       feedbackPart.set(tempControl);
-      filteredFeedback.update();
-      filteredFeedback.getFrameVector2d(tempControl);
       desiredCMP.add(tempControl);
 
+      rawCMPOutput.set(desiredCMP);
+      filteredCMPOutput.update();
+      filteredCMPOutput.getFramePoint2d(desiredCMP);
+      
       return desiredCMP;
    }
 
