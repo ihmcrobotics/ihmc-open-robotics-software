@@ -7,6 +7,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ManipulationControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
@@ -68,6 +69,7 @@ public class ManipulationControlModule
                                     ManipulationControllerParameters parameters, final VariousWalkingProviders variousWalkingProviders,
                                     DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
                                     SideDependentList<HandControllerInterface> handControllers, MomentumBasedController momentumBasedController,
+                                    ArmControllerParameters armControlParameters,
                                     YoVariableRegistry parentRegistry)
    {
       this.variousWalkingProviders = variousWalkingProviders;
@@ -122,7 +124,7 @@ public class ManipulationControlModule
       createFrameVisualizers(dynamicGraphicObjectsListRegistry, fingersBentBackFrames, "fingersBentBackFrames", true);
 
       setUpStateMachine(yoTime, fullRobotModel, twistCalculator, parameters, variousWalkingProviders, dynamicGraphicObjectsListRegistry, handControllers,
-                        momentumBasedController, midHandPositionControlFrames, jacobians);
+                        momentumBasedController, midHandPositionControlFrames, jacobians, armControlParameters);
 
       parentRegistry.addChild(registry);
    }
@@ -157,7 +159,8 @@ public class ManipulationControlModule
                                   ManipulationControllerParameters parameters, final VariousWalkingProviders variousWalkingProviders,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
                                   SideDependentList<HandControllerInterface> handControllers, MomentumBasedController momentumBasedController,
-                                  SideDependentList<ReferenceFrame> handPositionControlFrames, SideDependentList<GeometricJacobian> jacobians)
+                                  SideDependentList<ReferenceFrame> handPositionControlFrames, SideDependentList<GeometricJacobian> jacobians, 
+                                  ArmControllerParameters armControlParameters)
    {
       DesiredHandPoseProvider handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
       DesiredHandLoadBearingProvider handLoadBearingProvider = variousWalkingProviders.getDesiredHandLoadBearingProvider();
@@ -168,7 +171,7 @@ public class ManipulationControlModule
 
 
       individualHandControlModules = createIndividualHandControlModules(yoTime, fullRobotModel, twistCalculator, dynamicGraphicObjectsListRegistry,
-              handControllers, momentumBasedController, jacobians);
+              handControllers, momentumBasedController, jacobians, armControlParameters);
 
       final HighLevelFingerValveManipulationState fingerToroidManipulationState = new HighLevelFingerValveManipulationState(jacobians, momentumBasedController,
                                                                                      fullRobotModel.getElevator(), torusPoseProvider,
@@ -192,7 +195,7 @@ public class ManipulationControlModule
    private SideDependentList<IndividualHandControlModule> createIndividualHandControlModules(DoubleYoVariable yoTime, FullRobotModel fullRobotModel,
            TwistCalculator twistCalculator, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
            SideDependentList<HandControllerInterface> handControllers, MomentumBasedController momentumBasedController,
-           SideDependentList<GeometricJacobian> jacobians)
+           SideDependentList<GeometricJacobian> jacobians, ArmControllerParameters armControlParameters)
    {
       SideDependentList<IndividualHandControlModule> individualHandControlModules = new SideDependentList<IndividualHandControlModule>();
 
@@ -211,7 +214,7 @@ public class ManipulationControlModule
 
          IndividualHandControlModule individualHandControlModule = new IndividualHandControlModule(yoTime, robotSide, fullRobotModel, twistCalculator,
                                                                       dynamicGraphicObjectsListRegistry, handControllerInterface, gravityZ, controlDT,
-                                                                      momentumBasedController, jacobian, registry);
+                                                                      momentumBasedController, jacobian, armControlParameters, registry);
          individualHandControlModules.put(robotSide, individualHandControlModule);
       }
 

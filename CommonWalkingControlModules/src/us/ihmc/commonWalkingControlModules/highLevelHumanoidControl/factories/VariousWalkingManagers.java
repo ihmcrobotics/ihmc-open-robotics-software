@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
+import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.HeadOrientationControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationControlModule;
@@ -41,6 +42,7 @@ public class VariousWalkingManagers
 
    public static VariousWalkingManagers create(MomentumBasedController momentumBasedController, SideDependentList<HandControllerInterface> handControllers,
            DoubleYoVariable yoTime, VariousWalkingProviders variousWalkingProviders, WalkingControllerParameters walkingControllerParameters,
+           ArmControllerParameters armControlParameters,
            YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
@@ -63,7 +65,8 @@ public class VariousWalkingManagers
       // Setup arm+hand manipulation state machines
       ManipulationControlModule manipulationControlModule = new ManipulationControlModule(yoTime, fullRobotModel, twistCalculator, walkingControllerParameters,
                                                                variousWalkingProviders, dynamicGraphicObjectsListRegistry, handControllers,
-                                                               momentumBasedController, registry);
+                                                               momentumBasedController, armControlParameters,
+                                                               registry);
 
       PelvisDesiredsHandler pelvisDesiredsHandler = new PelvisDesiredsHandler(controlDT, yoTime, registry);
 

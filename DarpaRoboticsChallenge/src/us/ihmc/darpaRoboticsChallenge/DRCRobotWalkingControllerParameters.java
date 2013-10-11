@@ -299,12 +299,32 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
       return Double.POSITIVE_INFINITY; //16.0;
    }
 
+   public double getKpCoMHeight()
+   {
+      return 40.0;
+   }
+
+   public double getZetaCoMHeight()
+   {
+      return 1.0;
+   }
+   
    public double getKpPelvisOrientation()
    {
       return 100.0;
    }
 
    public double getZetaPelvisOrientation()
+   {
+      return 1.0;
+   }
+
+   public double getKpHeadOrientation()
+   {
+      return 40.0;
+   }
+
+   public double getZetaHeadOrientation()
    {
       return 1.0;
    }

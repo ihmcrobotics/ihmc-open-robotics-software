@@ -269,12 +269,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
            YoPositionProvider finalPositionProvider,
            TrajectoryParametersProvider trajectoryParametersProvider, boolean stayOntoes, double desiredPelvisPitch, double trailingFootPitch,
            WalkingControllerParameters walkingControllerParameters, ICPBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
-           RootJointAngularAccelerationControlModule rootJointAngularAccelerationControlModule, LidarControllerInterface lidarControllerInterface,
+           LidarControllerInterface lidarControllerInterface,
            InstantaneousCapturePointPlanner instantaneousCapturePointPlanner, 
            ICPAndMomentumBasedController icpAndMomentumBasedController, MomentumBasedController momentumBasedController, WalkingStatusReporter walkingStatusReporter)
    {
       
-      super(variousWalkingProviders, variousWalkingManagers,rootJointAngularAccelerationControlModule, momentumBasedController, walkingControllerParameters, 
+      super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters, 
             lidarControllerInterface, dynamicGraphicObjectsListRegistry, controllerState);
      
       super.addUpdatables(icpAndMomentumBasedController.getUpdatables());
@@ -351,11 +351,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       this.upcomingFootstepList = new UpcomingFootstepList(footstepProvider, registry);
 
-    //TODO: Extract gains out.
       this.centerOfMassHeightController = new PDController("comHeight", registry);
-      centerOfMassHeightController.setProportionalGain(40.0);
-      double zeta = 1.0;
-      centerOfMassHeightController.setDerivativeGain(GainCalculator.computeDerivativeGain(centerOfMassHeightController.getProportionalGain(), zeta));
+      double kpCoMHeight = walkingControllerParameters.getKpCoMHeight();
+      centerOfMassHeightController.setProportionalGain(kpCoMHeight); 
+      double zetaCoMHeight =  walkingControllerParameters.getZetaCoMHeight(); 
+      centerOfMassHeightController.setDerivativeGain(GainCalculator.computeDerivativeGain(centerOfMassHeightController.getProportionalGain(), zetaCoMHeight));
 
       String namePrefix = "walking";
 
@@ -586,16 +586,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       ChestOrientationManager chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
       chestOrientationManager.turnOff();
 
-    //TODO: Extract gains out.
       HeadOrientationManager headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
 
       headOrientationManager.setUp(baseForHeadOrientationControl, jacobianForHeadOrientationControl);
-      walkingHeadOrientationKp.set(40.0);
-      walkingHeadOrientationZeta.set(1.0);
+      walkingHeadOrientationKp.set(walkingControllerParameters.getKpHeadOrientation()); 
+      walkingHeadOrientationZeta.set(walkingControllerParameters.getZetaHeadOrientation());
       VariableChangedListener headGainsChangedListener = createHeadGainsChangedListener();
       headGainsChangedListener.variableChanged(null);
-      
-      
       
       FrameOrientation initialDesiredPelvisOrientation = new FrameOrientation(referenceFrames.getAnkleZUpFrame(getUpcomingSupportLeg()));
       initialDesiredPelvisOrientation.changeFrame(worldFrame);

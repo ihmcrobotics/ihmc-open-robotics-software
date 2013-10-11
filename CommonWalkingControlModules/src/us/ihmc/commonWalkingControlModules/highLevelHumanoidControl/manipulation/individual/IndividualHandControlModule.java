@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.media.j3d.Transform3D;
 
+import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.SE3PDGains;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
@@ -98,7 +99,9 @@ public class IndividualHandControlModule
    public IndividualHandControlModule(final DoubleYoVariable simulationTime, final RobotSide robotSide, FullRobotModel fullRobotModel,
                                       final TwistCalculator twistCalculator, final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
                                       HandControllerInterface handController, double gravity, final double controlDT,
-                                      MomentumBasedController momentumBasedController, GeometricJacobian jacobian, final YoVariableRegistry parentRegistry)
+                                      MomentumBasedController momentumBasedController, GeometricJacobian jacobian, 
+                                      ArmControllerParameters armControlParameters,
+                                      final YoVariableRegistry parentRegistry)
    {
       RigidBody endEffector = jacobian.getEndEffector();
 
@@ -158,7 +161,8 @@ public class IndividualHandControlModule
       loadBearingPlaneFingersBentBackState = new LoadBearingPlaneHandControlState(IndividualHandControlState.LOAD_BEARING_PLANE_FINGERS_BENT_BACK, robotSide,
               momentumBasedController, fullRobotModel.getElevator(), jacobian, handController, registry);
 
-      jointSpaceHandControlState = new JointSpaceHandControlControlState(IndividualHandControlState.JOINT_SPACE, robotSide, jacobian, momentumBasedController,
+      jointSpaceHandControlState = new JointSpaceHandControlControlState(IndividualHandControlState.JOINT_SPACE, 
+            robotSide, jacobian, momentumBasedController,  armControlParameters, 
               registry, 1.0);
 
       objectManipulationState = new ObjectManipulationState(IndividualHandControlState.OBJECT_MANIPULATION, robotSide, momentumBasedController, jacobian,

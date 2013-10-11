@@ -23,21 +23,24 @@ public class DRCSimulatedSensorNoiseParameters
    {
       SensorNoiseParameters sensorNoiseParameters = new SensorNoiseParameters();
 
+      sensorNoiseParameters.setJointPositionMeasurementStandardDeviation(0.0); //0.01 is very high, 0.001 medium, 0.0001 low
+      sensorNoiseParameters.setJointVelocityMeasurementStandardDeviation(0.0); // 0.2 is very high, 0.02 medium, 0.002 low
+      
       sensorNoiseParameters.setComAccelerationProcessNoiseStandardDeviation(0.0); // Not used.
       sensorNoiseParameters.setAngularAccelerationProcessNoiseStandardDeviation(0.0); // Not used.
       
-      sensorNoiseParameters.setOrientationMeasurementStandardDeviation(0.01);
-      sensorNoiseParameters.setAngularVelocityMeasurementStandardDeviation(0.01);
-      sensorNoiseParameters.setLinearAccelerationMeasurementStandardDeviation(0.2);
+      sensorNoiseParameters.setOrientationMeasurementStandardDeviation(0.0); //0.01);
+      sensorNoiseParameters.setAngularVelocityMeasurementStandardDeviation(0.0); //(0.01);
+      sensorNoiseParameters.setLinearAccelerationMeasurementStandardDeviation(0.0); //(0.2);
 
-      sensorNoiseParameters.setAngularVelocityBiasProcessNoiseStandardDeviation(0.001);
-      sensorNoiseParameters.setLinearAccelerationBiasProcessNoiseStandardDeviation(0.001);
+      sensorNoiseParameters.setAngularVelocityBiasProcessNoiseStandardDeviation(0.0); //(0.001);
+      sensorNoiseParameters.setLinearAccelerationBiasProcessNoiseStandardDeviation(0.0); //(0.001);
       
-      Vector3d initialLinearAccelerationBias = new Vector3d(0.01, 0.02, 0.033);
-      Vector3d initialAngularVelocityBias = new Vector3d(0.005, -0.007, 0.02);
-
-      sensorNoiseParameters.setInitialLinearVelocityBias(initialLinearAccelerationBias);
-      sensorNoiseParameters.setInitialAngularVelocityBias(initialAngularVelocityBias);
+//      Vector3d initialLinearAccelerationBias = new Vector3d(0.01, 0.02, 0.033);
+//      Vector3d initialAngularVelocityBias = new Vector3d(0.005, -0.007, 0.02);
+//
+//      sensorNoiseParameters.setInitialLinearVelocityBias(initialLinearAccelerationBias);
+//      sensorNoiseParameters.setInitialAngularVelocityBias(initialAngularVelocityBias);
 
       return sensorNoiseParameters;
    }

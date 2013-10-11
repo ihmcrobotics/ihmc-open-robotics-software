@@ -11,12 +11,8 @@ import javax.vecmath.Point2d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
-
-import com.yobotics.simulationconstructionset.util.GainCalculator;
-
+import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.packetConsumers.*;
-import us.ihmc.commonWalkingControlModules.packets.DesiredHighLevelStateProvider;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
@@ -29,9 +25,25 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CoMBasedMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OldMomentumControlModule;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAngularAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredArmJointAngleProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredChestOrientationProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandLoadBearingProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHeadOrientationProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBearingProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.FingerStateProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.ReinitializeWalkingControllerProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.TorusManipulationProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.TorusPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.VehiclePoseProvider;
+import us.ihmc.commonWalkingControlModules.packets.DesiredHighLevelStateProvider;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FingerForceSensors;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
@@ -39,7 +51,6 @@ import us.ihmc.commonWalkingControlModules.visualizer.ForceSensorDataVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointGroundReactionWrenchDistributor;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromController;
 import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -56,6 +67,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
+import com.yobotics.simulationconstructionset.util.GainCalculator;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
@@ -70,10 +82,11 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
    private final RobotSide[] footContactSides;
    private final RobotSide[] handContactSides;
    private final WalkingControllerParameters walkingControllerParameters;
+   private final ArmControllerParameters armControllerParameters;
 
    public MultiContactTestHumanoidControllerFactory(SideDependentList<String> namesOfJointsBeforeHands,
            SideDependentList<Transform3D> handContactPointTransforms, SideDependentList<List<Point2d>> handContactPoints, RobotSide[] footContactSides,
-           RobotSide[] handContactSides, WalkingControllerParameters walkingControllerParameters)
+           RobotSide[] handContactSides, WalkingControllerParameters walkingControllerParameters, ArmControllerParameters armControllerParameters)
    {
       this.namesOfJointsBeforeHands = namesOfJointsBeforeHands;
       this.handContactPointTransforms = handContactPointTransforms;
@@ -81,6 +94,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       this.footContactSides = footContactSides;
       this.handContactSides = handContactSides;
       this.walkingControllerParameters = walkingControllerParameters;
+      this.armControllerParameters = armControllerParameters;
    }
 
    public RobotController create(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
@@ -159,12 +173,6 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
                                                            processedOutputs, optimizationMomentumControlModule , oldMomentumControlModule, null, stateEstimationDataFromControllerSink,
                                                            dynamicGraphicObjectsListRegistry);
 
-      RootJointAngularAccelerationControlModule rootJointAccelerationControlModule = new RootJointAngularAccelerationControlModule(momentumBasedController,
-                                                                                        registry);
-      rootJointAccelerationControlModule.setProportionalGains(100.0, 100.0, 100.0);
-      rootJointAccelerationControlModule.setDerivativeGains(20.0, 20.0, 20.0);
-
-
       DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters);
       TorusPoseProvider torusPoseProvider = new TorusPoseProvider();
       TorusManipulationProvider torusManipulationProvider = new TorusManipulationProvider();
@@ -195,10 +203,10 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
             pelvisLoadBearingProvider, fingerStateProvider, armJointAngleProvider, reinitializeWalkingController, drivingCommandProvider);
 
       VariousWalkingManagers variousWalkingManagers = VariousWalkingManagers.create(momentumBasedController, handControllers, yoTime, variousWalkingProviders,
-            walkingControllerParameters, registry, dynamicGraphicObjectsListRegistry);
+            walkingControllerParameters, armControllerParameters, registry, dynamicGraphicObjectsListRegistry);
       
       MultiContactTestHumanoidController multiContactBehavior = new MultiContactTestHumanoidController(variousWalkingProviders, variousWalkingManagers,
-                                                                   momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
+                                                                   momentumRateOfChangeControlModule,
                                                                    momentumBasedController, walkingControllerParameters, null,
                                                                    dynamicGraphicObjectsListRegistry);
 

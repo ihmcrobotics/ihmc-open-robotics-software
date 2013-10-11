@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
+import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
@@ -54,9 +55,11 @@ public class DRCDemo03
       ObjectCommunicator drcNetworkProcessorServer = new LocalObjectCommunicator();
 
       WalkingControllerParameters drivingControllerParameters = new DRCRobotDrivingControllerParameters();
+      ArmControllerParameters armControllerParameters = new DRCRobotArmControllerParameters();
       DRCRobotJointMap jointMap = robotInterface.getJointMap();
       HighLevelState initialBehavior = HighLevelState.DRIVING;
-      ControllerFactory controllerFactory = DRCObstacleCourseSimulation.createDRCMultiControllerFactory(drcNetworkProcessorServer, drivingControllerParameters, false,
+      ControllerFactory controllerFactory = DRCObstacleCourseSimulation.createDRCMultiControllerFactory(drcNetworkProcessorServer, drivingControllerParameters, 
+            armControllerParameters, false,
 
             initialBehavior);
 

@@ -137,6 +137,7 @@ public class DRCFlatGroundRewindabilityTest
       GroundProfile groundProfile = new FlatGroundProfile();
 
       DRCRobotWalkingControllerParameters drcControlParameters = new DRCRobotWalkingControllerParameters();
+      DRCRobotArmControllerParameters armControllerParameters = new DRCRobotArmControllerParameters();
 
       AutomaticSimulationRunner automaticSimulationRunner = null;
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
@@ -149,7 +150,7 @@ public class DRCFlatGroundRewindabilityTest
       DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel, false);
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotInterface.getSimulateDT());
 
-      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(drcControlParameters, robotInterface, robotInitialSetup,
+      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(drcControlParameters, armControllerParameters, robotInterface, robotInitialSetup,
                                                                guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript, automaticSimulationRunner,
                                                                timePerRecordTick, simulationDataBufferSize,
             cheatWithGroundHeightAtForFootstep);
