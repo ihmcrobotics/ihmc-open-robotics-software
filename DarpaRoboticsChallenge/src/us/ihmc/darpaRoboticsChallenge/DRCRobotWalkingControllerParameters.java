@@ -283,4 +283,29 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    {
       return 0.0;
    }
+
+   public double getCaptureKpParallelToMotion()
+   {
+      return 1.5;
+   }
+
+   public double getCaptureKpOrthogonalToMotion()
+   {
+      return 1.5;
+   }
+   
+   public double getCaptureFilterBreakFrequencyInHz()
+   {
+      return Double.POSITIVE_INFINITY; //16.0;
+   }
+
+   public double getKpPelvisOrientation()
+   {
+      return 100.0;
+   }
+
+   public double getZetaPelvisOrientation()
+   {
+      return 1.0;
+   }
 }

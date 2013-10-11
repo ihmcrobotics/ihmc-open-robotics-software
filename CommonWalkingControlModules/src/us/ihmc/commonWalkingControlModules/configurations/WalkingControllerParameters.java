@@ -49,4 +49,12 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getMaxStepWidth();
 
    public abstract double getStepPitch();
+
+   public abstract double getCaptureKpParallelToMotion();
+   public abstract double getCaptureKpOrthogonalToMotion();
+   public abstract double getCaptureFilterBreakFrequencyInHz();
+
+   public abstract double getKpPelvisOrientation();
+   public abstract double getZetaPelvisOrientation();
+
 }
