@@ -16,6 +16,7 @@ import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.YoVariablesUpdatedListener;
 import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake;
 import us.ihmc.robotDataCommunication.jointState.JointState;
+import us.ihmc.utilities.math.TimeTools;
 
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.Robot;
@@ -87,7 +88,7 @@ public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener
          {
             jointUpdaters.get(i).update();
          }
-
+         scs.setTime(TimeTools.nanoSecondstoSeconds(timestamp));
          scs.tickAndUpdate();
       }
    }
