@@ -59,8 +59,13 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
 //      double groundKxy = 27500.0;
 //      double groundBxy = 1100.0;
 
-      double groundKz = 500;
-      double groundBz = 300.0;
+//      double groundKz = 500.0;
+//      double groundBz = 300.0;
+//      double groundKxy = 50000.0;
+//      double groundBxy = 2000.0;
+      
+      double groundKz = 2000.0;
+      double groundBz = 1500.0;
       double groundKxy = 50000.0;
       double groundBxy = 2000.0;
 
