@@ -3,7 +3,6 @@ package us.ihmc.darpaRoboticsChallenge.controllers;
 import java.util.HashMap;
 import java.util.Map;
 
-import us.ihmc.atlas.AtlasJointIdMap;
 import us.ihmc.atlas.AtlasJointPDGains;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;

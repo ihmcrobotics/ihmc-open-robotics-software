@@ -30,12 +30,6 @@ public class DRCConfigParameters
 
    public static final boolean USE_SUPER_DUPER_HIGH_RESOLUTION_FOR_COMMS = false;
 
-   public static final boolean USE_GAZEBO_PHYSICS = false;    // TODO: This one is
-
-// needed just for
-   // FlatGroundWalkingTrack
-   // in Gazebo...
-
    public static final boolean USE_HYDRA = false;
    public static final boolean USE_FISHEYE = false;
 

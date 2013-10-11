@@ -44,15 +44,13 @@ public class DRCSimulationTestHelper
       this.createMovie = createMovie;
       
       boolean startOutsidePen = false;
-      boolean useGazebo = false;
       boolean automaticallyStartSimulation = false;
       boolean startDRCNetworkProcessor = false;
 
       boolean initializeEstimatorToActual = true;
       
       drcSimulation = DRCDemo01.startDRCSim(networkObjectCommunicator, selectedLocation, selectedEnvironment, initializeEstimatorToActual,
-            startOutsidePen,
-              useGazebo, automaticallyStartSimulation, startDRCNetworkProcessor);
+            startOutsidePen, automaticallyStartSimulation, startDRCNetworkProcessor);
 
       blockingSimulationRunner = new BlockingSimulationRunner(drcSimulation.getSimulationConstructionSet(), 60.0 * 10.0);
 

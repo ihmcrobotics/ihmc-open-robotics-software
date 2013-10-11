@@ -7,12 +7,10 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.GazeboStateCommunicator.GazeboRobot;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
-import us.ihmc.commonWalkingControlModules.controllers.NullLidarController;
 import us.ihmc.commonWalkingControlModules.controllers.PIDLidarTorqueController;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.controllers.EstimationLinkHolder;
@@ -28,7 +26,6 @@ import us.ihmc.darpaRoboticsChallenge.outputs.DRCSimulationOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSSandiaJointMap;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCPerfectSensorReaderFactory;
-import us.ihmc.darpaRoboticsChallenge.sensors.GazeboForceSensor;
 import us.ihmc.projectM.R2Sim02.initialSetup.GuiInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.ScsInitialSetup;
@@ -94,18 +91,11 @@ public class DRCSimulationFactory
       LidarControllerInterface lidarControllerInterface;
 
       SensorNoiseParameters sensorNoiseParameters;
-      if (simulatedRobot instanceof GazeboRobot)
-      {
-         lidarControllerInterface = new NullLidarController();
-         sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersZeroNoise();
-      }
-      else
-      {
-         lidarControllerInterface = new PIDLidarTorqueController(DRCConfigParameters.LIDAR_SPINDLE_VELOCITY, controlDT);
-         sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersZeroNoise();
+
+      lidarControllerInterface = new PIDLidarTorqueController(DRCConfigParameters.LIDAR_SPINDLE_VELOCITY, controlDT);
+      sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersZeroNoise();
 //         sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersALittleNoise();
 //         sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersGazeboSDF();
-      }
 
       //    SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMapForEstimator;
       //    scsToInverseDynamicsJointMapForEstimator = robotInterface.getSCSToInverseDynamicsJointMap();
@@ -137,24 +127,13 @@ public class DRCSimulationFactory
 
       ArrayList<WrenchCalculatorInterface> wrenchProviders = new ArrayList<WrenchCalculatorInterface>();
 
-      if (simulatedRobot instanceof GazeboRobot)
+      for (OneDegreeOfFreedomJoint sensorJoint : forceTorqueSensorJoints)
       {
-         for (OneDegreeOfFreedomJoint sensorJoint : forceTorqueSensorJoints)
-         {
-            GazeboForceSensor gazeboForceSensor = new GazeboForceSensor((GazeboRobot) simulatedRobot, sensorJoint, registry);
-            wrenchProviders.add(gazeboForceSensor);
-         }
-      }
-      else
-      {
-         for (OneDegreeOfFreedomJoint sensorJoint : forceTorqueSensorJoints)
-         {
-            ArrayList<GroundContactPoint> groundContactPoints = new ArrayList<GroundContactPoint>();
-            sensorJoint.recursiveGetAllGroundContactPoints(groundContactPoints);
-            GroundContactPointBasedWrenchCalculator groundContactPointBasedWrenchCalculator = new GroundContactPointBasedWrenchCalculator(groundContactPoints,
-                  sensorJoint);
-            wrenchProviders.add(groundContactPointBasedWrenchCalculator);
-         }
+         ArrayList<GroundContactPoint> groundContactPoints = new ArrayList<GroundContactPoint>();
+         sensorJoint.recursiveGetAllGroundContactPoints(groundContactPoints);
+         GroundContactPointBasedWrenchCalculator groundContactPointBasedWrenchCalculator = new GroundContactPointBasedWrenchCalculator(groundContactPoints,
+               sensorJoint);
+         wrenchProviders.add(groundContactPointBasedWrenchCalculator);
       }
 
       SensorReaderFactory sensorReaderFactory; // this is the connection between the ModularRobotController and the DRCController below
@@ -213,11 +192,6 @@ public class DRCSimulationFactory
          StateEstimatorErrorCalculatorController stateEstimatorErrorCalculatorController = new StateEstimatorErrorCalculatorController(stateEstimator,
                simulatedRobot, estimationJoint, DRCConfigParameters.ASSUME_PERFECT_IMU);
          simulatedRobot.setController(stateEstimatorErrorCalculatorController, estimationTicksPerControlTick);
-      }
-
-      if (simulatedRobot instanceof GazeboRobot)
-      {
-         ((GazeboRobot) simulatedRobot).registerWithSCS(humanoidRobotSimulation.getSimulationConstructionSet());
       }
 
       return new Pair<HumanoidRobotSimulation<SDFRobot>, DRCController>(humanoidRobotSimulation, robotController);

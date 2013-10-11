@@ -1,9 +1,6 @@
 package us.ihmc.SdfLoader;
 
 import java.util.ArrayList;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Quat4d;
@@ -29,14 +26,9 @@ public class SDFFullRobotModelVisualizer implements RobotVisualizer
    
    private SixDoFJoint rootJoint;
    private final ArrayList<Pair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<Pair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
-
-   private final SCSUpdateRunner scsUpdateRunner;
-   private final Executor scsUpdaterExecutor = Executors.newSingleThreadExecutor();
-   private final AtomicBoolean updaterIsRunning = new AtomicBoolean(false); 
-   
+  
    public SDFFullRobotModelVisualizer(SDFRobot robot, int estimatorTicksPerSCSTickAndUpdate, double estimatorDT)
    {
-	  scsUpdateRunner = new SCSUpdateRunner(estimatorTicksPerSCSTickAndUpdate);
 	   
       this.name = robot.getName() + "SimulatedSensorReader";
       
@@ -92,55 +84,27 @@ public class SDFFullRobotModelVisualizer implements RobotVisualizer
    private final Quat4d tempOrientation = new Quat4d();
    public void update(long timestamp)
    {
-      if(!updaterIsRunning.get())
+      if(rootJoint != null)
       {
-         updaterIsRunning.set(true);
-         if(rootJoint != null)
-         {
-            Transform3D rootTransform = rootJoint.getJointTransform3D();
-            rootTransform.get(tempOrientation, tempPosition);
-            robot.setOrientation(tempOrientation);
-            robot.setPositionInWorld(tempPosition);
-         }
-         
-         for (Pair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair : revoluteJoints)
-         {
-            OneDegreeOfFreedomJoint pinJoint = jointPair.first();
-            OneDoFJoint revoluteJoint = jointPair.second();
-   
-            pinJoint.setQ(revoluteJoint.getQ());
-            pinJoint.setQd(revoluteJoint.getQd());
-            pinJoint.setTau(revoluteJoint.getTau());
-         }
-         robot.setTime(robot.getTime() + estimatorDT);
-         scsUpdaterExecutor.execute(scsUpdateRunner);
+         Transform3D rootTransform = rootJoint.getJointTransform3D();
+         rootTransform.get(tempOrientation, tempPosition);
+         robot.setOrientation(tempOrientation);
+         robot.setPositionInWorld(tempPosition);
       }
-   }
-
-   private class SCSUpdateRunner implements Runnable
-   {
-	   private final int ticksPerRecord;
-	   private int counts = 0;
-	   
-	   public SCSUpdateRunner(int ticksPerRecord)
-	   {
-		   this.ticksPerRecord = ticksPerRecord;
-	   }
-	   
-	   public void run()
+      
+      for (Pair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair : revoluteJoints)
       {
-         counts++;
-         if (counts >= ticksPerRecord)
-         {
-            if (scs != null)
-            {
-               scs.tickAndUpdate();
-            }
+         OneDegreeOfFreedomJoint pinJoint = jointPair.first();
+         OneDoFJoint revoluteJoint = jointPair.second();
 
-            counts = 0;
-         }
-
-         updaterIsRunning.set(false);
+         pinJoint.setQ(revoluteJoint.getQ());
+         pinJoint.setQd(revoluteJoint.getQd());
+         pinJoint.setTau(revoluteJoint.getTau());
+      }
+      robot.setTime(robot.getTime() + estimatorDT);
+      if (scs != null)
+      {
+         scs.tickAndUpdate();
       }
    }
 
