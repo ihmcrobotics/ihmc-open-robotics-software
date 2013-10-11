@@ -132,23 +132,31 @@ public class DRCConfigParameters
    // LIDAR:
    public static final boolean USE_ROS_FOR_MULTISENSE_TRANSFORMS = false;
    public static final boolean USING_REAL_HEAD = false;
-   public static final double LIDAR_SPINDLE_VELOCITY = 2.5;
+   public static final double LIDAR_SPINDLE_VELOCITY = 5.0;
 
    public static final boolean STREAM_POLAR_LIDAR = true;
    public static final int LIDAR_UPDATE_RATE_OVERRIDE = 5;
    public static final int LIDAR_SWEEPS_PER_SCAN = 1;
 
    public static final int LIDAR_POINTS_PER_SWEEP;
+   public static final float LIDAR_SWEEP_MAX_YAW;
+   public static final float LIDAR_SWEEP_MIN_YAW;
+
 
    static
    {
       if (DRCConfigParameters.USING_REAL_HEAD)
       {
          LIDAR_POINTS_PER_SWEEP = 1081;
+         LIDAR_SWEEP_MIN_YAW = -2.356194f;
+         LIDAR_SWEEP_MAX_YAW = 2.356194f;
+
       }
       else
       {
          LIDAR_POINTS_PER_SWEEP = 720;
+         LIDAR_SWEEP_MIN_YAW = -1.570796f;
+         LIDAR_SWEEP_MAX_YAW = 1.570796f;
       }
    }
 
@@ -157,8 +165,6 @@ public class DRCConfigParameters
    public static final float LIDAR_MAX_DISTANCE = 20.0f;
    public static final float LIDAR_NEAR_SCAN_MAX_DISTANCE = 3.0f;
 
-   public static final float LIDAR_SWEEP_MAX_YAW = 2.356194f;
-   public static final float LIDAR_SWEEP_MIN_YAW = -2.356194f;
    public static final float LIDAR_SCAN_MAX_ROLL = 0.0f;    // rolls the LIDAR to
 
    // simulate a faster
