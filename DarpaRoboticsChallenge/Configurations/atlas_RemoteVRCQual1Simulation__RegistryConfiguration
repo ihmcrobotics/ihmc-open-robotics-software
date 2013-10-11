@@ -1,0 +1,8 @@
+root*false*false
+root.atlas*false*false
+root.atlas.SimulatedDRCRobotTimeProvider*false*false
+root.atlas.DRCSimulationVisualizer*false*false
+root.atlas.RemoteRobotController*false*false
+root.atlas.RemoteRobotController.RobotCommandMessageHandler*false*false
+root.atlas.LinearGroundContactModel*false*false
+root.atlas.DRCSimulatedSpindleCommunicator*false*false

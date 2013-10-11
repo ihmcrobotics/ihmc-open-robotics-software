@@ -47,7 +47,7 @@ public class DRCFlatGroundWalkingTrack
          dynamicGraphicObjectsListRegistry = null;
       YoVariableRegistry registry = new YoVariableRegistry("adjustableParabolicTrajectoryDemoSimRegistry");
 
-      boolean useFastTouchdowns = DRCConfigParameters.USE_GAZEBO_PHYSICS;
+      boolean useFastTouchdowns = false;
 
       FlatGroundWalkingHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory =
          new FlatGroundWalkingHighLevelHumanoidControllerFactory(drcControlParameters, armControllerParameters, useVelocityAndHeadingScript, useFastTouchdowns);
@@ -64,7 +64,7 @@ public class DRCFlatGroundWalkingTrack
          robotVisualizer = new YoVariableServer(robotInterface.getRobot().getRobotsYoVariableRegistry(), RemoteAtlasVisualizer.defaultPort, DRCConfigParameters.ESTIMATE_DT, dynamicGraphicObjectsListRegistry);
       }
       
-      ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.USE_GAZEBO_PHYSICS);
+      ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, false);
       Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, null, robotInterface, robotInitialSetup, scsInitialSetup, guiInitialSetup, null, robotVisualizer, dynamicGraphicObjectsListRegistry);
       drcSimulation = humanoidSimulation.first();
 
