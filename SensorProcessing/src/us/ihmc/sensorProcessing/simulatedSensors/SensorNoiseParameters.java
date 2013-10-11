@@ -4,6 +4,9 @@ import javax.vecmath.Vector3d;
 
 public class SensorNoiseParameters
 {
+   private double jointPositionMeasurementStandardDeviation = 0.0;
+   private double jointVelocityMeasurementStandardDeviation = 0.0;
+   
    private double comAccelerationProcessNoiseStandardDeviation = 0.0;
    private double angularAccelerationProcessNoiseStandardDeviation = 0.0;
 
@@ -17,6 +20,26 @@ public class SensorNoiseParameters
    private final Vector3d initialLinearVelocityBias = new Vector3d();
    private final Vector3d initialAngularVelocityBias = new Vector3d();
 
+   public double getJointPositionMeasurementStandardDeviation()
+   {
+      return this.jointPositionMeasurementStandardDeviation;
+   }
+
+   public double getJointVelocityMeasurementStandardDeviation()
+   {
+      return this.jointVelocityMeasurementStandardDeviation;
+   }
+   
+   public void setJointPositionMeasurementStandardDeviation(double jointPositionMeasurementStandardDeviation)
+   {
+      this.jointPositionMeasurementStandardDeviation = jointPositionMeasurementStandardDeviation;
+   }
+
+   public void setJointVelocityMeasurementStandardDeviation(double jointVelocityMeasurementStandardDeviation)
+   {
+      this.jointVelocityMeasurementStandardDeviation = jointVelocityMeasurementStandardDeviation;
+   }
+   
    public double getComAccelerationProcessNoiseStandardDeviation()
    {
       return comAccelerationProcessNoiseStandardDeviation;
@@ -36,7 +59,6 @@ public class SensorNoiseParameters
    {
       this.angularAccelerationProcessNoiseStandardDeviation = angularAccelerationProcessNoiseStandardDeviation;
    }
-
    
    public double getOrientationMeasurementStandardDeviation()
    {
@@ -107,5 +129,7 @@ public class SensorNoiseParameters
    {
       this.initialAngularVelocityBias.set(initialAngularVelocityBias);
    }
+
+
 
 }
