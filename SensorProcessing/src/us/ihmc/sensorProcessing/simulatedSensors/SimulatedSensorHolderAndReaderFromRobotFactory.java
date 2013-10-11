@@ -7,6 +7,7 @@ import java.util.Set;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.sensorProcessing.signalCorruption.GaussianDoubleCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianOrientationCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianVectorCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.RandomWalkBiasVectorCorruptor;
@@ -105,14 +106,31 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
       ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
       robot.getAllOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);
 
+      long seed = 18735L;
+      
       for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
       {
          OneDoFJoint oneDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint(oneDegreeOfFreedomJoint);
 
          SimulatedOneDoFJointPositionSensor positionSensor = new SimulatedOneDoFJointPositionSensor(oneDegreeOfFreedomJoint.getName(), oneDegreeOfFreedomJoint);
-         simulatedSensorHolderAndReader.addJointPositionSensorPort(oneDoFJoint, positionSensor);
-
          SimulatedOneDoFJointVelocitySensor velocitySensor = new SimulatedOneDoFJointVelocitySensor(oneDegreeOfFreedomJoint.getName(), oneDegreeOfFreedomJoint);
+
+         if (sensorNoiseParameters != null)
+         {
+            GaussianDoubleCorruptor jointPositionCorruptor = new GaussianDoubleCorruptor(seed, "posNoise" + oneDegreeOfFreedomJoint.getName(), registry);
+            double positionMeasurementStandardDeviation = sensorNoiseParameters.getJointPositionMeasurementStandardDeviation();
+            jointPositionCorruptor.setStandardDeviation(positionMeasurementStandardDeviation);
+            positionSensor.addSignalCorruptor(jointPositionCorruptor);
+            seed = seed + 10;
+            
+            GaussianDoubleCorruptor jointVelocityCorruptor = new GaussianDoubleCorruptor(17735L, "velNoise" + oneDegreeOfFreedomJoint.getName(), registry);
+            double velocityMeasurementStandardDeviation = sensorNoiseParameters.getJointVelocityMeasurementStandardDeviation();
+            jointVelocityCorruptor.setStandardDeviation(velocityMeasurementStandardDeviation);
+            velocitySensor.addSignalCorruptor(jointVelocityCorruptor);
+            seed = seed + 10;
+         }
+         
+         simulatedSensorHolderAndReader.addJointPositionSensorPort(oneDoFJoint, positionSensor);
          simulatedSensorHolderAndReader.addJointVelocitySensorPort(oneDoFJoint, velocitySensor);
       }
    }
