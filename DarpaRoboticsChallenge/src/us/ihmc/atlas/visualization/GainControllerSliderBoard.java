@@ -35,7 +35,7 @@ public class GainControllerSliderBoard
       sliderBoardConfigurationManager.setSlider(6, "kpAllArmJointsR", registry, 0.0, 100.0);
       sliderBoardConfigurationManager.setKnob  (6, "zetaAllArmJointsR", registry, 0.0, 1.0);
 
-      sliderBoardConfigurationManager.setSlider(7, "hl_transitionRatio", registry,  0.0, 1.0);
+      sliderBoardConfigurationManager.setSlider(7, "ll_transitionRatio", registry,  0.0, 1.0);
 
       //sliderBoardConfigurationManager.saveConfiguration(this.getClass().getSimpleName());
       //sliderBoardConfigurationManager.loadConfiguration(this.getClass().getSimpleName());
