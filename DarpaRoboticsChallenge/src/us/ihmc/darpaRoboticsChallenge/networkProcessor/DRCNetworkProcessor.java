@@ -1,9 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-
 import com.martiansoftware.jsap.*;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
@@ -20,13 +16,10 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCSensorParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.GazeboCameraReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.SCSCameraDataReceiver;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.driving.DrivingProcessorFactory;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.GazeboLidarDataReceiver;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.GeoregressionTransformListenerAndProvider;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.LidarDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.RobotBoundingBoxes;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.SCSLidarDataReceiver;
-import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosNativeNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.vrc.VRCScoreDataReceiver;
@@ -38,10 +31,15 @@ import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
 import us.ihmc.utilities.net.KryoObjectClient;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
 import us.ihmc.utilities.net.ObjectCommunicator;
+import us.ihmc.utilities.ros.RosMainNode;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class DRCNetworkProcessor
 {
-   private final VideoSettings videoSettings = VideoSettingsFactory.get32kBitSettings();
+   private final VideoSettings videoSettings;
 
 
    private final ObjectCommunicator fieldComputerClient;
@@ -148,10 +146,12 @@ public class DRCNetworkProcessor
       if (DRCConfigParameters.USING_REAL_HEAD)
       {
          ppsTimestampOffsetProvider = new RealRobotPPSTimestampOffsetProvider();
+         videoSettings = VideoSettingsFactory.get32kBitSettingsWide();
       }
       else
       {
          ppsTimestampOffsetProvider = new AlwaysZeroOffsetPPSTimestampOffsetProvider();
+         videoSettings = VideoSettingsFactory.get32kBitSettingsSquare();
       }
 
       try
