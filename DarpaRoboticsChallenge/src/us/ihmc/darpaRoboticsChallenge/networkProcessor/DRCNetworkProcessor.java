@@ -1,6 +1,9 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor;
 
-import com.martiansoftware.jsap.*;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AlwaysZeroOffsetPPSTimestampOffsetProvider;
@@ -33,9 +36,11 @@ import us.ihmc.utilities.net.LocalObjectCommunicator;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.ros.RosMainNode;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAP;
+import com.martiansoftware.jsap.JSAPException;
+import com.martiansoftware.jsap.JSAPResult;
+import com.martiansoftware.jsap.Switch;
 
 public class DRCNetworkProcessor
 {

@@ -1,17 +1,8 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
-import com.jme3.app.SimpleApplication;
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.Vector3f;
-import com.jme3.scene.Node;
 import georegression.struct.point.Point3D_F64;
-import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
-import us.ihmc.utilities.kinematics.TransformInterpolationCalculator;
-import us.ihmc.utilities.lidar.polarLidar.geometry.PolarLidarScanParameters;
 
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Point3d;
-import java.awt.*;
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -21,6 +12,18 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Point3d;
+
+import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
+import us.ihmc.utilities.lidar.polarLidar.LidarScan;
+import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
+
+import com.jme3.app.SimpleApplication;
+import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector3f;
+import com.jme3.scene.Node;
 
 /**
  * @author Peter Abeles
@@ -45,7 +48,7 @@ public class LoadCloudWithPoses extends SimpleApplication
    @Override
    public void simpleInitApp()
    {
-      List<Point3D_F64>[] clouds = loadPointCloud(810, 1);
+      List<Point3D_F64>[] clouds = loadPointCloud(40*100, 1);
       render(clouds);
    }
 
@@ -105,7 +108,7 @@ public class LoadCloudWithPoses extends SimpleApplication
       {
          int pointsPerSweep = 1081;
          String file = new Scanner(new BufferedReader(new FileReader(fileName))).useDelimiter("\\Z").next();
-         PolarLidarScanParameters param = new PolarLidarScanParameters(false, pointsPerSweep, 1, 2.356194f, -2.356194f, 0, 0, 0, 0, 0, 0, 0);
+         LidarScanParameters param = new LidarScanParameters(false, pointsPerSweep, 1, 2.356194f, -2.356194f, 0, 0, 0, 0, 0, 0, 0);
 
          Transform3D start, end;
          Point3d point;
@@ -130,36 +133,27 @@ public class LoadCloudWithPoses extends SimpleApplication
             if (scans % mod != 0)
                continue;
 
-            
             double[] mx = new double[16];
             for (int j = 0; j < 16; j++)
                mx[j] = doubles[i++];
             start = new Transform3D(mx);
-            
 
             mx = new double[16];
             for (int j = 0; j < 16; j++)
                mx[j] = doubles[i++];
             end = new Transform3D(mx);
 
+            float[] ranges = new float[pointsPerSweep];
             for (int j = 0; j < pointsPerSweep; j++)
             {
                distance = (float) doubles[i++];
-               if (j > .9995*pointsPerSweep || distance > 29 || distance < .2)
-                  continue;
-
-               point = param.getPoint(distance, j);
-               start.transform(point);
-               clouds[0].add(new Point3D_F64(point.x, point.y, point.z));
-
-               point = param.getPoint(distance, j);
-               end.transform(point);
-               //clouds[1].add(new Point3D_F64(point.x, point.y, point.z));
-
-               point = param.getPoint(distance, j);
-               TransformInterpolationCalculator.computeInterpolation(start, end, j / (double) pointsPerSweep).transform(point);
-               //clouds[2].add(new Point3D_F64(point.x, point.y, point.z));
+               ranges[j] = distance;
             }
+
+            LidarScan scan = new LidarScan(param, start, end, ranges);
+
+            for (Point3d p : scan.getAllPoints())
+               clouds[0].add(new Point3D_F64(p.x, p.y, p.z));
          }
       }
       catch (FileNotFoundException e)

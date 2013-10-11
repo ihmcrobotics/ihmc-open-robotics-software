@@ -22,7 +22,7 @@ import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.lidar.polarLidar.geometry.LIDARScanDefinition;
-import us.ihmc.utilities.lidar.polarLidar.geometry.PolarLidarScanParameters;
+import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
 import us.ihmc.utilities.screwTheory.RigidBodyInertia;
 
 import javax.media.j3d.Transform3D;
@@ -517,7 +517,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
                      }
                   }
 
-                  PolarLidarScanParameters polarDefinition = new PolarLidarScanParameters(false, sdfSamples, 1, (float) sdfMaxAngle, (float) sdfMinAngle, 0.0f,
+                  LidarScanParameters polarDefinition = new LidarScanParameters(false, sdfSamples, 1, (float) sdfMaxAngle, (float) sdfMinAngle, 0.0f,
                                                                 0.0f, 0.0f, 0.0f, 0.0f, (float) sdfMinRange, (float) sdfMaxRange);
                   LIDARScanDefinition lidarScanDefinition = LIDARScanDefinition.PlanarSweep(sdfMaxAngle - sdfMinAngle, sdfSamples);
                   Transform3D transform3d = SDFConversionsHelper.poseToTransform(sensor.getPose());

@@ -1,13 +1,13 @@
 package us.ihmc.utilities.ros;
 
-import us.ihmc.utilities.lidar.polarLidar.PolarLidarScan;
+import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import sensor_msgs.LaserScan;
-import us.ihmc.utilities.lidar.polarLidar.geometry.PolarLidarScanParameters;
+import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
 
 public abstract class RosLidarSubscriber extends AbstractRosTopicSubscriber<sensor_msgs.LaserScan>
 {
    private boolean DEBUG = false;
-   private PolarLidarScanParameters initialPolarLidarScanParameters = null;
+   private LidarScanParameters initialPolarLidarScanParameters = null;
 
    public RosLidarSubscriber()
    {
@@ -16,7 +16,7 @@ public abstract class RosLidarSubscriber extends AbstractRosTopicSubscriber<sens
 
    public void onNewMessage(LaserScan message)
    {
-      PolarLidarScanParameters polarLidarScanParameters = new PolarLidarScanParameters(false, message.getRanges().length, 1, message.getAngleMax(),
+      LidarScanParameters polarLidarScanParameters = new LidarScanParameters(false, message.getHeader().getStamp().totalNsecs(), message.getRanges().length, 1, message.getAngleMax(),
                                                              message.getAngleMin(), message.getAngleIncrement(), message.getTimeIncrement(),
                                                              message.getScanTime(), 0.0f, 0.0f, message.getRangeMin(), message.getRangeMax());
 
@@ -25,17 +25,17 @@ public abstract class RosLidarSubscriber extends AbstractRosTopicSubscriber<sens
          verifyDataFromGazeboRemainsTheSame(polarLidarScanParameters);
       }
 
-      PolarLidarScan polarLidarScan = new PolarLidarScan(message.getHeader().getStamp().totalNsecs(), message.getRanges(), polarLidarScanParameters);
+      LidarScan polarLidarScan = new LidarScan(polarLidarScanParameters, message.getRanges());
       newScan(polarLidarScan);
    }
 
-   private void verifyDataFromGazeboRemainsTheSame(PolarLidarScanParameters polarLidarScanParameters)
+   private void verifyDataFromGazeboRemainsTheSame(LidarScanParameters polarLidarScanParameters)
    {
       verifyLidarScanDefinitionDoesNotChange(polarLidarScanParameters);
       verifyTimeIncrementRemainsZero(polarLidarScanParameters);
    }
 
-   private void verifyTimeIncrementRemainsZero(PolarLidarScanParameters polarLidarScanParameters)
+   private void verifyTimeIncrementRemainsZero(LidarScanParameters polarLidarScanParameters)
    {
       if (polarLidarScanParameters.timeIncrement != 0.0)
       {
@@ -43,7 +43,7 @@ public abstract class RosLidarSubscriber extends AbstractRosTopicSubscriber<sens
       }
    }
 
-   private void verifyLidarScanDefinitionDoesNotChange(PolarLidarScanParameters polarLidarScanParameters)
+   private void verifyLidarScanDefinitionDoesNotChange(LidarScanParameters polarLidarScanParameters)
    {
       if (initialPolarLidarScanParameters == null)
       {
@@ -61,6 +61,6 @@ public abstract class RosLidarSubscriber extends AbstractRosTopicSubscriber<sens
       }
    }
 
-   protected abstract void newScan(PolarLidarScan polarLidarScan);
+   protected abstract void newScan(LidarScan polarLidarScan);
 
 }
