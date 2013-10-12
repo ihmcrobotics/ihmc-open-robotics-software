@@ -274,6 +274,9 @@ public class IndividualHandControlModule
       {
          public boolean checkCondition()
          {
+            if(handControllerInterface == null)
+               return false;
+            
             boolean transitionRequested = requestedState.getEnumValue() == toState.getStateEnum();
             boolean ableToBearLoad = handControllerInterface.areFingersBentBack();
 
