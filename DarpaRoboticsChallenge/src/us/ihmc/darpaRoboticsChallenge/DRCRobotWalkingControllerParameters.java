@@ -20,7 +20,7 @@ import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.*;
 
 public class DRCRobotWalkingControllerParameters implements WalkingControllerParameters
 {
-   private static final boolean USE_VRC_PARAMETERS = true;
+   protected static final boolean USE_VRC_PARAMETERS = true;
    
    private final SideDependentList<Transform3D> handControlFramesWithRespectToFrameAfterWrist = new SideDependentList<Transform3D>();
    private final SideDependentList<Transform3D> handPosesWithRespectToChestFrame = new SideDependentList<Transform3D>();

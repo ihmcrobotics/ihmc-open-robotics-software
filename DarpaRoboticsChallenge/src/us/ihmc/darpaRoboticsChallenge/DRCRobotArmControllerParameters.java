@@ -6,7 +6,8 @@ public class DRCRobotArmControllerParameters implements ArmControllerParameters
 {
    public double getKpAllArmJoints()
    {
-      return 120.0;
+      if (DRCRobotWalkingControllerParameters.USE_VRC_PARAMETERS) return 120.0;
+      return 20.0; 
    }
 
    public double getZetaAllArmJoints()
