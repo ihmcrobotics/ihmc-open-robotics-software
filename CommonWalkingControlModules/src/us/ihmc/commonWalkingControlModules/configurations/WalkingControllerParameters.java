@@ -2,12 +2,7 @@ package us.ihmc.commonWalkingControlModules.configurations;
 
 import javax.media.j3d.Transform3D;
 
-import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
-
-import java.util.Map;
 
 public interface WalkingControllerParameters extends HeadOrientationControllerParameters, ManipulationControllerParameters
 {
@@ -62,5 +57,8 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract double getKpHeadOrientation();
    public abstract double getZetaHeadOrientation();
+
+   public abstract double getKpUpperBody();
+   public abstract double getZetaUpperBody();
 
 }

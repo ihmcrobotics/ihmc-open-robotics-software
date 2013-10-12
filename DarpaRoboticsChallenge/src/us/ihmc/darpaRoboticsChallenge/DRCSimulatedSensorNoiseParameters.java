@@ -23,7 +23,7 @@ public class DRCSimulatedSensorNoiseParameters
    {
       SensorNoiseParameters sensorNoiseParameters = new SensorNoiseParameters();
 
-      sensorNoiseParameters.setJointPositionMeasurementStandardDeviation(0.0); //0.01 is very high, 0.001 medium, 0.0001 low
+      sensorNoiseParameters.setJointPositionMeasurementStandardDeviation(0.01); //0.01 is very high, 0.001 medium, 0.0001 low
       sensorNoiseParameters.setJointVelocityMeasurementStandardDeviation(0.0); // 0.2 is very high, 0.02 medium, 0.002 low
       
       sensorNoiseParameters.setComAccelerationProcessNoiseStandardDeviation(0.0); // Not used.

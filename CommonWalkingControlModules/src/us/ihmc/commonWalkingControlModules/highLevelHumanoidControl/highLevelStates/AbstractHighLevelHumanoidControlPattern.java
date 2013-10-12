@@ -83,8 +83,8 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
    protected final MomentumBasedController momentumBasedController;
    protected final WalkingControllerParameters walkingControllerParameters;
 
-   protected final DoubleYoVariable kJointPositionControl = new DoubleYoVariable("kUpperBody", registry);
-   protected final DoubleYoVariable zetaJointPositionControl = new DoubleYoVariable("zetaUpperBody", registry);
+   private final DoubleYoVariable kpJointPositionControl = new DoubleYoVariable("kpUpperBody", registry);
+   private final DoubleYoVariable zetaJointPositionControl = new DoubleYoVariable("zetaUpperBody", registry);
 
    protected final SideDependentList<? extends ContactablePlaneBody> feet, handPalms;
    protected final SideDependentList<ContactableCylinderBody> graspingHands;
@@ -132,14 +132,12 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       this.lidarControllerInterface = lidarControllerInterface;
       this.walkingControllerParameters = walkingControllerParameters;
 
-    //TODO: Extract gains out.
-      kJointPositionControl.set(100.0);
-      zetaJointPositionControl.set(1.0);
-      coefficientOfFriction.set(1.0);    // 0.6);//
-
       // Setup jacobians for legs and arms
       setupLegJacobians(fullRobotModel);
-
+      coefficientOfFriction.set(1.0);
+      
+      setJointPositionControlGains(walkingControllerParameters.getKpUpperBody(), walkingControllerParameters.getZetaUpperBody());
+      
       // Setup foot control modules:
 //    setupFootControlModules(); //TODO: get rid of that?
 
@@ -161,7 +159,12 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       positionControlJoints = setupJointConstraints();
    }
    
-
+   public void setJointPositionControlGains(double kpJointPositionControl, double zetaJointPositionControl)
+   {
+      this.kpJointPositionControl.set(kpJointPositionControl);
+      this.zetaJointPositionControl.set(zetaJointPositionControl);
+   }
+   
    private VariableChangedListener createPelvisOrientationGainsChangedListener()
    {
       VariableChangedListener listener = new VariableChangedListener(){
@@ -328,14 +331,14 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
       if (jointForExtendedNeckPitchRange != null)
       {
-         double kUpperBody = this.kJointPositionControl.getDoubleValue();
-         double dUpperBody = GainCalculator.computeDerivativeGain(kUpperBody, zetaJointPositionControl.getDoubleValue());
+         double kpUpperBody = this.kpJointPositionControl.getDoubleValue();
+         double kdUpperBody = GainCalculator.computeDerivativeGain(kpUpperBody, zetaJointPositionControl.getDoubleValue());
          double angle = 0.0;
 
          if (desiredHeadOrientationProvider != null)
             angle = desiredHeadOrientationProvider.getDesiredExtendedNeckPitchJointAngle();
 
-         momentumBasedController.doPDControl(jointForExtendedNeckPitchRange, kUpperBody, dUpperBody, angle, 0.0);
+         momentumBasedController.doPDControl(jointForExtendedNeckPitchRange, kpUpperBody, kdUpperBody, angle, 0.0);
       }
 
 
@@ -377,7 +380,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
    protected void doJointPositionControl()
    {
-      double kUpperBody = this.kJointPositionControl.getDoubleValue();
+      double kUpperBody = this.kpJointPositionControl.getDoubleValue();
       double dUpperBody = GainCalculator.computeDerivativeGain(kUpperBody, zetaJointPositionControl.getDoubleValue());
       momentumBasedController.doPDControl(positionControlJoints, kUpperBody, dUpperBody);
    }

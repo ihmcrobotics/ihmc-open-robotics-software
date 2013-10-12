@@ -20,6 +20,8 @@ import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.*;
 
 public class DRCRobotWalkingControllerParameters implements WalkingControllerParameters
 {
+   private static final boolean USE_VRC_PARAMETERS = true;
+   
    private final SideDependentList<Transform3D> handControlFramesWithRespectToFrameAfterWrist = new SideDependentList<Transform3D>();
    private final SideDependentList<Transform3D> handPosesWithRespectToChestFrame = new SideDependentList<Transform3D>();
    private final double minElbowRollAngle = 0.5;
@@ -286,46 +288,67 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
 
    public double getCaptureKpParallelToMotion()
    {
-      return 1.5;
+      if (USE_VRC_PARAMETERS) return 1.5;
+      return 0.3; 
    }
 
    public double getCaptureKpOrthogonalToMotion()
-   {
-      return 1.5;
+   {      
+      if (USE_VRC_PARAMETERS) return 1.5;
+      return 0.3; 
    }
    
    public double getCaptureFilterBreakFrequencyInHz()
    {
-      return Double.POSITIVE_INFINITY; //16.0;
+      if (USE_VRC_PARAMETERS) return Double.POSITIVE_INFINITY;
+      return 16.0;
    }
 
    public double getKpCoMHeight()
    {
-      return 40.0;
+      if (USE_VRC_PARAMETERS) return 40.0;
+      return 20.0; 
    }
 
    public double getZetaCoMHeight()
    {
+      if (USE_VRC_PARAMETERS) return 1.0;
       return 1.0;
    }
    
    public double getKpPelvisOrientation()
    {
-      return 100.0;
+      if (USE_VRC_PARAMETERS) return 100.0;
+      return 30.0; 
    }
 
    public double getZetaPelvisOrientation()
    {
+      if (USE_VRC_PARAMETERS) return 1.0;
       return 1.0;
    }
 
    public double getKpHeadOrientation()
    {
-      return 40.0;
+      if (USE_VRC_PARAMETERS) return 40.0;
+      return 15.0; 
    }
 
    public double getZetaHeadOrientation()
    {
+      if (USE_VRC_PARAMETERS) return 1.0;
+      return 1.0;
+   }
+
+   public double getKpUpperBody()
+   {
+      if (USE_VRC_PARAMETERS) return 100.0;
+      return 40.0;
+   }
+
+   public double getZetaUpperBody()
+   {
+      if (USE_VRC_PARAMETERS) return 1.0;
       return 1.0;
    }
 }

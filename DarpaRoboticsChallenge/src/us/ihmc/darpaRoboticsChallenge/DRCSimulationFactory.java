@@ -80,11 +80,11 @@ public class DRCSimulationFactory
       final DRCOutputWriter drcOutputWriter;
       if (DRCConfigParameters.LIMIT_CONTROLLER_OUTPUT_TORQUES)
       {
-         drcOutputWriter = new DRCOutputWriterWithTorqueLimits(new DRCSimulationOutputWriter(simulatedRobot, dynamicGraphicObjectsListRegistry, robotVisualizer));
+         drcOutputWriter = new DRCOutputWriterWithTorqueLimits(new DRCSimulationOutputWriter(simulatedRobot, registry, dynamicGraphicObjectsListRegistry, robotVisualizer));
       }
       else
       {
-         drcOutputWriter = new DRCSimulationOutputWriter(simulatedRobot, dynamicGraphicObjectsListRegistry, robotVisualizer);
+         drcOutputWriter = new DRCSimulationOutputWriter(simulatedRobot, registry, dynamicGraphicObjectsListRegistry, robotVisualizer);
       }
       
       // TODO: Build LIDAR here
