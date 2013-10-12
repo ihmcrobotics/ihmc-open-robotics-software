@@ -395,8 +395,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       this.userDesiredPelvisPitch.set(desiredPelvisPitch);
       this.stayOnToes.set(stayOntoes);
       this.trailingFootPitch.set(trailingFootPitch);
-      kJointPositionControl.set(100.0);
-      zetaJointPositionControl.set(1.0);
+      
       onToesTriangleAreaLimit.set(0.01);
       doToeOffIfPossible.set(walkingControllerParameters.doToeOffIfPossible());
 
