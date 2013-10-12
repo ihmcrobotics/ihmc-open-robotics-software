@@ -19,9 +19,7 @@ import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.*;
 
 
 public class DRCRobotWalkingControllerParameters implements WalkingControllerParameters
-{
-   protected static final boolean USE_VRC_PARAMETERS = true;
-   
+{   
    private final SideDependentList<Transform3D> handControlFramesWithRespectToFrameAfterWrist = new SideDependentList<Transform3D>();
    private final SideDependentList<Transform3D> handPosesWithRespectToChestFrame = new SideDependentList<Transform3D>();
    private final double minElbowRollAngle = 0.5;
@@ -288,67 +286,67 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
 
    public double getCaptureKpParallelToMotion()
    {
-      if (USE_VRC_PARAMETERS) return 1.5;
+      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 1.5;
       return 0.3; 
    }
 
    public double getCaptureKpOrthogonalToMotion()
    {      
-      if (USE_VRC_PARAMETERS) return 1.5;
+      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 1.5;
       return 0.3; 
    }
    
    public double getCaptureFilterBreakFrequencyInHz()
    {
-      if (USE_VRC_PARAMETERS) return Double.POSITIVE_INFINITY;
+      if (DRCConfigParameters.USE_VRC_PARAMETERS) return Double.POSITIVE_INFINITY;
       return 16.0;
    }
 
    public double getKpCoMHeight()
    {
-      if (USE_VRC_PARAMETERS) return 40.0;
+      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 40.0;
       return 20.0; 
    }
 
    public double getZetaCoMHeight()
    {
-      if (USE_VRC_PARAMETERS) return 1.0;
+      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 1.0;
       return 1.0;
    }
    
    public double getKpPelvisOrientation()
    {
-      if (USE_VRC_PARAMETERS) return 100.0;
+      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 100.0;
       return 30.0; 
    }
 
    public double getZetaPelvisOrientation()
    {
-      if (USE_VRC_PARAMETERS) return 1.0;
+      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 1.0;
       return 1.0;
    }
 
    public double getKpHeadOrientation()
    {
-      if (USE_VRC_PARAMETERS) return 40.0;
+      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 40.0;
       return 15.0; 
    }
 
    public double getZetaHeadOrientation()
    {
-      if (USE_VRC_PARAMETERS) return 1.0;
+      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 1.0;
       return 1.0;
    }
 
    public double getKpUpperBody()
    {
-      if (USE_VRC_PARAMETERS) return 100.0;
+      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 100.0;
       return 40.0;
    }
 
    public double getZetaUpperBody()
    {
-      if (USE_VRC_PARAMETERS) return 1.0;
+      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 1.0;
       return 1.0;
    }
 }
