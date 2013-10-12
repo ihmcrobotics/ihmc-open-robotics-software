@@ -6,6 +6,9 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 
 public class DRCConfigParameters
 {
+   public static final boolean USE_VRC_PARAMETERS = true;
+   public static final boolean RUNNING_ON_REAL_ROBOT = false;
+   
    public static final boolean USE_DUMMY_DRIVNG = false;
    public static final boolean RESTART_FOR_FANCY_CONTROL = true;    // Enable for testing standup
 
@@ -31,7 +34,7 @@ public class DRCConfigParameters
    public static final boolean USE_SUPER_DUPER_HIGH_RESOLUTION_FOR_COMMS = false;
 
    public static final boolean USE_HYDRA = false;
-   public static final boolean USE_FISHEYE = false;
+   public static final boolean USE_FISHEYE = RUNNING_ON_REAL_ROBOT;
 
    public static final boolean LIMIT_CONTROLLER_OUTPUT_TORQUES = false;
 
@@ -90,7 +93,19 @@ public class DRCConfigParameters
    public static final String LOG_HOST = "192.168.6.203";
    public static final String GAZEBO_HOST = "10.66.171.41";    // CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP; //CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP;
 
-   public static final String SCS_MACHINE_IP_ADDRESS = LOCALHOST;    // CONSTELLATION_FIELD_COMPUTER_2_VPN_IP; //CONSTELLATION_FIELD_COMPUTER_2_VPN_IP;    // CLOUD_MONSTER_IP;
+   public static final String SCS_MACHINE_IP_ADDRESS ;    
+   static
+   {
+      if (RUNNING_ON_REAL_ROBOT)
+      {
+         SCS_MACHINE_IP_ADDRESS = "10.66.171.20";
+      }
+      else
+      {
+         SCS_MACHINE_IP_ADDRESS = LOCALHOST; // CONSTELLATION_FIELD_COMPUTER_2_VPN_IP; //CONSTELLATION_FIELD_COMPUTER_2_VPN_IP;    // CLOUD_MONSTER_IP;
+      }
+   }
+   
    public static final String NET_PROC_MACHINE_IP_ADDRESS = LOCALHOST;    // CONSTELLATION_FIELD_COMPUTER_1_VPN_IP; //CONSTELLATION_FIELD_COMPUTER_1_VPN_IP;    // SCS_MACHINE_IP_ADDRESS;
 
    public static final String OPERATOR_INTERFACE_IP_ADDRESS = LOCALHOST;
@@ -125,7 +140,7 @@ public class DRCConfigParameters
 
    // LIDAR:
    public static final boolean USE_ROS_FOR_MULTISENSE_TRANSFORMS = false;
-   public static final boolean USING_REAL_HEAD = false;
+   public static final boolean USING_REAL_HEAD = RUNNING_ON_REAL_ROBOT;
    public static final double LIDAR_SPINDLE_VELOCITY = 5.0;
 
    public static final boolean STREAM_POLAR_LIDAR = true;
@@ -208,8 +223,22 @@ public class DRCConfigParameters
    public static final String CHEATING_POLARIS_HOST = LOCALHOST;
    
    // Filter Parameters
-   public static final double  positionSensorFrequencyHz = Double.POSITIVE_INFINITY; //16.0;  JERRYPRATT
-   public static final double  velocitySensorFrequencyHz = Double.POSITIVE_INFINITY; //16.0;  JERRYPRATT
+   public static final double  positionSensorFrequencyHz;
+   public static final double  velocitySensorFrequencyHz;
+
+   static
+   {
+      if (USE_VRC_PARAMETERS)
+      {
+         positionSensorFrequencyHz = Double.POSITIVE_INFINITY;
+         velocitySensorFrequencyHz = Double.POSITIVE_INFINITY;
+      }
+      else
+      {
+         positionSensorFrequencyHz = 16.0;
+         velocitySensorFrequencyHz = 16.0; 
+      }
+   }
    
    public static final double JOINT_POSITION_FILTER_FREQ_HZ = positionSensorFrequencyHz;
    public static final double JOINT_VELOCITY_FILTER_FREQ_HZ = velocitySensorFrequencyHz;
