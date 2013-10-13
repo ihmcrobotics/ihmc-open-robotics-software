@@ -231,6 +231,7 @@ public class SDFFullRobotModel implements FullRobotModel
       inverseDynamicsJoint.setDampingParameter(joint.getDamping());
 
 
+      inverseDynamicsJoint.setEffortLimit(joint.getEffortLimit());
       inverseDynamicsJoint.setJointLimitLower(joint.getLowerLimit());
       inverseDynamicsJoint.setJointLimitUpper(joint.getUpperLimit());
 
