@@ -29,6 +29,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.M
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
+import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.stateEstimation.DesiredCoMAndAngularAccelerationGrabber;
 import us.ihmc.commonWalkingControlModules.stateEstimation.PointPositionGrabber;
@@ -417,6 +418,30 @@ public class MomentumBasedController
       updateYoVariables();
    }
 
+   /**
+    * Call this method after doSecondaryControl() to generate a small torque of flexion at the knees when almost straight.
+    * This helps a lot when working near singularities but it is kinda hackish.
+    */
+   public void doPassiveKneeControl()
+   {
+      double maxPassiveTorque = 25.0;
+      double kneeLimit = 0.3;
+      double kdKnee = 5.0;
+      
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         OneDoFJoint kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE);
+         double tauKnee = kneeJoint.getTau();
+         double qKnee = kneeJoint.getQ();
+         double qdKnee = kneeJoint.getQd();
+         if (qKnee < kneeLimit)
+         {
+            tauKnee += maxPassiveTorque * MathTools.square(1.0 - qKnee / kneeLimit) - kdKnee * qdKnee;
+            kneeJoint.setTau(tauKnee);
+         }
+      }
+   }
+   
    public void requestResetEstimatorPositionsToCurrent()
    {
       this.resetEstimatorPositionsToCurrent.set(true);
