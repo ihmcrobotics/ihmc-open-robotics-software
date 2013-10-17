@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import javax.media.j3d.Transform3D;
-import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
@@ -17,7 +16,6 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceTexture;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.math.geometry.Box3d;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
-import us.ihmc.utilities.math.geometry.Direction;
 
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Robot;
@@ -26,8 +24,9 @@ import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.CylinderTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.RotatableCinderBlockTerrainObject;
-import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
+import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
+import com.yobotics.simulationconstructionset.util.ground.TrussWithSimpleCollisions;
 
 public class DRCDemo01NavigationEnvironment implements
 		CommonAvatarEnvironmentInterface {
@@ -47,31 +46,17 @@ public class DRCDemo01NavigationEnvironment implements
 	private static final double ROCK_FIELD_WIDTH = 2.0;
 	private static final double ROCK_BOUNDING_BOX_WIDTH = 0.5;
 
-	private static final boolean FULLY_RANDOM = true; // Will do a neat grid if
-														// set to false;
+	// FULLY_RANDOM Will do a neat grid if set to false;
+	private static final boolean FULLY_RANDOM = true; 
 	private static final int ROCKS_PER_ROW = 4;
-	private static final boolean DIFFICULT_STEPPING_STONES = false; // for path
-																	// 8, if
-																	// true
-																	// creates
-																	// an
-																	// extension
-																	// to the
-																	// path with
-																	// harder
-																	// steps
+	// for path 8, if DIFFICULT_STEPPING_STONES true creates an extension to the path with harder steps
+	private static final boolean DIFFICULT_STEPPING_STONES = false; 
 
 	private static final AppearanceDefinition cinderBlockAppearance = YoAppearance
 			.DarkGray();
-	private static final double cinderBlockLength = 0.40; // 40 cm (approx 16
-															// in, just less
-															// than 16in)
+	private static final double cinderBlockLength = 0.40; // 40 cm (approx 16 in, just less than 16in)
 	private static final double cinderBlockWidth = cinderBlockLength / 2;
-	private static final double cinderBlockHeight = 0.15; // 15 cm (approx 6 in,
-															// less than 6 in,
-															// but consistent
-															// with other cm
-															// measurements)
+	private static final double cinderBlockHeight = 0.15; // 15 cm (approx 6 in, less than 6 in, but consistent with other cm measurements)
 	private static final double cinderBlockTiltDegrees = 15;
 	private static final double cinderBlockTiltRadians = Math
 			.toRadians(cinderBlockTiltDegrees);
@@ -104,6 +89,26 @@ public class DRCDemo01NavigationEnvironment implements
 		conditionallyAddLimboBar();
 
 		// testRotatableRampsSetupForGraphicsAndCollision();
+		// addFalseStair();
+	}
+
+	private void addFalseStair() {
+		final double courseAngle = 3 * 45. / 2;
+		final double startDistance = 6.75;
+		AppearanceDefinition app = YoAppearance.Red();
+		YoAppearance.makeTransparent(app,1);
+
+		final double stepWidth = 0.812;
+		final double stepTread = stepWidth;
+		final double stepThickness = 0.0381;
+		final double stepRise = 0.3048;
+
+		double[] centerPointLocal = { startDistance + stepTread / 2, 0 };
+		double[] centerPoint;
+		double stairTopHeight=stepRise;
+		centerPoint = rotateAroundOrigin(centerPointLocal, courseAngle);
+		setUpFloatingStair(centerPoint, stepWidth, stepTread,
+				stepThickness, stairTopHeight, courseAngle, app);
 	}
 
 	private void setUpPathDRCTrialsLadder() {
@@ -253,11 +258,7 @@ public class DRCDemo01NavigationEnvironment implements
 			double zEnd = z0Railing + vzRailing * (xEnd - x0Railing)
 					/ vxRailing;
 			if (zEnd > stairTopHeight + topRailingHeight) {
-				zEnd = stairTopHeight + topRailingHeight;// top of stair railing
-															// won't meet top of
-															// top railing, but
-															// close enough for
-															// now
+				zEnd = stairTopHeight + topRailingHeight;
 				xEnd = x0Railing + vxRailing * (zEnd - z0Railing) / vzRailing;
 
 				// Extend top rail
@@ -487,8 +488,7 @@ public class DRCDemo01NavigationEnvironment implements
 
 		// Setup Door
 		sectionLength = 1.22; // 4 ft
-		double doorWidth = 0.80; // 32 inches (rounded down to 90cm according to
-									// p37 initial task description dims
+		double doorWidth = 0.80; // 32 inches (rounded down to 90cm according to p37 initial task description dims
 		double doorHeight = 2; // 82 inches.
 		startDistance += sectionLength;
 		point[0] = startDistance;
@@ -507,13 +507,13 @@ public class DRCDemo01NavigationEnvironment implements
 						doorHeight / 2, borderWidth, borderWidth, doorHeight,
 						0, courseAngleDeg, color);
 			}
-//			//Door overhead
-//			point[1] = doorCenter;
-//			rotatedPoint = rotateAroundOrigin(point, courseAngleDeg);
-//			setUpSlopedBox(rotatedPoint[0], rotatedPoint[1], doorHeight
-//					+ borderWidth / 2, borderWidth,
-//					doorWidth + 2 * borderWidth, borderWidth, 0,
-//					courseAngleDeg, color);
+			//			//Door overhead
+			//			point[1] = doorCenter;
+			//			rotatedPoint = rotateAroundOrigin(point, courseAngleDeg);
+			//			setUpSlopedBox(rotatedPoint[0], rotatedPoint[1], doorHeight
+			//					+ borderWidth / 2, borderWidth,
+			//					doorWidth + 2 * borderWidth, borderWidth, 0,
+			//					courseAngleDeg, color);
 		}
 		//Walls
 		point[1] = 0;
@@ -568,7 +568,7 @@ public class DRCDemo01NavigationEnvironment implements
 			double gripRadius = 0.039 + Math.random()*0.06-0.03;
 			linkGraphics.addArcTorus(0, Math.PI * 2, outsideRadius, gripRadius,
 					YoAppearance.randomColor(random));
-			
+
 
 			combinedTerrainObject.addStaticLinkGraphics(linkGraphics);// new
 		}
@@ -576,8 +576,8 @@ public class DRCDemo01NavigationEnvironment implements
 
 	private void setUpStepOverObstacles(double courseAngleDeg,
 			double startDistance, AppearanceDefinition color,
-			final double sectionLength) {
-		// TODO: Finish course (step 10)
+			final double sectionLength) 
+	{
 		double[] point = { startDistance + sectionLength * 0.75,
 				sectionLength * 0.25 };
 		double[] newPoint = rotateAroundOrigin(point, courseAngleDeg);
@@ -589,44 +589,9 @@ public class DRCDemo01NavigationEnvironment implements
 		point = new double[] { startDistance + sectionLength * 0.75 - 0.3,
 				-sectionLength * 0.25 + .18 };
 		newPoint = rotateAroundOrigin(point, courseAngleDeg);
-		double trussLength = 1.5;
-		double trussSide = 0.3;
-		setUpSlopedBox(newPoint[0], newPoint[1], trussSide / 2.0, trussLength,
-				trussSide, trussSide, 0.0, courseAngleDeg - 45, color);
-
-		// // ///
-		//
-		// // Transform3D transform = box.getTransformCopy();
-		//
-		// // Vector3d extraTranslationDueToStupidConvention = new Vector3d(0.0,
-		// // 0.0, -box.getDimension(Direction.Z) / 2.0);
-		// // Transform3D postTranslation = new Transform3D();
-		// // postTranslation.set(extraTranslationDueToStupidConvention);
-		//
-		// // transform.mul(postTranslation);
-		// //
-		// // Matrix3d rotation = new Matrix3d();
-		// // transform.get(rotation);
-		//
-		// Vector3d translation = new Vector3d(newPoint[0], newPoint[1],
-		// trussSide / 2.0);
-		//
-		// Graphics3DObject linkGraphics =
-		// combinedTerrainObject.getLinkGraphics();// new
-		// // Graphics3DObject();
-		//
-		// linkGraphics.translate(translation);
-		// linkGraphics.rotate(courseAngleDeg - 45, Axis.Z);
-		//
-		// // Vector3d veftor = new Vector3d(box.getDimension(Direction.X),
-		// // box.getDimension(Direction.Y), box.getDimension(Direction.Z));
-		// // // Vector3d veftor = new Vector3d(0.1,0.2,0.3);
-		// //
-		// // linkGraphics.scale(veftor);
-		//
-		// linkGraphics.addModelFile(getClass().getResource("truss.dae"));
-		//
-		// // ///
+		double trussLength = 1.524;
+		double trussSide = 0.291;
+		setUpTruss(newPoint, trussLength, trussSide, courseAngleDeg+45, color);
 
 		point = new double[] { startDistance + sectionLength * 0.75 / 2,
 				sectionLength / 4 };
@@ -653,6 +618,16 @@ public class DRCDemo01NavigationEnvironment implements
 		setUpSlopedBox(newPoint[0], newPoint[1], beamVerticalHeight / 2.0
 				+ beamZLength / 2, beamLength, 0.04, beamZLength, beamSlopeRad,
 				courseAngleDeg, color);
+	}
+
+	private void setUpTruss(double[] newPoint, double trussLength,
+			double trussSide, double courseAngleDeg, AppearanceDefinition color) 
+	{
+		AppearanceDefinition overrideColor = YoAppearance.White();	//color;
+		overrideColor.setTransparency(0.95);
+
+		TrussWithSimpleCollisions truss = new TrussWithSimpleCollisions(newPoint, trussLength, trussSide, courseAngleDeg, overrideColor);
+		combinedTerrainObject.addTerrainObject(truss);
 	}
 
 	private void setUpCinderBlockField(double courseAngle, double startDistance) {
@@ -689,8 +664,7 @@ public class DRCDemo01NavigationEnvironment implements
 				{ 0, 0, 0, 0, 1, 1 },
 				{ 0, 0, 0, 0, 0, 1 },
 				{ 0, 0, 0, 0, 0, 0 },
-				{ 0, 0, 0, 0, 0, 0 }, // 8.9. Ascend/descend Pitch/Roll 15 deg
-										// Top Steps
+				{ 0, 0, 0, 0, 0, 0 }, // 8.9. Ascend/descend Pitch/Roll 15 deg Top Steps
 				{ 1, 0, 1, 0, 1, 0 }, // 1 angled...
 				{ 0, 1, 0, 1, 0, 1 }, { 0, 0, 0, 0, 1, 2 },
 				{ 0, 0, 0, 1, 2, 3 }, { 0, 0, 1, 2, 3, 2 },
@@ -869,11 +843,9 @@ public class DRCDemo01NavigationEnvironment implements
 
 		for (int i = 0; i < numberZigZagHurdles.length; i++) {
 			int start45sign = Math
-					.round((float) numberZigZagHurdles[i] / 2.0 + .25) % 2 == 0 ? 1
-					: -1;// start45 when n=3,4,7,8,11,12,...
+					.round((float) numberZigZagHurdles[i] / 2.0 + .25) % 2 == 0 ? 1: -1;// start45 when n=3,4,7,8,11,12,...
 			int startXsign = Math
-					.round(((float) numberZigZagHurdles[i] + 1.) / 2.0 + .25) % 2 == 0 ? -1
-					: 1;// start x+ when n=1, 4,5, 8,9, ...
+					.round(((float) numberZigZagHurdles[i] + 1.) / 2.0 + .25) % 2 == 0 ? -1: 1;// start x+ when n=1, 4,5, 8,9, ...
 			for (int j = 0; j < numberZigZagHurdles[i]; j++) {
 				int evenBlockSign = (j % 2 == 0) ? 1 : -1;
 				double signedXOffset = xOffset * evenBlockSign * startXsign;
@@ -1244,7 +1216,8 @@ public class DRCDemo01NavigationEnvironment implements
 
 	private void setUpSlopedBox(double xCenter, double yCenter, double zCenter,
 			double xLength, double yLength, double zLength,
-			double slopeRadians, double yawDegrees, AppearanceDefinition app) {
+			double slopeRadians, double yawDegrees, AppearanceDefinition app) 
+	{
 		Transform3D location = new Transform3D();
 		location.rotZ(Math.toRadians(yawDegrees));
 
@@ -1260,22 +1233,19 @@ public class DRCDemo01NavigationEnvironment implements
 
 	private void setUpSlopedCylinder(double xCenter, double yCenter,
 			double zCenter, double xLength, double radius, double slopeRadians,
-			double yawDegrees, AppearanceDefinition app) {
-		Transform3D location = new Transform3D();
-		location.rotZ(Math.toRadians(yawDegrees));
+			double yawDegrees, AppearanceDefinition app) 
+	{
+		double pitchDownDegrees = Math.toDegrees(-slopeRadians + Math.PI / 2);
+		Vector3d center = new Vector3d(xCenter, yCenter, zCenter);
 
-		Transform3D tiltZToXThenToSlope = new Transform3D();
-		tiltZToXThenToSlope.rotY(-slopeRadians + Math.PI / 2);
-		location.mul(tiltZToXThenToSlope);
-
-		location.setTranslation(new Vector3d(xCenter, yCenter, zCenter));
-		CylinderTerrainObject newCylinder = new CylinderTerrainObject(location,
+		CylinderTerrainObject newCylinder = new CylinderTerrainObject(center,pitchDownDegrees,yawDegrees,
 				xLength, radius, app);
 		combinedTerrainObject.addTerrainObject(newCylinder);
 	}
 
 	private void setUpSlopedCinderBlock(double xCenter, double yCenter,
-			int numberFlatSupports, double yawDegrees) {
+			int numberFlatSupports, double yawDegrees) 
+	{
 		if (numberFlatSupports < 0)
 			return;
 

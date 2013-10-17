@@ -15,7 +15,15 @@ import us.ihmc.graphics3DAdapter.jme.JMEGraphics3dAdapter;
 public class DRCDemo01EnvironmentViewer
 {
    private final boolean SHOWGRAPHICS = true;//false;//
-   private final boolean SHOWCOLLISIONTERRAIN = false;//true;
+   private final boolean SHOWCOLLISIONTERRAIN = false;//true;//
+   
+   //look at end of walking obstacle course
+   private final double[] CAMFIX = {17,17,0};
+   private final double[] CAMPOS = {10,24,20};
+   
+//   //look at trials qualification course
+//   private final double[] CAMFIX = {5,-5,0};
+//   private final double[] CAMPOS = {0,-10,20};
    
    
    Robot robot = new Robot("NotARobot");
@@ -61,21 +69,8 @@ public class DRCDemo01EnvironmentViewer
       linkGraphics.addCoordinateSystem(0.3);
       scs.addStaticLinkGraphics(linkGraphics);
       
-//      scs.setCameraPosition(6.0, -2.0, 4.5);
-//      scs.setCameraFix(-0.44, -0.17, 0.75);
-//      scs.setCameraPosition(-11.5, -2,4.8);
-//      scs.setCameraFix(3.5,1.5,0);
-//      scs.setCameraPosition(-3, -7, 3);
-//      scs.setCameraFix(4,4,0);
-      //look at end of walking obstacle course
-      scs.setCameraFix(17,17,0);
-      scs.setCameraPosition(10, 24, 20);
-      
-      //look at trials qualification course
-      scs.setCameraFix(5,-5,0);
-      scs.setCameraPosition(0, -10, 20);
-      
-
+      scs.setCameraFix(CAMFIX[0],CAMFIX[1],CAMFIX[2]);
+      scs.setCameraPosition(CAMPOS[0],CAMPOS[1], CAMPOS[2]);
 
 //      scs.setCameraTracking(false, true, true, false);
 //      scs.setCameraDolly(false, true, true, false);
