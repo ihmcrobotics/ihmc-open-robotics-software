@@ -50,9 +50,11 @@ public class DRCLidar
       {
          System.out.println("DRCLidar: Setting up lidar.");
          FastPolarRayCastLIDAR polarLidar = getLidarSensor(sdfRobotSimulation.getRobot());
+         
          if (polarLidar != null)
          {
             polarLidar.setWorld(graphics3dAdapter);
+            polarLidar.setNodesToIntersect(DRCConfigParameters.SCS_LIDAR_NODES_TO_INTERSECT);
             if (DRCConfigParameters.OVERRIDE_DRC_LIDAR_CONFIG)
             {
                LidarScanParameters largeScan = new LidarScanParameters(true, DRCConfigParameters.LIDAR_POINTS_PER_SWEEP,
