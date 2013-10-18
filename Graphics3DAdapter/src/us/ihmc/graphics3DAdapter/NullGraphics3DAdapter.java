@@ -211,6 +211,10 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
          {
             return 0;
          }
+
+         public void setChildrenToIntersect(String[] childrenToIntersect)
+         {
+         }
       };
    }
 

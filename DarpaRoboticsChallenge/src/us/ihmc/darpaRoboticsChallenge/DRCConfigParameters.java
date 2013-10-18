@@ -143,8 +143,11 @@ public class DRCConfigParameters
    public static final boolean USING_REAL_HEAD = RUNNING_ON_REAL_ROBOT;
    public static final double LIDAR_SPINDLE_VELOCITY = 5.0;
 
+   // the useful children are "Static Link Graphic" and "atlas", but you don't really need atlas. ~30% faster without atlas.
+   public static final String[] SCS_LIDAR_NODES_TO_INTERSECT = new String[] {"Static Link Graphic"};
+   
    public static final boolean STREAM_POLAR_LIDAR = true;
-   public static final int LIDAR_UPDATE_RATE_OVERRIDE = 5;
+   public static final int LIDAR_UPDATE_RATE_OVERRIDE = 30;
    public static final int LIDAR_SWEEPS_PER_SCAN = 1;
 
    public static final int LIDAR_POINTS_PER_SWEEP;
