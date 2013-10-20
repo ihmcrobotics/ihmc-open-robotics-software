@@ -89,6 +89,7 @@ public class DRCDashboard
 
    private File configFileHandle;
    private boolean shouldLoadConfig = false;
+   private String pluginOption;
 
    public DRCDashboard()
    {
@@ -132,95 +133,133 @@ public class DRCDashboard
    {
       try
       {
-         BufferedReader reader = new BufferedReader(new FileReader(configFileHandle));
-         String line, pluginOption = "default";
-         boolean done = false;
-         while (!done)
-         {
-            line = reader.readLine();
-
-            if (line.contains("END") || (line == null))
-            {
-               done = true;
-            }
-            else
-            {
-               if ((line != null) && line.startsWith("PLUGIN:"))
-               {
-                  pluginOption = line.substring(line.indexOf(":") + 1, line.length());
-
-                  if (pluginOption.contains("plugin"))
-                  {
-                     radioGroup.setSelected(usePluginButton.getModel(), true);
-                  }
-                  else
-                  {
-                     radioGroup.setSelected(useDefaultButton.getModel(), true);
-                  }
-               }
-               else if ((line != null) && line.startsWith("TASK:"))
-               {
-                  String taskOption = line.substring(line.indexOf(":") + 1, line.length());
-
-                  forceTaskComboUpdate();
-
-                  if (pluginOption.contains("plugin"))
-                     taskCombo.setSelectedItem(DRCPluginTasks.valueOf(taskOption));
-                  else
-                     taskCombo.setSelectedItem(DRCROSTasks.valueOf(taskOption));
-               }
-               else if ((line != null) && line.startsWith("START:"))
-               {
-                  String startOption = line.substring(line.indexOf(":") + 1, line.length());
-
-                  if (!startOption.equals(""))
-                     startingLocationsList.setSelectedValue(startOption, true);
-               }
-               else if ((line != null) && line.startsWith("UI:"))
-               {
-                  String uiOption = line.substring(line.indexOf(":") + 1, line.length());
-
-                  if (uiOption.contains("true"))
-                     operatorUICheckBox.setSelected(true);
-                  else
-                     operatorUICheckBox.setSelected(false);
-               }
-               else if ((line != null) && line.startsWith("SCS:"))
-               {
-                  String scsOption = line.substring(line.indexOf(":") + 1, line.length());
-
-                  if (scsOption.contains("true"))
-                     scsCheckBox.setSelected(true);
-                  else
-                     scsCheckBox.setSelected(false);
-               }
-               else if ((line != null) && line.startsWith("ESTIMATOR:"))
-               {
-                  String estimatorOption = line.substring(line.indexOf(":") + 1, line.length());
-
-                  if (estimatorOption.contains("true"))
-                  {
-                     estimatorCheckBox.setSelected(true);
-                  }
-                  else
-                  {
-                     estimatorCheckBox.setSelected(false);
-                  }
-
-                  estimatorCheckBox.setEnabled(scsCheckBox.isSelected());
-               }
-            }
-         }
-
-         reader.close();
-      }
-      catch (FileNotFoundException e)
-      {
-         e.printStackTrace();
+         processConfigFile();
       }
       catch (IOException e)
       {
          e.printStackTrace();
+      }
+   }
+
+   private void processConfigFile() throws IOException
+   {
+      BufferedReader reader = new BufferedReader(new FileReader(configFileHandle));
+      String line;
+      pluginOption = "default";
+      boolean done = false;
+
+      while (!done)
+      {
+         line = reader.readLine();
+
+         if (line.contains("END") || (line == null))
+         {
+            done = true;
+         }
+         else
+         {
+            processNextConfigOption(line);
+         }
+      }
+
+      reader.close();
+   }
+
+   private void processNextConfigOption(String line)
+   {
+      if ((line != null) && line.startsWith("PLUGIN:"))
+      {
+         setInitialPluginOption(line);
+      }
+      else if ((line != null) && line.startsWith("TASK:"))
+      {
+         setInitialTaskOption(line);
+      }
+      else if ((line != null) && line.startsWith("START:"))
+      {
+         setInitialStartLocationOption(line);
+      }
+      else if ((line != null) && line.startsWith("UI:"))
+      {
+         setInitialShouldLaunchUIOption(line);
+      }
+      else if ((line != null) && line.startsWith("SCS:"))
+      {
+         setInitialShouldLaunchSCSOption(line);
+      }
+      else if ((line != null) && line.startsWith("ESTIMATOR:"))
+      {
+         setInitialShouldInitializeEstimatorOption(line);
+      }
+   }
+
+   private void setInitialShouldInitializeEstimatorOption(String line)
+   {
+      String estimatorOption = line.substring(line.indexOf(":") + 1, line.length());
+
+      if (estimatorOption.contains("true"))
+      {
+         estimatorCheckBox.setSelected(true);
+      }
+      else
+      {
+         estimatorCheckBox.setSelected(false);
+      }
+
+      estimatorCheckBox.setEnabled(scsCheckBox.isSelected());
+   }
+
+   private void setInitialShouldLaunchSCSOption(String line)
+   {
+      String scsOption = line.substring(line.indexOf(":") + 1, line.length());
+
+      if (scsOption.contains("true"))
+         scsCheckBox.setSelected(true);
+      else
+         scsCheckBox.setSelected(false);
+   }
+
+   private void setInitialShouldLaunchUIOption(String line)
+   {
+      String uiOption = line.substring(line.indexOf(":") + 1, line.length());
+
+      if (uiOption.contains("true"))
+         operatorUICheckBox.setSelected(true);
+      else
+         operatorUICheckBox.setSelected(false);
+   }
+
+   private void setInitialStartLocationOption(String line)
+   {
+      String startOption = line.substring(line.indexOf(":") + 1, line.length());
+
+      if (!startOption.equals(""))
+         startingLocationsList.setSelectedValue(startOption, true);
+   }
+
+   private void setInitialTaskOption(String line)
+   {
+      String taskOption = line.substring(line.indexOf(":") + 1, line.length());
+
+      forceTaskComboUpdate();
+
+      if (pluginOption.contains("plugin"))
+         taskCombo.setSelectedItem(DRCPluginTasks.valueOf(taskOption));
+      else
+         taskCombo.setSelectedItem(DRCROSTasks.valueOf(taskOption));
+   }
+
+   private void setInitialPluginOption(String line)
+   {
+      pluginOption = line.substring(line.indexOf(":") + 1, line.length());
+
+      if (pluginOption.contains("plugin"))
+      {
+         radioGroup.setSelected(usePluginButton.getModel(), true);
+      }
+      else
+      {
+         radioGroup.setSelected(useDefaultButton.getModel(), true);
       }
    }
 
@@ -1143,11 +1182,11 @@ public class DRCDashboard
    private void launchDemo01(final LocalCloudMachines gazeboMachine, final String task, final String pluginOption)
    {
       String[] javaArgs;
-      if(DEBUG_REMOTE_APPLICATION)
+      if (DEBUG_REMOTE_APPLICATION)
          javaArgs = new String[] {"-Xms1024m", "-Xmx3000m", "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,address=\"8000\""};    // {"-Xms1024m", "-Xmx2048m"};
       else
          javaArgs = new String[] {"-Xms1024m", "-Xmx3000m"};    // {"-Xms1024m", "-Xmx2048m"};
-      
+
       if (gazeboMachine == null)
       {
          scsSpawner.spawn(DRCDemo01.class, javaArgs, null);
