@@ -28,6 +28,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvi
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
+import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.trajectories.ChangeableConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.PoseTrajectoryGenerator;
@@ -42,6 +43,7 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
@@ -373,7 +375,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          DoubleTrajectoryGenerator onToesTrajectory = new ThirdOrderPolynomialTrajectoryGenerator(sideString + bodyName, onToesInitialPitchProvider,
                                                          onToesInitialPitchVelocityProvider, onToesFinalPitchProvider, trajectoryTimeProvider, registry);
 
-         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(foot, jacobian, poseTrajectoryGenerator, null,
+         OneDoFJoint kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE);
+         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(foot, jacobian, kneeJoint, poseTrajectoryGenerator, null,
                                                                 onToesTrajectory, momentumBasedController, registry);
          footEndEffectorControlModules.put(foot, endEffectorControlModule);
       }

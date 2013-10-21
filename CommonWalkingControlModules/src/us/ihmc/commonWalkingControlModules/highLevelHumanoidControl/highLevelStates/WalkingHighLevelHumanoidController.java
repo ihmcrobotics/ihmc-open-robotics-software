@@ -77,6 +77,7 @@ import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -486,7 +487,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          
 
          GeometricJacobian jacobian = legJacobians.get(robotSide);
-         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(bipedFoot, jacobian, swingPoseTrajectoryGenerator,
+         OneDoFJoint kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE);
+         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(bipedFoot, jacobian, kneeJoint, swingPoseTrajectoryGenerator,
                                                                 heelPitchTrajectoryGenerator, onToesPitchTrajectoryGenerator, momentumBasedController, registry);
          double singularityEscapeNullspaceMultiplier = 200.0;
          double minJacobianDeterminantForSingularityEscape = 0.03;

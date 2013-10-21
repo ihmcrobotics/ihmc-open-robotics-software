@@ -11,9 +11,9 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CoMBasedMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAngularAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
+import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.trajectories.ChangeableConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
@@ -107,8 +107,8 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
          swingPositionTrajectoryGenerators.put(foot, positionTrajectoryGenerator);
          swingOrientationTrajectoryGenerators.put(foot, orientationTrajectoryGenerator);
 
-
-         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(foot, jacobian, poseTrajectoryGenerator, null,
+         OneDoFJoint kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE);
+         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(foot, jacobian, kneeJoint, poseTrajectoryGenerator, null,
                                                                 null, momentumBasedController, registry);
          footEndEffectorControlModules.put(foot, endEffectorControlModule);
       }
