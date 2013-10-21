@@ -21,6 +21,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 import us.ihmc.darpaRoboticsChallenge.handControl.SimulatedHandControllerDispatcher;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
+import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriterWithAccelerationIntegration;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriterWithTorqueLimits;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCSimulationOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap;
@@ -77,14 +78,20 @@ public class DRCSimulationFactory
 
       setupJointDamping(simulatedRobot);
 
-      final DRCOutputWriter drcOutputWriter;
+      DRCOutputWriter drcOutputWriter = new DRCSimulationOutputWriter(simulatedRobot, registry, dynamicGraphicObjectsListRegistry, robotVisualizer);
+      
       if (DRCConfigParameters.LIMIT_CONTROLLER_OUTPUT_TORQUES)
       {
-         drcOutputWriter = new DRCOutputWriterWithTorqueLimits(new DRCSimulationOutputWriter(simulatedRobot, registry, dynamicGraphicObjectsListRegistry, robotVisualizer));
+         drcOutputWriter = new DRCOutputWriterWithTorqueLimits(drcOutputWriter);
       }
-      else
+      if (DRCConfigParameters.INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
       {
-         drcOutputWriter = new DRCSimulationOutputWriter(simulatedRobot, registry, dynamicGraphicObjectsListRegistry, robotVisualizer);
+         DRCOutputWriterWithAccelerationIntegration drcOutputWriterWithAccelerationIntegration = new DRCOutputWriterWithAccelerationIntegration(drcOutputWriter, controlDT);
+         
+         drcOutputWriterWithAccelerationIntegration.setAlphaDesiredVelocity(0.8);
+         drcOutputWriterWithAccelerationIntegration.setKForceVel(8.0);
+         
+         drcOutputWriter = drcOutputWriterWithAccelerationIntegration;
       }
       
       // TODO: Build LIDAR here
