@@ -117,12 +117,22 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
       return ret;
    }
 
+   public boolean stayOnToes()
+   {
+      return false; // Not working for now
+   }
+   
    public boolean doToeOffIfPossible()
    {
 //      return true; 
       return false; //TODO: JEP. Changed to false for now so we can walk down into the mud reliably without falling.
    }
 
+   public boolean doToeTouchdownIfPossible()
+   {
+      return false;
+   }
+   
    public String[] getDefaultHeadOrientationControlJointNames()
    {
       // Get rid of back_bkx to prevent hip roll jumps.

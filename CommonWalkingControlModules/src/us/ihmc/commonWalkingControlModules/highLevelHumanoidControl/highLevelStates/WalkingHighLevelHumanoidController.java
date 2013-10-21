@@ -34,7 +34,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointD
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointTrajectoryData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModuleBridge.MomentumControlModuleType;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAngularAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ReinitializeWalkingControllerProvider;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
@@ -267,7 +266,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
            SideDependentList<DoubleTrajectoryGenerator> heelPitchTrajectoryGenerators, HeelPitchTouchdownProvidersManager heelPitchTouchdownProvidersManager,
            SwingTimeCalculationProvider swingTimeCalculationProvider, TransferTimeCalculationProvider transferTimeCalculationProvider, 
            YoPositionProvider finalPositionProvider,
-           TrajectoryParametersProvider trajectoryParametersProvider, boolean stayOntoes, double desiredPelvisPitch, double trailingFootPitch,
+           TrajectoryParametersProvider trajectoryParametersProvider, double desiredPelvisPitch, double trailingFootPitch,
            WalkingControllerParameters walkingControllerParameters, ICPBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
            LidarControllerInterface lidarControllerInterface,
            InstantaneousCapturePointPlanner instantaneousCapturePointPlanner, 
@@ -393,7 +392,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             
       stopInDoubleSupporTrajectoryTime.set(0.5);
       this.userDesiredPelvisPitch.set(desiredPelvisPitch);
-      this.stayOnToes.set(stayOntoes);
+      this.stayOnToes.set(walkingControllerParameters.stayOnToes());
       this.trailingFootPitch.set(trailingFootPitch);
       
       onToesTriangleAreaLimit.set(0.01);
