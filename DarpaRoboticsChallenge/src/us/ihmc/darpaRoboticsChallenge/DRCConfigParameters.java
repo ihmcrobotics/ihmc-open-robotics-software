@@ -90,7 +90,7 @@ public class DRCConfigParameters
    public static final String LEFT_IROBOT_HAND_IP = "192.168.40.38";
    public static final String RIGHT_IROBOT_HAND_IP = "192.168.40.32";
 
-   public static final String LOG_HOST = "192.168.6.203";
+   public static final String LOG_HOST = "192.168.6.204";
    public static final String GAZEBO_HOST = "localhost";    // CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP; //CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP;
 
    public static final String SCS_MACHINE_IP_ADDRESS ;    
