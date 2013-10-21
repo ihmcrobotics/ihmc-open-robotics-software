@@ -272,10 +272,12 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
             if (enableDamping)
             {
                pinJoint.setDamping(joint.getDamping());
+               pinJoint.setStiction(joint.getFriction());
             }
             else
             {
                pinJoint.setDampingParameterOnly(joint.getDamping());
+               pinJoint.setStictionParameterOnly(joint.getFriction());
             }
 
             if (enableTorqueVelocityLimits)
