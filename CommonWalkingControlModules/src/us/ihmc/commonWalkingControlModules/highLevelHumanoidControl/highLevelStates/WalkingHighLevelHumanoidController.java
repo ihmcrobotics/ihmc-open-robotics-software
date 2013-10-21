@@ -229,24 +229,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final YoFramePoint2d desiredECMP = new YoFramePoint2d("desiredECMP", "", worldFrame, registry);
    private final BooleanYoVariable desiredECMPinSupportPolygon = new BooleanYoVariable("desiredECMPinSupportPolygon", registry);
    private YoFramePoint ecmpViz = new YoFramePoint("ecmpViz", ReferenceFrame.getWorldFrame(), registry);
-//   private final DoubleYoVariable trailingLegJacobianDeterminant = new DoubleYoVariable("trailingLegJacobianDeterminant", registry);
-   private final DoubleYoVariable trailingLegKneeAngle = new DoubleYoVariable("trailingLegKneeAngle", registry);
-   private final DoubleYoVariable toeOffKneeAngleThreashold = new DoubleYoVariable("toeOffKneeAngleThreashold", registry);
-   private final BooleanYoVariable useTrailingLegKneeAngleAsToeOffTrigger = new BooleanYoVariable("useLegDeterminantAsToeOffTrigger", registry);
-   
-   private final DoubleYoVariable trailingLegAnklePitchAngle = new DoubleYoVariable("trailingLegAnklePitchAngle", registry);
-   private final DoubleYoVariable toeOffAnklePitchThreashold = new DoubleYoVariable("toeOffAnklePitchThreashold", registry);
-   private final BooleanYoVariable useAnklePitchAngleAsToeOffTrigger = new BooleanYoVariable("useAnklePitchAngleAsToeOffTrigger", registry);
-   
    
    private final boolean replaceQuinticToeOffSplineByCubicSpline = true;
    private final YoVariableDoubleProvider totalEstimatedToeOffTimeProvider = new YoVariableDoubleProvider("totalEstimatedToeOffTimeProvider", registry);
-   
+
+   private final DoubleYoVariable singularityEscapeNullspaceMultiplierSwingLeg = new DoubleYoVariable("singularityEscapeNullspaceMultiplierSwingLeg", registry);
+   private final DoubleYoVariable singularityEscapeNullspaceMultiplierSupportLeg = new DoubleYoVariable("singularityEscapeNullspaceMultiplierSupportLeg", registry);
+   private final DoubleYoVariable singularityEscapeNullspaceMultiplierSupportLegLocking = new DoubleYoVariable("singularityEscapeNullspaceMultiplierSupportLegLocking", registry);
    
    private final BooleanYoVariable toeOffTrigger = new BooleanYoVariable("toeOffTrigger", registry);
-   
 
-   private double minimumKneeAngleAfterToeOff = 60*Math.PI/180; 
    private double maximumToeOffAngle = 0.5; 
    private double referenceTime = 0.22; 
    private MaximumConstantJerkFinalToeOffAngleComputer maximumConstantJerkFinalToeOffAngleComputer = new MaximumConstantJerkFinalToeOffAngleComputer();  
@@ -288,17 +280,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = variousWalkingProviders.getMapFromFootstepsToTrajectoryParameters();
       this.reinitializeControllerProvider = variousWalkingProviders.getReinitializeWalkingControllerProvider();
 
-      toeOffKneeAngleThreashold.set(45*Math.PI/180); //52*Math.PI/180);
-      useTrailingLegKneeAngleAsToeOffTrigger.set(true);
-      
-      
-      toeOffAnklePitchThreashold.set(-40*Math.PI/180);
-      useAnklePitchAngleAsToeOffTrigger.set(true);
-      
-            
       maximumConstantJerkFinalToeOffAngleComputer.reinitialize(maximumToeOffAngle, referenceTime);
-      
-      
       
       if (dynamicGraphicObjectsListRegistry == null)
       {
@@ -421,6 +403,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    protected void setupFootControlModules(SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators,
            SideDependentList<DoubleTrajectoryGenerator> heelPitchTrajectoryGenerators)
    {
+      singularityEscapeNullspaceMultiplierSwingLeg.set(200.0);
+      singularityEscapeNullspaceMultiplierSupportLeg.set(20.0);
+      singularityEscapeNullspaceMultiplierSupportLegLocking.set(-0.5);
+      double minJacobianDeterminantForSingularityEscape = 0.03;
+      
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactablePlaneBody bipedFoot = feet.get(robotSide);
@@ -428,7 +415,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          //TODO: If we know the surface normal here, use it.
          momentumBasedController.setPlaneContactStateFullyConstrained(bipedFoot, coefficientOfFriction.getDoubleValue(), null);
          
-//         contactStates.get(bipedFoot).set(bipedFoot.getContactPoints2d(), coefficientOfFriction.getDoubleValue());    // flat feet
          String sideString = robotSide.getCamelCaseNameForStartOfExpression();
 
          PositionTrajectoryGenerator swingPositionTrajectoryGenerator = footPositionTrajectoryGenerators.get(robotSide);
@@ -442,33 +428,25 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                                                                                  + "SwingFootOrientation", worldFrame, swingTimeCalculationProvider,
                                                                                     initialOrientationProvider, finalFootOrientationProvider, registry);
          
-         PoseTrajectoryGenerator swingPoseTrajectoryGenerator = new WrapperForPositionAndOrientationTrajectoryGenerators(swingPositionTrajectoryGenerator, swingOrientationTrajectoryGenerator);
+         PoseTrajectoryGenerator swingPoseTrajectoryGenerator = new WrapperForPositionAndOrientationTrajectoryGenerators(swingPositionTrajectoryGenerator,
+                                                                   swingOrientationTrajectoryGenerator);
          
          YoVariableDoubleProvider onToesInitialPitchProvider = new YoVariableDoubleProvider(sideString + "OnToesInitialPitch", registry);
-         
- 
          DoubleProvider onToesInitialPitchVelocityProvider = new ConstantDoubleProvider(0.0);
-
+         DoubleProvider onToesTrajectoryTimeProvider = totalEstimatedToeOffTimeProvider; 
+         
          DoubleTrajectoryGenerator onToesPitchTrajectoryGenerator; 
-
          if (replaceQuinticToeOffSplineByCubicSpline)
          {
-               onToesFinalPitchProvider.set(maximumConstantJerkFinalToeOffAngleComputer.getMaximumFeasibleConstantJerkFinalToeOffAngle
+            onToesFinalPitchProvider.set(maximumConstantJerkFinalToeOffAngleComputer.getMaximumFeasibleConstantJerkFinalToeOffAngle
                      (onToesInitialPitchProvider.getValue(), instantaneousCapturePointPlanner.getEstimatedTimeRemainingForState(yoTime.getDoubleValue())));
-
-            
-            DoubleProvider onToesTrajectoryTimeProvider = totalEstimatedToeOffTimeProvider; 
             
             onToesPitchTrajectoryGenerator = new ThirdOrderPolynomialTrajectoryGenerator(sideString + "OnToesPitch",
-                  onToesInitialPitchProvider, onToesInitialPitchVelocityProvider,
-                  onToesFinalPitchProvider, onToesTrajectoryTimeProvider, registry);
-                
+                                                                          onToesInitialPitchProvider, onToesInitialPitchVelocityProvider,
+                                                                          onToesFinalPitchProvider, onToesTrajectoryTimeProvider, registry);
          }
          else
          {
-    
-            DoubleProvider onToesTrajectoryTimeProvider = transferTimeCalculationProvider;
-            
             DoubleProvider onToesFinalPitchVelocityProvider = new ConstantDoubleProvider(walkingControllerParameters.getFinalToeOffPitchAngularVelocity());
 
             onToesPitchTrajectoryGenerator = new QuinticPolynomialTrajectoryGenerator(sideString + "OnToesPitch",
@@ -478,21 +456,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
 
          onToesInitialAngleProviders.put(robotSide, onToesInitialPitchProvider);
+         onToesFinalAngleProviders.put(robotSide, onToesFinalPitchProvider);
          
-         
-         if (!useECMPinToeSupportPolygonInsteadICPTriangle)
-         {
-            onToesFinalAngleProviders.put(robotSide, onToesFinalPitchProvider);
-         }
-         
-
          GeometricJacobian jacobian = legJacobians.get(robotSide);
          OneDoFJoint kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE);
          EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(bipedFoot, jacobian, kneeJoint, swingPoseTrajectoryGenerator,
                                                                 heelPitchTrajectoryGenerator, onToesPitchTrajectoryGenerator, momentumBasedController, registry);
-         double singularityEscapeNullspaceMultiplier = 200.0;
-         double minJacobianDeterminantForSingularityEscape = 0.03;
-         endEffectorControlModule.setParameters(minJacobianDeterminantForSingularityEscape, singularityEscapeNullspaceMultiplier);
+         endEffectorControlModule.setParameters(minJacobianDeterminantForSingularityEscape, singularityEscapeNullspaceMultiplierSwingLeg.getDoubleValue());
          footEndEffectorControlModules.put(bipedFoot, endEffectorControlModule);
       }
    }
@@ -683,8 +653,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                   feet);
             checkForSteppingOnOrOff(transferToSide);
          }
-
-
          
          initializeICPPlannerIfNecessary();
 
@@ -715,11 +683,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             }
          }
          
-         trailingLegKneeAngle.set(fullRobotModel.getLegJoint(trailingLegSide, LegJointName.KNEE).getQ());
-         
-         trailingLegAnklePitchAngle.set(fullRobotModel.getLegJoint(trailingLegSide, LegJointName.ANKLE_PITCH).getQ());
-         
-         
          initializeECMPbasedToeOffIfNotInitializedYet();
 
          // Only during the first few seconds, we will control the pelvis orientation based on midfeetZup
@@ -732,7 +695,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          // keep desired pelvis orientation as it is
          desiredPelvisAngularVelocity.set(0.0, 0.0, 0.0);
          desiredPelvisAngularAcceleration.set(0.0, 0.0, 0.0);
-
       }
 
       public void initializeICPPlannerIfNecessary()
@@ -775,8 +737,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             icpTrajectoryHasBeenInitialized.set(true);
          }
       }
-      
-      
 
       public void initializeECMPbasedToeOffIfNotInitializedYet()
       {
@@ -797,36 +757,23 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                   desiredECMPinSupportPolygon.set(desiredECMPOK);
                   toeOff.set(desiredECMPOK && doToeOffIfPossible.getBooleanValue());
 
-                  double minimumToeOffTime = 0.0; // JOJO: might want to set a value here
                   double remainingToeOffTime = instantaneousCapturePointPlanner.getEstimatedTimeRemainingForState(yoTime.getDoubleValue()); 
-                  
 
                   toeOffTrigger.set
                   (
-                        toeOff.getBooleanValue() && (remainingToeOffTime > minimumToeOffTime) && 
-                        (
-                              (!useTrailingLegKneeAngleAsToeOffTrigger.getBooleanValue() && !useAnklePitchAngleAsToeOffTrigger.getBooleanValue()) || 
-                              (trailingLegKneeAngle.getDoubleValue() < toeOffKneeAngleThreashold.getDoubleValue() && useTrailingLegKneeAngleAsToeOffTrigger.getBooleanValue()) || 
-                              (trailingLegAnklePitchAngle.getDoubleValue() < toeOffAnklePitchThreashold.getDoubleValue() && useAnklePitchAngleAsToeOffTrigger.getBooleanValue())
-                              
-                              && (Math.abs(trailingLegKneeAngle.getDoubleValue()) < Math.PI - (minimumKneeAngleAfterToeOff + maximumToeOffAngle))
-                        )
-                        
+                        toeOff.getBooleanValue() && Math.abs(footEndEffectorControlModules.get(trailingFoot).getJacobianDeterminant()) < 0.06
                   );
-                  
                   
                   if (toeOffTrigger.getBooleanValue())
                   {
                      onToesFinalPitchProvider.set(maximumConstantJerkFinalToeOffAngleComputer.getMaximumFeasibleConstantJerkFinalToeOffAngle
                            (onToesInitialAngleProviders.get(trailingLeg).getValue(), remainingToeOffTime));
 
-                     
                      setOnToesContactState(supportFoot);
                      icpAndMomentumBasedController.updateBipedSupportPolygons(bipedSupportPolygons);    // need to always update biped support polygons after a change to the contact states
                      ecmpBasedToeOffHasBeenInitialized.set(true);
-                     
 
-                     totalEstimatedToeOffTimeProvider.set(instantaneousCapturePointPlanner.getEstimatedTimeRemainingForState(yoTime.getDoubleValue()));
+                     totalEstimatedToeOffTimeProvider.set(remainingToeOffTime);
                   }
                   else
                   {
@@ -934,7 +881,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          ecmpBasedToeOffHasBeenInitialized.set(false);
 
          icpTrajectoryHasBeenInitialized.set(false);
-         icpTrajectoryHasBeenInitialized.set(false);
          if (DEBUG)
             System.out.println("WalkingHighLevelHumanoidController: enteringDoubleSupportState");
          setSupportLeg(null);    // TODO: check if necessary
@@ -1033,9 +979,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private void setDesiredPelvisYawToAverageOfFeetOnStartupOnly(RobotSide transferToSide)
    {
-      FrameOrientation averageOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
+      FrameOrientation averageOrientation = new FrameOrientation(worldFrame);
       averageOrientationCalculator.computeAverageOrientation(averageOrientation, feet.get(RobotSide.LEFT).getPlaneFrame(),
-              feet.get(RobotSide.RIGHT).getPlaneFrame(), ReferenceFrame.getWorldFrame());
+              feet.get(RobotSide.RIGHT).getPlaneFrame(), worldFrame);
 
       double[] yawPitchRoll = averageOrientation.getYawPitchRoll();
 
@@ -1130,6 +1076,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          desiredPelvisAngularVelocity.set(desiredPelvisAngularVelocityToPack);
          desiredPelvisAngularAcceleration.set(desiredPelvisAngularAccelerationToPack);
 
+         if (stateMachine.timeInCurrentState() < 0.5 * swingTimeCalculationProvider.getValue() && footEndEffectorControlModules.get(feet.get(swingSide)).isInSingularityNeighborhood())
+         {
+            footEndEffectorControlModules.get(feet.get(swingSide)).doSingularityEscape(true);
+         }
       }
 
       @Override
@@ -1211,7 +1161,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          initialPelvisOrientationProvider.setOrientation(orientation);
 
          FrameOrientation finalPelvisOrientation = nextFootstep.getOrientationInFrame(worldFrame);
-         finalPelvisOrientation.setYawPitchRoll(finalPelvisOrientation.getYawPitchRoll()[0] + swingSide.negateIfLeftSide(userDesiredPelvisYaw.getDoubleValue()), userDesiredPelvisPitch.getDoubleValue(), userDesiredPelvisRoll.getDoubleValue());
+         FramePoint swingFootFinalPosition = nextFootstep.getPositionInFrame(referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide()));
+         FrameVector supportFootToSwingFoot = new FrameVector(swingFootFinalPosition);
+         Vector3d temp = supportFootToSwingFoot.getVectorCopy();
+         double desiredPelvisYawAngle = 0.0;
+         if (Math.abs(temp.x) > 0.1)
+         {
+            desiredPelvisYawAngle = Math.atan2(temp.y, temp.x);
+            desiredPelvisYawAngle -= swingSide.negateIfRightSide(Math.PI/2.0);
+         }
+         finalPelvisOrientation.setYawPitchRoll(finalPelvisOrientation.getYawPitchRoll()[0] + userDesiredPelvisYaw.getDoubleValue() * desiredPelvisYawAngle, userDesiredPelvisPitch.getDoubleValue(), userDesiredPelvisRoll.getDoubleValue());
          finalPelvisOrientationProvider.setOrientation(finalPelvisOrientation);
          pelvisOrientationTrajectoryGenerator.initialize();
 
@@ -1523,7 +1482,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       ContactablePlaneBody contactableBody = feet.get(swingSide);
       if (stayOnToes.getBooleanValue())
       {
-         List<FramePoint> contactPoints = getContactPointsForWalkingOnEdge(contactableBody, ConstraintType.TOES);
+         List<FramePoint> contactPoints = getToePoints(contactableBody);
          footPolygon = FrameConvexPolygon2d.constructByProjectionOntoXYPlane(contactPoints, referenceFrames.getSoleFrame(swingSide));
       }
       else
@@ -1626,8 +1585,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       setTorqueControlJointsToZeroDersiredAcceleration();
 
       momentumBasedController.doSecondaryControl();
+      
+      momentumBasedController.doPassiveKneeControl();
    }
- 
 
    // TODO: connect ports instead
    private void setICPBasedMomentumRateOfChangeControlModuleInputs()
@@ -1718,9 +1678,33 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          
          zdCurrent = comVelocity.getZ(); // Just use com velocity for now for damping...
       }
-      
+
       double zddDesired = centerOfMassHeightController.compute(zCurrent, zDesired, zdCurrent, zdDesired) + zddFeedForward;
 
+      
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         EndEffectorControlModule endEffectorControlModule = footEndEffectorControlModules.get(feet.get(robotSide));
+         
+         if (endEffectorControlModule.getCurrentConstraintType() == ConstraintType.FULL && endEffectorControlModule.isInSingularityNeighborhood())
+         {
+            // Can't achieve a desired height acceleration
+            zddDesired = 0.0;
+            double zTreshold = 0.01;
+
+            if (zDesired >= zCurrent - zTreshold)
+            {
+               // Can't achieve the desired height, just lock the knee
+               endEffectorControlModule.doSingularityEscape(singularityEscapeNullspaceMultiplierSupportLegLocking.getDoubleValue());
+            }
+            else
+            {
+               // Do the singularity escape before trying to achieve the desired height
+               endEffectorControlModule.doSingularityEscape(singularityEscapeNullspaceMultiplierSupportLeg.getDoubleValue());
+            }
+         }
+      }
+      
       double epsilon = 1e-12;
       zddDesired = MathTools.clipToMinMax(zddDesired, -gravity + epsilon, Double.POSITIVE_INFINITY);
 
@@ -1745,7 +1729,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private void setOnToesContactState(ContactablePlaneBody contactableBody)
    {
-      footEndEffectorControlModules.get(contactableBody).setContactState(ConstraintType.TOES);
+      RobotSide robotSide = RobotSide.LEFT;
+      
+      if (feet.get(robotSide.getOppositeSide()).equals(contactableBody))
+         robotSide = RobotSide.RIGHT;
+
+      // TODO cannot use world or elevator frames with non perfect sensors... some bug to fix obviously
+      footEndEffectorControlModules.get(contactableBody).setContactState(ConstraintType.TOES, new FrameVector(referenceFrames.getAnkleZUpFrame(robotSide), 0.0, 0.0, 1.0));
    }
 
    private void setOnHeelContactState(ContactablePlaneBody contactableBody)
@@ -1761,18 +1751,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private void setContactStateForSwing(ContactablePlaneBody contactableBody)
    {
       EndEffectorControlModule endEffectorControlModule = footEndEffectorControlModules.get(contactableBody);
-      endEffectorControlModule.doSingularityEscapeBeforeTransitionToNextState();
+      endEffectorControlModule.doSingularityEscape(true);
       endEffectorControlModule.setContactState(ConstraintType.UNCONSTRAINED);
-   }
-
-   @Deprecated
-   private List<FramePoint> getContactPointsForWalkingOnEdge(ContactablePlaneBody contactableBody, ConstraintType constraintType)
-   {
-      FrameVector direction = new FrameVector(contactableBody.getBodyFrame(), 1.0, 0.0, 0.0);
-      if (constraintType == ConstraintType.HEEL)
-         direction.scale(-1.0);
-
-      return DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactableBody.getContactPoints(), direction, 2);
    }
 
    // TODO: should probably precompute this somewhere else
@@ -1787,7 +1767,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private boolean landOnHeels()
    {
-      return (heelPitchTouchdownProvidersManager != null) && (heelPitchTouchdownProvidersManager.getInitialAngle() != 0.0);
+      FramePoint footPosition = new FramePoint(referenceFrames.getAnkleZUpFrame(RobotSide.LEFT));
+      footPosition.changeFrame(referenceFrames.getAnkleZUpFrame(RobotSide.RIGHT));
+      // TODO Sylvain: extend the HeeTouchdownProvidersManager to detect if landing on heel is appropriate.
+      return (Math.abs(footPosition.getX()) > 0.15 && heelPitchTouchdownProvidersManager != null) && (heelPitchTouchdownProvidersManager.getInitialAngle() != 0.0);
    }
 
    private void checkForSteppingOnOrOff(RobotSide transferToSide)
