@@ -4,9 +4,9 @@ import java.util.ArrayList;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
+import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.TimestampProvider;
-import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
 
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.simulatedSensors.FastPolarRayCastLIDAR;
@@ -57,10 +57,10 @@ public class DRCLidar
             polarLidar.setNodesToIntersect(DRCConfigParameters.SCS_LIDAR_NODES_TO_INTERSECT);
             if (DRCConfigParameters.OVERRIDE_DRC_LIDAR_CONFIG)
             {
-               LidarScanParameters largeScan = new LidarScanParameters(true, DRCConfigParameters.LIDAR_POINTS_PER_SWEEP,
-                     DRCConfigParameters.LIDAR_SWEEPS_PER_SCAN, DRCConfigParameters.LIDAR_SWEEP_MAX_YAW, DRCConfigParameters.LIDAR_SWEEP_MIN_YAW,
-                     DRCConfigParameters.LIDAR_ANGLE_INCREMENT, DRCConfigParameters.LIDAR_TIME_INCREMENT, DRCConfigParameters.LIDAR_SCAN_TIME,
-                     DRCConfigParameters.LIDAR_SCAN_MAX_ROLL, DRCConfigParameters.LIDAR_SCAN_MIN_ROLL, DRCConfigParameters.LIDAR_MIN_DISTANCE, DRCConfigParameters.LIDAR_MAX_DISTANCE);
+               LidarScanParameters largeScan = new LidarScanParameters(DRCConfigParameters.LIDAR_POINTS_PER_SWEEP, DRCConfigParameters.LIDAR_SWEEP_MIN_YAW,
+                     DRCConfigParameters.LIDAR_SWEEP_MAX_YAW, DRCConfigParameters.LIDAR_ANGLE_INCREMENT, DRCConfigParameters.LIDAR_TIME_INCREMENT,
+                     DRCConfigParameters.LIDAR_SWEEPS_PER_SCAN, DRCConfigParameters.LIDAR_SCAN_MIN_ROLL, DRCConfigParameters.LIDAR_SCAN_MAX_ROLL,
+                     DRCConfigParameters.LIDAR_MIN_DISTANCE, DRCConfigParameters.LIDAR_MAX_DISTANCE, DRCConfigParameters.LIDAR_SCAN_TIME, true);
                polarLidar.setScan(largeScan);
                updateParameters.setUpdateRate(DRCConfigParameters.LIDAR_UPDATE_RATE_OVERRIDE);
             }
