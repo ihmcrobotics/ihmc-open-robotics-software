@@ -108,7 +108,7 @@ public class LoadCloudWithPoses extends SimpleApplication
       {
          int pointsPerSweep = 1081;
          String file = new Scanner(new BufferedReader(new FileReader(fileName))).useDelimiter("\\Z").next();
-         LidarScanParameters param = new LidarScanParameters(false, pointsPerSweep, 1, 2.356194f, -2.356194f, 0, 0, 0, 0, 0, 0, 0);
+         LidarScanParameters param = new LidarScanParameters(pointsPerSweep, -2.356194f, 2.356194f, 0, 0, 1, 0, 0, 0, 0, 0, false);
 
          Transform3D start, end;
          Point3d point;

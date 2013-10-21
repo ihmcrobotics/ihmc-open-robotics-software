@@ -1,7 +1,7 @@
 package us.ihmc.utilities.ros;
 
-import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import sensor_msgs.LaserScan;
+import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
 
 public abstract class RosLidarSubscriber extends AbstractRosTopicSubscriber<sensor_msgs.LaserScan>
@@ -16,9 +16,9 @@ public abstract class RosLidarSubscriber extends AbstractRosTopicSubscriber<sens
 
    public void onNewMessage(LaserScan message)
    {
-      LidarScanParameters polarLidarScanParameters = new LidarScanParameters(false, message.getHeader().getStamp().totalNsecs(), message.getRanges().length, 1, message.getAngleMax(),
-                                                             message.getAngleMin(), message.getAngleIncrement(), message.getTimeIncrement(),
-                                                             message.getScanTime(), 0.0f, 0.0f, message.getRangeMin(), message.getRangeMax());
+      LidarScanParameters polarLidarScanParameters = new LidarScanParameters(message.getRanges().length, message.getAngleMin(), message.getAngleMax(),
+            message.getAngleIncrement(), message.getTimeIncrement(), 1, 0.0f, 0.0f, message.getRangeMin(), message.getRangeMax(), message.getScanTime(),
+            message.getHeader().getStamp().totalNsecs(), false);
 
       if (DEBUG)
       {
