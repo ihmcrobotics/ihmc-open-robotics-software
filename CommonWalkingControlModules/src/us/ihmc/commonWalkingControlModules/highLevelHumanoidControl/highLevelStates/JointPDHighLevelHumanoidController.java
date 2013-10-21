@@ -1,17 +1,16 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
-
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class JointPDHighLevelHumanoidController extends State<HighLevelState>
 {
@@ -52,15 +51,15 @@ public class JointPDHighLevelHumanoidController extends State<HighLevelState>
       
       for (OneDoFJoint joint : oneDoFJoints)
       {
-         DoubleYoVariable kp = new DoubleYoVariable("hl_" + joint.getName()+ "_k_q_p", registry);
+         DoubleYoVariable kp = new DoubleYoVariable("hl_" + joint.getName()+ CommonNames.k_q_p, registry);
          kp.set(initialKpGains.get(joint));
          kpJoints.put(joint, kp);
          
-         DoubleYoVariable kd = new DoubleYoVariable("hl_" + joint.getName() + "_k_qd_p", registry);
+         DoubleYoVariable kd = new DoubleYoVariable("hl_" + joint.getName() + CommonNames.k_qd_p, registry);
          kd.set(initialKdGains.get(joint));
          kdJoints.put(joint, kd);
          
-         DoubleYoVariable q_d = new DoubleYoVariable("hl_" + joint.getName() + "_q_d", registry);
+         DoubleYoVariable q_d = new DoubleYoVariable("hl_" + joint.getName() + CommonNames.q_d, registry);
          q_dJoints.put(joint, q_d);
          
          AlphaFilteredYoVariable qd_filtered = new AlphaFilteredYoVariable("hl_" + joint.getName() + "_qd_filt", registry, alphaQD);
