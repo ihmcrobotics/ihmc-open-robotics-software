@@ -37,6 +37,7 @@ public class DRCConfigParameters
    public static final boolean USE_FISHEYE = RUNNING_ON_REAL_ROBOT;
 
    public static final boolean LIMIT_CONTROLLER_OUTPUT_TORQUES = false;
+   public static final boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES = false;
 
    // Limit the controller to use only a certain percentage of maximum torque that the robot can provide
    public static final double MAX_TORQUE_TO_USE_IN_PERCENT = 0.98;
