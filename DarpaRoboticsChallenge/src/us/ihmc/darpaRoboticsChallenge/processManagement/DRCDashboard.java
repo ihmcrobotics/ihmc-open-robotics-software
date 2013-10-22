@@ -152,7 +152,7 @@ public class DRCDashboard
       {
          line = reader.readLine();
 
-         if (line.contains("END") || (line == null))
+         if ((line == null) || line.contains("END"))
          {
             done = true;
          }
@@ -167,29 +167,32 @@ public class DRCDashboard
 
    private void processNextConfigOption(String line)
    {
-      if ((line != null) && line.startsWith("PLUGIN:"))
+      if (line != null)
       {
-         setInitialPluginOption(line);
-      }
-      else if ((line != null) && line.startsWith("TASK:"))
-      {
-         setInitialTaskOption(line);
-      }
-      else if ((line != null) && line.startsWith("START:"))
-      {
-         setInitialStartLocationOption(line);
-      }
-      else if ((line != null) && line.startsWith("UI:"))
-      {
-         setInitialShouldLaunchUIOption(line);
-      }
-      else if ((line != null) && line.startsWith("SCS:"))
-      {
-         setInitialShouldLaunchSCSOption(line);
-      }
-      else if ((line != null) && line.startsWith("ESTIMATOR:"))
-      {
-         setInitialShouldInitializeEstimatorOption(line);
+         if (line.startsWith("PLUGIN:"))
+         {
+            setInitialPluginOption(line);
+         }
+         else if (line.startsWith("TASK:"))
+         {
+            setInitialTaskOption(line);
+         }
+         else if (line.startsWith("START:"))
+         {
+            setInitialStartLocationOption(line);
+         }
+         else if (line.startsWith("UI:"))
+         {
+            setInitialShouldLaunchUIOption(line);
+         }
+         else if (line.startsWith("SCS:"))
+         {
+            setInitialShouldLaunchSCSOption(line);
+         }
+         else if (line.startsWith("ESTIMATOR:"))
+         {
+            setInitialShouldInitializeEstimatorOption(line);
+         }
       }
    }
 
