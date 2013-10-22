@@ -8,7 +8,8 @@ public class DRCConfigParameters
 {
    public static final boolean USE_VRC_PARAMETERS = true;
    public static final boolean RUNNING_ON_REAL_ROBOT = false;
-   
+   public static final boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES = RUNNING_ON_REAL_ROBOT;
+
    public static final boolean USE_DUMMY_DRIVNG = false;
    public static final boolean RESTART_FOR_FANCY_CONTROL = true;    // Enable for testing standup
 
@@ -37,7 +38,6 @@ public class DRCConfigParameters
    public static final boolean USE_FISHEYE = RUNNING_ON_REAL_ROBOT;
 
    public static final boolean LIMIT_CONTROLLER_OUTPUT_TORQUES = false;
-   public static final boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES = false;
 
    // Limit the controller to use only a certain percentage of maximum torque that the robot can provide
    public static final double MAX_TORQUE_TO_USE_IN_PERCENT = 0.98;
@@ -92,7 +92,7 @@ public class DRCConfigParameters
    public static final String RIGHT_IROBOT_HAND_IP = "192.168.40.32";
 
    public static final String LOG_HOST = "192.168.6.204";
-   public static final String GAZEBO_HOST = "localhost";    // CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP; //CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP;
+   public static final String GAZEBO_HOST = "10.66.171.41";    // CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP; //CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP;
 
    public static final String SCS_MACHINE_IP_ADDRESS ;    
    static
@@ -140,7 +140,7 @@ public class DRCConfigParameters
    public static final boolean ASSUME_PERFECT_IMU = true;    // assume perfect orientation, angular velocity and linear acceleration output from IMU
 
    // LIDAR:
-   public static final boolean USE_ROS_FOR_MULTISENSE_TRANSFORMS = false;
+   public static final boolean USE_ROS_FOR_MULTISENSE_TRANSFORMS = RUNNING_ON_REAL_ROBOT;
    public static final boolean USING_REAL_HEAD = RUNNING_ON_REAL_ROBOT;
    public static final double LIDAR_SPINDLE_VELOCITY = 5.0;
 
