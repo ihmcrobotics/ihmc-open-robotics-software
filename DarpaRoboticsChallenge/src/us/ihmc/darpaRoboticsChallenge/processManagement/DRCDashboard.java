@@ -167,32 +167,29 @@ public class DRCDashboard
 
    private void processNextConfigOption(String line)
    {
-      if (line != null)
+      if (line.startsWith("PLUGIN:"))
       {
-         if (line.startsWith("PLUGIN:"))
-         {
-            setInitialPluginOption(line);
-         }
-         else if (line.startsWith("TASK:"))
-         {
-            setInitialTaskOption(line);
-         }
-         else if (line.startsWith("START:"))
-         {
-            setInitialStartLocationOption(line);
-         }
-         else if (line.startsWith("UI:"))
-         {
-            setInitialShouldLaunchUIOption(line);
-         }
-         else if (line.startsWith("SCS:"))
-         {
-            setInitialShouldLaunchSCSOption(line);
-         }
-         else if (line.startsWith("ESTIMATOR:"))
-         {
-            setInitialShouldInitializeEstimatorOption(line);
-         }
+         setInitialPluginOption(line);
+      }
+      else if (line.startsWith("TASK:"))
+      {
+         setInitialTaskOption(line);
+      }
+      else if (line.startsWith("START:"))
+      {
+         setInitialStartLocationOption(line);
+      }
+      else if (line.startsWith("UI:"))
+      {
+         setInitialShouldLaunchUIOption(line);
+      }
+      else if (line.startsWith("SCS:"))
+      {
+         setInitialShouldLaunchSCSOption(line);
+      }
+      else if (line.startsWith("ESTIMATOR:"))
+      {
+         setInitialShouldInitializeEstimatorOption(line);
       }
    }
 
