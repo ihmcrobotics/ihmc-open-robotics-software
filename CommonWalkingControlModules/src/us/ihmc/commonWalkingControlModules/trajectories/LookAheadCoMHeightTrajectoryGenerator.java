@@ -5,6 +5,7 @@ import java.util.List;
 import javax.vecmath.Point2d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
+import us.ihmc.commonWalkingControlModules.controlModules.WalkOnToesManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
@@ -62,6 +63,9 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final DynamicGraphicPosition pointS0MaxViz, pointSFMaxViz, pointD0MaxViz, pointDFMaxViz, pointSNextMaxViz;
    
    private final BagOfBalls bagOfBalls;
+
+   private WalkOnToesManager walkOnToesManager;
+   private double extraCoMMaxHeightWithToes = 0.0;
    
    public LookAheadCoMHeightTrajectoryGenerator(DesiredComHeightProvider desiredComHeightProvider, double minimumHeightAboveGround, 
          double nominalHeightAboveGround, double maximumHeightAboveGround, 
@@ -164,6 +168,12 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       }
    }
    
+   public void attachWalkOnToesManager(WalkOnToesManager walkOnToesManager)
+   {
+      this.walkOnToesManager = walkOnToesManager;
+      extraCoMMaxHeightWithToes = walkOnToesManager.getExtraCoMMaxHeightWithToes();
+   }
+   
    private void setOffsetHeightAboveGround(double offsetHeightAboveGround)
    {
       this.offsetHeightAboveGround.set(offsetHeightAboveGround);
@@ -215,9 +225,11 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final Point2d dF = new Point2d();
    private final Point2d sF = new Point2d();
    private final Point2d sNext = new Point2d();
-   
+
    private void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
    {
+      if (desiredComHeightProvider != null) offsetHeightAboveGround.set(desiredComHeightProvider.getComHeightOffset());
+      
       Footstep transferFromFootstep = transferToAndNextFootstepsData.getTransferFromFootstep();
       Footstep transferToFootstep = transferToAndNextFootstepsData.getTransferToFootstep();
       Footstep nextFootstep = transferToAndNextFootstepsData.getNextFootstep();
@@ -266,13 +278,23 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       sFNom.setY(footHeight1 + nominalHeightAboveGround.getDoubleValue());
       sFMax.setY(footHeight1 + maximumHeightAboveGround.getDoubleValue());
       
+         
+      
       d0Min.setY(findMinimumDoubleSupportHeight(s0.getX(), sF.getX(), d0.getX(), footHeight0, footHeight1));      
       d0Nom.setY(findNominalDoubleSupportHeight(s0.getX(), sF.getX(), d0.getX(), footHeight0, footHeight1));      
       d0Max.setY(findMaximumDoubleSupportHeight(s0.getX(), sF.getX(), d0.getX(), footHeight0, footHeight1));
       
       dFMin.setY(findMinimumDoubleSupportHeight(s0.getX(), sF.getX(), dF.getX(), footHeight0, footHeight1));
       dFNom.setY(findNominalDoubleSupportHeight(s0.getX(), sF.getX(), dF.getX(), footHeight0, footHeight1));
-      dFMax.setY(findMaximumDoubleSupportHeight(s0.getX(), sF.getX(), dF.getX(), footHeight0, footHeight1));
+      
+      if (walkOnToesManager != null && walkOnToesManager.willDoToeOff(transferToAndNextFootstepsData))
+      {
+         dFMax.setY(findMaximumDoubleSupportHeight(s0.getX(), sF.getX(), dF.getX(), footHeight0 + extraCoMMaxHeightWithToes, footHeight1));
+      }
+      else
+      {
+         dFMax.setY(findMaximumDoubleSupportHeight(s0.getX(), sF.getX(), dF.getX(), footHeight0, footHeight1));
+      }
       
       sNextMin.setY(nextFootHeight + minimumHeightAboveGround.getDoubleValue());
       sNextNom.setY(nextFootHeight + nominalHeightAboveGround.getDoubleValue());
@@ -294,55 +316,55 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       if (VISUALIZE)
       {
          FramePoint framePointS0 = new FramePoint(transferFromContactFramePosition);
-         framePointS0.setZ(s0.getY());
+         framePointS0.setZ(s0.getY() + offsetHeightAboveGround.getDoubleValue());
          pointS0Viz.setPosition(framePointS0);
          
-         framePointS0.setZ(s0Min.getY());
+         framePointS0.setZ(s0Min.getY() + offsetHeightAboveGround.getDoubleValue());
          pointS0MinViz.setPosition(framePointS0);
          
-         framePointS0.setZ(s0Max.getY());
+         framePointS0.setZ(s0Max.getY() + offsetHeightAboveGround.getDoubleValue());
          pointS0MaxViz.setPosition(framePointS0);
          
          FramePoint framePointD0 = FramePoint.morph(transferFromContactFramePosition, transferToContactFramePosition, d0.getX()/sF.getX());
-         framePointD0.setZ(d0.getY());
+         framePointD0.setZ(d0.getY() + offsetHeightAboveGround.getDoubleValue());
          pointD0Viz.setPosition(framePointD0);
          
-         framePointD0.setZ(d0Min.getY());
+         framePointD0.setZ(d0Min.getY() + offsetHeightAboveGround.getDoubleValue());
          pointD0MinViz.setPosition(framePointD0);
          
-         framePointD0.setZ(d0Max.getY());
+         framePointD0.setZ(d0Max.getY() + offsetHeightAboveGround.getDoubleValue());
          pointD0MaxViz.setPosition(framePointD0);
          
          FramePoint framePointDF = FramePoint.morph(transferFromContactFramePosition, transferToContactFramePosition, dF.getX()/sF.getX());
-         framePointDF.setZ(dF.getY());
+         framePointDF.setZ(dF.getY() + offsetHeightAboveGround.getDoubleValue());
          pointDFViz.setPosition(framePointDF);
          
-         framePointDF.setZ(dFMin.getY());
+         framePointDF.setZ(dFMin.getY() + offsetHeightAboveGround.getDoubleValue());
          pointDFMinViz.setPosition(framePointDF);
          
-         framePointDF.setZ(dFMax.getY());
+         framePointDF.setZ(dFMax.getY() + offsetHeightAboveGround.getDoubleValue());
          pointDFMaxViz.setPosition(framePointDF);
          
          FramePoint framePointSF = new FramePoint(transferToContactFramePosition);
-         framePointSF.setZ(sF.getY());
+         framePointSF.setZ(sF.getY() + offsetHeightAboveGround.getDoubleValue());
          pointSFViz.setPosition(framePointSF);     
          
-         framePointSF.setZ(sFMin.getY());
+         framePointSF.setZ(sFMin.getY() + offsetHeightAboveGround.getDoubleValue());
          pointSFMinViz.setPosition(framePointSF);     
          
-         framePointSF.setZ(sFMax.getY());
+         framePointSF.setZ(sFMax.getY() + offsetHeightAboveGround.getDoubleValue());
          pointSFMaxViz.setPosition(framePointSF);     
          
          if (nextContactFramePosition != null)
          {
             FramePoint framePointSNext = new FramePoint(nextContactFramePosition);
-            framePointSNext.setZ(sNext.getY());
+            framePointSNext.setZ(sNext.getY() + offsetHeightAboveGround.getDoubleValue());
             pointSNextViz.setPosition(framePointSNext);     
 
-            framePointSNext.setZ(sNextMin.getY());
+            framePointSNext.setZ(sNextMin.getY() + offsetHeightAboveGround.getDoubleValue());
             pointSNextMinViz.setPosition(framePointSNext);     
 
-            framePointSNext.setZ(sNextMax.getY());
+            framePointSNext.setZ(sNextMax.getY() + offsetHeightAboveGround.getDoubleValue());
             pointSNextMaxViz.setPosition(framePointSNext);     
          }
          else
@@ -398,9 +420,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private void computeHeightsToUseByStretchingString()
    {
       // s0 is at previous
-      double z0 = previousZFinal.getDoubleValue();
-      if (z0 > s0Max.getY()) z0 = s0Max.getY();
-      else if (z0 < s0Min.getY()) z0 = s0Min.getY();
+      double z0 = MathTools.clipToMinMax(previousZFinal.getDoubleValue(), s0Min.getY(), s0Max.getY());
       s0.setY(z0);
       
       StringStretcher2d stringStretcher2d = new StringStretcher2d();
