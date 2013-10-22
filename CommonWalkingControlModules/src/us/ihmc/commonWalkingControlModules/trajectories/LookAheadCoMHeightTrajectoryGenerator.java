@@ -61,7 +61,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final DynamicGraphicPosition pointS0Viz, pointSFViz, pointD0Viz, pointDFViz, pointSNextViz;
    private final DynamicGraphicPosition pointS0MinViz, pointSFMinViz, pointD0MinViz, pointDFMinViz, pointSNextMinViz;
    private final DynamicGraphicPosition pointS0MaxViz, pointSFMaxViz, pointD0MaxViz, pointDFMaxViz, pointSNextMaxViz;
-   
    private final BagOfBalls bagOfBalls;
 
    private WalkOnToesManager walkOnToesManager;
