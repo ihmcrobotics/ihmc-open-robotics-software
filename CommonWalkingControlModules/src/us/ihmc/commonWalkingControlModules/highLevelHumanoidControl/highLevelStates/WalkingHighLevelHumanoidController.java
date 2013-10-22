@@ -349,6 +349,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       setupLegJacobians(fullRobotModel);
 
       walkOnToesManager = new WalkOnToesManager(walkingControllerParameters, feet, footEndEffectorControlModules, registry);
+      this.centerOfMassHeightTrajectoryGenerator.attachWalkOnToesManager(walkOnToesManager);
       
       setupFootControlModules(footPositionTrajectoryGenerators, heelPitchTrajectoryGenerators);
 
