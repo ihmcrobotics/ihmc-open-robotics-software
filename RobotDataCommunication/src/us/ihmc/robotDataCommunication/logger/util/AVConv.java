@@ -2,6 +2,9 @@ package us.ihmc.robotDataCommunication.logger.util;
 
 public class AVConv implements ExternalProgram
 {
+   /*
+    * LibAV is broken with respect to timestamps, use ffmpeg version 2.0.2.
+    */
    private static final String avconvBinary = "ffmpeg";
 
    private final String path;
