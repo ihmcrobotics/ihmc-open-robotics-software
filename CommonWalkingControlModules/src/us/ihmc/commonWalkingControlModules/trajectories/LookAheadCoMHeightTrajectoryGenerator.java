@@ -168,7 +168,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       }
    }
    
-   @Override
    public void attachWalkOnToesManager(WalkOnToesManager walkOnToesManager)
    {
       this.walkOnToesManager = walkOnToesManager;
@@ -195,7 +194,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       this.maximumHeightAboveGround.set(maximumHeightAboveGround);
    }
 
-   @Override
    public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, RobotSide supportLeg, Footstep nextFootstep, List<PlaneContactState> contactStates)
    {
       initialize(transferToAndNextFootstepsData);
@@ -562,7 +560,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final Point2d queryPoint = new Point2d();
    private final Point2d solutionPoint = new Point2d();
    
-   @Override
    public void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, ContactStatesAndUpcomingFootstepData centerOfMassHeightInputData)
    {
       getCenterOfMass2d(queryPoint, centerOfMassHeightInputData.getCenterOfMassFrame());
@@ -668,7 +665,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       getPoint2d(point2dToPack, coM);
    }
    
-   @Override
    public boolean hasBeenInitializedWithNextStep()
    {
       return hasBeenInitializedWithNextStep.getBooleanValue();
