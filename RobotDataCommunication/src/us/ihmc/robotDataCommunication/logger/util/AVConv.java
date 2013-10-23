@@ -2,7 +2,7 @@ package us.ihmc.robotDataCommunication.logger.util;
 
 public class AVConv implements ExternalProgram
 {
-   private static final String avconvBinary = "avconv";
+   private static final String avconvBinary = "ffmpeg";
 
    private final String path;
    
@@ -14,7 +14,7 @@ public class AVConv implements ExternalProgram
 
    private int quality = -1;
    
-   private boolean showinfo;
+   private boolean showinfo = false;
 
    public AVConv()
    {
@@ -93,6 +93,10 @@ public class AVConv implements ExternalProgram
       if (audioCodec != null)
       {
          appendCmdOption(cmd, "-acodec", audioCodec);
+      }
+      else
+      {
+         appendCmdOption(cmd, "-an");
       }
       
       if(quality != -1)

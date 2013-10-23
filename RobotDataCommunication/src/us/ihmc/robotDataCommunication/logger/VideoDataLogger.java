@@ -37,12 +37,14 @@ public class VideoDataLogger implements TimestampListener
       
     
       AVConv avconv = new AVConv(options.getAvconvPath());
-      avconv.setAudioCodec("copy");
+      avconv.setAudioCodec(null);
       avconv.setVideoCodec(options.getVideoCodec());
       avconv.setQuality(5);
       avconv.setInputFile("-");
       avconv.setOutputFile(logPath.getAbsolutePath() + File.separator + videoFilename);
-      
+
+      System.out.println();
+      System.out.println(avconv.getCommandLine());
       commandExecutor = new PipedCommandExecutor(bmdCapture, avconv);
       commandExecutor.execute();
       
@@ -58,5 +60,24 @@ public class VideoDataLogger implements TimestampListener
 	   System.out.println("Signalling recorder");
 	  commandExecutor.writeln("-1");
 	  commandExecutor.waitFor();
+   }
+   
+   public static void main(String[] args)
+   {
+      BMDCapture bmdCapture = new BMDCapture("bmdcapture");
+      bmdCapture.setMode(mode);
+      bmdCapture.setFormat("nut");
+      bmdCapture.setFilename("pipe:1");
+      bmdCapture.setTimestampData(File.separator + timestampDataFilename);
+      
+    
+      AVConv avconv = new AVConv("avconv");
+      avconv.setAudioCodec("copy");
+      avconv.setVideoCodec("mjpeg");
+      avconv.setQuality(5);
+      avconv.setInputFile("-");
+      avconv.setOutputFile(File.separator + videoFilename);
+      
+      System.out.println(bmdCapture.getCommandLine() + "|" + avconv.getCommandLine());
    }
 }

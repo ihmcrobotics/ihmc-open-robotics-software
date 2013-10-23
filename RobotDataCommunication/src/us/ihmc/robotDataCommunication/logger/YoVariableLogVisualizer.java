@@ -93,7 +93,9 @@ public class YoVariableLogVisualizer
       scs.setTimeVariableName(timeVariableName);
       YoVariableLogPlaybackRobot robot = new YoVariableLogPlaybackRobot(loader.getGeneralizedSDFRobotModel(jointNameMap.getModelName()),jointNameMap, parser.getJointStates(), parser.getYoVariablesList(), logChannel, scs);
       
-      scs.setDT(parser.getDt(), 1);
+      double dt = parser.getDt();
+      System.out.println(getClass().getSimpleName()+ ": dt set to " + dt);
+      scs.setDT(dt, 1);
       scs.setPlaybackDesiredFrameRate(0.04);
       
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = parser.getDynamicGraphicObjectsListRegistry();
