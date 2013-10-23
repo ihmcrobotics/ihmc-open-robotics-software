@@ -100,7 +100,7 @@ public class WalkOnToesManager
       minStepLengthForToeTouchdown.set(0.40);
 
       maximumToeOffAngle.set(Math.toRadians(45.0));
-      toeTouchdownAngle.set(Math.toRadians(40.0));
+      toeTouchdownAngle.set(Math.toRadians(60.0));
 
       parentRegistry.addChild(registry);
    }
