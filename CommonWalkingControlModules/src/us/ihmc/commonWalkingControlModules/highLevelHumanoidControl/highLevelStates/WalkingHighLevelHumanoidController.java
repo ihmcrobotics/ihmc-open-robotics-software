@@ -1055,7 +1055,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          
          if (walkOnToesManager.willLandOnToes())
          {
-            nextFootstep = Footstep.copyButChangePitch(nextFootstep, walkOnToesManager.getToeTouchdownAngle());
+            heelPitchTouchdownProvidersManager.setInitialAngle(walkOnToesManager.getToeTouchdownAngle());
+            nextFootstep = Footstep.copyButChangePitch(nextFootstep, heelPitchTouchdownProvidersManager.getInitialAngle());
             heelPitchTouchdownProvidersManager.updateInitialAngularSpeed();
             nextFootstepHasBeenReplaced = true;
          }
