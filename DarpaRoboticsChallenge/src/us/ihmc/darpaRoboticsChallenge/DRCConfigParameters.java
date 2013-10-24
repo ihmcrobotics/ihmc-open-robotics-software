@@ -73,6 +73,8 @@ public class DRCConfigParameters
    public static final int REAR_CAMERA = 5;
    public static final int VIDEO_FRAME = 6;
    
+  
+   
    // Networking
    public static final String LOCALHOST = "localhost";
    public static final String CLOUD_MINION1_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMINION_1);
@@ -130,6 +132,12 @@ public class DRCConfigParameters
 
    public static final long ROBOT_JOINT_SERVER_UPDATE_MILLIS = 100;
 
+   //ROS Topics
+   public static final String FISHEYE_RIGHT_CAMERA_TOPIC = "/blackfly/camera/right";
+   public static final String FISHEYE_LEFT_CAMERA_TOPIC = "/blackfly/camera/LEFT";
+   public static final String MULTISENSE_LEFT_CAMERA_TOPIC = "/multisense_sl/camera/left/image_rect_color/compressed";
+   public static final String MULTISENSE_RIGHT_CAMERA_TOPIC = "/multisense_sl/camera/right/image_rect/compressed";
+   
    // Video Settings
    public static final boolean STREAM_VIDEO = true;
 
