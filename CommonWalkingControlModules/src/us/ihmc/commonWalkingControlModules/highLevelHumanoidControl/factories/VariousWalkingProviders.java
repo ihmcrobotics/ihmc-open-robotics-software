@@ -26,9 +26,42 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHead
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.SimpleDesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.DrivingCommandProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.*;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredArmJointAngleProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredChestOrientationProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandLoadBearingProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHeadOrientationProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBearingProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.FingerStateProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HandStateToFingerStateConverter;
+import us.ihmc.commonWalkingControlModules.packetConsumers.ReinitializeWalkingControllerProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.TorusManipulationProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.TorusPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredHeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.VehiclePoseProvider;
-import us.ihmc.commonWalkingControlModules.packets.*;
+import us.ihmc.commonWalkingControlModules.packets.ArmJointAnglePacket;
+import us.ihmc.commonWalkingControlModules.packets.BumStatePacket;
+import us.ihmc.commonWalkingControlModules.packets.ComHeightPacket;
+import us.ihmc.commonWalkingControlModules.packets.DesiredHighLevelStateProvider;
+import us.ihmc.commonWalkingControlModules.packets.FingerStatePacket;
+import us.ihmc.commonWalkingControlModules.packets.FootPosePacket;
+import us.ihmc.commonWalkingControlModules.packets.FootStatePacket;
+import us.ihmc.commonWalkingControlModules.packets.HandLoadBearingPacket;
+import us.ihmc.commonWalkingControlModules.packets.HandPosePacket;
+import us.ihmc.commonWalkingControlModules.packets.HandStatePacket;
+import us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket;
+import us.ihmc.commonWalkingControlModules.packets.HighLevelStatePacket;
+import us.ihmc.commonWalkingControlModules.packets.LookAtPacket;
+import us.ihmc.commonWalkingControlModules.packets.PelvisOrientationPacket;
+import us.ihmc.commonWalkingControlModules.packets.ReinitializeWalkingControllerPacket;
+import us.ihmc.commonWalkingControlModules.packets.ThighStatePacket;
+import us.ihmc.commonWalkingControlModules.packets.TorusManipulationPacket;
+import us.ihmc.commonWalkingControlModules.packets.TorusPosePacket;
 import us.ihmc.commonWalkingControlModules.packets.VehiclePosePacket;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.terrain.VaryingStairGroundProfile;
@@ -453,5 +486,44 @@ public class VariousWalkingProviders
                                                            pelvisLoadBearingProvider, fingerStateProvider, armJointAngleProvider, reinitializeWalkingControllerProvider, drivingCommandProvider);
 
       return variousWalkingProviders;
+   }
+
+   public static VariousWalkingProviders createUsingYoVariables(FullRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters,
+         CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> bipedFeet, ConstantTransferTimeCalculator transferTimeCalculator,
+         ConstantSwingTimeCalculator swingTimeCalculator, YoVariableRegistry registry)
+   {
+      DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters);
+      TorusPoseProvider torusPoseProvider = new TorusPoseProvider();
+      TorusManipulationProvider torusManipulationProvider = new TorusManipulationProvider();
+
+      LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
+
+      FootstepPathCoordinator footstepPathCoordinator = null;
+      DesiredHighLevelStateProvider highLevelStateProvider = null; 
+      DesiredHeadOrientationProvider headOrientationProvider = new UserDesiredHeadOrientationProvider(referenceFrames.getPelvisZUpFrame(), registry); 
+      DesiredComHeightProvider desiredComHeightProvider = null;
+      DesiredPelvisPoseProvider pelvisPoseProvider = null;
+      DesiredChestOrientationProvider chestOrientationProvider = null; 
+      DesiredFootPoseProvider footPoseProvider = null; 
+      VehiclePoseProvider vehiclePoseProvider = null; 
+      ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider = null; 
+
+      DesiredHandLoadBearingProvider handLoadBearingProvider = null; 
+      DesiredFootStateProvider footLoadBearingProvider = null; 
+      DesiredThighLoadBearingProvider thighLoadBearingProvider = null; 
+      DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = null; 
+      
+      DesiredArmJointAngleProvider armJointAngleProvider = null; 
+
+      FingerStateProvider fingerStateProvider = null;  
+      DrivingCommandProvider drivingCommandProvider = null;
+
+      
+      VariousWalkingProviders variousProvidersFactory = new VariousWalkingProviders(footstepPathCoordinator, mapFromFootstepsToTrajectoryParameters,
+            headOrientationProvider, desiredComHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, torusPoseProvider, torusManipulationProvider,
+            chestOrientationProvider, footPoseProvider, footLoadBearingProvider, vehiclePoseProvider, highLevelStateProvider, thighLoadBearingProvider,
+            pelvisLoadBearingProvider, fingerStateProvider, armJointAngleProvider, reinitializeWalkingControllerProvider, drivingCommandProvider);
+
+      return variousProvidersFactory;
    }
 }
