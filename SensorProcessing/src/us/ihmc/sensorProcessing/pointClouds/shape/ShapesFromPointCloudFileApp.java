@@ -89,7 +89,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
 
    public static void main(String[] args)
    {
-      ShapesFromPointCloudFileApp test1 = new ShapesFromPointCloudFileApp("../SensorProcessing/box_5s.txt");
+      ShapesFromPointCloudFileApp test1 = new ShapesFromPointCloudFileApp("../SensorProcessing/box_10s.txt");
       test1.start();
    }
 
@@ -193,7 +193,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
             System.out.println("Ransac time: " + (System.currentTimeMillis() - time));
             time = System.currentTimeMillis();
 
-            List<PointCloudShapeFinder.Shape> found = shapeFinder.getFound();
+            List<Shape> found = new ArrayList<Shape>(shapeFinder.getFound());
 
             List<Point3D_F64> unmatched = new ArrayList<Point3D_F64>();
             shapeFinder.getUnmatched(unmatched);
@@ -207,7 +207,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
             }
 
             ScoringFunction scorer = ExpectationMaximizationFitter.getGaussianSqauresMixedError(.01 / 2);
-            List<Shape> emFitShapes = getEMFitShapes(planes, cloud, scorer, 15);
+            List<Shape> emFitShapes = getEMFitShapes(planes, cloud, scorer, 35, .99);
 
             List<Shape> allShapes = new ArrayList<PointCloudShapeFinder.Shape>();
             for (int i = 0; i < emFitShapes.size(); i++)
@@ -216,7 +216,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
                allShapes.add(emFitShapes.get(i));
             }
 
-            render(found);
+            //render(found);
             //filter(emFitShapes, .25, 10);
 
             /*
@@ -231,7 +231,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
             //render(found);
             try
             {
-               Thread.sleep(2000);
+               Thread.sleep(000);
                shapesNode.detachAllChildren();
             }
             catch (InterruptedException e)
@@ -240,6 +240,11 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
                e.printStackTrace();
             }
 
+            List<PlaneGeneral3D_F64> orientPlanes = new ArrayList<PlaneGeneral3D_F64>();
+            for (int i = 1; i<emFitShapes.size(); i++) 
+               orientPlanes.add((PlaneGeneral3D_F64)emFitShapes.get(i).parameters);
+            CubeCalibration.orient(orientPlanes);
+            
             render(emFitShapes);
 
          }
@@ -247,7 +252,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       emFit.start();
    }
 
-   private List<Shape> getEMFitShapes(List<PlaneGeneral3D_F64> startPlanes, List<Point3D_F64> cloud, ScoringFunction scorer, int rounds)
+   private List<Shape> getEMFitShapes(List<PlaneGeneral3D_F64> startPlanes, List<Point3D_F64> cloud, ScoringFunction scorer, int rounds, double filter)
    {
       List<PlaneGeneral3D_F64> planes = ExpectationMaximizationFitter.fit(startPlanes, cloud, scorer, rounds);
       double[][] weights = ExpectationMaximizationFitter.getWeights(null, planes, cloud, scorer);
@@ -263,7 +268,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
          emFitShapes.add(s);
          for (int j = 0; j < cloud.size(); j++)
          {
-            if (weights[i][j] > .5)
+            if (weights[i][j] > filter)
                s.points.add(cloud.get(j));
          }
       }
@@ -388,10 +393,11 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       ColorRGBA[] colors = new ColorRGBA[total];
 
       int index = 0;
-      float hue = -(1.0f / found.size());
+      float hue = 0;
       for (final PointCloudShapeFinder.Shape s : found)
       {
-         int c = Color.HSBtoRGB(hue += (1.0 / found.size()), 1.0f, 1.0f);
+         int c = Color.HSBtoRGB(hue, 1.0f, 1.0f);
+         hue += (1.0 / found.size());
          final ColorRGBA color = new ColorRGBA(((c >> 16) & 0xFF) / 256.0f, ((c >> 8) & 0xFF) / 256.0f, ((c >> 0) & 0xFF) / 256.0f, 1.0f);
          System.out.println("Shape " + s.type + " hue: " + hue);
 
