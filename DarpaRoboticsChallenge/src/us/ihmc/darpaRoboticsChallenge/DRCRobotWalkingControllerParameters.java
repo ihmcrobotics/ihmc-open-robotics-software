@@ -132,7 +132,12 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    {
       return false;
    }
-   
+
+   public boolean doHeelTouchdownIfPossible()
+   {
+      return false;
+   }
+
    public String[] getDefaultHeadOrientationControlJointNames()
    {
       // Get rid of back_bkx to prevent hip roll jumps.
