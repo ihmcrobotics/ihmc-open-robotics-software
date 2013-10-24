@@ -7,7 +7,7 @@ import javax.media.j3d.Transform3D;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.calculators.OrbitalEnergyCalculator;
-import us.ihmc.commonWalkingControlModules.controlModules.WalkOnToesManager;
+import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
@@ -277,7 +277,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CoMHeight
       return false;
    }
 
-   public void attachWalkOnToesManager(WalkOnToesManager walkOnToesManager)
+   public void attachWalkOnToesManager(WalkOnTheEdgesManager walkOnTheEdgesManager)
    {
    }
 }
