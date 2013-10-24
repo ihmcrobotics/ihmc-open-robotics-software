@@ -43,7 +43,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame centerOfMassFrame;
 
-   private final YoFramePoint2d desiredCMP = new YoFramePoint2d("desiredCMP", "", worldFrame, registry);
+   private final YoFramePoint2d controlledCMP = new YoFramePoint2d("controlledCMP", "", worldFrame, registry);
 
    private final BooleanYoVariable cmpProjected = new BooleanYoVariable("cmpProjected", registry);
    private final double totalMass;
@@ -66,7 +66,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
       momentumRateOfChangeOutputPort.setData(momentumRateOfChangeData);
 
       // hide CoP since we won't be calculating it explicitly in this class
-      visualizer.setDesiredCoP(new FramePoint2d(desiredCMP.getReferenceFrame(), Double.NaN, Double.NaN));
+      visualizer.setDesiredCoP(new FramePoint2d(controlledCMP.getReferenceFrame(), Double.NaN, Double.NaN));
    }
 
    public void startComputation()
@@ -97,8 +97,8 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
     	  }
       }
       
-      desiredCMP.changeFrame(this.desiredCMP.getReferenceFrame());
-      this.desiredCMP.set(desiredCMP);
+      desiredCMP.changeFrame(this.controlledCMP.getReferenceFrame());
+      this.controlledCMP.set(desiredCMP);
 
       visualizer.setDesiredCapturePoint(desiredCapturePointTrajectory.getDesiredCapturePoint());
       visualizer.setDesiredCMP(desiredCMP);

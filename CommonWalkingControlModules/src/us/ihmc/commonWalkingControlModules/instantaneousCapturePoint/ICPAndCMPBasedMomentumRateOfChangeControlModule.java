@@ -61,9 +61,9 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
    private final ReferenceFrame pelvisFrame;
    private final ReferenceFrame centerOfMassFrame;
 
-   private final YoFramePoint2d desiredCoP = new YoFramePoint2d("desiredCoP", "", worldFrame, registry);
-   private final YoFramePoint2d desiredCMP = new YoFramePoint2d("desiredCMP", "", worldFrame, registry);
-   private final YoFrameVector2d desiredDeltaCMP = new YoFrameVector2d("desiredDeltaCMP", "", worldFrame, registry);
+   private final YoFramePoint2d controlledCoP = new YoFramePoint2d("controlledCoP", "", worldFrame, registry);
+   private final YoFramePoint2d controlledCMP = new YoFramePoint2d("controlledCMP", "", worldFrame, registry);
+   private final YoFrameVector2d controlledDeltaCMP = new YoFrameVector2d("controlledDeltaCMP", "", worldFrame, registry);
 
    private final BooleanYoVariable copProjected = new BooleanYoVariable("copProjected", registry);
    private final double totalMass;
@@ -108,7 +108,7 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
                                    desiredCapturePointTrajectory.getDesiredCapturePoint(), desiredCapturePointTrajectory.getDesiredCapturePointVelocity(),
                                    capturePointData.getOmega0());
 
-      this.desiredCMP.set(desiredCMP);
+      this.controlledCMP.set(desiredCMP);
 
       Momentum momentum = new Momentum(centerOfMassFrame);
       momentumCalculator.computeAndPack(momentum);
@@ -129,10 +129,10 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
          copProjected.set(true);
       }
 
-      desiredCoP.changeFrame(this.desiredCoP.getReferenceFrame());
-      this.desiredCoP.set(desiredCoP);
+      desiredCoP.changeFrame(this.controlledCoP.getReferenceFrame());
+      this.controlledCoP.set(desiredCoP);
       desiredDeltaCMP.sub(desiredCMP, desiredCoP);
-      this.desiredDeltaCMP.set(desiredDeltaCMP);
+      this.controlledDeltaCMP.set(desiredDeltaCMP);
 
       visualizer.setDesiredCapturePoint(desiredCapturePointTrajectory.getDesiredCapturePoint());
       visualizer.setDesiredCoP(desiredCoP);
