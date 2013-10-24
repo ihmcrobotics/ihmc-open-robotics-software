@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
 
-import org.w3c.dom.events.KeyboardEvent;
-
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 import us.ihmc.sensorProcessing.pointClouds.shape.ExpectationMaximizationFitter.ScoringFunction;
 import bubo.io.serialization.DataDefinition;
