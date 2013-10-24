@@ -18,7 +18,7 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
 {
 	private double rhoMin;
 	private static final int VECTORS = 3;
-	private static final int MAXPOINTS = 4;
+	private static final int MAXPOINTS = 6;
 	private int numberOfPointsInContact=MAXPOINTS;
 	private static final int MAX_RHO_SIZE = MAXPOINTS * VECTORS;
 	private static final double ANGLE_INCREMENT = 2 * Math.PI / ((double) VECTORS);
