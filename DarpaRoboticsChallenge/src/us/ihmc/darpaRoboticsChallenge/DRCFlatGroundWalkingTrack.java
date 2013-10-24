@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.FlatGroundWalkingHighLevelHumanoidControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.SimulatedModelCorruptorDRCRobotInterface;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCSimDRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.remote.RemoteAtlasVisualizer;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
@@ -102,6 +103,12 @@ public class DRCFlatGroundWalkingTrack
 //    DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(TerrainType.FLAT_Z_NEGATIVE_TWO);
 //    RobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(-2.0);
       DRCRobotInterface robotInterface = new PlainDRCRobot(DRCRobotModel.getDefaultRobotModel(), false);
+      
+      if (DRCConfigParameters.CORRUPT_SIMULATION_MODEL)
+      {
+         robotInterface = new SimulatedModelCorruptorDRCRobotInterface(robotInterface);
+      }
+      
       final double groundHeight = 0.0;
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(new FlatGroundProfile(groundHeight), robotInterface.getSimulateDT());
       scsInitialSetup.setInitializeEstimatorToActual(true);
