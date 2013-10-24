@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
-import us.ihmc.commonWalkingControlModules.controlModules.WalkOnToesManager;
+import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.robotSide.RobotSide;
@@ -47,7 +47,7 @@ public class ConstantCenterOfMassHeightTrajectoryGenerator implements CoMHeightT
       return false;
    }
 
-   public void attachWalkOnToesManager(WalkOnToesManager walkOnToesManager)
+   public void attachWalkOnToesManager(WalkOnTheEdgesManager walkOnTheEdgesManager)
    {
    }
 }

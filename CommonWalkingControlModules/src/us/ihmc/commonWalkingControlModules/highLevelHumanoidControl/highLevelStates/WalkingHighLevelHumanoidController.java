@@ -13,8 +13,8 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.commonWalkingControlModules.calculators.EquivalentConstantCoPCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
-import us.ihmc.commonWalkingControlModules.controlModules.WalkOnToesManager;
-import us.ihmc.commonWalkingControlModules.controlModules.WalkOnToesManager.ToeOffMotionType;
+import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
+import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager.ToeOffMotionType;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
@@ -242,7 +242,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable walkingHeadOrientationKp = new DoubleYoVariable("walkingHeadOrientationKp", registry);
    private final DoubleYoVariable walkingHeadOrientationZeta = new DoubleYoVariable("walkingHeadOrientationZeta", registry);
    
-   private final WalkOnToesManager walkOnToesManager;
+   private final WalkOnTheEdgesManager walkOnTheEdgesManager;
 
    public WalkingHighLevelHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          SideDependentList<FootSwitchInterface> footSwitches,
@@ -345,10 +345,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       setupLegJacobians(fullRobotModel);
 
-      walkOnToesManager = new WalkOnToesManager(walkingControllerParameters, feet, footEndEffectorControlModules, registry);
-      this.centerOfMassHeightTrajectoryGenerator.attachWalkOnToesManager(walkOnToesManager);
+      walkOnTheEdgesManager = new WalkOnTheEdgesManager(walkingControllerParameters, feet, footEndEffectorControlModules, registry);
+      this.centerOfMassHeightTrajectoryGenerator.attachWalkOnToesManager(walkOnTheEdgesManager);
       
-      maximumConstantJerkFinalToeOffAngleComputer.reinitialize(walkOnToesManager.getMaximumToeOffAngle(), referenceTime);
+      maximumConstantJerkFinalToeOffAngleComputer.reinitialize(walkOnTheEdgesManager.getMaximumToeOffAngle(), referenceTime);
       
       setupFootControlModules(footPositionTrajectoryGenerators, heelPitchTrajectoryGenerators);
 
@@ -428,7 +428,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          DoubleProvider onToesTrajectoryTimeProvider = totalEstimatedToeOffTimeProvider; 
          
          DoubleTrajectoryGenerator onToesPitchTrajectoryGenerator = null; 
-         switch(WalkOnToesManager.TOEOFF_MOTION_TYPE_USED)
+         switch(WalkOnTheEdgesManager.TOEOFF_MOTION_TYPE_USED)
          {
          case CUBIC_SPLINE:
             onToesFinalPitchProvider.set(maximumConstantJerkFinalToeOffAngleComputer.getMaximumFeasibleConstantJerkFinalToeOffAngle
@@ -460,7 +460,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          OneDoFJoint kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE);
          
          final EndEffectorControlModule endEffectorControlModule;
-         if (WalkOnToesManager.TOEOFF_MOTION_TYPE_USED != ToeOffMotionType.FREE)
+         if (WalkOnTheEdgesManager.TOEOFF_MOTION_TYPE_USED != ToeOffMotionType.FREE)
          {
             endEffectorControlModule = new EndEffectorControlModule(bipedFoot, jacobian, kneeJoint, swingPoseTrajectoryGenerator,
                                           heelPitchTrajectoryGenerator, onToesPitchTrajectoryGenerator, momentumBasedController, registry);
@@ -469,7 +469,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             // Let the toe pitch motion free. It seems to work better.
             endEffectorControlModule = new EndEffectorControlModule(bipedFoot, jacobian, kneeJoint, swingPoseTrajectoryGenerator,
-                                          heelPitchTrajectoryGenerator, walkOnToesManager.getMaximumToeOffAngleProvider(), momentumBasedController, registry);
+                                          heelPitchTrajectoryGenerator, walkOnTheEdgesManager.getMaximumToeOffAngleProvider(), momentumBasedController, registry);
          }
          endEffectorControlModule.setParameters(minJacobianDeterminantForSingularityEscape, singularityEscapeNullspaceMultiplierSwingLeg.getDoubleValue());
          footEndEffectorControlModules.put(bipedFoot, endEffectorControlModule);
@@ -718,9 +718,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                finalDesiredICP.changeFrame(desiredICP.getReferenceFrame());
 
                RobotSide trailingLeg = transferToSide.getOppositeSide();
-               walkOnToesManager.updateToeOffStatusBasedOnICP(trailingLeg, desiredICP.getFramePoint2dCopy(), finalDesiredICP);
+               walkOnTheEdgesManager.updateToeOffStatusBasedOnICP(trailingLeg, desiredICP.getFramePoint2dCopy(), finalDesiredICP);
 
-               if (walkOnToesManager.doToeOff())
+               if (walkOnTheEdgesManager.doToeOff())
                {
                   ContactablePlaneBody trailingFoot = feet.get(trailingLeg);
                   setOnToesContactState(trailingFoot);
@@ -738,9 +738,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if ((!ecmpBasedToeOffHasBeenInitialized.getBooleanValue()) && (transferToSide != null))
          {
             RobotSide trailingLeg = transferToSide.getOppositeSide();
-            walkOnToesManager.updateToeOffStatusBasedOnECMP(trailingLeg, desiredECMP.getFramePoint2dCopy());
+            walkOnTheEdgesManager.updateToeOffStatusBasedOnECMP(trailingLeg, desiredECMP.getFramePoint2dCopy());
 
-            if (walkOnToesManager.doToeOff())
+            if (walkOnTheEdgesManager.doToeOff())
             {
                double remainingToeOffTime = instantaneousCapturePointPlanner.getEstimatedTimeRemainingForState(yoTime.getDoubleValue()); 
                onToesFinalPitchProvider.set(maximumConstantJerkFinalToeOffAngleComputer.getMaximumFeasibleConstantJerkFinalToeOffAngle
@@ -862,7 +862,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             RobotSide trailingLeg = transferToSide.getOppositeSide();
          }
 
-         if (walkOnToesManager.stayOnToes())
+         if (walkOnTheEdgesManager.stayOnToes())
          {
             for (RobotSide robotSide : RobotSide.values)
             {
@@ -878,7 +878,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                   setFlatFootContactState(feet.get(robotSide));
                }
             }
-            else if (walkOnToesManager.willLandOnToes())
+            else if (walkOnTheEdgesManager.willLandOnToes())
             {
                setTouchdownOnToesContactState(feet.get(transferToSide));
             }
@@ -894,7 +894,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             }
          }
          
-         walkOnToesManager.reset();
+         walkOnTheEdgesManager.reset();
 
          if (!instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue()) && (transferToSide != null))
          {
@@ -941,7 +941,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          momentumBasedController.requestResetEstimatorPositionsToCurrent();
          
          desiredECMPinSupportPolygon.set(false);
-         walkOnToesManager.reset();
+         walkOnTheEdgesManager.reset();
          ecmpBasedToeOffHasBeenInitialized.set(false);
 
          alreadyBeenInDoubleSupportOnce.set(true);
@@ -1051,11 +1051,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             nextFootstepHasBeenReplaced = true;
          }
 
-         walkOnToesManager.checkAndRememberIfLandOnToes(swingSide.getOppositeSide(), nextFootstep);
+         walkOnTheEdgesManager.checkAndRememberIfLandOnToes(swingSide.getOppositeSide(), nextFootstep);
          
-         if (walkOnToesManager.willLandOnToes())
+         if (walkOnTheEdgesManager.willLandOnToes())
          {
-            heelPitchTouchdownProvidersManager.setInitialAngle(walkOnToesManager.getToeTouchdownAngle());
+            heelPitchTouchdownProvidersManager.setInitialAngle(walkOnTheEdgesManager.getToeTouchdownAngle());
             nextFootstep = Footstep.copyButChangePitch(nextFootstep, heelPitchTouchdownProvidersManager.getInitialAngle());
             heelPitchTouchdownProvidersManager.updateInitialAngularSpeed();
             nextFootstepHasBeenReplaced = true;
@@ -1076,7 +1076,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          setSupportLeg(supportSide);
 
-         if (walkOnToesManager.stayOnToes())
+         if (walkOnTheEdgesManager.stayOnToes())
          {
             setOnToesContactState(feet.get(supportSide));
          }
@@ -1279,7 +1279,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          // TODO probably make all FootSwitches in this class be HeelSwitches and get rid of instanceof
          boolean footSwitchActivated;
          
-         if (walkOnToesManager.willLandOnToes())
+         if (walkOnTheEdgesManager.willLandOnToes())
          {
             if (!(footSwitch instanceof ToeSwitch))
             {
@@ -1406,10 +1406,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       finalDesiredICPInWorld.set(finalDesiredICP);
 
       RobotSide supportSide = swingSide.getOppositeSide();
-      walkOnToesManager.updateOnToesTriangle(finalDesiredICP, supportSide);
+      walkOnTheEdgesManager.updateOnToesTriangle(finalDesiredICP, supportSide);
 
       FramePoint2d icpWayPoint;
-      if (walkOnToesManager.doToeOffIfPossible() && walkOnToesManager.isOnToesTriangleLargeEnough())
+      if (walkOnTheEdgesManager.doToeOffIfPossible() && walkOnTheEdgesManager.isOnToesTriangleLargeEnough())
       {
          FramePoint toeOffPoint = new FramePoint(worldFrame);
          ContactablePlaneBody supportFoot = feet.get(supportSide);
@@ -1439,7 +1439,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       FrameConvexPolygon2d footPolygon;
       ContactablePlaneBody contactableBody = feet.get(swingSide);
-      if (walkOnToesManager.stayOnToes())
+      if (walkOnTheEdgesManager.stayOnToes())
       {
          List<FramePoint> contactPoints = getToePoints(contactableBody);
          footPolygon = FrameConvexPolygon2d.constructByProjectionOntoXYPlane(contactPoints, referenceFrames.getSoleFrame(swingSide));

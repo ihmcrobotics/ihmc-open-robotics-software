@@ -25,7 +25,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.YoVariableDoubleProvider;
 
-public class WalkOnToesManager
+public class WalkOnTheEdgesManager
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -81,7 +81,7 @@ public class WalkOnToesManager
    private final FramePoint tempLeadingFootPositionInWorld = new FramePoint();
    private final FramePoint tempTrailingFootPositionInWorld = new FramePoint();
 
-   public WalkOnToesManager(WalkingControllerParameters walkingControllerParameters, SideDependentList<? extends ContactablePlaneBody> feet,
+   public WalkOnTheEdgesManager(WalkingControllerParameters walkingControllerParameters, SideDependentList<? extends ContactablePlaneBody> feet,
          Map<ContactablePlaneBody, EndEffectorControlModule> footEndEffectorControlModules, YoVariableRegistry parentRegistry)
    {
       this.stayOnToes.set(walkingControllerParameters.stayOnToes());

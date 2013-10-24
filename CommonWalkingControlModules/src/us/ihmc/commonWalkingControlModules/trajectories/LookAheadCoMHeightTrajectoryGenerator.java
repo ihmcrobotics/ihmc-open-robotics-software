@@ -5,7 +5,7 @@ import java.util.List;
 import javax.vecmath.Point2d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
-import us.ihmc.commonWalkingControlModules.controlModules.WalkOnToesManager;
+import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
@@ -64,7 +64,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    
    private final BagOfBalls bagOfBalls;
 
-   private WalkOnToesManager walkOnToesManager;
+   private WalkOnTheEdgesManager walkOnTheEdgesManager;
    private double extraCoMMaxHeightWithToes = 0.0;
    
    public LookAheadCoMHeightTrajectoryGenerator(DesiredComHeightProvider desiredComHeightProvider, double minimumHeightAboveGround, 
@@ -168,10 +168,10 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       }
    }
    
-   public void attachWalkOnToesManager(WalkOnToesManager walkOnToesManager)
+   public void attachWalkOnToesManager(WalkOnTheEdgesManager walkOnTheEdgesManager)
    {
-      this.walkOnToesManager = walkOnToesManager;
-      extraCoMMaxHeightWithToes = walkOnToesManager.getExtraCoMMaxHeightWithToes();
+      this.walkOnTheEdgesManager = walkOnTheEdgesManager;
+      extraCoMMaxHeightWithToes = walkOnTheEdgesManager.getExtraCoMMaxHeightWithToes();
    }
    
    private void setOffsetHeightAboveGround(double offsetHeightAboveGround)
@@ -282,9 +282,9 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       
       d0Min.setY(findMinimumDoubleSupportHeight(s0.getX(), sF.getX(), d0.getX(), footHeight0, footHeight1));      
       d0Nom.setY(findNominalDoubleSupportHeight(s0.getX(), sF.getX(), d0.getX(), footHeight0, footHeight1));
-      if (walkOnToesManager != null && walkOnToesManager.willLandOnToes())
+      if (walkOnTheEdgesManager != null && walkOnTheEdgesManager.willLandOnToes())
       {
-         System.out.println("TEEEST: "+ walkOnToesManager.willLandOnToes());
+         System.out.println("TEEEST: "+ walkOnTheEdgesManager.willLandOnToes());
          d0Max.setY(findMaximumDoubleSupportHeight(s0.getX(), sF.getX(), d0.getX(), footHeight0, footHeight1 + extraCoMMaxHeightWithToes));
       }
       else
@@ -295,7 +295,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       dFMin.setY(findMinimumDoubleSupportHeight(s0.getX(), sF.getX(), dF.getX(), footHeight0, footHeight1));
       dFNom.setY(findNominalDoubleSupportHeight(s0.getX(), sF.getX(), dF.getX(), footHeight0, footHeight1));
       
-      if (walkOnToesManager != null && walkOnToesManager.willDoToeOff(transferToAndNextFootstepsData))
+      if (walkOnTheEdgesManager != null && walkOnTheEdgesManager.willDoToeOff(transferToAndNextFootstepsData))
       {
          dFMax.setY(findMaximumDoubleSupportHeight(s0.getX(), sF.getX(), dF.getX(), footHeight0 + extraCoMMaxHeightWithToes, footHeight1));
       }

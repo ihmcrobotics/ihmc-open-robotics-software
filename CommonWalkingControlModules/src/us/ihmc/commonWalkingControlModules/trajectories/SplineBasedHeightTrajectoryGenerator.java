@@ -5,7 +5,7 @@ import java.util.List;
 import javax.vecmath.Point2d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
-import us.ihmc.commonWalkingControlModules.controlModules.WalkOnToesManager;
+import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -172,7 +172,7 @@ public class SplineBasedHeightTrajectoryGenerator implements CoMHeightTrajectory
       return false;
    }
 
-   public void attachWalkOnToesManager(WalkOnToesManager walkOnToesManager)
+   public void attachWalkOnToesManager(WalkOnTheEdgesManager walkOnTheEdgesManager)
    {
    }
 }
