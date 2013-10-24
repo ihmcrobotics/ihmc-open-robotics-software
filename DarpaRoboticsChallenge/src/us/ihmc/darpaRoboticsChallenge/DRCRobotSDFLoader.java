@@ -50,7 +50,9 @@ public class DRCRobotSDFLoader
 
          case ATLAS_SANDIA_HANDS :
             fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_sandia_hands.sdf");
-
+            break;
+         case ATLAS_NO_HANDS_ADDED_MASS :
+            fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_addedmass.sdf");
             break;
          case V1 :
             fileInputStream = myClass.getResourceAsStream("models/V1/urdf/V1_gazebo.sdf");
