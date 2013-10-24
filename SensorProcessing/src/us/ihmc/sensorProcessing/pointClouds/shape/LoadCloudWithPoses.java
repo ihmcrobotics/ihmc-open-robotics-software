@@ -6,6 +6,8 @@ import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -48,7 +50,21 @@ public class LoadCloudWithPoses extends SimpleApplication
    @Override
    public void simpleInitApp()
    {
-      List<Point3D_F64>[] clouds = loadPointCloud(40*100, 1);
+      List<Point3D_F64>[] clouds = loadPointCloud(40*1, 1);
+      try
+      {
+         FileWriter fw = new FileWriter("box_1s.txt");
+         for (Point3D_F64 p : clouds[0]) {
+            fw.write(p.x + " " + p.y + " " + p.z + "\n");
+         }
+         fw.close();
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+      
+      
       render(clouds);
    }
 
@@ -152,8 +168,12 @@ public class LoadCloudWithPoses extends SimpleApplication
 
             LidarScan scan = new LidarScan(param, start, end, ranges);
 
-            for (Point3d p : scan.getAllPoints())
-               clouds[0].add(new Point3D_F64(p.x, p.y, p.z));
+            for (int j = 0; j < scan.size(); j++) {
+               if (scan.getRange(j) < 30.0) {
+                  Point3d p = scan.getPoint(j);
+                  clouds[0].add(new Point3D_F64(p.x, p.y, p.z));
+               }
+            }
          }
       }
       catch (FileNotFoundException e)
