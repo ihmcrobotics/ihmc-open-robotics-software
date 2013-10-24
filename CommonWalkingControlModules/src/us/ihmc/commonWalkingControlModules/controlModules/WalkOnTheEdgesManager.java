@@ -5,12 +5,16 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
+import us.ihmc.commonWalkingControlModules.trajectories.WalkOnTheEdgesProviders;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
@@ -22,8 +26,6 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.YoVariableDoubleProvider;
 
 public class WalkOnTheEdgesManager
 {
@@ -41,13 +43,6 @@ public class WalkOnTheEdgesManager
 
    public static final SwitchToToeOffMethods TOEOFF_TRIGGER_METHOD = SwitchToToeOffMethods.USE_ECMP;
 
-   public enum ToeOffMotionType
-   {
-      QUINTIC_SPLINE, CUBIC_SPLINE, FREE
-   };
-
-   public static final ToeOffMotionType TOEOFF_MOTION_TYPE_USED = ToeOffMotionType.FREE;
-
    private final BooleanYoVariable stayOnToes = new BooleanYoVariable("stayOnToes", registry);
 
    private final BooleanYoVariable doToeOffIfPossible = new BooleanYoVariable("doToeOffIfPossible", registry);
@@ -55,6 +50,9 @@ public class WalkOnTheEdgesManager
 
    private final BooleanYoVariable doToeTouchdownIfPossible = new BooleanYoVariable("doToeTouchdownIfPossible", registry);
    private final BooleanYoVariable doToeTouchdown = new BooleanYoVariable("doToeTouchdown", registry);
+
+   private final BooleanYoVariable doHeelTouchdownIfPossible = new BooleanYoVariable("doHeelTouchdownIfPossible", registry);
+   private final BooleanYoVariable doHeelTouchdown = new BooleanYoVariable("doHeelTouchdown", registry);
 
    private final DoubleYoVariable onToesTriangleArea = new DoubleYoVariable("onToesTriangleArea", registry);
    private final DoubleYoVariable onToesTriangleAreaLimit = new DoubleYoVariable("onToesTriangleAreaLimit", registry);
@@ -73,20 +71,26 @@ public class WalkOnTheEdgesManager
 
    private final DoubleYoVariable extraCoMMaxHeightWithToes = new DoubleYoVariable("extraCoMMaxHeightWithToes", registry);
 
-   private final YoVariableDoubleProvider maximumToeOffAngle = new YoVariableDoubleProvider("maximumToeOffAngle", registry);
-   private final YoVariableDoubleProvider toeTouchdownAngle = new YoVariableDoubleProvider("toeTouchdownAngle", registry);
-
    private final FramePoint tempLeadingFootPosition = new FramePoint();
    private final FramePoint tempTrailingFootPosition = new FramePoint();
    private final FramePoint tempLeadingFootPositionInWorld = new FramePoint();
    private final FramePoint tempTrailingFootPositionInWorld = new FramePoint();
+   
+   private final WalkingControllerParameters walkingControllerParameters;
+   private final WalkOnTheEdgesProviders walkOnTheEdgesProviders;
 
-   public WalkOnTheEdgesManager(WalkingControllerParameters walkingControllerParameters, SideDependentList<? extends ContactablePlaneBody> feet,
-         Map<ContactablePlaneBody, EndEffectorControlModule> footEndEffectorControlModules, YoVariableRegistry parentRegistry)
+   public WalkOnTheEdgesManager(WalkingControllerParameters walkingControllerParameters, WalkOnTheEdgesProviders walkOnTheEdgesProviders,
+         SideDependentList<? extends ContactablePlaneBody> feet, Map<ContactablePlaneBody, EndEffectorControlModule> footEndEffectorControlModules,
+         YoVariableRegistry parentRegistry)
    {
       this.stayOnToes.set(walkingControllerParameters.stayOnToes());
       this.doToeOffIfPossible.set(walkingControllerParameters.doToeOffIfPossible());
       this.doToeTouchdownIfPossible.set(walkingControllerParameters.doToeTouchdownIfPossible());
+      this.doHeelTouchdownIfPossible.set(walkingControllerParameters.doHeelTouchdownIfPossible());
+      
+      this.walkingControllerParameters = walkingControllerParameters;
+      this.walkOnTheEdgesProviders = walkOnTheEdgesProviders;
+      
       this.feet = feet;
       this.footEndEffectorControlModules = footEndEffectorControlModules;
 
@@ -98,9 +102,6 @@ public class WalkOnTheEdgesManager
       minStepHeightForToeOff.set(0.10);
 
       minStepLengthForToeTouchdown.set(0.40);
-
-      maximumToeOffAngle.set(Math.toRadians(45.0));
-      toeTouchdownAngle.set(Math.toRadians(60.0));
 
       parentRegistry.addChild(registry);
    }
@@ -242,23 +243,54 @@ public class WalkOnTheEdgesManager
       return isStepLongEnough;
    }
 
-   public void checkAndRememberIfLandOnToes(RobotSide supportLeg, Footstep nextFootstep)
+   private boolean isFrontFootWellPositionedForHeelTouchdown(RobotSide trailingLeg, ReferenceFrame frontFootFrame)
    {
-      if (!doToeTouchdownIfPossible.getBooleanValue())
-      {
-         doToeTouchdown.set(false);
-         return;
-      }
+      ReferenceFrame trailingFootFrame = feet.get(trailingLeg).getBodyFrame();
+      tempLeadingFootPosition.setToZero(frontFootFrame);
+      tempTrailingFootPosition.setToZero(trailingFootFrame);
+      tempLeadingFootPosition.changeFrame(trailingFootFrame);
 
+      tempLeadingFootPositionInWorld.setToZero(frontFootFrame);
+      tempTrailingFootPositionInWorld.setToZero(trailingFootFrame);
+      tempLeadingFootPositionInWorld.changeFrame(worldFrame);
+      tempTrailingFootPositionInWorld.changeFrame(worldFrame);
+
+      boolean isBackardOrSideStepping = tempLeadingFootPosition.getX() < 0.15;
+      if (isBackardOrSideStepping)
+         return false;
+
+      boolean isStepLongEnough = tempLeadingFootPosition.distance(tempTrailingFootPosition) > minStepLengthForToeTouchdown.getDoubleValue();
+      return isStepLongEnough;
+   }
+
+   public void updateEdgeTouchdownStatus(RobotSide supportLeg, Footstep nextFootstep)
+   {
       RobotSide nextTrailingLeg = supportLeg;
       ReferenceFrame nextFrontFootFrame;
+
       if (nextFootstep != null)
          nextFrontFootFrame = nextFootstep.getPoseReferenceFrame();
       else
          nextFrontFootFrame = feet.get(nextTrailingLeg.getOppositeSide()).getBodyFrame();
 
-      boolean frontFootWellPositionedForToeTouchdown = isFrontFootWellPositionedForToeTouchdown(nextTrailingLeg, nextFrontFootFrame);
-      doToeTouchdown.set(frontFootWellPositionedForToeTouchdown);
+      if (!doToeTouchdownIfPossible.getBooleanValue())
+      {
+         doToeTouchdown.set(false);
+      }
+      else
+      {
+         boolean frontFootWellPositionedForToeTouchdown = isFrontFootWellPositionedForToeTouchdown(nextTrailingLeg, nextFrontFootFrame);
+         doToeTouchdown.set(frontFootWellPositionedForToeTouchdown);
+      }
+      
+      if (!doHeelTouchdownIfPossible.getBooleanValue() || doToeTouchdown.getBooleanValue())
+      {
+         doHeelTouchdown.set(false);
+         return;
+      }
+      
+      boolean frontFootWellPositionedForHeelTouchdown = isFrontFootWellPositionedForHeelTouchdown(nextTrailingLeg, nextFrontFootFrame);
+      doHeelTouchdown.set(frontFootWellPositionedForHeelTouchdown);
    }
 
    public boolean willLandOnToes()
@@ -267,6 +299,14 @@ public class WalkOnTheEdgesManager
          return false;
 
       return doToeTouchdown.getBooleanValue();
+   }
+
+   public boolean willLandOnHeel()
+   {
+      if (!doHeelTouchdownIfPossible.getBooleanValue())
+         return false;
+
+      return doHeelTouchdown.getBooleanValue();
    }
 
    public boolean willDoToeOff(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
@@ -290,6 +330,33 @@ public class WalkOnTheEdgesManager
       return frontFootWellPositionedForToeOff;
    }
 
+   public void updateTouchdownInitialAngularVelocity()
+   {
+      Vector3d edgeToAnkle;
+      double initialPitchAngle = walkOnTheEdgesProviders.getTouchdownInitialPitch();
+      
+      if (initialPitchAngle < 0.0)
+         edgeToAnkle = new Vector3d(walkingControllerParameters.getFootBackwardOffset(), 0.0, walkingControllerParameters.getAnkleHeight());
+      else
+         edgeToAnkle = new Vector3d(-walkingControllerParameters.getFootForwardOffset(), 0.0, walkingControllerParameters.getAnkleHeight());
+      
+      Transform3D rotationByPitch = new Transform3D();
+      rotationByPitch.rotY(-initialPitchAngle);
+      rotationByPitch.transform(edgeToAnkle);
+
+      Vector3d orthonormalToHeelToAnkle = new Vector3d(edgeToAnkle);
+      Transform3D perpendicularRotation = new Transform3D();
+      perpendicularRotation.rotY(-Math.PI / 2.0);
+      perpendicularRotation.transform(orthonormalToHeelToAnkle);
+      orthonormalToHeelToAnkle.normalize();
+
+      FrameVector linearVelocity = new FrameVector(worldFrame);
+      walkOnTheEdgesProviders.getTouchdownDesiredVelocity(linearVelocity);
+      double angularSpeed = -orthonormalToHeelToAnkle.dot(linearVelocity.getVector()) / edgeToAnkle.length();
+
+      walkOnTheEdgesProviders.setTouchdownInitialAngularVelocityProvider(angularSpeed);
+   }
+   
    public boolean stayOnToes()
    {
       return stayOnToes.getBooleanValue();
@@ -314,23 +381,10 @@ public class WalkOnTheEdgesManager
    {
       isDesiredECMPOKForToeOff.set(false);
       isDesiredICPOKForToeOff.set(false);
+      
       doToeOff.set(false);
       doToeTouchdown.set(false);
-   }
-
-   public double getMaximumToeOffAngle()
-   {
-      return maximumToeOffAngle.getValue();
-   }
-
-   public DoubleProvider getMaximumToeOffAngleProvider()
-   {
-      return maximumToeOffAngle;
-   }
-   
-   public double getToeTouchdownAngle()
-   {
-      return toeTouchdownAngle.getValue();
+      doHeelTouchdown.set(false);
    }
 
    private FrameConvexPolygon2d getOnToesTriangle(FramePoint2d finalDesiredICP, ContactablePlaneBody supportFoot)
