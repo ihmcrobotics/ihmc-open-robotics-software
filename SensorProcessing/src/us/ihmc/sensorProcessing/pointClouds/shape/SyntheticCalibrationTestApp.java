@@ -3,14 +3,16 @@ package us.ihmc.sensorProcessing.pointClouds.shape;
 import bubo.ptcloud.CloudShapeTypes;
 import bubo.ptcloud.FactoryPointCloudShape;
 import bubo.ptcloud.PointCloudShapeFinder;
+import bubo.ptcloud.PointCloudShapeFinder.Shape;
 import bubo.ptcloud.alg.ConfigSchnabel2007;
-import bubo.ptcloud.wrapper.ConfigMergeShapes;
 import bubo.ptcloud.wrapper.ConfigRemoveFalseShapes;
 import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
+
 import com.jme3.app.SimpleApplication;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
+
 import georegression.metric.Intersection3D_F64;
 import georegression.struct.line.LineParametric3D_F64;
 import georegression.struct.plane.PlaneGeneral3D_F64;
@@ -20,17 +22,25 @@ import georegression.struct.point.Vector3D_F64;
 import georegression.struct.shapes.Cylinder3D_F64;
 import georegression.struct.shapes.Sphere3D_F64;
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
+import us.ihmc.sensorProcessing.pointClouds.shape.ExpectationMaximizationFitter.ScoringFunction;
 
+import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Callable;
 
 /**
  * @author Alex Lesman
  */
 public class SyntheticCalibrationTestApp extends SimpleApplication
 {
-   private static Random rand = new Random(System.currentTimeMillis());
+   private static Random rand = new Random(123);
+
+   private ShapeTranslator translator = new ShapeTranslator(this);
 
    Sphere3D_F64 truthSphere = new Sphere3D_F64(2, 2, 10, 3);
    Cylinder3D_F64 truthCylinder = new Cylinder3D_F64(0, 1, 3, -1, 1, 0.5, 1);
@@ -46,33 +56,29 @@ public class SyntheticCalibrationTestApp extends SimpleApplication
 
    }
 
-   private static List<Point3D_F64> createBoxCloud(Point3D_F64 center, double size, double noise)
+   private static List<Point3D_F64> createBoxCloud(Point3D_F64 center, int numPoints, double size, double noise)
    {
       List<Point3D_F64> cloud = new ArrayList<Point3D_F64>();
-      noise /=2; //gives 95% of gaussian noise within range
+      noise /= 3; //gives 98% of gaussian noise within range
 
       Vector3D_F64[] sides = new Vector3D_F64[] { new Vector3D_F64(1, 1, 0), new Vector3D_F64(1, 0, 1), new Vector3D_F64(0, 1, 1) };
-      Vector3D_F64[] noises = new Vector3D_F64[] { new Vector3D_F64(0, 0, noise), new Vector3D_F64(0, noise, 0), new Vector3D_F64(noise, 0, 0) };
 
       for (int side = 0; side < sides.length; side++)
       {
          Vector3D_F64 sideVector = sides[side];
-         Vector3D_F64 noiseVector = noises[side];
-         for (int i = 0; i < 500; i++)
+         for (int i = 0; i < numPoints; i++)
          {
-            double x = (size * (rand.nextDouble() - .5) * sideVector.x) - (center.x - (sideVector.x * size / 2));
-            double y = (size * (rand.nextDouble() - .5) * sideVector.y) - (center.y - (sideVector.y * size / 2));
-            double z = (size * (rand.nextDouble() - .5) * sideVector.z) - (center.z - (sideVector.z * size / 2));            
-            
-            
-            x += ((rand.nextGaussian() - .5) * noiseVector.x) - (center.x);
-            y += ((rand.nextGaussian() - .5) * noiseVector.y) - (center.y);
-            z += ((rand.nextGaussian() - .5) * noiseVector.z) - (center.z);
+            double x = (size * (rand.nextDouble() - .5) * sideVector.x) + (center.x - (sideVector.x * size / 2));
+            double y = (size * (rand.nextDouble() - .5) * sideVector.y) + (center.y - (sideVector.y * size / 2));
+            double z = (size * (rand.nextDouble() - .5) * sideVector.z) + (center.z - (sideVector.z * size / 2));
+
+            x += ((rand.nextGaussian() - .5) * noise);
+            y += ((rand.nextGaussian() - .5) * noise);
+            z += ((rand.nextGaussian() - .5) * noise);
 
             cloud.add(new Point3D_F64(x, y, z));
          }
       }
-      System.out.println(cloud);
       return cloud;
    }
 
@@ -98,58 +104,92 @@ public class SyntheticCalibrationTestApp extends SimpleApplication
    {
       zUpNode.setLocalRotation(JMEGeometryUtils.getRotationFromJMEToZupCoordinates());
 
-      List<Point3D_F64> cloud = createBoxCloud(new Point3D_F64(0, 0, 0), -1, .05);
+      List<Point3D_F64> cloud = createBoxCloud(new Point3D_F64(1, 2, 3), 1000, 1, 0.05);
+      PointCloudShapeFinder shapeFinder = applyRansac(cloud);
 
-      CloudShapeTypes shapeTypes[] = new CloudShapeTypes[]{CloudShapeTypes.PLANE};
-      ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(100, 0.8, 0.1,shapeTypes);
-      configRansac.minModelAccept = 300;
-      configRansac.octreeSplit = 300;
-      configRansac.ransacExtension = 200;
-      configRansac.maximumAllowedIterations *= 2;
+      List<PlaneGeneral3D_F64> planes = new ArrayList<PlaneGeneral3D_F64>();
+      HashSet<Point3D_F64> pointSet = new HashSet<Point3D_F64>();
 
-      ConfigSurfaceNormals configSurface = new ConfigSurfaceNormals(6, 20, 3);
-      ConfigRemoveFalseShapes configMerge = new ConfigRemoveFalseShapes(0.6);
+      for (PointCloudShapeFinder.Shape shape : shapeFinder.getFound())
+      {
+         if (shape.type == CloudShapeTypes.PLANE)
+         {
+            planes.add((PlaneGeneral3D_F64) shape.parameters);
+            pointSet.addAll(shape.points);
+         }
+      }
+
+      List<Point3D_F64> allPoints = new LinkedList<Point3D_F64>(pointSet);
+
+
+      ScoringFunction sf = ExpectationMaximizationFitter.getGaussianSqauresMixedError(.05 / 2);
+      orient(planes = ExpectationMaximizationFitter.fit(3, rand, allPoints, sf, 16));
+      double[][] weights = ExpectationMaximizationFitter.getWeights(null, planes, cloud, sf);
+      List<Shape> emFitShapes = new ArrayList<PointCloudShapeFinder.Shape>();
+
+      for (int i = 0; i < planes.size(); i++)
+      {
+         Shape s = new Shape();
+         s.type = CloudShapeTypes.PLANE;
+         s.points = new ArrayList<Point3D_F64>();
+         s.parameters = planes.get(i);
+         emFitShapes.add(s);
+         for (int j = 0; j < cloud.size(); j++)
+         {
+            if (weights[i][j] >= .5)
+               s.points.add(cloud.get(j));
+         }
+      }
+
+      render(emFitShapes);
+
+      //render(fitShapes);
+
+      //render(shapeFinder.getFound());
+   }
+
+   private PointCloudShapeFinder applyRansac(List<Point3D_F64> cloud)
+   {
+      CloudShapeTypes shapeTypes[] = new CloudShapeTypes[] { CloudShapeTypes.PLANE };//, CloudShapeTypes.CYLINDER, CloudShapeTypes.SPHERE};
+
+      ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(20, 0.8, 0.02, shapeTypes);
+      configRansac.randomSeed = 2342342;
+
+      configRansac.minModelAccept = 100;
+      configRansac.octreeSplit = 25;
+
+      configRansac.maximumAllowedIterations = 1000;
+      configRansac.ransacExtension = 25;
+
+      //configRansac.models.get(1).modelCheck = new CheckShapeCylinderRadius(0.2);
+      //configRansac.models.get(2).modelCheck = new CheckShapeSphere3DRadius(0.2);
+
+      ConfigSurfaceNormals configSurface = new ConfigSurfaceNormals(10, 30, Double.MAX_VALUE);
+      ConfigRemoveFalseShapes configMerge = new ConfigRemoveFalseShapes(0.7);
 
       PointCloudShapeFinder shapeFinder = FactoryPointCloudShape.ransacOctree(configSurface, configRansac, configMerge);
 
       shapeFinder.process(cloud, null);
-
-
-      orient(shapeFinder);
-      render(shapeFinder);
-
+      return shapeFinder;
    }
-   
-   private void orient(PointCloudShapeFinder shapeFinder) {
-      ArrayList<PlaneGeneral3D_F64> planes = new ArrayList<PlaneGeneral3D_F64>();
-      
-      for (PointCloudShapeFinder.Shape shape : shapeFinder.getFound()) {
-         System.out.println(shape.type);
-         if (shape.type == CloudShapeTypes.PLANE) 
-            planes.add((PlaneGeneral3D_F64)shape.parameters);
-         
-      }
 
-      System.out.println("Num Planes: " + planes.size());
+   private void orient(List<PlaneGeneral3D_F64> planes)
+   {
       if (planes.size() < 3)
          return;
-      
+
       LineParametric3D_F64 line = new LineParametric3D_F64();
       Point3D_F64 point = new Point3D_F64();
       Intersection3D_F64.intersect(planes.get(0), planes.get(1), line);
       Intersection3D_F64.intersect(planes.get(2), line, point);
-      
+
       System.out.println(point);
    }
 
-   private void render(PointCloudShapeFinder shapeFinder)
+   private void render(List<Shape> found)
    {
-      List<PointCloudShapeFinder.Shape> found = shapeFinder.getFound();
       List<Point3D_F64> unmatched = new ArrayList<Point3D_F64>();
-      shapeFinder.getUnmatched(unmatched);
 
-      System.out.println("Unmatched points " + unmatched.size());
-      System.out.println("total shapes found: " + found.size());
       int total = 0;
 
       PointCloudShapeFinder.Shape unShape = new PointCloudShapeFinder.Shape();
@@ -158,8 +198,6 @@ public class SyntheticCalibrationTestApp extends SimpleApplication
 
       for (PointCloudShapeFinder.Shape s : found)
       {
-         System.out.println("  " + s.type + "  points = " + s.points.size());
-         System.out.println("           " + s.parameters);
          total += s.points.size();
       }
 
@@ -167,24 +205,16 @@ public class SyntheticCalibrationTestApp extends SimpleApplication
       ColorRGBA[] colors = new ColorRGBA[total];
 
       int index = 0;
+      float hue = 0.0f;
       for (PointCloudShapeFinder.Shape s : found)
       {
-         float r = rand.nextFloat();
-         float g = rand.nextFloat();
-         float b = rand.nextFloat();
+         int c = Color.HSBtoRGB(hue += (1.0 / found.size()), 1.0f, 1.0f);
+         ColorRGBA color = new ColorRGBA(((c >> 16) & 0xFF) / 256.0f, ((c >> 8) & 0xFF) / 256.0f, ((c >> 0) & 0xFF) / 256.0f, 1.0f);
 
-         // make sure it is bright enough to see
-         float n = (r + g + b) / 3.0f;
-
-         if (n < 0.5f)
+         if (s.type != null && s.points.size() > 0)
          {
-            r *= 0.5f / n;
-            g *= 0.5f / n;
-            b *= 0.5f / n;
+            translator.translateShape(s, color, zUpNode);
          }
-
-         ColorRGBA color = new ColorRGBA(r, g, b, 1.0f);
-         System.out.println(" color " + r + " " + g + " " + b);
 
          for (Point3D_F64 p : s.points)
          {
@@ -199,7 +229,7 @@ public class SyntheticCalibrationTestApp extends SimpleApplication
       try
       {
          rootNode.attachChild(zUpNode);
-         zUpNode.attachChild(generator.generatePointCloudGraph(points, colors,0.75f));
+         zUpNode.attachChild(generator.generatePointCloudGraph(points, colors, 0.75f));
       }
       catch (Exception e)
       {
