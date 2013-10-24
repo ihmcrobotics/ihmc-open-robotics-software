@@ -42,6 +42,8 @@ public class UpcomingFootstepList
    public void checkForFootsteps(PointPositionGrabberInterface pointPositionGrabber, BooleanYoVariable readyToGrabNextFootstep,
                                  EnumYoVariable<RobotSide> upcomingSupportLeg, SideDependentList<? extends ContactablePlaneBody> bipedFeet)
    {
+      if (footstepProvider == null) return;
+
       if (readyToGrabNextFootstep.getBooleanValue())
       {
          for (int i = nextFootstepList.size() - 1; i > nextFootstepIndex.getIntegerValue(); i--)
@@ -145,16 +147,22 @@ public class UpcomingFootstepList
 
    public void notifyComplete()
    {
+      if (footstepProvider == null) return;
+
       footstepProvider.notifyComplete();
    }
 
    public boolean isFootstepProviderEmpty()
    {
+      if (footstepProvider == null) return true;
+
       return footstepProvider.isEmpty();
    }
    
    public int getNumberOfFootstepsToProvide()
    {
+      if (footstepProvider == null) return 0;
+      
       return footstepProvider.getNumberOfFootstepsToProvide();
    }
 
