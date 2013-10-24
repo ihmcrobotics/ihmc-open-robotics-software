@@ -1,11 +1,16 @@
 package us.ihmc.darpaRoboticsChallenge.controllers;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import javax.vecmath.Point2d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.atlas.AtlasJointPDGains;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
@@ -56,9 +61,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
            CenterOfMassJacobian centerOfMassJacobian, ForceSensorDataHolder forceSensorDataHolder, SideDependentList<HandControllerInterface> handControllers,
            LidarControllerInterface lidarControllerInterface, StateEstimationDataFromController stateEstimationDataFromControllerSink)
    {
-      double footForward = DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD;
-      double footBack = DRCRobotParameters.DRC_ROBOT_FOOT_BACK;
-      double footWidth = DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH;
+      ArrayList<Vector3d> contactPointsArrayList = DRCRobotParameters.DRC_ROBOT_GROUND_CONTACT_POINT_OFFSET_FROM_FOOT;
 
       YoVariableRegistry specificRegistry = new YoVariableRegistry("specific");
 
@@ -68,10 +71,8 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       {
          RigidBody footBody = fullRobotModel.getFoot(robotSide);
          ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
-         double left = footWidth / 2.0;
-         double right = -footWidth / 2.0;
-
-         ContactablePlaneBody foot = new RectangularContactableBody(footBody, soleFrame, footForward, -footBack, left, right);
+         ListOfPointsContactablePlaneBody foot = new ListOfPointsContactablePlaneBody(footBody, soleFrame, this.createContactPoints(contactPointsArrayList));
+         
          bipedFeet.put(robotSide, foot);
       }
 
@@ -121,6 +122,16 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
    public double getControlDT()
    {
       return DRCConfigParameters.CONTROL_DT;
+   }
+   
+   private List<Point2d> createContactPoints(ArrayList<Vector3d> list)
+   {
+      ArrayList<Point2d> contactPoints = new ArrayList<Point2d>();
+      for(int i = 0; i<list.size(); i++)
+      {
+         contactPoints.add(new Point2d(list.get(i).x, list.get(i).y));
+      }
+      return contactPoints;
    }
 
 }
