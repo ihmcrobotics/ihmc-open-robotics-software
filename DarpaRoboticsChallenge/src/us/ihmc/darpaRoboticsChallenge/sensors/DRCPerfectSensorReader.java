@@ -85,7 +85,7 @@ public class DRCPerfectSensorReader implements SensorReader, RobotController
       
       if(controllerDispatcher != null)
       {
-         controllerDispatcher.startEstimator(estimateDTinNs * step.getIntegerValue());
+         controllerDispatcher.startEstimator(estimateDTinNs * step.getIntegerValue(), System.nanoTime());
       }
    }
 
