@@ -15,7 +15,7 @@ public class RootJointAngularAccelerationControlModule
 
    private final RigidBodyOrientationControlModule rootJointOrientationControlModule;
 
-   private final YoFrameVector desiredPelvisAngularAcceleration;
+   private final YoFrameVector controlledPelvisAngularAcceleration;
    private InverseDynamicsJoint rootJoint;
    private final DenseMatrix64F rootJointNullspaceMultipliers = new DenseMatrix64F(0, 1);
 
@@ -28,7 +28,7 @@ public class RootJointAngularAccelerationControlModule
       registry = new YoVariableRegistry(getClass().getSimpleName());
       rootJointOrientationControlModule = new RigidBodyOrientationControlModule(rootJoint.getName(), rootJoint.getPredecessor(), rootJoint.getSuccessor(),
               momentumBasedController.getTwistCalculator(), registry);
-      this.desiredPelvisAngularAcceleration = new YoFrameVector("desired" + rootJoint.getName() + "AngularAcceleration", rootJoint.getFrameAfterJoint(),
+      this.controlledPelvisAngularAcceleration = new YoFrameVector("controlled" + rootJoint.getName() + "AngularAcceleration", rootJoint.getFrameAfterJoint(),
               registry);
 
       this.momentumBasedController = momentumBasedController;
@@ -41,8 +41,8 @@ public class RootJointAngularAccelerationControlModule
       taskspaceConstraintData.setAngularAcceleration(rootJoint.getSuccessor().getBodyFixedFrame(), rootJoint.getPredecessor().getBodyFixedFrame(), rootJointAngularAcceleration, rootJointNullspaceMultipliers);
       momentumBasedController.setDesiredSpatialAcceleration(rootJoint.getMotionSubspace(), taskspaceConstraintData);
 
-      rootJointAngularAcceleration.changeFrame(this.desiredPelvisAngularAcceleration.getReferenceFrame());
-      this.desiredPelvisAngularAcceleration.set(rootJointAngularAcceleration);
+      rootJointAngularAcceleration.changeFrame(this.controlledPelvisAngularAcceleration.getReferenceFrame());
+      this.controlledPelvisAngularAcceleration.set(rootJointAngularAcceleration);
    }
 
    public void waitUntilComputationIsDone()
