@@ -19,6 +19,7 @@ public class IntermediateEstimatorStateHolder
    
    private long estimatorTick;
    private long timestamp;
+   private long estimatorClockStartTime;
    private long checksum;
 
    private final InverseDynamicsJointStateChecksum estimatorChecksum; 
@@ -54,10 +55,11 @@ public class IntermediateEstimatorStateHolder
    {
    }
 
-   public void setFromEstimatorModel(long timestamp, long estimatorTick)
+   public void setFromEstimatorModel(long timestamp, long estimatorTick, long estimatorClockStartTime)
    {
       this.timestamp = timestamp;
       this.estimatorTick = estimatorTick;
+      this.estimatorClockStartTime = estimatorClockStartTime;
       
       checksum = calculateEstimatorChecksum();
       estimatorToIntermediateCopier.copy();
@@ -78,6 +80,11 @@ public class IntermediateEstimatorStateHolder
    public long getEstimatorTick()
    {
       return estimatorTick;
+   }
+   
+   public long getEstimatorClockStartTime()
+   {
+      return estimatorClockStartTime;
    }
    
    private long calculateEstimatorChecksum()

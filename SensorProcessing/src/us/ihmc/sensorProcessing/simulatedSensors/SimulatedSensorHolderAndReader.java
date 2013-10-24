@@ -223,7 +223,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
 
       public void run()
       {
-         controllerDispatcher.startEstimator(estimateDTinNs * step.getIntegerValue());
+         controllerDispatcher.startEstimator(estimateDTinNs * step.getIntegerValue(), System.nanoTime());
       }
       
    }
