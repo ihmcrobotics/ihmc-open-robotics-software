@@ -60,8 +60,8 @@ import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProv
 import us.ihmc.commonWalkingControlModules.trajectories.TransferTimeCalculationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointTrajectoryUtils;
 import us.ihmc.commonWalkingControlModules.trajectories.WalkOnTheEdgesProviders;
-import us.ihmc.commonWalkingControlModules.trajectories.WrapperForPositionAndOrientationTrajectoryGenerators;
 import us.ihmc.commonWalkingControlModules.trajectories.WalkOnTheEdgesProviders.ToeOffMotionType;
+import us.ihmc.commonWalkingControlModules.trajectories.WrapperForPositionAndOrientationTrajectoryGenerators;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -170,6 +170,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable userDesiredPelvisYaw = new DoubleYoVariable("userDesiredPelvisYaw", registry);
    private final DoubleYoVariable userDesiredPelvisPitch = new DoubleYoVariable("userDesiredPelvisPitch", registry);
    private final DoubleYoVariable userDesiredPelvisRoll = new DoubleYoVariable("userDesiredPelvisRoll", registry);
+   private final BooleanYoVariable userSetDesiredPelvis = new BooleanYoVariable("userSetDesiredPelvis", registry);
    
    private final SettableOrientationProvider initialPelvisOrientationProvider;
    private final SettableOrientationProvider finalPelvisOrientationProvider;
@@ -209,7 +210,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final YoFramePoint2d desiredICP;
    private final YoFrameVector2d desiredICPVelocity;
 
-   private final DoubleYoVariable desiredCoMHeightAcceleration;
+   private final DoubleYoVariable controlledCoMHeightAcceleration;
    private final DoubleYoVariable controllerInitializationTime;
 
    private final TransferToAndNextFootstepsDataVisualizer transferToAndNextFootstepsDataVisualizer;
@@ -253,6 +254,15 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
      
       super.addUpdatables(icpAndMomentumBasedController.getUpdatables());
 
+      userSetDesiredPelvis.addVariableChangedListener(new VariableChangedListener(){
+         public void variableChanged(YoVariable v)
+         {
+            FrameOrientation frameOrientation = new FrameOrientation(referenceFrames.getPelvisFrame());
+            frameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+            
+            userDesiredPelvisYaw.set(frameOrientation.getYawPitchRoll()[0]);
+         }});
+      
       this.variousWalkingProviders = variousWalkingProviders;
       this.variousWalkingManagers = variousWalkingManagers;
       
@@ -293,7 +303,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       desiredICP = icpAndMomentumBasedController.getDesiredICP();
       desiredICPVelocity = icpAndMomentumBasedController.getDesiredICPVelocity();
       bipedSupportPolygons = icpAndMomentumBasedController.getBipedSupportPolygons();
-      desiredCoMHeightAcceleration = icpAndMomentumBasedController.getDesiredCoMHeightAcceleration();
+      controlledCoMHeightAcceleration = icpAndMomentumBasedController.getControlledCoMHeightAcceleration();
       centerOfMassJacobian = momentumBasedController.getCenterOfMassJacobian();
 
       coMHeightTimeDerivativesSmoother = new CoMHeightTimeDerivativesSmoother(controlDT, registry);
@@ -650,6 +660,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             setDesiredPelvisYawToAverageOfFeetOnStartupOnly(transferToSide);
          }
 
+         if (userSetDesiredPelvis.getBooleanValue())
+         {
+            desiredPelvisOrientation.set(userDesiredPelvisYaw.getDoubleValue(), userDesiredPelvisPitch.getDoubleValue(), userDesiredPelvisRoll.getDoubleValue());
+         }
+         
          // keep desired pelvis orientation as it is
          desiredPelvisAngularVelocity.set(0.0, 0.0, 0.0);
          desiredPelvisAngularAcceleration.set(0.0, 0.0, 0.0);
@@ -1479,7 +1494,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
 
-      desiredCoMHeightAcceleration.set(computeDesiredCoMHeightAcceleration(desiredICPVelocity.getFrameVector2dCopy()));
+      controlledCoMHeightAcceleration.set(computeDesiredCoMHeightAcceleration(desiredICPVelocity.getFrameVector2dCopy()));
 
       doFootControl();
       doArmControl();
@@ -1513,7 +1528,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       icpBasedMomentumRateOfChangeControlModule.getSupportLegInputPort().setData(getSupportLeg());
 
-      icpBasedMomentumRateOfChangeControlModule.getDesiredCenterOfMassHeightAccelerationInputPort().setData(desiredCoMHeightAcceleration.getDoubleValue());
+      icpBasedMomentumRateOfChangeControlModule.getDesiredCenterOfMassHeightAccelerationInputPort().setData(controlledCoMHeightAcceleration.getDoubleValue());
 
       icpBasedMomentumRateOfChangeControlModule.startComputation();
       icpBasedMomentumRateOfChangeControlModule.waitUntilComputationIsDone();
@@ -1748,6 +1763,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    
    private void checkForReinitialization()
    {
+      if (reinitializeControllerProvider == null) return;
+      
       if(reinitializeControllerProvider.isReinitializeRequested() && (stateMachine.getCurrentStateEnum() == WalkingState.DOUBLE_SUPPORT))
       {
          reinitializeControllerProvider.set(false);

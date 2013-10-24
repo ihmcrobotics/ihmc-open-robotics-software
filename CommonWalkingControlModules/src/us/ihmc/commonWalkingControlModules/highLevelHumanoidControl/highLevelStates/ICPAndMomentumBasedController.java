@@ -49,7 +49,7 @@ public class ICPAndMomentumBasedController
    private final YoFramePoint2d desiredICP;
    private final YoFrameVector2d desiredICPVelocity;
    private final EnumYoVariable<RobotSide> supportLeg;
-   private final DoubleYoVariable desiredCoMHeightAcceleration;
+   private final DoubleYoVariable controlledCoMHeightAcceleration;
    private final YoFramePoint capturePoint;
    private final DoubleYoVariable omega0;
    private final Omega0CalculatorInterface omega0Calculator;
@@ -79,7 +79,7 @@ public class ICPAndMomentumBasedController
 
       omega0 = new DoubleYoVariable("omega0", registry);
       capturePoint = new YoFramePoint("capturePoint", worldFrame, registry);
-      this.desiredCoMHeightAcceleration = new DoubleYoVariable("desiredCoMHeightAcceleration", registry);
+      this.controlledCoMHeightAcceleration = new DoubleYoVariable("controlledCoMHeightAcceleration", registry);
       this.bipedFeet = bipedFeet;
       this.bipedSupportPolygons = bipedSupportPolygons;
 
@@ -234,9 +234,9 @@ public class ICPAndMomentumBasedController
       return supportLeg;
    }
 
-   public DoubleYoVariable getDesiredCoMHeightAcceleration()
+   public DoubleYoVariable getControlledCoMHeightAcceleration()
    {
-      return desiredCoMHeightAcceleration;
+      return controlledCoMHeightAcceleration;
    }
 
    public BipedSupportPolygons getBipedSupportPolygons()
