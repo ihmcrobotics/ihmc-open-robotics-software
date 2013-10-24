@@ -103,6 +103,21 @@ public abstract class CameraDataReceiver
       
       
    }
+   protected void updateFishEyeImage(BufferedImage bufferedImage, long timeStamp, double fov, int sourceId)
+   {
+	   RobotPoseData robotPoseData = robotPoseBuffer.floorEntry(ppsTimestampOffsetProvider.ajustTimeStampToRobotClock(timeStamp));
+	   
+	   if(robotPoseData == null)
+	   {
+		   return;
+	   }
+	   
+	   robotPoseData.getCameraPose().get(cameraOrientation, tempVector);
+	   cameraPosition.set(tempVector);
+//	   compressedVideoDataServer.updateImage(bufferedImage, timeStamp, cameraPosition, cameraOrientation, fov, sourceId);
+	   
+	   
+   }
 
 
    protected void updateRightEyeImage(BufferedImage bufferedImage, long timeStamp, double fov)
