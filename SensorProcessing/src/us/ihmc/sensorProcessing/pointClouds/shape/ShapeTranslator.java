@@ -105,11 +105,9 @@ public class ShapeTranslator
          plane.process((PlaneGeneral3D_F64) s.parameters, s.points);
          Point3D_F64[] points = plane.getRect();
 
-         System.out.println(points.length);
 
          if (points.length == 4)
          {
-            System.out.println(points[0] + " " + points[1] + " " + points[2] + " " + points[3]);
             nodeToAddTo.attachChild(generatePlane(points[0], points[1], points[3], points[2], color));
 
          }
