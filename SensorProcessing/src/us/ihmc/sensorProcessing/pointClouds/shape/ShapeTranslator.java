@@ -132,10 +132,6 @@ public class ShapeTranslator
        
        lineNode.attachChild(lineGeometry);
        return lineNode;
-	   
-	   
-	   
-	   
    }
    
 

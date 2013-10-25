@@ -56,7 +56,7 @@ public class SyntheticCalibrationTestApp extends SimpleApplication
 
    }
 
-   private static List<Point3D_F64> createBoxCloud(Point3D_F64 center, int numPoints, double size, double noise)
+   public static List<Point3D_F64> createBoxCloud(Point3D_F64 center, int numPoints, double size, double noise)
    {
       List<Point3D_F64> cloud = new ArrayList<Point3D_F64>();
       noise /= 3; //gives 98% of gaussian noise within range

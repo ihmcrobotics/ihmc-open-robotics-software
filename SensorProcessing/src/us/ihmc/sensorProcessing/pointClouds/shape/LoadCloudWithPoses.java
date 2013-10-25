@@ -50,21 +50,25 @@ public class LoadCloudWithPoses extends SimpleApplication
    @Override
    public void simpleInitApp()
    {
-      List<Point3D_F64>[] clouds = loadPointCloud(40*5, 1);
-      try
+      List<Point3D_F64>[] clouds = loadPointCloud((int)(40 * 1.5), 1, false);
+
+      if (true)
       {
-         FileWriter fw = new FileWriter("box_5s_h.txt");
-         for (Point3D_F64 p : clouds[0]) {
-            fw.write(p.x + " " + p.y + " " + p.z + "\n");
+         try
+         {
+            FileWriter fw = new FileWriter("box_1_5s.txt");
+            for (Point3D_F64 p : clouds[0])
+            {
+               fw.write(p.x + " " + p.y + " " + p.z + "\n");
+            }
+            fw.close();
          }
-         fw.close();
+         catch (IOException e)
+         {
+            e.printStackTrace();
+         }
       }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
-      
-      
+
       render(clouds);
    }
 
@@ -114,7 +118,7 @@ public class LoadCloudWithPoses extends SimpleApplication
       flyCam.setMoveSpeed(25);
    }
 
-   private List<Point3D_F64>[] loadPointCloud(int maxScans, int mod)
+   private List<Point3D_F64>[] loadPointCloud(int maxScans, int mod, boolean half)
    {
       List<Point3D_F64>[] clouds = new ArrayList[3];
       for (int i = 0; i < clouds.length; i++)
@@ -168,10 +172,12 @@ public class LoadCloudWithPoses extends SimpleApplication
 
             LidarScan scan = new LidarScan(param, start, end, ranges);
 
-            for (int j = 0; j < scan.size(); j++) {
-               if (scan.getRange(j) < 30.0) {
+            for (int j = 0; j < scan.size(); j++)
+            {
+               if (scan.getRange(j) < 30.0)
+               {
                   Point3d p = scan.getPoint(j);
-                  if (j > scan.size()/2)
+                  if (!half || j > scan.size() / 2)
                      clouds[0].add(new Point3D_F64(p.x, p.y, p.z));
                   else
                      clouds[1].add(new Point3D_F64(p.x, p.y, p.z));
