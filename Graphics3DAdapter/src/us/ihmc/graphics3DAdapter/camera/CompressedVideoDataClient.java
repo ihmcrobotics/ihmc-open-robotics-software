@@ -1,12 +1,5 @@
 package us.ihmc.graphics3DAdapter.camera;
 
-import java.awt.image.BufferedImage;
-
-import us.ihmc.graphics3DAdapter.camera.VideoSettings.VideoCompressionKey;
-import us.ihmc.utilities.net.NetStateListener;
-import us.ihmc.utilities.net.ObjectCommunicator;
-import us.ihmc.utilities.net.ObjectConsumer;
-
 import com.xuggle.ferry.IBuffer;
 import com.xuggle.xuggler.IPacket;
 import com.xuggle.xuggler.IStreamCoder;
@@ -14,6 +7,12 @@ import com.xuggle.xuggler.IStreamCoder.Direction;
 import com.xuggle.xuggler.IVideoPicture;
 import com.xuggle.xuggler.video.ConverterFactory;
 import com.xuggle.xuggler.video.IConverter;
+import us.ihmc.graphics3DAdapter.camera.VideoSettings.VideoCompressionKey;
+import us.ihmc.utilities.net.NetStateListener;
+import us.ihmc.utilities.net.ObjectCommunicator;
+import us.ihmc.utilities.net.ObjectConsumer;
+
+import java.awt.image.BufferedImage;
 
 public class CompressedVideoDataClient implements ObjectConsumer<VideoPacket>, NetStateListener
 {
@@ -29,8 +28,6 @@ public class CompressedVideoDataClient implements ObjectConsumer<VideoPacket>, N
 
       objectCommunicator.attachStateListener(this);
       objectCommunicator.attachListener(VideoPacket.class, this);
-
-
    }
 
    
