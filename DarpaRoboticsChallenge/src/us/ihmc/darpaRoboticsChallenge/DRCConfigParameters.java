@@ -7,7 +7,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 public class DRCConfigParameters
 {
    public static final boolean USE_VRC_PARAMETERS = false;
-   public static final boolean RUNNING_ON_REAL_ROBOT = true;
+   public static final boolean RUNNING_ON_REAL_ROBOT = DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT;
    public static final boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES = RUNNING_ON_REAL_ROBOT;
    public static final boolean CORRUPT_SIMULATION_MODEL = false;
 
@@ -96,7 +96,7 @@ public class DRCConfigParameters
    public static final String RIGHT_IROBOT_HAND_IP = "192.168.40.32";
 
    public static final String LOG_HOST = "192.168.6.204";
-   public static final String GAZEBO_HOST = "10.66.171.41";    // CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP; //CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP;
+   public static final String GAZEBO_HOST = DRCLocalConfigParameters.GAZEBO_HOST;    // CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP; //CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP;
 
    public static final String SCS_MACHINE_IP_ADDRESS ;    
    static
@@ -111,9 +111,9 @@ public class DRCConfigParameters
       }
    }
    
-   public static final String NET_PROC_MACHINE_IP_ADDRESS = LOCALHOST;    // CONSTELLATION_FIELD_COMPUTER_1_VPN_IP; //CONSTELLATION_FIELD_COMPUTER_1_VPN_IP;    // SCS_MACHINE_IP_ADDRESS;
+   public static final String NET_PROC_MACHINE_IP_ADDRESS = DRCLocalConfigParameters.NET_PROC_MACHINE_IP_ADDRESS;    // CONSTELLATION_FIELD_COMPUTER_1_VPN_IP; //CONSTELLATION_FIELD_COMPUTER_1_VPN_IP;    // SCS_MACHINE_IP_ADDRESS;
 
-   public static final String OPERATOR_INTERFACE_IP_ADDRESS = LOCALHOST;
+   public static final String OPERATOR_INTERFACE_IP_ADDRESS = DRCLocalConfigParameters.OPERATOR_INTERFACE_IP_ADDRESS;
 
    public static final String ROS_MASTER_URI = "http://" + GAZEBO_HOST + ":11311";
    public static final int CONTROLLER_TO_UI_TCP_PORT = 4893;
