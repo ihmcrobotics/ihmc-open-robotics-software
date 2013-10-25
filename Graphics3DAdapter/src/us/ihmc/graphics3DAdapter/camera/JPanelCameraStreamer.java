@@ -1,14 +1,12 @@
 package us.ihmc.graphics3DAdapter.camera;
 
-import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.Graphics;
-import java.awt.image.BufferedImage;
+import boofcv.struct.calib.IntrinsicParameters;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 
 
 public class JPanelCameraStreamer extends JPanel implements VideoStreamer, CameraStreamer
@@ -26,7 +24,12 @@ public class JPanelCameraStreamer extends JPanel implements VideoStreamer, Camer
       this.bufferedImage = bufferedImage;
       repaint();
    }
-   
+
+   public void setIntrinsic(IntrinsicParameters param, int cameraId)
+   {
+
+   }
+
    public synchronized void updateImage(BufferedImage bufferedImage, Point3d cameraPosition, Quat4d cameraOrientation, double fov)
    {
       updateImage(bufferedImage);
