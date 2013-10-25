@@ -1,6 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.atlas.visualization.SliderBoardFactory;
+import us.ihmc.atlas.visualization.WalkControllerSliderBoard;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
@@ -98,7 +100,8 @@ public class DRCFlatGroundWalkingTrack
    {
       AutomaticSimulationRunner automaticSimulationRunner = null;
 
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
+      SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
+      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, sliderBoardFactory);
 
 //    DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(TerrainType.FLAT_Z_NEGATIVE_TWO);
 //    RobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(-2.0);

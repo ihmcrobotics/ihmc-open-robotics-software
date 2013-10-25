@@ -2,6 +2,10 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import javax.swing.JButton;
 
+import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.SdfLoader.JaxbSDFLoader;
+import us.ihmc.atlas.visualization.SliderBoardFactory;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.NullGraphics3DAdapter;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
@@ -22,11 +26,18 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
    private boolean is3dGraphicsShown = true;
    private final boolean groundProfileVisible;
    private final boolean drawPlaneAtZ0;
+   private final SliderBoardFactory sliderBoardFactory;
    
    public DRCGuiInitialSetup(boolean groundProfileVisible, boolean drawPlaneAtZeroHeight)
    {
+      this(groundProfileVisible, drawPlaneAtZeroHeight, null);
+   }
+   
+   public DRCGuiInitialSetup(boolean groundProfileVisible, boolean drawPlaneAtZeroHeight, SliderBoardFactory sliderBoardFactory)
+   {
       this.groundProfileVisible = groundProfileVisible;
       this.drawPlaneAtZ0 = drawPlaneAtZeroHeight;
+      this.sliderBoardFactory = sliderBoardFactory;
    }
    
    public void initializeGUI(SimulationConstructionSet scs, Robot robot)
@@ -74,6 +85,13 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
          exportTorqueAndSpeedButton.addActionListener(dataExporter);
          scs.addButton(exportTorqueAndSpeedButton);
       }
+      
+      //TODO: Clean this up!
+      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_NO_HANDS, false);
+      JaxbSDFLoader robotLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
+      GeneralizedSDFRobotModel generalizedSDFRobotModel = robotLoader.getGeneralizedSDFRobotModel(jointMap.getModelName());
+      
+      sliderBoardFactory.makeSliderBoard(scs, scs.getRootRegistry(), generalizedSDFRobotModel);
    }
 
    public boolean isGuiShown()
