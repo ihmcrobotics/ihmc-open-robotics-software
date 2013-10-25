@@ -7,6 +7,8 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.atlas.api.AtlasControlDataFromRobot;
+import us.ihmc.atlas.api.AtlasJointId;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.darpaRoboticsChallenge.handControl.FingerJoint;
@@ -20,6 +22,8 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 // collects Atlas joint positions and Hand positions and packs them together
 public class JointConfigurationGatherer
 {
+   private static boolean USE_BDI;
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final OneDoFJoint[] atlasJoints;
@@ -31,12 +35,18 @@ public class JointConfigurationGatherer
 
    private final SideDependentList<ConcurrentCopier<double[]>> handAngles = new SideDependentList<ConcurrentCopier<double[]>>();
 
+   private AtlasControlDataFromRobot bdiDataFromRobot;
 
-   public JointConfigurationGatherer(SDFFullRobotModel estimatorModel, SideDependentList<ArrayList<FingerJoint>> handModels, YoVariableRegistry parentRegistry)
+   public JointConfigurationGatherer(SDFFullRobotModel estimatorModel, SideDependentList<ArrayList<FingerJoint>> handModels, YoVariableRegistry parentRegistry,
+                                     AtlasControlDataFromRobot bdiDataFromRobot)
    {
+      USE_BDI = (bdiDataFromRobot == null) ? false : true;
 
       parentRegistry.addChild(registry);
       this.rootJoint = estimatorModel.getRootJoint();
+
+      this.bdiDataFromRobot = bdiDataFromRobot;
+
       // Setup Atlas Joints
       int numberOfAtlasJoints = DRCJointConfigurationData.atlasJointNames.length;
       this.atlasJoints = new OneDoFJoint[numberOfAtlasJoints];
@@ -66,7 +76,6 @@ public class JointConfigurationGatherer
 
          final Builder<double[]> handAngleBuilder = new Builder<double[]>()
          {
-            @Override
             public double[] newInstance()
             {
                return new double[numberOfHandJoints];
@@ -91,12 +100,25 @@ public class JointConfigurationGatherer
       double[] leftHandAngles = handAngles.get(RobotSide.LEFT).getCopyForReading();
       double[] rightHandAngles = handAngles.get(RobotSide.LEFT).getCopyForReading();
 
-      rootJoint.packTranslation(rootTranslation);
-      rootJoint.packRotation(rootOrientation);
-
-      for (int i = 0; i < atlasJoints.length; i++)
+      if (USE_BDI)
       {
-         jointAngles[i] = atlasJoints[i].getQ();
+         rootTranslation.set(bdiDataFromRobot.getAtlasPositionData().getPosition());
+         rootOrientation.set(bdiDataFromRobot.getFiltered_imu().getOrientation_estimate());
+
+         for (int i = 0; i < atlasJoints.length; i++)
+         {
+            jointAngles[i] = bdiDataFromRobot.getJ(AtlasJointId.values[i]).getQ();
+         }
+      }
+      else
+      {
+         rootJoint.packTranslation(rootTranslation);
+         rootJoint.packRotation(rootOrientation);
+
+         for (int i = 0; i < atlasJoints.length; i++)
+         {
+            jointAngles[i] = atlasJoints[i].getQ();
+         }
       }
 
       if ((leftHandAngles != null) && (rightHandAngles != null))
@@ -120,5 +142,10 @@ public class JointConfigurationGatherer
          sideHandAngles[i] = sideHandJoints[i].getQ();
       }
       handAngles.get(robotSide).commit();
+   }
+   
+   public void updateDataFromRobot(AtlasControlDataFromRobot dataFromRobot)
+   {
+      bdiDataFromRobot = dataFromRobot;
    }
 }
