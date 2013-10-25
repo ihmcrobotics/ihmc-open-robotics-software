@@ -1,14 +1,15 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Point2d;
-
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
+import com.yobotics.simulationconstructionset.robotController.RobotController;
+import com.yobotics.simulationconstructionset.util.GainCalculator;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
+import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
+import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
+import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
@@ -27,22 +28,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OldMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredArmJointAngleProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredChestOrientationProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandLoadBearingProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandPoseProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHeadOrientationProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBearingProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.FingerStateProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.ReinitializeWalkingControllerProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.TorusManipulationProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.TorusPoseProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.VehiclePoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.*;
 import us.ihmc.commonWalkingControlModules.packets.DesiredHighLevelStateProvider;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FingerForceSensors;
@@ -51,28 +37,15 @@ import us.ihmc.commonWalkingControlModules.visualizer.ForceSensorDataVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointGroundReactionWrenchDistributor;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromController;
 import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.ScrewTools;
-import us.ihmc.utilities.screwTheory.SpatialMotionVector;
-import us.ihmc.utilities.screwTheory.TotalMassCalculator;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.utilities.screwTheory.*;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
-import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.GainCalculator;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
-import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
-import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
-import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Point2d;
+import java.util.*;
 
 public class MultiContactTestHumanoidControllerFactory implements HighLevelHumanoidControllerFactory
 {
@@ -98,14 +71,14 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
    }
 
    public RobotController create(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
-         Map<OneDoFJoint, Double> initialPositionControlKpGains, Map<OneDoFJoint, Double> initialPositionControlKdGains, 
+                                 Map<OneDoFJoint, Double> initialPositionControlKpGains, Map<OneDoFJoint, Double> initialPositionControlKdGains,
                                  CommonWalkingReferenceFrames referenceFrames, FingerForceSensors fingerForceSensors, DoubleYoVariable yoTime, double gravityZ,
                                  TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian, SideDependentList<ContactablePlaneBody> feet,
                                  double controlDT, SideDependentList<FootSwitchInterface> footSwitches,
                                  SideDependentList<HandControllerInterface> handControllers, LidarControllerInterface lidarControllerInterface,
                                  StateEstimationDataFromController stateEstimationDataFromControllerSink,
                                  DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry,
-                                 GUISetterUpperRegistry guiSetterUpperRegistry, ProcessedOutputsInterface processedOutputs, ForceSensorDataVisualizer forceSensorDataVisualizer)
+                                 GUISetterUpperRegistry guiSetterUpperRegistry, ProcessedOutputsInterface processedOutputs, ForceSensorDataVisualizer forceSensorDataVisualizer, ForceSensorDataHolder forceSensorDataHolder)
    {
       LinkedHashMap<ContactablePlaneBody, RigidBody> contactablePlaneBodiesAndBases = new LinkedHashMap<ContactablePlaneBody, RigidBody>();
 

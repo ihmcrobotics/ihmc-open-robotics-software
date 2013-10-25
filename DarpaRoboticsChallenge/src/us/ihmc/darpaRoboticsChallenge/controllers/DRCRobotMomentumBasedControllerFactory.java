@@ -1,13 +1,10 @@
 package us.ihmc.darpaRoboticsChallenge.controllers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector3d;
-
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
+import com.yobotics.simulationconstructionset.robotController.RobotController;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import us.ihmc.atlas.AtlasJointPDGains;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
@@ -33,11 +30,12 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
-import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import javax.vecmath.Point2d;
+import javax.vecmath.Vector3d;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 {
@@ -90,14 +88,13 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       Map<OneDoFJoint, Double> initialPositionControlKdGains = new HashMap<OneDoFJoint, Double>();
       
       AtlasJointPDGains.createMaps(fullRobotModel, initialPositionControlKpGains, initialPositionControlKdGains);
-      
-      
+
       RobotController highLevelHumanoidController = highLevelHumanoidControllerFactory.create(estimationLink, estimationFrame, fullRobotModel,
             initialPositionControlKpGains, initialPositionControlKdGains, 
             referenceFrames, null, yoTime, gravityZ, twistCalculator, centerOfMassJacobian, bipedFeet,
             controlDT, footSwitches, handControllers, lidarControllerInterface,
             stateEstimationDataFromControllerSink, dynamicGraphicObjectsListRegistry, specificRegistry,
-            guiSetterUpperRegistry, null, forceSensorDataVisualizer);
+            guiSetterUpperRegistry, null, forceSensorDataVisualizer, forceSensorDataHolder);
       highLevelHumanoidController.getYoVariableRegistry().addChild(specificRegistry);
 
 
