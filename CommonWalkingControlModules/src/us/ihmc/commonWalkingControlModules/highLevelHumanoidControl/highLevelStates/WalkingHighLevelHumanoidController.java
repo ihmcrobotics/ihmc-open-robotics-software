@@ -218,7 +218,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final BooleanYoVariable ecmpBasedToeOffHasBeenInitialized = new BooleanYoVariable("ecmpBasedToeOffHasBeenInitialized", registry);
    private final YoFramePoint2d desiredECMP = new YoFramePoint2d("desiredECMP", "", worldFrame, registry);
    private final BooleanYoVariable desiredECMPinSupportPolygon = new BooleanYoVariable("desiredECMPinSupportPolygon", registry);
-   private YoFramePoint ecmpViz = new YoFramePoint("ecmpViz", ReferenceFrame.getWorldFrame(), registry);
+   private YoFramePoint ecmpViz = new YoFramePoint("ecmpViz", worldFrame, registry);
    
    private final YoVariableDoubleProvider totalEstimatedToeOffTimeProvider = new YoVariableDoubleProvider("totalEstimatedToeOffTimeProvider", registry);
    
@@ -633,7 +633,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             FramePoint2d desiredICPLocal = new FramePoint2d(desiredICP.getReferenceFrame());
             FrameVector2d desiredICPVelocityLocal = new FrameVector2d(desiredICPVelocity.getReferenceFrame());
-            FramePoint2d ecmpLocal = new FramePoint2d(ReferenceFrame.getWorldFrame());
+            FramePoint2d ecmpLocal = new FramePoint2d(worldFrame);
 
             FramePoint2d capturePoint2d = capturePoint.getFramePoint2dCopy();
             
@@ -958,7 +958,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          checkForReinitialization();
          FramePoint2d desiredICPLocal = new FramePoint2d(desiredICP.getReferenceFrame());
          FrameVector2d desiredICPVelocityLocal = new FrameVector2d(desiredICPVelocity.getReferenceFrame());
-         FramePoint2d ecmpLocal = new FramePoint2d(ReferenceFrame.getWorldFrame());
+         FramePoint2d ecmpLocal = new FramePoint2d(worldFrame);
 
          FramePoint2d capturePoint2d = capturePoint.getFramePoint2dCopy();
 
@@ -1017,17 +1017,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          walkOnTheEdgesManager.updateEdgeTouchdownStatus(swingSide.getOppositeSide(), nextFootstep);
          
-         if (walkOnTheEdgesManager.willLandOnToes())
+         if (walkOnTheEdgesManager.willLandOnEdge())
          {
-            walkOnTheEdgesProviders.setToeTouchdownInitialPitch();
-            nextFootstep = Footstep.copyButChangePitch(nextFootstep, walkOnTheEdgesProviders.getTouchdownInitialPitch());
-            walkOnTheEdgesManager.updateTouchdownInitialAngularVelocity();
-            nextFootstepHasBeenReplaced = true;
-         }
-         else if (walkOnTheEdgesManager.willLandOnHeel())
-         {
-            walkOnTheEdgesProviders.setHeelTouchdownInitialPitch();
-            nextFootstep = Footstep.copyButChangePitch(nextFootstep, walkOnTheEdgesProviders.getTouchdownInitialPitch());
+            nextFootstep = walkOnTheEdgesManager.createFootstepForEdgeTouchdown(nextFootstep);
             walkOnTheEdgesManager.updateTouchdownInitialAngularVelocity();
             nextFootstepHasBeenReplaced = true;
          }
@@ -1358,7 +1350,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private FramePoint2d getSingleSupportFinalDesiredICPForWalking(TransferToAndNextFootstepsData transferToAndNextFootstepsData, RobotSide swingSide)
    {
-      ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
+      ReferenceFrame referenceFrame = worldFrame;
 
       // FramePoint2d initialDesiredICP = desiredICP.getFramePoint2dCopy();
       // initialDesiredICP.changeFrame(referenceFrame);
@@ -1584,7 +1576,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       coMHeightTimeDerivativesSmoother.smooth(comHeightDataAfterSmoothing, comHeightDataBeforeSmoothing);
 
-      FramePoint centerOfMassHeightPoint = new FramePoint(ReferenceFrame.getWorldFrame());
+      FramePoint centerOfMassHeightPoint = new FramePoint(worldFrame);
       comHeightDataAfterSmoothing.getComHeight(centerOfMassHeightPoint);
       double zDesired = centerOfMassHeightPoint.getZ();
 
@@ -1748,7 +1740,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private static Footstep createFootstepFromFootAndContactablePlaneBody(ReferenceFrame footReferenceFrame, ContactablePlaneBody contactablePlaneBody)
    {
       FramePose framePose = new FramePose(footReferenceFrame);
-      framePose.changeFrame(ReferenceFrame.getWorldFrame());
+      framePose.changeFrame(worldFrame);
 
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("poseReferenceFrame", framePose);
 

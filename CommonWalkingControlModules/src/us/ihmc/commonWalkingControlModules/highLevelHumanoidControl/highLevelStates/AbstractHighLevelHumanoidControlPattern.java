@@ -51,7 +51,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
    private final String name = getClass().getSimpleName();
    protected final YoVariableRegistry registry = new YoVariableRegistry(name);
 
-   protected final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    protected final DoubleYoVariable yoTime;
    protected final double controlDT;

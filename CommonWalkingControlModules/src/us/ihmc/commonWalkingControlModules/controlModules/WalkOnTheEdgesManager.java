@@ -18,9 +18,12 @@ import us.ihmc.commonWalkingControlModules.trajectories.WalkOnTheEdgesProviders;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -281,6 +284,9 @@ public class WalkOnTheEdgesManager
       {
          boolean frontFootWellPositionedForToeTouchdown = isFrontFootWellPositionedForToeTouchdown(nextTrailingLeg, nextFrontFootFrame);
          doToeTouchdown.set(frontFootWellPositionedForToeTouchdown);
+         
+         if (doToeTouchdown.getBooleanValue())
+            walkOnTheEdgesProviders.setToeTouchdownInitialPitch();
       }
       
       if (!doHeelTouchdownIfPossible.getBooleanValue() || doToeTouchdown.getBooleanValue())
@@ -291,6 +297,84 @@ public class WalkOnTheEdgesManager
       
       boolean frontFootWellPositionedForHeelTouchdown = isFrontFootWellPositionedForHeelTouchdown(nextTrailingLeg, nextFrontFootFrame);
       doHeelTouchdown.set(frontFootWellPositionedForHeelTouchdown);
+      
+      if (doHeelTouchdown.getBooleanValue())
+         walkOnTheEdgesProviders.setHeelTouchdownInitialPitch();
+   }
+
+   public Footstep createFootstepForEdgeTouchdown(Footstep footstepToModify)
+   {
+      if (!doToeTouchdown.getBooleanValue() && !doHeelTouchdown.getBooleanValue())
+         return footstepToModify;
+
+      FramePose oldPose = footstepToModify.getPoseCopy();
+
+      FrameOrientation newOrientation = oldPose.getOrientationCopy();
+      FramePoint newPosition = oldPose.getPostionCopy();
+      double[] yawPitchRoll = newOrientation.getYawPitchRoll();
+      yawPitchRoll[1] += walkOnTheEdgesProviders.getTouchdownInitialPitch();
+
+      Vector3d ankleToEdge, edgeToAnkle;
+      
+      if (doToeTouchdown.getBooleanValue())
+         ankleToEdge = new Vector3d(walkingControllerParameters.getFootForwardOffset(), 0.0, -walkingControllerParameters.getAnkleHeight());
+      else
+         ankleToEdge = new Vector3d(-walkingControllerParameters.getFootBackwardOffset(), 0.0, walkingControllerParameters.getAnkleHeight());
+      
+      edgeToAnkle = new Vector3d(ankleToEdge);
+      edgeToAnkle.negate();
+      
+      Transform3D rotationByPitch = new Transform3D();
+      rotationByPitch.rotY(walkOnTheEdgesProviders.getTouchdownInitialPitch());
+      rotationByPitch.transform(edgeToAnkle);
+
+      double newX = newPosition.getX() + ankleToEdge.x + edgeToAnkle.x;
+      double newHeight = newPosition.getZ() + ankleToEdge.z + edgeToAnkle.z;
+
+      newPosition.setX(newX);
+      newPosition.setZ(newHeight);
+      newOrientation.setYawPitchRoll(yawPitchRoll);
+      FramePose newPose = new FramePose(newPosition, newOrientation);
+      PoseReferenceFrame newReferenceFrame = new PoseReferenceFrame("newPoseFrame", newPose);
+
+      return Footstep.copyChangePoseFrame(footstepToModify, newReferenceFrame);
+   }
+
+   public void updateTouchdownInitialAngularVelocity()
+   {
+      if (!doToeTouchdown.getBooleanValue() && !doHeelTouchdown.getBooleanValue())
+         return;
+      
+      Vector3d edgeToAnkle;
+      
+      if (doToeTouchdown.getBooleanValue())
+         edgeToAnkle = new Vector3d(-walkingControllerParameters.getFootForwardOffset(), 0.0, walkingControllerParameters.getAnkleHeight());
+      else
+         edgeToAnkle = new Vector3d(walkingControllerParameters.getFootBackwardOffset(), 0.0, walkingControllerParameters.getAnkleHeight());
+      
+      Transform3D rotationByPitch = new Transform3D();
+      rotationByPitch.rotY(-walkOnTheEdgesProviders.getTouchdownInitialPitch());
+      rotationByPitch.transform(edgeToAnkle);
+
+      Vector3d orthonormalToHeelToAnkle = new Vector3d(edgeToAnkle);
+      Transform3D perpendicularRotation = new Transform3D();
+      perpendicularRotation.rotY(-Math.PI / 2.0);
+      perpendicularRotation.transform(orthonormalToHeelToAnkle);
+      orthonormalToHeelToAnkle.normalize();
+
+      Vector3d linearVelocity = new Vector3d();
+      walkOnTheEdgesProviders.getTouchdownDesiredVelocity(linearVelocity);
+      double angularSpeed = -orthonormalToHeelToAnkle.dot(linearVelocity) / edgeToAnkle.length();
+
+      walkOnTheEdgesProviders.setTouchdownInitialAngularVelocityProvider(angularSpeed);
+   }
+
+   public boolean willLandOnEdge()
+   {
+      if (!doToeTouchdownIfPossible.getBooleanValue() && !doHeelTouchdownIfPossible.getBooleanValue())
+         return false;
+      
+      return doToeTouchdown.getBooleanValue() || doHeelTouchdown.getBooleanValue();
    }
 
    public boolean willLandOnToes()
@@ -330,33 +414,6 @@ public class WalkOnTheEdgesManager
       return frontFootWellPositionedForToeOff;
    }
 
-   public void updateTouchdownInitialAngularVelocity()
-   {
-      Vector3d edgeToAnkle;
-      double initialPitchAngle = walkOnTheEdgesProviders.getTouchdownInitialPitch();
-      
-      if (initialPitchAngle < 0.0)
-         edgeToAnkle = new Vector3d(walkingControllerParameters.getFootBackwardOffset(), 0.0, walkingControllerParameters.getAnkleHeight());
-      else
-         edgeToAnkle = new Vector3d(-walkingControllerParameters.getFootForwardOffset(), 0.0, walkingControllerParameters.getAnkleHeight());
-      
-      Transform3D rotationByPitch = new Transform3D();
-      rotationByPitch.rotY(-initialPitchAngle);
-      rotationByPitch.transform(edgeToAnkle);
-
-      Vector3d orthonormalToHeelToAnkle = new Vector3d(edgeToAnkle);
-      Transform3D perpendicularRotation = new Transform3D();
-      perpendicularRotation.rotY(-Math.PI / 2.0);
-      perpendicularRotation.transform(orthonormalToHeelToAnkle);
-      orthonormalToHeelToAnkle.normalize();
-
-      FrameVector linearVelocity = new FrameVector(worldFrame);
-      walkOnTheEdgesProviders.getTouchdownDesiredVelocity(linearVelocity);
-      double angularSpeed = -orthonormalToHeelToAnkle.dot(linearVelocity.getVector()) / edgeToAnkle.length();
-
-      walkOnTheEdgesProviders.setTouchdownInitialAngularVelocityProvider(angularSpeed);
-   }
-   
    public boolean stayOnToes()
    {
       return stayOnToes.getBooleanValue();
