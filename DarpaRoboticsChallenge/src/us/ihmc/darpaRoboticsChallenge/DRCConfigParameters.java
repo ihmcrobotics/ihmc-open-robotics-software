@@ -6,8 +6,8 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 
 public class DRCConfigParameters
 {
-   public static final boolean USE_VRC_PARAMETERS = true;
-   public static final boolean RUNNING_ON_REAL_ROBOT = false;
+   public static final boolean USE_VRC_PARAMETERS = false;
+   public static final boolean RUNNING_ON_REAL_ROBOT = true;
    public static final boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES = RUNNING_ON_REAL_ROBOT;
    public static final boolean CORRUPT_SIMULATION_MODEL = false;
 
