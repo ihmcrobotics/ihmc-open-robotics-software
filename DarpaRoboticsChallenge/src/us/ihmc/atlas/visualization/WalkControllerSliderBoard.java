@@ -49,7 +49,7 @@ public class WalkControllerSliderBoard
       
       sliderBoardConfigurationManager.setSlider(1, "offsetHeightAboveGround", registry, 0.0, 0.12);
 
-      sliderBoardConfigurationManager.setSlider(2, "desiredICPX", registry, -0.05, 0.05);
+      sliderBoardConfigurationManager.setSlider(2, "desiredICPX", registry, -0.05, 0.15);
       sliderBoardConfigurationManager.setKnob  (2, "desiredICPY", registry, -0.2, 0.2);
       
       sliderBoardConfigurationManager.setSlider(3, "userDesiredPelvisYaw", registry, -0.8, 0.8);
@@ -68,13 +68,17 @@ public class WalkControllerSliderBoard
       
       sliderBoardMode.set(SliderBoardMode.WalkingGains);
       
-      sliderBoardMode.addVariableChangedListener(new VariableChangedListener()
+      VariableChangedListener listener = new VariableChangedListener()
       {
+         @Override
          public void variableChanged(YoVariable v)
          {
             sliderBoardConfigurationManager.loadConfiguration(sliderBoardMode.getEnumValue().toString());
          }
-      });
+      };
+      
+      sliderBoardMode.addVariableChangedListener(listener);
+      listener.variableChanged(null);
       
    }
    
