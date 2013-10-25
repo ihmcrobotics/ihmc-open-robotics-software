@@ -36,7 +36,7 @@ public class DRCConfigParameters
    public static final boolean USE_SUPER_DUPER_HIGH_RESOLUTION_FOR_COMMS = false;
 
    public static final boolean USE_HYDRA = false;
-   public static final boolean USE_FISHEYE = RUNNING_ON_REAL_ROBOT;
+   public static final boolean USE_FISHEYE = false;
 
    public static final boolean LIMIT_CONTROLLER_OUTPUT_TORQUES = false;
 
@@ -72,9 +72,9 @@ public class DRCConfigParameters
    public static final int FISHEYE_RIGHT_CAMERA = 4;
    public static final int REAR_CAMERA = 5;
    public static final int VIDEO_FRAME = 6;
-   
-  
-   
+
+
+
    // Networking
    public static final String LOCALHOST = "localhost";
    public static final String CLOUD_MINION1_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMINION_1);
@@ -98,7 +98,8 @@ public class DRCConfigParameters
    public static final String LOG_HOST = "192.168.6.204";
    public static final String GAZEBO_HOST = DRCLocalConfigParameters.GAZEBO_HOST;    // CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP; //CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP;
 
-   public static final String SCS_MACHINE_IP_ADDRESS ;    
+   public static final String SCS_MACHINE_IP_ADDRESS;
+
    static
    {
       if (RUNNING_ON_REAL_ROBOT)
@@ -107,10 +108,10 @@ public class DRCConfigParameters
       }
       else
       {
-         SCS_MACHINE_IP_ADDRESS = LOCALHOST; // CONSTELLATION_FIELD_COMPUTER_2_VPN_IP; //CONSTELLATION_FIELD_COMPUTER_2_VPN_IP;    // CLOUD_MONSTER_IP;
+         SCS_MACHINE_IP_ADDRESS = LOCALHOST;    // CONSTELLATION_FIELD_COMPUTER_2_VPN_IP; //CONSTELLATION_FIELD_COMPUTER_2_VPN_IP;    // CLOUD_MONSTER_IP;
       }
    }
-   
+
    public static final String NET_PROC_MACHINE_IP_ADDRESS = DRCLocalConfigParameters.NET_PROC_MACHINE_IP_ADDRESS;    // CONSTELLATION_FIELD_COMPUTER_1_VPN_IP; //CONSTELLATION_FIELD_COMPUTER_1_VPN_IP;    // SCS_MACHINE_IP_ADDRESS;
 
    public static final String OPERATOR_INTERFACE_IP_ADDRESS = DRCLocalConfigParameters.OPERATOR_INTERFACE_IP_ADDRESS;
@@ -132,12 +133,12 @@ public class DRCConfigParameters
 
    public static final long ROBOT_JOINT_SERVER_UPDATE_MILLIS = 100;
 
-   //ROS Topics
+   // ROS Topics
    public static final String FISHEYE_RIGHT_CAMERA_TOPIC = "/blackfly/camera/right";
    public static final String FISHEYE_LEFT_CAMERA_TOPIC = "/blackfly/camera/LEFT";
    public static final String MULTISENSE_LEFT_CAMERA_TOPIC = "/multisense_sl/camera/left/image_rect_color/compressed";
    public static final String MULTISENSE_RIGHT_CAMERA_TOPIC = "/multisense_sl/camera/right/image_rect/compressed";
-   
+
    // Video Settings
    public static final boolean STREAM_VIDEO = true;
 
@@ -156,7 +157,7 @@ public class DRCConfigParameters
 
    // the useful children are "Static Link Graphic" and "atlas", but you don't really need atlas. ~30% faster without atlas.
    public static final String[] SCS_LIDAR_NODES_TO_INTERSECT = new String[] {"Static Link Graphic"};
-   
+
    public static final boolean STREAM_POLAR_LIDAR = true;
    public static final int LIDAR_UPDATE_RATE_OVERRIDE = 30;
    public static final int LIDAR_SWEEPS_PER_SCAN = 1;
@@ -235,10 +236,10 @@ public class DRCConfigParameters
 
    public static final int CHEATING_POLARIS_PORT = 1543;
    public static final String CHEATING_POLARIS_HOST = LOCALHOST;
-   
+
    // Filter Parameters
-   public static final double  positionSensorFrequencyHz;
-   public static final double  velocitySensorFrequencyHz;
+   public static final double positionSensorFrequencyHz;
+   public static final double velocitySensorFrequencyHz;
 
    static
    {
@@ -250,10 +251,10 @@ public class DRCConfigParameters
       else
       {
          positionSensorFrequencyHz = 16.0;
-         velocitySensorFrequencyHz = 16.0; 
+         velocitySensorFrequencyHz = 16.0;
       }
    }
-   
+
    public static final double JOINT_POSITION_FILTER_FREQ_HZ = positionSensorFrequencyHz;
    public static final double JOINT_VELOCITY_FILTER_FREQ_HZ = velocitySensorFrequencyHz;
    public static final double ORIENTATION_FILTER_FREQ_HZ = positionSensorFrequencyHz;
@@ -261,9 +262,9 @@ public class DRCConfigParameters
    public static final double LINEAR_ACCELERATION_FILTER_FREQ_HZ = velocitySensorFrequencyHz;
 
    // State Estimator Filter Parameters
-   public static final double pointVelocityXYMeasurementStandardDeviation = 2.0; //8.0; //2.0;
-   public static final double pointVelocityZMeasurementStandardDeviation = 2.0; //8.0; //2.0;
+   public static final double pointVelocityXYMeasurementStandardDeviation = 2.0;    // 8.0; //2.0;
+   public static final double pointVelocityZMeasurementStandardDeviation = 2.0;    // 8.0; //2.0;
 
-   public static final double pointPositionXYMeasurementStandardDeviation = 0.1; //0.4; //0.1;
-   public static final double pointPositionZMeasurementStandardDeviation = 0.1; //0.4; //0.1;
+   public static final double pointPositionXYMeasurementStandardDeviation = 0.1;    // 0.4; //0.1;
+   public static final double pointPositionZMeasurementStandardDeviation = 0.1;    // 0.4; //0.1;
 }

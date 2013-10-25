@@ -75,7 +75,7 @@ public class CompressedVideoDataClient implements ObjectConsumer<VideoPacket>, N
 
       if (pictureIn.isComplete())
       {
-         videoStreamer.updateImage(converter.toImage(pictureIn), packetData.getPosition(), packetData.getOrientation(), packetData.getFieldOfView());
+         videoStreamer.updateImage(converter.toImage(pictureIn), packetData.getPosition(), packetData.getOrientation(), packetData.getFieldOfView(), packetData.getCameraSourceId());
       }
       else
       {
