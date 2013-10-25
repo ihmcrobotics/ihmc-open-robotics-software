@@ -15,12 +15,12 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 
 public class ExpectationMaximizationFitter
 {
-   public static List<PlaneGeneral3D_F64> fit(int numPlanes, List<Point3D_F64> allPoints, ScoringFunction scorer, int iterations)
+   public static List<PlaneGeneral3D_F64> fit(int numPlanes, List<Point3D_F64> allPoints, ScoringFunction<PlaneGeneral3D_F64, Point3D_F64> scorer, int iterations)
    {
       return fit(numPlanes, new Random(), allPoints, scorer, iterations);
    }
 
-   public static List<PlaneGeneral3D_F64> fit(int numPlanes, Random rand, List<Point3D_F64> allPoints, ScoringFunction scorer, int iterations)
+   public static List<PlaneGeneral3D_F64> fit(int numPlanes, Random rand, List<Point3D_F64> allPoints, ScoringFunction<PlaneGeneral3D_F64, Point3D_F64> scorer, int iterations)
    {
       List<PlaneGeneral3D_F64> planes = new ArrayList<PlaneGeneral3D_F64>();
       for (int i = 0; i < numPlanes; i++)
@@ -31,7 +31,7 @@ public class ExpectationMaximizationFitter
       return fit(planes, allPoints, scorer, iterations);
    }
 
-   public static List<PlaneGeneral3D_F64> fit(List<PlaneGeneral3D_F64> planes, List<Point3D_F64> allPoints, ScoringFunction scorer, int iterations)
+   public static List<PlaneGeneral3D_F64> fit(List<PlaneGeneral3D_F64> planes, List<Point3D_F64> allPoints, ScoringFunction<PlaneGeneral3D_F64, Point3D_F64> scorer, int iterations)
    {
       FitPlaneWeighted3D_F64 fitter = new FitPlaneWeighted3D_F64();
       Point3D_F64 fitOrigin = new Point3D_F64();
@@ -55,7 +55,7 @@ public class ExpectationMaximizationFitter
       return planes;
    }
 
-   public static double[][] getWeights(double[][] weights, List<PlaneGeneral3D_F64> planes, List<Point3D_F64> allPoints, ScoringFunction scorer)
+   public static double[][] getWeights(double[][] weights, List<PlaneGeneral3D_F64> planes, List<Point3D_F64> allPoints, ScoringFunction<PlaneGeneral3D_F64, Point3D_F64> scorer)
    {
       if(weights == null)
          weights = new double[planes.size()][allPoints.size()];
@@ -69,7 +69,7 @@ public class ExpectationMaximizationFitter
          sumProbability = 0;
          for (int j = 0; j < planes.size(); j++)
          {
-            probabilities[j] = scorer.score(Distance3D_F64.distance(planes.get(j), allPoints.get(i)));
+            probabilities[j] = scorer.score(planes.get(j), allPoints.get(i));
             sumProbability += probabilities[j];
          }
 
@@ -90,22 +90,36 @@ public class ExpectationMaximizationFitter
       return weights;
    }
 
-   public static interface ScoringFunction
+   public static interface ScoringFunction <T,E>
    {
-      public double score(double e);
+      public double score(T model, E sample);
    }
 
-   public static ScoringFunction getGaussianSqauresMixedError(double sigma)
+   public static ScoringFunction<PlaneGeneral3D_F64, Point3D_F64> getGaussianSqauresMixedError(double sigma)
    {
       final NormalDistribution d = new NormalDistribution(0, sigma);
       final double distAmplitude = d.density(0);
 
-      return new ScoringFunction()
+      return new ScoringFunction<PlaneGeneral3D_F64, Point3D_F64>()
       {
-         public double score(double e)
+         public double score(PlaneGeneral3D_F64 plane, Point3D_F64 point)
          {
+            double e = Distance3D_F64.distance(plane, point);
             // gaussian best for fitting, small 1/(e*e) component for large errors 
             return d.density(e) + distAmplitude * 1e-12 / (1e-10 + (e * e));
+         }
+      };
+   }
+   
+   public static ScoringFunction<PlaneNormal3D_F64, Point3D_F64> getNormalSingularityError()
+   {
+      return new ScoringFunction<PlaneNormal3D_F64, Point3D_F64>()
+      {
+         public double score(PlaneNormal3D_F64 plane, Point3D_F64 diff)
+         {
+            double e = plane.n.x * diff.x + plane.n.y * diff.y + plane.n.z * diff.z;
+            e /= diff.norm();
+            return 1 / (1e-2 + (e));
          }
       };
    }
