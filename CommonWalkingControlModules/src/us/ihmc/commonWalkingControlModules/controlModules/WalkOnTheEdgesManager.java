@@ -309,31 +309,34 @@ public class WalkOnTheEdgesManager
 
       FramePose oldPose = footstepToModify.getPoseCopy();
 
+      FrameOrientation oldOrientation = oldPose.getOrientationCopy();
       FrameOrientation newOrientation = oldPose.getOrientationCopy();
       FramePoint newPosition = oldPose.getPostionCopy();
       double[] yawPitchRoll = newOrientation.getYawPitchRoll();
       yawPitchRoll[1] += walkOnTheEdgesProviders.getTouchdownInitialPitch();
-
+      newOrientation.setYawPitchRoll(yawPitchRoll);
+      
       Vector3d ankleToEdge, edgeToAnkle;
       
       if (doToeTouchdown.getBooleanValue())
          ankleToEdge = new Vector3d(walkingControllerParameters.getFootForwardOffset(), 0.0, -walkingControllerParameters.getAnkleHeight());
       else
-         ankleToEdge = new Vector3d(-walkingControllerParameters.getFootBackwardOffset(), 0.0, walkingControllerParameters.getAnkleHeight());
+         ankleToEdge = new Vector3d(-walkingControllerParameters.getFootBackwardOffset(), 0.0, -walkingControllerParameters.getAnkleHeight());
       
       edgeToAnkle = new Vector3d(ankleToEdge);
       edgeToAnkle.negate();
       
-      Transform3D rotationByPitch = new Transform3D();
-      rotationByPitch.rotY(walkOnTheEdgesProviders.getTouchdownInitialPitch());
-      rotationByPitch.transform(edgeToAnkle);
+      Transform3D tempTransform = new Transform3D();
+      oldOrientation.getTransform3D(tempTransform);
+      tempTransform.transform(ankleToEdge);
+      newOrientation.getTransform3D(tempTransform);
+      tempTransform.transform(edgeToAnkle);
 
       double newX = newPosition.getX() + ankleToEdge.x + edgeToAnkle.x;
       double newHeight = newPosition.getZ() + ankleToEdge.z + edgeToAnkle.z;
 
       newPosition.setX(newX);
       newPosition.setZ(newHeight);
-      newOrientation.setYawPitchRoll(yawPitchRoll);
       FramePose newPose = new FramePose(newPosition, newOrientation);
       PoseReferenceFrame newReferenceFrame = new PoseReferenceFrame("newPoseFrame", newPose);
 
