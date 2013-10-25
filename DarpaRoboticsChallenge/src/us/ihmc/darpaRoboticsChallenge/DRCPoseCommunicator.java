@@ -58,6 +58,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
    {
       new Thread(new Runnable()
       {
+         @Override
          public void run()
          {
             while (true)
@@ -67,6 +68,14 @@ public class DRCPoseCommunicator implements RawOutputWriter
                   State state;
                   while ((state = stateRingBuffer.read()) != null)
                   {
+                     if(networkProcessorCommunicator == null)
+                     {
+                        System.out.println("Net Proc Comm");
+                     }
+                     if(state.poseData == null)
+                     {
+                        System.out.println("Pose Data");
+                     }
                      networkProcessorCommunicator.consumeObject(state.poseData);
                      networkProcessorCommunicator.consumeObject(state.jointData);
                   }
@@ -79,26 +88,31 @@ public class DRCPoseCommunicator implements RawOutputWriter
       }).start();
    }
 
+   @Override
    public void initialize()
    {
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return getClass().getSimpleName();
    }
 
+   @Override
    public String getDescription()
    {
       return getName();
    }
 
    // puts the state data into the ring buffer for the output thread
+   @Override
    public void write()
    {
       rootFrame.getTransformToDesiredFrame(rootTransform, ReferenceFrame.getWorldFrame());
@@ -126,6 +140,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
 
       public static final Builder<State> builder = new Builder<State>()
       {
+         @Override
          public State newInstance()
          {
             return new State();
