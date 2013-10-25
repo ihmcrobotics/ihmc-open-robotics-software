@@ -52,13 +52,13 @@ public class WalkControllerSliderBoard
       sliderBoardConfigurationManager.setSlider(2, "desiredICPX", registry, -0.05, 0.05);
       sliderBoardConfigurationManager.setKnob  (2, "desiredICPY", registry, -0.2, 0.2);
       
-      sliderBoardConfigurationManager.setSlider(3, "userDesiredPelvisYaw", registry, -0.05, 0.05);
+      sliderBoardConfigurationManager.setSlider(3, "userDesiredPelvisYaw", registry, -0.8, 0.8);
       sliderBoardConfigurationManager.setKnob  (3, "userSetDesiredPelvis", registry, 0.0, 1.0);
-      sliderBoardConfigurationManager.setSlider(4, "userDesiredPelvisPitch", registry, -0.05, 0.05);
-      sliderBoardConfigurationManager.setSlider(5, "userDesiredPelvisRoll", registry, -0.05, 0.05);
+      sliderBoardConfigurationManager.setSlider(4, "userDesiredPelvisPitch", registry, -0.4, 0.4);
+      sliderBoardConfigurationManager.setSlider(5, "userDesiredPelvisRoll", registry, -0.3, 0.3);
       
-      sliderBoardConfigurationManager.setSlider(6, "userDesiredHeadPitch", registry, -0.05, 0.05);
-      sliderBoardConfigurationManager.setSlider(7, "userDesiredHeadYaw", registry, -0.05, 0.05);
+      sliderBoardConfigurationManager.setSlider(6, "userDesiredHeadPitch", registry, -0.5, 0.5);
+      sliderBoardConfigurationManager.setSlider(7, "userDesiredHeadYaw", registry, -0.8, 0.8);
 
       sliderBoardConfigurationManager.setKnob  (8, "sliderBoardMode", registry, 0.0, SliderBoardMode.values().length);
 
