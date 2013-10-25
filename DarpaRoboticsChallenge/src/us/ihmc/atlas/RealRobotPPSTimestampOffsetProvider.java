@@ -38,6 +38,7 @@ public class RealRobotPPSTimestampOffsetProvider implements PPSTimestampOffsetPr
          public void onNewMessage(Time message)
          {
             currentTimeStampOffset.set(requestNewestRobotTimestamp() - message.getData().totalNsecs());
+            System.out.println("offset: " + currentTimeStampOffset.get()/1000000);
             offsetIsDetermined.set(true);
          }
       };
@@ -50,22 +51,26 @@ public class RealRobotPPSTimestampOffsetProvider implements PPSTimestampOffsetPr
       requester.connect("tcp://" + DRCConfigParameters.SCS_MACHINE_IP_ADDRESS + ":" + DRCConfigParameters.PPS_PROVIDER_PORT);
    }
 
+   @Override
    public void attachToRosMainNode(RosMainNode rosMainNode)
    {
       rosMainNode.attachSubscriber(MULTISENSE_SL_PPS_TOPIC, ppsSubscriber);
    }
 
+   @Override
    public long getCurrentTimestampOffset()
    {
       return currentTimeStampOffset.get();
    }
 
+   @Override
    public long ajustTimeStampToRobotClock(long timeStamp)
    {
       return timeStamp + currentTimeStampOffset.get();
    }
 
    
+   @Override
    public long requestNewestRobotTimestamp()
    {
       requester.send(requestPayload, 0);
@@ -74,6 +79,7 @@ public class RealRobotPPSTimestampOffsetProvider implements PPSTimestampOffsetPr
       return responseBuffer.getLong(0);
    }
 
+   @Override
    public boolean offsetIsDetermined()
    {
       return offsetIsDetermined.get();
