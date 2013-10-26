@@ -10,6 +10,7 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
@@ -33,7 +34,6 @@ import us.ihmc.commonWalkingControlModules.packets.DesiredHighLevelStateProvider
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FingerForceSensors;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
-import us.ihmc.commonWalkingControlModules.visualizer.ForceSensorDataVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointGroundReactionWrenchDistributor;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -45,6 +45,7 @@ import us.ihmc.utilities.screwTheory.*;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Point2d;
+
 import java.util.*;
 
 public class MultiContactTestHumanoidControllerFactory implements HighLevelHumanoidControllerFactory
@@ -78,7 +79,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
                                  SideDependentList<HandControllerInterface> handControllers, LidarControllerInterface lidarControllerInterface,
                                  StateEstimationDataFromController stateEstimationDataFromControllerSink,
                                  DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry,
-                                 GUISetterUpperRegistry guiSetterUpperRegistry, ProcessedOutputsInterface processedOutputs, ForceSensorDataVisualizer forceSensorDataVisualizer, ForceSensorDataHolder forceSensorDataHolder)
+                                 GUISetterUpperRegistry guiSetterUpperRegistry, ProcessedOutputsInterface processedOutputs, ForceSensorDataHolder forceSensorDataHolder)
    {
       LinkedHashMap<ContactablePlaneBody, RigidBody> contactablePlaneBodiesAndBases = new LinkedHashMap<ContactablePlaneBody, RigidBody>();
 

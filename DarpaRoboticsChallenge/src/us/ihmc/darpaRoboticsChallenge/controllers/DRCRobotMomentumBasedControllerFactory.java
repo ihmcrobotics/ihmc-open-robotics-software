@@ -19,7 +19,6 @@ import us.ihmc.commonWalkingControlModules.controllers.RobotControllerUpdatables
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.visualizer.ForceSensorDataVisualizer;
@@ -59,6 +58,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       this.useGazeboPhysics = useGazeboPhysics;
    }
 
+   @Override
    public RobotController getController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
            CommonWalkingReferenceFrames referenceFrames, double controlDT, DoubleYoVariable yoTime,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, GUISetterUpperRegistry guiSetterUpperRegistry, TwistCalculator twistCalculator,
@@ -96,7 +96,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
             referenceFrames, null, yoTime, gravityZ, twistCalculator, centerOfMassJacobian, bipedFeet,
             controlDT, footSwitches, handControllers, lidarControllerInterface,
             stateEstimationDataFromControllerSink, dynamicGraphicObjectsListRegistry, specificRegistry,
-            guiSetterUpperRegistry, null, null, forceSensorDataHolder);
+            guiSetterUpperRegistry, null, forceSensorDataHolder);
       
       highLevelHumanoidController.getYoVariableRegistry().addChild(specificRegistry);
 
@@ -104,25 +104,24 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       if (dynamicGraphicObjectsListRegistry!=null)
       {
          RobotControllerUpdatablesAdapter  highLevelHumanoidControllerUpdatables = new RobotControllerUpdatablesAdapter(highLevelHumanoidController);
-         final ForceSensorDataVisualizer forceSensorDataVisualizer=new ForceSensorDataVisualizer(fullRobotModel, forceSensorDataHolder, dynamicGraphicObjectsListRegistry, specificRegistry);
-         final CenterOfPressureVisualizer centerOfPressureVisualizer = new CenterOfPressureVisualizer(fullRobotModel, forceSensorDataHolder, dynamicGraphicObjectsListRegistry, specificRegistry);
 
+         final ForceSensorDataVisualizer forceSensorDataVisualizer=new ForceSensorDataVisualizer(fullRobotModel, forceSensorDataHolder, dynamicGraphicObjectsListRegistry, specificRegistry);
+         final CenterOfPressureVisualizer centerOfPressureVisualizer=new CenterOfPressureVisualizer(fullRobotModel, forceSensorDataHolder, dynamicGraphicObjectsListRegistry, specificRegistry);
+         
          highLevelHumanoidControllerUpdatables.addUpdatable(
             new Updatable()
             {
                @Override
                public void update(double time)
                {
-                  forceSensorDataVisualizer.update(time);
-                  centerOfPressureVisualizer.visualize();
+                    forceSensorDataVisualizer.visualize();
+                    centerOfPressureVisualizer.visualize();
                }
             });
-         return highLevelHumanoidControllerUpdatables;
+         
+         highLevelHumanoidController = highLevelHumanoidControllerUpdatables;
       }
-      else      
-      {
-         return highLevelHumanoidController;
-      }
+      return highLevelHumanoidController;      
    }
 
    private SideDependentList<FootSwitchInterface> createFootSwitches(SideDependentList<ContactablePlaneBody> bipedFeet,
@@ -140,6 +139,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       return footSwitches;
    }
 
+   @Override
    public double getControlDT()
    {
       return DRCConfigParameters.CONTROL_DT;
