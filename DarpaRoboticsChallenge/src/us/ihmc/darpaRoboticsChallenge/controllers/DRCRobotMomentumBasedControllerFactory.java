@@ -1,18 +1,25 @@
 package us.ihmc.darpaRoboticsChallenge.controllers;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
-import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.vecmath.Point2d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.atlas.AtlasJointPDGains;
+import us.ihmc.atlas.visualization.CenterOfPressureVisualizer;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
+import us.ihmc.commonWalkingControlModules.controllers.RobotControllerUpdatablesAdapter;
+import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.visualizer.ForceSensorDataVisualizer;
@@ -30,12 +37,11 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
+import com.yobotics.simulationconstructionset.robotController.RobotController;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 {
@@ -75,12 +81,8 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       }
 
       SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(bipedFeet, forceSensorDataHolder, dynamicGraphicObjectsListRegistry, specificRegistry);
-      ForceSensorDataVisualizer forceSensorDataVisualizer;
+      
 
-      if (dynamicGraphicObjectsListRegistry == null)
-         forceSensorDataVisualizer = null;
-      else
-         forceSensorDataVisualizer = new  ForceSensorDataVisualizer(fullRobotModel, forceSensorDataHolder, dynamicGraphicObjectsListRegistry, specificRegistry);
 
       double gravityZ = 9.81;
 
@@ -94,11 +96,33 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
             referenceFrames, null, yoTime, gravityZ, twistCalculator, centerOfMassJacobian, bipedFeet,
             controlDT, footSwitches, handControllers, lidarControllerInterface,
             stateEstimationDataFromControllerSink, dynamicGraphicObjectsListRegistry, specificRegistry,
-            guiSetterUpperRegistry, null, forceSensorDataVisualizer, forceSensorDataHolder);
+            guiSetterUpperRegistry, null, null, forceSensorDataHolder);
+      
       highLevelHumanoidController.getYoVariableRegistry().addChild(specificRegistry);
 
 
-      return highLevelHumanoidController;
+      if (dynamicGraphicObjectsListRegistry!=null)
+      {
+         RobotControllerUpdatablesAdapter  highLevelHumanoidControllerUpdatables = new RobotControllerUpdatablesAdapter(highLevelHumanoidController);
+         final ForceSensorDataVisualizer forceSensorDataVisualizer=new ForceSensorDataVisualizer(fullRobotModel, forceSensorDataHolder, dynamicGraphicObjectsListRegistry, specificRegistry);
+         final CenterOfPressureVisualizer centerOfPressureVisualizer = new CenterOfPressureVisualizer(fullRobotModel, forceSensorDataHolder, dynamicGraphicObjectsListRegistry, specificRegistry);
+
+         highLevelHumanoidControllerUpdatables.addUpdatable(
+            new Updatable()
+            {
+               @Override
+               public void update(double time)
+               {
+                  forceSensorDataVisualizer.update(time);
+                  centerOfPressureVisualizer.visualize();
+               }
+            });
+         return highLevelHumanoidControllerUpdatables;
+      }
+      else      
+      {
+         return highLevelHumanoidController;
+      }
    }
 
    private SideDependentList<FootSwitchInterface> createFootSwitches(SideDependentList<ContactablePlaneBody> bipedFeet,
