@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
 import java.awt.Color;
 
-import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
+import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
