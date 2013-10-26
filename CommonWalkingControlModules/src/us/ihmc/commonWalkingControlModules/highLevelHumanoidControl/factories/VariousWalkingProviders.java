@@ -7,7 +7,7 @@ import java.util.LinkedHashMap;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.spine.ChestOrientationPacket;
-import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
+import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.BlindWalkingPacketConsumer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.BlindWalkingToDestinationDesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.BoxDesiredFootstepCalculator;

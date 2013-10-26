@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
+import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 

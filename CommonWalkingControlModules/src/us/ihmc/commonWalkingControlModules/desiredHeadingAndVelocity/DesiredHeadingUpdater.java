@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
 
-import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
+import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 
 public class DesiredHeadingUpdater implements Updatable
 {

@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.captureRegion.CapturePointCalculatorInterface;
 import us.ihmc.commonWalkingControlModules.captureRegion.CaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.DoubleAndSingleSupportDurationUpdater;
+import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
