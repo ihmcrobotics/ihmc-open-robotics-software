@@ -7,7 +7,7 @@ import java.util.List;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
+import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.utilities.InertiaTools;

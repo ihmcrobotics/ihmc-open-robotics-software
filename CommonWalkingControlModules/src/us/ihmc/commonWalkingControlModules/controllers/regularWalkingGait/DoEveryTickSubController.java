@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait;
 
+import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.robotSide.RobotSide;
 
 public interface DoEveryTickSubController

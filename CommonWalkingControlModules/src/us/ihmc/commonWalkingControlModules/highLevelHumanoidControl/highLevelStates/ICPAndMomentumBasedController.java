@@ -10,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.commonWalkingControlModules.calculators.ConstantOmega0Calculator;
 import us.ihmc.commonWalkingControlModules.calculators.Omega0Calculator;
 import us.ihmc.commonWalkingControlModules.calculators.Omega0CalculatorInterface;
-import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
+import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
