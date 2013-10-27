@@ -35,7 +35,7 @@ import bubo.ptcloud.alg.PointVectorNN;
 import bubo.ptcloud.tools.PointCloudShapeTools;
 import bubo.ptcloud.wrapper.ConfigRemoveFalseShapes;
 import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
-import cern.colt.Arrays;
+import java.util.Arrays;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.RawInputListener;
