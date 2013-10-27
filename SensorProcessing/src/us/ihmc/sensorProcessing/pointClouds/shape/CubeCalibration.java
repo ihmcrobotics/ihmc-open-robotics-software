@@ -157,4 +157,48 @@ public class CubeCalibration
       n[1] = Math.cos(phi) * Math.sin(theta);
       n[2] = Math.sin(phi);
    }
+
+   public static double score(PointVectorNN p)
+   {
+      PlaneNormal3D_F64 normPlane = new PlaneNormal3D_F64(p.p, p.normal);
+      PlaneGeneral3D_F64 genPlane = UtilPlane3D_F64.convert(normPlane, null);
+      double averageError = 0;
+      for (PointVectorNN n : p.neighbors.toList()) {
+         averageError += Math.abs(Distance3D_F64.distance(genPlane, n.p));
+      }
+      
+      averageError /= p.neighbors.size();
+      
+      double above = 0;
+      double below = 0;
+      for (PointVectorNN n : p.neighbors.toList()) {
+         double dist = Distance3D_F64.distance(genPlane, n.p);
+         if (Math.abs(dist) < averageError/4)
+            continue;
+         
+         if (dist > 0)
+            above += dist;
+         else
+            below -= dist;
+      }
+      
+      
+      return (above*below)/Math.pow(p.neighbors.size(), 2);
+   }
+   
+   public static double filter(PointVectorNN p, double norm, double alpha) {
+
+      if (score(p)/norm > alpha)
+         return 0;
+      
+      //boolean[] neighbors = new boolean[p.neighbors.size];
+      double badNeighbors = 0;
+      for (int i = 0; i<p.neighbors.size(); i++) {
+         //neighbors[i] = score(p.neighbors.get(i)) > alpha;
+         if (score(p.neighbors.get(i))/norm > alpha)
+            badNeighbors++;
+      }
+      
+      return badNeighbors/p.neighbors.size();
+   }
 }

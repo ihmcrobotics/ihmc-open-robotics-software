@@ -38,7 +38,7 @@ public class RealRobotPPSTimestampOffsetProvider implements PPSTimestampOffsetPr
          public void onNewMessage(Time message)
          {
             currentTimeStampOffset.set(requestNewestRobotTimestamp() - message.getData().totalNsecs());
-            System.out.println("offset: " + currentTimeStampOffset.get()/1000000);
+            //System.out.println("offset: " + currentTimeStampOffset.get()/1000000);
             offsetIsDetermined.set(true);
          }
       };
