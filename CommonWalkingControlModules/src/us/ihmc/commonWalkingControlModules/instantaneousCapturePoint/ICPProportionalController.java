@@ -4,7 +4,6 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
@@ -14,6 +13,8 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFrameVector2d;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
+import com.yobotics.simulationconstructionset.util.math.filter.FilteredVelocityYoFrameVector;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
 
 public class ICPProportionalController
@@ -29,15 +30,27 @@ public class ICPProportionalController
    private final YoFrameVector2d rawCMPOutput = new YoFrameVector2d("rawCMPOutput", "", worldFrame, registry);
    private final AlphaFilteredYoFrameVector2d filteredCMPOutput = AlphaFilteredYoFrameVector2d.createAlphaFilteredYoFrameVector2d("filteredCMPOutput", "",
                                                                     registry, alphaFeedBack, rawCMPOutput);
+   private final YoFramePoint icpPosition;
+   private final DoubleYoVariable alphaICPVelocity;
+   private final FilteredVelocityYoFrameVector icpVelocity;
+   private final FrameVector2d icpDamping = new FrameVector2d(ReferenceFrame.getWorldFrame());
+   
    private final double controlDT;
    private final DoubleYoVariable captureKpParallelToMotion = new DoubleYoVariable("captureKpParallel", registry);
    private final DoubleYoVariable captureKpOrthogonalToMotion = new DoubleYoVariable("captureKpOrthogonal", registry);
+   
+   private final DoubleYoVariable captureKd = new DoubleYoVariable("captureKd", registry);
+
    private final Vector2dZUpFrame icpVelocityDirectionFrame;
 
    public ICPProportionalController(double controlDT, YoVariableRegistry parentRegistry)
    {
       this.controlDT = controlDT;
       icpVelocityDirectionFrame = new Vector2dZUpFrame("icpVelocityDirectionFrame", worldFrame);
+      
+      icpPosition = new YoFramePoint("icpPosition", ReferenceFrame.getWorldFrame(), registry);
+      alphaICPVelocity = new DoubleYoVariable("alphaICPVelocity", registry);
+      icpVelocity = FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector("icpVelocity", "", alphaICPVelocity, controlDT, parentRegistry, icpPosition);
       parentRegistry.addChild(registry);
    }
 
@@ -52,6 +65,9 @@ public class ICPProportionalController
       desiredCapturePointVelocity.changeFrame(desiredCapturePoint.getReferenceFrame());
       FramePoint2d desiredCMP = new FramePoint2d(capturePoint);
 
+      icpPosition.set(capturePoint.getX(), capturePoint.getY(), 0.0);
+      icpVelocity.update();
+      
       // feed forward part
       tempControl.setAndChangeFrame(desiredCapturePointVelocity);
       tempControl.scale(1.0 / omega0);
@@ -76,6 +92,17 @@ public class ICPProportionalController
          tempControl.scale(captureKpOrthogonalToMotion.getDoubleValue());
       }
 
+      icpDamping.set(icpVelocity.getX(), icpVelocity.getY());
+      icpDamping.scale(captureKd.getDoubleValue());
+      double length = icpDamping.length();
+      double maxLength = 0.02;
+      if (length > maxLength)
+      {
+         icpDamping.scale(maxLength/length);
+      }
+      
+      tempControl.add(icpDamping);
+      
       feedbackPart.set(tempControl);
       desiredCMP.add(tempControl);
 
