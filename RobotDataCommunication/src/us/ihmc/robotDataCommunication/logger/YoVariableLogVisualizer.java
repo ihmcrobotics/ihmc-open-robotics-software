@@ -41,6 +41,7 @@ public class YoVariableLogVisualizer
       int returnValue = fileChooser.showOpenDialog(null);
       if(returnValue == JFileChooser.APPROVE_OPTION)
       {
+         System.out.println("loading log from folder:" + fileChooser.getSelectedFile());
          readLogFile(fileChooser.getSelectedFile()); 
       }
       else
@@ -104,16 +105,22 @@ public class YoVariableLogVisualizer
       scs.getRootRegistry().addChild(parser.getRootRegistry());
       scs.setGroundVisible(false);
       
-      VideoDataPlayer player = new VideoDataPlayer(selectedFile, logProperties, robot.getTimestamp());
-      scs.attachPlaybackListener(player);
-      scs.attachSimulationRewoundListener(player);
-      
-      scs.getStandardSimulationGUI().addJComponentToMainPanel( new YoVariableLogVisualizerGUI(player, robot, scs), BorderLayout.SOUTH);
+      VideoDataPlayer player = null;
+      try
+      {
+         player = new VideoDataPlayer(selectedFile, logProperties, robot.getTimestamp());
+         scs.attachPlaybackListener(player);
+         scs.getJFrame().setTitle(this.getClass().getSimpleName() + " - " + selectedFile);
+         scs.attachSimulationRewoundListener(player);
 
-      
-     
-      
-      
+      }
+      catch(Exception e)
+      {
+         System.err.println("Couldn't load video file!");
+         e.printStackTrace();
+      }
+ 
+      scs.getStandardSimulationGUI().addJComponentToMainPanel( new YoVariableLogVisualizerGUI(player, robot, scs), BorderLayout.SOUTH);
       
       new Thread(scs).start();
    }
