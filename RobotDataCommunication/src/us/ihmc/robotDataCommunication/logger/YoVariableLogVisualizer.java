@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 
 import javax.swing.Action;
+import javax.swing.ActionMap;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JTable;
 
@@ -55,13 +57,21 @@ public class YoVariableLogVisualizer
    {
       
       // Found this hack on http://stackoverflow.com/questions/16429779/start-a-jfilechooser-with-files-ordered-by-date
-      Action details = fileChooser.getActionMap().get("viewTypeDetails");
-      details.actionPerformed(null);
-
-      //  Find the JTable on the file chooser panel and manually do the sort
-
-      JTable table = SwingUtils.getDescendantsOfType(JTable.class, fileChooser).get(0);
-      table.getRowSorter().toggleSortOrder(2); table.getRowSorter().toggleSortOrder(2);
+      ActionMap actionMap = fileChooser.getActionMap();
+      Action details = actionMap.get("viewTypeDetails");
+      if(details != null)
+      {
+         details.actionPerformed(null);
+   
+         //  Find the JTable on the file chooser panel and manually do the sort
+   
+         JTable table = SwingUtils.getDescendantsOfType(JTable.class, fileChooser).get(0);
+         table.getRowSorter().toggleSortOrder(2); table.getRowSorter().toggleSortOrder(2);
+      }
+      else
+      {
+         System.err.println("sort by datetime doesn't work known on OSX ... bail out");
+      }
    }
 
    private void readLogFile(File selectedFile) throws IOException
