@@ -23,24 +23,31 @@ public class ICPProportionalController
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final FrameVector2d tempControl = new FrameVector2d(worldFrame);
    private final YoFrameVector2d icpError = new YoFrameVector2d("icpError", "", worldFrame, registry);
+   private final YoFrameVector2d icpErrorIntegrated = new YoFrameVector2d("icpErrorIntegrated", "", worldFrame, registry);
    
    private final YoFrameVector2d feedbackPart = new YoFrameVector2d("feedbackPart", "", worldFrame, registry);
    
    private final DoubleYoVariable alphaFeedBack = new DoubleYoVariable("alphaFeedBack", registry);
+   private final YoFrameVector2d desiredCMPToICP = new YoFrameVector2d("desiredCMPToICP", "", worldFrame, registry);
    private final YoFrameVector2d rawCMPOutput = new YoFrameVector2d("rawCMPOutput", "", worldFrame, registry);
    private final AlphaFilteredYoFrameVector2d filteredCMPOutput = AlphaFilteredYoFrameVector2d.createAlphaFilteredYoFrameVector2d("filteredCMPOutput", "",
                                                                     registry, alphaFeedBack, rawCMPOutput);
+
+   private final DoubleYoVariable maxDistanceBetweenICPAndCMP = new DoubleYoVariable("maxDistanceBetweenICPAndCMP", registry);
+   
    private final YoFramePoint icpPosition;
    private final DoubleYoVariable alphaICPVelocity;
    private final FilteredVelocityYoFrameVector icpVelocity;
-   private final FrameVector2d icpDamping = new FrameVector2d(ReferenceFrame.getWorldFrame());
+   private final FrameVector2d icpDamping = new FrameVector2d(worldFrame);
+   private final FrameVector2d icpIntegral = new FrameVector2d(worldFrame);
    
    private final double controlDT;
    private final DoubleYoVariable captureKpParallelToMotion = new DoubleYoVariable("captureKpParallel", registry);
    private final DoubleYoVariable captureKpOrthogonalToMotion = new DoubleYoVariable("captureKpOrthogonal", registry);
-   
-   private final DoubleYoVariable captureKd = new DoubleYoVariable("captureKd", registry);
 
+   private final DoubleYoVariable captureKd = new DoubleYoVariable("captureKd", registry);
+   private final DoubleYoVariable captureKi = new DoubleYoVariable("captureKi", registry);
+   
    private final Vector2dZUpFrame icpVelocityDirectionFrame;
 
    public ICPProportionalController(double controlDT, YoVariableRegistry parentRegistry)
@@ -52,6 +59,8 @@ public class ICPProportionalController
       alphaICPVelocity = new DoubleYoVariable("alphaICPVelocity", registry);
       icpVelocity = FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector("icpVelocity", "", alphaICPVelocity, controlDT, parentRegistry, icpPosition);
       parentRegistry.addChild(registry);
+      
+      maxDistanceBetweenICPAndCMP.set(Double.POSITIVE_INFINITY);
    }
 
    public void reset()
@@ -76,7 +85,7 @@ public class ICPProportionalController
       // feedback part
       icpError.set(capturePoint);
       icpError.sub(desiredCapturePoint);
-
+      
       icpError.getFrameVector2d(tempControl);
       double epsilonZeroICPVelocity = 1e-5;
       if (desiredCapturePointVelocity.lengthSquared() > MathTools.square(epsilonZeroICPVelocity))
@@ -103,10 +112,32 @@ public class ICPProportionalController
       
       tempControl.add(icpDamping);
       
+      icpErrorIntegrated.add(icpError);
+      icpErrorIntegrated.getFrameVector2d(icpIntegral);
+      icpIntegral.scale(captureKi.getDoubleValue());
+      length = icpDamping.length();
+      if (length > maxLength)
+      {
+         icpIntegral.scale(maxLength/length);
+      }
+      
+      tempControl.add(icpIntegral);
+      
       feedbackPart.set(tempControl);
       desiredCMP.add(tempControl);
 
+      desiredCMPToICP.sub(capturePoint, desiredCMP);
+
+      double distanceDesiredCMPToICP = desiredCMPToICP.length();
+      if (distanceDesiredCMPToICP > maxDistanceBetweenICPAndCMP.getDoubleValue())
+      {
+         desiredCMPToICP.scale(maxDistanceBetweenICPAndCMP.getDoubleValue() / distanceDesiredCMPToICP);
+         desiredCMP.set(capturePoint);
+         desiredCMP.sub(desiredCMPToICP.getFrameVector2dCopy());
+      }
+      
       rawCMPOutput.set(desiredCMP);
+      
       filteredCMPOutput.update();
       filteredCMPOutput.getFramePoint2d(desiredCMP);
       
