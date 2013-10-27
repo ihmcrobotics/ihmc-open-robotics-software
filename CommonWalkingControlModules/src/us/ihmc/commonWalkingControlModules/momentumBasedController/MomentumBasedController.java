@@ -85,6 +85,14 @@ public class MomentumBasedController
    private final SideDependentList<ContactableCylinderBody> graspingHands;
    private final List<ContactablePlaneBody> listOfAllContactablePlaneBodies;
    private final List<ContactableCylinderBody> listOfAllContactableCylinderBodies;
+   
+   private DoubleYoVariable leftPassiveKneeTorque = new DoubleYoVariable("leftPassiveKneeTorque", registry);
+   private DoubleYoVariable rightPassiveKneeTorque = new DoubleYoVariable("rightPassiveKneeTorque", registry);
+   private final SideDependentList<DoubleYoVariable> passiveKneeTorque = new SideDependentList<DoubleYoVariable>(leftPassiveKneeTorque, rightPassiveKneeTorque);
+   
+   private final DoubleYoVariable passiveQKneeThreshold = new DoubleYoVariable("passiveQKneeThreshold", registry);
+   private final DoubleYoVariable passiveKneeMaxTorque = new DoubleYoVariable("passiveKneeMaxTorque", registry);
+   private final DoubleYoVariable passiveKneeKv = new DoubleYoVariable("passiveKneeKv", registry);
 
    private final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> yoPlaneContactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
    private final LinkedHashMap<ContactableCylinderBody, YoCylindricalContactState> yoCylindricalContactStates = new LinkedHashMap<ContactableCylinderBody, YoCylindricalContactState>();
@@ -283,6 +291,11 @@ public class MomentumBasedController
          contactPointVisualizer = null;
          wrenchVisualizer = null;
       }
+      
+      
+      passiveQKneeThreshold.set(0.3);
+      passiveKneeMaxTorque.set(25.0);
+      passiveKneeKv.set(5.0);      
    }
 
    public SideDependentList<ContactablePlaneBody> getFeet()
@@ -424,9 +437,9 @@ public class MomentumBasedController
     */
    public void doPassiveKneeControl()
    {
-      double maxPassiveTorque = 25.0;
-      double kneeLimit = 0.3;
-      double kdKnee = 5.0;
+      double maxPassiveTorque = passiveKneeMaxTorque.getDoubleValue();
+      double kneeLimit = passiveQKneeThreshold.getDoubleValue();
+      double kdKnee = passiveKneeKv.getDoubleValue();
       
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -436,7 +449,8 @@ public class MomentumBasedController
          double qdKnee = kneeJoint.getQd();
          if (qKnee < kneeLimit)
          {
-            tauKnee += maxPassiveTorque * MathTools.square(1.0 - qKnee / kneeLimit) - kdKnee * qdKnee;
+            passiveKneeTorque.get(robotSide).set(maxPassiveTorque * MathTools.square(1.0 - qKnee / kneeLimit) - kdKnee * qdKnee);
+            tauKnee += passiveKneeTorque.get(robotSide).getDoubleValue();
             kneeJoint.setTau(tauKnee);
          }
       }
