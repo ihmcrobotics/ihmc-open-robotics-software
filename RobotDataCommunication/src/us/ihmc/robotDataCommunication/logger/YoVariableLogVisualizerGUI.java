@@ -37,8 +37,6 @@ public class YoVariableLogVisualizerGUI extends JPanel
       this.robot = robot;
       this.scs = scs;
 
-
-
       setLayout(new GridLayout(1, 2));
 
       addGUIElements();
@@ -48,7 +46,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
 
    private void switchVideoUpdate(boolean update)
    {
-      player.updateVideo(update);
+      if (player != null) player.updateVideo(update);
    }
 
    private void seek(int newValue)
@@ -66,7 +64,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
             e.printStackTrace();
          }
 
-         player.indexChanged(0, 0);
+         if (player != null) player.indexChanged(0, 0);
       }
    }
 
