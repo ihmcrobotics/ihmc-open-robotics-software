@@ -39,7 +39,7 @@ public class VideoDataLogger implements TimestampListener
       AVConv avconv = new AVConv(options.getAvconvPath());
       avconv.setAudioCodec(null);
       avconv.setVideoCodec(options.getVideoCodec());
-      avconv.setQuality(5);
+      avconv.setQuality(options.getVideoQuality());
       avconv.setInputFile("-");
       avconv.setOutputFile(logPath.getAbsolutePath() + File.separator + videoFilename);
 
@@ -74,7 +74,7 @@ public class VideoDataLogger implements TimestampListener
       AVConv avconv = new AVConv("avconv");
       avconv.setAudioCodec("copy");
       avconv.setVideoCodec("mjpeg");
-      avconv.setQuality(5);
+      //avconv.setQuality(5);
       avconv.setInputFile("-");
       avconv.setOutputFile(File.separator + videoFilename);
       
