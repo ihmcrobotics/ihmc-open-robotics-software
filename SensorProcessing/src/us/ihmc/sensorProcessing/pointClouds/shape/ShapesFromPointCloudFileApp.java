@@ -1,8 +1,11 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
 import georegression.struct.plane.PlaneGeneral3D_F64;
+import georegression.struct.plane.PlaneNormal3D_F64;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.point.Vector3D_F64;
+import georegression.struct.shapes.Cylinder3D_F64;
+import georegression.struct.shapes.Sphere3D_F64;
 
 import java.awt.Color;
 import java.io.FileInputStream;
@@ -29,8 +32,10 @@ import bubo.ptcloud.PointCloudShapeFinder.Shape;
 import bubo.ptcloud.alg.ApproximateSurfaceNormals;
 import bubo.ptcloud.alg.ConfigSchnabel2007;
 import bubo.ptcloud.alg.PointVectorNN;
+import bubo.ptcloud.tools.PointCloudShapeTools;
 import bubo.ptcloud.wrapper.ConfigRemoveFalseShapes;
 import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
+import cern.colt.Arrays;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.RawInputListener;
@@ -71,11 +76,8 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
    private float boxExtent = 1f;
    private Vector3f initialTranslation = new Vector3f(3.8f, -0.55f, -0.75f);
 
-   private Node zUp = new Node();
-   private Node pointCloudNode = new Node();
    private float translateSpeed = 0.1f;
    private ShapeTranslator translator = new ShapeTranslator(this);
-   private Node shapesNode = new Node();
    private DirectionalLight primaryLight;
    private List<Point3D_F64> fullCloud;
    private ColorRGBA defaultColor = ColorRGBA.Red;
@@ -84,11 +86,15 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
    private float defaultPointSize = 0.75f;
    private float selectPointSize = 2.0f;
 
+   private Node zUp = new Node();
+   private Node shapesNode = new Node();
+   private Node normalsNode = new Node();
+   private Node pointCloudNode = new Node();
    private Node selectionNode = new Node();
 
    private boolean SHADOWS = false;
 
-   ConfigSurfaceNormals configNormal = new ConfigSurfaceNormals(100, 100, .2);
+   ConfigSurfaceNormals configNormal = new ConfigSurfaceNormals(2000, 2000, .20);
 
    public static void main(String[] args)
    {
@@ -111,10 +117,19 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       rootNode.attachChild(zUp);
       zUp.attachChild(pointCloudNode);
       zUp.attachChild(shapesNode);
+      zUp.attachChild(normalsNode);
       zUp.attachChild(selectionNode);
 
-      //fullCloud = SyntheticCalibrationTestApp.createBoxCloud(new Point3D_F64(0, 0, 0), 750, 1, 0.0);
-      fullCloud = readPointCloud(10000000, new Vector3f(-99999.0f, -99999.0f, -99999.0f), new Vector3f(99999.0f, 99999.0f, 99999.0f));
+      
+      fullCloud = new ArrayList<Point3D_F64>();
+      
+      /*
+      fullCloud.addAll(createModelCloud(new Cylinder3D_F64(0, -2, 0, 1, 0, 0, .5), 1000, .0, 2));
+      fullCloud.addAll(createModelCloud(new PlaneNormal3D_F64(new Point3D_F64(0,-2,0), new Vector3D_F64(1,0,0)), 250, .0, 1));
+      fullCloud.addAll(SyntheticCalibrationTestApp.createBoxCloud(new Point3D_F64(0, 0, 0), 750, 1, 0.0));
+      */
+      
+      fullCloud.addAll(readPointCloud(10000000, new Vector3f(-99999.0f, -99999.0f, -99999.0f), new Vector3f(99999.0f, 99999.0f, 99999.0f)));
 
       displayView(fullCloud, defaultColor, defaultPointSize, pointCloudNode);
 
@@ -133,6 +148,47 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       //getViewPort().addProcessor(fpp);
       setupBoxNode();
 
+   }
+
+   private List<Point3D_F64> createModelCloud(Object model, int N, double sigma, double size)
+   {
+      List<Point3D_F64> cloud = new ArrayList<Point3D_F64>();
+
+      for (int i = 0; i < N; i++)
+      {
+
+
+         Point3D_F64 p;
+         if (model instanceof Cylinder3D_F64)
+         {
+            double z = size * rand.nextDouble();
+            double theta = 2.0 * Math.PI * rand.nextDouble();
+            p = PointCloudShapeTools.createPt((Cylinder3D_F64) model, z, theta);
+         }
+         else if (model instanceof PlaneNormal3D_F64)
+         {
+            double x = size * (rand.nextDouble() - 0.5);
+            double y = size * (rand.nextDouble() - 0.5);
+
+            p = PointCloudShapeTools.createPt((PlaneNormal3D_F64) model, x, y);
+         }
+         else if (model instanceof Sphere3D_F64)
+         {
+            double phi = 2.0 * Math.PI * rand.nextDouble();
+            double theta = 2.0 * Math.PI * rand.nextDouble();
+
+            p = PointCloudShapeTools.createPt((Sphere3D_F64) model, phi, theta);
+         }
+         else
+            return cloud;
+
+         p.x += rand.nextGaussian() * sigma;
+         p.y += rand.nextGaussian() * sigma;
+         p.z += rand.nextGaussian() * sigma;
+
+         cloud.add(p);
+      }
+      return cloud;
    }
 
    private void setupLighting()
@@ -189,7 +245,6 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
          public Object call() throws Exception
          {
             shapesNode.detachAllChildren();
-
             return null;
          }
       });
@@ -274,23 +329,45 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
 
             FastQueue<PointVectorNN> normalVectors = new FastQueue<PointVectorNN>(PointVectorNN.class, false);
             surface.process(cloud, normalVectors);
-            System.out.println("Normals: " + normalVectors.size());
-            renderNormals(new ArrayList<PointVectorNN>(normalVectors.toList()), .04f, .0015f, ColorRGBA.White);
+            //renderNormals(new ArrayList<PointVectorNN>(normalVectors.toList()), .04f, .0015f, ColorRGBA.White);
 
-            for (PointVectorNN p : normalVectors.toList())
+            ColorRGBA[] colors = new ColorRGBA[normalVectors.size()];
+            double[] scores = new double[normalVectors.size()];
+            for (int i = 0; i < normalVectors.size(); i++)
             {
+               PointVectorNN p = normalVectors.get(i);
                //CubeCalibration.nonLinearFitNormal(p);
                //CubeCalibration.weightedLinearFit(p, ExpectationMaximizationFitter.getNormalSingularityError(), 5);
+               scores[i] = CubeCalibration.score(p);
+
             }
 
-            //renderNormals(new ArrayList<PointVectorNN>(normalVectors.toList()), .06f, .001f, ColorRGBA.Yellow);
+            double maxScore = 0;
+            for (int i = 0; i < scores.length; i++)
+               if (scores[i] > maxScore)
+                  maxScore = scores[i];
+
+            for (int i = 0; i < scores.length; i++)
+               scores[i] /= maxScore;
+
+            for (int i = 0; i < scores.length; i++)
+            {
+               //int c = Color.HSBtoRGB(.7f-.7f*(float)scores[i], 1, 1.0f);
+               //int c = Color.HSBtoRGB(.7f - .7f*(float)CubeCalibration.filter(normalVectors.get(i), maxScore, .15), 1, 1.0f);
+               int c = Color.HSBtoRGB(CubeCalibration.filter(normalVectors.get(i), maxScore, .1) < .5 ? .7f : 0, 1, 1.0f);
+               //int c = Color.HSBtoRGB(scores[i] < .1 ? .7f : 0, 1, 1.0f);
+               colors[i] = new ColorRGBA(((c >> 16) & 0xFF) / 256.0f, ((c >> 8) & 0xFF) / 256.0f, ((c >> 0) & 0xFF) / 256.0f, 1.0f);
+            }
+
+            renderNormals(new ArrayList<PointVectorNN>(normalVectors.toList()), colors, .06f, .001f);
 
          }
       });
       normals.start();
    }
 
-   private List<Shape> getEMFitShapes(List<PlaneGeneral3D_F64> startPlanes, List<Point3D_F64> cloud, ScoringFunction<PlaneGeneral3D_F64, Point3D_F64> scorer, int rounds, double filter)
+   private List<Shape> getEMFitShapes(List<PlaneGeneral3D_F64> startPlanes, List<Point3D_F64> cloud, ScoringFunction<PlaneGeneral3D_F64, Point3D_F64> scorer,
+         int rounds, double filter)
    {
       List<PlaneGeneral3D_F64> planes = ExpectationMaximizationFitter.fit(startPlanes, cloud, scorer, rounds);
       double[][] weights = ExpectationMaximizationFitter.getWeights(null, planes, cloud, scorer);
@@ -364,7 +441,6 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
          public Object call() throws Exception
          {
             shapesNode.detachAllChildren();
-
             return null;
          }
       });
@@ -476,7 +552,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       }
    }
 
-   private void renderNormals(final List<PointVectorNN> normals, final float length, final float width, final ColorRGBA color)
+   private void renderNormals(final List<PointVectorNN> normals, final ColorRGBA[] colors, final float length, final float width)
    {
       final ShapeTranslator shapeTranslator = new ShapeTranslator(this);
 
@@ -484,22 +560,22 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       {
          PointCloud generator = new PointCloud(assetManager);
          Vector3f[] points = new Vector3f[normals.size()];
-         ColorRGBA[] colors = new ColorRGBA[normals.size()];
+         //ColorRGBA[] colors = new ColorRGBA[normals.size()];
          for (int i = 0; i < normals.size(); i++)
          {
             Point3D_F64 p = normals.get(i).p;
             points[i] = new Vector3f((float) p.x, (float) p.y, (float) p.z);
-            colors[i] = color;
+            //colors[i] = color;
          }
 
-         final Node pointCloudNodeToAdd = generator.generatePointCloudGraph(points, colors, defaultPointSize);
+         //final Node pointCloudNodeToAdd = generator.generatePointCloudGraph(points, colors, defaultPointSize);
 
          enqueue(new Callable<Object>()
          {
             public Object call() throws Exception
             {
 
-               //selectionNode.detachAllChildren();
+               normalsNode.detachAllChildren();
 
                for (int i = 1; i < normals.size(); i++)
                {
@@ -508,7 +584,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
                   Vector3f start = new Vector3f((float) p.x, (float) p.y, (float) p.z);
                   Vector3f end = new Vector3f((float) n.x, (float) n.y, (float) n.z);
                   end.scaleAdd(length, start);
-                  shapesNode.attachChild(shapeTranslator.generateCylinder(start, end, width, color));
+                  normalsNode.attachChild(shapeTranslator.generateCylinder(start, end, width, colors[i]));
 
                }
 
@@ -783,6 +859,14 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       if (evt.getKeyChar() == 'n' && evt.isPressed())
       {
          normalsRun(ransacCloud);
+      }
+
+      if (evt.getKeyChar() == 'c' && evt.isPressed())
+      {
+         shapesNode.detachAllChildren();
+         normalsNode.detachAllChildren();
+         pointCloudNode.detachAllChildren();
+         showBounds();
       }
    }
 
