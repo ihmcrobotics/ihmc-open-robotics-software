@@ -13,8 +13,8 @@ public class YoVariableLoggerOptions
    public final static String defaultLogDirectory = System.getProperty("user.home") + "/robotLogs";
    public final static String defaultBmdCapturePath ="bin/bmdcapture"; 
    public final static String defaultAvConvPath = "ffmpeg";
-   public final static String defaultVideoCodec = "mjpeg";
-   public final static int defaultVideoQuality = 5;
+   public final static String defaultVideoCodec = "prores";
+   public final static int defaultVideoQuality = 11;
    
    
    private String logDirectory = defaultLogDirectory;
