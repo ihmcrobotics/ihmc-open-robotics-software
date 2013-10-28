@@ -8,7 +8,7 @@ public class DRCConfigParameters
 {
    public static final DRCRobotModel robotModelToUse = DRCRobotModel.ATLAS_NO_HANDS_ADDED_MASS;
    
-   public static final boolean USE_VRC_PARAMETERS = true;
+   public static final boolean USE_VRC_PARAMETERS = !DRCLocalConfigParameters.USE_JERRY_PARAMETERS;
    public static final boolean RUNNING_ON_REAL_ROBOT = DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT;
    public static final boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES = RUNNING_ON_REAL_ROBOT;
    public static final boolean CORRUPT_SIMULATION_MODEL = false;
@@ -150,8 +150,8 @@ public class DRCConfigParameters
    }
 
    // ROS Topics
-   public static final String FISHEYE_RIGHT_CAMERA_TOPIC = "/blackfly/camera/right";
-   public static final String FISHEYE_LEFT_CAMERA_TOPIC = "/blackfly/camera/LEFT";
+   public static final String FISHEYE_RIGHT_CAMERA_TOPIC = "/blackfly/camera/right/compressed";
+   public static final String FISHEYE_LEFT_CAMERA_TOPIC = "/blackfly/camera/left/compressed";
    public static final String MULTISENSE_LEFT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/left/image_rect_color/compressed";
    public static final String MULTISENSE_RIGHT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/right/image_rect/compressed";
 
