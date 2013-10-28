@@ -1,6 +1,9 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor;
 
-import com.martiansoftware.jsap.*;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AlwaysZeroOffsetPPSTimestampOffsetProvider;
@@ -34,14 +37,15 @@ import us.ihmc.utilities.net.LocalObjectCommunicator;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.ros.RosMainNode;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAP;
+import com.martiansoftware.jsap.JSAPException;
+import com.martiansoftware.jsap.JSAPResult;
+import com.martiansoftware.jsap.Switch;
 
 public class DRCNetworkProcessor
 {
    private final VideoSettings videoSettings;
-
 
    private final ObjectCommunicator fieldComputerClient;
    private final AtomicSettableTimestampProvider timestampProvider = new AtomicSettableTimestampProvider();
@@ -86,39 +90,41 @@ public class DRCNetworkProcessor
          rosNativeNetworkProcessor = null;
       }
 
-//      GeoregressionTransformListenerAndProvider transformForDrivingProviderListener = new GeoregressionTransformListenerAndProvider();
+      //      GeoregressionTransformListenerAndProvider transformForDrivingProviderListener = new GeoregressionTransformListenerAndProvider();
 
       CameraDataReceiver cameraDataReceiver = new GazeboCameraReceiver(robotPoseBuffer, videoSettings, rosMainNode, networkingManager,
-                                                 DRCSensorParameters.FIELD_OF_VIEW, ppsTimestampOffsetProvider);
-      MultiSenseCameraInfoReciever cameraInfoReciever = new MultiSenseCameraInfoReciever(rosMainNode,drcNetworkObjectCommunicator);
-
+            DRCSensorParameters.FIELD_OF_VIEW, ppsTimestampOffsetProvider);
+      if (drcNetworkObjectCommunicator != null)
+      {
+         MultiSenseCameraInfoReciever cameraInfoReciever = new MultiSenseCameraInfoReciever(rosMainNode, drcNetworkObjectCommunicator);
+      }
       LidarDataReceiver lidarDataReceiver = new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, fullRobotModel, robotBoundingBoxes,
-                                               jointMap, fieldComputerClient, rosNativeNetworkProcessor, ppsTimestampOffsetProvider);
+            jointMap, fieldComputerClient, rosNativeNetworkProcessor, ppsTimestampOffsetProvider);
       new VRCScoreDataReceiver(networkingManager, lidarDataReceiver, rosNativeNetworkProcessor);
 
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
 
       rosMainNode.execute();
 
-
-//      if (DRCConfigParameters.USE_DUMMY_DRIVNG)
-//      {
-//         DrivingProcessorFactory.createCheatingDrivingProcessor(networkingManager, cameraDataReceiver, timestampProvider, rosCoreURI.toString(),
-//                 transformForDrivingProviderListener);
-//      }
-//      else
-//      {
-//         DrivingProcessorFactory.createDrivingProcessor(networkingManager, cameraDataReceiver, timestampProvider, fieldComputerClient,
-//                 transformForDrivingProviderListener);
-//      }
+      //      if (DRCConfigParameters.USE_DUMMY_DRIVNG)
+      //      {
+      //         DrivingProcessorFactory.createCheatingDrivingProcessor(networkingManager, cameraDataReceiver, timestampProvider, rosCoreURI.toString(),
+      //                 transformForDrivingProviderListener);
+      //      }
+      //      else
+      //      {
+      //         DrivingProcessorFactory.createDrivingProcessor(networkingManager, cameraDataReceiver, timestampProvider, fieldComputerClient,
+      //                 transformForDrivingProviderListener);
+      //      }
    }
 
    public DRCNetworkProcessor(LocalObjectCommunicator scsCommunicator, ObjectCommunicator drcNetworkObjectCommunicator)
    {
       this(drcNetworkObjectCommunicator);
-      CameraDataReceiver cameraDataReceiver = new SCSCameraDataReceiver(robotPoseBuffer, videoSettings, scsCommunicator, networkingManager, ppsTimestampOffsetProvider);
+      CameraDataReceiver cameraDataReceiver = new SCSCameraDataReceiver(robotPoseBuffer, videoSettings, scsCommunicator, networkingManager,
+            ppsTimestampOffsetProvider);
       new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, fullRobotModel, robotBoundingBoxes, jointMap, fieldComputerClient,
-                               ppsTimestampOffsetProvider);
+            ppsTimestampOffsetProvider);
 
    }
 
@@ -127,7 +133,7 @@ public class DRCNetworkProcessor
       if (fieldComputerClient == null)
       {
          this.fieldComputerClient = new KryoObjectClient(scsMachineIPAddress, DRCConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
-                 new DRCNetClassList());
+               new DRCNetClassList());
          ((KryoObjectClient) this.fieldComputerClient).setReconnectAutomatically(true);
       }
       else
@@ -170,10 +176,10 @@ public class DRCNetworkProcessor
    public static void main(String[] args) throws URISyntaxException, JSAPException
    {
       JSAP jsap = new JSAP();
-      FlaggedOption scsIPFlag =
-         new FlaggedOption("scs-ip").setLongFlag("scs-ip").setShortFlag(JSAP.NO_SHORTFLAG).setRequired(false).setStringParser(JSAP.STRING_PARSER);
-      FlaggedOption rosURIFlag =
-         new FlaggedOption("ros-uri").setLongFlag("ros-uri").setShortFlag(JSAP.NO_SHORTFLAG).setRequired(false).setStringParser(JSAP.STRING_PARSER);
+      FlaggedOption scsIPFlag = new FlaggedOption("scs-ip").setLongFlag("scs-ip").setShortFlag(JSAP.NO_SHORTFLAG).setRequired(false)
+            .setStringParser(JSAP.STRING_PARSER);
+      FlaggedOption rosURIFlag = new FlaggedOption("ros-uri").setLongFlag("ros-uri").setShortFlag(JSAP.NO_SHORTFLAG).setRequired(false)
+            .setStringParser(JSAP.STRING_PARSER);
       Switch simulateController = new Switch("simulate-controller").setShortFlag('d').setLongFlag(JSAP.NO_LONGFLAG);
 
       jsap.registerParameter(scsIPFlag);
