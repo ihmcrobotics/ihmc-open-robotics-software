@@ -38,7 +38,7 @@ public class DRCConfigParameters
    public static final boolean USE_SUPER_DUPER_HIGH_RESOLUTION_FOR_COMMS = false;
 
    public static final boolean USE_HYDRA = false;
-   public static final boolean USE_FISHEYE = false;
+   public static final boolean USE_FISHEYE = RUNNING_ON_REAL_ROBOT;
 
    public static final boolean LIMIT_CONTROLLER_OUTPUT_TORQUES = false;
 
@@ -134,12 +134,26 @@ public class DRCConfigParameters
    public static final int PPS_PROVIDER_PORT = 5050;
 
    public static final long ROBOT_JOINT_SERVER_UPDATE_MILLIS = 100;
+   
+   public static final String MULTISENSE_CAMERA_STRING_BASE;
+   
+   static
+   {
+      if (DRCConfigParameters.USING_REAL_HEAD)
+      {
+         MULTISENSE_CAMERA_STRING_BASE = "/multisense_sl";
+      }
+      else
+      {
+         MULTISENSE_CAMERA_STRING_BASE = "/multisense_sl/camera";
+      }
+   }
 
    // ROS Topics
    public static final String FISHEYE_RIGHT_CAMERA_TOPIC = "/blackfly/camera/right";
    public static final String FISHEYE_LEFT_CAMERA_TOPIC = "/blackfly/camera/LEFT";
-   public static final String MULTISENSE_LEFT_CAMERA_TOPIC = "/multisense_sl/camera/left/image_rect_color/compressed";
-   public static final String MULTISENSE_RIGHT_CAMERA_TOPIC = "/multisense_sl/camera/right/image_rect/compressed";
+   public static final String MULTISENSE_LEFT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/left/image_rect_color/compressed";
+   public static final String MULTISENSE_RIGHT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/right/image_rect/compressed";
 
    // Video Settings
    public static final boolean STREAM_VIDEO = true;

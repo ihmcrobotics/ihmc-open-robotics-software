@@ -1,13 +1,13 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.state;
 
-import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
-
 import javax.media.j3d.Transform3D;
+
+import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
 
 public class HeadToLidarTransformBuffer implements PendableBuffer
 {
    private final int size;
-   private TimeStampedTransform3D[] transforms;
+   private final TimeStampedTransform3D[] transforms;
    private int currentIndex;
    private long oldestTimeStamp;
    private long newestTimestamp;
@@ -51,6 +51,7 @@ public class HeadToLidarTransformBuffer implements PendableBuffer
       transforms[currentIndex].setTransform3D(timeStampedTransform3D.getTransform3D());
       transforms[currentIndex].setTimeStamp(timeStampedTransform3D.getTimeStamp());
       newestTimestamp = timeStampedTransform3D.getTimeStamp();
+
       currentIndex++;
 
       if (currentIndex >= size)
@@ -116,11 +117,13 @@ public class HeadToLidarTransformBuffer implements PendableBuffer
       return null;
    }
 
+   @Override
    public synchronized boolean isPending(long timestamp)
    {
       return timestamp > newestTimestamp;
    }
 
+   @Override
    public long newestTimestamp()
    {
       return newestTimestamp;
