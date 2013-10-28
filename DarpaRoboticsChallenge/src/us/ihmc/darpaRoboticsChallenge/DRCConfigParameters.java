@@ -6,6 +6,8 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 
 public class DRCConfigParameters
 {
+   public static final DRCRobotModel robotModelToUse = DRCRobotModel.ATLAS_NO_HANDS_ADDED_MASS;
+   
    public static final boolean USE_VRC_PARAMETERS = true;
    public static final boolean RUNNING_ON_REAL_ROBOT = DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT;
    public static final boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES = RUNNING_ON_REAL_ROBOT;
