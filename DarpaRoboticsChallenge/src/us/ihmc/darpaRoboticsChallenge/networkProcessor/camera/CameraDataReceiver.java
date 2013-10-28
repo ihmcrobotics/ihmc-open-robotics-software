@@ -45,6 +45,7 @@ public abstract class CameraDataReceiver
       ObjectCommunicator videoConsumer = new ObjectCommunicator()
       {
          
+         @Override
          public void consumeObject(Object object)
          {
             if(object instanceof VideoPacket)
@@ -53,26 +54,31 @@ public abstract class CameraDataReceiver
             }
          }
          
+         @Override
          public boolean isConnected()
          {
             return networkingManager.isConnected();
          }
          
+         @Override
          public void close()
          {
             networkingManager.close();
          }
          
+         @Override
          public void attachStateListener(NetStateListener stateListener)
          {
             networkingManager.attachStateListener(stateListener);
          }
          
+         @Override
          public <T> void attachListener(Class<T> clazz, ObjectConsumer<T> listener)
          {
             
          }
 
+         @Override
          public void connect() throws IOException
          {
          }
@@ -114,7 +120,7 @@ public abstract class CameraDataReceiver
 	   
 	   robotPoseData.getCameraPose().get(cameraOrientation, tempVector);
 	   cameraPosition.set(tempVector);
-//	   compressedVideoDataServer.updateImage(bufferedImage, timeStamp, cameraPosition, cameraOrientation, fov, sourceId);
+	   compressedVideoDataServer.updateImage(bufferedImage, timeStamp, cameraPosition, cameraOrientation, fov, sourceId);
 	   
 	   
    }
