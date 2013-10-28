@@ -21,7 +21,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 {
    public static final String propertyFile = "robotData.log";
    private static final long connectTimeout = 30000;
-   private static final long disconnectTimeout = 1000; 
+   private static final long disconnectTimeout = 5000; 
    private static final String handshakeFilename = "handshake.proto";
    private static final String dataFilename = "robotData.bin";
    
@@ -177,7 +177,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       {
          if(totalTimeout > disconnectTimeout)
          {
-            System.out.println("Connection lost, closing client.");
+            System.out.println("Timeout reached: " + totalTimeout + ". Connection lost, closing client.");
             yoVariableClient.close();
          }
       }
