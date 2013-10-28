@@ -1,9 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-
+import com.martiansoftware.jsap.*;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AlwaysZeroOffsetPPSTimestampOffsetProvider;
@@ -37,11 +34,9 @@ import us.ihmc.utilities.net.LocalObjectCommunicator;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.ros.RosMainNode;
 
-import com.martiansoftware.jsap.FlaggedOption;
-import com.martiansoftware.jsap.JSAP;
-import com.martiansoftware.jsap.JSAPException;
-import com.martiansoftware.jsap.JSAPResult;
-import com.martiansoftware.jsap.Switch;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class DRCNetworkProcessor
 {
@@ -94,10 +89,8 @@ public class DRCNetworkProcessor
 
       CameraDataReceiver cameraDataReceiver = new GazeboCameraReceiver(robotPoseBuffer, videoSettings, rosMainNode, networkingManager,
             DRCSensorParameters.FIELD_OF_VIEW, ppsTimestampOffsetProvider);
-      if (drcNetworkObjectCommunicator != null)
-      {
-         MultiSenseCameraInfoReciever cameraInfoReciever = new MultiSenseCameraInfoReciever(rosMainNode, drcNetworkObjectCommunicator);
-      }
+      MultiSenseCameraInfoReciever cameraInfoReciever = new MultiSenseCameraInfoReciever(rosMainNode, fieldComputerClient);
+
       LidarDataReceiver lidarDataReceiver = new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, fullRobotModel, robotBoundingBoxes,
             jointMap, fieldComputerClient, rosNativeNetworkProcessor, ppsTimestampOffsetProvider);
       new VRCScoreDataReceiver(networkingManager, lidarDataReceiver, rosNativeNetworkProcessor);
