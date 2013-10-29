@@ -99,28 +99,30 @@ public class SandiaHandModel
    {
       this.robotSide = robotSide;
       String prefix = robotSide == RobotSide.LEFT ? "left_" : "right_";
-      addFingerJoints(prefix + "f3", SandiaFingerName.THUMB);
-      addFingerJoints(prefix + "f0", SandiaFingerName.INDEX);
-      addFingerJoints(prefix + "f1", SandiaFingerName.MIDDLE);
-      addFingerJoints(prefix + "f2", SandiaFingerName.RING);
+      addFingerJoints(fullRobotModel, prefix + "f3", SandiaFingerName.THUMB);
+      addFingerJoints(fullRobotModel, prefix + "f0", SandiaFingerName.INDEX);
+      addFingerJoints(fullRobotModel, prefix + "f1", SandiaFingerName.MIDDLE);
+      addFingerJoints(fullRobotModel, prefix + "f2", SandiaFingerName.RING);
 
       this.wristForceSensor = forceSensorDataForController;
       wristJoint = fullRobotModel.getOneDoFJointByName(robotSide.getShortLowerCaseName() + "_arm_wrx");
    }
 
-   private FingerJoint addFingerJoint(String name)
+   private FingerJoint addFingerJoint(String name,  SDFFullRobotModel fullRobotModel)
    {
       FingerJoint fingerJoint = new FingerJoint(name);
+      OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(name);
+      fingerJoint.setDamping(oneDoFJoint.getDampingParameter());
       allJoints.add(fingerJoint);
       return fingerJoint;
    }
 
-   private void addFingerJoints(String prefix, SandiaFingerName finger)
+   private void addFingerJoints(SDFFullRobotModel fullRobotModel, String prefix, SandiaFingerName finger)
    {
       EnumMap<SandiaFingerJointName, FingerJoint> fingerJoints = new EnumMap<SandiaFingerJointName, FingerJoint>(SandiaFingerJointName.class);
-      fingerJoints.put(SandiaFingerJointName.BASEJOINT, addFingerJoint(prefix + "_j0"));
-      fingerJoints.put(SandiaFingerJointName.FIRSTJOINT, addFingerJoint(prefix + "_j1"));
-      fingerJoints.put(SandiaFingerJointName.SECONDJOINT, addFingerJoint(prefix + "_j2"));
+      fingerJoints.put(SandiaFingerJointName.BASEJOINT, addFingerJoint(prefix + "_j0", fullRobotModel));
+      fingerJoints.put(SandiaFingerJointName.FIRSTJOINT, addFingerJoint(prefix + "_j1", fullRobotModel));
+      fingerJoints.put(SandiaFingerJointName.SECONDJOINT, addFingerJoint(prefix + "_j2", fullRobotModel));
       handJoints.put(finger, fingerJoints);
    }
 
