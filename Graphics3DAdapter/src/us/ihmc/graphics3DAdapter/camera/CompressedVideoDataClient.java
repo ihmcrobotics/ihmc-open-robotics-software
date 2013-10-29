@@ -64,7 +64,6 @@ public class CompressedVideoDataClient implements ObjectConsumer<VideoPacket>, N
       this.videoCompressionKey = videoCompressionKey; 
    }
 
-   @Override
    public synchronized void consumeObject(VideoPacket packetData)
    {
       if(inputStreamCoder == null || videoCompressionKey != packetData.getVideoCompressionKey())
@@ -94,12 +93,10 @@ public class CompressedVideoDataClient implements ObjectConsumer<VideoPacket>, N
       }
    }
 
-   @Override
    public synchronized void connected()
    {
    }
 
-   @Override
    public void disconnected()
    {
       close();
