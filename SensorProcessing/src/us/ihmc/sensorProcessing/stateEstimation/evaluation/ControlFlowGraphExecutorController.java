@@ -13,7 +13,8 @@ public class ControlFlowGraphExecutorController implements RobotController
 
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final ArrayList<ControlFlowGraph> controlFlowGraphs = new ArrayList<ControlFlowGraph>();
-
+   private final ArrayList<Runnable> postRunnables = new ArrayList<Runnable>();
+   
    public ControlFlowGraphExecutorController()
    {
    }
@@ -58,5 +59,15 @@ public class ControlFlowGraphExecutorController implements RobotController
       {
          controlFlowGraphs.get(i).waitUntilComputationIsDone();
       }
+      
+      for (int i=0; i<postRunnables.size(); i++)
+      {
+         postRunnables.get(i).run();
+      }
+   }
+
+   public void addPostRunnable(Runnable runnable)
+   {
+      postRunnables.add(runnable);
    }
 }
