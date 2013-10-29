@@ -21,10 +21,12 @@ import us.ihmc.darpaRoboticsChallenge.sensors.AtlasWristFeetYoVariables;
 import us.ihmc.darpaRoboticsChallenge.sensors.WrenchBasedFootSwitch;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.AtlasWristFeetSensorServer;
 import us.ihmc.sensorProcessing.sensors.ForceSensorData;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromController;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -55,11 +57,12 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 
    @Override
    public RobotController getController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
-           CommonWalkingReferenceFrames referenceFrames, double controlDT, DoubleYoVariable yoTime,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, GUISetterUpperRegistry guiSetterUpperRegistry, TwistCalculator twistCalculator,
-           CenterOfMassJacobian centerOfMassJacobian, ForceSensorDataHolder forceSensorDataHolder, SideDependentList<HandControllerInterface> handControllers,
-           LidarControllerInterface lidarControllerInterface, StateEstimationDataFromController stateEstimationDataFromControllerSink)
+                                        CommonWalkingReferenceFrames referenceFrames, double controlDT, DoubleYoVariable yoTime,
+                                        DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, GUISetterUpperRegistry guiSetterUpperRegistry, TwistCalculator twistCalculator,
+                                        CenterOfMassJacobian centerOfMassJacobian, ForceSensorDataHolder forceSensorDataHolder, SideDependentList<HandControllerInterface> handControllers,
+                                        LidarControllerInterface lidarControllerInterface, StateEstimationDataFromController stateEstimationDataFromControllerSink, ObjectCommunicator objectCommunicator)
    {
+
       ArrayList<Vector3d> contactPointsArrayList = DRCRobotParameters.DRC_ROBOT_GROUND_CONTACT_POINT_OFFSET_FROM_FOOT;
 
       YoVariableRegistry specificRegistry = new YoVariableRegistry("specific");
@@ -103,6 +106,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
          final ForceSensorDataVisualizer forceSensorDataVisualizer=new ForceSensorDataVisualizer(fullRobotModel, forceSensorDataHolder, dynamicGraphicObjectsListRegistry, specificRegistry);
          final CenterOfPressureVisualizer centerOfPressureVisualizer=new CenterOfPressureVisualizer(fullRobotModel, forceSensorDataHolder, dynamicGraphicObjectsListRegistry, specificRegistry);
          final AtlasWristFeetYoVariables wristFeetVariables = new AtlasWristFeetYoVariables(forceSensorDataHolder, specificRegistry);
+         final AtlasWristFeetSensorServer wristFeetNetwork = objectCommunicator == null ? null : new AtlasWristFeetSensorServer(forceSensorDataHolder,objectCommunicator);
 
          highLevelHumanoidControllerUpdatables.addUpdatable(
             new Updatable()
@@ -113,6 +117,8 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
                     forceSensorDataVisualizer.visualize();
                     centerOfPressureVisualizer.visualize();
                     wristFeetVariables.update();
+                    if( wristFeetNetwork != null)
+                       wristFeetNetwork.update();
                }
             });
          
