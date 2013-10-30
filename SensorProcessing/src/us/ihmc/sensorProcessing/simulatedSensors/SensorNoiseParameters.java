@@ -11,7 +11,11 @@ public class SensorNoiseParameters
    private double angularAccelerationProcessNoiseStandardDeviation = 0.0;
 
    private double orientationMeasurementStandardDeviation = 0.0;
+   private double orientationMeasurementLatency = 0.0;
+   
    private double angularVelocityMeasurementStandardDeviation = 0.0;
+   private double angularVelocityMeasurmentLatency = 0.0;
+   
    private double linearAccelerationMeasurementStandardDeviation = 0.0;
 
    private double angularVelocityBiasProcessNoiseStandardDeviation = 0.0;
@@ -64,6 +68,11 @@ public class SensorNoiseParameters
    {
       return orientationMeasurementStandardDeviation;
    }
+   
+   public double getOrientationMeasurementLatency()
+   {
+      return orientationMeasurementLatency;
+   }
 
    public double getAngularVelocityBiasProcessNoiseStandardDeviation()
    {
@@ -73,6 +82,11 @@ public class SensorNoiseParameters
    public double getAngularVelocityMeasurementStandardDeviation()
    {
       return angularVelocityMeasurementStandardDeviation;
+   }
+   
+   public double getAngularVelocityMeasurementLatency()
+   {
+      return angularVelocityMeasurmentLatency;
    }
 
    public void getInitialAngularVelocityBias(Vector3d vectorToPack)
@@ -98,6 +112,16 @@ public class SensorNoiseParameters
    public void setOrientationMeasurementStandardDeviation(double orientationMeasurementStandardDeviation)
    {
       this.orientationMeasurementStandardDeviation = orientationMeasurementStandardDeviation;
+   }
+   
+   public void setOrientationMeasurementLatency(double orientationMeasurementLatency)
+   {
+      this.orientationMeasurementLatency = orientationMeasurementLatency;
+   }
+   
+   public void setAngularVelocityMeasurementLatency(double angularVelocityMeasurmentLatency)
+   {
+      this.angularVelocityMeasurmentLatency = angularVelocityMeasurmentLatency;
    }
 
    public void setAngularVelocityMeasurementStandardDeviation(double angularVelocityMeasurementStandardDeviation)
@@ -130,6 +154,6 @@ public class SensorNoiseParameters
       this.initialAngularVelocityBias.set(initialAngularVelocityBias);
    }
 
-
-
+  
+  
 }
