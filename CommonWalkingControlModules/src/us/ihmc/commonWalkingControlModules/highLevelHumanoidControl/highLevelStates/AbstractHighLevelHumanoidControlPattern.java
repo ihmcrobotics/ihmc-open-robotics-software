@@ -85,7 +85,8 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
    private final DoubleYoVariable kpUpperBody = new DoubleYoVariable("kpUpperBody", registry);
    private final DoubleYoVariable zetaUpperBody = new DoubleYoVariable("zetaUpperBody", registry);
-
+   private final DoubleYoVariable maxAccelerationUpperBody = new DoubleYoVariable("maxAccelerationUpperBody", registry);
+   
    protected final SideDependentList<? extends ContactablePlaneBody> feet, handPalms;
    protected final SideDependentList<ContactableCylinderBody> graspingHands;
 
@@ -135,7 +136,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       setupLegJacobians(fullRobotModel);
       coefficientOfFriction.set(1.0);
 
-      setUpperBodyControlGains(walkingControllerParameters.getKpUpperBody(), walkingControllerParameters.getZetaUpperBody());
+      setUpperBodyControlGains(walkingControllerParameters.getKpUpperBody(), walkingControllerParameters.getZetaUpperBody(), walkingControllerParameters.getMaxAccelerationUpperBody());
 
       // Setup foot control modules:
 //    setupFootControlModules(); //TODO: get rid of that?
@@ -158,10 +159,11 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       positionControlJoints = setupJointConstraints();
    }
 
-   public void setUpperBodyControlGains(double kpUpperBody, double zetaUpperBody)
+   public void setUpperBodyControlGains(double kpUpperBody, double zetaUpperBody, double maxAcceleration)
    {
       this.kpUpperBody.set(kpUpperBody);
       this.zetaUpperBody.set(zetaUpperBody);
+      this.maxAccelerationUpperBody.set(maxAcceleration);
    }
 
 
@@ -337,10 +339,13 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
          double kdHead = GainCalculator.computeDerivativeGain(kpHead, zetaUpperBody.getDoubleValue());
          double angle = 0.0;
 
+         double maxAcceleration = maxAccelerationUpperBody.getDoubleValue();
+
+         
          if (desiredHeadOrientationProvider != null)
             angle = desiredHeadOrientationProvider.getDesiredExtendedNeckPitchJointAngle();
 
-         momentumBasedController.doPDControl(jointForExtendedNeckPitchRange, kpHead, kdHead, angle, 0.0);
+         momentumBasedController.doPDControl(jointForExtendedNeckPitchRange, kpHead, kdHead, angle, 0.0, maxAcceleration);
       }
 
 
@@ -382,9 +387,11 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
    protected void doJointPositionControl()
    {
-      double kUpperBody = this.kpUpperBody.getDoubleValue();
-      double dUpperBody = GainCalculator.computeDerivativeGain(kUpperBody, zetaUpperBody.getDoubleValue());
-      momentumBasedController.doPDControl(positionControlJoints, kUpperBody, dUpperBody);
+      double kpUpperBody = this.kpUpperBody.getDoubleValue();
+      double kdUpperBody = GainCalculator.computeDerivativeGain(kpUpperBody, zetaUpperBody.getDoubleValue());
+      double maxAccelerationUpperBody = this.maxAccelerationUpperBody.getDoubleValue();
+      
+      momentumBasedController.doPDControl(positionControlJoints, kpUpperBody, kdUpperBody, maxAccelerationUpperBody);
    }
 
    // TODO: New methods coming from extending State class
