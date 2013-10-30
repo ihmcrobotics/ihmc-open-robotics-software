@@ -6,14 +6,16 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.io.streamingData.StreamingDataConsumer;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.net.ObjectConsumer;
 
-public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
+public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer,ObjectConsumer<FootstepData>
 {
    private final ConcurrentLinkedQueue<Footstep> footstepQueue = new ConcurrentLinkedQueue<Footstep>();
    private final long dataIdentifier;
@@ -115,4 +117,10 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
    {
       return false;
    }
+
+
+public void consumeObject(FootstepData object) {
+	// TODO Auto-generated method stub
+	
+}
 }
