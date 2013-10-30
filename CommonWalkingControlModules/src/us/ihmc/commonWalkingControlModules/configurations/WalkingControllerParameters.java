@@ -64,5 +64,6 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract double getKpUpperBody();
    public abstract double getZetaUpperBody();
+   public abstract double getMaxAccelerationUpperBody();
 
 }

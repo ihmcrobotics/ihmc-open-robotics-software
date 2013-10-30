@@ -505,17 +505,19 @@ public class MomentumBasedController
       updatables.add(updatable);
    }
 
-   public void doPDControl(OneDoFJoint[] joints, double k, double d)
+   public void doPDControl(OneDoFJoint[] joints, double kp, double kd, double maxAcceleration)
    {
       for (OneDoFJoint joint : joints)
       {
-         doPDControl(joint, k, d, 0.0, 0.0);
+         doPDControl(joint, kp, kd, 0.0, 0.0, maxAcceleration);
       }
    }
 
-   public void doPDControl(OneDoFJoint joint, double k, double d, double desiredPosition, double desiredVelocity)
+   public void doPDControl(OneDoFJoint joint, double kp, double kd, double desiredPosition, double desiredVelocity, double maxAcceleration)
    {
-      double desiredAcceleration = computeDesiredAcceleration(k, d, desiredPosition, desiredVelocity, joint);
+      double desiredAcceleration = computeDesiredAcceleration(kp, kd, desiredPosition, desiredVelocity, joint);
+      
+      desiredAcceleration = MathTools.clipToMinMax(desiredAcceleration, maxAcceleration);
       setOneDoFJointAcceleration(joint, desiredAcceleration);
    }
 

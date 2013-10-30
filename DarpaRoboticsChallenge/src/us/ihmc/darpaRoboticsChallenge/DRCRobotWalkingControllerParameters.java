@@ -364,4 +364,10 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
       if (DRCConfigParameters.USE_VRC_PARAMETERS) return 1.0;
       return 1.0;
    }
+   
+   public double getMaxAccelerationUpperBody()
+   {
+      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 100.0;
+      return 2.0;
+   }
 }
