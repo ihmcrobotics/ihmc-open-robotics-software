@@ -29,6 +29,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 
 public class WalkOnTheEdgesManager
 {
@@ -81,6 +82,16 @@ public class WalkOnTheEdgesManager
    
    private final WalkingControllerParameters walkingControllerParameters;
    private final WalkOnTheEdgesProviders walkOnTheEdgesProviders;
+
+   private final SideDependentList<DoubleYoVariable> angleFootsWithDesired = new SideDependentList<>(
+         new DoubleYoVariable("angleFootWithDesiredLeft", registry), new DoubleYoVariable("angleFootWithDesiredRight", registry));
+   private BooleanYoVariable enabledDoubleState = new BooleanYoVariable("enabledDoubleState", registry);
+
+   private final SideDependentList<YoFrameOrientation> footOrientationInWorld = new SideDependentList<>(new YoFrameOrientation("orientationLeftFoot",
+         worldFrame, registry), new YoFrameOrientation("orientationRightFoot", worldFrame, registry));
+   
+   private final SideDependentList<BooleanYoVariable> desiredAngleReached = new SideDependentList<>(new BooleanYoVariable("l_Desired_Pitch", registry), new BooleanYoVariable("r_Desired_Pitch", registry));
+
 
    public WalkOnTheEdgesManager(WalkingControllerParameters walkingControllerParameters, WalkOnTheEdgesProviders walkOnTheEdgesProviders,
          SideDependentList<? extends ContactablePlaneBody> feet, Map<ContactablePlaneBody, EndEffectorControlModule> footEndEffectorControlModules,
@@ -268,7 +279,7 @@ public class WalkOnTheEdgesManager
 
    public void updateEdgeTouchdownStatus(RobotSide supportLeg, Footstep nextFootstep)
    {
-      RobotSide nextTrailingLeg = supportLeg;
+      RobotSide nextTrailingLeg = supportLeg; 
       ReferenceFrame nextFrontFootFrame;
 
       if (nextFootstep != null)
@@ -492,4 +503,33 @@ public class WalkOnTheEdgesManager
       return new FrameConvexPolygon2d(allPoints);
    }
 
+   public boolean isPitchReachedDesired(RobotSide robotSide, Footstep savedFootStep)
+   {
+      if (savedFootStep != null)
+      {
+         desiredAngleReached.get(robotSide).set(false);
+         
+         FrameOrientation footFrameOrientation = new FrameOrientation(feet.get(robotSide).getBodyFrame());
+         footFrameOrientation.changeFrame(worldFrame);
+         footOrientationInWorld.get(robotSide).set(footFrameOrientation);
+         FrameOrientation desiredOrientation = new FrameOrientation(savedFootStep.getPoseReferenceFrame());
+         desiredOrientation.changeFrame(worldFrame);
+         
+//         double yawDifference = footFrameOrientation.getYawPitchRoll()[0] - desiredOrientation.getYawPitchRoll()[0];
+         double pitchDifference = footFrameOrientation.getYawPitchRoll()[1] - desiredOrientation.getYawPitchRoll()[1];
+         double rollDifference = footFrameOrientation.getYawPitchRoll()[2] - desiredOrientation.getYawPitchRoll()[2];
+         
+         angleFootsWithDesired.get(robotSide).set(pitchDifference);
+         
+         if(Math.abs(pitchDifference) < 0.1 && Math.abs(rollDifference) < 0.1)
+         {
+            desiredAngleReached.get(robotSide).set(true); // todo: delete only used to check in SCS
+            enabledDoubleState.set(true);
+         }else
+         {
+            enabledDoubleState.set(false);
+         }
+      }
+      return enabledDoubleState.getBooleanValue();
+   }
 }
