@@ -13,7 +13,7 @@ public class YoVariableLogger
 {
    public static final String defaultHost = "192.168.6.202";
    public static final int defaultPort = 5555;
-   public static final long timeout = 30000;
+   public static final long timeout = 5000;
    
    
    private final YoVariableClient client;
