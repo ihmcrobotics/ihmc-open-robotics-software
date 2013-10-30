@@ -10,6 +10,8 @@ import javax.vecmath.Vector3d;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianDoubleCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianOrientationCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianVectorCorruptor;
+import us.ihmc.sensorProcessing.signalCorruption.LatencyVectorCorruptor;
+import us.ihmc.sensorProcessing.signalCorruption.OrientationLatencyCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.RandomWalkBiasVectorCorruptor;
 import us.ihmc.utilities.ForceSensorDefinition;
 import us.ihmc.utilities.IMUDefinition;
@@ -149,10 +151,15 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
          if (sensorNoiseParameters != null)
          {
             double orientationMeasurementStandardDeviation = sensorNoiseParameters.getOrientationMeasurementStandardDeviation();
-
+            
             GaussianOrientationCorruptor orientationCorruptor = new GaussianOrientationCorruptor(sensorName, 12334255L, registry);
             orientationCorruptor.setStandardDeviation(orientationMeasurementStandardDeviation);
             orientationSensor.addSignalCorruptor(orientationCorruptor);
+            
+            double orientationMeasurementLatency = sensorNoiseParameters.getOrientationMeasurementLatency();
+            int latencyTicks = (int) Math.round(orientationMeasurementLatency / estimateDT);
+            OrientationLatencyCorruptor orientationLatencyCorruptor = new OrientationLatencyCorruptor(sensorName, latencyTicks, registry);
+            orientationSensor.addSignalCorruptor(orientationLatencyCorruptor);
          }
 
          simulatedSensorHolderAndReader.addOrientationSensorPort(imuDefinition, orientationSensor);
@@ -186,8 +193,13 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
 
             double angularVelocityBiasProcessNoiseStandardDeviation = sensorNoiseParameters.getAngularVelocityBiasProcessNoiseStandardDeviation();
             biasVectorCorruptor.setStandardDeviation(angularVelocityBiasProcessNoiseStandardDeviation);
-
             angularVelocitySensor.addSignalCorruptor(biasVectorCorruptor);
+            
+            
+            double getAngularVelocityMeasurementLatency = sensorNoiseParameters.getAngularVelocityMeasurementLatency();
+            int latencyTicks = (int) Math.round(getAngularVelocityMeasurementLatency / estimateDT);
+            LatencyVectorCorruptor angularVelocityLatencyCorruptor = new LatencyVectorCorruptor(sensorName, latencyTicks, registry);
+            angularVelocitySensor.addSignalCorruptor(angularVelocityLatencyCorruptor); 
          }
 
          simulatedSensorHolderAndReader.addAngularVelocitySensorPort(imuDefinition, angularVelocitySensor);
