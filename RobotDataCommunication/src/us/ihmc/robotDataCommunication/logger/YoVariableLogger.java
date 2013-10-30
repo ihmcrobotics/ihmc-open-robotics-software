@@ -22,7 +22,7 @@ public class YoVariableLogger
       DateFormat dateFormat = new SimpleDateFormat("yyyMMdd_HHmmss");
       Calendar calendar = Calendar.getInstance();
       String timestamp = dateFormat.format(calendar.getTime());
-      File directory = new File(options.getLogDirectory(), robotName + "_" + timestamp);
+      File directory = new File(options.getLogDirectory(), timestamp + "_" + robotName);
       if(directory.exists())
       {
          throw new IOException("Directory " + directory.getAbsolutePath() + " already exists");
