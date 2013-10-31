@@ -312,12 +312,11 @@ public class WalkOnTheEdgesManager
       
       if (doHeelTouchdown.getBooleanValue())
          walkOnTheEdgesProviders.setHeelTouchdownInitialPitch();
-      
-      desiredFootstep = new Footstep(nextFootstep);
    }
 
    public Footstep createFootstepForEdgeTouchdown(Footstep footstepToModify)
    {
+      desiredFootstep = new Footstep(footstepToModify);
       if (!doToeTouchdown.getBooleanValue() && !doHeelTouchdown.getBooleanValue())
          return footstepToModify;
 
@@ -508,15 +507,16 @@ public class WalkOnTheEdgesManager
 
    public boolean isEdgeTouchDownDone(RobotSide robotSide)
    {
+
       if (!doToeTouchdownIfPossible.getBooleanValue() && !doHeelTouchdownIfPossible.getBooleanValue())
-      {
-         return false;
-      }
+         return true;
+
+      if (!doToeTouchdown.getBooleanValue() && !doHeelTouchdown.getBooleanValue())
+         return true;
       
       if (desiredFootstep != null)
       {
          desiredAngleReached.get(robotSide).set(false);
-         
          FrameOrientation footFrameOrientation = new FrameOrientation(feet.get(robotSide).getBodyFrame());
          footFrameOrientation.changeFrame(worldFrame);
          footOrientationInWorld.get(robotSide).set(footFrameOrientation);
