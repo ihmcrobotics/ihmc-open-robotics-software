@@ -1,11 +1,9 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepUtils;
@@ -17,9 +15,12 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Wrench;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 
 /**
  * @author twan
@@ -36,9 +37,11 @@ public class PlaneContactWrenchProcessor
    private final LinkedHashMap<ContactablePlaneBody, YoFramePoint2d> centersOfPressure2d = new LinkedHashMap<ContactablePlaneBody, YoFramePoint2d>();
 
    private final Map<ContactablePlaneBody, FramePoint2d> cops = new LinkedHashMap<ContactablePlaneBody, FramePoint2d>();
+   private final YoVariableRegistry registry;
 
-   public PlaneContactWrenchProcessor(List<ContactablePlaneBody> contactablePlaneBodies, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry)
+   public PlaneContactWrenchProcessor(List<ContactablePlaneBody> contactablePlaneBodies, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
+      registry = new YoVariableRegistry(getClass().getSimpleName());
       this.contactablePlaneBodies = contactablePlaneBodies;
       for (ContactablePlaneBody contactableBody : contactablePlaneBodies)
       {
@@ -65,6 +68,8 @@ public class PlaneContactWrenchProcessor
             dynamicGraphicObjectsListRegistry.registerArtifact(listName, copViz.createArtifact());
          }
       }
+      
+      parentRegistry.addChild(registry);
    }
 
    public void compute(Map<RigidBody, Wrench> externalWrenches)
