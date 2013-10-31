@@ -133,6 +133,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final CoMHeightTimeDerivativesCalculator coMHeightTimeDerivativesCalculator = new CoMHeightTimeDerivativesCalculator();
    private final CoMHeightTimeDerivativesSmoother coMHeightTimeDerivativesSmoother;
 
+   private EndEffectorControlModule endEffectorControlModule;
+
    private final PDController centerOfMassHeightController;
    private final SideDependentList<WalkingState> singleSupportStateEnums = new SideDependentList<WalkingState>(WalkingState.LEFT_SUPPORT,
                                                                               WalkingState.RIGHT_SUPPORT);
@@ -234,6 +236,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final DoubleYoVariable walkingHeadOrientationKp = new DoubleYoVariable("walkingHeadOrientationKp", registry);
    private final DoubleYoVariable walkingHeadOrientationZeta = new DoubleYoVariable("walkingHeadOrientationZeta", registry);
+   
+   private final DoubleYoVariable swingKpXY = new DoubleYoVariable("swingKpXY", registry);
+   private final DoubleYoVariable swingKpZ = new DoubleYoVariable("swingKpZ", registry);
+   private final DoubleYoVariable swingKpOrientation = new DoubleYoVariable("swingKpOrientation", registry);
+   private final DoubleYoVariable swingZeta = new DoubleYoVariable("swingZeta", registry);
    
    private final WalkOnTheEdgesManager walkOnTheEdgesManager;
    private final WalkOnTheEdgesProviders walkOnTheEdgesProviders;
@@ -385,10 +392,17 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    protected void setupFootControlModules(SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators)
    {
+      //TODO: Pull these up to a higher level.
+
       singularityEscapeNullspaceMultiplierSwingLeg.set(200.0);
       singularityEscapeNullspaceMultiplierSupportLeg.set(20.0);
       singularityEscapeNullspaceMultiplierSupportLegLocking.set(-0.5);
       double minJacobianDeterminantForSingularityEscape = 0.03;
+      
+      swingKpXY.set(100.0);
+      swingKpZ.set(200.0);
+      swingKpOrientation.set(200.0);
+      swingZeta.set(1.0);
       
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -416,7 +430,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          GeometricJacobian jacobian = legJacobians.get(robotSide);
          OneDoFJoint kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE);
          
-         final EndEffectorControlModule endEffectorControlModule;
          if (WalkOnTheEdgesProviders.TOEOFF_MOTION_TYPE_USED != ToeOffMotionType.FREE)
          {
             DoubleTrajectoryGenerator onToesPitchTrajectoryGenerator = walkOnTheEdgesProviders.getToeOffPitchTrajectoryGenerators(robotSide);
@@ -430,6 +443,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             endEffectorControlModule = new EndEffectorControlModule(bipedFoot, jacobian, kneeJoint, swingPoseTrajectoryGenerator,
                                           heelPitchTrajectoryGenerator, maximumToeOffAngleProvider, momentumBasedController, registry);
          }
+         
+                  
+         VariableChangedListener swingGainsChangedListener = createSwingGainsChangedListener();
+         swingGainsChangedListener.variableChanged(null);
+
          endEffectorControlModule.setParameters(minJacobianDeterminantForSingularityEscape, singularityEscapeNullspaceMultiplierSwingLeg.getDoubleValue());
          footEndEffectorControlModules.put(bipedFoot, endEffectorControlModule);
       }
@@ -560,6 +578,23 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          
          walkingHeadOrientationKp.addVariableChangedListener(ret);
          walkingHeadOrientationZeta.addVariableChangedListener(ret);
+      
+      return ret;
+   }
+   
+   private VariableChangedListener createSwingGainsChangedListener()
+   {
+      VariableChangedListener ret = new VariableChangedListener()
+      {
+         public void variableChanged(YoVariable v)
+         {
+            endEffectorControlModule.setSwingGains(swingKpXY.getDoubleValue(), swingKpZ.getDoubleValue(), swingKpOrientation.getDoubleValue(), swingZeta.getDoubleValue());
+         }};
+         
+         swingKpXY.addVariableChangedListener(ret);
+         swingKpZ.addVariableChangedListener(ret);
+         swingKpOrientation.addVariableChangedListener(ret);
+         swingZeta.addVariableChangedListener(ret);
       
       return ret;
    }
