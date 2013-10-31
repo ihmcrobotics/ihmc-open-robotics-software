@@ -205,7 +205,7 @@ public class MomentumBasedController
 
       if (feet != null)
       {
-         this.listOfAllContactablePlaneBodies.addAll(feet.values());
+         this.listOfAllContactablePlaneBodies.addAll(feet.values()); //leftSole and rightSole
       }
 
       if (handsWithFingersBentBack != null)
@@ -290,7 +290,7 @@ public class MomentumBasedController
       {
          contactPointVisualizer = new ContactPointVisualizer(this.yoPlaneContactStates.values(), dynamicGraphicObjectsListRegistry, registry);
          List<RigidBody> rigidBodies = Arrays.asList(ScrewTools.computeSupportAndSubtreeSuccessors(fullRobotModel.getRootJoint().getSuccessor()));
-         wrenchVisualizer = new WrenchVisualizer("Desired", rigidBodies, dynamicGraphicObjectsListRegistry, registry);
+         wrenchVisualizer = new WrenchVisualizer("DesiredExternalWrench", rigidBodies, dynamicGraphicObjectsListRegistry, registry);
       }
       else
       {
@@ -403,7 +403,7 @@ public class MomentumBasedController
          inverseDynamicsCalculator.setExternalWrench(rigidBody, externalWrenches.get(rigidBody));
       }
 
-      planeContactWrenchProcessor.compute(externalWrenches);
+      planeContactWrenchProcessor.compute(externalWrenches); 
       if (wrenchVisualizer != null)
          wrenchVisualizer.visualize(externalWrenches);
 
