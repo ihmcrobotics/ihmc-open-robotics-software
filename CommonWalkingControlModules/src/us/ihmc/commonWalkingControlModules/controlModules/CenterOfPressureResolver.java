@@ -41,13 +41,19 @@ public class CenterOfPressureResolver
       double vector12x = Double.NaN;
       double vector12y = Double.NaN;
       
+      double normalTorqueAtCenterOfPressure;
       if (Math.abs(fz) > 1e-7)
       {
+         //with sufficient normal force
          vector12x = -1.0/fz * torqueAtZeroInPlaneFrame.getY();
-         vector12y = 1.0/fz * torqueAtZeroInPlaneFrame.getX(); 
+         vector12y = 1.0/fz * torqueAtZeroInPlaneFrame.getX();
+         normalTorqueAtCenterOfPressure = torqueAtZeroInPlaneFrame.getZ() - vector12x * forceInPlaneFrame.getY() + vector12y * forceInPlaneFrame.getX();
       }
-  
-      double normalTorqueAtCenterOfPressure = torqueAtZeroInPlaneFrame.getZ() - vector12x * forceInPlaneFrame.getY() + vector12y * forceInPlaneFrame.getX();
+      else
+      {
+        //without normal force
+         normalTorqueAtCenterOfPressure = torqueAtZeroInPlaneFrame.getZ();
+      }
       
       centerOfPressureToPack.set(centerOfPressurePlaneFrame, vector12x, vector12y);
       return normalTorqueAtCenterOfPressure;
