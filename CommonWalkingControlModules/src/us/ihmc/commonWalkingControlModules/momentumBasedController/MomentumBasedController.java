@@ -27,6 +27,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.D
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
@@ -388,11 +389,16 @@ public class MomentumBasedController
          momentumModuleSolution = momentumControlModuleBridge.compute(this.yoPlaneContactStates, this.yoCylindricalContactStates,
                upcomingSupportLeg.getEnumValue());
       }
-      catch (NoConvergenceException e)
+      catch (MomentumControlModuleException momentumControlModuleException)
       {
          if (momentumBasedControllerSpy != null)
             momentumBasedControllerSpy.printMomentumCommands(System.err);
-         throw new RuntimeException(e);
+         
+         // Don't crash and burn. Instead do the best you can with what you have.
+         // Or maybe just use the previous ticks solution.
+         // Need to test these.
+         momentumModuleSolution = momentumControlModuleException.getMomentumModuleSolution();
+         //throw new RuntimeException(momentumControlModuleException);
       }
 
       SpatialForceVector desiredCentroidalMomentumRate = momentumModuleSolution.getCentroidalMomentumRateSolution();

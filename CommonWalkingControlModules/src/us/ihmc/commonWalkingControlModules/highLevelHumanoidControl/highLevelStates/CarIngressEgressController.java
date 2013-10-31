@@ -378,6 +378,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          OneDoFJoint kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE);
          EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(foot, jacobian, kneeJoint, poseTrajectoryGenerator, null,
                                                                 onToesTrajectory, momentumBasedController, registry);
+         endEffectorControlModule.setSwingGains(100.0, 200.0, 200.0, 1.0);
+
          footEndEffectorControlModules.put(foot, endEffectorControlModule);
       }
    }
