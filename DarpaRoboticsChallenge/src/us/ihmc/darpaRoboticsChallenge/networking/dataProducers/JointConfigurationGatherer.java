@@ -97,7 +97,7 @@ public class JointConfigurationGatherer
       double[] jointAngles = jointConfigurationData.getJointAngles();
 
       double[] leftHandAngles = handAngles.get(RobotSide.LEFT).getCopyForReading();
-      double[] rightHandAngles = handAngles.get(RobotSide.LEFT).getCopyForReading();
+      double[] rightHandAngles = handAngles.get(RobotSide.RIGHT).getCopyForReading();
 
       rootJoint.packTranslation(rootTranslation);
       rootJoint.packRotation(rootOrientation);
