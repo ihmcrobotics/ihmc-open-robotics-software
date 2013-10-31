@@ -96,7 +96,7 @@ public class DRCConfigParameters
    public static final String CONSTELLATION_FIELD_COMPUTER_1_VPN_IP = "10.0.0.52";
    public static final String CONSTELLATION_FIELD_COMPUTER_2_VPN_IP = "10.0.0.53";
 
-   public static final Boolean USE_HANDS = true;
+   public static final Boolean USE_HANDS = false;
    public static final Boolean USE_IROBOT_HAND = false;
    public static final String LEFT_IROBOT_HAND_IP = "192.168.40.38";
    public static final String RIGHT_IROBOT_HAND_IP = "192.168.40.32";
@@ -110,7 +110,7 @@ public class DRCConfigParameters
    {
       if (RUNNING_ON_REAL_ROBOT)
       {
-         SCS_MACHINE_IP_ADDRESS = "10.66.171.20";
+         SCS_MACHINE_IP_ADDRESS = DRCLocalConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
       }
       else
       {
@@ -119,10 +119,8 @@ public class DRCConfigParameters
    }
 
    public static final String NET_PROC_MACHINE_IP_ADDRESS = DRCLocalConfigParameters.NET_PROC_MACHINE_IP_ADDRESS;    // CONSTELLATION_FIELD_COMPUTER_1_VPN_IP; //CONSTELLATION_FIELD_COMPUTER_1_VPN_IP;    // SCS_MACHINE_IP_ADDRESS;
-
-   public static final String OPERATOR_INTERFACE_IP_ADDRESS = DRCLocalConfigParameters.OPERATOR_INTERFACE_IP_ADDRESS;
    
-   public static final String REMOTE_ATLAS_VISUALIZER_HOST=DRCLocalConfigParameters.REMOTE_ATLAS_VISUALIZER_HOST;
+   public static final String REMOTE_ATLAS_VISUALIZER_HOST=DRCLocalConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
 
    public static final String ROS_MASTER_URI = "http://" + GAZEBO_HOST + ":11311";
    public static final int CONTROLLER_TO_UI_TCP_PORT = 4893;
