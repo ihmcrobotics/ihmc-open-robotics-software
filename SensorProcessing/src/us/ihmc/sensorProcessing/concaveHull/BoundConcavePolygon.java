@@ -46,7 +46,7 @@ public class BoundConcavePolygon {
 
 	FastQueue<Point2D_F64> points2D = new FastQueue<Point2D_F64>(Point2D_F64.class,true);
 
-	Point3D_F64 center = new Point3D_F64();
+	private Point3D_F64 center = new Point3D_F64();
 	Vector3D_F64 norm = new Vector3D_F64();
 	Vector3D_F64 axisX = new Vector3D_F64();
 	Vector3D_F64 axisY = new Vector3D_F64();
@@ -85,7 +85,7 @@ public class BoundConcavePolygon {
 		points2D.reset();
 
 		// pick a point and find the closest point to the plane from it
-		ClosestPoint3D_F64.closestPoint(plane,points.get(0),center);
+		ClosestPoint3D_F64.closestPoint(plane,points.get(0),getCenter());
 
 		// pick two arbitrary vectors to be the axis of the plane's 2D coordinate system
 		norm.set(plane.A,plane.B,plane.C);
@@ -101,9 +101,9 @@ public class BoundConcavePolygon {
 		for( int i = 0; i < points.size(); i++ ) {
 			Point3D_F64 p = points.get(i);
 
-			double dx = p.x - center.x;
-			double dy = p.y - center.y;
-			double dz = p.z - center.z;
+			double dx = p.x - getCenter().x;
+			double dy = p.y - getCenter().y;
+			double dz = p.z - getCenter().z;
 
 			double X = axisX.x*dx + axisX.y*dy + axisX.z*dz;
 			double Y = axisY.x*dx + axisY.y*dy + axisY.z*dz;
@@ -210,5 +210,15 @@ public class BoundConcavePolygon {
 	 */
 	public Point3D_F64[] getRect() {
 		return rect;
+	}
+
+
+	public Point3D_F64 getCenter() {
+		return center;
+	}
+
+
+	public void setCenter(Point3D_F64 center) {
+		this.center = center;
 	}
 }

@@ -1,5 +1,6 @@
 package us.ihmc.sensorProcessing.concaveHull;
 
+import georegression.struct.plane.PlaneGeneral3D_F64;
 import georegression.struct.point.Point3D_F64;
 
 import java.awt.Color;
@@ -19,6 +20,7 @@ import us.ihmc.sensorProcessing.pointClouds.shape.ShapeTranslator;
 import bubo.io.serialization.DataDefinition;
 import bubo.io.serialization.SerializationDefinitionManager;
 import bubo.io.text.ReadCsvObjectSmart;
+import bubo.ptcloud.PointCloudShapeFinder.Shape;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.math.ColorRGBA;
@@ -37,7 +39,7 @@ public class DisplayPointCloudFileApp extends SimpleApplication
    public static void main(String[] args)
    {
       ///home/unknownid/workspace/SensorProcessing/output.txt
-	   DisplayPointCloudFileApp test1 = new DisplayPointCloudFileApp("poly.txt");
+	   DisplayPointCloudFileApp test1 = new DisplayPointCloudFileApp("plane.txt");
       test1.start();
    }
 
@@ -63,16 +65,9 @@ public class DisplayPointCloudFileApp extends SimpleApplication
       
       
       ShapeTranslator shapeTranslator = new ShapeTranslator(this);
-      
-
-      for(int i = 1;i<cloud.size();i++)
-      {
-    	  Vector3f start = new Vector3f((float)cloud.get(i-1).x, (float)cloud.get(i-1).y, (float)cloud.get(i-1).z);
-    	  Vector3f end = new Vector3f((float)cloud.get(i).x, (float)cloud.get(i).y, (float)cloud.get(i).z);
-    	  zUpNode.attachChild(shapeTranslator.drawLine(start, end));
-      }
-      
-      
+      PlaneGeneral3D_F64 plane = new PlaneGeneral3D_F64(0,1,0,2);
+     
+      shapeTranslator.createPolygon(plane,cloud, ColorRGBA.Cyan, zUpNode);
       System.out.println("total points: " + cloud.size());
 
       Vector3f[] points = new Vector3f[cloud.size()];
