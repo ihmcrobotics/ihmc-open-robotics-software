@@ -64,6 +64,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.math.filter.RateLimitedYoVariable;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class MomentumBasedController
@@ -86,8 +87,8 @@ public class MomentumBasedController
    private final List<ContactablePlaneBody> listOfAllContactablePlaneBodies;
    private final List<ContactableCylinderBody> listOfAllContactableCylinderBodies;
    
-   private DoubleYoVariable leftPassiveKneeTorque = new DoubleYoVariable("leftPassiveKneeTorque", registry);
-   private DoubleYoVariable rightPassiveKneeTorque = new DoubleYoVariable("rightPassiveKneeTorque", registry);
+   private final DoubleYoVariable leftPassiveKneeTorque = new DoubleYoVariable("leftPassiveKneeTorque", registry);
+   private final DoubleYoVariable rightPassiveKneeTorque = new DoubleYoVariable("rightPassiveKneeTorque", registry);
    private final SideDependentList<DoubleYoVariable> passiveKneeTorque = new SideDependentList<DoubleYoVariable>(leftPassiveKneeTorque, rightPassiveKneeTorque);
    
    private final DoubleYoVariable passiveQKneeThreshold = new DoubleYoVariable("passiveQKneeThreshold", registry);
@@ -113,6 +114,9 @@ public class MomentumBasedController
    private final YoFrameVector groundReactionTorqueCheck;
    private final YoFrameVector groundReactionForceCheck;
 
+   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> preRateLimitedDesiredAccelerations = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
+   private final LinkedHashMap<OneDoFJoint, RateLimitedYoVariable> rateLimitedDesiredAccelerations = new LinkedHashMap<OneDoFJoint, RateLimitedYoVariable>();
+   
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredAccelerationYoVariables = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
 
    private final ProcessedOutputsInterface processedOutputs;
@@ -253,6 +257,8 @@ public class MomentumBasedController
          if (joint instanceof OneDoFJoint)
          {
             desiredAccelerationYoVariables.put((OneDoFJoint) joint, new DoubleYoVariable(joint.getName() + "qdd_d", registry));
+            rateLimitedDesiredAccelerations.put((OneDoFJoint) joint, new RateLimitedYoVariable(joint.getName() + "_rl_qdd_d", registry, 10000.0, controlDT));
+            preRateLimitedDesiredAccelerations.put((OneDoFJoint) joint, new DoubleYoVariable(joint.getName() + "_prl_qdd_d", registry));
          }
       }
 
@@ -505,20 +511,25 @@ public class MomentumBasedController
       updatables.add(updatable);
    }
 
-   public void doPDControl(OneDoFJoint[] joints, double kp, double kd, double maxAcceleration)
+   public void doPDControl(OneDoFJoint[] joints, double kp, double kd, double maxAcceleration, double maxJerk)
    {
       for (OneDoFJoint joint : joints)
       {
-         doPDControl(joint, kp, kd, 0.0, 0.0, maxAcceleration);
+         doPDControl(joint, kp, kd, 0.0, 0.0, maxAcceleration, maxJerk);
       }
    }
 
-   public void doPDControl(OneDoFJoint joint, double kp, double kd, double desiredPosition, double desiredVelocity, double maxAcceleration)
+   public void doPDControl(OneDoFJoint joint, double kp, double kd, double desiredPosition, double desiredVelocity, double maxAcceleration, double maxJerk)
    {
       double desiredAcceleration = computeDesiredAcceleration(kp, kd, desiredPosition, desiredVelocity, joint);
-      
       desiredAcceleration = MathTools.clipToMinMax(desiredAcceleration, maxAcceleration);
-      setOneDoFJointAcceleration(joint, desiredAcceleration);
+      preRateLimitedDesiredAccelerations.get(joint).set(desiredAcceleration);
+
+      RateLimitedYoVariable rateLimitedDesiredAcceleration = this.rateLimitedDesiredAccelerations.get(joint);
+      rateLimitedDesiredAcceleration.setMaxRate(maxJerk);
+      rateLimitedDesiredAcceleration.update(desiredAcceleration);
+      
+      setOneDoFJointAcceleration(joint, rateLimitedDesiredAcceleration.getDoubleValue());
    }
 
    public void setOneDoFJointAcceleration(OneDoFJoint joint, double desiredAcceleration)
