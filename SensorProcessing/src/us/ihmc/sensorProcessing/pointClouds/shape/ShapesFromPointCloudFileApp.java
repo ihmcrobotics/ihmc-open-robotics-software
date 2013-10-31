@@ -35,7 +35,6 @@ import bubo.ptcloud.alg.PointVectorNN;
 import bubo.ptcloud.tools.PointCloudShapeTools;
 import bubo.ptcloud.wrapper.ConfigRemoveFalseShapes;
 import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
-import java.util.Arrays;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.RawInputListener;
@@ -55,6 +54,7 @@ import com.jme3.post.FilterPostProcessor;
 import com.jme3.post.filters.CartoonEdgeFilter;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
+import com.jme3.scene.BatchNode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial.CullHint;
@@ -73,8 +73,8 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
    private List<Point3D_F64> ransacCloud;
 
    private Node boundsNode = new Node("meshBounds");
-   private float boxExtent = 1f;
-   private Vector3f initialTranslation = new Vector3f(3.8f, -0.55f, -0.75f);
+   private float boxExtent = 10.75f;
+   private Vector3f initialTranslation = new Vector3f(4.1f, -0.55f, -0.75f);
 
    private float translateSpeed = 0.1f;
    private ShapeTranslator translator = new ShapeTranslator(this);
@@ -88,17 +88,18 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
 
    private Node zUp = new Node();
    private Node shapesNode = new Node();
-   private Node normalsNode = new Node();
+   private BatchNode normalsNode = new BatchNode();
+   private Node allPointCloud = new Node();
    private Node pointCloudNode = new Node();
    private Node selectionNode = new Node();
 
    private boolean SHADOWS = false;
 
-   ConfigSurfaceNormals configNormal = new ConfigSurfaceNormals(2000, 2000, .20);
+   ConfigSurfaceNormals configNormal = new ConfigSurfaceNormals(100, 100, .1);
 
    public static void main(String[] args)
    {
-      ShapesFromPointCloudFileApp test1 = new ShapesFromPointCloudFileApp("../SensorProcessing/box_10s.txt");
+      ShapesFromPointCloudFileApp test1 = new ShapesFromPointCloudFileApp("../SensorProcessing/box_10s_h.txt");
       test1.start();
    }
 
@@ -116,22 +117,26 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
 
       rootNode.attachChild(zUp);
       zUp.attachChild(pointCloudNode);
+      zUp.attachChild(allPointCloud);
       zUp.attachChild(shapesNode);
       zUp.attachChild(normalsNode);
       zUp.attachChild(selectionNode);
 
-      
       fullCloud = new ArrayList<Point3D_F64>();
-      
+
       /*
-      fullCloud.addAll(createModelCloud(new Cylinder3D_F64(0, -2, 0, 1, 0, 0, .5), 1000, .0, 2));
-      fullCloud.addAll(createModelCloud(new PlaneNormal3D_F64(new Point3D_F64(0,-2,0), new Vector3D_F64(1,0,0)), 250, .0, 1));
-      fullCloud.addAll(SyntheticCalibrationTestApp.createBoxCloud(new Point3D_F64(0, 0, 0), 750, 1, 0.0));
-      */
-      
+       * fullCloud.addAll(createModelCloud(new Cylinder3D_F64(0, 1, 0, 1, 0, 0,
+       * .05), 300, .0, 1)); fullCloud.addAll(createModelCloud(new
+       * Cylinder3D_F64(0, -2, 0, 1, 0, 0, .5), 1000, .0, 2));
+       * fullCloud.addAll(createModelCloud(new PlaneNormal3D_F64(new
+       * Point3D_F64(0,-2,0), new Vector3D_F64(1,0,0)), 250, .0, 1));
+       * fullCloud.addAll(SyntheticCalibrationTestApp.createBoxCloud(new
+       * Point3D_F64(0, 0, 0), 750, 1, 0.0));
+       */
+
       fullCloud.addAll(readPointCloud(10000000, new Vector3f(-99999.0f, -99999.0f, -99999.0f), new Vector3f(99999.0f, 99999.0f, 99999.0f)));
 
-      displayView(fullCloud, defaultColor, defaultPointSize, pointCloudNode);
+      displayView(fullCloud, defaultColor, defaultPointSize, allPointCloud);
 
       cam.setFrustumPerspective(45.0f, ((float) cam.getWidth()) / ((float) cam.getHeight()), 0.05f, 100.0f);
       cam.setLocation(new Vector3f(0, 0, -5));
@@ -156,7 +161,6 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
 
       for (int i = 0; i < N; i++)
       {
-
 
          Point3D_F64 p;
          if (model instanceof Cylinder3D_F64)
@@ -273,7 +277,13 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
             ScoringFunction<PlaneGeneral3D_F64, Point3D_F64> scorer = ExpectationMaximizationFitter.getGaussianSqauresMixedError(.01 / 2);
 
             time = System.currentTimeMillis();
-            List<Shape> emFitShapes = getEMFitShapes(planes, cloud, scorer, 75, .9999);
+
+            //List<Shape> emFitShapes = getEMFitShapes(planes, cloud, scorer, 25, .999);
+            List<Point3D_F64> allPoints = new ArrayList<Point3D_F64>();
+            for (Shape s : found)
+               allPoints.addAll(s.points);
+            List<Shape> emFitShapes = getEMFitShapes(planes, cloud, scorer, 25, .9999);
+
             System.out.println("EM Fit time: " + (System.currentTimeMillis() - time));
 
             List<Shape> allShapes = new ArrayList<PointCloudShapeFinder.Shape>();
@@ -338,7 +348,8 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
                PointVectorNN p = normalVectors.get(i);
                //CubeCalibration.nonLinearFitNormal(p);
                //CubeCalibration.weightedLinearFit(p, ExpectationMaximizationFitter.getNormalSingularityError(), 5);
-               scores[i] = CubeCalibration.score(p);
+               //scores[i] = CubeCalibration.score(p);
+               scores[i] = CubeCalibration.getAverageError(p);
 
             }
 
@@ -347,19 +358,31 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
                if (scores[i] > maxScore)
                   maxScore = scores[i];
 
+            maxScore = .04;
+
             for (int i = 0; i < scores.length; i++)
                scores[i] /= maxScore;
 
+            ArrayList<PointVectorNN> subset = new ArrayList<PointVectorNN>();
+            ArrayList<ColorRGBA> colorSubset = new ArrayList<ColorRGBA>();
             for (int i = 0; i < scores.length; i++)
             {
-               //int c = Color.HSBtoRGB(.7f-.7f*(float)scores[i], 1, 1.0f);
+               int c = Color.HSBtoRGB(.7f - .7f * (float) scores[i], 1, 1.0f);
                //int c = Color.HSBtoRGB(.7f - .7f*(float)CubeCalibration.filter(normalVectors.get(i), maxScore, .15), 1, 1.0f);
-               int c = Color.HSBtoRGB(CubeCalibration.filter(normalVectors.get(i), maxScore, .1) < .5 ? .7f : 0, 1, 1.0f);
+               //int c = Color.HSBtoRGB(CubeCalibration.filter(normalVectors.get(i), maxScore, .1) < .5 ? .7f : 0, 1, 1.0f);
                //int c = Color.HSBtoRGB(scores[i] < .1 ? .7f : 0, 1, 1.0f);
                colors[i] = new ColorRGBA(((c >> 16) & 0xFF) / 256.0f, ((c >> 8) & 0xFF) / 256.0f, ((c >> 0) & 0xFF) / 256.0f, 1.0f);
+
+               if (scores[i] < .01)
+               {
+                  subset.add(normalVectors.get(i));
+                  colorSubset.add(new ColorRGBA(1, 1, 1, 1));
+                  //colorSubset.add(colors[i]);
+               }
             }
 
             renderNormals(new ArrayList<PointVectorNN>(normalVectors.toList()), colors, .06f, .001f);
+            //renderNormals(subset, colorSubset.toArray(new ColorRGBA[subset.size()]), .06f, .001f);
 
          }
       });
@@ -458,7 +481,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
             System.out.println("Unmatched points " + unmatched.size());
             System.out.println("total shapes found: " + found.size());
 
-            filter(found, .25, 20);
+            //filter(found, .25, 200);
 
             renderShapes(found);
 
@@ -479,13 +502,13 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       configRansac.minModelAccept = 50;
       configRansac.octreeSplit = 25;
 
-      configRansac.maximumAllowedIterations = 1000;
-      configRansac.ransacExtension = 25;
+      configRansac.maximumAllowedIterations = 30000;
+      configRansac.ransacExtension = 100;
 
       //configRansac.models.get(1).modelCheck = new CheckShapeCylinderRadius(0.2);
       //configRansac.models.get(2).modelCheck = new CheckShapeSphere3DRadius(0.2);
 
-      ConfigRemoveFalseShapes configMerge = new ConfigRemoveFalseShapes(0.7);
+      ConfigRemoveFalseShapes configMerge = new ConfigRemoveFalseShapes(0.25);
 
       PointCloudShapeFinder shapeFinder = FactoryPointCloudShape.ransacOctree(configNormal, configRansac, configMerge);
 
@@ -589,6 +612,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
                }
 
                //pointCloudNode.attachChild(pointCloudNodeToAdd);
+               normalsNode.batch();
                return null;
             }
          });
@@ -697,6 +721,26 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       for (Point3D_F64 pt : fullCloud)
       {
          if ((pt.x >= min.x) && (pt.y >= min.y) && (pt.z >= min.z) && (pt.x <= max.x) && (pt.y <= max.y) && (pt.z <= max.z))
+         {
+            cloud.add(pt);
+         }
+      }
+      return cloud;
+   }
+
+   private List<Point3D_F64> getSphere(double radius)
+   {
+      Vector3f p = boundsNode.getLocalTranslation();
+      Point3D_F64 center = new Point3D_F64(p.x, p.y, p.z);
+      System.out.println(center);
+
+      List<Point3D_F64> cloud = new ArrayList<Point3D_F64>();
+      SerializationDefinitionManager manager = new SerializationDefinitionManager();
+      manager.addDefinition(new DataDefinition("point3d", Point3D_F64.class, "x", "y", "z"));
+
+      for (Point3D_F64 pt : fullCloud)
+      {
+         if (pt.distance(center) < radius)
             cloud.add(pt.copy());
       }
       return cloud;
@@ -861,11 +905,47 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
          normalsRun(ransacCloud);
       }
 
+      if (evt.getKeyChar() == 'f' && evt.isPressed())
+      {
+         Thread boundsThread = new Thread(new Runnable()
+         {
+            public void run()
+            {
+               List<Point3D_F64> filterCloud = CubeCalibration.thin(fullCloud, .02);
+               filterCloud = CubeCalibration.filterByResidual(filterCloud, configNormal, .005);
+               final List<Point3D_F64> finalCloud = filterCloud;
+               
+               System.out.println("Full: " + fullCloud.size() + " Filtered: " + filterCloud.size());
+               fullCloud = filterCloud;
+
+               if (true)
+               {
+                  allPointCloud.detachAllChildren();
+                  showBounds();
+                  return;
+               }
+
+               enqueue(new Callable<Object>()
+               {
+                  public Object call() throws Exception
+                  {
+                     displayView(finalCloud, ColorRGBA.White, defaultPointSize, allPointCloud);
+
+                     return null;
+                  }
+               });
+
+            }
+         });
+         boundsThread.start();
+      }
+
       if (evt.getKeyChar() == 'c' && evt.isPressed())
       {
          shapesNode.detachAllChildren();
          normalsNode.detachAllChildren();
          pointCloudNode.detachAllChildren();
+         allPointCloud.detachAllChildren();
          showBounds();
       }
    }
@@ -878,6 +958,14 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
          public void run()
          {
             ransacCloud = getBoundedCloud();
+
+            final List<Point3D_F64> fullCloudCopy = new ArrayList<Point3D_F64>(fullCloud);
+            for (Point3D_F64 p : ransacCloud)
+            {
+               fullCloudCopy.remove(p);
+            }
+
+            //ransacCloud = getSphere(1);
             enqueue(new Callable<Object>()
             {
                public Object call() throws Exception
@@ -885,6 +973,9 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
                   selectionNode.detachAllChildren();
                   displayView(ransacCloud, selectColor, selectPointSize, selectionNode);
                   calculatingBounds = false;
+
+                  allPointCloud.detachAllChildren();
+                  displayView(fullCloudCopy, defaultColor, defaultPointSize, allPointCloud);
 
                   return null;
                }
