@@ -35,11 +35,17 @@ public class StateEstimatorErrorCalculator
    private final DoubleYoVariable comZPositionError = new DoubleYoVariable("comZPositionError", registry);
    private final DoubleYoVariable comVelocityError = new DoubleYoVariable("comVelocityError", registry);
 
+   private final DoubleYoVariable pelvisXYPositionError = new DoubleYoVariable("pelvisXYPositionError", registry);
+   private final DoubleYoVariable pelvisZPositionError = new DoubleYoVariable("pelvisZPositionError", registry);
+   private final DoubleYoVariable pelvisLinearVelocityError = new DoubleYoVariable("pelvisLinearVelocityError", registry);
+
    private final YoFrameQuaternion perfectOrientation = new YoFrameQuaternion("perfectOrientation", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector perfectAngularVelocity = new YoFrameVector("perfectAngularVelocity", ReferenceFrame.getWorldFrame(), registry);
 
    private final YoFramePoint perfectCoMPosition = new YoFramePoint("perfectCoMPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector perfectCoMVelocity = new YoFrameVector("perfectCoMVelocity", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint perfectPelvisPosition = new YoFramePoint("perfectPelvisPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector perfectPelvisVelocity = new YoFrameVector("perfectPelvisVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final boolean assumePerfectIMU;
    private boolean useSimplePelvisPositionEstimator;
 
@@ -150,12 +156,53 @@ public class StateEstimatorErrorCalculator
 		   computeOrientationError();
 		   computeAngularVelocityError();
 	   }
-	   //TODO compute error even for simple pelvis state estimator
+
 	   if (!useSimplePelvisPositionEstimator)
 	   {
 	      computeCoMPositionError();
 	      computeCoMVelocityError();
 	   }
+	   else
+	   {
+         computePelvisPositionError();
+         computePelvisVelocityError();
+	   }
    }
 
+   private final FramePoint estimatedPelvisPosition = new FramePoint();
+   
+   private void computePelvisPositionError()
+   {
+      Vector3d actualPosition = new Vector3d();
+      Vector3d positionError = new Vector3d();
+
+      estimationJoint.getTranslationToWorld(actualPosition);
+      perfectPelvisPosition.set(actualPosition);
+      
+      orientationEstimator.getEstimatedPelvisPosition(estimatedPelvisPosition);
+      estimatedPelvisPosition.getPoint(positionError);
+      positionError.sub(actualPosition);
+
+      pelvisZPositionError.set(positionError.getZ());
+
+      positionError.setZ(0.0);
+      pelvisXYPositionError.set(positionError.length());
+   }
+
+   private final FrameVector estimatedPelvisVelocityFrameVector = new FrameVector();
+
+   private void computePelvisVelocityError()
+   {
+      Vector3d actualVelocity = new Vector3d();
+      Vector3d linearVelocityError = new Vector3d();
+
+      estimationJoint.getLinearVelocityInBody(actualVelocity, new Vector3d());
+      perfectCoMVelocity.set(actualVelocity);
+      
+      orientationEstimator.getEstimatedPelvisLinearVelocity(estimatedPelvisVelocityFrameVector);
+      estimatedPelvisVelocityFrameVector.getVector(linearVelocityError);
+      linearVelocityError.sub(actualVelocity);
+
+      pelvisLinearVelocityError.set(linearVelocityError.length());
+   }
 }
