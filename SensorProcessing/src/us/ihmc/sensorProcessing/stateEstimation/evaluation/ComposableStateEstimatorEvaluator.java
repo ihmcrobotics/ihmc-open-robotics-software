@@ -33,6 +33,7 @@ public class ComposableStateEstimatorEvaluator
 {
    private static final boolean SHOW_GUI = true;
    private final boolean assumePerfectIMU = false;
+   private final boolean useSimpleComEstimator = false;
    private final double simDT = 1e-3;
    private final int simTicksPerControlDT = 5;
    private final double controlDT = simDT * simTicksPerControlDT;
@@ -119,7 +120,7 @@ public class ComposableStateEstimatorEvaluator
             sensorFilterParameters, pointMeasurementNoiseParameters,
             gravitationalAcceleration,
             inverseDynamicsStructure, referenceFrameMap, rigidBodyToIndexMap, controlDT,
-            assumePerfectIMU, registry);
+            assumePerfectIMU, useSimpleComEstimator, null, registry);
 
       ControlFlowGraph controlFlowGraph = sensorAndEstimatorAssembler.getControlFlowGraph();
       StateEstimatorWithPorts orientationEstimator = sensorAndEstimatorAssembler.getEstimator();
@@ -133,7 +134,7 @@ public class ComposableStateEstimatorEvaluator
       ControlFlowGraphExecutorController controlFlowGraphExecutorController = new ControlFlowGraphExecutorController(controlFlowGraph);
       
       StateEstimatorErrorCalculatorController composableStateEstimatorEvaluatorController =
-         new StateEstimatorErrorCalculatorController(orientationEstimator, robot, estimationJoint, assumePerfectIMU);
+         new StateEstimatorErrorCalculatorController(orientationEstimator, robot, estimationJoint, assumePerfectIMU, useSimpleComEstimator);
       
       
       robot.setController(desiredCoMAccelerationsFromRobotStealerController, simTicksPerControlDT);

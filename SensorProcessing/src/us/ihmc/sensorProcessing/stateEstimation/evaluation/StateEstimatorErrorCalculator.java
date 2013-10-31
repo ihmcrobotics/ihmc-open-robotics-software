@@ -41,14 +41,17 @@ public class StateEstimatorErrorCalculator
    private final YoFramePoint perfectCoMPosition = new YoFramePoint("perfectCoMPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector perfectCoMVelocity = new YoFrameVector("perfectCoMVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final boolean assumePerfectIMU;
+   private boolean useSimplePelvisPositionEstimator;
+
 
    public StateEstimatorErrorCalculator(Robot robot, Joint estimationJoint, StateEstimator orientationEstimator, boolean assumePerfectIMU,
-           YoVariableRegistry parentRegistry)
+           boolean useSimplePelvisPositionEstimator, YoVariableRegistry parentRegistry)
    {
       this.robot = robot;
       this.estimationJoint = estimationJoint;
       this.orientationEstimator = orientationEstimator;
       this.assumePerfectIMU = assumePerfectIMU;
+      this.useSimplePelvisPositionEstimator = useSimplePelvisPositionEstimator;
       parentRegistry.addChild(registry);
    }
 
@@ -147,8 +150,12 @@ public class StateEstimatorErrorCalculator
 		   computeOrientationError();
 		   computeAngularVelocityError();
 	   }
-      computeCoMPositionError();
-      computeCoMVelocityError();
+	   //TODO compute error even for simple pelvis state estimator
+	   if (!useSimplePelvisPositionEstimator)
+	   {
+	      computeCoMPositionError();
+	      computeCoMVelocityError();
+	   }
    }
 
 }
