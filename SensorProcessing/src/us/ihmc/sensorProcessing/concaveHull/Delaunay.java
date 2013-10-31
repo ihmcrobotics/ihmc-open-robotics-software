@@ -14,6 +14,10 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.opensphere.geometry.algorithm.ConcaveHull;
+import org.opensphere.geometry.triangulation.model.Edge;
+import org.opensphere.geometry.triangulation.model.Triangle;
+import org.opensphere.geometry.triangulation.model.Vertex;
+
 
 //import bubo.ptcloud.alg.BoundPlaneRectangle;
 import com.vividsolutions.jts.geom.Coordinate;
@@ -26,7 +30,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 public class Delaunay {
     	
 	public static void main(String args[]) throws FileNotFoundException{
-		Scanner sc = new Scanner(new File("con.txt"));
+		Scanner sc = new Scanner(new File("plane.txt"));
 		
 		BoundConcavePolygon conversion2d = new BoundConcavePolygon();
 		Coordinate[] points = new Coordinate[3000];
@@ -52,70 +56,41 @@ public class Delaunay {
 			 System.out.println(points[i]);
 		 }
 		 
-//		Random rand = new Random();
-//		for(int i =0;i<100;i++){
-//			points[i]=new Coordinate(rand.nextFloat(),rand.nextFloat());
-//					
-//		}
+
 		GeometryCollection geometry = new GeometryFactory().createMultiPoint(points);
 		ConcaveHull c = new ConcaveHull(geometry, 0.7);
 		Geometry concaveHull = c.getConcaveHull();
-		System.out.println(concaveHull.toText());
-		System.out.println(concaveHull.getGeometryType());
-		HSSFWorkbook workbook = new HSSFWorkbook();
-		HSSFSheet sheet = workbook.createSheet("graph");
-		for(int i=0;i<100;i++){
-			Row row = sheet.createRow(i);
-			Cell cell1 = row.createCell(0);
-			cell1.setCellValue(points[i].x);
-			Cell cell2 = row.createCell(1);
-			cell2.setCellValue(points[i].y);
-				
+		System.out.println("the number of triangles "+c.triangles.size());
+		// testing the triangles
+		HashMap<Integer,Vertex> verts = new HashMap<Integer, Vertex>();
+		Vertex ov,ev;
+		for(Triangle triangle : c.triangles.values()){
+		    List<Edge> edges = triangle.getEdges();
+		    for(Edge e: edges){
+		       ov = e.getOV();
+		       verts.put(Integer.valueOf(ov.getId()),ov);
+		       ev = e.getEV();
+		       verts.put(Integer.valueOf(ev.getId()), ev);
+		    }
 		}
-		try
-        {
-            //Write the workbook in file system
-            FileOutputStream out = new FileOutputStream(new File("graph_data.xls"));
-            workbook.write(out);
-            out.close();
-            System.out.println("howtodoinjava_demo.xlsx written successfully on disk.");
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-		HSSFWorkbook workbook2 = new HSSFWorkbook();
-		HSSFSheet sheet2 = workbook2.createSheet("polygon");
-	    Coordinate[] boundary = concaveHull.getCoordinates();
+		System.out.println("the number of vertices "+verts.keySet().toArray());
+		
+//		System.out.println(concaveHull.toText());
+//		System.out.println(concaveHull.getGeometryType());
+		    Coordinate[] boundary = concaveHull.getCoordinates();
 	    
 	    //new code
 	    PrintStream out1 = new PrintStream("poly.txt");
 		for(int i=0;i<boundary.length;i++){
 			String str="";
-			Row row = sheet2.createRow(i);
-			Cell cell1 = row.createCell(0);
-			cell1.setCellValue(boundary[i].x);
-			Cell cell2 = row.createCell(1);
-			cell2.setCellValue(boundary[i].y);
-			Point3D_F64 p3= conversion2d.convertTo3D(boundary[i].x, boundary[i].y, conversion2d.center);
+				Point3D_F64 p3= conversion2d.convertTo3D(boundary[i].x, boundary[i].y, conversion2d.getCenter());
 			str=p3.x+" "+p3.y+" "+p3.z;
 			out1.println(str);
 			
 				
 		}
 		out1.close();
-		try
-        {
-            //Write the workbook in file system
-            FileOutputStream out = new FileOutputStream(new File("polygon_data.xls"));
-            workbook2.write(out);
-            out.close();
-            System.out.println("polygon_data.xls written successfully on disk.");
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+		
 	}
 
 	
