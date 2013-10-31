@@ -83,14 +83,14 @@ public class WalkOnTheEdgesManager
    private final WalkingControllerParameters walkingControllerParameters;
    private final WalkOnTheEdgesProviders walkOnTheEdgesProviders;
 
-   private final SideDependentList<DoubleYoVariable> angleFootsWithDesired = new SideDependentList<>(
+   private final SideDependentList<DoubleYoVariable> angleFootsWithDesired = new SideDependentList<DoubleYoVariable>(
          new DoubleYoVariable("angleFootWithDesiredLeft", registry), new DoubleYoVariable("angleFootWithDesiredRight", registry));
    private BooleanYoVariable enabledDoubleState = new BooleanYoVariable("enabledDoubleState", registry);
 
-   private final SideDependentList<YoFrameOrientation> footOrientationInWorld = new SideDependentList<>(new YoFrameOrientation("orientationLeftFoot",
+   private final SideDependentList<YoFrameOrientation> footOrientationInWorld = new SideDependentList<YoFrameOrientation>(new YoFrameOrientation("orientationLeftFoot",
          worldFrame, registry), new YoFrameOrientation("orientationRightFoot", worldFrame, registry));
    
-   private final SideDependentList<BooleanYoVariable> desiredAngleReached = new SideDependentList<>(new BooleanYoVariable("l_Desired_Pitch", registry), new BooleanYoVariable("r_Desired_Pitch", registry));
+   private final SideDependentList<BooleanYoVariable> desiredAngleReached = new SideDependentList<BooleanYoVariable>(new BooleanYoVariable("l_Desired_Pitch", registry), new BooleanYoVariable("r_Desired_Pitch", registry));
 
 
    public WalkOnTheEdgesManager(WalkingControllerParameters walkingControllerParameters, WalkOnTheEdgesProviders walkOnTheEdgesProviders,
