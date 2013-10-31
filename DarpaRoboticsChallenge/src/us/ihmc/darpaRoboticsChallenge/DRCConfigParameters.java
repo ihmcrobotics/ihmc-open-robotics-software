@@ -169,7 +169,8 @@ public class DRCConfigParameters
    public static final double POSITION_NOISE_STD = 0.01;
    public static final double QUATERNION_NOISE_STD = 0.01;
    public static final boolean ASSUME_PERFECT_IMU = true;    // assume perfect orientation, angular velocity and linear acceleration output from IMU
-
+   public static final boolean USE_SIMPLE_PELVIS_POSITION_ESTIMATOR = false;    // estimate pelvis position and velocity using the robot kinematics and IMU (no Kalman filtering)
+   
    // LIDAR:
    public static final boolean USE_ROS_FOR_MULTISENSE_TRANSFORMS = RUNNING_ON_REAL_ROBOT;
    public static final boolean USING_REAL_HEAD = RUNNING_ON_REAL_ROBOT;
