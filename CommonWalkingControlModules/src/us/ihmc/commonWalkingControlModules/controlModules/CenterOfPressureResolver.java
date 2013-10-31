@@ -38,8 +38,8 @@ public class CenterOfPressureResolver
             
       double fz = forceInPlaneFrame.getZ();
       
-      double vector12x = 0.0;
-      double vector12y = 0.0;
+      double vector12x = Double.NaN;
+      double vector12y = Double.NaN;
       
       if (Math.abs(fz) > 1e-7)
       {
