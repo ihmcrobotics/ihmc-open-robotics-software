@@ -9,7 +9,6 @@ import java.nio.channels.FileChannel;
 
 import javax.swing.Action;
 import javax.swing.ActionMap;
-import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JTable;
 

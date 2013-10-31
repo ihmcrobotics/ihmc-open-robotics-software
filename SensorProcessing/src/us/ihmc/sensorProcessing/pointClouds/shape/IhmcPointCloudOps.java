@@ -22,12 +22,17 @@ public class IhmcPointCloudOps
     * @param points (Input) List of points on the plane
     * @param output (Output) Converted normal.
     */
-   public static void convert( PlaneGeneral3D_F64 original , List<Point3D_F64> points , PlaneNormal3D_F64 output ) {
+   public static PlaneNormal3D_F64 convert( PlaneGeneral3D_F64 original , List<Point3D_F64> points , PlaneNormal3D_F64 output ) {
+      if (output == null)
+         output = new PlaneNormal3D_F64();
+      
       UtilPoint3D_F64.mean(points,output.p);
       ClosestPoint3D_F64.closestPoint(original,output.p,output.p);
 
       output.n.set( original.A, original.B, original.C );
       output.n.normalize();
+      
+      return output;
    }
 
    /**

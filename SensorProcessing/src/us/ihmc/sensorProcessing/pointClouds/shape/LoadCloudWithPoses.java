@@ -50,13 +50,13 @@ public class LoadCloudWithPoses extends SimpleApplication
    @Override
    public void simpleInitApp()
    {
-      List<Point3D_F64>[] clouds = loadPointCloud((int)(40 * 1.5), 1, false);
+      List<Point3D_F64>[] clouds = loadPointCloud((int)(40 * 20), 1, true);
 
       if (true)
       {
          try
          {
-            FileWriter fw = new FileWriter("box_1_5s.txt");
+            FileWriter fw = new FileWriter("box_10s_h.txt");
             for (Point3D_F64 p : clouds[0])
             {
                fw.write(p.x + " " + p.y + " " + p.z + "\n");
@@ -174,7 +174,7 @@ public class LoadCloudWithPoses extends SimpleApplication
 
             for (int j = 0; j < scan.size(); j++)
             {
-               if (scan.getRange(j) < 30.0)
+               if (.5 < scan.getRange(j) && scan.getRange(j) < 30.0)
                {
                   Point3d p = scan.getPoint(j);
                   if (!half || j > scan.size() / 2)
