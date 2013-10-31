@@ -467,7 +467,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                                                             stopWalkingStateTransitionActions);
          transferState.addStateTransition(toDoubleSupport);
          StateTransition<WalkingState> toSingleSupport = new StateTransition<WalkingState>(singleSupportStateEnums.get(robotSide),
-                                                            new DoneWithTransferCondition());
+                                                            new DoneWithTransferCondition(robotSide));
          transferState.addStateTransition(toSingleSupport);
          stateMachine.addState(transferState);
 
@@ -603,7 +603,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
 
          ContactablePlaneBody transferFoot = feet.get(transferToSide);
-
          if ((footEndEffectorControlModules.get(transferFoot) != null) && walkOnTheEdgesManager.isEdgeTouchDownDone(leadingLegSide))
          {
             setFlatFootContactState(transferFoot);
@@ -1165,6 +1164,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    public class DoneWithTransferCondition implements StateTransitionCondition
    {
+      RobotSide robotSide;
+      public DoneWithTransferCondition(RobotSide robotSide)
+      {
+         this.robotSide = robotSide;
+      }
       public boolean checkCondition()
       {
          if (walkingControllerParameters.checkOrbitalEnergyCondition())
@@ -1215,12 +1219,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       public DoneWithSingleSupportCondition(EndEffectorControlModule endEffectorControlModule)
       {
       }
-
+      
       public boolean checkCondition()
       {
          RobotSide swingSide = getSupportLeg().getOppositeSide();
          hasMinimumTimePassed.set(hasMinimumTimePassed());
-         
+         if(!walkOnTheEdgesManager.isEdgeTouchDownDone(swingSide)) return false;   
          if (!hasICPPlannerFinished.getBooleanValue())
          {
             hasICPPlannerFinished.set(instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue()));
