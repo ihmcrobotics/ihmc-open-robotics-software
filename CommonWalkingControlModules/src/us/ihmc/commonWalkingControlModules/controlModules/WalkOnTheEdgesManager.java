@@ -91,7 +91,7 @@ public class WalkOnTheEdgesManager
          worldFrame, registry), new YoFrameOrientation("orientationRightFoot", worldFrame, registry));
    
    private final SideDependentList<BooleanYoVariable> desiredAngleReached = new SideDependentList<BooleanYoVariable>(new BooleanYoVariable("l_Desired_Pitch", registry), new BooleanYoVariable("r_Desired_Pitch", registry));
-
+   private Footstep desiredFootstep;
 
    public WalkOnTheEdgesManager(WalkingControllerParameters walkingControllerParameters, WalkOnTheEdgesProviders walkOnTheEdgesProviders,
          SideDependentList<? extends ContactablePlaneBody> feet, Map<ContactablePlaneBody, EndEffectorControlModule> footEndEffectorControlModules,
@@ -107,6 +107,7 @@ public class WalkOnTheEdgesManager
       
       this.feet = feet;
       this.footEndEffectorControlModules = footEndEffectorControlModules;
+      desiredFootstep = null;
 
       onToesTriangleAreaLimit.set(0.01);
 
@@ -311,6 +312,8 @@ public class WalkOnTheEdgesManager
       
       if (doHeelTouchdown.getBooleanValue())
          walkOnTheEdgesProviders.setHeelTouchdownInitialPitch();
+      
+      desiredFootstep = new Footstep(nextFootstep);
    }
 
    public Footstep createFootstepForEdgeTouchdown(Footstep footstepToModify)
@@ -503,16 +506,21 @@ public class WalkOnTheEdgesManager
       return new FrameConvexPolygon2d(allPoints);
    }
 
-   public boolean isPitchReachedDesired(RobotSide robotSide, Footstep savedFootStep)
+   public boolean isEdgeTouchDownDone(RobotSide robotSide)
    {
-      if (savedFootStep != null)
+      if (!doToeTouchdownIfPossible.getBooleanValue() && !doHeelTouchdownIfPossible.getBooleanValue())
+      {
+         return false;
+      }
+      
+      if (desiredFootstep != null)
       {
          desiredAngleReached.get(robotSide).set(false);
          
          FrameOrientation footFrameOrientation = new FrameOrientation(feet.get(robotSide).getBodyFrame());
          footFrameOrientation.changeFrame(worldFrame);
          footOrientationInWorld.get(robotSide).set(footFrameOrientation);
-         FrameOrientation desiredOrientation = new FrameOrientation(savedFootStep.getPoseReferenceFrame());
+         FrameOrientation desiredOrientation = new FrameOrientation(desiredFootstep.getPoseReferenceFrame());
          desiredOrientation.changeFrame(worldFrame);
          
 //         double yawDifference = footFrameOrientation.getYawPitchRoll()[0] - desiredOrientation.getYawPitchRoll()[0];
@@ -523,7 +531,7 @@ public class WalkOnTheEdgesManager
          
          if(Math.abs(pitchDifference) < 0.1 && Math.abs(rollDifference) < 0.1)
          {
-            desiredAngleReached.get(robotSide).set(true); // todo: delete only used to check in SCS
+            desiredAngleReached.get(robotSide).set(true);
             enabledDoubleState.set(true);
          }else
          {
