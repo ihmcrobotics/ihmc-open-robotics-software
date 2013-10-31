@@ -604,8 +604,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          ContactablePlaneBody transferFoot = feet.get(transferToSide);
 
-         if ((footEndEffectorControlModules.get(transferFoot) != null) && (footEndEffectorControlModules.get(transferFoot).touchdownOnEdge())
-                 && footSwitches.get(transferToSide).hasFootHitGround())
+         if ((footEndEffectorControlModules.get(transferFoot) != null) && walkOnTheEdgesManager.isEdgeTouchDownDone(leadingLegSide))
          {
             setFlatFootContactState(transferFoot);
          }
