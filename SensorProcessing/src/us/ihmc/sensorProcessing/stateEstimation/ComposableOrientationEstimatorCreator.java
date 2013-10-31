@@ -289,5 +289,17 @@ public class ComposableOrientationEstimatorCreator
          return controlFlowGraph;
       }
 
+      @Override
+      public void getEstimatedPelvisPosition(FramePoint estimatedPelvisPositionToPack)
+      {
+         throw new RuntimeException("No pelvis position estimated with this state estimator (" + getClass().getSimpleName() + ").");
+      }
+
+      @Override
+      public void getEstimatedPelvisLinearVelocity(FrameVector estimatedPelvisLinearVelocityToPack)
+      {
+         throw new RuntimeException("No pelvis velocity estimated with this state estimator (" + getClass().getSimpleName() + ").");
+      }
+
    }
 }

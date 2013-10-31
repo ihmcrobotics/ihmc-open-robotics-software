@@ -24,6 +24,10 @@ public interface StateEstimator
 
    public abstract void setEstimatedCoMVelocity(FrameVector estimatedCoMVelocity);
 
+   public abstract void getEstimatedPelvisPosition(FramePoint estimatedPelvisPositionToPack);
+
+   public abstract void getEstimatedPelvisLinearVelocity(FrameVector estimatedPelvisLinearVelocityToPack);
+
    public abstract DenseMatrix64F getCovariance();
 
    public abstract DenseMatrix64F getState();
