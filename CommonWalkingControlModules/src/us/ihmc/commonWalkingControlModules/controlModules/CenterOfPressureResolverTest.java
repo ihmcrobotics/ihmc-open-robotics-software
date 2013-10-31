@@ -92,7 +92,7 @@ public class CenterOfPressureResolverTest
       Vector3d centerOfMassForce = new Vector3d(1.0, 0.0, 0.0);
       Vector3d centerOfMassTorque = new Vector3d(0.1, 0.2, 0.3);
       
-      Vector3d expectedCenterOfPressure = new Vector3d(0.0, 0.0, 0.0);
+      Vector3d expectedCenterOfPressure = new Vector3d(Double.NaN, Double.NaN,Double.NaN);
       
       double expectedNormalTorque = 0.3;
       
@@ -161,7 +161,11 @@ public class CenterOfPressureResolverTest
       double normalTorque = centerOfPressureAndNormalTorque.second();
       
       FramePoint expectedCenterOfPressureFramePoint = new FramePoint(worldFrame, expectedCenterOfPressure);
-      assertTrue("expectedCenterOfPressureFramePoint = " + expectedCenterOfPressureFramePoint + ", centerOfPressure = " + centerOfPressure, expectedCenterOfPressureFramePoint.epsilonEquals(centerOfPressure, 1e-7));
+      
+      if (Double.isNaN(expectedCenterOfPressureFramePoint.getX()) && Double.isNaN(expectedCenterOfPressureFramePoint.getY()) && Double.isNaN(expectedCenterOfPressureFramePoint.getZ()))
+         assertTrue(Double.isNaN(centerOfPressure.getX()) && Double.isNaN(centerOfPressure.getY()) && Double.isNaN(centerOfPressure.getZ()));
+      else
+         assertTrue("expectedCenterOfPressureFramePoint = " + expectedCenterOfPressureFramePoint + ", centerOfPressure = " + centerOfPressure, expectedCenterOfPressureFramePoint.epsilonEquals(centerOfPressure, 1e-7));
       
       assertEquals(expectedNormalTorque, normalTorque, 1e-7);
    }
