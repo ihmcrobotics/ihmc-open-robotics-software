@@ -162,7 +162,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
    {
       for (OneDoFJoint neckJoint : neckJoints)
       {
-         momentumBasedController.doPDControl(neckJoint, 100.0, 20.0, 0.0, 0.0, 10.0);
+         momentumBasedController.doPDControl(neckJoint, 100.0, 20.0, 0.0, 0.0, 10.0, 1000.0);
       }
    }
 
