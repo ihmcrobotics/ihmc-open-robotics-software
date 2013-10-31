@@ -117,6 +117,13 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
          SimulatedOneDoFJointPositionSensor positionSensor = new SimulatedOneDoFJointPositionSensor(oneDegreeOfFreedomJoint.getName(), oneDegreeOfFreedomJoint);
          SimulatedOneDoFJointVelocitySensor velocitySensor = new SimulatedOneDoFJointVelocitySensor(oneDegreeOfFreedomJoint.getName(), oneDegreeOfFreedomJoint);
 
+//         if (oneDegreeOfFreedomJoint.getName().contains("bky"))
+//         {
+//            SignalCorruptor<MutableDouble> backVelocityLatencyCorruptor = new LatencyDoubleCorruptor("backLatency", 100, registry);
+//            
+//            velocitySensor.addSignalCorruptor(backVelocityLatencyCorruptor );
+//         }
+         
          if (sensorNoiseParameters != null)
          {
             GaussianDoubleCorruptor jointPositionCorruptor = new GaussianDoubleCorruptor(seed, "posNoise" + oneDegreeOfFreedomJoint.getName(), registry);

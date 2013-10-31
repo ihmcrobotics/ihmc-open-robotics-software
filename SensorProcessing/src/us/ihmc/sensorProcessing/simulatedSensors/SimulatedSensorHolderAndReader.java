@@ -17,9 +17,12 @@ import us.ihmc.utilities.maps.ObjectObjectMap;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
+import com.yobotics.simulationconstructionset.util.math.filter.FilteredVelocityYoVariable;
 
 public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
 {
@@ -27,6 +30,8 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
    
    private final YoVariableRegistry registry = new YoVariableRegistry("DRCPerfectSensorReader");
    private final IntegerYoVariable step = new IntegerYoVariable("step", registry);
+   
+   private final double estimatorDT;
    private final long estimateDTinNs;
    
    private ControllerDispatcher controllerDispatcher;
@@ -61,10 +66,21 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
    private Future<?> dispatcherFuture;
 
    
+   private final BooleanYoVariable useFiniteDifferencesForVelocities;
+   private final DoubleYoVariable alphaFiniteDifferences;
+   private ObjectObjectMap<OneDoFJoint, FilteredVelocityYoVariable> finiteDifferenceVelocities;
+   
    public SimulatedSensorHolderAndReader(double estimateDT, YoVariableRegistry parentRegistry)
    {
+      this.estimatorDT = estimateDT;
       this.estimateDTinNs = TimeTools.secondsToNanoSeconds(estimateDT);
       step.set(29831);
+      
+      useFiniteDifferencesForVelocities = new BooleanYoVariable("useFiniteDifferencesForVelocities", registry);
+      alphaFiniteDifferences = new DoubleYoVariable("alphaFiniteDifferences", registry);
+      
+      alphaFiniteDifferences.set(0.8);
+      useFiniteDifferencesForVelocities.set(false);
       
       if(parentRegistry != null)
       {
@@ -80,6 +96,12 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
    public void addJointVelocitySensorPort(OneDoFJoint oneDoFJoint, SimulatedOneDoFJointVelocitySensor jointVelocitySensor)
    {
       jointVelocitySensors.add(oneDoFJoint, jointVelocitySensor);
+      
+      if (finiteDifferenceVelocities == null)
+         finiteDifferenceVelocities = new ObjectObjectMap<OneDoFJoint, FilteredVelocityYoVariable>();
+      
+      FilteredVelocityYoVariable finiteDifferenceVelocity = new FilteredVelocityYoVariable("fd_qd_" + oneDoFJoint.getName(), "", alphaFiniteDifferences, estimatorDT, registry);
+      finiteDifferenceVelocities.add(oneDoFJoint, finiteDifferenceVelocity);
    }
 
    public void addOrientationSensorPort(IMUDefinition imuDefinition, SimulatedOrientationSensorFromRobot orientationSensor)
@@ -142,17 +164,29 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
          simulatedOneDoFJointPositionSensor.waitUntilComputationIsDone();
          Double value = simulatedOneDoFJointPositionSensor.getJointPositionOutputPort().getData();
          jointAndIMUSensorDataSource.setJointPositionSensorValue(jointPositionSensors.getFirst(i), value);
+         
+         FilteredVelocityYoVariable finiteDifferenceVelocity = finiteDifferenceVelocities.getSecond(i);
+         finiteDifferenceVelocity.update(value);
+         
+         if (useFiniteDifferencesForVelocities.getBooleanValue())
+         {
+            jointAndIMUSensorDataSource.setJointVelocitySensorValue(jointVelocitySensors.getFirst(i), finiteDifferenceVelocity.getDoubleValue());
+         }
       }
 
-      for(int i = 0; i < jointVelocitySensors.getLength(); i++)
+      
+      if (!useFiniteDifferencesForVelocities.getBooleanValue())
       {
-         SimulatedOneDoFJointVelocitySensor simulatedOneDoFJointVelocitySensor = jointVelocitySensors.getSecond(i);
-         simulatedOneDoFJointVelocitySensor.startComputation();
-         simulatedOneDoFJointVelocitySensor.waitUntilComputationIsDone();
-         Double value = simulatedOneDoFJointVelocitySensor.getJointVelocityOutputPort().getData();
-         jointAndIMUSensorDataSource.setJointVelocitySensorValue(jointVelocitySensors.getFirst(i), value);
+         for(int i = 0; i < jointVelocitySensors.getLength(); i++)
+         {
+            SimulatedOneDoFJointVelocitySensor simulatedOneDoFJointVelocitySensor = jointVelocitySensors.getSecond(i);
+            simulatedOneDoFJointVelocitySensor.startComputation();
+            simulatedOneDoFJointVelocitySensor.waitUntilComputationIsDone();
+            Double value = simulatedOneDoFJointVelocitySensor.getJointVelocityOutputPort().getData();
+            jointAndIMUSensorDataSource.setJointVelocitySensorValue(jointVelocitySensors.getFirst(i), value);
+         }
       }
-
+      
       for(int i = 0; i < orientationSensors.getLength(); i++)
       {
          SimulatedOrientationSensorFromRobot orientationSensor = orientationSensors.getSecond(i);
