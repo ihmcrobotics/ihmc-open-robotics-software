@@ -121,6 +121,8 @@ public class DRCConfigParameters
    public static final String NET_PROC_MACHINE_IP_ADDRESS = DRCLocalConfigParameters.NET_PROC_MACHINE_IP_ADDRESS;    // CONSTELLATION_FIELD_COMPUTER_1_VPN_IP; //CONSTELLATION_FIELD_COMPUTER_1_VPN_IP;    // SCS_MACHINE_IP_ADDRESS;
 
    public static final String OPERATOR_INTERFACE_IP_ADDRESS = DRCLocalConfigParameters.OPERATOR_INTERFACE_IP_ADDRESS;
+   
+   public static final String REMOTE_ATLAS_VISUALIZER_HOST=DRCLocalConfigParameters.REMOTE_ATLAS_VISUALIZER_HOST;
 
    public static final String ROS_MASTER_URI = "http://" + GAZEBO_HOST + ":11311";
    public static final int CONTROLLER_TO_UI_TCP_PORT = 4893;

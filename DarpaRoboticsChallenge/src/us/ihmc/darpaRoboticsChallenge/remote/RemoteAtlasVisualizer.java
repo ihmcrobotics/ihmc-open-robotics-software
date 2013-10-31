@@ -4,6 +4,7 @@ import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.atlas.visualization.SliderBoardControllerListener;
 import us.ihmc.atlas.visualization.SliderBoardFactory;
 import us.ihmc.atlas.visualization.WalkControllerSliderBoard;
+import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -16,7 +17,7 @@ import com.martiansoftware.jsap.JSAPResult;
 
 public class RemoteAtlasVisualizer
 {
-   public static final String defaultHost = "10.66.171.20";//192.168.6.202";
+   public static final String defaultHost = DRCConfigParameters.REMOTE_ATLAS_VISUALIZER_HOST;//"localhost";//"10.66.171.20";//192.168.6.202";
    public static final int defaultPort = 5555;
    
    public RemoteAtlasVisualizer(String host, int port, int bufferSize)
