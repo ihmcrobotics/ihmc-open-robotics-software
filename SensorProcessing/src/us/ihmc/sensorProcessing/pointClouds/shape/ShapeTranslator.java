@@ -27,6 +27,7 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
 import com.jme3.material.RenderState.BlendMode;
+import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
@@ -132,87 +133,97 @@ public class ShapeTranslator
             System.out.println("NOT RIGHT NUMBER OF POINTS IN PLANE");
       }
    }
-   
-   public void createPolygon(PlaneGeneral3D_F64 plane ,List<Point3D_F64> points, ColorRGBA color, Node nodeToAddTo){
 
-	   // if the shape is a plane
-//      if (s.type.equals(CloudShapeTypes.PLANE))
-//	      {
-	         // get the concave polygon around and get the resulting triangulation
-           BoundConcavePolygon polygon = new BoundConcavePolygon();
-           ConcaveHull prep_c = prepareConcaveHull(plane,points,polygon);
-           // draw the polygon outer edges
-           List<Point3D_F64> points3d = getConcaveHull(prep_c,polygon);
-           // get the triangles from the concave hull  
-           System.out.println(prep_c.triangles.size());
-           nodeToAddTo.attachChild(generateCustomPolygon(prep_c.triangles.values(), polygon, color));
-           
-			
-			
-			 for(int i = 1;i<points3d.size();i++)
-		      {
-		    	  Vector3f start = new Vector3f((float)points3d.get(i-1).x, (float)points3d.get(i-1).y, (float)points3d.get(i-1).z);
-		    	  Vector3f end = new Vector3f((float)points3d.get(i).x, (float)points3d.get(i).y, (float)points3d.get(i).z);
-		    	  nodeToAddTo.attachChild(drawLine(start, end));
-		      }
-//	      }
+   public void createPolygon(PlaneGeneral3D_F64 plane, List<Point3D_F64> points, ColorRGBA color, Node nodeToAddTo)
+   {
+      // if the shape is a plane
+//    if (s.type.equals(CloudShapeTypes.PLANE))
+//          {
+      // get the concave polygon around and get the resulting triangulation
+      BoundConcavePolygon polygon = new BoundConcavePolygon();
+      ConcaveHull prep_c = prepareConcaveHull(plane, points, polygon);
+
+      // draw the polygon outer edges
+      List<Point3D_F64> points3d = getConcaveHull(prep_c, polygon);
+
+      // get the triangles from the concave hull
+      System.out.println(prep_c.triangles.size());
+      nodeToAddTo.attachChild(generateCustomPolygon(prep_c.triangles.values(), polygon, color));
+
+
+
+      for (int i = 1; i < points3d.size(); i++)
+      {
+         Vector3f start = new Vector3f((float) points3d.get(i - 1).x, (float) points3d.get(i - 1).y, (float) points3d.get(i - 1).z);
+         Vector3f end = new Vector3f((float) points3d.get(i).x, (float) points3d.get(i).y, (float) points3d.get(i).z);
+         nodeToAddTo.attachChild(drawLine(start, end));
+      }
+
+//    }
    }
-      
-   // prepares to build the concave hull    
-   public ConcaveHull prepareConcaveHull(PlaneGeneral3D_F64 plane ,List<Point3D_F64> points3d, BoundConcavePolygon polygon){
-   
+
+   // prepares to build the concave hull
+   public ConcaveHull prepareConcaveHull(PlaneGeneral3D_F64 plane, List<Point3D_F64> points3d, BoundConcavePolygon polygon)
+   {
       Coordinate[] points = new Coordinate[7000];
       polygon.process(plane, points3d);
-      
-      List<Point2D_F64> points2d =polygon.getPoints2D();
-   
-    System.out.println(points2d.size()+"total 2d points");
-    for(int i=0;i<points2d.size();i++){
-       Point2D_F64 po=points2d.get(i);
-       points[i]= new Coordinate(po.x,po.y);
-       //System.out.println(points[i]);
-    }
-    
-    GeometryCollection geometry = new GeometryFactory().createMultiPoint(points);
-    ConcaveHull c = new ConcaveHull(geometry, 0.7);
-   return c;
-   
+
+      List<Point2D_F64> points2d = polygon.getPoints2D();
+
+      System.out.println(points2d.size() + "total 2d points");
+
+      for (int i = 0; i < points2d.size(); i++)
+      {
+         Point2D_F64 po = points2d.get(i);
+         points[i] = new Coordinate(po.x, po.y);
+
+         // System.out.println(points[i]);
+      }
+
+      GeometryCollection geometry = new GeometryFactory().createMultiPoint(points);
+      ConcaveHull c = new ConcaveHull(geometry, 0.7);
+
+      return c;
+
    }
-   
+
    // mathod to get the concave hull from the concave hull object
-   public List<Point3D_F64> getConcaveHull(ConcaveHull c,BoundConcavePolygon polygon){
+   public List<Point3D_F64> getConcaveHull(ConcaveHull c, BoundConcavePolygon polygon)
+   {
       List<Point3D_F64> points3d = new ArrayList<Point3D_F64>();
-   
+
       com.vividsolutions.jts.geom.Geometry concaveHull = c.getConcaveHull();
       System.out.println(concaveHull.toText());
       Coordinate[] boundary = concaveHull.getCoordinates();
-      
-      for(int i=0;i<boundary.length;i++){
-                    
-           points3d.add(polygon.convertTo3D(boundary[i].x, boundary[i].y, polygon.getCenter()));
-                    
-        }
+
+      for (int i = 0; i < boundary.length; i++)
+      {
+         points3d.add(polygon.convertTo3D(boundary[i].x, boundary[i].y, polygon.getCenter()));
+
+      }
+
       return points3d;
    }
-   
-   
+
+
    public Node drawLine(Vector3f start, Vector3f end)
    {
-	   Node lineNode = new Node();
-	   Line line = new Line(start,end);
-	   line.setLineWidth(5);
-	   Geometry lineGeometry = new Geometry("line", line);
-	   
-	   Material objectMaterial = new Material(ui.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-       objectMaterial.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
-       objectMaterial.setColor("Color", ColorRGBA.White);
-       lineGeometry.setMaterial(objectMaterial);
-       lineGeometry.setQueueBucket(Bucket.Opaque);
-       
-       lineNode.attachChild(lineGeometry);
-       return lineNode;
+      Node lineNode = new Node();
+      Line line = new Line(start, end);
+      line.setLineWidth(5);
+      Geometry lineGeometry = new Geometry("line", line);
+
+      Material objectMaterial = new Material(ui.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+      objectMaterial.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
+      objectMaterial.setColor("Color", ColorRGBA.White);
+      lineGeometry.setMaterial(objectMaterial);
+      lineGeometry.setQueueBucket(Bucket.Opaque);
+
+      lineNode.attachChild(lineGeometry);
+
+      return lineNode;
    }
-   
+
 
    public Node generatePlane(Point3D_F64 p1, Point3D_F64 p2, Point3D_F64 p3, Point3D_F64 p4, ColorRGBA color)
    {
@@ -232,7 +243,7 @@ public class ShapeTranslator
 
          int[] indexes =
          {
-            2, 0, 1, 1, 3, 2, 1,3, 4
+            2, 0, 1, 1, 3, 2, 1, 3, 4
          };
 
          Mesh plane1 = new Mesh();
@@ -297,53 +308,60 @@ public class ShapeTranslator
       return plane;
 
    }
-   
+
    // generate a custom polygon mesh
-   
+
    public Node generateCustomPolygon(Collection<Triangle> triangles, BoundConcavePolygon polygon, ColorRGBA color)
    {
       Node plane = new Node();
       {
-         HashMap<Integer,Point3D_F64> verts = new HashMap<Integer, Point3D_F64>();
-         HashMap<Integer,Vertex> triVertex = new HashMap<Integer, Vertex>();
-         int[] indexes = new int[triangles.size()*3];    
-         int index=0;
-         Vertex ov,ev;
-         for(Triangle triangle : triangles){
-             List<Edge> edges = triangle.getEdges();
-             for(Edge e: edges){
-                ov = e.getOV();
-                verts.put(Integer.valueOf(ov.getId()),polygon.convertTo3D(ov.getCoordinate().x, ov.getCoordinate().y, polygon.getCenter()));
-                triVertex.put(Integer.valueOf(ov.getId()), ov);
-                ev = e.getEV();
-                verts.put(Integer.valueOf(ev.getId()), polygon.convertTo3D(ov.getCoordinate().x, ov.getCoordinate().y, polygon.getCenter()));
-                triVertex.put(Integer.valueOf(ev.getId()), ev);
-             
-             }
-             for(Integer i : triVertex.keySet()){
-                indexes[index++]=i.intValue();
-                
-             }
-             triVertex.clear();
-             
+         HashMap<Integer, Point3D_F64> verts = new HashMap<Integer, Point3D_F64>();
+         HashMap<Integer, Vertex> triVertex = new HashMap<Integer, Vertex>();
+         int[] indexes = new int[triangles.size() * 3];
+         int index = 0;
+         Vertex ov, ev;
+         for (Triangle triangle : triangles)
+         {
+            List<Edge> edges = triangle.getEdges();
+            for (Edge e : edges)
+            {
+               ov = e.getOV();
+               verts.put(Integer.valueOf(ov.getId()), polygon.convertTo3D(ov.getCoordinate().x, ov.getCoordinate().y, polygon.getCenter()));
+               triVertex.put(Integer.valueOf(ov.getId()), ov);
+               ev = e.getEV();
+               verts.put(Integer.valueOf(ev.getId()), polygon.convertTo3D(ov.getCoordinate().x, ov.getCoordinate().y, polygon.getCenter()));
+               triVertex.put(Integer.valueOf(ev.getId()), ev);
+
+            }
+
+            for (Integer i : triVertex.keySet())
+            {
+               indexes[index++] = i.intValue();
+
+            }
+
+            triVertex.clear();
+
          }
+
          List<Point3D_F64> points = new ArrayList<Point3D_F64>();
-            
+
          Vector3f[] vertices = new Vector3f[verts.size()];
-         for(Integer key : verts.keySet()){
+         for (Integer key : verts.keySet())
+         {
             Point3D_F64 p = verts.get(key);
             vertices[key.intValue()] = new Vector3f(new Float(p.x), new Float(p.y), new Float(p.z));
-            
+
          }
-        
+
          Vector2f[] texCoord = new Vector2f[4];
 
          texCoord[0] = new Vector2f(0, 0);
          texCoord[1] = new Vector2f(1, 0);
          texCoord[2] = new Vector2f(0, 1);
          texCoord[3] = new Vector2f(1, 1);
-         
-        
+
+
 
          Mesh plane1 = new Mesh();
 
@@ -356,6 +374,7 @@ public class ShapeTranslator
          Material objectMaterial = new Material(ui.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
          objectMaterial.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
          objectMaterial.setColor("Color", color);
+         objectMaterial.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
          geo.setMaterial(objectMaterial);
          geo.setQueueBucket(Bucket.Transparent);
          geo.setShadowMode(ShadowMode.CastAndReceive);
