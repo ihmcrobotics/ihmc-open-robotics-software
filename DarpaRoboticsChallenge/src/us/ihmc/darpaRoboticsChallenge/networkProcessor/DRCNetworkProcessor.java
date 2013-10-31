@@ -53,7 +53,7 @@ public class DRCNetworkProcessor
    private final DRCRobotJointMap jointMap;
    private final RobotBoundingBoxes robotBoundingBoxes;
 
-   private static String scsMachineIPAddress = DRCConfigParameters.SCS_MACHINE_IP_ADDRESS;
+   private static String scsMachineIPAddress = DRCConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
    private static String rosMasterURI = DRCConfigParameters.ROS_MASTER_URI;
 
    /*

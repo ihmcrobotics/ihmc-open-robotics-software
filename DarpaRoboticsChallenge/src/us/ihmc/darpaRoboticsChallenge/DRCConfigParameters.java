@@ -19,6 +19,7 @@ public class DRCConfigParameters
    public static final boolean ALLOW_LAG_SIMULATION = true;
    public static final boolean ENABLE_LAG_SIMULATION_ON_START = false;
 
+
    static
    {
       if (ALLOW_LAG_SIMULATION)
@@ -101,28 +102,13 @@ public class DRCConfigParameters
    public static final String LEFT_IROBOT_HAND_IP = "192.168.40.38";
    public static final String RIGHT_IROBOT_HAND_IP = "192.168.40.32";
 
-   public static final String LOG_HOST = "192.168.6.204";
-   public static final String GAZEBO_HOST = DRCLocalConfigParameters.GAZEBO_HOST;    // CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP; //CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP;
+   public static final String LOG_HOST_IP_ADDRESS = DRCLocalConfigParameters.LOG_HOST_IP_ADDRESS;
+   public static final String ROS_HOST_IP_ADDRESS = DRCLocalConfigParameters.ROS_HOST_IP_ADDRESS;
 
-   public static final String SCS_MACHINE_IP_ADDRESS;
-
-   static
-   {
-      if (RUNNING_ON_REAL_ROBOT)
-      {
-         SCS_MACHINE_IP_ADDRESS = DRCLocalConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
-      }
-      else
-      {
-         SCS_MACHINE_IP_ADDRESS = LOCALHOST;    // CONSTELLATION_FIELD_COMPUTER_2_VPN_IP; //CONSTELLATION_FIELD_COMPUTER_2_VPN_IP;    // CLOUD_MONSTER_IP;
-      }
-   }
-
-   public static final String NET_PROC_MACHINE_IP_ADDRESS = DRCLocalConfigParameters.NET_PROC_MACHINE_IP_ADDRESS;    // CONSTELLATION_FIELD_COMPUTER_1_VPN_IP; //CONSTELLATION_FIELD_COMPUTER_1_VPN_IP;    // SCS_MACHINE_IP_ADDRESS;
+   public static final String ROBOT_CONTROLLER_IP_ADDRESS = DRCLocalConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
+   public static final String NET_PROC_MACHINE_IP_ADDRESS = DRCLocalConfigParameters.NET_PROC_MACHINE_IP_ADDRESS;
    
-   public static final String REMOTE_ATLAS_VISUALIZER_HOST=DRCLocalConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
-
-   public static final String ROS_MASTER_URI = "http://" + GAZEBO_HOST + ":11311";
+   public static final String ROS_MASTER_URI = "http://" + ROS_HOST_IP_ADDRESS + ":11311";
    public static final int CONTROLLER_TO_UI_TCP_PORT = 4893;
 
    public static final int NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT = 4895;
@@ -169,8 +155,8 @@ public class DRCConfigParameters
    public static final double POSITION_NOISE_STD = 0.01;
    public static final double QUATERNION_NOISE_STD = 0.01;
    public static final boolean ASSUME_PERFECT_IMU = true;    // assume perfect orientation, angular velocity and linear acceleration output from IMU
-   public static final boolean USE_SIMPLE_PELVIS_POSITION_ESTIMATOR = false;    // estimate pelvis position and velocity using the robot kinematics and IMU (no Kalman filtering)
-   
+   public static boolean USE_SIMPLE_PELVIS_POSITION_ESTIMATOR = false;
+
    // LIDAR:
    public static final boolean USE_ROS_FOR_MULTISENSE_TRANSFORMS = RUNNING_ON_REAL_ROBOT;
    public static final boolean USING_REAL_HEAD = RUNNING_ON_REAL_ROBOT;
@@ -220,10 +206,7 @@ public class DRCConfigParameters
    public static final float LIDAR_SCAN_TIME = 0.0f;
    public static final double LIDAR_NOISE_LEVEL_OVERRIDE = 0.005;    // DRCGazebo
 
-   // will
-   // simulate
-   // with:
-   // 0.005
+   // will simulate with: 0.005
    public static final boolean DEBUG_GAZEBO_LIDAR = false;
 
    // LIDAR Processor

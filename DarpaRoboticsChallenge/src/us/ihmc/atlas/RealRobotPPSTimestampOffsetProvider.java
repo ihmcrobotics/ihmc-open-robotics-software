@@ -47,7 +47,7 @@ public class RealRobotPPSTimestampOffsetProvider implements PPSTimestampOffsetPr
    {
       ZMQ.Context context = ZMQ.context(1);
       requester = context.socket(ZMQ.REQ);
-      requester.connect("tcp://" + DRCConfigParameters.SCS_MACHINE_IP_ADDRESS + ":" + DRCConfigParameters.PPS_PROVIDER_PORT);
+      requester.connect("tcp://" + DRCConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS + ":" + DRCConfigParameters.PPS_PROVIDER_PORT);
    }
 
    @Override
