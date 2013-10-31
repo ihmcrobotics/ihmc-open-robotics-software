@@ -8,7 +8,7 @@ public class DRCConfigParameters
 {
    public static final DRCRobotModel robotModelToUse = DRCRobotModel.ATLAS_NO_HANDS_ADDED_MASS;
 
-   public static final boolean USE_VRC_PARAMETERS = !DRCLocalConfigParameters.USE_JERRY_PARAMETERS;
+   public static final boolean USE_VRC_PARAMETERS = !DRCLocalConfigParameters.USE_JERRY_PARAMETERS;//false;//false in combo with torque limiting makes robot hip oscillate a lot in simulation
    public static final boolean RUNNING_ON_REAL_ROBOT = DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT;
    public static final boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES = RUNNING_ON_REAL_ROBOT;
    public static final boolean CORRUPT_SIMULATION_MODEL = false;
@@ -40,7 +40,7 @@ public class DRCConfigParameters
    public static final boolean USE_HYDRA = false;
    public static final boolean USE_FISHEYE = RUNNING_ON_REAL_ROBOT;
 
-   public static final boolean LIMIT_CONTROLLER_OUTPUT_TORQUES = false;
+   public static final boolean LIMIT_CONTROLLER_OUTPUT_TORQUES = false;//true;//True causes hip oscillations or jerk in simulation
 
    // Limit the controller to use only a certain percentage of maximum torque that the robot can provide
    public static final double MAX_TORQUE_TO_USE_IN_PERCENT = 0.98;
