@@ -17,7 +17,7 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
 
    private final byte[] buffer;
 
-   private static String scsMachineIPAddress = DRCConfigParameters.SCS_MACHINE_IP_ADDRESS;
+   private static String scsMachineIPAddress = DRCConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
    private static String rosMasterURI = DRCConfigParameters.ROS_MASTER_URI;
 
    private static String[] javaArgs = new String[] { "-Xms2048m", "-Xmx2048m" };
