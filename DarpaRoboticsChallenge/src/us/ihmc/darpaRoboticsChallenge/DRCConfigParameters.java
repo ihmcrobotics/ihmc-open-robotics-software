@@ -89,8 +89,8 @@ public class DRCConfigParameters
    public static final String CLOUD_MINION4_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMINION_4);
    public static final String CLOUD_MINION5_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMINION_5);
    public static final String CLOUD_MINION6_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMINION_6);
+   public static final String CLOUD_MINION7_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMINION_7);
    public static final String CLOUD_MINION8_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMINION_8);
-   public static final String CLOUD_MONSTER_JR_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMONSTER_JR);
    public static final String CLOUD_MONSTER_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMONSTER);
 
    public static final String CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP = "10.0.0.51";

@@ -503,7 +503,7 @@ public class DRCDashboard
       for (final LocalCloudMachines machine : LocalCloudMachines.values())
       {
          if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMONSTER)
-               || machine.equals(LocalCloudMachines.CLOUDMONSTER_JR) || machine.equals(LocalCloudMachines.CLOUDMINION_5)
+               || machine.equals(LocalCloudMachines.CLOUDMINION_5)
                || machine.equals(LocalCloudMachines.CLOUDMINION_6)))
          {
             DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("<html><body style=\"font-weight:bold;font-size:1.1em;\">"
@@ -592,7 +592,7 @@ public class DRCDashboard
       for (final LocalCloudMachines machine : LocalCloudMachines.values())
       {
          if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMONSTER)
-               || machine.equals(LocalCloudMachines.CLOUDMONSTER_JR) || machine.equals(LocalCloudMachines.CLOUDMINION_5)
+               || machine.equals(LocalCloudMachines.CLOUDMINION_5)
                || machine.equals(LocalCloudMachines.CLOUDMINION_6)))
             cloudMachineTrees.get(machine).first().addMouseListener(new MouseListener()
             {
@@ -691,7 +691,7 @@ public class DRCDashboard
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
          if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMONSTER)
-               || machine.equals(LocalCloudMachines.CLOUDMONSTER_JR) || machine.equals(LocalCloudMachines.CLOUDMINION_5)
+               || machine.equals(LocalCloudMachines.CLOUDMINION_5)
                || machine.equals(LocalCloudMachines.CLOUDMINION_6)))
             cloudMachineTrees.get(machine).first().addTreeSelectionListener(customTreeSelectionListener);
       }
@@ -702,7 +702,7 @@ public class DRCDashboard
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
          if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMONSTER)
-               || machine.equals(LocalCloudMachines.CLOUDMONSTER_JR) || machine.equals(LocalCloudMachines.CLOUDMINION_5)
+               || machine.equals(LocalCloudMachines.CLOUDMINION_5)
                || machine.equals(LocalCloudMachines.CLOUDMINION_6)))
             cloudMachineTrees.get(machine).first().setToggleClickCount(0);
       }
@@ -1028,7 +1028,7 @@ public class DRCDashboard
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
          if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMONSTER)
-               || machine.equals(LocalCloudMachines.CLOUDMONSTER_JR) || machine.equals(LocalCloudMachines.CLOUDMINION_5)
+               || machine.equals(LocalCloudMachines.CLOUDMINION_5)
                || machine.equals(LocalCloudMachines.CLOUDMINION_6)))
          {
             DefaultMutableTreeNode root = cloudMachineTrees.get(machine).second();
@@ -1044,7 +1044,7 @@ public class DRCDashboard
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
          if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMONSTER)
-               || machine.equals(LocalCloudMachines.CLOUDMONSTER_JR) || machine.equals(LocalCloudMachines.CLOUDMINION_5)
+               || machine.equals(LocalCloudMachines.CLOUDMINION_5)
                || machine.equals(LocalCloudMachines.CLOUDMINION_6)))
          {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) cloudMachineTrees.get(machine).second().getChildAt(0);
@@ -1073,7 +1073,7 @@ public class DRCDashboard
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
          if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMONSTER)
-               || machine.equals(LocalCloudMachines.CLOUDMONSTER_JR) || machine.equals(LocalCloudMachines.CLOUDMINION_5)
+               || machine.equals(LocalCloudMachines.CLOUDMINION_5)
                || machine.equals(LocalCloudMachines.CLOUDMINION_6)))
          {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) cloudMachineTrees.get(machine).second().getChildAt(1);
@@ -1095,7 +1095,7 @@ public class DRCDashboard
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
          if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMONSTER)
-               || machine.equals(LocalCloudMachines.CLOUDMONSTER_JR) || machine.equals(LocalCloudMachines.CLOUDMINION_5)
+               || machine.equals(LocalCloudMachines.CLOUDMINION_5)
                || machine.equals(LocalCloudMachines.CLOUDMINION_6)))
          {
             if (sshSimLauncher.isMachineReachable(machine))
