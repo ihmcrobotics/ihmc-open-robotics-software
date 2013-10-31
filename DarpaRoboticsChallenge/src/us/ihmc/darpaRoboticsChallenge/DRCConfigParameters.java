@@ -7,7 +7,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 public class DRCConfigParameters
 {
    public static final DRCRobotModel robotModelToUse = DRCRobotModel.ATLAS_NO_HANDS_ADDED_MASS;
-   
+
    public static final boolean USE_VRC_PARAMETERS = !DRCLocalConfigParameters.USE_JERRY_PARAMETERS;
    public static final boolean RUNNING_ON_REAL_ROBOT = DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT;
    public static final boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES = RUNNING_ON_REAL_ROBOT;
@@ -58,8 +58,11 @@ public class DRCConfigParameters
 
    public static final boolean SHOW_BANDWIDTH_DIALOG = false;
 
-   public static final double ESTIMATE_DT = 0.003;
+   public static final double ATLAS_INTERFACING_DT = 0.003;
    public static final double CONTROL_DT = 0.006;
+   public static final double ATLAS_ONBOARD_SAMPLINGFREQ = 1000;
+   public static final double ATLAS_ONBOARD_DT = 1.0 / ATLAS_ONBOARD_SAMPLINGFREQ;
+   public static final boolean DO_NEW_FORCE_CONTROL_TEMP = false;
 
    // Set whether or not to use GFE Robot Model
    public static final boolean USE_GFE_ROBOT_MODEL = true;
@@ -135,9 +138,9 @@ public class DRCConfigParameters
    public static final int PPS_PROVIDER_PORT = 5050;
 
    public static final long ROBOT_JOINT_SERVER_UPDATE_MILLIS = 100;
-   
+
    public static final String MULTISENSE_CAMERA_STRING_BASE;
-   
+
    static
    {
       if (DRCConfigParameters.USING_REAL_HEAD)
