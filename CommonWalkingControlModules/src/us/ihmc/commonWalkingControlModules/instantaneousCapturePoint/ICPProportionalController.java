@@ -14,6 +14,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFrameVector2d;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.filter.FilteredVelocityYoFrameVector;
+import com.yobotics.simulationconstructionset.util.math.filter.RateLimitedYoFrameVector2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
 
@@ -27,11 +28,15 @@ public class ICPProportionalController
    
    private final YoFrameVector2d feedbackPart = new YoFrameVector2d("feedbackPart", "", worldFrame, registry);
    
-   private final DoubleYoVariable alphaFeedBack = new DoubleYoVariable("alphaFeedBack", registry);
+   private final DoubleYoVariable alphaCMP = new DoubleYoVariable("alphaCMP", registry);
+   private final DoubleYoVariable rateLimitCMP = new DoubleYoVariable("rateLimitCMP", registry);
+
    private final YoFrameVector2d desiredCMPToICP = new YoFrameVector2d("desiredCMPToICP", "", worldFrame, registry);
    private final YoFrameVector2d rawCMPOutput = new YoFrameVector2d("rawCMPOutput", "", worldFrame, registry);
    private final AlphaFilteredYoFrameVector2d filteredCMPOutput = AlphaFilteredYoFrameVector2d.createAlphaFilteredYoFrameVector2d("filteredCMPOutput", "",
-                                                                    registry, alphaFeedBack, rawCMPOutput);
+                                                                    registry, alphaCMP, rawCMPOutput);
+   
+   private final RateLimitedYoFrameVector2d rateLimitedCMPOutput;
 
    private final DoubleYoVariable maxDistanceBetweenICPAndCMP = new DoubleYoVariable("maxDistanceBetweenICPAndCMP", registry);
    
@@ -53,6 +58,9 @@ public class ICPProportionalController
    public ICPProportionalController(double controlDT, YoVariableRegistry parentRegistry)
    {
       this.controlDT = controlDT;
+      
+      rateLimitedCMPOutput = RateLimitedYoFrameVector2d.createRateLimitedYoFrameVector2d("rateLimitedCMPOutput", "", registry, rateLimitCMP, controlDT, filteredCMPOutput);
+
       icpVelocityDirectionFrame = new Vector2dZUpFrame("icpVelocityDirectionFrame", worldFrame);
       
       icpPosition = new YoFramePoint("icpPosition", ReferenceFrame.getWorldFrame(), registry);
@@ -66,6 +74,7 @@ public class ICPProportionalController
    public void reset()
    {
       filteredCMPOutput.reset();
+      rateLimitedCMPOutput.reset();
    }
 
    public FramePoint2d doProportionalControl(FramePoint2d capturePoint, FramePoint2d desiredCapturePoint, FrameVector2d desiredCapturePointVelocity,
@@ -139,16 +148,18 @@ public class ICPProportionalController
       rawCMPOutput.set(desiredCMP);
       
       filteredCMPOutput.update();
-      filteredCMPOutput.getFramePoint2d(desiredCMP);
+      rateLimitedCMPOutput.update();
+      rateLimitedCMPOutput.getFramePoint2d(desiredCMP);
       
       return desiredCMP;
    }
 
-   public void setGains(double captureKpParallelToMotion, double captureKpOrthogonalToMotion, double filterBreakFrequencyHertz)
+   public void setGains(double captureKpParallelToMotion, double captureKpOrthogonalToMotion, double filterBreakFrequencyHertz, double rateLimitCMP)
    {
       this.captureKpParallelToMotion.set(captureKpParallelToMotion);
       this.captureKpOrthogonalToMotion.set(captureKpOrthogonalToMotion);
-      this.alphaFeedBack.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequencyHertz, controlDT));
+      this.alphaCMP.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequencyHertz, controlDT));
+      this.rateLimitCMP.set(rateLimitCMP);
    }
 
    public class Vector2dZUpFrame extends ReferenceFrame
