@@ -1,5 +1,11 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.back_bkx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.back_bky;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.back_bkz;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.jointNames;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.neck_ry;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -15,7 +21,6 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.*;
 
 
 public class DRCRobotWalkingControllerParameters implements WalkingControllerParameters
@@ -168,9 +173,9 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    }
 
 // USE THESE FOR DRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
-   private double minimumHeightAboveGround = 0.785;                                       
+   private final double minimumHeightAboveGround = 0.785;                                       
    private double nominalHeightAboveGround = 0.865; 
-   private double maximumHeightAboveGround = 0.925; 
+   private final double maximumHeightAboveGround = 0.925; 
    
 //   // USE THESE FOR VRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
 //   private double minimumHeightAboveGround = 0.68;                                       
@@ -320,13 +325,13 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    public double getCMPRateLimit()
    {
       if (DRCConfigParameters.USE_VRC_PARAMETERS) return 100.0;
-      return 3.0;
+      return 4.0; //3.0;
    }
 
    public double getKpCoMHeight()
    {
       if (DRCConfigParameters.USE_VRC_PARAMETERS) return 40.0;
-      return 20.0; 
+      return 30.0; //20.0; 
    }
 
    public double getZetaCoMHeight()
@@ -338,7 +343,7 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    public double getKpPelvisOrientation()
    {
       if (DRCConfigParameters.USE_VRC_PARAMETERS) return 100.0;
-      return 30.0; 
+      return 80.0; //30.0; 
    }
 
    public double getZetaPelvisOrientation()
@@ -375,7 +380,7 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    public double getKpUpperBody()
    {
       if (DRCConfigParameters.USE_VRC_PARAMETERS) return 100.0;
-      return 40.0;
+      return 80.0; //40.0;
    }
 
    public double getZetaUpperBody()
@@ -387,7 +392,7 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    public double getMaxAccelerationUpperBody()
    {
       if (DRCConfigParameters.USE_VRC_PARAMETERS) return 100.0;
-      return 4.5;
+      return 6.0;
    }
    
    public double getMaxJerkUpperBody()
