@@ -45,7 +45,7 @@ public class StateEstimatorErrorCalculator
    private final YoFramePoint perfectCoMPosition = new YoFramePoint("perfectCoMPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector perfectCoMVelocity = new YoFrameVector("perfectCoMVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint perfectPelvisPosition = new YoFramePoint("perfectPelvisPosition", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector perfectPelvisVelocity = new YoFrameVector("perfectPelvisVelocity", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector perfectPelvisLinearVelocity = new YoFrameVector("perfectPelvisLinearVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final boolean assumePerfectIMU;
    private boolean useSimplePelvisPositionEstimator;
 
@@ -196,8 +196,8 @@ public class StateEstimatorErrorCalculator
       Vector3d actualVelocity = new Vector3d();
       Vector3d linearVelocityError = new Vector3d();
 
-      estimationJoint.getLinearVelocityInBody(actualVelocity, new Vector3d());
-      perfectCoMVelocity.set(actualVelocity);
+      estimationJoint.getLinearVelocityInWorld(actualVelocity, new Vector3d());
+      perfectPelvisLinearVelocity.set(actualVelocity);
       
       orientationEstimator.getEstimatedPelvisLinearVelocity(estimatedPelvisVelocityFrameVector);
       estimatedPelvisVelocityFrameVector.getVector(linearVelocityError);
