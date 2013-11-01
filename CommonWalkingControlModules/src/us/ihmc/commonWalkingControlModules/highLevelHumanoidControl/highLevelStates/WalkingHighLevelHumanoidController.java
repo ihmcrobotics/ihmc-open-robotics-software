@@ -433,14 +433,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (WalkOnTheEdgesProviders.TOEOFF_MOTION_TYPE_USED != ToeOffMotionType.FREE)
          {
             DoubleTrajectoryGenerator onToesPitchTrajectoryGenerator = walkOnTheEdgesProviders.getToeOffPitchTrajectoryGenerators(robotSide);
-            endEffectorControlModule = new EndEffectorControlModule(bipedFoot, jacobian, kneeJoint, swingPoseTrajectoryGenerator,
+            endEffectorControlModule = new EndEffectorControlModule(controlDT, bipedFoot, jacobian, kneeJoint, swingPoseTrajectoryGenerator,
                                           heelPitchTrajectoryGenerator, onToesPitchTrajectoryGenerator, momentumBasedController, registry);
          }
          else
          {
             // Let the toe pitch motion free. It seems to work better.
             DoubleProvider maximumToeOffAngleProvider = walkOnTheEdgesProviders.getMaximumToeOffAngleProvider();
-            endEffectorControlModule = new EndEffectorControlModule(bipedFoot, jacobian, kneeJoint, swingPoseTrajectoryGenerator,
+            endEffectorControlModule = new EndEffectorControlModule(controlDT, bipedFoot, jacobian, kneeJoint, swingPoseTrajectoryGenerator,
                                           heelPitchTrajectoryGenerator, maximumToeOffAngleProvider, momentumBasedController, registry);
          }
          

@@ -20,11 +20,11 @@ public class RigidBodyOrientationControlModule
    private final Twist endEffectorTwist = new Twist();
    private final FrameVector currentAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
 
-   public RigidBodyOrientationControlModule(String namePrefix, RigidBody base, RigidBody endEffector, TwistCalculator twistCalculator, YoVariableRegistry parentRegistry)
+   public RigidBodyOrientationControlModule(String namePrefix, RigidBody base, RigidBody endEffector, TwistCalculator twistCalculator, double dt, YoVariableRegistry parentRegistry)
    {
       this.base = base;
       this.endEffector = endEffector;
-      this.axisAngleOrientationController = new AxisAngleOrientationController(namePrefix, endEffector.getBodyFixedFrame(), parentRegistry);
+      this.axisAngleOrientationController = new AxisAngleOrientationController(namePrefix, endEffector.getBodyFixedFrame(), dt, parentRegistry);
       this.twistCalculator = twistCalculator;
    }
    
@@ -51,6 +51,11 @@ public class RigidBodyOrientationControlModule
    {
       axisAngleOrientationController.setDerivativeGains(derivativeGainX, derivativeGainY, derivativeGainZ);
    }
+   
+   public void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
+   {
+      axisAngleOrientationController.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
+   }
 
    public RigidBody getBase()
    {
@@ -61,5 +66,7 @@ public class RigidBodyOrientationControlModule
    {
       return endEffector;
    }
+
+   
 }
 

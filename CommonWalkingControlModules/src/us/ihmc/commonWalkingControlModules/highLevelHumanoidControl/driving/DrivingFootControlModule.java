@@ -112,7 +112,7 @@ public class DrivingFootControlModule
 
 
    public DrivingFootControlModule(FullRobotModel fullRobotModel, ContactablePlaneBody contactablePlaneFoot, MomentumBasedController momentumBasedController,
-                                   DrivingReferenceFrames drivingReferenceFrames, DoubleYoVariable yoTime, TwistCalculator twistCalculator,
+                                   DrivingReferenceFrames drivingReferenceFrames, double dt, DoubleYoVariable yoTime, TwistCalculator twistCalculator,
                                    YoVariableRegistry parentRegistry, QueueBasedStreamingDataProducer<LowLevelDrivingStatus> statusProducer,
                                    DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
@@ -164,7 +164,7 @@ public class DrivingFootControlModule
       toePointPositionController.setDerivativeGains(kD, kD, kD);
 
 
-      orientationController = new AxisAngleOrientationController(foot.getName() + "PD", foot.getBodyFixedFrame(), registry);
+      orientationController = new AxisAngleOrientationController(foot.getName() + "PD", foot.getBodyFixedFrame(), dt, registry);
       double kPOrientationYZ = 50.0;
       double kDOrientationYZ = GainCalculator.computeDerivativeGain(kPOrientationYZ, dampingRatio);
 

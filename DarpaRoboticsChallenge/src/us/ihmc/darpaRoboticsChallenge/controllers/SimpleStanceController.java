@@ -129,7 +129,7 @@ public class SimpleStanceController implements RobotController
       contactStates = createContactStates(feet, registry, coefficientOfFriction);
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
 
-      this.pelvisOrientationController = new AxisAngleOrientationController("pelvis", pelvis.getBodyFixedFrame(), registry);
+      this.pelvisOrientationController = new AxisAngleOrientationController("pelvis", pelvis.getBodyFixedFrame(), controlDT, registry);
       pelvisOrientationController.setProportionalGains(5.0, 5.0, 5.0);
       pelvisOrientationController.setDerivativeGains(1.0, 1.0, 1.0);
 

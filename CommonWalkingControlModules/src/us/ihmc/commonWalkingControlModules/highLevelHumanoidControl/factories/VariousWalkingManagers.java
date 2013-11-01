@@ -51,7 +51,7 @@ public class VariousWalkingManagers
 
       DesiredHeadOrientationProvider desiredHeadOrientationProvider = variousWalkingProviders.getDesiredHeadOrientationProvider();
 
-      HeadOrientationControlModule headOrientationControlModule = setupHeadOrientationControlModule(fullRobotModel, twistCalculator, registry,
+      HeadOrientationControlModule headOrientationControlModule = setupHeadOrientationControlModule(controlDT, fullRobotModel, twistCalculator, registry,
                                                                      dynamicGraphicObjectsListRegistry, momentumBasedController,
                                                                      desiredHeadOrientationProvider, walkingControllerParameters);
 
@@ -59,7 +59,7 @@ public class VariousWalkingManagers
                                                          desiredHeadOrientationProvider);
 
 
-      ChestOrientationControlModule chestOrientationControlModule = setupChestOrientationControlModule(fullRobotModel, twistCalculator, registry);
+      ChestOrientationControlModule chestOrientationControlModule = setupChestOrientationControlModule(controlDT, fullRobotModel, twistCalculator, registry);
       ChestOrientationManager chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestOrientationControlModule, registry);
 
       // Setup arm+hand manipulation state machines
@@ -77,19 +77,19 @@ public class VariousWalkingManagers
       return variousWalkingManagers;
    }
 
-   private static ChestOrientationControlModule setupChestOrientationControlModule(FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
+   private static ChestOrientationControlModule setupChestOrientationControlModule(double controlDT, FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
            YoVariableRegistry registry)
    {
       RigidBody chest = fullRobotModel.getChest();
       RigidBody pelvis = fullRobotModel.getPelvis();
 
-      ChestOrientationControlModule chestOrientationControlModule = new ChestOrientationControlModule(pelvis, chest, twistCalculator, registry);
+      ChestOrientationControlModule chestOrientationControlModule = new ChestOrientationControlModule(pelvis, chest, twistCalculator, controlDT, registry);
 
       return chestOrientationControlModule;
    }
 
 
-   private static HeadOrientationControlModule setupHeadOrientationControlModule(FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
+   private static HeadOrientationControlModule setupHeadOrientationControlModule(double controlDT, FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
            YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, MomentumBasedController momentumBasedController,
            DesiredHeadOrientationProvider desiredHeadOrientationProvider, HeadOrientationControllerParameters headOrientationControllerParameters)
    {
@@ -106,7 +106,7 @@ public class VariousWalkingManagers
          headOrientationExpressedInFrame = desiredHeadOrientationProvider.getHeadOrientationExpressedInFrame();
       else
          headOrientationExpressedInFrame = referenceFrames.getPelvisZUpFrame(); // ReferenceFrame.getWorldFrame(); //
-      HeadOrientationControlModule headOrientationControlModule = new HeadOrientationControlModule(pelvis, elevator, head, twistCalculator,
+      HeadOrientationControlModule headOrientationControlModule = new HeadOrientationControlModule(controlDT, pelvis, elevator, head, twistCalculator,
                                                                      headOrientationExpressedInFrame, chestFrame, headOrientationControllerParameters,
                                                                      registry, dynamicGraphicObjectsListRegistry);
 

@@ -56,6 +56,8 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract double getKpPelvisOrientation();
    public abstract double getZetaPelvisOrientation();
+   public abstract double getMaxAccelerationPelvisOrientation();
+   public abstract double getMaxJerkPelvisOrientation();
 
    public abstract double getKpCoMHeight();
    public abstract double getZetaCoMHeight();
@@ -67,6 +69,5 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getZetaUpperBody();
    public abstract double getMaxAccelerationUpperBody();
    public abstract double getMaxJerkUpperBody();
-
 
 }

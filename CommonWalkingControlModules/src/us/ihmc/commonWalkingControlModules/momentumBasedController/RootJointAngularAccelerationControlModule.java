@@ -22,12 +22,12 @@ public class RootJointAngularAccelerationControlModule
    private final TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
    private MomentumBasedController momentumBasedController;
 
-   public RootJointAngularAccelerationControlModule(MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
+   public RootJointAngularAccelerationControlModule(double controlDT, MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
    {
       this.rootJoint = momentumBasedController.getFullRobotModel().getRootJoint();
       registry = new YoVariableRegistry(getClass().getSimpleName());
       rootJointOrientationControlModule = new RigidBodyOrientationControlModule(rootJoint.getName(), rootJoint.getPredecessor(), rootJoint.getSuccessor(),
-              momentumBasedController.getTwistCalculator(), registry);
+              momentumBasedController.getTwistCalculator(), controlDT, registry);
       this.controlledPelvisAngularAcceleration = new YoFrameVector("controlled" + rootJoint.getName() + "AngularAcceleration", rootJoint.getFrameAfterJoint(),
               registry);
 
@@ -68,5 +68,11 @@ public class RootJointAngularAccelerationControlModule
    public void setDerivativeGains(double derivativeGainX, double derivativeGainY, double derivativeGainZ)
    {
       rootJointOrientationControlModule.setDerivativeGains(derivativeGainX, derivativeGainY, derivativeGainZ);
+   }
+
+   public void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
+   {
+      rootJointOrientationControlModule.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
+      
    }
 }

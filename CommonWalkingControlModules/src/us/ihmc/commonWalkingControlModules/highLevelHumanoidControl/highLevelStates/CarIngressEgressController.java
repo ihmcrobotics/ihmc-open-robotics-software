@@ -183,7 +183,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       pelvisPositionControlFrame = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint();
       boolean visualize = true;
       this.pelvisController = new RigidBodySpatialAccelerationControlModule("pelvis", twistCalculator, fullRobotModel.getPelvis(), pelvisPositionControlFrame,
-              visualize, registry);
+              visualize, controlDT, registry);
 
       carIngressPelvisPositionKp.set(100.0);
       carIngressPelvisPositionZeta.set(1.0);
@@ -376,7 +376,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
                                                          onToesInitialPitchVelocityProvider, onToesFinalPitchProvider, trajectoryTimeProvider, registry);
 
          OneDoFJoint kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE);
-         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(foot, jacobian, kneeJoint, poseTrajectoryGenerator, null,
+         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(controlDT, foot, jacobian, kneeJoint, poseTrajectoryGenerator, null,
                                                                 onToesTrajectory, momentumBasedController, registry);
          endEffectorControlModule.setSwingGains(100.0, 200.0, 200.0, 1.0);
 

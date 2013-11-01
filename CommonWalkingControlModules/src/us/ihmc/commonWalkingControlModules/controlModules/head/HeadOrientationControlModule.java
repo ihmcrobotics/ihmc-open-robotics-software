@@ -35,11 +35,11 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
    
    private final RigidBody head; 
    
-   public HeadOrientationControlModule(RigidBody pelvis, RigidBody elevator, RigidBody head, TwistCalculator twistCalculator,
+   public HeadOrientationControlModule(double controlDT, RigidBody pelvis, RigidBody elevator, RigidBody head, TwistCalculator twistCalculator,
          ReferenceFrame headOrientationFrame, ReferenceFrame chestFrame, HeadOrientationControllerParameters headOrientationControllerParameters, YoVariableRegistry parentRegistry,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      super("head", new RigidBody[] {}, head, new GeometricJacobian[]{}, twistCalculator, parentRegistry);
+      super("head", new RigidBody[] {}, head, new GeometricJacobian[]{}, twistCalculator, controlDT, parentRegistry);
 
       this.head = head;
       

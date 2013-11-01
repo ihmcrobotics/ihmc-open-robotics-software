@@ -101,6 +101,8 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
    private final DoubleYoVariable kpPelvisOrientation = new DoubleYoVariable("kpPelvisOrientation", registry);
    private final DoubleYoVariable zetaPelvisOrientation = new DoubleYoVariable("zetaPelvisOrientation", registry);
+   private final DoubleYoVariable maxAccelerationPelvisOrientation = new DoubleYoVariable("maxAccelerationPelvisOrientation", registry);
+   private final DoubleYoVariable maxJerkPelvisOrientation = new DoubleYoVariable("maxJerkPelvisOrientation", registry);
 
    public AbstractHighLevelHumanoidControlPattern(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
            MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
@@ -153,7 +155,11 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       // Setup the RootJointAngularAccelerationControlModule for PelvisOrientation control ////////
       kpPelvisOrientation.set(walkingControllerParameters.getKpPelvisOrientation());
       zetaPelvisOrientation.set(walkingControllerParameters.getZetaPelvisOrientation());
-      rootJointAccelerationControlModule = new RootJointAngularAccelerationControlModule(momentumBasedController, registry);
+      maxAccelerationPelvisOrientation.set(walkingControllerParameters.getMaxAccelerationPelvisOrientation());
+      maxJerkPelvisOrientation.set(walkingControllerParameters.getMaxJerkPelvisOrientation());
+      
+      
+      rootJointAccelerationControlModule = new RootJointAngularAccelerationControlModule(controlDT, momentumBasedController, registry);
       VariableChangedListener pelvisOrientationGainsChangedListener = createPelvisOrientationGainsChangedListener();
       pelvisOrientationGainsChangedListener.variableChanged(null);
 
@@ -180,12 +186,15 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
             rootJointAccelerationControlModule.setProportionalGains(kpPelvisOrientation.getDoubleValue(), kpPelvisOrientation.getDoubleValue(),
                     kpPelvisOrientation.getDoubleValue());
             rootJointAccelerationControlModule.setDerivativeGains(dPelvisOrientation, dPelvisOrientation, dPelvisOrientation);
+            rootJointAccelerationControlModule.setMaxAccelerationAndJerk(maxAccelerationPelvisOrientation.getDoubleValue(), maxJerkPelvisOrientation.getDoubleValue());
          }
       };
 
       kpPelvisOrientation.addVariableChangedListener(listener);
       zetaPelvisOrientation.addVariableChangedListener(listener);
-
+      maxAccelerationPelvisOrientation.addVariableChangedListener(listener);
+      maxJerkPelvisOrientation.addVariableChangedListener(listener);
+      
       return listener;
    }
 

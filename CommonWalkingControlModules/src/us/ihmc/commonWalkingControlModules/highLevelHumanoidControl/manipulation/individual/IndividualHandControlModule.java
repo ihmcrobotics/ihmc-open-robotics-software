@@ -96,6 +96,8 @@ public class IndividualHandControlModule
    private final Map<ReferenceFrame, YoSE3ConfigurationProvider> currentDesiredConfigurationProviders = new LinkedHashMap<ReferenceFrame,
                                                                                                            YoSE3ConfigurationProvider>();
 
+   private final double controlDT;
+   
    public IndividualHandControlModule(final DoubleYoVariable simulationTime, final RobotSide robotSide, FullRobotModel fullRobotModel,
                                       final TwistCalculator twistCalculator, final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
                                       HandControllerInterface handController, double gravity, final double controlDT,
@@ -103,6 +105,7 @@ public class IndividualHandControlModule
                                       ArmControllerParameters armControlParameters,
                                       final YoVariableRegistry parentRegistry)
    {
+      this.controlDT = controlDT;
       RigidBody endEffector = jacobian.getEndEffector();
 
       this.robotSide = robotSide;
@@ -556,7 +559,7 @@ public class IndividualHandControlModule
       if (ret == null)
       {
          ret = new RigidBodySpatialAccelerationControlModule(name + handPositionControlFrame.getName(), twistCalculator, jacobian.getEndEffector(),
-                 handPositionControlFrame, registry);
+                 handPositionControlFrame, controlDT, registry);
 
          handSpatialAccelerationControlModules.put(handPositionControlFrame, ret);
       }
