@@ -27,8 +27,7 @@ public class DRCRobotSDFLoader
       if(!headless)
       {
          resourceDirectories.add(myClass.getResource("models/GFE/gazebo").getFile());
-         resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/atlas_description").getFile());
-         resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/multisense_sl_description").getFile());
+         resourceDirectories.add(myClass.getResource("models/GFE/").getFile());
          resourceDirectories.add(myClass.getResource("models").getFile());
       }
       
@@ -54,9 +53,6 @@ public class DRCRobotSDFLoader
          case ATLAS_NO_HANDS_ADDED_MASS :
             fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_addedmass.sdf");
             break;
-         case V1 :
-            fileInputStream = myClass.getResourceAsStream("models/V1/urdf/V1_gazebo.sdf");
-            break;
          default:
             throw new RuntimeException("DRCRobotSDFLoader: Unimplemented enumeration case : " + selectedModel);
       }
@@ -81,8 +77,7 @@ public class DRCRobotSDFLoader
    
    public static void main(String[] args)
    {
-//      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_SANDIA_HANDS, false);
-      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.V1, false);
+      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_SANDIA_HANDS, false);
       JaxbSDFLoader loader = loadDRCRobot(jointMap, false);
       System.out.println(loader.createRobot(jointMap, true).getName());
       
