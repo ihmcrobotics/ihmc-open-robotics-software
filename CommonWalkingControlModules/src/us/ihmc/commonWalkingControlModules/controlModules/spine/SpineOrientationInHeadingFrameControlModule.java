@@ -38,7 +38,7 @@ public class SpineOrientationInHeadingFrameControlModule implements SpineControl
    
 
    public SpineOrientationInHeadingFrameControlModule(ProcessedSensorsInterface processedSensors, DesiredHeadingControlModule desiredHeadingControlModule,
-           ReferenceFrame chestFrame, GeometricJacobian spineJacobian, YoVariableRegistry parentRegistry)
+           ReferenceFrame chestFrame, GeometricJacobian spineJacobian, double dt, YoVariableRegistry parentRegistry)
    {
       this.processedSensors = processedSensors;
       this.bodyFrame = chestFrame;
@@ -48,7 +48,7 @@ public class SpineOrientationInHeadingFrameControlModule implements SpineControl
       this.tauChest = new YoFrameVector("tauChest", "", bodyFrame, registry);
       this.chestWrench = new Wrench(bodyFrame, bodyFrame);
 
-      this.axisAngleOrientationController = new AxisAngleOrientationController("chest", bodyFrame, parentRegistry);
+      this.axisAngleOrientationController = new AxisAngleOrientationController("chest", bodyFrame, dt, parentRegistry);
       this.desiredHeadingControlModule = desiredHeadingControlModule;
       
       this.spineJacobian = spineJacobian;

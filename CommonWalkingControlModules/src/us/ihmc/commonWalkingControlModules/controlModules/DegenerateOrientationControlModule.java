@@ -38,12 +38,16 @@ public abstract class DegenerateOrientationControlModule
    private final RigidBody endEffector;
    private final TwistCalculator twistCalculator;
    
+   private final double controlDT;
+   
    public DegenerateOrientationControlModule(String namePrefix, RigidBody[] defaultBases, RigidBody endEffector, GeometricJacobian[] defaultJacobians,
-           TwistCalculator twistCalculator, YoVariableRegistry parentRegistry)
+           TwistCalculator twistCalculator, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.namePrefix = namePrefix;
       this.endEffector = endEffector;
       this.twistCalculator = twistCalculator;
+      
+      this.controlDT = controlDT;
       
       this.jacobianIndex = new IntegerYoVariable(namePrefix + "JacobianIndex", registry);
       jacobianIndex.set(-1);
@@ -83,7 +87,7 @@ public abstract class DegenerateOrientationControlModule
       bases.add(base);
       String baseName = FormattingTools.capitalizeFirstLetter(base.getName());
       RigidBodyOrientationControlModule rigidBodyOrientationControlModule = new RigidBodyOrientationControlModule(namePrefix + baseName, base, endEffector,
-                                                                               twistCalculator, registry);
+                                                                               twistCalculator, controlDT, registry);
       
       rigidBodyOrientationControlModule.setProportionalGains(proportionalGainX, proportionalGainY, proportionalGainZ);
       rigidBodyOrientationControlModule.setDerivativeGains(derivativeGainX, derivativeGainY, derivativeGainZ);

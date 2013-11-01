@@ -35,7 +35,7 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
 
 
    public AxisAnglePelvisOrientationControlModule(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames,
-         CouplingRegistry couplingRegistry, YoVariableRegistry parentRegistry, boolean useFeedforward)
+         CouplingRegistry couplingRegistry, double dt, YoVariableRegistry parentRegistry, boolean useFeedforward)
    {
       this.processedSensors = processedSensors;
       ReferenceFrame bodyFrame = referenceFrames.getPelvisFrame();
@@ -46,7 +46,7 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
       this.tauPelvis = new YoFrameVector("tauPelvis", "", bodyFrame, registry);
       this.tauSwingLegCompensation = new YoFrameVector("tauSwingLegCompensation", "", bodyFrame, registry);
       this.useFeedforward = useFeedforward;
-      this.axisAngleOrientationController = new AxisAngleOrientationController("pelvis", bodyFrame, registry);
+      this.axisAngleOrientationController = new AxisAngleOrientationController("pelvis", bodyFrame, dt, registry);
 
 
       parentRegistry.addChild(registry);
