@@ -8,7 +8,7 @@ public class DRCConfigParameters
 {
    public static final DRCRobotModel robotModelToUse = DRCRobotModel.ATLAS_NO_HANDS_ADDED_MASS;
 
-   public static final boolean USE_VRC_PARAMETERS = !DRCLocalConfigParameters.USE_JERRY_PARAMETERS;//false;//false in combo with torque limiting makes robot hip oscillate a lot in simulation
+   public static final boolean USE_VRC_PARAMETERS = !DRCLocalConfigParameters.USE_JERRY_PARAMETERS;    // false;//false in combo with torque limiting makes robot hip oscillate a lot in simulation
    public static final boolean RUNNING_ON_REAL_ROBOT = DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT;
    public static final boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES = RUNNING_ON_REAL_ROBOT;
    public static final boolean CORRUPT_SIMULATION_MODEL = false;
@@ -41,7 +41,7 @@ public class DRCConfigParameters
    public static final boolean USE_HYDRA = false;
    public static final boolean USE_FISHEYE = RUNNING_ON_REAL_ROBOT;
 
-   public static final boolean LIMIT_CONTROLLER_OUTPUT_TORQUES = false;//true;//True causes hip oscillations or jerk in simulation
+   public static final boolean LIMIT_CONTROLLER_OUTPUT_TORQUES = false;    // true;//True causes hip oscillations or jerk in simulation
 
    // Limit the controller to use only a certain percentage of maximum torque that the robot can provide
    public static final double MAX_TORQUE_TO_USE_IN_PERCENT = 0.98;
@@ -107,7 +107,7 @@ public class DRCConfigParameters
 
    public static final String ROBOT_CONTROLLER_IP_ADDRESS = DRCLocalConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
    public static final String NET_PROC_MACHINE_IP_ADDRESS = DRCLocalConfigParameters.NET_PROC_MACHINE_IP_ADDRESS;
-   
+
    public static final String ROS_MASTER_URI = "http://" + ROS_HOST_IP_ADDRESS + ":11311";
    public static final int CONTROLLER_TO_UI_TCP_PORT = 4893;
 
@@ -258,6 +258,11 @@ public class DRCConfigParameters
          velocitySensorFrequencyHz = 16.0;
       }
    }
+
+   // Atlas onboard filtering parameters
+   public static final boolean FILTER_JOINT_ANGLES = false;
+   public static final boolean FILTER_JOINT_VELOCITIES = false;
+   public static final boolean FILTER_JOINT_TORQUES = false;
 
    public static final double JOINT_POSITION_FILTER_FREQ_HZ = positionSensorFrequencyHz;
    public static final double JOINT_VELOCITY_FILTER_FREQ_HZ = velocitySensorFrequencyHz;
