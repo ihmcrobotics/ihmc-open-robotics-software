@@ -29,11 +29,14 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.vecmath.Point2d;
+
+import us.ihmc.plotting.shapes.PointArtifact;
 
 public class PlotterPanel extends JPanel
 {
    /**
-    * 
+    *
     */
    private static final long serialVersionUID = 4697277324924209439L;
    protected Plotter plotter;
@@ -97,8 +100,7 @@ public class PlotterPanel extends JPanel
    {
       JMenu menu;
       JMenuItem menuItem;
-      @SuppressWarnings("unused")
-      JRadioButtonMenuItem rbMenuItem;
+      @SuppressWarnings("unused") JRadioButtonMenuItem rbMenuItem;
       JCheckBoxMenuItem cbMenuItem;
 
       Vector<JMenu> menus = new Vector<JMenu>();
@@ -128,10 +130,8 @@ public class PlotterPanel extends JPanel
       {
          public void actionPerformed(ActionEvent ae)
          {
-            @SuppressWarnings("unused")
-            Artifact gps = plotter.getArtifact("gps");
-            @SuppressWarnings("unused")
-            Artifact odom = plotter.getArtifact("odom");
+            @SuppressWarnings("unused") Artifact gps = plotter.getArtifact("gps");
+            @SuppressWarnings("unused") Artifact odom = plotter.getArtifact("odom");
 
             // saveMovementPlot((PointArtifact)gps, (PointArtifact)odom);
          }
@@ -322,6 +322,23 @@ public class PlotterPanel extends JPanel
       f.getContentPane().add(new JScrollPane(p), BorderLayout.CENTER);
       f.pack();
       f.setVisible(true);
+
+
+      for (float i = 0; i < 100; i++)
+      {
+         try
+         {
+            Thread.sleep(100);
+         }
+         catch (InterruptedException e1)
+         {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+         }
+
+         PointArtifact pa = new PointArtifact("test_" + i, new Point2d(i / 10, 0));
+         p.getPlotter().addArtifact(pa);
+      }
 
    }
 }
