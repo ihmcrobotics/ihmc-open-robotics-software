@@ -38,7 +38,7 @@ public class LoadCloudWithPoses extends SimpleApplication
 
    public static void main(String[] args)
    {
-      LoadCloudWithPoses test1 = new LoadCloudWithPoses("D:\\lidarLog_5_1.txt");
+      LoadCloudWithPoses test1 = new LoadCloudWithPoses("D:\\lidarLog_1.txt");
       test1.start();
    }
 
@@ -50,9 +50,9 @@ public class LoadCloudWithPoses extends SimpleApplication
    @Override
    public void simpleInitApp()
    {
-      List<Point3D_F64>[] clouds = loadPointCloud((int)(40 * 20), 1, true);
+      List<Point3D_F64>[] clouds = loadPointCloud((int)(40 * 10), 1, true);
 
-      if (true)
+      if (false)
       {
          try
          {

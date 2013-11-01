@@ -1,5 +1,27 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
+import georegression.struct.plane.PlaneGeneral3D_F64;
+import georegression.struct.plane.PlaneNormal3D_F64;
+import georegression.struct.point.Point3D_F64;
+import georegression.struct.point.Vector3D_F64;
+import georegression.struct.shapes.Cylinder3D_F64;
+import georegression.struct.shapes.Sphere3D_F64;
+
+import java.awt.Color;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.Callable;
+
+import org.ddogleg.struct.FastQueue;
+
+import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
+import us.ihmc.sensorProcessing.pointClouds.shape.ExpectationMaximizationFitter.ScoringFunction;
 import bubo.io.serialization.DataDefinition;
 import bubo.io.serialization.SerializationDefinitionManager;
 import bubo.io.text.ReadCsvObjectSmart;
@@ -13,9 +35,15 @@ import bubo.ptcloud.alg.PointVectorNN;
 import bubo.ptcloud.tools.PointCloudShapeTools;
 import bubo.ptcloud.wrapper.ConfigRemoveFalseShapes;
 import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
+
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.RawInputListener;
-import com.jme3.input.event.*;
+import com.jme3.input.event.JoyAxisEvent;
+import com.jme3.input.event.JoyButtonEvent;
+import com.jme3.input.event.KeyInputEvent;
+import com.jme3.input.event.MouseButtonEvent;
+import com.jme3.input.event.MouseMotionEvent;
+import com.jme3.input.event.TouchEvent;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
@@ -33,23 +61,6 @@ import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.shape.Box;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.shadow.EdgeFilteringMode;
-import georegression.struct.plane.PlaneGeneral3D_F64;
-import georegression.struct.plane.PlaneNormal3D_F64;
-import georegression.struct.point.Point3D_F64;
-import georegression.struct.point.Vector3D_F64;
-import georegression.struct.shapes.Cylinder3D_F64;
-import georegression.struct.shapes.Sphere3D_F64;
-import org.ddogleg.struct.FastQueue;
-import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
-import us.ihmc.sensorProcessing.pointClouds.shape.ExpectationMaximizationFitter.ScoringFunction;
-
-import java.awt.*;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.*;
-import java.util.List;
-import java.util.concurrent.Callable;
 
 /**
  * @author Peter Abeles
@@ -62,7 +73,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
    private List<Point3D_F64> ransacCloud;
 
    private Node boundsNode = new Node("meshBounds");
-   private float boxExtent = 10.75f;
+   private float boxExtent = 0.75f;
    private Vector3f initialTranslation = new Vector3f(4.1f, -0.55f, -0.75f);
 
    private float translateSpeed = 0.1f;
@@ -88,7 +99,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
 
    public static void main(String[] args)
    {
-      ShapesFromPointCloudFileApp test1 = new ShapesFromPointCloudFileApp("../SensorProcessing/box_10s_h.txt");
+      ShapesFromPointCloudFileApp test1 = new ShapesFromPointCloudFileApp("../SensorProcessing/box_5s.txt");
       test1.start();
    }
 
@@ -488,16 +499,16 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(20, 0.8, 0.02, shapeTypes);
       configRansac.randomSeed = rand.nextLong();
 
-      configRansac.minModelAccept = 50;
+      configRansac.minModelAccept = 100;
       configRansac.octreeSplit = 25;
 
-      configRansac.maximumAllowedIterations = 30000;
-      configRansac.ransacExtension = 100;
+      configRansac.maximumAllowedIterations = 1000;
+      configRansac.ransacExtension = 15;
 
       //configRansac.models.get(1).modelCheck = new CheckShapeCylinderRadius(0.2);
       //configRansac.models.get(2).modelCheck = new CheckShapeSphere3DRadius(0.2);
 
-      ConfigRemoveFalseShapes configMerge = new ConfigRemoveFalseShapes(0.25);
+      ConfigRemoveFalseShapes configMerge = new ConfigRemoveFalseShapes(0.7);
 
       PointCloudShapeFinder shapeFinder = FactoryPointCloudShape.ransacOctree(configNormal, configRansac, configMerge);
 
@@ -900,11 +911,17 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
          {
             public void run()
             {
-               List<Point3D_F64> filterCloud = CubeCalibration.thin(fullCloud, .02);
-               filterCloud = CubeCalibration.filterByResidual(filterCloud, configNormal, .005);
+               System.out.println("Filter! : " + fullCloud.size());
+               List<Point3D_F64> filterCloud = CubeCalibration.thin(fullCloud, .01);
+               System.out.println(filterCloud.size());
+               filterCloud = CubeCalibration.thin(fullCloud, .015);
+               System.out.println(filterCloud.size());
+               filterCloud = CubeCalibration.thin(fullCloud, .02);
+               System.out.println(filterCloud.size());
+               //filterCloud = CubeCalibration.filterByResidual(filterCloud, configNormal, .005);
+               System.out.println(filterCloud.size());
                final List<Point3D_F64> finalCloud = filterCloud;
                
-               System.out.println("Full: " + fullCloud.size() + " Filtered: " + filterCloud.size());
                fullCloud = filterCloud;
 
                if (true)
@@ -919,7 +936,6 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
                   public Object call() throws Exception
                   {
                      displayView(finalCloud, ColorRGBA.White, defaultPointSize, allPointCloud);
-
                      return null;
                   }
                });
