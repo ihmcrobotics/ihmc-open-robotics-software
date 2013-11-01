@@ -47,7 +47,7 @@ public class StateEstimatorErrorCalculator
    private final YoFramePoint perfectPelvisPosition = new YoFramePoint("perfectPelvisPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector perfectPelvisLinearVelocity = new YoFrameVector("perfectPelvisLinearVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final boolean assumePerfectIMU;
-   private boolean useSimplePelvisPositionEstimator;
+   private final boolean useSimplePelvisPositionEstimator;
 
 
    public StateEstimatorErrorCalculator(Robot robot, Joint estimationJoint, StateEstimator orientationEstimator, boolean assumePerfectIMU,
@@ -157,12 +157,10 @@ public class StateEstimatorErrorCalculator
 		   computeAngularVelocityError();
 	   }
 
-	   if (!useSimplePelvisPositionEstimator)
-	   {
-	      computeCoMPositionError();
-	      computeCoMVelocityError();
-	   }
-	   else
+	   computeCoMPositionError();
+	   computeCoMVelocityError();
+	   
+	   if (useSimplePelvisPositionEstimator)
 	   {
          computePelvisPositionError();
          computePelvisVelocityError();
