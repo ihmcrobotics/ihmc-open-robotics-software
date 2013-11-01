@@ -270,7 +270,7 @@ public class ShapeTranslator
 
          int[] indexes =
          {
-            2, 0, 1, 1, 3, 2, 1, 3, 4
+            2, 0, 1, 1, 3, 2
          };
 
          Mesh plane1 = new Mesh();
