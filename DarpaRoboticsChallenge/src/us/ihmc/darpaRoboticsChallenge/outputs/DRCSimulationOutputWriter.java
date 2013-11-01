@@ -1,5 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.outputs;
 
+import java.util.ArrayList;
+
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
 import us.ihmc.SdfLoader.SDFRobot;
@@ -13,6 +15,7 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.robotController.RawOutputWriter;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.filter.DelayedDoubleYoVariable;
 
@@ -27,6 +30,8 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
    private final ObjectObjectMap<OneDoFJoint, DoubleYoVariable> rawJointTorques;
    private final ObjectObjectMap<OneDoFJoint, DelayedDoubleYoVariable> delayedJointTorques;
    
+   private final ArrayList<RawOutputWriter> rawOutputWriters = new ArrayList<RawOutputWriter>();
+
    double[] prevError;
    public DRCSimulationOutputWriter(SDFRobot robot, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, RobotVisualizer robotVisualizer)
    {
@@ -82,6 +87,11 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
          
       }
       
+      for (int i=0; i<rawOutputWriters.size(); i++)
+      {
+         rawOutputWriters.get(i).write();
+      }
+      
       if(dynamicGraphicObjectsListRegistry != null)
       {
          dynamicGraphicObjectsListRegistry.update();
@@ -120,6 +130,12 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
    public void setEstimatorModel(SDFFullRobotModel estimatorModel)
    {
       
+   }
+   
+
+   public void addRawOutputWriter(RawOutputWriter rawOutputWriter)
+   {
+      rawOutputWriters.add(rawOutputWriter);
    }
 
 }
