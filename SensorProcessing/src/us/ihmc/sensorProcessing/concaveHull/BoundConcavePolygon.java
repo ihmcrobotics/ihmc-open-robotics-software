@@ -95,6 +95,10 @@ public class BoundConcavePolygon {
 
 		axisX.normalize();
 		axisY.normalize();
+		// new code
+		norm.normalize();
+		
+		
 
 		// find the 2D coordinate of each point
 		meanX=meanY=0;
@@ -189,18 +193,18 @@ public class BoundConcavePolygon {
 		return true;
 	}
 
-	public Point3D_F64 convertTo3D( double x , double y , Point3D_F64 center ) {
+	public Point3D_F64 convertTo3D( double X2 , double Y2 , Point3D_F64 center ) {
 		
 		Point3D_F64 p3 = new Point3D_F64();
 		// rotated to standard 2D
-		double X2 = x*axis2X.x + y*axis2Y.x + meanX;
-		double Y2 = x*axis2X.y + y*axis2Y.y + meanY;
+		//double X2 = x*axis2X.x + y*axis2Y.x + meanX;
+		//double Y2 = x*axis2X.y + y*axis2Y.y + meanY;
 
-		// convert into 3D point
+//		// convert into 3D point
 		p3.x = X2*axisX.x + Y2*axisY.x + center.x;
 		p3.y = X2*axisX.y + Y2*axisY.y + center.y;
 		p3.z = X2*axisX.z + Y2*axisY.z + center.z;
-		
+
 		return p3;
 	}
 
