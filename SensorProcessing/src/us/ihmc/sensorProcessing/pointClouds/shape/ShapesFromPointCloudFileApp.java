@@ -1,27 +1,5 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
-import georegression.struct.plane.PlaneGeneral3D_F64;
-import georegression.struct.plane.PlaneNormal3D_F64;
-import georegression.struct.point.Point3D_F64;
-import georegression.struct.point.Vector3D_F64;
-import georegression.struct.shapes.Cylinder3D_F64;
-import georegression.struct.shapes.Sphere3D_F64;
-
-import java.awt.Color;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.Callable;
-
-import org.ddogleg.struct.FastQueue;
-
-import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
-import us.ihmc.sensorProcessing.pointClouds.shape.ExpectationMaximizationFitter.ScoringFunction;
 import bubo.io.serialization.DataDefinition;
 import bubo.io.serialization.SerializationDefinitionManager;
 import bubo.io.text.ReadCsvObjectSmart;
@@ -35,15 +13,9 @@ import bubo.ptcloud.alg.PointVectorNN;
 import bubo.ptcloud.tools.PointCloudShapeTools;
 import bubo.ptcloud.wrapper.ConfigRemoveFalseShapes;
 import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
-
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.RawInputListener;
-import com.jme3.input.event.JoyAxisEvent;
-import com.jme3.input.event.JoyButtonEvent;
-import com.jme3.input.event.KeyInputEvent;
-import com.jme3.input.event.MouseButtonEvent;
-import com.jme3.input.event.MouseMotionEvent;
-import com.jme3.input.event.TouchEvent;
+import com.jme3.input.event.*;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
@@ -61,6 +33,23 @@ import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.shape.Box;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.shadow.EdgeFilteringMode;
+import georegression.struct.plane.PlaneGeneral3D_F64;
+import georegression.struct.plane.PlaneNormal3D_F64;
+import georegression.struct.point.Point3D_F64;
+import georegression.struct.point.Vector3D_F64;
+import georegression.struct.shapes.Cylinder3D_F64;
+import georegression.struct.shapes.Sphere3D_F64;
+import org.ddogleg.struct.FastQueue;
+import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
+import us.ihmc.sensorProcessing.pointClouds.shape.ExpectationMaximizationFitter.ScoringFunction;
+
+import java.awt.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.*;
+import java.util.List;
+import java.util.concurrent.Callable;
 
 /**
  * @author Peter Abeles
@@ -334,7 +323,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       {
          public void run()
          {
-            ApproximateSurfaceNormals surface = new ApproximateSurfaceNormals(configNormal.numPlane, configNormal.numNeighbors,
+            ApproximateSurfaceNormals surface = new ApproximateSurfaceNormals(configNormal.numPlane,configNormal.maxDistancePlane, configNormal.numNeighbors,
                   configNormal.maxDistanceNeighbor);
 
             FastQueue<PointVectorNN> normalVectors = new FastQueue<PointVectorNN>(PointVectorNN.class, false);

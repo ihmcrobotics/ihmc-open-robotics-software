@@ -1,5 +1,8 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
+import bubo.ptcloud.alg.ApproximateSurfaceNormals;
+import bubo.ptcloud.alg.PointVectorNN;
+import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
 import georegression.geometry.UtilPlane3D_F64;
 import georegression.metric.Distance3D_F64;
 import georegression.metric.Intersection3D_F64;
@@ -8,21 +11,16 @@ import georegression.struct.plane.PlaneGeneral3D_F64;
 import georegression.struct.plane.PlaneNormal3D_F64;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.point.Vector3D_F64;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-
 import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.UtilOptimize;
 import org.ddogleg.optimization.functions.FunctionNtoM;
 import org.ddogleg.struct.FastQueue;
-
 import us.ihmc.sensorProcessing.pointClouds.shape.ExpectationMaximizationFitter.ScoringFunction;
-import bubo.ptcloud.alg.ApproximateSurfaceNormals;
-import bubo.ptcloud.alg.PointVectorNN;
-import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 public class CubeCalibration
 {
@@ -41,7 +39,7 @@ public class CubeCalibration
 
    public static List<Point3D_F64> thin(List<Point3D_F64> cloud, double size)
    {
-      ApproximateSurfaceNormals surface = new ApproximateSurfaceNormals(1000, 1000, size);
+      ApproximateSurfaceNormals surface = new ApproximateSurfaceNormals(1000, size, 1000, size);
       FastQueue<PointVectorNN> pointNormList = new FastQueue<PointVectorNN>(PointVectorNN.class, false);
       surface.process(cloud, pointNormList);
 
@@ -72,7 +70,7 @@ public class CubeCalibration
    
    public static List<Point3D_F64> filterByResidual(List<Point3D_F64> cloud, ConfigSurfaceNormals configNormal, double thresh)
    {
-      ApproximateSurfaceNormals surface = new ApproximateSurfaceNormals(configNormal.numPlane,configNormal.numNeighbors, configNormal.maxDistanceNeighbor);
+      ApproximateSurfaceNormals surface = new ApproximateSurfaceNormals(configNormal.numPlane,configNormal.maxDistancePlane,configNormal.numNeighbors, configNormal.maxDistanceNeighbor);
       FastQueue<PointVectorNN> pointNormList = new FastQueue<PointVectorNN>(PointVectorNN.class, false);
       surface.process(cloud, pointNormList);
 
