@@ -34,7 +34,7 @@ public class DisplayPointCloudFileApp extends SimpleApplication
 
    public static void main(String[] args)
    {
-      DisplayPointCloudFileApp test1 = new DisplayPointCloudFileApp("../SensorProcessing/output.txt");
+      DisplayPointCloudFileApp test1 = new DisplayPointCloudFileApp("plane.txt");
       test1.start();
    }
 
