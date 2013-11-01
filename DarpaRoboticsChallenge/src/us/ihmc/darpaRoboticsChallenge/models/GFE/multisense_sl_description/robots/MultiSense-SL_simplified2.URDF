@@ -1,0 +1,96 @@
+<robot
+  name="MultiSense-SL_simplified2">
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="3.3383E-05 0.020093 -0.06026"
+        rpy="0 0 0" />
+      <mass
+        value="1.4199" />
+      <inertia
+        ixx="0.0041178"
+        ixy="1.5797E-06"
+        ixz="-6.8415E-07"
+        iyy="0.0039688"
+        iyz="0.00089293"
+        izz="0.0035243" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://MultiSense-SL_simplified2/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.9098 0.44314 0.031373 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://MultiSense-SL_simplified2/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="hokuyo_link">
+    <inertial>
+      <origin
+        xyz="0.0004084 -0.012428 -0.0041835"
+        rpy="0 0 0" />
+      <mass
+        value="0.057664" />
+      <inertia
+        ixx="4.2412E-05"
+        ixy="-4.9927E-08"
+        ixz="-9.8165E-09"
+        iyy="3.7174E-05"
+        iyz="-1.1015E-05"
+        izz="4.167E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://MultiSense-SL_simplified2/meshes/hokuyo_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.72941 0.35686 0.023529 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://MultiSense-SL_simplified2/meshes/hokuyo_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="hokuyo_joint"
+    type="continuous">
+    <origin
+      xyz="0 0 0"
+      rpy="1.5707963267949 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="hokuyo_link" />
+    <axis
+      xyz="0 0 -1" />
+  </joint>
+</robot>
