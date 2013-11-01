@@ -133,7 +133,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final CoMHeightTimeDerivativesCalculator coMHeightTimeDerivativesCalculator = new CoMHeightTimeDerivativesCalculator();
    private final CoMHeightTimeDerivativesSmoother coMHeightTimeDerivativesSmoother;
 
-   private EndEffectorControlModule endEffectorControlModule;
 
    private final PDController centerOfMassHeightController;
    private final SideDependentList<WalkingState> singleSupportStateEnums = new SideDependentList<WalkingState>(WalkingState.LEFT_SUPPORT,
@@ -430,6 +429,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          GeometricJacobian jacobian = legJacobians.get(robotSide);
          OneDoFJoint kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE);
          
+         EndEffectorControlModule endEffectorControlModule;
+
          if (WalkOnTheEdgesProviders.TOEOFF_MOTION_TYPE_USED != ToeOffMotionType.FREE)
          {
             DoubleTrajectoryGenerator onToesPitchTrajectoryGenerator = walkOnTheEdgesProviders.getToeOffPitchTrajectoryGenerators(robotSide);
@@ -445,7 +446,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
          
                   
-         VariableChangedListener swingGainsChangedListener = createSwingGainsChangedListener();
+         VariableChangedListener swingGainsChangedListener = createSwingGainsChangedListener(endEffectorControlModule);
          swingGainsChangedListener.variableChanged(null);
 
          endEffectorControlModule.setParameters(minJacobianDeterminantForSingularityEscape, singularityEscapeNullspaceMultiplierSwingLeg.getDoubleValue());
@@ -582,7 +583,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       return ret;
    }
    
-   private VariableChangedListener createSwingGainsChangedListener()
+   private VariableChangedListener createSwingGainsChangedListener(final EndEffectorControlModule endEffectorControlModule)
    {
       VariableChangedListener ret = new VariableChangedListener()
       {
