@@ -68,7 +68,8 @@ public class ShapeTranslator
 
       else if (s.type.equals(CloudShapeTypes.PLANE))
       {
-         createPlane(s, color, nodeToAddTo);
+         //createPlane(s, color, nodeToAddTo);
+         createPolygon(s, color, nodeToAddTo);
       }
       else if (s.type.equals(CloudShapeTypes.SPHERE))
       {
@@ -161,7 +162,33 @@ public class ShapeTranslator
 
 //    }
    }
+   public void createPolygon(Shape s, ColorRGBA color, Node nodeToAddTo)
+   {
+      // if the shape is a plane
+    if (s.type.equals(CloudShapeTypes.PLANE))
+          {
+      // get the concave polygon around and get the resulting triangulation
+      BoundConcavePolygon polygon = new BoundConcavePolygon();
+      ConcaveHull prep_c = prepareConcaveHull((PlaneGeneral3D_F64)s.parameters, s.points, polygon);
 
+      // draw the polygon outer edges
+      List<Point3D_F64> points3d = getConcaveHull(prep_c, polygon);
+
+      // get the triangles from the concave hull
+      System.out.println(prep_c.triangles.size());
+      nodeToAddTo.attachChild(generateCustomPolygon(prep_c.triangles.values(), polygon, color));
+
+
+
+      for (int i = 1; i < points3d.size(); i++)
+      {
+         Vector3f start = new Vector3f((float) points3d.get(i - 1).x, (float) points3d.get(i - 1).y, (float) points3d.get(i - 1).z);
+         Vector3f end = new Vector3f((float) points3d.get(i).x, (float) points3d.get(i).y, (float) points3d.get(i).z);
+         nodeToAddTo.attachChild(drawLine(start, end));
+      }
+
+    }
+   }
    // prepares to build the concave hull
    public ConcaveHull prepareConcaveHull(PlaneGeneral3D_F64 plane, List<Point3D_F64> points3d, BoundConcavePolygon polygon)
    {
