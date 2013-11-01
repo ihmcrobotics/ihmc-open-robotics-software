@@ -13,5 +13,4 @@ public interface DRCOutputWriter extends RobotControlElement
    public abstract void writeAfterSimulationTick();
    public abstract void setFullRobotModel(SDFFullRobotModel controllerModel);
    public abstract void setEstimatorModel(SDFFullRobotModel estimatorModel);
-   public abstract void addRawOutputWriter(RawOutputWriter rawOutputWriter);
 }
