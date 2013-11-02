@@ -66,7 +66,7 @@ public class SensorAndEstimatorAssembler
       this.useSimplePelvisPositionEstimator = useSimplePelvisPositionEstimator;
       
       this.stateEstimatorDataFromControllerSource = stateEstimatorDataFromControllerSource;
-      SensorConfigurationFactory SensorConfigurationFactory = new SensorConfigurationFactory(sensorNoiseParametersForEstimator, gravitationalAcceleration);
+      SensorConfigurationFactory sensorConfigurationFactory = new SensorConfigurationFactory(sensorNoiseParametersForEstimator, gravitationalAcceleration);
 
       jointSensorDataSource = new JointAndIMUSensorDataSource(stateEstimatorSensorDefinitions, sensorFilterParameters, registry);
       JointAndIMUSensorMap jointAndIMUSensorMap = jointSensorDataSource.getSensorMap();
@@ -74,14 +74,14 @@ public class SensorAndEstimatorAssembler
       ReferenceFrame estimationFrame = inverseDynamicsStructure.getEstimationFrame();
 
       // Sensor configurations for estimator
-      Collection<OrientationSensorConfiguration> orientationSensorConfigurations = SensorConfigurationFactory
+      Collection<OrientationSensorConfiguration> orientationSensorConfigurations = sensorConfigurationFactory
             .createOrientationSensorConfigurations(jointAndIMUSensorMap.getOrientationSensors());
 
       
-      Collection<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations = SensorConfigurationFactory
+      Collection<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations = sensorConfigurationFactory
             .createAngularVelocitySensorConfigurations(jointAndIMUSensorMap.getAngularVelocitySensors());
 
-      Collection<LinearAccelerationSensorConfiguration> linearAccelerationSensorConfigurations = SensorConfigurationFactory
+      Collection<LinearAccelerationSensorConfiguration> linearAccelerationSensorConfigurations = sensorConfigurationFactory
             .createLinearAccelerationSensorConfigurations(jointAndIMUSensorMap.getLinearAccelerationSensors());
 
       controlFlowGraph = new ControlFlowGraph();
