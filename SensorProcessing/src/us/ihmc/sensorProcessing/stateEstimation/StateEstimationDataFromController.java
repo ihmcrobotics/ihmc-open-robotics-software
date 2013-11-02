@@ -127,7 +127,8 @@ public class StateEstimationDataFromController extends AbstractControlFlowElemen
       return desiredAngularAcceleration;
    }
 
-   private FrameVector getDesiredCenterOfMassAcceleration()
+   // TODO make that private again (Sylvain)
+   public FrameVector getDesiredCenterOfMassAcceleration()
    {
       return desiredCenterOfMassAcceleration;
    }
