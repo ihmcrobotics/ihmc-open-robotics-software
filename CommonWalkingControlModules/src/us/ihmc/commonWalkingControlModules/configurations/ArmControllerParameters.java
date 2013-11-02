@@ -4,4 +4,6 @@ public interface ArmControllerParameters
 {
    public abstract double getKpAllArmJoints();
    public abstract double getZetaAllArmJoints();
+   public abstract double getMaxAccelerationAllArmJoints();
+   public abstract double getMaxJerkAllArmJoints();
 }

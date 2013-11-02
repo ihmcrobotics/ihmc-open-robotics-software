@@ -8,6 +8,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.FormattingTools;
+import us.ihmc.utilities.maps.ObjectObjectMap;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -21,6 +23,7 @@ import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.GainCalculator;
 import com.yobotics.simulationconstructionset.util.PDController;
+import com.yobotics.simulationconstructionset.util.math.filter.RateLimitedYoVariable;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
 
@@ -31,14 +34,17 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
    private final LinkedHashMap<OneDoFJoint, DoubleTrajectoryGenerator> trajectories;
    private final LinkedHashMap<OneDoFJoint, PDController> pdControllers;
 
-   private final DoubleYoVariable kpAllArmJoints, kdAllArmJoints, zetaAllArmJoints;
+   private final ObjectObjectMap<OneDoFJoint, RateLimitedYoVariable> rateLimitedAccelerations;
+
+   
+   private final DoubleYoVariable kpAllArmJoints, kdAllArmJoints, zetaAllArmJoints, maxAccelerationArmJoints, maxJerkArmJoints;
 
    private final DoubleYoVariable moveTimeArmJoint;
 
    private final YoVariableRegistry registry;
    private final MomentumBasedController momentumBasedController;
 
-   public JointSpaceHandControlControlState(IndividualHandControlState stateEnum, RobotSide robotSide, GeometricJacobian jacobian,
+   public JointSpaceHandControlControlState(double dt, IndividualHandControlState stateEnum, RobotSide robotSide, GeometricJacobian jacobian,
            MomentumBasedController momentumBasedController, ArmControllerParameters armControllerParameters, YoVariableRegistry parentRegistry, double moveTime)
    {
       super(stateEnum);
@@ -56,11 +62,19 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
       zetaAllArmJoints.set(armControllerParameters.getZetaAllArmJoints());
 
       kdAllArmJoints = new DoubleYoVariable("kdAllArmJoints" + robotSide, registry);
+
+      maxAccelerationArmJoints = new DoubleYoVariable("maxAccelerationArmJoints" + robotSide, registry);
+      maxJerkArmJoints = new DoubleYoVariable("maxJerkArmJoints" + robotSide, registry);
+      
+      maxAccelerationArmJoints.set(armControllerParameters.getMaxAccelerationAllArmJoints());
+      maxJerkArmJoints.set(armControllerParameters.getMaxJerkAllArmJoints());
+      
       setupVariableListener();
 
       trajectories = new LinkedHashMap<OneDoFJoint, DoubleTrajectoryGenerator>();
       pdControllers = new LinkedHashMap<OneDoFJoint, PDController>();
-
+      rateLimitedAccelerations = new ObjectObjectMap<OneDoFJoint, RateLimitedYoVariable>();
+      
       InverseDynamicsJoint[] joints = ScrewTools.createJointPath(jacobian.getBase(), jacobian.getEndEffector());
       this.oneDoFJoints = ScrewTools.filterJoints(joints, RevoluteJoint.class);
 
@@ -69,6 +83,10 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
          PDController pdController = new PDController(kpAllArmJoints, kdAllArmJoints, joint.getName() + robotSide.getCamelCaseNameForMiddleOfExpression(),
                                         registry);
          pdControllers.put(joint, pdController);
+         
+         
+         RateLimitedYoVariable rateLimitedAcceleration = new RateLimitedYoVariable(joint.getName() + "Acceleration" + robotSide, registry, maxJerkArmJoints, dt);
+         rateLimitedAccelerations.add(joint, rateLimitedAcceleration);
       }
 
       this.momentumBasedController = momentumBasedController;
@@ -111,6 +129,12 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
          PDController pdController = pdControllers.get(joint);
          double desiredAcceleration = feedforwardAcceleration + pdController.compute(currentPosition, desiredPosition, currentVelocity, desiredVelocity);
 
+         desiredAcceleration = MathTools.clipToMinMax(desiredAcceleration, maxAccelerationArmJoints.getDoubleValue());
+         
+         RateLimitedYoVariable rateLimitedAcceleration = rateLimitedAccelerations.get(joint);
+         rateLimitedAcceleration.update(desiredAcceleration);
+         desiredAcceleration = rateLimitedAcceleration.getDoubleValue();
+         
          momentumBasedController.setOneDoFJointAcceleration(joint, desiredAcceleration);
       }
    }

@@ -164,7 +164,7 @@ public class IndividualHandControlModule
       loadBearingPlaneFingersBentBackState = new LoadBearingPlaneHandControlState(IndividualHandControlState.LOAD_BEARING_PLANE_FINGERS_BENT_BACK, robotSide,
               momentumBasedController, fullRobotModel.getElevator(), jacobian, handController, registry);
 
-      jointSpaceHandControlState = new JointSpaceHandControlControlState(IndividualHandControlState.JOINT_SPACE, 
+      jointSpaceHandControlState = new JointSpaceHandControlControlState(controlDT, IndividualHandControlState.JOINT_SPACE, 
             robotSide, jacobian, momentumBasedController,  armControlParameters, 
               registry, 1.0);
 
