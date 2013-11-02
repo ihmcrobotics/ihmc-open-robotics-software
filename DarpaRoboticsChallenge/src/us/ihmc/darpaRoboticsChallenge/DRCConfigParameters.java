@@ -259,10 +259,10 @@ public class DRCConfigParameters
       }
    }
 
-   // Atlas onboard filtering parameters
-   public static final boolean FILTER_JOINT_ANGLES = false;
-   public static final boolean FILTER_JOINT_VELOCITIES = false;
-   public static final boolean FILTER_JOINT_TORQUES = false;
+   // Atlas on-board filtering parameters
+   public static final boolean USE_IHMCFILTER_JOINT_ANGLES = false;
+   public static final boolean USE_IHMCFILTER_JOINT_VELOCITIES = false;
+   public static final boolean USE_IHMCFILTER_JOINT_TORQUES = true;
 
    public static final double JOINT_POSITION_FILTER_FREQ_HZ = positionSensorFrequencyHz;
    public static final double JOINT_VELOCITY_FILTER_FREQ_HZ = velocitySensorFrequencyHz;
