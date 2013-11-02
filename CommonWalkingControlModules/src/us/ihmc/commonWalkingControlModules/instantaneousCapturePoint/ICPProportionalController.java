@@ -11,6 +11,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.math.filter.AccelerationLimitedYoFrameVector2d;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFrameVector2d;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.filter.FilteredVelocityYoFrameVector;
@@ -30,13 +31,14 @@ public class ICPProportionalController
    
    private final DoubleYoVariable alphaCMP = new DoubleYoVariable("alphaCMP", registry);
    private final DoubleYoVariable rateLimitCMP = new DoubleYoVariable("rateLimitCMP", registry);
+   private final DoubleYoVariable accelerationLimitCMP = new DoubleYoVariable("accelerationLimitCMP", registry);
 
    private final YoFrameVector2d desiredCMPToICP = new YoFrameVector2d("desiredCMPToICP", "", worldFrame, registry);
    private final YoFrameVector2d rawCMPOutput = new YoFrameVector2d("rawCMPOutput", "", worldFrame, registry);
    private final AlphaFilteredYoFrameVector2d filteredCMPOutput = AlphaFilteredYoFrameVector2d.createAlphaFilteredYoFrameVector2d("filteredCMPOutput", "",
                                                                     registry, alphaCMP, rawCMPOutput);
    
-   private final RateLimitedYoFrameVector2d rateLimitedCMPOutput;
+   private final AccelerationLimitedYoFrameVector2d rateLimitedCMPOutput;
 
    private final DoubleYoVariable maxDistanceBetweenICPAndCMP = new DoubleYoVariable("maxDistanceBetweenICPAndCMP", registry);
    
@@ -59,7 +61,7 @@ public class ICPProportionalController
    {
       this.controlDT = controlDT;
       
-      rateLimitedCMPOutput = RateLimitedYoFrameVector2d.createRateLimitedYoFrameVector2d("rateLimitedCMPOutput", "", registry, rateLimitCMP, controlDT, filteredCMPOutput);
+      rateLimitedCMPOutput = AccelerationLimitedYoFrameVector2d.createAccelerationLimitedYoFrameVector2d("rateLimitedCMPOutput", "", registry, rateLimitCMP, accelerationLimitCMP, controlDT, filteredCMPOutput);
 
       icpVelocityDirectionFrame = new Vector2dZUpFrame("icpVelocityDirectionFrame", worldFrame);
       
@@ -154,12 +156,13 @@ public class ICPProportionalController
       return desiredCMP;
    }
 
-   public void setGains(double captureKpParallelToMotion, double captureKpOrthogonalToMotion, double filterBreakFrequencyHertz, double rateLimitCMP)
+   public void setGains(double captureKpParallelToMotion, double captureKpOrthogonalToMotion, double filterBreakFrequencyHertz, double rateLimitCMP, double accelerationLimitCMP)
    {
       this.captureKpParallelToMotion.set(captureKpParallelToMotion);
       this.captureKpOrthogonalToMotion.set(captureKpOrthogonalToMotion);
       this.alphaCMP.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequencyHertz, controlDT));
       this.rateLimitCMP.set(rateLimitCMP);
+      this.accelerationLimitCMP.set(accelerationLimitCMP);
    }
 
    public class Vector2dZUpFrame extends ReferenceFrame

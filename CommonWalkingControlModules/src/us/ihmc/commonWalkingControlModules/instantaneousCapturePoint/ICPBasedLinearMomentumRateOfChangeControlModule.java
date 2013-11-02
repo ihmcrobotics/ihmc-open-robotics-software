@@ -129,9 +129,10 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
       return ret;
    }
 
-   public void setGains(double captureKpParallelToMotion, double captureKpOrthogonalToMotion, double filterBreakFrequencyHertz, double rateLimitCMP)
+   public void setGains(double captureKpParallelToMotion, double captureKpOrthogonalToMotion, 
+         double filterBreakFrequencyHertz, double rateLimitCMP, double accelerationLimitCMP)
    {
-      this.icpProportionalController.setGains(captureKpParallelToMotion, captureKpOrthogonalToMotion, filterBreakFrequencyHertz, rateLimitCMP);
+      this.icpProportionalController.setGains(captureKpParallelToMotion, captureKpOrthogonalToMotion, filterBreakFrequencyHertz, rateLimitCMP, accelerationLimitCMP);
    }
 
    public void waitUntilComputationIsDone()
