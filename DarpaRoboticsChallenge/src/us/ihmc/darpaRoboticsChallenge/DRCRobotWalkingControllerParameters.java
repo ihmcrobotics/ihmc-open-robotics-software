@@ -328,6 +328,12 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
       return 4.0; //3.0;
    }
 
+   public double getCMPAccelerationLimit()
+   {
+      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 1000.0;
+      return 40.0;
+   }
+   
    public double getKpCoMHeight()
    {
       if (DRCConfigParameters.USE_VRC_PARAMETERS) return 40.0;

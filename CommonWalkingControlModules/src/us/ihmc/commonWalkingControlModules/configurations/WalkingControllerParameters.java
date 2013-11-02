@@ -53,6 +53,7 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getCaptureKpOrthogonalToMotion();
    public abstract double getCaptureFilterBreakFrequencyInHz();
    public abstract double getCMPRateLimit();
+   public abstract double getCMPAccelerationLimit();
 
    public abstract double getKpPelvisOrientation();
    public abstract double getZetaPelvisOrientation();
@@ -69,5 +70,6 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getZetaUpperBody();
    public abstract double getMaxAccelerationUpperBody();
    public abstract double getMaxJerkUpperBody();
+
 
 }
