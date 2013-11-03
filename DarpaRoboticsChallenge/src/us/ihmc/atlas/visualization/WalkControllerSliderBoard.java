@@ -49,8 +49,8 @@ public class WalkControllerSliderBoard
       
       sliderBoardConfigurationManager.setSlider(1, "offsetHeightAboveGround", registry, 0.0, 0.12);
 
-      sliderBoardConfigurationManager.setSlider(2, "desiredICPX", registry, -0.05, 0.15);
-      sliderBoardConfigurationManager.setKnob  (2, "desiredICPY", registry, -0.2, 0.2);
+      sliderBoardConfigurationManager.setSlider(2, "desiredICPX", registry, -0.3, 0.3);
+      sliderBoardConfigurationManager.setKnob  (2, "desiredICPY", registry, -0.3, 0.3);
       
       sliderBoardConfigurationManager.setSlider(3, "userDesiredPelvisYaw", registry, -Math.PI, Math.PI);
       sliderBoardConfigurationManager.setKnob  (3, "userSetDesiredPelvis", registry, 0.0, 1.0);
