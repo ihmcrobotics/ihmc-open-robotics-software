@@ -63,7 +63,6 @@ public class DRCConfigParameters
    public static final double CONTROL_DT = 0.006;
    public static final double ATLAS_ONBOARD_SAMPLINGFREQ = 1000;
    public static final double ATLAS_ONBOARD_DT = 1.0 / ATLAS_ONBOARD_SAMPLINGFREQ;
-   public static final boolean DO_NEW_FORCE_CONTROL_TEMP = false;
 
    // Set whether or not to use GFE Robot Model
    public static final boolean USE_GFE_ROBOT_MODEL = true;
