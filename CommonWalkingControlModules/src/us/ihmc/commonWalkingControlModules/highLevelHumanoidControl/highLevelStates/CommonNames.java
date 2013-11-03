@@ -47,6 +47,7 @@ public enum CommonNames
    a_ff_qd("_a_ff_qd"),
    a_ff_qd_d("_a_ff_qd_d"),
    a_ff_f_d("_a_ff_f_d"),
+   qerr_int_abs_max("qerr_int_abs_max"),
    kp("_kp"),
    kd("_kd"),
    current("_i"),
