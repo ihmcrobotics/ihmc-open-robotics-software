@@ -325,13 +325,13 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    public double getCMPRateLimit()
    {
       if (DRCConfigParameters.USE_VRC_PARAMETERS) return 100.0;
-      return 4.0; //3.0;
+      return 3.0; //4.0; //3.0;
    }
 
    public double getCMPAccelerationLimit()
    {
       if (DRCConfigParameters.USE_VRC_PARAMETERS) return 1000.0;
-      return 40.0;
+      return 120.0; //80.0; //40.0;
    }
    
    public double getKpCoMHeight()
@@ -343,7 +343,7 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    public double getZetaCoMHeight()
    {
       if (DRCConfigParameters.USE_VRC_PARAMETERS) return 1.0;
-      return 1.0;
+      return 0.8;
    }
    
    public double getKpPelvisOrientation()
@@ -355,7 +355,7 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    public double getZetaPelvisOrientation()
    {
       if (DRCConfigParameters.USE_VRC_PARAMETERS) return 1.0;
-      return 1.0;
+      return 0.8;
    }
    
 
@@ -380,7 +380,7 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    public double getZetaHeadOrientation()
    {
       if (DRCConfigParameters.USE_VRC_PARAMETERS) return 1.0;
-      return 1.0;
+      return 0.8;
    }
 
    public double getKpUpperBody()
@@ -392,7 +392,7 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    public double getZetaUpperBody()
    {
       if (DRCConfigParameters.USE_VRC_PARAMETERS) return 1.0;
-      return 1.0;
+      return 0.8;
    }
    
    public double getMaxAccelerationUpperBody()
