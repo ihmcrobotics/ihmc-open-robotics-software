@@ -18,26 +18,21 @@ import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.IMUMount;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
-import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 
 public class StateEstimatorSensorDefinitionsFromRobotFactory
 {
    private final SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap;
-   private final Robot robot;
-
    private final LinkedHashMap<IMUMount, IMUDefinition> imuDefinitions;
    private final Map<WrenchCalculatorInterface,ForceSensorDefinition> forceSensorDefinitions;
 
    private final StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
 
-   public StateEstimatorSensorDefinitionsFromRobotFactory(SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap, Robot robot, 
+   public StateEstimatorSensorDefinitionsFromRobotFactory(SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap, 
            ArrayList<IMUMount> imuMounts, ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators,  
            boolean addLinearAccelerationSensors)
    {
       this.scsToInverseDynamicsJointMap = scsToInverseDynamicsJointMap;
-      this.robot = robot;
-
       this.imuDefinitions = generateIMUDefinitions(imuMounts);
       this.forceSensorDefinitions = generateForceSensorDefinitions(groundContactPointBasedWrenchCalculators);
 
@@ -104,8 +99,7 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
 
    public void createAndAddOneDoFPositionAndVelocitySensors()
    {
-      ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
-      robot.getAllOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);
+      ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>(scsToInverseDynamicsJointMap.getSCSOneDegreeOfFreedomJoints());
 
       for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
       {
