@@ -3,7 +3,7 @@ package us.ihmc.robotDataCommunication.logger;
 import java.io.File;
 import java.io.IOException;
 
-import us.ihmc.robotDataCommunication.logger.util.AVConv;
+import us.ihmc.robotDataCommunication.logger.util.FFMpeg;
 import us.ihmc.robotDataCommunication.logger.util.BMDCapture;
 import us.ihmc.robotDataCommunication.logger.util.PipedCommandExecutor;
 import us.ihmc.utilities.net.TimestampListener;
@@ -36,7 +36,7 @@ public class VideoDataLogger implements TimestampListener
       bmdCapture.setTimestampData(logPath.getAbsolutePath() + File.separator + timestampDataFilename);
       
     
-      AVConv avconv = new AVConv(options.getAvconvPath());
+      FFMpeg avconv = new FFMpeg(options.getAvconvPath());
       avconv.setAudioCodec(null);
       avconv.setVideoCodec(options.getVideoCodec());
       avconv.setQuality(options.getVideoQuality());
@@ -71,7 +71,7 @@ public class VideoDataLogger implements TimestampListener
       bmdCapture.setTimestampData(File.separator + timestampDataFilename);
       
     
-      AVConv avconv = new AVConv("avconv");
+      FFMpeg avconv = new FFMpeg("avconv");
       avconv.setAudioCodec("copy");
       avconv.setVideoCodec("mjpeg");
       //avconv.setQuality(5);

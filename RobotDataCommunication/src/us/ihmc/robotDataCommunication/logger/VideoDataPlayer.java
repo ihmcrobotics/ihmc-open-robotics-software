@@ -8,7 +8,11 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
+import us.ihmc.robotDataCommunication.logger.util.FFMpeg;
+import us.ihmc.robotDataCommunication.logger.util.PipedCommandExecutor;
+
 import com.xuggle.mediatool.IMediaReader;
+import com.xuggle.mediatool.IMediaViewer;
 import com.xuggle.mediatool.IMediaViewer.Mode;
 import com.xuggle.mediatool.ToolFactory;
 import com.xuggle.xuggler.ICodec.Type;
@@ -37,11 +41,14 @@ public class VideoDataPlayer implements PlaybackListener, SimulationRewoundListe
    private long upcomingRobottimestamp = 0;
    
    private volatile boolean updateVideo = true;
+   private final IMediaViewer viewer;
+
+   private final File videoFile;
    
    public VideoDataPlayer(File dataDirectory, LogProperties logProperties, LongYoVariable timestamp)
    {
       this.interlaced = logProperties.getInterlaced();
-      File videoFile = new File(dataDirectory, logProperties.getVideoFile());
+      videoFile = new File(dataDirectory, logProperties.getVideoFile());
       File timestampFile = new File(dataDirectory, logProperties.getTimestampFile());
 
       parseTimestampData(timestampFile);
@@ -66,7 +73,8 @@ public class VideoDataPlayer implements PlaybackListener, SimulationRewoundListe
       this.videoStream = videoStream;
       
       
-      reader.addListener(ToolFactory.makeViewer(Mode.FAST_VIDEO_ONLY, false));
+      viewer = ToolFactory.makeViewer(Mode.FAST_VIDEO_ONLY, false);
+      reader.addListener(viewer);
       reader.readPacket();
    }
 
@@ -77,18 +85,7 @@ public class VideoDataPlayer implements PlaybackListener, SimulationRewoundListe
          return;
       }
       
-      for(int i = robotTimestamps.size() - 1; i >= 0; i--)
-      {
-         long nextTimestamp = robotTimestamps.get(i);
-         if(timestamp >= nextTimestamp)
-         {
-            currentlyShowingRobottimestamp = nextTimestamp;
-            currentlyShowingIndex = i;
-            break;
-         }
-      }
-      
-      long videoTimestamp = videoTimestamps.get(currentlyShowingIndex);
+      long videoTimestamp = getVideoTimestamp(timestamp);
       
       if(currentlyShowingIndex + 1 < robotTimestamps.size())
       {
@@ -105,6 +102,23 @@ public class VideoDataPlayer implements PlaybackListener, SimulationRewoundListe
          System.err.println(IError.make(retval).getDescription());
       }
       reader.readPacket();
+   }
+
+   private long getVideoTimestamp(long timestamp)
+   {
+      for(int i = robotTimestamps.size() - 1; i >= 0; i--)
+      {
+         long nextTimestamp = robotTimestamps.get(i);
+         if(timestamp >= nextTimestamp)
+         {
+            currentlyShowingRobottimestamp = nextTimestamp;
+            currentlyShowingIndex = i;
+            break;
+         }
+      }
+      
+      long videoTimestamp = videoTimestamps.get(currentlyShowingIndex);
+      return videoTimestamp;
    }
    
    private void parseTimestampData(File timestampFile)
@@ -172,6 +186,44 @@ public class VideoDataPlayer implements PlaybackListener, SimulationRewoundListe
    public void updateVideo(boolean update)
    {
       this.updateVideo = update;
+   }
+
+   public long getCurrentTimestamp()
+   {
+      return timestamp.getLongValue();
+   }
+
+   public void exportVideo(File selectedFile, long startTimestamp, long endTimestamp)
+   {
+      
+      long startVideoTimestamp = getVideoTimestamp(startTimestamp);
+      long endVideoTimestamp = getVideoTimestamp(endTimestamp);
+      
+      double timebase = reader.getContainer().getStream(videoStream).getTimeBase().getDouble();
+      
+      double startTime = startVideoTimestamp * timebase;
+      double endTime = endVideoTimestamp * timebase;
+      
+      FFMpeg ffMpeg  = new FFMpeg(true);
+      
+      ffMpeg.setStarttime(startTime);
+      ffMpeg.setEndtime(endTime);
+      ffMpeg.setInputFile(videoFile.getAbsolutePath());
+      ffMpeg.setVideoCodec("h264");
+      ffMpeg.setAudioCodec("aac");
+      ffMpeg.enableExperimentalCodecs(true);
+      ffMpeg.setOutputFile(selectedFile.getAbsolutePath());
+      
+      PipedCommandExecutor executor = new PipedCommandExecutor(ffMpeg);
+      try
+      {
+         executor.execute();
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+      
    }
 
 }
