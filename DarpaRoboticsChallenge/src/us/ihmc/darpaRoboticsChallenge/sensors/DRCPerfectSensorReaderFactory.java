@@ -42,7 +42,7 @@ public class DRCPerfectSensorReaderFactory implements SensorReaderFactory
       SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = SCSToInverseDynamicsJointMap.createByName((FloatingJoint) rootJoint, sixDoFJoint);
 
       StateEstimatorSensorDefinitionsFromRobotFactory stateEstimatorSensorDefinitionsFromRobotFactory = new StateEstimatorSensorDefinitionsFromRobotFactory(
-            scsToInverseDynamicsJointMap, robot, new ArrayList<IMUMount>(), groundContactPointBasedWrenchCalculators, addLinearAccelerationSensors);
+            scsToInverseDynamicsJointMap, new ArrayList<IMUMount>(), groundContactPointBasedWrenchCalculators, addLinearAccelerationSensors);
       this.stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
       
       
