@@ -6,17 +6,17 @@ public class ExternalProgramHelpers
    {
       String os = System.getProperty("os.name");
       
-      if("mac os x".equals(os))
+      if("mac os x".equals(os.toLowerCase()))
       {
          return "mac";
       }
       
-      if(os != null && os.indexOf("windows") != -1)
+      if(os != null && os.toLowerCase().indexOf("windows") != -1)
       {
          return "windows";
       }
       
-      if(os != null && os.indexOf("linux") != -1)
+      if(os != null && os.toLowerCase().indexOf("linux") != -1)
       {
          return "linux";
       }
