@@ -71,7 +71,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
       {
          SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = SCSToInverseDynamicsJointMap.createByName((FloatingJoint) rootJoint, sixDoFJoint);
          StateEstimatorSensorDefinitionsFromRobotFactory stateEstimatorSensorDefinitionsFromRobotFactory = new StateEstimatorSensorDefinitionsFromRobotFactory(
-               scsToInverseDynamicsJointMap, robot, imuMounts, groundContactPointBasedWrenchCalculators, addLinearAccelerationSensors);
+               scsToInverseDynamicsJointMap, imuMounts, groundContactPointBasedWrenchCalculators, addLinearAccelerationSensors);
          
          this.stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
          this.imuDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getIMUDefinitions();
@@ -105,8 +105,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
 
    private void createAndAddOneDoFPositionAndVelocitySensors(SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap)
    {
-      ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
-      robot.getAllOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);
+      ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>(scsToInverseDynamicsJointMap.getSCSOneDegreeOfFreedomJoints());
 
       long seed = 18735L;
       
