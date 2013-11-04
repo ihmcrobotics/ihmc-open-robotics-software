@@ -4,13 +4,14 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
-import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JSeparator;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -20,6 +21,7 @@ import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
 import com.yobotics.simulationconstructionset.VariableChangedListener;
 import com.yobotics.simulationconstructionset.YoVariable;
+import com.yobotics.simulationconstructionset.movies.MovieFileFilter;
 
 public class YoVariableLogVisualizerGUI extends JPanel
 {
@@ -58,6 +60,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
          try
          {
             scs.simulateOneRecordStepNow();
+            scs.setInPoint();
          }
          catch (UnreasonableAccelerationException e)
          {
@@ -66,6 +69,50 @@ public class YoVariableLogVisualizerGUI extends JPanel
 
          if (player != null) player.indexChanged(0, 0);
       }
+   }
+   
+
+   private void exportVideo()
+   {
+      if(player != null)
+      {
+         
+         if(scs.isSimulating())
+         {
+            scs.stop();
+         }
+         
+         scs.gotoInPointNow();
+         long startTimestamp = player.getCurrentTimestamp();
+         scs.gotoOutPointNow();
+         long endTimestamp = player.getCurrentTimestamp();
+         
+         if(startTimestamp > endTimestamp)
+         {
+            
+            JOptionPane.showMessageDialog(this,
+                  "startTimestamp > endTimestamp. Please set the in-point and out-point correctly",
+                  "Timestmap error",
+                  JOptionPane.ERROR_MESSAGE);
+            
+            return;
+         }
+         
+         
+         JFileChooser saveDialog = new JFileChooser(System.getProperty("user.home"));
+         saveDialog.setFileFilter(new MovieFileFilter());
+         File selectedFile = null;
+         if (JFileChooser.APPROVE_OPTION == saveDialog.showSaveDialog(this))
+         {
+            selectedFile = saveDialog.getSelectedFile();
+            
+            player.exportVideo(selectedFile, startTimestamp, endTimestamp);
+            
+         }
+         
+         
+      }
+      
    }
 
    private void addGUIElements()
@@ -115,9 +162,27 @@ public class YoVariableLogVisualizerGUI extends JPanel
             }
          }
       });
+      
+      
+      final JButton exportVideo = new JButton("Export video");
+      exportVideo.setToolTipText("Export video starting from the in point till the out point.");
+      exportVideo.addActionListener(new ActionListener()
+      {
+         
+         @Override
+         public void actionPerformed(ActionEvent e)
+         {
+            exportVideo();
+         }
+
+      });
+      
       timePanel.add(slider, BorderLayout.CENTER);
       timePanel.add(currentTime, BorderLayout.EAST);
+      
       add(timePanel);
+      add(exportVideo);
+      
    }
 
 
