@@ -28,6 +28,8 @@ public class DRCRobotSDFLoader
       {
          resourceDirectories.add(myClass.getResource("models/GFE/gazebo").getFile());
          resourceDirectories.add(myClass.getResource("models/GFE/").getFile());
+         resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/atlas_description").getFile());
+         resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/multisense_sl_description").getFile());
          resourceDirectories.add(myClass.getResource("models").getFile());
       }
       
@@ -46,6 +48,13 @@ public class DRCRobotSDFLoader
                resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/irobot_hand_description").getFile());
             }
             break;
+         case ATLAS_V3_IROBOT_HANDS :
+        	 fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_v3_irobot_hands.sdf");
+        	 if(!headless)
+        	 {
+        		 resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/irobot_hand_description").getFile());
+        	 }
+        	 break;
 
          case ATLAS_SANDIA_HANDS :
             fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_sandia_hands.sdf");

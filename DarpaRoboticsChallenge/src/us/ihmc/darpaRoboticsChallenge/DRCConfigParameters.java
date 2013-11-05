@@ -6,7 +6,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 
 public class DRCConfigParameters
 {
-   public static final DRCRobotModel robotModelToUse = DRCRobotModel.ATLAS_NO_HANDS_ADDED_MASS;
+   public static final DRCRobotModel robotModelToUse = DRCRobotModel.ATLAS_SANDIA_HANDS;
 
    public static final boolean USE_VRC_PARAMETERS = !DRCLocalConfigParameters.USE_JERRY_PARAMETERS;    // false;//false in combo with torque limiting makes robot hip oscillate a lot in simulation
    public static final boolean RUNNING_ON_REAL_ROBOT = DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT;

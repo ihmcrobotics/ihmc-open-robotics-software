@@ -7,7 +7,6 @@ import us.ihmc.atlas.AlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.atlas.PPSTimestampOffsetProvider;
 import us.ihmc.atlas.RealRobotPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCNetClassList;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotDataReceiver;
@@ -137,11 +136,11 @@ public class DRCNetworkProcessor
       robotPoseBuffer = new RobotPoseBuffer(this.fieldComputerClient, 1000, timestampProvider);
       networkingManager = new DRCNetworkProcessorNetworkingManager(this.fieldComputerClient, timestampProvider);
 
-      jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_SANDIA_HANDS, false);
+      jointMap = new DRCRobotJointMap(DRCConfigParameters.robotModelToUse, false);
       JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap, true);
-
       fullRobotModel = loader.createFullRobotModel(jointMap);
-      DRCRobotDataReceiver drcRobotDataReceiver = new DRCRobotDataReceiver(DRCRobotModel.ATLAS_SANDIA_HANDS, fullRobotModel);
+      
+      DRCRobotDataReceiver drcRobotDataReceiver = new DRCRobotDataReceiver(DRCConfigParameters.robotModelToUse, fullRobotModel);
       this.fieldComputerClient.attachListener(DRCJointConfigurationData.class, drcRobotDataReceiver);
       robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, fullRobotModel);
 
