@@ -57,7 +57,7 @@ public class DRCOptimizationMomentumControlModuleTest
    {
       Random random = new Random(1252515L);
 
-      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_SANDIA_HANDS, false);
+      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCConfigParameters.robotModelToUse, false);
       JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       SDFFullRobotModel fullRobotModel = jaxbSDFLoader.createFullRobotModel(jointMap);
       SDFRobot robot = jaxbSDFLoader.createRobot(jointMap, false);
@@ -141,7 +141,7 @@ public class DRCOptimizationMomentumControlModuleTest
    {
       Random random = new Random(1252515L);
 
-      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_SANDIA_HANDS, false);
+      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCConfigParameters.robotModelToUse, false);
       JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       SDFFullRobotModel fullRobotModel = jaxbSDFLoader.createFullRobotModel(jointMap);
       SDFRobot robot = jaxbSDFLoader.createRobot(jointMap, false);

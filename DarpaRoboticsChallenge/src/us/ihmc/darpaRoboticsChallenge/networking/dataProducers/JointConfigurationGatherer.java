@@ -54,7 +54,7 @@ public class JointConfigurationGatherer
             HashMap<String, FingerJoint> jointsByName = new HashMap<String, FingerJoint>();
             for (FingerJoint joint : handModels.get(robotSide))
             {
-               jointsByName.put(joint.getName(), joint);
+               jointsByName.put(joint.getName().toLowerCase(), joint);
             }
 
             String[] handNames = robotSide == RobotSide.LEFT ? DRCJointConfigurationData.leftHandNames : DRCJointConfigurationData.rightHandNames;
@@ -63,7 +63,8 @@ public class JointConfigurationGatherer
             handJoints.put(robotSide, new FingerJoint[numberOfHandJoints]);
             for (int i = 0; i < numberOfHandJoints; i++)
             {
-               handJoints.get(robotSide)[i] = jointsByName.get(handNames[i]);
+               handJoints.get(robotSide)[i] = jointsByName.get(handNames[i].toLowerCase());
+               System.out.println(handJoints.get(robotSide)[i].getName());
             }
          }
          else
@@ -127,7 +128,10 @@ public class JointConfigurationGatherer
          final double[] sideHandAngles = handAngles.get(robotSide).getCopyForWriting();
          for (int i = 0; i < sideHandJoints.length; i++)
          {
-            sideHandAngles[i] = sideHandJoints[i].getQ();
+        	 if(sideHandJoints[i] != null)
+        	 {
+        		 sideHandAngles[i] = sideHandJoints[i].getQ();
+        	 }
          }
          handAngles.get(robotSide).commit();
       }
