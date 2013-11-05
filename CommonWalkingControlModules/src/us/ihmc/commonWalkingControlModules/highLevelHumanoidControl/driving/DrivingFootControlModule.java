@@ -127,7 +127,7 @@ public class DrivingFootControlModule
       transform.set(toePoint.getVectorCopy());
       toePointFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(toePointName, toePoint.getReferenceFrame(), transform);
       this.drivingReferenceFrames = drivingReferenceFrames;
-      toePointPositionController = new EuclideanPositionController(toePointName, toePointFrame, registry);
+      toePointPositionController = new EuclideanPositionController(toePointName, toePointFrame, dt, registry);
       this.momentumBasedController = momentumBasedController;
       this.time = yoTime;
       trajectoryInitializationTime = new DoubleYoVariable(toePointName + "InitializationTime", registry);

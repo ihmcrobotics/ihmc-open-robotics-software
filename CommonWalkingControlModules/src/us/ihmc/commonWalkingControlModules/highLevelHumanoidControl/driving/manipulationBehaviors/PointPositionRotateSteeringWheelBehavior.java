@@ -63,7 +63,7 @@ public class PointPositionRotateSteeringWheelBehavior
    private final VehicleModelObjects vehicleModelObjects;
 
 
-   public PointPositionRotateSteeringWheelBehavior(RobotSide robotSide, IndividualHandControlModule individualHandControlModule,
+   public PointPositionRotateSteeringWheelBehavior(double dt, RobotSide robotSide, IndividualHandControlModule individualHandControlModule,
            ReferenceFrame creepyGripHandPositionControlFrame, FullRobotModel fullRobotModel, ReferenceFrame steeringWheelFrame,
            MomentumBasedController momentumBasedController, VehicleModelObjects vehicleModelObjects,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
@@ -81,7 +81,7 @@ public class PointPositionRotateSteeringWheelBehavior
 //      CylindricalPDGains gains = new CylindricalPDGains(50.0, 100.0, 50.0, zeta);
 //      positionController.setGains(gains);
 
-      positionController = new EuclideanPositionController("pointRotateSteeringWheel", creepyGripHandPositionControlFrame, registry);
+      positionController = new EuclideanPositionController("pointRotateSteeringWheel", creepyGripHandPositionControlFrame, dt, registry);
       positionController.setProportionalGains(100.0, 100.0, 100.0);
       positionController.setDerivativeGains(20.0, 20.0, 20.0);
 

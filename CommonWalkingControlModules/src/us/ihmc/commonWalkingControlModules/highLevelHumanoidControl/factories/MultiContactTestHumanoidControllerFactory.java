@@ -121,7 +121,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       groundReactionWrenchDistributor.setWeights(diagonalCWeights, 1.0, 0.001);
 
       CoMBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule =
-         new CoMBasedMomentumRateOfChangeControlModule(referenceFrames.getCenterOfMassFrame(), centerOfMassJacobian, registry);
+         new CoMBasedMomentumRateOfChangeControlModule(controlDT, referenceFrames.getCenterOfMassFrame(), centerOfMassJacobian, registry);
 
       double comProportionalGain = 100.0;
       double dampingRatio = 1.0;
