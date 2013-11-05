@@ -19,6 +19,13 @@ public class Graphics3DAddMeshDataInstruction extends Graphics3DInstruction
    {
       return meshData;
    }
+   
+
+   public String toString()
+   {
+      return "\t\t\t<MeshDataInstruction>\n";
+   }
+
 
    public void setMeshChangedListener(MeshChangedListener meshChangedListener)
    {
