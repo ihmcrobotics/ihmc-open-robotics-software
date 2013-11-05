@@ -284,7 +284,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       d0Nom.setY(findNominalDoubleSupportHeight(s0.getX(), sF.getX(), d0.getX(), footHeight0, footHeight1));
       if (walkOnTheEdgesManager != null && walkOnTheEdgesManager.willLandOnToes())
       {
-         System.out.println("TEEEST: "+ walkOnTheEdgesManager.willLandOnToes());
          d0Max.setY(findMaximumDoubleSupportHeight(s0.getX(), sF.getX(), d0.getX(), footHeight0, footHeight1 + extraCoMMaxHeightWithToes));
       }
       else
