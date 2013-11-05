@@ -224,7 +224,7 @@ public class BMDCapture implements ExternalProgram
       
       if(card != -1)
       {
-         appendCmdOption(cmd, "-c", card);
+         appendCmdOption(cmd, "-C", card);
       }
       
       if(audioIn != null)

@@ -17,23 +17,20 @@ public class VideoDataLogger implements TimestampListener
    /**
     * Make sure to set a progressive mode, otherwise the timestamps will be all wrong!
     */
-//   private static final int mode = 11; // 1080p59.94Hz
-//   private static final int mode = 9; // 1080p60
-   private static final int mode = 14; // 720p59.94Hz
-   private static final boolean interlaced = false;
    
    private final PipedCommandExecutor commandExecutor;
    
    public VideoDataLogger(File logPath, LogProperties logProperties, VideoSettings settings, YoVariableLoggerOptions options) throws IOException
    {
-      logProperties.setInterlaced(settings.getDescription(), interlaced);
+      logProperties.setInterlaced(settings.getDescription(), settings.isInterlaced());
       String videoFilename = settings.getDescription() + videoPostfix;
       logProperties.setVideoFile(settings.getDescription(), videoFilename);
       String timestampDataFilename = settings.getDescription() + timestampDataPostfix;
       logProperties.setTimestampFile(settings.getDescription(), timestampDataFilename);
       
       BMDCapture bmdCapture = new BMDCapture();
-      bmdCapture.setMode(mode);
+      bmdCapture.setCard(settings.getDevice());
+      bmdCapture.setMode(settings.getMode());
       bmdCapture.setFormat("nut");
       bmdCapture.setFilename("pipe:1");
       bmdCapture.setTimestampData(logPath.getAbsolutePath() + File.separator + timestampDataFilename);
