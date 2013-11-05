@@ -35,7 +35,7 @@ public abstract class LogProperties extends Properties
    {
       if(getProperty("videoStreams") != null)
       {
-         setProperty("videoStreams", getProperty("videoStream") + "," + description);
+         setProperty("videoStreams", getProperty("videoStreams") + "," + description);
       }
       else
       {
