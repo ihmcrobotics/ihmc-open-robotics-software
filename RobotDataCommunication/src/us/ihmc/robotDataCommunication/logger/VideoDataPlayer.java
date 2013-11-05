@@ -7,6 +7,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.HashMap;
+
+import javax.swing.JFrame;
 
 import us.ihmc.robotDataCommunication.logger.util.FFMpeg;
 import us.ihmc.robotDataCommunication.logger.util.PipedCommandExecutor;
@@ -18,43 +22,38 @@ import com.xuggle.mediatool.ToolFactory;
 import com.xuggle.xuggler.ICodec.Type;
 import com.xuggle.xuggler.IError;
 import com.xuggle.xuggler.IStream;
-import com.yobotics.simulationconstructionset.LongYoVariable;
-import com.yobotics.simulationconstructionset.PlaybackListener;
-import com.yobotics.simulationconstructionset.SimulationRewoundListener;
 
-public class VideoDataPlayer implements PlaybackListener, SimulationRewoundListener
+public class VideoDataPlayer
 {
 
    private final boolean interlaced;
    
    private final TLongArrayList robotTimestamps = new TLongArrayList();
    private final TLongArrayList videoTimestamps = new TLongArrayList();
-
    
-   private final LongYoVariable timestamp;
+   
    private final int videoStream;
    private final IMediaReader reader;
+   private final HideableMediaFrame viewer;
    
    
    private int currentlyShowingIndex = 0;
    private long currentlyShowingRobottimestamp = 0;
    private long upcomingRobottimestamp = 0;
    
-   private volatile boolean updateVideo = true;
-   private final IMediaViewer viewer;
-
    private final File videoFile;
    
-   public VideoDataPlayer(File dataDirectory, LogProperties logProperties, LongYoVariable timestamp)
+   public VideoDataPlayer(String description, File dataDirectory, LogProperties logProperties)
    {
-      this.interlaced = logProperties.getInterlaced();
-      videoFile = new File(dataDirectory, logProperties.getVideoFile());
-      File timestampFile = new File(dataDirectory, logProperties.getTimestampFile());
+      this.interlaced = logProperties.getInterlaced(description);
+      videoFile = new File(dataDirectory, logProperties.getVideoFile(description));
+      File timestampFile = new File(dataDirectory, logProperties.getTimestampFile(description));
 
       parseTimestampData(timestampFile);
       
-      this.timestamp = timestamp;
       reader = ToolFactory.makeReader(videoFile.getAbsolutePath());
+      viewer = new HideableMediaFrame();
+      reader.addListener(viewer.getViewer());
       reader.open();
       int videoStream = -1;
       for(int i = 0; i < reader.getContainer().getNumStreams(); i++)
@@ -72,11 +71,8 @@ public class VideoDataPlayer implements PlaybackListener, SimulationRewoundListe
       }
       this.videoStream = videoStream;
       
-      
-      viewer = ToolFactory.makeViewer(Mode.FAST_VIDEO_ONLY, false);
-      reader.addListener(viewer);
-      reader.readPacket();
    }
+   
 
    public void showVideoFrame(long timestamp)
    {
@@ -104,6 +100,11 @@ public class VideoDataPlayer implements PlaybackListener, SimulationRewoundListe
       reader.readPacket();
    }
 
+   public void setVisible(boolean visible)
+   {
+      viewer.setVisible(visible);
+   }
+   
    private long getVideoTimestamp(long timestamp)
    {
       for(int i = robotTimestamps.size() - 1; i >= 0; i--)
@@ -154,45 +155,7 @@ public class VideoDataPlayer implements PlaybackListener, SimulationRewoundListe
          throw new RuntimeException(e);
       }
    }
-
    
-   @Override
-   public void indexChanged(int newIndex, double newTime)
-   {
-      if(updateVideo)
-      {
-         showVideoFrame(timestamp.getLongValue());
-      }
-   }
-
-   @Override
-   public void play(double realTimeRate)
-   {
-      
-   }
-
-   @Override
-   public void stop()
-   {
-      
-   }
-
-   @Override
-   public void simulationWasRewound()
-   {
-      showVideoFrame(timestamp.getLongValue());
-   }
-
-   public void updateVideo(boolean update)
-   {
-      this.updateVideo = update;
-   }
-
-   public long getCurrentTimestamp()
-   {
-      return timestamp.getLongValue();
-   }
-
    public void exportVideo(File selectedFile, long startTimestamp, long endTimestamp)
    {
       
@@ -204,7 +167,7 @@ public class VideoDataPlayer implements PlaybackListener, SimulationRewoundListe
       double startTime = startVideoTimestamp * timebase;
       double endTime = endVideoTimestamp * timebase;
       
-      FFMpeg ffMpeg  = new FFMpeg(true);
+      FFMpeg ffMpeg  = new FFMpeg();
       
       ffMpeg.setStarttime(startTime);
       ffMpeg.setEndtime(endTime);
@@ -226,4 +189,41 @@ public class VideoDataPlayer implements PlaybackListener, SimulationRewoundListe
       
    }
 
+   
+   private class HideableMediaFrame 
+   {
+      private final IMediaViewer mediaViewer;
+      private final HashMap<Integer, JFrame> mFrames;
+      
+      public HideableMediaFrame()
+      {
+         mediaViewer = ToolFactory.makeViewer(Mode.FAST_VIDEO_ONLY, false);
+         Field frames;
+         try
+         {
+            frames = mediaViewer.getClass().getDeclaredField("mFrames");
+            frames.setAccessible(true);
+            mFrames = (HashMap<Integer, JFrame>) frames.get(mediaViewer);
+         }
+         catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e)
+         {
+            throw new RuntimeException(e);
+         }
+         
+      }
+      
+      public IMediaViewer getViewer()
+      {
+         return mediaViewer;
+      }
+      
+      public void setVisible(boolean visible)
+      {
+         for(JFrame frame : mFrames.values())
+         {
+            frame.setVisible(visible);
+         }
+      }
+      
+   }
 }

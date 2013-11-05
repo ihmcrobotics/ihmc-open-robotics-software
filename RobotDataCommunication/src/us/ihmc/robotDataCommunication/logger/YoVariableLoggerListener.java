@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.robotDataCommunication.YoVariableClient;
@@ -36,7 +37,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    private long totalTimeout = 0;
   
    private final LogPropertiesWriter logProperties;
-   private VideoDataLogger videoDataLogger;
+   private ArrayList<VideoDataLogger> videoDataLoggers = new ArrayList<VideoDataLogger>();
    
    public YoVariableLoggerListener(File directory, YoVariableLoggerOptions options)
    {
@@ -83,9 +84,9 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    {
       connected = true;
       totalTimeout = 0;
-      if(videoDataLogger != null)
+      for(VideoDataLogger videoDataLogger : videoDataLoggers)
       {
-    	  videoDataLogger.timestampChanged(timestamp);
+         videoDataLogger.timestampChanged(timestamp);
       }
       
       synchronized (synchronizer)
@@ -124,7 +125,9 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       {
          try
          {
-            videoDataLogger = new VideoDataLogger(directory, logProperties, options);
+            
+            videoDataLoggers.add(new VideoDataLogger(directory, logProperties, VideoSettings.SONY_720P60_TRIPOD, options));
+            videoDataLoggers.add(new VideoDataLogger(directory, logProperties, VideoSettings.BLACKMAGIC_1080P30_CRANE, options));
          }
          catch (IOException e)
          {
@@ -145,7 +148,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
          e.printStackTrace();
       }
       
-      if(videoDataLogger != null)
+      for(VideoDataLogger videoDataLogger : videoDataLoggers)
       {
          videoDataLogger.close();
       }

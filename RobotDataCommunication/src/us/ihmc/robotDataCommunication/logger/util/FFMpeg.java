@@ -5,9 +5,8 @@ public class FFMpeg implements ExternalProgram
    /*
     * LibAV is broken with respect to timestamps, use ffmpeg version 2.0.2.
     */
-   private static final String ffmpegBinary = "ffmpeg";
-   private static final String builtinFFMpeg = FFMpeg.class.getResource(
-         "bin/" + ExternalProgramHelpers.getOS() + "/ffmpeg" + ExternalProgramHelpers.getExecutableExtension()).getFile();
+   private static final String builtinFFMpeg = ExternalProgramHelpers.extractExternalProgram(FFMpeg.class.getResource(
+         "bin/" + ExternalProgramHelpers.getOS() + "/ffmpeg" + ExternalProgramHelpers.getExecutableExtension()));
 
    private final String path;
 
@@ -24,14 +23,9 @@ public class FFMpeg implements ExternalProgram
    private boolean showinfo = false;
    private boolean enableExperimentalCodecs = false;
 
-   public FFMpeg(boolean useBuiltinFFMpeg)
+   public FFMpeg()
    {
-      this(useBuiltinFFMpeg ? builtinFFMpeg : ffmpegBinary);
-   }
-
-   public FFMpeg(String path)
-   {
-      this.path = path;
+      this.path = builtinFFMpeg;
    }
 
    public void setInputFile(String file)
