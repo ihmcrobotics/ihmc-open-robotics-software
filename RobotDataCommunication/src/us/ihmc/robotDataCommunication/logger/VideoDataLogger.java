@@ -22,6 +22,7 @@ public class VideoDataLogger implements TimestampListener
    
    public VideoDataLogger(File logPath, LogProperties logProperties, VideoSettings settings, YoVariableLoggerOptions options) throws IOException
    {
+      logProperties.addVideoFile(settings.getDescription());
       logProperties.setInterlaced(settings.getDescription(), settings.isInterlaced());
       String videoFilename = settings.getDescription() + videoPostfix;
       logProperties.setVideoFile(settings.getDescription(), videoFilename);
