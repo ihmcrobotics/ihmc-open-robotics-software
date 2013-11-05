@@ -1,5 +1,6 @@
 package us.ihmc.plotting.shapes;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.io.BufferedReader;
 import java.io.PrintWriter;
@@ -26,6 +27,12 @@ public class CircleArtifact extends Artifact
       this.y = y;
       this.diameter = diameter;
       this.fill = fill;
+   }
+
+   public CircleArtifact(String string, double x2, double y2, double d, boolean b, Color color)
+   {
+      this(string, x2, y2, d, b);
+      this.setColor(color);
    }
 
    public void setPosition(double x, double y)
