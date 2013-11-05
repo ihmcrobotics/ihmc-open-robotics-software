@@ -7,7 +7,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -27,15 +27,15 @@ public class YoVariableLogVisualizerGUI extends JPanel
 {
    private static final long serialVersionUID = 6414551517161321596L;
 
-   private final VideoDataPlayer player;
+   private final MultiVideoDataPlayer multiPlayer;
    private final YoVariableLogPlaybackRobot robot;
    private final SimulationConstructionSet scs;
 
-   public YoVariableLogVisualizerGUI(VideoDataPlayer player, YoVariableLogPlaybackRobot robot, SimulationConstructionSet scs)
+   public YoVariableLogVisualizerGUI(MultiVideoDataPlayer player, YoVariableLogPlaybackRobot robot, SimulationConstructionSet scs)
    {
       super();
 
-      this.player = player;
+      this.multiPlayer = player;
       this.robot = robot;
       this.scs = scs;
 
@@ -46,9 +46,10 @@ public class YoVariableLogVisualizerGUI extends JPanel
       setVisible(true);
    }
 
-   private void switchVideoUpdate(boolean update)
+   private void switchVideoUpdate(String videoName)
    {
-      if (player != null) player.updateVideo(update);
+      if (multiPlayer != null) multiPlayer.setActivePlayer(videoName);
+      
    }
 
    private void seek(int newValue)
@@ -67,14 +68,14 @@ public class YoVariableLogVisualizerGUI extends JPanel
             e.printStackTrace();
          }
 
-         if (player != null) player.indexChanged(0, 0);
+         multiPlayer.indexChanged(0, 0);
       }
    }
    
 
    private void exportVideo()
    {
-      if(player != null)
+      if(multiPlayer != null)
       {
          
          if(scs.isSimulating())
@@ -83,9 +84,9 @@ public class YoVariableLogVisualizerGUI extends JPanel
          }
          
          scs.gotoInPointNow();
-         long startTimestamp = player.getCurrentTimestamp();
+         long startTimestamp = multiPlayer.getCurrentTimestamp();
          scs.gotoOutPointNow();
-         long endTimestamp = player.getCurrentTimestamp();
+         long endTimestamp = multiPlayer.getCurrentTimestamp();
          
          if(startTimestamp > endTimestamp)
          {
@@ -106,7 +107,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
          {
             selectedFile = saveDialog.getSelectedFile();
             
-            player.exportVideo(selectedFile, startTimestamp, endTimestamp);
+            multiPlayer.exportCurrentVideo(selectedFile, startTimestamp, endTimestamp);
             
          }
          
@@ -117,19 +118,34 @@ public class YoVariableLogVisualizerGUI extends JPanel
 
    private void addGUIElements()
    {
-      final JCheckBox showVideo = new JCheckBox("Update video", true);
-      showVideo.addActionListener(new ActionListener()
+      
+      
+      final JComboBox<String> videoFiles = new JComboBox<>();
+      videoFiles.addItem("-- Disabled --");
+      for(String video : multiPlayer.getVideos())
       {
+         videoFiles.addItem(video);
+      }
+      
+      videoFiles.addActionListener(new ActionListener()
+      {
+         
          @Override
          public void actionPerformed(ActionEvent e)
          {
-            switchVideoUpdate(showVideo.isSelected());
+            if(videoFiles.getSelectedIndex() == 0)
+            {
+               switchVideoUpdate(null);
+            }
+            else
+            {
+               switchVideoUpdate((String) videoFiles.getSelectedItem());
+            }
          }
       });
-      add(showVideo);
+      videoFiles.setSelectedIndex(1);
 
-      showVideo.setHorizontalAlignment(JLabel.CENTER);
-
+      add(videoFiles);
 //    timePanel.add(new JSeparator(JSeparator.VERTICAL));
 
       JPanel timePanel = new JPanel();

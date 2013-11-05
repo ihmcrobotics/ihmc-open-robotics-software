@@ -10,33 +10,36 @@ import us.ihmc.utilities.net.TimestampListener;
 
 public class VideoDataLogger implements TimestampListener
 {
-   private static final String timestampDataFilename = "timestamps.dat";
-   private static final String videoFilename = "externalVideo.mov";
+   private static final String timestampDataPostfix = "Timestamps.dat";
+   private static final String videoPostfix = "Video.mov";
    
    
    /**
     * Make sure to set a progressive mode, otherwise the timestamps will be all wrong!
     */
 //   private static final int mode = 11; // 1080p59.94Hz
+//   private static final int mode = 9; // 1080p60
    private static final int mode = 14; // 720p59.94Hz
    private static final boolean interlaced = false;
    
    private final PipedCommandExecutor commandExecutor;
    
-   public VideoDataLogger(File logPath, LogProperties logProperties, YoVariableLoggerOptions options) throws IOException
+   public VideoDataLogger(File logPath, LogProperties logProperties, VideoSettings settings, YoVariableLoggerOptions options) throws IOException
    {
-      logProperties.setInterlaced(interlaced);
-      logProperties.setVideoFile(videoFilename);
-      logProperties.setTimestampFile(timestampDataFilename);
+      logProperties.setInterlaced(settings.getDescription(), interlaced);
+      String videoFilename = settings.getDescription() + videoPostfix;
+      logProperties.setVideoFile(settings.getDescription(), videoFilename);
+      String timestampDataFilename = settings.getDescription() + timestampDataPostfix;
+      logProperties.setTimestampFile(settings.getDescription(), timestampDataFilename);
       
-      BMDCapture bmdCapture = new BMDCapture(options.getBmdCapturePath());
+      BMDCapture bmdCapture = new BMDCapture();
       bmdCapture.setMode(mode);
       bmdCapture.setFormat("nut");
       bmdCapture.setFilename("pipe:1");
       bmdCapture.setTimestampData(logPath.getAbsolutePath() + File.separator + timestampDataFilename);
       
     
-      FFMpeg avconv = new FFMpeg(options.getAvconvPath());
+      FFMpeg avconv = new FFMpeg();
       avconv.setAudioCodec(null);
       avconv.setVideoCodec(options.getVideoCodec());
       avconv.setQuality(options.getVideoQuality());
@@ -62,22 +65,4 @@ public class VideoDataLogger implements TimestampListener
 	  commandExecutor.waitFor();
    }
    
-   public static void main(String[] args)
-   {
-      BMDCapture bmdCapture = new BMDCapture("bmdcapture");
-      bmdCapture.setMode(mode);
-      bmdCapture.setFormat("nut");
-      bmdCapture.setFilename("pipe:1");
-      bmdCapture.setTimestampData(File.separator + timestampDataFilename);
-      
-    
-      FFMpeg avconv = new FFMpeg("avconv");
-      avconv.setAudioCodec("copy");
-      avconv.setVideoCodec("mjpeg");
-      //avconv.setQuality(5);
-      avconv.setInputFile("-");
-      avconv.setOutputFile(File.separator + videoFilename);
-      
-      System.out.println(bmdCapture.getCommandLine() + "|" + avconv.getCommandLine());
-   }
 }

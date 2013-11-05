@@ -19,14 +19,38 @@ public abstract class LogProperties extends Properties
      return getProperty("general.robotName");
    }
    
-   public void setInterlaced(boolean interlaced)
+   public String[] getVideoFiles()
    {
-      setProperty("video.interlaced", interlaced?"true":"false");
+      if(getProperty("videoStreams") != null)
+      {
+         return getProperty("videoStreams").split(",");
+      }
+      else
+      {
+         return new String[] { "video" };
+      }
    }
    
-   public boolean getInterlaced()
+   public void addVideoFile(String description)
    {
-      return getProperty("video.interlaced").equals("true");
+      if(getProperty("videoStreams") != null)
+      {
+         setProperty("videoStreams", getProperty("videoStream") + "," + description);
+      }
+      else
+      {
+         setProperty("videoStreams", description);
+      }
+   }
+   
+   public void setInterlaced(String description, boolean interlaced)
+   {
+      setProperty(description + ".interlaced", interlaced?"true":"false");
+   }
+   
+   public boolean getInterlaced(String description)
+   {
+      return getProperty(description + ".interlaced").equals("true");
    }
    
    public void setHandshakeFile(String filename)
@@ -49,24 +73,24 @@ public abstract class LogProperties extends Properties
       return getProperty("variables.data");
    }
    
-   public void setVideoFile(String filename)
+   public void setVideoFile(String description, String filename)
    {
-      setProperty("video.video", filename);
+      setProperty(description + ".video", filename);
    }
    
-   public String getVideoFile()
+   public String getVideoFile(String description)
    {
-      return getProperty("video.video");
+      return getProperty(description + ".video");
    }
    
-   public void setTimestampFile(String filename)
+   public void setTimestampFile(String description, String filename)
    {
-      setProperty("video.timestamps", filename);
+      setProperty(description + ".timestamps", filename);
    }
    
-   public String getTimestampFile()
+   public String getTimestampFile(String description)
    {
-      return getProperty("video.timestamps");
+      return getProperty(description + ".timestamps");
    }
 }
 

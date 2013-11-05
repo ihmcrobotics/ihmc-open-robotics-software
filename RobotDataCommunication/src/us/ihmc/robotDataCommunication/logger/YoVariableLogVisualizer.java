@@ -114,13 +114,14 @@ public class YoVariableLogVisualizer
       scs.getRootRegistry().addChild(parser.getRootRegistry());
       scs.setGroundVisible(false);
       
-      VideoDataPlayer player = null;
+      MultiVideoDataPlayer players = null;
       try
       {
-         player = new VideoDataPlayer(selectedFile, logProperties, robot.getTimestamp());
-         scs.attachPlaybackListener(player);
-         scs.getJFrame().setTitle(this.getClass().getSimpleName() + " - " + selectedFile);
-         scs.attachSimulationRewoundListener(player);
+         
+         players = new MultiVideoDataPlayer(selectedFile, logProperties, robot.getTimestamp());
+         
+         scs.attachPlaybackListener(players);
+         scs.attachSimulationRewoundListener(players);
 
       }
       catch(Exception e)
@@ -129,7 +130,8 @@ public class YoVariableLogVisualizer
          e.printStackTrace();
       }
  
-      scs.getStandardSimulationGUI().addJComponentToMainPanel( new YoVariableLogVisualizerGUI(player, robot, scs), BorderLayout.SOUTH);
+      scs.getJFrame().setTitle(this.getClass().getSimpleName() + " - " + selectedFile);
+      scs.getStandardSimulationGUI().addJComponentToMainPanel( new YoVariableLogVisualizerGUI(players, robot, scs), BorderLayout.SOUTH);
       
       new Thread(scs).start();
    }
