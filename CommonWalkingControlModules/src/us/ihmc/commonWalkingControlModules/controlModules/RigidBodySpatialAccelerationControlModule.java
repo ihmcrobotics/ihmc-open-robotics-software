@@ -84,7 +84,7 @@ public class RigidBodySpatialAccelerationControlModule
    public FrameVector getPositionErrorInWorld()
    {
       FrameVector ret = new FrameVector(endEffectorFrame);
-      se3pdController.getPositionController().packPositionError(ret);
+      se3pdController.getPositionError(ret);
       ret.changeFrame(ReferenceFrame.getWorldFrame());
 
       return ret;
@@ -157,22 +157,22 @@ public class RigidBodySpatialAccelerationControlModule
 
    public void setPositionProportionalGains(double kx, double ky, double kz)
    {
-      se3pdController.getPositionController().setProportionalGains(kx, ky, kz);
+      se3pdController.setPositionProportionalGains(kx, ky, kz);
    }
 
    public void setPositionDerivativeGains(double bx, double by, double bz)
    {
-      se3pdController.getPositionController().setDerivativeGains(bx, by, bz);
+      se3pdController.setPositionDerivativeGains(bx, by, bz);
    }
 
    public void setOrientationProportionalGains(double kx, double ky, double kz)
    {
-      se3pdController.getOrientationController().setProportionalGains(kx, ky, kz);
+      se3pdController.setOrientationProportionalGains(kx, ky, kz);
    }
 
    public void setOrientationDerivativeGains(double bx, double by, double bz)
    {
-      se3pdController.getOrientationController().setDerivativeGains(bx, by, bz);
+      se3pdController.setOrientationDerivativeGains(bx, by, bz);
    }
 
    public ReferenceFrame getTrackingFrame()
@@ -182,10 +182,16 @@ public class RigidBodySpatialAccelerationControlModule
 
    public void setGains(SE3PDGains gains)
    {
-      se3pdController.getPositionController().setProportionalGains(gains.getPositionProportionalGains());
-      se3pdController.getPositionController().setDerivativeGains(gains.getPositionDerivativeGains());
-
-      se3pdController.getOrientationController().setProportionalGains(gains.getOrientationProportionalGains());
-      se3pdController.getOrientationController().setDerivativeGains(gains.getOrientationDerivativeGains());
+      se3pdController.setGains(gains);
+   }
+   
+   public void setPositionMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
+   {
+      se3pdController.setPositionMaxAccelerationAndJerk(maxAcceleration, maxJerk);
+   }
+   
+   public void setOrientationMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
+   {
+      se3pdController.setOrientationMaxAccelerationAndJerk(maxAcceleration, maxJerk);
    }
 }

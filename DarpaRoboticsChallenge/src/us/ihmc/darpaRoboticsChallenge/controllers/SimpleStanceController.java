@@ -135,7 +135,7 @@ public class SimpleStanceController implements RobotController
 
       centerOfMassJacobian = new CenterOfMassJacobian(rootJoint.getSuccessor());
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      momentumRateOfChangeControlModule = new CoMBasedMomentumRateOfChangeControlModule(centerOfMassFrame, centerOfMassJacobian, registry);
+      momentumRateOfChangeControlModule = new CoMBasedMomentumRateOfChangeControlModule(controlDT, centerOfMassFrame, centerOfMassJacobian, registry);
       momentumRateOfChangeControlModule.setProportionalGains(100.0, 100.0, 100.0);
       momentumRateOfChangeControlModule.setDerivativeGains(20.0, 20.0, 20.0);
 
