@@ -2,6 +2,15 @@ package us.ihmc.robotDataCommunication.logger;
 
 public enum VideoSettings
 {
+/**
+ * 
+ * Known BlackMagic Mini Recorder modes
+ * 
+ * mode = 11 -> 1080p59.94Hz
+ * mode = 9 -> 1080p60
+ * mode = 14 -> 720p59.94Hz
+*/   
+   
    SONY_720P60_TRIPOD("Tripod", 0, 14, false),
    BLACKMAGIC_1080P30_CRANE("Crane", 1, 9, false);
    
