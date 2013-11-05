@@ -241,6 +241,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable swingKpOrientation = new DoubleYoVariable("swingKpOrientation", registry);
    private final DoubleYoVariable swingZeta = new DoubleYoVariable("swingZeta", registry);
    
+   private final DoubleYoVariable swingMaxPositionAcceleration = new DoubleYoVariable("swingMaxPositionAcceleration", registry);
+   private final DoubleYoVariable swingMaxPositionJerk = new DoubleYoVariable("swingMaxPositionJerk", registry);
+   private final DoubleYoVariable swingMaxOrientationAcceleration = new DoubleYoVariable("swingMaxOrientationAcceleration", registry);
+   private final DoubleYoVariable swingMaxOrientationJerk = new DoubleYoVariable("swingMaxOrientationJerk", registry);
+
    private final WalkOnTheEdgesManager walkOnTheEdgesManager;
    private final WalkOnTheEdgesProviders walkOnTheEdgesProviders;
 
@@ -402,6 +407,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       swingKpZ.set(200.0);
       swingKpOrientation.set(200.0);
       swingZeta.set(1.0);
+      
+      swingMaxPositionAcceleration.set(Double.POSITIVE_INFINITY);
+      swingMaxPositionJerk.set(Double.POSITIVE_INFINITY);
+      swingMaxOrientationAcceleration.set(Double.POSITIVE_INFINITY);
+      swingMaxOrientationJerk.set(Double.POSITIVE_INFINITY);
       
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -583,6 +593,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       return ret;
    }
    
+   
    private VariableChangedListener createSwingGainsChangedListener(final EndEffectorControlModule endEffectorControlModule)
    {
       VariableChangedListener ret = new VariableChangedListener()
@@ -590,13 +601,20 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          public void variableChanged(YoVariable v)
          {
             endEffectorControlModule.setSwingGains(swingKpXY.getDoubleValue(), swingKpZ.getDoubleValue(), swingKpOrientation.getDoubleValue(), swingZeta.getDoubleValue());
+            endEffectorControlModule.setMaxAccelerationAndJerk(swingMaxPositionAcceleration.getDoubleValue(), swingMaxPositionJerk.getDoubleValue(), 
+                  swingMaxOrientationAcceleration.getDoubleValue(), swingMaxOrientationJerk.getDoubleValue());
          }};
          
          swingKpXY.addVariableChangedListener(ret);
          swingKpZ.addVariableChangedListener(ret);
          swingKpOrientation.addVariableChangedListener(ret);
          swingZeta.addVariableChangedListener(ret);
-      
+         
+         swingMaxPositionAcceleration.addVariableChangedListener(ret);
+         swingMaxPositionJerk.addVariableChangedListener(ret);
+         swingMaxOrientationAcceleration.addVariableChangedListener(ret);
+         swingMaxOrientationJerk.addVariableChangedListener(ret);
+   
       return ret;
    }
 
