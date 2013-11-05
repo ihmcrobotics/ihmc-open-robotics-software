@@ -14,7 +14,6 @@ import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
-import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -30,58 +29,47 @@ import us.ihmc.utilities.test.JUnitTools;
 public class NumericalInverseKinematicsCalculatorWithRobotTest
 {
    private static final long seed = 12091092L;
-   Random randomNumberGenerator = new Random(seed);
    private static final ArrayList<Double> shoulderRollLimits = new ArrayList<Double>();
    private static final ArrayList<Double> elbowRollLimits = new ArrayList<Double>();
    private static final ArrayList<Double> wristRollLimits = new ArrayList<Double>();
    private static final ArrayList<Double> shoulderPitchLimits = new ArrayList<Double>();
    private static final ArrayList<Double> elbowPitchLimits = new ArrayList<Double>();
    private static final ArrayList<Double> wristPitchLimits = new ArrayList<Double>();
+   private final Random randomNumberGenerator = new Random(seed);
+   private final EnumMap<JointNames, OneDoFJoint> oneDoFJoints = new EnumMap<JointNames, OneDoFJoint>(JointNames.class);
+   private final EnumMap<JointNames, ArrayList<Double>> jointLimits = new EnumMap<JointNames, ArrayList<Double>>(JointNames.class);
+   private final EnumMap<JointNames, Double> jointAngles = new EnumMap<JointNames, Double>(JointNames.class);
+   private final EnumMap<JointNames, Double> jointAnglesInitial = new EnumMap<JointNames, Double>(JointNames.class);
+   private final SDFFullRobotModel fullRobotModel;
+   private final ReferenceFrame worldFrame;
+   private final double tolerance, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar;
+   private final int maxIterations;
 
-   public enum JointNames
+   private GeometricJacobian leftHandJacobian;
+   private NumericalInverseKinematicsCalculator leftArmInverseKinematicsCalculator;
+
+   private enum JointNames
    {
       SHOULDER_PITCH, SHOULDER_ROLL, ELBOW_PITCH, ELBOW_ROLL, WRIST_PITCH, WRIST_ROLL;
    };
 
-   public enum JointLimits
-   {
-      SHOULDER_PITCH_LIMIT, SHOULDER_ROLL_LIMIT, ELBOW_PITCH_LIMIT, ELBOW_ROLL_LIMIT, WRIST_PITCH_LIMIT, WRIST_ROLL_LIMIT;
-   };
-
-   private final EnumMap<JointNames, OneDoFJoint> oneDoFJoints = new EnumMap<JointNames, OneDoFJoint>(JointNames.class);
-   private final EnumMap<JointNames, ArrayList<Double>> jointLimits = new EnumMap<JointNames, ArrayList<Double>>(JointNames.class);
-   private final EnumMap<JointNames, Double> randomJointAngles = new EnumMap<JointNames, Double>(JointNames.class);
-
-   private final SDFFullRobotModel fullRobotModel;
-   private final ReferenceFrame worldFrame;
-   private final GeometricJacobian leftHandJacobian;
-   private final NumericalInverseKinematicsCalculator leftArmInverseKinematicsCalculator;
-
-   private ReferenceFrames referenceFrames;
-
-   @SuppressWarnings("static-access")
    public NumericalInverseKinematicsCalculatorWithRobotTest()
    {
       DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCConfigParameters.robotModelToUse, false);
       JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap, true);
       SDFFullRobotModelFactory fullRobotModelFactory = new SDFFullRobotModelFactory(jaxbSDFLoader.getGeneralizedSDFRobotModel(jointMap.getModelName()),
             jointMap);
+
       fullRobotModel = fullRobotModelFactory.create();
-      referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, jointMap.getAnkleHeight());
-      worldFrame = referenceFrames.getWorldFrame();
+      worldFrame = ReferenceFrame.getWorldFrame();
+      tolerance = 1e-8;
+      maxStepSize = 1.0;
+      minRandomSearchScalar = -0.5;
+      maxRandomSearchScalar = 1.0;
+      maxIterations = 100;
 
-      leftHandJacobian = new GeometricJacobian(fullRobotModel.getChest(), fullRobotModel.getHand(RobotSide.LEFT), fullRobotModel.getHand(RobotSide.LEFT)
-            .getBodyFixedFrame());
-      double tolerance = 1e-8;
-      double maxStepSize = 1.0;
-      double minRandomSearchScalar = -0.5;
-      double maxRandomSearchScalar = 1.0;
-      int maxIterations = 100000;
-      leftArmInverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(leftHandJacobian, tolerance, maxIterations, maxStepSize,
-            minRandomSearchScalar, maxRandomSearchScalar);
-
-      //*_*_Limits(*_*_Max, *_*_Min);
-      // atlasJointLimits TODO: get these values from somewhere
+      // TODO: get these values from somewhere RobotJointLimitWatcher
+      // *_*_Limits(*_*_Max, *_*_Min);
       shoulderRollLimits.add(1.74533);
       shoulderRollLimits.add(-1.39626);
       shoulderPitchLimits.add(1.9635);
@@ -94,7 +82,6 @@ public class NumericalInverseKinematicsCalculatorWithRobotTest
       wristRollLimits.add(-0.436);
       wristPitchLimits.add(1.571);
       wristPitchLimits.add(-1.571);
-
       oneDoFJoints.put(JointNames.SHOULDER_PITCH, fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.SHOULDER_PITCH));
       oneDoFJoints.put(JointNames.SHOULDER_ROLL, fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.SHOULDER_ROLL));
       oneDoFJoints.put(JointNames.ELBOW_PITCH, fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.ELBOW_PITCH));
@@ -108,60 +95,71 @@ public class NumericalInverseKinematicsCalculatorWithRobotTest
       jointLimits.put(JointNames.ELBOW_ROLL, elbowRollLimits);
       jointLimits.put(JointNames.WRIST_PITCH, wristPitchLimits);
       jointLimits.put(JointNames.WRIST_ROLL, wristRollLimits);
-
+                
+      jointAnglesInitial.put(JointNames.SHOULDER_PITCH, 0.346);
+      jointAnglesInitial.put(JointNames.SHOULDER_ROLL, -1.3141);
+      jointAnglesInitial.put(JointNames.ELBOW_PITCH, 1.9195);
+      jointAnglesInitial.put(JointNames.ELBOW_ROLL, 1.1749);
+      jointAnglesInitial.put(JointNames.WRIST_PITCH, -0.0068);
+      jointAnglesInitial.put(JointNames.WRIST_ROLL, -0.0447);
    }
 
    @Test
    public void generateRandomFeasibleRobotPoses()
    {
-
-      for(int i = 0; i<10; i++)
+      for (int i = 0; i < 100; i++)
       {
-//         System.out.println(i + "-------------------------------------------------------------------");
          randomArmPoseWithForwardKinematics();
+
          FramePoint handEndEffectorPositionFK = getHandEndEffectorPosition();
          FrameOrientation handEndEffectorOrientationFK = getHandEndEffectorOrientation();
+
          armPoseWithInverseKinematics(handEndEffectorOrientationFK, handEndEffectorPositionFK);
+
          FramePoint handEndEffectorPositionIK = getHandEndEffectorPosition();
          FrameOrientation handEndEffectorOrientationIK = getHandEndEffectorOrientation();
 
-//         System.out.println(handEndEffectorPositionFK.toString());
-//         System.out.println(handEndEffectorPositionIK.toString());
-//         System.out.println(handEndEffectorOrientationFK.toStringAsYawPitchRoll());
-//         System.out.println(handEndEffectorOrientationIK.toStringAsYawPitchRoll());
-//         System.out.println("-------------------------------------------------------------------");
-//         System.out.println(" ");
-
-         JUnitTools.assertFramePointEquals(handEndEffectorPositionFK, handEndEffectorPositionIK, 0.1);
+         JUnitTools.assertFramePointEquals(handEndEffectorPositionFK, handEndEffectorPositionIK, 0.01);
          JUnitTools.assertFrameOrientationEquals(handEndEffectorOrientationFK, handEndEffectorOrientationIK, 0.1);
          
+//         System.out.println("FK: " + handEndEffectorPositionFK.toString());
+//         System.out.println("IK: " + handEndEffectorPositionIK.toString());
+//         System.out.println("--------------------------------------------------------------------------------------");
       }
-      
    }
-   
+
    @Test
    public void generateRandomDoubleInRangeTest()
    {
       double min = -randomNumberGenerator.nextDouble();
       double max = randomNumberGenerator.nextDouble();
+
       for (int i = 0; i < 10000; i++)
       {
          double randomNumber = generateRandomDoubleInRange(max, min);
-         assertTrue(randomNumber <= max && randomNumber >= min);
+
+         assertTrue((randomNumber <= max) && (randomNumber >= min));
       }
    }
 
    private void armPoseWithInverseKinematics(FrameOrientation desiredOrientation, FramePoint desiredPosition)
    {
       FramePose handPose = new FramePose(worldFrame);
+
       handPose.setOrientation(desiredOrientation);
       handPose.setPosition(desiredPosition);
       handPose.changeFrame(fullRobotModel.getChest().getBodyFixedFrame());
+
       Transform3D transform = new Transform3D();
+
       handPose.getTransformFromPoseToFrame(transform);
-      
-      resetArmPoseToZero();
-      fullRobotModel.updateFrames();
+      initialArmPose();
+
+      leftHandJacobian = new GeometricJacobian(fullRobotModel.getChest(), fullRobotModel.getHand(RobotSide.LEFT), fullRobotModel.getHand(RobotSide.LEFT)
+            .getBodyFixedFrame());
+
+      leftArmInverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(leftHandJacobian, tolerance, maxIterations, maxStepSize,
+            minRandomSearchScalar, maxRandomSearchScalar);
       leftArmInverseKinematicsCalculator.solve(transform);
    }
 
@@ -177,16 +175,15 @@ public class NumericalInverseKinematicsCalculatorWithRobotTest
    {
       ReferenceFrame handEndEffectorFrame = fullRobotModel.getHand(RobotSide.LEFT).getBodyFixedFrame();
       FramePoint handEndEffectorPosition = new FramePoint(handEndEffectorFrame);
-      handEndEffectorPosition.set(0, 0, 0);
       handEndEffectorPosition.changeFrame(worldFrame);
       return handEndEffectorPosition;
    }
 
-   private void resetArmPoseToZero()
+   private void initialArmPose()
    {
       for (JointNames name : JointNames.values())
       {
-         oneDoFJoints.get(name).setQ(0.1);
+         oneDoFJoints.get(name).setQ(jointAnglesInitial.get(name));
       }
    }
 
@@ -194,8 +191,8 @@ public class NumericalInverseKinematicsCalculatorWithRobotTest
    {
       for (JointNames name : JointNames.values())
       {
-         randomJointAngles.put(name, generateRandomDoubleInRange(jointLimits.get(name).get(0) - 0.5, jointLimits.get(name).get(1) + 0.5));
-         oneDoFJoints.get(name).setQ(randomJointAngles.get(name));
+         jointAngles.put(name, generateRandomDoubleInRange(jointLimits.get(name).get(0), jointLimits.get(name).get(1)));
+         oneDoFJoints.get(name).setQ(jointAngles.get(name));
       }
    }
 
