@@ -27,10 +27,8 @@ import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingMa
 import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.DRCJointConfigurationData;
 import us.ihmc.graphics3DAdapter.camera.VideoSettings;
 import us.ihmc.graphics3DAdapter.camera.VideoSettingsFactory;
-import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
-import us.ihmc.utilities.net.KryoObjectClient;
-import us.ihmc.utilities.net.LocalObjectCommunicator;
-import us.ihmc.utilities.net.ObjectCommunicator;
+import us.ihmc.sensorProcessing.sensorData.AtlasWristFeetSensorPacket;
+import us.ihmc.utilities.net.*;
 import us.ihmc.utilities.ros.RosMainNode;
 
 import java.io.IOException;
@@ -120,9 +118,9 @@ public class DRCNetworkProcessor
 
    }
 
-   private DRCNetworkProcessor(ObjectCommunicator fieldComputerClient)
+   private DRCNetworkProcessor(ObjectCommunicator fieldComputerClientL)
    {
-      if (fieldComputerClient == null)
+      if (fieldComputerClientL == null)
       {
          this.fieldComputerClient = new KryoObjectClient(scsMachineIPAddress, DRCConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
                new DRCNetClassList());
@@ -130,7 +128,7 @@ public class DRCNetworkProcessor
       }
       else
       {
-         this.fieldComputerClient = fieldComputerClient;
+         this.fieldComputerClient = fieldComputerClientL;
       }
 
       robotPoseBuffer = new RobotPoseBuffer(this.fieldComputerClient, 1000, timestampProvider);
@@ -143,6 +141,13 @@ public class DRCNetworkProcessor
       DRCRobotDataReceiver drcRobotDataReceiver = new DRCRobotDataReceiver(DRCConfigParameters.robotModelToUse, fullRobotModel);
       this.fieldComputerClient.attachListener(DRCJointConfigurationData.class, drcRobotDataReceiver);
       robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, fullRobotModel);
+
+      this.fieldComputerClient.attachListener(AtlasWristFeetSensorPacket.class,new ObjectConsumer<AtlasWristFeetSensorPacket>()
+      {
+         @Override
+         public void consumeObject(AtlasWristFeetSensorPacket object)
+         {networkingManager.getControllerStateHandler().sendAtlasWristFeetSensorPacket(object); }
+      });
 
       if (DRCConfigParameters.USING_REAL_HEAD)
       {
