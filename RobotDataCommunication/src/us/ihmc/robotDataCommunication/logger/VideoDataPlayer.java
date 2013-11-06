@@ -21,15 +21,22 @@ import com.xuggle.mediatool.IMediaViewer.Mode;
 import com.xuggle.mediatool.ToolFactory;
 import com.xuggle.xuggler.ICodec.Type;
 import com.xuggle.xuggler.IError;
+import com.xuggle.xuggler.IRational;
 import com.xuggle.xuggler.IStream;
 
 public class VideoDataPlayer
 {
 
+   private final boolean hasTimebase;
    private final boolean interlaced;
    
    private final TLongArrayList robotTimestamps = new TLongArrayList();
    private final TLongArrayList videoTimestamps = new TLongArrayList();
+   
+   private long bmdTimeBaseNum;
+   private long bmdTimeBaseDen;
+   private long ffTimeBaseNum;
+   private long ffTimeBaseDen;
    
    
    private final int videoStream;
@@ -46,6 +53,12 @@ public class VideoDataPlayer
    public VideoDataPlayer(String description, File dataDirectory, LogProperties logProperties)
    {
       this.interlaced = logProperties.getInterlaced(description);
+      this.hasTimebase = logProperties.hasTimebase();
+      
+      if(!hasTimebase)
+      {
+         System.err.println("Video data is using timestamps instead of frame numbers. Falling back to seeking based on timestamp.");
+      }
       videoFile = new File(dataDirectory, logProperties.getVideoFile(description));
       File timestampFile = new File(dataDirectory, logProperties.getTimestampFile(description));
 
@@ -71,10 +84,19 @@ public class VideoDataPlayer
       }
       this.videoStream = videoStream;
       
+      
+      IRational timeBase = reader.getContainer().getStream(videoStream).getTimeBase();
+      ffTimeBaseNum = timeBase.getNumerator();
+      ffTimeBaseDen = timeBase.getDenominator();
+      
+      
+      
+      
+      
    }
    
 
-   public void showVideoFrame(long timestamp)
+   public synchronized void showVideoFrame(long timestamp)
    {
       if(timestamp >= currentlyShowingRobottimestamp && timestamp < upcomingRobottimestamp)
       {
@@ -93,6 +115,7 @@ public class VideoDataPlayer
       }
       
       int retval = reader.getContainer().seekKeyFrame(videoStream, videoTimestamp, 0);
+      
       if(retval != 0)
       {
          System.err.println(IError.make(retval).getDescription());
@@ -119,15 +142,43 @@ public class VideoDataPlayer
       }
       
       long videoTimestamp = videoTimestamps.get(currentlyShowingIndex);
+      
+      if(hasTimebase)
+      {
+         videoTimestamp = (videoTimestamp * bmdTimeBaseNum * ffTimeBaseDen) / (bmdTimeBaseDen * ffTimeBaseNum);
+      }
+      
       return videoTimestamp;
    }
    
    private void parseTimestampData(File timestampFile)
    {
+      BufferedReader reader = null;
       try
       {
-         BufferedReader reader = new BufferedReader(new FileReader(timestampFile));
+         reader = new BufferedReader(new FileReader(timestampFile));
+         
+                  
          String line;
+         
+         if((line = reader.readLine()) != null)
+         {
+            bmdTimeBaseNum = Long.valueOf(line);
+         }
+         else
+         {
+            throw new RuntimeException("Cannot read numerator");
+         }
+         
+         if((line = reader.readLine()) != null)
+         {
+            bmdTimeBaseDen = Long.valueOf(line);
+         }
+         else
+         {
+            throw new RuntimeException("Cannot read denumerator");
+         }
+                  
          while ((line = reader.readLine()) != null)
          {
             String[] stamps = line.split("\\s");
@@ -144,7 +195,6 @@ public class VideoDataPlayer
 
          }
 
-         reader.close();
       }
       catch (FileNotFoundException e)
       {
@@ -153,6 +203,19 @@ public class VideoDataPlayer
       catch (IOException e)
       {
          throw new RuntimeException(e);
+      }
+      finally
+      {
+         try
+         {
+            if(reader != null)
+            {
+               reader.close();
+            }
+         }
+         catch (IOException e)
+         {
+         }
       }
    }
    
@@ -195,6 +258,7 @@ public class VideoDataPlayer
       private final IMediaViewer mediaViewer;
       private final HashMap<Integer, JFrame> mFrames;
       
+      @SuppressWarnings("unchecked")
       public HideableMediaFrame()
       {
          mediaViewer = ToolFactory.makeViewer(Mode.FAST_VIDEO_ONLY, false);
