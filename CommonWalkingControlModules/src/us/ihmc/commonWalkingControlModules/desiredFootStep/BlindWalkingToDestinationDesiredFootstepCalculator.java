@@ -94,7 +94,7 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
       }
       
       Matrix3d footToWorldRotation = computeDesiredFootRotation(angleToDestination.getDoubleValue(), swingLegSide, supportAnkleFrame);
-      FramePoint footstepPosition = getDesiredFootstepPosition(supportAnkleZUpFrame, supportAnkleFrame, swingLegSide, desiredDestination.getFramePoint2dCopy(), footToWorldRotation);
+      FramePoint footstepPosition = getDesiredFootstepPositionCopy(supportAnkleZUpFrame, supportAnkleFrame, swingLegSide, desiredDestination.getFramePoint2dCopy(), footToWorldRotation);
 
       setYoVariables(swingLegSide, footToWorldRotation, footstepPosition);
    }
@@ -111,7 +111,7 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
       computeDistanceAndAngleToDestination(futureSupportAnkleZUpFrame, futureSwingLegSide, desiredDestination.getFramePoint2dCopy());
       Matrix3d footToWorldRotation = computeDesiredFootRotation(angleToDestination.getDoubleValue(), futureSwingLegSide, futureSupportAnkleFrame);
 
-      FramePoint footstepPosition = getDesiredFootstepPosition(futureSupportAnkleZUpFrame, futureSupportAnkleFrame, futureSwingLegSide, desiredDestination.getFramePoint2dCopy(), footToWorldRotation);
+      FramePoint footstepPosition = getDesiredFootstepPositionCopy(futureSupportAnkleZUpFrame, futureSupportAnkleFrame, futureSwingLegSide, desiredDestination.getFramePoint2dCopy(), footToWorldRotation);
       FrameOrientation footstepOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
       double[] yawPitchRoll = new double[3];
       RotationFunctions.getYawPitchRoll(yawPitchRoll, footToWorldRotation);
@@ -129,7 +129,7 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
       return new Footstep(foot, poseReferenceFrame, soleFrame, contactPoints, trustHeight);
    }
 
-   private FramePoint getDesiredFootstepPosition(ReferenceFrame supportAnkleZUpFrame, ReferenceFrame supportAnkleFrame, RobotSide swingLegSide, FramePoint2d desiredDestination,
+   private FramePoint getDesiredFootstepPositionCopy(ReferenceFrame supportAnkleZUpFrame, ReferenceFrame supportAnkleFrame, RobotSide swingLegSide, FramePoint2d desiredDestination,
            Matrix3d footToWorldRotation)
    {
       FrameVector2d desiredOffsetFromAnkle = computeDesiredOffsetFromSupportAnkle(supportAnkleZUpFrame, swingLegSide, angleToDestination.getDoubleValue(), distanceToDestination.getDoubleValue());       

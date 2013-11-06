@@ -97,10 +97,10 @@ public class FlatGroundPlaneContactState implements PlaneContactState
       contactFramePoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), backRight));
       contactFramePoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), backLeft));
 
-      contactFramePoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), createProjectionToXY(frontLeft)));
-      contactFramePoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), createProjectionToXY(frontRight)));
-      contactFramePoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), createProjectionToXY(backRight)));
-      contactFramePoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), createProjectionToXY(backLeft)));
+      contactFramePoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), projectToXY(frontLeft)));
+      contactFramePoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), projectToXY(frontRight)));
+      contactFramePoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), projectToXY(backRight)));
+      contactFramePoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), projectToXY(backLeft)));
       
       this.coefficientOfFriction = coefficientOfFriction;
       
@@ -119,7 +119,7 @@ public class FlatGroundPlaneContactState implements PlaneContactState
       totalNumberOfContactPoints = contactPoints.size();
    }
 
-   private Point2d createProjectionToXY(Point3d point)
+   private Point2d projectToXY(Point3d point)
    {
       return new Point2d(point.getX(), point.getY());
    }
