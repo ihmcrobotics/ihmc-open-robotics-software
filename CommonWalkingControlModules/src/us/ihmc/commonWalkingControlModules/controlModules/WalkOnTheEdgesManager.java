@@ -132,7 +132,7 @@ public class WalkOnTheEdgesManager
 
       ContactablePlaneBody trailingFoot = feet.get(trailingLeg);
       ContactablePlaneBody leadingFoot = feet.get(trailingLeg.getOppositeSide());
-      FrameConvexPolygon2d OnToesSupportPolygon = getOnToesSupportPolygon(trailingFoot, leadingFoot);
+      FrameConvexPolygon2d OnToesSupportPolygon = getOnToesSupportPolygonCopy(trailingFoot, leadingFoot);
       isDesiredECMPOKForToeOff.set(Math.abs(OnToesSupportPolygon.distance(desiredECMP)) < 0.06);
       //    isDesiredCMPOKForToeOff.set(OnToesSupportPolygon.isPointInside(desiredECMP));
 
@@ -169,7 +169,7 @@ public class WalkOnTheEdgesManager
 
    public void updateOnToesTriangle(FramePoint2d finalDesiredICP, RobotSide supportSide)
    {
-      onToesTriangle = getOnToesTriangle(finalDesiredICP, feet.get(supportSide));
+      onToesTriangle = getOnToesTriangleCopy(finalDesiredICP, feet.get(supportSide));
       onToesTriangleArea.set(onToesTriangle.getArea());
       isOnToesTriangleLargeEnough.set(onToesTriangleArea.getDoubleValue() > onToesTriangleAreaLimit.getDoubleValue());
    }
@@ -460,9 +460,9 @@ public class WalkOnTheEdgesManager
       doHeelTouchdown.set(false);
    }
 
-   private FrameConvexPolygon2d getOnToesTriangle(FramePoint2d finalDesiredICP, ContactablePlaneBody supportFoot)
+   private FrameConvexPolygon2d getOnToesTriangleCopy(FramePoint2d finalDesiredICP, ContactablePlaneBody supportFoot)
    {
-      List<FramePoint> toePoints = getToePoints(supportFoot);
+      List<FramePoint> toePoints = getToePointsCopy(supportFoot);
       Collection<FramePoint2d> points = new ArrayList<FramePoint2d>();
       for (FramePoint toePoint : toePoints)
       {
@@ -475,7 +475,7 @@ public class WalkOnTheEdgesManager
       return new FrameConvexPolygon2d(points);
    }
 
-   private List<FramePoint> getToePoints(ContactablePlaneBody supportFoot)
+   private List<FramePoint> getToePointsCopy(ContactablePlaneBody supportFoot)
    {
       FrameVector forward = new FrameVector(supportFoot.getPlaneFrame(), 1.0, 0.0, 0.0);
       int nToePoints = 2;
@@ -484,9 +484,9 @@ public class WalkOnTheEdgesManager
       return toePoints;
    }
 
-   private FrameConvexPolygon2d getOnToesSupportPolygon(ContactablePlaneBody trailingFoot, ContactablePlaneBody leadingFoot)
+   private FrameConvexPolygon2d getOnToesSupportPolygonCopy(ContactablePlaneBody trailingFoot, ContactablePlaneBody leadingFoot)
    {
-      List<FramePoint> toePoints = getToePoints(trailingFoot);
+      List<FramePoint> toePoints = getToePointsCopy(trailingFoot);
       List<FramePoint> leadingFootPoints = leadingFoot.getContactPoints();
 
       List<FramePoint2d> allPoints = new ArrayList<FramePoint2d>();

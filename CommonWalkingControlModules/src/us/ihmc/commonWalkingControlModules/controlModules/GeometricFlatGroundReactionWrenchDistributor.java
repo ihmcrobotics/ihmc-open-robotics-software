@@ -153,11 +153,11 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
       outputData.reset();
       for (PlaneContactState planeContactState : contactStates)
       {
-         outputData.set(planeContactState, getForce(planeContactState), getCenterOfPressure(planeContactState), getNormalTorque(planeContactState));
+         outputData.set(planeContactState, getForceCopy(planeContactState), getCenterOfPressureCopy(planeContactState), getNormalTorque(planeContactState));
       }
    }
    
-   private FramePoint2d getCenterOfPressure(PlaneContactState contactState)
+   private FramePoint2d getCenterOfPressureCopy(PlaneContactState contactState)
    {
       RobotSide robotSide = getRobotSide(contactState);
       return new FramePoint2d(virtualToePoints.get(robotSide));
@@ -179,7 +179,7 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
       return torque.getZ();
    }
 
-   private FrameVector getForce(PlaneContactState contactState)
+   private FrameVector getForceCopy(PlaneContactState contactState)
    {
       RobotSide robotSide = getRobotSide(contactState);
       
@@ -217,7 +217,6 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
          return RobotSide.RIGHT;
       }
       else throw new RuntimeException("Don't have that contact state in my contact states!");
-      
    }
 
 }
