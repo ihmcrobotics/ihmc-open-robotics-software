@@ -131,6 +131,8 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
 
             case SLOW_DOWN_TO_ZERO :
             {
+               desiredHeadingControlModule.setMaxHeadingDot(0.2);
+
                break;
             }
 
@@ -190,6 +192,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
 
             case WAVE_CRUISE :
             {
+               desiredHeadingControlModule.setMaxHeadingDot(0.2);
                initialDesiredHeadingAngle.set(desiredHeadingControlModule.getDesiredHeadingAngle());
 
                break;
@@ -197,6 +200,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
 
             case CHANGE_HEADING_WALKING_STRAIGHT :
             {
+               desiredHeadingControlModule.setMaxHeadingDot(0.2);
                initialDesiredHeadingAngle.set(desiredHeadingControlModule.getDesiredHeadingAngle());
 
                break;
