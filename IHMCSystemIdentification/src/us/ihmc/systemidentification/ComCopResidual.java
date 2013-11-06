@@ -145,7 +145,6 @@ public class ComCopResidual implements FunctionNtoM
       {
          plotter.addArtifact(new CircleArtifact("sensedCoP" + i, cop.get(i).x, cop.get(i).y, 0.005, true, Color.RED));
          plotter.addArtifact(new CircleArtifact("modelCoM"  + i, com.get(i).x, com.get(i).y,  0.01, false, Color.RED));
-
       }
    }
 
