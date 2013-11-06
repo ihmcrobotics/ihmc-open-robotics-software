@@ -12,6 +12,7 @@ import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -25,7 +26,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 
 public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractControlFlowElement implements ICPBasedMomentumRateOfChangeControlModule
 {
-   private static final boolean KEEP_CMP_INSIDE_SUPPORT_POLYGON = false;
+   private static final boolean KEEP_CMP_INSIDE_SUPPORT_POLYGON = true; //false;
    
    private final ControlFlowInputPort<Double> desiredCenterOfMassHeightAccelerationInputPort = createInputPort("desiredCenterOfMassHeightAccelerationInputPort");
    private final ControlFlowInputPort<BipedSupportPolygons> bipedSupportPolygonsInputPort = createInputPort("bipedSupportPolygonsInputPort");
@@ -69,6 +70,9 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
       visualizer.setDesiredCoP(new FramePoint2d(controlledCMP.getReferenceFrame(), Double.NaN, Double.NaN));
    }
 
+   
+   private final FrameLineSegment2d cmpToICP = new FrameLineSegment2d();
+   
    public void startComputation()
    {
       if (supportLegInputPort.getData() != supportLegPreviousTick.getEnumValue())
@@ -78,29 +82,44 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
 
       CapturePointData capturePointData = capturePointInputPort.getData();
       CapturePointTrajectoryData desiredCapturePointTrajectory = desiredCapturePointTrajectoryInputPort.getData();
-      FramePoint2d desiredCMP = icpProportionalController.doProportionalControl(capturePointData.getCapturePoint(),
-                                   desiredCapturePointTrajectory.getDesiredCapturePoint(), desiredCapturePointTrajectory.getDesiredCapturePointVelocity(),
+      FramePoint2d desiredCapturePoint = desiredCapturePointTrajectory.getDesiredCapturePoint();
+      FramePoint2d capturePoint = capturePointData.getCapturePoint();
+      
+      FramePoint2d desiredCMP = icpProportionalController.doProportionalControl(capturePoint,
+                                   desiredCapturePoint, desiredCapturePointTrajectory.getDesiredCapturePointVelocity(),
                                    capturePointData.getOmega0());
       FrameConvexPolygon2d supportPolygon = bipedSupportPolygonsInputPort.getData().getSupportPolygonInMidFeetZUp();
       desiredCMP.changeFrame(supportPolygon.getReferenceFrame());
 
       if (KEEP_CMP_INSIDE_SUPPORT_POLYGON)
       {
-    	  if (supportPolygon.isPointInside(desiredCMP))
-    	  {
-    		  cmpProjected.set(false);
-    	  }
-    	  else
-    	  {
-    		  supportPolygon.orthogonalProjection(desiredCMP);
-    		  cmpProjected.set(true);
-    	  }
+         if (supportPolygon.isPointInside(desiredCMP))
+         {
+            cmpProjected.set(false);
+         }
+         else
+         {
+            // Don't just project the cmp onto the support polygon.
+            // Instead, find the first intersection from the cmp to the support polygon
+            // along the line segment from the cmp to the capture point. 
+            cmpProjected.set(true);
+
+            capturePoint.changeFrame(desiredCMP.getReferenceFrame());
+
+            cmpToICP.setAndChangeFrame(desiredCMP, capturePoint);
+            FramePoint2d[] intersections = supportPolygon.intersectionWith(cmpToICP); 
+
+            if ((intersections != null) && (intersections[0] != null))
+            {
+               desiredCMP.set(intersections[0]);
+            }
+         }
       }
-      
+
       desiredCMP.changeFrame(this.controlledCMP.getReferenceFrame());
       this.controlledCMP.set(desiredCMP);
 
-      visualizer.setDesiredCapturePoint(desiredCapturePointTrajectory.getDesiredCapturePoint());
+      visualizer.setDesiredCapturePoint(desiredCapturePoint);
       visualizer.setDesiredCMP(desiredCMP);
 
       supportLegPreviousTick.set(supportLegInputPort.getData());
