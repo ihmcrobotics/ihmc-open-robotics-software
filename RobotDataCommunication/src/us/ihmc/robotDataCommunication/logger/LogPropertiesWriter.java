@@ -19,6 +19,9 @@ public class LogPropertiesWriter extends LogProperties
          throw new RuntimeException("Properties file " + file.getAbsolutePath() + " already exists");
       }
       setProperty("version", version);
+      
+      // Backwards comparability options
+      setProperty("video.hasTimebase", "true");
    }
    
    public void store() throws IOException

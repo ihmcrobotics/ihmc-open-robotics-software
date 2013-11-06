@@ -4,10 +4,21 @@ import java.util.Properties;
 
 public abstract class LogProperties extends Properties
 {
-   protected static final String version = "1.0";
+   protected static final String version = "1.1";
    
    private static final long serialVersionUID = -2904334709894113620L;
-   
+      
+   public boolean hasTimebase()
+   {
+      if(getProperty("video.hasTimebase") != null)
+      {
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
    
    public void setRobotname(String robotName)
    {
