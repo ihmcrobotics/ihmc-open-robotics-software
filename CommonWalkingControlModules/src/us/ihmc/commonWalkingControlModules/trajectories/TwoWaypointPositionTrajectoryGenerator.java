@@ -51,8 +51,6 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private final BagOfBalls trajectoryBagOfBalls;
    private final BagOfBalls fixedPointBagOfBalls;
 
-   private final BagOfBalls boxBag;
-
    private final DoubleProvider stepTimeProvider;
    private final PositionProvider[] positionSources = new PositionProvider[2];
    private final VectorProvider[] velocitySources = new VectorProvider[2];
@@ -110,8 +108,6 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          trajectoryBagOfBalls = null;
          fixedPointBagOfBalls = null;
       }
-
-      boxBag = new BagOfBalls(5, 0.06, namePrefix + "BoxBag", registry, dynamicGraphicObjectsListRegistry);
 
       this.waypointGenerationMethod = new EnumYoVariable<TrajectoryWaypointGenerationMethod>(namePrefix + "WaypointGenerationMethod", registry,
             TrajectoryWaypointGenerationMethod.class);
