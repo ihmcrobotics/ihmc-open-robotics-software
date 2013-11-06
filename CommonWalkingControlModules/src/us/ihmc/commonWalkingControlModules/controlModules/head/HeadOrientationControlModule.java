@@ -71,7 +71,7 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
    }
    
    @Override
-   protected FrameOrientation getDesiredFrameOrientation()
+   protected FrameOrientation getDesiredFrameOrientationCopy()
    {
       FramePoint positionToPointAt = pointToTrack.getFramePointCopy();
       GeometricJacobian jacobian = super.getJacobian();
@@ -148,13 +148,13 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
    }
 
    @Override
-   protected FrameVector getDesiredAngularVelocity()
+   protected FrameVector getDesiredAngularVelocityCopy()
    {
       return new FrameVector(ReferenceFrame.getWorldFrame());
    }
 
    @Override
-   protected FrameVector getDesiredAngularAccelerationFeedForward()
+   protected FrameVector getDesiredAngularAccelerationFeedForwardCopy()
    {
       return new FrameVector(ReferenceFrame.getWorldFrame());
    }

@@ -75,7 +75,7 @@ public class ResizableBipedFoot implements BipedFootInterface
          onToesPoints.add(new Point3d(point.x + maxHeelPointsForward * footLength, point.y, point.z));
       }
 
-      if (!ConvexHullCalculator2d.isConvexAndClockwise(projectToXYPlane(onToesPoints)))
+      if (!ConvexHullCalculator2d.isConvexAndClockwise(createProjectionToXYPlane(onToesPoints)))
          throw new RuntimeException("Not convex and clockwise when fully on toes!");
 
       ArrayList<Point3d> onHeelPoints = new ArrayList<Point3d>();
@@ -89,7 +89,7 @@ public class ResizableBipedFoot implements BipedFootInterface
          onHeelPoints.add(new Point3d(point.x - maxToePointsBack * footLength, point.y, point.z));
       }
 
-      if (!ConvexHullCalculator2d.isConvexAndClockwise(projectToXYPlane(onHeelPoints)))
+      if (!ConvexHullCalculator2d.isConvexAndClockwise(createProjectionToXYPlane(onHeelPoints)))
          throw new RuntimeException("Not convex and clockwise when fully on heel!");
 
       // Actual construction:
@@ -183,11 +183,11 @@ public class ResizableBipedFoot implements BipedFootInterface
       return robotSide;
    }
 
-   public FrameConvexPolygon2d getFootPolygonInUseInAnkleZUp()
+   public FrameConvexPolygon2d getFootPolygonInUseInAnkleZUpCopy()
    {
       FootPolygonEnum footPolygonEnum = footPolygonInUseEnum.getEnumValue();
 
-      ArrayList<FramePoint> footPolygonPoints = computeFootPolygonPoints(footPolygonEnum);
+      ArrayList<FramePoint> footPolygonPoints = computeFootPolygonPointsCopy(footPolygonEnum);
 
       ArrayList<FramePoint2d> projectedFootPolygonPoints = GeometryTools.changeFrameToZUpAndProjectToXYPlane(ankleZUpFrame, footPolygonPoints);
       FrameConvexPolygon2d ret = new FrameConvexPolygon2d(projectedFootPolygonPoints);
@@ -195,7 +195,7 @@ public class ResizableBipedFoot implements BipedFootInterface
       return ret;
    }
 
-   private ArrayList<FramePoint> computeFootPolygonPoints(FootPolygonEnum footPolygonEnum)
+   private ArrayList<FramePoint> computeFootPolygonPointsCopy(FootPolygonEnum footPolygonEnum)
    {
       if ((shift.getDoubleValue() < 0.0) || (shift.getDoubleValue() > 1.0))
          throw new RuntimeException("shift < 0.0 || shift > 1.0");
@@ -258,15 +258,15 @@ public class ResizableBipedFoot implements BipedFootInterface
       return footPolygonPoints;
    }
 
-   public FrameConvexPolygon2d getFlatFootPolygonInAnkleZUp()
+   public FrameConvexPolygon2d getFlatFootPolygonInAnkleZUpCopy()
    {
-      ArrayList<FramePoint> footPolygonPoints = computeFootPolygonPoints(FootPolygonEnum.FLAT);
+      ArrayList<FramePoint> footPolygonPoints = computeFootPolygonPointsCopy(FootPolygonEnum.FLAT);
       ArrayList<FramePoint2d> projectedFootPolygonPoints = GeometryTools.changeFrameToZUpAndProjectToXYPlane(ankleZUpFrame, footPolygonPoints);
 
       return new FrameConvexPolygon2d(projectedFootPolygonPoints);
    }
 
-   private ArrayList<Point2d> projectToXYPlane(List<Point3d> points)
+   private ArrayList<Point2d> createProjectionToXYPlane(List<Point3d> points)
    {
       ArrayList<Point2d> ret = new ArrayList<Point2d>(points.size());
       for (int i = 0; i < points.size(); i++)
@@ -496,7 +496,7 @@ public class ResizableBipedFoot implements BipedFootInterface
    {
       FootPolygonEnum footPolygonEnum = footPolygonInUseEnum.getEnumValue();
 
-      ArrayList<FramePoint> footPolygonPoints = computeFootPolygonPoints(footPolygonEnum);
+      ArrayList<FramePoint> footPolygonPoints = computeFootPolygonPointsCopy(footPolygonEnum);
 
       ArrayList<FramePoint2d> projectedFootPolygonPoints = GeometryTools.changeFrameToZUpAndProjectToXYPlane(soleFrame, footPolygonPoints);
       FrameConvexPolygon2d ret = new FrameConvexPolygon2d(projectedFootPolygonPoints);
@@ -548,7 +548,7 @@ public class ResizableBipedFoot implements BipedFootInterface
 
    public List<FramePoint> computeFootPoints()
    {
-      return computeFootPolygonPoints(getFootPolygonInUse());
+      return computeFootPolygonPointsCopy(getFootPolygonInUse());
    }
 
    public ReferenceFrame getPlaneFrame()

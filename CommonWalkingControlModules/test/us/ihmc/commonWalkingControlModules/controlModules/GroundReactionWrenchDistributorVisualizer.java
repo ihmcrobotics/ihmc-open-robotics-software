@@ -151,7 +151,7 @@ public class GroundReactionWrenchDistributorVisualizer
          {
             PlaneContactState contactState = contactStates.get(i);
 
-            List<FramePoint2d> contactPoints = contactState.getCopyOfContactFramePoints2dInContact();
+            List<FramePoint2d> contactPoints = contactState.getContactFramePoints2dInContactCopy();
             FrameConvexPolygon2d frameConvexPolygon2d = new FrameConvexPolygon2d(contactPoints);
 
             YoFrameConvexPolygon2d yoFrameConvexPolygon2d = contactPolygonsWorld.get(i);

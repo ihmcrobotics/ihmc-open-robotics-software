@@ -425,7 +425,7 @@ public class CommonStanceSubController implements StanceSubController
       }
 
       FrameOrientation desiredPelvisOrientation =
-         desiredPelvisOrientationControlModule.getDesiredPelvisOrientationSingleSupport(legTorquesToPackForStanceSide.getRobotSide());
+         desiredPelvisOrientationControlModule.getDesiredPelvisOrientationSingleSupportCopy(legTorquesToPackForStanceSide.getRobotSide());
       Wrench upperBodyWrench = couplingRegistry.getDesiredUpperBodyWrench();
       balanceSupportControlModule.doSingleSupportBalance(legTorquesToPackForStanceSide, desiredVelocity, desiredPelvisOrientation, upperBodyWrench, singleSupportCondition, timeInState);
    }
@@ -435,7 +435,7 @@ public class CommonStanceSubController implements StanceSubController
       FrameVector2d desiredVelocity = walk
                                       ? desiredVelocityControlModule.getDesiredVelocity()
                                       : new FrameVector2d(desiredVelocityControlModule.getDesiredVelocity().getReferenceFrame());
-      FrameOrientation desiredPelvisOrientation = desiredPelvisOrientationControlModule.getDesiredPelvisOrientationDoubleSupport();
+      FrameOrientation desiredPelvisOrientation = desiredPelvisOrientationControlModule.getDesiredPelvisOrientationDoubleSupportCopy();
       balanceSupportControlModule.doDoubleSupportBalance(lowerBodyTorquesToPack, loadingLeg, desiredVelocity, desiredPelvisOrientation);
 
 //    balanceSupportControlModule.doDoubleSupportBalanceToeOff(lowerBodyTorquesToPack, loadingLeg, desiredVelocity, desiredPelvisOrientation);
@@ -447,7 +447,7 @@ public class CommonStanceSubController implements StanceSubController
       zeroVelocity = zeroVelocity.changeFrameCopy(desiredHeadingControlModule.getDesiredHeadingFrame());
 
 //    desiredVelocityControlModule.setDesiredVelocity(zeroVelocity);
-      FrameOrientation desiredPelvisOrientation = desiredPelvisOrientationControlModule.getDesiredPelvisOrientationDoubleSupport();
+      FrameOrientation desiredPelvisOrientation = desiredPelvisOrientationControlModule.getDesiredPelvisOrientationDoubleSupportCopy();
       balanceSupportControlModule.doDoubleSupportBalance(lowerBodyTorquesToPack, loadingLeg, zeroVelocity.toFrameVector2d(), desiredPelvisOrientation);
    }
 

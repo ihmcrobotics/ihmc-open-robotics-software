@@ -62,7 +62,7 @@ public class MomentumControlTestTools
          FramePoint2d cop = new FramePoint2d(planeFrame);
          centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(cop, wrench, planeFrame);
 
-         FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(contactState.getCopyOfContactFramePoints2dInContact());
+         FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(contactState.getContactFramePoints2dInContactCopy());
          assertTrue(supportPolygon.isPointInside(cop));
       }
    }

@@ -482,7 +482,7 @@ public class MomentumBasedController
             YoPlaneContactState contactState = yoPlaneContactStates.get(contactablePlaneBody);
             if (contactState.inContact())
             {
-               momentumBasedControllerSpy.setPlaneContactState(contactablePlaneBody, contactState.getCopyOfContactFramePoints2dInContact(),
+               momentumBasedControllerSpy.setPlaneContactState(contactablePlaneBody, contactState.getContactFramePoints2dInContactCopy(),
                      contactState.getCoefficientOfFriction(), contactState.getContactNormalFrameVectorCopy());
             }
          }
@@ -797,7 +797,7 @@ public class MomentumBasedController
 
    public List<FramePoint> getContactPoints(ContactablePlaneBody contactablePlaneBody)
    {
-      return yoPlaneContactStates.get(contactablePlaneBody).getCopyOfContactFramePointsInContact();
+      return yoPlaneContactStates.get(contactablePlaneBody).getContactFramePointsInContactCopy();
    }
 
    public PlaneContactState getContactState(ContactablePlaneBody contactablePlaneBody)

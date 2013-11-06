@@ -91,7 +91,7 @@ public class ListofPointsContactableRollingBody implements ContactableRollingBod
       return ret;
    }
 
-   public FramePoint getCopyOfCylinderOriginInBodyFrame()
+   public FramePoint getCylinderOriginCopy()
    {
       return new FramePoint(originInBodyFrame);
    }

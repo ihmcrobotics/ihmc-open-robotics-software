@@ -81,7 +81,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       return contactPoints;
    }
    
-   public List<FramePoint> getCopyOfContactFramePointsInContact()
+   public List<FramePoint> getContactFramePointsInContactCopy()
    {
       List<FramePoint> ret = new ArrayList<FramePoint>(totalNumberOfContactPoints);
 
@@ -100,7 +100,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       return ret;
    }
    
-   public List<FramePoint2d> getCopyOfContactFramePoints2dInContact()
+   public List<FramePoint2d> getContactFramePoints2dInContactCopy()
    {
       List<FramePoint2d> ret = new ArrayList<FramePoint2d>(totalNumberOfContactPoints);
       

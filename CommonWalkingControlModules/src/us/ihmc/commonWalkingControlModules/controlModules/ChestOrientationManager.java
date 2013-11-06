@@ -94,6 +94,6 @@ public class ChestOrientationManager
 
    public FrameOrientation getDesiredChestOrientation()
    {
-      return chestOrientationControlModule.getDesiredFrameOrientation();
+      return chestOrientationControlModule.getDesiredFrameOrientationCopy();
    }
 }

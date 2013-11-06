@@ -6,13 +6,13 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 
 public interface DesiredPelvisOrientationControlModule
 {
-   public abstract FrameOrientation getDesiredPelvisOrientationSingleSupport(RobotSide robotSide);
+   public abstract FrameOrientation getDesiredPelvisOrientationSingleSupportCopy(RobotSide robotSide);
 
-   public abstract FrameOrientation getDesiredPelvisOrientationDoubleSupport();
+   public abstract FrameOrientation getDesiredPelvisOrientationDoubleSupportCopy();
 
    public abstract void setDesiredPelvisOrientation(FrameOrientation orientation);
    
-   public abstract FrameOrientation getEstimatedOrientationAtEndOfStep(RobotSide stanceSide, FramePoint desiredFootLocation);
+   public abstract FrameOrientation getEstimatedOrientationAtEndOfStepCopy(RobotSide stanceSide, FramePoint desiredFootLocation);
    
    public abstract void useTwistScale(boolean useTwistScale);
 }

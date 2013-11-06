@@ -139,7 +139,7 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
       transformFromContactFrameToBodyFrame.setIdentity();
       Vector3d eulerAngles = new Vector3d(theta, Math.PI / 2.0, 0.0);
       transformFromContactFrameToBodyFrame.setEuler(eulerAngles);
-      FramePoint originInBodyFrame = contactableCylinderBody.getCopyOfCylinderOriginInBodyFrame();
+      FramePoint originInBodyFrame = contactableCylinderBody.getCylinderOriginCopy();
       double cylinderRadius = contactableCylinderBody.getCylinderRadius();
       Vector3d translation = new Vector3d(-cylinderRadius  * Math.cos(theta) + originInBodyFrame .getX(), cylinderRadius * Math.sin(theta)
             + originInBodyFrame.getY(), originInBodyFrame.getZ());
@@ -148,7 +148,7 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
       updatableContactFrame.update();
    }
    
-   public List<FramePoint> getCopyOfContactFramePointsInContact()
+   public List<FramePoint> getContactFramePointsInContactCopy()
    {
       List<FramePoint> ret = new ArrayList<FramePoint>(totalNumberOfContactPoints);
 
@@ -167,7 +167,7 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
       return ret;
    }
 
-   public List<FramePoint2d> getCopyOfContactFramePoints2dInContact()
+   public List<FramePoint2d> getContactFramePoints2dInContactCopy()
    {
       List<FramePoint2d> ret = new ArrayList<FramePoint2d>(totalNumberOfContactPoints);
       for (int i = 0; i < totalNumberOfContactPoints; i++)

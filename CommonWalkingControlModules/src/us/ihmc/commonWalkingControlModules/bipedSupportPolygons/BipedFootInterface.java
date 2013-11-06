@@ -13,9 +13,9 @@ public interface BipedFootInterface extends ContactablePlaneBody
 
    public abstract ReferenceFrame getFootFrame();
    
-   public abstract FrameConvexPolygon2d getFootPolygonInUseInAnkleZUp();
+   public abstract FrameConvexPolygon2d getFootPolygonInUseInAnkleZUpCopy();
 
-   public abstract FrameConvexPolygon2d getFlatFootPolygonInAnkleZUp();
+   public abstract FrameConvexPolygon2d getFlatFootPolygonInAnkleZUpCopy();
 
    public abstract FrameConvexPolygon2d getFootPolygonInSoleFrame();
 
