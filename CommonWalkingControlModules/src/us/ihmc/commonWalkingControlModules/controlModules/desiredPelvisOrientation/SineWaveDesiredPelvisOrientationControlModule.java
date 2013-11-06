@@ -45,7 +45,7 @@ public class SineWaveDesiredPelvisOrientationControlModule implements DesiredPel
       parentRegistry.addChild(registry);
    }
    
-   public FrameOrientation getDesiredPelvisOrientationSingleSupport(RobotSide robotSide)
+   public FrameOrientation getDesiredPelvisOrientationSingleSupportCopy(RobotSide robotSide)
    {
       return new FrameOrientation(referenceFrames.getPelvisFrame());
    }
@@ -55,7 +55,7 @@ public class SineWaveDesiredPelvisOrientationControlModule implements DesiredPel
       alphaDesiredOrientation.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterFreqInHz, dt));
    }
 
-   public FrameOrientation getDesiredPelvisOrientationDoubleSupport()
+   public FrameOrientation getDesiredPelvisOrientationDoubleSupportCopy()
    {
       double time = processedSensors.getTime();
       
@@ -80,7 +80,7 @@ public class SineWaveDesiredPelvisOrientationControlModule implements DesiredPel
       // empty
    }
 
-   public FrameOrientation getEstimatedOrientationAtEndOfStep(RobotSide robotSide, FramePoint desiredFootLocation)
+   public FrameOrientation getEstimatedOrientationAtEndOfStepCopy(RobotSide robotSide, FramePoint desiredFootLocation)
    {
       return new FrameOrientation(referenceFrames.getMidFeetZUpFrame());
    }

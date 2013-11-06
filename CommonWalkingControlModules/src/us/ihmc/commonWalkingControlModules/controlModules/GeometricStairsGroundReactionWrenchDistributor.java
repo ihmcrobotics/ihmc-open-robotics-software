@@ -202,13 +202,13 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
       {
          PlaneContactState contactState = contactStates.get(robotSide);
          double momentWeighting;
-         if (contactState == null || contactState.getCopyOfContactFramePoints2dInContact().size() == 0)
+         if (contactState == null || contactState.getContactFramePoints2dInContactCopy().size() == 0)
          {
             momentWeighting = 0.0;
          }
          else
          {
-            List<FramePoint> contactPoints = contactState.getCopyOfContactFramePointsInContact();
+            List<FramePoint> contactPoints = contactState.getContactFramePointsInContactCopy();
             FramePoint centerOfPressureOnSole = centersOfPressureOnSole3d.get(robotSide);
             centerOfPressureOnSole.changeFrame(contactState.getPlaneFrame());
             double minDistance = GeometryTools.minimumDistance(centerOfPressureOnSole, contactPoints);

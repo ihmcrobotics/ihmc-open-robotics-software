@@ -56,7 +56,7 @@ public class OldFootPolygonVisualizer implements Updatable
          if (yoFootPolygon != null)
          {
           BipedFootInterface bipedFoot = bipedFeet.get(robotSide);
-          yoFootPolygon.setFrameConvexPolygon2d(bipedFoot.getFootPolygonInUseInAnkleZUp().changeFrameAndProjectToXYPlaneCopy(ReferenceFrame.getWorldFrame()));           
+          yoFootPolygon.setFrameConvexPolygon2d(bipedFoot.getFootPolygonInUseInAnkleZUpCopy().changeFrameAndProjectToXYPlaneCopy(ReferenceFrame.getWorldFrame()));           
          }
       }
    }

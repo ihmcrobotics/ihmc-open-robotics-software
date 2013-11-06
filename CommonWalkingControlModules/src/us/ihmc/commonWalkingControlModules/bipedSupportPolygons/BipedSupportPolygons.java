@@ -2,9 +2,7 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
 import java.awt.Color;
 import java.util.List;
-import java.util.Timer;
 
-import com.yobotics.simulationconstructionset.time.GlobalTimer;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
@@ -16,6 +14,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.plotting.DynamicGraphicYoPolygonArtifact;
+import com.yobotics.simulationconstructionset.time.GlobalTimer;
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;

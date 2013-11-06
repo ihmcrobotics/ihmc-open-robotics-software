@@ -84,7 +84,7 @@ public class NonFlatGroundPlaneContactState implements PlaneContactState
       return new Point2d(point.getX(), point.getY());
    }
 
-   public List<FramePoint> getCopyOfContactFramePointsInContact()
+   public List<FramePoint> getContactFramePointsInContactCopy()
    {
       return contactFramePoints;
    }
@@ -104,7 +104,7 @@ public class NonFlatGroundPlaneContactState implements PlaneContactState
       return planeFrame;
    }
 
-   public List<FramePoint2d> getCopyOfContactFramePoints2dInContact()
+   public List<FramePoint2d> getContactFramePoints2dInContactCopy()
    {
       return contactFramePoints2d;
    }

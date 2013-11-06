@@ -53,7 +53,7 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
       return rigidBody.getParentJoint().getFrameAfterJoint();
    }
 
-   public FrameConvexPolygon2d getContactPolygon()
+   public FrameConvexPolygon2d getContactPolygonCopy()
    {
       return new FrameConvexPolygon2d(soleFrame, contactPoints);
    }

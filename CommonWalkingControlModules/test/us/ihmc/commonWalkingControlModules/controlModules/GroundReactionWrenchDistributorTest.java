@@ -1035,7 +1035,7 @@ public class GroundReactionWrenchDistributorTest
    private void verifyCenterOfPressureIsInsideFoot(FramePoint2d centerOfPressure, PlaneContactState planeContactState)
    {
       centerOfPressure.checkReferenceFrameMatch(planeContactState.getPlaneFrame());
-      List<FramePoint2d> contactPoints = planeContactState.getCopyOfContactFramePoints2dInContact();
+      List<FramePoint2d> contactPoints = planeContactState.getContactFramePoints2dInContactCopy();
       FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d(contactPoints);
 
       assertTrue("footPolygon.distance(centerOfPressure) should be negative " + footPolygon.distance(centerOfPressure),
@@ -1258,7 +1258,7 @@ public class GroundReactionWrenchDistributorTest
       FrameVector tempCrossVector = new FrameVector(centerOfMassFrame);
       FramePoint tempContactPoint = new FramePoint(centerOfMassFrame);
 
-      for (FramePoint2d contactPoint : plane.getCopyOfContactFramePoints2dInContact())
+      for (FramePoint2d contactPoint : plane.getContactFramePoints2dInContactCopy())
       {
          tempContactPoint.set(contactPoint.getReferenceFrame(), contactPoint.getX(), contactPoint.getY(), 0.0);
          tempContactPoint.changeFrame(centerOfMassFrame);
@@ -1306,7 +1306,7 @@ public class GroundReactionWrenchDistributorTest
          FrameVector tempCrossVector = new FrameVector(centerOfMassFrame);
          FramePoint tempContactPoint = new FramePoint(centerOfMassFrame);
 
-         for (FramePoint2d contactPoint : contactState.getCopyOfContactFramePoints2dInContact())
+         for (FramePoint2d contactPoint : contactState.getContactFramePoints2dInContactCopy())
          {
             tempContactPoint.set(contactPoint.getReferenceFrame(), contactPoint.getX(), contactPoint.getY(), 0.0);
             tempContactPoint.changeFrame(centerOfMassFrame);
@@ -1347,7 +1347,7 @@ public class GroundReactionWrenchDistributorTest
       Point2d ret = new Point2d();
       double totalWeight = 0.0;
 
-      List<FramePoint2d> contactPoints = contactState.getCopyOfContactFramePoints2dInContact();
+      List<FramePoint2d> contactPoints = contactState.getContactFramePoints2dInContactCopy();
       for (FramePoint2d contactPoint : contactPoints)
       {
          Point2d point2d = contactPoint.getPointCopy();

@@ -68,7 +68,7 @@ public class LungingBasedDesiredCoPControlModule implements DesiredCoPControlMod
       }
       else
       {
-         FramePoint2d desiredCoPDirection = getDesiredCoPOrthogonalToLungeAxis(midFeetZUpFrame, lungeAxis);
+         FramePoint2d desiredCoPDirection = getDesiredCoPOrthogonalToLungeAxisCopy(midFeetZUpFrame, lungeAxis);
          desiredCoP = clipLineOnSupportPolygon(supportPolygonInMidFeetZUp, supportPolygonInMidFeetZUp.getCentroidCopy(), desiredCoPDirection);
          // putting it on the edge makes the feet roll/pitch
          desiredCoP.scale(0.75);
@@ -82,7 +82,7 @@ public class LungingBasedDesiredCoPControlModule implements DesiredCoPControlMod
       return desiredCoP;
    }
 
-   private FramePoint2d getDesiredCoPOrthogonalToLungeAxis(ReferenceFrame expressedInFrame, FrameVector2d lungeAxis)   
+   private FramePoint2d getDesiredCoPOrthogonalToLungeAxisCopy(ReferenceFrame expressedInFrame, FrameVector2d lungeAxis)   
    {
       FramePoint2d desiredCoP = new FramePoint2d(lungeAxis.getReferenceFrame(), lungeAxis.getY(), -lungeAxis.getX());
       desiredCoP.changeFrame(expressedInFrame);

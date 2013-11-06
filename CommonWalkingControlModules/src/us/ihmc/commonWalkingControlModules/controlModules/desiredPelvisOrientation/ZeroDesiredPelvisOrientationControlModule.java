@@ -15,12 +15,12 @@ public class ZeroDesiredPelvisOrientationControlModule implements DesiredPelvisO
       this.desiredHeadingFrame = desiredHeadingFrame;
    }
 
-   public FrameOrientation getDesiredPelvisOrientationSingleSupport(RobotSide robotSide)
+   public FrameOrientation getDesiredPelvisOrientationSingleSupportCopy(RobotSide robotSide)
    {
       return new FrameOrientation(desiredHeadingFrame);
    }
 
-   public FrameOrientation getDesiredPelvisOrientationDoubleSupport()
+   public FrameOrientation getDesiredPelvisOrientationDoubleSupportCopy()
    {
       return new FrameOrientation(desiredHeadingFrame);
    }
@@ -30,7 +30,7 @@ public class ZeroDesiredPelvisOrientationControlModule implements DesiredPelvisO
       // empty
    }
 
-   public FrameOrientation getEstimatedOrientationAtEndOfStep(RobotSide robotSide, FramePoint desiredFootLocation)
+   public FrameOrientation getEstimatedOrientationAtEndOfStepCopy(RobotSide robotSide, FramePoint desiredFootLocation)
    {
       return new FrameOrientation(desiredHeadingFrame);
    }

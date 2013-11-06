@@ -34,19 +34,19 @@ public class ChestOrientationControlModule extends DegenerateOrientationControlM
       return chest;
    }
 
-   protected FrameOrientation getDesiredFrameOrientation()
+   protected FrameOrientation getDesiredFrameOrientationCopy()
    {
       FrameOrientation ret = new FrameOrientation(desiredOrientation.getReferenceFrame());
       desiredOrientation.get(ret);
       return ret;
    }
 
-   protected FrameVector getDesiredAngularVelocity()
+   protected FrameVector getDesiredAngularVelocityCopy()
    {
       return desiredAngularVelocity.getFrameVectorCopy();
    }
 
-   protected FrameVector getDesiredAngularAccelerationFeedForward()
+   protected FrameVector getDesiredAngularAccelerationFeedForwardCopy()
    {
       return feedForwardAngularAcceleration.getFrameVectorCopy();
    }
