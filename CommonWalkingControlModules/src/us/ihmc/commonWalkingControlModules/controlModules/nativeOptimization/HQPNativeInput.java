@@ -1,10 +1,11 @@
 package us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization;
 
+import java.util.Arrays;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.utilities.math.MatrixTools;
 
-import java.util.Arrays;
+import us.ihmc.utilities.math.MatrixTools;
 
 public class HQPNativeInput
 {
@@ -77,8 +78,8 @@ public class HQPNativeInput
       rhoMin = new double[rhoMinMatrix.getNumElements()];
       phiMin = new double[phiMinMatrix.getNumElements()];
       phiMax = new double[phiMaxMatrix.getNumElements()];
-      WRho = new double[WRhoMatrix.getNumRows()]; // diagonal
-      WPhi = new double[WPhiMatrix.getNumRows()]; // diagonal
+      WRho = new double[WRhoMatrix.getNumRows()];    // diagonal
+      WPhi = new double[WPhiMatrix.getNumRows()];    // diagonal
    }
 
    public void reset()
@@ -155,7 +156,7 @@ public class HQPNativeInput
    {
       return Qrho;
    }
-   
+
    public double[] getQphi()
    {
       return Qphi;
@@ -170,12 +171,12 @@ public class HQPNativeInput
    {
       return rhoMin;
    }
-   
+
    public double[] getPhiMin()
    {
       return phiMin;
    }
-   
+
    public double[] getPhiMax()
    {
       return phiMax;
@@ -241,7 +242,7 @@ public class HQPNativeInput
       CommonOps.insert(Qrho, this.QrhoMatrix, 0, 0);
       MatrixTools.denseMatrixToArrayColumnMajor(this.QrhoMatrix, this.Qrho);
    }
-   
+
    public void setContactPointWrenchMatrixForBoundedCylinderVariables(DenseMatrix64F Qphi)
    {
       CommonOps.insert(Qphi, this.QphiMatrix, 0, 0);
@@ -259,13 +260,13 @@ public class HQPNativeInput
       CommonOps.insert(rhoMin, this.rhoMinMatrix, 0, 0);
       MatrixTools.denseMatrixToArrayColumnMajor(this.rhoMinMatrix, this.rhoMin);
    }
-   
+
    public void setPhiMin(DenseMatrix64F phiMin)
    {
       CommonOps.insert(phiMin, this.phiMinMatrix, 0, 0);
       MatrixTools.denseMatrixToArrayColumnMajor(this.phiMinMatrix, this.phiMin);
    }
-   
+
    public void setPhiMax(DenseMatrix64F phiMax)
    {
       CommonOps.insert(phiMax, this.phiMaxMatrix, 0, 0);
@@ -286,4 +287,3 @@ public class HQPNativeInput
       MatrixTools.extractDiagonal(this.WPhiMatrix, this.WPhi);
    }
 }
-

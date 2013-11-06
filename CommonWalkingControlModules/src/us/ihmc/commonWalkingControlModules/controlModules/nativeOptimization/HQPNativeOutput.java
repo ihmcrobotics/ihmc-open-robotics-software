@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization;
 
 import org.ejml.data.DenseMatrix64F;
+
 public class HQPNativeOutput
 {
    private final DenseMatrix64F vd;
@@ -17,19 +18,25 @@ public class HQPNativeOutput
    public void setRho(double[] rho)
    {
       for (int i = 0; i < this.rho.getNumRows(); i++)
+      {
          this.rho.set(i, 0, rho[i]);
+      }
    }
-   
+
    public void setPhi(double[] phi)
    {
-      for (int i=0;i<this.phi.getNumRows();i++)
-         this.phi.set(i,0,phi[i]);
+      for (int i = 0; i < this.phi.getNumRows(); i++)
+      {
+         this.phi.set(i, 0, phi[i]);
+      }
    }
 
    public void setJointAccelerations(double[] vd)
    {
       for (int i = 0; i < this.vd.getNumRows(); i++)
+      {
          this.vd.set(i, 0, vd[i]);
+      }
    }
 
    public DenseMatrix64F getJointAccelerations()
@@ -41,7 +48,7 @@ public class HQPNativeOutput
    {
       return rho;
    }
-   
+
    public DenseMatrix64F getPhi()
    {
       return phi;
