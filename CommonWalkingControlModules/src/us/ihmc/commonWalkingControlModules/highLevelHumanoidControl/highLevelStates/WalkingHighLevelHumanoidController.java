@@ -156,7 +156,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    
    private final BooleanYoVariable hasICPPlannerFinished = new BooleanYoVariable("hasICPPlannerFinished", registry);
    private final DoubleYoVariable timeThatICPPlannerFinished = new DoubleYoVariable("timeThatICPPlannerFinished", registry);
-   
+   private final BooleanYoVariable initializingICPTrajectory = new BooleanYoVariable("initializingICPTrajectory", registry);
    // private final FinalDesiredICPCalculator finalDesiredICPCalculator;
 
    private final BooleanYoVariable rememberFinalICPFromSingleSupport = new BooleanYoVariable("rememberFinalICPFromSingleSupport", registry);
@@ -215,6 +215,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable controllerInitializationTime;
 
    private final TransferToAndNextFootstepsDataVisualizer transferToAndNextFootstepsDataVisualizer;
+   
+   private final BooleanYoVariable doneFinishingSingleSupportTransfer = new BooleanYoVariable("doneFinishingSingleSupportTransfer", registry);
 
    private final BooleanYoVariable ecmpBasedToeOffHasBeenInitialized = new BooleanYoVariable("ecmpBasedToeOffHasBeenInitialized", registry);
    private final YoFramePoint2d desiredECMP = new YoFramePoint2d("desiredECMP", "", worldFrame, registry);
@@ -664,10 +666,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          // note: this has to be done before the ICP trajectory generator is initialized, since it is using nextFootstep
          // TODO: Make a LOADING state and clean all of these timing hacks up.
-         boolean doneFinishingSingleSupportTransfer = instantaneousCapturePointPlanner.isPerformingICPDoubleSupport();
+         doneFinishingSingleSupportTransfer.set(instantaneousCapturePointPlanner.isPerformingICPDoubleSupport());
          double estimatedTimeRemainingForState = instantaneousCapturePointPlanner.getEstimatedTimeRemainingForState(yoTime.getDoubleValue()); 
          
-         if (doneFinishingSingleSupportTransfer || estimatedTimeRemainingForState < 0.02)
+         if (doneFinishingSingleSupportTransfer.getBooleanValue() || estimatedTimeRemainingForState < 0.02)
          {
             upcomingFootstepList.checkForFootsteps(momentumBasedController.getPointPositionGrabber(), readyToGrabNextFootstep, upcomingSupportLeg,
                   feet);
@@ -726,6 +728,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       {
          if (!icpTrajectoryHasBeenInitialized.getBooleanValue() && instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue()))
          {
+            initializingICPTrajectory.set(true);
+            
             Pair<FramePoint2d, Double> finalDesiredICPAndTrajectoryTime = computeFinalDesiredICPAndTrajectoryTime();
 
             if (transferToSide != null)    // the only case left for determining the contact state of the trailing foot
@@ -745,6 +749,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
             icpAndMomentumBasedController.updateBipedSupportPolygons(bipedSupportPolygons);    // need to always update biped support polygons after a change to the contact states
             icpTrajectoryHasBeenInitialized.set(true);
+         }
+         else
+         {           
+            initializingICPTrajectory.set(false);
          }
       }
 
@@ -782,6 +790,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             double trajectoryTime = stopInDoubleSupporTrajectoryTime.getDoubleValue();
 
             finalDesiredICPInWorld.set(Double.NaN, Double.NaN);
+//            finalDesiredICPInWorld.set(finalDesiredICP);
 
             finalDesiredICPAndTrajectoryTime = new Pair<FramePoint2d, Double>(finalDesiredICP, trajectoryTime);
          }
