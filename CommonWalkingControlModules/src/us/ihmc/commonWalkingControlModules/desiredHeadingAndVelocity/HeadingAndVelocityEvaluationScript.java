@@ -28,6 +28,9 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
    private final double controlDT;
    private final DoubleYoVariable acceleration = new DoubleYoVariable("acceleration", registry);
    private final DoubleYoVariable maxVelocity = new DoubleYoVariable("maxVelocity", registry);
+   
+   private final DoubleYoVariable maxHeadingDot = new DoubleYoVariable("maxHeadingDot", registry);
+
    private final DoubleYoVariable cruiseVelocity = new DoubleYoVariable("cruiseVelocity", registry);
    private final DoubleYoVariable sidestepVelocity = new DoubleYoVariable("sidestepVelocity", registry);
    private final DoubleYoVariable desiredVelocityMagnitude = new DoubleYoVariable("desiredVelocityMagnitude", registry);
@@ -64,6 +67,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
       acceleration.set(0.25);
       maxVelocity.set(1.0);    // (1.5);
       cruiseVelocity.set(0.6);    // (0.8);
+      maxHeadingDot.set(0.5);
       sidestepVelocity.set(0.4);
       eventDuration.set(evaluationEvent.getEnumValue().getMinTimeForScript());
 
@@ -89,6 +93,11 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
    public double getMaxVelocity()
    {
       return maxVelocity.getDoubleValue();
+   }
+   
+   public double getMaxHeadingDot()
+   {
+      return maxHeadingDot.getDoubleValue();
    }
 
    public void update(double time)
@@ -123,7 +132,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
 
             case TURN_180_CRUISE :
             {
-               desiredHeadingControlModule.setMaxHeadingDot(0.2);
+               desiredHeadingControlModule.setMaxHeadingDot(maxHeadingDot.getDoubleValue() * 0.4);
                desiredHeadingControlModule.setFinalHeadingTargetAngle(previousDesiredHeadingAngle + Math.PI);
 
                break;
@@ -131,7 +140,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
 
             case SLOW_DOWN_TO_ZERO :
             {
-               desiredHeadingControlModule.setMaxHeadingDot(0.2);
+               desiredHeadingControlModule.setMaxHeadingDot(maxHeadingDot.getDoubleValue() * 0.4);
 
                break;
             }
@@ -154,7 +163,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
 
             case TURN_IN_PLACE180 :
             {
-               desiredHeadingControlModule.setMaxHeadingDot(0.5);
+               desiredHeadingControlModule.setMaxHeadingDot(maxHeadingDot.getDoubleValue());
                desiredHeadingControlModule.setFinalHeadingTargetAngle(previousDesiredHeadingAngle - Math.PI);
 
                break;
@@ -192,7 +201,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
 
             case WAVE_CRUISE :
             {
-               desiredHeadingControlModule.setMaxHeadingDot(0.2);
+               desiredHeadingControlModule.setMaxHeadingDot(maxHeadingDot.getDoubleValue() * 0.4);
                initialDesiredHeadingAngle.set(desiredHeadingControlModule.getDesiredHeadingAngle());
 
                break;
@@ -200,7 +209,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
 
             case CHANGE_HEADING_WALKING_STRAIGHT :
             {
-               desiredHeadingControlModule.setMaxHeadingDot(0.2);
+               desiredHeadingControlModule.setMaxHeadingDot(maxHeadingDot.getDoubleValue() * 0.4);
                initialDesiredHeadingAngle.set(desiredHeadingControlModule.getDesiredHeadingAngle());
 
                break;

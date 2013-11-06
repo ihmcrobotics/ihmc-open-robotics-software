@@ -143,8 +143,9 @@ public class HeadingAndVelocityEvaluationScriptTest
 //      System.out.println("desiredHeadingControlModule.getMaxHeadingDot() = " + desiredHeadingControlModule.getMaxHeadingDot());
 //      System.out.println("script.getAcceleration() = " + script.getAcceleration());
       
-      assertTrue(maxHeadingChanges[0] < desiredHeadingControlModule.getMaxHeadingDot() * 1.05);
-      assertTrue(maxHeadingChanges[1] < desiredHeadingControlModule.getMaxHeadingDot() * 1.05);
+      
+      assertTrue(maxHeadingChanges[0] < script.getMaxHeadingDot() * 1.05);
+      assertTrue(maxHeadingChanges[1] < script.getMaxHeadingDot() * 1.05);
       
       assertTrue(maxVelocityChanges[0] < script.getAcceleration() * 2.0);
       assertTrue(maxVelocityChanges[1] < script.getAcceleration() * 2.0);
