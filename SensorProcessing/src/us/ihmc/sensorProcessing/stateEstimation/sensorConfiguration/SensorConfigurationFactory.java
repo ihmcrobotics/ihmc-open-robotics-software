@@ -21,13 +21,12 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 
 public class SensorConfigurationFactory
 {
-   private final Vector3d gravitationalAcceleration;
+   private final double gravitationalAcceleration;
    private final SensorNoiseParameters sensorNoiseParameters;
 
-   public SensorConfigurationFactory(SensorNoiseParameters sensorNoiseParameters, Vector3d gravitationalAcceleration)
+   public SensorConfigurationFactory(SensorNoiseParameters sensorNoiseParameters, double gravitationalAcceleration)
    {
-      this.gravitationalAcceleration = new Vector3d();
-      this.gravitationalAcceleration.set(gravitationalAcceleration);
+      this.gravitationalAcceleration = gravitationalAcceleration;
       this.sensorNoiseParameters = sensorNoiseParameters;
    }
 
@@ -114,7 +113,7 @@ public class SensorConfigurationFactory
 
          LinearAccelerationSensorConfiguration linearAccelerationSensorConfiguration = new LinearAccelerationSensorConfiguration(outputPort, sensorName,
                                                                                           estimatedMeasurementBody, estimatedMeasurementFrame,
-                                                                                          gravitationalAcceleration.getZ(), linearAccelerationNoiseCovariance,
+                                                                                          gravitationalAcceleration, linearAccelerationNoiseCovariance,
                                                                                           linearAccelerationBiasProcessNoiseCovariance);
 
          linearAccelerationSensorConfigurations.add(linearAccelerationSensorConfiguration);

@@ -80,8 +80,7 @@ public class ComposableStateEstimatorEvaluator
          new DesiredCoMAccelerationsFromRobotStealerController(estimationFrame, comAccelerationProcessNoiseStandardDeviation,
                angularAccelerationProcessNoiseStandardDeviation, generator, estimationJoint, controlDT);
 
-      Vector3d gravitationalAcceleration = new Vector3d();
-      robot.getGravity(gravitationalAcceleration);
+      double gravitationalAcceleration = robot.getGravityZ();
 
       // The following few lines are what you need to do to get the state estimator working with a robot.
       // You also need to either add the controlFlowGraph to another one, or make sure to run it's startComputation method at the right time:
