@@ -109,7 +109,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
 
          OneDoFJoint kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE);
          EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(controlDT, foot, jacobian, kneeJoint, poseTrajectoryGenerator, null,
-                                                                null, momentumBasedController, registry);
+                                                                null, null, momentumBasedController, registry);
          endEffectorControlModule.setSwingGains(100.0, 200.0, 200.0, 1.0);
 
          footEndEffectorControlModules.put(foot, endEffectorControlModule);
