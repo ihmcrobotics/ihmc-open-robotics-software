@@ -103,13 +103,13 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
    {
       //String file = "../SensorProcessing/drc_oi_stairs.txt";
       //initialTranslation = new Vector3f(2.8513365f, 6.8462625f, -0.5126955f);
-      
+
       //String file = "../SensorProcessing/drc_oi_stairs2.txt";
       //initialTranslation = new Vector3f(2.918974f, 6.8149567f, -0.5126952f);
-      
-      String file = "../SensorProcessing/drc_oi_stairs3.txt";
+
+      String file = "../SensorProcessing/drc_oi_stairs4.txt";
       initialTranslation = new Vector3f(2.918974f, 6.8149567f, -0.5126952f);
-      
+
       //String file = "../SensorProcessing/drc_oi_door.txt";
       //initialTranslation= new Vector3f(3.6121516f, -3.6621094f, 0.027623236f);
 
@@ -508,13 +508,14 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       });
       ransac.start();
    }
-   
-   private void findStairs(final List<Point3D_F64> fullCloud, final Vector3f firstClick, final Vector3f secondClick) {
-      
+
+   private void findStairs(final List<Point3D_F64> fullCloud, final Vector3f firstClick, final Vector3f secondClick)
+   {
+
       List<Shape> found = new ArrayList<PointCloudShapeFinder.Shape>();
       found.add(findLocalPlane(fullCloud, firstClick));
       found.add(findLocalPlane(fullCloud, secondClick));
-      
+
       ArrayList<Step> steps = new ArrayList<Step>();
       for (Shape s : found)
       {
@@ -527,7 +528,6 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
          steps.add(new Step(bounds, PointCloudTools.pointToVec(com)));
       }
 
-
       Comparator<Step> zSort = new Comparator<Step>()
       {
          public int compare(Step o1, Step o2)
@@ -535,16 +535,16 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
             return o1.com.z > o2.com.z ? 1 : -1;
          }
       };
-      
+
       Collections.sort(steps, zSort);
       System.out.println(steps);
 
       Step first = steps.get(0);
-      Step second = steps.get(steps.size()-1);
+      Step second = steps.get(steps.size() - 1);
       float diff = 3;
-      
+
       createObject(first, second, diff);
-      
+
       //renderShapes(found);
    }
 
@@ -591,7 +591,6 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
                steps.add(new Step(bounds, PointCloudTools.pointToVec(com)));
             }
 
-
             Comparator<Step> zSort = new Comparator<Step>()
             {
                public int compare(Step o1, Step o2)
@@ -599,16 +598,16 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
                   return o1.com.z > o2.com.z ? 1 : -1;
                }
             };
-            
+
             Collections.sort(steps, zSort);
             System.out.println(steps);
 
             Step first = steps.get(0);
-            Step second = steps.get(steps.size()-1);
-            float diff = steps.size()-1;
-            
+            Step second = steps.get(steps.size() - 1);
+            float diff = steps.size() - 1;
+
             createObject(first, second, diff);
-            
+
             renderShapes(shapeFinder.getFound());
          }
       });
@@ -639,23 +638,23 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
 
       return maxVector;
    }
-   
-   public static class Step {
+
+   public static class Step
+   {
       Vector3f[] points;
       Vector3f com;
-      
-      public Step(Vector3f[] points, Vector3f com) {
+
+      public Step(Vector3f[] points, Vector3f com)
+      {
          this.points = points;
          this.com = com;
       }
    }
 
-   
    public void createObject(Step first, Step second, float diff)
    {
       float STEP_THICKNESS = 0;//.0381f;
 
-      
       // Find length and width directions and dimensions
       Vector3f lengthDir = first.com.subtract(second.com);
       lengthDir.setZ(0);
@@ -666,7 +665,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       final Vector3f firstFront = maxInDir(first.points, lengthDir, first.com, false);
       final Vector3f firstLeft = maxInDir(first.points, widthDir, first.com, false);
       final Vector3f firstRight = maxInDir(first.points, widthDir.mult(-1), first.com, false);
-      
+
       final Vector3f secondBack = maxInDir(second.points, lengthDir.mult(-1), second.com, false);
 
       float xOffset = firstBack.subtract(secondBack).project(lengthDir).length() / diff;
@@ -783,8 +782,9 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       shapeFinder.process(cloud, null);
       return shapeFinder;
    }
-   
-   private Shape findLocalPlane(List<Point3D_F64> fullCloud, Vector3f clickPoint) {
+
+   private Shape findLocalPlane(List<Point3D_F64> fullCloud, Vector3f clickPoint)
+   {
       Random rand = new Random();
       Point3D_F64 center = PointCloudTools.vecToPoint(clickPoint);
 
@@ -1169,10 +1169,10 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       {
          findStairs(fullCloud, initialTranslation);
       }
-      
+
       if (evt.getKeyChar() == 'T' && evt.isPressed())
       {
-         findStairs(fullCloud, new Vector3f(2.7624996f, 6.71209f, -0.80566406f), new Vector3f(2.9161694f, 7.173393f, 0.12207049f));
+         findStairs(fullCloud, new Vector3f(2.7624996f, 6.71209f, -0.80566406f), new Vector3f(2.9711876f, 7.142084f, 0.12207055f));
          //(2.7624996, 6.71209, -0.80566406)
          //(2.9161694, 7.173393, 0.12207049)
 
