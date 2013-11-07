@@ -47,41 +47,41 @@ public class SimpleHQPNative
    private DoubleBuffer xDoubleBuffer;
    private DoubleBuffer ParamsDoubleBuffer;
 
-   public void initializeJava(int stages, int sizeA, int sizeb, int initA, int sizeC, int sized, int initC, int sizeE, int sizef, int initE, int sizeG,
-                              int sizeh, int initG, int sizex)
+   public void initializeJava(int nStages, int ASize, int bSize, int AInit, int CSize, int dSize, int CInit, int ESize, int fSize, int EInit, int GSize,
+                              int hSize, int GInit, int xSize)
    {
-      nStages = stages;
-      ASize = sizeA;
-      bSize = sizeb;
-      AInit = initA;
-      CSize = sizeC;
-      dSize = sized;
-      CInit = initC;
-      ESize = sizeE;
-      fSize = sizef;
-      EInit = initE;
-      GSize = sizeG;
-      hSize = sizeh;
-      GInit = initG;
-      xSize = sizex;
+      this.nStages = nStages;
+      this.ASize = ASize;
+      this.bSize = bSize;
+      this.AInit = AInit;
+      this.CSize = CSize;
+      this.dSize = dSize;
+      this.CInit = CInit;
+      this.ESize = ESize;
+      this.fSize = fSize;
+      this.EInit = EInit;
+      this.GSize = GSize;
+      this.hSize = hSize;
+      this.GInit = GInit;
+      this.xSize = xSize;
 
       x = new double[xSize];
 
       Params = new double[nParams];
-      Params[0] = nStages;
-      Params[1] = ASize;
-      Params[2] = bSize;
-      Params[3] = AInit;
-      Params[4] = CSize;
-      Params[5] = dSize;
-      Params[6] = CInit;
-      Params[7] = ESize;
-      Params[8] = fSize;
-      Params[9] = EInit;
-      Params[10] = GSize;
-      Params[11] = hSize;
-      Params[12] = GInit;
-      Params[13] = xSize;
+      Params[0] = this.nStages;
+      Params[1] = this.ASize;
+      Params[2] = this.bSize;
+      Params[3] = this.AInit;
+      Params[4] = this.CSize;
+      Params[5] = this.dSize;
+      Params[6] = this.CInit;
+      Params[7] = this.ESize;
+      Params[8] = this.fSize;
+      Params[9] = this.EInit;
+      Params[10] = this.GSize;
+      Params[11] = this.hSize;
+      Params[12] = this.GInit;
+      Params[13] = this.xSize;
       initParams();
 
       ParamsDoubleBuffer = setupBuffer(getParamsBuffer());
