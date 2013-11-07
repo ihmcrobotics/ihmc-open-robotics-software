@@ -5,8 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
 import org.opensphere.geometry.algorithm.ConcaveHull;
 import org.opensphere.geometry.triangulation.model.Edge;
 import org.opensphere.geometry.triangulation.model.Triangle;
@@ -26,7 +24,6 @@ import bubo.ptcloud.alg.BoundPlaneRectangle;
 import com.jme3.app.SimpleApplication;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
-import com.jme3.material.RenderState.BlendMode;
 import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector2f;
@@ -36,7 +33,6 @@ import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
-import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.scene.shape.Cylinder;
 import com.jme3.scene.shape.Line;
@@ -68,8 +64,8 @@ public class ShapeTranslator
 
       else if (s.type.equals(CloudShapeTypes.PLANE))
       {
-         //createPlane(s, color, nodeToAddTo);
-         createPolygon(s, color, nodeToAddTo);
+         createPlane(s, color, nodeToAddTo);
+         //createPolygon(s, color, nodeToAddTo);
       }
       else if (s.type.equals(CloudShapeTypes.SPHERE))
       {
@@ -95,7 +91,6 @@ public class ShapeTranslator
          Vector3f start = new Vector3f(new Float(a.x), new Float(a.y), new Float(a.z));
          Vector3f end = new Vector3f(new Float(b.x), new Float(b.y), new Float(b.z));
 
-
          nodeToAddTo.attachChild(generateCylinder(start, end, new Float(((Cylinder3D_F64) s.parameters).radius), color));
 
       }
@@ -108,8 +103,6 @@ public class ShapeTranslator
          Point3D_F64 center = ((Sphere3D_F64) s.parameters).center;
          Vector3f centerF = new Vector3f(new Float(center.x), new Float(center.y), new Float(center.z));
          float radius = new Float(((Sphere3D_F64) s.parameters).radius);
-
-
 
          nodeToAddTo.attachChild(generateSphere(centerF, radius, color));
 
@@ -124,7 +117,6 @@ public class ShapeTranslator
          plane.process((PlaneGeneral3D_F64) s.parameters, s.points);
          Point3D_F64[] points = plane.getRect();
 
-
          if (points.length == 4)
          {
             nodeToAddTo.attachChild(generatePlane(points[0], points[1], points[3], points[2], color));
@@ -137,9 +129,6 @@ public class ShapeTranslator
 
    public void createPolygon(PlaneGeneral3D_F64 plane, List<Point3D_F64> points, ColorRGBA color, Node nodeToAddTo)
    {
-      // if the shape is a plane
-//    if (s.type.equals(CloudShapeTypes.PLANE))
-//          {
       // get the concave polygon around and get the resulting triangulation
       BoundConcavePolygon polygon = new BoundConcavePolygon();
       ConcaveHull prep_c = prepareConcaveHull(plane, points, polygon);
@@ -151,8 +140,6 @@ public class ShapeTranslator
       System.out.println(prep_c.triangles.size());
       nodeToAddTo.attachChild(generateCustomPolygon(prep_c.triangles.values(), polygon, color));
 
-
-
       for (int i = 1; i < points3d.size(); i++)
       {
          Vector3f start = new Vector3f((float) points3d.get(i - 1).x, (float) points3d.get(i - 1).y, (float) points3d.get(i - 1).z);
@@ -160,35 +147,15 @@ public class ShapeTranslator
          nodeToAddTo.attachChild(drawLine(start, end));
       }
 
-//    }
+      //    }
    }
+
    public void createPolygon(Shape s, ColorRGBA color, Node nodeToAddTo)
    {
-      // if the shape is a plane
-    if (s.type.equals(CloudShapeTypes.PLANE))
-          {
-      // get the concave polygon around and get the resulting triangulation
-      BoundConcavePolygon polygon = new BoundConcavePolygon();
-      ConcaveHull prep_c = prepareConcaveHull((PlaneGeneral3D_F64)s.parameters, s.points, polygon);
-
-      // draw the polygon outer edges
-      List<Point3D_F64> points3d = getConcaveHull(prep_c, polygon);
-
-      // get the triangles from the concave hull
-      System.out.println(prep_c.triangles.size());
-      nodeToAddTo.attachChild(generateCustomPolygon(prep_c.triangles.values(), polygon, color));
-
-
-
-      for (int i = 1; i < points3d.size(); i++)
-      {
-         Vector3f start = new Vector3f((float) points3d.get(i - 1).x, (float) points3d.get(i - 1).y, (float) points3d.get(i - 1).z);
-         Vector3f end = new Vector3f((float) points3d.get(i).x, (float) points3d.get(i).y, (float) points3d.get(i).z);
-         nodeToAddTo.attachChild(drawLine(start, end));
-      }
-
-    }
+      if (s.type.equals(CloudShapeTypes.PLANE))
+         createPolygon((PlaneGeneral3D_F64) s.parameters, s.points, color, nodeToAddTo);
    }
+
    // prepares to build the concave hull
    public ConcaveHull prepareConcaveHull(PlaneGeneral3D_F64 plane, List<Point3D_F64> points3d, BoundConcavePolygon polygon)
    {
@@ -232,7 +199,6 @@ public class ShapeTranslator
       return points3d;
    }
 
-
    public Node drawLine(Vector3f start, Vector3f end)
    {
       Node lineNode = new Node();
@@ -251,7 +217,6 @@ public class ShapeTranslator
       return lineNode;
    }
 
-
    public Node generatePlane(Point3D_F64 p1, Point3D_F64 p2, Point3D_F64 p3, Point3D_F64 p4, ColorRGBA color)
    {
       Node plane = new Node();
@@ -268,10 +233,7 @@ public class ShapeTranslator
          texCoord[2] = new Vector2f(0, 1);
          texCoord[3] = new Vector2f(1, 1);
 
-         int[] indexes =
-         {
-            2, 0, 1, 1, 3, 2
-         };
+         int[] indexes = { 2, 0, 1, 1, 3, 2 };
 
          Mesh plane1 = new Mesh();
 
@@ -280,7 +242,7 @@ public class ShapeTranslator
          plane1.setBuffer(Type.Index, 3, BufferUtils.createIntBuffer(indexes));
          plane1.updateBound();
 
-         Geometry geo = new Geometry("OurMesh", plane1);    // using our custom mesh object
+         Geometry geo = new Geometry("OurMesh", plane1); // using our custom mesh object
          Material objectMaterial = new Material(ui.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
          objectMaterial.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
          objectMaterial.setColor("Color", color);
@@ -306,10 +268,7 @@ public class ShapeTranslator
          texCoord[2] = new Vector2f(0, 1);
          texCoord[3] = new Vector2f(1, 1);
 
-         int[] indexes =
-         {
-            2, 3, 1, 1, 0, 2
-         };
+         int[] indexes = { 2, 3, 1, 1, 0, 2 };
 
          Mesh plane1 = new Mesh();
 
@@ -318,7 +277,7 @@ public class ShapeTranslator
          plane1.setBuffer(Type.Index, 3, BufferUtils.createIntBuffer(indexes));
          plane1.updateBound();
 
-         Geometry geo = new Geometry("OurMesh", plane1);    // using our custom mesh object
+         Geometry geo = new Geometry("OurMesh", plane1); // using our custom mesh object
          Material objectMaterial = new Material(ui.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
          objectMaterial.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
          objectMaterial.setColor("Color", color);
@@ -358,7 +317,6 @@ public class ShapeTranslator
                ev = e.getEV();
                verts.put(Integer.valueOf(ev.getId()), polygon.convertTo3D(ov.getCoordinate().x, ov.getCoordinate().y, polygon.getCenter()));
                triVertex.put(Integer.valueOf(ev.getId()), ev);
-
             }
 
             for (Integer i : triVertex.keySet())
@@ -366,12 +324,10 @@ public class ShapeTranslator
                indexes[index++] = i.intValue();
 
             }
-
             triVertex.clear();
-
          }
-
-         List<Point3D_F64> points = new ArrayList<Point3D_F64>();
+         
+         System.out.println("Index? " + index + " of " + indexes.length);
 
          Vector3f[] vertices = new Vector3f[verts.size()];
          for (Integer key : verts.keySet())
@@ -388,8 +344,6 @@ public class ShapeTranslator
          texCoord[2] = new Vector2f(0, 1);
          texCoord[3] = new Vector2f(1, 1);
 
-
-
          Mesh plane1 = new Mesh();
 
          plane1.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(vertices));
@@ -397,7 +351,7 @@ public class ShapeTranslator
          plane1.setBuffer(Type.Index, 3, BufferUtils.createIntBuffer(indexes));
          plane1.updateBound();
 
-         Geometry geo = new Geometry("OurMesh", plane1);    // using our custom mesh object
+         Geometry geo = new Geometry("OurMesh", plane1); // using our custom mesh object
          Material objectMaterial = new Material(ui.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
          objectMaterial.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
          objectMaterial.setColor("Color", color);
@@ -415,12 +369,10 @@ public class ShapeTranslator
 
    }
 
-
    public Node generateCylinder(Vector3f start, Vector3f end, float radius, ColorRGBA color)
    {
       float length = start.distance(end);
       Cylinder c = new Cylinder(10, 10, radius, length, true);
-
 
       Geometry g = new Geometry("cyl", c);
       g.setLocalTranslation(0, 0, length / 2.0f);
@@ -461,6 +413,5 @@ public class ShapeTranslator
       return sphereNode;
    }
 
-
-//   
+   //   
 }

@@ -216,6 +216,10 @@ public class DRCConfigParameters
    public static final double LIDAR_BLINDNESS_CYLINDAR_SQUARED_RADIUS = 0.1;
    public static final boolean HIDE_THINGS_ABOVE_HEAD_FROM_LIDAR = true;
 
+   public static final double NEAR_SCAN_SPHERE_RADIUS = 1.1;
+   public static final double NEAR_SCAN_SPHERE_Z_OFFSET = -.4;
+   public static final double NEAR_SCAN_DENSITY = .025;
+   
    // Footstep Generator
    public static final double BOUNDING_BOX_FOR_FOOTSTEP_HEIGHT_FINDING_SIDE_LENGTH =
       (1 + 0.3) * 2
