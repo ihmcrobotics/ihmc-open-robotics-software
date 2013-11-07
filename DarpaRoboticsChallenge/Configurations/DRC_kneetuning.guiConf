@@ -1,21 +1,9 @@
 <GraphGroup>
 	<Cols>1</Cols>
 	<Graph>
-		<Variables>root.remoteroot.AtlasSliderBoardController.ll_l_arm_wrx.ll_l_arm_wrx_ferr_filt</Variables>
-		<GraphConfiguration>
-			<Name>config1</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
 		<Variables>root.remoteroot.AtlasControlThread.lastExtSequenceId</Variables>
 		<GraphConfiguration>
-			<Name>config2</Name>
+			<Name>config10</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -27,7 +15,7 @@
 	<Graph>
 		<Variables>root.remoteroot.AtlasControlThread.processed_ext_to_robot_packet_seq_id</Variables>
 		<GraphConfiguration>
-			<Name>config3</Name>
+			<Name>config11</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -37,9 +25,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remoteroot.AtlasSliderBoardController.ll_l_arm_wrx.ll_l_arm_wrx_f_d,root.remoteroot.AtlasSliderBoardController.ll_l_arm_wrx.ll_l_arm_wrx_f_filt,root.remoteroot.AtlasSliderBoardController.ll_l_arm_wrx.ll_l_arm_wrx_f</Variables>
+		<Variables>root.remoteroot.AtlasSliderBoardController.ll_l_arm_wrx.ll_l_arm_wrx_f_filt,root.remoteroot.AtlasSliderBoardController.ll_l_arm_wrx.ll_l_arm_wrx_f</Variables>
 		<GraphConfiguration>
-			<Name>config4</Name>
+			<Name>config12</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -51,7 +39,7 @@
 	<Graph>
 		<Variables>root.remoteroot.AtlasSliderBoardController.testFunctionYoFunGen.testFunctionValue</Variables>
 		<GraphConfiguration>
-			<Name>config5</Name>
+			<Name>config13</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -61,7 +49,7 @@
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-<Entry Boxes>requestedBehavior,use_f_filt,resendExtendedDataToRobot,ll_r_leg_kny_a_k_f_p,ll_r_leg_kny_a_ff_qd,ll_r_leg_kny_param_a_k_i_alpha,testedJoint,testFunctionMode,testFunctionAmp,testFunctionFreq,testFunctionOffset</Entry Boxes>
+<Entry Boxes>requestedBehavior,use_f_filt,resendExtendedDataToRobot,testedJoint,testFunctionMode,testFunctionAmp,testFunctionFreq,testFunctionOffset,ll_l_leg_kny_a_k_f_p,ll_l_leg_kny_a_ff_qd,test_JOINT_R_LEG_HPX_name,ll_l_leg_kny_ctrl_kI_alpha,ll_l_leg_kny_ctrl_kP,ll_l_leg_kny_ctrl_kI,ll_l_leg_kny_ctrl_kD,ll_l_leg_kny_ctrl_cutoffFactor1,ll_l_leg_kny_ctrl_cutoffFactor2,ll_l_leg_kny_ctrl_doSuperPID</Entry Boxes>
 
 <Number of ViewPorts>1</Number of ViewPorts>
  <Main Viewport> 
@@ -72,9 +60,33 @@
 <GraphGroup>
 	<Cols>1</Cols>
 	<Graph>
-		<Variables>root.remoteroot.AtlasSliderBoardController.ll_r_leg_kny.ll_r_leg_kny_f_d</Variables>
+		<Variables>root.remoteroot.AtlasSliderBoardController.ll_l_leg_kny.ll_l_leg_kny_f_d,root.remoteroot.AtlasSliderBoardController.ll_l_leg_kny.ll_l_leg_kny_f</Variables>
 		<GraphConfiguration>
-			<Name>config6</Name>
+			<Name>config14</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>50.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remoteroot.AtlasSliderBoardController.ll_l_leg_kny.ll_l_leg_kny_ferr_filt_ihmc,root.remoteroot.AtlasSliderBoardController.ll_l_leg_kny.ll_l_leg_kny_ferr_filt</Variables>
+		<GraphConfiguration>
+			<Name>config15</Name>
+			<ScalingMethod>0</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>10.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remoteroot.AtlasSliderBoardController.ll_l_leg_kny.ll_l_leg_kny_f,root.remoteroot.AtlasSliderBoardController.ll_l_leg_kny.ll_l_leg_kny_f_filt</Variables>
+		<GraphConfiguration>
+			<Name>config16</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -84,9 +96,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remoteroot.AtlasSliderBoardController.ll_r_leg_kny.ll_r_leg_kny_ferr_filt_ihmc,root.remoteroot.AtlasSliderBoardController.ll_r_leg_kny.ll_r_leg_kny_ferr_filt</Variables>
+		<Variables>root.remoteroot.AtlasSliderBoardController.ll_l_leg_kny.ll_l_leg_kny_ferr_filt</Variables>
 		<GraphConfiguration>
-			<Name>config7</Name>
+			<Name>config17</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -96,9 +108,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remoteroot.AtlasSliderBoardController.ll_r_leg_kny.ll_r_leg_kny_f,root.remoteroot.AtlasSliderBoardController.ll_r_leg_kny.ll_r_leg_kny_f_filt</Variables>
+		<Variables>root.remoteroot.AtlasSliderBoardController.ll_l_leg_kny.ll_l_leg_kny_ferr_filt_ihmc</Variables>
 		<GraphConfiguration>
-			<Name>config8</Name>
+			<Name>config18</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
