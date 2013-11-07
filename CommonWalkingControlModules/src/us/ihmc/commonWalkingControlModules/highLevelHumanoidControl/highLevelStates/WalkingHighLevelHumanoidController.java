@@ -165,6 +165,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final YoFramePoint2d finalDesiredICPInWorld = new YoFramePoint2d("finalDesiredICPInWorld", "", worldFrame, registry);
 
    private final SideDependentList<FootSwitchInterface> footSwitches;
+   private final SideDependentList<BooleanYoVariable> footSwitchesActivated = new SideDependentList<BooleanYoVariable>();
 
    private final DoubleYoVariable minOrbitalEnergyForSingleSupport = new DoubleYoVariable("minOrbitalEnergyForSingleSupport", registry);
    private final DoubleYoVariable amountToBeInsideSingleSupport = new DoubleYoVariable("amountToBeInsideSingleSupport", registry);
@@ -406,6 +407,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    protected void setupFootControlModules(SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators)
    {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         BooleanYoVariable footSwitchActivated = new BooleanYoVariable("Is" + robotSide.getCamelCaseNameForMiddleOfExpression() + "FootSwitchActivated", registry);
+         footSwitchesActivated.put(robotSide, footSwitchActivated);
+      }
+      
       //TODO: Pull these up to a higher level.
 
       singularityEscapeNullspaceMultiplierSwingLeg.set(200.0);
@@ -451,18 +458,20 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          
          EndEffectorControlModule endEffectorControlModule;
 
+         BooleanYoVariable footSwitchActivated = footSwitchesActivated.get(robotSide);
+         
          if (WalkOnTheEdgesProviders.TOEOFF_MOTION_TYPE_USED != ToeOffMotionType.FREE)
          {
             DoubleTrajectoryGenerator onToesPitchTrajectoryGenerator = walkOnTheEdgesProviders.getToeOffPitchTrajectoryGenerators(robotSide);
             endEffectorControlModule = new EndEffectorControlModule(controlDT, bipedFoot, jacobian, kneeJoint, swingPoseTrajectoryGenerator,
-                                          heelPitchTrajectoryGenerator, onToesPitchTrajectoryGenerator, momentumBasedController, registry);
+                                          heelPitchTrajectoryGenerator, onToesPitchTrajectoryGenerator, footSwitchActivated, momentumBasedController, registry);
          }
          else
          {
             // Let the toe pitch motion free. It seems to work better.
             DoubleProvider maximumToeOffAngleProvider = walkOnTheEdgesProviders.getMaximumToeOffAngleProvider();
             endEffectorControlModule = new EndEffectorControlModule(controlDT, bipedFoot, jacobian, kneeJoint, swingPoseTrajectoryGenerator,
-                                          heelPitchTrajectoryGenerator, maximumToeOffAngleProvider, momentumBasedController, registry);
+                                          heelPitchTrajectoryGenerator, maximumToeOffAngleProvider, footSwitchActivated, momentumBasedController, registry);
          }
          
                   
@@ -1355,7 +1364,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
          else
          {
-            footSwitchActivated = footSwitch.hasFootHitGround();
+            footSwitchActivated = footSwitchesActivated.get(swingSide).getBooleanValue();
          }
 
          if (hasMinimumTimePassed.getBooleanValue() && justFall.getBooleanValue()) return true;
@@ -1579,7 +1588,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    
    // FIXME: don't override
    public void doMotionControlInternal()
-   {      
+   {
+      for (RobotSide robotSide : RobotSide.values)
+         footSwitchesActivated.get(robotSide).set(footSwitches.get(robotSide).hasFootHitGround());
+      
       momentumBasedController.doPrioritaryControl();
       super.callUpdatables();
 
