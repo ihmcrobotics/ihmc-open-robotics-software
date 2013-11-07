@@ -1,12 +1,14 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor;
 
 import com.martiansoftware.jsap.*;
+
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.atlas.PPSTimestampOffsetProvider;
 import us.ihmc.atlas.RealRobotPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCNetClassList;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotDataReceiver;
@@ -68,33 +70,39 @@ public class DRCNetworkProcessor
 
       System.out.println("Connecting to ROS");
 
-      RosMainNode rosMainNode;
-      rosMainNode = new RosMainNode(rosCoreURI, "darpaRoboticsChallange/networkProcessor");
 
-      RosNativeNetworkProcessor rosNativeNetworkProcessor;
-      if (RosNativeNetworkProcessor.hasNativeLibrary())
+
+      if(DRCLocalConfigParameters.ENABLE_CAMERA_AND_LIDAR)
       {
-         rosNativeNetworkProcessor = RosNativeNetworkProcessor.getInstance(rosCoreURI.toString());
-         rosNativeNetworkProcessor.connect();
+         RosMainNode rosMainNode;
+         rosMainNode = new RosMainNode(rosCoreURI, "darpaRoboticsChallange/networkProcessor");
+         
+         RosNativeNetworkProcessor rosNativeNetworkProcessor;
+         if (RosNativeNetworkProcessor.hasNativeLibrary())
+         {
+            rosNativeNetworkProcessor = RosNativeNetworkProcessor.getInstance(rosCoreURI.toString());
+            rosNativeNetworkProcessor.connect();
+         }
+         else
+         {
+            rosNativeNetworkProcessor = null;
+         }
+         CameraDataReceiver cameraDataReceiver = new GazeboCameraReceiver(robotPoseBuffer, videoSettings, rosMainNode, networkingManager,
+               DRCSensorParameters.FIELD_OF_VIEW, ppsTimestampOffsetProvider);
+         MultiSenseCameraInfoReciever cameraInfoReciever = new MultiSenseCameraInfoReciever(rosMainNode, fieldComputerClient);
+         
+         LidarDataReceiver lidarDataReceiver = new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, fullRobotModel, robotBoundingBoxes,
+               jointMap, fieldComputerClient, rosNativeNetworkProcessor, ppsTimestampOffsetProvider);
+         
+         ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
+         
+         rosMainNode.execute();
       }
       else
       {
-         rosNativeNetworkProcessor = null;
+         System.err.println("WARNING: DRCLocalConfigParameters: Camera and LIDAR disabled.");
       }
 
-      //      GeoregressionTransformListenerAndProvider transformForDrivingProviderListener = new GeoregressionTransformListenerAndProvider();
-
-      CameraDataReceiver cameraDataReceiver = new GazeboCameraReceiver(robotPoseBuffer, videoSettings, rosMainNode, networkingManager,
-            DRCSensorParameters.FIELD_OF_VIEW, ppsTimestampOffsetProvider);
-      MultiSenseCameraInfoReciever cameraInfoReciever = new MultiSenseCameraInfoReciever(rosMainNode, fieldComputerClient);
-
-      LidarDataReceiver lidarDataReceiver = new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, fullRobotModel, robotBoundingBoxes,
-            jointMap, fieldComputerClient, rosNativeNetworkProcessor, ppsTimestampOffsetProvider);
-      new VRCScoreDataReceiver(networkingManager, lidarDataReceiver, rosNativeNetworkProcessor);
-
-      ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
-
-      rosMainNode.execute();
 
       //      if (DRCConfigParameters.USE_DUMMY_DRIVNG)
       //      {
@@ -111,7 +119,7 @@ public class DRCNetworkProcessor
    public DRCNetworkProcessor(LocalObjectCommunicator scsCommunicator, ObjectCommunicator drcNetworkObjectCommunicator)
    {
       this(drcNetworkObjectCommunicator);
-      CameraDataReceiver cameraDataReceiver = new SCSCameraDataReceiver(robotPoseBuffer, videoSettings, scsCommunicator, networkingManager,
+      new SCSCameraDataReceiver(robotPoseBuffer, videoSettings, scsCommunicator, networkingManager,
             ppsTimestampOffsetProvider);
       new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, fullRobotModel, robotBoundingBoxes, jointMap, fieldComputerClient,
             ppsTimestampOffsetProvider);
