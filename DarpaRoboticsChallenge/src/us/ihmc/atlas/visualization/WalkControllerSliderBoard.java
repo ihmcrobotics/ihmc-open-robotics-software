@@ -40,7 +40,7 @@ public class WalkControllerSliderBoard
       sliderBoardConfigurationManager.setKnob  (6, "zetaAllArmJointsR", registry, 0.0, 1.0);
 
       sliderBoardConfigurationManager.setSlider(7, "ll_transitionRatio", registry,  0.0, 1.0);
-      sliderBoardConfigurationManager.setSlider(8, "offsetHeightAboveGround", registry, 0.0, 0.12);
+      sliderBoardConfigurationManager.setSlider(8, "offsetHeightAboveGround", registry, 0.0, 0.20);
       
       sliderBoardConfigurationManager.setKnob  (8, "sliderBoardMode", registry, 0.0, SliderBoardMode.values().length);
 
@@ -60,7 +60,7 @@ public class WalkControllerSliderBoard
       
       sliderBoardConfigurationManager.setSlider(6, "userDesiredHeadPitch", registry, -0.5, 0.5);
       sliderBoardConfigurationManager.setSlider(7, "userDesiredHeadYaw", registry, -0.8, 0.8);
-      sliderBoardConfigurationManager.setSlider(8, "offsetHeightAboveGround", registry, 0.0, 0.12);
+      sliderBoardConfigurationManager.setSlider(8, "offsetHeightAboveGround", registry, 0.0, 0.20);
 
       sliderBoardConfigurationManager.setKnob  (8, "sliderBoardMode", registry, 0.0, SliderBoardMode.values().length);
 
