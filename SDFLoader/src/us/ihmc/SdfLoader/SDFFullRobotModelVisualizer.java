@@ -113,4 +113,9 @@ public class SDFFullRobotModelVisualizer implements RobotVisualizer
       // TODO Auto-generated method stub
       
    }
+
+   public void close()
+   {
+      // no-op
+   }
 }

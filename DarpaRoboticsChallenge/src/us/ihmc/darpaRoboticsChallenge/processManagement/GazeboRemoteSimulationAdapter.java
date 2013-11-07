@@ -300,7 +300,7 @@ public class GazeboRemoteSimulationAdapter extends Thread
 
    private void setupNetworkPollingTimer()
    {
-      Timer networkPollingTimer = new Timer();
+      Timer networkPollingTimer = new Timer("Gazebo Network Polling Timer");
 
       networkPollingTimer.schedule(new TimerTask()
       {

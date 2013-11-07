@@ -274,7 +274,7 @@ public class GraphicsDemoTools
          this.panXAmplitude = panXAmplitude;
          this.panXFrequency = panXFrequency;
 
-         ThreadTools.startAsDaemon(this);
+         ThreadTools.startAsDaemon(this, "Pan Tracking & Dolly Daemon");
       }
 
       public void run()

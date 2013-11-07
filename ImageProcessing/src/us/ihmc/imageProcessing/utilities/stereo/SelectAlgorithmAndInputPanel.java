@@ -229,7 +229,7 @@ public abstract class SelectAlgorithmAndInputPanel extends JPanel
 					state[i] = algCookies[i].get(algBoxes[i].getSelectedIndex());
 				}
 				// create a new thread to process this change
-				new Thread() {
+				new Thread("Selected Algorithm GUI Refresh") {
 					public void run() {
 						setActiveGUI(false);
 						refreshAll(state);
@@ -277,7 +277,7 @@ public abstract class SelectAlgorithmAndInputPanel extends JPanel
 				final String name = (String)algBoxes[i].getSelectedItem();
 				final int indexFamily = i;
 
-				new Thread() {
+				new Thread("Perform Set Algorithm") {
 					public void run() {
 						performSetAlgorithm(indexFamily,name, cookie);
 					}

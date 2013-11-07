@@ -27,6 +27,8 @@ public class DRCFlatGroundWalkingTrack
    private static final boolean START_YOVARIABLE_SERVER = true; 
    
    private final HumanoidRobotSimulation<SDFRobot> drcSimulation;
+   private final DRCController drcController;
+   private final YoVariableServer robotVisualizer;
 
    public DRCFlatGroundWalkingTrack(DRCRobotWalkingControllerParameters drcControlParameters, ArmControllerParameters armControllerParameters, 
          DRCRobotInterface robotInterface,
@@ -60,16 +62,19 @@ public class DRCFlatGroundWalkingTrack
          highLevelHumanoidControllerFactory.setupForCheatingUsingGroundHeightAtForFootstepProvider(scsInitialSetup.getGroundProfile());
       }
 
-      YoVariableServer robotVisualizer = null;
-      
       if (START_YOVARIABLE_SERVER)
       {
          robotVisualizer = new YoVariableServer(robotInterface.getRobot().getRobotsYoVariableRegistry(), RemoteAtlasVisualizer.defaultPort, DRCConfigParameters.ATLAS_INTERFACING_DT, dynamicGraphicObjectsListRegistry);
+      }
+      else
+      {
+         robotVisualizer = null;
       }
       
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, false);
       Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, null, robotInterface, robotInitialSetup, scsInitialSetup, guiInitialSetup, null, robotVisualizer, dynamicGraphicObjectsListRegistry);
       drcSimulation = humanoidSimulation.first();
+      drcController = humanoidSimulation.second();
 
       // add other registries
       drcSimulation.addAdditionalYoVariableRegistriesToSCS(registry);
@@ -94,6 +99,16 @@ public class DRCFlatGroundWalkingTrack
    public SimulationConstructionSet getSimulationConstructionSet()
    {
       return drcSimulation.getSimulationConstructionSet();
+   }
+
+   public DRCController getDrcController()
+   {
+      return drcController;
+   }
+
+   public YoVariableServer getRobotVisualizer()
+   {
+      return robotVisualizer;
    }
 
    public static void main(String[] args) throws JSAPException

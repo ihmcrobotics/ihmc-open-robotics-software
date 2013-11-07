@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
 
+import com.yobotics.simulationconstructionset.time.GlobalTimer;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.BlindWalkingPacket;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
@@ -18,12 +19,14 @@ import us.ihmc.darpaRoboticsChallenge.DRCEnvironmentModel;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseSimulation;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.ThreadTools;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
+import us.ihmc.utilities.TimerTaskScheduler;
 
 public class DRCSimulationTestHelper
 {
@@ -129,6 +132,13 @@ public class DRCSimulationTestHelper
    {
       blockingSimulationRunner.destroySimulation();
       blockingSimulationRunner = null;
+      if (drcSimulation != null && drcSimulation.getController() != null)
+      {
+         drcSimulation.getController().dispose();
+      }
+      GlobalTimer.clearTimers();
+      TimerTaskScheduler.cancelAndReset();
+      AsyncContinuousExecutor.cancelAndReset();
    }
 
    public boolean simulateAndBlockAndCatchExceptions(double simulationTime)

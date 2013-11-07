@@ -9,6 +9,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.messages.controller.RobotPoseData;
 import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.DRCJointConfigurationData;
 import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.JointConfigurationGatherer;
+import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectCommunicator;
@@ -56,36 +57,31 @@ public class DRCPoseCommunicator implements RawOutputWriter
    // this thread reads from the stateRingBuffer and pushes the data out to the objectConsumer
    private void startWriterThread()
    {
-      new Thread(new Runnable()
+      AsyncContinuousExecutor.executeContinuously(new Runnable()
       {
          @Override
          public void run()
          {
-            while (true)
+            if (stateRingBuffer.poll())
             {
-               if (stateRingBuffer.poll())
+               State state;
+               while ((state = stateRingBuffer.read()) != null)
                {
-                  State state;
-                  while ((state = stateRingBuffer.read()) != null)
+                  if (networkProcessorCommunicator == null)
                   {
-                     if(networkProcessorCommunicator == null)
-                     {
-                        System.out.println("Net Proc Comm");
-                     }
-                     if(state.poseData == null)
-                     {
-                        System.out.println("Pose Data");
-                     }
-                     networkProcessorCommunicator.consumeObject(state.poseData);
-                     networkProcessorCommunicator.consumeObject(state.jointData);
+                     System.out.println("Net Proc Comm");
                   }
-                  stateRingBuffer.flush();
+                  if (state.poseData == null)
+                  {
+                     System.out.println("Pose Data");
+                  }
+                  networkProcessorCommunicator.consumeObject(state.poseData);
+                  networkProcessorCommunicator.consumeObject(state.jointData);
                }
-
-               ThreadTools.sleep(WORKER_SLEEP_TIME_MILLIS);
+               stateRingBuffer.flush();
             }
          }
-      }).start();
+      }, WORKER_SLEEP_TIME_MILLIS, "DRC Pose Communicator");
    }
 
    @Override
