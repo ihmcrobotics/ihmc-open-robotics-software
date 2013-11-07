@@ -165,7 +165,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final YoFramePoint2d finalDesiredICPInWorld = new YoFramePoint2d("finalDesiredICPInWorld", "", worldFrame, registry);
 
    private final SideDependentList<FootSwitchInterface> footSwitches;
-   private final SideDependentList<BooleanYoVariable> footSwitchesActivated = new SideDependentList<BooleanYoVariable>();
+   private final DoubleYoVariable footLoadThresholdToHoldPosition = new DoubleYoVariable("footLoadThresholdToHoldPosition", registry);
+   private final SideDependentList<BooleanYoVariable> requestSupportFootToHoldPosition = new SideDependentList<BooleanYoVariable>();
 
    private final DoubleYoVariable minOrbitalEnergyForSingleSupport = new DoubleYoVariable("minOrbitalEnergyForSingleSupport", registry);
    private final DoubleYoVariable amountToBeInsideSingleSupport = new DoubleYoVariable("amountToBeInsideSingleSupport", registry);
@@ -409,8 +410,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         BooleanYoVariable footSwitchActivated = new BooleanYoVariable("Is" + robotSide.getCamelCaseNameForMiddleOfExpression() + "FootSwitchActivated", registry);
-         footSwitchesActivated.put(robotSide, footSwitchActivated);
+         BooleanYoVariable requestHoldPosition = new BooleanYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "RequestSupportFootToHoldPosition", registry);
+         requestSupportFootToHoldPosition.put(robotSide, requestHoldPosition);
       }
       
       //TODO: Pull these up to a higher level.
@@ -458,20 +459,20 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          
          EndEffectorControlModule endEffectorControlModule;
 
-         BooleanYoVariable footSwitchActivated = footSwitchesActivated.get(robotSide);
+         BooleanYoVariable requestHoldPosition = requestSupportFootToHoldPosition.get(robotSide);
          
          if (WalkOnTheEdgesProviders.TOEOFF_MOTION_TYPE_USED != ToeOffMotionType.FREE)
          {
             DoubleTrajectoryGenerator onToesPitchTrajectoryGenerator = walkOnTheEdgesProviders.getToeOffPitchTrajectoryGenerators(robotSide);
             endEffectorControlModule = new EndEffectorControlModule(controlDT, bipedFoot, jacobian, kneeJoint, swingPoseTrajectoryGenerator,
-                                          heelPitchTrajectoryGenerator, onToesPitchTrajectoryGenerator, footSwitchActivated, momentumBasedController, registry);
+                                          heelPitchTrajectoryGenerator, onToesPitchTrajectoryGenerator, requestHoldPosition, momentumBasedController, registry);
          }
          else
          {
             // Let the toe pitch motion free. It seems to work better.
             DoubleProvider maximumToeOffAngleProvider = walkOnTheEdgesProviders.getMaximumToeOffAngleProvider();
             endEffectorControlModule = new EndEffectorControlModule(controlDT, bipedFoot, jacobian, kneeJoint, swingPoseTrajectoryGenerator,
-                                          heelPitchTrajectoryGenerator, maximumToeOffAngleProvider, footSwitchActivated, momentumBasedController, registry);
+                                          heelPitchTrajectoryGenerator, maximumToeOffAngleProvider, requestHoldPosition, momentumBasedController, registry);
          }
          
                   
@@ -1364,7 +1365,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
          else
          {
-            footSwitchActivated = footSwitchesActivated.get(swingSide).getBooleanValue();
+            footSwitchActivated = footSwitch.hasFootHitGround();
          }
 
          if (hasMinimumTimePassed.getBooleanValue() && justFall.getBooleanValue()) return true;
@@ -1590,7 +1591,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    public void doMotionControlInternal()
    {
       for (RobotSide robotSide : RobotSide.values)
-         footSwitchesActivated.get(robotSide).set(footSwitches.get(robotSide).hasFootHitGround());
+         requestSupportFootToHoldPosition.get(robotSide).set(footSwitches.get(robotSide).computeFootLoadPercentage() < footLoadThresholdToHoldPosition.getDoubleValue());
       
       momentumBasedController.doPrioritaryControl();
       super.callUpdatables();

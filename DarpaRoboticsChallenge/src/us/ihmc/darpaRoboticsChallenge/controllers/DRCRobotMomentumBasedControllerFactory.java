@@ -30,6 +30,7 @@ import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import javax.vecmath.Point2d;
@@ -57,7 +58,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 
    @Override
    public RobotController getController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
-                                        CommonWalkingReferenceFrames referenceFrames, double controlDT, DoubleYoVariable yoTime,
+                                        CommonWalkingReferenceFrames referenceFrames, double controlDT, double gravity, DoubleYoVariable yoTime,
                                         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, GUISetterUpperRegistry guiSetterUpperRegistry, TwistCalculator twistCalculator,
                                         CenterOfMassJacobian centerOfMassJacobian, ForceSensorDataHolder forceSensorDataHolder, SideDependentList<HandControllerInterface> handControllers,
                                         LidarControllerInterface lidarControllerInterface, StateEstimationDataFromController stateEstimationDataFromControllerSink, ObjectCommunicator objectCommunicator)
@@ -78,11 +79,14 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
          bipedFeet.put(robotSide, foot);
       }
 
-      SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(bipedFeet, forceSensorDataHolder, dynamicGraphicObjectsListRegistry, specificRegistry);
+
+      double gravityZ = Math.abs(gravity);
+      double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator()) * gravityZ;
+      
+      SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(bipedFeet, forceSensorDataHolder, totalRobotWeight, dynamicGraphicObjectsListRegistry, specificRegistry);
       
 
 
-      double gravityZ = 9.81;
 
       Map<OneDoFJoint, Double> initialPositionControlKpGains = new HashMap<OneDoFJoint, Double>();
       Map<OneDoFJoint, Double> initialPositionControlKdGains = new HashMap<OneDoFJoint, Double>();
@@ -128,13 +132,14 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
    }
 
    private SideDependentList<FootSwitchInterface> createFootSwitches(SideDependentList<ContactablePlaneBody> bipedFeet,
-                                                                            ForceSensorDataHolder forceSensorDataHolder, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry)
+         ForceSensorDataHolder forceSensorDataHolder, double totalRobotWeight, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry)
    {
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<FootSwitchInterface>();
+      
       for (RobotSide robotSide : RobotSide.values)
       {
          ForceSensorData footForceSensor = forceSensorDataHolder.getByName(robotSide.getShortLowerCaseName() + "_leg_akx");
-         WrenchBasedFootSwitch wrenchBasedFootSwitch = new WrenchBasedFootSwitch(bipedFeet.get(robotSide).getName(), footForceSensor, 0.02, bipedFeet.get(robotSide),
+         WrenchBasedFootSwitch wrenchBasedFootSwitch = new WrenchBasedFootSwitch(bipedFeet.get(robotSide).getName(), footForceSensor, 0.02, totalRobotWeight, bipedFeet.get(robotSide),
                                                           dynamicGraphicObjectsListRegistry, useGazeboPhysics, registry);
          footSwitches.put(robotSide, wrenchBasedFootSwitch);
       }
