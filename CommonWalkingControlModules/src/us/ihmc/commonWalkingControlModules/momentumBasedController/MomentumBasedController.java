@@ -606,6 +606,12 @@ public class MomentumBasedController
       return planeContactWrenchProcessor.getCops().get(contactablePlaneBody);
    }
 
+   public void setPlaneContactCoefficientOfFriction(ContactablePlaneBody contactableBody, double coefficientOfFriction)
+   {
+      YoPlaneContactState yoPlaneContactState = yoPlaneContactStates.get(contactableBody);
+      yoPlaneContactState.setCoefficientOfFriction(coefficientOfFriction);
+   }
+
    public void setPlaneContactState(ContactablePlaneBody contactableBody, boolean[] newContactPointStates)
    {
       YoPlaneContactState yoPlaneContactState = yoPlaneContactStates.get(contactableBody);
