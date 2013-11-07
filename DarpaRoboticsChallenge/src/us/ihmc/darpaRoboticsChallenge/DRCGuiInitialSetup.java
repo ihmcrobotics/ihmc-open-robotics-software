@@ -99,7 +99,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
    {
       return isGuiShown;
    }
-   
+
    public void setIsGuiShown(boolean isGuiShown)
    {
       this.isGuiShown = isGuiShown;

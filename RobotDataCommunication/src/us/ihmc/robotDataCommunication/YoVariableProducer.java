@@ -21,6 +21,8 @@ public class YoVariableProducer extends Thread
    private final int jointStateOffset;
    private final LongBuffer longBuffer;
    private final zmq.Msg msg;
+
+   private zmq.SocketBase variablePublisher;
    
    public YoVariableProducer(int port, List<YoVariable> variables, List<JointHolder> jointHolders, ConcurrentRingBuffer<FullStateBuffer> variableBuffer)
    {
@@ -45,7 +47,7 @@ public class YoVariableProducer extends Thread
    
    public void run()
    {
-      zmq.SocketBase variablePublisher = ctx.create_socket(ZMQ.PUB);
+      variablePublisher = ctx.create_socket(ZMQ.PUB);
       RemoteVisualizationUtils.mayRaise();
 
       if (!variablePublisher.bind("tcp://*:" + port))
@@ -86,12 +88,15 @@ public class YoVariableProducer extends Thread
          }
       }
    
-      
-      variablePublisher.close();
+      if (variablePublisher.check_tag()) variablePublisher.close(); // don't close if already closed
    }
    
    public void close()
    {
+      if (variablePublisher != null)
+      {
+         variablePublisher.close();
+      }
       ctx.terminate();
       interrupt();
       try

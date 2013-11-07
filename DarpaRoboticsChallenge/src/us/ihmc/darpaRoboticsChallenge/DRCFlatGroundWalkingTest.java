@@ -5,6 +5,7 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 
+import com.yobotics.simulationconstructionset.time.GlobalTimer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,6 +14,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
+import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile;
@@ -20,9 +22,7 @@ import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
-import us.ihmc.utilities.MemoryTools;
-import us.ihmc.utilities.Pair;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.*;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -44,6 +44,8 @@ public class DRCFlatGroundWalkingTest
    private static final boolean SHOW_GUI = ALWAYS_SHOW_GUI || checkNothingChanged || CREATE_MOVIE;
 
    private BlockingSimulationRunner blockingSimulationRunner;
+   private DRCController drcController;
+   private RobotVisualizer robotVisualizer;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -65,10 +67,25 @@ public class DRCFlatGroundWalkingTest
          blockingSimulationRunner.destroySimulation();
          blockingSimulationRunner = null;
       }
+
+      if (drcController != null)
+      {
+         drcController.dispose();
+         drcController = null;
+      }
+
+      if (robotVisualizer != null)
+      {
+         robotVisualizer.close();
+         robotVisualizer = null;
+      }
+
+      GlobalTimer.clearTimers();
+      TimerTaskScheduler.cancelAndReset();
+      AsyncContinuousExecutor.cancelAndReset();
       
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-
 
    @Test
    public void testDRCOverShallowRamp() throws SimulationExceededMaximumTimeException
@@ -95,11 +112,16 @@ public class DRCFlatGroundWalkingTest
       CombinedTerrainObject combinedTerrainObject = combinedTerrainObjectAndRampEndX.first();
       double rampEndX = combinedTerrainObjectAndRampEndX.second();
       
-      SimulationConstructionSet scs = setupScs(drcControlParameters, armControllerParameters, combinedTerrainObject, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep);
+      DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, combinedTerrainObject, useVelocityAndHeadingScript,
+            cheatWithGroundHeightAtForFootstep);
+
+      drcController = track.getDrcController();
+      robotVisualizer = track.getRobotVisualizer();
+
+      SimulationConstructionSet scs = track.getSimulationConstructionSet();
       scs.setGroundVisible(false);
       scs.addStaticLinkGraphics(combinedTerrainObject.getLinkGraphics());
-      
-      
+
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
       NothingChangedVerifier nothingChangedVerifier = null;
@@ -192,7 +214,11 @@ public class DRCFlatGroundWalkingTest
 
       DRCRobotWalkingControllerParameters drcControlParameters = new DRCRobotWalkingControllerParameters();
       DRCRobotArmControllerParameters armControllerParameters = new DRCRobotArmControllerParameters();
-      SimulationConstructionSet scs = setupScs(drcControlParameters, armControllerParameters, groundProfile, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep);
+      DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, groundProfile, useVelocityAndHeadingScript,
+            cheatWithGroundHeightAtForFootstep);
+
+      drcController = track.getDrcController();
+      SimulationConstructionSet scs = track.getSimulationConstructionSet();
 
       NothingChangedVerifier nothingChangedVerifier = null;
       if (checkNothingChanged)
@@ -258,8 +284,9 @@ public class DRCFlatGroundWalkingTest
 
    boolean setupForCheatingUsingGroundHeightAtForFootstepProvider = false;
 
-   private SimulationConstructionSet setupScs(DRCRobotWalkingControllerParameters drcControlParameters, ArmControllerParameters armControllerParameters, GroundProfile groundProfile,
-           boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep)
+   private DRCFlatGroundWalkingTrack setupSimulationTrack(DRCRobotWalkingControllerParameters drcControlParameters, ArmControllerParameters
+         armControllerParameters, GroundProfile groundProfile,
+                                                          boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep)
    {
       AutomaticSimulationRunner automaticSimulationRunner = null;
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
@@ -283,7 +310,7 @@ public class DRCFlatGroundWalkingTest
 
       setupCameraForUnitTest(scs);
 
-      return scs;
+      return drcFlatGroundWalkingTrack;
    }
 
    private void checkNothingChanged(NothingChangedVerifier nothingChangedVerifier)

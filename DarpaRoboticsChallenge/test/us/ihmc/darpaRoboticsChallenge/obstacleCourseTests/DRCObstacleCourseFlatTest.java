@@ -6,6 +6,7 @@ import javax.vecmath.Point3d;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.bambooTools.BambooTools;
@@ -52,6 +53,18 @@ public class DRCObstacleCourseFlatTest
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+
+   @Ignore("Invoked manually to test memory & thread leaks")
+   @Test
+   public void testForMemoryLeaks() throws Exception
+   {
+      for (int i = 0; i < 10; i++)
+      {
+         showMemoryUsageBeforeTest();
+         testStandingForACoupleSeconds();
+         destroySimulationAndRecycleMemory();
+      }
    }
 
    @Test
