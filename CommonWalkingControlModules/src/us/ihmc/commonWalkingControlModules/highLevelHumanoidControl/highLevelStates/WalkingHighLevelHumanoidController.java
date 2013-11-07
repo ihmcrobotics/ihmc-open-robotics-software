@@ -359,7 +359,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       rememberFinalICPFromSingleSupport.set(false);    // true);
       finalDesiredICPInWorld.set(Double.NaN, Double.NaN);
 
-      coefficientOfFriction.set(0.8); //0.6);    // TODO: tune?
+      coefficientOfFriction.set(0.0); //TODO Remove coefficient of friction from the abstract high level stuff and let the EndEffector controlModule deal with it
 
       setupLegJacobians(fullRobotModel);
 
@@ -436,7 +436,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          ContactablePlaneBody bipedFoot = feet.get(robotSide);
 
          //TODO: If we know the surface normal here, use it.
-         momentumBasedController.setPlaneContactStateFullyConstrained(bipedFoot, coefficientOfFriction.getDoubleValue(), null);
+         momentumBasedController.setPlaneContactStateFullyConstrained(bipedFoot);
          
          String sideString = robotSide.getCamelCaseNameForStartOfExpression();
 
