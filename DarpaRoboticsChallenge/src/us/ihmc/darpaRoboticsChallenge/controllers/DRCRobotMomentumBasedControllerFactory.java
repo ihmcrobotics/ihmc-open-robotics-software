@@ -5,7 +5,8 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import us.ihmc.atlas.AtlasJointPDGains;
+
+import us.ihmc.atlas.parameters.AtlasJointPDGains;
 import us.ihmc.atlas.visualization.CenterOfPressureVisualizer;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
@@ -35,6 +36,7 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
