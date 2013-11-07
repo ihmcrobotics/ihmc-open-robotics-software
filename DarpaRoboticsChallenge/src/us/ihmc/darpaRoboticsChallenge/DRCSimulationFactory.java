@@ -168,9 +168,8 @@ public class DRCSimulationFactory
 
       controller.addRobotController(lidarControllerInterface);
 
-      Vector3d gravity = new Vector3d();
-      robotInterface.getRobot().getGravity(gravity);
-
+      double gravity = robotInterface.getRobot().getGravityZ();
+     
       //TODO: Can only do this if we have a simulation...
       Pair<Point3d, Quat4d> initialCoMPositionAndEstimationLinkOrientation = null;
       if (scsInitialSetup.getInitializeEstimatorToActual())
