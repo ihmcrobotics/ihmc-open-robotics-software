@@ -60,8 +60,11 @@ public class ComposableStateEstimatorEvaluator
 
 
       
+      double filterFreqHz = 16.0;
+      double slopTime = 0.007; //15;
       SensorReaderFactory simulatedSensorHolderAndReaderFromRobotFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(robot,
-            simulatedSensorNoiseParameters, controlDT, imuMounts, new ArrayList<WrenchCalculatorInterface>(), registry);
+            simulatedSensorNoiseParameters, controlDT, filterFreqHz, slopTime,
+            imuMounts, new ArrayList<WrenchCalculatorInterface>(), registry);
       
       boolean addLinearAccelerationSensors = true;
       

@@ -157,8 +157,11 @@ public class DRCSimulationFactory
       }
       else
       {
+         double filterFreqHz = DRCConfigParameters.JOINT_VELOCITY_FILTER_FREQ_HZ;
+         double slopTime = DRCConfigParameters.JOINT_VELOCITY_SLOP_TIME_FOR_BACKLASH_COMPENSATION;
+
          SimulatedSensorHolderAndReaderFromRobotFactory simulatedSensorHolderAndReaderFromRobotFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(
-               simulatedRobot, sensorNoiseParameters, estimateDT, imuMounts, wrenchProviders, registry);
+               simulatedRobot, sensorNoiseParameters, estimateDT, filterFreqHz, slopTime, imuMounts, wrenchProviders, registry);
          controller.addRobotController(new RunnableRunnerController(simulatedSensorHolderAndReaderFromRobotFactory.getSensorReader()));
          sensorReaderFactory = simulatedSensorHolderAndReaderFromRobotFactory;
       }

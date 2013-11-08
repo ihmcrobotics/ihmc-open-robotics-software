@@ -264,6 +264,8 @@ public class DRCConfigParameters
    public static final boolean USE_IHMCFILTER_JOINT_VELOCITIES = false;
    public static final boolean USE_IHMCFILTER_JOINT_TORQUES = false;
 
+   public static final double JOINT_VELOCITY_SLOP_TIME_FOR_BACKLASH_COMPENSATION = 0.0001; //0.0035; //0.007; //0.0155;
+   
    public static final double JOINT_POSITION_FILTER_FREQ_HZ = positionSensorFrequencyHz;
    public static final double JOINT_VELOCITY_FILTER_FREQ_HZ = velocitySensorFrequencyHz;
    public static final double ORIENTATION_FILTER_FREQ_HZ = positionSensorFrequencyHz;
