@@ -224,9 +224,9 @@ public class PointCloudTools
       FastQueue<PointVectorNN> pointNormList = new FastQueue<PointVectorNN>(PointVectorNN.class, false);
       surface.process(cloud, pointNormList);
 
-      System.out.println("Before: " + pointNormList.size());
+      System.out.println("Point cloud size: " + pointNormList.size());
       pointNormList = boundSphereNormals(pointNormList, center, radius);
-      System.out.println("After: " + pointNormList.size());
+      System.out.println("After bounding: " + pointNormList.size());
 
       System.out.println("about to process...");
       PointCloudShapeDetectionSchnabel2007 alg = new PointCloudShapeDetectionSchnabel2007(configRansac);
@@ -236,7 +236,6 @@ public class PointCloudTools
 
       alg.process(pointNormList, boundingBox);
       System.out.println("done...");
-
 
       return convertIntoOuput(alg.getFoundObjects().toList());
    }
