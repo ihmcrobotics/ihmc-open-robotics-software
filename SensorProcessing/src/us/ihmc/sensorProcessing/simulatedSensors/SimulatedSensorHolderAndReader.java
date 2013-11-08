@@ -22,7 +22,8 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
-import com.yobotics.simulationconstructionset.util.math.filter.FilteredVelocityYoVariable;
+import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
+import com.yobotics.simulationconstructionset.util.math.filter.BacklashCompensatingVelocityYoVariable;
 
 public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
 {
@@ -68,9 +69,11 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
    
    private final BooleanYoVariable useFiniteDifferencesForVelocities;
    private final DoubleYoVariable alphaFiniteDifferences;
-   private ObjectObjectMap<OneDoFJoint, FilteredVelocityYoVariable> finiteDifferenceVelocities;
+   private final DoubleYoVariable slopTimeFiniteDifferences;
    
-   public SimulatedSensorHolderAndReader(double estimateDT, YoVariableRegistry parentRegistry)
+   private ObjectObjectMap<OneDoFJoint, BacklashCompensatingVelocityYoVariable> finiteDifferenceVelocities;
+   
+   public SimulatedSensorHolderAndReader(double estimateDT, double filterFreqHz, double slopTime, YoVariableRegistry parentRegistry)
    {
       this.estimatorDT = estimateDT;
       this.estimateDTinNs = TimeTools.secondsToNanoSeconds(estimateDT);
@@ -78,8 +81,10 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
       
       useFiniteDifferencesForVelocities = new BooleanYoVariable("useFiniteDifferencesForVelocities", registry);
       alphaFiniteDifferences = new DoubleYoVariable("alphaFiniteDifferences", registry);
+      slopTimeFiniteDifferences = new DoubleYoVariable("slopTimeFiniteDifferences", registry);
       
-      alphaFiniteDifferences.set(0.8);
+      alphaFiniteDifferences.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterFreqHz, estimateDT));
+      slopTimeFiniteDifferences.set(slopTime);
       useFiniteDifferencesForVelocities.set(false);
       
       if(parentRegistry != null)
@@ -98,9 +103,9 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
       jointVelocitySensors.add(oneDoFJoint, jointVelocitySensor);
       
       if (finiteDifferenceVelocities == null)
-         finiteDifferenceVelocities = new ObjectObjectMap<OneDoFJoint, FilteredVelocityYoVariable>();
+         finiteDifferenceVelocities = new ObjectObjectMap<OneDoFJoint, BacklashCompensatingVelocityYoVariable>();
       
-      FilteredVelocityYoVariable finiteDifferenceVelocity = new FilteredVelocityYoVariable("fd_qd_" + oneDoFJoint.getName(), "", alphaFiniteDifferences, estimatorDT, registry);
+      BacklashCompensatingVelocityYoVariable finiteDifferenceVelocity = new BacklashCompensatingVelocityYoVariable("fd_qd_" + oneDoFJoint.getName(), "", alphaFiniteDifferences, estimatorDT, slopTimeFiniteDifferences, registry);
       finiteDifferenceVelocities.add(oneDoFJoint, finiteDifferenceVelocity);
    }
 
@@ -165,7 +170,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
          Double value = simulatedOneDoFJointPositionSensor.getJointPositionOutputPort().getData();
          jointAndIMUSensorDataSource.setJointPositionSensorValue(jointPositionSensors.getFirst(i), value);
          
-         FilteredVelocityYoVariable finiteDifferenceVelocity = finiteDifferenceVelocities.getSecond(i);
+         BacklashCompensatingVelocityYoVariable finiteDifferenceVelocity = finiteDifferenceVelocities.getSecond(i);
          finiteDifferenceVelocity.update(value);
          
          if (useFiniteDifferencesForVelocities.getBooleanValue())

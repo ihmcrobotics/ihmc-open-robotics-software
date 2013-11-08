@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedatlas.DRCControllerDispatcher.DRCOutputWriterWithAccelerationIntegration.kForceVel</Variables>
+		<Variables>atlas.qd_x</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -37,7 +37,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>atlas.qd_x</Variables>
+		<Variables>atlas.qd_y</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -49,7 +49,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>atlas.qd_y</Variables>
+		<Variables>root.loggedatlas.DRCControllerDispatcher.estimatorTime</Variables>
 		<GraphConfiguration>
 			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -61,7 +61,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedatlas.DRCControllerDispatcher.estimatorTime</Variables>
+		<Variables>atlas.q_x</Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -73,7 +73,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>atlas.q_x</Variables>
+		<Variables>atlas.q_y</Variables>
 		<GraphConfiguration>
 			<Name>config7</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -85,7 +85,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>atlas.q_y</Variables>
+		<Variables>atlas.q_l_leg_kny</Variables>
 		<GraphConfiguration>
 			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -97,7 +97,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>atlas.q_l_leg_kny</Variables>
+		<Variables>atlas.q_l_leg_hpy</Variables>
 		<GraphConfiguration>
 			<Name>config9</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -108,8 +108,19 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+</GraphGroup>
+<Entry Boxes>requestedBehavior,hl_gainScaling,requestedHighLevelState,transitionToFullControl,alphaQD,jointPositionAlpha,jointVelocityAlpha,captureKpParallel,captureKpOrthogonal,kp_comHeight,kd_comHeight,kpPelvisOrientation,zetaPelvisOrientation,walkingHeadOrientationKp,walkingHeadOrientationZeta,kpAllArmJointsL,kpAllArmJointsR,kdAllArmJointsL,kdAllArmJointsR,useFiniteDifferencesForVelocities</Entry Boxes>
+
+<Number of ViewPorts>1</Number of ViewPorts>
+ <Main Viewport> 
+<Visible> true</Visible>
+</Main Viewport>
+
+<Graph Array Window Size>14</Graph Array Window Size><Graph Array Window1>
+<GraphGroup>
+	<Cols>4</Cols>
 	<Graph>
-		<Variables>atlas.q_l_leg_hpy</Variables>
+		<Variables>atlas.q_l_arm_shy</Variables>
 		<GraphConfiguration>
 			<Name>config10</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -121,44 +132,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.OptimizationMomentumControlModule.converged,root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.OptimizationMomentumControlModule.hasNotConvergedCounts</Variables>
-		<GraphConfiguration>
-			<Name>config11</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-</GraphGroup>
-<Entry Boxes>requestedBehavior,hl_gainScaling,requestedHighLevelState,transitionToFullControl,alphaQD,jointPositionAlpha,jointVelocityAlpha,captureKpParallel,captureKpOrthogonal,kp_comHeight,kd_comHeight,kpPelvisOrientation,zetaPelvisOrientation,walkingHeadOrientationKp,walkingHeadOrientationZeta,kpAllArmJointsL,kpAllArmJointsR,kdAllArmJointsL,kdAllArmJointsR,alphaFeedBack</Entry Boxes>
-
-<Number of ViewPorts>1</Number of ViewPorts>
- <Main Viewport> 
-<Visible> true</Visible>
-</Main Viewport>
-
-<Graph Array Window Size>13</Graph Array Window Size><Graph Array Window1>
-<GraphGroup>
-	<Cols>4</Cols>
-	<Graph>
-		<Variables>atlas.q_l_arm_shy</Variables>
-		<GraphConfiguration>
-			<Name>config12</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
 		<Variables>atlas.q_l_leg_hpz</Variables>
 		<GraphConfiguration>
-			<Name>config13</Name>
+			<Name>config11</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -170,7 +146,7 @@
 	<Graph>
 		<Variables>atlas.q_r_leg_hpz</Variables>
 		<GraphConfiguration>
-			<Name>config14</Name>
+			<Name>config12</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -182,7 +158,7 @@
 	<Graph>
 		<Variables>atlas.q_r_arm_shy</Variables>
 		<GraphConfiguration>
-			<Name>config15</Name>
+			<Name>config13</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -194,7 +170,7 @@
 	<Graph>
 		<Variables>atlas.q_l_arm_shx</Variables>
 		<GraphConfiguration>
-			<Name>config16</Name>
+			<Name>config14</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -206,7 +182,7 @@
 	<Graph>
 		<Variables>atlas.q_l_leg_hpx</Variables>
 		<GraphConfiguration>
-			<Name>config17</Name>
+			<Name>config15</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -218,7 +194,7 @@
 	<Graph>
 		<Variables>atlas.q_r_leg_hpx</Variables>
 		<GraphConfiguration>
-			<Name>config18</Name>
+			<Name>config16</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -230,7 +206,7 @@
 	<Graph>
 		<Variables>atlas.q_r_arm_shx</Variables>
 		<GraphConfiguration>
-			<Name>config19</Name>
+			<Name>config17</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -242,7 +218,7 @@
 	<Graph>
 		<Variables>atlas.q_l_arm_ely</Variables>
 		<GraphConfiguration>
-			<Name>config20</Name>
+			<Name>config18</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -254,7 +230,7 @@
 	<Graph>
 		<Variables>atlas.q_l_leg_hpy</Variables>
 		<GraphConfiguration>
-			<Name>config21</Name>
+			<Name>config19</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -266,7 +242,7 @@
 	<Graph>
 		<Variables>atlas.q_r_leg_hpy</Variables>
 		<GraphConfiguration>
-			<Name>config22</Name>
+			<Name>config20</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -278,7 +254,7 @@
 	<Graph>
 		<Variables>atlas.q_r_arm_ely</Variables>
 		<GraphConfiguration>
-			<Name>config23</Name>
+			<Name>config21</Name>
 			<ScalingMethod>-1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -290,7 +266,7 @@
 	<Graph>
 		<Variables>atlas.q_l_arm_elx</Variables>
 		<GraphConfiguration>
-			<Name>config24</Name>
+			<Name>config22</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -302,7 +278,7 @@
 	<Graph>
 		<Variables>atlas.q_l_leg_kny</Variables>
 		<GraphConfiguration>
-			<Name>config25</Name>
+			<Name>config23</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -314,7 +290,7 @@
 	<Graph>
 		<Variables>atlas.q_r_leg_kny</Variables>
 		<GraphConfiguration>
-			<Name>config26</Name>
+			<Name>config24</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -326,7 +302,7 @@
 	<Graph>
 		<Variables>atlas.q_r_arm_elx</Variables>
 		<GraphConfiguration>
-			<Name>config27</Name>
+			<Name>config25</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -338,7 +314,7 @@
 	<Graph>
 		<Variables>atlas.q_l_arm_wry</Variables>
 		<GraphConfiguration>
-			<Name>config28</Name>
+			<Name>config26</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -350,7 +326,7 @@
 	<Graph>
 		<Variables>atlas.q_l_leg_aky</Variables>
 		<GraphConfiguration>
-			<Name>config29</Name>
+			<Name>config27</Name>
 			<ScalingMethod>-1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -362,7 +338,7 @@
 	<Graph>
 		<Variables>atlas.q_r_leg_aky</Variables>
 		<GraphConfiguration>
-			<Name>config30</Name>
+			<Name>config28</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -374,7 +350,7 @@
 	<Graph>
 		<Variables>atlas.q_r_arm_wry</Variables>
 		<GraphConfiguration>
-			<Name>config31</Name>
+			<Name>config29</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -386,7 +362,7 @@
 	<Graph>
 		<Variables>atlas.q_l_arm_wrx</Variables>
 		<GraphConfiguration>
-			<Name>config32</Name>
+			<Name>config30</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -398,7 +374,7 @@
 	<Graph>
 		<Variables>atlas.q_l_leg_akx</Variables>
 		<GraphConfiguration>
-			<Name>config33</Name>
+			<Name>config31</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -410,7 +386,7 @@
 	<Graph>
 		<Variables>atlas.q_r_leg_akx</Variables>
 		<GraphConfiguration>
-			<Name>config34</Name>
+			<Name>config32</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -422,7 +398,7 @@
 	<Graph>
 		<Variables>atlas.q_r_arm_wrx</Variables>
 		<GraphConfiguration>
-			<Name>config35</Name>
+			<Name>config33</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -438,7 +414,7 @@
 	<Graph>
 		<Variables>atlas.q_back_bkz</Variables>
 		<GraphConfiguration>
-			<Name>config36</Name>
+			<Name>config34</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -450,7 +426,7 @@
 	<Graph>
 		<Variables>atlas.q_back_bky</Variables>
 		<GraphConfiguration>
-			<Name>config37</Name>
+			<Name>config35</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -462,7 +438,7 @@
 	<Graph>
 		<Variables>atlas.q_back_bkx</Variables>
 		<GraphConfiguration>
-			<Name>config38</Name>
+			<Name>config36</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -474,7 +450,7 @@
 	<Graph>
 		<Variables>atlas.qd_back_bkz,atlas.qd_wz</Variables>
 		<GraphConfiguration>
-			<Name>config39</Name>
+			<Name>config37</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -486,7 +462,7 @@
 	<Graph>
 		<Variables>atlas.qd_back_bky,atlas.qd_wy</Variables>
 		<GraphConfiguration>
-			<Name>config40</Name>
+			<Name>config38</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -498,7 +474,7 @@
 	<Graph>
 		<Variables>atlas.qd_back_bkx,atlas.qd_wx</Variables>
 		<GraphConfiguration>
-			<Name>config41</Name>
+			<Name>config39</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -510,7 +486,7 @@
 	<Graph>
 		<Variables>atlas.qd_wx</Variables>
 		<GraphConfiguration>
-			<Name>config42</Name>
+			<Name>config40</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -522,7 +498,7 @@
 	<Graph>
 		<Variables>atlas.qd_wy</Variables>
 		<GraphConfiguration>
-			<Name>config43</Name>
+			<Name>config41</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -534,7 +510,7 @@
 	<Graph>
 		<Variables>atlas.qd_wz</Variables>
 		<GraphConfiguration>
-			<Name>config44</Name>
+			<Name>config42</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -546,7 +522,7 @@
 	<Graph>
 		<Variables>atlas.q_qx</Variables>
 		<GraphConfiguration>
-			<Name>config45</Name>
+			<Name>config43</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -558,7 +534,7 @@
 	<Graph>
 		<Variables>atlas.q_qy</Variables>
 		<GraphConfiguration>
-			<Name>config46</Name>
+			<Name>config44</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -570,7 +546,7 @@
 	<Graph>
 		<Variables>atlas.q_qz</Variables>
 		<GraphConfiguration>
-			<Name>config47</Name>
+			<Name>config45</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -586,7 +562,7 @@
 	<Graph>
 		<Variables>atlas.q_back_bkz</Variables>
 		<GraphConfiguration>
-			<Name>config48</Name>
+			<Name>config46</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -598,7 +574,7 @@
 	<Graph>
 		<Variables>atlas.q_back_bky</Variables>
 		<GraphConfiguration>
-			<Name>config49</Name>
+			<Name>config47</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -610,7 +586,7 @@
 	<Graph>
 		<Variables>atlas.q_back_bkx</Variables>
 		<GraphConfiguration>
-			<Name>config50</Name>
+			<Name>config48</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -622,7 +598,7 @@
 	<Graph>
 		<Variables>atlas.qd_back_bkz,atlas.qd_wz</Variables>
 		<GraphConfiguration>
-			<Name>config51</Name>
+			<Name>config49</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -634,7 +610,7 @@
 	<Graph>
 		<Variables>atlas.qd_back_bky,atlas.qd_wy</Variables>
 		<GraphConfiguration>
-			<Name>config52</Name>
+			<Name>config50</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -646,7 +622,7 @@
 	<Graph>
 		<Variables>atlas.qd_back_bkx,atlas.qd_wx</Variables>
 		<GraphConfiguration>
-			<Name>config53</Name>
+			<Name>config51</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -658,7 +634,7 @@
 	<Graph>
 		<Variables>atlas.qd_wx</Variables>
 		<GraphConfiguration>
-			<Name>config54</Name>
+			<Name>config52</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -670,7 +646,7 @@
 	<Graph>
 		<Variables>atlas.qd_wy</Variables>
 		<GraphConfiguration>
-			<Name>config55</Name>
+			<Name>config53</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -682,7 +658,7 @@
 	<Graph>
 		<Variables>atlas.qd_wz</Variables>
 		<GraphConfiguration>
-			<Name>config56</Name>
+			<Name>config54</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -694,7 +670,7 @@
 	<Graph>
 		<Variables>atlas.q_qx</Variables>
 		<GraphConfiguration>
-			<Name>config57</Name>
+			<Name>config55</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -706,7 +682,7 @@
 	<Graph>
 		<Variables>atlas.q_qy</Variables>
 		<GraphConfiguration>
-			<Name>config58</Name>
+			<Name>config56</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -718,7 +694,7 @@
 	<Graph>
 		<Variables>atlas.q_qz</Variables>
 		<GraphConfiguration>
-			<Name>config59</Name>
+			<Name>config57</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -734,7 +710,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_l_arm_shy.ll_l_arm_shy_f_d,root.loggedatlas.AtlasDispatcherThread.ll_l_arm_shy.ll_l_arm_shy_f</Variables>
 		<GraphConfiguration>
-			<Name>config60</Name>
+			<Name>config58</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -746,8 +722,8 @@
 	<Graph>
 		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_l_leg_hpz.ll_l_leg_hpz_f_d,root.loggedatlas.AtlasDispatcherThread.ll_l_leg_hpz.ll_l_leg_hpz_f</Variables>
 		<GraphConfiguration>
-			<Name>config61</Name>
-			<ScalingMethod>-1</ScalingMethod>
+			<Name>config59</Name>
+			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
 			<BaseLines>0.0,</BaseLines>
@@ -758,7 +734,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_r_leg_hpz.ll_r_leg_hpz_f_d,root.loggedatlas.AtlasDispatcherThread.ll_r_leg_hpz.ll_r_leg_hpz_f</Variables>
 		<GraphConfiguration>
-			<Name>config62</Name>
+			<Name>config60</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -770,7 +746,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_r_arm_shy.ll_r_arm_shy_f_d,root.loggedatlas.AtlasDispatcherThread.ll_r_arm_shy.ll_r_arm_shy_f</Variables>
 		<GraphConfiguration>
-			<Name>config63</Name>
+			<Name>config61</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -782,7 +758,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_l_arm_shx.ll_l_arm_shx_f_d,root.loggedatlas.AtlasDispatcherThread.ll_l_arm_shx.ll_l_arm_shx_f</Variables>
 		<GraphConfiguration>
-			<Name>config64</Name>
+			<Name>config62</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -794,7 +770,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_l_leg_hpx.ll_l_leg_hpx_f_d,root.loggedatlas.AtlasDispatcherThread.ll_l_leg_hpx.ll_l_leg_hpx_f</Variables>
 		<GraphConfiguration>
-			<Name>config65</Name>
+			<Name>config63</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -806,7 +782,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_r_leg_hpx.ll_r_leg_hpx_f_d,root.loggedatlas.AtlasDispatcherThread.ll_r_leg_hpx.ll_r_leg_hpx_f</Variables>
 		<GraphConfiguration>
-			<Name>config66</Name>
+			<Name>config64</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -818,7 +794,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_r_arm_shx.ll_r_arm_shx_f_d,root.loggedatlas.AtlasDispatcherThread.ll_r_arm_shx.ll_r_arm_shx_f</Variables>
 		<GraphConfiguration>
-			<Name>config67</Name>
+			<Name>config65</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -830,7 +806,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_l_arm_ely.ll_l_arm_ely_f_d,root.loggedatlas.AtlasDispatcherThread.ll_l_arm_ely.ll_l_arm_ely_f</Variables>
 		<GraphConfiguration>
-			<Name>config68</Name>
+			<Name>config66</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -842,7 +818,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_l_leg_hpy.ll_l_leg_hpy_f_d,root.loggedatlas.AtlasDispatcherThread.ll_l_leg_hpy.ll_l_leg_hpy_f</Variables>
 		<GraphConfiguration>
-			<Name>config69</Name>
+			<Name>config67</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -854,7 +830,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_r_leg_hpy.ll_r_leg_hpy_f_d,root.loggedatlas.AtlasDispatcherThread.ll_r_leg_hpy.ll_r_leg_hpy_f</Variables>
 		<GraphConfiguration>
-			<Name>config70</Name>
+			<Name>config68</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -866,7 +842,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_r_arm_ely.ll_r_arm_ely_f_d,root.loggedatlas.AtlasDispatcherThread.ll_r_arm_ely.ll_r_arm_ely_f</Variables>
 		<GraphConfiguration>
-			<Name>config71</Name>
+			<Name>config69</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -878,7 +854,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_l_arm_elx.ll_l_arm_elx_f_d,root.loggedatlas.AtlasDispatcherThread.ll_l_arm_elx.ll_l_arm_elx_f</Variables>
 		<GraphConfiguration>
-			<Name>config72</Name>
+			<Name>config70</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -890,7 +866,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_l_leg_kny.ll_l_leg_kny_f_d,root.loggedatlas.AtlasDispatcherThread.ll_l_leg_kny.ll_l_leg_kny_f</Variables>
 		<GraphConfiguration>
-			<Name>config73</Name>
+			<Name>config71</Name>
 			<ScalingMethod>-1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -902,7 +878,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_r_leg_kny.ll_r_leg_kny_f_d,root.loggedatlas.AtlasDispatcherThread.ll_r_leg_kny.ll_r_leg_kny_f</Variables>
 		<GraphConfiguration>
-			<Name>config74</Name>
+			<Name>config72</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -914,7 +890,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_r_arm_elx.ll_r_arm_elx_f_d,root.loggedatlas.AtlasDispatcherThread.ll_r_arm_elx.ll_r_arm_elx_f</Variables>
 		<GraphConfiguration>
-			<Name>config75</Name>
+			<Name>config73</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -926,7 +902,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_l_arm_wry.ll_l_arm_wry_f_d,root.loggedatlas.AtlasDispatcherThread.ll_l_arm_wry.ll_l_arm_wry_f</Variables>
 		<GraphConfiguration>
-			<Name>config76</Name>
+			<Name>config74</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -938,7 +914,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_l_leg_aky.ll_l_leg_aky_f_d,root.loggedatlas.AtlasDispatcherThread.ll_l_leg_aky.ll_l_leg_aky_f</Variables>
 		<GraphConfiguration>
-			<Name>config77</Name>
+			<Name>config75</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -950,7 +926,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_r_leg_aky.ll_r_leg_aky_f_d,root.loggedatlas.AtlasDispatcherThread.ll_r_leg_aky.ll_r_leg_aky_f</Variables>
 		<GraphConfiguration>
-			<Name>config78</Name>
+			<Name>config76</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -962,7 +938,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_r_arm_wry.ll_r_arm_wry_f_d,root.loggedatlas.AtlasDispatcherThread.ll_r_arm_wry.ll_r_arm_wry_f</Variables>
 		<GraphConfiguration>
-			<Name>config79</Name>
+			<Name>config77</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -974,7 +950,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_l_arm_wrx.ll_l_arm_wrx_f_d,root.loggedatlas.AtlasDispatcherThread.ll_l_arm_wrx.ll_l_arm_wrx_f</Variables>
 		<GraphConfiguration>
-			<Name>config80</Name>
+			<Name>config78</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -986,7 +962,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_l_leg_akx.ll_l_leg_akx_f_d,root.loggedatlas.AtlasDispatcherThread.ll_l_leg_akx.ll_l_leg_akx_f</Variables>
 		<GraphConfiguration>
-			<Name>config81</Name>
+			<Name>config79</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -998,7 +974,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_r_leg_akx.ll_r_leg_akx_f_d,root.loggedatlas.AtlasDispatcherThread.ll_r_leg_akx.ll_r_leg_akx_f</Variables>
 		<GraphConfiguration>
-			<Name>config82</Name>
+			<Name>config80</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1010,7 +986,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_r_arm_wrx.ll_r_arm_wrx_f_d,root.loggedatlas.AtlasDispatcherThread.ll_r_arm_wrx.ll_r_arm_wrx_f</Variables>
 		<GraphConfiguration>
-			<Name>config83</Name>
+			<Name>config81</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1026,7 +1002,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.LookAheadCoMHeightTrajectoryGenerator.desiredCoMHeight</Variables>
 		<GraphConfiguration>
-			<Name>config84</Name>
+			<Name>config82</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1038,7 +1014,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.ICPAndMomentumBasedController.controlledCoMHeightAcceleration</Variables>
 		<GraphConfiguration>
-			<Name>config85</Name>
+			<Name>config83</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1050,7 +1026,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.ICPAndMomentumBasedController.desiredICPX,root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.ICPAndMomentumBasedController.capturePointX</Variables>
 		<GraphConfiguration>
-			<Name>config86</Name>
+			<Name>config84</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1062,7 +1038,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.ICPAndMomentumBasedController.desiredICPY,root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.ICPAndMomentumBasedController.capturePointY</Variables>
 		<GraphConfiguration>
-			<Name>config87</Name>
+			<Name>config85</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1074,7 +1050,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.ICPBasedLinearMomentumRateOfChangeControlModule.controlledCMPX</Variables>
 		<GraphConfiguration>
-			<Name>config88</Name>
+			<Name>config86</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1086,7 +1062,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.ICPBasedLinearMomentumRateOfChangeControlModule.controlledCMPY</Variables>
 		<GraphConfiguration>
-			<Name>config89</Name>
+			<Name>config87</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1102,7 +1078,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.WalkingHighLevelHumanoidController.userDesiredPelvisYaw</Variables>
 		<GraphConfiguration>
-			<Name>config90</Name>
+			<Name>config88</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1114,7 +1090,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.WalkingHighLevelHumanoidController.userDesiredPelvisPitch</Variables>
 		<GraphConfiguration>
-			<Name>config91</Name>
+			<Name>config89</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1126,7 +1102,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.WalkingHighLevelHumanoidController.userDesiredPelvisRoll</Variables>
 		<GraphConfiguration>
-			<Name>config92</Name>
+			<Name>config90</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1138,7 +1114,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.WalkingHighLevelHumanoidController.RootJointAngularAccelerationControlModule.controlledpelvisAngularAccelerationZ</Variables>
 		<GraphConfiguration>
-			<Name>config93</Name>
+			<Name>config91</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1150,7 +1126,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.WalkingHighLevelHumanoidController.RootJointAngularAccelerationControlModule.controlledpelvisAngularAccelerationY</Variables>
 		<GraphConfiguration>
-			<Name>config94</Name>
+			<Name>config92</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1162,7 +1138,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.WalkingHighLevelHumanoidController.RootJointAngularAccelerationControlModule.controlledpelvisAngularAccelerationX</Variables>
 		<GraphConfiguration>
-			<Name>config95</Name>
+			<Name>config93</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1176,9 +1152,9 @@
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.userDesiredHeadPitch,atlas.q_back_bky</Variables>
+		<Variables>atlas.q_back_bky</Variables>
 		<GraphConfiguration>
-			<Name>config96</Name>
+			<Name>config94</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1188,9 +1164,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.userDesiredHeadYaw,atlas.q_back_bkz</Variables>
+		<Variables>atlas.q_back_bkz</Variables>
 		<GraphConfiguration>
-			<Name>config97</Name>
+			<Name>config95</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1202,7 +1178,7 @@
 	<Graph>
 		<Variables>atlas.q_back_bkx</Variables>
 		<GraphConfiguration>
-			<Name>config98</Name>
+			<Name>config96</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1214,7 +1190,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.back_bkyqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config99</Name>
+			<Name>config97</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1226,7 +1202,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.back_bkzqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config100</Name>
+			<Name>config98</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1238,7 +1214,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.back_bkxqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config101</Name>
+			<Name>config99</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1254,7 +1230,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.l_arm_shyqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config102</Name>
+			<Name>config100</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1266,7 +1242,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.l_leg_hpzqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config103</Name>
+			<Name>config101</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1278,7 +1254,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.r_leg_hpzqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config104</Name>
+			<Name>config102</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1290,7 +1266,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.r_arm_shyqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config105</Name>
+			<Name>config103</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1302,7 +1278,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.l_arm_shxqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config106</Name>
+			<Name>config104</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1314,7 +1290,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.l_leg_hpxqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config107</Name>
+			<Name>config105</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1326,7 +1302,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.r_leg_hpxqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config108</Name>
+			<Name>config106</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1338,7 +1314,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.r_arm_shxqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config109</Name>
+			<Name>config107</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1350,7 +1326,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.l_arm_elyqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config110</Name>
+			<Name>config108</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1362,7 +1338,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.l_leg_hpyqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config111</Name>
+			<Name>config109</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1374,7 +1350,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.r_leg_hpyqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config112</Name>
+			<Name>config110</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1386,7 +1362,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.r_arm_elyqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config113</Name>
+			<Name>config111</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1398,7 +1374,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.l_arm_elxqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config114</Name>
+			<Name>config112</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1408,9 +1384,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.l_leg_knyqdd_d,root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.back_bkxqdd_d</Variables>
+		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.l_leg_knyqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config115</Name>
+			<Name>config113</Name>
 			<ScalingMethod>0</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1422,7 +1398,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.r_leg_knyqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config116</Name>
+			<Name>config114</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1434,7 +1410,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.r_arm_elxqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config117</Name>
+			<Name>config115</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1446,7 +1422,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.l_arm_wryqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config118</Name>
+			<Name>config116</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1458,7 +1434,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.l_leg_akyqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config119</Name>
+			<Name>config117</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1470,7 +1446,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.r_leg_akyqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config120</Name>
+			<Name>config118</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1482,7 +1458,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.r_arm_wryqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config121</Name>
+			<Name>config119</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1494,7 +1470,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.l_arm_wrxqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config122</Name>
+			<Name>config120</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1506,7 +1482,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.l_leg_akxqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config123</Name>
+			<Name>config121</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1518,7 +1494,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.r_leg_akxqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config124</Name>
+			<Name>config122</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1530,7 +1506,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.r_arm_wrxqdd_d</Variables>
 		<GraphConfiguration>
-			<Name>config125</Name>
+			<Name>config123</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1546,7 +1522,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.DRCOutputWriterWithAccelerationIntegration.qd_d_l_leg_hpz,atlas.qd_l_leg_hpz</Variables>
 		<GraphConfiguration>
-			<Name>config126</Name>
+			<Name>config124</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1558,7 +1534,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.DRCOutputWriterWithAccelerationIntegration.qd_d_r_leg_hpz,atlas.qd_r_leg_hpz</Variables>
 		<GraphConfiguration>
-			<Name>config127</Name>
+			<Name>config125</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1570,7 +1546,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.DRCOutputWriterWithAccelerationIntegration.qd_d_l_leg_hpy,atlas.qd_l_leg_hpy</Variables>
 		<GraphConfiguration>
-			<Name>config128</Name>
+			<Name>config126</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1582,7 +1558,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.DRCOutputWriterWithAccelerationIntegration.qd_d_r_leg_hpx,atlas.qd_r_leg_hpx</Variables>
 		<GraphConfiguration>
-			<Name>config129</Name>
+			<Name>config127</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1594,7 +1570,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.DRCOutputWriterWithAccelerationIntegration.qd_d_l_leg_hpx,atlas.qd_l_leg_hpx</Variables>
 		<GraphConfiguration>
-			<Name>config130</Name>
+			<Name>config128</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1606,7 +1582,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.DRCOutputWriterWithAccelerationIntegration.qd_d_r_leg_hpy,atlas.qd_r_leg_hpy</Variables>
 		<GraphConfiguration>
-			<Name>config131</Name>
+			<Name>config129</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1620,10 +1596,34 @@
 <GraphGroup>
 	<Cols>1</Cols>
 	<Graph>
-		<Variables>root.loggedatlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SimplePositionStateCalculator.leftFootToPelvisPositionX,root.loggedatlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SimplePositionStateCalculator.rightFootToPelvisPositionX</Variables>
+		<Variables></Variables>
+		<GraphConfiguration>
+			<Name>config130</Name>
+			<ScalingMethod>0</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables></Variables>
+		<GraphConfiguration>
+			<Name>config131</Name>
+			<ScalingMethod>0</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config132</Name>
-			<ScalingMethod>0</ScalingMethod>
+			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
 			<BaseLines>0.0,</BaseLines>
@@ -1632,10 +1632,10 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedatlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SimplePositionStateCalculator.leftFootToPelvisPositionY,root.loggedatlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SimplePositionStateCalculator.rightFootToPelvisPositionY</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config133</Name>
-			<ScalingMethod>0</ScalingMethod>
+			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
 			<BaseLines>0.0,</BaseLines>
@@ -1644,7 +1644,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedatlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SimplePositionStateCalculator.leftFootToPelvisVelocityX,root.loggedatlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SimplePositionStateCalculator.rightFootToPelvisVelocityX</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config134</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1656,7 +1656,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedatlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SimplePositionStateCalculator.leftFootToPelvisVelocityY,root.loggedatlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SimplePositionStateCalculator.rightFootToPelvisVelocityY</Variables>
+		<Variables>atlas.q_l_leg_hpx,root.loggedatlas.AtlasDispatcherThread.ll_l_leg_hpx.ll_l_leg_hpx_q</Variables>
 		<GraphConfiguration>
 			<Name>config135</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1668,7 +1668,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedatlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SimplePositionStateCalculator.hasLeftFootHitTheGroundFiltered,root.loggedatlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SimplePositionStateCalculator.hasRightFootHitTheGroundFiltered</Variables>
+		<Variables>atlas.q_r_leg_hpx,root.loggedatlas.AtlasDispatcherThread.ll_r_leg_hpx.ll_r_leg_hpx_q</Variables>
 		<GraphConfiguration>
 			<Name>config136</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1680,7 +1680,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>atlas.q_l_leg_hpx,root.loggedatlas.AtlasDispatcherThread.ll_l_leg_hpx.ll_l_leg_hpx_q</Variables>
+		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_l_leg_hpx.ll_l_leg_hpx_f</Variables>
 		<GraphConfiguration>
 			<Name>config137</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1692,7 +1692,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>atlas.q_r_leg_hpx,root.loggedatlas.AtlasDispatcherThread.ll_r_leg_hpx.ll_r_leg_hpx_q</Variables>
+		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_r_leg_hpx.ll_r_leg_hpx_f</Variables>
 		<GraphConfiguration>
 			<Name>config138</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1704,7 +1704,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_l_leg_hpx.ll_l_leg_hpx_f</Variables>
+		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_l_leg_hpx.ll_l_leg_hpx_qd,atlas.qd_l_leg_hpx</Variables>
 		<GraphConfiguration>
 			<Name>config139</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1716,33 +1716,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_r_leg_hpx.ll_r_leg_hpx_f</Variables>
-		<GraphConfiguration>
-			<Name>config140</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_l_leg_hpx.ll_l_leg_hpx_qd,atlas.qd_l_leg_hpx</Variables>
-		<GraphConfiguration>
-			<Name>config141</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
 		<Variables>root.loggedatlas.AtlasDispatcherThread.ll_r_leg_hpx.ll_r_leg_hpx_qd,atlas.qd_r_leg_hpx</Variables>
 		<GraphConfiguration>
-			<Name>config142</Name>
+			<Name>config140</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1758,7 +1734,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.PlaneContactWrenchProcessor.leftSoleCoPX</Variables>
 		<GraphConfiguration>
-			<Name>config143</Name>
+			<Name>config141</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1770,7 +1746,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.PlaneContactWrenchProcessor.leftSoleCoPY</Variables>
 		<GraphConfiguration>
-			<Name>config144</Name>
+			<Name>config142</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1782,7 +1758,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.PlaneContactWrenchProcessor.leftSoleCoP2dX</Variables>
 		<GraphConfiguration>
-			<Name>config145</Name>
+			<Name>config143</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1794,7 +1770,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.PlaneContactWrenchProcessor.leftSoleCoP2dY</Variables>
 		<GraphConfiguration>
-			<Name>config146</Name>
+			<Name>config144</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1810,7 +1786,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.ICPBasedLinearMomentumRateOfChangeControlModule.controlledCMPX</Variables>
 		<GraphConfiguration>
-			<Name>config147</Name>
+			<Name>config145</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1822,7 +1798,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.ICPBasedLinearMomentumRateOfChangeControlModule.controlledCMPY</Variables>
 		<GraphConfiguration>
-			<Name>config148</Name>
+			<Name>config146</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1834,7 +1810,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.WalkingHighLevelHumanoidController.RootJointAngularAccelerationControlModule.controlledpelvisAngularAccelerationX</Variables>
 		<GraphConfiguration>
-			<Name>config149</Name>
+			<Name>config147</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1846,7 +1822,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.WalkingHighLevelHumanoidController.RootJointAngularAccelerationControlModule.controlledpelvisAngularAccelerationY</Variables>
 		<GraphConfiguration>
-			<Name>config150</Name>
+			<Name>config148</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1858,7 +1834,7 @@
 	<Graph>
 		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.WalkingHighLevelHumanoidController.RootJointAngularAccelerationControlModule.controlledpelvisAngularAccelerationZ</Variables>
 		<GraphConfiguration>
-			<Name>config151</Name>
+			<Name>config149</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1872,7 +1848,31 @@
 <GraphGroup>
 	<Cols>1</Cols>
 	<Graph>
-		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.ICPBasedLinearMomentumRateOfChangeControlModule.ICPProportionalController.rawCMPOutputX,root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.ICPBasedLinearMomentumRateOfChangeControlModule.ICPProportionalController.filteredCMPOutputX</Variables>
+		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.ICPBasedLinearMomentumRateOfChangeControlModule.ICPProportionalController.rawCMPOutputX,root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.ICPBasedLinearMomentumRateOfChangeControlModule.ICPProportionalController.filteredCMPOutputX,root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.ICPBasedLinearMomentumRateOfChangeControlModule.ICPProportionalController.rateLimitedCMPOutputX</Variables>
+		<GraphConfiguration>
+			<Name>config150</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.ICPBasedLinearMomentumRateOfChangeControlModule.ICPProportionalController.rawCMPOutputY,root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.ICPBasedLinearMomentumRateOfChangeControlModule.ICPProportionalController.filteredCMPOutputY,root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.ICPBasedLinearMomentumRateOfChangeControlModule.ICPProportionalController.rateLimitedCMPOutputY</Variables>
+		<GraphConfiguration>
+			<Name>config151</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedatlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SimplePelvisStateCalculator.centerOfMassPositionX</Variables>
 		<GraphConfiguration>
 			<Name>config152</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1884,7 +1884,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.ICPBasedLinearMomentumRateOfChangeControlModule.ICPProportionalController.rawCMPOutputY,root.loggedatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.ICPBasedLinearMomentumRateOfChangeControlModule.ICPProportionalController.filteredCMPOutputY</Variables>
+		<Variables>root.loggedatlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SimplePelvisStateCalculator.centerOfMassPositionY</Variables>
 		<GraphConfiguration>
 			<Name>config153</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1895,19 +1895,215 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+	<Graph>
+		<Variables>root.loggedatlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SimplePelvisStateCalculator.centerOfMassPositionZ</Variables>
+		<GraphConfiguration>
+			<Name>config154</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedatlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SimplePelvisStateCalculator.centerOfMassVelocityX</Variables>
+		<GraphConfiguration>
+			<Name>config155</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedatlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SimplePelvisStateCalculator.centerOfMassVelocityY</Variables>
+		<GraphConfiguration>
+			<Name>config156</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedatlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SimplePelvisStateCalculator.centerOfMassVelocityZ</Variables>
+		<GraphConfiguration>
+			<Name>config157</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
 </GraphGroup>
-</Graph Array Window13>
+</Graph Array Window13><Graph Array Window14>
+<GraphGroup>
+	<Cols>2</Cols>
+	<Graph>
+		<Variables>root.loggedatlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SensorAndEstimatorAssembler.JointAndIMUSensorDataSource.raw_qd_l_leg_hpz,atlas.qd_l_leg_hpz,root.loggedatlas.AtlasSensorReader.fd_qd_JOINT_L_LEG_HPZ</Variables>
+		<GraphConfiguration>
+			<Name>config158</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedatlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SensorAndEstimatorAssembler.JointAndIMUSensorDataSource.raw_qd_r_leg_hpz,atlas.qd_r_leg_hpz,root.loggedatlas.AtlasSensorReader.fd_qd_JOINT_R_LEG_HPZ</Variables>
+		<GraphConfiguration>
+			<Name>config159</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedatlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SensorAndEstimatorAssembler.JointAndIMUSensorDataSource.raw_qd_l_leg_hpx,atlas.qd_l_leg_hpx,root.loggedatlas.AtlasSensorReader.fd_qd_JOINT_L_LEG_HPX</Variables>
+		<GraphConfiguration>
+			<Name>config160</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedatlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SensorAndEstimatorAssembler.JointAndIMUSensorDataSource.raw_qd_r_leg_hpx,atlas.qd_r_leg_hpx,root.loggedatlas.AtlasSensorReader.fd_qd_JOINT_R_LEG_HPX</Variables>
+		<GraphConfiguration>
+			<Name>config161</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedatlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SensorAndEstimatorAssembler.JointAndIMUSensorDataSource.raw_qd_l_leg_hpy,atlas.qd_l_leg_hpy,root.loggedatlas.AtlasSensorReader.fd_qd_JOINT_L_LEG_HPY</Variables>
+		<GraphConfiguration>
+			<Name>config162</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedatlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SensorAndEstimatorAssembler.JointAndIMUSensorDataSource.raw_qd_r_leg_hpy,atlas.qd_r_leg_hpy,root.loggedatlas.AtlasSensorReader.fd_qd_JOINT_R_LEG_HPY</Variables>
+		<GraphConfiguration>
+			<Name>config163</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedatlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SensorAndEstimatorAssembler.JointAndIMUSensorDataSource.raw_qd_l_leg_kny,atlas.qd_l_leg_kny,root.loggedatlas.AtlasSensorReader.fd_qd_JOINT_L_LEG_KNY</Variables>
+		<GraphConfiguration>
+			<Name>config164</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedatlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SensorAndEstimatorAssembler.JointAndIMUSensorDataSource.raw_qd_r_leg_kny,atlas.qd_r_leg_kny,root.loggedatlas.AtlasSensorReader.fd_qd_JOINT_R_LEG_KNY</Variables>
+		<GraphConfiguration>
+			<Name>config165</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedatlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SensorAndEstimatorAssembler.JointAndIMUSensorDataSource.raw_qd_l_leg_aky,atlas.qd_l_leg_aky,root.loggedatlas.AtlasSensorReader.fd_qd_JOINT_L_LEG_AKY</Variables>
+		<GraphConfiguration>
+			<Name>config166</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedatlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SensorAndEstimatorAssembler.JointAndIMUSensorDataSource.raw_qd_r_leg_aky,atlas.qd_r_leg_aky,root.loggedatlas.AtlasSensorReader.fd_qd_JOINT_R_LEG_AKY</Variables>
+		<GraphConfiguration>
+			<Name>config167</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedatlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SensorAndEstimatorAssembler.JointAndIMUSensorDataSource.raw_qd_l_leg_akx,atlas.qd_l_leg_akx,root.loggedatlas.AtlasSensorReader.fd_qd_JOINT_L_LEG_AKX</Variables>
+		<GraphConfiguration>
+			<Name>config168</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedatlas.DRCControllerDispatcher.EstimatorController.DRCStateEstimator.SensorAndEstimatorAssembler.JointAndIMUSensorDataSource.raw_qd_r_leg_akx,atlas.qd_r_leg_akx,root.loggedatlas.AtlasSensorReader.fd_qd_JOINT_R_LEG_AKX</Variables>
+		<GraphConfiguration>
+			<Name>config169</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window14>
 
 <Extra Panels>
 <Main Viewport>
-Plotter,Plotter Legend,
+Plotter,
 </Main Viewport></Extra Panels>
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>2.135118345432663</Camera X>
- <Camera Y>-0.8507189900521276</Camera Y>
- <Camera Z>0.2609111447086913</Camera Z>
+ <Camera X>4.0467381346221245</Camera X>
+ <Camera Y>1.015125493910985</Camera Y>
+ <Camera Z>0.060778087053392604</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -1931,8 +2127,8 @@ Plotter,Plotter Legend,
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>0.05225420469224251</Fix X>
-<Fix Y>-0.02026924930102658</Fix Y>
-<Fix Z>0.27040205665835126</Fix Z>
+<Fix X>-0.010981334440775647</Fix X>
+<Fix Y>0.16488857529249257</Fix Y>
+<Fix Z>0.8571574191916653</Fix Z>
 </Fix Position>
 </Canvas 1>
