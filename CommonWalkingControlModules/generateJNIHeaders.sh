@@ -5,3 +5,4 @@ javah -classpath ../IHMCUtilities/classes:./classes -o csrc/ContactPointWrenchOp
 javah -classpath ../IHMCUtilities/classes:./classes -o csrc/MomentumOptimizerNative.h us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.MomentumOptimizerNative
 javah -classpath ../IHMCUtilities/classes:./classes -o csrc/CVXWithCylinderNative.h us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXWithCylinderNative
 javah -classpath ../IHMCUtilities/classes:./classes -o csrc/CylinderAndPlaneContactForceOptimizerNative.h us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CylinderAndPlaneContactForceOptimizerNative
+javah -classpath ../IHMCUtilities/classes:./classes -o csrc/CVXMomentumOptimizerWithGRFSmootherNative.h us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXMomentumOptimizerWithGRFSmootherNative

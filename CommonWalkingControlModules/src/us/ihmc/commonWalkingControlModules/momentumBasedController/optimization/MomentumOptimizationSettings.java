@@ -136,4 +136,9 @@ public class MomentumOptimizationSettings
    {
       return lambda.getDoubleValue();
    }
+
+   public double getRateOfChangeOfRhoPlaneContactRegularization()
+   {
+      return 100000000000000000.0; //TODO Do not hardcode there -_-'
+   }
 }
