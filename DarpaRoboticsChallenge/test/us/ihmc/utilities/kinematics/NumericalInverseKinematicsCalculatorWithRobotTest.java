@@ -1,42 +1,31 @@
 package us.ihmc.utilities.kinematics;
 
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.Random;
-
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Point3d;
-
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import org.junit.Test;
-
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
-import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
-import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
-import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.darpaRoboticsChallenge.environment.VRCTask;
-import us.ihmc.darpaRoboticsChallenge.environment.VRCTaskName;
 import us.ihmc.robotSide.RobotSide;
-import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.test.JUnitTools;
 
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import javax.media.j3d.Transform3D;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.Random;
+
+import static org.junit.Assert.assertTrue;
 
 public class NumericalInverseKinematicsCalculatorWithRobotTest
 {
@@ -71,7 +60,7 @@ public class NumericalInverseKinematicsCalculatorWithRobotTest
    private boolean successfulSolve = true;
    private ArrayList<Integer> numbIteration = new ArrayList<Integer>();
    private static final double controlDT = DRCConfigParameters.CONTROL_DT;
-   private final boolean dDog = false;
+   private final boolean dDog = true;
 
    private enum JointNames
    {
@@ -205,6 +194,17 @@ public class NumericalInverseKinematicsCalculatorWithRobotTest
       if (successfulSolve)
       {
          numbIteration.add(inverseKinematicsCalculator.getNumberOfIterations());
+
+         // make sure joint constraints are being obeyed
+         OneDoFJoint[] oneDoFJoints = ScrewTools.filterJoints(leftHandJacobian.getJointsInOrder(), OneDoFJoint.class);
+         for (int i = 0; i < oneDoFJoints.length; i++)
+         {
+            OneDoFJoint oneDoFJoint = oneDoFJoints[i];
+            double q = oneDoFJoint.getQ();
+
+            assertTrue( "Failed joint limit", q >= oneDoFJoint.getJointLimitLower() );
+            assertTrue( "Failed joint limit", q <= oneDoFJoint.getJointLimitUpper() );
+         }
       }
    }
 
