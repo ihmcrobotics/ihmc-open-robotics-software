@@ -62,6 +62,8 @@ public class FootCenterToToeEvaluator
    private YoFramePoint doubleSupportStartICPYoFramePoint = null;
    private YoFramePoint doubleSupportEndICPYoFramePoint = null;
 
+   private final double deltaT = 0.001;
+
    private double doubleSupportFirstStepFraction = 0.5;
    private int maxNumberOfConsideredFootsteps = 4;
    private DoubleSupportFootCenterToToeICPComputer smoothICPComputer;  
@@ -73,7 +75,7 @@ public class FootCenterToToeEvaluator
    public void createRegistryBeforeTests()
    {
       registry = new YoVariableRegistry(getClass().getSimpleName());
-      smoothICPComputer = new DoubleSupportFootCenterToToeICPComputer(doubleSupportFirstStepFraction,  
+      smoothICPComputer = new DoubleSupportFootCenterToToeICPComputer(deltaT, doubleSupportFirstStepFraction,  
             maxNumberOfConsideredFootsteps, registry, dynamicGraphicObjectsListRegistry);
    }
 
@@ -119,7 +121,6 @@ public class FootCenterToToeEvaluator
    @Test
    public void testTypicalFourStepExampleWithSuddenStop()
    {
-      double deltaT = 0.001;
       stopSignalTime.set(1.9e100);
 
       createVisualizers(maxNumberOfConsideredFootsteps);

@@ -85,7 +85,8 @@ public class HighLevelHumanoidControllerFactoryHelper
          SimpleDesiredHeadingControlModule simpleDesiredHeadingControlModule = new SimpleDesiredHeadingControlModule(0.0, controlDT, registry);
          simpleDesiredHeadingControlModule.setMaxHeadingDot(0.4);
          simpleDesiredHeadingControlModule.updateDesiredHeadingFrame();
-         HeadingAndVelocityEvaluationScript headingAndVelocityEvaluationScript = new HeadingAndVelocityEvaluationScript(true, controlDT,
+         boolean cycleThroughAllEvents = true;
+         HeadingAndVelocityEvaluationScript headingAndVelocityEvaluationScript = new HeadingAndVelocityEvaluationScript(cycleThroughAllEvents, controlDT,
                                                                                     simpleDesiredHeadingControlModule, desiredVelocityControlModule, registry);
          updatables.add(headingAndVelocityEvaluationScript);
          desiredHeadingControlModule = simpleDesiredHeadingControlModule;
