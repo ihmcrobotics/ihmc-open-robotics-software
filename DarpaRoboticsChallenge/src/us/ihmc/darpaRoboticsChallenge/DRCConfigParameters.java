@@ -6,7 +6,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 
 public class DRCConfigParameters
 {
-   public static final DRCRobotModel robotModelToUse = DRCRobotModel.ATLAS_SANDIA_HANDS;
+   public static final DRCRobotModel robotModelToUse = DRCRobotModel.ATLAS_V3_IROBOT_HANDS;
 
    public static final boolean USE_VRC_PARAMETERS = !DRCLocalConfigParameters.USE_JERRY_PARAMETERS;    // false;//false in combo with torque limiting makes robot hip oscillate a lot in simulation
    public static final boolean RUNNING_ON_REAL_ROBOT = DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT;
@@ -96,8 +96,8 @@ public class DRCConfigParameters
    public static final String CONSTELLATION_FIELD_COMPUTER_1_VPN_IP = "10.0.0.52";
    public static final String CONSTELLATION_FIELD_COMPUTER_2_VPN_IP = "10.0.0.53";
 
-   public static final Boolean USE_HANDS = false;
-   public static final Boolean USE_IROBOT_HAND = false;
+   public static final Boolean USE_HANDS = true;
+   public static final Boolean USE_IROBOT_HAND = true;
    public static final String LEFT_IROBOT_HAND_IP = "192.168.40.38";
    public static final String RIGHT_IROBOT_HAND_IP = "192.168.40.32";
 
@@ -220,7 +220,7 @@ public class DRCConfigParameters
    public static final double NEAR_SCAN_CYL_Z_MAX = 0;
    public static final double NEAR_SCAN_CYL_Z_MIN = -1.5;
    public static final double NEAR_SCAN_DENSITY = .025;
-   
+
    // Footstep Generator
    public static final double BOUNDING_BOX_FOR_FOOTSTEP_HEIGHT_FINDING_SIDE_LENGTH =
       (1 + 0.3) * 2
