@@ -47,10 +47,10 @@ public class CVXMomentumOptimizerWithGRFSmootherNativeInput
 
    public CVXMomentumOptimizerWithGRFSmootherNativeInput()
    {
-      int rhoSize = CVXWithCylinderNative.rhoSize;
-      int phiSize = CVXWithCylinderNative.phiSize;
-      int wrenchLength = CVXWithCylinderNative.wrenchLength;
-      int nDoF = CVXWithCylinderNative.nDoF;
+      int rhoSize = CVXMomentumOptimizerWithGRFSmootherNative.rhoSize;
+      int phiSize = CVXMomentumOptimizerWithGRFSmootherNative.phiSize;
+      int wrenchLength = CVXMomentumOptimizerWithGRFSmootherNative.wrenchLength;
+      int nDoF = CVXMomentumOptimizerWithGRFSmootherNative.nDoF;
 
       AMatrix = new DenseMatrix64F(wrenchLength, nDoF);
       bMatrix = new DenseMatrix64F(wrenchLength, 1);
