@@ -111,7 +111,7 @@ public class DoubleSupportFootCenterToToeICPComputer
    {
       this.dt = dt;
      
-      int numberOfCoefficientsForDoubleSupport = 5;
+      int numberOfCoefficientsForDoubleSupport = 5; // 5 will set acceleration at end to 0.0
       doubleSupportPolynomialTrajectory = new DoubleSupportPolynomialTrajectory("icpDouble", numberOfCoefficientsForDoubleSupport, ReferenceFrame.getWorldFrame(), registry);
       
       //Don't set setDoHeelToToeTransfer to true unless you make the VRC Task 2 work with it on first, especially the mud!      
