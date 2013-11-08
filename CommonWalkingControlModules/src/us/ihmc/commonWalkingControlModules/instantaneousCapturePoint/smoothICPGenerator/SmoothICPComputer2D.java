@@ -27,7 +27,7 @@ public class SmoothICPComputer2D extends DoubleSupportFootCenterToToeICPComputer
    
    private final YoFramePoint initialFootPlacement = new YoFramePoint("initialFootPlacement", worldFrame, registry);
    private final YoFramePoint currentFootPlacement = new YoFramePoint("currentFootPlacement", worldFrame, registry);
-   private final EnumYoVariable<RobotSide> currentTransferToSide = new EnumYoVariable<>("currentTransferToSide", registry, RobotSide.class);
+   private final EnumYoVariable<RobotSide> currentTransferToSide = new EnumYoVariable<RobotSide>("currentTransferToSide", registry, RobotSide.class);
    
    private final DoubleYoVariable percentIn = new DoubleYoVariable("percentIn", registry);
    
@@ -52,7 +52,6 @@ public class SmoothICPComputer2D extends DoubleSupportFootCenterToToeICPComputer
    private final Vector3d icpAccelerationToPackTemp = new Vector3d();
    private final Point3d ecmpToPackTemp = new Point3d();
 
-   @Override
    public void getICPPositionAndVelocity(FramePoint2d icpPostionToPack, FrameVector2d icpVelocityToPack, FramePoint2d ecmpToPack, FramePoint2d actualICP, double time)
    {
       super.computeICPPositionVelocityAcceleration(icpPostionToPackTemp, icpVelocityToPackTemp, icpAccelerationToPackTemp, ecmpToPackTemp, time);
@@ -94,7 +93,6 @@ public class SmoothICPComputer2D extends DoubleSupportFootCenterToToeICPComputer
    
    private final Point3d initialICPPositionTemp = new Point3d();
    
-   @Override
    public void initializeDoubleSupportInitialTransfer(TransferToAndNextFootstepsData transferToAndNextFootstepsData, Point2d initialICPPosition,
          double initialTime)
    {
@@ -106,7 +104,6 @@ public class SmoothICPComputer2D extends DoubleSupportFootCenterToToeICPComputer
    }
    
 
-   @Override
    public FramePoint2d getFinalDesiredICP()
    {
       Point3d upcomingCornerPoint = super.getUpcomingCornerPoint();
