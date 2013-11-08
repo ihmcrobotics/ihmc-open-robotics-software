@@ -56,4 +56,12 @@ if(NOT WIN32)
 	endif(APPLE)
 endif()
 
-INSTALL(TARGETS LeeGoswamiForceOptimizer LeeGoswamiCoPAndNormalTorqueOptimizer ContactPointWrenchOptimizer MomentumOptimizer CVXWithCylinder CylinderAndPlaneContactForceOptimizer RUNTIME DESTINATION lib LIBRARY DESTINATION lib)
+add_library(CVXMomentumOptimizerWithGRFSmoother SHARED CVXMomentumOptimizerWithGRFSmootherNative.c CVXMomentumOptimizerWithGRFSmoother/util.c CVXMomentumOptimizerWithGRFSmoother/solver.c CVXMomentumOptimizerWithGRFSmoother/matrix_support.c CVXMomentumOptimizerWithGRFSmoother/ldl.c)
+if(NOT WIN32)
+	target_link_libraries(CVXMomentumOptimizerWithGRFSmoother m)
+	if(APPLE)
+		set_target_properties(CVXMomentumOptimizerWithGRFSmoother PROPERTIES SUFFIX .jnilib)
+	endif(APPLE)
+endif()
+
+INSTALL(TARGETS LeeGoswamiForceOptimizer LeeGoswamiCoPAndNormalTorqueOptimizer ContactPointWrenchOptimizer MomentumOptimizer CVXWithCylinder CylinderAndPlaneContactForceOptimizer CVXMomentumOptimizerWithGRFSmoother RUNTIME DESTINATION lib LIBRARY DESTINATION lib)

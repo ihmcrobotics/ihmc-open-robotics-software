@@ -1,0 +1,57 @@
+# Produced by CVXGEN, 2013-11-07 20:49:04 -0500.
+# CVXGEN is Copyright (C) 2006-2012 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2012 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+dimensions
+  nSupportVectors = 3 # number of basis vectors for approximation of friciton cones
+  nPointsPerContact = 4 # points per plane contact
+  nPlanes = 4 # number of plane contacts
+  wrenchLength = 6 # universal constant for physical space
+  nDoF = 34 # size of the robot actuator joint acceleration space.
+  nCylinders = 2 # number of cylindrical hands
+  nCylinderVectors = 8
+  nCylinderBoundedVariables = 5
+end
+
+parameters
+  A (wrenchLength, nDoF) # CentroidalMomentumMatrix
+  b (wrenchLength, 1) # MomentumDotEquationRightHandSide DesiredChangeInMomentum
+  C (wrenchLength, wrenchLength) diagonal psd #MomentumDotWeight
+
+  Js (nDoF, nDoF) # SecondaryConstraintJacobian
+  ps (nDoF, 1) # SecondaryConstraintRightHandSide
+  Ws (nDoF, nDoF) diagonal psd # SecondaryConstraintWeight
+
+  Lambda (nDoF, nDoF) diagonal psd # JointAccelerationRegularization
+
+  Qrho (wrenchLength, nPlanes * nSupportVectors * nPointsPerContact + nCylinders*nCylinderVectors ) # ContactPointWrenchMatrix
+  Qphi (wrenchLength, nCylinders*nCylinderBoundedVariables) # ContactPointWrenchMatrixForFullyBoundedVariables
+  c (wrenchLength, 1) # WrenchEquationRightHandSide
+  rhoMin (nSupportVectors * nPointsPerContact * nPlanes + nCylinders*nCylinderVectors ) positive
+  WRho (nPlanes * nSupportVectors * nPointsPerContact + nCylinders*nCylinderVectors, nPlanes * nSupportVectors * nPointsPerContact + nCylinders*nCylinderVectors) diagonal psd # GroundReactionForceRegularization
+  WPhi (nCylinders*nCylinderBoundedVariables, nCylinders*nCylinderBoundedVariables) diagonal psd
+  phiMin (nCylinders*nCylinderBoundedVariables) negative
+  phiMax (nCylinders*nCylinderBoundedVariables) positive
+
+  rhoPrevious (nSupportVectors * nPointsPerContact * nPlanes + nCylinders*nCylinderVectors ) positive
+  WRhoSmoother (nPlanes * nSupportVectors * nPointsPerContact + nCylinders*nCylinderVectors, nPlanes * nSupportVectors * nPointsPerContact + nCylinders*nCylinderVectors) diagonal psd # RateOfChangeOfGroundReactionForceRegularization
+end
+
+variables
+  rho (nSupportVectors * nPointsPerContact * nPlanes + nCylinders*nCylinderVectors ) # magnitude of each ground reaction force component
+  phi (nCylinders*nCylinderBoundedVariables) # specific to cylinders. bounded above and below
+  vd (nDoF) # JointAccelerations
+end
+
+minimize
+  quad(A * vd - b, C) + quad(Js * vd - ps, Ws) + quad(rho, WRho) + quad(phi, WPhi) + quad(vd, Lambda) + quad(rho - rhoPrevious, WRhoSmoother)
+subject to
+  Qrho * rho + Qphi * phi == A * vd + c # simple force balance
+  rho >= rhoMin
+  phiMin <= phi <= phiMax # phi is fully bounded
+end
