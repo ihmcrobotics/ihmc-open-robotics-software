@@ -19,6 +19,7 @@ import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotDampingParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
+import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandModel;
 import us.ihmc.darpaRoboticsChallenge.handControl.SimulatedHandControllerDispatcher;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriterWithAccelerationIntegration;
@@ -231,18 +232,21 @@ public class DRCSimulationFactory
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         for (int i = 0; i < ROSSandiaJointMap.numberOfJointsPerHand; i++)
-         {
-            try
-            {
-               simulatedRobot.getOneDoFJoint(ROSSandiaJointMap.handNames.get(robotSide)[i]).setDamping(
-                     DRCRobotDampingParameters.getSandiaHandDamping(robotSide, i));
-            }
-            catch (NullPointerException e)
-            {
-               System.err.println("NullPointerException for the joint: " + ROSSandiaJointMap.handNames.get(robotSide)[i]);
-            }
-         }
+    	 {
+    		 if(DRCConfigParameters.robotModelToUse.getHandModel() == DRCHandModel.SANDIA)
+	         for (int i = 0; i < ROSSandiaJointMap.numberOfJointsPerHand; i++)
+	         {
+	            try
+	            {
+	               simulatedRobot.getOneDoFJoint(ROSSandiaJointMap.handNames.get(robotSide)[i]).setDamping(
+	                     DRCRobotDampingParameters.getSandiaHandDamping(robotSide, i));
+	            }
+	            catch (NullPointerException e)
+	            {
+	               System.err.println("NullPointerException for the joint: " + ROSSandiaJointMap.handNames.get(robotSide)[i]);
+	            }
+	         }
+    	 }
       }
    }
 
