@@ -21,7 +21,6 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameConvexPolygon2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameLineSegment2d;
 
-
 /**
  * <p>Title: BipedSupportPolygons </p>
  *
@@ -36,9 +35,8 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameLineSegmen
  * @version 1.0
  */
 
-
 /*
-* FIXME: not rewindable!
+ * FIXME: not rewindable!
  */
 public class BipedSupportPolygons
 {
@@ -73,7 +71,7 @@ public class BipedSupportPolygons
    private final GlobalTimer timer = new GlobalTimer(getClass().getSimpleName() + "Timer", registry);
 
    public BipedSupportPolygons(SideDependentList<ReferenceFrame> ankleZUpFrames, ReferenceFrame midFeetZUpFrame, YoVariableRegistry parentRegistry,
-                               DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, boolean useConnectingEdges)
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, boolean useConnectingEdges)
    {
       this.ankleZUpFrames = ankleZUpFrames;
       this.midFeetZUp = midFeetZUpFrame;
@@ -86,7 +84,7 @@ public class BipedSupportPolygons
       ArtifactList artifactList = new ArtifactList("VTP Calculator");
 
       DynamicGraphicYoPolygonArtifact dynamicGraphicYoPolygonArtifact = new DynamicGraphicYoPolygonArtifact("Combined Polygon", supportPolygonViz, Color.pink,
-                                                                           false);
+            false);
       artifactList.add(dynamicGraphicYoPolygonArtifact);
 
       if (dynamicGraphicObjectsListRegistry != null)
@@ -153,14 +151,19 @@ public class BipedSupportPolygons
             supportSide = robotSide;
             neitherFootIsSupportingFoot = false;
 
-            FrameConvexPolygon2d footPolygonInAnkleZUp = FrameConvexPolygon2d.constructByProjectionOntoXYPlane(contactPointsForSide,
-                                                            ankleZUpFrames.get(robotSide));
-            FrameConvexPolygon2d footPolygonInMidFeetZUp = FrameConvexPolygon2d.constructByProjectionOntoXYPlane(contactPointsForSide, midFeetZUp);
+            if (footPolygonsInAnkleZUp.get(robotSide) == null || footPolygonsInMidFeetZUp == null)
+            {
+               this.footPolygonsInAnkleZUp.set(robotSide,
+                     FrameConvexPolygon2d.constructByProjectionOntoXYPlane(contactPointsForSide, ankleZUpFrames.get(robotSide)));
+               this.footPolygonsInMidFeetZUp.set(robotSide, FrameConvexPolygon2d.constructByProjectionOntoXYPlane(contactPointsForSide, midFeetZUp));
+            }
+            else
+            {
+               this.footPolygonsInAnkleZUp.get(robotSide).updateByProjectionOntoXYPlane(contactPointsForSide);
+               this.footPolygonsInMidFeetZUp.get(robotSide).updateByProjectionOntoXYPlane(contactPointsForSide);
+            }
 
-
-            this.footPolygonsInAnkleZUp.set(robotSide, footPolygonInAnkleZUp);
-            this.footPolygonsInMidFeetZUp.set(robotSide, footPolygonInMidFeetZUp);
-            this.sweetSpots.set(robotSide, footPolygonsInAnkleZUp.get(robotSide).getCentroidCopy());    // Sweet spots are the centroids of the foot polygons.
+            this.sweetSpots.set(robotSide, footPolygonsInAnkleZUp.get(robotSide).getCentroidCopy()); // Sweet spots are the centroids of the foot polygons.
          }
          else
          {
@@ -173,18 +176,17 @@ public class BipedSupportPolygons
       // If in single support, then the support polygon is just the foot polygon of the supporting foot.
       if (inDoubleSupport)
       {
-//       ArrayList<FramePoint2d> allPoints = new ArrayList<FramePoint2d>();
-//       for (RobotSide robotSide : RobotSide.values)
-//       {
-//          allPoints.addAll(footPolygonsInMidFeetZUp.get(robotSide).getClockwiseOrderedListOfFramePoints());
-//       }
-//       supportPolygonInMidFeetZUp = new FrameConvexPolygon2d(allPoints);
-
+         //       ArrayList<FramePoint2d> allPoints = new ArrayList<FramePoint2d>();
+         //       for (RobotSide robotSide : RobotSide.values)
+         //       {
+         //          allPoints.addAll(footPolygonsInMidFeetZUp.get(robotSide).getClockwiseOrderedListOfFramePoints());
+         //       }
+         //       supportPolygonInMidFeetZUp = new FrameConvexPolygon2d(allPoints);
 
          if (useConnectingEdges)
          {
-            FrameConvexPolygon2dAndConnectingEdges supportPolygonAndEdgesInMidFeetZUp =
-                  FrameConvexPolygon2d.combineDisjointPolygons(footPolygonsInMidFeetZUp.get(RobotSide.LEFT), footPolygonsInMidFeetZUp.get(RobotSide.RIGHT));
+            FrameConvexPolygon2dAndConnectingEdges supportPolygonAndEdgesInMidFeetZUp = FrameConvexPolygon2d.combineDisjointPolygons(
+                  footPolygonsInMidFeetZUp.get(RobotSide.LEFT), footPolygonsInMidFeetZUp.get(RobotSide.RIGHT));
 
             if (supportPolygonAndEdgesInMidFeetZUp == null)
                System.err.println("Feet polygons overlap. Crashing!!!");
@@ -200,7 +202,6 @@ public class BipedSupportPolygons
             supportPolygonInMidFeetZUp = footPolygonsInMidFeetZUp.get(RobotSide.LEFT).combineWith(footPolygonsInMidFeetZUp.get(RobotSide.RIGHT));
          }
 
-
       }
       else
       {
@@ -215,8 +216,8 @@ public class BipedSupportPolygons
          connectingEdge2 = null;
       }
 
-      this.footToFootLineSegmentInMidFeetZUp = new FrameLineSegment2d(sweetSpots.get(RobotSide.LEFT).changeFrameAndProjectToXYPlaneCopy(midFeetZUp),
-              sweetSpots.get(RobotSide.RIGHT).changeFrameAndProjectToXYPlaneCopy(midFeetZUp));
+      this.footToFootLineSegmentInMidFeetZUp = new FrameLineSegment2d(sweetSpots.get(RobotSide.LEFT).changeFrameAndProjectToXYPlaneCopy(midFeetZUp), sweetSpots
+            .get(RobotSide.RIGHT).changeFrameAndProjectToXYPlaneCopy(midFeetZUp));
 
       timer.stopTimer();
 
