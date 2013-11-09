@@ -26,9 +26,6 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    private final FrameVector contactNormalFrameVector;
    private final int totalNumberOfContactPoints;
    private final List<YoContactPoint> contactPoints;
-   
-   // TODO: Probably get rid of that. Now, it is used for smooth unload/load transitions in the CarIngressEgressController.
-   private final DoubleYoVariable wRho;
 
    public YoPlaneContactState(String namePrefix, RigidBody rigidBody, ReferenceFrame planeFrame, List<FramePoint2d> contactFramePoints,
          double coefficientOfFriction, YoVariableRegistry parentRegistry)
@@ -43,9 +40,6 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       parentRegistry.addChild(registry);
       
       this.contactNormalFrameVector = new FrameVector(planeFrame, 0.0, 0.0, 1.0);
-      
-      wRho = new DoubleYoVariable(namePrefix + "_wRhoContactRegularization", registry);
-      resetContactRegularization();
       
       contactPoints = new ArrayList<YoContactPoint>(contactFramePoints.size());
       for (int i = 0; i < contactFramePoints.size(); i++)
@@ -235,21 +229,6 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       }
       
       inContact.set(true);
-   }
-
-   public void setRhoContactRegularization(double wRho)
-   {
-      this.wRho.set(wRho);
-   }
-
-   public double getRhoContactRegularization()
-   {
-      return wRho.getDoubleValue();
-   }
-
-   public void resetContactRegularization()
-   {
-      wRho.set(DEFAULT_WRHO);
    }
 
    public RigidBody getRigidBody()

@@ -44,12 +44,6 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 
 public class HighLevelHumanoidControllerFactoryHelper
 {
-   //TODO: JEP: USE_NEW_OPTIMIZATION_MOMENTUM_CONTROL_MODULE has to be false or walking sucks. 
-//   private static final boolean USE_NEW_OPTIMIZATION_MOMENTUM_CONTROL_MODULE = false;
-
-   //TODO (Sylvain): get rid of that boolean (used for CarIngressEgressController)
-   private static final boolean USE_WRHO_WPHI_OF_CONTACT_STATES = true;
-
    public static BlindWalkingToDestinationDesiredFootstepCalculator getBlindWalkingToDestinationDesiredFootstepCalculator(
            WalkingControllerParameters walkingControllerParameters, CommonWalkingReferenceFrames referenceFrames,
            SideDependentList<ContactablePlaneBody> bipedFeet, YoVariableRegistry registry)
@@ -149,61 +143,6 @@ public class HighLevelHumanoidControllerFactoryHelper
       return joints.toArray(new InverseDynamicsJoint[joints.size()]);
    }
 
-/* TODO: Get rid of the following
-   public static MomentumControlModule createMomentumControlModule(WalkingControllerParameters walkingControllerParameters, FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, double gravityZ,
-         TwistCalculator twistCalculator, double controlDT, LidarControllerInterface lidarControllerInterface, YoVariableRegistry registry,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
-   {
-      MomentumControlModule momentumControlModule;
-      if (USE_NEW_OPTIMIZATION_MOMENTUM_CONTROL_MODULE)
-      {
-         InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, lidarControllerInterface.getLidarJoint());
-         MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(registry);
-         momentumOptimizationSettings.setDampedLeastSquaresFactor(5e-2);
-         momentumOptimizationSettings.setRhoCylinderContactRegularization(0.002);
-         momentumOptimizationSettings.setPhiCylinderContactRegularization(0.002);
-         momentumOptimizationSettings.setRhoPlaneContactRegularization(0.001);
-         momentumOptimizationSettings.setMomentumWeight(1.0, 1.0, 10.0, 10.0);
-         momentumOptimizationSettings.setRhoMin(0.0);
-         momentumControlModule = new OptimizationMomentumControlModule(fullRobotModel.getRootJoint(), referenceFrames.getCenterOfMassFrame(), controlDT,
-                 jointsToOptimizeFor, momentumOptimizationSettings, gravityZ, twistCalculator, dynamicGraphicObjectsListRegistry, registry);
-      }
-      else
-      {
-         GroundReactionWrenchDistributor groundReactionWrenchDistributor = null;
-//         if (USE_PLANE_ONLY_FORCE_DISTRIBUTOR)
-         {
-            ContactPointGroundReactionWrenchDistributor contactPointGroundReactionWrenchDistributor =
-                  new ContactPointGroundReactionWrenchDistributor(referenceFrames.getCenterOfMassFrame(), registry);
-            double[] diagonalCWeights = new double[]
-                  {
-                        1.0, 1.0, 1.0, 10.0, 10.0, 10.0
-                  };
-            contactPointGroundReactionWrenchDistributor.setWeights(diagonalCWeights, 5.0, 0.001);
-            groundReactionWrenchDistributor = contactPointGroundReactionWrenchDistributor;
-         } 
-         //JEP: Don't use CylinderAndContactPointWrenchDistributor when walking. only when getting in car.
-//         else
-//         {
-//            CylinderAndContactPointWrenchDistributor optimizationBasedWrenchDistributor =
-//                  new CylinderAndContactPointWrenchDistributor(referenceFrames.getCenterOfMassFrame(), registry, dynamicGraphicObjectsListRegistry);
-//            groundReactionWrenchDistributor = optimizationBasedWrenchDistributor;
-//         }
-
-
-         DampedLeastSquaresSolver jacobianSolver = new DampedLeastSquaresSolver(SpatialMotionVector.SIZE);
-         jacobianSolver.setAlpha(5e-2);
-
-         OldMomentumControlModule oldMomentumControlModule = new OldMomentumControlModule(fullRobotModel.getRootJoint(), gravityZ,
-                                                                groundReactionWrenchDistributor, referenceFrames.getCenterOfMassFrame(), controlDT,
-                                                                twistCalculator, jacobianSolver, registry, dynamicGraphicObjectsListRegistry);
-         oldMomentumControlModule.setGroundReactionWrenchBreakFrequencyHertz(walkingControllerParameters.getGroundReactionWrenchBreakFrequencyHertz());
-
-         momentumControlModule = oldMomentumControlModule;
-      }
-      return momentumControlModule;
-   }
-*/
    public static OldMomentumControlModule createOldMomentumControlModule(WalkingControllerParameters walkingControllerParameters,
          FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, double gravityZ, TwistCalculator twistCalculator, double controlDT,
          LidarControllerInterface lidarControllerInterface, YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
@@ -238,7 +177,7 @@ public class HighLevelHumanoidControllerFactoryHelper
       
       InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, lidarJoint);
 
-      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(USE_WRHO_WPHI_OF_CONTACT_STATES, registry);
+      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(registry);
       momentumOptimizationSettings.setDampedLeastSquaresFactor(5e-2);
       momentumOptimizationSettings.setRhoCylinderContactRegularization(0.002);
       momentumOptimizationSettings.setPhiCylinderContactRegularization(0.002);

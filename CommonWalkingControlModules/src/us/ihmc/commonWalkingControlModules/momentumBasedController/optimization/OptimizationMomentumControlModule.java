@@ -21,7 +21,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.D
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylinderAndPlaneContactMatrixCalculatorAdapter;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylinderAndPlaneContactMatrixCalculatorAdapterwRhowPhiObtainedFromContactStates;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylindricalContactState;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
@@ -94,17 +93,8 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       double wRhoPlaneContacts = momentumOptimizationSettings.getRhoPlaneContactRegularization();
       double wRhoSmoother = momentumOptimizationSettings.getRateOfChangeOfRhoPlaneContactRegularization();
       
-      if (momentumOptimizationSettings.isContactRegularizationWeightObtainedFromContactState())
-      {
-         //TODO (Sylvain): get rid of that class (used for CarIngressEgressController)
-         this.wrenchMatrixCalculator = new CylinderAndPlaneContactMatrixCalculatorAdapterwRhowPhiObtainedFromContactStates(centerOfMassFrame, registry,
-               dynamicGraphicObjectsListRegistry, rhoSize, phiSize, wRhoSmoother);
-      }
-      else
-      {
-         this.wrenchMatrixCalculator = new CylinderAndPlaneContactMatrixCalculatorAdapter(centerOfMassFrame, registry, dynamicGraphicObjectsListRegistry, rhoSize,
-               phiSize, wRhoCylinderContacts, wPhiCylinderContacts, wRhoPlaneContacts, wRhoSmoother);
-      }
+      this.wrenchMatrixCalculator = new CylinderAndPlaneContactMatrixCalculatorAdapter(centerOfMassFrame, registry, dynamicGraphicObjectsListRegistry, rhoSize,
+            phiSize, wRhoCylinderContacts, wPhiCylinderContacts, wRhoPlaneContacts, wRhoSmoother);
 
       int nDoF = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
 
