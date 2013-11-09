@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableCylin
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXGenMomentumOptimizerBridge;
-import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXGenMomentumOptimizerBridge.MomentumOptimizer;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXWithCylinderNative;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
@@ -98,9 +97,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
       int nDoF = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
 
-      //TODO Make EnumYoVariable so it can be change online
-      MomentumOptimizer momentumOptimizerToUse = MomentumOptimizer.NO_GRF_SMOOTHER;
-      momentumOptimizer = new CVXGenMomentumOptimizerBridge(nDoF, momentumOptimizerToUse, momentumOptimizationSettings);
+      momentumOptimizer = new CVXGenMomentumOptimizerBridge(nDoF, momentumOptimizationSettings);
       this.momentumOptimizationSettings = momentumOptimizationSettings;
       
       dampedLeastSquaresFactorMatrix = new DenseMatrix64F(nDoF, nDoF);

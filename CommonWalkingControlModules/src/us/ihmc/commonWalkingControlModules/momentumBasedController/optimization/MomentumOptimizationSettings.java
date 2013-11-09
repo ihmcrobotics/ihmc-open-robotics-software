@@ -1,9 +1,14 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+
+import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXGenMomentumOptimizerBridge;
+import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXGenMomentumOptimizerBridge.MomentumOptimizer;
 import us.ihmc.utilities.screwTheory.Momentum;
 
 /**
@@ -19,6 +24,8 @@ public class MomentumOptimizationSettings
    private final DoubleYoVariable angularMomentumZWeight = new DoubleYoVariable("angularMomentumZWeight", registry);
    private final DoubleYoVariable rhoMin = new DoubleYoVariable("rhoMin", registry);
    private final DoubleYoVariable lambda = new DoubleYoVariable("lambda", registry);
+   
+   private final EnumYoVariable<MomentumOptimizer> activeMomentumOptimizer = new EnumYoVariable<CVXGenMomentumOptimizerBridge.MomentumOptimizer>("activeMomentumOptimizer", registry, MomentumOptimizer.class);
    
    private final double[] momentumWeightDiagonal = new double[Momentum.SIZE];
    private final DenseMatrix64F C = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
@@ -128,5 +135,15 @@ public class MomentumOptimizationSettings
    public void setRateOfChangeOfRhoPlaneContactRegularization(double wRhoSmoother)
    {
       this.wRhoSmoother = wRhoSmoother;
+   }
+   
+   public void setMomentumOptimizerToUse(MomentumOptimizer momentumOptimizerToUse)
+   {
+      activeMomentumOptimizer.set(momentumOptimizerToUse);
+   }
+   
+   public MomentumOptimizer getMomentumOptimizerToUse()
+   {
+      return activeMomentumOptimizer.getEnumValue();
    }
 }
