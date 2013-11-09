@@ -283,34 +283,43 @@ public class AllMomentumModuleListener implements MotionConstraintListener, Desi
       jacobianMatrixSmallestSingularValue.set(Double.POSITIVE_INFINITY);
    }
 
+   private final DenseMatrix64F centroidalMomentumAMatrixCopy = new DenseMatrix64F();
+   private final DenseMatrix64F momentumDotEquationRightHandSideCopy = new DenseMatrix64F();
+   private final DenseMatrix64F momentumSubspaceCopy = new DenseMatrix64F();
+   
    public void setCentroidalMomentumMatrix(DenseMatrix64F centroidalMomentumAMatrix, DenseMatrix64F momentumDotEquationRightHandSide, DenseMatrix64F momentumSubspace)
    { 
+      centroidalMomentumAMatrixCopy.setReshape(centroidalMomentumAMatrix);
+      momentumDotEquationRightHandSideCopy.setReshape(momentumDotEquationRightHandSide);
+      momentumSubspaceCopy.setReshape(momentumSubspace);
+      
       if (printMotionConstraints.getBooleanValue())
       {
          System.out.println();
-         MatrixTools.printJavaForConstruction("centroidalMomentumAMatrix", centroidalMomentumAMatrix);
+         MatrixTools.printJavaForConstruction("centroidalMomentumAMatrix", centroidalMomentumAMatrixCopy);
          
          System.out.println();
-         MatrixTools.printJavaForConstruction("momentumDotEquationRightHandSide", momentumDotEquationRightHandSide);
+         MatrixTools.printJavaForConstruction("momentumDotEquationRightHandSide", momentumDotEquationRightHandSideCopy);
          
          System.out.println();
-         MatrixTools.printJavaForConstruction("momentumSubspace", momentumSubspace);
+         MatrixTools.printJavaForConstruction("momentumSubspace", momentumSubspaceCopy);
       }
       
-      SingularValueDecomposition<DenseMatrix64F> svd = computeSVD(centroidalMomentumAMatrix);      
+      SingularValueDecomposition<DenseMatrix64F> svd = computeSVD(centroidalMomentumAMatrixCopy);      
       double[] singularValues = svd.getSingularValues();
       centroidalMomentumSmallestSingularValue.set(computeSmallestSingularValue(singularValues));
    }
 
    public void setPrimaryMotionConstraintJMatrix(DenseMatrix64F jPrimary)
    {
+      jPrimaryMotionConstraint.setReshape(jPrimary);
+      
       if (printMotionConstraints.getBooleanValue())
       {
          System.out.println();
-         MatrixTools.printJavaForConstruction("JPrimaryMotionConstraints", jPrimary);
+         MatrixTools.printJavaForConstruction("JPrimaryMotionConstraints", jPrimaryMotionConstraint);
       }
                  
-      jPrimaryMotionConstraint.setReshape(jPrimary);
       SingularValueDecomposition<DenseMatrix64F> svd = computeSVD(jPrimaryMotionConstraint);
       double[] singularValues = svd.getSingularValues();
       double minSingularValue = computeSmallestSingularValue(singularValues);
@@ -344,30 +353,30 @@ public class AllMomentumModuleListener implements MotionConstraintListener, Desi
 
    public void setPrimaryMotionConstraintPVector(DenseMatrix64F pPrimary)
    {
+      pPrimaryMotionConstraint.setReshape(pPrimary);
+      
       if (printMotionConstraints.getBooleanValue())
       {
          System.out.println();
-         MatrixTools.printJavaForConstruction("pPrimaryMotionConstraints", pPrimary);
+         MatrixTools.printJavaForConstruction("pPrimaryMotionConstraints", pPrimaryMotionConstraint);
       }
       
-//      System.out.println("!!! PrimaryMotionConstraintPMatrix = " + pPrimary);
+//      System.out.println("!!! PrimaryMotionConstraintPMatrix = " + pPrimaryMotionConstraint);
 
-      pPrimaryMotionConstraint.setReshape(pPrimary);
    }
 
    public void setPrimaryMotionConstraintCheck(DenseMatrix64F primaryCheck)
    {
-//      System.out.println("!!! PrimaryMotionConstraint Check = " + primaryCheck);
-
       primaryMotionConstraintCheck.setReshape(primaryCheck);
-
+      
+//      System.out.println("!!! PrimaryMotionConstraint Check = " + primaryMotionConstraintCheck);
    }
 
    public void setCheckJQEqualsZeroAfterSetConstraint(DenseMatrix64F checkJQEqualsZero)
    {
-//      System.out.println("!!! PrimaryMotionConstraint checkJQEqualsZero = " + checkJQEqualsZero);
-
       this.checkJQEqualsZero.setReshape(checkJQEqualsZero);
+      
+//      System.out.println("!!! PrimaryMotionConstraint checkJQEqualsZero = " + this.checkJQEqualsZero);
    }
 
    public void setSecondaryMotionConstraintJMatrix(DenseMatrix64F jSecondary)
@@ -392,7 +401,7 @@ public class AllMomentumModuleListener implements MotionConstraintListener, Desi
    {
       this.jointsToOptimizeFor = jointsToOptimizeFor;
       this.jointAccelerationsSolution.setReshape(jointAccelerationsSolution);
-//      System.out.println("\n\n***********\njointAccelerationsSolution = " + jointAccelerationsSolution);
+//      System.out.println("\n\n***********\njointAccelerationsSolution = " + this.jointAccelerationsSolution);
 
    }
 

@@ -16,10 +16,17 @@ public class MomentumControlModuleSolverVisualizer implements MomentumControlMod
    
    private final DoubleYoVariable largestCheckJQEqualsZeroNumber = new DoubleYoVariable("largestCheckJQEqualsZeroNumber", registry);
    
-   private DenseMatrix64F centroidalMomentumMatrix, momentumDotEquationRightHandSide, momentumSubspace;
-   private DenseMatrix64F jPrimary, pPrimary, primaryMotionConstraintCheck, checkJQEqualsZeroAfterSetConstraint;
-   private DenseMatrix64F jSecondary, pSecondary, weightMatrixSecondary;
-   private DenseMatrix64F jointAccelerations;
+   private final DenseMatrix64F centroidalMomentumMatrixCopy = new DenseMatrix64F();
+   private final DenseMatrix64F momentumDotEquationRightHandSideCopy = new DenseMatrix64F();
+   private final DenseMatrix64F momentumSubspaceCopy = new DenseMatrix64F();
+   private final DenseMatrix64F jPrimaryCopy = new DenseMatrix64F();
+   private final DenseMatrix64F pPrimaryCopy = new DenseMatrix64F();
+   private final DenseMatrix64F primaryMotionConstraintCheckCopy = new DenseMatrix64F();
+   private final DenseMatrix64F checkJQEqualsZeroAfterSetConstraintCopy = new DenseMatrix64F();
+   private final DenseMatrix64F jSecondaryCopy = new DenseMatrix64F();
+   private final DenseMatrix64F pSecondaryCopy = new DenseMatrix64F();
+   private final DenseMatrix64F weightMatrixSecondaryCopy = new DenseMatrix64F();
+   private final DenseMatrix64F jointAccelerationsCopy = new DenseMatrix64F();
    private double optimizationValue;
    
    public MomentumControlModuleSolverVisualizer(YoVariableRegistry parentRegistry)
@@ -29,51 +36,51 @@ public class MomentumControlModuleSolverVisualizer implements MomentumControlMod
    
    public void setCentroidalMomentumMatrix(DenseMatrix64F centroidalMomentumMatrix, DenseMatrix64F momentumDotEquationRightHandSide, DenseMatrix64F momentumSubspace)
    {
-     this.centroidalMomentumMatrix = centroidalMomentumMatrix;
-     if (printForViz) System.out.println("CentroidalMomentumMatrix = " + centroidalMomentumMatrix);
+     this.centroidalMomentumMatrixCopy.setReshape(centroidalMomentumMatrix);
+     if (printForViz) System.out.println("CentroidalMomentumMatrix = " + centroidalMomentumMatrixCopy);
      
-     this.momentumDotEquationRightHandSide = momentumDotEquationRightHandSide;
-     if (printForViz) System.out.println("MomentumDotEquationRightHandSide = " + momentumDotEquationRightHandSide);
+     this.momentumDotEquationRightHandSideCopy.setReshape(momentumDotEquationRightHandSide);
+     if (printForViz) System.out.println("MomentumDotEquationRightHandSide = " + momentumDotEquationRightHandSideCopy);
      
-     this.momentumSubspace = momentumSubspace;
-     if (printForViz) System.out.println("momentumSubspace = " + momentumSubspace);
+     this.momentumSubspaceCopy.setReshape(momentumSubspace);
+     if (printForViz) System.out.println("momentumSubspace = " + momentumSubspaceCopy);
    }
 
 
    public void setPrimaryMotionConstraintJMatrix(DenseMatrix64F jPrimary)
    {
-      this.jPrimary = jPrimary;
-      if (printForViz) System.out.println("PrimaryMotionConstraintJMatrix = " + jPrimary);
+      this.jPrimaryCopy.setReshape(jPrimary);
+      if (printForViz) System.out.println("PrimaryMotionConstraintJMatrix = " + jPrimaryCopy);
    }
 
    public void setPrimaryMotionConstraintPVector(DenseMatrix64F pPrimary)
    {
-      this.pPrimary = pPrimary;
-      if (printForViz) System.out.println("PrimaryMotionConstraintPVector = " + pPrimary);
+      this.pPrimaryCopy.setReshape(pPrimary);
+      if (printForViz) System.out.println("PrimaryMotionConstraintPVector = " + pPrimaryCopy);
    }
 
    public void setSecondaryMotionConstraintJMatrix(DenseMatrix64F jSecondary)
    {
-      this.jSecondary = jSecondary;
-      if (printForViz) System.out.println("SecondaryMotionConstraintJMatrix = " + jSecondary);
+      this.jSecondaryCopy.setReshape(jSecondary);
+      if (printForViz) System.out.println("SecondaryMotionConstraintJMatrix = " + jSecondaryCopy);
    }
 
    public void setSecondaryMotionConstraintPVector(DenseMatrix64F pSecondary)
    {
-      this.pSecondary = pSecondary;
-      if (printForViz) System.out.println("SecondaryMotionConstraintPVector = " + pSecondary);
+      this.pSecondaryCopy.setReshape(pSecondary);
+      if (printForViz) System.out.println("SecondaryMotionConstraintPVector = " + pSecondaryCopy);
    }
 
    public void setSecondaryMotionConstraintWeightMatrix(DenseMatrix64F weightMatrixSecondary)
    {
-      this.weightMatrixSecondary = weightMatrixSecondary;
-      if (printForViz) System.out.println("SecondaryMotionConstraintWeightMatrix = " + weightMatrixSecondary);
+      this.weightMatrixSecondaryCopy.setReshape(weightMatrixSecondary);
+      if (printForViz) System.out.println("SecondaryMotionConstraintWeightMatrix = " + weightMatrixSecondaryCopy);
    }
 
    public void setJointAccelerationSolution(InverseDynamicsJoint[] jointsToOptimizeFor, DenseMatrix64F jointAccelerations)
    {      
-      this.jointAccelerations = jointAccelerations;
-      if (printForViz) System.out.println("JointAccelerationSolution = " + jointAccelerations);
+      this.jointAccelerationsCopy.setReshape(jointAccelerations);
+      if (printForViz) System.out.println("JointAccelerationSolution = " + jointAccelerationsCopy);
    }
 
    public void setOptimizationValue(double optimizationValue)
@@ -84,27 +91,27 @@ public class MomentumControlModuleSolverVisualizer implements MomentumControlMod
    
    public void reviewSolution()
    {
-      DenseMatrix64F ATimesVDot = new DenseMatrix64F(centroidalMomentumMatrix.getNumRows(), jointAccelerations.getNumCols());
-      CommonOps.mult(centroidalMomentumMatrix, jointAccelerations, ATimesVDot);
+      DenseMatrix64F ATimesVDot = new DenseMatrix64F(centroidalMomentumMatrixCopy.getNumRows(), jointAccelerationsCopy.getNumCols());
+      CommonOps.mult(centroidalMomentumMatrixCopy, jointAccelerationsCopy, ATimesVDot);
       
       if (printForViz) System.out.println("\n\nATimesVDot = " + ATimesVDot);
-      if (printForViz) System.out.println("MomentumDotEquationRightHandSide = " + momentumDotEquationRightHandSide);
+      if (printForViz) System.out.println("MomentumDotEquationRightHandSide = " + momentumDotEquationRightHandSideCopy);
 
    }
 
    public void setPrimaryMotionConstraintCheck(DenseMatrix64F check)
    {
-      this.primaryMotionConstraintCheck = check;
-      if (printForViz) System.out.println("PrimaryMotionConstraintCheck = " + primaryMotionConstraintCheck);
+      this.primaryMotionConstraintCheckCopy.setReshape(check);
+      if (printForViz) System.out.println("PrimaryMotionConstraintCheck = " + primaryMotionConstraintCheckCopy);
 
    }
 
    public void setCheckJQEqualsZeroAfterSetConstraint(DenseMatrix64F checkJQEqualsZeroAfterSetConstraint)
    {      
-      this.checkJQEqualsZeroAfterSetConstraint = checkJQEqualsZeroAfterSetConstraint;
-      if (printForViz) System.out.println("CheckJQEqualsZeroAfterSetConstraint = " + checkJQEqualsZeroAfterSetConstraint);
+      this.checkJQEqualsZeroAfterSetConstraintCopy.setReshape(checkJQEqualsZeroAfterSetConstraint);
+      if (printForViz) System.out.println("CheckJQEqualsZeroAfterSetConstraint = " + checkJQEqualsZeroAfterSetConstraintCopy);
       
-      largestCheckJQEqualsZeroNumber.set(getMaxAbsoluteElement(checkJQEqualsZeroAfterSetConstraint));
+      largestCheckJQEqualsZeroNumber.set(getMaxAbsoluteElement(checkJQEqualsZeroAfterSetConstraintCopy));
    }
 
    private double getMaxAbsoluteElement(DenseMatrix64F matrix)

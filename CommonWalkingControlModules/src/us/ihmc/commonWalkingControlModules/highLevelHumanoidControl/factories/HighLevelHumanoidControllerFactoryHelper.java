@@ -245,6 +245,7 @@ public class HighLevelHumanoidControllerFactoryHelper
       momentumOptimizationSettings.setRhoPlaneContactRegularization(0.001);
       momentumOptimizationSettings.setMomentumWeight(1.0, 1.0, 10.0, 10.0);
       momentumOptimizationSettings.setRhoMin(0.0);
+      momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(10.0);
 
       OptimizationMomentumControlModule optimizationMomentumControlModule = new OptimizationMomentumControlModule(fullRobotModel.getRootJoint(), referenceFrames.getCenterOfMassFrame(), controlDT,
             jointsToOptimizeFor, momentumOptimizationSettings, gravityZ, twistCalculator, dynamicGraphicObjectsListRegistry, registry);
