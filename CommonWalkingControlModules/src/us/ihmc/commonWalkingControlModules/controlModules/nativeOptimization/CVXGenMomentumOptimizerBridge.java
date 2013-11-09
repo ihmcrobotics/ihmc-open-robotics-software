@@ -54,7 +54,7 @@ public class CVXGenMomentumOptimizerBridge
       momentumOptimizerNative = new CVXWithCylinderNative(nDoF, rhoSize, phiSize);
       momentumOptimizerNativeInput = new CVXWithCylinderNativeInput();
 
-      if (activeMomentumOptimizer == MomentumOptimizer.NO_GRF_SMOOTHER)
+      if (activeMomentumOptimizer != MomentumOptimizer.NO_GRF_SMOOTHER)
       {
          momentumOptimizerWithGRFSmootherNative = new CVXMomentumOptimizerWithGRFSmootherNative(nDoF, rhoSize, phiSize);
          momentumOptimizerWithGRFSmootherNativeInput = new CVXMomentumOptimizerWithGRFSmootherNativeInput();
