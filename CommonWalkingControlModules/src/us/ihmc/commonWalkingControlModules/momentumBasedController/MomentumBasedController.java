@@ -36,11 +36,9 @@ import us.ihmc.commonWalkingControlModules.stateEstimation.DesiredCoMAndAngularA
 import us.ihmc.commonWalkingControlModules.stateEstimation.PointPositionGrabber;
 import us.ihmc.commonWalkingControlModules.stateEstimation.PointPositionGrabberInterface;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylindricalContactState;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromController;
-import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -351,28 +349,6 @@ public class MomentumBasedController
 
       inverseDynamicsCalculator.reset();
       momentumControlModuleBridge.reset();
-
-      resetWeightsForContactRegularization();
-   }
-
-   //TODO  (Sylvain): get rid of that
-   private void resetWeightsForContactRegularization()
-   {
-      // TODO: get rid of contactStates or planeContactStates. This is confusing.
-      for (PlaneContactState contactState : yoPlaneContactStates.values())
-      {
-         contactState.resetContactRegularization();
-      }
-
-      for (PlaneContactState contactState : yoPlaneContactStates.values())
-      {
-         contactState.resetContactRegularization();
-      }
-
-      for (CylindricalContactState contactState : yoCylindricalContactStates.values())
-      {
-         contactState.resetContactRegularization();
-      }
    }
 
    // TODO: Temporary method for a big refactor allowing switching between high level behaviors
@@ -842,18 +818,6 @@ public class MomentumBasedController
    public void setDelayTimeBeforeTrustingContacts(double delayTimeBeforeTrustingContacts)
    {
       pointPositionGrabber.setDelayTimeBeforeTrustingContacts(delayTimeBeforeTrustingContacts);
-   }
-
-   //TODO (Sylvain): get rid of these methods changing wRho & wPhi of contact state
-   public void setPlaneContactState_wRho(ContactablePlaneBody contactablePlaneBody, double wRho)
-   {
-      yoPlaneContactStates.get(contactablePlaneBody).setRhoContactRegularization(wRho);
-   }
-
-   public void setCylindricalContactState_wRho_wPhi(ContactableCylinderBody contactableCylinderBody, double wRho, double wPhi)
-   {
-      yoCylindricalContactStates.get(contactableCylinderBody).setRhoContactRegularization(wRho);
-      yoCylindricalContactStates.get(contactableCylinderBody).setPhiContactRegularization(wPhi);
    }
 
    public void setCylindricalContactStateProperties(ContactableCylinderBody contactableCylinderBody, double coefficientOfFriction, double gripStrength,

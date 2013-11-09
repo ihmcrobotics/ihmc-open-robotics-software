@@ -10,8 +10,6 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 
 public interface PlaneContactState
 {
-   public static final double DEFAULT_WRHO = 0.001;
-
    public abstract RigidBody getRigidBody();
    public abstract ReferenceFrame getFrameAfterParentJoint();
    public abstract ReferenceFrame getPlaneFrame();
@@ -25,9 +23,4 @@ public interface PlaneContactState
    public abstract int getTotalNumberOfContactPoints(); 
    
    public abstract List<? extends ContactPoint> getContactPoints();
-
-   // TODO: Probably get rid of that. Now, it is used for smooth unload/load transitions in the CarIngressEgressController.
-   public void setRhoContactRegularization(double wRho);
-   public double getRhoContactRegularization();
-   public void resetContactRegularization();
 }

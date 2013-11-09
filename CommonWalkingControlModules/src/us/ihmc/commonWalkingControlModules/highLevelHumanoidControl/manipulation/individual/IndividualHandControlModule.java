@@ -19,7 +19,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LoadBearingPlaneHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.ObjectManipulationState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.PointPositionHandControlState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.ProgressiveUnloadingHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TaskspaceHandPositionControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.sensors.MassMatrixEstimatingToolRigidBody;
@@ -50,7 +49,6 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
-import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionAction;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
@@ -79,7 +77,6 @@ public class IndividualHandControlModule
    private final TaskspaceHandPositionControlState taskSpacePositionControlState;
    private final JointSpaceHandControlControlState jointSpaceHandControlState;
    private final LoadBearingCylindricalHandControlState loadBearingCylindricalState;
-   private final ProgressiveUnloadingHandControlState progressiveUnloadingHandControlState;
    private final ObjectManipulationState objectManipulationState;
    private final LoadBearingPlaneHandControlState loadBearingPlaneFingersBentBackState;
    private final List<TaskspaceHandPositionControlState> taskSpacePositionControlStates = new ArrayList<TaskspaceHandPositionControlState>();
@@ -158,9 +155,6 @@ public class IndividualHandControlModule
               jacobian, fullRobotModel.getElevator(), parentRegistry, robotSide);
 
 
-      progressiveUnloadingHandControlState = new ProgressiveUnloadingHandControlState(IndividualHandControlState.UNLOADING_STATE, momentumBasedController,
-              jacobian, fullRobotModel.getElevator(), handController, parentRegistry, robotSide);
-
       loadBearingPlaneFingersBentBackState = new LoadBearingPlaneHandControlState(IndividualHandControlState.LOAD_BEARING_PLANE_FINGERS_BENT_BACK, robotSide,
               momentumBasedController, fullRobotModel.getElevator(), jacobian, handController, registry);
 
@@ -199,7 +193,7 @@ public class IndividualHandControlModule
       addTransitionToCylindricalLoadBearing(requestedState, handController, jointSpaceHandControlState, loadBearingCylindricalState, simulationTime);
       addTransitionToCylindricalLoadBearing(requestedState, handController, taskSpacePositionControlState, loadBearingCylindricalState, simulationTime);
 //      addTransitionToLeaveCylindricalLoadBearing(handController, loadBearingCylindricalState, taskSpacePositionControlState);
-      addRequestedStateTransition(requestedState, true, loadBearingCylindricalState, progressiveUnloadingHandControlState, taskSpacePositionControlState);
+      addRequestedStateTransition(requestedState, true, loadBearingCylindricalState, taskSpacePositionControlState);
 
       addTransitionToPlaneLoadBearingFingersBentBack(requestedState, handController, taskSpacePositionControlState, loadBearingPlaneFingersBentBackState);
       addRequestedStateTransition(requestedState, true, loadBearingPlaneFingersBentBackState, taskSpacePositionControlState);
@@ -208,7 +202,6 @@ public class IndividualHandControlModule
       stateMachine.addState(taskSpacePositionControlState);
       stateMachine.addState(objectManipulationState);
       stateMachine.addState(loadBearingCylindricalState);
-      stateMachine.addState(progressiveUnloadingHandControlState);
       stateMachine.addState(loadBearingPlaneFingersBentBackState);
       stateMachine.addState(pointPositionControlState);
 
@@ -243,30 +236,6 @@ public class IndividualHandControlModule
       };
       StateTransition<IndividualHandControlState> stateTransition = new StateTransition<IndividualHandControlState>(toState.getStateEnum(),
                                                                        stateTransitionCondition);
-      fromState.addStateTransition(stateTransition);
-   }
-
-   private static void addTransitionToLeaveCylindricalLoadBearing(final EnumYoVariable<IndividualHandControlState> requestedState,
-           final HandControllerInterface handControllerInterface, State<IndividualHandControlState> fromState, final State<IndividualHandControlState> toState)
-   {
-      StateTransitionCondition stateTransitionCondition = new StateTransitionCondition()
-      {
-         public boolean checkCondition()
-         {
-            boolean transitionRequested = requestedState.getEnumValue() == toState.getStateEnum();
-
-            return transitionRequested;
-         }
-      };
-      StateTransitionAction stateTransitionAction = new StateTransitionAction()
-      {
-         public void doTransitionAction()
-         {
-            handControllerInterface.openFingers();
-         }
-      };
-      StateTransition<IndividualHandControlState> stateTransition = new StateTransition<IndividualHandControlState>(toState.getStateEnum(),
-                                                                       stateTransitionCondition, stateTransitionAction);
       fromState.addStateTransition(stateTransition);
    }
 

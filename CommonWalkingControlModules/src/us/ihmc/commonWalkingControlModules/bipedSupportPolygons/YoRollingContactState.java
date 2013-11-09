@@ -31,9 +31,6 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
    private final ContactableRollingBody contactableCylinderBody;
    private final int totalNumberOfContactPoints;
 
-   // TODO: Probably get rid of that. Now, it is used for smooth unload/load transitions in the CarIngressEgressController.
-   private final DoubleYoVariable wRho;
-
    // Class enabling to update the contact points of a contactable rolling body as it is rolling on the ground or on another contactable surface
    public YoRollingContactState(String namePrefix, ContactableRollingBody contactableCylinderBody, List<FramePoint2d> contactFramePoints, YoVariableRegistry parentRegistry)
    {
@@ -59,9 +56,6 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
       parentRegistry.addChild(registry);
       
       this.contactNormalFrameVector = new FrameVector(updatableContactFrame, 0.0, 0.0, 1.0);
-
-      wRho = new DoubleYoVariable(namePrefix + "_wRhoContactRegularization", registry);
-      resetContactRegularization();
 
       FramePoint2d tempFramePoint = new FramePoint2d(updatableContactFrame);
       
@@ -243,21 +237,6 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
       }
       
       inContact.set(true);
-   }
-
-   public void setRhoContactRegularization(double wRho)
-   {
-      this.wRho.set(wRho);
-   }
-
-   public double getRhoContactRegularization()
-   {
-      return wRho.getDoubleValue();
-   }
-
-   public void resetContactRegularization()
-   {
-      wRho.set(DEFAULT_WRHO);
    }
 
    public List<YoContactPoint> getContactPoints()
