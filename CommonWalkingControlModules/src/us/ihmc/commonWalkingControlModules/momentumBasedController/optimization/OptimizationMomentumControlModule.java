@@ -32,6 +32,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.optimization.EqualityConstraintEnforcer;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.Momentum;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
@@ -73,6 +74,9 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final MomentumRateOfChangeData momentumRateOfChangeData;
    private final DampedLeastSquaresSolver hardMotionConstraintSolver;
+   
+   private final DenseMatrix64F dampedLeastSquaresFactorMatrix;
+   private final DenseMatrix64F bOriginal = new DenseMatrix64F(Momentum.SIZE, 1);
 
    public OptimizationMomentumControlModule(InverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame, double controlDT,
            InverseDynamicsJoint[] jointsToOptimizeFor, MomentumOptimizationSettings momentumOptimizationSettings, double gravityZ,
@@ -102,8 +106,11 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
                phiSize, wRhoCylinderContacts, wPhiCylinderContacts, wRhoPlaneContacts);
       }
 
-      this.momentumOptimizerNative = new CVXWithCylinderNative(ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor), rhoSize, phiSize);
+      int nDoF = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
+      this.momentumOptimizerNative = new CVXWithCylinderNative(nDoF, rhoSize, phiSize);
       this.momentumOptimizationSettings = momentumOptimizationSettings;
+      
+      dampedLeastSquaresFactorMatrix = new DenseMatrix64F(nDoF, nDoF);
 
       this.jointsToOptimizeFor = jointsToOptimizeFor;
 
@@ -180,12 +187,12 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       DenseMatrix64F a = centroidalMomentumHandler.getCentroidalMomentumMatrixPart(jointsToOptimizeFor);
       DenseMatrix64F b = centroidalMomentumHandler.getMomentumDotEquationRightHandSide(momentumRateOfChangeData); 
       
-      DenseMatrix64F bOriginal = new DenseMatrix64F(b);
+      bOriginal.set(b);
 
       if (momentumControlModuleSolverListener != null)
       {
-         momentumControlModuleSolverListener.setPrimaryMotionConstraintJMatrix(new DenseMatrix64F(jPrimary));
-         momentumControlModuleSolverListener.setPrimaryMotionConstraintPVector(new DenseMatrix64F(pPrimary));
+         momentumControlModuleSolverListener.setPrimaryMotionConstraintJMatrix(jPrimary);
+         momentumControlModuleSolverListener.setPrimaryMotionConstraintPVector(pPrimary);
       }
       
       equalityConstraintEnforcer.setConstraint(jPrimary, pPrimary);
@@ -193,11 +200,10 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
       if (momentumControlModuleSolverListener != null)
       {
-         DenseMatrix64F momentumSubspace = new DenseMatrix64F(momentumRateOfChangeData.getMomentumSubspace());
-         momentumControlModuleSolverListener.setCentroidalMomentumMatrix(new DenseMatrix64F(a), new DenseMatrix64F(b), momentumSubspace);
+         momentumControlModuleSolverListener.setCentroidalMomentumMatrix(a, b, momentumRateOfChangeData.getMomentumSubspace());
          
          DenseMatrix64F checkJQEqualsZeroAfterSetConstraint = equalityConstraintEnforcer.checkJQEqualsZeroAfterSetConstraint();
-         momentumControlModuleSolverListener.setCheckJQEqualsZeroAfterSetConstraint(new DenseMatrix64F(checkJQEqualsZeroAfterSetConstraint));
+         momentumControlModuleSolverListener.setCheckJQEqualsZeroAfterSetConstraint(checkJQEqualsZeroAfterSetConstraint);
       }
       
       if (momentumControlModuleSolverListener != null)
@@ -230,8 +236,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
        * after the hard constraints have been applied. We really need a solver that can handle hard constraints in addition to soft constraints without being
        * too computationally expensive!
        */
-      DenseMatrix64F dampedLeastSquaresFactorMatrix = momentumOptimizationSettings.getDampedLeastSquaresFactorMatrix(ScrewTools.computeDegreesOfFreedom
-            (jointsToOptimizeFor));
+      momentumOptimizationSettings.packDampedLeastSquaresFactorMatrix(dampedLeastSquaresFactorMatrix);
       momentumOptimizerNativeInput.setJointAccelerationRegularization(dampedLeastSquaresFactorMatrix);
 
       secondaryMotionConstraintHandler.compute();
@@ -243,9 +248,9 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
       if (momentumControlModuleSolverListener != null)
       {
-         momentumControlModuleSolverListener.setSecondaryMotionConstraintJMatrix(new DenseMatrix64F(jSecondary));
-         momentumControlModuleSolverListener.setSecondaryMotionConstraintPVector(new DenseMatrix64F(pSecondary));
-         momentumControlModuleSolverListener.setSecondaryMotionConstraintWeightMatrix(new DenseMatrix64F(weightMatrixSecondary));
+         momentumControlModuleSolverListener.setSecondaryMotionConstraintJMatrix(jSecondary);
+         momentumControlModuleSolverListener.setSecondaryMotionConstraintPVector(pSecondary);
+         momentumControlModuleSolverListener.setSecondaryMotionConstraintWeightMatrix(weightMatrixSecondary);
       }
       
       momentumOptimizerNativeInput.setSecondaryConstraintJacobian(jSecondary);
@@ -276,7 +281,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       
       if (momentumControlModuleSolverListener != null)
       {
-         momentumControlModuleSolverListener.setJointAccelerationSolution(jointsToOptimizeFor, new DenseMatrix64F(jointAccelerations));
+         momentumControlModuleSolverListener.setJointAccelerationSolution(jointsToOptimizeFor, jointAccelerations);
          momentumControlModuleSolverListener.setOptimizationValue(output.getOptVal());
          momentumControlModuleSolverListener.reviewSolution();
       }
@@ -297,6 +302,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       return momentumModuleSolution;
    }
 
+   // TODO Conversion nastiness!! To be refactored
    private static LinkedHashMap<RigidBody, Set<PlaneContactState>> convertContactStates(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates)
    {
       LinkedHashMap<RigidBody, Set<PlaneContactState>> ret = new LinkedHashMap<RigidBody, Set<PlaneContactState>>();
@@ -315,6 +321,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       return ret;
    }
 
+   // TODO Conversion nastiness!! To be refactored
    private static LinkedHashMap<RigidBody, CylindricalContactState> convertCylindricalContactStates(
          Map<ContactableCylinderBody, ? extends CylindricalContactState> contactStates)
    {

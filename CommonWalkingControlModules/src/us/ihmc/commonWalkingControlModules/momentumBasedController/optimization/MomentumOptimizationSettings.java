@@ -28,6 +28,7 @@ public class MomentumOptimizationSettings
    private double wRhoCylinder;
    private double wPhiCylinder;
    private double wRhoPlane;
+   private double wRhoSmoother;
 
    private final DenseMatrix64F momentumSubspaceProjector = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
    private final DenseMatrix64F tempMatrix = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
@@ -118,13 +119,10 @@ public class MomentumOptimizationSettings
       return wRhoPlane;
    }
 
-   public DenseMatrix64F getDampedLeastSquaresFactorMatrix(int size)
+   public void packDampedLeastSquaresFactorMatrix(DenseMatrix64F dampedLeastSquaresFactorMatrixToPack)
    {
-      DenseMatrix64F ret = new DenseMatrix64F(size, size);
-      CommonOps.setIdentity(ret);
-      CommonOps.scale(lambda.getDoubleValue(), ret);
-
-      return ret;
+      CommonOps.setIdentity(dampedLeastSquaresFactorMatrixToPack);
+      CommonOps.scale(lambda.getDoubleValue(), dampedLeastSquaresFactorMatrixToPack);
    }
 
    public double getRhoMinScalar()
@@ -139,6 +137,11 @@ public class MomentumOptimizationSettings
 
    public double getRateOfChangeOfRhoPlaneContactRegularization()
    {
-      return 100000000000000000.0; //TODO Do not hardcode there -_-'
+      return wRhoSmoother;
+   }
+
+   public void setRateOfChangeOfRhoPlaneContactRegularization(double wRhoSmoother)
+   {
+      this.wRhoSmoother = wRhoSmoother;
    }
 }
