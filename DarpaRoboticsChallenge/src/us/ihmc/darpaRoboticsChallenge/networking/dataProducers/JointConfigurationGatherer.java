@@ -64,7 +64,6 @@ public class JointConfigurationGatherer
             for (int i = 0; i < numberOfHandJoints; i++)
             {
                handJoints.get(robotSide)[i] = jointsByName.get(handNames[i].toLowerCase());
-               System.out.println(handJoints.get(robotSide)[i].getName());
             }
          }
          else
