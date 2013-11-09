@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -40,12 +41,13 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
    private final DoubleYoVariable wRhoCylinderContacts = new DoubleYoVariable("wRhoCylinderContacts", registry);
    private final DoubleYoVariable wPhiCylinderContacts = new DoubleYoVariable("wPhiCylinderContacts", registry);
    private final DoubleYoVariable wRhoPlaneContacts = new DoubleYoVariable("wRhoPlaneContacts", registry);
+   private final DoubleYoVariable wRhoSmoother = new DoubleYoVariable("wRhoSmoother", registry);
    protected final DoubleYoVariable rhoMinScalar = new DoubleYoVariable("rhoMinScalarInAdapter", registry);
 
 
    public CylinderAndPlaneContactMatrixCalculatorAdapter(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, int rhoSize, int phiSize, double wRhoCylinderContacts,
-           double wPhiCylinderContacts, double wRhoPlaneContacts)
+           double wPhiCylinderContacts, double wRhoPlaneContacts, double wRhoSmoother)
    {
       cylinderAndPlaneContactMatrixCalculator = new CylinderAndPlaneContactMatrixCalculator(centerOfMassFrame, registry, dynamicGraphicObjectsListRegistry,
               rhoSize, phiSize);
@@ -58,6 +60,7 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
       this.wRhoCylinderContacts.set(wRhoCylinderContacts);
       this.wPhiCylinderContacts.set(wPhiCylinderContacts);
       this.wRhoPlaneContacts.set(wRhoPlaneContacts);
+      this.wRhoSmoother.set(wRhoSmoother);
    }
 
    public DenseMatrix64F getRhoMin()
@@ -253,6 +256,12 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
    public DenseMatrix64F getWPhi()
    {
       return cylinderAndPlaneContactMatrixCalculator.getWPhi();
+   }
+   
+   public void packWRhoSmoother(DenseMatrix64F wRhoSmootherToPack)
+   {
+      CommonOps.setIdentity(wRhoSmootherToPack);
+      CommonOps.scale(wRhoSmoother.getDoubleValue(), wRhoSmootherToPack);
    }
 
    public void setRhoMinScalar(double rhoMinScalar)
