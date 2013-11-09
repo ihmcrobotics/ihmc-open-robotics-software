@@ -138,6 +138,11 @@ public class BipedSupportPolygons
 
    public void update(SideDependentList<List<FramePoint>> contactPoints)
    {
+      update(contactPoints, true);
+   }
+   
+   public void update(SideDependentList<List<FramePoint>> contactPoints, boolean recycleMemory)
+   {      
       timer.startTimer();
       boolean inDoubleSupport = true;
       boolean neitherFootIsSupportingFoot = true;
@@ -151,7 +156,7 @@ public class BipedSupportPolygons
             supportSide = robotSide;
             neitherFootIsSupportingFoot = false;
 
-            if (footPolygonsInAnkleZUp.get(robotSide) == null || footPolygonsInMidFeetZUp == null)
+            if ((!recycleMemory) || (footPolygonsInAnkleZUp.get(robotSide) == null) || (footPolygonsInMidFeetZUp.get(robotSide) == null))
             {
                this.footPolygonsInAnkleZUp.set(robotSide,
                      FrameConvexPolygon2d.constructByProjectionOntoXYPlane(contactPointsForSide, ankleZUpFrames.get(robotSide)));
@@ -159,8 +164,8 @@ public class BipedSupportPolygons
             }
             else
             {
-               this.footPolygonsInAnkleZUp.get(robotSide).updateByProjectionOntoXYPlane(contactPointsForSide);
-               this.footPolygonsInMidFeetZUp.get(robotSide).updateByProjectionOntoXYPlane(contactPointsForSide);
+               this.footPolygonsInAnkleZUp.get(robotSide).updateByProjectionOntoXYPlane(contactPointsForSide, ankleZUpFrames.get(robotSide));
+               this.footPolygonsInMidFeetZUp.get(robotSide).updateByProjectionOntoXYPlane(contactPointsForSide, midFeetZUp);
             }
 
             this.sweetSpots.set(robotSide, footPolygonsInAnkleZUp.get(robotSide).getCentroidCopy()); // Sweet spots are the centroids of the foot polygons.
