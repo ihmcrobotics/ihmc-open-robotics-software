@@ -54,8 +54,16 @@ public class CVXGenMomentumOptimizerBridge
       momentumOptimizerNative = new CVXWithCylinderNative(nDoF, rhoSize, phiSize);
       momentumOptimizerNativeInput = new CVXWithCylinderNativeInput();
 
-      momentumOptimizerWithGRFSmootherNative = new CVXMomentumOptimizerWithGRFSmootherNative(nDoF, rhoSize, phiSize);
-      momentumOptimizerWithGRFSmootherNativeInput = new CVXMomentumOptimizerWithGRFSmootherNativeInput();
+      if (activeMomentumOptimizer == MomentumOptimizer.NO_GRF_SMOOTHER)
+      {
+         momentumOptimizerWithGRFSmootherNative = new CVXMomentumOptimizerWithGRFSmootherNative(nDoF, rhoSize, phiSize);
+         momentumOptimizerWithGRFSmootherNativeInput = new CVXMomentumOptimizerWithGRFSmootherNativeInput();
+      }
+      else
+      {
+         momentumOptimizerWithGRFSmootherNative = null;
+         momentumOptimizerWithGRFSmootherNativeInput = null;
+      }
       
       outputRho = new DenseMatrix64F(rhoSize, 1);
       rhoPrevious = new DenseMatrix64F(rhoSize, 1);
