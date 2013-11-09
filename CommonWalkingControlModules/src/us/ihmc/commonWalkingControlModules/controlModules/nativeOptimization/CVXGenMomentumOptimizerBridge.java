@@ -26,9 +26,12 @@ public class CVXGenMomentumOptimizerBridge
    public enum MomentumOptimizer {NO_GRF_SMOOTHER, GRF_SMOOTHER};
    private MomentumOptimizer activeMomentumOptimizer;
    
-   public CVXGenMomentumOptimizerBridge(int nDoF, MomentumOptimizer momentumOptimizerToUse, MomentumOptimizationSettings momentumOptimizationSettings)
+   private final MomentumOptimizationSettings momentumOptimizationSettings;
+   
+   public CVXGenMomentumOptimizerBridge(int nDoF, MomentumOptimizationSettings momentumOptimizationSettings)
    {
-      this.activeMomentumOptimizer = momentumOptimizerToUse;
+      this.momentumOptimizationSettings = momentumOptimizationSettings;
+      activeMomentumOptimizer = momentumOptimizationSettings.getMomentumOptimizerToUse();
       
       int cvxWithCylinderNativeRhoSize = CVXWithCylinderNative.rhoSize;
       int cvxMomentumOptimizerWithGRFSmootherNativeRhoSize = CVXMomentumOptimizerWithGRFSmootherNative.rhoSize;
@@ -90,6 +93,8 @@ public class CVXGenMomentumOptimizerBridge
          DenseMatrix64F wrenchEquationRightHandSide, DenseMatrix64F momentumDotWeight, DenseMatrix64F dampedLeastSquaresFactorMatrix,
          DenseMatrix64F jSecondary, DenseMatrix64F pSecondary, DenseMatrix64F weightMatrixSecondary)
    {
+      this.activeMomentumOptimizer = momentumOptimizationSettings.getMomentumOptimizerToUse();
+      
       switch(activeMomentumOptimizer)
       {
       case NO_GRF_SMOOTHER:
