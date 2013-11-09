@@ -6,6 +6,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXGenMomentumOptimizerBridge.MomentumOptimizer;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.BlindWalkingToDestinationDesiredFootstepCalculator;
@@ -178,13 +179,14 @@ public class HighLevelHumanoidControllerFactoryHelper
       InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, lidarJoint);
 
       MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(registry);
-      momentumOptimizationSettings.setDampedLeastSquaresFactor(5e-2);
+      momentumOptimizationSettings.setDampedLeastSquaresFactor(0.05);
       momentumOptimizationSettings.setRhoCylinderContactRegularization(0.002);
       momentumOptimizationSettings.setPhiCylinderContactRegularization(0.002);
       momentumOptimizationSettings.setRhoPlaneContactRegularization(0.001);
       momentumOptimizationSettings.setMomentumWeight(1.0, 1.0, 10.0, 10.0);
       momentumOptimizationSettings.setRhoMin(0.0);
-      momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.0);
+      momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.015);
+      momentumOptimizationSettings.setMomentumOptimizerToUse(MomentumOptimizer.NO_GRF_SMOOTHER);
 
       OptimizationMomentumControlModule optimizationMomentumControlModule = new OptimizationMomentumControlModule(fullRobotModel.getRootJoint(), referenceFrames.getCenterOfMassFrame(), controlDT,
             jointsToOptimizeFor, momentumOptimizationSettings, gravityZ, twistCalculator, dynamicGraphicObjectsListRegistry, registry);
