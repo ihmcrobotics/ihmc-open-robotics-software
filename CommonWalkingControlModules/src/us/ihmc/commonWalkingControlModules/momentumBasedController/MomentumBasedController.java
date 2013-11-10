@@ -28,6 +28,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.D
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
@@ -140,13 +141,11 @@ public class MomentumBasedController
          TwistCalculator twistCalculator, SideDependentList<ContactablePlaneBody> feet, SideDependentList<ContactablePlaneBody> handsWithFingersBentBack,
          SideDependentList<ContactableCylinderBody> graspingHands, SideDependentList<ContactablePlaneBody> thighs, ContactablePlaneBody pelvis,
          ContactablePlaneBody pelvisBack, double controlDT, ProcessedOutputsInterface processedOutputs,
-         OptimizationMomentumControlModule optimizationMomentumControlModule, OldMomentumControlModule oldMomentumControlModule,
+         MomentumOptimizationSettings momentumOptimizationSettings, OldMomentumControlModule oldMomentumControlModule,
          ArrayList<Updatable> updatables, StateEstimationDataFromController stateEstimationDataFromControllerSink,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-
-      momentumControlModuleBridge = new MomentumControlModuleBridge(optimizationMomentumControlModule, oldMomentumControlModule, centerOfMassFrame, registry);
 
       if (SPY_ON_MOMENTUM_BASED_CONTROLLER)
          momentumBasedControllerSpy = new MomentumBasedControllerSpy(registry);
@@ -297,6 +296,14 @@ public class MomentumBasedController
          wrenchVisualizer = null;
       }
       
+      OptimizationMomentumControlModule optimizationMomentumControlModule = null;
+      if (momentumOptimizationSettings != null)
+      {
+         optimizationMomentumControlModule = new OptimizationMomentumControlModule(fullRobotModel.getRootJoint(), referenceFrames.getCenterOfMassFrame(),
+               controlDT, gravityZ, momentumOptimizationSettings, twistCalculator, dynamicGraphicObjectsListRegistry, registry, yoPlaneContactStates.values(), yoCylindricalContactStates.values());
+      }
+
+      momentumControlModuleBridge = new MomentumControlModuleBridge(optimizationMomentumControlModule, oldMomentumControlModule, centerOfMassFrame, registry);
       
       passiveQKneeThreshold.set(0.3);
       passiveKneeMaxTorque.set(25.0);

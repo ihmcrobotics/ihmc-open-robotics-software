@@ -157,12 +157,12 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
 		this.rhoMin = rhoMin;
 	}
 
-	public int getSizeInRho()
+	public int getRhoSize()
 	{
 		return VECTORS*numberOfPointsInContact;
 	}
 
-	public int getSizeInPhi()
+	public int getPhiSize()
 	{
 		return 0;
 	}

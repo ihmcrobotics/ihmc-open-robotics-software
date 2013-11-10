@@ -7,6 +7,7 @@ import static us.ihmc.commonWalkingControlModules.momentumBasedController.Moment
 import static us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlTestTools.assertWrenchesSumUpToMomentumDot;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -36,6 +37,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.D
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointWrenchMatrixCalculator;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylindricalContactState;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.utilities.math.NullspaceCalculator;
@@ -91,13 +93,14 @@ public class OptimizationMomentumControlModuleTest
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", ReferenceFrame.getWorldFrame(), rootJoint.getSuccessor());
       centerOfMassFrame.update();
 
-      MomentumOptimizationSettings momentumOptimizationSettings = createStandardOptimizationSettings();
-      OptimizationMomentumControlModule momentumControlModule = createAndInitializeMomentumControlModule(rootJoint, randomFloatingChain.getRevoluteJoints(),
-                                                                   controlDT, centerOfMassFrame, momentumOptimizationSettings);
-
+      MomentumOptimizationSettings momentumOptimizationSettings = createStandardOptimizationSettings(rootJoint);
+      
       LinkedHashMap<ContactablePlaneBody, PlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, PlaneContactState>();
       double coefficientOfFriction = 1.0;
       addContactState(coefficientOfFriction, randomFloatingChain.getLeafBody(), contactStates);
+
+      OptimizationMomentumControlModule momentumControlModule = createAndInitializeMomentumControlModule(rootJoint, randomFloatingChain.getRevoluteJoints(),
+                                                                   controlDT, centerOfMassFrame, momentumOptimizationSettings, contactStates.values(), null);
 
       MomentumRateOfChangeData momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
       double totalMass = TotalMassCalculator.computeSubTreeMass(randomFloatingChain.getElevator());
@@ -143,15 +146,16 @@ public class OptimizationMomentumControlModuleTest
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", ReferenceFrame.getWorldFrame(), rootJoint.getSuccessor());
       centerOfMassFrame.update();
 
-      MomentumOptimizationSettings momentumOptimizationSettings = createStandardOptimizationSettings();
+      MomentumOptimizationSettings momentumOptimizationSettings = createStandardOptimizationSettings(rootJoint);
       momentumOptimizationSettings.setRhoMin(-10000.0);
-      OptimizationMomentumControlModule momentumControlModule = createAndInitializeMomentumControlModule(rootJoint, randomFloatingChain.getRevoluteJoints(),
-                                                                   controlDT, centerOfMassFrame, momentumOptimizationSettings);
-
+      
       LinkedHashMap<ContactablePlaneBody, PlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, PlaneContactState>();
       RigidBody endEffector = randomFloatingChain.getLeafBody();
       double coefficientOfFriction = 1000.0;
       addContactState(coefficientOfFriction, endEffector, contactStates);
+
+      OptimizationMomentumControlModule momentumControlModule = createAndInitializeMomentumControlModule(rootJoint, randomFloatingChain.getRevoluteJoints(),
+                                                                   controlDT, centerOfMassFrame, momentumOptimizationSettings, contactStates.values(), null);
 
       MomentumRateOfChangeData momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
       RigidBody elevator = randomFloatingChain.getElevator();
@@ -217,15 +221,16 @@ public class OptimizationMomentumControlModuleTest
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", ReferenceFrame.getWorldFrame(), rootJoint.getSuccessor());
       centerOfMassFrame.update();
 
-      MomentumOptimizationSettings momentumOptimizationSettings = createStandardOptimizationSettings();
+      MomentumOptimizationSettings momentumOptimizationSettings = createStandardOptimizationSettings(rootJoint);
       momentumOptimizationSettings.setRhoMin(-10000.0);
-      OptimizationMomentumControlModule momentumControlModule = createAndInitializeMomentumControlModule(rootJoint, randomFloatingChain.getRevoluteJoints(),
-                                                                   controlDT, centerOfMassFrame, momentumOptimizationSettings);
-
+      
       LinkedHashMap<ContactablePlaneBody, PlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, PlaneContactState>();
       RigidBody endEffector = randomFloatingChain.getLeafBody();
       double coefficientOfFriction = 1000.0;
       addContactState(coefficientOfFriction, endEffector, contactStates);
+
+      OptimizationMomentumControlModule momentumControlModule = createAndInitializeMomentumControlModule(rootJoint, randomFloatingChain.getRevoluteJoints(),
+                                                                   controlDT, centerOfMassFrame, momentumOptimizationSettings, contactStates.values(), null);
 
       MomentumRateOfChangeData momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
       RigidBody elevator = randomFloatingChain.getElevator();
@@ -295,13 +300,14 @@ public class OptimizationMomentumControlModuleTest
 
 
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", ReferenceFrame.getWorldFrame(), elevator);
-      MomentumOptimizationSettings momentumOptimizationSettings = createStandardOptimizationSettings();
-      OptimizationMomentumControlModule momentumControlModule = createAndInitializeMomentumControlModule(rootJoint, new ArrayList<RevoluteJoint>(), controlDT,
-                                                                   centerOfMassFrame, momentumOptimizationSettings);
-
+      MomentumOptimizationSettings momentumOptimizationSettings = createStandardOptimizationSettings(rootJoint);
+      
       LinkedHashMap<ContactablePlaneBody, PlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, PlaneContactState>();
       double coefficientOfFriction = 1.0;
       addContactState(coefficientOfFriction, rootBody, contactStates);
+
+      OptimizationMomentumControlModule momentumControlModule = createAndInitializeMomentumControlModule(rootJoint, new ArrayList<RevoluteJoint>(), controlDT,
+                                                                   centerOfMassFrame, momentumOptimizationSettings, contactStates.values(), null);
       double totalMass = TotalMassCalculator.computeMass(ScrewTools.computeSupportAndSubtreeSuccessors(elevator));
       double rhoMin = momentumOptimizationSettings.getRhoMinScalar();
 
@@ -358,15 +364,16 @@ public class OptimizationMomentumControlModuleTest
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", ReferenceFrame.getWorldFrame(), rootJoint.getSuccessor());
       centerOfMassFrame.update();
 
-      MomentumOptimizationSettings momentumOptimizationSettings = createStandardOptimizationSettings();
+      MomentumOptimizationSettings momentumOptimizationSettings = createStandardOptimizationSettings(rootJoint);
       momentumOptimizationSettings.setRhoMin(-10000.0);
-      OptimizationMomentumControlModule momentumControlModule = createAndInitializeMomentumControlModule(rootJoint, randomFloatingChain.getRevoluteJoints(),
-                                                                   controlDT, centerOfMassFrame, momentumOptimizationSettings);
-
+      
       LinkedHashMap<ContactablePlaneBody, PlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, PlaneContactState>();
       RigidBody endEffector = randomFloatingChain.getLeafBody();
       double coefficientOfFriction = 1000.0;
       addContactState(coefficientOfFriction, endEffector, contactStates);
+
+      OptimizationMomentumControlModule momentumControlModule = createAndInitializeMomentumControlModule(rootJoint, randomFloatingChain.getRevoluteJoints(),
+                                                                   controlDT, centerOfMassFrame, momentumOptimizationSettings, contactStates.values(), null);
 
       MomentumRateOfChangeData momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
       RigidBody elevator = randomFloatingChain.getElevator();
@@ -463,7 +470,7 @@ public class OptimizationMomentumControlModuleTest
       centerOfMassFrame.update();
 
 
-      MomentumOptimizationSettings momentumOptimizationSettings = createStandardOptimizationSettings();
+      MomentumOptimizationSettings momentumOptimizationSettings = createStandardOptimizationSettings(rootJoint);
       momentumOptimizationSettings.setDampedLeastSquaresFactor(0.0);
       momentumOptimizationSettings.setRhoMin(-10000.0);
 
@@ -474,7 +481,7 @@ public class OptimizationMomentumControlModuleTest
 
 
       OptimizationMomentumControlModule momentumControlModule = createAndInitializeMomentumControlModule(rootJoint, revoluteJoints, controlDT,
-            centerOfMassFrame, momentumOptimizationSettings);
+            centerOfMassFrame, momentumOptimizationSettings, contactStates.values(), null);
 
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       SpatialForceVector desiredMomentumRate = generateRandomFeasibleMomentumRateOfChange(centerOfMassFrame, contactStates, totalMass, gravityZ, random,
@@ -533,15 +540,16 @@ public class OptimizationMomentumControlModuleTest
    }
 
    private OptimizationMomentumControlModule createAndInitializeMomentumControlModule(SixDoFJoint rootJoint, List<RevoluteJoint> revoluteJoints, double dt,
-           ReferenceFrame centerOfMassFrame, MomentumOptimizationSettings momentumOptimizationSettings)
+         ReferenceFrame centerOfMassFrame, MomentumOptimizationSettings momentumOptimizationSettings,
+         Collection<? extends PlaneContactState> planeContactStates, Collection<? extends CylindricalContactState> cylindricalContactStates)
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
-      InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(rootJoint.getSuccessor());
 
       TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), rootJoint.getPredecessor());
-      OptimizationMomentumControlModule momentumControlModule = new OptimizationMomentumControlModule(rootJoint, centerOfMassFrame, controlDT,
-                                                                   jointsToOptimizeFor, momentumOptimizationSettings, gravityZ, twistCalculator, null,
-                                                                   registry);
+
+      OptimizationMomentumControlModule momentumControlModule = new OptimizationMomentumControlModule(rootJoint, centerOfMassFrame, controlDT, gravityZ,
+            momentumOptimizationSettings, twistCalculator, null, registry, planeContactStates, cylindricalContactStates);
+      
       momentumControlModule.initialize();
 
       ScrewTestTools.integrateVelocities(rootJoint, dt);
@@ -619,9 +627,11 @@ public class OptimizationMomentumControlModuleTest
       return ret;
    }
 
-   private static MomentumOptimizationSettings createStandardOptimizationSettings()
+   private static MomentumOptimizationSettings createStandardOptimizationSettings(SixDoFJoint rootJoint)
    {
-      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(new YoVariableRegistry("test1"));
+      InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(rootJoint.getSuccessor());
+      
+      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(jointsToOptimizeFor, new YoVariableRegistry("test1"));
       momentumOptimizationSettings.setMomentumWeight(1.0, 1.0, 1.0, 1.0);
 
 //    momentumOptimizationSettings.setDampedLeastSquaresFactor(1e-11);

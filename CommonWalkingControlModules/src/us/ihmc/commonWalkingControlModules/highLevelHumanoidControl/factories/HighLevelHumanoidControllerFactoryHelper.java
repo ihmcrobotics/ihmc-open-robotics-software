@@ -20,7 +20,6 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.SimpleDesir
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OldMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointGroundReactionWrenchDistributor;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributor;
@@ -169,16 +168,15 @@ public class HighLevelHumanoidControllerFactoryHelper
       return oldMomentumControlModule;
    }
 
-   public static OptimizationMomentumControlModule createOptimizationMomentumControlModule(FullRobotModel fullRobotModel,
-         CommonWalkingReferenceFrames referenceFrames, double gravityZ, TwistCalculator twistCalculator, double controlDT,
-         LidarControllerInterface lidarControllerInterface, YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public static MomentumOptimizationSettings createMomentumOptimizationSettings(FullRobotModel fullRobotModel,
+         LidarControllerInterface lidarControllerInterface, YoVariableRegistry registry)
    {
       OneDoFJoint lidarJoint = null;
       if (lidarControllerInterface != null) lidarJoint = lidarControllerInterface.getLidarJoint();
       
       InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, lidarJoint);
 
-      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(registry);
+      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(jointsToOptimizeFor, registry);
       momentumOptimizationSettings.setDampedLeastSquaresFactor(0.05);
       momentumOptimizationSettings.setRhoCylinderContactRegularization(0.002);
       momentumOptimizationSettings.setPhiCylinderContactRegularization(0.002);
@@ -188,10 +186,7 @@ public class HighLevelHumanoidControllerFactoryHelper
       momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.015);
       momentumOptimizationSettings.setMomentumOptimizerToUse(MomentumOptimizer.NO_GRF_SMOOTHER);
 
-      OptimizationMomentumControlModule optimizationMomentumControlModule = new OptimizationMomentumControlModule(fullRobotModel.getRootJoint(), referenceFrames.getCenterOfMassFrame(), controlDT,
-            jointsToOptimizeFor, momentumOptimizationSettings, gravityZ, twistCalculator, dynamicGraphicObjectsListRegistry, registry);
-
-      return optimizationMomentumControlModule;
+      return momentumOptimizationSettings;
    }
   
 }

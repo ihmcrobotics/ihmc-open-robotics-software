@@ -6,8 +6,8 @@ import us.ihmc.utilities.screwTheory.SpatialForceVector;
 public interface OptimizerContactModel
 {
 
-   public int getSizeInRho();
-   public int getSizeInPhi();
+   public int getRhoSize();
+   public int getPhiSize();
    public double getRhoMin(int i);
    public double getPhiMin(int i);
    public double getPhiMax(int i);

@@ -146,7 +146,7 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
          {
             tempSum.zero();
             OptimizerContactModel model = endEffector.getContactModel();
-            for (int iRhoModel = 0; iRhoModel < model.getSizeInRho(); iRhoModel++)
+            for (int iRhoModel = 0; iRhoModel < model.getRhoSize(); iRhoModel++)
             {
                packQrho(iRho, tempVectorMatrix);
                double rhoOfI = rho.get(iRho);
@@ -160,7 +160,7 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
                iRho++;
             }
 
-            for (int iPhiModel = 0; iPhiModel < model.getSizeInPhi(); iPhiModel++)
+            for (int iPhiModel = 0; iPhiModel < model.getPhiSize(); iPhiModel++)
             {
                packQphi(phiLocation, tempVectorMatrix);
                double phiOfI = phi.get(phiLocation);
@@ -206,7 +206,7 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
                tempPoint.changeFrame(endEffector.getReferenceFrame().getRootFrame());
                q = 0;
 
-               for (int iRhoModel = 0; iRhoModel < contactModel.getSizeInRho(); iRhoModel++)
+               for (int iRhoModel = 0; iRhoModel < contactModel.getRhoSize(); iRhoModel++)
                {
                   packQrho(iRho, tempVectorMatrix);
                   double rhoOfI = rho.get(iRho);
@@ -221,7 +221,7 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
 
                q = 1;
 
-               for (int iPhiModel = 0; iPhiModel < contactModel.getSizeInPhi(); iPhiModel++)
+               for (int iPhiModel = 0; iPhiModel < contactModel.getPhiSize(); iPhiModel++)
                {
                   packQphi(phiLocation, tempVectorMatrix);
                   double phiOfI = phi.get(phiLocation);

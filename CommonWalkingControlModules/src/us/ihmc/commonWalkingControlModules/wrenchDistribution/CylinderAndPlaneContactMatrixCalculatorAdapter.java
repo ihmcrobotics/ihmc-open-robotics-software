@@ -3,10 +3,8 @@ package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -30,208 +28,161 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector
  */
 public class CylinderAndPlaneContactMatrixCalculatorAdapter
 {
-   //TODO (Sylvain): change all variable to private (used for CarIngressEgressController)
-   protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final CylinderAndPlaneContactMatrixCalculator cylinderAndPlaneContactMatrixCalculator;
    private final CylinderAndPlaneContactSpatialForceVectorCalculator cylinderAndPlaneContactSpatialForceVectorCalculator;
-   protected final ReferenceFrame centerOfMassFrame;
+   private final ReferenceFrame centerOfMassFrame;
    private final Map<RigidBody, Wrench> wrenches = new LinkedHashMap<RigidBody, Wrench>();
    private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
-   protected final IntegerYoVariable planeContactIndex = new IntegerYoVariable("planeContactIndex", registry);
+   private final IntegerYoVariable planeContactIndex = new IntegerYoVariable("planeContactIndex", registry);
+   
    private final DoubleYoVariable wRhoCylinderContacts = new DoubleYoVariable("wRhoCylinderContacts", registry);
    private final DoubleYoVariable wPhiCylinderContacts = new DoubleYoVariable("wPhiCylinderContacts", registry);
    private final DoubleYoVariable wRhoPlaneContacts = new DoubleYoVariable("wRhoPlaneContacts", registry);
    private final DoubleYoVariable wRhoSmoother = new DoubleYoVariable("wRhoSmoother", registry);
-   protected final DoubleYoVariable rhoMinScalar = new DoubleYoVariable("rhoMinScalarInAdapter", registry);
+   private final DoubleYoVariable rhoMinScalar = new DoubleYoVariable("rhoMinScalarInAdapter", registry);
+   
+   private final List<? extends PlaneContactState> planeContactStates;
+   private final List<? extends CylindricalContactState> cylindricalContactStates;
+   private final Map<PlaneContactState, EndEffector> planeEndEffectorMap;
+   private final Map<CylindricalContactState, EndEffector> cylindricalEndEffectorMap;
+   private final List<EndEffector> allEndEffectors;
+   
+   private final List<DynamicGraphicObject> endEffectorResultGraphics = new ArrayList<DynamicGraphicObject>();
 
-
-   public CylinderAndPlaneContactMatrixCalculatorAdapter(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, int rhoSize, int phiSize, double wRhoCylinderContacts,
-           double wPhiCylinderContacts, double wRhoPlaneContacts, double wRhoSmoother)
+   public CylinderAndPlaneContactMatrixCalculatorAdapter(ReferenceFrame centerOfMassFrame, int rhoSize, int phiSize, double wRhoCylinderContacts,
+         double wPhiCylinderContacts, double wRhoPlaneContacts, double wRhoSmoother, Collection<? extends PlaneContactState> planeContactStates,
+         Collection<? extends CylindricalContactState> cylindricalContactStates, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+         YoVariableRegistry parentRegistry)
    {
-      cylinderAndPlaneContactMatrixCalculator = new CylinderAndPlaneContactMatrixCalculator(centerOfMassFrame, registry, dynamicGraphicObjectsListRegistry,
-              rhoSize, phiSize);
-      cylinderAndPlaneContactSpatialForceVectorCalculator = new CylinderAndPlaneContactSpatialForceVectorCalculator(centerOfMassFrame, registry,
-              dynamicGraphicObjectsListRegistry, rhoSize, phiSize);
       this.centerOfMassFrame = centerOfMassFrame;
-      this.dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistry;
-      parentRegistry.addChild(registry);
-
+      
       this.wRhoCylinderContacts.set(wRhoCylinderContacts);
       this.wPhiCylinderContacts.set(wPhiCylinderContacts);
       this.wRhoPlaneContacts.set(wRhoPlaneContacts);
       this.wRhoSmoother.set(wRhoSmoother);
-   }
+      
+      allEndEffectors = new ArrayList<EndEffector>();
 
-   public DenseMatrix64F getRhoMin()
-   {
-      return cylinderAndPlaneContactMatrixCalculator.getRhoMin();
-   }
-
-   public DenseMatrix64F getQRho()
-   {
-      return cylinderAndPlaneContactMatrixCalculator.getQRho();
-   }
-
-   public DenseMatrix64F getPhiMin()
-   {
-      return cylinderAndPlaneContactMatrixCalculator.getPhiMin();
-   }
-
-   public DenseMatrix64F getPhiMax()
-   {
-      return cylinderAndPlaneContactMatrixCalculator.getPhiMax();
-   }
-
-   public DenseMatrix64F getQPhi()
-   {
-      return cylinderAndPlaneContactMatrixCalculator.getQPhi();
-   }
-
-   public void computeMatrices(LinkedHashMap<RigidBody,Set<PlaneContactState>> planeContactStates,
-                               Map<RigidBody, ? extends CylindricalContactState> cylindricalContactStates)
-   {
-      convertToEndEffectorsHack(planeContactStates, cylindricalContactStates);
-
-      cylinderAndPlaneContactMatrixCalculator.computeMatrices(computeEndEffectorCollection(endEffectors.values()));
-   }
-
-   private Collection<? extends EndEffector> computeEndEffectorCollection(Collection<Set<EndEffector>> values)
-   {
-      List<EndEffector> ret = new ArrayList<EndEffector>();
-      for (Set<EndEffector> set : values)
+      if (planeContactStates != null)
       {
-         ret.addAll(set);
+         this.planeContactStates = new ArrayList<PlaneContactState>(planeContactStates);
+         planeEndEffectorMap = new LinkedHashMap<PlaneContactState, EndEffector>();
+         populatePlaneEndEffectorMap();
       }
-      return ret;
+      else
+      {
+         this.planeContactStates = null;
+         planeEndEffectorMap = null;
+      }
+
+      if (cylindricalContactStates != null)
+      {
+         this.cylindricalContactStates = new ArrayList<CylindricalContactState>(cylindricalContactStates);
+         cylindricalEndEffectorMap = new LinkedHashMap<CylindricalContactState, EndEffector>();
+         populateCylindricalEndEffectorMap();
+      }
+      else
+      {
+         this.cylindricalContactStates = null;
+         cylindricalEndEffectorMap = null;
+      }
+      
+      
+      cylinderAndPlaneContactMatrixCalculator = new CylinderAndPlaneContactMatrixCalculator(centerOfMassFrame, registry, dynamicGraphicObjectsListRegistry,
+              rhoSize, phiSize);
+      cylinderAndPlaneContactSpatialForceVectorCalculator = new CylinderAndPlaneContactSpatialForceVectorCalculator(centerOfMassFrame, registry,
+              dynamicGraphicObjectsListRegistry, rhoSize, phiSize);
+      
+      
+      this.dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistry;
+      parentRegistry.addChild(registry);
+   }
+
+   private void populatePlaneEndEffectorMap()
+   {
+      for (PlaneContactState contactState : this.planeContactStates)
+      {
+         EndEffector endEffector = EndEffector.fromPlane("" + planeContactIndex.getIntegerValue(), this.centerOfMassFrame, contactState,
+               this.wRhoPlaneContacts.getDoubleValue(), rhoMinScalar.getDoubleValue(), registry);;
+         planeEndEffectorMap.put(contactState, endEffector);
+         allEndEffectors.add(endEffector);
+         registerEndEffectorGraphic(endEffector);
+         planeContactIndex.increment();
+      }
+   }
+
+   private void populateCylindricalEndEffectorMap()
+   {
+      for (CylindricalContactState contactState : this.cylindricalContactStates)
+      {
+         EndEffector endEffector = EndEffector.fromCylinder(this.centerOfMassFrame, contactState, this.wRhoCylinderContacts.getDoubleValue(),
+               this.wPhiCylinderContacts.getDoubleValue(), registry);
+         cylindricalEndEffectorMap.put(contactState, endEffector);
+         allEndEffectors.add(endEffector);
+         registerEndEffectorGraphic(endEffector);
+      }
+   }
+
+   public void computeMatrices()
+   {
+      updateEndEffectors();
+
+      cylinderAndPlaneContactMatrixCalculator.computeMatrices(allEndEffectors);
    }
 
    public Map<RigidBody, Wrench> computeWrenches(DenseMatrix64F rho, DenseMatrix64F phi)
    {
       cylinderAndPlaneContactSpatialForceVectorCalculator.setQRho(cylinderAndPlaneContactMatrixCalculator.getQRho());
       cylinderAndPlaneContactSpatialForceVectorCalculator.setQPhi(cylinderAndPlaneContactMatrixCalculator.getQPhi());
-      cylinderAndPlaneContactSpatialForceVectorCalculator.computeWrenches(computeEndEffectorCollection(endEffectors.values()), rho, phi);
+      cylinderAndPlaneContactSpatialForceVectorCalculator.computeWrenches(allEndEffectors, rho, phi);
 
       // TODO: garbage:
       wrenches.clear();
 
-      for (RigidBody rigidBody : endEffectors.keySet())
+      for (PlaneContactState contactState : planeContactStates)
       {
-         Set<EndEffector> set = endEffectors.get(rigidBody);
-         
-         for (EndEffector endEffector : set)
+         EndEffector endEffector = planeEndEffectorMap.get(contactState);
+
+         RigidBody rigidBody = contactState.getRigidBody();
+         SpatialForceVector spatialForceVector = cylinderAndPlaneContactSpatialForceVectorCalculator.getSpatialForceVector(endEffector);
+         Wrench newWrench = new Wrench(rigidBody.getBodyFixedFrame(), spatialForceVector.getExpressedInFrame(), spatialForceVector.getLinearPartCopy(),
+               spatialForceVector.getAngularPartCopy());
+         newWrench.changeFrame(rigidBody.getBodyFixedFrame());
+
+         Wrench wrenchInMap = wrenches.get(rigidBody);
+         if (wrenchInMap == null)
          {
-            SpatialForceVector spatialForceVector = cylinderAndPlaneContactSpatialForceVectorCalculator.getSpatialForceVector(endEffector);
-            Wrench newWrench = new Wrench(rigidBody.getBodyFixedFrame(), spatialForceVector.getExpressedInFrame(), spatialForceVector.getLinearPartCopy(),
-                                       spatialForceVector.getAngularPartCopy());
-            newWrench.changeFrame(rigidBody.getBodyFixedFrame());
-            
-            Wrench wrenchInMap = wrenches.get(rigidBody);
-            if (wrenchInMap == null)
-            {
-               wrenches.put(rigidBody, newWrench);
-            }
-            else
-            {
-               wrenchInMap.add(newWrench);
-            }
+            wrenches.put(rigidBody, newWrench);
+         }
+         else
+         {
+            wrenchInMap.add(newWrench);
          }
       }
 
       return wrenches;
    }
-
-   // CONVERSION NASTINESS
-   // TODO: clean up
-   private final Map<RigidBody, Set<EndEffector>> endEffectors = new LinkedHashMap<RigidBody, Set<EndEffector>>();
-   protected Map<PlaneContactState, EndEffector> previouslyUsedPlaneEndEffectors = new LinkedHashMap<PlaneContactState, EndEffector>();
-   protected Map<CylindricalContactState, EndEffector> previouslyUsedCylinderEndEffectors = new LinkedHashMap<CylindricalContactState, EndEffector>();
-   private final List<DynamicGraphicObject> endEffectorResultGraphics = new ArrayList<DynamicGraphicObject>();
-
-   private void convertToEndEffectorsHack(LinkedHashMap<RigidBody,Set<PlaneContactState>> planeContactStates,
-           Map<RigidBody, ? extends CylindricalContactState> cylindricalContactStates)
+   
+   private void updateEndEffectors()
    {
-      endEffectors.clear();
-
       if (planeContactStates != null)
       {
-         for (RigidBody rigidBody : planeContactStates.keySet())
-         {
-            Set<PlaneContactState> set = planeContactStates.get(rigidBody);
-            
-            for (PlaneContactState planeContactState : set)
-            {               
-               if (planeContactState.getNumberOfContactPointsInContact() > 0)
-               {
-                  Set<EndEffector> endEffectorSet = endEffectors.get(rigidBody);
-                  if (endEffectorSet == null)
-                  {
-                     endEffectorSet = new LinkedHashSet<EndEffector>();
-                     endEffectors.put(rigidBody, endEffectorSet);
-                  }
-                  
-                  endEffectorSet.add(getOrCreate(planeContactState));                  
-               }
-            }
+         for (PlaneContactState planeContactState : planeContactStates)
+         {               
+            EndEffector endEffector = planeEndEffectorMap.get(planeContactState);
+            endEffector.updateFromPlane(planeContactState, wRhoPlaneContacts.getDoubleValue(), rhoMinScalar.getDoubleValue());                  
          }
       }
 
       if (cylindricalContactStates != null)
       {
-         for (RigidBody rigidBody : cylindricalContactStates.keySet())
+         for (CylindricalContactState contactState : cylindricalContactStates)
          {
-            CylindricalContactState cylindricalContactState = cylindricalContactStates.get(rigidBody);
-            if (cylindricalContactState.isInContact())
-            {
-               Set<EndEffector> endEffectorSet = endEffectors.get(rigidBody);
-               if (endEffectorSet == null)
-               {
-                  endEffectorSet = new LinkedHashSet<EndEffector>();
-                  endEffectors.put(rigidBody, endEffectorSet);
-               }
-               endEffectorSet.add(getOrCreate(cylindricalContactState));
-            }
+            EndEffector endEffector = cylindricalEndEffectorMap.get(contactState);
+            endEffector.updateFromCylinder(contactState, wRhoCylinderContacts.getDoubleValue(), wPhiCylinderContacts.getDoubleValue());
          }
       }
-   }
-
-   //TODO (Sylvain): change to private (used for CarIngressEgressController)
-   protected EndEffector getOrCreate(PlaneContactState planeContactState)
-   {
-      if (previouslyUsedPlaneEndEffectors.containsKey(planeContactState))
-      {
-         EndEffector endEffector = previouslyUsedPlaneEndEffectors.get(planeContactState);
-         endEffector.updateFromPlane(planeContactState, wRhoPlaneContacts.getDoubleValue(), rhoMinScalar.getDoubleValue());
-
-         return endEffector;
-      }
-
-      EndEffector endEffector = EndEffector.fromPlane("" + planeContactIndex.getIntegerValue(), centerOfMassFrame, planeContactState,
-                                   wRhoPlaneContacts.getDoubleValue(), rhoMinScalar.getDoubleValue(), registry);
-      previouslyUsedPlaneEndEffectors.put(planeContactState, endEffector);
-      registerEndEffectorGraphic(endEffector);
-      planeContactIndex.increment();
-
-      return endEffector;
-   }
-
-   //TODO (Sylvain): change to private (used for CarIngressEgressController)
-   protected EndEffector getOrCreate(CylindricalContactState cylinder)
-   {
-      if (previouslyUsedCylinderEndEffectors.containsKey(cylinder))
-      {
-         EndEffector endEffector = previouslyUsedCylinderEndEffectors.get(cylinder);
-         endEffector.updateFromCylinder(cylinder, wRhoCylinderContacts.getDoubleValue(), wPhiCylinderContacts.getDoubleValue());
-
-         return endEffector;
-      }
-
-      EndEffector endEffector = EndEffector.fromCylinder(centerOfMassFrame, cylinder, wRhoCylinderContacts.getDoubleValue(),
-                                   wPhiCylinderContacts.getDoubleValue(), registry);
-      previouslyUsedCylinderEndEffectors.put(cylinder, endEffector);
-      registerEndEffectorGraphic(endEffector);
-
-      return endEffector;
    }
 
    public void registerEndEffectorGraphic(EndEffector endEffector)
@@ -267,5 +218,30 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
    public void setRhoMinScalar(double rhoMinScalar)
    {
       this.rhoMinScalar.set(rhoMinScalar);
+   }
+
+   public DenseMatrix64F getRhoMin()
+   {
+      return cylinderAndPlaneContactMatrixCalculator.getRhoMin();
+   }
+
+   public DenseMatrix64F getQRho()
+   {
+      return cylinderAndPlaneContactMatrixCalculator.getQRho();
+   }
+
+   public DenseMatrix64F getPhiMin()
+   {
+      return cylinderAndPlaneContactMatrixCalculator.getPhiMin();
+   }
+
+   public DenseMatrix64F getPhiMax()
+   {
+      return cylinderAndPlaneContactMatrixCalculator.getPhiMax();
+   }
+
+   public DenseMatrix64F getQPhi()
+   {
+      return cylinderAndPlaneContactMatrixCalculator.getQPhi();
    }
 }
