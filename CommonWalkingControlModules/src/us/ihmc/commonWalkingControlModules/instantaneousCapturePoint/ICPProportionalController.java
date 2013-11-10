@@ -15,7 +15,6 @@ import com.yobotics.simulationconstructionset.util.math.filter.AccelerationLimit
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFrameVector2d;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.filter.FilteredVelocityYoFrameVector;
-import com.yobotics.simulationconstructionset.util.math.filter.RateLimitedYoFrameVector2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
 
@@ -56,6 +55,8 @@ public class ICPProportionalController
    private final DoubleYoVariable captureKi = new DoubleYoVariable("captureKi", registry);
    
    private final Vector2dZUpFrame icpVelocityDirectionFrame;
+   
+   private final FrameVector2d tempICPErrorIntegrated = new FrameVector2d(worldFrame);
 
    public ICPProportionalController(double controlDT, YoVariableRegistry parentRegistry)
    {
@@ -123,15 +124,24 @@ public class ICPProportionalController
       
       tempControl.add(icpDamping);
       
-      icpErrorIntegrated.add(icpError);
-      icpErrorIntegrated.getFrameVector2d(icpIntegral);
-      icpIntegral.scale(captureKi.getDoubleValue());
-      length = icpDamping.length();
+      icpError.getFrameVector2d(tempICPErrorIntegrated);
+      tempICPErrorIntegrated.scale(controlDT);
+      tempICPErrorIntegrated.scale(captureKi.getDoubleValue());
+      
+      icpErrorIntegrated.add(tempICPErrorIntegrated);
+
+      length = icpErrorIntegrated.length();
       if (length > maxLength)
       {
-         icpIntegral.scale(maxLength/length);
+         icpErrorIntegrated.scale(maxLength/length);
       }
       
+      if (Math.abs(captureKi.getDoubleValue()) < 1e-10)
+      {
+         icpErrorIntegrated.set(0.0, 0.0);
+      }
+      
+      icpErrorIntegrated.getFrameVector2d(icpIntegral);
       tempControl.add(icpIntegral);
       
       feedbackPart.set(tempControl);
