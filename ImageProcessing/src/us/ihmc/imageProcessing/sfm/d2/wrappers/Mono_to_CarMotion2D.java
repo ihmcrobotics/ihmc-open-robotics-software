@@ -2,7 +2,6 @@ package us.ihmc.imageProcessing.sfm.d2.wrappers;
 
 import boofcv.abst.sfm.d3.MonocularPlaneVisualOdometry;
 import boofcv.alg.sfm.overhead.OverheadView;
-import boofcv.struct.calib.IntrinsicParameters;
 import boofcv.struct.calib.MonoPlaneParameters;
 import boofcv.struct.calib.StereoParameters;
 import boofcv.struct.image.ImageFloat32;
@@ -67,7 +66,7 @@ public class Mono_to_CarMotion2D implements EstimateCarMotion2D
       output.T.x = groundToWorld.T.z;
       output.T.y = -groundToWorld.T.x;
 
-      double[] euler = RotationMatrixGenerator.matrixToEulerXYZ(groundToWorld.getR());
+      double[] euler = RotationMatrixGenerator.matrixToEulerXYZ(groundToWorld.getR(),null);
       double rotY = -euler[1];
 
       output.setYaw(rotY);
