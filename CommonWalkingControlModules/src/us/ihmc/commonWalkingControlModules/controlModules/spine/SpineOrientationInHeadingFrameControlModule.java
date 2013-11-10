@@ -56,6 +56,11 @@ public class SpineOrientationInHeadingFrameControlModule implements SpineControl
       setGains();
       parentRegistry.addChild(registry);
    }
+   
+   public void reset()
+   {
+      axisAngleOrientationController.reset();
+   }
 
    public void doSpineControl(SpineTorques spineTorquesToPack)
    {

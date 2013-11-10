@@ -34,6 +34,11 @@ public class RootJointAngularAccelerationControlModule
       this.momentumBasedController = momentumBasedController;
       parentRegistry.addChild(registry);
    }
+   
+   public void reset()
+   {
+      rootJointOrientationControlModule.reset();
+   }
 
    public void doControl(OrientationTrajectoryData orientationTrajectoryData)
    {

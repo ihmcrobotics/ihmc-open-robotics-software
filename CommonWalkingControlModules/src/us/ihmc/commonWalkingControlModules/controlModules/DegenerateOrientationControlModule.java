@@ -69,6 +69,14 @@ public abstract class DegenerateOrientationControlModule
       parentRegistry.addChild(registry);
    }
    
+   public void reset()
+   {
+      for (int i=0; i<rigidBodyOrientationControlModules.size(); i++)
+      {
+         rigidBodyOrientationControlModules.get(i).reset();
+      }
+   }
+   
    public int addJacobian(GeometricJacobian jacobian)
    {      
       jacobians.add(jacobian);

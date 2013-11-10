@@ -56,6 +56,11 @@ public class RigidBodySpatialAccelerationControlModule
       parentRegistry.addChild(registry);
    }
    
+   public void reset()
+   {
+      se3pdController.reset();   
+   }
+   
    public void setMaximumLinearAccelerationMagnitude(double maximumLinearAccelerationMagnitude)
    {
       this.maximumLinearAccelerationMagnitude.set(maximumLinearAccelerationMagnitude);

@@ -33,6 +33,11 @@ public class CoMBasedMomentumRateOfChangeControlModule extends AbstractControlFl
       parentRegistry.addChild(registry);
    }
 
+   public void reset()
+   {
+      comPositionController.reset();
+   }
+   
    public void startComputation()
    {
       FramePoint desiredCoM = desiredCenterOfMassInputPort.getData();

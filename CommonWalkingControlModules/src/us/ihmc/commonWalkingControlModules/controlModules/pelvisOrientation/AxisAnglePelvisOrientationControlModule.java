@@ -52,6 +52,11 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
       parentRegistry.addChild(registry);
    }
 
+   public void reset()
+   {
+      axisAngleOrientationController.reset();
+   }
+   
    public void setupParametersForR2()
    {
       axisAngleOrientationController.setProportionalGains(1500.0, 1500.0, 1500.0);

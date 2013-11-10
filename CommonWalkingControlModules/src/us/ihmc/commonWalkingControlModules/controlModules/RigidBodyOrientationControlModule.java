@@ -28,6 +28,11 @@ public class RigidBodyOrientationControlModule
       this.twistCalculator = twistCalculator;
    }
    
+   public void reset()
+   {
+      axisAngleOrientationController.reset();
+   }
+   
    public void compute(FrameVector outputToPack, FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector feedForwardAngularAcceleration)
    {
       // using twists is a bit overkill; optimize if needed.
