@@ -212,6 +212,11 @@ public class DrivingFootControlModule
 //    }
 // }
 
+   public void reset()
+   {
+      orientationController.reset();
+      toePointPositionController.reset();
+   }
    public void holdPosition()
    {
       FramePoint target = new FramePoint(toePoint);
