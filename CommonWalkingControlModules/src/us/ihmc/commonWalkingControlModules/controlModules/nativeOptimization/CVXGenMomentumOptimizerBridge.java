@@ -31,6 +31,10 @@ public class CVXGenMomentumOptimizerBridge
    public CVXGenMomentumOptimizerBridge(int nDoF, MomentumOptimizationSettings momentumOptimizationSettings)
    {
       this.momentumOptimizationSettings = momentumOptimizationSettings;
+      
+      if (momentumOptimizationSettings.getMomentumOptimizerToUse() == null)
+         throw new RuntimeException("The setting MomentumOptimizerToUse is null");
+      
       activeMomentumOptimizer = momentumOptimizationSettings.getMomentumOptimizerToUse();
       
       int cvxWithCylinderNativeRhoSize = CVXWithCylinderNative.rhoSize;

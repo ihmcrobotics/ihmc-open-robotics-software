@@ -27,12 +27,12 @@ public class OptimizerCylinderContactModel implements OptimizerContactModel
    // This weakness is described by the gripWeaknessFactor which goes from 0, a fully useless grip to 1, for a grip which is just as 
    // strong as the tensile max load)
 
-   public int getSizeInRho()
+   public int getRhoSize()
    {
       return RHO_SIZE;
    }
 
-   public int getSizeInPhi()
+   public int getPhiSize()
    {
       return PHI_SIZE;
    }

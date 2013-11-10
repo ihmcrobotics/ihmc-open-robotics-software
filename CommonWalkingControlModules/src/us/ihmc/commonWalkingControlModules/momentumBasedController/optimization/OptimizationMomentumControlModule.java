@@ -1,9 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
+import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 
 import org.ejml.data.DenseMatrix64F;
 
@@ -75,10 +73,12 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    private final DenseMatrix64F dampedLeastSquaresFactorMatrix;
    private final DenseMatrix64F bOriginal = new DenseMatrix64F(Momentum.SIZE, 1);
 
-   public OptimizationMomentumControlModule(InverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame, double controlDT,
-           InverseDynamicsJoint[] jointsToOptimizeFor, MomentumOptimizationSettings momentumOptimizationSettings, double gravityZ,
-           TwistCalculator twistCalculator, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+   public OptimizationMomentumControlModule(InverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame,
+         double controlDT, double gravityZ, MomentumOptimizationSettings momentumOptimizationSettings, TwistCalculator twistCalculator,
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry,
+         Collection<? extends PlaneContactState> planeContactStates, Collection<? extends CylindricalContactState> cylindricalContactStates)
    {
+      this.jointsToOptimizeFor = momentumOptimizationSettings.getJointsToOptimizeFor();
       this.centroidalMomentumHandler = new CentroidalMomentumHandler(rootJoint, centerOfMassFrame, controlDT, registry);
       this.externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, rootJoint);
       this.primaryMotionConstraintHandler = new MotionConstraintHandler("primary", jointsToOptimizeFor, twistCalculator, registry);
@@ -92,8 +92,8 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       double wRhoPlaneContacts = momentumOptimizationSettings.getRhoPlaneContactRegularization();
       double wRhoSmoother = momentumOptimizationSettings.getRateOfChangeOfRhoPlaneContactRegularization();
       
-      this.wrenchMatrixCalculator = new CylinderAndPlaneContactMatrixCalculatorAdapter(centerOfMassFrame, registry, dynamicGraphicObjectsListRegistry, rhoSize,
-            phiSize, wRhoCylinderContacts, wPhiCylinderContacts, wRhoPlaneContacts, wRhoSmoother);
+      this.wrenchMatrixCalculator = new CylinderAndPlaneContactMatrixCalculatorAdapter(centerOfMassFrame, rhoSize, phiSize, wRhoCylinderContacts,
+            wPhiCylinderContacts, wRhoPlaneContacts, wRhoSmoother, planeContactStates, cylindricalContactStates, dynamicGraphicObjectsListRegistry, registry);
 
       int nDoF = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
 
@@ -102,7 +102,6 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       
       dampedLeastSquaresFactorMatrix = new DenseMatrix64F(nDoF, nDoF);
 
-      this.jointsToOptimizeFor = jointsToOptimizeFor;
 
       this.momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
 
@@ -148,24 +147,10 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
                        Map<ContactableCylinderBody, ? extends CylindricalContactState> cylinderContactStates, RobotSide upcomingSupportLeg) throws MomentumControlModuleException
 
    {
-      LinkedHashMap<RigidBody, Set<PlaneContactState>> planeContactStates = convertContactStates(contactStates);
-      LinkedHashMap<RigidBody, CylindricalContactState> cylinderContactStatesConverted;
-      if (cylinderContactStates != null)
-      {
-         cylinderContactStatesConverted = convertCylindricalContactStates(cylinderContactStates);
-      }
-      else
-      {
-         cylinderContactStatesConverted = null;
-      }
-
       wrenchMatrixCalculator.setRhoMinScalar(momentumOptimizationSettings.getRhoMinScalar());
 
       hardMotionConstraintSolver.setAlpha(momentumOptimizationSettings.getDampedLeastSquaresFactor());
       momentumOptimizer.reset();
-
-//      if (EqualityConstraintEnforcer.TEST_CONSTRAINT_CONSISTENCY)
-//         hardMotionConstraintSolver.setAlpha(0.0);
 
       primaryMotionConstraintHandler.compute();
 
@@ -181,7 +166,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       equalityConstraintEnforcer.setConstraint(jPrimary, pPrimary);
       equalityConstraintEnforcer.constrainEquation(a, b);
 
-      wrenchMatrixCalculator.computeMatrices(planeContactStates, cylinderContactStatesConverted);
+      wrenchMatrixCalculator.computeMatrices();
 
       DenseMatrix64F centroidalMomentumConvectiveTerm = centroidalMomentumHandler.getCentroidalMomentumConvectiveTerm();
       DenseMatrix64F wrenchEquationRightHandSide = externalWrenchHandler.computeWrenchEquationRightHandSide(centroidalMomentumConvectiveTerm, bOriginal, b);
@@ -238,37 +223,6 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       }
        
       return momentumModuleSolution;
-   }
-
-   // TODO Conversion nastiness!! To be refactored
-   private static LinkedHashMap<RigidBody, Set<PlaneContactState>> convertContactStates(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates)
-   {
-      LinkedHashMap<RigidBody, Set<PlaneContactState>> ret = new LinkedHashMap<RigidBody, Set<PlaneContactState>>();
-      for (ContactablePlaneBody contactablePlaneBody : contactStates.keySet())
-      {
-         RigidBody rigidBody = contactablePlaneBody.getRigidBody();
-         Set<PlaneContactState> set = ret.get(rigidBody);
-         if (set == null)
-         {
-            set = new LinkedHashSet<PlaneContactState>();
-            ret.put(rigidBody, set);
-         }
-         set.add(contactStates.get(contactablePlaneBody));
-      }
-
-      return ret;
-   }
-
-   // TODO Conversion nastiness!! To be refactored
-   private static LinkedHashMap<RigidBody, CylindricalContactState> convertCylindricalContactStates(
-         Map<ContactableCylinderBody, ? extends CylindricalContactState> contactStates)
-   {
-      LinkedHashMap<RigidBody, CylindricalContactState> ret = new LinkedHashMap<RigidBody, CylindricalContactState>();
-      for (ContactableCylinderBody contactableCylinderBody : contactStates.keySet())
-      {
-         ret.put(contactableCylinderBody.getRigidBody(), contactStates.get(contactableCylinderBody));
-      }
-      return ret;
    }
 
    private void optimize() throws NoConvergenceException

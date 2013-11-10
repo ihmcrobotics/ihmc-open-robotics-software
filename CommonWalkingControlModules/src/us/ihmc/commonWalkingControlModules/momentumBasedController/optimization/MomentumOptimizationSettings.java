@@ -9,6 +9,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXGenMomentumOptimizerBridge;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXGenMomentumOptimizerBridge.MomentumOptimizer;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.Momentum;
 
 /**
@@ -24,6 +25,7 @@ public class MomentumOptimizationSettings
    private final DoubleYoVariable angularMomentumZWeight = new DoubleYoVariable("angularMomentumZWeight", registry);
    private final DoubleYoVariable rhoMin = new DoubleYoVariable("rhoMin", registry);
    private final DoubleYoVariable lambda = new DoubleYoVariable("lambda", registry);
+   private final InverseDynamicsJoint[] jointsToOptimizeFor;
    
    private final EnumYoVariable<MomentumOptimizer> activeMomentumOptimizer = new EnumYoVariable<CVXGenMomentumOptimizerBridge.MomentumOptimizer>("activeMomentumOptimizer", registry, MomentumOptimizer.class);
    
@@ -38,8 +40,9 @@ public class MomentumOptimizationSettings
    private final DenseMatrix64F tempMatrix = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
    private final Momentum tempMomentum = new Momentum(); // just to make sure that the ordering of force and torque are correct
 
-   public MomentumOptimizationSettings(YoVariableRegistry parentRegistry)
+   public MomentumOptimizationSettings(InverseDynamicsJoint[] jointsToOptimizeFor, YoVariableRegistry parentRegistry)
    {
+      this.jointsToOptimizeFor = jointsToOptimizeFor;
       parentRegistry.addChild(registry);
    }
 
@@ -145,5 +148,10 @@ public class MomentumOptimizationSettings
    public MomentumOptimizer getMomentumOptimizerToUse()
    {
       return activeMomentumOptimizer.getEnumValue();
+   }
+
+   public InverseDynamicsJoint[] getJointsToOptimizeFor()
+   {
+      return jointsToOptimizeFor;
    }
 }

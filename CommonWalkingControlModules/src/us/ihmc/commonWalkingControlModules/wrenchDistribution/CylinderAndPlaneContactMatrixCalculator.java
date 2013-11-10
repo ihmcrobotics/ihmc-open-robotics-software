@@ -154,8 +154,6 @@ public class CylinderAndPlaneContactMatrixCalculator
 
    }
 
-
-
    public void computeMatrices(Collection<? extends EndEffector> endEffectors)
    {
       int iRho = 0;
@@ -178,7 +176,7 @@ public class CylinderAndPlaneContactMatrixCalculator
          {
             OptimizerContactModel model = endEffector.getContactModel();
 
-            for (int iRhoModel = 0; iRhoModel < model.getSizeInRho(); iRhoModel++)
+            for (int iRhoModel = 0; iRhoModel < model.getRhoSize(); iRhoModel++)
             {
                SpatialForceVector currentBasisVector = qRhoVectors[iRho];
 
@@ -193,7 +191,7 @@ public class CylinderAndPlaneContactMatrixCalculator
                iRho++;
             }
 
-            for (int iPhiModel = 0; iPhiModel < model.getSizeInPhi(); iPhiModel++)
+            for (int iPhiModel = 0; iPhiModel < model.getPhiSize(); iPhiModel++)
             {
                SpatialForceVector currentBasisVector = qPhiVectors[iPhi];
 
@@ -233,7 +231,7 @@ public class CylinderAndPlaneContactMatrixCalculator
                q = 0;
                OptimizerContactModel model = contactModel;
 
-               for (int iRhoModel = 0; iRhoModel < model.getSizeInRho(); iRhoModel++)
+               for (int iRhoModel = 0; iRhoModel < model.getRhoSize(); iRhoModel++)
                {
                   SpatialForceVector currentBasisVector = qRhoVectors[iRho];
                   currentBasisVector.changeFrame(frameOfInterest);
@@ -243,7 +241,7 @@ public class CylinderAndPlaneContactMatrixCalculator
 
                q = 1;
 
-               for (int iPhiModel = 0; iPhiModel < model.getSizeInPhi(); iPhiModel++)
+               for (int iPhiModel = 0; iPhiModel < model.getPhiSize(); iPhiModel++)
                {
                   SpatialForceVector currentBasisVector = qPhiVectors[iPhi];
                   currentBasisVector.changeFrame(frameOfInterest);
