@@ -521,9 +521,15 @@ public class MomentumBasedController
       setOneDoFJointAcceleration(joint, rateLimitedDesiredAcceleration.getDoubleValue());
    }
 
+   private final Map<OneDoFJoint, DenseMatrix64F> tempJointAcceleration = new LinkedHashMap<OneDoFJoint, DenseMatrix64F>();
+   
    public void setOneDoFJointAcceleration(OneDoFJoint joint, double desiredAcceleration)
    {
-      DenseMatrix64F jointAcceleration = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
+      
+      if (tempJointAcceleration.get(joint) == null)
+         tempJointAcceleration.put(joint, new DenseMatrix64F(joint.getDegreesOfFreedom(), 1));
+      
+      DenseMatrix64F jointAcceleration = tempJointAcceleration.get(joint);
       jointAcceleration.set(0, 0, desiredAcceleration);
 
       if (momentumBasedControllerSpy != null)
@@ -535,9 +541,11 @@ public class MomentumBasedController
       momentumControlModuleBridge.setDesiredJointAcceleration(desiredJointAccelerationCommand);
    }
 
+   private final SpatialAccelerationVector pelvisAcceleration = new SpatialAccelerationVector();
+   private final Wrench pelvisJointWrench = new Wrench();
+   
    private void updateYoVariables()
    {
-      SpatialAccelerationVector pelvisAcceleration = new SpatialAccelerationVector();
       fullRobotModel.getRootJoint().packDesiredJointAcceleration(pelvisAcceleration);
 
       finalDesiredPelvisAngularAcceleration.checkReferenceFrameMatch(pelvisAcceleration.getExpressedInFrame());
@@ -546,7 +554,6 @@ public class MomentumBasedController
       finalDesiredPelvisLinearAcceleration.checkReferenceFrameMatch(pelvisAcceleration.getExpressedInFrame());
       finalDesiredPelvisLinearAcceleration.set(pelvisAcceleration.getLinearPartCopy());
 
-      Wrench pelvisJointWrench = new Wrench();
       fullRobotModel.getRootJoint().packWrench(pelvisJointWrench);
       pelvisJointWrench.changeFrame(referenceFrames.getCenterOfMassFrame());
       desiredPelvisForce.set(pelvisJointWrench.getLinearPartCopy());

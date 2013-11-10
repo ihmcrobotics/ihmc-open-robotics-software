@@ -92,6 +92,8 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
       this.momentumBasedController = momentumBasedController;
 
       parentRegistry.addChild(registry);
+      
+      setupVariableListener();
    }
 
    private void setupVariableListener()
@@ -112,8 +114,6 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
 
    private void setDesiredJointAccelerations()
    {
-      setupVariableListener();
-
       for (OneDoFJoint joint : oneDoFJoints)
       {
          DoubleTrajectoryGenerator trajectoryGenerator = trajectories.get(joint);
