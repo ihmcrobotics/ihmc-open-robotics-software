@@ -5,6 +5,8 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 
+// TODO the problem could be defined in a simpler way making the problem faster to solve and the problem easier to understand
+// Probably should get rid of either the phi or the rho part.
 public class OptimizerCylinderContactModel implements OptimizerContactModel
 {
    private static final int PHI_SIZE = 5;
@@ -13,13 +15,12 @@ public class OptimizerCylinderContactModel implements OptimizerContactModel
    private final double[] phiMax = new double[PHI_SIZE];
    private final DenseMatrix64F[] qPhi = new DenseMatrix64F[PHI_SIZE];
    private final DenseMatrix64F[] qRho = new DenseMatrix64F[RHO_SIZE];
-   private static final int[] phiVectorDirections = new int[] {3, 4, 5, 0, 1};
    private ReferenceFrame grippedCylinderFrame;
-   private static int PHI_X = 0;
-   private static int PHI_Y = 1; 
-   private static int PHI_Z = 2;
-   private static int PHI_XX = 3;
-   private static int PHI_YY = 4;
+   private final static int PHI_X = 0;
+   private final static int PHI_Y = 1; 
+   private final static int PHI_Z = 2;
+   private final static int PHI_XX = 3;
+   private final static int PHI_YY = 4;
    private double wPhi;
    private double wRho;
 
@@ -27,6 +28,16 @@ public class OptimizerCylinderContactModel implements OptimizerContactModel
    // This weakness is described by the gripWeaknessFactor which goes from 0, a fully useless grip to 1, for a grip which is just as 
    // strong as the tensile max load)
 
+   public OptimizerCylinderContactModel()
+   {
+      for (int i = 0; i < PHI_SIZE; i++)
+         qPhi[i] = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
+      
+
+      for (int i = 0; i < RHO_SIZE; i++)
+         qRho[i] = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
+   }
+   
    public int getRhoSize()
    {
       return RHO_SIZE;
@@ -73,10 +84,7 @@ public class OptimizerCylinderContactModel implements OptimizerContactModel
                      ReferenceFrame grippedCylinderFrame, double wRho, double wPhi)
    {
       this.grippedCylinderFrame = grippedCylinderFrame;
-      initializePhiLimitsToHandStrength(cylinderTensileGripStrength);
-      accountForWeakGripDirection(gripWeaknessFactor);
-      accountForFrictionalContact(mu);
-      accountForMomentArms(cylinderRadius, cylinderHalfHandWidth);
+      setupPhiLimits(mu, cylinderRadius, cylinderHalfHandWidth, cylinderTensileGripStrength, gripWeaknessFactor);
       setQPhiToFirstFiveColumnsOfIdentity();
       setupQRho(mu, cylinderRadius, cylinderHalfHandWidth);
       this.wRho = wRho;
@@ -92,7 +100,12 @@ public class OptimizerCylinderContactModel implements OptimizerContactModel
          {
             for (int zz = -1; zz <= 1; zz += 2)
             {
-               qRho[qRhoLocation] = new DenseMatrix64F(6, 1, false, xx * mu * cylinderRadius, 0.0, zz * cylinderHalfHandWidth, x * mu, -1.0, 0.0);
+               qRho[qRhoLocation].set(0, 0, xx * mu * cylinderRadius);
+               qRho[qRhoLocation].set(1, 0, 0.0);
+               qRho[qRhoLocation].set(2, 0, zz * cylinderHalfHandWidth);
+               qRho[qRhoLocation].set(3, 0, x * mu);
+               qRho[qRhoLocation].set(4, 0, -1.0);
+               qRho[qRhoLocation].set(5, 0, 0.0);
                qRhoLocation++;
             }
          }
@@ -101,45 +114,27 @@ public class OptimizerCylinderContactModel implements OptimizerContactModel
 
    private void setQPhiToFirstFiveColumnsOfIdentity()
    {
-      for (int i = 0; i < PHI_SIZE; i++)
-      {
-         qPhi[i] = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
-         qPhi[i].set(phiVectorDirections[i], 0, 1);
-      }
+      qPhi[PHI_X].set(3, 0, 1);
+      qPhi[PHI_Y].set(4, 0, 1);
+      qPhi[PHI_Z].set(5, 0, 1);
+      qPhi[PHI_XX].set(0, 0, 1);
+      qPhi[PHI_YY].set(1, 0, 1);
    }
 
-   private void initializePhiLimitsToHandStrength(double cylinderTensileGripStrength)
+   private void setupPhiLimits(double mu, double cylinderRadius, double cylinderHalfHandWidth, double cylinderTensileGripStrength, double gripWeaknessFactor)
    {
-      for (int i = 0; i < PHI_SIZE; i++)
-      {
-         phiMin[i] = -cylinderTensileGripStrength;
-         phiMax[i] = cylinderTensileGripStrength;
-      }
-   }
+      phiMin[PHI_X] = -cylinderTensileGripStrength * mu;
+      phiMin[PHI_Y] = -cylinderTensileGripStrength;
+      phiMin[PHI_Z] = -cylinderTensileGripStrength;
+      phiMin[PHI_XX] = -cylinderTensileGripStrength * mu * cylinderRadius;
+      phiMin[PHI_YY] = -cylinderTensileGripStrength * gripWeaknessFactor * cylinderHalfHandWidth;
 
-   private void accountForWeakGripDirection(double gripWeaknessFactor)
-   {
+      for (int i = 0; i < PHI_SIZE; i++)
+         phiMax[i] = -phiMin[i];
+   
       phiMax[PHI_Z] *= gripWeaknessFactor;
-      phiMin[PHI_YY] *= gripWeaknessFactor;
-      phiMax[PHI_YY] *= gripWeaknessFactor;
    }
-
-   private void accountForFrictionalContact(double mu)
-   {
-      phiMin[PHI_X] *= mu;
-      phiMax[PHI_X] *= mu;
-      phiMin[PHI_XX] *= mu;
-      phiMax[PHI_XX] *= mu;
-   }
-
-   private void accountForMomentArms(double cylinderRadius, double cylinderHalfHandWidth)
-   {
-      phiMin[PHI_XX] *= cylinderRadius;
-      phiMax[PHI_XX] *= cylinderRadius;
-      phiMin[PHI_YY] *= cylinderHalfHandWidth;
-      phiMax[PHI_YY] *= cylinderHalfHandWidth;
-   }
-
+   
    public double getWPhi()
    {
       return wPhi;
