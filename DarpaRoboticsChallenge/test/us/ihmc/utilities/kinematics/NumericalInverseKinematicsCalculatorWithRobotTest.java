@@ -111,7 +111,7 @@ public class NumericalInverseKinematicsCalculatorWithRobotTest
             minRandomSearchScalar, maxRandomSearchScalar);
       
       } else {
-      inverseKinematicsCalculator = new DdoglegInverseKinematicsCalculator(leftHandJacobian, 1 , maxIterations, true, 0.02, 0.02);
+      inverseKinematicsCalculator = new DdoglegInverseKinematicsCalculator(leftHandJacobian, 1 , maxIterations, true, 1e-12, 0.02, 0.02);
       }
    }
 
