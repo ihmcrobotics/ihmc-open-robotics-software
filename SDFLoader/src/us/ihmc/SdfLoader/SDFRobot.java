@@ -585,7 +585,6 @@ public class SDFRobot extends Robot implements HumanoidRobot // TODO: make an SD
       if (SHOW_COM_REFERENCE_FRAMES)
       {
          scsLink.addCoordinateSystemToCOM(0.1);
-         scsLink.drawJointAxis();
       }
 
       return scsLink;
