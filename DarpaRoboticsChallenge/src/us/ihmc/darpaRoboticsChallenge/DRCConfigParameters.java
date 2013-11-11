@@ -262,7 +262,7 @@ public class DRCConfigParameters
    // Atlas on-board filtering parameters
    public static final boolean USE_IHMCFILTER_JOINT_ANGLES = false;
    public static final boolean USE_IHMCFILTER_JOINT_VELOCITIES = false;
-   public static final boolean USE_IHMCFILTER_JOINT_TORQUES = false;
+   public static final boolean USE_IHMCFILTER_JOINT_TORQUES = true;
 
    public static final double JOINT_VELOCITY_SLOP_TIME_FOR_BACKLASH_COMPENSATION = 0.0001; //0.0035; //0.007; //0.0155;
    
