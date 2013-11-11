@@ -38,7 +38,7 @@ public class LoadCloudWithPoses extends SimpleApplication
 
    public static void main(String[] args)
    {
-      LoadCloudWithPoses test1 = new LoadCloudWithPoses("D:\\lidarLog_5_1.txt");
+      LoadCloudWithPoses test1 = new LoadCloudWithPoses("D:\\lid_dump.txt");
       test1.start();
    }
 
@@ -50,9 +50,15 @@ public class LoadCloudWithPoses extends SimpleApplication
    @Override
    public void simpleInitApp()
    {
-      List<Point3D_F64>[] clouds = loadPointCloud((int)(40 * 10), 1, false);
+      //REAL
+      //LidarScanParameters param = new LidarScanParameters(1080, -2.356194f, 2.356194f, 0, 0, 1, 0, 0, 0, 0, 0, false);
+      
+      //SCS
+      LidarScanParameters param = new LidarScanParameters(720, -1.570796f, 1.570796f, 0, 0, 1, 0, 0, 0, 0, 0, false);
 
-      if (true)
+      List<Point3D_F64>[] clouds = loadPointCloud((int)(40 * 10), param, 1, false);
+
+      if (false)
       {
          try
          {
@@ -118,7 +124,7 @@ public class LoadCloudWithPoses extends SimpleApplication
       flyCam.setMoveSpeed(25);
    }
 
-   private List<Point3D_F64>[] loadPointCloud(int maxScans, int mod, boolean half)
+   private List<Point3D_F64>[] loadPointCloud(int maxScans, LidarScanParameters params, int mod, boolean half)
    {
       List<Point3D_F64>[] clouds = new ArrayList[3];
       for (int i = 0; i < clouds.length; i++)
@@ -126,12 +132,9 @@ public class LoadCloudWithPoses extends SimpleApplication
 
       try
       {
-         int pointsPerSweep = 1081;
          String file = new Scanner(new BufferedReader(new FileReader(fileName))).useDelimiter("\\Z").next();
-         LidarScanParameters param = new LidarScanParameters(pointsPerSweep, -2.356194f, 2.356194f, 0, 0, 1, 0, 0, 0, 0, 0, false);
 
          Transform3D start, end;
-         Point3d point;
          float distance;
 
          List<String> allMatches = new ArrayList<String>();
@@ -163,14 +166,14 @@ public class LoadCloudWithPoses extends SimpleApplication
                mx[j] = doubles[i++];
             end = new Transform3D(mx);
 
-            float[] ranges = new float[pointsPerSweep];
-            for (int j = 0; j < pointsPerSweep; j++)
+            float[] ranges = new float[params.pointsPerSweep];
+            for (int j = 0; j < params.pointsPerSweep; j++)
             {
                distance = (float) doubles[i++];
                ranges[j] = distance;
             }
 
-            LidarScan scan = new LidarScan(param, start, end, ranges);
+            LidarScan scan = new LidarScan(params, start, end, ranges);
 
             for (int j = 0; j < scan.size(); j++)
             {
