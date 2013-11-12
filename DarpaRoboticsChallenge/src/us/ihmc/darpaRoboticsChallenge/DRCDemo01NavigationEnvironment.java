@@ -476,7 +476,7 @@ public class DRCDemo01NavigationEnvironment implements
 
 	private void setUpTrialsQuals() {
 		double courseAngleDeg = -45.0;
-		double startDistance = 4.0;
+		double startDistance = 2.0;
 		AppearanceDefinition color = YoAppearance.Gray();
 
 		double sectionLength = 1.83; // 6 ft
@@ -546,26 +546,24 @@ public class DRCDemo01NavigationEnvironment implements
 					sectionLength * 2, borderWidth, borderWidth, 0,
 					courseAngleDeg, color);
 		}
-		startDistance += sectionLength;
+//		startDistance += sectionLength;
 
 
 		// valve (graphics only)
-		startDistance += sectionLength;
+//		startDistance += sectionLength;
 
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 1; i++) {
 			Graphics3DObject linkGraphics = new Graphics3DObject();
 			//Vector3d translation = new Vector3d(-1.0, 0, startDistance);// startDistance);
 			Vector3d translation = new Vector3d(
-					-Math.random()*doorHeight, 
-					Math.random()*sectionWidth - sectionWidth/2, 
-					startDistance);// startDistance);
+				-1,0,2.9);// startDistance);
 
 			linkGraphics.rotate(Math.PI / 2, Axis.Y);
 			linkGraphics.rotate(Math.toRadians(-courseAngleDeg), Axis.X);
 			linkGraphics.translate(translation);
 
-			double outsideRadius = 0.12 + Math.random()*0.09-0.045;
-			double gripRadius = 0.039 + Math.random()*0.06-0.03;
+			double outsideRadius = 0.2;
+			double gripRadius = 0.022;
 			linkGraphics.addArcTorus(0, Math.PI * 2, outsideRadius, gripRadius,
 					YoAppearance.randomColor(random));
 
