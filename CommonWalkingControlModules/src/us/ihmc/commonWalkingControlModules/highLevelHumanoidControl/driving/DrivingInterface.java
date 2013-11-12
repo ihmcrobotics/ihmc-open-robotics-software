@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.driving;
 
-import us.ihmc.packets.LowLevelDrivingStatus;
-import us.ihmc.utilities.io.streamingData.QueueBasedStreamingDataProducer;
+import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 
 /**
  *
@@ -50,7 +49,7 @@ public interface DrivingInterface
    /**
     * VRC hack for DO_NOTHING command
     */
-   public abstract QueueBasedStreamingDataProducer<LowLevelDrivingStatus> getStatusProducer();
+   public abstract GlobalDataProducer getStatusProducer();
    
    
    public enum GearName

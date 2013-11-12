@@ -1,33 +1,36 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Random;
+
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.Random;
-
-import static org.junit.Assert.*;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 /**
  * User: Matt
@@ -55,7 +58,7 @@ public class FootstepPathCoordinatorTest
    {
       // create a random list of footsteps
       YoVariableRegistry registry = new YoVariableRegistry("Test");
-      ObjectCommunicator objectCommunicator = null;
+      GlobalDataProducer objectCommunicator = null;
       BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator = null;
       ConstantSwingTimeCalculator constantSwingTimeCalculator = new ConstantSwingTimeCalculator(0.6, registry);
       ConstantTransferTimeCalculator constantTransferTimeCalculator = new ConstantTransferTimeCalculator(0.3, registry);
@@ -81,7 +84,7 @@ public class FootstepPathCoordinatorTest
    {
       // verify list is initially empty
       YoVariableRegistry registry = new YoVariableRegistry("Test");
-      ObjectCommunicator objectCommunicator = null;
+      GlobalDataProducer objectCommunicator = null;
       BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator = null;
       ConstantSwingTimeCalculator constantSwingTimeCalculator = new ConstantSwingTimeCalculator(0.6, registry);
       ConstantTransferTimeCalculator constantTransferTimeCalculator = new ConstantTransferTimeCalculator(0.3, registry);
@@ -111,7 +114,7 @@ public class FootstepPathCoordinatorTest
    {
       // create a random list of footsteps
       YoVariableRegistry registry = new YoVariableRegistry("Test");
-      ObjectCommunicator objectCommunicator = null;
+      GlobalDataProducer objectCommunicator = null;
       BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator = null;
       ConstantSwingTimeCalculator constantSwingTimeCalculator = new ConstantSwingTimeCalculator(0.6, registry);
       ConstantTransferTimeCalculator constantTransferTimeCalculator = new ConstantTransferTimeCalculator(0.3, registry);
@@ -150,7 +153,7 @@ public class FootstepPathCoordinatorTest
    {
       // create a random list of footsteps
       YoVariableRegistry registry = new YoVariableRegistry("Test");
-      ObjectCommunicator objectCommunicator = null;
+      GlobalDataProducer objectCommunicator = null;
       BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator = null;
       ConstantSwingTimeCalculator constantSwingTimeCalculator = new ConstantSwingTimeCalculator(0.6, registry);
       ConstantTransferTimeCalculator constantTransferTimeCalculator = new ConstantTransferTimeCalculator(0.3, registry);

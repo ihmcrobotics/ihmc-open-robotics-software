@@ -26,10 +26,10 @@ import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWren
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.ScrewTools;
@@ -105,9 +105,9 @@ public class HighLevelHumanoidControllerFactoryHelper
       return desiredFootstepCalculator;
    }
 
-   public static WalkingStatusReporter getWalkingStatusReporter(ObjectCommunicator objectCommunicator, YoVariableRegistry registry)
+   public static WalkingStatusReporter getWalkingStatusReporter(GlobalDataProducer dataProducer, YoVariableRegistry registry)
    {
-      WalkingStatusReporter walkingStatusReporter = new WalkingStatusReporter(objectCommunicator);
+      WalkingStatusReporter walkingStatusReporter = new WalkingStatusReporter(dataProducer);
 
       DoubleYoVariable icpErrorX = (DoubleYoVariable) registry.getVariable("icpErrorX");
       DoubleYoVariable icpErrorY = (DoubleYoVariable) registry.getVariable("icpErrorY");

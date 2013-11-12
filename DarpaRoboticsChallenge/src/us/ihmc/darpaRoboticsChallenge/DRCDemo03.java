@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameter
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.VRCTask1InVehicleHovering;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
@@ -16,6 +15,7 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
 import us.ihmc.utilities.net.ObjectCommunicator;
 
@@ -53,17 +53,18 @@ public class DRCDemo03
       environment.activateDisturbanceControllerOnSteeringWheel(YoFunctionGeneratorMode.SINE);
 
       ObjectCommunicator drcNetworkProcessorServer = new LocalObjectCommunicator();
+      GlobalDataProducer dataProducer = new GlobalDataProducer(drcNetworkProcessorServer);
 
       WalkingControllerParameters drivingControllerParameters = new DRCRobotDrivingControllerParameters();
       ArmControllerParameters armControllerParameters = new DRCRobotArmControllerParameters();
-      DRCRobotJointMap jointMap = robotInterface.getJointMap();
+//      DRCRobotJointMap jointMap = robotInterface.getJointMap();
       HighLevelState initialBehavior = HighLevelState.DRIVING;
-      ControllerFactory controllerFactory = DRCObstacleCourseSimulation.createDRCMultiControllerFactory(drcNetworkProcessorServer, drivingControllerParameters, 
+      ControllerFactory controllerFactory = DRCObstacleCourseSimulation.createDRCMultiControllerFactory(dataProducer, drivingControllerParameters, 
             armControllerParameters, initialBehavior);
 
       
       Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, environment, robotInterface, robotInitialSetup, scsInitialSetup,
-              guiInitialSetup, drcNetworkProcessorServer, null, dynamicGraphicObjectsListRegistry);
+              guiInitialSetup, dataProducer, null, dynamicGraphicObjectsListRegistry);
       drcSimulation = humanoidSimulation.first();
 
       SimulationConstructionSet simulationConstructionSet = drcSimulation.getSimulationConstructionSet();
@@ -139,8 +140,8 @@ public class DRCDemo03
 
       double timePerRecordTick = DRCConfigParameters.CONTROL_DT;
       int simulationDataBufferSize = 16000;
-      String ipAddress = null;
-      int portNumber = -1;
+//      String ipAddress = null;
+//      int portNumber = -1;
       new DRCDemo03(guiInitialSetup, automaticSimulationRunner, timePerRecordTick, simulationDataBufferSize);
    }
 

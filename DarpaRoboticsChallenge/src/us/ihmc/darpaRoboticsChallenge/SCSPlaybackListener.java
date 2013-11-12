@@ -1,17 +1,17 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import us.ihmc.utilities.net.ObjectCommunicator;
+import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 
 import com.yobotics.simulationconstructionset.PlaybackListener;
 
 
 public class SCSPlaybackListener implements PlaybackListener
 {
-   public ObjectCommunicator networkServer;
+   public GlobalDataProducer networkServer;
 
-   public SCSPlaybackListener(ObjectCommunicator networkServer)
+   public SCSPlaybackListener(GlobalDataProducer dataProducer)
    {
-      this.networkServer = networkServer;
+      this.networkServer = dataProducer;
    }
 
    public void play(double realTimeRate)
@@ -21,7 +21,7 @@ public class SCSPlaybackListener implements PlaybackListener
    public void stop()
    {
 //      System.out.println("SCSPlaybackListener: stopped");
-      networkServer.consumeObject(new SCSListenerPacket());
+      networkServer.queueDataToSend(new SCSListenerPacket());
    }
 
    public void indexChanged(int newIndex, double newTime)

@@ -71,7 +71,7 @@ import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.packets.LowLevelDrivingCommand;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.net.ObjectCommunicator;
+import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.net.ObjectConsumer;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -264,7 +264,7 @@ public class VariousWalkingProviders
       return drivingCommandProvider;
    }
 
-   public static VariousWalkingProviders createUsingObjectCommunicator(ObjectCommunicator objectCommunicator, FullRobotModel fullRobotModel,
+   public static VariousWalkingProviders createUsingObjectCommunicator(GlobalDataProducer objectCommunicator, FullRobotModel fullRobotModel,
            WalkingControllerParameters walkingControllerParameters, CommonWalkingReferenceFrames referenceFrames,
            SideDependentList<ContactablePlaneBody> bipedFeet, ConstantTransferTimeCalculator transferTimeCalculator,
            ConstantSwingTimeCalculator swingTimeCalculator, YoVariableRegistry registry)

@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceCons
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.packets.LowLevelDrivingAction;
 import us.ihmc.packets.LowLevelDrivingStatus;
+import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.io.streamingData.QueueBasedStreamingDataProducer;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -61,7 +62,7 @@ public class DrivingFootControlModule
    private final EuclideanPositionController toePointPositionController;
    private final MomentumBasedController momentumBasedController;
 
-   private final QueueBasedStreamingDataProducer<LowLevelDrivingStatus> statusProducer;
+   private final GlobalDataProducer statusProducer;
 
    private final FramePoint desiredPosition = new FramePoint();
    private final FrameVector desiredVelocity = new FrameVector();
@@ -113,7 +114,7 @@ public class DrivingFootControlModule
 
    public DrivingFootControlModule(FullRobotModel fullRobotModel, ContactablePlaneBody contactablePlaneFoot, MomentumBasedController momentumBasedController,
                                    DrivingReferenceFrames drivingReferenceFrames, double dt, DoubleYoVariable yoTime, TwistCalculator twistCalculator,
-                                   YoVariableRegistry parentRegistry, QueueBasedStreamingDataProducer<LowLevelDrivingStatus> statusProducer,
+                                   YoVariableRegistry parentRegistry, GlobalDataProducer statusProducer,
                                    DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.statusProducer = statusProducer;

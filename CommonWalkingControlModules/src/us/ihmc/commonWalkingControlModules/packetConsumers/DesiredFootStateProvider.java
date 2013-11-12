@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import us.ihmc.commonWalkingControlModules.packets.FootStatePacket;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -7,27 +9,23 @@ import us.ihmc.utilities.net.ObjectConsumer;
 
 public class DesiredFootStateProvider implements ObjectConsumer<FootStatePacket>
 {
-   private SideDependentList<Boolean> hasLoadBearingBeenRequested = new SideDependentList<Boolean>();
+   private SideDependentList<AtomicBoolean> hasLoadBearingBeenRequested = new SideDependentList<AtomicBoolean>();
    
    public DesiredFootStateProvider()
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         hasLoadBearingBeenRequested.put(robotSide, false);
+         hasLoadBearingBeenRequested.put(robotSide, new AtomicBoolean(false));
       }
    }
    
-   public synchronized boolean checkForNewLoadBearingRequest(RobotSide robotSide)
+   public boolean checkForNewLoadBearingRequest(RobotSide robotSide)
    {
-      boolean ret = hasLoadBearingBeenRequested.get(robotSide);
-      hasLoadBearingBeenRequested.put(robotSide, false);
-      
-      return ret;
+      return hasLoadBearingBeenRequested.get(robotSide).getAndSet(false);
    }
 
-   public synchronized void consumeObject(FootStatePacket object)
+   public void consumeObject(FootStatePacket object)
    {
-      RobotSide robotSide = object.getRobotSide();
-      hasLoadBearingBeenRequested.put(robotSide, true);
+      hasLoadBearingBeenRequested.get(object.getRobotSide()).set(true);;
    }
 }

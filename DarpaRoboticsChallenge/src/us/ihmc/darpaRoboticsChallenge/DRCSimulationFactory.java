@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
@@ -42,7 +41,7 @@ import us.ihmc.sensorProcessing.stateEstimation.evaluation.StateEstimatorErrorCa
 import us.ihmc.util.NonRealtimeThreadFactory;
 import us.ihmc.util.ThreadFactory;
 import us.ihmc.utilities.Pair;
-import us.ihmc.utilities.net.ObjectCommunicator;
+import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 
 import com.yobotics.simulationconstructionset.GroundContactPoint;
 import com.yobotics.simulationconstructionset.IMUMount;
@@ -62,12 +61,14 @@ public class DRCSimulationFactory
 
    public static Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> createSimulation(ControllerFactory controllerFactory,
          CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCRobotInterface robotInterface, RobotInitialSetup<SDFRobot> robotInitialSetup,
-         ScsInitialSetup scsInitialSetup, GuiInitialSetup guiInitialSetup, ObjectCommunicator networkProccesorCommunicator, RobotVisualizer robotVisualizer,
+         ScsInitialSetup scsInitialSetup, GuiInitialSetup guiInitialSetup, GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       GUISetterUpperRegistry guiSetterUpperRegistry = new GUISetterUpperRegistry();
 
       DRCRobotJointMap jointMap = robotInterface.getJointMap();
+            
+
 
       double estimateDT = DRCConfigParameters.ATLAS_INTERFACING_DT;
       double simulateDT = robotInterface.getSimulateDT();
@@ -187,7 +188,7 @@ public class DRCSimulationFactory
 
       DRCController robotController = new DRCController(initialCoMPositionAndEstimationLinkOrientation, robotInterface.getFullRobotModelFactory(),
             controllerFactory, sensorReaderFactory, drcOutputWriter, handControllerDispatcher, jointMap, lidarControllerInterface, gravity, estimateDT,
-            controlDT, networkProccesorCommunicator, robotInterface.getTimeStampProvider(), dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry,
+            controlDT, dataProducer, robotInterface.getTimeStampProvider(), dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry,
             registry, null, threadFactory, threadSynchronizer);
       robotController.initialize();
 

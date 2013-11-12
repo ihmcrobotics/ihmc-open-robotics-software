@@ -1,31 +1,30 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import us.ihmc.commonWalkingControlModules.packets.BumStatePacket;
 import us.ihmc.utilities.net.ObjectConsumer;
 
 public class DesiredPelvisLoadBearingProvider implements ObjectConsumer<BumStatePacket>
 {
-   private boolean hasNewLoadBearingState = false;
-   private boolean loadBearingState = false;
-   
+   private AtomicInteger loadBearingState = new AtomicInteger(-1);
+
    public DesiredPelvisLoadBearingProvider()
    {
    }
 
-   public synchronized boolean checkForNewLoadBearingState()
+   public boolean checkForNewLoadBearingState()
    {
-      return hasNewLoadBearingState;
+      return loadBearingState.get() != -1;
    }
 
-   public synchronized boolean getDesiredPelvisLoadBearingState()
+   public boolean getDesiredPelvisLoadBearingState()
    {
-      hasNewLoadBearingState = false;
-      return loadBearingState;
+      return loadBearingState.getAndSet(-1) == 1;
    }
 
-   public synchronized void consumeObject(BumStatePacket object)
+   public void consumeObject(BumStatePacket object)
    {
-      hasNewLoadBearingState = true;
-      loadBearingState = object.isLoadBearing();
+      loadBearingState.set(object.isLoadBearing() ? 1 : 0);
    }
 }

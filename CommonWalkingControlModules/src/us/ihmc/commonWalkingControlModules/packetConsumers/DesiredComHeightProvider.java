@@ -1,16 +1,19 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import com.google.common.util.concurrent.AtomicDouble;
+
 import us.ihmc.commonWalkingControlModules.packets.ComHeightPacket;
 import us.ihmc.utilities.net.ObjectConsumer;
 
 public class DesiredComHeightProvider
 {
-   private final Object synchronizationObject = new Object();
-
    private final ComHeightPacketConsumer comHeightPacketConsumer;
 
-   private boolean isNewComHeightInformationAvailable;
-   private double comHeightOffset;
+   // Do not do it like this, preferably use one atomic
+   private final AtomicBoolean newDataAvailable = new AtomicBoolean(false);
+   private final AtomicDouble comHeightOffset = new AtomicDouble(0.0);
 
    public DesiredComHeightProvider()
    {
@@ -31,34 +34,22 @@ public class DesiredComHeightProvider
 
       public void consumeObject(ComHeightPacket packet)
       {
-         synchronized (synchronizationObject)
-         {
-            comHeightOffset = packet.getHeightOffset();
-
-            isNewComHeightInformationAvailable = true;
-         }
+         newDataAvailable.set(true);
+         comHeightOffset.set(packet.getHeightOffset());
       }
    }
 
 
    public boolean isNewComHeightInformationAvailable()
    {
-      synchronized (synchronizationObject)
-      {
-         return isNewComHeightInformationAvailable;
-      }
+      return newDataAvailable.getAndSet(false);
    }
 
 
 
    public double getComHeightOffset()
    {
-      synchronized (synchronizationObject)
-      {
-         isNewComHeightInformationAvailable = false;
-
-         return comHeightOffset;
-      }
+      return comHeightOffset.get();
    }
 
 }

@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import us.ihmc.commonWalkingControlModules.packets.ThighStatePacket;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -7,34 +9,29 @@ import us.ihmc.utilities.net.ObjectConsumer;
 
 public class DesiredThighLoadBearingProvider implements ObjectConsumer<ThighStatePacket>
 {
-   private SideDependentList<Boolean> hasNewLoadBearingState = new SideDependentList<Boolean>();
-   private SideDependentList<Boolean> loadBearingState = new SideDependentList<Boolean>();
+   private final SideDependentList<AtomicInteger> loadBearingState = new SideDependentList<AtomicInteger>();
    
    public DesiredThighLoadBearingProvider()
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         hasNewLoadBearingState.put(robotSide, false);
-         loadBearingState.put(robotSide, false);
+         loadBearingState.put(robotSide, new AtomicInteger(-1));
       }
    }
    
-   public synchronized boolean checkForNewLoadBearingState(RobotSide robotSide)
+   public boolean checkForNewLoadBearingState(RobotSide robotSide)
    {
-      return hasNewLoadBearingState.get(robotSide);
+      return loadBearingState.get(robotSide).get() != -1;
    }
    
-   public synchronized boolean getDesiredThighLoadBearingState(RobotSide robotSide)
+   public boolean getDesiredThighLoadBearingState(RobotSide robotSide)
    {
-      hasNewLoadBearingState.put(robotSide, false);
-      
-      return loadBearingState.get(robotSide);
+      return loadBearingState.get(robotSide).getAndSet(-1) == 1;
    }
 
-   public synchronized void consumeObject(ThighStatePacket object)
+   public void consumeObject(ThighStatePacket object)
    {
       RobotSide robotSide = object.getRobotSide();
-      hasNewLoadBearingState.put(robotSide, true);
-      loadBearingState.put(robotSide, object.isLoadBearing());
+      loadBearingState.get(robotSide).set(object.isLoadBearing() ? 1 : 0);
    }
 }

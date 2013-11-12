@@ -9,10 +9,9 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.BlindWalk
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.BlindWalkingSpeed;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
-import us.ihmc.utilities.io.streamingData.QueueBasedStreamingDataProducer;
+import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.net.ObjectCommunicator;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
@@ -34,7 +33,7 @@ public class FootstepPathCoordinator implements FootstepProvider
    private final YoVariableRegistry registry = new YoVariableRegistry("FootstepPathCoordinator");
    private final EnumYoVariable<WalkMethod> walkMethod = new EnumYoVariable<WalkMethod>("walkMethod", registry, WalkMethod.class);
    private final BooleanYoVariable isPaused = new BooleanYoVariable("isPaused", registry);
-   private final QueueBasedStreamingDataProducer<FootstepStatus> footstepStatusDataProducer;
+   private final GlobalDataProducer footstepStatusDataProducer;
    private Footstep stepInProgress = null;
 
    private final BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator;
@@ -42,7 +41,7 @@ public class FootstepPathCoordinator implements FootstepProvider
    private final ConstantSwingTimeCalculator constantSwingTimeCalculator;
    private final ConstantTransferTimeCalculator constantTransferTimeCalculator;
 
-   public FootstepPathCoordinator(ObjectCommunicator objectCommunicator,
+   public FootstepPathCoordinator(GlobalDataProducer objectCommunicator,
                                   BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator,
                                   ConstantSwingTimeCalculator constantSwingTimeCalculator,
                                   ConstantTransferTimeCalculator constantTransferTimeCalculator,
@@ -55,14 +54,7 @@ public class FootstepPathCoordinator implements FootstepProvider
       this.constantSwingTimeCalculator = constantSwingTimeCalculator;
       this.constantTransferTimeCalculator = constantTransferTimeCalculator;
       
-      footstepStatusDataProducer = new QueueBasedStreamingDataProducer<FootstepStatus>();
-
-      if (objectCommunicator != null)
-      {
-         footstepStatusDataProducer.addConsumer(objectCommunicator);
-      }
-
-      footstepStatusDataProducer.startProducingData();
+      footstepStatusDataProducer = objectCommunicator;
 
       desiredFootstepCalculatorFootstepProviderWrapper =
          new DesiredFootstepCalculatorFootstepProviderWrapper(blindWalkingToDestinationDesiredFootstepCalculator, registry);
@@ -203,8 +195,11 @@ public class FootstepPathCoordinator implements FootstepProvider
 
    private void notifyConsumersOfStatus(FootstepStatus.Status status)
    {
-      FootstepStatus footstepStatus = new FootstepStatus(status);
-      footstepStatusDataProducer.queueDataToSend(footstepStatus);
+      if(footstepStatusDataProducer != null)
+      {
+         FootstepStatus footstepStatus = new FootstepStatus(status);
+         footstepStatusDataProducer.queueDataToSend(footstepStatus);         
+      }
    }
 
    public boolean isEmpty()
