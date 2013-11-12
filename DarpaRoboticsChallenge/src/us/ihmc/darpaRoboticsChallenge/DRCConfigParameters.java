@@ -214,7 +214,7 @@ public class DRCConfigParameters
 
    public static final double NEAR_SCAN_CYL_RADIUS = 2;
    public static final double NEAR_SCAN_CYL_Z_MAX = 0;
-   public static final double NEAR_SCAN_CYL_Z_MIN = -1.5;
+   public static final double NEAR_SCAN_CYL_Z_MIN = -2;
    public static final double NEAR_SCAN_DENSITY = .025;
    
    // Footstep Generator
@@ -229,8 +229,8 @@ public class DRCConfigParameters
    public static final boolean USE_RESOLUTION_SPHERE = true;
    public static final double LIDAR_RESOLUTION_SPHERE_OUTER_RESOLUTION = 0.10;
    public static final double LIDAR_RESOLUTION_SPHERE_OUTER_RADIUS = 16.0;
-   public static final double LIDAR_RESOLUTION_SPHERE_INNER_RESOLUTION = 0.05;
-   public static final double LIDAR_RESOLUTION_SPHERE_INNER_RADIUS = 8.0;
+   public static final double LIDAR_RESOLUTION_SPHERE_INNER_RESOLUTION = 0.01;
+   public static final double LIDAR_RESOLUTION_SPHERE_INNER_RADIUS = 1.0;
    public static final double LIDAR_RESOLUTION_SPHERE_DISTANCE_FROM_HEAD = 1.0;
 
    public static final boolean USE_TABS_IN_UI = true;
