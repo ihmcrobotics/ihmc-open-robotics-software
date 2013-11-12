@@ -2,8 +2,6 @@ package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 
 import java.util.Collection;
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
