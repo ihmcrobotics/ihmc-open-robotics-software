@@ -2,7 +2,6 @@ package us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
@@ -15,7 +14,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public abstract class AbstractMeasurementModelElement implements MeasurementModelElement
 {
-   private final List<ControlFlowOutputPort<?>> controlFlowOutputPortList;
+   private final ArrayList<ControlFlowOutputPort<?>> controlFlowOutputPortList;
    private final Map<ControlFlowOutputPort<?>, DenseMatrix64F> outputMatrixBlocks;
    private final DenseMatrix64F measurementCovarianceMatrixBlock;
    private final DenseMatrix64F scaledMeasurementCovarianceMatrixBlock;
@@ -72,7 +71,7 @@ public abstract class AbstractMeasurementModelElement implements MeasurementMode
       measurementCovarianceMatrixBlock.set(measurementNoiseCovariance);
    }
 
-   public final List<ControlFlowOutputPort<?>> getStatePorts()
+   public final ArrayList<ControlFlowOutputPort<?>> getStatePorts()
    {
       return controlFlowOutputPortList;
    }

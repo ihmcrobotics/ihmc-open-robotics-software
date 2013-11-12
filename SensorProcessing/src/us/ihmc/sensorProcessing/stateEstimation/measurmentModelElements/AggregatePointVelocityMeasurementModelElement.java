@@ -40,7 +40,7 @@ public class AggregatePointVelocityMeasurementModelElement implements Measuremen
    private final RigidBodyToIndexMap rigidBodyToIndexMap;
 
    private final ReferenceFrame estimationFrame;
-   private final List<ControlFlowOutputPort<?>> statePorts = new ArrayList<ControlFlowOutputPort<?>>();
+   private final ArrayList<ControlFlowOutputPort<?>> statePorts = new ArrayList<ControlFlowOutputPort<?>>();
 
    private final Map<ControlFlowOutputPort<?>, DenseMatrix64F> outputMatrixBlocks = new LinkedHashMap<ControlFlowOutputPort<?>, DenseMatrix64F>();
    private final DenseMatrix64F measurementCovarianceMatrixBlock = new DenseMatrix64F(1, 1);
@@ -115,8 +115,9 @@ public class AggregatePointVelocityMeasurementModelElement implements Measuremen
 
       int rowIndex = 0;
       int elementIndex = 0;
-      for (PointVelocityDataObject pointVelocityDataObject : pointVelocityDataObjects)
+      for (int i = 0; i <pointVelocityDataObjects.size(); i++)
       {
+         PointVelocityDataObject pointVelocityDataObject = pointVelocityDataObjects.get(i);
          if (!pointVelocityDataObject.isPointVelocityValid())
             continue;
          
@@ -141,9 +142,9 @@ public class AggregatePointVelocityMeasurementModelElement implements Measuremen
    private void reshapeAndZeroMatrices()
    {
       int size = nElementsInUse * PointVelocityMeasurementModelElement.SIZE;
-      for (ControlFlowOutputPort<?> statePort : statePorts)
+      for (int i = 0; i < statePorts.size(); i++)
       {
-         DenseMatrix64F outputMatrixBlock = outputMatrixBlocks.get(statePort);
+         DenseMatrix64F outputMatrixBlock = outputMatrixBlocks.get(statePorts.get(i));
          outputMatrixBlock.reshape(size, PointVelocityMeasurementModelElement.SIZE);
          outputMatrixBlock.zero();
       }
@@ -178,7 +179,7 @@ public class AggregatePointVelocityMeasurementModelElement implements Measuremen
       return residual;
    }
 
-   public List<ControlFlowOutputPort<?>> getStatePorts()
+   public ArrayList<ControlFlowOutputPort<?>> getStatePorts()
    {
       return statePorts;
    }

@@ -37,11 +37,11 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
 
    public void startComputation()
    {
-      long t0 = System.currentTimeMillis();
+      long t0 = System.nanoTime();
       kalmanFilter.configure();
       kalmanFilter.predict(null);
       kalmanFilter.update(null);
-      long tf = System.currentTimeMillis();
+      long tf = System.nanoTime();
       statistics.addValue((double) (tf - t0));
 //      System.out.println(statistics.getMean());
    }

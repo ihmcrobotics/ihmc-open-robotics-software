@@ -55,8 +55,9 @@ public class MeasurementModel
          MeasurementModelElement measurementModelElement = measurementModelElements.get(i);
          int measurementStartIndex = measurementStartIndices.get(measurementModelElement);
 
-         for (ControlFlowOutputPort<?> statePort : measurementModelElement.getStatePorts())
+         for (int j = 0; j < measurementModelElement.getStatePorts().size(); j++)
          {
+            ControlFlowOutputPort<?> statePort  = measurementModelElement.getStatePorts().get(j);
             Integer stateStartIndexInteger = stateStartIndices.get(statePort);
             if (stateStartIndexInteger == null) throw new RuntimeException("Cannot find state port " + statePort + " for MeasurementModelElement " + measurementModelElement);
 
@@ -110,9 +111,9 @@ public class MeasurementModel
       {
          MeasurementModelElement measurementModelElement = measurementModelElements.get(i);
          List<ControlFlowOutputPort<?>> measurementModelElementStates = measurementModelElement.getStatePorts();
-         for (ControlFlowOutputPort<?> statePort : measurementModelElementStates)
+         for (int j = 0; j < measurementModelElementStates.size(); j++)
          {
-            DenseMatrix64F outputMatrixBlock = measurementModelElement.getOutputMatrixBlock(statePort);
+            DenseMatrix64F outputMatrixBlock = measurementModelElement.getOutputMatrixBlock(measurementModelElementStates.get(j));
             checkOrAddSize(measurementSizes, measurementModelElement, outputMatrixBlock.getNumRows());
          }
       }
