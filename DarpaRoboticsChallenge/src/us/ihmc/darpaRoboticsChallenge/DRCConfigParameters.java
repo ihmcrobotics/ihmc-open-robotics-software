@@ -155,7 +155,7 @@ public class DRCConfigParameters
    // LIDAR:
    public static final boolean USE_ROS_FOR_MULTISENSE_TRANSFORMS = RUNNING_ON_REAL_ROBOT;
    public static final boolean USING_REAL_HEAD = RUNNING_ON_REAL_ROBOT;
-   public static final double LIDAR_SPINDLE_VELOCITY = 1.0;
+   public static final double LIDAR_SPINDLE_VELOCITY = 5.1;
 
    // the useful children are "Static Link Graphic" and "atlas", but you don't really need atlas. ~30% faster without atlas.
    public static final String[] SCS_LIDAR_NODES_TO_INTERSECT = new String[] {"Static Link Graphic"};
