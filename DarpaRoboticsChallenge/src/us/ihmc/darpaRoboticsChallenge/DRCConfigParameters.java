@@ -173,9 +173,10 @@ public class DRCConfigParameters
    {
       if (DRCConfigParameters.USING_REAL_HEAD)
       {
+         final float crc = -.0010908f;
          LIDAR_POINTS_PER_SWEEP = 1081;
-         LIDAR_SWEEP_MIN_YAW = -2.356194f;
-         LIDAR_SWEEP_MAX_YAW = 2.356194f;
+         LIDAR_SWEEP_MIN_YAW = -2.356194f + crc;
+         LIDAR_SWEEP_MAX_YAW = 2.356194f + crc;
 
       }
       else
@@ -214,8 +215,10 @@ public class DRCConfigParameters
 
    public static final double NEAR_SCAN_CYL_RADIUS = 2;
    public static final double NEAR_SCAN_CYL_Z_MAX = 0;
-   public static final double NEAR_SCAN_CYL_Z_MIN = -2;
-   public static final double NEAR_SCAN_DENSITY = .025;
+   public static final double NEAR_SCAN_CYL_Z_MIN = -1.5;
+   public static final double NEAR_SCAN_DENSITY = .01;
+   public static final long NEAR_SCAN_DECAY_MILLIS = 10000;
+   public static final long NEAR_SCAN_CAPACITY = 10000;
    
    // Footstep Generator
    public static final double BOUNDING_BOX_FOR_FOOTSTEP_HEIGHT_FINDING_SIDE_LENGTH =
@@ -278,4 +281,5 @@ public class DRCConfigParameters
 
    public static final double pointPositionXYMeasurementStandardDeviation = 0.1;    // 0.4; //0.1;
    public static final double pointPositionZMeasurementStandardDeviation = 0.1;    // 0.4; //0.1;
+
 }
