@@ -1,35 +1,31 @@
 package us.ihmc.commonWalkingControlModules.packets;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
 import us.ihmc.utilities.net.ObjectConsumer;
 
 public class DesiredHighLevelStateProvider implements ObjectConsumer<HighLevelStatePacket>
 {
-
-   private boolean hasNewState = false;
-   private HighLevelState highLevelState = HighLevelState.WALKING;
-
+   private final AtomicReference<HighLevelState> highLevelState = new AtomicReference<HighLevelState>(HighLevelState.WALKING);
+   
    public DesiredHighLevelStateProvider()
    {
    }
    
-   public synchronized boolean checkForNewState()
+   public boolean checkForNewState()
    {
-      return hasNewState;
+      return highLevelState.get() != null;
    }
    
-   public synchronized HighLevelState getDesiredHighLevelState()
+   public HighLevelState getDesiredHighLevelState()
    {
-      hasNewState = false;
-      
-      return highLevelState;
+      return highLevelState.getAndSet(null);
    }
    
    public void consumeObject(HighLevelStatePacket object)
    {
-      hasNewState = true;
-
-      highLevelState = object.getHighLevelState();
+       highLevelState.set(object.getHighLevelState());
    }
 
 }

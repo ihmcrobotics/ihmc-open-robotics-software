@@ -1,7 +1,8 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import us.ihmc.commonWalkingControlModules.packets.FingerStatePacket;
-import us.ihmc.commonWalkingControlModules.packets.HandStatePacket;
 import us.ihmc.utilities.net.ObjectConsumer;
 
 /**
@@ -10,23 +11,20 @@ import us.ihmc.utilities.net.ObjectConsumer;
  */
 public class FingerStateProvider implements ObjectConsumer<FingerStatePacket>
 {
-   private FingerStatePacket packet;
-   private boolean isNewFingerStateAvailable;
+   private AtomicReference<FingerStatePacket> packet = new AtomicReference<FingerStatePacket>();
 
-   public synchronized void consumeObject(FingerStatePacket packet)
+   public void consumeObject(FingerStatePacket packet)
    {
-      this.packet = packet;
-      isNewFingerStateAvailable = true;
+      this.packet.set(packet);
    }
 
-   public synchronized FingerStatePacket getPacket()
+   public FingerStatePacket getPacket()
    {
-      isNewFingerStateAvailable = false;
-      return packet;
+      return packet.getAndSet(null);
    }
 
-   public synchronized boolean isNewFingerStateAvailable()
+   public boolean isNewFingerStateAvailable()
    {
-      return isNewFingerStateAvailable;
+      return packet.get() != null;
    }
 }

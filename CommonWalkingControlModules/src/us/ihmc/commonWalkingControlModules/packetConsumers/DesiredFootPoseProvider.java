@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import us.ihmc.commonWalkingControlModules.packets.FootPosePacket;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -17,50 +19,40 @@ import us.ihmc.utilities.net.ObjectConsumer;
 
 public class DesiredFootPoseProvider implements ObjectConsumer<FootPosePacket>
 {
+   private final SideDependentList<AtomicReference<FootPosePacket>> footPosePacket = new SideDependentList<AtomicReference<FootPosePacket>>();
+   
    private final SideDependentList<FramePose> desiredFootPoses = new SideDependentList<FramePose>();
-   private SideDependentList<Boolean> hasNewPose = new SideDependentList<Boolean>();
-   private SideDependentList<Boolean> hasNotConsumedPreviousPose = new SideDependentList<Boolean>();
 
    public DesiredFootPoseProvider()
    {
       FramePose pose = new FramePose(ReferenceFrame.getWorldFrame());
       for (RobotSide robotSide : RobotSide.values)
       {
-         hasNewPose.put(robotSide, false);
-         hasNotConsumedPreviousPose.put(robotSide, false);
-         // Just initializing to whatever...
+         footPosePacket.put(robotSide, new AtomicReference<FootPosePacket>());
          desiredFootPoses.put(robotSide, pose);
       }
    }
 
-   public synchronized boolean checkForNewPose(RobotSide robotSide)
+   public boolean checkForNewPose(RobotSide robotSide)
    {
-      return hasNewPose.get(robotSide);
+      return footPosePacket.get(robotSide).get() != null;
    }
 
-   public synchronized boolean checkIfPreviousPoseNotConsumed(RobotSide robotSide)
+   public FramePose getDesiredFootPose(RobotSide robotSide)
    {
-      return hasNotConsumedPreviousPose.get(robotSide);
-   }
-
-   public synchronized FramePose getDesiredFootPose(RobotSide robotSide)
-   {
-      hasNewPose.put(robotSide, false);
-      hasNotConsumedPreviousPose.put(robotSide, false);
-
+      FootPosePacket object = footPosePacket.get(robotSide).getAndSet(null);
+      if(object != null)
+      {         
+         
+         FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), object.getPosition(), object.getOrientation());
+         desiredFootPoses.put(robotSide, pose);
+      }
+      
       return desiredFootPoses.get(robotSide);
    }
 
-   public synchronized void consumeObject(FootPosePacket object)
+   public void consumeObject(FootPosePacket object)
    {
-      RobotSide robotSide = object.getRobotSide();
-      
-      if (hasNewPose.get(robotSide))
-         hasNotConsumedPreviousPose.put(robotSide, true);
-
-      hasNewPose.put(robotSide, true);
-
-      FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), object.getPosition(), object.getOrientation());
-      desiredFootPoses.put(robotSide, pose);
+      footPosePacket.get(object.getRobotSide()).set(object);
    }
 }

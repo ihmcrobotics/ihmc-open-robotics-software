@@ -10,7 +10,6 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.messages.controller.Robot
 import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.DRCJointConfigurationData;
 import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.JointConfigurationGatherer;
 import us.ihmc.utilities.AsyncContinuousExecutor;
-import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.TimestampProvider;

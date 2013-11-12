@@ -1,16 +1,16 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.driving;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.taskExecutor.Task;
-import us.ihmc.utilities.io.streamingData.QueueBasedStreamingDataProducer;
+import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 
 public class NotifyStatusListenerTask<T> implements Task
 {
-   private final QueueBasedStreamingDataProducer<T> drivingStatusListener;
+   private final GlobalDataProducer drivingStatusListener;
    private final T statusObject;
    
-   public NotifyStatusListenerTask(QueueBasedStreamingDataProducer<T> drivingStatusListener, T statusObject)
+   public NotifyStatusListenerTask(GlobalDataProducer statusProducer, T statusObject)
    {
-      this.drivingStatusListener = drivingStatusListener;
+      this.drivingStatusListener = statusProducer;
       this.statusObject = statusObject;
    }
 

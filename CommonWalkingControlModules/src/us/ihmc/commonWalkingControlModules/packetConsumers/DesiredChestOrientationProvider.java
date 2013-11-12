@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import us.ihmc.commonWalkingControlModules.controlModules.spine.ChestOrientationPacket;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -8,30 +10,24 @@ import us.ihmc.utilities.net.ObjectConsumer;
 public class DesiredChestOrientationProvider implements ObjectConsumer<ChestOrientationPacket>
 {
 
-   private FrameOrientation desiredChestOrientation;
-   private Boolean hasNewPose;
+   private final AtomicReference<FrameOrientation> desiredChestOrientation = new AtomicReference<FrameOrientation>(new FrameOrientation(ReferenceFrame.getWorldFrame()));
 
    public DesiredChestOrientationProvider()
    {
-      desiredChestOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
-      hasNewPose = false;
    }
 
-   public synchronized boolean checkForNewPose()
+   public boolean checkForNewPose()
    {
-      return hasNewPose;
+      return desiredChestOrientation.get() != null;
    }
 
-   public synchronized FrameOrientation getDesiredChestOrientation()
+   public FrameOrientation getDesiredChestOrientation()
    {
-      hasNewPose = false;
-      
-      return desiredChestOrientation;
+      return desiredChestOrientation.getAndSet(null);
    }
 
-   public synchronized void consumeObject(ChestOrientationPacket object)
+   public void consumeObject(ChestOrientationPacket object)
    {
-      hasNewPose = true;
-      desiredChestOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), object.getQuaternion());
+      desiredChestOrientation.set(new FrameOrientation(ReferenceFrame.getWorldFrame(), object.getQuaternion()));
    }
 }

@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.packets.HandPosePacket;
@@ -12,10 +14,10 @@ import us.ihmc.utilities.net.ObjectConsumer;
 public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>
 {
 
+   private final SideDependentList<AtomicReference<HandPosePacket>> packets = new SideDependentList<AtomicReference<HandPosePacket>>();
+   
    private final SideDependentList<FramePose> homePositions = new SideDependentList<FramePose>();
    private final SideDependentList<FramePose> desiredHandPoses = new SideDependentList<FramePose>();
-
-   private SideDependentList<Boolean> hasNewPose = new SideDependentList<Boolean>();
 
    private final ReferenceFrame chestFrame;
    private boolean relativeToWorld = false;
@@ -25,59 +27,66 @@ public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>
       chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
       for (RobotSide robotSide : RobotSide.values)
       {
+         packets.put(robotSide, new AtomicReference<HandPosePacket>());
+         
          homePositions.put(robotSide, new FramePose(chestFrame, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame().get(robotSide)));
 
          desiredHandPoses.put(robotSide, homePositions.get(robotSide));
-         hasNewPose.put(robotSide, false);
       }
 
    }
 
-   public synchronized boolean checkForNewPose(RobotSide robotSide)
+   public boolean checkForNewPose(RobotSide robotSide)
    {
-      return hasNewPose.get(robotSide);
+      return packets.get(robotSide).get() != null;
+      
+      
    }
 
-   public synchronized FramePose getDesiredHandPose(RobotSide robotSide)
+   public FramePose getDesiredHandPose(RobotSide robotSide)
    {
-      hasNewPose.put(robotSide, false);
+      HandPosePacket object = packets.get(robotSide).getAndSet(null);
+      
+      if(object != null)
+      {
+        
+         if(object.isToHomePosition())
+         {
+            relativeToWorld = false;
+            desiredHandPoses.put(robotSide, homePositions.get(robotSide));
+         }
+         else
+         {
+            ReferenceFrame referenceFrame;
+            switch(object.getReferenceFrame())
+            {
+            case WORLD:
+               referenceFrame = ReferenceFrame.getWorldFrame();
+               relativeToWorld = true;
+               break;
+            case CHEST:
+               referenceFrame = chestFrame;
+               relativeToWorld = false;
+               break;
+            default:
+               throw new RuntimeException("Unkown frame");
+            }
+            
+            FramePose pose = new FramePose(referenceFrame, object.getPosition(), object.getOrientation());
+            desiredHandPoses.put(robotSide, pose);
+         }
+      }
+
       return desiredHandPoses.get(robotSide);
    }
    
-   public synchronized boolean isRelativeToWorld()
+   public boolean isRelativeToWorld()
    {
       return relativeToWorld;
    }
 
-   public synchronized void consumeObject(HandPosePacket object)
+   public void consumeObject(HandPosePacket object)
    {
-      RobotSide robotSide = object.getRobotSide();
-      hasNewPose.put(robotSide, true);
-      
-      if(object.isToHomePosition())
-      {
-         relativeToWorld = false;
-         desiredHandPoses.put(robotSide, homePositions.get(robotSide));
-      }
-      else
-      {
-         ReferenceFrame referenceFrame;
-         switch(object.getReferenceFrame())
-         {
-         case WORLD:
-            referenceFrame = ReferenceFrame.getWorldFrame();
-            relativeToWorld = true;
-            break;
-         case CHEST:
-            referenceFrame = chestFrame;
-            relativeToWorld = false;
-            break;
-         default:
-            throw new RuntimeException("Unkown frame");
-         }
-         
-         FramePose pose = new FramePose(referenceFrame, object.getPosition(), object.getOrientation());
-         desiredHandPoses.put(robotSide, pose);
-      }
+      packets.get(object.getRobotSide()).set(object);
    }
 }

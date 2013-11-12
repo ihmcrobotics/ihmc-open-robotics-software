@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import us.ihmc.commonWalkingControlModules.packets.TorusPosePacket;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -11,51 +13,44 @@ import us.ihmc.utilities.net.ObjectConsumer;
  */
 public class TorusPoseProvider implements ObjectConsumer<TorusPosePacket>
 {
-   private final Object synchronizationObject = new Object();
+
+   private final AtomicReference<TorusPosePacket> torusPosePacket = new AtomicReference<TorusPosePacket>();
+
    private FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame());
    private double fingerHoleRadius;
-   private boolean hasNewPose;
 
    public TorusPoseProvider()
    {
 
    }
 
-   public synchronized void consumeObject(TorusPosePacket object)
+   public void consumeObject(TorusPosePacket object)
    {
-      synchronized (synchronizationObject)
+      torusPosePacket.set(object);
+   }
+
+   public boolean checkForNewPose()
+   {
+      TorusPosePacket object = torusPosePacket.getAndSet(null);
+      if (object != null)
       {
          framePose = new FramePose(ReferenceFrame.getWorldFrame(), object.getPosition(), object.getOrientation());
          fingerHoleRadius = object.getFingerHoleRadius();
-         hasNewPose = true;
+         return true;
+      }
+      else
+      {
+         return false;
       }
    }
 
-   public synchronized boolean checkForNewPose()
+   public double getFingerHoleRadius()
    {
-      synchronized (synchronizationObject)
-      {
-         return hasNewPose;
-      }
+      return fingerHoleRadius;
    }
 
-   public synchronized double getFingerHoleRadius()
+   public FramePose getFramePose()
    {
-      synchronized (synchronizationObject)
-      {
-         hasNewPose = false;
-
-         return fingerHoleRadius;
-      }
-   }
-
-   public synchronized FramePose getFramePose()
-   {
-      synchronized (synchronizationObject)
-      {
-         hasNewPose = false;
-
-         return new FramePose(framePose);
-      }
+      return new FramePose(framePose);
    }
 }

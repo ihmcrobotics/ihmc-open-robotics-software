@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import us.ihmc.commonWalkingControlModules.packets.PelvisOrientationPacket;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -13,30 +15,24 @@ import us.ihmc.utilities.net.ObjectConsumer;
 public class DesiredPelvisPoseProvider implements ObjectConsumer<PelvisOrientationPacket>
 {
 
-   private FramePose desiredPelvisPose;
-   private Boolean hasNewPose;
+   private AtomicReference<FramePose> desiredPelvisPose = new AtomicReference<FramePose>(new FramePose(ReferenceFrame.getWorldFrame()));
 
    public DesiredPelvisPoseProvider()
    {
-      desiredPelvisPose = new FramePose(ReferenceFrame.getWorldFrame());
-      hasNewPose = false;
    }
 
-   public synchronized boolean checkForNewPose()
+   public boolean checkForNewPose()
    {
-      return hasNewPose;
+      return desiredPelvisPose.get() != null;
    }
 
-   public synchronized FramePose getDesiredPelvisPose()
+   public FramePose getDesiredPelvisPose()
    {
-      hasNewPose = false;
-      
-      return desiredPelvisPose;
+      return desiredPelvisPose.getAndSet(null);
    }
 
-   public synchronized void consumeObject(PelvisOrientationPacket object)
+   public void consumeObject(PelvisOrientationPacket object)
    {
-      hasNewPose = true;
-      desiredPelvisPose = new FramePose(ReferenceFrame.getWorldFrame(), object.getPoint(), object.getQuaternion());
+      desiredPelvisPose.set(new FramePose(ReferenceFrame.getWorldFrame(), object.getPoint(), object.getQuaternion()));
    }
 }

@@ -1,32 +1,29 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
-import us.ihmc.commonWalkingControlModules.packets.VehiclePosePacket;
-import us.ihmc.utilities.net.ObjectConsumer;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.commonWalkingControlModules.packets.VehiclePosePacket;
+import us.ihmc.utilities.net.ObjectConsumer;
+
 public class VehiclePoseProvider implements ObjectConsumer<VehiclePosePacket>
 {
-   private final Transform3D transformFromVehicleToWorld = new Transform3D();
-   private boolean hasNewPose;
+   private final AtomicReference<Transform3D> transformFromVehicleToWorld = new AtomicReference<Transform3D>();
 
-   public synchronized void consumeObject(VehiclePosePacket object)
+   public void consumeObject(VehiclePosePacket object)
    {
-      transformFromVehicleToWorld.set(object.getOrientation());
-      transformFromVehicleToWorld.setTranslation(new Vector3d(object.getPosition()));
-
-      hasNewPose = true;
+      transformFromVehicleToWorld.set(new Transform3D(object.getOrientation(), new Vector3d(object.getPosition()), 1.0));
    }
 
    public synchronized boolean checkForNewPose()
    {
-      return hasNewPose;
+      return transformFromVehicleToWorld.get() != null;
    }
 
-   public synchronized Transform3D getTransformFromVehicleToWorld()
+   public Transform3D getTransformFromVehicleToWorld()
    {
-      hasNewPose = false;
-      return transformFromVehicleToWorld;
+      return transformFromVehicleToWorld.getAndSet(null);
    }
 }
