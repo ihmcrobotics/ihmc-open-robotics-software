@@ -303,9 +303,9 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
    protected void callUpdatables()
    {
       double time = yoTime.getDoubleValue();
-      for (Updatable updatable : updatables)
+      for (int i = 0; i < updatables.size(); i++)
       {
-         updatable.update(time);
+         updatables.get(i).update(time);
       }
    }
 

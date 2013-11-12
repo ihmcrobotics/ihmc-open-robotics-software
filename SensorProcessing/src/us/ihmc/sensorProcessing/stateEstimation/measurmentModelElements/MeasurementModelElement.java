@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import org.ejml.data.DenseMatrix64F;
 
@@ -16,5 +16,5 @@ public interface MeasurementModelElement
 
    public abstract DenseMatrix64F computeResidual();
 
-   public abstract List<ControlFlowOutputPort<?>> getStatePorts();
+   public abstract ArrayList<ControlFlowOutputPort<?>> getStatePorts();
 }

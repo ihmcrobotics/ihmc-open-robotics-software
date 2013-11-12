@@ -31,7 +31,7 @@ public class AggregatePointPositionMeasurementModelElement implements Measuremen
    private final ControlFlowOutputPort<FrameOrientation> orientationPort;
    private final ReferenceFrame estimationFrame;
    private final AfterJointReferenceFrameNameMap referenceFrameMap;
-   private final List<ControlFlowOutputPort<?>> statePorts = new ArrayList<ControlFlowOutputPort<?>>();
+   private final ArrayList<ControlFlowOutputPort<?>> statePorts = new ArrayList<ControlFlowOutputPort<?>>();
 
    private final Map<ControlFlowOutputPort<?>, DenseMatrix64F> outputMatrixBlocks = new LinkedHashMap<ControlFlowOutputPort<?>, DenseMatrix64F>();
    private final DenseMatrix64F measurementCovarianceMatrixBlock = new DenseMatrix64F(1, 1);
@@ -71,9 +71,9 @@ public class AggregatePointPositionMeasurementModelElement implements Measuremen
       List<PointPositionDataObject> pointPositionDataObjects = inputPort.getData();
       nElementsInUse = pointPositionDataObjects.size();
 
-      for (PointPositionDataObject pointPositionDataObject : pointPositionDataObjects)
+      for (int i = 0; i < pointPositionDataObjects.size(); i++)
       {
-         if (!pointPositionDataObject.isPointPositionValid())
+         if (!pointPositionDataObjects.get(i).isPointPositionValid())
          {
             nElementsInUse--;
          }
@@ -119,9 +119,9 @@ public class AggregatePointPositionMeasurementModelElement implements Measuremen
    private void reshapeAndZeroMatrices()
    {
       int size = nElementsInUse * PointPositionMeasurementModelElement.SIZE;
-      for (ControlFlowOutputPort<?> statePort : statePorts)
+      for (int i = 0; i < statePorts.size(); i++)
       {
-         DenseMatrix64F outputMatrixBlock = outputMatrixBlocks.get(statePort);
+         DenseMatrix64F outputMatrixBlock = outputMatrixBlocks.get(statePorts.get(i));
          outputMatrixBlock.reshape(size, PointPositionMeasurementModelElement.SIZE);
          outputMatrixBlock.zero();
       }
@@ -155,7 +155,7 @@ public class AggregatePointPositionMeasurementModelElement implements Measuremen
       return residual;
    }
 
-   public List<ControlFlowOutputPort<?>> getStatePorts()
+   public ArrayList<ControlFlowOutputPort<?>> getStatePorts()
    {
       return statePorts;
    }
