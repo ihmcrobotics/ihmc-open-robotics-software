@@ -88,9 +88,9 @@ public class AggregatePointVelocityMeasurementModelElement implements Measuremen
       List<PointVelocityDataObject> pointVelocityDataObjects = inputPort.getData();
       nElementsInUse = pointVelocityDataObjects.size();
 
-      for (PointVelocityDataObject pointVelocityDataObject : pointVelocityDataObjects)
+      for (int i = 0; i < pointVelocityDataObjects.size(); i++)
       {
-         if (!pointVelocityDataObject.isPointVelocityValid())
+         if (!pointVelocityDataObjects.get(i).isPointVelocityValid())
          {
             nElementsInUse--;
          }

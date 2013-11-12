@@ -26,7 +26,7 @@ public class YoVariableProducer extends Thread
    
    public YoVariableProducer(int port, List<YoVariable> variables, List<JointHolder> jointHolders, ConcurrentRingBuffer<FullStateBuffer> variableBuffer)
    {
-      super();
+      super("YoVariableProducer_" + port);
       this.port = port;
       this.variableBuffer = variableBuffer;
       
