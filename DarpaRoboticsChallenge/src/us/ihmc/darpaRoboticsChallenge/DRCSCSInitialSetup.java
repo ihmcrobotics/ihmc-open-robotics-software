@@ -21,7 +21,7 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
    private static final boolean SHOW_WORLD_COORDINATE_FRAME = false;
    private final double simulateDT;// = 0.0001;    // 0.00005; //
    private int recordFrequency = 50;    // 10;
-
+   private boolean drawGroundProfile = false;
 
    private int simulationDataBufferSize = 16000;
    private double gravity = -9.81;
@@ -83,14 +83,6 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
 
       groundContactModel.setGroundProfile(commonTerrain.getGroundProfile());
 
-      boolean drawGround = false;
-      if (drawGround)
-      {
-         boolean drawGroundBelow = false;
-         ArrayList<Graphics3DObject> branchGroup = commonTerrain.createLinkGraphics(drawGroundBelow);
-         robot.addStaticLinkGraphics(branchGroup);
-      }
-
       // TODO: change this to scs.setGroundContactModel(groundContactModel);
       robot.setGroundContactModel(groundContactModel);
    }
@@ -119,14 +111,20 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
    {
       scs.setDT(simulateDT, recordFrequency);
 
+      if (drawGroundProfile)
+      {
+         boolean drawGroundBelow = false;
+         
+         ArrayList<Graphics3DObject> groundLinkGraphics = commonTerrain.createLinkGraphics(drawGroundBelow);
+         scs.addStaticLinkGraphics(groundLinkGraphics);
+      }
+      
       if (SHOW_WORLD_COORDINATE_FRAME)
       {
          Graphics3DObject linkGraphics = new Graphics3DObject();
          linkGraphics.addCoordinateSystem(0.3);
          scs.addStaticLinkGraphics(linkGraphics);
       }
-
-
 
       /*
        * This makes sure that the initial values of all YoVariables that are added to the scs (i.e. at index 0 of the data buffer)
@@ -174,5 +172,15 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
    public SteppingStones getSteppingStones()
    {
       return commonTerrain.getSteppingStones();
+   }
+   
+   public boolean getDrawGroundProfile()
+   {
+      return drawGroundProfile;
+   }
+   
+   public void setDrawGroundProfile(boolean drawGroundProfile)
+   {
+      this.drawGroundProfile = drawGroundProfile;
    }
 }
