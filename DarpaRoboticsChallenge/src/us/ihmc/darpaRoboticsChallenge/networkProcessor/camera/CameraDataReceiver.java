@@ -38,7 +38,7 @@ public abstract class CameraDataReceiver
 
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final ROSNativeTransformTools rosTransformProvider;
-   private Transform3D rosTransformFromHeadBaseToCamera;
+   private Transform3D rosTransformFromHeadBaseToCamera = new Transform3D();
    
    private final Transform3D cameraPose;
    
