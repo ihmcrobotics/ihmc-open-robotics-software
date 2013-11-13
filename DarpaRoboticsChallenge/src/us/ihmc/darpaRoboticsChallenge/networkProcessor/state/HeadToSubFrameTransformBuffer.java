@@ -4,7 +4,7 @@ import javax.media.j3d.Transform3D;
 
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
 
-public class HeadToLidarTransformBuffer implements PendableBuffer
+public class HeadToSubFrameTransformBuffer implements PendableBuffer
 {
    private final int size;
    private final TimeStampedTransform3D[] transforms;
@@ -12,7 +12,7 @@ public class HeadToLidarTransformBuffer implements PendableBuffer
    private long oldestTimeStamp;
    private long newestTimestamp;
 
-   public HeadToLidarTransformBuffer(int size)
+   public HeadToSubFrameTransformBuffer(int size)
    {
       this.size = size;
       transforms = new TimeStampedTransform3D[size];
