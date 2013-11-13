@@ -307,7 +307,7 @@ public class MomentumBasedController
       
       passiveQKneeThreshold.set(0.3);
       passiveKneeMaxTorque.set(25.0);
-      passiveKneeKv.set(5.0);      
+      passiveKneeKv.set(5.0);
    }
 
    public SideDependentList<ContactablePlaneBody> getFeet()
@@ -352,6 +352,9 @@ public class MomentumBasedController
          momentumBasedControllerSpy.doPrioritaryControl();
       }
 
+      for (GeometricJacobian jacobian : robotJacobians)
+         jacobian.compute();
+      
       callUpdatables();
 
       inverseDynamicsCalculator.reset();
@@ -479,11 +482,6 @@ public class MomentumBasedController
 
          momentumBasedControllerSpy.doSecondaryControl();
       }
-   }
-
-   private void resetGroundReactionWrenchFilter()
-   {
-      momentumControlModuleBridge.resetGroundReactionWrenchFilter();
    }
 
    private void callUpdatables()
@@ -649,8 +647,10 @@ public class MomentumBasedController
       return centerOfMassFrame;
    }
 
-   public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
+   public void setDesiredSpatialAcceleration(int jacobianId, TaskspaceConstraintData taskspaceConstraintData)
    {
+      GeometricJacobian jacobian = getJacobian(jacobianId);
+      
       if (momentumBasedControllerSpy != null)
       {
          momentumBasedControllerSpy.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
@@ -660,8 +660,10 @@ public class MomentumBasedController
       momentumControlModuleBridge.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);
    }
 
-   public void setDesiredPointAcceleration(GeometricJacobian rootToEndEffectorJacobian, FramePoint contactPoint, FrameVector desiredAcceleration)
+   public void setDesiredPointAcceleration(int rootToEndEffectorJacobianId, FramePoint contactPoint, FrameVector desiredAcceleration)
    {
+      GeometricJacobian rootToEndEffectorJacobian = getJacobian(rootToEndEffectorJacobianId);
+      
       if (momentumBasedControllerSpy != null)
       {
          momentumBasedControllerSpy.setDesiredPointAcceleration(rootToEndEffectorJacobian, contactPoint, desiredAcceleration);
@@ -672,9 +674,11 @@ public class MomentumBasedController
       momentumControlModuleBridge.setDesiredPointAcceleration(desiredPointAccelerationCommand);
    }
 
-   public void setDesiredPointAcceleration(GeometricJacobian rootToEndEffectorJacobian, FramePoint contactPoint, FrameVector desiredAcceleration,
+   public void setDesiredPointAcceleration(int rootToEndEffectorJacobianId, FramePoint contactPoint, FrameVector desiredAcceleration,
          DenseMatrix64F selectionMatrix)
    {
+      GeometricJacobian rootToEndEffectorJacobian = getJacobian(rootToEndEffectorJacobianId);
+      
       if (momentumBasedControllerSpy != null)
       {
          momentumBasedControllerSpy.setDesiredPointAcceleration(rootToEndEffectorJacobian, contactPoint, desiredAcceleration);
@@ -844,5 +848,92 @@ public class MomentumBasedController
    public void setCylindricalContactStateProperties(ContactableCylinderBody contactableCylinderBody, double coefficientOfFriction, boolean inContact)
    {
       yoCylindricalContactStates.get(contactableCylinderBody).set(coefficientOfFriction, contactableCylinderBody, inContact);
+   }
+   
+   private final List<GeometricJacobian> robotJacobians = new ArrayList<GeometricJacobian>();
+   
+   /**
+    * Find or create a jacobian and register it in the MomentumBasedController.
+    * It returns an jacobianId with which it is possible to find the jacobian later with the method getJacobian(int jacobianId).
+    * @param ancestor
+    * @param descendant
+    * @param jacobianFrame
+    * @return
+    */
+   public int getOrCreateGeometricJacobian(RigidBody ancestor, RigidBody descendant, ReferenceFrame jacobianFrame)
+   {
+      for (int i = 0; i < robotJacobians.size(); i++)
+      {
+         GeometricJacobian jacobian = robotJacobians.get(i);
+         boolean ancestorsAreTheSame = ancestor == jacobian.getBase();
+         boolean descendantAreTheSame = descendant == jacobian.getEndEffector();
+         boolean areExpressedFrameTheSame = jacobianFrame == jacobian.getJacobianFrame();
+         
+         if (ancestorsAreTheSame && descendantAreTheSame && areExpressedFrameTheSame)
+         {
+            System.out.println("Jacobians are the same!");
+            return i;
+         }
+      }
+      
+      GeometricJacobian newJacobian = new GeometricJacobian(ancestor, descendant, jacobianFrame);
+      int jacobianId = robotJacobians.size();
+      robotJacobians.add(newJacobian);
+      return jacobianId;
+   }
+   
+   /**
+    * 
+    * @param ancestor
+    * @param descendant
+    * @param jacobianFrame
+    * @return
+    */
+   public int getOrCreateGeometricJacobian(InverseDynamicsJoint[] joints, ReferenceFrame jacobianFrame)
+   {
+      for (int i = 0; i < robotJacobians.size(); i++)
+      {
+         GeometricJacobian jacobian = robotJacobians.get(i);
+         InverseDynamicsJoint[] existingJacobianJoints = jacobian.getJointsInOrder();
+         boolean sameNumberOfJoints = joints.length == existingJacobianJoints.length;
+         boolean areExpressedFrameTheSame = jacobianFrame == jacobian.getJacobianFrame();
+         
+         if (sameNumberOfJoints && areExpressedFrameTheSame)
+         {
+            boolean allJointsAreTheSame = true;
+            // The joint arrays are considered to be in the same order
+            for (int j = 0; j < existingJacobianJoints.length; j++)
+            {
+               boolean jointsAreTheSame = joints[j] == existingJacobianJoints[j];
+               if (!jointsAreTheSame)
+               {
+                  allJointsAreTheSame = false;
+                  break;
+               }
+            }
+            if (allJointsAreTheSame)
+            {
+               System.out.println("Jacobians are the same!");
+               return i;
+            }
+         }
+      }
+
+      GeometricJacobian newJacobian = new GeometricJacobian(joints, jacobianFrame);
+      int jacobianId = robotJacobians.size();
+      robotJacobians.add(newJacobian);
+      return jacobianId;
+   }
+   
+   /**
+    * Return a jacobian previously created with the getOrCreate method using a jacobianId.
+    * @param jacobianId
+    * @return
+    */
+   public GeometricJacobian getJacobian(int jacobianId)
+   {
+      if (jacobianId >= robotJacobians.size() || jacobianId < 0)
+         return null;
+      return robotJacobians.get(jacobianId);
    }
 }
