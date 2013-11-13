@@ -66,4 +66,9 @@ public class SimulatedLinearAccelerationSensor extends SimulatedSensor<Vector3d>
    {
       return linearAccelerationOutputPort;
    }
+
+   public void initialize()
+   {
+//    empty
+   }
 }

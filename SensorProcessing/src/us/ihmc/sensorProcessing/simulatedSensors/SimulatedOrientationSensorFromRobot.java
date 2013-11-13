@@ -72,4 +72,9 @@ public class SimulatedOrientationSensorFromRobot extends SimulatedSensor<Matrix3
    {
       return orientationOutputPort;
    }
+
+   public void initialize()
+   {
+//    empty
+   }
 }

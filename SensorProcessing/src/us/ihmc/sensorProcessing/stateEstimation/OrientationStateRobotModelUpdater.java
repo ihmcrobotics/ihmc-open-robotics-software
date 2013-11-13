@@ -176,4 +176,10 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
    {
       return inverseDynamicsStructureOutputPort;
    }
+
+   public void initialize()
+   {
+      startComputation();
+      waitUntilComputationIsDone();
+   }
 }

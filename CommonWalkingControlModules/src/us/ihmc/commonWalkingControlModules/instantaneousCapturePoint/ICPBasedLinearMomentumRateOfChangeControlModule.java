@@ -188,4 +188,9 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
    {
       return desiredCenterOfMassHeightAccelerationInputPort;
    }
+
+   public void initialize()
+   {
+//    empty
+   }
 }

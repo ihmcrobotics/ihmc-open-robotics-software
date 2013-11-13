@@ -72,4 +72,9 @@ public class SimulatedPointVelocitySensor extends SimulatedSensor<Vector3d>
    {
       return pointVelocityOutputPort;
    }
+
+   public void initialize()
+   {
+//    empty
+   }
 }

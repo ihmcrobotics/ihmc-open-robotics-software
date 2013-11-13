@@ -46,4 +46,9 @@ public class SimulatedLinearAccelerationSensorFromRobot extends SimulatedSensor<
    {
       return linearAccelerationOutputPort;
    }
+
+   public void initialize()
+   {
+//    empty
+   }
 }

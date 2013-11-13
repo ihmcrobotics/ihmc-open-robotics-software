@@ -78,4 +78,9 @@ public class CoMBasedMomentumRateOfChangeControlModule extends AbstractControlFl
    {
       return desiredCenterOfMassInputPort;
    }
+
+   public void initialize()
+   {
+//    empty
+   }
 }

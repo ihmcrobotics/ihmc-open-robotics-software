@@ -56,4 +56,9 @@ public class SimulatedAngularVelocitySensor extends SimulatedSensor<Vector3d>
    {
       return angularVelocityOutputPort;
    }
+
+   public void initialize()
+   {
+      // empty
+   }
 }

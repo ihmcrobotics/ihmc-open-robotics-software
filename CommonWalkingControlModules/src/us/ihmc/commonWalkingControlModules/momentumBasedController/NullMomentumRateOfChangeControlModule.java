@@ -29,4 +29,9 @@ public class NullMomentumRateOfChangeControlModule extends AbstractControlFlowEl
    {
       return momentumRateOfChangeOutputPort;
    }
+
+   public void initialize()
+   {
+//    empty
+   }
 }

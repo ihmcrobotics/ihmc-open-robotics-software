@@ -125,13 +125,9 @@ public class SensorAndEstimatorAssembler
             orientationAndCoMEstimatorCreator.addLinearAccelerationSensorConfigurations(linearAccelerationSensorConfigurations);
          }
 
-         // TODO: Not sure if we need to do this here:
-         inverseDynamicsStructure.updateInternalState();
-
          fancyEstimator = orientationAndCoMEstimatorCreator.createOrientationAndCoMEstimator(controlFlowGraph, controlDT, estimationFrame, estimatorReferenceFrameMap,
                estimatorRigidBodyToIndexMap, registry);
          stateEstimatorDataFromControllerSource.connectDesiredAccelerationPorts(controlFlowGraph, fancyEstimator);
-         fancyEstimator.initialize();
          
          simpleEstimator = null;
       }
@@ -140,15 +136,17 @@ public class SensorAndEstimatorAssembler
          fancyEstimator = null;
          simpleEstimator = new SimplePelvisStateEstimatorRobotModelUpdater("simpleCoMEstimator", controlDT, estimationFrame, estimatorReferenceFrameMap, estimatorRigidBodyToIndexMap,
                controlFlowGraph, inverseDynamicsStructureOutputPort, simplePositionStateRobotModelUpdater, registry, assumePerfectIMU);
-         simpleEstimator.initialize();
       }
       
       parentRegistry.addChild(registry);
 
-      controlFlowGraph.initializeAfterConnections();
-      controlFlowGraph.startComputation();
-      controlFlowGraph.waitUntilComputationIsDone();
+   }
 
+
+   public void initialize()
+   {
+      controlFlowGraph.initializeAfterConnections();
+      
       if (VISUALIZE_CONTROL_FLOW_GRAPH)
       {
          controlFlowGraph.visualize();
@@ -181,5 +179,4 @@ public class SensorAndEstimatorAssembler
    {
       return jointSensorDataSource;
    }
-
 }

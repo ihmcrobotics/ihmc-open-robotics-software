@@ -68,5 +68,10 @@ public class SimulatedPointVelocitySensorFromRobot extends SimulatedSensor<Tuple
    {
       return pointVelocityOutputPort;
    }
+
+   public void initialize()
+   {
+//    empty
+   }
 }
 

@@ -103,4 +103,9 @@ public class JointStateFullRobotModelUpdater extends AbstractControlFlowElement
       return inverseDynamicsStructureOutputPort;
    }
 
+   public void initialize()
+   {
+      startComputation();
+      waitUntilComputationIsDone();
+   }
 }

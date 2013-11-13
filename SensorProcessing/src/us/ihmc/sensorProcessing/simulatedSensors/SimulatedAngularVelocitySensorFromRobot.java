@@ -46,4 +46,9 @@ public class SimulatedAngularVelocitySensorFromRobot extends SimulatedSensor<Tup
    {
       return angularVelocityOutputPort;
    }
+
+   public void initialize()
+   {
+//    empty
+   }
 }

@@ -33,4 +33,9 @@ public class SimulatedOneDoFJointPositionSensor extends SimulatedSensor<MutableD
    {
       return jointPositionOutputPort;
    }
+
+   public void initialize()
+   {
+//    empty
+   }
 }
