@@ -68,7 +68,7 @@ public class NumericalInverseKinematicsCalculatorWithRobotTest
 
    public NumericalInverseKinematicsCalculatorWithRobotTest()
    {
-      InverseKinematicsSolver inverseKinameticSolverToUse = InverseKinematicsSolver.PETER_SOLVER;
+      InverseKinematicsSolver inverseKinameticSolverToUse = InverseKinematicsSolver.MAARTEN_SOLVER;
       DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCConfigParameters.robotModelToUse, false);
       JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap, true);
       SDFFullRobotModelFactory fullRobotModelFactory = new SDFFullRobotModelFactory(jaxbSDFLoader.getGeneralizedSDFRobotModel(jointMap.getModelName()),
@@ -105,7 +105,7 @@ public class NumericalInverseKinematicsCalculatorWithRobotTest
    @Test
    public void generateRandomFeasibleRobotPoses()
    {
-      int nTests = 10000;
+      int nTests = 10;
 
       for (int i = 0; i < nTests; i++)
       {
