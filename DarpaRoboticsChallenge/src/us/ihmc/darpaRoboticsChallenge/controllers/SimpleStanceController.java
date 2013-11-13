@@ -127,7 +127,7 @@ public class SimpleStanceController implements RobotController
       contactStates = createContactStates(feet, registry, coefficientOfFriction);
       
       this.momentumControlModule = new OptimizationMomentumControlModule(rootJoint, referenceFrames.getCenterOfMassFrame(), controlDT, gravityZ,
-            momentumOptimizationSettings, twistCalculator, contactStates.values(), new ArrayList<CylindricalContactState>(), null, registry);
+            momentumOptimizationSettings, twistCalculator, null, contactStates.values(), new ArrayList<CylindricalContactState>(), null, registry);
 
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
 

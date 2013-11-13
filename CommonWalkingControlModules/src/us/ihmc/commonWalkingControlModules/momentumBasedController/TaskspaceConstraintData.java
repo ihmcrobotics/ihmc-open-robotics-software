@@ -5,6 +5,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 
@@ -13,7 +14,15 @@ public class TaskspaceConstraintData
    private final SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector();
    private final DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
    private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
+   private RigidBody base;
+   private RigidBody endEffector;
 
+   public void set(RigidBody base, RigidBody endEffector)
+   {
+      this.base = base;
+      this.endEffector = endEffector;
+   }
+   
    public void set(SpatialAccelerationVector spatialAcceleration)
    {
       this.spatialAcceleration.set(spatialAcceleration);
@@ -78,6 +87,16 @@ public class TaskspaceConstraintData
    public DenseMatrix64F getSelectionMatrix()
    {
       return selectionMatrix;
+   }
+
+   public RigidBody getBase()
+   {
+      return base;
+   }
+
+   public RigidBody getEndEffector()
+   {
+      return endEffector;
    }
 
    @Override

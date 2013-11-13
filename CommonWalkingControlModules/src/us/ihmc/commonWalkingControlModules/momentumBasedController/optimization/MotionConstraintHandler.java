@@ -11,6 +11,7 @@ import org.ejml.factory.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.SingularOps;
 
+import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredPointAccelerationCommand;
@@ -70,11 +71,16 @@ public class MotionConstraintHandler
 
    private final YoVariableRegistry registry; 
    private final BooleanYoVariable removeNullspaceFromJ;
+   private final GeometricJacobianHolder geometricJacobianHolder;
+   private final boolean jacobiansHaveToBeUpdated;
    
-   public MotionConstraintHandler(String name, InverseDynamicsJoint[] jointsInOrder, TwistCalculator twistCalculator, YoVariableRegistry parentRegistry)
+   public MotionConstraintHandler(String name, InverseDynamicsJoint[] jointsInOrder, TwistCalculator twistCalculator, GeometricJacobianHolder geometricJacobianHolder, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(name + getClass().getSimpleName()); 
       removeNullspaceFromJ = new BooleanYoVariable(name + "RemoveNullspaceFromJ", registry);
+      
+      this.geometricJacobianHolder = (geometricJacobianHolder != null) ? geometricJacobianHolder : new GeometricJacobianHolder();
+      jacobiansHaveToBeUpdated = geometricJacobianHolder == null;
       
       this.jointsInOrder = jointsInOrder;
       this.nDegreesOfFreedom = ScrewTools.computeDegreesOfFreedom(jointsInOrder);
@@ -177,7 +183,6 @@ public class MotionConstraintHandler
    {
       // (S * J) * vdot = S * (Tdot - Jdot * v)
       GeometricJacobian jacobian = desiredSpatialAccelerationCommand.getJacobian();
-      jacobian.compute(); //TODO: Necessary, inefficient?
       TaskspaceConstraintData taskspaceConstraintData = desiredSpatialAccelerationCommand.getTaskspaceConstraintData();
       double weight = desiredSpatialAccelerationCommand.getWeight();
       
@@ -187,12 +192,13 @@ public class MotionConstraintHandler
 
       if (selectionMatrix.getNumRows() > 0)
       {
-         RigidBody base = getBase(taskSpaceAcceleration);
-         RigidBody endEffector = getEndEffector(taskSpaceAcceleration);
-
-         // TODO: inefficient
-         GeometricJacobian baseToEndEffectorJacobian = new GeometricJacobian(base, endEffector, taskSpaceAcceleration.getExpressedInFrame());    // FIXME: garbage, repeated computation
-         baseToEndEffectorJacobian.compute();
+         RigidBody base = (taskspaceConstraintData.getBase() == null) ? getBase(taskSpaceAcceleration) : taskspaceConstraintData.getBase();
+         RigidBody endEffector = (taskspaceConstraintData.getEndEffector() == null) ? getEndEffector(taskSpaceAcceleration) : taskspaceConstraintData.getEndEffector();
+         
+         int baseToEndEffectorJacobianId = geometricJacobianHolder.getOrCreateGeometricJacobian(base, endEffector, taskSpaceAcceleration.getExpressedInFrame());
+         GeometricJacobian baseToEndEffectorJacobian = geometricJacobianHolder.getJacobian(baseToEndEffectorJacobianId);
+         if (jacobiansHaveToBeUpdated)
+            baseToEndEffectorJacobian.compute();
 
          // TODO: inefficient
          convectiveTermCalculator.computeJacobianDerivativeTerm(baseToEndEffectorJacobian, convectiveTerm);
@@ -344,9 +350,10 @@ public class MotionConstraintHandler
          RigidBody base = getBase(taskSpaceAcceleration);
          RigidBody endEffector = getEndEffector(taskSpaceAcceleration);
 
-         // TODO: inefficient
-         GeometricJacobian baseToEndEffectorJacobian = new GeometricJacobian(base, endEffector, taskSpaceAcceleration.getExpressedInFrame());    // FIXME: garbage, repeated computation
-         baseToEndEffectorJacobian.compute();
+         int baseToEndEffectorJacobianId = geometricJacobianHolder.getOrCreateGeometricJacobian(base, endEffector, taskSpaceAcceleration.getExpressedInFrame());
+         GeometricJacobian baseToEndEffectorJacobian = geometricJacobianHolder.getJacobian(baseToEndEffectorJacobianId);
+         if (jacobiansHaveToBeUpdated)
+            baseToEndEffectorJacobian.compute();
 
          // TODO: inefficient
          convectiveTermCalculator.computeJacobianDerivativeTerm(baseToEndEffectorJacobian, convectiveTerm);

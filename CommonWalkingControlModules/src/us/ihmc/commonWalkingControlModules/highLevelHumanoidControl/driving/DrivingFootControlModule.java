@@ -320,6 +320,7 @@ public class DrivingFootControlModule
 
       footOrientationControlSpatialAcceleration.setToZero(foot.getBodyFixedFrame(), elevator.getBodyFixedFrame(), foot.getBodyFixedFrame());
       footOrientationControlSpatialAcceleration.setAngularPart(output.getVector());
+      footOrientationTaskspaceConstraintData.set(elevator, foot);
       footOrientationTaskspaceConstraintData.set(footOrientationControlSpatialAcceleration, footOrientationNullspaceMultipliers,
               footOrientationSelectionMatrix);
       momentumBasedController.setDesiredSpatialAcceleration(footJacobianId, footOrientationTaskspaceConstraintData);

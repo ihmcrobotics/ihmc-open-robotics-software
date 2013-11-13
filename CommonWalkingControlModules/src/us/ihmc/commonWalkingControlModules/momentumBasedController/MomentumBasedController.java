@@ -136,6 +136,8 @@ public class MomentumBasedController
    private final ContactPointVisualizer contactPointVisualizer;
    private final WrenchVisualizer wrenchVisualizer;
 
+   private final GeometricJacobianHolder robotJacobianHolder = new GeometricJacobianHolder();
+   
    public MomentumBasedController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
          CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime, double gravityZ,
          TwistCalculator twistCalculator, SideDependentList<ContactablePlaneBody> feet, SideDependentList<ContactablePlaneBody> handsWithFingersBentBack,
@@ -300,7 +302,7 @@ public class MomentumBasedController
       if (momentumOptimizationSettings != null)
       {
          optimizationMomentumControlModule = new OptimizationMomentumControlModule(fullRobotModel.getRootJoint(), referenceFrames.getCenterOfMassFrame(),
-               controlDT, gravityZ, momentumOptimizationSettings, twistCalculator, yoPlaneContactStates.values(), yoCylindricalContactStates.values(), dynamicGraphicObjectsListRegistry, registry);
+               controlDT, gravityZ, momentumOptimizationSettings, twistCalculator, robotJacobianHolder, yoPlaneContactStates.values(), yoCylindricalContactStates.values(), dynamicGraphicObjectsListRegistry, registry);
       }
 
       momentumControlModuleBridge = new MomentumControlModuleBridge(optimizationMomentumControlModule, oldMomentumControlModule, centerOfMassFrame, registry);
@@ -352,8 +354,7 @@ public class MomentumBasedController
          momentumBasedControllerSpy.doPrioritaryControl();
       }
 
-      for (GeometricJacobian jacobian : robotJacobians)
-         jacobian.compute();
+      robotJacobianHolder.compute();
       
       callUpdatables();
 
@@ -850,81 +851,14 @@ public class MomentumBasedController
       yoCylindricalContactStates.get(contactableCylinderBody).set(coefficientOfFriction, contactableCylinderBody, inContact);
    }
    
-   private final List<GeometricJacobian> robotJacobians = new ArrayList<GeometricJacobian>();
-   
-   /**
-    * Find or create a jacobian and register it in the MomentumBasedController.
-    * It returns an jacobianId with which it is possible to find the jacobian later with the method getJacobian(int jacobianId).
-    * @param ancestor
-    * @param descendant
-    * @param jacobianFrame
-    * @return
-    */
    public int getOrCreateGeometricJacobian(RigidBody ancestor, RigidBody descendant, ReferenceFrame jacobianFrame)
    {
-      for (int i = 0; i < robotJacobians.size(); i++)
-      {
-         GeometricJacobian jacobian = robotJacobians.get(i);
-         boolean ancestorsAreTheSame = ancestor == jacobian.getBase();
-         boolean descendantAreTheSame = descendant == jacobian.getEndEffector();
-         boolean areExpressedFrameTheSame = jacobianFrame == jacobian.getJacobianFrame();
-         
-         if (ancestorsAreTheSame && descendantAreTheSame && areExpressedFrameTheSame)
-         {
-            System.out.println("Jacobians are the same!");
-            return i;
-         }
-      }
-      
-      GeometricJacobian newJacobian = new GeometricJacobian(ancestor, descendant, jacobianFrame);
-      newJacobian.compute(); // Compute in case you need it right away
-      int jacobianId = robotJacobians.size();
-      robotJacobians.add(newJacobian);
-      return jacobianId;
+      return robotJacobianHolder.getOrCreateGeometricJacobian(ancestor, descendant, jacobianFrame);
    }
    
-   /**
-    * 
-    * @param ancestor
-    * @param descendant
-    * @param jacobianFrame
-    * @return
-    */
    public int getOrCreateGeometricJacobian(InverseDynamicsJoint[] joints, ReferenceFrame jacobianFrame)
    {
-      for (int i = 0; i < robotJacobians.size(); i++)
-      {
-         GeometricJacobian jacobian = robotJacobians.get(i);
-         InverseDynamicsJoint[] existingJacobianJoints = jacobian.getJointsInOrder();
-         boolean sameNumberOfJoints = joints.length == existingJacobianJoints.length;
-         boolean areExpressedFrameTheSame = jacobianFrame == jacobian.getJacobianFrame();
-         
-         if (sameNumberOfJoints && areExpressedFrameTheSame)
-         {
-            boolean allJointsAreTheSame = true;
-            // The joint arrays are considered to be in the same order
-            for (int j = 0; j < existingJacobianJoints.length; j++)
-            {
-               boolean jointsAreTheSame = joints[j] == existingJacobianJoints[j];
-               if (!jointsAreTheSame)
-               {
-                  allJointsAreTheSame = false;
-                  break;
-               }
-            }
-            if (allJointsAreTheSame)
-            {
-               System.out.println("Jacobians are the same!");
-               return i;
-            }
-         }
-      }
-
-      GeometricJacobian newJacobian = new GeometricJacobian(joints, jacobianFrame);
-      newJacobian.compute(); // Compute in case you need it right away
-      int jacobianId = robotJacobians.size();
-      robotJacobians.add(newJacobian);
-      return jacobianId;
+      return robotJacobianHolder.getOrCreateGeometricJacobian(joints, jacobianFrame);
    }
    
    /**
@@ -934,8 +868,6 @@ public class MomentumBasedController
     */
    public GeometricJacobian getJacobian(int jacobianId)
    {
-      if (jacobianId >= robotJacobians.size() || jacobianId < 0)
-         return null;
-      return robotJacobians.get(jacobianId);
+      return robotJacobianHolder.getJacobian(jacobianId);
    }
 }

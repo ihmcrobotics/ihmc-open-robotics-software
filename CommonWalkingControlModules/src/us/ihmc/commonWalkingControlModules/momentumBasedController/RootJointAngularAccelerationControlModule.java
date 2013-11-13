@@ -34,6 +34,7 @@ public class RootJointAngularAccelerationControlModule
       rootPredecessor = rootJoint.getPredecessor();
       rootSuccessor = rootJoint.getSuccessor();
       rootJacobianId = momentumBasedController.getOrCreateGeometricJacobian(rootPredecessor, rootSuccessor, rootJoint.getFrameAfterJoint());
+      taskspaceConstraintData.set(rootPredecessor, rootSuccessor);
       
       registry = new YoVariableRegistry(getClass().getSimpleName());
       rootJointOrientationControlModule = new RigidBodyOrientationControlModule(rootJoint.getName(), rootPredecessor, rootSuccessor,

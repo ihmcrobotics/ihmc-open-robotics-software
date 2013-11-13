@@ -20,7 +20,7 @@ public abstract class LoadBearingHandControlState extends TaskspaceHandControlSt
    public LoadBearingHandControlState(String namePrefix, IndividualHandControlState stateEnum, MomentumBasedController momentumBasedController, int jacobianId,
          RigidBody elevator, RigidBody endEffector, YoVariableRegistry parentRegistry)
    {
-      super(namePrefix, stateEnum, momentumBasedController, jacobianId, parentRegistry);
+      super(namePrefix, stateEnum, momentumBasedController, jacobianId, elevator, endEffector, parentRegistry);
       
       coefficientOfFriction = new DoubleYoVariable(name + "CoefficientOfFriction", registry);
       handAcceleration = new SpatialAccelerationVector(endEffector.getBodyFixedFrame(), elevator.getBodyFixedFrame(), endEffector.getBodyFixedFrame());
