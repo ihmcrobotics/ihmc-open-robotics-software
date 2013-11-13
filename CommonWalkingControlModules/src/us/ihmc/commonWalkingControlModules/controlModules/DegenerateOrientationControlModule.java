@@ -34,6 +34,8 @@ public abstract class DegenerateOrientationControlModule
    private final DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 1);
    private final SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector();
 
+   private final TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
+   
    private final String namePrefix;
    private final RigidBody endEffector;
    private final TwistCalculator twistCalculator;
@@ -147,7 +149,7 @@ public abstract class DegenerateOrientationControlModule
    {
       DenseMatrix64F selectionMatrix = selectionMatrices.get(jacobianIndex.getIntegerValue());
 
-      TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
+      taskspaceConstraintData.set(bases.get(baseIndex.getIntegerValue()), endEffector);
       taskspaceConstraintData.set(spatialAcceleration, nullspaceMultipliers, selectionMatrix);
       return taskspaceConstraintData;
    }

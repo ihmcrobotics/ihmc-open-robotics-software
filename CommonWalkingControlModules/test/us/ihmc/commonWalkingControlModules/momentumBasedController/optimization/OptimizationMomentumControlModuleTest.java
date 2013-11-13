@@ -548,7 +548,7 @@ public class OptimizationMomentumControlModuleTest
       TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), rootJoint.getPredecessor());
 
       OptimizationMomentumControlModule momentumControlModule = new OptimizationMomentumControlModule(rootJoint, centerOfMassFrame, controlDT, gravityZ,
-            momentumOptimizationSettings, twistCalculator, planeContactStates, cylindricalContactStates, null, registry);
+            momentumOptimizationSettings, twistCalculator, null, planeContactStates, cylindricalContactStates, null, registry);
       
       momentumControlModule.initialize();
 

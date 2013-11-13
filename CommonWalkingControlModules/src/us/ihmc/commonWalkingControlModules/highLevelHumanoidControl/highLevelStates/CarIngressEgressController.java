@@ -107,6 +107,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    private final DoubleYoVariable coefficientOfFrictionForFeet = new DoubleYoVariable("coefficientOfFrictionForFeet", registry);
    
    private final RigidBody elevator;
+   private final RigidBody pelvis;
    private final List<ContactablePlaneBody> bodiesInContact = new ArrayList<ContactablePlaneBody>();
    private final Map<ContactablePlaneBody, Integer> contactJacobians = new LinkedHashMap<ContactablePlaneBody, Integer>();
 
@@ -149,6 +150,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       coefficientOfFrictionForFeet.set(0.6);
 
       elevator = fullRobotModel.getElevator();
+      pelvis = fullRobotModel.getPelvis();
       contactableThighs = momentumBasedController.getContactablePlaneThighs();
       contactablePelvis = momentumBasedController.getContactablePlanePelvis();
       contactablePelvisBack = momentumBasedController.getContactablePlanePelvisBack();
@@ -499,6 +501,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
       if (!requestedPelvisLoadBearing.getBooleanValue())
       {
+         pelvisTaskspaceConstraintData.set(elevator, pelvis);
          pelvisTaskspaceConstraintData.set(pelvisSpatialAcceleration);
       }
       else

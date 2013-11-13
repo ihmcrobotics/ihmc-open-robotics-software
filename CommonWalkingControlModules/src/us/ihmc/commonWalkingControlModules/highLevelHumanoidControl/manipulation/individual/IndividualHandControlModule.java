@@ -167,10 +167,10 @@ public class IndividualHandControlModule
             jacobianId, momentumBasedController, armControlParameters, controlDT, moveTime, registry);
 
       objectManipulationState = new ObjectManipulationState(namePrefix, IndividualHandControlState.OBJECT_MANIPULATION, robotSide, momentumBasedController, jacobianId,
-              handController, toolBody, endEffector, dynamicGraphicObjectsListRegistry, parentRegistry);
+              handController, toolBody, base, endEffector, dynamicGraphicObjectsListRegistry, parentRegistry);
 
       taskSpacePositionControlState = new TaskspaceHandPositionControlState(namePrefix, IndividualHandControlState.TASK_SPACE_POSITION, robotSide, momentumBasedController,
-              jacobianId, dynamicGraphicObjectsListRegistry, registry);
+              jacobianId, base, endEffector, dynamicGraphicObjectsListRegistry, registry);
 
       pointPositionControlState = new PointPositionHandControlState(momentumBasedController, robotSide, dynamicGraphicObjectsListRegistry, registry);
 
