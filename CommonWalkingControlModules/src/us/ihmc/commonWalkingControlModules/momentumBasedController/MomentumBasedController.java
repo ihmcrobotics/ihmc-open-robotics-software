@@ -300,7 +300,7 @@ public class MomentumBasedController
       if (momentumOptimizationSettings != null)
       {
          optimizationMomentumControlModule = new OptimizationMomentumControlModule(fullRobotModel.getRootJoint(), referenceFrames.getCenterOfMassFrame(),
-               controlDT, gravityZ, momentumOptimizationSettings, twistCalculator, dynamicGraphicObjectsListRegistry, registry, yoPlaneContactStates.values(), yoCylindricalContactStates.values());
+               controlDT, gravityZ, momentumOptimizationSettings, twistCalculator, yoPlaneContactStates.values(), yoCylindricalContactStates.values(), dynamicGraphicObjectsListRegistry, registry);
       }
 
       momentumControlModuleBridge = new MomentumControlModuleBridge(optimizationMomentumControlModule, oldMomentumControlModule, centerOfMassFrame, registry);
@@ -877,6 +877,7 @@ public class MomentumBasedController
       }
       
       GeometricJacobian newJacobian = new GeometricJacobian(ancestor, descendant, jacobianFrame);
+      newJacobian.compute(); // Compute in case you need it right away
       int jacobianId = robotJacobians.size();
       robotJacobians.add(newJacobian);
       return jacobianId;
@@ -920,6 +921,7 @@ public class MomentumBasedController
       }
 
       GeometricJacobian newJacobian = new GeometricJacobian(joints, jacobianFrame);
+      newJacobian.compute(); // Compute in case you need it right away
       int jacobianId = robotJacobians.size();
       robotJacobians.add(newJacobian);
       return jacobianId;

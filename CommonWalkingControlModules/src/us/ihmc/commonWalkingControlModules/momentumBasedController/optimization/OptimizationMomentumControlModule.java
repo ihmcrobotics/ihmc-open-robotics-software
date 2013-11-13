@@ -75,8 +75,8 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
    public OptimizationMomentumControlModule(InverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame,
          double controlDT, double gravityZ, MomentumOptimizationSettings momentumOptimizationSettings, TwistCalculator twistCalculator,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry,
-         Collection<? extends PlaneContactState> planeContactStates, Collection<? extends CylindricalContactState> cylindricalContactStates)
+         Collection<? extends PlaneContactState> planeContactStates, Collection<? extends CylindricalContactState> cylindricalContactStates,
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.jointsToOptimizeFor = momentumOptimizationSettings.getJointsToOptimizeFor();
       this.centroidalMomentumHandler = new CentroidalMomentumHandler(rootJoint, centerOfMassFrame, controlDT, registry);
