@@ -5,10 +5,13 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.filter.AccelerationLimitedYoFrameVector2d;
@@ -40,7 +43,9 @@ public class ICPProportionalController
    private final AccelerationLimitedYoFrameVector2d rateLimitedCMPOutput;
 
    private final DoubleYoVariable maxDistanceBetweenICPAndCMP = new DoubleYoVariable("maxDistanceBetweenICPAndCMP", registry);
-   
+   private final BooleanYoVariable cmpProjected = new BooleanYoVariable("cmpProjected", registry);
+   private final FrameLineSegment2d cmpToICP = new FrameLineSegment2d();
+
    private final YoFramePoint icpPosition;
    private final DoubleYoVariable alphaICPVelocity;
    private final FilteredVelocityYoFrameVector icpVelocity;
@@ -78,10 +83,11 @@ public class ICPProportionalController
    {
       filteredCMPOutput.reset();
       rateLimitedCMPOutput.reset();
+      icpErrorIntegrated.set(0.0, 0.0);
    }
 
    public FramePoint2d doProportionalControl(FramePoint2d capturePoint, FramePoint2d desiredCapturePoint, FrameVector2d desiredCapturePointVelocity,
-           double omega0)
+           double omega0, boolean projectIntoSupportPolygon, FrameConvexPolygon2d supportPolygon)
    {
       desiredCapturePointVelocity.changeFrame(desiredCapturePoint.getReferenceFrame());
       FramePoint2d desiredCMP = new FramePoint2d(capturePoint);
@@ -157,6 +163,16 @@ public class ICPProportionalController
          desiredCMP.sub(desiredCMPToICP.getFrameVector2dCopy());
       }
       
+      if (projectIntoSupportPolygon)
+      {
+         projectIntoSupportPolygonIfOutside(capturePoint, desiredCapturePoint, supportPolygon, desiredCMP);
+         
+         if (cmpProjected.getBooleanValue())
+         {
+            icpErrorIntegrated.scale(0.9); //Bleed off quickly when projecting. 0.9 is a pretty arbitrary magic number.
+         }
+      }
+      
       rawCMPOutput.set(desiredCMP);
       
       filteredCMPOutput.update();
@@ -164,6 +180,36 @@ public class ICPProportionalController
       rateLimitedCMPOutput.getFramePoint2d(desiredCMP);
       
       return desiredCMP;
+   }
+
+   private void projectIntoSupportPolygonIfOutside(FramePoint2d capturePoint, FramePoint2d desiredCapturePoint, FrameConvexPolygon2d supportPolygon,
+         FramePoint2d desiredCMP)
+   {
+      desiredCMP.changeFrame(supportPolygon.getReferenceFrame());
+
+      if (supportPolygon.isPointInside(desiredCMP))
+      {
+         cmpProjected.set(false);
+      }
+      else
+      {
+         // Don't just project the cmp onto the support polygon.
+         // Instead, find the first intersection from the cmp to the support polygon
+         // along the line segment from the cmp to the capture point. 
+         cmpProjected.set(true);
+
+         capturePoint.changeFrame(desiredCMP.getReferenceFrame());
+
+         cmpToICP.setAndChangeFrame(desiredCMP, capturePoint);
+         FramePoint2d[] intersections = supportPolygon.intersectionWith(cmpToICP); 
+
+         if ((intersections != null) && (intersections[0] != null))
+         {
+            desiredCMP.set(intersections[0]);
+         }
+      }
+      
+      desiredCMP.changeFrame(desiredCapturePoint.getReferenceFrame());
    }
 
    public void setGains(double captureKpParallelToMotion, double captureKpOrthogonalToMotion, double filterBreakFrequencyHertz, double rateLimitCMP, double accelerationLimitCMP)
