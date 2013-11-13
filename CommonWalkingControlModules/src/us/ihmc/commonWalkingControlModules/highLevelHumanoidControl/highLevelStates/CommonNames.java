@@ -17,22 +17,10 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
  */
 public enum CommonNames
 {
-   /**
-    * Desired pose
-    */
    q_d("_q_d"),
-   /**
-    * Desired pose derivative, e.g. desired velocity
-    */
    qd_d("_qd_d"),
    f_d("_f_d"),
-   /**
-    * Propotional gains on position
-    */
    k_q_p("_k_q_p"),
-   /**
-    * Integral gains on velocity
-    */
    k_q_i("_k_q_i"),
    k_qd_p("_k_qd_p"),
    k_f_p("_k_f_p"),
@@ -51,8 +39,7 @@ public enum CommonNames
    kp("_kp"),
    kd("_kd"),
    current("_i"),
-   forceCtrlScaling("_forceCtrlScaling");
-
+   doIHMCControlRatio("doIHMCControlRatio");
 
    private String name;
 
