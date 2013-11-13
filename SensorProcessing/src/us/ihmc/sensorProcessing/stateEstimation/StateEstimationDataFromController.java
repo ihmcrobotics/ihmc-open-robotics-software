@@ -236,5 +236,10 @@ public class StateEstimationDataFromController extends AbstractControlFlowElemen
          pointVelocities.get(i).calculateChecksum(checksum);
       }
    }
+
+   public void initialize()
+   {
+//    empty
+   }
 }
 

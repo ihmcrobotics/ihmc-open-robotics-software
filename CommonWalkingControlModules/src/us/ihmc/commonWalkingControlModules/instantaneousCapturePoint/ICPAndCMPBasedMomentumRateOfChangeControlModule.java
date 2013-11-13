@@ -295,4 +295,9 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
    {
       return momentumRateOfChangeOutputPort;
    }
+
+   public void initialize()
+   {
+//    empty
+   }
 }

@@ -33,4 +33,9 @@ public class SimulatedOneDoFJointVelocitySensor extends SimulatedSensor<MutableD
    {
       return jointVelocityOutputPort;
    }
+
+   public void initialize()
+   {
+//    empty
+   }
 }

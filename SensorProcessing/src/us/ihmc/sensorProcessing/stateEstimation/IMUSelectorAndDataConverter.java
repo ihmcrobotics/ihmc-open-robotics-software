@@ -171,4 +171,9 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
       return registry;
    }
 
+   public void initialize()
+   {
+      startComputation();
+      waitUntilComputationIsDone();
+   }
 }

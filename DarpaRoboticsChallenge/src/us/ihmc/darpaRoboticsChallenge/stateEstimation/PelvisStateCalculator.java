@@ -64,8 +64,6 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
 
    private final DoubleYoVariable delayTimeBeforeTrustingFoot = new DoubleYoVariable("delayTimeBeforeTrustingFoot", registry);
 
-   private boolean hasBeenInitialized = false;
-
    private final CenterOfMassCalculator centerOfMassCalculator;
    private final CenterOfMassJacobian centerOfMassJacobianBody;
 
@@ -301,6 +299,8 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
       forceZInPercentThresholdToFilterFoot.set(0.3); 
       
       slippageCompensatorMode.set(SlippageCompensatorMode.LOAD_THRESHOLD);
+      
+      initializeRobotState();
    }
    
    @SuppressWarnings("unchecked")
@@ -673,6 +673,8 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
    {
       reinitialize.set(false);
 
+      updateKinematics();
+      
       for(RobotSide robotSide : RobotSide.values)
       {
          footPositionsInWorld.get(robotSide).setToZero();
@@ -697,13 +699,6 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
    {
       defaultActionIntoStates();
       
-      if (!hasBeenInitialized)
-      {
-         hasBeenInitialized = true;
-         initializeRobotState();
-         return;
-      }
-
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
       
