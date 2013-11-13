@@ -39,7 +39,7 @@ public class WrenchVisualizer
    private final Wrench tempWrench = new Wrench();
    private final FrameVector tempVector = new FrameVector();
    private final FramePoint tempPoint = new FramePoint();
-   private final List<RigidBody> rigidBodies;
+   private final ArrayList<RigidBody> rigidBodies = new ArrayList<RigidBody>();
 
    public WrenchVisualizer(String name, List<RigidBody> rigidBodies, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
@@ -51,7 +51,7 @@ public class WrenchVisualizer
    {
       DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList(name);
 
-      this.rigidBodies = rigidBodies;
+      this.rigidBodies.addAll(rigidBodies);
       for (RigidBody rigidBody : rigidBodies)
       {
          String prefix = name + rigidBody.getName();
@@ -84,50 +84,43 @@ public class WrenchVisualizer
 
    public void visualize(Map<RigidBody, Wrench> wrenches)
    {
-      for (RigidBody rigidBody : rigidBodies)
+      for (int i = 0; i < rigidBodies.size(); i++)
       {
-         forces.get(rigidBody).set(Double.NaN, Double.NaN, Double.NaN);
-         torques.get(rigidBody).set(Double.NaN, Double.NaN, Double.NaN);
-         pointsOfApplication.get(rigidBody).set(Double.NaN, Double.NaN, Double.NaN);
-         forceVisualizers.get(rigidBody).hideGraphicObject();
-         torqueVisualizers.get(rigidBody).hideGraphicObject();
-      }
-      
-      for (RigidBody rigidBody : wrenches.keySet())
-      {
-         Wrench wrench = wrenches.get(rigidBody);
-         tempWrench.set(wrench);
-         tempWrench.changeFrame(tempWrench.getBodyFrame());
-
-         YoFrameVector force = forces.get(rigidBody);
-         tempVector.setToZero(tempWrench.getExpressedInFrame());
-         tempWrench.packLinearPart(tempVector);
-         tempVector.changeFrame(ReferenceFrame.getWorldFrame());
-         force.set(tempVector);
-
-         YoFrameVector torque = torques.get(rigidBody);
-         tempVector.setToZero(tempWrench.getExpressedInFrame());
-         tempWrench.packAngularPart(tempVector);
-         tempVector.changeFrame(ReferenceFrame.getWorldFrame());
-         torque.set(tempVector);
-
-         YoFramePoint pointOfApplication = pointsOfApplication.get(rigidBody);
-         tempPoint.setToZero(wrench.getBodyFrame());
-         tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
-         pointOfApplication.set(tempPoint);
-         
-         forceVisualizers.get(rigidBody).showGraphicObject();
-         torqueVisualizers.get(rigidBody).showGraphicObject();
-      }
-
-      for (DynamicGraphicVector forceVisualizer : forceVisualizers.values())
-      {
-         forceVisualizer.update();
-      }
-
-      for (DynamicGraphicVector torqueVisualizer : torqueVisualizers.values())
-      {
-         torqueVisualizer.update();
+         RigidBody rigidBody = rigidBodies.get(i);
+         Wrench wrench;
+         if((wrench = wrenches.get(rigidBody)) != null)
+         {
+            tempWrench.set(wrench);
+            tempWrench.changeFrame(tempWrench.getBodyFrame());
+            
+            YoFrameVector force = forces.get(rigidBody);
+            tempVector.setToZero(tempWrench.getExpressedInFrame());
+            tempWrench.packLinearPart(tempVector);
+            tempVector.changeFrame(ReferenceFrame.getWorldFrame());
+            force.set(tempVector);
+            
+            YoFrameVector torque = torques.get(rigidBody);
+            tempVector.setToZero(tempWrench.getExpressedInFrame());
+            tempWrench.packAngularPart(tempVector);
+            tempVector.changeFrame(ReferenceFrame.getWorldFrame());
+            torque.set(tempVector);
+            
+            YoFramePoint pointOfApplication = pointsOfApplication.get(rigidBody);
+            tempPoint.setToZero(wrench.getBodyFrame());
+            tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
+            pointOfApplication.set(tempPoint);
+            
+            forceVisualizers.get(rigidBody).showGraphicObject();
+            torqueVisualizers.get(rigidBody).showGraphicObject();
+         }
+         else
+         {
+            forces.get(rigidBody).set(Double.NaN, Double.NaN, Double.NaN);
+            torques.get(rigidBody).set(Double.NaN, Double.NaN, Double.NaN);
+            pointsOfApplication.get(rigidBody).set(Double.NaN, Double.NaN, Double.NaN);
+            forceVisualizers.get(rigidBody).hideGraphicObject();
+            torqueVisualizers.get(rigidBody).hideGraphicObject();            
+         }
       }
    }
 }
