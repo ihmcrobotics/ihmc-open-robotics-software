@@ -1,15 +1,15 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
+
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 
 public class ChestOrientationManager
@@ -18,6 +18,7 @@ public class ChestOrientationManager
    private final ChestOrientationControlModule chestOrientationControlModule;
    private final MomentumBasedController momentumBasedController;
    private final DoubleYoVariable timeLastUpdated = new DoubleYoVariable("chestDesiredTimelastUpdated", registry);
+   private int jacobianId = -1;
 
    public ChestOrientationManager(MomentumBasedController momentumBasedController, ChestOrientationControlModule chestOrientationControlModule, YoVariableRegistry parentRegistry)
    {
@@ -29,13 +30,11 @@ public class ChestOrientationManager
 
    public void compute()
    {
-      GeometricJacobian jacobian = chestOrientationControlModule.getJacobian();
-
-      if (jacobian != null)
+      if (jacobianId >= 0)
       {
          chestOrientationControlModule.compute();
 
-         momentumBasedController.setDesiredSpatialAcceleration(jacobian, chestOrientationControlModule.getTaskspaceConstraintData());
+         momentumBasedController.setDesiredSpatialAcceleration(jacobianId, chestOrientationControlModule.getTaskspaceConstraintData());
       }
    }
 
@@ -45,32 +44,28 @@ public class ChestOrientationManager
       timeLastUpdated.set(momentumBasedController.getYoTime().getDoubleValue());
    }
 
-   public GeometricJacobian createJacobian(FullRobotModel fullRobotModel, String[] chestOrientationControlJointNames)
+   public int createJacobian(FullRobotModel fullRobotModel, String[] chestOrientationControlJointNames)
    {
       InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
       InverseDynamicsJoint[] chestOrientationControlJoints = ScrewTools.findJointsWithNames(allJoints, chestOrientationControlJointNames);
 
-      return createJacobian(chestOrientationControlJoints);
+      int jacobianId = momentumBasedController.getOrCreateGeometricJacobian(chestOrientationControlJoints, chestOrientationControlModule.getChest().getBodyFixedFrame());
+      return jacobianId;
    }
 
-   public GeometricJacobian createJacobian(InverseDynamicsJoint[] chestOrientationControlJoints)
+   public void setUp(RigidBody base, int jacobianId)
    {
-      GeometricJacobian spineJacobian = new GeometricJacobian(chestOrientationControlJoints, chestOrientationControlModule.getChest().getBodyFixedFrame());
-
-      return spineJacobian;
-   }
-
-   public void setUp(RigidBody base, GeometricJacobian spineJacobian)
-   {
+      this.jacobianId = jacobianId;
       chestOrientationControlModule.setBase(base);
-      chestOrientationControlModule.setJacobian(spineJacobian);
+      chestOrientationControlModule.setJacobian(momentumBasedController.getJacobian(jacobianId));
    }
    
-   public void setUp(RigidBody base, GeometricJacobian spineJacobian, double proportionalGainX, double proportionalGainY, double proportionalGainZ,
+   public void setUp(RigidBody base, int jacobianId, double proportionalGainX, double proportionalGainY, double proportionalGainZ,
                      double derivativeGainX, double derivativeGainY, double derivativeGainZ)
    {
+      this.jacobianId = jacobianId;
       chestOrientationControlModule.setBase(base);
-      chestOrientationControlModule.setJacobian(spineJacobian);
+      chestOrientationControlModule.setJacobian(momentumBasedController.getJacobian(jacobianId));
       chestOrientationControlModule.setProportionalGains(proportionalGainX, proportionalGainY, proportionalGainZ);
       chestOrientationControlModule.setDerivativeGains(derivativeGainX, derivativeGainY, derivativeGainZ);
    }
@@ -83,7 +78,7 @@ public class ChestOrientationManager
 
    public void turnOff()
    {
-      setUp(null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+      setUp(null, -1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
    }
 
    public boolean areDesiredsValid()

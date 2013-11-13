@@ -5,6 +5,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationControlModule;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.RigidBody;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
@@ -21,12 +22,21 @@ public class RootJointAngularAccelerationControlModule
 
    private final TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
    private MomentumBasedController momentumBasedController;
+   
+   private final int rootJacobianId;
+   private final RigidBody rootPredecessor;
+   private final RigidBody rootSuccessor;
 
    public RootJointAngularAccelerationControlModule(double controlDT, MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
    {
       this.rootJoint = momentumBasedController.getFullRobotModel().getRootJoint();
+      
+      rootPredecessor = rootJoint.getPredecessor();
+      rootSuccessor = rootJoint.getSuccessor();
+      rootJacobianId = momentumBasedController.getOrCreateGeometricJacobian(rootPredecessor, rootSuccessor, rootJoint.getFrameAfterJoint());
+      
       registry = new YoVariableRegistry(getClass().getSimpleName());
-      rootJointOrientationControlModule = new RigidBodyOrientationControlModule(rootJoint.getName(), rootJoint.getPredecessor(), rootJoint.getSuccessor(),
+      rootJointOrientationControlModule = new RigidBodyOrientationControlModule(rootJoint.getName(), rootPredecessor, rootSuccessor,
               momentumBasedController.getTwistCalculator(), controlDT, registry);
       this.controlledPelvisAngularAcceleration = new YoFrameVector("controlled" + rootJoint.getName() + "AngularAcceleration", rootJoint.getFrameAfterJoint(),
               registry);
@@ -43,8 +53,8 @@ public class RootJointAngularAccelerationControlModule
    public void doControl(OrientationTrajectoryData orientationTrajectoryData)
    {
       FrameVector rootJointAngularAcceleration = computeDesiredRootJointAngularAcceleration(orientationTrajectoryData);
-      taskspaceConstraintData.setAngularAcceleration(rootJoint.getSuccessor().getBodyFixedFrame(), rootJoint.getPredecessor().getBodyFixedFrame(), rootJointAngularAcceleration, rootJointNullspaceMultipliers);
-      momentumBasedController.setDesiredSpatialAcceleration(rootJoint.getMotionSubspace(), taskspaceConstraintData);
+      taskspaceConstraintData.setAngularAcceleration(rootSuccessor.getBodyFixedFrame(), rootPredecessor.getBodyFixedFrame(), rootJointAngularAcceleration, rootJointNullspaceMultipliers);
+      momentumBasedController.setDesiredSpatialAcceleration(rootJacobianId, taskspaceConstraintData);
 
       rootJointAngularAcceleration.changeFrame(this.controlledPelvisAngularAcceleration.getReferenceFrame());
       this.controlledPelvisAngularAcceleration.set(rootJointAngularAcceleration);

@@ -1,12 +1,12 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.IndividualHandControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 /**
  * @author twan
@@ -17,11 +17,13 @@ public abstract class LoadBearingHandControlState extends TaskspaceHandControlSt
    protected final DoubleYoVariable coefficientOfFriction;
    protected final SpatialAccelerationVector handAcceleration;
 
-   public LoadBearingHandControlState(IndividualHandControlState stateEnum, MomentumBasedController momentumBasedController, GeometricJacobian jacobian, RigidBody elevator, YoVariableRegistry parentRegistry)
+   public LoadBearingHandControlState(String namePrefix, IndividualHandControlState stateEnum, MomentumBasedController momentumBasedController, int jacobianId,
+         RigidBody elevator, RigidBody endEffector, YoVariableRegistry parentRegistry)
    {
-      super(stateEnum, momentumBasedController, jacobian, parentRegistry);
+      super(namePrefix, stateEnum, momentumBasedController, jacobianId, parentRegistry);
+      
       coefficientOfFriction = new DoubleYoVariable(name + "CoefficientOfFriction", registry);
-      handAcceleration = new SpatialAccelerationVector(jacobian.getEndEffectorFrame(), elevator.getBodyFixedFrame(), jacobian.getEndEffectorFrame());
+      handAcceleration = new SpatialAccelerationVector(endEffector.getBodyFixedFrame(), elevator.getBodyFixedFrame(), endEffector.getBodyFixedFrame());
    }
 
    public void setCoefficientOfFriction(double coefficientOfFriction)

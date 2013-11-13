@@ -221,18 +221,12 @@ public class MomentumBasedControllerSpy
    private class PlaneContactStateCommand
    {
       private final ContactablePlaneBody contactableBody;
-      private final List<FramePoint2d> contactPoints;
-      private final double coefficientOfFriction;
-      private final FrameVector normalContactVector;
       private final StackTraceElement[] stackTrace;
 
       public PlaneContactStateCommand(ContactablePlaneBody contactableBody, List<FramePoint2d> contactPoints, double coefficientOfFriction,
                                       FrameVector normalContactVector)
       {
          this.contactableBody = contactableBody;
-         this.contactPoints = contactPoints;
-         this.coefficientOfFriction = coefficientOfFriction;
-         this.normalContactVector = normalContactVector;
 
          this.stackTrace = Thread.currentThread().getStackTrace();
       }
@@ -247,15 +241,11 @@ public class MomentumBasedControllerSpy
    private class RollingContactStateCommand
    {
       private final ContactableRollingBody contactableRollingBody;
-      private final List<FramePoint2d> contactPoints;
-      private final double coefficientOfFriction;
       private final StackTraceElement[] stackTrace;
 
       public RollingContactStateCommand(ContactableRollingBody contactableRollingBody, List<FramePoint2d> contactPoints, double coefficientOfFriction)
       {
          this.contactableRollingBody = contactableRollingBody;
-         this.contactPoints = contactPoints;
-         this.coefficientOfFriction = coefficientOfFriction;
 
          this.stackTrace = Thread.currentThread().getStackTrace();
       }

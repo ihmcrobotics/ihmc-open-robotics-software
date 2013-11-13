@@ -4,20 +4,16 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHeadOrientationProvider;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
-
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class HeadOrientationManager
 {   
    private final HeadOrientationControlModule headOrientationControlModule;
    private final MomentumBasedController momentumBasedController;
    private final DesiredHeadOrientationProvider desiredHeadOrientationProvider;
-
+   private int jacobianId = -1;
 
    public HeadOrientationManager(MomentumBasedController momentumBasedController, HeadOrientationControlModule headOrientationControlModule,
                                  DesiredHeadOrientationProvider desiredHeadOrientationProvider)
@@ -42,43 +38,37 @@ public class HeadOrientationManager
          }
       }
 
-      GeometricJacobian jacobian = headOrientationControlModule.getJacobian();
-      
-      if (jacobian != null)
+      if (jacobianId >= 0)
       {
          headOrientationControlModule.compute();
 
          TaskspaceConstraintData taskspaceConstraintData = headOrientationControlModule.getTaskspaceConstraintData();
-         momentumBasedController.setDesiredSpatialAcceleration(jacobian,
-               taskspaceConstraintData);
+         momentumBasedController.setDesiredSpatialAcceleration(jacobianId, taskspaceConstraintData);
       }
    }
    
-   public GeometricJacobian createJacobian(FullRobotModel fullRobotModel, RigidBody base, String[] headOrientationControlJointNames)
+   public int createJacobian(FullRobotModel fullRobotModel, RigidBody base, String[] headOrientationControlJointNames)
    {
       InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
       InverseDynamicsJoint[] headOrientationControlJoints = ScrewTools.findJointsWithNames(allJoints, headOrientationControlJointNames);
-      
-      return createJacobian(base, headOrientationControlJoints);
-   }
-   
-   public GeometricJacobian createJacobian(RigidBody base, InverseDynamicsJoint[] headOrientationControlJoints)
-   {
-      GeometricJacobian spineJacobian = new GeometricJacobian(headOrientationControlJoints, headOrientationControlModule.getHead().getBodyFixedFrame());
-      return spineJacobian;
-   }
 
-   public void setUp(RigidBody base, GeometricJacobian spineJacobian)
-   {
-      headOrientationControlModule.setBase(base);
-      headOrientationControlModule.setJacobian(spineJacobian);
+      int jacobianId = momentumBasedController.getOrCreateGeometricJacobian(headOrientationControlJoints, headOrientationControlModule.getHead().getBodyFixedFrame());
+      return jacobianId;
    }
    
-   public void setUp(RigidBody base, GeometricJacobian spineJacobian, double proportionalGainX, double proportionalGainY, double proportionalGainZ,
+   public void setUp(RigidBody base, int jacobianId)
+   {
+      this.jacobianId = jacobianId;
+      headOrientationControlModule.setBase(base);
+      headOrientationControlModule.setJacobian(momentumBasedController.getJacobian(jacobianId));
+   }
+   
+   public void setUp(RigidBody base, int jacobianId, double proportionalGainX, double proportionalGainY, double proportionalGainZ,
                      double derivativeGainX, double derivativeGainY, double derivativeGainZ)
    {
+      this.jacobianId = jacobianId;
       headOrientationControlModule.setBase(base);
-      headOrientationControlModule.setJacobian(spineJacobian);
+      headOrientationControlModule.setJacobian(momentumBasedController.getJacobian(jacobianId));
       headOrientationControlModule.setProportionalGains(proportionalGainX, proportionalGainY, proportionalGainZ);
       headOrientationControlModule.setDerivativeGains(derivativeGainX, derivativeGainY, derivativeGainZ);
    }
@@ -91,7 +81,7 @@ public class HeadOrientationManager
    
    public void turnOff()
    {
-      setUp(null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+      setUp(null, -1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
    }
 
    

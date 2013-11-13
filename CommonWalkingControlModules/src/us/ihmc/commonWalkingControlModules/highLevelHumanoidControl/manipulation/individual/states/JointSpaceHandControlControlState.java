@@ -10,11 +10,9 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.maps.ObjectObjectMap;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
-import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -44,13 +42,13 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
    private final YoVariableRegistry registry;
    private final MomentumBasedController momentumBasedController;
 
-   public JointSpaceHandControlControlState(double dt, IndividualHandControlState stateEnum, RobotSide robotSide, GeometricJacobian jacobian,
-           MomentumBasedController momentumBasedController, ArmControllerParameters armControllerParameters, YoVariableRegistry parentRegistry, double moveTime)
+   public JointSpaceHandControlControlState(String namePrefix, IndividualHandControlState stateEnum, RobotSide robotSide,
+                                            InverseDynamicsJoint[] controlledJoints, int jacobianId, MomentumBasedController momentumBasedController,
+                                            ArmControllerParameters armControllerParameters, double dt, double moveTime, YoVariableRegistry parentRegistry)
    {
       super(stateEnum);
 
-      RigidBody endEffector = jacobian.getEndEffector();
-      registry = new YoVariableRegistry(endEffector.getName() + FormattingTools.underscoredToCamelCase(this.stateEnum.toString(), true) + "State");
+      registry = new YoVariableRegistry(namePrefix + FormattingTools.underscoredToCamelCase(this.stateEnum.toString(), true) + "State");
 
       moveTimeArmJoint = new DoubleYoVariable("moveTimeArmJoint", registry);
       moveTimeArmJoint.set(moveTime);
@@ -75,8 +73,7 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
       pdControllers = new LinkedHashMap<OneDoFJoint, PDController>();
       rateLimitedAccelerations = new ObjectObjectMap<OneDoFJoint, RateLimitedYoVariable>();
       
-      InverseDynamicsJoint[] joints = ScrewTools.createJointPath(jacobian.getBase(), jacobian.getEndEffector());
-      this.oneDoFJoints = ScrewTools.filterJoints(joints, RevoluteJoint.class);
+      this.oneDoFJoints = ScrewTools.filterJoints(controlledJoints, RevoluteJoint.class);
 
       for (OneDoFJoint joint : oneDoFJoints)
       {

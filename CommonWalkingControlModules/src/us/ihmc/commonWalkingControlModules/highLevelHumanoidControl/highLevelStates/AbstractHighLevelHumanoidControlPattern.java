@@ -20,16 +20,12 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OrientationTrajectoryData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAngularAccelerationControlModule;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHeadOrientationProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.TorusManipulationProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.TorusPoseProvider;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -76,7 +72,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
    protected final YoFrameVector desiredPelvisAngularVelocity = new YoFrameVector("desiredPelvisAngularVelocity", worldFrame, registry);
 
    protected final YoFrameVector desiredPelvisAngularAcceleration = new YoFrameVector("desiredPelvisAngularAcceleration", worldFrame, registry);
-   protected final SideDependentList<GeometricJacobian> legJacobians = new SideDependentList<GeometricJacobian>();
+   protected final SideDependentList<Integer> legJacobianIds = new SideDependentList<Integer>();
    protected final LinkedHashMap<ContactablePlaneBody, EndEffectorControlModule> footEndEffectorControlModules = new LinkedHashMap<ContactablePlaneBody,
                                                                                                                     EndEffectorControlModule>();
    protected final FullRobotModel fullRobotModel;
@@ -97,7 +93,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
 
    private final VariousWalkingProviders variousWalkingProviders;
-   private final VariousWalkingManagers variousWalkingManagers;
+//   private final VariousWalkingManagers variousWalkingManagers;
 
    private final DoubleYoVariable kpPelvisOrientation = new DoubleYoVariable("kpPelvisOrientation", registry);
    private final DoubleYoVariable zetaPelvisOrientation = new DoubleYoVariable("zetaPelvisOrientation", registry);
@@ -112,7 +108,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       super(controllerState);
 
       this.variousWalkingProviders = variousWalkingProviders;
-      this.variousWalkingManagers = variousWalkingManagers;
+//      this.variousWalkingManagers = variousWalkingManagers;
 
       // Getting parameters from the momentumBasedController
       this.momentumBasedController = momentumBasedController;
@@ -145,9 +141,9 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       // Setup foot control modules:
 //    setupFootControlModules(); //TODO: get rid of that?
 
-      DesiredHandPoseProvider handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
-      TorusPoseProvider torusPoseProvider = variousWalkingProviders.getTorusPoseProvider();
-      TorusManipulationProvider torusManipulationProvider = variousWalkingProviders.getTorusManipulationProvider();
+//      DesiredHandPoseProvider handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
+//      TorusPoseProvider torusPoseProvider = variousWalkingProviders.getTorusPoseProvider();
+//      TorusManipulationProvider torusManipulationProvider = variousWalkingProviders.getTorusManipulationProvider();
 
       jointForExtendedNeckPitchRange = setupJointForExtendedNeckPitchRange();
 
@@ -204,8 +200,8 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBody endEffector = fullRobotModel.getFoot(robotSide);
-         GeometricJacobian jacobian = new GeometricJacobian(fullRobotModel.getPelvis(), endEffector, endEffector.getBodyFixedFrame());
-         legJacobians.put(robotSide, jacobian);
+         int jacobianId = momentumBasedController.getOrCreateGeometricJacobian(fullRobotModel.getPelvis(), endEffector, endEffector.getBodyFixedFrame());
+         legJacobianIds.put(robotSide, jacobianId);
       }
    }
 
@@ -307,13 +303,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       {
          updatables.get(i).update(time);
       }
-   }
-
-   public double getDeterminantOfHipToAnkleJacobian(RobotSide robotSide)
-   {
-      legJacobians.get(robotSide).compute();
-
-      return legJacobians.get(robotSide).det();
    }
 
    public void doMotionControl()

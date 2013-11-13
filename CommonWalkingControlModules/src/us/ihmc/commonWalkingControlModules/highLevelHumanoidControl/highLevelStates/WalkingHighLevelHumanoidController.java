@@ -454,7 +454,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          PoseTrajectoryGenerator swingPoseTrajectoryGenerator = new WrapperForPositionAndOrientationTrajectoryGenerators(swingPositionTrajectoryGenerator,
                                                                    swingOrientationTrajectoryGenerator);
          
-         GeometricJacobian jacobian = legJacobians.get(robotSide);
+         int jacobianId = legJacobianIds.get(robotSide);
          OneDoFJoint kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE);
          
          EndEffectorControlModule endEffectorControlModule;
@@ -464,14 +464,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (WalkOnTheEdgesProviders.TOEOFF_MOTION_TYPE_USED != ToeOffMotionType.FREE)
          {
             DoubleTrajectoryGenerator onToesPitchTrajectoryGenerator = walkOnTheEdgesProviders.getToeOffPitchTrajectoryGenerators(robotSide);
-            endEffectorControlModule = new EndEffectorControlModule(controlDT, bipedFoot, jacobian, kneeJoint, swingPoseTrajectoryGenerator,
+            endEffectorControlModule = new EndEffectorControlModule(controlDT, bipedFoot, jacobianId, kneeJoint, swingPoseTrajectoryGenerator,
                                           heelPitchTrajectoryGenerator, onToesPitchTrajectoryGenerator, requestHoldPosition, momentumBasedController, registry);
          }
          else
          {
             // Let the toe pitch motion free. It seems to work better.
             DoubleProvider maximumToeOffAngleProvider = walkOnTheEdgesProviders.getMaximumToeOffAngleProvider();
-            endEffectorControlModule = new EndEffectorControlModule(controlDT, bipedFoot, jacobian, kneeJoint, swingPoseTrajectoryGenerator,
+            endEffectorControlModule = new EndEffectorControlModule(controlDT, bipedFoot, jacobianId, kneeJoint, swingPoseTrajectoryGenerator,
                                           heelPitchTrajectoryGenerator, maximumToeOffAngleProvider, requestHoldPosition, momentumBasedController, registry);
          }
          
@@ -550,7 +550,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    }
 
    private RigidBody baseForHeadOrientationControl;
-   private GeometricJacobian jacobianForHeadOrientationControl;
+   private int jacobianIdForHeadOrientationControl;
    
    public void setupManagers(VariousWalkingManagers variousWalkingManagers)
    {
@@ -558,7 +558,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       HeadOrientationManager headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
       String[] headOrientationControlJointNames = walkingControllerParameters.getDefaultHeadOrientationControlJointNames(); 
 
-      jacobianForHeadOrientationControl = headOrientationManager.createJacobian(fullRobotModel, baseForHeadOrientationControl, headOrientationControlJointNames);
+      jacobianIdForHeadOrientationControl = headOrientationManager.createJacobian(fullRobotModel, baseForHeadOrientationControl, headOrientationControlJointNames);
    }
   
    public void initialize()
@@ -575,7 +575,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       HeadOrientationManager headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
 
-      headOrientationManager.setUp(baseForHeadOrientationControl, jacobianForHeadOrientationControl);
+      headOrientationManager.setUp(baseForHeadOrientationControl, jacobianIdForHeadOrientationControl);
       walkingHeadOrientationKp.set(walkingControllerParameters.getKpHeadOrientation()); 
       walkingHeadOrientationZeta.set(walkingControllerParameters.getZetaHeadOrientation());
       VariableChangedListener headGainsChangedListener = createHeadGainsChangedListener();

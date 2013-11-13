@@ -31,8 +31,11 @@ public class PointPositionHandControlState extends State<IndividualHandControlSt
    private PositionTrajectoryGenerator positionTrajectoryGenerator;
    private PositionController positionController;
 
-   private FramePoint pointInBody;
-   private GeometricJacobian jacobian;
+   private FramePoint pointInBody = new FramePoint();
+   
+   private int jacobianId;
+   private RigidBody base;
+   private RigidBody endEffector;
 
    // temp stuff:
    private final FramePoint desiredPosition = new FramePoint(worldFrame);
@@ -42,7 +45,6 @@ public class PointPositionHandControlState extends State<IndividualHandControlSt
 
    private final FrameVector pointAcceleration = new FrameVector(worldFrame);
    private Twist currentTwist = new Twist();
-
 
    private final FramePoint point = new FramePoint(worldFrame);
 
@@ -72,7 +74,7 @@ public class PointPositionHandControlState extends State<IndividualHandControlSt
    public void doAction()
    {
       point.setAndChangeFrame(pointInBody);
-      point.changeFrame(jacobian.getBaseFrame());
+      point.changeFrame(base.getBodyFixedFrame());
 
       updateCurrentVelocity(point);
 
@@ -86,17 +88,16 @@ public class PointPositionHandControlState extends State<IndividualHandControlSt
       desiredPosition.changeFrame(worldFrame);
       yoDesiredPosition.set(desiredPosition);
 
-      pointAcceleration.changeFrame(jacobian.getBaseFrame());
+      pointAcceleration.changeFrame(base.getBodyFixedFrame());
 
-      jacobian.compute();
-      momentumBasedController.setDesiredPointAcceleration(jacobian, point, pointAcceleration);
+      momentumBasedController.setDesiredPointAcceleration(jacobianId, point, pointAcceleration);
    }
 
 
    private void updateCurrentVelocity(FramePoint point)
    {
-      twistCalculator.packRelativeTwist(currentTwist, jacobian.getBase(), jacobian.getEndEffector());
-      currentTwist.changeFrame(jacobian.getBaseFrame());
+      twistCalculator.packRelativeTwist(currentTwist, base, endEffector);
+      currentTwist.changeFrame(base.getBodyFixedFrame());
       currentTwist.packVelocityOfPointFixedInBodyFrame(currentVelocity, point);
    }
 
@@ -118,12 +119,14 @@ public class PointPositionHandControlState extends State<IndividualHandControlSt
    }
 
    public void setTrajectory(PositionTrajectoryGenerator positionTrajectoryGenerator,
-                             PositionController positionController, FramePoint pointInBody, GeometricJacobian jacobian)
+                             PositionController positionController, FramePoint pointInBody, int jacobianId)
    {
       this.positionTrajectoryGenerator = positionTrajectoryGenerator;
       this.positionController = positionController;
-      this.pointInBody = new FramePoint(pointInBody);
-      this.jacobian = jacobian;
+      this.pointInBody.setAndChangeFrame(pointInBody);
+      this.jacobianId = jacobianId;
+      this.base = momentumBasedController.getJacobian(jacobianId).getBase();
+      this.endEffector = momentumBasedController.getJacobian(jacobianId).getEndEffector();
    }
 
    public FramePoint getDesiredPosition()

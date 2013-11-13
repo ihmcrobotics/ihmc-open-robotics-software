@@ -41,7 +41,6 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
@@ -72,7 +71,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    private final DesiredPelvisPoseProvider pelvisPoseProvider;
    private final RigidBodySpatialAccelerationControlModule pelvisController;
    private final ReferenceFrame pelvisPositionControlFrame;
-   private final GeometricJacobian pelvisJacobian;
+   private final int pelvisJacobianId;
    private final TaskspaceConstraintData pelvisTaskspaceConstraintData = new TaskspaceConstraintData();
    private final ChangeableConfigurationProvider desiredPelvisConfigurationProvider, initialPelvisConfigurationProvider;
    private final StraightLinePositionTrajectoryGenerator pelvisPositionTrajectoryGenerator;
@@ -109,7 +108,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    
    private final RigidBody elevator;
    private final List<ContactablePlaneBody> bodiesInContact = new ArrayList<ContactablePlaneBody>();
-   private final Map<ContactablePlaneBody, GeometricJacobian> contactJacobians = new LinkedHashMap<ContactablePlaneBody, GeometricJacobian>();
+   private final Map<ContactablePlaneBody, Integer> contactJacobians = new LinkedHashMap<ContactablePlaneBody, Integer>();
 
    private final DenseMatrix64F pelvisNullspaceMultipliers = new DenseMatrix64F(0, 1);
 
@@ -179,7 +178,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       pelvisGainsChangedListener.variableChanged(null);
       
 
-      pelvisJacobian = new GeometricJacobian(fullRobotModel.getElevator(), fullRobotModel.getPelvis(), fullRobotModel.getPelvis().getBodyFixedFrame());
+      pelvisJacobianId = momentumBasedController.getOrCreateGeometricJacobian(fullRobotModel.getElevator(), fullRobotModel.getPelvis(), fullRobotModel.getPelvis().getBodyFixedFrame());
 
       initialPelvisConfigurationProvider = new ChangeableConfigurationProvider(new FramePose(pelvisPositionControlFrame));
       desiredPelvisConfigurationProvider = new ChangeableConfigurationProvider(new FramePose(pelvisPositionControlFrame));
@@ -284,7 +283,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactablePlaneBody foot = feet.get(robotSide);
-         GeometricJacobian jacobian = legJacobians.get(robotSide);
+         int jacobianId = legJacobianIds.get(robotSide);
 
          String bodyName = foot.getRigidBody().getName();
          String sideString = robotSide.getCamelCaseNameForStartOfExpression();
@@ -315,7 +314,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
                                                          onToesInitialPitchVelocityProvider, onToesFinalPitchProvider, trajectoryTimeProvider, registry);
 
          OneDoFJoint kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE);
-         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(controlDT, foot, jacobian, kneeJoint, poseTrajectoryGenerator, null,
+         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(controlDT, foot, jacobianId, kneeJoint, poseTrajectoryGenerator, null,
                                                                 onToesTrajectory, null, momentumBasedController, registry);
          endEffectorControlModule.setSwingGains(100.0, 200.0, 200.0, 1.0);
 
@@ -324,22 +323,22 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    }
 
    private RigidBody baseForChestOrientationControl;
-   private GeometricJacobian jacobianForChestOrientationControl;
+   private int jacobianForChestOrientationControlId;
    
    private RigidBody baseForHeadOrientationControl;
-   private GeometricJacobian jacobianForHeadOrientationControl;
+   private int jacobianIdForHeadOrientationControl;
 
    private void setupManagers(VariousWalkingManagers variousWalkingManagers)
    {
       baseForChestOrientationControl = fullRobotModel.getPelvis();
       ChestOrientationManager chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
       String[] chestOrientationControlJointNames = walkingControllerParameters.getDefaultChestOrientationControlJointNames();
-      jacobianForChestOrientationControl = chestOrientationManager.createJacobian(fullRobotModel, chestOrientationControlJointNames);
+      jacobianForChestOrientationControlId = chestOrientationManager.createJacobian(fullRobotModel, chestOrientationControlJointNames);
       
       baseForHeadOrientationControl = fullRobotModel.getPelvis();
       HeadOrientationManager headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
       String[] headOrientationControlJointNames = walkingControllerParameters.getDefaultHeadOrientationControlJointNames();
-      jacobianForHeadOrientationControl = headOrientationManager.createJacobian(fullRobotModel, baseForHeadOrientationControl, headOrientationControlJointNames);
+      jacobianIdForHeadOrientationControl = headOrientationManager.createJacobian(fullRobotModel, baseForHeadOrientationControl, headOrientationControlJointNames);
    }
    
    public void initialize()
@@ -349,13 +348,13 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       momentumBasedController.setMomentumControlModuleToUse(MOMENTUM_CONTROL_MODULE_TO_USE);
       momentumBasedController.setDelayTimeBeforeTrustingContacts(DELAY_TIME_BEFORE_TRUSTING_CONTACTS);
       
-      chestOrientationManager.setUp(baseForChestOrientationControl, jacobianForChestOrientationControl);
+      chestOrientationManager.setUp(baseForChestOrientationControl, jacobianForChestOrientationControlId);
       carIngressChestOrientationKp.set(100.0);
       carIngressChestOrientationZeta.set(1.0);
       VariableChangedListener chestGainsChangedListener = createChestGainsChangedListener();
       chestGainsChangedListener.variableChanged(null);
       
-      headOrientationManager.setUp(baseForHeadOrientationControl, jacobianForHeadOrientationControl);
+      headOrientationManager.setUp(baseForHeadOrientationControl, jacobianIdForHeadOrientationControl);
       carIngressHeadOrientationKp.set(40.0);
       carIngressHeadOrientationZeta.set(1.0);
       VariableChangedListener headGainsChangedListener = createHeadGainsChangedListener();
@@ -512,7 +511,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          pelvisTaskspaceConstraintData.set(pelvisSpatialAcceleration, pelvisNullspaceMultipliers, selectionMatrix);
       }
       
-      momentumBasedController.setDesiredSpatialAcceleration(pelvisJacobian, pelvisTaskspaceConstraintData);
+      momentumBasedController.setDesiredSpatialAcceleration(pelvisJacobianId, pelvisTaskspaceConstraintData);
 
       desiredOrientation.changeFrame(this.desiredPelvisOrientation.getReferenceFrame());
       desiredAngularVelocity.changeFrame(this.desiredPelvisAngularVelocity.getReferenceFrame());
@@ -577,14 +576,14 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    {
       for (ContactablePlaneBody body : bodiesInContact)
       {
-         GeometricJacobian jacobian = contactJacobians.get(body);
-         jacobian.compute();
-         FrameVector desiredAcceleration = new FrameVector(jacobian.getBaseFrame(), 0.0, 0.0, 0.0);
+         int jacobianId = contactJacobians.get(body);
+         ReferenceFrame baseFrame = momentumBasedController.getJacobian(jacobianId).getBaseFrame();
+         FrameVector desiredAcceleration = new FrameVector(baseFrame, 0.0, 0.0, 0.0);
          DenseMatrix64F selectionMatrix = new DenseMatrix64F(1, 3);
          selectionMatrix.set(0, 2, 1.0);
          for (FramePoint contactPoint : body.getContactPoints())
          {
-            momentumBasedController.setDesiredPointAcceleration(jacobian, contactPoint, desiredAcceleration, selectionMatrix);
+            momentumBasedController.setDesiredPointAcceleration(jacobianId, contactPoint, desiredAcceleration, selectionMatrix);
          }
       }
    }
@@ -598,7 +597,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       }
       bodiesInContact.add(contactablePlaneBody);
       RigidBody rigidBody = contactablePlaneBody.getRigidBody();
-      contactJacobians.put(contactablePlaneBody, new GeometricJacobian(elevator, rigidBody, elevator.getBodyFixedFrame()));
+      contactJacobians.put(contactablePlaneBody, momentumBasedController.getOrCreateGeometricJacobian(elevator, rigidBody, elevator.getBodyFixedFrame()));
    }
 
    private void removeBodyInContact(ContactablePlaneBody contactablePlaneBody)

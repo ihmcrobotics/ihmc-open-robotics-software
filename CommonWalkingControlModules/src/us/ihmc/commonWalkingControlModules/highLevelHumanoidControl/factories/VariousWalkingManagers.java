@@ -63,9 +63,9 @@ public class VariousWalkingManagers
       ChestOrientationManager chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestOrientationControlModule, registry);
 
       // Setup arm+hand manipulation state machines
-      ManipulationControlModule manipulationControlModule = new ManipulationControlModule(yoTime, fullRobotModel, twistCalculator, walkingControllerParameters,
-                                                               variousWalkingProviders, dynamicGraphicObjectsListRegistry, handControllers,
-                                                               momentumBasedController, armControlParameters,
+      ManipulationControlModule manipulationControlModule = new ManipulationControlModule(fullRobotModel, twistCalculator, variousWalkingProviders, armControlParameters,
+                                                               walkingControllerParameters, handControllers, yoTime,
+                                                               momentumBasedController, dynamicGraphicObjectsListRegistry,
                                                                registry);
 
       PelvisDesiredsHandler pelvisDesiredsHandler = new PelvisDesiredsHandler(controlDT, yoTime, registry);

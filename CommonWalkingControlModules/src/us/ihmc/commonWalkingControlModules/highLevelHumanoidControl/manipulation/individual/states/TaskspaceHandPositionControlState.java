@@ -1,22 +1,27 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
-import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
+import java.util.ArrayList;
+import java.util.Collection;
+
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.IndividualHandControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationTrajectoryGenerator;
 import us.ihmc.robotSide.RobotSide;
-import us.ihmc.utilities.math.geometry.*;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
+import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 
 /**
  * @author twan
@@ -45,11 +50,10 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
    private RigidBody base;
    private RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule;
 
-   public TaskspaceHandPositionControlState(IndividualHandControlState stateEnum, RobotSide robotSide,
-                                            MomentumBasedController momentumBasedController,
-                                            GeometricJacobian jacobian, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+   public TaskspaceHandPositionControlState(String namePrefix, IndividualHandControlState stateEnum, RobotSide robotSide, MomentumBasedController momentumBasedController,
+                                            int jacobianId, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
-      super(stateEnum, momentumBasedController, jacobian, parentRegistry);
+      super(namePrefix, stateEnum, momentumBasedController, jacobianId, parentRegistry);
 
       desiredPositionFrame = new PoseReferenceFrame(robotSide.getCamelCaseNameForStartOfExpression() + name + "DesiredFrame", worldFrame);
 

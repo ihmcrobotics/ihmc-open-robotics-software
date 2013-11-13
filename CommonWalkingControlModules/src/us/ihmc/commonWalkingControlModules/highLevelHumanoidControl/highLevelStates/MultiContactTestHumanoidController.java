@@ -26,7 +26,6 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
@@ -71,8 +70,8 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       RigidBody pelvis = fullRobotModel.getPelvis();
       RigidBody chest = fullRobotModel.getChest();
 
-      GeometricJacobian spineJacobian = new GeometricJacobian(pelvis, chest, chest.getBodyFixedFrame());
-      variousWalkingManagers.getChestOrientationManager().setUp(pelvis, spineJacobian, 100.0, 100.0, 100.0, 20.0, 20.0, 20.0);
+      int spineJacobianId = momentumBasedController.getOrCreateGeometricJacobian(pelvis, chest, chest.getBodyFixedFrame());
+      variousWalkingManagers.getChestOrientationManager().setUp(pelvis, spineJacobianId, 100.0, 100.0, 100.0, 20.0, 20.0, 20.0);
 
       this.neckJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(chest, fullRobotModel.getHead()), OneDoFJoint.class);
 
@@ -84,7 +83,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactablePlaneBody foot = feet.get(robotSide);
-         GeometricJacobian jacobian = legJacobians.get(robotSide);
+         int jacobianId = legJacobianIds.get(robotSide);
 
          String bodyName = foot.getRigidBody().getName();
 
@@ -108,7 +107,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
          swingOrientationTrajectoryGenerators.put(foot, orientationTrajectoryGenerator);
 
          OneDoFJoint kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE);
-         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(controlDT, foot, jacobian, kneeJoint, poseTrajectoryGenerator, null,
+         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(controlDT, foot, jacobianId, kneeJoint, poseTrajectoryGenerator, null,
                                                                 null, null, momentumBasedController, registry);
          endEffectorControlModule.setSwingGains(100.0, 200.0, 200.0, 1.0);
 
