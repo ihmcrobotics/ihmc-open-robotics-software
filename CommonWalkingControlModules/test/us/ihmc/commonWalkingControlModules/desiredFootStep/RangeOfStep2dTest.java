@@ -20,7 +20,7 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 
 public class RangeOfStep2dTest
 {
-   private final double epsilon = 1e-7;
+   private static final double EPSILON = 1e-7;
 //   private final double verticalLength = 0.0;
 
    @Before
@@ -78,14 +78,14 @@ public class RangeOfStep2dTest
          
          // moving in +/- y (depending on robotSide) by offset should give the midpoint of the straight edge of the hemi-ellipse
          assertTrue(range.contains(new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, robotSide.negateIfRightSide(offset), 0.0)));
-         assertFalse(range.contains(new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, robotSide.negateIfRightSide(offset-epsilon), 0.0)));
+         assertFalse(range.contains(new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, robotSide.negateIfRightSide(offset-EPSILON), 0.0)));
          
          // from midpoint of flat edge, moving in +/- x by half the forwardLength should give the two corners of the hemi-ellipse
-         assertTrue(range.contains(new FramePoint(ReferenceFrame.getWorldFrame(), 0.5 * forwardLength - epsilon, robotSide.negateIfRightSide(offset), 0.0)));
-         assertFalse(range.contains(new FramePoint(ReferenceFrame.getWorldFrame(), forwardLength, robotSide.negateIfRightSide(offset-epsilon), 0.0)));
+         assertTrue(range.contains(new FramePoint(ReferenceFrame.getWorldFrame(), 0.5 * forwardLength - EPSILON, robotSide.negateIfRightSide(offset), 0.0)));
+         assertFalse(range.contains(new FramePoint(ReferenceFrame.getWorldFrame(), forwardLength, robotSide.negateIfRightSide(offset-EPSILON), 0.0)));
          
-         assertTrue(range.contains(new FramePoint(ReferenceFrame.getWorldFrame(), -0.5 * (forwardLength - epsilon), robotSide.negateIfRightSide(offset), 0.0)));
-         assertFalse(range.contains(new FramePoint(ReferenceFrame.getWorldFrame(), -forwardLength, robotSide.negateIfRightSide(offset - epsilon), 0.0)));
+         assertTrue(range.contains(new FramePoint(ReferenceFrame.getWorldFrame(), -0.5 * (forwardLength - EPSILON), robotSide.negateIfRightSide(offset), 0.0)));
+         assertFalse(range.contains(new FramePoint(ReferenceFrame.getWorldFrame(), -forwardLength, robotSide.negateIfRightSide(offset - EPSILON), 0.0)));
       }
    }
    
@@ -95,47 +95,40 @@ public class RangeOfStep2dTest
       double forwardLength = 1.0;
       double sideLength = 1.0;
       double offset = 0.1;
-      
+
       double x = 5.0;
       double y = 5.0;
       double z = 5.0;
-      
-      RobotSide robotSide = null;
-      
+
       Transform3D transform = new Transform3D();
       transform.setTranslation(new Vector3d(x, y, z));
       ReferenceFrame frame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("translatedFrame", ReferenceFrame.getWorldFrame(), transform);
-      
+
       RigidBody rigidBody = new RigidBody("rigidBody", frame);
-      
-      for (int i = 0; i < 2; i++)
+
+      for (RobotSide robotSide : RobotSide.values)
       {
-         if (i == 0)
-            robotSide = RobotSide.LEFT;
-         if (i == 1)
-            robotSide = RobotSide.RIGHT;
-         
          RangeOfStep2d range = new RangeOfStep2d(rigidBody, robotSide, forwardLength, sideLength, offset);
-         
-         System.out.println("center X: "+range.getCenterX()+" center Y: "+range.getCenterY());
-         
+
+         System.out.println("center X: " + range.getCenterX() + " center Y: " + range.getCenterY());
+
          assertFalse(range.contains(new FramePoint(ReferenceFrame.getWorldFrame(), x, y, 0.0)));
          assertFalse(range.contains(new FramePoint(ReferenceFrame.getWorldFrame(), x, y, 1.0)));
          assertFalse(range.contains(new FramePoint(ReferenceFrame.getWorldFrame(), x, y, -1.0)));
-         
+
          assertFalse(range.contains(new FramePoint(frame, 0.0, 0.0, 0.0)));
-         
-         assertTrue(range.contains(new FramePoint(frame, 0.0, robotSide.negateIfRightSide(offset), 0.0)));
-         assertFalse(range.contains(new FramePoint(frame, 0.0, robotSide.negateIfRightSide(offset - epsilon), 0.0)));
-         
-         assertTrue(range.contains(new FramePoint(ReferenceFrame.getWorldFrame(), x, y + robotSide.negateIfRightSide(offset + epsilon), z)));
-         assertFalse(range.contains(new FramePoint(ReferenceFrame.getWorldFrame(), x, y + robotSide.negateIfRightSide(offset - epsilon), z)));
-         
-         assertTrue(range.contains(new FramePoint(ReferenceFrame.getWorldFrame(), x + 0.5 * forwardLength - epsilon, y + robotSide.negateIfRightSide(offset + epsilon), z)));
-         assertFalse(range.contains(new FramePoint(ReferenceFrame.getWorldFrame(), x + 0.5 * forwardLength + epsilon, y + robotSide.negateIfRightSide(offset + epsilon), z)));
-         
-         assertTrue(range.contains(new FramePoint(ReferenceFrame.getWorldFrame(), x - (0.5 * forwardLength - epsilon), y + robotSide.negateIfRightSide(offset + epsilon), z)));
-         assertFalse(range.contains(new FramePoint(ReferenceFrame.getWorldFrame(), x - (0.5 * forwardLength + epsilon), y + robotSide.negateIfRightSide(offset + epsilon), z)));
+
+         assertTrue(range.contains(new FramePoint(frame, 0.0, robotSide.negateIfRightSide(offset + EPSILON), 0.0)));
+         assertFalse(range.contains(new FramePoint(frame, 0.0, robotSide.negateIfRightSide(offset - EPSILON), 0.0)));
+
+         assertTrue(range.contains(new FramePoint(ReferenceFrame.getWorldFrame(), x, y + robotSide.negateIfRightSide(offset + EPSILON), z)));
+         assertFalse(range.contains(new FramePoint(ReferenceFrame.getWorldFrame(), x, y + robotSide.negateIfRightSide(offset - EPSILON), z)));
+
+         assertTrue(range.contains(new FramePoint(ReferenceFrame.getWorldFrame(), x + 0.5 * forwardLength - EPSILON, y + robotSide.negateIfRightSide(offset + EPSILON), z)));
+         assertFalse(range.contains(new FramePoint(ReferenceFrame.getWorldFrame(), x + 0.5 * forwardLength + EPSILON, y + robotSide.negateIfRightSide(offset + EPSILON), z)));
+
+         assertTrue(range.contains(new FramePoint(ReferenceFrame.getWorldFrame(), x - (0.5 * forwardLength - EPSILON), y + robotSide.negateIfRightSide(offset + EPSILON), z)));
+         assertFalse(range.contains(new FramePoint(ReferenceFrame.getWorldFrame(), x - (0.5 * forwardLength + EPSILON), y + robotSide.negateIfRightSide(offset + EPSILON), z)));
       }
    }
 }
