@@ -118,6 +118,8 @@ public abstract class CameraDataReceiver
          return;
       }
 
+      cameraPose.set(robotPoseData.getCameraPose());
+
       if (DRCConfigParameters.USE_ROS_FOR_MULTISENSE_TRANSFORMS)
       {
          if ((rosTransformFromHeadBaseToCamera.getType() & Transform3D.IDENTITY) != 0)
@@ -130,11 +132,7 @@ public abstract class CameraDataReceiver
             rosTransformFromHeadBaseToCamera.setIdentity();
          }
 
-         cameraPose.mul(robotPoseData.getCameraPose(), rosTransformFromHeadBaseToCamera);
-      }
-      else
-      {
-         cameraPose.set(robotPoseData.getCameraPose());
+         cameraPose.mul(rosTransformFromHeadBaseToCamera);
       }
 
       cameraPose.get(cameraOrientation, tempVector);
@@ -163,7 +161,7 @@ public abstract class CameraDataReceiver
       if (ppsTimestampOffsetProvider.offsetIsDetermined())
       {
          long robotTimestamp = ppsTimestampOffsetProvider.ajustTimeStampToRobotClock(rosTimestamp);
-         TimeStampedTransform3D transformFromRos = rosTransformProvider.getTimeStampedTransform("/left_camera_optical_frame", "/head", rosTimestamp,
+         TimeStampedTransform3D transformFromRos = rosTransformProvider.getTimeStampedTransform("/left_camera_frame", "/head", rosTimestamp,
                                                       robotTimestamp);
          rosTransformFromHeadBaseToCamera = transformFromRos.getTransform3D();
       }
@@ -183,6 +181,3 @@ public abstract class CameraDataReceiver
    }
 
 }
-
-
-//~ Formatted by Jindent --- http://www.jindent.com
