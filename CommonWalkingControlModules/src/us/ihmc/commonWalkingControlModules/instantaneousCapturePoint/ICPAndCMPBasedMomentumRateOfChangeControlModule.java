@@ -104,9 +104,12 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
 
       CapturePointData capturePointData = capturePointInputPort.getData();
       CapturePointTrajectoryData desiredCapturePointTrajectory = desiredCapturePointTrajectoryInputPort.getData();
+      FrameConvexPolygon2d supportPolygon = bipedSupportPolygonsInputPort.getData().getSupportPolygonInMidFeetZUp();
+      boolean projectIntoSupportPolygon = false;
+
       FramePoint2d desiredCMP = icpProportionalController.doProportionalControl(capturePointData.getCapturePoint(),
                                    desiredCapturePointTrajectory.getDesiredCapturePoint(), desiredCapturePointTrajectory.getDesiredCapturePointVelocity(),
-                                   capturePointData.getOmega0());
+                                   capturePointData.getOmega0(), projectIntoSupportPolygon, supportPolygon);
 
       this.controlledCMP.set(desiredCMP);
 
@@ -116,7 +119,6 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
       FrameVector2d desiredDeltaCMP = determineDesiredDeltaCMP(desiredPelvisOrientation, momentum);
       FramePoint2d desiredCoP = new FramePoint2d(desiredCMP);
       desiredCoP.sub(desiredDeltaCMP);
-      FrameConvexPolygon2d supportPolygon = bipedSupportPolygonsInputPort.getData().getSupportPolygonInMidFeetZUp();
       desiredCoP.changeFrame(supportPolygon.getReferenceFrame());
 
       if (supportPolygon.isPointInside(desiredCoP))

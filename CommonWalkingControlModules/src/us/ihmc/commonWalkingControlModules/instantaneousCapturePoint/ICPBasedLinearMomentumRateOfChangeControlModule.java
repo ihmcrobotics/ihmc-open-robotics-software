@@ -46,7 +46,6 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
 
    private final YoFramePoint2d controlledCMP = new YoFramePoint2d("controlledCMP", "", worldFrame, registry);
 
-   private final BooleanYoVariable cmpProjected = new BooleanYoVariable("cmpProjected", registry);
    private final double totalMass;
    private final double gravityZ;
 
@@ -70,9 +69,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
       visualizer.setDesiredCoP(new FramePoint2d(controlledCMP.getReferenceFrame(), Double.NaN, Double.NaN));
    }
 
-   
-   private final FrameLineSegment2d cmpToICP = new FrameLineSegment2d();
-   
+      
    public void startComputation()
    {
       if (supportLegInputPort.getData() != supportLegPreviousTick.getEnumValue())
@@ -84,37 +81,12 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
       CapturePointTrajectoryData desiredCapturePointTrajectory = desiredCapturePointTrajectoryInputPort.getData();
       FramePoint2d desiredCapturePoint = desiredCapturePointTrajectory.getDesiredCapturePoint();
       FramePoint2d capturePoint = capturePointData.getCapturePoint();
-      
+      FrameConvexPolygon2d supportPolygon = bipedSupportPolygonsInputPort.getData().getSupportPolygonInMidFeetZUp();
+
       FramePoint2d desiredCMP = icpProportionalController.doProportionalControl(capturePoint,
                                    desiredCapturePoint, desiredCapturePointTrajectory.getDesiredCapturePointVelocity(),
-                                   capturePointData.getOmega0());
-      FrameConvexPolygon2d supportPolygon = bipedSupportPolygonsInputPort.getData().getSupportPolygonInMidFeetZUp();
-      desiredCMP.changeFrame(supportPolygon.getReferenceFrame());
-
-      if (KEEP_CMP_INSIDE_SUPPORT_POLYGON)
-      {
-         if (supportPolygon.isPointInside(desiredCMP))
-         {
-            cmpProjected.set(false);
-         }
-         else
-         {
-            // Don't just project the cmp onto the support polygon.
-            // Instead, find the first intersection from the cmp to the support polygon
-            // along the line segment from the cmp to the capture point. 
-            cmpProjected.set(true);
-
-            capturePoint.changeFrame(desiredCMP.getReferenceFrame());
-
-            cmpToICP.setAndChangeFrame(desiredCMP, capturePoint);
-            FramePoint2d[] intersections = supportPolygon.intersectionWith(cmpToICP); 
-
-            if ((intersections != null) && (intersections[0] != null))
-            {
-               desiredCMP.set(intersections[0]);
-            }
-         }
-      }
+                                   capturePointData.getOmega0(), KEEP_CMP_INSIDE_SUPPORT_POLYGON, supportPolygon);
+      
 
       desiredCMP.changeFrame(this.controlledCMP.getReferenceFrame());
       this.controlledCMP.set(desiredCMP);
