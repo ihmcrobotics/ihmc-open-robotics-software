@@ -8,6 +8,8 @@ import java.util.Map;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
+import org.apache.tools.ant.types.CommandlineJava.SysProperties;
+
 import us.ihmc.atlas.parameters.AtlasJointPDGains;
 import us.ihmc.atlas.visualization.CenterOfPressureVisualizer;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
@@ -61,6 +63,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       this.highLevelHumanoidControllerFactory = highLevelHumanoidControllerFactory;
       this.useGazeboPhysics = useGazeboPhysics;
    }
+   int tick = 0;
 
    @Override
    public RobotController getController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
@@ -124,11 +127,20 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
                @Override
                public void update(double time)
                {
+                  
+                  tick++;
+                  if(tick>50)
+                  
+                  
+                  {
+//                     System.out.println(".");
+                     tick = 0;
                     forceSensorDataVisualizer.visualize();
                     centerOfPressureVisualizer.visualize();
                     wristFeetVariables.update();
                     if( wristFeetNetwork != null)
                        wristFeetNetwork.update();
+                  }
                }
             });
          
