@@ -1,7 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor;
 
 import com.martiansoftware.jsap.*;
-
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AlwaysZeroOffsetPPSTimestampOffsetProvider;
@@ -24,7 +23,6 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.RobotBoundingBoxes;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.SCSLidarDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosNativeNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.vrc.VRCScoreDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.DRCJointConfigurationData;
 import us.ihmc.graphics3DAdapter.camera.VideoSettings;
@@ -70,8 +68,6 @@ public class DRCNetworkProcessor
 
       System.out.println("Connecting to ROS");
 
-
-
       if(DRCLocalConfigParameters.ENABLE_CAMERA_AND_LIDAR)
       {
          RosMainNode rosMainNode;
@@ -89,7 +85,8 @@ public class DRCNetworkProcessor
          }
          CameraDataReceiver cameraDataReceiver = new GazeboCameraReceiver(robotPoseBuffer, videoSettings, rosMainNode, networkingManager,
                DRCSensorParameters.FIELD_OF_VIEW, ppsTimestampOffsetProvider);
-         MultiSenseCameraInfoReciever cameraInfoReciever = new MultiSenseCameraInfoReciever(rosMainNode, fieldComputerClient);
+         MultiSenseCameraInfoReciever cameraInfoServer = new MultiSenseCameraInfoReciever(rosMainNode, networkingManager.getControllerStateHandler());
+         networkingManager.getControllerCommandHandler().setIntrinsicServer(cameraInfoServer);
          
          LidarDataReceiver lidarDataReceiver = new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, fullRobotModel, robotBoundingBoxes,
                jointMap, fieldComputerClient, rosNativeNetworkProcessor, ppsTimestampOffsetProvider);
