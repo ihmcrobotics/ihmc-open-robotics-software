@@ -12,7 +12,7 @@ public class DRCRobotArmControllerParameters implements ArmControllerParameters
 
    public double getZetaAllArmJoints()
    {
-      return 1.0;
+      return 0.8; //1.0;
    }
 
    public double getMaxAccelerationAllArmJoints()

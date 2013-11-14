@@ -306,19 +306,19 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
 
    public double getCaptureKpParallelToMotion()
    {
-      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 1.5;
+      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 1.0; //1.5;
       return 0.3; 
    }
 
    public double getCaptureKpOrthogonalToMotion()
    {      
-      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 1.5;
+      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 1.0; //1.5;
       return 0.3; 
    }
    
    public double getCaptureFilterBreakFrequencyInHz()
    {
-      if (DRCConfigParameters.USE_VRC_PARAMETERS) return Double.POSITIVE_INFINITY;
+      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 16.0; //Double.POSITIVE_INFINITY;
       return 16.0;
    }
    
@@ -342,32 +342,32 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
 
    public double getZetaCoMHeight()
    {
-      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 1.0;
+      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 0.8; //1.0;
       return 0.8;
    }
    
    public double getKpPelvisOrientation()
    {
-      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 100.0;
+      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 80.0; //100.0;
       return 80.0; //30.0; 
    }
 
    public double getZetaPelvisOrientation()
    {
-      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 1.0;
+      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 0.8; //1.0;
       return 0.8;
    }
    
 
    public double getMaxAccelerationPelvisOrientation()
    {
-      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 100.0;
+      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 12.0;
       return 12.0; 
    }
 
    public double getMaxJerkPelvisOrientation()
    {
-      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 1000.0;
+      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 180.0;
       return 180.0; 
    }
 
@@ -379,31 +379,31 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
 
    public double getZetaHeadOrientation()
    {
-      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 1.0;
+      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 0.8; //1.0;
       return 0.8;
    }
 
    public double getKpUpperBody()
    {
-      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 100.0;
+      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 80.0; //100.0;
       return 80.0; //40.0;
    }
 
    public double getZetaUpperBody()
    {
-      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 1.0;
+      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 0.8; //1.0;
       return 0.8;
    }
    
    public double getMaxAccelerationUpperBody()
    {
-      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 100.0;
+      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 12.0; //100.0;
       return 6.0;
    }
    
    public double getMaxJerkUpperBody()
    {
-      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 1000.0;
+      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 180.0; //1000.0;
       return 60.0;
    }
 
