@@ -32,9 +32,6 @@ public class DRCConfigParameters
    public static final boolean USE_COLLISIONS_MESHS_FOR_VISUALIZATION = false;
    public static final boolean SEND_HIGH_SPEED_CONFIGURATION_DATA = false;
 
-   // TODO: Temporary static variable for testing getting into the car
-   public static final boolean TEST_GETTING_INTO_CAR = false;    // true;
-
    public static final boolean USE_SLIDER_FOR_POSE_PLAYBACK = false;    // true;
 
    public static final boolean USE_SUPER_DUPER_HIGH_RESOLUTION_FOR_COMMS = false;
