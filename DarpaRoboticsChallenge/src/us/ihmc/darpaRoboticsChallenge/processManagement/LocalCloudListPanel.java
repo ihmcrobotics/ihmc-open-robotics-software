@@ -36,7 +36,7 @@ public class LocalCloudListPanel extends JPanel
    private HashMap<LocalCloudMachines, Pair<JTree, DefaultMutableTreeNode>> cloudMachineTrees = new HashMap<LocalCloudMachines,
                                                                                                    Pair<JTree, DefaultMutableTreeNode>>();
 
-   JTree currentSelection = null;
+   private JTree currentSelection = null;
 
    public LocalCloudListPanel(GazeboRemoteSimulationAdapter sshSimLauncher)
    {
