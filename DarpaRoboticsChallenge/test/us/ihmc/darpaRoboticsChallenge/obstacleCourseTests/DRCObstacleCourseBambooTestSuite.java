@@ -12,7 +12,7 @@ import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
 //   us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCoursePlatformTest.class,
 //   us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseRampsTest.class,
 //   us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseRocksTest.class,
-//   us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseSteppingStonesTest.class
+   us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseSteppingStonesTest.class
 })
 
 public class DRCObstacleCourseBambooTestSuite
