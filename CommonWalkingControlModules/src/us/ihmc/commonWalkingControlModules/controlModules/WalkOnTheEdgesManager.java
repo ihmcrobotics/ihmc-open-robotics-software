@@ -189,7 +189,7 @@ public class WalkOnTheEdgesManager
          return;
       }
 
-      EndEffectorControlModule trailingEndEffectorControlModule = footEndEffectorControlModules.get(feet.get(trailingLeg));
+      EndEffectorControlModule trailingEndEffectorControlModule = footEndEffectorControlModules.get(trailingLeg);
       doToeOff.set(Math.abs(trailingEndEffectorControlModule.getJacobianDeterminant()) < 0.06);
    }
 
