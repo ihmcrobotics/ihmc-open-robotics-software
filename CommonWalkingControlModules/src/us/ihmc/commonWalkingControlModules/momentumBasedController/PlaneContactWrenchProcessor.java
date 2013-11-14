@@ -75,8 +75,9 @@ public class PlaneContactWrenchProcessor
    public void compute(Map<RigidBody, Wrench> externalWrenches)
    {
       cops.clear();
-      for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodies)
+      for (int i = 0; i < contactablePlaneBodies.size(); i++)
       {
+         ContactablePlaneBody contactablePlaneBody = contactablePlaneBodies.get(i);
          Wrench wrench = externalWrenches.get(contactablePlaneBody.getRigidBody());
 
          if (wrench != null)

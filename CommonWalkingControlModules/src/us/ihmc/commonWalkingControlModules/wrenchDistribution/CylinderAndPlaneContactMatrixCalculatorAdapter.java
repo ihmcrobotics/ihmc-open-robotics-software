@@ -44,8 +44,8 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
    
    private final List<? extends PlaneContactState> planeContactStates;
    private final List<? extends CylindricalContactState> cylindricalContactStates;
-   private final Map<PlaneContactState, EndEffector> planeEndEffectorMap;
-   private final Map<CylindricalContactState, EndEffector> cylindricalEndEffectorMap;
+   private final List<EndEffector> planeEndEffector;
+   private final List<EndEffector> cylindricalEndEffector;
    private final List<EndEffector> allEndEffectors;
    
    private final List<DynamicGraphicObject> endEffectorResultGraphics = new ArrayList<DynamicGraphicObject>();
@@ -67,25 +67,25 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
       if (planeContactStates != null)
       {
          this.planeContactStates = new ArrayList<PlaneContactState>(planeContactStates);
-         planeEndEffectorMap = new LinkedHashMap<PlaneContactState, EndEffector>();
+         planeEndEffector = new ArrayList<EndEffector>();
          populatePlaneEndEffectorMap();
       }
       else
       {
          this.planeContactStates = null;
-         planeEndEffectorMap = null;
+         planeEndEffector = null;
       }
 
       if (cylindricalContactStates != null)
       {
          this.cylindricalContactStates = new ArrayList<CylindricalContactState>(cylindricalContactStates);
-         cylindricalEndEffectorMap = new LinkedHashMap<CylindricalContactState, EndEffector>();
+         cylindricalEndEffector = new ArrayList<EndEffector>();
          populateCylindricalEndEffectorMap();
       }
       else
       {
          this.cylindricalContactStates = null;
-         cylindricalEndEffectorMap = null;
+         cylindricalEndEffector = null;
       }
       
       
@@ -105,7 +105,7 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
       {
          EndEffector endEffector = EndEffector.fromPlane("" + planeContactIndex.getIntegerValue(), this.centerOfMassFrame, contactState,
                this.wRhoPlaneContacts.getDoubleValue(), rhoMinScalar.getDoubleValue(), registry);;
-         planeEndEffectorMap.put(contactState, endEffector);
+         planeEndEffector.add(endEffector);
          allEndEffectors.add(endEffector);
          registerEndEffectorGraphic(endEffector);
          planeContactIndex.increment();
@@ -118,7 +118,7 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
       {
          EndEffector endEffector = EndEffector.fromCylinder(this.centerOfMassFrame, contactState, this.wRhoCylinderContacts.getDoubleValue(),
                this.wPhiCylinderContacts.getDoubleValue(), registry);
-         cylindricalEndEffectorMap.put(contactState, endEffector);
+         cylindricalEndEffector.add(endEffector);
          allEndEffectors.add(endEffector);
          registerEndEffectorGraphic(endEffector);
       }
@@ -140,11 +140,12 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
       // TODO: garbage:
       wrenches.clear();
 
-      for (PlaneContactState contactState : planeContactStates)
+      for (int i = 0; i < planeEndEffector.size(); i++)
       {
-         EndEffector endEffector = planeEndEffectorMap.get(contactState);
+         PlaneContactState planeContactState = planeContactStates.get(i);
+         EndEffector endEffector = planeEndEffector.get(i);
 
-         RigidBody rigidBody = contactState.getRigidBody();
+         RigidBody rigidBody = planeContactState.getRigidBody();
          SpatialForceVector spatialForceVector = cylinderAndPlaneContactSpatialForceVectorCalculator.getSpatialForceVector(endEffector);
          Wrench newWrench = new Wrench(rigidBody.getBodyFixedFrame(), spatialForceVector.getExpressedInFrame(), spatialForceVector.getLinearPartCopy(),
                spatialForceVector.getAngularPartCopy());
@@ -168,19 +169,21 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
    {
       if (planeContactStates != null)
       {
-         for (PlaneContactState planeContactState : planeContactStates)
-         {               
-            EndEffector endEffector = planeEndEffectorMap.get(planeContactState);
+         for (int i = 0; i < planeEndEffector.size(); i++)
+         {
+            PlaneContactState planeContactState = planeContactStates.get(i);
+            EndEffector endEffector = planeEndEffector.get(i);
             endEffector.updateFromPlane(planeContactState, wRhoPlaneContacts.getDoubleValue(), rhoMinScalar.getDoubleValue());                  
          }
       }
 
       if (cylindricalContactStates != null)
       {
-         for (CylindricalContactState contactState : cylindricalContactStates)
+         for (int i = 0; i < cylindricalContactStates.size(); i++)
          {
-            EndEffector endEffector = cylindricalEndEffectorMap.get(contactState);
-            endEffector.updateFromCylinder(contactState, wRhoCylinderContacts.getDoubleValue(), wPhiCylinderContacts.getDoubleValue());
+            CylindricalContactState cylindricalContactState = cylindricalContactStates.get(i);
+            EndEffector endEffector = cylindricalEndEffector.get(i);
+            endEffector.updateFromCylinder(cylindricalContactState, wRhoCylinderContacts.getDoubleValue(), wPhiCylinderContacts.getDoubleValue());
          }
       }
    }
