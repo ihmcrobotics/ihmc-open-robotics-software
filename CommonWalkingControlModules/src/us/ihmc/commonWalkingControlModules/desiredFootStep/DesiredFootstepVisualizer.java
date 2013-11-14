@@ -122,7 +122,7 @@ public class DesiredFootstepVisualizer
       SideDependentList<Color> footColors = new SideDependentList<Color>(Color.pink, Color.blue);
       for (RobotSide robotSide : RobotSide.values)
       {
-         int maxNumberOfVertices = bipedFeet.get(robotSide).getContactPoints().size();
+         int maxNumberOfVertices = bipedFeet.get(robotSide).getContactPointsCopy().size();
          String footName = robotSide.getCamelCaseNameForStartOfExpression() + "Foot";
          YoFrameConvexPolygon2d yoFrameFootPolygonInWorld = new YoFrameConvexPolygon2d(footName, "", ReferenceFrame.getWorldFrame(), maxNumberOfVertices,
                                                                registry);
@@ -240,7 +240,7 @@ public class DesiredFootstepVisualizer
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         FrameConvexPolygon2d footPolygonInWorld = FrameConvexPolygon2d.constructByProjectionOntoXYPlane(bipedFeet.get(robotSide).getContactPoints(),
+         FrameConvexPolygon2d footPolygonInWorld = FrameConvexPolygon2d.constructByProjectionOntoXYPlane(bipedFeet.get(robotSide).getContactPointsCopy(),
                                                       ReferenceFrame.getWorldFrame());
 
          feetPolygonsInWorld.get(robotSide).setFrameConvexPolygon2d(footPolygonInWorld);

@@ -340,7 +340,7 @@ public class DrivingFootControlModule
    {
       FrameVector forward = new FrameVector(foot.getPlaneFrame(), 1.0, 0.0, 0.0);
       int nToePoints = 2;
-      List<FramePoint> toePoints = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(foot.getContactPoints(), forward, nToePoints);
+      List<FramePoint> toePoints = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(foot.getContactPointsCopy(), forward, nToePoints);
       FramePoint centerToePoint = FramePoint.average(toePoints);
 
       return centerToePoint;

@@ -38,7 +38,7 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
       return rigidBody.getName();
    }
 
-   public List<FramePoint> getContactPoints()
+   public List<FramePoint> getContactPointsCopy()
    {
       List<FramePoint> ret = new ArrayList<FramePoint>(contactPoints.size());
       for (int i = 0; i < contactPoints.size(); i++)

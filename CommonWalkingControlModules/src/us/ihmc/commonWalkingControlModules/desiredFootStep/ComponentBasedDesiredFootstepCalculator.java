@@ -276,7 +276,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
          double zUpcomingSwing = upcomingSwingAnkle.getZ();
 
          FrameVector searchDirection = new FrameVector(upcomingSupportAnkleZUpFrame, 0.0, 0.0, -1.0);
-         FramePoint upcomingSwingMinZPoint = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(upcomingSwingFoot.getContactPoints(),
+         FramePoint upcomingSwingMinZPoint = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(upcomingSwingFoot.getContactPointsCopy(),
                                                 searchDirection, 1).get(0);
          upcomingSwingMinZPoint.changeFrame(ankleZUpFrames.get(upcomingSwingLegSide));
          double upcomingSwingMinZ = upcomingSwingMinZPoint.getZ();
@@ -342,7 +342,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
    protected List<FramePoint> getContactPoints(RobotSide swingSide)
    {
       double stepPitch = this.stepPitch.getDoubleValue();
-      List<FramePoint> allContactPoints = contactableBodies.get(swingSide).getContactPoints();
+      List<FramePoint> allContactPoints = contactableBodies.get(swingSide).getContactPointsCopy();
       if (stepPitch == 0.0)
       {
          return allContactPoints;

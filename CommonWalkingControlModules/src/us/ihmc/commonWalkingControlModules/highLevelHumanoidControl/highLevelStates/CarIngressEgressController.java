@@ -584,7 +584,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          FrameVector desiredAcceleration = new FrameVector(baseFrame, 0.0, 0.0, 0.0);
          DenseMatrix64F selectionMatrix = new DenseMatrix64F(1, 3);
          selectionMatrix.set(0, 2, 1.0);
-         for (FramePoint contactPoint : body.getContactPoints())
+         for (FramePoint contactPoint : body.getContactPointsCopy())
          {
             momentumBasedController.setDesiredPointAcceleration(jacobianId, contactPoint, desiredAcceleration, selectionMatrix);
          }

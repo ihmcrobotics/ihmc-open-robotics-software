@@ -478,7 +478,7 @@ public class WalkOnTheEdgesManager
    {
       FrameVector forward = new FrameVector(supportFoot.getPlaneFrame(), 1.0, 0.0, 0.0);
       int nToePoints = 2;
-      List<FramePoint> toePoints = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(supportFoot.getContactPoints(), forward, nToePoints);
+      List<FramePoint> toePoints = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(supportFoot.getContactPointsCopy(), forward, nToePoints);
 
       return toePoints;
    }
@@ -486,7 +486,7 @@ public class WalkOnTheEdgesManager
    private FrameConvexPolygon2d getOnToesSupportPolygonCopy(ContactablePlaneBody trailingFoot, ContactablePlaneBody leadingFoot)
    {
       List<FramePoint> toePoints = getToePointsCopy(trailingFoot);
-      List<FramePoint> leadingFootPoints = leadingFoot.getContactPoints();
+      List<FramePoint> leadingFootPoints = leadingFoot.getContactPointsCopy();
 
       List<FramePoint2d> allPoints = new ArrayList<FramePoint2d>();
       for (FramePoint framePoint : toePoints)
