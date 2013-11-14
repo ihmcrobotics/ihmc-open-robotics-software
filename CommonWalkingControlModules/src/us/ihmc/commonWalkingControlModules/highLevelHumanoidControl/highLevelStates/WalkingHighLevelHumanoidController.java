@@ -502,7 +502,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       ResetICPTrajectoryAction resetICPTrajectoryAction = new ResetICPTrajectoryAction();
       for (RobotSide robotSide : RobotSide.values)
       {
-         EndEffectorControlModule swingEndEffectorControlModule = footEndEffectorControlModules.get(feet.get(robotSide.getOppositeSide()));
+         EndEffectorControlModule swingEndEffectorControlModule = footEndEffectorControlModules.get(robotSide.getOppositeSide());
          StopWalkingCondition stopWalkingCondition = new StopWalkingCondition(swingEndEffectorControlModule);
          ResetSwingTrajectoryDoneAction resetSwingTrajectoryDoneAction = new ResetSwingTrajectoryDoneAction(swingEndEffectorControlModule);
 
@@ -641,9 +641,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       momentumBasedController.clearContacts();
 
-      for (ContactablePlaneBody contactablePlaneBody : momentumBasedController.getContactablePlaneFeet())
+      for (RobotSide robotSide : RobotSide.values)
       {
-         setFlatFootContactState(contactablePlaneBody);
+         setFlatFootContactState(robotSide);
       }
    }
 
@@ -681,10 +681,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             leadingLegSide = transferToSide;
          }
 
-         ContactablePlaneBody transferFoot = feet.get(transferToSide);
-         if ((footEndEffectorControlModules.get(transferFoot) != null) && walkOnTheEdgesManager.isEdgeTouchDownDone(leadingLegSide))
+         if ((footEndEffectorControlModules.get(transferToSide) != null) && walkOnTheEdgesManager.isEdgeTouchDownDone(leadingLegSide))
          {
-            setFlatFootContactState(transferFoot);
+            setFlatFootContactState(transferToSide);
          }
 
          // note: this has to be done before the ICP trajectory generator is initialized, since it is using nextFootstep
@@ -694,8 +693,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          
          if (doneFinishingSingleSupportTransfer.getBooleanValue() || estimatedTimeRemainingForState < 0.02)
          {
-            upcomingFootstepList.checkForFootsteps(momentumBasedController.getPointPositionGrabber(), readyToGrabNextFootstep, upcomingSupportLeg,
-                  feet);
+            upcomingFootstepList.checkForFootsteps(momentumBasedController.getPointPositionGrabber(), readyToGrabNextFootstep, upcomingSupportLeg, feet);
             checkForSteppingOnOrOff(transferToSide);
          }
          
@@ -777,8 +775,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
                if (walkOnTheEdgesManager.doToeOff())
                {
-                  ContactablePlaneBody trailingFoot = feet.get(trailingLeg);
-                  setOnToesContactState(trailingFoot);
+                  setOnToesContactState(trailingLeg);
                }
             }
 
@@ -805,8 +802,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                walkOnTheEdgesProviders.setToeOffFinalAngle(maximumConstantJerkFinalToeOffAngleComputer.getMaximumFeasibleConstantJerkFinalToeOffAngle
                      (walkOnTheEdgesProviders.getToeOffInitialAngle(trailingLeg), remainingToeOffTime));
 
-               ContactablePlaneBody trailingFoot = feet.get(trailingLeg);
-               setOnToesContactState(trailingFoot);
+               setOnToesContactState(trailingLeg);
                icpAndMomentumBasedController.updateBipedSupportPolygons(bipedSupportPolygons);    // need to always update biped support polygons after a change to the contact states
                ecmpBasedToeOffHasBeenInitialized.set(true);
 
@@ -926,7 +922,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             for (RobotSide robotSide : RobotSide.values)
             {
-               setOnToesContactState(feet.get(robotSide));
+               setOnToesContactState(robotSide);
             }
          }
          else
@@ -935,20 +931,20 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             {
                for (RobotSide robotSide : RobotSide.values)
                {
-                  setFlatFootContactState(feet.get(robotSide));
+                  setFlatFootContactState(robotSide);
                }
             }
             else if (walkOnTheEdgesManager.willLandOnToes())
             {
-               setTouchdownOnToesContactState(feet.get(transferToSide));
+               setTouchdownOnToesContactState(transferToSide);
             }
             else if (walkOnTheEdgesManager.willLandOnHeel())
             {
-               setTouchdownOnHeelContactState(feet.get(transferToSide));
+               setTouchdownOnHeelContactState(transferToSide);
             }
             else
             {
-               setFlatFootContactState(feet.get(transferToSide));
+               setFlatFootContactState(transferToSide);
 
                // still need to determine contact state for trailing leg. This is done in doAction as soon as the previous ICP trajectory is done
             }
@@ -1091,9 +1087,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          desiredPelvisAngularVelocity.set(desiredPelvisAngularVelocityToPack);
          desiredPelvisAngularAcceleration.set(desiredPelvisAngularAccelerationToPack);
 
-         if (stateMachine.timeInCurrentState() < 0.5 * swingTimeCalculationProvider.getValue() && footEndEffectorControlModules.get(feet.get(swingSide)).isInSingularityNeighborhood())
+         if (stateMachine.timeInCurrentState() < 0.5 * swingTimeCalculationProvider.getValue() && footEndEffectorControlModules.get(swingSide).isInSingularityNeighborhood())
          {
-            footEndEffectorControlModules.get(feet.get(swingSide)).doSingularityEscape(true);
+            footEndEffectorControlModules.get(swingSide).doSingularityEscape(true);
          }
       }
 
@@ -1143,11 +1139,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (walkOnTheEdgesManager.stayOnToes())
          {
-            setOnToesContactState(feet.get(supportSide));
+            setOnToesContactState(supportSide);
          }
          else
          {
-            setFlatFootContactState(feet.get(supportSide));
+            setFlatFootContactState(supportSide);
          }
 
          finalPositionProvider.set(nextFootstep.getPositionInFrame(worldFrame));
@@ -1211,7 +1207,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          FramePoint2d finalDesiredICP = getSingleSupportFinalDesiredICPForWalking(transferToAndNextFootstepsData, swingSide);
 
          ContactablePlaneBody swingFoot = feet.get(swingSide);
-         setContactStateForSwing(swingFoot);
+         setContactStateForSwing(swingSide);
          setSupportLeg(supportSide);
          icpAndMomentumBasedController.updateBipedSupportPolygons(bipedSupportPolygons);
 
@@ -1721,7 +1717,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       
       for (RobotSide robotSide : RobotSide.values)
       {
-         EndEffectorControlModule endEffectorControlModule = footEndEffectorControlModules.get(feet.get(robotSide));
+         EndEffectorControlModule endEffectorControlModule = footEndEffectorControlModules.get(robotSide);
          
          if (endEffectorControlModule.getCurrentConstraintType() == ConstraintType.FULL && endEffectorControlModule.isInSingularityNeighborhood())
          {
@@ -1764,47 +1760,32 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       return contactStatesList;
    }
 
-   private void setOnToesContactState(ContactablePlaneBody contactableBody)
+   private void setOnToesContactState(RobotSide robotSide)
    {
-      RobotSide robotSide = RobotSide.LEFT;
-      
-      if (feet.get(robotSide.getOppositeSide()).equals(contactableBody))
-         robotSide = RobotSide.RIGHT;
-
       // TODO cannot use world or elevator frames with non perfect sensors... some bug to fix obviously
-      footEndEffectorControlModules.get(contactableBody).setContactState(ConstraintType.TOES, new FrameVector(referenceFrames.getAnkleZUpFrame(robotSide), 0.0, 0.0, 1.0));
+      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.TOES, new FrameVector(referenceFrames.getAnkleZUpFrame(robotSide), 0.0, 0.0, 1.0));
    }
 
-   private void setTouchdownOnHeelContactState(ContactablePlaneBody contactableBody)
+   private void setTouchdownOnHeelContactState(RobotSide robotSide)
    {
-      RobotSide robotSide = RobotSide.LEFT;
-      
-      if (feet.get(robotSide.getOppositeSide()).equals(contactableBody))
-         robotSide = RobotSide.RIGHT;
-
       // TODO cannot use world or elevator frames with non perfect sensors... some bug to fix obviously
-      footEndEffectorControlModules.get(contactableBody).setContactState(ConstraintType.HEEL_TOUCHDOWN, new FrameVector(referenceFrames.getAnkleZUpFrame(robotSide), 0.0, 0.0, 1.0));
+      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.HEEL_TOUCHDOWN, new FrameVector(referenceFrames.getAnkleZUpFrame(robotSide), 0.0, 0.0, 1.0));
    }
 
-   private void setTouchdownOnToesContactState(ContactablePlaneBody contactableBody)
+   private void setTouchdownOnToesContactState(RobotSide robotSide)
    {
-      RobotSide robotSide = RobotSide.LEFT;
-      
-      if (feet.get(robotSide.getOppositeSide()).equals(contactableBody))
-         robotSide = RobotSide.RIGHT;
-
       // TODO cannot use world or elevator frames with non perfect sensors... some bug to fix obviously
-      footEndEffectorControlModules.get(contactableBody).setContactState(ConstraintType.TOES_TOUCHDOWN, new FrameVector(referenceFrames.getAnkleZUpFrame(robotSide), 0.0, 0.0, 1.0));
+      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.TOES_TOUCHDOWN, new FrameVector(referenceFrames.getAnkleZUpFrame(robotSide), 0.0, 0.0, 1.0));
    }
 
-   private void setFlatFootContactState(ContactablePlaneBody contactableBody)
+   private void setFlatFootContactState(RobotSide robotSide)
    {
-      footEndEffectorControlModules.get(contactableBody).setContactState(ConstraintType.FULL);
+      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.FULL);
    }
 
-   private void setContactStateForSwing(ContactablePlaneBody contactableBody)
+   private void setContactStateForSwing(RobotSide robotSide)
    {
-      EndEffectorControlModule endEffectorControlModule = footEndEffectorControlModules.get(contactableBody);
+      EndEffectorControlModule endEffectorControlModule = footEndEffectorControlModules.get(robotSide);
       endEffectorControlModule.doSingularityEscape(true);
       endEffectorControlModule.setContactState(ConstraintType.UNCONSTRAINED);
    }
