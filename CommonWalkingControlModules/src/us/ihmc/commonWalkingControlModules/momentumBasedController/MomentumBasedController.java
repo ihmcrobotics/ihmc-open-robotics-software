@@ -405,8 +405,8 @@ public class MomentumBasedController
       SpatialForceVector totalGroundReactionWrench = new SpatialForceVector(centerOfMassFrame);
       Wrench admissibleGroundReactionWrench = TotalWrenchCalculator.computeTotalWrench(externalWrenches.values(),
             totalGroundReactionWrench.getExpressedInFrame());
-      admissibleDesiredGroundReactionTorque.set(admissibleGroundReactionWrench.getAngularPartCopy());
-      admissibleDesiredGroundReactionForce.set(admissibleGroundReactionWrench.getLinearPartCopy());
+      admissibleDesiredGroundReactionTorque.set(admissibleGroundReactionWrench.getAngularPartX(), admissibleGroundReactionWrench.getAngularPartY(), admissibleGroundReactionWrench.getAngularPartZ());
+      admissibleDesiredGroundReactionForce.set(admissibleGroundReactionWrench.getLinearPartX(), admissibleGroundReactionWrench.getLinearPartY(), admissibleGroundReactionWrench.getLinearPartZ());
 
       SpatialForceVector groundReactionWrenchCheck = inverseDynamicsCalculator.computeTotalExternalWrench(centerOfMassFrame);
       groundReactionTorqueCheck.set(groundReactionWrenchCheck.getAngularPartCopy());
@@ -551,15 +551,15 @@ public class MomentumBasedController
       fullRobotModel.getRootJoint().packDesiredJointAcceleration(pelvisAcceleration);
 
       finalDesiredPelvisAngularAcceleration.checkReferenceFrameMatch(pelvisAcceleration.getExpressedInFrame());
-      finalDesiredPelvisAngularAcceleration.set(pelvisAcceleration.getAngularPartCopy());
+      finalDesiredPelvisAngularAcceleration.set(pelvisAcceleration.getAngularPartX(), pelvisAcceleration.getAngularPartY(), pelvisAcceleration.getAngularPartZ());
 
       finalDesiredPelvisLinearAcceleration.checkReferenceFrameMatch(pelvisAcceleration.getExpressedInFrame());
-      finalDesiredPelvisLinearAcceleration.set(pelvisAcceleration.getLinearPartCopy());
+      finalDesiredPelvisLinearAcceleration.set(pelvisAcceleration.getLinearPartX(), pelvisAcceleration.getLinearPartY(), pelvisAcceleration.getLinearPartZ());
 
       fullRobotModel.getRootJoint().packWrench(pelvisJointWrench);
       pelvisJointWrench.changeFrame(referenceFrames.getCenterOfMassFrame());
-      desiredPelvisForce.set(pelvisJointWrench.getLinearPartCopy());
-      desiredPelvisTorque.set(pelvisJointWrench.getAngularPartCopy());
+      desiredPelvisForce.set(pelvisJointWrench.getLinearPartX(), pelvisJointWrench.getLinearPartY(), pelvisJointWrench.getLinearPartZ());
+      desiredPelvisTorque.set(pelvisJointWrench.getAngularPartX(), pelvisJointWrench.getAngularPartY(), pelvisJointWrench.getAngularPartZ());
 
       for (OneDoFJoint joint : desiredAccelerationYoVariables.keySet())
       {
