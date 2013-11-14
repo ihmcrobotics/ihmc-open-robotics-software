@@ -1,13 +1,11 @@
 package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -15,8 +13,12 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.Wrench;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 
 
 public class CylinderAndPlaneContactMatrixCalculator
@@ -154,7 +156,7 @@ public class CylinderAndPlaneContactMatrixCalculator
 
    }
 
-   public void computeMatrices(Collection<? extends EndEffector> endEffectors)
+   public void computeMatrices(List<? extends EndEffector> endEffectors)
    {
       int iRho = 0;
       int iPhi = 0;
@@ -170,8 +172,9 @@ public class CylinderAndPlaneContactMatrixCalculator
       CommonOps.setIdentity(wRho);
       CommonOps.setIdentity(wPhi);
 
-      for (EndEffector endEffector : endEffectors)
+      for (int i = 0; i < endEffectors.size(); i++)
       {
+         EndEffector endEffector = endEffectors.get(i);
          if (endEffector.isLoadBearing())
          {
             OptimizerContactModel model = endEffector.getContactModel();
@@ -215,8 +218,9 @@ public class CylinderAndPlaneContactMatrixCalculator
          iPhi = 0;
          int q = 0;
 
-         for (EndEffector endEffector : endEffectors)
+         for (int i = 0; i < endEffectors.size(); i++)
          {
+            EndEffector endEffector = endEffectors.get(i);
             if (endEffector.isLoadBearing())
             {
                ReferenceFrame frameOfInterest = endEffector.getReferenceFrame();

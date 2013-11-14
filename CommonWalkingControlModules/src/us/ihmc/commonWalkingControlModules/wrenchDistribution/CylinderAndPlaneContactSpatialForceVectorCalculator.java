@@ -1,11 +1,12 @@
 package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -13,10 +14,11 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.Wrench;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 
 public class CylinderAndPlaneContactSpatialForceVectorCalculator
 {
@@ -135,13 +137,14 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
       this.qPhi.set(qPhi);
    }
 
-   public void computeWrenches(Collection<? extends EndEffector> endEffectors, DenseMatrix64F rho, DenseMatrix64F phi)
+   public void computeWrenches(List<? extends EndEffector> endEffectors, DenseMatrix64F rho, DenseMatrix64F phi)
    {
       int iRho = 0;
       int phiLocation = 0;
 
-      for (EndEffector endEffector : endEffectors)
+      for (int i = 0; i < endEffectors.size(); i++)
       {
+         EndEffector endEffector = endEffectors.get(i);
          if (endEffector.isLoadBearing())
          {
             tempSum.zero();
@@ -190,8 +193,9 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
          int q = 0;
          iRho = 0;
          phiLocation = 0;
-         for (EndEffector endEffector : endEffectors)
+         for (int i = 0; i < endEffectors.size(); i++)
          {
+            EndEffector endEffector = endEffectors.get(i);
             if (endEffector.isLoadBearing())
             {
                ReferenceFrame frameOfInterest = endEffector.getReferenceFrame();

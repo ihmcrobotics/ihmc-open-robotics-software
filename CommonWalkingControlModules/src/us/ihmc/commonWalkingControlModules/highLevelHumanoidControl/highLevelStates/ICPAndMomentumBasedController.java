@@ -154,7 +154,6 @@ public class ICPAndMomentumBasedController
    {
       CenterOfMassJacobian centerOfMassJacobian = momentumBasedController.getCenterOfMassJacobian();
 
-      centerOfMassJacobian.compute();
       FrameVector ret = new FrameVector(ReferenceFrame.getWorldFrame());
       centerOfMassJacobian.packCenterOfMassVelocity(ret);
 

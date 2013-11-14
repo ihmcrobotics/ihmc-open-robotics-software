@@ -9,7 +9,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableCylin
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXGenMomentumOptimizerBridge;
-import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXWithCylinderNative;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
@@ -86,8 +85,12 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       this.primaryMotionConstraintHandler = new MotionConstraintHandler("primary", jointsToOptimizeFor, twistCalculator, geometricJacobianHolder, registry);
       this.secondaryMotionConstraintHandler = new MotionConstraintHandler("secondary", jointsToOptimizeFor, twistCalculator, geometricJacobianHolder,registry);
 
-      int rhoSize = CVXWithCylinderNative.rhoSize;
-      int phiSize = CVXWithCylinderNative.phiSize;
+      int nDoF = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
+
+      momentumOptimizer = new CVXGenMomentumOptimizerBridge(nDoF, momentumOptimizationSettings);
+      
+      int rhoSize = momentumOptimizer.getRhoSize();
+      int phiSize = momentumOptimizer.getPhiSize();
       dynamicGraphicObjectsListRegistry = null; // don't visualize vectors
       double wRhoCylinderContacts = momentumOptimizationSettings.getRhoCylinderContactRegularization();
       double wPhiCylinderContacts = momentumOptimizationSettings.getPhiCylinderContactRegularization();
@@ -97,13 +100,9 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       this.wrenchMatrixCalculator = new CylinderAndPlaneContactMatrixCalculatorAdapter(centerOfMassFrame, rhoSize, phiSize, wRhoCylinderContacts,
             wPhiCylinderContacts, wRhoPlaneContacts, wRhoSmoother, planeContactStates, cylindricalContactStates, dynamicGraphicObjectsListRegistry, registry);
 
-      int nDoF = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
-
-      momentumOptimizer = new CVXGenMomentumOptimizerBridge(nDoF, momentumOptimizationSettings);
       this.momentumOptimizationSettings = momentumOptimizationSettings;
-      
-      dampedLeastSquaresFactorMatrix = new DenseMatrix64F(nDoF, nDoF);
 
+      dampedLeastSquaresFactorMatrix = new DenseMatrix64F(nDoF, nDoF);
 
       this.momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
 
