@@ -73,6 +73,11 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
 
    public DRCRobotJointMap(DRCRobotModel selectedModel, boolean addLoadsOfContactPoints)
    {
+      this(selectedModel, addLoadsOfContactPoints, false);
+   }
+   
+   public DRCRobotJointMap(DRCRobotModel selectedModel, boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsForFeetOnly)
+   {
       this.selectedModel = selectedModel;
 
       for (RobotSide robotSide : RobotSide.values)
@@ -104,7 +109,13 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
          handGroundContactPoints.put(robotSide, new ArrayList<Pair<String, Vector3d>>());
          thighGroundContactPoints.put(robotSide, new ArrayList<Pair<String, Vector3d>>());
 
-         for (Vector3d footv3d : DRCRobotParameters.DRC_ROBOT_GROUND_CONTACT_POINT_OFFSET_FROM_FOOT)
+         ArrayList<Vector3d> contactPointOffsetList;
+         if (addLoadsOfContactPointsForFeetOnly)
+            contactPointOffsetList = DRCRobotParameters.DRC_ROBOT_GROUND_LOADS_OF_CONTACT_POINT_OFFSET_FROM_FOOT;
+         else
+            contactPointOffsetList = DRCRobotParameters.DRC_ROBOT_GROUND_CONTACT_POINT_OFFSET_FROM_FOOT;
+            
+         for (Vector3d footv3d : contactPointOffsetList)
          {
             // add ankle joint contact points on each corner of the foot
             footGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(forcedSideJointNames[l_leg_akx], footv3d));

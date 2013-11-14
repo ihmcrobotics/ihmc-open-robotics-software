@@ -27,47 +27,64 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
    private double gravity = -9.81;
    
    private boolean initializeEstimatorToActual = false;
+   private final boolean useSoftGroundContactGains;
    
    private final CommonTerrain commonTerrain;
 
    private DynamicIntegrationMethod dynamicIntegrationMethod = DynamicIntegrationMethod.EULER_DOUBLE_STEPS;
    
-   public DRCSCSInitialSetup(TerrainType terrainType, double simulateDT)
-   {
-      System.out.println("terrainType = " + terrainType);
-      commonTerrain = new CommonTerrain(terrainType);
-      this.simulateDT = simulateDT;
-   }
-
-   public DRCSCSInitialSetup(GroundProfile groundProfile, double simulateDT)
+   public DRCSCSInitialSetup(GroundProfile groundProfile, double simulateDT, boolean useSoftGroundContactGains)
    {
       commonTerrain = new CommonTerrain(groundProfile);
       this.simulateDT = simulateDT;
+      this.useSoftGroundContactGains = useSoftGroundContactGains;
+   }
+   
+   public DRCSCSInitialSetup(GroundProfile groundProfile, double simulateDT)
+   {
+      this(groundProfile, simulateDT, false);
+   }
+
+   public DRCSCSInitialSetup(TerrainType terrainType, double simulateDT)
+   {
+      this(CommonTerrain.setUpTerrain(terrainType), simulateDT, false);
+   }
+
+   public DRCSCSInitialSetup(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, double simulateDT, boolean useSoftGroundContactGains)
+   {
+      this(commonAvatarEnvironmentInterface.getTerrainObject(), simulateDT, useSoftGroundContactGains);
    }
 
    public DRCSCSInitialSetup(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, double simulateDT)
    {
-      this(commonAvatarEnvironmentInterface.getTerrainObject(), simulateDT);
+      this(commonAvatarEnvironmentInterface, simulateDT, false);
    }
 
    public void initializeRobot(Robot robot, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       robot.setGravity(gravity);
 
-//      double groundKz = 165.0;
-//      double groundBz = 55.0;
-//      double groundKxy = 27500.0;
-//      double groundBxy = 1100.0;
-
-//      double groundKz = 500.0;
-//      double groundBz = 300.0;
-//      double groundKxy = 50000.0;
-//      double groundBxy = 2000.0;
+      double groundKz, groundBz, groundKxy, groundBxy;
       
-      double groundKz = 2000.0;
-      double groundBz = 1500.0;
-      double groundKxy = 50000.0;
-      double groundBxy = 2000.0;
+//      groundKz = 500.0;
+//      groundBz = 300.0;
+//      groundKxy = 50000.0;
+//      groundBxy = 2000.0;
+      
+      if (useSoftGroundContactGains)
+      {
+         groundKz = 800.0;
+         groundBz = 800.0;
+         groundKxy = 10000.0;
+         groundBxy = 800.0;
+      }
+      else
+      {
+         groundKz = 2000.0;
+         groundBz = 1500.0;
+         groundKxy = 50000.0;
+         groundBxy = 2000.0;
+      }
 
 //      double alphaStick = 1.0;
 //      double alphaSlip = 0.5;

@@ -345,7 +345,7 @@ public class CommonTerrain
    }
 
 
-   private GroundProfile setUpTerrain(TerrainType terrainType)
+   public static GroundProfile setUpTerrain(TerrainType terrainType)
    {
       GroundProfile groundProfile;
       switch (terrainType)
