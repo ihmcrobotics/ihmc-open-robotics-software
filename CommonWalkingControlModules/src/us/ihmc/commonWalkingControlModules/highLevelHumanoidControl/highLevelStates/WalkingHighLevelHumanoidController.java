@@ -479,7 +479,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          swingGainsChangedListener.variableChanged(null);
 
          endEffectorControlModule.setParameters(minJacobianDeterminantForSingularityEscape, singularityEscapeNullspaceMultiplierSwingLeg.getDoubleValue());
-         footEndEffectorControlModules.put(bipedFoot, endEffectorControlModule);
+         footEndEffectorControlModules.put(robotSide, endEffectorControlModule);
       }
    }
 

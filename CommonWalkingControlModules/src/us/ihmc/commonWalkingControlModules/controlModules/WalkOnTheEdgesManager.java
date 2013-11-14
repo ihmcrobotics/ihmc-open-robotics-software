@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
@@ -71,7 +70,7 @@ public class WalkOnTheEdgesManager
    private final DoubleYoVariable minStepLengthForToeTouchdown = new DoubleYoVariable("minStepLengthForToeTouchdown", registry);
 
    private final SideDependentList<? extends ContactablePlaneBody> feet;
-   private final Map<ContactablePlaneBody, EndEffectorControlModule> footEndEffectorControlModules;
+   private final SideDependentList<EndEffectorControlModule> footEndEffectorControlModules;
 
    private final DoubleYoVariable extraCoMMaxHeightWithToes = new DoubleYoVariable("extraCoMMaxHeightWithToes", registry);
 
@@ -94,7 +93,7 @@ public class WalkOnTheEdgesManager
    private Footstep desiredFootstep;
 
    public WalkOnTheEdgesManager(WalkingControllerParameters walkingControllerParameters, WalkOnTheEdgesProviders walkOnTheEdgesProviders,
-         SideDependentList<? extends ContactablePlaneBody> feet, Map<ContactablePlaneBody, EndEffectorControlModule> footEndEffectorControlModules,
+         SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<EndEffectorControlModule> footEndEffectorControlModules,
          YoVariableRegistry parentRegistry)
    {
       this.stayOnToes.set(walkingControllerParameters.stayOnToes());
