@@ -632,10 +632,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
    public boolean isContactablePlaneBodyInContact(ContactablePlaneBody contactablePlaneBody)
    {
-      if (momentumBasedController.getContactPoints(contactablePlaneBody).size() == 0)
-         return false;
-      else
-         return true;
+      return momentumBasedController.getContactState(contactablePlaneBody).inContact();
    }
    
    public void setFootInContact(RobotSide robotSide, boolean inContact)

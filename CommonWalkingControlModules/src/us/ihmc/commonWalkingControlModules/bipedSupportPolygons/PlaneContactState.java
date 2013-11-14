@@ -17,6 +17,7 @@ public interface PlaneContactState
    public abstract FrameVector getContactNormalFrameVectorCopy();
    public abstract void getContactNormalFrameVector(FrameVector frameVectorToPack);
    public abstract List<FramePoint> getContactFramePointsInContactCopy();
+   public abstract void getContactFramePointsInContact(List<FramePoint> contactPointListToPack);
    public abstract List<FramePoint2d> getContactFramePoints2dInContactCopy();
    public abstract double getCoefficientOfFriction();
    public abstract int getNumberOfContactPointsInContact();

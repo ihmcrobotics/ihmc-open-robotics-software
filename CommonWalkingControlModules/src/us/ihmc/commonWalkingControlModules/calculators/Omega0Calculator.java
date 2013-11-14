@@ -17,11 +17,16 @@ public class Omega0Calculator implements Omega0CalculatorInterface
    private final OriginAndPointFrame copToCoPFrame = new OriginAndPointFrame("copToCoP", worldFrame);
    private final ReferenceFrame centerOfMassFrame;
    private final double totalMass;
+   private final List<FramePoint> cops = new ArrayList<FramePoint>(2); // Max of 2 CoPs assumed here
+   private final FramePoint2d pseudoCoP2d = new FramePoint2d();
 
    public Omega0Calculator(ReferenceFrame centerOfMassFrame, double totalMass)
    {
       this.centerOfMassFrame = centerOfMassFrame;
       this.totalMass = totalMass;
+      
+      for (int i = 0; i < 2; i++) // Max of 2 CoPs assumed here
+         cops.add(new FramePoint());
    }
 
    public double computeOmega0(List<FramePoint2d> cop2ds, SpatialForceVector totalGroundReactionWrench)
@@ -38,17 +43,16 @@ public class Omega0Calculator implements Omega0CalculatorInterface
       }
       else    // assume 2 CoPs
       {
-         List<FramePoint> cops = new ArrayList<FramePoint>(cop2ds.size());
-         for (FramePoint2d cop2d : cop2ds)
+         for (int i = 0; i < 2; i++)
          {
-            FramePoint cop = cop2d.toFramePoint();
-            cop.changeFrame(copToCoPFrame.getParent());
-            cops.add(cop);
+            FramePoint2d cop2d = cop2ds.get(i);
+            cops.get(i).set(cop2d.getReferenceFrame(), cop2d.getX(), cop2d.getY(), 0.0);
+            cops.get(i).changeFrame(copToCoPFrame.getParent());
          }
 
          copToCoPFrame.setOriginAndPositionToPointAt(cops.get(0), cops.get(1));
          copToCoPFrame.update();
-         FramePoint2d pseudoCoP2d = new FramePoint2d(copToCoPFrame);
+         pseudoCoP2d.setToZero(copToCoPFrame);
          centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(pseudoCoP2d, totalGroundReactionWrench, copToCoPFrame);
          FramePoint pseudoCoP = pseudoCoP2d.toFramePoint();
          pseudoCoP.changeFrame(centerOfMassFrame);

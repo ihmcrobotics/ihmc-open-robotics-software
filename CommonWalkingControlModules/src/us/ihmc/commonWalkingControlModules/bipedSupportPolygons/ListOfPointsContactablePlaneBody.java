@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.vecmath.Point2d;
+import javax.vecmath.Tuple2d;
 
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -40,8 +41,9 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
    public List<FramePoint> getContactPoints()
    {
       List<FramePoint> ret = new ArrayList<FramePoint>(contactPoints.size());
-      for (Point2d point : contactPoints)
+      for (int i = 0; i < contactPoints.size(); i++)
       {
+         Tuple2d point = contactPoints.get(i);
          ret.add(new FramePoint(soleFrame, point.getX(), point.getY(), 0.0));
       }
    
@@ -66,8 +68,9 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
    public List<FramePoint2d> getContactPoints2d()
    {
       List<FramePoint2d> ret = new ArrayList<FramePoint2d>(contactPoints.size());
-      for (Point2d point : contactPoints)
+      for (int i = 0; i < contactPoints.size(); i++)
       {
+         Tuple2d point = contactPoints.get(i);
          ret.add(new FramePoint2d(soleFrame, point));
       }
    

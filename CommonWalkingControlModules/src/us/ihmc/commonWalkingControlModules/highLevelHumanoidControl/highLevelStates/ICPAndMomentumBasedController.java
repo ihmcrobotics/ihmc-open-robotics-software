@@ -161,13 +161,13 @@ public class ICPAndMomentumBasedController
       return ret;
    }
 
+   private final SideDependentList<List<FramePoint>> footContactPoints = new SideDependentList<List<FramePoint>>(new ArrayList<FramePoint>(), new ArrayList<FramePoint>());
+   
    protected void updateBipedSupportPolygons(BipedSupportPolygons bipedSupportPolygons)
    {
-      SideDependentList<List<FramePoint>> footContactPoints = new SideDependentList<List<FramePoint>>();
       for (RobotSide robotSide : RobotSide.values)
       {
-         List<FramePoint> contactPoints = momentumBasedController.getContactPoints(bipedFeet.get(robotSide));
-         footContactPoints.put(robotSide, contactPoints);
+         momentumBasedController.getContactPoints(bipedFeet.get(robotSide), footContactPoints.get(robotSide));
       }
 
       bipedSupportPolygons.update(footContactPoints);

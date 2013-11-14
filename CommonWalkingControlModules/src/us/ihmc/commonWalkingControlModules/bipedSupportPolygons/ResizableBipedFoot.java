@@ -160,14 +160,16 @@ public class ResizableBipedFoot implements BipedFootInterface
    {
       double maxX = Double.NEGATIVE_INFINITY;
       double minX = Double.POSITIVE_INFINITY;
-      for (Point3d point : clockwiseToePoints)
+      for (int i = 0; i < clockwiseToePoints.size(); i++)
       {
+         Point3d point = clockwiseToePoints.get(i);
          if (point.x > maxX)
             maxX = point.x;
       }
 
-      for (Point3d point : clockwiseHeelPoints)
+      for (int i = 0; i < clockwiseHeelPoints.size(); i++)
       {
+         Point3d point = clockwiseHeelPoints.get(i);
          if (point.x < minX)
             minX = point.x;
       }
@@ -217,13 +219,15 @@ public class ResizableBipedFoot implements BipedFootInterface
             if (shift.getDoubleValue() > maxToePointsBack)
                shift.set(maxToePointsBack);
 
-            for (FramePoint point : toePoints)
+            for (int i = 0; i < toePoints.size(); i++)
             {
+               FramePoint point = toePoints.get(i);
                footPolygonPoints.add(new FramePoint(footFrame, point.getX() - shift.getDoubleValue() * footLength, point.getY(), point.getZ()));
             }
 
-            for (FramePoint point : heelPoints)
+            for (int i = 0; i < heelPoints.size(); i++)
             {
+               FramePoint point = heelPoints.get(i);
                footPolygonPoints.add(new FramePoint(point));
             }
 
@@ -235,13 +239,15 @@ public class ResizableBipedFoot implements BipedFootInterface
             if (shift.getDoubleValue() > maxHeelPointsForward)
                shift.set(maxHeelPointsForward);
 
-            for (FramePoint point : toePoints)
+            for (int i = 0; i < toePoints.size(); i++)
             {
+               FramePoint point = toePoints.get(i);
                footPolygonPoints.add(new FramePoint(footFrame, point.getX(), point.getY() * narrowWidthOnToesPercentage, point.getZ()));
             }
 
-            for (FramePoint point : heelPoints)
+            for (int i = 0; i < heelPoints.size(); i++)
             {
+               FramePoint point = heelPoints.get(i);
                footPolygonPoints.add(new FramePoint(footFrame, point.getX() + shift.getDoubleValue() * footLength, point.getY() * narrowWidthOnToesPercentage,
                        point.getZ()));
             }
@@ -384,8 +390,9 @@ public class ResizableBipedFoot implements BipedFootInterface
       FramePoint ret = null;
       double retX = Double.POSITIVE_INFINITY;
       double retY = Double.NEGATIVE_INFINITY;
-      for (FramePoint point : pointList)
+      for (int i = 0; i < pointList.size(); i++)
       {
+         FramePoint point = pointList.get(i);
          if (point.getX() < retX)
          {
             ret = point;
@@ -411,8 +418,9 @@ public class ResizableBipedFoot implements BipedFootInterface
       FramePoint ret = null;
       double retX = Double.POSITIVE_INFINITY;
       double retY = Double.POSITIVE_INFINITY;
-      for (FramePoint point : pointList)
+      for (int i = 0; i < pointList.size(); i++)
       {
+         FramePoint point = pointList.get(i);
          if (point.getX() < retX)
          {
             ret = point;
@@ -438,8 +446,9 @@ public class ResizableBipedFoot implements BipedFootInterface
       FramePoint ret = null;
       double retX = Double.NEGATIVE_INFINITY;
       double retY = Double.NEGATIVE_INFINITY;
-      for (FramePoint point : pointList)
+      for (int i = 0; i < pointList.size(); i++)
       {
+         FramePoint point = pointList.get(i);
          if (point.getX() > retX)
          {
             ret = point;
@@ -465,8 +474,9 @@ public class ResizableBipedFoot implements BipedFootInterface
       FramePoint ret = null;
       double retX = Double.NEGATIVE_INFINITY;
       double retY = Double.POSITIVE_INFINITY;
-      for (FramePoint point : pointList)
+      for (int i = 0; i < pointList.size(); i++)
       {
+         FramePoint point = pointList.get(i);
          if (point.getX() > retX)
          {
             ret = point;
@@ -528,13 +538,15 @@ public class ResizableBipedFoot implements BipedFootInterface
    {
       List<FramePoint> ret = new ArrayList<FramePoint>(heelPoints.size() + toePoints.size());
 
-      for (FramePoint point : heelPoints)
+      for (int i = 0; i < heelPoints.size(); i++)
       {
+         FramePoint point = heelPoints.get(i);
          ret.add(new FramePoint(point));
       }
 
-      for (FramePoint point : toePoints)
+      for (int i = 0; i < toePoints.size(); i++)
       {
+         FramePoint point = toePoints.get(i);
          ret.add(new FramePoint(point));
       }
 

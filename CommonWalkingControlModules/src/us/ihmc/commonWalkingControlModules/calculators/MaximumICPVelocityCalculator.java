@@ -20,8 +20,9 @@ public class MaximumICPVelocityCalculator
       
       FramePoint2d intersectionToUse = null;
       double minParameterAlongLine = Double.POSITIVE_INFINITY;
-      for (FramePoint2d intersection : intersections)
+      for (int i = 0; i < intersections.length; i++)
       {
+         FramePoint2d intersection = intersections[i];
          double parameterAlongLine = lineOfICPMotion.getParameterGivenPointEpsilon(intersection, Double.POSITIVE_INFINITY);
          if (parameterAlongLine < minParameterAlongLine)
          {

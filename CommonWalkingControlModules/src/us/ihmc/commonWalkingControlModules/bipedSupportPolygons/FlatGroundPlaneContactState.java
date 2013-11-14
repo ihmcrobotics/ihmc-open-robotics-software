@@ -141,12 +141,52 @@ public class FlatGroundPlaneContactState implements PlaneContactState
 
    public List<FramePoint> getContactFramePointsInContactCopy()
    {
-      return contactFramePoints;
+      List<FramePoint> ret = new ArrayList<FramePoint>();
+      
+      for (int i = 0; i < contactFramePoints.size(); i++)
+      {
+         ContactPoint contactPoint = contactPoints.get(i);
+         if (!contactPoint.isInContact())
+            continue;
+         
+         ret.add(new FramePoint(contactPoint.getPosition()));
+      }
+      return ret;
+   }
+
+   public void getContactFramePointsInContact(List<FramePoint> contactPointListToPack)
+   {
+      for (int i = 0; i < contactFramePoints.size(); i++)
+      {
+         ContactPoint contactPoint = contactPoints.get(i);
+         if (!contactPoint.isInContact())
+            continue;
+         
+         if (i >= contactPointListToPack.size())
+            contactPointListToPack.add(new FramePoint());
+         
+         contactPointListToPack.get(i).setAndChangeFrame(contactPoint.getPosition());
+      }
+      
+      for (int i = contactPointListToPack.size() - 1; i >= getNumberOfContactPointsInContact(); i--)
+      {
+         contactPointListToPack.remove(i);
+      }
    }
 
    public List<FramePoint2d> getContactFramePoints2dInContactCopy()
    {
-      return contactFramePoints2d;
+      List<FramePoint2d> ret = new ArrayList<FramePoint2d>();
+      
+      for (int i = 0; i < contactFramePoints2d.size(); i++)
+      {
+         ContactPoint contactPoint = contactPoints.get(i);
+         if (!contactPoint.isInContact())
+            continue;
+         
+         ret.add(new FramePoint2d(contactPoint.getPosition2d()));
+      }
+      return ret;
    }
 
    public ReferenceFrame getFrameAfterParentJoint()

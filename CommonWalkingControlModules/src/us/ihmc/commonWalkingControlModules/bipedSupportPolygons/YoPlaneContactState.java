@@ -85,15 +85,35 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
 
          if (contactPoint.isInContact())
          {
-            FramePoint2d framePoint2d = contactPoint.getPosition2d();
-            FramePoint framePoint = new FramePoint(framePoint2d.getReferenceFrame(), framePoint2d.getX(), framePoint2d.getY(), 0.0);
+            FramePoint framePoint = new FramePoint(contactPoint.getPosition());
             ret.add(framePoint);
          }
       }
 
       return ret;
    }
-   
+
+   public void getContactFramePointsInContact(List<FramePoint> contactPointListToPack)
+   {
+      for (int i = 0; i < totalNumberOfContactPoints; i++)
+      {
+         YoContactPoint contactPoint = contactPoints.get(i);
+
+         if (!contactPoint.isInContact())
+            continue;
+         
+         if (i >= contactPointListToPack.size())
+            contactPointListToPack.add(new FramePoint());
+         
+         contactPointListToPack.get(i).setAndChangeFrame(contactPoint.getPosition());
+      }
+      
+      for (int i = contactPointListToPack.size() - 1; i >= getNumberOfContactPointsInContact(); i--)
+      {
+         contactPointListToPack.remove(i);
+      }
+   }
+
    public List<FramePoint2d> getContactFramePoints2dInContactCopy()
    {
       List<FramePoint2d> ret = new ArrayList<FramePoint2d>(totalNumberOfContactPoints);
@@ -188,6 +208,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       return coefficientOfFriction.getDoubleValue();
    }
 
+   // TODO can do better than that
    public int getNumberOfContactPointsInContact()
    {
       int numberOfContactPointsInContact = 0;

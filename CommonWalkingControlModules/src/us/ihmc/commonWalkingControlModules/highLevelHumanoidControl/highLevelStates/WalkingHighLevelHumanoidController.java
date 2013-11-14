@@ -78,7 +78,6 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 
@@ -651,6 +650,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private class DoubleSupportState extends State<WalkingState>
    {
       private final RobotSide transferToSide;
+      private final FramePoint2d desiredICPLocal = new FramePoint2d();
+      private final FrameVector2d desiredICPVelocityLocal = new FrameVector2d();
+      private final FramePoint2d ecmpLocal = new FramePoint2d();
+      private final FramePoint2d capturePoint2d = new FramePoint2d();
 
       public DoubleSupportState(RobotSide transferToSide)
       {
@@ -705,11 +708,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
          else
          {
-            FramePoint2d desiredICPLocal = new FramePoint2d(desiredICP.getReferenceFrame());
-            FrameVector2d desiredICPVelocityLocal = new FrameVector2d(desiredICPVelocity.getReferenceFrame());
-            FramePoint2d ecmpLocal = new FramePoint2d(worldFrame);
-
-            FramePoint2d capturePoint2d = capturePoint.getFramePoint2dCopy();
+            desiredICPLocal.setToZero(desiredICP.getReferenceFrame());
+            desiredICPVelocityLocal.setToZero(desiredICPVelocity.getReferenceFrame());
+            ecmpLocal.setToZero(worldFrame);
+            capturePoint.getFramePoint2dAndChangeFrameOfPackedPoint(capturePoint2d);
             
             instantaneousCapturePointPlanner.getICPPositionAndVelocity(
                   desiredICPLocal, desiredICPVelocityLocal, ecmpLocal, 
@@ -1037,6 +1039,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       private final FrameVector desiredPelvisAngularAccelerationToPack;
       private final ErrorType[] singleSupportErrorToMonitor = new ErrorType[] {ErrorType.COM_Z, ErrorType.ICP_X, ErrorType.ICP_Y, ErrorType.PELVIS_ORIENTATION};
 
+      private final FramePoint2d desiredICPLocal = new FramePoint2d();
+      private final FrameVector2d desiredICPVelocityLocal = new FrameVector2d();
+      private final FramePoint2d ecmpLocal = new FramePoint2d();
+      private final FramePoint2d capturePoint2d = new FramePoint2d();
+      
       public SingleSupportState(RobotSide robotSide)
       {
          super(singleSupportStateEnums.get(robotSide));
@@ -1052,11 +1059,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          integrateAnkleAccelerationsOnSwingLeg(swingSide);
          
          checkForReinitialization();
-         FramePoint2d desiredICPLocal = new FramePoint2d(desiredICP.getReferenceFrame());
-         FrameVector2d desiredICPVelocityLocal = new FrameVector2d(desiredICPVelocity.getReferenceFrame());
-         FramePoint2d ecmpLocal = new FramePoint2d(worldFrame);
+         desiredICPLocal.setToZero(desiredICP.getReferenceFrame());
+         desiredICPVelocityLocal.setToZero(desiredICPVelocity.getReferenceFrame());
+         ecmpLocal.setToZero(worldFrame);
 
-         FramePoint2d capturePoint2d = capturePoint.getFramePoint2dCopy();
+         capturePoint.getFramePoint2dAndChangeFrameOfPackedPoint(capturePoint2d);
 
          instantaneousCapturePointPlanner.getICPPositionAndVelocity(
                desiredICPLocal, desiredICPVelocityLocal, ecmpLocal, 
@@ -1802,14 +1809,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       endEffectorControlModule.setContactState(ConstraintType.UNCONSTRAINED);
    }
 
+   private final List<FramePoint> tempContactPoints = new ArrayList<FramePoint>();
+   private final FrameConvexPolygon2d tempFootPolygon = new FrameConvexPolygon2d(worldFrame);
+   
    // TODO: should probably precompute this somewhere else
    private FrameConvexPolygon2d computeFootPolygon(RobotSide robotSide, ReferenceFrame referenceFrame)
    {
-//      List<FramePoint> contactPoints = contactStates.get(feet.get(robotSide)).getContactPoints();
-      List<FramePoint> contactPoints = momentumBasedController.getContactPoints(feet.get(robotSide));
-      FrameConvexPolygon2d footPolygon = FrameConvexPolygon2d.constructByProjectionOntoXYPlane(contactPoints, referenceFrame);
+      momentumBasedController.getContactPoints(feet.get(robotSide), tempContactPoints);
+      tempFootPolygon.updateByProjectionOntoXYPlane(tempContactPoints, referenceFrame);
 
-      return footPolygon;
+      return tempFootPolygon;
    }
 
    private void checkForSteppingOnOrOff(RobotSide transferToSide)
@@ -1837,7 +1846,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             this.stepOnOrOff.set(false);
          }
-
          else
          {
             this.stepOnOrOff.set(TwoWaypointTrajectoryUtils.stepOnOrOff(initialSoleFrame, finalSoleFrame));
