@@ -24,17 +24,19 @@ public class NewDRCDashboard
       
       c.insets = new Insets(5, 5, 5, 5);
       
+      GazeboRemoteSimulationAdapter sshSimLauncher = new GazeboRemoteSimulationAdapter();
+      
       TaskSelectionPanel taskSelectionPanel = new TaskSelectionPanel();
-      LocalCloudListPanel cloudListPanel = new LocalCloudListPanel(new GazeboRemoteSimulationAdapter());
+      LocalCloudListPanel cloudListPanel = new LocalCloudListPanel(sshSimLauncher);
       JPanel dropListPanel = new JPanel(new GridBagLayout());
       
       c.gridx = 0;
       c.gridy = 0;
-      dropListPanel.add(new DragAndDropListPanel("Empty Panel:"), c);      
+      dropListPanel.add(new DragAndDropTreePanel("Empty Panel:", sshSimLauncher), c);      
       c.gridy++;
-      dropListPanel.add(new DragAndDropListPanel("Empty Panel:"), c);
+      dropListPanel.add(new DragAndDropTreePanel("Empty Panel:", sshSimLauncher), c);
       c.gridy++;
-      dropListPanel.add(new DragAndDropListPanel("Empty Panel:"), c);
+      dropListPanel.add(new DragAndDropTreePanel("Empty Panel:", sshSimLauncher), c);
       
       c.gridx = 0;
       c.gridy = 0;
