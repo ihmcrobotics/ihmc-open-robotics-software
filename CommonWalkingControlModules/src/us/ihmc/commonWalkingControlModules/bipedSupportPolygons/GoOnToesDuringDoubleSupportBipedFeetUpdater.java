@@ -216,9 +216,9 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
       // 1. If desiredCapturePointInZUp is null, use flat feet
       if (capturePointInMidFeetZUp == null)
       {
-         for (BipedFootInterface foot : feet)
+         for (RobotSide robotSide : RobotSide.values)
          {
-            foot.setFootPolygonInUse(FootPolygonEnum.FLAT);
+            feet.get(robotSide).setFootPolygonInUse(FootPolygonEnum.FLAT);
          }
 
          return;

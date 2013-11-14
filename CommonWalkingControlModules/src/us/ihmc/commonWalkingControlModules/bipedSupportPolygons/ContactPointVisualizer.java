@@ -1,19 +1,19 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 /**
  * @author twan
@@ -30,15 +30,15 @@ public class ContactPointVisualizer
    private final List<YoFrameVector> normalVectors = new ArrayList<YoFrameVector>();
    private final double normalVectorScale = 0.1;
    private final int maxNumberOfDynamicGraphicPositions;
-   private final Collection<? extends PlaneContactState> contactStates;
+   private final ArrayList<? extends PlaneContactState> contactStates;
 
-   public ContactPointVisualizer(Collection<? extends PlaneContactState> contactStates, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+   public ContactPointVisualizer(ArrayList<? extends PlaneContactState> contactStates, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
          YoVariableRegistry parentRegistry)
    {
       this.contactStates = contactStates;
       int totalNumberOfContactPoints = 0;
-      for (PlaneContactState contactState : contactStates)
-         totalNumberOfContactPoints += contactState.getTotalNumberOfContactPoints();
+      for (int i = 0; i < contactStates.size(); i++)
+         totalNumberOfContactPoints += contactStates.get(i).getTotalNumberOfContactPoints();
 
       maxNumberOfDynamicGraphicPositions = totalNumberOfContactPoints;
 
@@ -65,15 +65,17 @@ public class ContactPointVisualizer
    public void update()
    {
       int i = 0;
-      for (PlaneContactState contactState : contactStates)
+      for (int j = 0; j < contactStates.size(); j++)
       {
+         PlaneContactState contactState = contactStates.get(j);
          contactState.getContactNormalFrameVector(tempFrameVector);
          tempFrameVector.changeFrame(worldFrame);
          tempFrameVector.scale(normalVectorScale);
 
-         for (ContactPoint contactPoint : contactState.getContactPoints())
+         List<? extends ContactPoint> contactPoints = contactState.getContactPoints();
+         for (int k = 0; k < contactPoints.size(); k++)
          {
-            updateContactPointDynamicGraphicObjects(i++, contactPoint);
+            updateContactPointDynamicGraphicObjects(i++, contactPoints.get(k));
          }
       }
    }
