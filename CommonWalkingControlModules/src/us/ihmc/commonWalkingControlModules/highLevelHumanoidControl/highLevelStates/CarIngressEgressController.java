@@ -320,7 +320,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
                                                                 onToesTrajectory, null, momentumBasedController, registry);
          endEffectorControlModule.setSwingGains(100.0, 200.0, 200.0, 1.0);
 
-         footEndEffectorControlModules.put(foot, endEffectorControlModule);
+         footEndEffectorControlModules.put(robotSide, endEffectorControlModule);
       }
    }
 
