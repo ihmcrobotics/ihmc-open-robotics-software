@@ -51,7 +51,7 @@ public class NewDRCDashboard
       frame.add(panel);
       
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      frame.setMinimumSize(new Dimension(600, 450));
+      frame.setMinimumSize(new Dimension(800, 600));
       frame.setVisible(true);
    }
 

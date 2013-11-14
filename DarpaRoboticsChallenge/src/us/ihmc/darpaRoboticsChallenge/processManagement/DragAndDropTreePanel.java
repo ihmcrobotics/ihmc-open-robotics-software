@@ -1,5 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.processManagement;
 
+import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -15,6 +16,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.TransferHandler;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
@@ -57,7 +60,7 @@ public class DragAndDropTreePanel extends JPanel
       c.ipady = 0;
       c.weighty = 0;
 
-      scrollPane = new JScrollPane(new JPanel());
+      scrollPane = new JScrollPane();
       this.setTransferHandler(new TransferHandler()
       {
          private static final long serialVersionUID = -5010952551725770452L;
@@ -109,9 +112,13 @@ public class DragAndDropTreePanel extends JPanel
             else
                setCloudStatusItemIcon(currentSelection, badConnectionIcon);
             
+            scrollPane.getViewport().setView(new JPanel());
             ((JPanel) scrollPane.getViewport().getView()).add(currentSelection);
             thisPanel.revalidate();
 
+            disableNodeCollapse();
+            setupTreeSelection();
+            
             return true;
          }
       });
@@ -122,9 +129,42 @@ public class DragAndDropTreePanel extends JPanel
    private void setCloudStatusItemIcon(JTree cloudStatusSubtree, ImageIcon icon)
    {
       DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) cloudStatusSubtree.getCellRenderer();
-
+      
       renderer.setOpenIcon(icon);
       renderer.setClosedIcon(icon);
       renderer.setLeafIcon(null);
+   }
+   
+   private void disableNodeCollapse()
+   {
+      currentSelection.setToggleClickCount(0);
+   }
+   
+   private void setupTreeSelection()
+   {
+      TreeSelectionListener customTreeSelectionListener = new TreeSelectionListener()
+      {
+         private Color white = Color.white;
+//         private Color selectionColor = new Color(232, 236, 241);
+         
+         public void valueChanged(TreeSelectionEvent e)
+         {
+            JTree tree = (JTree) e.getSource();
+            tree.getSelectionModel().clearSelection();
+            
+            if (currentSelection != null)
+            {
+               currentSelection.setBackground(white);
+               ((DefaultTreeCellRenderer) currentSelection.getCellRenderer()).setBackgroundNonSelectionColor(white);
+            }
+            
+//            currentSelection = tree;
+//            currentSelection.setBackground(selectionColor);
+//            ((DefaultTreeCellRenderer) currentSelection.getCellRenderer()).setBackgroundNonSelectionColor(selectionColor);
+         }
+         
+      };
+      
+      currentSelection.addTreeSelectionListener(customTreeSelectionListener);
    }
 }
