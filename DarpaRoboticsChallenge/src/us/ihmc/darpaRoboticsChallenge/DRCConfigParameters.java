@@ -216,10 +216,10 @@ public class DRCConfigParameters
    public static final double NEAR_SCAN_CYL_RADIUS = 2;
    public static final double NEAR_SCAN_CYL_Z_MAX = 0;
    public static final double NEAR_SCAN_CYL_Z_MIN = -1.5;
-   public static final double NEAR_SCAN_DENSITY = .01;
-   public static final long NEAR_SCAN_DECAY_MILLIS = 10000;
-   public static final long NEAR_SCAN_CAPACITY = 10000;
-   
+   public static final float NEAR_SCAN_RESOLUTION = .01f;
+   public static final long NEAR_SCAN_DECAY_MILLIS = 10000;    // -1 to turn off decay
+   public static final int NEAR_SCAN_CAPACITY = 100000;
+
    // Footstep Generator
    public static final double BOUNDING_BOX_FOR_FOOTSTEP_HEIGHT_FINDING_SIDE_LENGTH =
       (1 + 0.3) * 2
@@ -267,8 +267,8 @@ public class DRCConfigParameters
    public static final boolean USE_IHMCFILTER_JOINT_VELOCITIES = false;
    public static final boolean USE_IHMCFILTER_JOINT_TORQUES = true;
 
-   public static final double JOINT_VELOCITY_SLOP_TIME_FOR_BACKLASH_COMPENSATION = 0.0001; //0.0035; //0.007; //0.0155;
-   
+   public static final double JOINT_VELOCITY_SLOP_TIME_FOR_BACKLASH_COMPENSATION = 0.0001;    // 0.0035; //0.007; //0.0155;
+
    public static final double JOINT_POSITION_FILTER_FREQ_HZ = positionSensorFrequencyHz;
    public static final double JOINT_VELOCITY_FILTER_FREQ_HZ = velocitySensorFrequencyHz;
    public static final double ORIENTATION_FILTER_FREQ_HZ = positionSensorFrequencyHz;
