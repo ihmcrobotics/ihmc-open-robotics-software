@@ -58,6 +58,8 @@ public class DRCObstacleCourseSteppingStonesTest
    @Test
    public void testWalkingOverEasySteppingStones() throws SimulationExceededMaximumTimeException
    {
+      try
+      {
       BambooTools.reportTestStartedMessage();
 
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.EASY_STEPPING_STONES;
@@ -83,6 +85,13 @@ public class DRCObstacleCourseSteppingStonesTest
       assertTrue(success);
       
       BambooTools.reportTestFinishedMessage();
+      }
+      catch (Throwable throwable)
+      {
+         System.err.println("Caught throwable in testWalkingOverEasySteppingStones: " + throwable);
+         System.err.flush();
+         throw throwable;
+      }
    }
    
  
