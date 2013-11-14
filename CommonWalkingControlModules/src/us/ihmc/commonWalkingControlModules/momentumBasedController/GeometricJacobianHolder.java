@@ -7,6 +7,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTools;
 
 public class GeometricJacobianHolder
 {
@@ -21,8 +22,8 @@ public class GeometricJacobianHolder
    }
    
    /**
-    * Find or create a jacobian and register it in the MomentumBasedController.
-    * It returns an jacobianId with which it is possible to find the jacobian later with the method getJacobian(int jacobianId).
+    * Find or create a Jacobian and register it in the MomentumBasedController.
+    * It returns an jacobianId with which it is possible to find the Jacobian later with the method getJacobian(int jacobianId).
     * @param ancestor
     * @param descendant
     * @param jacobianFrame
@@ -30,28 +31,13 @@ public class GeometricJacobianHolder
     */
    public int getOrCreateGeometricJacobian(RigidBody ancestor, RigidBody descendant, ReferenceFrame jacobianFrame)
    {
-      for (int i = 0; i < robotJacobians.size(); i++)
-      {
-         GeometricJacobian jacobian = robotJacobians.get(i);
-         boolean ancestorsAreTheSame = ancestor == jacobian.getBase();
-         boolean descendantAreTheSame = descendant == jacobian.getEndEffector();
-         boolean areExpressedFrameTheSame = jacobianFrame == jacobian.getJacobianFrame();
-         
-         if (ancestorsAreTheSame && descendantAreTheSame && areExpressedFrameTheSame)
-            return i;
-      }
-      
-      GeometricJacobian newJacobian = new GeometricJacobian(ancestor, descendant, jacobianFrame);
-      newJacobian.compute(); // Compute in case you need it right away
-      int jacobianId = robotJacobians.size();
-      robotJacobians.add(newJacobian);
-      return jacobianId;
+      return getOrCreateGeometricJacobian(ScrewTools.createJointPath(ancestor, descendant), jacobianFrame);
    }
    
    /**
-    * 
-    * @param ancestor
-    * @param descendant
+    * Find or create a Jacobian and register it in the MomentumBasedController.
+    * It returns an jacobianId with which it is possible to find the Jacobian later with the method getJacobian(int jacobianId).
+    * @param joints
     * @param jacobianFrame
     * @return
     */
