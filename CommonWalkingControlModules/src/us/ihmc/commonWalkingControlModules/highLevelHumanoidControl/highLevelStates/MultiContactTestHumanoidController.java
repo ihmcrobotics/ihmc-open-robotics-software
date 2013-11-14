@@ -21,6 +21,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.WrapperForPositionAndOrientationTrajectoryGenerators;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -42,8 +43,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
 
    private final DesiredFootPoseProvider footPoseProvider;
 
-   private final LinkedHashMap<ContactablePlaneBody, ChangeableConfigurationProvider> desiredConfigurationProviders = new LinkedHashMap<ContactablePlaneBody,
-                                                                                                                         ChangeableConfigurationProvider>();
+   private final SideDependentList<ChangeableConfigurationProvider> desiredConfigurationProviders = new SideDependentList<ChangeableConfigurationProvider>();
    private final LinkedHashMap<ContactablePlaneBody, StraightLinePositionTrajectoryGenerator> swingPositionTrajectoryGenerators =
       new LinkedHashMap<ContactablePlaneBody, StraightLinePositionTrajectoryGenerator>();
    private final LinkedHashMap<ContactablePlaneBody, OrientationInterpolationTrajectoryGenerator> swingOrientationTrajectoryGenerators =
@@ -102,7 +102,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
 
          PoseTrajectoryGenerator poseTrajectoryGenerator = new WrapperForPositionAndOrientationTrajectoryGenerators(positionTrajectoryGenerator, orientationTrajectoryGenerator);
 
-         desiredConfigurationProviders.put(foot, desiredConfigurationProvider);
+         desiredConfigurationProviders.put(robotSide, desiredConfigurationProvider);
          swingPositionTrajectoryGenerators.put(foot, positionTrajectoryGenerator);
          swingOrientationTrajectoryGenerators.put(foot, orientationTrajectoryGenerator);
 
@@ -152,7 +152,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
          {
             FramePose newFootPose = footPoseProvider.getDesiredFootPose(robotSide);
             desiredConfigurationProviders.get(foot).set(newFootPose);
-            footEndEffectorControlModules.get(foot).resetCurrentState();
+            footEndEffectorControlModules.get(robotSide).resetCurrentState();
          }
       }
 
@@ -174,11 +174,11 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
 
       if (inContact)
       {
-         setFlatFootContactState(feet.get(robotSide));
+         setFlatFootContactState(robotSide);
       }
       else
       {
-         setContactStateForSwing(feet.get(robotSide));
+         setContactStateForSwing(robotSide);
       }
    }
 
@@ -198,18 +198,18 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       }
    }
 
-   private void setFlatFootContactState(ContactablePlaneBody contactableBody)
+   private void setFlatFootContactState(RobotSide robotSide)
    {
-      footEndEffectorControlModules.get(contactableBody).setContactState(ConstraintType.FULL);
+      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.FULL);
    }
 
-   private void setContactStateForSwing(ContactablePlaneBody contactableBody)
+   private void setContactStateForSwing(RobotSide robotSide)
    {
       // Initialize desired foot pose to the actual, so no surprising behavior
-      ReferenceFrame footFrame = footEndEffectorControlModules.get(contactableBody).getEndEffectorFrame();
-      desiredConfigurationProviders.get(contactableBody).set(new FramePose(footFrame));
+      ReferenceFrame footFrame = footEndEffectorControlModules.get(robotSide).getEndEffectorFrame();
+      desiredConfigurationProviders.get(robotSide).set(new FramePose(footFrame));
 
-      footEndEffectorControlModules.get(contactableBody).doSingularityEscapeBeforeTransitionToNextState();
-      footEndEffectorControlModules.get(contactableBody).setContactState(ConstraintType.UNCONSTRAINED);
+      footEndEffectorControlModules.get(robotSide).doSingularityEscapeBeforeTransitionToNextState();
+      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.UNCONSTRAINED);
    }
 }

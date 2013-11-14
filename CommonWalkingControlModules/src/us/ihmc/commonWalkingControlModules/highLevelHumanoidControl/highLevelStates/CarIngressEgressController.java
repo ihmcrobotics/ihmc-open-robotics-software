@@ -90,8 +90,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
    private final LinkedHashMap<ContactablePlaneBody, ChangeableConfigurationProvider> initialFootConfigurationProviders =
       new LinkedHashMap<ContactablePlaneBody, ChangeableConfigurationProvider>();
-   private final LinkedHashMap<ContactablePlaneBody, ChangeableConfigurationProvider> desiredFootConfigurationProviders =
-      new LinkedHashMap<ContactablePlaneBody, ChangeableConfigurationProvider>();
+   private final SideDependentList<ChangeableConfigurationProvider> desiredFootConfigurationProviders = new SideDependentList<ChangeableConfigurationProvider>();
    private final LinkedHashMap<ContactablePlaneBody, StraightLinePositionTrajectoryGenerator> swingPositionTrajectoryGenerators =
       new LinkedHashMap<ContactablePlaneBody, StraightLinePositionTrajectoryGenerator>();
    private final LinkedHashMap<ContactablePlaneBody, OrientationInterpolationTrajectoryGenerator> swingOrientationTrajectoryGenerators =
@@ -304,7 +303,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          PoseTrajectoryGenerator poseTrajectoryGenerator = new WrapperForPositionAndOrientationTrajectoryGenerators(positionTrajectoryGenerator, orientationTrajectoryGenerator);
 
          initialFootConfigurationProviders.put(foot, initialConfigurationProvider);
-         desiredFootConfigurationProviders.put(foot, desiredConfigurationProvider);
+         desiredFootConfigurationProviders.put(robotSide, desiredConfigurationProvider);
          swingPositionTrajectoryGenerators.put(foot, positionTrajectoryGenerator);
          swingOrientationTrajectoryGenerators.put(foot, orientationTrajectoryGenerator);
 
@@ -407,7 +406,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       chestOrientationTrajectoryGenerator.initialize();
       
       for (RobotSide robotSide : RobotSide.values)
-         footEndEffectorControlModules.get(feet.get(robotSide)).resetCurrentState();
+         footEndEffectorControlModules.get(robotSide).resetCurrentState();
    }
 
    
@@ -567,8 +566,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
             initialFootConfigurationProviders.get(foot).set(oldFootPose);
             
             FramePose newFootPose = footPoseProvider.getDesiredFootPose(robotSide);
-            desiredFootConfigurationProviders.get(foot).set(newFootPose);
-            footEndEffectorControlModules.get(foot).resetCurrentState();
+            desiredFootConfigurationProviders.get(robotSide).set(newFootPose);
+            footEndEffectorControlModules.get(robotSide).resetCurrentState();
          }
       }
 
@@ -642,11 +641,11 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
       if (inContact)
       {
-         setFlatFootContactState(feet.get(robotSide));
+         setFlatFootContactState(robotSide);
       }
       else
       {
-         setContactStateForSwing(feet.get(robotSide));
+         setContactStateForSwing(robotSide);
       }
    }
 
@@ -708,24 +707,24 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       }
    }
 
-   private void setOnToesContactState(ContactablePlaneBody contactableBody)
+   private void setOnToesContactState(RobotSide robotSide)
    {
-      footEndEffectorControlModules.get(contactableBody).setContactState(ConstraintType.TOES);
+      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.TOES);
    }
 
-   private void setFlatFootContactState(ContactablePlaneBody contactableBody)
+   private void setFlatFootContactState(RobotSide robotSide)
    {
-      footEndEffectorControlModules.get(contactableBody).setContactState(ConstraintType.FULL);
+      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.FULL);
    }
 
-   private void setContactStateForSwing(ContactablePlaneBody contactableBody)
+   private void setContactStateForSwing(RobotSide robotSide)
    {
       // Initialize desired foot pose to the actual, so no surprising behavior
-      ReferenceFrame footFrame = footEndEffectorControlModules.get(contactableBody).getEndEffectorFrame();
-      desiredFootConfigurationProviders.get(contactableBody).set(new FramePose(footFrame));
+      ReferenceFrame footFrame = footEndEffectorControlModules.get(robotSide).getEndEffectorFrame();
+      desiredFootConfigurationProviders.get(robotSide).set(new FramePose(footFrame));
 
-      footEndEffectorControlModules.get(contactableBody).doSingularityEscapeBeforeTransitionToNextState();
-      footEndEffectorControlModules.get(contactableBody).setContactState(ConstraintType.UNCONSTRAINED);
+      footEndEffectorControlModules.get(robotSide).doSingularityEscapeBeforeTransitionToNextState();
+      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.UNCONSTRAINED);
    }
 
    private class LoadBearingVariableChangedListener implements VariableChangedListener
@@ -765,11 +764,12 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
             {
                if (doToeOff.get(robotSide).getBooleanValue())
                {
-                  setOnToesContactState(feet.get(robotSide));
+                  setOnToesContactState(robotSide);
                }
                else
                {
-                  setFlatFootContactState(feet.get(robotSide));
+                  setFlatFootContactState(robotSide
+                        );
                }
             }
          }
