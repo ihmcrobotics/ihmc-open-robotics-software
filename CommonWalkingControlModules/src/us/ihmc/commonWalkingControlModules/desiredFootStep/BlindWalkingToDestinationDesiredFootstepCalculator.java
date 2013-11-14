@@ -381,7 +381,7 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
    protected List<FramePoint> getContactPoints(RobotSide swingSide)
    {
       double stepPitch = this.stepPitch.getDoubleValue();
-      List<FramePoint> allContactPoints = contactableBodies.get(swingSide).getContactPoints();
+      List<FramePoint> allContactPoints = contactableBodies.get(swingSide).getContactPointsCopy();
       if (stepPitch == 0.0)
       {
          return allContactPoints;

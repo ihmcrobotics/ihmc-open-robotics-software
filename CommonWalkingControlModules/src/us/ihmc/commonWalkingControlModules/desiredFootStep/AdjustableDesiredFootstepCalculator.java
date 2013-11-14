@@ -264,7 +264,7 @@ public class AdjustableDesiredFootstepCalculator extends AbstractAdjustableDesir
 
    protected List<FramePoint> getContactPoints(RobotSide swingSide)
    {
-      return contactableBodies.get(swingSide).getContactPoints();
+      return contactableBodies.get(swingSide).getContactPointsCopy();
    }
    
    public boolean isDone()

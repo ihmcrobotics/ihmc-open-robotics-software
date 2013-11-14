@@ -196,7 +196,7 @@ public class FootstepGeneratorVisualizer
       generator.setFootstepPath(footstepPath);
       ContactablePlaneBody leftFoot = bipedFeet.get(RobotSide.LEFT);
       ReferenceFrame startStanceSoleFrame = FootstepUtils.createSoleFrame(startStancePoseFrame, leftFoot);
-      List<FramePoint> stanceContactPoints = FootstepUtils.getContactPointsInFrame(leftFoot.getContactPoints(), startStanceSoleFrame);
+      List<FramePoint> stanceContactPoints = FootstepUtils.getContactPointsInFrame(leftFoot.getContactPointsCopy(), startStanceSoleFrame);
 
       Footstep startStanceFootstep = new Footstep(leftFoot, startStancePoseFrame, startStanceSoleFrame, stanceContactPoints, trustHeight);
       generator.setStanceStart(startStanceFootstep);

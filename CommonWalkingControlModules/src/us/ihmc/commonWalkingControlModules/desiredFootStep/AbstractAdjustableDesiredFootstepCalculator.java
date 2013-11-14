@@ -72,7 +72,7 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
          PoseReferenceFrame stanceFootPoseFrame = new PoseReferenceFrame("desiredFootstep", stanceFootPose);
 
          ReferenceFrame stanceFootSoleFrame = FootstepUtils.createSoleFrame(stanceFootPoseFrame, stanceFoot);
-         List<FramePoint> stanceContactPoints = FootstepUtils.getContactPointsInFrame(stanceFoot.getContactPoints(), stanceFootSoleFrame);
+         List<FramePoint> stanceContactPoints = FootstepUtils.getContactPointsInFrame(stanceFoot.getContactPointsCopy(), stanceFootSoleFrame);
          Footstep stanceFootstep = new Footstep(stanceFoot, stanceFootPoseFrame, stanceFootSoleFrame, stanceContactPoints, trustHeight);
          desiredFootstep = desiredFootstepAdjustor.adjustDesiredFootstep(stanceFootstep, desiredFootstep);
 

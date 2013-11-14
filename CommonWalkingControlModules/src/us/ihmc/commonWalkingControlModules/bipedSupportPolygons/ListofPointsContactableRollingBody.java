@@ -57,7 +57,7 @@ public class ListofPointsContactableRollingBody implements ContactableRollingBod
    }
 
    //TODO: This is wrong but it works for now... Should be refactored
-   public List<FramePoint> getContactPoints()
+   public List<FramePoint> getContactPointsCopy()
    {
       List<FramePoint> ret = new ArrayList<FramePoint>(contactPoints.size());
       for (int i = 0; i < contactPoints.size(); i++)

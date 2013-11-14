@@ -534,7 +534,7 @@ public class ResizableBipedFoot implements BipedFootInterface
       return body;
    }
 
-   public List<FramePoint> getContactPoints()
+   public List<FramePoint> getContactPointsCopy()
    {
       List<FramePoint> ret = new ArrayList<FramePoint>(heelPoints.size() + toePoints.size());
 
@@ -570,7 +570,7 @@ public class ResizableBipedFoot implements BipedFootInterface
 
    public List<FramePoint2d> getContactPoints2d()
    {
-      List<FramePoint> footPolygonPoints = getContactPoints();
+      List<FramePoint> footPolygonPoints = getContactPointsCopy();
       ArrayList<FramePoint2d> projectedFootPolygonPoints = GeometryTools.changeFrameToZUpAndProjectToXYPlane(soleFrame, footPolygonPoints);
 
       return projectedFootPolygonPoints;

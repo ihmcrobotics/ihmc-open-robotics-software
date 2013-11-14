@@ -140,7 +140,7 @@ public class SimpleWorldDesiredFootstepCalculator extends AbstractAdjustableDesi
 
    protected List<FramePoint> getContactPoints(RobotSide swingSide)
    {
-      return contactableBodies.get(swingSide).getContactPoints();
+      return contactableBodies.get(swingSide).getContactPointsCopy();
    }
    
    public boolean isDone()
