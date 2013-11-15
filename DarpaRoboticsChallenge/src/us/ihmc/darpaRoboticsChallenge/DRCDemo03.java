@@ -39,7 +39,7 @@ public class DRCDemo03
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
 
       environment = new DRCDemoEnvironmentWithBoxAndSteeringWheel(dynamicGraphicObjectsListRegistry);
-      final PlainDRCRobot robotInterface = new PlainDRCRobot(DRCConfigParameters.robotModelToUse, true);
+      final PlainDRCRobot robotInterface = new PlainDRCRobot(DRCLocalConfigParameters.robotModelToUse, true);
       scsInitialSetup = new DRCSCSInitialSetup(environment, robotInterface.getSimulateDT());
       scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
       scsInitialSetup.setInitializeEstimatorToActual(true);

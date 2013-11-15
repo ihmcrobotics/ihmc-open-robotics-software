@@ -12,6 +12,7 @@ import javax.vecmath.Vector3d;
 import geometry_msgs.Transform;
 import us.ihmc.atlas.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.driving.DRCStereoListener;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.messages.controller.RobotPoseData;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
@@ -90,7 +91,7 @@ public abstract class CameraDataReceiver
          }
       };
 
-      if (DRCConfigParameters.USE_ROS_FOR_MULTISENSE_TRANSFORMS)
+      if (DRCLocalConfigParameters.USE_ROS_FOR_MULTISENSE_TRANSFORMS)
       {
          rosTransformProvider = ROSNativeTransformTools.getInstance(DRCConfigParameters.ROS_MASTER_URI);
          rosTransformProvider.connect();
@@ -120,7 +121,7 @@ public abstract class CameraDataReceiver
 
       cameraPose.set(robotPoseData.getCameraPose());
 
-      if (DRCConfigParameters.USE_ROS_FOR_MULTISENSE_TRANSFORMS)
+      if (DRCLocalConfigParameters.USE_ROS_FOR_MULTISENSE_TRANSFORMS)
       {
          if ((rosTransformFromHeadBaseToCamera.getType() & Transform3D.IDENTITY) != 0)
          {

@@ -1,7 +1,9 @@
 package us.ihmc.darpaRoboticsChallenge.processManagement;
 
 import com.martiansoftware.jsap.*;
+
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
 import us.ihmc.utilities.net.tcpServer.DisconnectedException;
@@ -17,7 +19,7 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
 
    private final byte[] buffer;
 
-   private static String scsMachineIPAddress = DRCConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
+   private static String scsMachineIPAddress = DRCLocalConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
    private static String rosMasterURI = DRCConfigParameters.ROS_MASTER_URI;
 
    private static String[] javaArgs = new String[] { "-Xms2048m", "-Xmx2048m" };

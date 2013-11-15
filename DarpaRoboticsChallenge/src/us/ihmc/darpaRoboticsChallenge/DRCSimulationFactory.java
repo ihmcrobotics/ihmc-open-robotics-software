@@ -86,7 +86,7 @@ public class DRCSimulationFactory
       {
          drcOutputWriter = new DRCOutputWriterWithTorqueLimits(drcOutputWriter);
       }
-      if (DRCConfigParameters.INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
+      if (DRCLocalConfigParameters.INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
       {
          DRCOutputWriterWithAccelerationIntegration drcOutputWriterWithAccelerationIntegration = new DRCOutputWriterWithAccelerationIntegration(drcOutputWriter, controlDT);
          
@@ -237,7 +237,7 @@ public class DRCSimulationFactory
       for (RobotSide robotSide : RobotSide.values)
       {
     	 {
-    		 if(DRCConfigParameters.robotModelToUse.getHandModel() == DRCHandModel.SANDIA)
+    		 if(DRCLocalConfigParameters.robotModelToUse.getHandModel() == DRCHandModel.SANDIA)
 	         for (int i = 0; i < ROSSandiaJointMap.numberOfJointsPerHand; i++)
 	         {
 	            try

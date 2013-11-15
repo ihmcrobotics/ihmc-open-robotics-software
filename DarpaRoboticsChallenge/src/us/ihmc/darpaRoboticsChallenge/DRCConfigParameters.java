@@ -1,17 +1,11 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig;
-import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig.LocalCloudMachines;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 
 public class DRCConfigParameters
 {
-   public static final DRCRobotModel robotModelToUse = DRCRobotModel.ATLAS_SANDIA_HANDS;
    public static final boolean USE_RED_TEAM_CONTROLLER = false;
 
-   public static final boolean USE_VRC_PARAMETERS = !DRCLocalConfigParameters.USE_JERRY_PARAMETERS;    // false;//false in combo with torque limiting makes robot hip oscillate a lot in simulation
-   public static final boolean RUNNING_ON_REAL_ROBOT = DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT;
-   public static final boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES = RUNNING_ON_REAL_ROBOT;
    public static final boolean CORRUPT_SIMULATION_MODEL = false;
 
    public static final boolean USE_DUMMY_DRIVNG = false;
@@ -58,7 +52,7 @@ public class DRCConfigParameters
    public static final boolean SHOW_BANDWIDTH_DIALOG = false;
 
    public static final double ATLAS_INTERFACING_DT = 0.003;
-   public static final double CONTROL_DT = 0.006;
+   public static final double CONTROL_DT = 0.003;
    public static final double ATLAS_ONBOARD_SAMPLINGFREQ = 1000.0;
    public static final double ATLAS_ONBOARD_DT = 1.0 / ATLAS_ONBOARD_SAMPLINGFREQ;
 
@@ -79,27 +73,15 @@ public class DRCConfigParameters
 
 
    // Networking
-   public static final String LOCALHOST = "localhost";
-   public static final String CLOUD_MINION1_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMINION_1);
-   public static final String CLOUD_MINION2_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMINION_2);
-   public static final String CLOUD_MINION3_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMINION_3);
-   public static final String CLOUD_MINION4_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMINION_4);
-   public static final String CLOUD_MINION5_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMINION_5);
-   public static final String CLOUD_MINION6_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMINION_6);
-   public static final String CLOUD_MINION7_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMINION_7);
-   public static final String CLOUD_MINION8_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMINION_8);
-   public static final String CLOUD_MONSTER_IP = DRCLocalCloudConfig.getIPAddress(LocalCloudMachines.CLOUDMONSTER);
+
 
    public static final String CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP = "10.0.0.51";
    public static final String CONSTELLATION_FIELD_COMPUTER_1_VPN_IP = "10.0.0.52";
    public static final String CONSTELLATION_FIELD_COMPUTER_2_VPN_IP = "10.0.0.53";
 
 
-   public static final String LOG_HOST_IP_ADDRESS = DRCLocalConfigParameters.LOG_HOST_IP_ADDRESS;
-   public static final String ROS_HOST_IP_ADDRESS = DRCLocalConfigParameters.ROS_HOST_IP_ADDRESS;
-
-   public static final String ROBOT_CONTROLLER_IP_ADDRESS = DRCLocalConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
-   public static final String NET_PROC_MACHINE_IP_ADDRESS = DRCLocalConfigParameters.NET_PROC_MACHINE_IP_ADDRESS;
+   public static final String LOG_HOST_IP_ADDRESS = "10.66.171.42";
+   public static final String ROS_HOST_IP_ADDRESS = "192.168.6.232";
 
    public static final String ROS_MASTER_URI = "http://" + ROS_HOST_IP_ADDRESS + ":11311";
    public static final int CONTROLLER_TO_UI_TCP_PORT = 4893;
@@ -122,7 +104,7 @@ public class DRCConfigParameters
 
    static
    {
-      if (DRCConfigParameters.USING_REAL_HEAD)
+      if (DRCLocalConfigParameters.USING_REAL_HEAD)
       {
          MULTISENSE_CAMERA_STRING_BASE = "/multisense_sl";
       }
@@ -150,9 +132,6 @@ public class DRCConfigParameters
    public static final boolean ASSUME_PERFECT_IMU = true;    // assume perfect orientation, angular velocity and linear acceleration output from IMU
    public static final boolean USE_SIMPLE_PELVIS_POSITION_ESTIMATOR = false;
 
-   // LIDAR:
-   public static final boolean USE_ROS_FOR_MULTISENSE_TRANSFORMS = RUNNING_ON_REAL_ROBOT;
-   public static final boolean USING_REAL_HEAD = RUNNING_ON_REAL_ROBOT;
    public static final double LIDAR_SPINDLE_VELOCITY = 5.1;
 
    // the useful children are "Static Link Graphic" and "atlas", but you don't really need atlas. ~30% faster without atlas.
@@ -169,7 +148,7 @@ public class DRCConfigParameters
 
    static
    {
-      if (DRCConfigParameters.USING_REAL_HEAD)
+      if (DRCLocalConfigParameters.USING_REAL_HEAD)
       {
          final float crc = -.0010908f;
          LIDAR_POINTS_PER_SWEEP = 1081;
@@ -243,7 +222,7 @@ public class DRCConfigParameters
    public static final boolean USE_PURE_POSITION_CONTROL_FOR_HANDS = false;
 
    public static final int CHEATING_POLARIS_PORT = 1543;
-   public static final String CHEATING_POLARIS_HOST = LOCALHOST;
+   public static final String CHEATING_POLARIS_HOST = "localhost";
 
    // Filter Parameters
    public static final double positionSensorFrequencyHz;
@@ -251,7 +230,7 @@ public class DRCConfigParameters
 
    static
    {
-      if (USE_VRC_PARAMETERS)
+      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS)
       {
          positionSensorFrequencyHz = Double.POSITIVE_INFINITY;
          velocitySensorFrequencyHz = Double.POSITIVE_INFINITY;
