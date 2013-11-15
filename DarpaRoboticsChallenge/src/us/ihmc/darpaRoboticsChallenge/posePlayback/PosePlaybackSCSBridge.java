@@ -13,6 +13,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.environment.VRCTask;
 import us.ihmc.darpaRoboticsChallenge.environment.VRCTaskName;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -40,7 +41,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public class PosePlaybackSCSBridge
 {
-   private static final String ipAddress = DRCConfigParameters.CLOUD_MINION2_IP;
+   private static final String ipAddress = DRCLocalConfigParameters.CLOUD_MINION2_IP;
    private static final double controlDT = DRCConfigParameters.CONTROL_DT;
 
    private static final boolean promptForTimeDelay = false;
