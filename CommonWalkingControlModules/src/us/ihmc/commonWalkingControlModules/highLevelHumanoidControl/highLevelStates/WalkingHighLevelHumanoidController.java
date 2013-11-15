@@ -912,52 +912,33 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             System.out.println("WalkingHighLevelHumanoidController: enteringDoubleSupportState");
          setSupportLeg(null);    // TODO: check if necessary
 
-         // TODO: simplify the following
-         if (transferToSide != null)
+         if (walkOnTheEdgesManager.stayOnToes())   
          {
-            RobotSide trailingLeg = transferToSide.getOppositeSide();
+            setOnToesContactStates();
          }
-
-         if (walkOnTheEdgesManager.stayOnToes())
+         else if (transferToSide == null)
          {
-            for (RobotSide robotSide : RobotSide.values)
-            {
-               setOnToesContactState(robotSide);
-            }
+            setFlatFootContactStates();
+         }
+         else if (walkOnTheEdgesManager.willLandOnToes())
+         {
+            setTouchdownOnToesContactState(transferToSide);
+         }
+         else if (walkOnTheEdgesManager.willLandOnHeel())
+         {
+            setTouchdownOnHeelContactState(transferToSide);
          }
          else
          {
-            if (transferToSide == null)
-            {
-               for (RobotSide robotSide : RobotSide.values)
-               {
-                  setFlatFootContactState(robotSide);
-               }
-            }
-            else if (walkOnTheEdgesManager.willLandOnToes())
-            {
-               setTouchdownOnToesContactState(transferToSide);
-            }
-            else if (walkOnTheEdgesManager.willLandOnHeel())
-            {
-               setTouchdownOnHeelContactState(transferToSide);
-            }
-            else
-            {
-               setFlatFootContactState(transferToSide);
-
-               // still need to determine contact state for trailing leg. This is done in doAction as soon as the previous ICP trajectory is done
-            }
+            setFlatFootContactState(transferToSide); // still need to determine contact state for trailing leg. This is done in doAction as soon as the previous ICP trajectory is done
          }
          
          walkOnTheEdgesManager.reset();
 
          if (!instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue()) && (transferToSide != null))
          {
-            Footstep transferToFootstep = createFootstepFromFootAndContactablePlaneBody(referenceFrames.getFootFrame(transferToSide),
-                                             feet.get(transferToSide));
-            TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(transferToFootstep,
-                                                                               transferToSide);
+            Footstep transferToFootstep = createFootstepFromFootAndContactablePlaneBody(referenceFrames.getFootFrame(transferToSide), feet.get(transferToSide));
+            TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(transferToFootstep, transferToSide);
 
             instantaneousCapturePointPlanner.reInitializeSingleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue());
          }
@@ -977,16 +958,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
             centerOfMassHeightTrajectoryGenerator.initialize(transferToAndNextFootstepsDataForDoubleSupport, transferToAndNextFootstepsDataForDoubleSupport.getTransferToSide(), null, getContactStatesList());
          }
-      
-         //         RobotSide transferToSideToUseInFootstepData = transferToSide;
-//         if (transferToSideToUseInFootstepData == null)
-//            transferToSideToUseInFootstepData = RobotSide.LEFT;    // Arbitrary here.
-//         TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport =
-//            createTransferToAndNextFootstepDataForDoubleSupport(transferToSideToUseInFootstepData);
-//
-////       centerOfMassHeightTrajectoryGenerator.initialize(transferToAndNextFootstepsDataForDoubleSupport.getTransferToSide(), null, getContactStatesList());
-//         centerOfMassHeightTrajectoryGenerator.initialize(transferToAndNextFootstepsDataForDoubleSupport,
-//                 transferToAndNextFootstepsDataForDoubleSupport.getTransferToSide(), null, getContactStatesList());
       }
 
       @Override
@@ -1206,7 +1177,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
          FramePoint2d finalDesiredICP = getSingleSupportFinalDesiredICPForWalking(transferToAndNextFootstepsData, swingSide);
 
-         ContactablePlaneBody swingFoot = feet.get(swingSide);
          setContactStateForSwing(swingSide);
          setSupportLeg(supportSide);
          icpAndMomentumBasedController.updateBipedSupportPolygons(bipedSupportPolygons);
@@ -1760,6 +1730,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       return contactStatesList;
    }
 
+   private void setOnToesContactStates()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+         setOnToesContactState(robotSide);
+   }
+
    private void setOnToesContactState(RobotSide robotSide)
    {
       // TODO cannot use world or elevator frames with non perfect sensors... some bug to fix obviously
@@ -1776,6 +1752,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       // TODO cannot use world or elevator frames with non perfect sensors... some bug to fix obviously
       footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.TOES_TOUCHDOWN, new FrameVector(referenceFrames.getAnkleZUpFrame(robotSide), 0.0, 0.0, 1.0));
+   }
+
+   private void setFlatFootContactStates()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+         setFlatFootContactState(robotSide);
    }
 
    private void setFlatFootContactState(RobotSide robotSide)

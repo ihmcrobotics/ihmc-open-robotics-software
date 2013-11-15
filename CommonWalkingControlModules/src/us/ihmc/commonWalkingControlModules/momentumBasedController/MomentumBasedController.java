@@ -242,7 +242,6 @@ public class MomentumBasedController
          double touchdownTime = 0.12;
          double minCoPDistance = 0.01;
 
-         //       this.pointPositionGrabber = new SingleReferenceFramePointPositionGrabber(stateEstimationDataFromController, registry, controlDT, touchdownTime, minCoPDistance);
          this.pointPositionGrabber = new PointPositionGrabber(stateEstimationDataFromControllerSink, yoPlaneContactStates, registry, controlDT, touchdownTime,
                minCoPDistance);
          setDelayTimeBeforeTrustingContacts(touchdownTime);
@@ -844,7 +843,8 @@ public class MomentumBasedController
 
    public void setDelayTimeBeforeTrustingContacts(double delayTimeBeforeTrustingContacts)
    {
-      pointPositionGrabber.setDelayTimeBeforeTrustingContacts(delayTimeBeforeTrustingContacts);
+      if (pointPositionGrabber != null)
+         pointPositionGrabber.setDelayTimeBeforeTrustingContacts(delayTimeBeforeTrustingContacts);
    }
 
    public void setCylindricalContactStateProperties(ContactableCylinderBody contactableCylinderBody, double coefficientOfFriction, double gripStrength,
