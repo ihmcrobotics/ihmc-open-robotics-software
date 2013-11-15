@@ -212,10 +212,11 @@ public class ICPProportionalController
       desiredCMP.changeFrame(desiredCapturePoint.getReferenceFrame());
    }
 
-   public void setGains(double captureKpParallelToMotion, double captureKpOrthogonalToMotion, double filterBreakFrequencyHertz, double rateLimitCMP, double accelerationLimitCMP)
+   public void setGains(double captureKpParallelToMotion, double captureKpOrthogonalToMotion, double captureKi, double filterBreakFrequencyHertz, double rateLimitCMP, double accelerationLimitCMP)
    {
       this.captureKpParallelToMotion.set(captureKpParallelToMotion);
       this.captureKpOrthogonalToMotion.set(captureKpOrthogonalToMotion);
+      this.captureKi.set(captureKi);
       this.alphaCMP.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequencyHertz, controlDT));
       this.rateLimitCMP.set(rateLimitCMP);
       this.accelerationLimitCMP.set(accelerationLimitCMP);
