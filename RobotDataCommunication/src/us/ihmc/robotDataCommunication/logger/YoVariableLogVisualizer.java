@@ -130,8 +130,10 @@ public class YoVariableLogVisualizer
          e.printStackTrace();
       }
  
+      YoVariableLogCropper yoVariableLogCropper = new YoVariableLogCropper(players, selectedFile, logProperties);
+      
       scs.getJFrame().setTitle(this.getClass().getSimpleName() + " - " + selectedFile);
-      scs.getStandardSimulationGUI().addJComponentToMainPanel( new YoVariableLogVisualizerGUI(players, robot, scs), BorderLayout.SOUTH);
+      scs.getStandardSimulationGUI().addJComponentToMainPanel( new YoVariableLogVisualizerGUI(players, robot, yoVariableLogCropper, scs), BorderLayout.SOUTH);
       
       new Thread(scs).start();
    }

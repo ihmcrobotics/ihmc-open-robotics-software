@@ -12,6 +12,8 @@ import com.yobotics.simulationconstructionset.FloatingJoint;
 
 public class SixDoFState extends JointState<FloatingJoint>
 {
+   public static final int numberOfStateVariables = 13;
+   
    private final Quat4d rotation = new Quat4d();
    private final Matrix3d rotationMatrix = new Matrix3d();
    
@@ -75,6 +77,6 @@ public class SixDoFState extends JointState<FloatingJoint>
    @Override
    public int getNumberOfStateVariables()
    {
-      return 13;
+      return numberOfStateVariables;
    }
 }

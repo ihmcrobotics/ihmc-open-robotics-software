@@ -63,18 +63,34 @@ public class YoVariableHandshakeParser
       return dynamicGraphicObjectsListRegistry;
    }
 
-   
-   public void parseFrom(byte[] handShake)
+   private static YoProtoHandshake parseYoProtoHandshake(byte[] handShake) 
    {
-      YoProtoHandshake yoProtoHandshake;
       try
       {
-         yoProtoHandshake = YoProtoHandshake.parseFrom(handShake);
+         return YoProtoHandshake.parseFrom(handShake);
       }
       catch (InvalidProtocolBufferException e)
       {
          throw new RuntimeException(e);
       }
+   }
+   
+   public static int getNumberOfVariables(byte[] handShake)
+   {
+      YoProtoHandshake yoProtoHandshake = parseYoProtoHandshake(handShake);
+      
+      int jointStateVariables = 0;
+      for (int i = 0; i < yoProtoHandshake.getJointCount(); i++)
+      {
+         jointStateVariables += JointState.getNumberOfVariables(yoProtoHandshake.getJoint(i).getType());
+      }
+      
+      return 1 + yoProtoHandshake.getVariableList().size() + jointStateVariables;
+   }
+   
+   public void parseFrom(byte[] handShake)
+   {
+      YoProtoHandshake yoProtoHandshake = parseYoProtoHandshake(handShake);
       
       if(listener != null)
       {

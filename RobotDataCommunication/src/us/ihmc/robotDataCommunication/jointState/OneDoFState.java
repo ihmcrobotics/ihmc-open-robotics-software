@@ -6,6 +6,8 @@ import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 
 public class OneDoFState extends JointState<OneDegreeOfFreedomJoint>
 {
+   public static final int numberOfStateVariables = 2;
+   
    private double q;
    private double qd;
    
@@ -38,7 +40,7 @@ public class OneDoFState extends JointState<OneDegreeOfFreedomJoint>
    @Override
    public int getNumberOfStateVariables()
    {
-      return 2;
+      return numberOfStateVariables;
    }
 
 }
