@@ -80,10 +80,7 @@ public class DRCConfigParameters
    public static final String CONSTELLATION_FIELD_COMPUTER_2_VPN_IP = "10.0.0.53";
 
 
-   public static final String LOG_HOST_IP_ADDRESS = "10.66.171.42";
-   public static final String ROS_HOST_IP_ADDRESS = "192.168.6.232";
-
-   public static final String ROS_MASTER_URI = "http://" + ROS_HOST_IP_ADDRESS + ":11311";
+   public static final String ROS_MASTER_URI = "http://" + DRCLocalConfigParameters.ROS_HOST_IP_ADDRESS + ":11311";
    public static final int CONTROLLER_TO_UI_TCP_PORT = 4893;
 
    public static final int NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT = 4895;
@@ -188,6 +185,7 @@ public class DRCConfigParameters
    public static final double OCTREE_RESOLUTION_WHEN_NOT_USING_RESOLUTION_SPHERE = 0.05;
    public static final float QUADTREE_HEIGHT_THRESHOLD = 0.05f;
    public static final double LIDAR_BLINDNESS_CYLINDAR_SQUARED_RADIUS = 0.1;
+   public static final double LIDAR_Z_CUTOFF_ABOVE_HEAD = -0.5;
    public static final boolean HIDE_THINGS_ABOVE_HEAD_FROM_LIDAR = true;
 
    public static final double NEAR_SCAN_CYL_RADIUS = 2;
@@ -247,8 +245,8 @@ public class DRCConfigParameters
    public static final boolean USE_IHMCFILTER_JOINT_VELOCITIES = false;
    public static final boolean USE_IHMCFILTER_JOINT_TORQUES = true;
 
-   public static final double JOINT_VELOCITY_SLOP_TIME_FOR_BACKLASH_COMPENSATION = 0.0001;    // 0.0035; //0.007; //0.0155;
-
+   public static final double JOINT_VELOCITY_SLOP_TIME_FOR_BACKLASH_COMPENSATION = 0.03;
+   
    public static final double JOINT_POSITION_FILTER_FREQ_HZ = positionSensorFrequencyHz;
    public static final double JOINT_VELOCITY_FILTER_FREQ_HZ = velocitySensorFrequencyHz;
    public static final double ORIENTATION_FILTER_FREQ_HZ = positionSensorFrequencyHz;
