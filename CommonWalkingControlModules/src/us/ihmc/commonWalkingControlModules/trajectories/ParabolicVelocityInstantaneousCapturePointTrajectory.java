@@ -9,13 +9,15 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 
 public class ParabolicVelocityInstantaneousCapturePointTrajectory implements InstantaneousCapturePointTrajectory
 {
-
-   private static final int MAX_LOOPS = (int) 1e7;
+   //TODO: This class is completely incomprehensible. Should make it more readable and clean it up...
+   
+   private static final int MAX_LOOPS = (int) 100;//1e7;
    private final YoVariableRegistry registry;
    private final ZeroToOneParabolicVelocityTrajectoryGenerator parameterGenerator;
    private final YoFramePoint2d initialDesiredICP;
@@ -23,6 +25,7 @@ public class ParabolicVelocityInstantaneousCapturePointTrajectory implements Ins
    private final DoubleYoVariable trajectoryTime;
    private final DoubleYoVariable startTime;
    private final DoubleYoVariable currentTime;
+   private final IntegerYoVariable loopCount;
    
    private final BipedSupportPolygons bipedSupportPolygons;
    
@@ -43,6 +46,8 @@ public class ParabolicVelocityInstantaneousCapturePointTrajectory implements Ins
       startTime = new DoubleYoVariable(namePrefix + "icpStartTime", registry);
       currentTime = new DoubleYoVariable(namePrefix + "icpCurrentTime", registry);
             
+      loopCount = new IntegerYoVariable(namePrefix + "loopCount", registry);
+      
       parameterGenerator = new ZeroToOneParabolicVelocityTrajectoryGenerator(namePrefix, Double.NaN, registry); // Set a sensible value for the trajectoryTime during initialization.
       
       parentRegistry.addChild(registry);   
@@ -75,11 +80,29 @@ public class ParabolicVelocityInstantaneousCapturePointTrajectory implements Ins
       lowerExtremeCoP.changeFrame(supportReferenceFrame);
       higherExtremeCoP.changeFrame(supportReferenceFrame);
       
-      int breakCount = 0;
+      loopCount.set(0);
       while(!supportPolygon.isPointInside(lowerExtremeCoP) && supportPolygon.isPointInside(higherExtremeCoP))
       {
-         if(breakCount >= MAX_LOOPS)
-            throw new RuntimeException("Maximum amount of loops reached to determine trajectoryTime. Possible infinite loop.");
+         if (loopCount.getIntegerValue() >= MAX_LOOPS)
+         {
+            System.err.println("Maximum amount of loops reached to determine trajectoryTime. Possible infinite loop.");
+            System.err.println("supportPolygon = " + supportPolygon);
+            System.err.println("initialDesiredICP = " + initialDesiredICP);
+            System.err.println("finalDesiredICP = " + finalDesiredICP);
+            System.err.println("moveTime = " + moveTime);
+            System.err.println("omega0 = " + omega0);
+            System.err.println("amountToBeInside = " + amountToBeInside);
+            System.err.println("supportSide = " + supportSide);
+            System.err.println("time = " + time);
+            
+            parameterGenerator.setTrajectoryTime(moveTime);
+            parameterGenerator.initialize();
+            
+            this.trajectoryTime.set(moveTime);
+            this.currentTime.set(0.0);
+            return;
+//            throw new RuntimeException("Maximum amount of loops reached to determine trajectoryTime. Possible infinite loop.");
+         }
          
          moveTime += 0.001; //TODO: What the heck is this?
          
@@ -88,7 +111,7 @@ public class ParabolicVelocityInstantaneousCapturePointTrajectory implements Ins
          lowerExtremeCoP.changeFrame(supportReferenceFrame);
          higherExtremeCoP.changeFrame(supportReferenceFrame);
          
-         breakCount++;
+         loopCount.increment();
       }
       
       parameterGenerator.setTrajectoryTime(moveTime);
