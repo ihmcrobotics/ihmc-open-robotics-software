@@ -398,11 +398,10 @@ public class PointCloudTools
       for (PointVectorNN n : p.neighbors.toList())
       {
          averageError += Math.abs(Distance3D_F64.distance(genPlane, n.p));
-         //averageError += Distance3D_F64.distance(genPlane, n.p);
       }
 
       averageError /= p.neighbors.size();
-      return Math.abs(averageError);
+      return averageError;
    }
 
    public static double score(PointVectorNN p)

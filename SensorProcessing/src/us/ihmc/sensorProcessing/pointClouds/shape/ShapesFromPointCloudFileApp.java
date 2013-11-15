@@ -75,7 +75,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
    private List<Point3D_F64> ransacCloud;
 
    private Node boundsNode = new Node("meshBounds");
-   private float boxExtent = 1.0f;
+   private float boxExtent = .01f;
    private static Vector3f initialTranslation;
 
    private float translateSpeed = 0.1f;
@@ -113,8 +113,14 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       //String file = "../SensorProcessing/drc_oi_door.txt";
       //initialTranslation= new Vector3f(3.6121516f, -3.6621094f, 0.027623236f);
 
-      String file = "../SensorProcessing/box_10s.txt";
-      initialTranslation= new Vector3f(4.1f, -0.55f, -0.75f);
+      //String file = "../SensorProcessing/box_10s.txt";
+      //initialTranslation= new Vector3f(4.1f, -0.55f, -0.75f);
+      
+      
+      
+
+      String file = "../SensorProcessing/wall.txt";
+      initialTranslation= new Vector3f(2.2372246f, -2.1972656f, 0.12291837f);
 
       ShapesFromPointCloudFileApp test1 = new ShapesFromPointCloudFileApp(file);
       test1.start();

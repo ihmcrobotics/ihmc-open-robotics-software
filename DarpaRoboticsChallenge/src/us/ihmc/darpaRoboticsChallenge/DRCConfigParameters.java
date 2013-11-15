@@ -217,6 +217,9 @@ public class DRCConfigParameters
    public static final float NEAR_SCAN_RESOLUTION = .01f;
    public static final long NEAR_SCAN_DECAY_MILLIS = 10000;    // -1 to turn off decay
    public static final int NEAR_SCAN_CAPACITY = 100000;
+   
+   // LIDAR point cloud processing
+   public static final int POINT_CLOUD_PROCESSING_SIZE = 20000;
 
    // Footstep Generator
    public static final double BOUNDING_BOX_FOR_FOOTSTEP_HEIGHT_FINDING_SIDE_LENGTH =
