@@ -95,7 +95,8 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
    private final SideDependentList<FilteredVelocityYoFrameVector> footToPelvisAccels;
 
    private final DoubleYoVariable feetSpacing = new DoubleYoVariable("estimatedFeetSpacing", registry);
-   private final DoubleYoVariable feetSpacingVelocity = new DoubleYoVariable("estimatedFeetSpacingVelocity", registry);
+   private final DoubleYoVariable alphaFeetSpacingVelocity = new DoubleYoVariable("alphaFeetSpacingVelocity", registry);
+   private final AlphaFilteredYoVariable feetSpacingVelocity = new AlphaFilteredYoVariable("estimatedFeetSpacingVelocity", registry, alphaFeetSpacingVelocity);
    private final DoubleYoVariable footVelocityThreshold = new DoubleYoVariable("footVelocityThresholdToFilterTrustedFoot", registry);
    
    private final SideDependentList<YoFramePoint> footPositionsInWorld = new SideDependentList<YoFramePoint>();
@@ -496,10 +497,17 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
          tempFrameVector.add(tempPosition);
       }
       
-      feetSpacingVelocity.set(feetSpacing.getDoubleValue());
       feetSpacing.set(tempFrameVector.length());
-      feetSpacingVelocity.set(feetSpacing.getDoubleValue() - feetSpacingVelocity.getDoubleValue());
-      feetSpacingVelocity.mul(1.0 / estimatorDT);
+
+      tempFrameVector.setToZero(worldFrame);
+      
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         footToPelvisVelocities.get(robotSide).getFrameVector(tempVelocity);
+         tempVelocity.scale(robotSide.negateIfRightSide(1.0));
+         tempFrameVector.add(tempVelocity);
+      }
+      feetSpacingVelocity.update(tempFrameVector.length());
    }
    
    private class TrustBothFeetState extends State<PelvisEstimationState>
