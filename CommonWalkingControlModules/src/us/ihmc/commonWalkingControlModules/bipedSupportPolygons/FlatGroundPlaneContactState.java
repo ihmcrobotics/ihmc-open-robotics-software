@@ -156,19 +156,20 @@ public class FlatGroundPlaneContactState implements PlaneContactState
 
    public void getContactFramePointsInContact(List<FramePoint> contactPointListToPack)
    {
+      int counter = 0;
       for (int i = 0; i < contactFramePoints.size(); i++)
       {
          ContactPoint contactPoint = contactPoints.get(i);
          if (!contactPoint.isInContact())
             continue;
          
-         if (i >= contactPointListToPack.size())
+         if (counter >= contactPointListToPack.size())
             contactPointListToPack.add(new FramePoint());
          
-         contactPointListToPack.get(i).setAndChangeFrame(contactPoint.getPosition());
+         contactPointListToPack.get(counter).setAndChangeFrame(contactPoint.getPosition());
       }
       
-      for (int i = contactPointListToPack.size() - 1; i >= getNumberOfContactPointsInContact(); i--)
+      for (int i = contactPointListToPack.size() - 1; i >= counter; i--)
       {
          contactPointListToPack.remove(i);
       }

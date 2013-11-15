@@ -163,6 +163,7 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
 
    public void getContactFramePointsInContact(List<FramePoint> contactPointListToPack)
    {
+      int counter = 0;
       for (int i = 0; i < totalNumberOfContactPoints; i++)
       {
          YoContactPoint contactPoint = contactPoints.get(i);
@@ -170,13 +171,13 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
          if (!contactPoint.isInContact())
             continue;
          
-         if (i >= contactPointListToPack.size())
+         if (counter >= contactPointListToPack.size())
             contactPointListToPack.add(new FramePoint());
          
-         contactPointListToPack.get(i).setAndChangeFrame(contactPoint.getPosition());
+         contactPointListToPack.get(counter).setAndChangeFrame(contactPoint.getPosition());
       }
       
-      for (int i = contactPointListToPack.size() - 1; i >= getNumberOfContactPointsInContact(); i--)
+      for (int i = contactPointListToPack.size() - 1; i >= counter; i--)
       {
          contactPointListToPack.remove(i);
       }

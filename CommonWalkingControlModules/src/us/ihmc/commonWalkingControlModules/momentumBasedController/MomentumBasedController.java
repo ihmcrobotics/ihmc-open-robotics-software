@@ -799,6 +799,11 @@ public class MomentumBasedController
       return thighs;
    }
 
+   public List<FramePoint> getContactPointsCopy(ContactablePlaneBody contactablePlaneBody)
+   {
+      return yoPlaneContactStates.get(contactablePlaneBody).getContactFramePointsInContactCopy();
+   }
+
    public void getContactPoints(ContactablePlaneBody contactablePlaneBody, List<FramePoint> contactPointListToPack)
    {
       yoPlaneContactStates.get(contactablePlaneBody).getContactFramePointsInContact(contactPointListToPack);
