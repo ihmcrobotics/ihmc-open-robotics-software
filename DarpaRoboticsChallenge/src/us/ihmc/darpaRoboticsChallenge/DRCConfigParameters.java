@@ -215,7 +215,7 @@ public class DRCConfigParameters
    public static final double NEAR_SCAN_CYL_Z_MAX = 0;
    public static final double NEAR_SCAN_CYL_Z_MIN = -1.5;
    public static final float NEAR_SCAN_RESOLUTION = .01f;
-   public static final long NEAR_SCAN_DECAY_MILLIS = 10000;    // -1 to turn off decay
+   public static final long NEAR_SCAN_DECAY_MILLIS = 30000;    // -1 to turn off decay
    public static final int NEAR_SCAN_CAPACITY = 100000;
    
    // LIDAR point cloud processing
