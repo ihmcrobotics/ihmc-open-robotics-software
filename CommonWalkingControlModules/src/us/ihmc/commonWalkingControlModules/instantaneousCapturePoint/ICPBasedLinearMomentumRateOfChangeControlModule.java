@@ -12,13 +12,11 @@ import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
-import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
@@ -47,9 +45,11 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
    private final YoFramePoint2d controlledCMP = new YoFramePoint2d("controlledCMP", "", worldFrame, registry);
 
    private final double totalMass;
+   private final FramePoint centerOfMass;
    private final double gravityZ;
 
    private final EnumYoVariable<RobotSide> supportLegPreviousTick = EnumYoVariable.create("supportLegPreviousTick", "", RobotSide.class, registry, true);
+
 
    public ICPBasedLinearMomentumRateOfChangeControlModule(ReferenceFrame centerOfMassFrame,
            double controlDT, double totalMass, double gravityZ, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
@@ -60,6 +60,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
       this.centerOfMassFrame = centerOfMassFrame;
       this.visualizer = new CapturabilityBasedDesiredCoPVisualizer(registry, dynamicGraphicObjectsListRegistry);
       this.totalMass = totalMass;
+      this.centerOfMass = new FramePoint(centerOfMassFrame);
       this.gravityZ = gravityZ;
       this.momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
       parentRegistry.addChild(registry);
@@ -79,12 +80,13 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
 
       CapturePointData capturePointData = capturePointInputPort.getData();
       CapturePointTrajectoryData desiredCapturePointTrajectory = desiredCapturePointTrajectoryInputPort.getData();
+      FramePoint2d finalDesiredCapturePoint = desiredCapturePointTrajectory.getFinalDesiredCapturePoint();
       FramePoint2d desiredCapturePoint = desiredCapturePointTrajectory.getDesiredCapturePoint();
       FramePoint2d capturePoint = capturePointData.getCapturePoint();
       FrameConvexPolygon2d supportPolygon = bipedSupportPolygonsInputPort.getData().getSupportPolygonInMidFeetZUp();
 
       FramePoint2d desiredCMP = icpProportionalController.doProportionalControl(capturePoint,
-                                   desiredCapturePoint, desiredCapturePointTrajectory.getDesiredCapturePointVelocity(),
+                                   desiredCapturePoint, finalDesiredCapturePoint, desiredCapturePointTrajectory.getDesiredCapturePointVelocity(),
                                    capturePointData.getOmega0(), KEEP_CMP_INSIDE_SUPPORT_POLYGON, supportPolygon);
       
 
@@ -93,6 +95,9 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
 
       visualizer.setDesiredCapturePoint(desiredCapturePoint);
       visualizer.setDesiredCMP(desiredCMP);
+      centerOfMass.setToZero(centerOfMassFrame);
+      visualizer.setCoM(centerOfMass);
+      visualizer.setFinalDesiredCapturePoint(finalDesiredCapturePoint);
 
       supportLegPreviousTick.set(supportLegInputPort.getData());
 
@@ -109,11 +114,12 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
 
    private FrameVector computeGroundReactionForce(FramePoint2d cmp2d, double fZ)
    {
-      FramePoint centerOfMass = new FramePoint(centerOfMassFrame);
+      centerOfMass.setToZero(centerOfMassFrame);
       FramePoint cmp3d = WrenchDistributorTools.computePseudoCMP3d(centerOfMass, cmp2d, fZ, totalMass, capturePointInputPort.getData().getOmega0());
       
       visualizer.setPseudoCMP(cmp3d);
       
+      centerOfMass.setToZero(centerOfMassFrame);
       FrameVector ret = WrenchDistributorTools.computeForce(centerOfMass, cmp3d, fZ);
       ret.changeFrame(centerOfMassFrame);
 

@@ -1632,7 +1632,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       icpBasedMomentumRateOfChangeControlModule.getCapturePointInputPort().setData(capturePointData);
 
       CapturePointTrajectoryData capturePointTrajectoryData = new CapturePointTrajectoryData();
-      capturePointTrajectoryData.set(desiredICP.getFramePoint2dCopy(), desiredICPVelocity.getFrameVector2dCopy());
+      capturePointTrajectoryData.set(finalDesiredICPInWorld.getFramePoint2dCopy(), desiredICP.getFramePoint2dCopy(), desiredICPVelocity.getFrameVector2dCopy());
       icpBasedMomentumRateOfChangeControlModule.getDesiredCapturePointTrajectoryInputPort().setData(capturePointTrajectoryData);
 
       icpBasedMomentumRateOfChangeControlModule.getSupportLegInputPort().setData(getSupportLeg());
