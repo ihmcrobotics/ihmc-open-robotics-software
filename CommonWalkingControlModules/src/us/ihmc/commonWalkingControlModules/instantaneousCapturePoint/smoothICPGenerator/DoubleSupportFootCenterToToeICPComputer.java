@@ -92,7 +92,7 @@ public class DoubleSupportFootCenterToToeICPComputer
    // TODO: Finish YoVariablizing these to make rewindable and visualizable.
 
    private Point3d constantCenterOfPressure;
-   private Point3d upcomingCornerPoint;
+   private Point3d upcomingCornerPoint = new Point3d();
 
    private Point3d singleSupportStartICP = new Point3d();
    private Vector3d singleSupportStartICPVelocity = new Vector3d();
@@ -209,8 +209,7 @@ public class DoubleSupportFootCenterToToeICPComputer
    public void initializeSingleSupport(ArrayList<FramePoint> footLocationList, ArrayList<ReferenceFrame> soleFrameList, double singleSupportDuration, double doubleSupportDuration, double omega0,
          double initialTime)
    {
-      this.omega0.set(omega0); // TODO: Magic number
-      //      this.omega0.set(3.4); //omega0); // TODO: Magic number
+      this.omega0.set(omega0);
 
       isInitialTransfer.set(false);
       comeToStop.set(false);
@@ -271,8 +270,7 @@ public class DoubleSupportFootCenterToToeICPComputer
    public void initializeDoubleSupportInitialTransfer(ArrayList<FramePoint> footLocationList,  ArrayList<ReferenceFrame> soleFrameList, Point3d initialICPPosition, double singleSupportDuration,
          double doubleSupportDuration, double doubleSupportInitialTransferDuration, double omega0, double initialTime)
    {
-      this.omega0.set(omega0); // TODO: Magic number
-      //      this.omega0.set(3.4); //omega0); // TODO: Magic number
+      this.omega0.set(omega0);
 
       isInitialTransfer.set(true);
       comeToStop.set(footLocationList.size() < 3);
@@ -371,8 +369,7 @@ public class DoubleSupportFootCenterToToeICPComputer
    private void initializeDoubleSupportLocal(ArrayList<FramePoint> footLocationList, double singleSupportDuration, double doubleSupportDuration, double omega0,
          double initialTime)
    {
-      this.omega0.set(omega0); // TODO: Magic number
-      //      this.omega0.set(3.4); //omega0); // TODO: Magic number
+      this.omega0.set(omega0);
 
       isInitialTransfer.set(false);
       comeToStop.set(footLocationList.size() < 3);
