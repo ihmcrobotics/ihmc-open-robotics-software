@@ -616,24 +616,24 @@ public class CaptureRegionCalculator
       {
          this.captureRegionGraphic.setFrameConvexPolygon2d(null);
 
-         for (YoFramePoint yoFramePoint : captureRegionBestCaseVertices)
+         for (int i = 0; i < captureRegionBestCaseVertices.length; i++)
          {
-            yoFramePoint.set(Double.NaN, Double.NaN, Double.NaN);
+            captureRegionBestCaseVertices[i].set(Double.NaN, Double.NaN, Double.NaN);
          }
 
-         for (YoFramePoint yoFramePoint : captureRegionKinematicLimitVertices)
+         for (int i = 0; i < captureRegionKinematicLimitVertices.length; i++)
          {
-            yoFramePoint.set(Double.NaN, Double.NaN, Double.NaN);
+            captureRegionKinematicLimitVertices[i].set(Double.NaN, Double.NaN, Double.NaN);
          }
 
-         for (YoFramePoint yoFramePoint : estimatedCOPExtremes)
+         for (int i = 0; i < estimatedCOPExtremes.length; i++)
          {
-            yoFramePoint.set(Double.NaN, Double.NaN, Double.NaN);
+            estimatedCOPExtremes[i].set(Double.NaN, Double.NaN, Double.NaN);
          }
 
-         for (YoFramePoint yoFramePoint : additionalKinematicLimitPoints)
+         for (int i = 0; i < additionalKinematicLimitPoints.length; i++)
          {
-            yoFramePoint.set(Double.NaN, Double.NaN, Double.NaN);
+            additionalKinematicLimitPoints[i].set(Double.NaN, Double.NaN, Double.NaN);
          }
       }
    }
