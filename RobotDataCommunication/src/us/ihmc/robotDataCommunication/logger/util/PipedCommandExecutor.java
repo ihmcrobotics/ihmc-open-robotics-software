@@ -32,6 +32,11 @@ public class PipedCommandExecutor
 
    public void execute() throws IOException
    {
+      execute(System.out, System.err);
+   }
+   
+   public void execute(PrintStream outputStream, PrintStream errorStream) throws IOException
+   {
 
       synchronized (synchronizer)
       {
@@ -43,8 +48,8 @@ public class PipedCommandExecutor
          processStdin = new PrintStream(process.getOutputStream(), true);
       }
 
-      new ProcessStreamGobbler("PipedCommandExecutor", process.getInputStream(), System.out).start();
-      new ProcessStreamGobbler("PipedCommandExecutor", process.getErrorStream(), System.err).start();
+      new ProcessStreamGobbler("PipedCommandExecutor", process.getInputStream(), outputStream).start();
+      new ProcessStreamGobbler("PipedCommandExecutor", process.getErrorStream(), errorStream).start();
 
    }
 

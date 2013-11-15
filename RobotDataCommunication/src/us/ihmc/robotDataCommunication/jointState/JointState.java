@@ -29,6 +29,11 @@ public abstract class JointState<U extends Joint>
    
    public abstract int getNumberOfStateVariables();
 
+   public static int getNumberOfVariables(JointType type)
+   {
+      return createJointState(null, type).getNumberOfStateVariables();
+   }
+   
    public static JointState<?> createJointState(String name, JointType type)
    {
       switch (type)

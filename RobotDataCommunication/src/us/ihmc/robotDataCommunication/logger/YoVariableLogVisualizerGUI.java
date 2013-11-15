@@ -30,15 +30,18 @@ public class YoVariableLogVisualizerGUI extends JPanel
    private final MultiVideoDataPlayer multiPlayer;
    private final YoVariableLogPlaybackRobot robot;
    private final SimulationConstructionSet scs;
+   private YoVariableLogCropper yoVariableLogCropper;
 
-   public YoVariableLogVisualizerGUI(MultiVideoDataPlayer player, YoVariableLogPlaybackRobot robot, SimulationConstructionSet scs)
+   public YoVariableLogVisualizerGUI(MultiVideoDataPlayer player, YoVariableLogPlaybackRobot robot, YoVariableLogCropper yoVariableLogCropper, SimulationConstructionSet scs)
    {
       super();
 
       this.multiPlayer = player;
       this.robot = robot;
+      this.yoVariableLogCropper = yoVariableLogCropper;
       this.scs = scs;
 
+      
       setLayout(new GridLayout(1, 2));
 
       addGUIElements();
@@ -72,48 +75,99 @@ public class YoVariableLogVisualizerGUI extends JPanel
       }
    }
    
+   private long[] getInAndOut()
+   {
+      if(scs.isSimulating())
+      {
+         scs.stop();
+      }
+      
+      scs.gotoInPointNow();
+      long startTimestamp = multiPlayer.getCurrentTimestamp();
+      scs.gotoOutPointNow();
+      long endTimestamp = multiPlayer.getCurrentTimestamp();
+      
+      if(startTimestamp > endTimestamp)
+      {
+         
+         JOptionPane.showMessageDialog(this,
+               "startTimestamp > endTimestamp. Please set the in-point and out-point correctly",
+               "Timestmap error",
+               JOptionPane.ERROR_MESSAGE);
+         
+         return new long[0];
+      }
+      
+      return new long[] { startTimestamp, endTimestamp };
+   }
+   
 
    private void exportVideo()
    {
       if(multiPlayer != null)
       {
-         
-         if(scs.isSimulating())
+         long[] timestamps = getInAndOut();
+         if(timestamps.length != 2)
          {
-            scs.stop();
-         }
-         
-         scs.gotoInPointNow();
-         long startTimestamp = multiPlayer.getCurrentTimestamp();
-         scs.gotoOutPointNow();
-         long endTimestamp = multiPlayer.getCurrentTimestamp();
-         
-         if(startTimestamp > endTimestamp)
-         {
-            
-            JOptionPane.showMessageDialog(this,
-                  "startTimestamp > endTimestamp. Please set the in-point and out-point correctly",
-                  "Timestmap error",
-                  JOptionPane.ERROR_MESSAGE);
-            
             return;
          }
+         
+         final long startTimestamp = timestamps[0];
+         final long endTimestamp = timestamps[1];
          
          
          JFileChooser saveDialog = new JFileChooser(System.getProperty("user.home"));
          saveDialog.setFileFilter(new MovieFileFilter());
-         File selectedFile = null;
+         
          if (JFileChooser.APPROVE_OPTION == saveDialog.showSaveDialog(this))
          {
-            selectedFile = saveDialog.getSelectedFile();
+            final File selectedFile = saveDialog.getSelectedFile();
             
-            multiPlayer.exportCurrentVideo(selectedFile, startTimestamp, endTimestamp);
+            new Thread()
+            {
+               @Override
+               public void run()
+               {
+                  multiPlayer.exportCurrentVideo(selectedFile, startTimestamp, endTimestamp);
+               }
+            }.start();
             
          }
          
          
       }
       
+   }
+   
+   private void crop()
+   {
+      long[] timestamps = getInAndOut();
+      if(timestamps.length != 2)
+      {
+         return;
+      }
+      
+      final long startTimestamp = timestamps[0];
+      final long endTimestamp = timestamps[1];
+      
+      
+      JFileChooser saveDialog = new JFileChooser(System.getProperty("user.home"));
+      saveDialog.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+      if (JFileChooser.APPROVE_OPTION == saveDialog.showSaveDialog(this))
+      {
+         
+         final File selectedFile = saveDialog.getSelectedFile();
+         new Thread()
+         {
+            @Override
+            public void run()
+            {
+               yoVariableLogCropper.crop(selectedFile, startTimestamp, endTimestamp);               
+            }
+         }.start();
+         
+      }
    }
 
    private void addGUIElements()
@@ -193,11 +247,25 @@ public class YoVariableLogVisualizerGUI extends JPanel
 
       });
       
+      final JButton crop = new JButton("Crop data");
+      crop.setToolTipText("Crop starting from the in point till the out point.");
+      crop.addActionListener(new ActionListener()
+      {
+         
+         @Override
+         public void actionPerformed(ActionEvent e)
+         {
+            crop();
+         }
+         
+      });
+      
       timePanel.add(slider, BorderLayout.CENTER);
       timePanel.add(currentTime, BorderLayout.EAST);
       
       add(timePanel);
       add(exportVideo);
+      add(crop);
       
    }
 

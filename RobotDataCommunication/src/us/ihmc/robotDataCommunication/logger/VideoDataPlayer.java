@@ -7,6 +7,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 
@@ -26,7 +28,7 @@ import com.xuggle.xuggler.IStream;
 
 public class VideoDataPlayer
 {
-
+   private final String name;
    private final boolean hasTimebase;
    private final boolean interlaced;
    
@@ -50,17 +52,18 @@ public class VideoDataPlayer
    
    private final File videoFile;
    
-   public VideoDataPlayer(String description, File dataDirectory, LogProperties logProperties)
+   public VideoDataPlayer(String name, File dataDirectory, LogProperties logProperties)
    {
-      this.interlaced = logProperties.getInterlaced(description);
+      this.name = name;
+      this.interlaced = logProperties.getInterlaced(name);
       this.hasTimebase = logProperties.hasTimebase();
       
       if(!hasTimebase)
       {
          System.err.println("Video data is using timestamps instead of frame numbers. Falling back to seeking based on timestamp.");
       }
-      videoFile = new File(dataDirectory, logProperties.getVideoFile(description));
-      File timestampFile = new File(dataDirectory, logProperties.getTimestampFile(description));
+      videoFile = new File(dataDirectory, logProperties.getVideoFile(name));
+      File timestampFile = new File(dataDirectory, logProperties.getTimestampFile(name));
 
       parseTimestampData(timestampFile);
       
@@ -219,7 +222,7 @@ public class VideoDataPlayer
       }
    }
    
-   public void exportVideo(File selectedFile, long startTimestamp, long endTimestamp)
+   public void exportVideo(File selectedFile, long startTimestamp, long endTimestamp, PrintStream output)
    {
       
       long startVideoTimestamp = getVideoTimestamp(startTimestamp);
@@ -243,7 +246,8 @@ public class VideoDataPlayer
       PipedCommandExecutor executor = new PipedCommandExecutor(ffMpeg);
       try
       {
-         executor.execute();
+         executor.execute(output, output);
+         executor.waitFor();
       }
       catch (IOException e)
       {
@@ -252,6 +256,70 @@ public class VideoDataPlayer
       
    }
 
+   
+   public void cropVideo(File outputFile, File timestampFile, long startTimestamp, long endTimestamp, PrintStream output) throws IOException
+   {
+      
+      PrintWriter timestampWriter = new PrintWriter(timestampFile);
+      timestampWriter.println(bmdTimeBaseNum);
+      timestampWriter.println(bmdTimeBaseDen);
+      
+      long videoOffset = Long.MIN_VALUE;
+      
+      for(int i = 0; i < robotTimestamps.size(); i++)
+      {
+         long robotTimestamp = robotTimestamps.get(i);
+         long videoTimestamp = videoTimestamps.get(i);
+         
+         if(robotTimestamp >= startTimestamp && robotTimestamp <= endTimestamp)
+         {
+            if(videoOffset == Long.MIN_VALUE)
+            {
+               videoOffset = videoTimestamp;
+            }
+            
+            timestampWriter.print(robotTimestamp);
+            timestampWriter.print(" ");
+            timestampWriter.println(videoTimestamp - videoOffset);
+         }
+         else if(robotTimestamp > endTimestamp)
+         {
+            break;
+         }
+      }
+      
+      timestampWriter.close();
+      
+      
+      
+      long startVideoTimestamp = getVideoTimestamp(startTimestamp);
+      long endVideoTimestamp = getVideoTimestamp(endTimestamp);
+      double timebase = reader.getContainer().getStream(videoStream).getTimeBase().getDouble();
+      
+      double startTime = startVideoTimestamp * timebase;
+      double endTime = endVideoTimestamp * timebase;
+      
+      FFMpeg ffMpeg  = new FFMpeg();
+      
+      ffMpeg.setStarttime(startTime);
+      ffMpeg.setEndtime(endTime);
+      ffMpeg.setInputFile(videoFile.getAbsolutePath());
+      ffMpeg.setVideoCodec("copy");
+      ffMpeg.setAudioCodec("copy");
+      ffMpeg.enableExperimentalCodecs(true);
+      ffMpeg.setOutputFile(outputFile.getAbsolutePath());
+      
+      PipedCommandExecutor executor = new PipedCommandExecutor(ffMpeg);
+      try
+      {
+         executor.execute(output, output);
+         executor.waitFor();
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+   }
    
    private class HideableMediaFrame 
    {
@@ -289,5 +357,10 @@ public class VideoDataPlayer
          }
       }
       
+   }
+
+   public String getName()
+   {
+      return name;
    }
 }

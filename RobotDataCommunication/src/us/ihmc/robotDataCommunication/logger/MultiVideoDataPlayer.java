@@ -1,7 +1,11 @@
 package us.ihmc.robotDataCommunication.logger;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.HashMap;
+
+import us.ihmc.utilities.gui.CustomProgressMonitor;
 
 import com.yobotics.simulationconstructionset.LongYoVariable;
 import com.yobotics.simulationconstructionset.PlaybackListener;
@@ -10,6 +14,7 @@ import com.yobotics.simulationconstructionset.SimulationRewoundListener;
 public class MultiVideoDataPlayer implements PlaybackListener, SimulationRewoundListener
 {
    private final LongYoVariable timestamp;
+   private final LogProperties logProperties;
    
    private final String[] videos; 
    
@@ -21,6 +26,7 @@ public class MultiVideoDataPlayer implements PlaybackListener, SimulationRewound
    {
       this.timestamp = timestamp;
       this.videos = logProperties.getVideoFiles();
+      this.logProperties = logProperties;
       
       for(String video : videos)
       {
@@ -98,7 +104,30 @@ public class MultiVideoDataPlayer implements PlaybackListener, SimulationRewound
    {
       if(activePlayer != null)
       {
-         activePlayer.exportVideo(selectedFile, startTimestamp, endTimestamp);
+         CustomProgressMonitor monitor = new CustomProgressMonitor("Exporting " + activePlayer.getName(), selectedFile.getAbsolutePath(), 0, 100);
+         PrintStream output = new PrintStream(monitor.getOutputStream(), true);
+         monitor.setProgress(10);
+         activePlayer.exportVideo(selectedFile, startTimestamp, endTimestamp, output);
+         monitor.close();
+      }
+   }
+   
+   public void crop(File selectedDirectory, long startTimestamp, long endTimestamp, CustomProgressMonitor monitor) throws IOException
+   {
+      PrintStream output = new PrintStream(monitor.getOutputStream(), true);
+      
+      for(int i = 0; i < videos.length; i++)
+      {
+         String video = videos[i];
+         if(monitor != null)
+         {
+            monitor.setNote("Cropping video " + video);
+            monitor.setProgress(50 + ((int)(50.0 * ((double)i/(double)videos.length))));            
+         }
+         
+         File timestampFile = new File(selectedDirectory, logProperties.getTimestampFile(video));
+         File videoFile = new File(selectedDirectory, logProperties.getVideoFile(video));
+         players.get(video).cropVideo(videoFile, timestampFile, startTimestamp, endTimestamp, output);
       }
    }
 
