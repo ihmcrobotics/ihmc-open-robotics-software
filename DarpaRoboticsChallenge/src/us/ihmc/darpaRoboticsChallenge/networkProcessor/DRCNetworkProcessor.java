@@ -50,7 +50,7 @@ public class DRCNetworkProcessor
    private final DRCRobotJointMap jointMap;
    private final RobotBoundingBoxes robotBoundingBoxes;
 
-   private static String scsMachineIPAddress = DRCConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
+   private static String scsMachineIPAddress = DRCLocalConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
    private static String rosMasterURI = DRCConfigParameters.ROS_MASTER_URI;
 
    /*
@@ -139,11 +139,11 @@ public class DRCNetworkProcessor
       robotPoseBuffer = new RobotPoseBuffer(this.fieldComputerClient, 1000, timestampProvider);
       networkingManager = new DRCNetworkProcessorNetworkingManager(this.fieldComputerClient, timestampProvider);
 
-      jointMap = new DRCRobotJointMap(DRCConfigParameters.robotModelToUse, false);
+      jointMap = new DRCRobotJointMap(DRCLocalConfigParameters.robotModelToUse, false);
       JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap, true);
       fullRobotModel = loader.createFullRobotModel(jointMap);
       
-      DRCRobotDataReceiver drcRobotDataReceiver = new DRCRobotDataReceiver(DRCConfigParameters.robotModelToUse, fullRobotModel);
+      DRCRobotDataReceiver drcRobotDataReceiver = new DRCRobotDataReceiver(DRCLocalConfigParameters.robotModelToUse, fullRobotModel);
       this.fieldComputerClient.attachListener(DRCJointConfigurationData.class, drcRobotDataReceiver);
       robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, fullRobotModel);
 
@@ -154,7 +154,7 @@ public class DRCNetworkProcessor
          {networkingManager.getControllerStateHandler().sendAtlasWristFeetSensorPacket(object); }
       });
 
-      if (DRCConfigParameters.USING_REAL_HEAD)
+      if (DRCLocalConfigParameters.USING_REAL_HEAD)
       {
          ppsTimestampOffsetProvider = new RealRobotPPSTimestampOffsetProvider();
          videoSettings = VideoSettingsFactory.get32kBitSettingsWide();

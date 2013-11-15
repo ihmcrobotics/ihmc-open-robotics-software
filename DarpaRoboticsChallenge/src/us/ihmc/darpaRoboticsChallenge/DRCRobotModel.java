@@ -8,7 +8,7 @@ public enum DRCRobotModel
    
    public static DRCRobotModel getDefaultRobotModel()
    {
-      return DRCConfigParameters.robotModelToUse;
+      return DRCLocalConfigParameters.robotModelToUse;
    }
    
    public DRCHandModel getHandModel()

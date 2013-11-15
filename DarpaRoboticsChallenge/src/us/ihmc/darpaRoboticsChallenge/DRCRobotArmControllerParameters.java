@@ -6,7 +6,7 @@ public class DRCRobotArmControllerParameters implements ArmControllerParameters
 {
    public double getKpAllArmJoints()
    {
-      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 120.0;
+      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 120.0;
       return 20.0; 
    }
 
@@ -17,13 +17,13 @@ public class DRCRobotArmControllerParameters implements ArmControllerParameters
 
    public double getMaxAccelerationAllArmJoints()
    {
-      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 100.0;
+      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 100.0;
       return 6.0;
    }
 
    public double getMaxJerkAllArmJoints()
    {
-      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 1000.0;
+      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 1000.0;
       return 60.0;
    }
 

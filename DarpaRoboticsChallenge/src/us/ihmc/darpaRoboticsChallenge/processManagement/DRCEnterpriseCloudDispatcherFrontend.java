@@ -4,7 +4,9 @@ import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
+
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
 import us.ihmc.utilities.gui.IHMCSwingTools;
 import us.ihmc.utilities.net.NetStateListener;
@@ -12,6 +14,7 @@ import us.ihmc.utilities.net.tcpServer.DisconnectedException;
 import us.ihmc.utilities.net.tcpServer.ReconnectingTCPClient;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -25,8 +28,8 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
    private ReconnectingTCPClient controllerClient;
    private final byte[] controllerBuffer;
 
-   private static String netProcMachineIpAddress = DRCConfigParameters.NET_PROC_MACHINE_IP_ADDRESS;
-   private static String controllerMachineIpAddress = DRCConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
+   private static String netProcMachineIpAddress = DRCLocalConfigParameters.NET_PROC_MACHINE_IP_ADDRESS;
+   private static String controllerMachineIpAddress = DRCLocalConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
 
    private JFrame frame;
    private JPanel netProcPanel, controllerPanel;
