@@ -34,9 +34,9 @@ public class SandiaHandManualControlUI extends AbstractNodeMain implements Actio
 {
    private static final String MASTER_URI = "http://localhost:11311";
 
-   private static final int sliderBounds = 10;
-   private static final int sliderMin = -sliderBounds;
-   private static final int sliderMax = sliderBounds;
+   private static final int sliderBounds = 20;
+   private static final int sliderMin = -sliderBounds * 3;
+   private static final int sliderMax = sliderBounds * 3;
 
    private Publisher<osrf_msgs.JointCommands> indexFingerJointPublisher, middleFingerJointPublisher, ringFingerJointPublisher, thumbJointPublisher;
    private osrf_msgs.JointCommands indexFingerJointCommand, middleFingerJointCommand, ringFingerJointCommand, thumbJointCommand;
