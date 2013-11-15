@@ -107,7 +107,7 @@ public class ICPProportionalController
          desICPToFinalDesICPVector.setAndChangeFrame(desiredCapturePoint);
          desICPToFinalDesICPVector.sub(finalDesiredCapturePoint);
          boolean isDesICPMovingTowardsFinalDesICP = desiredCapturePointVelocity.dot(desICPToFinalDesICPVector) > 0.0;
-         if (!isDesICPMovingTowardsFinalDesICP)
+         if (!isDesICPMovingTowardsFinalDesICP && desiredCapturePointVelocity.lengthSquared() > 1e-3 && finalDesiredCapturePoint.distance(desiredCapturePoint) > 0.01)
          {
             desiredICPToFinalDesiredICPSegment.setAndChangeFrame(finalDesiredCapturePoint, desiredCapturePoint);
             icpProjected.setAndChangeFrame(capturePoint);
