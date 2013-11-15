@@ -113,7 +113,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 {
    private boolean VISUALIZE = true;
 
-   private static final boolean DO_TRANSITION_WHEN_TIME_IS_UP = true;
+   private static final boolean DO_TRANSITION_WHEN_TIME_IS_UP = false;
 
    private final static HighLevelState controllerState = HighLevelState.WALKING;
    private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OPTIMIZATION;
@@ -391,7 +391,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       this.userDesiredPelvisPitch.set(desiredPelvisPitch);
       
       additionalSwingTimeForICP.set(0.1);
-      minimumSwingFraction.set(0.8);
+      minimumSwingFraction.set(0.5); //0.8);
 
       upcomingSupportLeg.set(RobotSide.RIGHT);    // TODO: stairs hack, so that the following lines use the correct leading leg
 
@@ -400,8 +400,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       controlPelvisHeightInsteadOfCoMHeight.set(false);
       
-      minimumICPFromCenterDuringSingleSupport.set(0.01); 
-      singleSupportTimeLeftBeforeShift.set(0.1); 
+      minimumICPFromCenterDuringSingleSupport.set(0.01);   //0.04);  //0.01); 
+      singleSupportTimeLeftBeforeShift.set(1.0);   //0.5);   //0.1); 
+      
+      footLoadThresholdToHoldPosition.set(0.2);
    }
 
 
@@ -415,7 +417,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       
       //TODO: Pull these up to a higher level.
 
-      singularityEscapeNullspaceMultiplierSwingLeg.set(200.0);
+      singularityEscapeNullspaceMultiplierSwingLeg.set(100.0);
       singularityEscapeNullspaceMultiplierSupportLeg.set(20.0);
       singularityEscapeNullspaceMultiplierSupportLegLocking.set(-0.5);
       double minJacobianDeterminantForSingularityEscape = 0.03;
@@ -424,11 +426,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       swingKpZ.set(200.0);
       swingKpOrientation.set(200.0);
       swingZeta.set(1.0);
-      
-      swingMaxPositionAcceleration.set(Double.POSITIVE_INFINITY); // 10.0); //
-      swingMaxPositionJerk.set(Double.POSITIVE_INFINITY); //150.0); 
-      swingMaxOrientationAcceleration.set(Double.POSITIVE_INFINITY); //100.0); 
-      swingMaxOrientationJerk.set(Double.POSITIVE_INFINITY); //750.0); 
+
+//      swingMaxPositionAcceleration.set(10.0); 
+//      swingMaxPositionJerk.set(150.0);
+//      swingMaxOrientationAcceleration.set(100.0);
+//      swingMaxOrientationJerk.set(1500.0);
+
+      swingMaxPositionAcceleration.set(Double.POSITIVE_INFINITY); 
+      swingMaxPositionJerk.set(Double.POSITIVE_INFINITY);
+      swingMaxOrientationAcceleration.set(Double.POSITIVE_INFINITY);
+      swingMaxOrientationJerk.set(Double.POSITIVE_INFINITY);
       
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -1754,6 +1761,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.TOES_TOUCHDOWN, new FrameVector(referenceFrames.getAnkleZUpFrame(robotSide), 0.0, 0.0, 1.0));
    }
 
+   private final FrameVector zWorld = new FrameVector(worldFrame, 0.0, 0.0, 1.0);
+   
    private void setFlatFootContactStates()
    {
       for (RobotSide robotSide : RobotSide.values)
@@ -1762,7 +1771,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private void setFlatFootContactState(RobotSide robotSide)
    {
-      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.FULL);
+      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.FULL, zWorld);
    }
 
    private void setContactStateForSwing(RobotSide robotSide)
