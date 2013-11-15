@@ -104,7 +104,7 @@ public class PointCloudTools
          if (pt.p.distance(center) < radius)
             result.add(pt);
       }
-      
+
       return result;
    }
 
@@ -199,6 +199,28 @@ public class PointCloudTools
       return result;
    }
 
+   public static List<Point3D_F64> filterByNormalOrientation(List<Point3D_F64> cloud, ConfigSurfaceNormals configNormal, Vector3D_F64 desiredNormal,
+         double thresh)
+   {
+      ApproximateSurfaceNormals surface = new ApproximateSurfaceNormals(configNormal.numPlane, configNormal.maxDistancePlane, configNormal.numNeighbors,
+            configNormal.maxDistanceNeighbor);
+      FastQueue<PointVectorNN> pointNormList = new FastQueue<PointVectorNN>(PointVectorNN.class, false);
+      surface.process(cloud, pointNormList);
+
+      desiredNormal.normalize();
+      List<Point3D_F64> result = new ArrayList<Point3D_F64>();
+      for (PointVectorNN p : pointNormList.toList())
+      {
+         double angle = Math.acos(Math.abs(p.normal.dot(desiredNormal) / (p.normal.norm())));
+         if (Math.abs(angle) < thresh)
+         {
+            result.add(p.p);
+         }
+      }
+
+      return result;
+   }
+
    public static void growPlane(Shape s, List<Point3D_F64> cloud, ConfigSurfaceNormals configNormal, double distTresh, double angleThresh)
    {
       PlaneGeneral3D_F64 plane = (PlaneGeneral3D_F64) s.parameters;
@@ -230,9 +252,9 @@ public class PointCloudTools
 
       System.out.println("about to process...");
       PointCloudShapeDetectionSchnabel2007 alg = new PointCloudShapeDetectionSchnabel2007(configRansac);
-      
+
       Cube3D_F64 boundingBox = new Cube3D_F64();
-      UtilPoint3D_F64.boundingCube(cloud,boundingBox);
+      UtilPoint3D_F64.boundingCube(cloud, boundingBox);
 
       alg.process(pointNormList, boundingBox);
       System.out.println("done...");
