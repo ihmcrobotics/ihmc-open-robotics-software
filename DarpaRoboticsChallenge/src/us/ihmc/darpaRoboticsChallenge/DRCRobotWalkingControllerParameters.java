@@ -306,14 +306,20 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
 
    public double getCaptureKpParallelToMotion()
    {
-      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 1.0; //1.5;
-      return 0.3; 
+      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 1.0;
+      return 1.0; 
    }
 
    public double getCaptureKpOrthogonalToMotion()
    {      
-      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 1.0; //1.5;
-      return 0.3; 
+      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 1.0; 
+      return 1.0; 
+   }
+   
+   public double getCaptureKi()
+   {      
+      if (DRCConfigParameters.USE_VRC_PARAMETERS) return 2.0;
+      return 2.0; 
    }
    
    public double getCaptureFilterBreakFrequencyInHz()
