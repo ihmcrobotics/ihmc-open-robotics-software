@@ -102,21 +102,7 @@ public class ICPProportionalController
       icpPosition.set(capturePoint.getX(), capturePoint.getY(), 0.0);
       icpVelocity.update();
       alphaICPVelocityFeedForward.set(1.0);
-      if (!finalDesiredCapturePoint.containsNaN())
-      {
-         desICPToFinalDesICPVector.setAndChangeFrame(desiredCapturePoint);
-         desICPToFinalDesICPVector.sub(finalDesiredCapturePoint);
-         boolean isDesICPMovingTowardsFinalDesICP = desiredCapturePointVelocity.dot(desICPToFinalDesICPVector) > 0.0;
-         if (!isDesICPMovingTowardsFinalDesICP && desiredCapturePointVelocity.lengthSquared() > 1e-3 && finalDesiredCapturePoint.distance(desiredCapturePoint) > 0.01)
-         {
-            desiredICPToFinalDesiredICPSegment.setAndChangeFrame(finalDesiredCapturePoint, desiredCapturePoint);
-            icpProjected.setAndChangeFrame(capturePoint);
-            desiredICPToFinalDesiredICPSegment.orthogonalProjection(icpProjected);
-
-            double percentageAlongLineSegment = MathTools.clipToMinMax(desiredICPToFinalDesiredICPSegment.percentageAlongLineSegment(icpProjected), 0.0, 1.0);
-            alphaICPVelocityFeedForward.set(percentageAlongLineSegment);
-         }
-      }
+      correctICPFeedForward(capturePoint, desiredCapturePoint, finalDesiredCapturePoint, desiredCapturePointVelocity);
       // feed forward part
       tempControl.setAndChangeFrame(desiredCapturePointVelocity);
       tempControl.scale(alphaICPVelocityFeedForward.getDoubleValue() / omega0);
@@ -204,6 +190,26 @@ public class ICPProportionalController
       rateLimitedCMPOutput.getFramePoint2d(desiredCMP);
       
       return desiredCMP;
+   }
+
+   private void correctICPFeedForward(FramePoint2d capturePoint, FramePoint2d desiredCapturePoint, FramePoint2d finalDesiredCapturePoint,
+         FrameVector2d desiredCapturePointVelocity)
+   {
+      if (!finalDesiredCapturePoint.containsNaN())
+      {
+         desICPToFinalDesICPVector.setAndChangeFrame(desiredCapturePoint);
+         desICPToFinalDesICPVector.sub(finalDesiredCapturePoint);
+         boolean isDesICPMovingTowardsFinalDesICP = desiredCapturePointVelocity.dot(desICPToFinalDesICPVector) > 0.0;
+         if (!isDesICPMovingTowardsFinalDesICP && desiredCapturePointVelocity.lengthSquared() > 1e-3 && finalDesiredCapturePoint.distance(desiredCapturePoint) > 0.01)
+         {
+            desiredICPToFinalDesiredICPSegment.setAndChangeFrame(finalDesiredCapturePoint, desiredCapturePoint);
+            icpProjected.setAndChangeFrame(capturePoint);
+            desiredICPToFinalDesiredICPSegment.orthogonalProjection(icpProjected);
+
+            double percentageAlongLineSegment = MathTools.clipToMinMax(desiredICPToFinalDesiredICPSegment.percentageAlongLineSegment(icpProjected), 0.0, 1.0);
+            alphaICPVelocityFeedForward.set(percentageAlongLineSegment);
+         }
+      }
    }
 
    private void projectIntoSupportPolygonIfOutside(FramePoint2d capturePoint, FramePoint2d desiredCapturePoint, FrameConvexPolygon2d supportPolygon,
