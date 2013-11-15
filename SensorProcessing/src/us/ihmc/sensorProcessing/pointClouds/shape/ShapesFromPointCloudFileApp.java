@@ -36,6 +36,7 @@ import bubo.ptcloud.alg.PointVectorNN;
 import bubo.ptcloud.tools.PointCloudShapeTools;
 import bubo.ptcloud.wrapper.ConfigRemoveFalseShapes;
 import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
+import cern.colt.Arrays;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.RawInputListener;
@@ -75,7 +76,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
    private List<Point3D_F64> ransacCloud;
 
    private Node boundsNode = new Node("meshBounds");
-   private float boxExtent = .01f;
+   private float boxExtent = 5.1f;
    private static Vector3f initialTranslation;
 
    private float translateSpeed = 0.1f;
@@ -115,12 +116,12 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
 
       //String file = "../SensorProcessing/box_10s.txt";
       //initialTranslation= new Vector3f(4.1f, -0.55f, -0.75f);
-      
-      
-      
 
-      String file = "../SensorProcessing/wall.txt";
-      initialTranslation= new Vector3f(2.2372246f, -2.1972656f, 0.12291837f);
+      //String file = "../SensorProcessing/wall.txt";
+      //initialTranslation= new Vector3f(2.2372246f, -2.1972656f, 0.12291837f);
+
+      String file = "../SensorProcessing/ladder_10.txt";
+      initialTranslation = new Vector3f(2.2372246f, -2.1972656f, 0.12291837f);
 
       ShapesFromPointCloudFileApp test1 = new ShapesFromPointCloudFileApp(file);
       test1.start();
@@ -357,6 +358,8 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       {
          public void run()
          {
+            ConfigSurfaceNormals configNormal = new ConfigSurfaceNormals(25, 50, .1);
+
             ApproximateSurfaceNormals surface = new ApproximateSurfaceNormals(configNormal.numPlane, configNormal.maxDistancePlane, configNormal.numNeighbors,
                   configNormal.maxDistanceNeighbor);
 
@@ -372,25 +375,35 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
                //CubeCalibration.nonLinearFitNormal(p);
                //CubeCalibration.weightedLinearFit(p, ExpectationMaximizationFitter.getNormalSingularityError(), 5);
                //scores[i] = CubeCalibration.score(p);
-               scores[i] = PointCloudTools.getAverageError(p);
-
+               //scores[i] = PointCloudTools.getAverageError(p);
+               scores[i] = Math.acos(Math.abs(p.normal.dot(new Vector3D_F64(0,0,1)) / (p.normal.norm())));
+               //if (scores[i] > Math.PI)
+               //   scores[i] -= 2*Math.PI;
+               //scores[i] = Math.abs(scores[i]);
+               
+               
             }
 
             double maxScore = 0;
             for (int i = 0; i < scores.length; i++)
                if (scores[i] > maxScore)
                   maxScore = scores[i];
+            
+            System.out.println(Arrays.toString(scores));
 
-            maxScore = .04;
+            //maxScore = .04;
 
             for (int i = 0; i < scores.length; i++)
                scores[i] /= maxScore;
 
+
+            
             ArrayList<PointVectorNN> subset = new ArrayList<PointVectorNN>();
             ArrayList<ColorRGBA> colorSubset = new ArrayList<ColorRGBA>();
             for (int i = 0; i < scores.length; i++)
             {
-               int c = Color.HSBtoRGB(.7f - .7f * (float) scores[i], 1, 1.0f);
+               int c = Color.HSBtoRGB(.7f * (float) scores[i], 1, 1.0f);
+               //int c = Color.HSBtoRGB(.7f - .7f * (float) scores[i], 1, 1.0f);
                //int c = Color.HSBtoRGB(.7f - .7f*(float)CubeCalibration.filter(normalVectors.get(i), maxScore, .15), 1, 1.0f);
                //int c = Color.HSBtoRGB(CubeCalibration.filter(normalVectors.get(i), maxScore, .1) < .5 ? .7f : 0, 1, 1.0f);
                //int c = Color.HSBtoRGB(scores[i] < .1 ? .7f : 0, 1, 1.0f);
@@ -551,74 +564,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
 
       createObject(first, second, diff);
 
-      //renderShapes(found);
-   }
-
-   private void findStairs(final List<Point3D_F64> fullCloud, final Vector3f clickPoint)
-   {
-      System.err.println("FINDING LOCAL PLANE PLEASE HOLD");
-
-      Thread findLocalPlane = new Thread(new Runnable()
-      {
-         public void run()
-         {
-            Random rand = new Random();
-            Point3D_F64 center = PointCloudTools.vecToPoint(clickPoint);
-
-            CloudShapeTypes shapeTypes[] = new CloudShapeTypes[] { CloudShapeTypes.PLANE };
-
-            ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(20, 0.8, 0.02, shapeTypes);
-            configRansac.randomSeed = rand.nextLong();
-            configRansac.minModelAccept = 25;
-            configRansac.octreeSplit = 25;
-            configRansac.maximumAllowedIterations = 1500;
-            configRansac.ransacExtension = 15;
-
-            ConfigRemoveFalseShapes mergeConfig = new ConfigRemoveFalseShapes(0.7);
-
-            ConfigSurfaceNormals stairNormalsConfig = new ConfigSurfaceNormals(100, 100, .10);
-            //stairNormalsConfig.maxDistancePlane = .1;
-
-            List<Point3D_F64> cloud = PointCloudTools.boundSphere(fullCloud, center, .5);
-            cloud = PointCloudTools.filterByResidual(cloud, stairNormalsConfig, .009);
-
-            PointCloudShapeFinder shapeFinder = FactoryPointCloudShape.ransacOctree(stairNormalsConfig, configRansac, mergeConfig);
-            shapeFinder.process(cloud, null);
-
-            ArrayList<Step> steps = new ArrayList<Step>();
-            for (Shape s : shapeFinder.getFound())
-            {
-               Vector3f[] bounds = new Vector3f[s.points.size()];
-               for (int i = 0; i < bounds.length; i++)
-                  bounds[i] = PointCloudTools.pointToVec(s.points.get(i));
-
-               Point3D_F64 com = PointCloudTools.getCoM(s.points);
-
-               steps.add(new Step(bounds, PointCloudTools.pointToVec(com)));
-            }
-
-            Comparator<Step> zSort = new Comparator<Step>()
-            {
-               public int compare(Step o1, Step o2)
-               {
-                  return o1.com.z > o2.com.z ? 1 : -1;
-               }
-            };
-
-            Collections.sort(steps, zSort);
-            System.out.println(steps);
-
-            Step first = steps.get(0);
-            Step second = steps.get(steps.size() - 1);
-            float diff = steps.size() - 1;
-
-            createObject(first, second, diff);
-
-            renderShapes(shapeFinder.getFound());
-         }
-      });
-
-      findLocalPlane.start();
+      renderShapes(found);
    }
 
    public Vector3f maxInDir(Vector3f[] vectors, Vector3f dir, Vector3f offset, boolean absolute)
@@ -800,22 +746,41 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       configRansac.randomSeed = rand.nextLong();
       configRansac.minModelAccept = 15;
       configRansac.octreeSplit = 25;
-      configRansac.maximumAllowedIterations = 1500;
-      configRansac.ransacExtension = 15;
+      configRansac.maximumAllowedIterations = 250;
+      configRansac.ransacExtension = 25;
 
-      ConfigSurfaceNormals stairNormalsConfig = new ConfigSurfaceNormals(100, 100, .10);
+      ConfigSurfaceNormals stairNormalsConfig = new ConfigSurfaceNormals(25, 50, .1);
 
-      List<Point3D_F64> cloud = PointCloudTools.boundSphere(fullCloud, center, 1.5);
+      long time = System.currentTimeMillis();
+      List<Point3D_F64> cloud = PointCloudTools.boundSphere(fullCloud, center, .3);
+      System.out.println("Bounding time: " + (System.currentTimeMillis() - time) + " size: " + cloud.size());
+
+      time = System.currentTimeMillis();
+      cloud = PointCloudTools.thinCloud(cloud, .01);
+      System.out.println("Thin time: " + (System.currentTimeMillis() - time) + " size: " + cloud.size());
+
+      time = System.currentTimeMillis();
+      cloud = PointCloudTools.filterByNormalOrientation(cloud, stairNormalsConfig, new Vector3D_F64(0, 0, 1), .25);
+      System.out.println("Normal time: " + (System.currentTimeMillis() - time) + " size: " + cloud.size());
+
+      time = System.currentTimeMillis();
       cloud = PointCloudTools.filterByResidual(cloud, stairNormalsConfig, .01);
+      System.out.println("Residual time: " + (System.currentTimeMillis() - time) + " size: " + cloud.size());
 
+      time = System.currentTimeMillis();
       List<Shape> found = PointCloudTools.process(cloud, stairNormalsConfig, configRansac, center, .2);
+      System.out.println("Ransac time: " + (System.currentTimeMillis() - time));
+
+      if (found.size() == 0)
+      {
+         System.out.println("no planes :(");
+         return null;
+      }
 
       Shape plane = found.get(0);
       for (int i = 1; i < found.size(); i++)
          if (found.get(i).points.size() > plane.points.size())
             plane = found.get(i);
-
-      renderShapes(found);
 
       return plane;
    }
@@ -1173,12 +1138,11 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
 
       if (evt.getKeyChar() == 't' && evt.isPressed())
       {
-         findStairs(fullCloud, initialTranslation);
-      }
+         //(1.787225, -2.9972649, 0.3729184)
+         //(2.1872246, -2.9972649, 1.2229183)
 
-      if (evt.getKeyChar() == 'T' && evt.isPressed())
-      {
-         findStairs(fullCloud, new Vector3f(2.7624996f, 6.71209f, -0.80566406f), new Vector3f(2.9711876f, 7.142084f, 0.12207055f));
+         findStairs(fullCloud, new Vector3f(1.787225f, -2.9972649f, 0.3729184f), new Vector3f(2.1872246f, -2.9972649f, 1.2229183f));
+         //findStairs(fullCloud, new Vector3f(2.7624996f, 6.71209f, -0.80566406f), new Vector3f(2.9711876f, 7.142084f, 0.12207055f));
          //(2.7624996, 6.71209, -0.80566406)
          //(2.9161694, 7.173393, 0.12207049)
 
@@ -1203,10 +1167,24 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
             {
                System.out.println("Filter! : " + fullCloud.size());
                List<Point3D_F64> filterCloud = fullCloud;
-               //filterCloud = PointCloudTools.thinCloud(filterCloud, .01);
-               ConfigSurfaceNormals filterNormalsConfig = new ConfigSurfaceNormals(100, 100, .15);
-               filterNormalsConfig.maxDistancePlane = .1;
-               filterCloud = PointCloudTools.filterByResidual(filterCloud, filterNormalsConfig, .01);
+
+               ConfigSurfaceNormals stairNormalsConfig = new ConfigSurfaceNormals(25, 50, .1);
+
+               long time = System.currentTimeMillis();
+               //filterCloud = PointCloudTools.boundSphere(fullCloud, center, 1.5);
+               System.out.println("Bounding time: " + (System.currentTimeMillis() - time) + " size: " + filterCloud.size());
+
+               time = System.currentTimeMillis();
+               filterCloud = PointCloudTools.thinCloud(filterCloud, .01);
+               System.out.println("Thin time: " + (System.currentTimeMillis() - time) + " size: " + filterCloud.size());
+
+               time = System.currentTimeMillis();
+               filterCloud = PointCloudTools.filterByNormalOrientation(filterCloud, stairNormalsConfig, new Vector3D_F64(0, 0, 1), .5);
+               System.out.println("Orient time: " + (System.currentTimeMillis() - time) + " size: " + filterCloud.size());
+
+               time = System.currentTimeMillis();
+               filterCloud = PointCloudTools.filterByResidual(filterCloud, stairNormalsConfig, .015);
+               System.out.println("Residual time: " + (System.currentTimeMillis() - time) + " size: " + filterCloud.size());
 
                final List<Point3D_F64> finalCloud = filterCloud;
 
@@ -1251,6 +1229,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
          public void run()
          {
             Vector3f current = boundsNode.getLocalTranslation();
+            System.out.println(current);
 
             ransacCloud = PointCloudTools.boundCube(fullCloud, new Point3D_F64(current.x, current.y, current.z), boxExtent);
 

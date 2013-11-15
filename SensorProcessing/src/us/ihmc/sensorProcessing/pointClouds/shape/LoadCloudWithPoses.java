@@ -38,7 +38,7 @@ public class LoadCloudWithPoses extends SimpleApplication
 
    public static void main(String[] args)
    {
-      LoadCloudWithPoses test1 = new LoadCloudWithPoses("D:\\AlexLogs\\lidar_dump_1384213072427.txt");
+      LoadCloudWithPoses test1 = new LoadCloudWithPoses("D:\\ladder.txt");
       //LoadCloudWithPoses test1 = new LoadCloudWithPoses("D:\\AlexLogs\\lidar_dump_1384211687790.txt");
       test1.start();
    }
@@ -53,19 +53,19 @@ public class LoadCloudWithPoses extends SimpleApplication
    {
       //REAL
       float crc = -.0010908f;
-      //crc = 0;
+      crc = -.002f;
       LidarScanParameters param = new LidarScanParameters(1081, -2.356194f+crc, 2.356194f+crc, 0, 0, 1, 0, 0, 0, 0, 0, false);
       
       //SCS
       //LidarScanParameters param = new LidarScanParameters(720, -1.570796f, 1.570796f, 0, 0, 1, 0, 0, 0, 0, 0, false);
 
-      List<Point3D_F64>[] clouds = loadPointCloud((int)(40 * 30), param, 1, true);
+      List<Point3D_F64>[] clouds = loadPointCloud((int)(40 * 10), param, 1, true);
 
-      if (false)
+      if (true)
       {
          try
          {
-            FileWriter fw = new FileWriter("box_10s_0_5.txt");
+            FileWriter fw = new FileWriter("ladder_10.txt");
             for (Point3D_F64 p : clouds[0])
             {
                fw.write(p.x + " " + p.y + " " + p.z + "\n");
