@@ -1743,25 +1743,29 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          setOnToesContactState(robotSide);
    }
 
+   private final FrameVector zUp = new FrameVector();
+
    private void setOnToesContactState(RobotSide robotSide)
    {
       // TODO cannot use world or elevator frames with non perfect sensors... some bug to fix obviously
-      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.TOES, new FrameVector(referenceFrames.getAnkleZUpFrame(robotSide), 0.0, 0.0, 1.0));
+      zUp.set(referenceFrames.getAnkleZUpFrame(robotSide), 0.0, 0.0, 1.0);
+      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.TOES, zUp);
    }
 
    private void setTouchdownOnHeelContactState(RobotSide robotSide)
    {
       // TODO cannot use world or elevator frames with non perfect sensors... some bug to fix obviously
-      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.HEEL_TOUCHDOWN, new FrameVector(referenceFrames.getAnkleZUpFrame(robotSide), 0.0, 0.0, 1.0));
+      zUp.set(referenceFrames.getAnkleZUpFrame(robotSide), 0.0, 0.0, 1.0);
+      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.HEEL_TOUCHDOWN, zUp);
    }
 
    private void setTouchdownOnToesContactState(RobotSide robotSide)
    {
       // TODO cannot use world or elevator frames with non perfect sensors... some bug to fix obviously
-      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.TOES_TOUCHDOWN, new FrameVector(referenceFrames.getAnkleZUpFrame(robotSide), 0.0, 0.0, 1.0));
+      zUp.set(referenceFrames.getAnkleZUpFrame(robotSide), 0.0, 0.0, 1.0);
+      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.TOES_TOUCHDOWN, zUp);
    }
 
-   private final FrameVector zWorld = new FrameVector(worldFrame, 0.0, 0.0, 1.0);
    
    private void setFlatFootContactStates()
    {
@@ -1771,7 +1775,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private void setFlatFootContactState(RobotSide robotSide)
    {
-      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.FULL, zWorld);
+      // TODO cannot use world or elevator frames with non perfect sensors... some bug to fix obviously
+      zUp.set(referenceFrames.getAnkleZUpFrame(robotSide), 0.0, 0.0, 1.0);
+      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.FULL, zUp);
    }
 
    private void setContactStateForSwing(RobotSide robotSide)
