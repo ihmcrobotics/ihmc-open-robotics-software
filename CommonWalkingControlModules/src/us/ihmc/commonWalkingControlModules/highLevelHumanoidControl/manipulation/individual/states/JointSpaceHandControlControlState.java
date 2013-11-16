@@ -104,6 +104,7 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
       };
 
       kpAllArmJoints.addVariableChangedListener(listener);
+      zetaAllArmJoints.addVariableChangedListener(listener);
       kdAllArmJoints.addVariableChangedListener(listener);
       
       listener.variableChanged(null);
