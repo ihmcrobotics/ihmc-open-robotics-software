@@ -33,7 +33,8 @@ public class TestYoVariableConnection
       SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new SCSYoVariablesUpdatedListener(bufferSize);
 
       server.start();
-      client = new YoVariableClient("localhost", 1234, scsYoVariablesUpdatedListener, "");
+      boolean showOverheadView = false;
+      client = new YoVariableClient("localhost", 1234, scsYoVariablesUpdatedListener, "", showOverheadView);
       client.start();
       var4.set(5000);
       

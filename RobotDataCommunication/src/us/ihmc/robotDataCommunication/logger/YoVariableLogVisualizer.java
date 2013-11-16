@@ -28,7 +28,7 @@ public class YoVariableLogVisualizer
    private final String timeVariableName;
    private final int bufferSize;
    
-   public YoVariableLogVisualizer(JaxbSDFLoader loader, SDFJointNameMap jointNameMap, String timeVariableName, int bufferSize) throws IOException
+   public YoVariableLogVisualizer(JaxbSDFLoader loader, SDFJointNameMap jointNameMap, String timeVariableName, int bufferSize, boolean showOverheadView) throws IOException
    {
       this.bufferSize = bufferSize;
       this.loader = loader;
@@ -43,7 +43,7 @@ public class YoVariableLogVisualizer
       if(returnValue == JFileChooser.APPROVE_OPTION)
       {
          System.out.println("loading log from folder:" + fileChooser.getSelectedFile());
-         readLogFile(fileChooser.getSelectedFile()); 
+         readLogFile(fileChooser.getSelectedFile(), showOverheadView); 
       }
       else
       {
@@ -73,7 +73,7 @@ public class YoVariableLogVisualizer
       }
    }
 
-   private void readLogFile(File selectedFile) throws IOException
+   private void readLogFile(File selectedFile, boolean showOverheadView) throws IOException
    {
       LogPropertiesReader logProperties = new LogPropertiesReader(new File(selectedFile, YoVariableLoggerListener.propertyFile));
       File handshake = new File(selectedFile, logProperties.getHandshakeFile());
@@ -110,7 +110,7 @@ public class YoVariableLogVisualizer
       
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = parser.getDynamicGraphicObjectsListRegistry();
       dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
-      VisualizerUtils.createOverheadPlotter(dynamicGraphicObjectsListRegistry, scs);
+      VisualizerUtils.createOverheadPlotter(dynamicGraphicObjectsListRegistry, scs, showOverheadView);
       scs.getRootRegistry().addChild(parser.getRootRegistry());
       scs.setGroundVisible(false);
       
