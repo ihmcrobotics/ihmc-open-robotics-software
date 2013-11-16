@@ -6,8 +6,8 @@ public class DRCRobotArmControllerParameters implements ArmControllerParameters
 {
    public double getKpAllArmJoints()
    {
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 120.0;
-      return 20.0; 
+      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 100.0;
+      return 100.0; 
    }
 
    public double getZetaAllArmJoints()
