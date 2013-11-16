@@ -10,7 +10,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 public class VisualizerUtils
 {
 
-   public static void createOverheadPlotter(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, SimulationConstructionSet scs)
+   public static void createOverheadPlotter(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, SimulationConstructionSet scs, boolean showOverheadView)
    {
       SimulationOverheadPlotter plotter = new SimulationOverheadPlotter();
       plotter.setDrawHistory(false);
@@ -19,7 +19,8 @@ public class VisualizerUtils
    
       scs.attachPlaybackListener(plotter);
       JPanel plotterPanel = plotter.getJPanel();
-      scs.addExtraJpanel(plotterPanel, "Plotter");
+      String plotterName = "Plotter";
+      scs.addExtraJpanel(plotterPanel, plotterName);
       JPanel plotterKeyJPanel = plotter.getJPanelKey();
    
       JScrollPane scrollPane = new JScrollPane(plotterKeyJPanel);
@@ -27,6 +28,9 @@ public class VisualizerUtils
       scs.addExtraJpanel(scrollPane, "Plotter Legend");
    
       dynamicGraphicObjectsListRegistry.addArtifactListsToPlotter(plotter.getPlotter());
+      
+      if (showOverheadView)
+         scs.getStandardSimulationGUI().selectPanel(plotterName);
    }
 
 }

@@ -11,9 +11,11 @@ public class YoVariableClient
    private final YoVariableHandshakeClient yoVariableHandshakeClient;
    private final YoVariableChangedProducer yoVariableChangedProducer;
    private final YoVariableConsumer yoVariableConsumer;
+   private final boolean showOverheadView;
    private boolean started = false;
 
-   public YoVariableClient(String host, int port, YoVariablesUpdatedListener listener, String registryPrefix)
+
+   public YoVariableClient(String host, int port, YoVariablesUpdatedListener listener, String registryPrefix, boolean showOverheadView)
    {
       int handshakePort = port;
       int consumerPort = port + 1;
@@ -31,6 +33,8 @@ public class YoVariableClient
          this.yoVariableChangedProducer = null;
       }
       this.listener = listener;
+      
+      this.showOverheadView = showOverheadView;
 
       listener.setYoVariableClient(this);
    }
@@ -57,7 +61,7 @@ public class YoVariableClient
       yoVariableHandshakeClient.connect(timeout);
       listener.setRegistry(yoVariableHandshakeClient.getRootRegistry());
       listener.setJointStates(yoVariableHandshakeClient.getJointStates());
-      listener.registerDynamicGraphicObjectListsRegistry(yoVariableHandshakeClient.getDynamicGraphicObjectsListRegistry());
+      listener.registerDynamicGraphicObjectListsRegistry(yoVariableHandshakeClient.getDynamicGraphicObjectsListRegistry(), showOverheadView);
 
       if(yoVariableChangedProducer != null)
       {

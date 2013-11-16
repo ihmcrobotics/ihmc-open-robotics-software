@@ -18,6 +18,7 @@ public class RemoteAtlasVisualizer
 {
    public static final String defaultHost = DRCLocalConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
    public static final int defaultPort = 5555;
+   private final boolean showOverheadView = DRCLocalConfigParameters.SHOW_OVERHEAD_VIEW;
    
    public RemoteAtlasVisualizer(String host, int port, int bufferSize)
    {
@@ -31,8 +32,10 @@ public class RemoteAtlasVisualizer
 //      SliderBoardFactory sliderBoardFactory = PositionControllerSliderBoard.getFactory();
       
       SliderBoardControllerListener scsYoVariablesUpdatedListener = new SliderBoardControllerListener(robotLoader, jointMap, bufferSize, sliderBoardFactory);
-      scsYoVariablesUpdatedListener.addButton("requestStop", 1.0);    
-      YoVariableClient client = new YoVariableClient(host, port, scsYoVariablesUpdatedListener, "remote");
+      scsYoVariablesUpdatedListener.addButton("requestStop", 1.0);
+      
+      
+      YoVariableClient client = new YoVariableClient(host, port, scsYoVariablesUpdatedListener, "remote", showOverheadView);
       client.start();
    }
 

@@ -35,7 +35,8 @@ public class YoVariableLogger
      
      
       YoVariableLoggerListener logger = new YoVariableLoggerListener(directory, options);
-      client = new YoVariableClient(host, port, logger, "");
+      boolean showOverheadView = false;
+      client = new YoVariableClient(host, port, logger, "", showOverheadView);
       try
       {
          client.start(timeout);

@@ -17,7 +17,7 @@ public interface YoVariablesUpdatedListener
    
    public void setRegistry(YoVariableRegistry registry);
 
-   public void registerDynamicGraphicObjectListsRegistry(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry);
+   public void registerDynamicGraphicObjectListsRegistry(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, boolean showOverheadView);
 
    public void receivedHandshake(YoProtoHandshake handshake);
    
