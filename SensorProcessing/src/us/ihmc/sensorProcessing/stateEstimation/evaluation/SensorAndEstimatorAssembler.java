@@ -189,7 +189,6 @@ public class SensorAndEstimatorAssembler
       return jointSensorDataSource;
    }
 
-
    public void initializeEstimatorToActual(FramePoint initialCoMPosition, FrameOrientation initialEstimationLinkOrientation)
    {
       initialize();
@@ -198,8 +197,9 @@ public class SensorAndEstimatorAssembler
       
       if (useSimplePelvisPositionEstimator)
       {
-         simpleEstimator.setEstimatedCoMPosition(initialCoMPosition);
          orientationStateRobotModelUpdater.initializeOrientionToActual(initialEstimationLinkOrientation);
+         jointStateFullRobotModelUpdater.initialize();
+         simpleEstimator.setEstimatedCoMPosition(initialCoMPosition);
       }
       else
       {
