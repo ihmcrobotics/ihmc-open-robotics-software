@@ -175,26 +175,25 @@ public class DRCSimulationFactory
 
       double gravity = robotInterface.getRobot().getGravityZ();
      
-      //TODO: Can only do this if we have a simulation...
-      Pair<Point3d, Quat4d> initialCoMPositionAndEstimationLinkOrientation = null;
-      if (scsInitialSetup.getInitializeEstimatorToActual())
-      {
-         System.err.println("Warning! Initializing Estimator to Actual!");
-         initialCoMPositionAndEstimationLinkOrientation = getInitialCoMPositionAndEstimationLinkOrientation(robotInitialSetup, simulatedRobot);
-      }
-
       ThreadFactory threadFactory = new NonRealtimeThreadFactory();
       ThreadSynchronizer threadSynchronizer = new BlockingThreadSynchronizer();
 
-      DRCController robotController = new DRCController(initialCoMPositionAndEstimationLinkOrientation, robotInterface.getFullRobotModelFactory(),
-            controllerFactory, sensorReaderFactory, drcOutputWriter, handControllerDispatcher, jointMap, lidarControllerInterface, gravity, estimateDT,
-            controlDT, dataProducer, robotInterface.getTimeStampProvider(), dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry,
-            registry, null, threadFactory, threadSynchronizer);
+      DRCController robotController = new DRCController(robotInterface.getFullRobotModelFactory(), controllerFactory, sensorReaderFactory, drcOutputWriter,
+            handControllerDispatcher, jointMap, lidarControllerInterface, gravity, estimateDT, controlDT, dataProducer, robotInterface.getTimeStampProvider(),
+            dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, registry, null, threadFactory, threadSynchronizer);
       robotController.initialize();
 
       final HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, controller,
             estimationTicksPerControlTick, commonAvatarEnvironmentInterface, simulatedRobot.getAllExternalForcePoints(), robotInitialSetup, scsInitialSetup,
             guiInitialSetup, guiSetterUpperRegistry, dynamicGraphicObjectsListRegistry);
+
+      //TODO: Can only do this if we have a simulation...
+      if (scsInitialSetup.getInitializeEstimatorToActual())
+      {
+         System.err.println("Warning! Initializing Estimator to Actual!");
+         DRCStateEstimator drcStateEstimator = robotController.getDRCStateEstimator();
+         initializeEstimatorToActual(drcStateEstimator, robotInitialSetup, simulatedRobot);
+      }
 
       if (COMPUTE_ESTIMATOR_ERROR && robotController.getDRCStateEstimator() != null)
       {
@@ -254,7 +253,7 @@ public class DRCSimulationFactory
       }
    }
 
-   private static Pair<Point3d, Quat4d> getInitialCoMPositionAndEstimationLinkOrientation(RobotInitialSetup<SDFRobot> robotInitialSetup, SDFRobot simulatedRobot)
+   private static void initializeEstimatorToActual(DRCStateEstimator drcStateEstimator, RobotInitialSetup<SDFRobot> robotInitialSetup, SDFRobot simulatedRobot)
    {
       // The following is to get the initial CoM position from the robot. 
       // It is cheating for now, and we need to move to where the 
@@ -271,7 +270,8 @@ public class DRCSimulationFactory
       Transform3D estimationLinkTransform3D = estimationJoint.getJointTransform3D();
       Quat4d initialEstimationLinkOrientation = new Quat4d();
       estimationLinkTransform3D.get(initialEstimationLinkOrientation);
-      return new Pair<Point3d, Quat4d>(initialCoMPosition, initialEstimationLinkOrientation);
+      
+      drcStateEstimator.initializeEstimatorToActual(initialCoMPosition, initialEstimationLinkOrientation);
    }
 
    private static void updateRobot(Robot robot)

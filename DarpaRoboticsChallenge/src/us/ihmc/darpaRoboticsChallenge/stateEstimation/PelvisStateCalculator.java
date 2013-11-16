@@ -39,6 +39,7 @@ import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFrameVector;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
@@ -58,6 +59,8 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final boolean VISUALIZE = true;
+   
+   private boolean hasEstimatorBeenInitilizedToActual = false;
    
    private final YoFrameVector imuAccelerationInWorld = new YoFrameVector("imuAccelerationInWorld", worldFrame, registry);
    private final YoFrameVector pelvisVelocityByIntegrating = new YoFrameVector("pelvisVelocityByIntegrating", worldFrame, registry);  
@@ -210,9 +213,12 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            DynamicGraphicPosition copInWorld = new DynamicGraphicPosition(robotSide.getCamelCaseNameForStartOfExpression() + "StateEstimatorCoP", copPositionsInWorld.get(robotSide), 0.005, YoAppearance.DeepPink());
+            String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
+            DynamicGraphicPosition copInWorld = new DynamicGraphicPosition(sidePrefix + "StateEstimatorCoP", copPositionsInWorld.get(robotSide), 0.005, YoAppearance.DeepPink());
             dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("StateEstimatorCoP", copInWorld);
             dynamicGraphicObjectsListRegistry.registerArtifact("StateEstimatorCoP", copInWorld.createArtifact());
+            DynamicGraphicVector footToPelvis = new DynamicGraphicVector(sidePrefix + "FootToPelvis", footPositionsInWorld.get(robotSide), footToPelvisPositions.get(robotSide), 1.0, YoAppearance.Blue());
+            dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("footToPelvis", footToPelvis);
          }
       }
    }
@@ -387,6 +393,9 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
 
    private void updatePelvisAccelerationWithIMU()
    {
+      if (linearAccelerationPort == null)
+         return;
+      
       tempIMUAcceleration.set(pelvisFrame, linearAccelerationPort.getData());
       gravityEstimation.update(tempIMUAcceleration.length());
       
@@ -495,7 +504,7 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
       
       for (RobotSide robotSide : RobotSide.values)
       {
-         footToPelvisPositions.get(robotSide).getFramePoint(tempPosition);
+         footToPelvisPositions.get(robotSide).getFramePointAndChangeFrameOfPackedPoint(tempPosition);
          tempPosition.scale(robotSide.negateIfRightSide(1.0));
          tempFrameVector.add(tempPosition);
       }
@@ -683,6 +692,9 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
    public void initializeRobotState()
    {
       reinitialize.set(false);
+      
+      if (hasEstimatorBeenInitilizedToActual)
+         return;
 
       updateKinematics();
       
@@ -793,5 +805,33 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
       {
          linearAccelerationPort = controlFlowOutputPort;
       }
+   }
+
+   @Override
+   public void initializeCoMPositionToActual(FramePoint estimatedCoMPosition)
+   {
+      hasEstimatorBeenInitilizedToActual = true;
+      
+      updateKinematics();
+      
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         footPositionsInWorld.get(robotSide).setToZero();
+         updatePelvisWithKinematics(robotSide, 2);
+      }
+
+      centerOfMassCalculator.compute();
+      centerOfMassCalculator.packCenterOfMass(tempPosition);
+      tempFrameVector.setAndChangeFrame(tempPosition);
+      tempFrameVector.changeFrame(worldFrame);
+
+      pelvisPosition.set(estimatedCoMPosition);
+      pelvisPosition.sub(tempFrameVector);
+
+      pelvisPositionKinematics.set(pelvisPosition);
+      pelvisVelocity.setToZero();
+      
+      for(RobotSide robotSide : RobotSide.values)
+         updateFootPosition(robotSide);
    }
 }
