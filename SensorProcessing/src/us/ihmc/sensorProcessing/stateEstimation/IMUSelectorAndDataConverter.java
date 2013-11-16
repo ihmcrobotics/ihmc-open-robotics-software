@@ -176,4 +176,9 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
       startComputation();
       waitUntilComputationIsDone();
    }
+
+   public void initializeOrientionToActual(FrameOrientation actualOrientation)
+   {
+      orientationOutputPort.setData(actualOrientation);
+   }
 }

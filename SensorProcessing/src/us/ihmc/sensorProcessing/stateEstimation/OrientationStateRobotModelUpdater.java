@@ -182,4 +182,10 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
       startComputation();
       waitUntilComputationIsDone();
    }
+
+   public void initializeOrientionToActual(FrameOrientation actualOrientation)
+   {
+      FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureInputPort.getData();
+      updateRootJointRotation(inverseDynamicsStructure.getRootJoint(), actualOrientation, inverseDynamicsStructure.getEstimationFrame());
+   }
 }

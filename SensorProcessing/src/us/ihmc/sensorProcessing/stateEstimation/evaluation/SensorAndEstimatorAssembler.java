@@ -26,6 +26,8 @@ import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.LinearAccele
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.OrientationSensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.SensorConfigurationFactory;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -37,6 +39,8 @@ public class SensorAndEstimatorAssembler
    private static final boolean VISUALIZE_CONTROL_FLOW_GRAPH = false; //false;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
+   private boolean hasEstimatorBeenInitilizedToActual = false;
+   
    private final ControlFlowGraph controlFlowGraph;
 
    // The following are the elements added to the controlFlowGraph:
@@ -50,6 +54,7 @@ public class SensorAndEstimatorAssembler
    private final IMUSelectorAndDataConverter imuSelectorAndDataConverter;
    
    private final boolean useSimplePelvisPositionEstimator;
+   private final boolean assumePerfectIMU;
 
    public SensorAndEstimatorAssembler(StateEstimationDataFromController stateEstimatorDataFromControllerSource,
          StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorNoiseParameters sensorNoiseParametersForEstimator,
@@ -62,6 +67,7 @@ public class SensorAndEstimatorAssembler
          throw new RuntimeException("ASSUME_PERFECT_IMU should be true if USE_SIMPLE_COM_ESTIMATOR is true.");
       
       this.useSimplePelvisPositionEstimator = useSimplePelvisPositionEstimator;
+      this.assumePerfectIMU = assumePerfectIMU;
       
       this.stateEstimatorDataFromControllerSource = stateEstimatorDataFromControllerSource;
       SensorConfigurationFactory sensorConfigurationFactory = new SensorConfigurationFactory(sensorNoiseParametersForEstimator, gravitationalAcceleration);
@@ -145,6 +151,9 @@ public class SensorAndEstimatorAssembler
 
    public void initialize()
    {
+      if (hasEstimatorBeenInitilizedToActual)
+         return;
+      
       controlFlowGraph.initializeAfterConnections();
       
       if (VISUALIZE_CONTROL_FLOW_GRAPH)
@@ -178,5 +187,31 @@ public class SensorAndEstimatorAssembler
    public JointAndIMUSensorDataSource getJointAndIMUSensorDataSource()
    {
       return jointSensorDataSource;
+   }
+
+
+   public void initializeEstimatorToActual(FramePoint initialCoMPosition, FrameOrientation initialEstimationLinkOrientation)
+   {
+      initialize();
+      hasEstimatorBeenInitilizedToActual = true;
+
+      
+      if (useSimplePelvisPositionEstimator)
+      {
+         simpleEstimator.setEstimatedCoMPosition(initialCoMPosition);
+         orientationStateRobotModelUpdater.initializeOrientionToActual(initialEstimationLinkOrientation);
+      }
+      else
+      {
+         fancyEstimator.setEstimatedCoMPosition(initialCoMPosition);
+         if (assumePerfectIMU)
+         {
+            orientationStateRobotModelUpdater.initializeOrientionToActual(initialEstimationLinkOrientation);
+         }
+         else
+         {
+            fancyEstimator.setEstimatedOrientation(initialEstimationLinkOrientation);
+         }
+      }
    }
 }
