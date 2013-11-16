@@ -8,8 +8,6 @@ import java.util.Map;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
-import org.apache.tools.ant.types.CommandlineJava.SysProperties;
-
 import us.ihmc.atlas.parameters.AtlasJointPDGains;
 import us.ihmc.atlas.visualization.CenterOfPressureVisualizer;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
