@@ -316,6 +316,9 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
 
       StateMachineTools.addRequestedStateTransition(requestedState, false, trustLeftFootState, trustBothFeetState);
       StateMachineTools.addRequestedStateTransition(requestedState, false, trustRightFootState, trustBothFeetState);
+
+      StateMachineTools.addRequestedStateTransition(requestedState, false, trustLeftFootState, trustRightFootState);
+      StateMachineTools.addRequestedStateTransition(requestedState, false, trustRightFootState, trustLeftFootState);
       
       stateMachine.addState(trustBothFeetState);
       stateMachine.addState(trustLeftFootState);
