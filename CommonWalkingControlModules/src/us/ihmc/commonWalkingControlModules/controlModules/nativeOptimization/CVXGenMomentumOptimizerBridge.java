@@ -163,15 +163,13 @@ public class CVXGenMomentumOptimizerBridge
          {
             momentumOptimizerNative.solve(momentumOptimizerNativeInput);
          }
-         catch (NoConvergenceException e)
+         finally
          {
             CVXWithCylinderNativeOutput momentumOptimizerNativeOutput = momentumOptimizerNative.getOutput();
             outputRho = momentumOptimizerNativeOutput.getRho();
             outputPhi = momentumOptimizerNativeOutput.getPhi();
             outputJointAccelerations = momentumOptimizerNativeOutput.getJointAccelerations();
             outputOptVal = momentumOptimizerNativeOutput.getOptVal();
-            
-            throw e;
          }
          break;
       case GRF_SMOOTHER:
@@ -180,15 +178,13 @@ public class CVXGenMomentumOptimizerBridge
          {
             momentumOptimizerWithGRFSmootherNative.solve(momentumOptimizerWithGRFSmootherNativeInput);
          }
-         catch (NoConvergenceException e)
+         finally
          {
             CVXMomentumOptimizerWithGRFSmootherNativeOutput momentumOptimizerWithGRFSmootherNativeOutput = momentumOptimizerWithGRFSmootherNative.getOutput();
             outputRho = momentumOptimizerWithGRFSmootherNativeOutput.getRho();
             outputPhi = momentumOptimizerWithGRFSmootherNativeOutput.getPhi();
             outputJointAccelerations = momentumOptimizerWithGRFSmootherNativeOutput.getJointAccelerations();
             outputOptVal = momentumOptimizerWithGRFSmootherNativeOutput.getOptVal();
-            
-            throw e;
          }
          break;
       default:
