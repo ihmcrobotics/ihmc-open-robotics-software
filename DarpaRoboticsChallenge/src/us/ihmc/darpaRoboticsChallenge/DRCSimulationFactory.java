@@ -271,7 +271,8 @@ public class DRCSimulationFactory
       Quat4d initialEstimationLinkOrientation = new Quat4d();
       estimationLinkTransform3D.get(initialEstimationLinkOrientation);
       
-      drcStateEstimator.initializeEstimatorToActual(initialCoMPosition, initialEstimationLinkOrientation);
+      if (drcStateEstimator != null)
+         drcStateEstimator.initializeEstimatorToActual(initialCoMPosition, initialEstimationLinkOrientation);
    }
 
    private static void updateRobot(Robot robot)
