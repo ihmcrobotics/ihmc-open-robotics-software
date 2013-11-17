@@ -6,28 +6,37 @@ import org.ddogleg.optimization.UnconstrainedLeastSquares;
 public class LinkComID
 {
    ComCopResidual residual;
+
    public LinkComID(ComCopResidual residual)
    {
       this.residual = residual;
    }
 
-   
+
    public void optimize()
    {
-
-      UnconstrainedLeastSquares optimizer = new FactoryOptimization().leastSquaresLM(1e-3, true);
+      new FactoryOptimization();
+      UnconstrainedLeastSquares optimizer = FactoryOptimization.leastSquaresLM(1e-3, true);
       optimizer.setFunction(residual, null);
-      
+
       double[] prm = new double[residual.getN()];
       residual.getCurrentLinkCom().set(prm);
-      
-      optimizer.initialize(prm, 1e-12, 1e-12);
-      
-      for(int i=0;i<5;i++)
+
+      optimizer.initialize(prm, 0, 0);
+      boolean converged;
+
+      int maxIter = 10;
+      for(int i=0;i < maxIter;i++)
       {
-         optimizer.iterate();
+         converged = optimizer.iterate();
          prm = optimizer.getParameters();
-         System.out.println("iter " + i + " obj: "+optimizer.getFunctionValue());
+         System.out.println("iter " + i + " obj: " + optimizer.getFunctionValue() + "converged " + converged);
+         
+         if(optimizer.isConverged())
+            break;
+
       }
+      System.out.println("Optimiztion finished.");
+
    }
 }

@@ -27,6 +27,17 @@ import com.yobotics.simulationconstructionset.DataBuffer;
 import com.yobotics.simulationconstructionset.Link;
 import com.yobotics.simulationconstructionset.Robot;
 
+
+/** Todo
+ * 
+ * @author tingfan
+ *
+ * Ideally this class should cache all the values once loaded from dataBuffer (or some other constructors)
+ * Or there should be an independent class independent from dataBuffer, so we can unittest it;
+ * But the fact Robot model is tie with dataBuffer make it really confusing to do so. 
+ */
+
+
 public class ComCopResidual implements FunctionNtoM
 {
    private Robot robot;
@@ -35,6 +46,13 @@ public class ComCopResidual implements FunctionNtoM
    private int[] selectedFrames;
    
 
+   /**
+    * 
+    * @param robot - the robot model
+    * @param linkName - the link to be ID'ed
+    * @param dataBuffer - scs.getDataBuffer();
+    * @param numSubsampleBetweenInOut: <0 (use keyPoints) >0 (equally spaced between in/out points);
+    */
    public ComCopResidual(Robot robot, String linkName, DataBuffer dataBuffer, int numSubsampleBetweenInOut)
    {
       this.dataBuffer = dataBuffer;
@@ -50,16 +68,29 @@ public class ComCopResidual implements FunctionNtoM
       System.out.println("target link "+ targetLink.getName()+"mass " + targetLink.getMass() + "kg, com " + getCurrentLinkCom());
 
       //select subframes
-      if (numSubsampleBetweenInOut > dataBuffer.getBufferInOutLength())
+      ArrayList<Integer> keyPoints= dataBuffer.getKeyPoints();
+      if(numSubsampleBetweenInOut<0)
       {
-         numSubsampleBetweenInOut = dataBuffer.getBufferInOutLength();
-         System.err.println("truncate numberSubSampleBetweenInOut to dataBufferSize " + dataBuffer.getBufferInOutLength());
+         System.out.println("Using key frames");
+         selectedFrames = new int[keyPoints.size()];
+         for(int i=0;i<keyPoints.size();i++)
+            selectedFrames[i]=keyPoints.get(i);
       }
-      
-      selectedFrames = new int[numSubsampleBetweenInOut];
-      for(int i=0;i<numSubsampleBetweenInOut; i++ )
+      else
       {
-         selectedFrames[i] = (int)Math.floor(i*dataBuffer.getBufferInOutLength()/numSubsampleBetweenInOut);
+         System.out.println("Using equally spaced frames between in/out");
+         if (numSubsampleBetweenInOut > dataBuffer.getBufferInOutLength())
+         {
+            numSubsampleBetweenInOut = dataBuffer.getBufferInOutLength();
+            System.err.println("truncate numberSubSampleBetweenInOut to dataBufferSize " + dataBuffer.getBufferInOutLength());
+         }
+         
+         selectedFrames = new int[numSubsampleBetweenInOut];
+         for(int i=0;i<numSubsampleBetweenInOut; i++ )
+         {
+            selectedFrames[i] = (int)Math.floor(i*dataBuffer.getBufferInOutLength()/numSubsampleBetweenInOut);
+            keyPoints.add(selectedFrames[i]);
+         }
       }
    }
    
@@ -76,9 +107,9 @@ public class ComCopResidual implements FunctionNtoM
       outCop.clear();
       for (int i = 0; i < selectedFrames.length; i++)
       {
-         dataBuffer.setIndex(selectedFrames[i]);
+         dataBuffer.setIndexButDoNotNotifySimulationRewoundListeners(selectedFrames[i]);
          // model predicted CoM
-         robot.update();
+         robot.update(); //this pull data from dataBuffer magically through YoVariables
          Point3d modelCoM = new Point3d();
          robot.computeCenterOfMass(modelCoM);
          outCom.add(modelCoM);
@@ -131,10 +162,10 @@ public class ComCopResidual implements FunctionNtoM
    }
    
    //Plot model-pred - measurement on a 2d graph
-   public void showSample(int numPlotSample)
+   public void showSample(int numPlotSample,String frameTitle)
    {
 
-      Plotter plotter = createPlotter();
+      Plotter plotter = createPlotter(frameTitle);
       // filter out zero velocity region
       int nSamples =getNumSamples();
       ArrayList<Point3d> com = new ArrayList<>(nSamples);
@@ -149,13 +180,17 @@ public class ComCopResidual implements FunctionNtoM
    }
 
    
-   
-   public static Plotter createPlotter()
+   static int plotterPanelId=0;
+   public static Plotter createPlotter(String frameTitle)
    {
       PlotterPanel plotterPanel = new PlotterPanel();
       Plotter plotter = plotterPanel.getPlotter();
       plotter.setRangeLimit(1, 2, -.2, .2, .2, -.2);
-      JFrame f = new JFrame("Plotter Panel");
+      if(frameTitle==null)
+      {
+         frameTitle = "Plotter Panel " + plotterPanelId;
+      }
+      JFrame f = new JFrame(frameTitle);
       f.getContentPane().add(new JScrollPane(plotterPanel), BorderLayout.CENTER);
       f.pack();
       f.setVisible(true);
