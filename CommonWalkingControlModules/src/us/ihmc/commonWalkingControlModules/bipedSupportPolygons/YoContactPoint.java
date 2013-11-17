@@ -30,6 +30,7 @@ public class YoContactPoint extends ContactPoint
 
    public void setInContact(boolean inContact)
    {
+      super.setInContact(inContact);
       isInContact.set(inContact);
    }
 
