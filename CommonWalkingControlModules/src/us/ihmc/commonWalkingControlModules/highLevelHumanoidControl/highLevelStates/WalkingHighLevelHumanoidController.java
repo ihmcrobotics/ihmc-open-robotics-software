@@ -187,7 +187,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final DoubleYoVariable additionalSwingTimeForICP = new DoubleYoVariable("additionalSwingTimeForICP", registry);
 
-   private final YoPositionProvider finalPositionProvider;
+   private final YoPositionProvider swingFootFinalPositionProvider;
 
    private final DoubleYoVariable swingAboveSupportAnkle = new DoubleYoVariable("swingAboveSupportAnkle", registry);
    private final BooleanYoVariable readyToGrabNextFootstep = new BooleanYoVariable("readyToGrabNextFootstep", registry);
@@ -261,7 +261,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          SideDependentList<FootSwitchInterface> footSwitches, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
          CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators,
          WalkOnTheEdgesProviders walkOnTheEdgesProviders, SwingTimeCalculationProvider swingTimeCalculationProvider,
-         TransferTimeCalculationProvider transferTimeCalculationProvider, YoPositionProvider finalPositionProvider,
+         TransferTimeCalculationProvider transferTimeCalculationProvider, YoPositionProvider swingFootFinalPositionProvider,
          TrajectoryParametersProvider trajectoryParametersProvider, double desiredPelvisPitch, WalkingControllerParameters walkingControllerParameters,
          ICPBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule, LidarControllerInterface lidarControllerInterface,
          InstantaneousCapturePointPlanner instantaneousCapturePointPlanner, ICPAndMomentumBasedController icpAndMomentumBasedController,
@@ -351,7 +351,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       this.stateMachine = new StateMachine<WalkingState>(namePrefix + "State", namePrefix + "SwitchTime", WalkingState.class, yoTime, registry);    // this is used by name, and it is ugly.
 
-      this.finalPositionProvider = finalPositionProvider;
+      this.swingFootFinalPositionProvider = swingFootFinalPositionProvider;
 
       this.icpTrajectoryHasBeenInitialized = new BooleanYoVariable("icpTrajectoryHasBeenInitialized", registry);
 
@@ -1124,7 +1124,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             setFlatFootContactState(supportSide);
          }
 
-         finalPositionProvider.set(nextFootstep.getPositionInFrame(worldFrame));
+         swingFootFinalPositionProvider.set(nextFootstep.getPositionInFrame(worldFrame));
 
          SideDependentList<Transform3D> footToWorldTransform = new SideDependentList<Transform3D>();
          for (RobotSide robotSide : RobotSide.values)
@@ -1136,9 +1136,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          Vector3d initialVectorPosition = new Vector3d();
          footToWorldTransform.get(supportSide.getOppositeSide()).get(initialVectorPosition);
          FramePoint initialFramePosition = new FramePoint(worldFrame, initialVectorPosition);
-         FramePoint finalPosition = new FramePoint(worldFrame);
-         finalPositionProvider.get(finalPosition);
-         double stepDistance = initialFramePosition.distance(finalPosition);
+         FramePoint footFinalPosition = new FramePoint(worldFrame);
+         swingFootFinalPositionProvider.get(footFinalPosition);
+         double stepDistance = initialFramePosition.distance(footFinalPosition);
          swingTimeCalculationProvider.setSwingTime(stepDistance);
          transferTimeCalculationProvider.setTransferTime();
 
@@ -1150,7 +1150,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          initialPelvisOrientationProvider.setOrientation(orientation);
 
          FrameOrientation finalPelvisOrientation = nextFootstep.getOrientationInFrame(worldFrame);
-         finalPelvisOrientation.setYawPitchRoll(0.5 * finalPelvisOrientation.getYawPitchRoll()[0] + 0.5 * orientation.getYawPitchRoll()[0], 0.0, 0.0);
+         finalPelvisOrientation.setYawPitchRoll(0.5 * finalPelvisOrientation.getYaw() + 0.5 * orientation.getYaw(), 0.0, 0.0);
          FramePoint swingFootFinalPosition = nextFootstep.getPositionInFrame(referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide()));
          FrameVector supportFootToSwingFoot = new FrameVector(swingFootFinalPosition);
          Vector3d temp = supportFootToSwingFoot.getVectorCopy();
@@ -1160,7 +1160,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             desiredPelvisYawAngle = Math.atan2(temp.y, temp.x);
             desiredPelvisYawAngle -= swingSide.negateIfRightSide(Math.PI/2.0);
          }
-         finalPelvisOrientation.setYawPitchRoll(finalPelvisOrientation.getYawPitchRoll()[0] + userDesiredPelvisYaw.getDoubleValue() * desiredPelvisYawAngle, userDesiredPelvisPitch.getDoubleValue(), userDesiredPelvisRoll.getDoubleValue());
+         finalPelvisOrientation.setYawPitchRoll(finalPelvisOrientation.getYaw() + userDesiredPelvisYaw.getDoubleValue() * desiredPelvisYawAngle, userDesiredPelvisPitch.getDoubleValue(), userDesiredPelvisRoll.getDoubleValue());
          finalPelvisOrientationProvider.setOrientation(finalPelvisOrientation);
          pelvisOrientationTrajectoryGenerator.initialize();
 
