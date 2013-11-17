@@ -1778,7 +1778,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       // TODO cannot use world or elevator frames with non perfect sensors... some bug to fix obviously
       zUp.set(referenceFrames.getAnkleZUpFrame(robotSide), 0.0, 0.0, 1.0);
-      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.FULL, null);
+      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.FULL, zUp);
    }
 
    private void setContactStateForSwing(RobotSide robotSide)
