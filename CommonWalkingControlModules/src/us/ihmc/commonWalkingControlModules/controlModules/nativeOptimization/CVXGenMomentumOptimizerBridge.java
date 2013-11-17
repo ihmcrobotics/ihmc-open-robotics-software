@@ -159,21 +159,37 @@ public class CVXGenMomentumOptimizerBridge
       switch(activeMomentumOptimizer)
       {
       case NO_GRF_SMOOTHER:
-         momentumOptimizerNative.solve(momentumOptimizerNativeInput);
-         CVXWithCylinderNativeOutput momentumOptimizerNativeOutput = momentumOptimizerNative.getOutput();
-         outputRho = momentumOptimizerNativeOutput.getRho();
-         outputPhi = momentumOptimizerNativeOutput.getPhi();
-         outputJointAccelerations = momentumOptimizerNativeOutput.getJointAccelerations();
-         outputOptVal = momentumOptimizerNativeOutput.getOptVal();
+         try
+         {
+            momentumOptimizerNative.solve(momentumOptimizerNativeInput);
+         }
+         catch (NoConvergenceException e)
+         {
+            CVXWithCylinderNativeOutput momentumOptimizerNativeOutput = momentumOptimizerNative.getOutput();
+            outputRho = momentumOptimizerNativeOutput.getRho();
+            outputPhi = momentumOptimizerNativeOutput.getPhi();
+            outputJointAccelerations = momentumOptimizerNativeOutput.getJointAccelerations();
+            outputOptVal = momentumOptimizerNativeOutput.getOptVal();
+            
+            throw e;
+         }
          break;
       case GRF_SMOOTHER:
          rhoPrevious.set(outputRho);
-         momentumOptimizerWithGRFSmootherNative.solve(momentumOptimizerWithGRFSmootherNativeInput);
-         CVXMomentumOptimizerWithGRFSmootherNativeOutput momentumOptimizerWithGRFSmootherNativeOutput = momentumOptimizerWithGRFSmootherNative.getOutput();
-         outputRho = momentumOptimizerWithGRFSmootherNativeOutput.getRho();
-         outputPhi = momentumOptimizerWithGRFSmootherNativeOutput.getPhi();
-         outputJointAccelerations = momentumOptimizerWithGRFSmootherNativeOutput.getJointAccelerations();
-         outputOptVal = momentumOptimizerWithGRFSmootherNativeOutput.getOptVal();
+         try
+         {
+            momentumOptimizerWithGRFSmootherNative.solve(momentumOptimizerWithGRFSmootherNativeInput);
+         }
+         catch (NoConvergenceException e)
+         {
+            CVXMomentumOptimizerWithGRFSmootherNativeOutput momentumOptimizerWithGRFSmootherNativeOutput = momentumOptimizerWithGRFSmootherNative.getOutput();
+            outputRho = momentumOptimizerWithGRFSmootherNativeOutput.getRho();
+            outputPhi = momentumOptimizerWithGRFSmootherNativeOutput.getPhi();
+            outputJointAccelerations = momentumOptimizerWithGRFSmootherNativeOutput.getJointAccelerations();
+            outputOptVal = momentumOptimizerWithGRFSmootherNativeOutput.getOptVal();
+            
+            throw e;
+         }
          break;
       default:
          throw new RuntimeException("Should not get there");
