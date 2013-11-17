@@ -474,7 +474,8 @@ public class DRCDemo01NavigationEnvironment implements
 
 	}
 
-	private void setUpTrialsQuals() {
+	private void setUpTrialsQuals() 
+	{
 		double courseAngleDeg = -45.0;
 		double startDistance = 2.0;
 		AppearanceDefinition color = YoAppearance.Gray();
@@ -489,7 +490,7 @@ public class DRCDemo01NavigationEnvironment implements
 		// Setup Door
 		sectionLength = 1.22; // 4 ft
 		double doorWidth = 0.80; // 32 inches (rounded down to 90cm according to p37 initial task description dims
-		double doorHeight = 2; // 82 inches.
+		double doorHeight = 2.0; // 82 inches.
 		startDistance += sectionLength;
 		point[0] = startDistance;
 		double doorCenter = 0;
@@ -523,12 +524,14 @@ public class DRCDemo01NavigationEnvironment implements
 				Math.abs(doorCenter) * 2 - doorWidth - 2 * borderWidth,
 				doorHeight + borderWidth, 0, courseAngleDeg, color);
 		// setup side walls
-		for (int side = -1; side <= 1; side += 2) {
+		double sideWallHeight = doorHeight/2.0;
+		for (int side = -1; side <= 1; side += 2) 
+		{
 			point[1] = side * (sectionWidth / 2 + borderWidth / 2);
 			rotatedPoint = rotateAroundOrigin(point, courseAngleDeg);
 			setUpSlopedBox(rotatedPoint[0], rotatedPoint[1],
-					(doorHeight + borderWidth) / 2, sectionLength * 2,
-					borderWidth, doorHeight + borderWidth, 0, courseAngleDeg,
+					(sideWallHeight + borderWidth) / 2, sectionLength * 2,
+					borderWidth, sideWallHeight + borderWidth, 0, courseAngleDeg,
 					color);
 		}
 		startDistance += sectionLength;
@@ -538,7 +541,8 @@ public class DRCDemo01NavigationEnvironment implements
 		setUpStraightHurdles(courseAngleDeg, startDistance, new int[] { 6 });
 		// sides to show boundaries, and virtual start and end lines:
 		point[0]=startDistance;
-		for (int side = -1; side <= 1; side += 2) {
+		for (int side = -1; side <= 1; side += 2) 
+		{
 			point[1] = side * (sectionWidth / 2 + borderWidth / 2);
 			point[1] = point[1];
 			rotatedPoint = rotateAroundOrigin(point, courseAngleDeg);
@@ -552,7 +556,8 @@ public class DRCDemo01NavigationEnvironment implements
 		// valve (graphics only)
 //		startDistance += sectionLength;
 
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 1; i++) 
+		{
 			Graphics3DObject linkGraphics = new Graphics3DObject();
 			//Vector3d translation = new Vector3d(-1.0, 0, startDistance);// startDistance);
 			Vector3d translation = new Vector3d(

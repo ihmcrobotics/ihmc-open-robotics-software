@@ -127,7 +127,7 @@ public class DRCConfigParameters
    public static final double POSITION_NOISE_STD = 0.01;
    public static final double QUATERNION_NOISE_STD = 0.01;
    public static final boolean ASSUME_PERFECT_IMU = true;    // assume perfect orientation, angular velocity and linear acceleration output from IMU
-   public static final boolean USE_SIMPLE_PELVIS_POSITION_ESTIMATOR = false; //true;
+   public static final boolean USE_SIMPLE_PELVIS_POSITION_ESTIMATOR = true;
 
    public static final double LIDAR_SPINDLE_VELOCITY = 5.1;
 
