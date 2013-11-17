@@ -24,7 +24,7 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 
 public class DRCObstacleCourseFlatTest
 {
-   private static final boolean KEEP_SCS_UP = false;
+   private static final boolean KEEP_SCS_UP = true;
 
    private static final boolean createMovie = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
@@ -86,6 +86,35 @@ public class DRCObstacleCourseFlatTest
       
       
 //      drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
+      drcSimulationTestHelper.checkNothingChanged();
+
+      assertTrue(success);
+      
+      BambooTools.reportTestFinishedMessage();
+   }
+
+   @Test
+   public void testStandingOnUnevenTerrainForACoupleSeconds() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.TOP_OF_SLOPES;
+      DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, true);
+
+      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
+      
+      Point3d cameraFix = new Point3d(3.25, 3.25, 1.02);
+      Point3d cameraPosition = new Point3d(6.35, 0.18, 0.97);
+      drcSimulationTestHelper.setupCameraForUnitTest(simulationConstructionSet, cameraFix, cameraPosition);
+      
+      setupCameraForWalkingUpToRamp(simulationConstructionSet);
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10.0);
+      
+      
+      drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -168,8 +197,6 @@ public class DRCObstacleCourseFlatTest
       BambooTools.reportTestFinishedMessage();
    }
    
-  
-
 
    private void setupCameraForWalkingUpToRamp(SimulationConstructionSet scs)
    {
