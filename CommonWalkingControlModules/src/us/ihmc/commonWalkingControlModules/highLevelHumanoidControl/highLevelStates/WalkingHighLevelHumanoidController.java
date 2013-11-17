@@ -1150,6 +1150,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          initialPelvisOrientationProvider.setOrientation(orientation);
 
          FrameOrientation finalPelvisOrientation = nextFootstep.getOrientationInFrame(worldFrame);
+         finalPelvisOrientation.setYawPitchRoll(0.5 * finalPelvisOrientation.getYawPitchRoll()[0] + 0.5 * orientation.getYawPitchRoll()[0], 0.0, 0.0);
          FramePoint swingFootFinalPosition = nextFootstep.getPositionInFrame(referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide()));
          FrameVector supportFootToSwingFoot = new FrameVector(swingFootFinalPosition);
          Vector3d temp = supportFootToSwingFoot.getVectorCopy();
@@ -1777,7 +1778,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       // TODO cannot use world or elevator frames with non perfect sensors... some bug to fix obviously
       zUp.set(referenceFrames.getAnkleZUpFrame(robotSide), 0.0, 0.0, 1.0);
-      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.FULL, zUp);
+      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.FULL, null);
    }
 
    private void setContactStateForSwing(RobotSide robotSide)
