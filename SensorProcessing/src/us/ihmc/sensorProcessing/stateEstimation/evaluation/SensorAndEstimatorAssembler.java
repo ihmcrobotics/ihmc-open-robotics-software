@@ -39,8 +39,6 @@ public class SensorAndEstimatorAssembler
    private static final boolean VISUALIZE_CONTROL_FLOW_GRAPH = false; //false;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private boolean hasEstimatorBeenInitilizedToActual = false;
-   
    private final ControlFlowGraph controlFlowGraph;
 
    // The following are the elements added to the controlFlowGraph:
@@ -151,9 +149,6 @@ public class SensorAndEstimatorAssembler
 
    public void initialize()
    {
-      if (hasEstimatorBeenInitilizedToActual)
-         return;
-      
       controlFlowGraph.initializeAfterConnections();
       
       if (VISUALIZE_CONTROL_FLOW_GRAPH)
@@ -191,24 +186,14 @@ public class SensorAndEstimatorAssembler
 
    public void initializeEstimatorToActual(FramePoint initialCoMPosition, FrameOrientation initialEstimationLinkOrientation)
    {
-      initialize();
-      hasEstimatorBeenInitilizedToActual = true;
-
-      
       if (useSimplePelvisPositionEstimator)
       {
-         orientationStateRobotModelUpdater.initializeOrientionToActual(initialEstimationLinkOrientation);
-         jointStateFullRobotModelUpdater.initialize();
          simpleEstimator.setEstimatedCoMPosition(initialCoMPosition);
       }
       else
       {
          fancyEstimator.setEstimatedCoMPosition(initialCoMPosition);
-         if (assumePerfectIMU)
-         {
-            orientationStateRobotModelUpdater.initializeOrientionToActual(initialEstimationLinkOrientation);
-         }
-         else
+         if (!assumePerfectIMU)
          {
             fancyEstimator.setEstimatedOrientation(initialEstimationLinkOrientation);
          }

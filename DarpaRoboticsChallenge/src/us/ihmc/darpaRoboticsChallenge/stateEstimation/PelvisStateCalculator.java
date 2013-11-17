@@ -39,6 +39,7 @@ import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFrameVector;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
@@ -59,7 +60,7 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
 
    private static final boolean VISUALIZE = true;
    
-   private boolean hasEstimatorBeenInitilizedToActual = false;
+   private boolean initializeEstimatorToActual = false;
    
    private final YoFrameVector imuAccelerationInWorld = new YoFrameVector("imuAccelerationInWorld", worldFrame, registry);
    private final YoFrameVector pelvisVelocityByIntegrating = new YoFrameVector("pelvisVelocityByIntegrating", worldFrame, registry);  
@@ -692,20 +693,20 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
    {
       reinitialize.set(false);
       
-      if (hasEstimatorBeenInitilizedToActual)
-         return;
-
       updateKinematics();
-      
-      for(RobotSide robotSide : RobotSide.values)
+
+      if (!initializeEstimatorToActual)
       {
-         footPositionsInWorld.get(robotSide).setToZero();
-         updatePelvisWithKinematics(robotSide, 2);
+         for(RobotSide robotSide : RobotSide.values)
+         {
+            footPositionsInWorld.get(robotSide).setToZero();
+            updatePelvisWithKinematics(robotSide, 2);
+         }
+
+         pelvisPosition.set(pelvisPositionKinematics);
+         pelvisVelocity.set(pelvisVelocityKinematics);
       }
 
-      pelvisPosition.set(pelvisPositionKinematics);
-      pelvisVelocity.set(pelvisVelocityKinematics);
-      
       for(RobotSide robotSide : RobotSide.values)
          updateFootPosition(robotSide);
    }
@@ -809,16 +810,8 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
    @Override
    public void initializeCoMPositionToActual(FramePoint estimatedCoMPosition)
    {
-      hasEstimatorBeenInitilizedToActual = true;
+      initializeEstimatorToActual = true;
       
-      updateKinematics();
-      
-      for(RobotSide robotSide : RobotSide.values)
-      {
-         footPositionsInWorld.get(robotSide).setToZero();
-         updatePelvisWithKinematics(robotSide, 2);
-      }
-
       centerOfMassCalculator.compute();
       centerOfMassCalculator.packCenterOfMass(tempPosition);
       tempFrameVector.setAndChangeFrame(tempPosition);
@@ -829,8 +822,5 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
 
       pelvisPositionKinematics.set(pelvisPosition);
       pelvisVelocity.setToZero();
-      
-      for(RobotSide robotSide : RobotSide.values)
-         updateFootPosition(robotSide);
    }
 }
