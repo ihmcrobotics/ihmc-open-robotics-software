@@ -41,6 +41,11 @@ public class DRCSimulationTestHelper
 
    public DRCSimulationTestHelper(String name, DRCDemo01StartingLocation selectedLocation, DRCEnvironmentModel selectedEnvironment, boolean checkNothingChanged, boolean createMovie)
    {
+      this(name, selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, false);
+   }
+   
+   public DRCSimulationTestHelper(String name, DRCDemo01StartingLocation selectedLocation, DRCEnvironmentModel selectedEnvironment, boolean checkNothingChanged, boolean createMovie, boolean createLoadOfContactPointForTheFeet)
+   {
       networkObjectCommunicator = new ScriptedFootstepDataListObjectCommunicator("Team");
 
       this.checkNothingChanged = checkNothingChanged;
@@ -53,7 +58,7 @@ public class DRCSimulationTestHelper
       boolean initializeEstimatorToActual = true;
       
       drcSimulation = DRCDemo01.startDRCSim(networkObjectCommunicator, selectedLocation, selectedEnvironment, initializeEstimatorToActual,
-            startOutsidePen, automaticallyStartSimulation, startDRCNetworkProcessor);
+            startOutsidePen, automaticallyStartSimulation, startDRCNetworkProcessor, createLoadOfContactPointForTheFeet);
 
       blockingSimulationRunner = new BlockingSimulationRunner(drcSimulation.getSimulationConstructionSet(), 60.0 * 10.0);
 

@@ -452,8 +452,8 @@ public class DRCFlatGroundWalkingTest
       int simulationDataBufferSize = 16000;
 
       RobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(0.0);
-      DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel, false);
-      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotInterface.getSimulateDT());
+      DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel, false, true);
+      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotInterface.getSimulateDT(), true);
       scsInitialSetup.setDrawGroundProfile(drawGroundProfile);
       
       if (cheatWithGroundHeightAtForFootstep)
