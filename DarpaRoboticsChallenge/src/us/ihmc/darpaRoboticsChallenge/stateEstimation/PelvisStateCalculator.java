@@ -59,8 +59,6 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
 
    private static final boolean VISUALIZE = true;
    
-   private boolean initializeEstimatorToActual = false;
-   
    private final YoFrameVector imuAccelerationInWorld = new YoFrameVector("imuAccelerationInWorld", worldFrame, registry);
    private final YoFrameVector pelvisVelocityByIntegrating = new YoFrameVector("pelvisVelocityByIntegrating", worldFrame, registry);  
 
@@ -307,6 +305,33 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
       slippageCompensatorMode.set(SlippageCompensatorMode.LOAD_THRESHOLD);
       
       initializeRobotState();
+   }
+
+   public void initializeRobotState()
+   {
+      reinitialize.set(false);
+      
+      updateKinematics();
+
+      centerOfMassCalculator.compute();
+      centerOfMassCalculator.packCenterOfMass(tempPosition);
+      tempFrameVector.setAndChangeFrame(tempPosition);
+      tempFrameVector.changeFrame(worldFrame);
+
+      pelvisPosition.set(centerOfMassPosition);
+      pelvisPosition.sub(tempFrameVector);
+
+      pelvisPositionKinematics.set(pelvisPosition);
+      pelvisVelocity.setToZero();
+      
+      for(RobotSide robotSide : RobotSide.values)
+         updateFootPosition(robotSide);
+   }
+
+   @Override
+   public void initializeCoMPositionToActual(FramePoint estimatedCoMPosition)
+   {
+      centerOfMassPosition.set(estimatedCoMPosition);
    }
    
    @SuppressWarnings("unchecked")
@@ -688,28 +713,6 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
       updateCoMState();
    }
    
-   public void initializeRobotState()
-   {
-      reinitialize.set(false);
-      
-      updateKinematics();
-
-      if (!initializeEstimatorToActual)
-      {
-         for(RobotSide robotSide : RobotSide.values)
-         {
-            footPositionsInWorld.get(robotSide).setToZero();
-            updatePelvisWithKinematics(robotSide, 2);
-         }
-
-         pelvisPosition.set(pelvisPositionKinematics);
-         pelvisVelocity.set(pelvisVelocityKinematics);
-      }
-
-      for(RobotSide robotSide : RobotSide.values)
-         updateFootPosition(robotSide);
-   }
-
    private final FrameVector tempIMUAcceleration = new FrameVector();
    private final FrameVector tempPelvisVelocityIntegrated = new FrameVector();
    private final FrameVector tempEstimatedVelocityIMUPart = new FrameVector();
@@ -804,22 +807,5 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
       {
          linearAccelerationPort = controlFlowOutputPort;
       }
-   }
-
-   @Override
-   public void initializeCoMPositionToActual(FramePoint estimatedCoMPosition)
-   {
-      initializeEstimatorToActual = true;
-      
-      centerOfMassCalculator.compute();
-      centerOfMassCalculator.packCenterOfMass(tempPosition);
-      tempFrameVector.setAndChangeFrame(tempPosition);
-      tempFrameVector.changeFrame(worldFrame);
-
-      pelvisPosition.set(estimatedCoMPosition);
-      pelvisPosition.sub(tempFrameVector);
-
-      pelvisPositionKinematics.set(pelvisPosition);
-      pelvisVelocity.setToZero();
    }
 }
