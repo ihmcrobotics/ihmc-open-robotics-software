@@ -104,7 +104,7 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
       for (PlaneContactState contactState : this.planeContactStates)
       {
          EndEffector endEffector = EndEffector.fromPlane("" + planeContactIndex.getIntegerValue(), this.centerOfMassFrame, contactState,
-               this.wRhoPlaneContacts.getDoubleValue(), rhoMinScalar.getDoubleValue(), registry);;
+               this.wRhoPlaneContacts.getDoubleValue(), rhoMinScalar.getDoubleValue(), registry);
          planeEndEffector.add(endEffector);
          allEndEffectors.add(endEffector);
          registerEndEffectorGraphic(endEffector);
