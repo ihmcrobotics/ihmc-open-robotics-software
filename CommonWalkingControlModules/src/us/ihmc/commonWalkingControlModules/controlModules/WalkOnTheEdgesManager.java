@@ -112,7 +112,7 @@ public class WalkOnTheEdgesManager
 
       extraCoMMaxHeightWithToes.set(0.07);
 
-      minStepLengthForToeOff.set(0.40);
+      minStepLengthForToeOff.set(0.10);
       minStepHeightForToeOff.set(0.10);
 
       minStepLengthForToeTouchdown.set(0.40);
