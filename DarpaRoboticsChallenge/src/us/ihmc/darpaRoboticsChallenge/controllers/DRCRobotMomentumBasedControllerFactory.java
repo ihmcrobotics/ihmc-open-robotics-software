@@ -49,17 +49,18 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 {
    private final HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory;
-   private final boolean useGazeboPhysics;
-
+   private final double contactTresholdForce;
+   
    public DRCRobotMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory)
    {
-      this(highLevelHumanoidControllerFactory, false);
+      this.highLevelHumanoidControllerFactory = highLevelHumanoidControllerFactory;
+      this.contactTresholdForce = DRCConfigParameters.contactTresholdForceForSCS;
    }
-
-   public DRCRobotMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory, boolean useGazeboPhysics)
+   
+   public DRCRobotMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory, double contactTresholdForce)
    {
       this.highLevelHumanoidControllerFactory = highLevelHumanoidControllerFactory;
-      this.useGazeboPhysics = useGazeboPhysics;
+      this.contactTresholdForce = contactTresholdForce;
    }
    int tick = 0;
 
@@ -156,7 +157,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       {
          ForceSensorData footForceSensor = forceSensorDataHolder.getByName(robotSide.getShortLowerCaseName() + "_leg_akx");
          WrenchBasedFootSwitch wrenchBasedFootSwitch = new WrenchBasedFootSwitch(bipedFeet.get(robotSide).getName(), footForceSensor, 0.02, totalRobotWeight, bipedFeet.get(robotSide),
-                                                          dynamicGraphicObjectsListRegistry, useGazeboPhysics, registry);
+                                                          dynamicGraphicObjectsListRegistry, contactTresholdForce, registry);
          footSwitches.put(robotSide, wrenchBasedFootSwitch);
       }
 
