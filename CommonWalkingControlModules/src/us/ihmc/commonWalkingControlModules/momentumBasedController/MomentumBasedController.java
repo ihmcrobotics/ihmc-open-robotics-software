@@ -603,6 +603,12 @@ public class MomentumBasedController
       yoPlaneContactState.setCoefficientOfFriction(coefficientOfFriction);
    }
 
+   public void setPlaneContactStateNormalContactVector(ContactablePlaneBody contactableBody, FrameVector normalContactVector)
+   {
+      YoPlaneContactState yoPlaneContactState = yoPlaneContactStates.get(contactableBody);
+      yoPlaneContactState.setContactNormalVector(normalContactVector);
+   }
+
    public void setPlaneContactState(ContactablePlaneBody contactableBody, boolean[] newContactPointStates)
    {
       YoPlaneContactState yoPlaneContactState = yoPlaneContactStates.get(contactableBody);
