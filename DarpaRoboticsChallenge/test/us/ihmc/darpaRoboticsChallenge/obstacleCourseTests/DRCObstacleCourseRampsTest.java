@@ -198,7 +198,7 @@ public class DRCObstacleCourseRampsTest
    private void setupCameraForWalkingOverRamp(SimulationConstructionSet scs)
    {
       Point3d cameraFix = new Point3d(5.0, -0.2, 0.89);
-      Point3d cameraPosition = new Point3d(5.0, -7.8, 1.6);
+      Point3d cameraPosition = new Point3d(5.0, 7.8, 1.6);
 
       drcSimulationTestHelper.setupCameraForUnitTest(scs, cameraFix, cameraPosition);
    }
