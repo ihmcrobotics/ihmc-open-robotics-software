@@ -105,53 +105,8 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
 		}
       this.wRho = wRho;
       this.rhoMin = rhoMin;
-      
-//      setupOld(plane, wRho, rhoMin);
 	}
 
-   public void setupOld(PlaneContactState plane, double wRho, double rhoMin)
-   {
-      this.mu = plane.getCoefficientOfFriction();
-      numberOfPointsInContact = plane.getNumberOfContactPointsInContact();
-      plane.getContactNormalFrameVector(tempContactNormalVector);
-      ReferenceFrame contactFrame = tempContactNormalVector.getReferenceFrame();
-
-      if (numberOfPointsInContact > MAXPOINTS)
-      {
-         throw new RuntimeException("Unhandled number of contact points: " + numberOfPointsInContact);
-      }
-
-      int i = -1;
-
-      for (ContactPoint contactPoint : plane.getContactPoints())
-      {
-         if (!contactPoint.isInContact())
-            continue;
-
-         i++;
-
-         tempFramePoint.setAndChangeFrame(contactPoint.getPosition());
-         tempFramePoint.changeFrame(contactFrame);
-
-         for (int j = 0; j < VECTORS; j++)
-         {
-            int rhoPosition = i * VECTORS + j;
-
-            double angle = j*ANGLE_INCREMENT;
-            tempLinearPart.set(Math.cos(angle)*mu, Math.sin(angle)*mu, 1);
-            tempLinearPart.normalize();
-
-            tempArm.set(tempFramePoint.getX(), tempFramePoint.getY(), 0.0);
-            tempForceVector.setUsingArm(tempFramePoint.getReferenceFrame(), tempLinearPart, tempArm);            
-            tempForceVector.changeFrame(plane.getFrameAfterParentJoint());
-
-            tempForceVector.packMatrix(rhoQ[rhoPosition]);
-         }
-      }
-      this.wRho = wRho;
-      this.rhoMin = rhoMin;
-   }
-   
 	@Deprecated
 	public void setup(double coefficientOfFriction, List<FramePoint> contactPoints, FrameVector normalContactVector, ReferenceFrame endEffectorFrame, double wRho, double rhoMin)
 	{
