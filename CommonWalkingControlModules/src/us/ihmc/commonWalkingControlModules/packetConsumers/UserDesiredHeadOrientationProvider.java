@@ -8,7 +8,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class UserDesiredHeadOrientationProvider extends DesiredHeadOrientationProvider
 {
-   private final DoubleYoVariable userDesiredHeadPitch, userDesiredHeadYaw;
+   private final DoubleYoVariable userDesiredHeadPitch, userDesiredHeadYaw, userDesiredNeckPitch;
    private final ReferenceFrame headOrientationFrame;
    
    public UserDesiredHeadOrientationProvider(ReferenceFrame headOrientationFrame, YoVariableRegistry registry)
@@ -19,6 +19,8 @@ public class UserDesiredHeadOrientationProvider extends DesiredHeadOrientationPr
       
       userDesiredHeadPitch = new DoubleYoVariable("userDesiredHeadPitch", registry);
       userDesiredHeadYaw = new DoubleYoVariable("userDesiredHeadYaw", registry);
+      userDesiredNeckPitch = new DoubleYoVariable("userDesiredNeckPitch", registry);
+
    }
 
    public double getDesiredExtendedNeckPitchJointAngle()
@@ -33,7 +35,7 @@ public class UserDesiredHeadOrientationProvider extends DesiredHeadOrientationPr
 
    public FrameOrientation getDesiredHeadOrientation()
    {      
-      FrameOrientation frameOrientation = new FrameOrientation(headOrientationFrame, userDesiredHeadYaw.getDoubleValue(), 0.0, 0.0);
+      FrameOrientation frameOrientation = new FrameOrientation(headOrientationFrame, userDesiredHeadYaw.getDoubleValue(), userDesiredNeckPitch.getDoubleValue(), 0.0);
       return frameOrientation;
    }
 }

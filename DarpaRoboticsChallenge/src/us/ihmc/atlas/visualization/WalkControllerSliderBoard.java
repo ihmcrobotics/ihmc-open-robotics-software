@@ -64,6 +64,8 @@ public class WalkControllerSliderBoard
       sliderBoardConfigurationManager.setSlider(5, "userDesiredPelvisRoll", registry, -0.3, 0.3);
 
       sliderBoardConfigurationManager.setSlider(6, "userDesiredHeadPitch", registry, -0.5, 0.5);
+      sliderBoardConfigurationManager.setKnob(6, "userDesiredNeckPitch", registry, -0.8, 0.8);
+      
       sliderBoardConfigurationManager.setSlider(7, "userDesiredHeadYaw", registry, -0.8, 0.8);
       sliderBoardConfigurationManager.setSlider(8, "offsetHeightAboveGround", registry, 0.0, 0.20);
 
