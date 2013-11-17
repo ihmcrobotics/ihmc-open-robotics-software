@@ -129,8 +129,7 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    
    public boolean doToeOffIfPossible()
    {
-//      return true; 
-      return false; //TODO: JEP. Changed to false for now so we can walk down into the mud reliably without falling.
+      return true; 
    }
 
    public boolean doToeTouchdownIfPossible()
