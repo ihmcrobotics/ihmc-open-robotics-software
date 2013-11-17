@@ -104,7 +104,7 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
 			}
 		}
       this.wRho = wRho;
-      this.rhoMin = rhoMin;
+//      this.rhoMin = rhoMin;
 	}
 
 	@Deprecated
