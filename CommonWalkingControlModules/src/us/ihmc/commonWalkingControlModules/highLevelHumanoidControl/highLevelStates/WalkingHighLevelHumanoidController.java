@@ -1744,27 +1744,21 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          setOnToesContactState(robotSide);
    }
 
-   private final FrameVector zUp = new FrameVector();
+   private final FrameVector zWorld = new FrameVector(worldFrame, 0.0, 0.0, 1.0);
 
    private void setOnToesContactState(RobotSide robotSide)
    {
-      // TODO cannot use world or elevator frames with non perfect sensors... some bug to fix obviously
-      zUp.set(referenceFrames.getAnkleZUpFrame(robotSide), 0.0, 0.0, 1.0);
-      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.TOES, zUp);
+      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.TOES, null);
    }
 
    private void setTouchdownOnHeelContactState(RobotSide robotSide)
    {
-      // TODO cannot use world or elevator frames with non perfect sensors... some bug to fix obviously
-      zUp.set(referenceFrames.getAnkleZUpFrame(robotSide), 0.0, 0.0, 1.0);
-      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.HEEL_TOUCHDOWN, zUp);
+      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.HEEL_TOUCHDOWN, zWorld);
    }
 
    private void setTouchdownOnToesContactState(RobotSide robotSide)
    {
-      // TODO cannot use world or elevator frames with non perfect sensors... some bug to fix obviously
-      zUp.set(referenceFrames.getAnkleZUpFrame(robotSide), 0.0, 0.0, 1.0);
-      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.TOES_TOUCHDOWN, zUp);
+      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.TOES_TOUCHDOWN, zWorld);
    }
 
    
@@ -1776,9 +1770,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private void setFlatFootContactState(RobotSide robotSide)
    {
-      // TODO cannot use world or elevator frames with non perfect sensors... some bug to fix obviously
-      zUp.set(referenceFrames.getAnkleZUpFrame(robotSide), 0.0, 0.0, 1.0);
-      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.FULL, null); //zUp);
+      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.FULL, zWorld);
    }
 
    private void setContactStateForSwing(RobotSide robotSide)
