@@ -27,14 +27,14 @@ public class YoVariableLogVisualizer
    private final SDFJointNameMap jointNameMap;
    private final String timeVariableName;
    private final int bufferSize;
-   
+   protected final SimulationConstructionSet scs;
    public YoVariableLogVisualizer(JaxbSDFLoader loader, SDFJointNameMap jointNameMap, String timeVariableName, int bufferSize, boolean showOverheadView) throws IOException
    {
       this.bufferSize = bufferSize;
       this.loader = loader;
       this.jointNameMap = jointNameMap;
       this.timeVariableName = timeVariableName;
-      
+
       final JFileChooser fileChooser = new JFileChooser(new File(YoVariableLoggerOptions.defaultLogDirectory));
       sortByDateHack(fileChooser);  
       
@@ -43,10 +43,12 @@ public class YoVariableLogVisualizer
       if(returnValue == JFileChooser.APPROVE_OPTION)
       {
          System.out.println("loading log from folder:" + fileChooser.getSelectedFile());
+         scs= new SimulationConstructionSet(true, bufferSize);
          readLogFile(fileChooser.getSelectedFile(), showOverheadView); 
       }
       else
       {
+         scs=null;
          System.err.println("No file selected, closing.");
       }
       
@@ -99,7 +101,6 @@ public class YoVariableLogVisualizer
       final FileChannel logChannel = new FileInputStream(logdata).getChannel();
       
       
-      SimulationConstructionSet scs = new SimulationConstructionSet(true, bufferSize);
       scs.setTimeVariableName(timeVariableName);
       YoVariableLogPlaybackRobot robot = new YoVariableLogPlaybackRobot(loader.getGeneralizedSDFRobotModel(jointNameMap.getModelName()),jointNameMap, parser.getJointStates(), parser.getYoVariablesList(), logChannel, scs);
       
@@ -134,9 +135,10 @@ public class YoVariableLogVisualizer
       
       scs.getJFrame().setTitle(this.getClass().getSimpleName() + " - " + selectedFile);
       scs.getStandardSimulationGUI().addJComponentToMainPanel( new YoVariableLogVisualizerGUI(players, robot, yoVariableLogCropper, scs), BorderLayout.SOUTH);
-      
-      new Thread(scs).start();
    }
    
-   
+   public void run()
+   {
+      new Thread(scs).start();
+   }
 }
