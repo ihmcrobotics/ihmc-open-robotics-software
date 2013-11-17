@@ -261,4 +261,8 @@ public class DRCConfigParameters
    public static final double pointPositionXYMeasurementStandardDeviation = 0.1;    // 0.4; //0.1;
    public static final double pointPositionZMeasurementStandardDeviation = 0.1;    // 0.4; //0.1;
 
+   public static final double contactTresholdForceForSCS = 5.0;
+   public static final double contactTresholdForceForGazebo = 120.0;
+   public static final double contactTresholdForceForRealAtlasRobot = 120.0;
+
 }
