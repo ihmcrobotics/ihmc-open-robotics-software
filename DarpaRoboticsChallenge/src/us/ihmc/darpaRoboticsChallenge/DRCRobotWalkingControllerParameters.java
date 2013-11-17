@@ -366,13 +366,13 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
 
    public double getMaxAccelerationPelvisOrientation()
    {
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return Double.POSITIVE_INFINITY; //12.0;
+      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 18.0;
       return 12.0; 
    }
 
    public double getMaxJerkPelvisOrientation()
    {
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return Double.POSITIVE_INFINITY; //180.0;
+      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 270.0;
       return 180.0; 
    }
 
