@@ -1744,21 +1744,34 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          setOnToesContactState(robotSide);
    }
 
-   private final FrameVector zWorld = new FrameVector(worldFrame, 0.0, 0.0, 1.0);
+   private final FrameVector footNormalContactVector = new FrameVector(worldFrame, 0.0, 0.0, 1.0);
 
    private void setOnToesContactState(RobotSide robotSide)
    {
-      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.TOES, null);
+      EndEffectorControlModule footEndEffectorControlModule = footEndEffectorControlModules.get(robotSide);
+      if (footEndEffectorControlModule.getCurrentConstraintType() == ConstraintType.HOLD_POSITION || footEndEffectorControlModule.getCurrentConstraintType() == ConstraintType.FULL)
+      {
+         footNormalContactVector.set(feet.get(robotSide).getPlaneFrame(), 0.0, 0.0, 1.0);
+         footNormalContactVector.changeFrame(worldFrame);
+      }
+      else
+      {
+         footNormalContactVector.set(worldFrame, 0.0, 0.0, 1.0);
+      }
+         
+      footEndEffectorControlModule.setContactState(ConstraintType.TOES, footNormalContactVector);
    }
 
    private void setTouchdownOnHeelContactState(RobotSide robotSide)
    {
-      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.HEEL_TOUCHDOWN, zWorld);
+      footNormalContactVector.set(worldFrame, 0.0, 0.0, 1.0);
+      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.HEEL_TOUCHDOWN, footNormalContactVector);
    }
 
    private void setTouchdownOnToesContactState(RobotSide robotSide)
    {
-      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.TOES_TOUCHDOWN, zWorld);
+      footNormalContactVector.set(worldFrame, 0.0, 0.0, 1.0);
+      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.TOES_TOUCHDOWN, footNormalContactVector);
    }
 
    
@@ -1770,7 +1783,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private void setFlatFootContactState(RobotSide robotSide)
    {
-      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.FULL, zWorld);
+      footNormalContactVector.set(feet.get(robotSide).getPlaneFrame(), 0.0, 0.0, 1.0);
+      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.FULL, footNormalContactVector);
    }
 
    private void setContactStateForSwing(RobotSide robotSide)
