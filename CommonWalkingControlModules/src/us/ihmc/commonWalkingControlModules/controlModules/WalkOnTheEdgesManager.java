@@ -38,6 +38,7 @@ public class WalkOnTheEdgesManager
    
    // TODO it would be nice to use toe touchdown for side steps, but it requires too often an unreachable orientation of the foot resulting in unstable behaviors
    private static final boolean DO_TOE_TOUCHDOWN_ONLY_WHEN_STEPPING_DOWN = true;
+   private static final boolean DO_TOEOFF_FOR_SIDE_STEPS = false;
 
    public enum SwitchToToeOffMethods
    {
@@ -136,8 +137,8 @@ public class WalkOnTheEdgesManager
       ContactablePlaneBody trailingFoot = feet.get(trailingLeg);
       ContactablePlaneBody leadingFoot = feet.get(trailingLeg.getOppositeSide());
       FrameConvexPolygon2d OnToesSupportPolygon = getOnToesSupportPolygonCopy(trailingFoot, leadingFoot);
-      isDesiredECMPOKForToeOff.set(Math.abs(OnToesSupportPolygon.distance(desiredECMP)) < 0.06);
-      //    isDesiredCMPOKForToeOff.set(OnToesSupportPolygon.isPointInside(desiredECMP));
+//      isDesiredECMPOKForToeOff.set(Math.abs(OnToesSupportPolygon.distance(desiredECMP)) < 0.06);
+      isDesiredECMPOKForToeOff.set(OnToesSupportPolygon.isPointInside(desiredECMP));
 
       if (!isDesiredECMPOKForToeOff.getBooleanValue())
       {
@@ -226,6 +227,10 @@ public class WalkOnTheEdgesManager
 
       boolean isForwardOrSideStepping = tempLeadingFootPosition.getX() > -0.05;
       if (!isForwardOrSideStepping)
+         return false;
+      
+      boolean isSideStepping = Math.abs(Math.atan2(tempLeadingFootPosition.getY(), tempLeadingFootPosition.getX())) > Math.toRadians(45.0);
+      if (isSideStepping && !DO_TOEOFF_FOR_SIDE_STEPS)
          return false;
 
       boolean isStepLongEnough = tempLeadingFootPosition.distance(tempTrailingFootPosition) > minStepLengthForToeOff.getDoubleValue();
@@ -464,8 +469,6 @@ public class WalkOnTheEdgesManager
       isDesiredICPOKForToeOff.set(false);
       
       doToeOff.set(false);
-      doToeTouchdown.set(false);
-      doHeelTouchdown.set(false);
    }
 
    private FrameConvexPolygon2d getOnToesTriangleCopy(FramePoint2d finalDesiredICP, ContactablePlaneBody supportFoot)
