@@ -38,10 +38,14 @@ public class NewDRCDashboard
       c.gridy++;
       dropListPanel.add(new DragAndDropTreePanel("Empty Panel:", sshSimLauncher), c);
       
+      c.fill = GridBagConstraints.HORIZONTAL;
+      c.weightx = 1.0;
       c.gridx = 0;
       c.gridy = 0;
       panel.add(taskSelectionPanel, c);
       
+      c.weightx = 0;
+//      c.weighty = 1;
       c.gridy = 1;
       panel.add(cloudListPanel, c);
       
@@ -51,7 +55,7 @@ public class NewDRCDashboard
       frame.add(panel);
       
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      frame.setMinimumSize(new Dimension(800, 600));
+      frame.setMinimumSize(new Dimension(800, 650));
       frame.setVisible(true);
    }
 
