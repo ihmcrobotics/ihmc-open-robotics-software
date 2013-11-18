@@ -1,13 +1,9 @@
 package us.ihmc.robotDataCommunication;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-
-import javax.vecmath.Color3f;
-
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.yobotics.simulationconstructionset.*;
+import com.yobotics.simulationconstructionset.util.graphics.*;
+import com.yobotics.simulationconstructionset.util.graphics.RemoteDynamicGraphic.RemoteGraphicType;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.plotting.Artifact;
@@ -19,22 +15,12 @@ import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHan
 import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.utilities.dynamicClassLoader.DynamicEnumCreator;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.EnumYoVariable;
-import com.yobotics.simulationconstructionset.IntegerYoVariable;
-import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.LongYoVariable;
-import com.yobotics.simulationconstructionset.YoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicFactory;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.RemoteDynamicGraphic;
-import com.yobotics.simulationconstructionset.util.graphics.RemoteDynamicGraphic.RemoteGraphicType;
+import javax.vecmath.Color3f;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
 public class YoVariableHandshakeParser
 {
@@ -46,7 +32,7 @@ public class YoVariableHandshakeParser
    private final ArrayList<YoVariableRegistry> registries = new ArrayList<YoVariableRegistry>();
    private final ArrayList<YoVariable> variables = new ArrayList<YoVariable>();
    private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
-   private final ArrayList<JointState<?>> jointStates = new ArrayList<JointState<?>>();
+   private final ArrayList<JointState<? extends Joint>> jointStates = new ArrayList<>();
    private final DynamicEnumCreator dynamicEnumCreator = new DynamicEnumCreator();
 
    private final YoVariablesUpdatedListener listener;
