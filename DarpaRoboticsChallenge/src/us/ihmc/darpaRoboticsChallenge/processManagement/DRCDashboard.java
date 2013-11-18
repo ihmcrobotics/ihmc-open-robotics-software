@@ -519,7 +519,7 @@ public class DRCDashboard
          if (!isMachineExcluded(machine))
          {
             DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("<html><body style=\"font-weight:bold;font-size:1.1em;\">"
-                                                 + WordUtils.capitalize(machine.toString().toLowerCase().replace("_", " ")) + "</body></html>");
+                                                 + WordUtils.capitalize(machine.toShortString().toLowerCase().replace("_", " ")) + "</body></html>");
             rootNode.add(new DefaultMutableTreeNode("ROS/GZ Sim:"));
             rootNode.add(new DefaultMutableTreeNode("SCS Controller?"));
 
@@ -635,7 +635,7 @@ public class DRCDashboard
                         if (!sshSimLauncher.isMachineRunningSim(machine))
                         {
                            String[] options = new String[] {"Yes", "No"};
-                           int n = JOptionPane.showOptionDialog(frame, "Do you want to launch " + task + " on " + machine.toString() + "?",
+                           int n = JOptionPane.showOptionDialog(frame, "Do you want to launch " + task + " on " + machine.toShortString() + "?",
                                       "Confirm Launch ROS/Gazebo Sim", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options,
                                       options[0]);
 
@@ -647,7 +647,7 @@ public class DRCDashboard
                         else if (userOwnedSim == machine)
                         {
                            String[] options = new String[] {"Yes", "No"};
-                           int n = JOptionPane.showOptionDialog(frame, "Do you want to kill your sim on " + machine.toString() + "?",
+                           int n = JOptionPane.showOptionDialog(frame, "Do you want to kill your sim on " + machine.toShortString() + "?",
                                       "Confirm Kill ROS/Gazebo Sim", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]);
 
                            if (n == 0)

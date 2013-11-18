@@ -36,4 +36,9 @@ public enum LocalCloudMachines
    {
       return getHost() + " (" + getIp() + ")";
    }
+
+   public String toShortString()
+   {
+      return toString().replace("cloud", "").replace("-", " ");
+   }
 }
