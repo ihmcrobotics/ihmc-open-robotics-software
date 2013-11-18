@@ -60,11 +60,13 @@ public class DragAndDropTreePanel extends JPanel
       c.ipady = 0;
       c.weighty = 0;
 
-      scrollPane = new JScrollPane();
+      scrollPane = new JScrollPane(new JPanel());
+      initializeJTree();
+
       this.setTransferHandler(new TransferHandler()
       {
          private static final long serialVersionUID = -5010952551725770452L;
-         
+
          private LocalCloudMachines machine = null;
 
          public boolean canImport(TransferSupport support)
@@ -93,10 +95,10 @@ public class DragAndDropTreePanel extends JPanel
 
                return false;
             }
-            
-            for(LocalCloudMachines machine : LocalCloudMachines.values())
+
+            for (LocalCloudMachines machine : LocalCloudMachines.values())
             {
-               if(machine.toString().matches(stringData))
+               if (machine.toString().matches(stringData))
                   this.machine = machine;
             }
 
@@ -111,60 +113,70 @@ public class DragAndDropTreePanel extends JPanel
                setCloudStatusItemIcon(currentSelection, goodConnectionIcon);
             else
                setCloudStatusItemIcon(currentSelection, badConnectionIcon);
-            
+
             scrollPane.getViewport().setView(new JPanel());
             ((JPanel) scrollPane.getViewport().getView()).add(currentSelection);
             thisPanel.revalidate();
 
             disableNodeCollapse();
             setupTreeSelection();
-            
+
             return true;
          }
       });
 
       this.add(scrollPane, c);
    }
-   
+
+   private void initializeJTree()
+   {
+      DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("<html><body style=\"font-weight:bold;font-size:1.1em;\">Empty: "
+                                           + "</body></html>");
+      rootNode.add(new DefaultMutableTreeNode("GZ Sim:"));
+      rootNode.add(new DefaultMutableTreeNode("SCS Controller:"));
+      currentSelection = new JTree(rootNode);
+      currentSelection.setBorder(BorderFactory.createEmptyBorder(15, 10, 15, 0));
+      
+      setCloudStatusItemIcon(currentSelection, null);
+      
+      ((JPanel) scrollPane.getViewport().getView()).add(currentSelection);
+      this.revalidate();
+   }
+
    private void setCloudStatusItemIcon(JTree cloudStatusSubtree, ImageIcon icon)
    {
       DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) cloudStatusSubtree.getCellRenderer();
-      
+
       renderer.setOpenIcon(icon);
       renderer.setClosedIcon(icon);
       renderer.setLeafIcon(null);
    }
-   
+
    private void disableNodeCollapse()
    {
       currentSelection.setToggleClickCount(0);
    }
-   
+
    private void setupTreeSelection()
    {
       TreeSelectionListener customTreeSelectionListener = new TreeSelectionListener()
       {
          private Color white = Color.white;
-//         private Color selectionColor = new Color(232, 236, 241);
-         
+
          public void valueChanged(TreeSelectionEvent e)
          {
             JTree tree = (JTree) e.getSource();
             tree.getSelectionModel().clearSelection();
-            
+
             if (currentSelection != null)
             {
                currentSelection.setBackground(white);
                ((DefaultTreeCellRenderer) currentSelection.getCellRenderer()).setBackgroundNonSelectionColor(white);
             }
-            
-//            currentSelection = tree;
-//            currentSelection.setBackground(selectionColor);
-//            ((DefaultTreeCellRenderer) currentSelection.getCellRenderer()).setBackgroundNonSelectionColor(selectionColor);
          }
-         
+
       };
-      
+
       currentSelection.addTreeSelectionListener(customTreeSelectionListener);
    }
 }
