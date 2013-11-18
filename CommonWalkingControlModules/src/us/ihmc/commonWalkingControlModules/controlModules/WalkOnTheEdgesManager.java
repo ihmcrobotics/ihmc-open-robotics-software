@@ -92,6 +92,7 @@ public class WalkOnTheEdgesManager
    private final SideDependentList<BooleanYoVariable> desiredAngleReached = new SideDependentList<BooleanYoVariable>(new BooleanYoVariable("l_Desired_Pitch", registry), new BooleanYoVariable("r_Desired_Pitch", registry));
    private Footstep desiredFootstep;
 
+
    public WalkOnTheEdgesManager(WalkingControllerParameters walkingControllerParameters, WalkOnTheEdgesProviders walkOnTheEdgesProviders,
          SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<EndEffectorControlModule> footEndEffectorControlModules,
          YoVariableRegistry parentRegistry)
@@ -190,7 +191,7 @@ public class WalkOnTheEdgesManager
       }
 
       EndEffectorControlModule trailingEndEffectorControlModule = footEndEffectorControlModules.get(trailingLeg);
-      doToeOff.set(Math.abs(trailingEndEffectorControlModule.getJacobianDeterminant()) < 0.06);
+      doToeOff.set(Math.abs(trailingEndEffectorControlModule.getJacobianDeterminant()) < walkOnTheEdgesProviders.getJacobianDeterminantThresholdForToeOff());
    }
 
    private boolean isFrontFootWellPositionedForToeOff(RobotSide trailingLeg, ReferenceFrame frontFootFrame)
