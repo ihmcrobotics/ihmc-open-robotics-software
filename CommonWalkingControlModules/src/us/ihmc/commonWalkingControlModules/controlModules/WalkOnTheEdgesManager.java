@@ -92,9 +92,10 @@ public class WalkOnTheEdgesManager
    private final SideDependentList<BooleanYoVariable> desiredAngleReached = new SideDependentList<BooleanYoVariable>(new BooleanYoVariable("l_Desired_Pitch", registry), new BooleanYoVariable("r_Desired_Pitch", registry));
    private Footstep desiredFootstep;
 
+   private final double inPlaceWidth;
 
    public WalkOnTheEdgesManager(WalkingControllerParameters walkingControllerParameters, WalkOnTheEdgesProviders walkOnTheEdgesProviders,
-         SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<EndEffectorControlModule> footEndEffectorControlModules,
+         double inPlaceWidth, SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<EndEffectorControlModule> footEndEffectorControlModules,
          YoVariableRegistry parentRegistry)
    {
       this.stayOnToes.set(walkingControllerParameters.stayOnToes());
@@ -108,6 +109,8 @@ public class WalkOnTheEdgesManager
       this.feet = feet;
       this.footEndEffectorControlModules = footEndEffectorControlModules;
       desiredFootstep = null;
+      
+      this.inPlaceWidth = inPlaceWidth;
 
       onToesTriangleAreaLimit.set(0.01);
 
@@ -200,7 +203,8 @@ public class WalkOnTheEdgesManager
       tempLeadingFootPosition.setToZero(frontFootFrame);
       tempTrailingFootPosition.setToZero(trailingFootFrame);
       tempLeadingFootPosition.changeFrame(trailingFootFrame);
-
+      tempLeadingFootPosition.setY(tempLeadingFootPosition.getY() + trailingLeg.negateIfRightSide(inPlaceWidth));
+      
       tempLeadingFootPositionInWorld.setToZero(frontFootFrame);
       tempTrailingFootPositionInWorld.setToZero(trailingFootFrame);
       tempLeadingFootPositionInWorld.changeFrame(worldFrame);
