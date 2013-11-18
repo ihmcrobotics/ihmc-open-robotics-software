@@ -363,7 +363,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       setupLegJacobians(fullRobotModel);
 
       this.walkOnTheEdgesProviders = walkOnTheEdgesProviders;
-      walkOnTheEdgesManager = new WalkOnTheEdgesManager(walkingControllerParameters, walkOnTheEdgesProviders, feet, footEndEffectorControlModules, registry);
+      walkOnTheEdgesManager = new WalkOnTheEdgesManager(walkingControllerParameters, walkOnTheEdgesProviders, walkingControllerParameters.getInPlaceWidth(), feet, footEndEffectorControlModules, registry);
       this.centerOfMassHeightTrajectoryGenerator.attachWalkOnToesManager(walkOnTheEdgesManager);
       
       maximumConstantJerkFinalToeOffAngleComputer.reinitialize(walkOnTheEdgesProviders.getMaximumToeOffAngle(), referenceTime);
