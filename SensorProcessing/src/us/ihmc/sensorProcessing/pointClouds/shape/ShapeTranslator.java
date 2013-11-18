@@ -159,11 +159,11 @@ public class ShapeTranslator
    // prepares to build the concave hull
    public ConcaveHull prepareConcaveHull(PlaneGeneral3D_F64 plane, List<Point3D_F64> points3d, BoundConcavePolygon polygon)
    {
-      Coordinate[] points = new Coordinate[7000];
+     
       polygon.process(plane, points3d);
 
       List<Point2D_F64> points2d = polygon.getPoints2D();
-
+      Coordinate[] points = new Coordinate[points2d.size()];
       System.out.println(points2d.size() + "total 2d points");
 
       for (int i = 0; i < points2d.size(); i++)
