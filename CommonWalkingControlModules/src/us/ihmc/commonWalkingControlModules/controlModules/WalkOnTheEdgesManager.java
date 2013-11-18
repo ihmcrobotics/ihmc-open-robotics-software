@@ -203,7 +203,11 @@ public class WalkOnTheEdgesManager
       tempLeadingFootPosition.setToZero(frontFootFrame);
       tempTrailingFootPosition.setToZero(trailingFootFrame);
       tempLeadingFootPosition.changeFrame(trailingFootFrame);
-      tempLeadingFootPosition.setY(tempLeadingFootPosition.getY() + trailingLeg.negateIfRightSide(inPlaceWidth));
+      
+      if (Math.abs(tempLeadingFootPosition.getY()) > trailingLeg.negateIfRightSide(inPlaceWidth))
+         tempLeadingFootPosition.setY(tempLeadingFootPosition.getY() + trailingLeg.negateIfRightSide(inPlaceWidth));
+      else
+         tempLeadingFootPosition.setY(0.0);
       
       tempLeadingFootPositionInWorld.setToZero(frontFootFrame);
       tempTrailingFootPositionInWorld.setToZero(trailingFootFrame);
