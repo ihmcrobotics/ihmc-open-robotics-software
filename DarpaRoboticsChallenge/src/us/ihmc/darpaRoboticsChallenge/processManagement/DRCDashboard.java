@@ -1,53 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.processManagement;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.TimerTask;
-
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListModel;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTree;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
-import javax.swing.WindowConstants;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.DefaultTreeModel;
-
 import org.apache.commons.lang.WordUtils;
-
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01Types;
 import us.ihmc.darpaRoboticsChallenge.DRCEnvironmentModel;
@@ -59,6 +12,18 @@ import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.gui.IHMCSwingTools;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
+
+import javax.swing.*;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.DefaultTreeModel;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+import java.util.HashMap;
+import java.util.TimerTask;
 
 public class DRCDashboard
 {
@@ -536,13 +501,11 @@ public class DRCDashboard
 
       for (final LocalCloudMachines machine : LocalCloudMachines.values())
       {
-         if (!(machine.equals(LocalCloudMachines.LOCALHOST) 
-               || machine.equals(LocalCloudMachines.CLOUDMINION_5)
+         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMINION_5)
                || machine.equals(LocalCloudMachines.CLOUDMINION_6)))
          {
             DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("<html><body style=\"font-weight:bold;font-size:1.1em;\">"
-                                                 + WordUtils.capitalize(machine.toString().toLowerCase().replace("_", " ")) + ": "
-                                                 + machine.getIp() + "</body></html>");
+                                                 + WordUtils.capitalize(machine.toString().toLowerCase().replace("_", " ")) + "</body></html>");
             rootNode.add(new DefaultMutableTreeNode("ROS/GZ Sim:"));
             rootNode.add(new DefaultMutableTreeNode("SCS Controller?"));
 
@@ -625,8 +588,7 @@ public class DRCDashboard
    {
       for (final LocalCloudMachines machine : LocalCloudMachines.values())
       {
-         if (!(machine.equals(LocalCloudMachines.LOCALHOST) 
-               || machine.equals(LocalCloudMachines.CLOUDMINION_5)
+         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMINION_5)
                || machine.equals(LocalCloudMachines.CLOUDMINION_6)))
             cloudMachineTrees.get(machine).first().addMouseListener(new MouseListener()
             {
@@ -724,8 +686,7 @@ public class DRCDashboard
 
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
-         if (!(machine.equals(LocalCloudMachines.LOCALHOST) 
-               || machine.equals(LocalCloudMachines.CLOUDMINION_5)
+         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMINION_5)
                || machine.equals(LocalCloudMachines.CLOUDMINION_6)))
             cloudMachineTrees.get(machine).first().addTreeSelectionListener(customTreeSelectionListener);
       }
@@ -735,8 +696,7 @@ public class DRCDashboard
    {
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
-         if (!(machine.equals(LocalCloudMachines.LOCALHOST)
-               || machine.equals(LocalCloudMachines.CLOUDMINION_5)
+         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMINION_5)
                || machine.equals(LocalCloudMachines.CLOUDMINION_6)))
             cloudMachineTrees.get(machine).first().setToggleClickCount(0);
       }
@@ -1061,8 +1021,7 @@ public class DRCDashboard
    {
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
-         if (!(machine.equals(LocalCloudMachines.LOCALHOST) 
-               || machine.equals(LocalCloudMachines.CLOUDMINION_5)
+         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMINION_5)
                || machine.equals(LocalCloudMachines.CLOUDMINION_6)))
          {
             DefaultMutableTreeNode root = cloudMachineTrees.get(machine).second();
@@ -1077,8 +1036,7 @@ public class DRCDashboard
    {
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
-         if (!(machine.equals(LocalCloudMachines.LOCALHOST) 
-               || machine.equals(LocalCloudMachines.CLOUDMINION_5)
+         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMINION_5)
                || machine.equals(LocalCloudMachines.CLOUDMINION_6)))
          {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) cloudMachineTrees.get(machine).second().getChildAt(0);
@@ -1106,8 +1064,7 @@ public class DRCDashboard
    {
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
-         if (!(machine.equals(LocalCloudMachines.LOCALHOST) 
-               || machine.equals(LocalCloudMachines.CLOUDMINION_5)
+         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMINION_5)
                || machine.equals(LocalCloudMachines.CLOUDMINION_6)))
          {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) cloudMachineTrees.get(machine).second().getChildAt(1);
@@ -1128,8 +1085,7 @@ public class DRCDashboard
    {
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
-         if (!(machine.equals(LocalCloudMachines.LOCALHOST) 
-               || machine.equals(LocalCloudMachines.CLOUDMINION_5)
+         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMINION_5)
                || machine.equals(LocalCloudMachines.CLOUDMINION_6)))
          {
             if (sshSimLauncher.isMachineReachable(machine))
@@ -1258,8 +1214,7 @@ public class DRCDashboard
                ThreadTools.sleep(8000);
                scsSpawner.spawn(DRCDemo01.class, javaArgs, new String[]
                {
-                  "--sim", "--env", newTask, "--gazebo", "--gazeboHost", gazeboMachine.getIp(), "--start",
-                  startingLocationsList.getSelectedValue().toString()
+                  "--sim", "--env", newTask, "--gazebo", "--gazeboHost", gazeboMachine.getIp(), "--start", startingLocationsList.getSelectedValue().toString()
                });
             }
          }
