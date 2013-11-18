@@ -21,7 +21,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
-import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig.LocalCloudMachines;
+import us.ihmc.darpaRoboticsChallenge.configuration.LocalCloudMachines;
 
 public class DragAndDropTreePanel extends JPanel
 {
