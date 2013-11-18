@@ -28,28 +28,40 @@ public class YoVariableLogVisualizer
    private final String timeVariableName;
    private final int bufferSize;
    protected final SimulationConstructionSet scs;
-   public YoVariableLogVisualizer(JaxbSDFLoader loader, SDFJointNameMap jointNameMap, String timeVariableName, int bufferSize, boolean showOverheadView) throws IOException
+   public YoVariableLogVisualizer(JaxbSDFLoader loader, SDFJointNameMap jointNameMap, String timeVariableName, 
+         int bufferSize, boolean showOverheadView, File logFile) throws IOException
    {
       this.bufferSize = bufferSize;
       this.loader = loader;
       this.jointNameMap = jointNameMap;
       this.timeVariableName = timeVariableName;
 
-      final JFileChooser fileChooser = new JFileChooser(new File(YoVariableLoggerOptions.defaultLogDirectory));
-      sortByDateHack(fileChooser);  
-      
-      fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-      int returnValue = fileChooser.showOpenDialog(null);
-      if(returnValue == JFileChooser.APPROVE_OPTION)
+      if (logFile == null)
       {
-         System.out.println("loading log from folder:" + fileChooser.getSelectedFile());
+         final JFileChooser fileChooser = new JFileChooser(new File(YoVariableLoggerOptions.defaultLogDirectory));
+         sortByDateHack(fileChooser);  
+         
+         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+         int returnValue = fileChooser.showOpenDialog(null);
+         if(returnValue == JFileChooser.APPROVE_OPTION)
+         {
+            logFile = fileChooser.getSelectedFile();
+         }
+         else
+         {
+            System.err.println("No file selected, closing.");
+         }
+      }
+      
+      if(logFile != null)
+      {
+         System.out.println("loading log from folder:" + logFile);
          scs= new SimulationConstructionSet(true, bufferSize);
-         readLogFile(fileChooser.getSelectedFile(), showOverheadView); 
+         readLogFile(logFile, showOverheadView); 
       }
       else
       {
          scs=null;
-         System.err.println("No file selected, closing.");
       }
       
    }
