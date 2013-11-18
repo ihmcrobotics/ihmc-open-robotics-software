@@ -31,4 +31,9 @@ public enum LocalCloudMachines
       return ip;
    }
 
+   @Override
+   public String toString()
+   {
+      return getHost() + " (" + getIp() + ")";
+   }
 }
