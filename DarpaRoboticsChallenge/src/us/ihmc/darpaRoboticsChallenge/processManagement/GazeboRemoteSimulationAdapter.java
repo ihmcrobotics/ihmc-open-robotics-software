@@ -11,14 +11,14 @@ import javax.swing.JOptionPane;
 
 import org.apache.commons.lang.mutable.MutableBoolean;
 
-import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig;
-import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig.LocalCloudMachines;
+import us.ihmc.darpaRoboticsChallenge.configuration.LocalCloudMachines;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+
 import us.ihmc.utilities.Pair;
 
 public class GazeboRemoteSimulationAdapter extends Thread
@@ -39,10 +39,10 @@ public class GazeboRemoteSimulationAdapter extends Thread
    private static volatile ConcurrentHashMap<ChannelShell, PrintStream> shellPrintStreams = new ConcurrentHashMap<ChannelShell, PrintStream>();
 
    private static volatile ConcurrentHashMap<LocalCloudMachines, MutableBoolean> reachability = new ConcurrentHashMap<LocalCloudMachines, MutableBoolean>();
-   private static volatile ConcurrentHashMap<LocalCloudMachines, MutableBoolean> isRunningRos = new ConcurrentHashMap<DRCLocalCloudConfig.LocalCloudMachines,
+   private static volatile ConcurrentHashMap<LocalCloudMachines, MutableBoolean> isRunningRos = new ConcurrentHashMap<LocalCloudMachines,
                                                                                                    MutableBoolean>();
    private static volatile ConcurrentHashMap<LocalCloudMachines, MutableBoolean> isRunningController =
-      new ConcurrentHashMap<DRCLocalCloudConfig.LocalCloudMachines, MutableBoolean>();
+      new ConcurrentHashMap<LocalCloudMachines, MutableBoolean>();
 
    private static final int REACHABLE_TIMEOUT = 5000;
    private static final int CONNECTION_TIMEOUT = 5000;
@@ -201,7 +201,7 @@ public class GazeboRemoteSimulationAdapter extends Thread
 
    private Pair<String, String> initCredentials(LocalCloudMachines machine)
    {
-      String hostname = DRCLocalCloudConfig.getHostName(machine);
+      String hostname = machine.getHost();
 
       String username, password;
 
@@ -222,7 +222,7 @@ public class GazeboRemoteSimulationAdapter extends Thread
    private void setupSession(LocalCloudMachines machine, Pair<String, String> authPair) throws JSchException
    {
       Session session;
-      session = jsch.getSession(authPair.first(), DRCLocalCloudConfig.getIPAddress(machine), 22);
+      session = jsch.getSession(authPair.first(), machine.getIp(), 22);
 
       session.setConfig(config);
 
@@ -260,7 +260,7 @@ public class GazeboRemoteSimulationAdapter extends Thread
          {
             if (machine != LocalCloudMachines.LOCALHOST)
             {
-               if (InetAddress.getByName(DRCLocalCloudConfig.getIPAddress(machine)).isReachable(REACHABLE_TIMEOUT))
+               if (InetAddress.getByName(machine.getIp()).isReachable(REACHABLE_TIMEOUT))
                {
                   reachability.get(machine).setValue(true);
                   checkSessionStatus(machine);
@@ -321,7 +321,7 @@ public class GazeboRemoteSimulationAdapter extends Thread
          {
             try
             {
-               if (InetAddress.getByName(DRCLocalCloudConfig.getIPAddress(machine)).isReachable(REACHABLE_TIMEOUT))
+               if (InetAddress.getByName(machine.getIp()).isReachable(REACHABLE_TIMEOUT))
                {
                   reachability.get(machine).setValue(true);
                   checkSessionStatus(machine);
