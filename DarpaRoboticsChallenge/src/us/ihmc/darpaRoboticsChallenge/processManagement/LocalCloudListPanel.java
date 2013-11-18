@@ -86,11 +86,7 @@ public class LocalCloudListPanel extends JPanel
          if (!machine.equals(LocalCloudMachines.LOCALHOST))
          {
             DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("<html><body style=\"font-weight:bold;font-size:1.1em;\">"
-                                                 + machine.toString() + ": " + "</body></html>");
-
-//          DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("<html><body style=\"font-weight:bold;font-size:1.1em;\">"
-//                + WordUtils.capitalize(machine.toString().toLowerCase().replace("_", " ")) + ": "
-//                + DRCLocalCloudConfig.getIPAddress(machine) + "</body></html>");
+                                                 + machine.getHost() + ": " + "</body></html>");
             rootNode.add(new DefaultMutableTreeNode("GZ Sim:"));
             rootNode.add(new DefaultMutableTreeNode("SCS Controller:"));
             JTree tree = new JTree(rootNode);

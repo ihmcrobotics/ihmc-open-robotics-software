@@ -98,7 +98,7 @@ public class DragAndDropTreePanel extends JPanel
             
             for (LocalCloudMachines machine : LocalCloudMachines.values())
             {
-               if (machine.toString().matches(stringData) || stringData.contains(machine.toString()))
+               if (machine.getHost().matches(stringData) || stringData.contains(machine.getHost()))
                   this.machine = machine;
             }
 
