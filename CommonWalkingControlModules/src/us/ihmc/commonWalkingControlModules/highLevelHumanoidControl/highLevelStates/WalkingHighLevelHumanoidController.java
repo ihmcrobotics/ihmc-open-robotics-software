@@ -1309,7 +1309,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       {
          RobotSide swingSide = getSupportLeg().getOppositeSide();
          hasMinimumTimePassed.set(hasMinimumTimePassed());
-         if(!walkOnTheEdgesManager.isEdgeTouchDownDone(swingSide)) return false;   
          if (!hasICPPlannerFinished.getBooleanValue())
          {
             hasICPPlannerFinished.set(instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue()));
