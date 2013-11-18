@@ -110,7 +110,7 @@ public class LocalCloudListPanel extends JPanel
                   JTree tree = (JTree) comp;
                   String transferable = tree.getModel().getRoot().toString();
 
-                  transferable = transferable.substring(transferable.indexOf("CLOUD"), transferable.length() - 1);
+                  transferable = transferable.substring(transferable.indexOf("cloud"), transferable.length() - 1);
                   transferable = transferable.substring(0, transferable.indexOf(":"));
 
                   return new StringSelection(transferable);

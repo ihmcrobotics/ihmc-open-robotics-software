@@ -95,10 +95,10 @@ public class DragAndDropTreePanel extends JPanel
 
                return false;
             }
-
+            
             for (LocalCloudMachines machine : LocalCloudMachines.values())
             {
-               if (machine.toString().matches(stringData))
+               if (machine.toString().matches(stringData) || stringData.contains(machine.toString()))
                   this.machine = machine;
             }
 
