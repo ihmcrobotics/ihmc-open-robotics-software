@@ -276,13 +276,7 @@ public class MotionConstraintHandler
 //            DenseMatrix64F selectionMatrixTimesCTransposeJ = new DenseMatrix64F(selectionMatrix.getNumRows(), matrixCTransposeJ.getNumCols());
 //            CommonOps.mult(selectionMatrix, matrixCTransposeJ, selectionMatrixTimesCTransposeJ);
          
-            for (int i=0; i<jBlockCompact.getNumRows(); i++)
-            {
-               for (int j=0; j<jBlockCompact.getNumCols(); j++)
-               {
-                  jBlockCompact.set(i, j, 0.0);
-               }
-            }
+            jBlockCompact.zero();
             
             tempNullSpaceMatrixNTranspose.reshape(nullity, tempMatrixVTranspose.getNumCols());
             CommonOps.extract(tempMatrixVTranspose, tempMatrixVTranspose.getNumRows() - nullity, tempMatrixVTranspose.getNumRows(), 0, tempMatrixVTranspose.getNumCols(), tempNullSpaceMatrixNTranspose, 0, 0);  
@@ -292,14 +286,21 @@ public class MotionConstraintHandler
 
             if (removeNullspaceFromJ.getBooleanValue())
             {
-            //TODO: Fix the null space stuff. Verify that the three things added are correct. Figure out why qdd is way off from desired.
-            CommonOps.extract(tempMatrixCTransposeJ, 0, tempMatrixCTransposeJ.getNumRows(), 0, tempMatrixCTransposeJ.getNumCols(), jBlockCompact, 0, 0);
-            CommonOps.extract(tempNullSpaceMatrixNTranspose, 0, tempNullSpaceMatrixNTranspose.getNumRows(), 0, tempNullSpaceMatrixNTranspose.getNumCols(), jBlockCompact, tempMatrixCTransposeJ.getNumRows(), 6);  //Hack 6
+               //TODO: Fix the null space stuff. Verify that the three things added are correct. Figure out why qdd is way off from desired.
+               CommonOps.extract(tempMatrixCTransposeJ, 0, tempMatrixCTransposeJ.getNumRows(), 0, tempMatrixCTransposeJ.getNumCols(), jBlockCompact, 0, 0);
+               CommonOps.extract(tempNullSpaceMatrixNTranspose, 0, tempNullSpaceMatrixNTranspose.getNumRows(), 0, tempNullSpaceMatrixNTranspose.getNumCols(), jBlockCompact, tempMatrixCTransposeJ.getNumRows(), 6);  //Hack 6
             }
             else
             {
-               CommonOps.extract(tempBaseToEndEffectorJacobianMatrix, 0, tempBaseToEndEffectorJacobianMatrix.getNumRows(), 0, tempBaseToEndEffectorJacobianMatrix.getNumCols(), jBlockCompact, 0, 0);
-               CommonOps.extract(tempNullSpaceMatrixNTranspose, 0, tempNullSpaceMatrixNTranspose.getNumRows(), 0, tempNullSpaceMatrixNTranspose.getNumCols(), jBlockCompact, tempBaseToEndEffectorJacobianMatrix.getNumRows(), 6);  //Hack 6
+               try
+               {
+                  CommonOps.extract(tempBaseToEndEffectorJacobianMatrix, 0, tempBaseToEndEffectorJacobianMatrix.getNumRows(), 0, tempBaseToEndEffectorJacobianMatrix.getNumCols(), jBlockCompact, 0, 0);
+                  CommonOps.extract(tempNullSpaceMatrixNTranspose, 0, tempNullSpaceMatrixNTranspose.getNumRows(), 0, tempNullSpaceMatrixNTranspose.getNumCols(), jBlockCompact, tempBaseToEndEffectorJacobianMatrix.getNumRows(), 6);  //Hack 6
+               }
+               catch (IllegalArgumentException e)
+               {
+                  System.out.println("blop");
+               }
             }
 //            System.out.println("jBlockCompact = " + jBlockCompact);
             
