@@ -22,11 +22,13 @@ import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TimerTask;
 
 public class DRCDashboard
 {
+   private final ArrayList<LocalCloudMachines> excludedMachines = new ArrayList<>();
    private final boolean DEBUG_REMOTE_APPLICATION = true;
    private static DRCDashboard instance;
 
@@ -79,12 +81,11 @@ public class DRCDashboard
    private JavaProcessSpawner scsSpawner = new JavaProcessSpawner(true);
    private GazeboRemoteSimulationAdapter sshSimLauncher = new GazeboRemoteSimulationAdapter();
 
-   private HashMap<LocalCloudMachines, Pair<JTree, DefaultMutableTreeNode>> cloudMachineTrees = new HashMap<LocalCloudMachines,
-                                                                                                   Pair<JTree, DefaultMutableTreeNode>>();
+   private HashMap<LocalCloudMachines, Pair<JTree, DefaultMutableTreeNode>> cloudMachineTrees = new HashMap<>();
    JTree currentSelection = null;
 
    protected LocalCloudMachines userOwnedSim;
-   private HashMap<JTree, JButton> launchButtons = new HashMap<JTree, JButton>();
+   private HashMap<JTree, JButton> launchButtons = new HashMap<>();
 
    private File configFileHandle;
    private boolean shouldLoadConfig = false;
@@ -99,6 +100,20 @@ public class DRCDashboard
       instance = this;
 
       initConfig();
+
+      initExcludedMachines();
+   }
+
+   private void initExcludedMachines()
+   {
+      excludedMachines.add(LocalCloudMachines.LOCALHOST);
+      excludedMachines.add(LocalCloudMachines.CLOUDMINION_5);
+      excludedMachines.add(LocalCloudMachines.CLOUDMINION_6);
+   }
+
+   private boolean isMachineExcluded(LocalCloudMachines machine)
+   {
+      return excludedMachines.contains(machine);
    }
 
    private void initConfig()
@@ -501,8 +516,7 @@ public class DRCDashboard
 
       for (final LocalCloudMachines machine : LocalCloudMachines.values())
       {
-         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMINION_5)
-               || machine.equals(LocalCloudMachines.CLOUDMINION_6)))
+         if (!isMachineExcluded(machine))
          {
             DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("<html><body style=\"font-weight:bold;font-size:1.1em;\">"
                                                  + WordUtils.capitalize(machine.toString().toLowerCase().replace("_", " ")) + "</body></html>");
@@ -565,7 +579,7 @@ public class DRCDashboard
             c2.ipadx = 10;
             c2.weightx = 0.7;
             view.add(buttonPanel, c2);
-            cloudMachineTrees.put(machine, new Pair<JTree, DefaultMutableTreeNode>(tree, rootNode));
+            cloudMachineTrees.put(machine, new Pair<>(tree, rootNode));
             launchButtons.put(tree, launchButton);
 
             c2.gridy++;
@@ -588,8 +602,7 @@ public class DRCDashboard
    {
       for (final LocalCloudMachines machine : LocalCloudMachines.values())
       {
-         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMINION_5)
-               || machine.equals(LocalCloudMachines.CLOUDMINION_6)))
+         if (!isMachineExcluded(machine))
             cloudMachineTrees.get(machine).first().addMouseListener(new MouseListener()
             {
                public void mouseReleased(MouseEvent e)
@@ -686,8 +699,7 @@ public class DRCDashboard
 
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
-         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMINION_5)
-               || machine.equals(LocalCloudMachines.CLOUDMINION_6)))
+         if (!isMachineExcluded(machine))
             cloudMachineTrees.get(machine).first().addTreeSelectionListener(customTreeSelectionListener);
       }
    }
@@ -696,8 +708,7 @@ public class DRCDashboard
    {
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
-         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMINION_5)
-               || machine.equals(LocalCloudMachines.CLOUDMINION_6)))
+         if (!isMachineExcluded(machine))
             cloudMachineTrees.get(machine).first().setToggleClickCount(0);
       }
    }
@@ -1021,8 +1032,7 @@ public class DRCDashboard
    {
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
-         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMINION_5)
-               || machine.equals(LocalCloudMachines.CLOUDMINION_6)))
+         if (!isMachineExcluded(machine))
          {
             DefaultMutableTreeNode root = cloudMachineTrees.get(machine).second();
             ((DefaultTreeModel) cloudMachineTrees.get(machine).first().getModel()).nodeChanged(root);
@@ -1036,8 +1046,7 @@ public class DRCDashboard
    {
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
-         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMINION_5)
-               || machine.equals(LocalCloudMachines.CLOUDMINION_6)))
+         if (!isMachineExcluded(machine))
          {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) cloudMachineTrees.get(machine).second().getChildAt(0);
 
@@ -1064,8 +1073,7 @@ public class DRCDashboard
    {
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
-         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMINION_5)
-               || machine.equals(LocalCloudMachines.CLOUDMINION_6)))
+         if (!isMachineExcluded(machine))
          {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) cloudMachineTrees.get(machine).second().getChildAt(1);
 
@@ -1085,8 +1093,7 @@ public class DRCDashboard
    {
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
-         if (!(machine.equals(LocalCloudMachines.LOCALHOST) || machine.equals(LocalCloudMachines.CLOUDMINION_5)
-               || machine.equals(LocalCloudMachines.CLOUDMINION_6)))
+         if (!isMachineExcluded(machine))
          {
             if (sshSimLauncher.isMachineReachable(machine))
             {
