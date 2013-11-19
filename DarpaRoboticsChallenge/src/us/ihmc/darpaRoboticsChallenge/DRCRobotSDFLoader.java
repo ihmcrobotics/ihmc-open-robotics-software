@@ -62,6 +62,9 @@ public class DRCRobotSDFLoader
          case ATLAS_NO_HANDS_ADDED_MASS :
             fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_addedmass.sdf");
             break;
+         case ATLAS_CALIBRATION:
+            fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_calibration.sdf");
+            break;
          default:
             throw new RuntimeException("DRCRobotSDFLoader: Unimplemented enumeration case : " + selectedModel);
       }
