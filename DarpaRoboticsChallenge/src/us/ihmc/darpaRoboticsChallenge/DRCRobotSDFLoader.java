@@ -55,6 +55,13 @@ public class DRCRobotSDFLoader
         		 resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/irobot_hand_description").getFile());
         	 }
         	 break;
+         case ATLAS_V3_IROBOT_HANDS_ADDED_MASS :
+            fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_v3_irobot_hands_addedmass.sdf");
+            if(!headless)
+            {
+               resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/irobot_hand_description").getFile());
+            }
+            break;
 
          case ATLAS_SANDIA_HANDS :
             fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_sandia_hands.sdf");

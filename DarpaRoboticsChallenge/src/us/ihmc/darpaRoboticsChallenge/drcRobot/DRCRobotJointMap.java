@@ -142,7 +142,7 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
                handGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(getNameOfJointBeforeHand(robotSide), offset));
             }
          }
-         else if ((selectedModel == DRCRobotModel.ATLAS_IROBOT_HANDS || selectedModel == DRCRobotModel.ATLAS_V3_IROBOT_HANDS) && addLoadsOfContactPoints)
+         else if ((selectedModel.hasIRobotHands()) && addLoadsOfContactPoints)
          {
             // add finger joint contact points offset to the middle of palm-facing side of the finger segment
             String longPrefix = (robotSide == RobotSide.LEFT) ? "left_" : "right_";
