@@ -1,21 +1,9 @@
 <GraphGroup>
-	<Cols>1</Cols>
-	<Graph>
-		<Variables>root.remoteroot.AtlasSliderBoardController.ll_l_leg_kny.ll_l_leg_kny_f</Variables>
-		<GraphConfiguration>
-			<Name>config1</Name>
-			<ScalingMethod>0</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>25.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
+	<Cols>2</Cols>
 	<Graph>
 		<Variables>root.remoteroot.AtlasSliderBoardController.ll_l_leg_kny.ll_l_leg_kny_q</Variables>
 		<GraphConfiguration>
-			<Name>config2</Name>
+			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -27,6 +15,18 @@
 	<Graph>
 		<Variables>root.remoteroot.AtlasSliderBoardController.ll_l_leg_kny.ll_l_leg_kny_i,root.remoteroot.AtlasSliderBoardController.ll_l_leg_kny.ll_l_leg_kny_ff_const</Variables>
 		<GraphConfiguration>
+			<Name>config2</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>0.2</MaxScaling>
+			<MinScaling>-0.2</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remoteroot.AtlasSliderBoardController.ll_l_leg_kny.ll_l_leg_kny_psi_neg,root.remoteroot.AtlasSliderBoardController.ll_l_leg_kny.ll_l_leg_kny_psi_pos</Variables>
+		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
@@ -37,7 +37,7 @@
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-<Entry Boxes>requestedBehavior,ll_l_leg_kny_a_k_f_p,ll_l_leg_kny_a_ff_qd,testFunctionMode,selectedJoint,testedJoint,testFunctionValue,testFunctionAmp,testFunctionFreq,testFunctionResetTime,testFunctionOffset</Entry Boxes>
+<Entry Boxes>requestedBehavior,ll_l_leg_kny_a_k_f_p,ll_l_leg_kny_a_ff_qd,testFunctionMode,selectedJoint,testFunctionValue,testFunctionAmp,testFunctionFreq,testFunctionResetTime,testFunctionOffset,testFunctionChirpFrequencyMax</Entry Boxes>
 
 <Number of ViewPorts>1</Number of ViewPorts>
  <Main Viewport> 
@@ -53,9 +53,9 @@
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>1.2219343998058327E-16</Camera X>
- <Camera Y>-7.995570315713216</Camera Y>
- <Camera Z>1.1330380210475477</Camera Z>
+ <Camera X>0.0</Camera X>
+ <Camera Y>-6.0</Camera Y>
+ <Camera Z>1.0</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
