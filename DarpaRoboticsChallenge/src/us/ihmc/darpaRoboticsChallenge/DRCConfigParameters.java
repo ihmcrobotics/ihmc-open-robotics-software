@@ -15,6 +15,8 @@ public class DRCConfigParameters
    public static final boolean ENABLE_LAG_SIMULATION_ON_START = false;
 
 
+
+
    static
    {
       if (ALLOW_LAG_SIMULATION)
@@ -147,7 +149,7 @@ public class DRCConfigParameters
    {
       if (DRCLocalConfigParameters.USING_REAL_HEAD)
       {
-         final float crc = -.0010908f; //0.0f;
+         final float crc = -.0010908f;
          LIDAR_POINTS_PER_SWEEP = 1081;
          LIDAR_SWEEP_MIN_YAW = -2.356194f + crc;
          LIDAR_SWEEP_MAX_YAW = 2.356194f + crc;
@@ -187,15 +189,15 @@ public class DRCConfigParameters
    public static final double LIDAR_BLINDNESS_CYLINDAR_SQUARED_RADIUS = 0.1;
    public static final double LIDAR_Z_CUTOFF_ABOVE_HEAD = -0.5;
    public static final double LIDAR_X_CUTOFF_AHEAD_OF_FEET = 0.0; //0.25;
-   
+
    // near scan
    public static final double NEAR_SCAN_CYL_RADIUS = 4.0; //3.0;
    public static final double NEAR_SCAN_CYL_Z_MAX = 0.0;
    public static final double NEAR_SCAN_CYL_Z_MIN = -2.5;
    public static final float NEAR_SCAN_RESOLUTION = 0.01f; //0.015f;
-   public static final long NEAR_SCAN_DECAY_MILLIS = 3000; //10000;    // -1 to turn off decay
+   public static final long NEAR_SCAN_DECAY_MILLIS = 30000; //10000;    // -1 to turn off decay
    public static final int NEAR_SCAN_CAPACITY = 100000;
-   
+
    // LIDAR point cloud processing
    public static final int POINT_CLOUD_PROCESSING_SIZE = 20000;
 
@@ -216,6 +218,12 @@ public class DRCConfigParameters
    public static final double LIDAR_RESOLUTION_SPHERE_DISTANCE_FROM_HEAD = 1.0;
 
    public static final boolean USE_TABS_IN_UI = true;
+
+// Path parameters
+   public static final double MAXIMUM_HIP_OPENING_ANGLE = Math.toRadians(10.0);
+   public static final double MAXIMUM_HIP_CLOSING_ANGLE = Math.toRadians(5.0);
+   public static final double DEFAULT_SPINNING_DIAMETER = 0.4;
+
 
    // Hand Controller
    public static final boolean USE_PURE_POSITION_CONTROL_FOR_HANDS = false;
@@ -247,7 +255,7 @@ public class DRCConfigParameters
    public static final boolean USE_IHMCFILTER_JOINT_TORQUES = true;
 
    public static final double JOINT_VELOCITY_SLOP_TIME_FOR_BACKLASH_COMPENSATION = 0.03;
-   
+
    public static final double JOINT_POSITION_FILTER_FREQ_HZ = positionSensorFrequencyHz;
    public static final double JOINT_VELOCITY_FILTER_FREQ_HZ = velocitySensorFrequencyHz;
    public static final double ORIENTATION_FILTER_FREQ_HZ = positionSensorFrequencyHz;
