@@ -20,13 +20,13 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class FootstepPathCoordinator implements FootstepProvider
 {
-   private static final double FOOTSTEP_PATH_SWING_TIME = 1.5; //0.6;
-   private static final double SLOW_BLIND_WALKING_SWING_TIME = 1.5; //0.8;
-   private static final double BLIND_WALKING_IN_MUD_SWING_TIME = 1.5; //2.2; //1.6; //2.5;
+   private static final double FOOTSTEP_PATH_SWING_TIME = 0.6;
+   private static final double SLOW_BLIND_WALKING_SWING_TIME = 0.8;
+   private static final double BLIND_WALKING_IN_MUD_SWING_TIME = 2.2; //1.6; //2.5;
    
-   private static final double FOOTSTEP_PATH_TRANSFER_TIME = 1.5; //0.25;
-   private static final double SLOW_BLIND_WALKING_TRANSFER_TIME = 1.5; //0.35;
-   private static final double BLIND_WALKING_IN_MUD_TRANSFER_TIME = 1.5; //0.6; //1.5;
+   private static final double FOOTSTEP_PATH_TRANSFER_TIME = 0.25;
+   private static final double SLOW_BLIND_WALKING_TRANSFER_TIME = 0.35;
+   private static final double BLIND_WALKING_IN_MUD_TRANSFER_TIME = 0.6; //1.5;
    
    private boolean DEBUG = false;
    private final ConcurrentLinkedQueue<Footstep> footstepQueue = new ConcurrentLinkedQueue<Footstep>();
