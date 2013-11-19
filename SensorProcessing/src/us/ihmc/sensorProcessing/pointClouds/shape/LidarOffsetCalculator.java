@@ -1,6 +1,7 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
 
+import georegression.metric.Distance3D_F64;
 import georegression.struct.GeoTuple3D_F64;
 import georegression.struct.GeoTuple_F64;
 import georegression.struct.plane.PlaneGeneral3D_F64;
@@ -43,8 +44,8 @@ public class LidarOffsetCalculator extends SimpleApplication
 
    public static void main(String[] args)
    {
-      LidarOffsetCalculator test1 = new LidarOffsetCalculator("lidar_dump_1384213072427.txt");
-      //LidarOffsetCalculator test1 = new LidarOffsetCalculator("lidar_dump_1384211687790.txt");
+      //LidarOffsetCalculator test1 = new LidarOffsetCalculator("lidar_dump_1384213072427.txt");
+      LidarOffsetCalculator test1 = new LidarOffsetCalculator("lidar_dump_1384211687790.txt");
       test1.start();
    }
 
@@ -78,7 +79,7 @@ public class LidarOffsetCalculator extends SimpleApplication
       }
 
 //      List<Point3D_F64> greenPoints = new ArrayList<Point3D_F64>();
-//      List<Point3D_F64> redPoints = new ArrayList<Point3D_F64>();
+     List<Point3D_F64> points2 = new ArrayList<Point3D_F64>();
       List<List<Point3D_F64>> points = new ArrayList<List<Point3D_F64>>();
       List<Vector3f> vectors = new ArrayList<Vector3f>();
       List<ColorRGBA> colors = new ArrayList<ColorRGBA>();
@@ -94,10 +95,10 @@ public class LidarOffsetCalculator extends SimpleApplication
          {
             
         	 Vector3f vec=new Vector3f((float) p.x, (float) p.y, (float) p.z);
-        	 if(vec.length() <5){ //&& vec.getZ()> -0.3f && vec.getZ() < 1.0f){
+        	 if(vec.length() <2){ //&& vec.getZ()> -0.3f && vec.getZ() < 1.0f){
                  points.get(i).add(p);
                  vectors.add(vec);
-                
+                 points2.add(p);
                  colors.add(color);
         	 }
             
@@ -109,57 +110,11 @@ public class LidarOffsetCalculator extends SimpleApplication
       ShapesFromPointCloudFileApp sp = new ShapesFromPointCloudFileApp("none");
       ShapeTranslator translator = new ShapeTranslator(this);
       
-      List<PointCloudShapeFinder.Shape> shapesRed = sp.run_ransac(points.get(0));
-      List<PointCloudShapeFinder.Shape> shapesGreen = sp.run_ransac(points.get(1));
-    
-//      renderPlane(zUpNode, translator, shapesGreen,ColorRGBA.Green);     
-//      renderPlane(zUpNode, translator, shapesRed,ColorRGBA.Red);
+      //calculateDistanceOffset(points2,zUpNode,sp,translator);
+     
+      calculateAngularOffset(points,zUpNode,sp,translator);
       
-     double threshold=0.4; 
-     List<PointCloudShapeFinder.Shape[]> finalShapes = new ArrayList<PointCloudShapeFinder.Shape[]>();
-     double planeAngle,min,minDist,avgAngle=0,avgDist=0;
-     PointCloudShapeFinder.Shape temps2;
-     for(PointCloudShapeFinder.Shape s1 : shapesGreen){
-    	 	
-    	 min=2* Math.PI;
-    	 temps2 = s1;
-    	 minDist=threshold;
-    	for(PointCloudShapeFinder.Shape s2 : shapesRed){
-    	
-    		 planeAngle = angle(s1,s2) ;
-    		
-    		 if(planeAngle< min){
-    			 	
-    			 GeoTuple3D_F64<GeoTuple3D_F64> g = calculateMean(s1.points);
-    	    	 double dist = calculateMean(s2.points).distance(g); 
-    	    	 if(dist<=threshold){
-    				 min = planeAngle;
-        			 temps2 = s2;
-        			 minDist = dist;
-    	    	 }
-    			
-    		 }
-    	 }
-    
-		 
-    	 if(temps2!=s1 && Math.toDegrees(min)<10){
-    		 avgAngle+=Math.toDegrees(min);
-    		 avgDist+=minDist;
-    		 System.out.println("min Angle"+Math.toDegrees(min));
-    		 System.out.println("distance"+ minDist);
-    	 PointCloudShapeFinder.Shape[] arr = new PointCloudShapeFinder.Shape[2]; 
-		 arr[0] = s1;
-		 arr[1] = temps2;
-		 finalShapes.add(arr);
-    	 }
-     }
-     avgAngle=avgAngle/finalShapes.size();
-     System.out.println("Avergae angle offset"+avgAngle);
-     avgDist=avgDist/finalShapes.size();
-     System.out.println("Avergae angle offset"+avgDist);
-     
-     renderPlane(zUpNode, translator, finalShapes,null);   
-     
+      
      
      
       PointCloud generator = new PointCloud(assetManager);
@@ -182,6 +137,77 @@ public class LidarOffsetCalculator extends SimpleApplication
    }
 
    
+private void calculateAngularOffset(List<List<Point3D_F64>> points,Node zUpNode, ShapesFromPointCloudFileApp sp, ShapeTranslator translator) {
+	// TODO Auto-generated method stub
+	List<PointCloudShapeFinder.Shape> shapesRed = sp.run_ransac(points.get(0),false);
+    List<PointCloudShapeFinder.Shape> shapesGreen = sp.run_ransac(points.get(1),false);
+  
+    renderPlane(zUpNode, translator, shapesGreen,ColorRGBA.Green);     
+    renderPlane(zUpNode, translator, shapesRed,ColorRGBA.Red);
+    
+   double threshold=1.0; 
+   List<PointCloudShapeFinder.Shape[]> finalShapes = new ArrayList<PointCloudShapeFinder.Shape[]>();
+   double planeAngle,min,minDist,avgAngle=0,avgDist=0;
+   PointCloudShapeFinder.Shape temps2;
+   for(PointCloudShapeFinder.Shape s1 : shapesGreen){
+  	 	
+  	 min=2* Math.PI;
+  	 temps2 = s1;
+  	 minDist=threshold;
+  	for(PointCloudShapeFinder.Shape s2 : shapesRed){
+  	
+  		 planeAngle = angle(s1,s2) ;
+  		
+  		 if(planeAngle< min){
+  			 	
+  			 GeoTuple3D_F64<GeoTuple3D_F64> g = calculateMean(s1.points);
+  	    	 double dist = calculateMean(s2.points).distance(g); 
+  	    	 
+  	    	 if(dist<=threshold){
+  				 min = planeAngle;
+      			 temps2 = s2;
+      			 minDist = dist;
+  	    	 }
+  			
+  		 }
+  	 }
+  
+  	 System.out.println("min Angle"+Math.toDegrees(min));
+		 System.out.println("distance"+ minDist);
+  	 if(temps2!=s1 && Math.toDegrees(min)<10){
+  		 avgAngle+=Math.toDegrees(min);
+  		 avgDist+=minDist;
+  		 System.out.println("min Angle"+Math.toDegrees(min));
+  		 System.out.println("distance"+ minDist);
+  	 PointCloudShapeFinder.Shape[] arr = new PointCloudShapeFinder.Shape[2]; 
+		 arr[0] = s1;
+		 arr[1] = temps2;
+		 finalShapes.add(arr);
+  	 }
+   }
+   avgAngle=avgAngle/finalShapes.size();
+   System.out.println("Avergae angle offset"+avgAngle);
+   avgDist=avgDist/finalShapes.size();
+   System.out.println("Avergae angle offset"+avgDist);
+   
+   renderPlane(zUpNode, translator, finalShapes,null);   
+   
+}
+
+private void calculateDistanceOffset(List<Point3D_F64> points2, Node zUpNode,ShapesFromPointCloudFileApp sp, ShapeTranslator translator) {
+	// TODO Auto-generated method stub
+	 List<PointCloudShapeFinder.Shape> shapes = sp.run_ransac(points2,true);
+     renderPlane(zUpNode, translator, shapes, ColorRGBA.Green);
+     System.out.println(shapes.size());
+     double distance = 0.0;
+     for(Point3D_F64 p : shapes.get(0).points){
+   	  distance+=Math.abs(Distance3D_F64.distance((PlaneGeneral3D_F64)shapes.get(0).parameters, p));
+   	  
+     }
+     distance/= shapes.get(0).points.size();
+     System.out.println("distance offset"+ 2*distance);
+}
+
 private <E> void renderPlane(Node zUpNode, ShapeTranslator translator, List<E> shapes,ColorRGBA color) {
 	float hue=0;
 	for(E s : shapes){
