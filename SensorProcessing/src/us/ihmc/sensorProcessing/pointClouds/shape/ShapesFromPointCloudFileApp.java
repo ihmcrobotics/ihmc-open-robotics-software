@@ -1,5 +1,28 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
+import georegression.struct.plane.PlaneGeneral3D_F64;
+import georegression.struct.plane.PlaneNormal3D_F64;
+import georegression.struct.point.Point3D_F64;
+import georegression.struct.point.Vector3D_F64;
+import georegression.struct.shapes.Cylinder3D_F64;
+import georegression.struct.shapes.Sphere3D_F64;
+
+import java.awt.Color;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.Callable;
+
+import org.ddogleg.struct.FastQueue;
+
+import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
+import us.ihmc.sensorProcessing.pointClouds.shape.ExpectationMaximizationFitter.ScoringFunction;
 import bubo.io.serialization.DataDefinition;
 import bubo.io.serialization.SerializationDefinitionManager;
 import bubo.io.text.ReadCsvObjectSmart;
@@ -11,6 +34,7 @@ import bubo.ptcloud.alg.ApproximateSurfaceNormals;
 import bubo.ptcloud.alg.ConfigSchnabel2007;
 import bubo.ptcloud.alg.PointVectorNN;
 import bubo.ptcloud.tools.PointCloudShapeTools;
+import bubo.ptcloud.wrapper.ConfigMultiShapeRansac;
 import bubo.ptcloud.wrapper.ConfigRemoveFalseShapes;
 import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
 import com.jme3.app.SimpleApplication;
@@ -269,7 +293,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
          public void run()
          {
             long time = System.currentTimeMillis();
-            PointCloudShapeFinder shapeFinder = applyRansac(cloud);
+            PointCloudShapeFinder shapeFinder = applyRansac(cloud,false);
             System.out.println("Ransac time: " + (System.currentTimeMillis() - time));
             time = System.currentTimeMillis();
 
@@ -495,7 +519,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       {
          public void run()
          {
-            PointCloudShapeFinder shapeFinder = applyRansac(cloud);
+            PointCloudShapeFinder shapeFinder = applyRansac(cloud,false);
 
             List<PointCloudShapeFinder.Shape> found = new ArrayList<Shape>(shapeFinder.getFound());
 
@@ -702,7 +726,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       findLocalPlane.start();
    }
 
-   private PointCloudShapeFinder applyRansac(List<Point3D_F64> cloud)
+   private PointCloudShapeFinder applyRansac(List<Point3D_F64> cloud, boolean fitSinglePlane)
    {
       CloudShapeTypes shapeTypes[] = new CloudShapeTypes[] { CloudShapeTypes.PLANE };//, CloudShapeTypes.CYLINDER, CloudShapeTypes.SPHERE};
 
@@ -714,10 +738,17 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
 
       configRansac.maximumAllowedIterations = 1500;
       configRansac.ransacExtension = 15;
+    
+      PointCloudShapeFinder shapeFinder; 
 
-      ConfigRemoveFalseShapes configMerge = new ConfigRemoveFalseShapes(0.7);
-
-      PointCloudShapeFinder shapeFinder = FactoryPointCloudShape.ransacOctree(configNormal, configRansac, configMerge);
+      if(fitSinglePlane){
+    	  ConfigMultiShapeRansac configMultiRansac = ConfigMultiShapeRansac.createDefault(20, 0.8, 0.20, shapeTypes);
+    	  shapeFinder = FactoryPointCloudShape.ransacSingle(configNormal, configMultiRansac);
+      }
+      else{
+    	  ConfigRemoveFalseShapes configMerge = new ConfigRemoveFalseShapes(0.7);
+    	  shapeFinder = FactoryPointCloudShape.ransacOctree(configNormal, configRansac, configMerge);
+      }
 
       shapeFinder.process(cloud, null);
       return shapeFinder;
@@ -932,8 +963,8 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       zUp.attachChild(boundsNode);
 
    }
-   public   List<PointCloudShapeFinder.Shape> run_ransac(List<Point3D_F64> cloud){
-	   PointCloudShapeFinder shapeFinder = applyRansac(cloud);
+   public   List<PointCloudShapeFinder.Shape> run_ransac(List<Point3D_F64> cloud, boolean fitSinglePlane){
+	   PointCloudShapeFinder shapeFinder = applyRansac(cloud,fitSinglePlane);
 
        List<PointCloudShapeFinder.Shape> found = new ArrayList<Shape>(shapeFinder.getFound());
 
