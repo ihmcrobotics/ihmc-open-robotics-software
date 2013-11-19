@@ -6,13 +6,14 @@ public class DRCRobotArmControllerParameters implements ArmControllerParameters
 {
    public double getKpAllArmJoints()
    {
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 100.0;
-      return 100.0; 
+      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 80.0;
+      return 80.0; 
    }
 
    public double getZetaAllArmJoints()
    {
-      return 0.8; //1.0;
+      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 0.6;
+      return 0.0;  // Lots of natural damping in the arms. Don't need to damp the controllers.
    }
 
    public double getMaxAccelerationAllArmJoints()
