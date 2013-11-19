@@ -147,7 +147,7 @@ public class DRCConfigParameters
    {
       if (DRCLocalConfigParameters.USING_REAL_HEAD)
       {
-         final float crc = -.0010908f;
+         final float crc = 0.0f;
          LIDAR_POINTS_PER_SWEEP = 1081;
          LIDAR_SWEEP_MIN_YAW = -2.356194f + crc;
          LIDAR_SWEEP_MAX_YAW = 2.356194f + crc;
@@ -186,14 +186,14 @@ public class DRCConfigParameters
    public static final float QUADTREE_HEIGHT_THRESHOLD = 0.05f;
    public static final double LIDAR_BLINDNESS_CYLINDAR_SQUARED_RADIUS = 0.1;
    public static final double LIDAR_Z_CUTOFF_ABOVE_HEAD = -0.5;
-   public static final double LIDAR_X_CUTOFF_AHEAD_OF_FEET = 0.0;
+   public static final double LIDAR_X_CUTOFF_AHEAD_OF_FEET = 0.25;
    
    // near scan
-   public static final double NEAR_SCAN_CYL_RADIUS = 4;
+   public static final double NEAR_SCAN_CYL_RADIUS = 3;
    public static final double NEAR_SCAN_CYL_Z_MAX = 0;
    public static final double NEAR_SCAN_CYL_Z_MIN = -2.5;
-   public static final float NEAR_SCAN_RESOLUTION = .01f;
-   public static final long NEAR_SCAN_DECAY_MILLIS = 30000;    // -1 to turn off decay
+   public static final float NEAR_SCAN_RESOLUTION = .015f;
+   public static final long NEAR_SCAN_DECAY_MILLIS = 10000;    // -1 to turn off decay
    public static final int NEAR_SCAN_CAPACITY = 100000;
    
    // LIDAR point cloud processing

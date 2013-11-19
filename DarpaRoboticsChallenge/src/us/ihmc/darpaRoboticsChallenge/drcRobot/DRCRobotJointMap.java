@@ -154,9 +154,9 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
                   // finger[0]/joint_base
                   // finger[0]/flexible_joint_flex_from_9_to_distal
                   handGroundContactPoints.get(robotSide).add(new Pair<String,
-                          Vector3d>(longPrefix + "finger[" + (int) fJointContactOffsets[1]
+                          Vector3d>(longPrefix + "finger_" + (int) fJointContactOffsets[1]
                                     + ((fJointContactOffsets[2] == 0.0)
-                                       ? "]joint_base" : "]flexible_joint_flex_from_9_to_distal"), new Vector3d(fJointContactOffsets[3],
+                                       ? "_joint_base" : "_flexible_joint_flex_from_9_to_distal"), new Vector3d(fJointContactOffsets[3],
                                           fJointContactOffsets[4], fJointContactOffsets[5])));
                }
             }
