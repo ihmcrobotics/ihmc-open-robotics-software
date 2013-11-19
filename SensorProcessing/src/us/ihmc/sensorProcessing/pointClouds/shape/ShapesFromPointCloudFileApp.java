@@ -1,28 +1,5 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
-import georegression.struct.plane.PlaneGeneral3D_F64;
-import georegression.struct.plane.PlaneNormal3D_F64;
-import georegression.struct.point.Point3D_F64;
-import georegression.struct.point.Vector3D_F64;
-import georegression.struct.shapes.Cylinder3D_F64;
-import georegression.struct.shapes.Sphere3D_F64;
-
-import java.awt.Color;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.Callable;
-
-import org.ddogleg.struct.FastQueue;
-
-import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
-import us.ihmc.sensorProcessing.pointClouds.shape.ExpectationMaximizationFitter.ScoringFunction;
 import bubo.io.serialization.DataDefinition;
 import bubo.io.serialization.SerializationDefinitionManager;
 import bubo.io.text.ReadCsvObjectSmart;
@@ -36,15 +13,10 @@ import bubo.ptcloud.alg.PointVectorNN;
 import bubo.ptcloud.tools.PointCloudShapeTools;
 import bubo.ptcloud.wrapper.ConfigRemoveFalseShapes;
 import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
-
 import com.jme3.app.SimpleApplication;
+import com.jme3.input.KeyInput;
 import com.jme3.input.RawInputListener;
-import com.jme3.input.event.JoyAxisEvent;
-import com.jme3.input.event.JoyButtonEvent;
-import com.jme3.input.event.KeyInputEvent;
-import com.jme3.input.event.MouseButtonEvent;
-import com.jme3.input.event.MouseMotionEvent;
-import com.jme3.input.event.TouchEvent;
+import com.jme3.input.event.*;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
@@ -63,6 +35,23 @@ import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.shape.Box;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.shadow.EdgeFilteringMode;
+import georegression.struct.plane.PlaneGeneral3D_F64;
+import georegression.struct.plane.PlaneNormal3D_F64;
+import georegression.struct.point.Point3D_F64;
+import georegression.struct.point.Vector3D_F64;
+import georegression.struct.shapes.Cylinder3D_F64;
+import georegression.struct.shapes.Sphere3D_F64;
+import org.ddogleg.struct.FastQueue;
+import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
+import us.ihmc.sensorProcessing.pointClouds.shape.ExpectationMaximizationFitter.ScoringFunction;
+
+import java.awt.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.*;
+import java.util.List;
+import java.util.concurrent.Callable;
 
 /**
  * @author Peter Abeles
@@ -1046,12 +1035,12 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       translateSpeed = 0.05f;
 
       // up 200 left 203 right 205 down 208
-      if ((evt.getKeyCode() == 29) || (evt.getKeyCode() == 157))
+      if ((evt.getKeyCode() == KeyInput.KEY_LCONTROL) || (evt.getKeyCode() == KeyInput.KEY_RCONTROL))
       {
          ctrlPressed = evt.isPressed();
       }
 
-      if (evt.getKeyCode() == 57)
+      if (evt.getKeyCode() == KeyInput.KEY_SPACE)
       {
          spacePressed = evt.isPressed();
       }
@@ -1063,14 +1052,14 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
 
       if (ctrlPressed)
       {
-         if ((evt.getKeyCode() == 23) && evt.isPressed())
+         if ((evt.getKeyCode() == KeyInput.KEY_I) && evt.isPressed())
          {
             Vector3f current = boundsNode.getLocalTranslation().clone();
             current.z += translateSpeed;
             boundsNode.setLocalTranslation(current);
             updateAfterMoveIfRequired();
          }
-         else if ((evt.getKeyCode() == 37) && evt.isPressed())
+         else if ((evt.getKeyCode() == KeyInput.KEY_K) && evt.isPressed())
          {
             Vector3f current = boundsNode.getLocalTranslation().clone();
             current.z -= translateSpeed;
@@ -1080,14 +1069,14 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       }
       else
       {
-         if ((evt.getKeyCode() == 23) && evt.isPressed())
+         if ((evt.getKeyCode() == KeyInput.KEY_I) && evt.isPressed())
          {
             Vector3f current = boundsNode.getLocalTranslation().clone();
             current.x += translateSpeed;
             boundsNode.setLocalTranslation(current);
             updateAfterMoveIfRequired();
          }
-         else if ((evt.getKeyCode() == 37) && evt.isPressed())
+         else if ((evt.getKeyCode() == KeyInput.KEY_K) && evt.isPressed())
          {
             Vector3f current = boundsNode.getLocalTranslation().clone();
             current.x -= translateSpeed;
@@ -1096,14 +1085,14 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
          }
       }
 
-      if ((evt.getKeyCode() == 36) && evt.isPressed())
+      if ((evt.getKeyCode() == KeyInput.KEY_J) && evt.isPressed())
       {
          Vector3f current = boundsNode.getLocalTranslation().clone();
          current.y += translateSpeed;
          boundsNode.setLocalTranslation(current);
          updateAfterMoveIfRequired();
       }
-      else if ((evt.getKeyCode() == 38) && evt.isPressed())
+      else if ((evt.getKeyCode() == KeyInput.KEY_L) && evt.isPressed())
       {
          Vector3f current = boundsNode.getLocalTranslation().clone();
          current.y -= translateSpeed;
@@ -1111,7 +1100,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
          updateAfterMoveIfRequired();
       }
 
-      if (evt.getKeyCode() == 13)
+      if (evt.getKeyCode() == KeyInput.KEY_0)
       {
          if (evt.isPressed())
          {
@@ -1128,7 +1117,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
          }
       }
 
-      if ((evt.getKeyCode() == 28) && evt.isPressed())
+      if ((evt.getKeyCode() == KeyInput.KEY_RETURN) && evt.isPressed())
       {
          // hide the box
          boundsNode.setCullHint(CullHint.Always);
