@@ -11,6 +11,7 @@ import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.BlindWalkingPacket;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.packets.ComHeightPacket;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.DRCController;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01;
@@ -117,10 +118,15 @@ public class DRCSimulationTestHelper
    {
       networkObjectCommunicator.sendFootstepListToListeners(footstepDataList);
    }
-   
+
    public void sendFootstepListToListeners(BlindWalkingPacket blindWalkingPacket)
    {
       networkObjectCommunicator.sendBlindWalkingPacketToListeners(blindWalkingPacket);
+   }
+
+   public void sendComHeightPacketToListeners(ComHeightPacket comHeightPacket)
+   {
+      networkObjectCommunicator.sendComHeightPacketToListeners(comHeightPacket);
    }
 
    public DRCObstacleCourseSimulation getDRCSimulation()

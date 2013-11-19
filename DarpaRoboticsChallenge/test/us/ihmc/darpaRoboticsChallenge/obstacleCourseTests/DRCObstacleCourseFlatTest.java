@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
+import us.ihmc.commonWalkingControlModules.packets.ComHeightPacket;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCEnvironmentModel;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
@@ -165,7 +166,7 @@ public class DRCObstacleCourseFlatTest
       
       BambooTools.reportTestFinishedMessage();
    }
-   
+
    @Test
    public void testWalkingUpToRampWithLongSteps() throws SimulationExceededMaximumTimeException
    {
@@ -196,12 +197,45 @@ public class DRCObstacleCourseFlatTest
       
       BambooTools.reportTestFinishedMessage();
    }
+
+   @Test
+   public void testWalkingUpToRampWithLongStepsAndOccasionallyStraightKnees() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
+      DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingUpToRampLongStepsTest", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie);
+
+      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
+      ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
+
+      setupCameraForWalkingUpToRamp(simulationConstructionSet);
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+
+      FootstepDataList footstepDataList = createFootstepsForWalkingOnFlatLongSteps(scriptedFootstepGenerator);
+//      FootstepDataList footstepDataList = createFootstepsForTwoLongFlatSteps(scriptedFootstepGenerator);
+      drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
+      drcSimulationTestHelper.sendComHeightPacketToListeners(new ComHeightPacket(0.08));
+
+      
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(15.0);
+      
+      drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
+      drcSimulationTestHelper.checkNothingChanged();
+
+      assertTrue(success);
+      
+      BambooTools.reportTestFinishedMessage();
+   }
    
 
    private void setupCameraForWalkingUpToRamp(SimulationConstructionSet scs)
    {
-      Point3d cameraFix = new Point3d(1.56, -0.2, 0.89);
-      Point3d cameraPosition = new Point3d(2.2, -7.8, 1.6);
+      Point3d cameraFix = new Point3d(1.8375, -0.16, 0.89);
+      Point3d cameraPosition = new Point3d(1.10, 8.30, 1.37);
 
       drcSimulationTestHelper.setupCameraForUnitTest(scs, cameraFix, cameraPosition);
    }
