@@ -186,7 +186,7 @@ public class DRCConfigParameters
    public static final float QUADTREE_HEIGHT_THRESHOLD = 0.05f;
    public static final double LIDAR_BLINDNESS_CYLINDAR_SQUARED_RADIUS = 0.1;
    public static final double LIDAR_Z_CUTOFF_ABOVE_HEAD = -0.5;
-   public static final double LIDAR_X_CUTOFF_AHEAD_OF_FEET = 0.25;
+   public static final double LIDAR_X_CUTOFF_AHEAD_OF_FEET = 0.0; //0.25;
    
    // near scan
    public static final double NEAR_SCAN_CYL_RADIUS = 4.0; //3.0;
