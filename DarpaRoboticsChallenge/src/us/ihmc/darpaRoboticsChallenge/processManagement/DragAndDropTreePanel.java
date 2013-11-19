@@ -50,7 +50,6 @@ public class DragAndDropTreePanel extends JPanel
       c.gridx = 0;
       c.gridy = 0;
       c.gridheight = 2;
-      c.ipady = 30;
       c.weighty = 1;
       JLabel listLabel = new JLabel(listTitle, JLabel.CENTER);
       this.add(listLabel, c);

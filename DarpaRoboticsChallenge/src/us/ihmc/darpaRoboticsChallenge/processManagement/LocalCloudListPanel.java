@@ -51,17 +51,15 @@ public class LocalCloudListPanel extends JPanel
       c.gridy = 0;
       c.gridheight = 2;
       c.ipady = 0;
-      c.weighty = 1;
-      JLabel label = new JLabel("Local Cloud List:", JLabel.CENTER);
+      JLabel label = new JLabel("Local Cloud List", JLabel.CENTER);
       this.add(label, c);
 
       c.gridy += 2;
-      c.gridheight = 16;
-      c.ipady = 0;
-      c.weighty = 0;
+      c.weighty = 1;
+      c.fill = GridBagConstraints.VERTICAL;
 
       localCloudListScrollPane = new JScrollPane(new JPanel());
-      localCloudListScrollPane.setPreferredSize(new Dimension(400, 300));
+      localCloudListScrollPane.setPreferredSize(new Dimension(220, 300));
 
       ImageIcon goodConnectionIcon = new ImageIcon(LocalCloudListPanel.class.getResource("good_connection.png"));
       ImageIcon badConnectionIcon = new ImageIcon(LocalCloudListPanel.class.getResource("bad_connection.png"));
