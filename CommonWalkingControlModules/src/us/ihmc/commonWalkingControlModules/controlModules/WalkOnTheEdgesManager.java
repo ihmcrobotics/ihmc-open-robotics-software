@@ -94,9 +94,10 @@ public class WalkOnTheEdgesManager
    private Footstep desiredFootstep;
 
    private final double inPlaceWidth;
+   private final double footLength;
 
    public WalkOnTheEdgesManager(WalkingControllerParameters walkingControllerParameters, WalkOnTheEdgesProviders walkOnTheEdgesProviders,
-         double inPlaceWidth, SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<EndEffectorControlModule> footEndEffectorControlModules,
+         SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<EndEffectorControlModule> footEndEffectorControlModules,
          YoVariableRegistry parentRegistry)
    {
       this.stayOnToes.set(walkingControllerParameters.stayOnToes());
@@ -111,13 +112,14 @@ public class WalkOnTheEdgesManager
       this.footEndEffectorControlModules = footEndEffectorControlModules;
       desiredFootstep = null;
       
-      this.inPlaceWidth = inPlaceWidth;
+      this.inPlaceWidth = walkingControllerParameters.getInPlaceWidth();
+      this.footLength = walkingControllerParameters.getFootBackwardOffset() + walkingControllerParameters.getFootForwardOffset();
 
       onToesTriangleAreaLimit.set(0.01);
 
-      extraCoMMaxHeightWithToes.set(0.07);
+      extraCoMMaxHeightWithToes.set(0.06);
 
-      minStepLengthForToeOff.set(0.10);
+      minStepLengthForToeOff.set(Math.max(0.10, footLength));
       minStepHeightForToeOff.set(0.10);
 
       minStepLengthForToeTouchdown.set(0.40);
@@ -205,7 +207,7 @@ public class WalkOnTheEdgesManager
       tempTrailingFootPosition.setToZero(trailingFootFrame);
       tempLeadingFootPosition.changeFrame(trailingFootFrame);
       
-      if (Math.abs(tempLeadingFootPosition.getY()) > trailingLeg.negateIfRightSide(inPlaceWidth))
+      if (Math.abs(tempLeadingFootPosition.getY()) > inPlaceWidth)
          tempLeadingFootPosition.setY(tempLeadingFootPosition.getY() + trailingLeg.negateIfRightSide(inPlaceWidth));
       else
          tempLeadingFootPosition.setY(0.0);
@@ -234,7 +236,8 @@ public class WalkOnTheEdgesManager
          return false;
 
       boolean isStepLongEnough = tempLeadingFootPosition.distance(tempTrailingFootPosition) > minStepLengthForToeOff.getDoubleValue();
-      return isStepLongEnough;
+      boolean isStepLongEnoughAlongX = tempLeadingFootPosition.getX() > footLength;
+      return isStepLongEnough && isStepLongEnoughAlongX;
    }
 
    @SuppressWarnings("unused")
@@ -518,13 +521,12 @@ public class WalkOnTheEdgesManager
 
    public boolean isEdgeTouchDownDone(RobotSide robotSide)
    {
-
       if (!doToeTouchdownIfPossible.getBooleanValue() && !doHeelTouchdownIfPossible.getBooleanValue())
          return true;
 
       if (!doToeTouchdown.getBooleanValue() && !doHeelTouchdown.getBooleanValue())
          return true;
-      
+
       if (desiredFootstep != null)
       {
          desiredAngleReached.get(robotSide).set(false);
@@ -533,18 +535,18 @@ public class WalkOnTheEdgesManager
          footOrientationInWorld.get(robotSide).set(footFrameOrientation);
          FrameOrientation desiredOrientation = new FrameOrientation(desiredFootstep.getPoseReferenceFrame());
          desiredOrientation.changeFrame(worldFrame);
-         
-//         double yawDifference = footFrameOrientation.getYawPitchRoll()[0] - desiredOrientation.getYawPitchRoll()[0];
+
          double pitchDifference = footFrameOrientation.getYawPitchRoll()[1] - desiredOrientation.getYawPitchRoll()[1];
          double rollDifference = footFrameOrientation.getYawPitchRoll()[2] - desiredOrientation.getYawPitchRoll()[2];
-         
+
          angleFootsWithDesired.get(robotSide).set(pitchDifference);
-         
-         if(Math.abs(pitchDifference) < 0.1 && Math.abs(rollDifference) < 0.1)
+
+         if (Math.abs(pitchDifference) < 0.1 && Math.abs(rollDifference) < 0.1)
          {
             desiredAngleReached.get(robotSide).set(true);
             enabledDoubleState.set(true);
-         }else
+         }
+         else
          {
             enabledDoubleState.set(false);
          }
