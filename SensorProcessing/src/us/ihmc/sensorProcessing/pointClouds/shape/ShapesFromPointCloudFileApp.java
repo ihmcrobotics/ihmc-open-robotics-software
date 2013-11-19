@@ -943,7 +943,24 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       zUp.attachChild(boundsNode);
 
    }
+   public   List<PointCloudShapeFinder.Shape> run_ransac(List<Point3D_F64> cloud){
+	   PointCloudShapeFinder shapeFinder = applyRansac(cloud);
 
+       List<PointCloudShapeFinder.Shape> found = new ArrayList<Shape>(shapeFinder.getFound());
+
+       List<Point3D_F64> unmatched = new ArrayList<Point3D_F64>();
+       shapeFinder.getUnmatched(unmatched);
+
+       System.out.println("Unmatched points " + unmatched.size());
+       System.out.println("total shapes found: " + found.size());
+
+       //filter(found, .25, 200);
+
+      // renderShapes(found);
+       System.out.println("RANSAC COMPLETE THANK YOU FOR YOUR PATIENCE");
+       return found;
+   }
+   
    private List<Point3D_F64> readPointCloud(int maxLines, Vector3f min, Vector3f max)
    {
       List<Point3D_F64> cloud = new ArrayList<Point3D_F64>();
