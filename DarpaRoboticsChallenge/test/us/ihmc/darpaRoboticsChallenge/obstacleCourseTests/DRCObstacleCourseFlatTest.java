@@ -233,9 +233,8 @@ public class DRCObstacleCourseFlatTest
       BambooTools.reportTestFinishedMessage();
    }
 
-   @Ignore("Broken until fixed")
    @Test
-   public void testTuorrningInPlaceAndPassingPI() throws SimulationExceededMaximumTimeException
+   public void testTurningInPlaceAndPassingPI() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -257,18 +256,16 @@ public class DRCObstacleCourseFlatTest
       
       final DoubleYoVariable pelvisOrientationError = (DoubleYoVariable) simulationConstructionSet.getVariable(
             "WalkingHighLevelHumanoidController.RootJointAngularAccelerationControlModule.pelvisAxisAngleOrientationController", "pelvisOrientationError");
-//      SDFRobot robot = drcSimulationTestHelper.getRobot();
       
-      SimulationDoneCriterion foo = new SimulationDoneCriterion()
+      SimulationDoneCriterion checkPelvisOrientationError = new SimulationDoneCriterion()
       {
          public boolean isSimulationDone()
          {
-//            return false;
-            return (Math.abs(pelvisOrientationError.getDoubleValue()) > 1.0);
+            return (Math.abs(pelvisOrientationError.getDoubleValue()) > 0.3);
          }
       };
       
-      simulationConstructionSet.setSimulateDoneCriterion(foo);
+      simulationConstructionSet.setSimulateDoneCriterion(checkPelvisOrientationError);
       
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(12.0);
       
