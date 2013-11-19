@@ -20,7 +20,9 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.SimulationDoneCriterion;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class DRCObstacleCourseFlatTest
@@ -233,7 +235,7 @@ public class DRCObstacleCourseFlatTest
 
    @Ignore("Broken until fixed")
    @Test
-   public void testTurningInPlaceAndPassingPI() throws SimulationExceededMaximumTimeException
+   public void testTuorrningInPlaceAndPassingPI() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -252,6 +254,21 @@ public class DRCObstacleCourseFlatTest
       FootstepDataList footstepDataList = createFootstepsForTurningInPlaceAndPassingPI(scriptedFootstepGenerator);
       drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
 
+      
+      final DoubleYoVariable pelvisOrientationError = (DoubleYoVariable) simulationConstructionSet.getVariable(
+            "WalkingHighLevelHumanoidController.RootJointAngularAccelerationControlModule.pelvisAxisAngleOrientationController", "pelvisOrientationError");
+//      SDFRobot robot = drcSimulationTestHelper.getRobot();
+      
+      SimulationDoneCriterion foo = new SimulationDoneCriterion()
+      {
+         public boolean isSimulationDone()
+         {
+//            return false;
+            return (Math.abs(pelvisOrientationError.getDoubleValue()) > 1.0);
+         }
+      };
+      
+      simulationConstructionSet.setSimulateDoneCriterion(foo);
       
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(12.0);
       

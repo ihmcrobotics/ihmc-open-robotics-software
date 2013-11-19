@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
 
-import com.yobotics.simulationconstructionset.time.GlobalTimer;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.BlindWalkingPacket;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
@@ -22,12 +22,13 @@ import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.TimerTaskScheduler;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.time.GlobalTimer;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
-import us.ihmc.utilities.TimerTaskScheduler;
 
 public class DRCSimulationTestHelper
 {
@@ -60,7 +61,7 @@ public class DRCSimulationTestHelper
       
       drcSimulation = DRCDemo01.startDRCSim(networkObjectCommunicator, selectedLocation, selectedEnvironment, initializeEstimatorToActual,
             startOutsidePen, automaticallyStartSimulation, startDRCNetworkProcessor, createLoadOfContactPointForTheFeet);
-
+      
       blockingSimulationRunner = new BlockingSimulationRunner(drcSimulation.getSimulationConstructionSet(), 60.0 * 10.0);
 
       if (checkNothingChanged)
@@ -129,6 +130,11 @@ public class DRCSimulationTestHelper
       networkObjectCommunicator.sendComHeightPacketToListeners(comHeightPacket);
    }
 
+   public SDFRobot getRobot()
+   {
+      return drcSimulation.getRobot();
+   }
+   
    public DRCObstacleCourseSimulation getDRCSimulation()
    {
       return drcSimulation;
