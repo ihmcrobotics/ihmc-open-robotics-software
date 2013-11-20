@@ -33,7 +33,6 @@ public class DRCConfigParameters
    public static final boolean USE_SUPER_DUPER_HIGH_RESOLUTION_FOR_COMMS = false;
 
    public static final boolean USE_HYDRA = false;
-   public static final boolean USE_FISHEYE = true;
 
    public static final boolean LIMIT_CONTROLLER_OUTPUT_TORQUES = false;    // true;//True causes hip oscillations or jerk in simulation
 

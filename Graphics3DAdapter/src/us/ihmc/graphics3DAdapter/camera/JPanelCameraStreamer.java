@@ -25,17 +25,17 @@ public class JPanelCameraStreamer extends JPanel implements VideoStreamer, Camer
       repaint();
    }
 
-   public void setIntrinsic(IntrinsicParameters param, int cameraId)
+   public void setIntrinsic(IntrinsicParameters param)
    {
 
    }
 
-   public synchronized void updateImage(BufferedImage bufferedImage, Point3d cameraPosition, Quat4d cameraOrientation, double fov, int camID)
+   public synchronized void updateImage(BufferedImage bufferedImage, Point3d cameraPosition, Quat4d cameraOrientation, double fov)
    {
       updateImage(bufferedImage);
    }
    
-   public synchronized void updateImage(BufferedImage bufferedImage, long timeStamp, Point3d cameraPosition, Quat4d cameraOrientation, double fov, int cameraSourceId)
+   public synchronized void updateImage(BufferedImage bufferedImage, long timeStamp, Point3d cameraPosition, Quat4d cameraOrientation, double fov)
    {
       updateImage(bufferedImage);
    }

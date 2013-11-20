@@ -2,6 +2,9 @@ package us.ihmc.graphics3DAdapter.camera;
 
 import java.awt.image.BufferedImage;
 
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+
 import us.ihmc.graphics3DAdapter.camera.VideoSettings.VideoCompressionKey;
 import us.ihmc.utilities.net.NetStateListener;
 import us.ihmc.utilities.net.ObjectCommunicator;
@@ -15,7 +18,7 @@ import com.xuggle.xuggler.IVideoPicture;
 import com.xuggle.xuggler.video.ConverterFactory;
 import com.xuggle.xuggler.video.IConverter;
 
-public class CompressedVideoDataClient implements ObjectConsumer<VideoPacket>, NetStateListener
+public class CompressedVideoDataClient implements NetStateListener
 {
    private final VideoStreamer videoStreamer;
    private VideoCompressionKey videoCompressionKey = null;
@@ -23,12 +26,9 @@ public class CompressedVideoDataClient implements ObjectConsumer<VideoPacket>, N
    private IVideoPicture pictureIn;
    private IConverter converter;
 
-   public CompressedVideoDataClient(ObjectCommunicator objectCommunicator, VideoStreamer videoStreamer)
+   public CompressedVideoDataClient(VideoStreamer videoStreamer)
    {
       this.videoStreamer = videoStreamer;
-
-      objectCommunicator.attachStateListener(this);
-      objectCommunicator.attachListener(VideoPacket.class, this);
    }
 
    
@@ -64,19 +64,19 @@ public class CompressedVideoDataClient implements ObjectConsumer<VideoPacket>, N
       this.videoCompressionKey = videoCompressionKey; 
    }
 
-   public synchronized void consumeObject(VideoPacket packetData)
+   public synchronized void consumeObject(VideoCompressionKey videoCompressionKey, byte[] data, Point3d position, Quat4d orientation, double fov)
    {
-      if(inputStreamCoder == null || videoCompressionKey != packetData.getVideoCompressionKey())
+      if(inputStreamCoder == null || this.videoCompressionKey != videoCompressionKey)
       {
-         initialize(packetData.getVideoCompressionKey());
+         initialize(videoCompressionKey);
       }
       
-      IPacket packet = IPacket.make(IBuffer.make(null, packetData.getData(), 0, packetData.getData().length));
+      IPacket packet = IPacket.make(IBuffer.make(null, data, 0, data.length));
       inputStreamCoder.decodeVideo(pictureIn, packet, 0);
 
       if (pictureIn.isComplete())
       {
-         videoStreamer.updateImage(converter.toImage(pictureIn), packetData.getPosition(), packetData.getOrientation(), packetData.getFieldOfView(), packetData.getCameraSourceId());
+         videoStreamer.updateImage(converter.toImage(pictureIn), position, orientation, fov);
       }
       else
       {
@@ -100,6 +100,19 @@ public class CompressedVideoDataClient implements ObjectConsumer<VideoPacket>, N
    public void disconnected()
    {
       close();
+   }
+   
+   public void attachVideoPacketListener(ObjectCommunicator communicator)
+   {
+      communicator.attachListener(VideoPacket.class, new ObjectConsumer<VideoPacket>()
+      {
+         @Override
+         public void consumeObject(VideoPacket object)
+         {
+            CompressedVideoDataClient.this.consumeObject(object.getVideoCompressionKey(), object.getData(), object.getPosition(), object.getOrientation(), object.getFieldOfView());
+         }
+      });
+      communicator.attachStateListener(this);
    }
 
 }

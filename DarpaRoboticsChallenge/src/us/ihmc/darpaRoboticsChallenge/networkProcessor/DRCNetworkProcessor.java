@@ -1,6 +1,9 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor;
 
-import com.martiansoftware.jsap.*;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AlwaysZeroOffsetPPSTimestampOffsetProvider;
@@ -13,12 +16,10 @@ import us.ihmc.darpaRoboticsChallenge.configuration.DRCNetClassList;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCSensorParameters;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.GazeboCameraReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.MultiSenseCameraInfoReciever;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.SCSCameraDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.GazeboLidarDataReceiver;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.LidarDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.RobotBoundingBoxes;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.SCSLidarDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosNativeNetworkProcessor;
@@ -28,12 +29,18 @@ import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.DRCJointConfigura
 import us.ihmc.graphics3DAdapter.camera.VideoSettings;
 import us.ihmc.graphics3DAdapter.camera.VideoSettingsFactory;
 import us.ihmc.sensorProcessing.sensorData.AtlasWristFeetSensorPacket;
-import us.ihmc.utilities.net.*;
+import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
+import us.ihmc.utilities.net.KryoObjectClient;
+import us.ihmc.utilities.net.LocalObjectCommunicator;
+import us.ihmc.utilities.net.ObjectCommunicator;
+import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.utilities.ros.RosMainNode;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAP;
+import com.martiansoftware.jsap.JSAPException;
+import com.martiansoftware.jsap.JSAPResult;
+import com.martiansoftware.jsap.Switch;
 
 public class DRCNetworkProcessor
 {
@@ -83,12 +90,12 @@ public class DRCNetworkProcessor
          {
             rosNativeNetworkProcessor = null;
          }
-         CameraDataReceiver cameraDataReceiver = new GazeboCameraReceiver(robotPoseBuffer, videoSettings, rosMainNode, networkingManager,
+         new GazeboCameraReceiver(robotPoseBuffer, videoSettings, rosMainNode, networkingManager,
                DRCSensorParameters.FIELD_OF_VIEW, ppsTimestampOffsetProvider);
          MultiSenseCameraInfoReciever cameraInfoServer = new MultiSenseCameraInfoReciever(rosMainNode, networkingManager.getControllerStateHandler());
          networkingManager.getControllerCommandHandler().setIntrinsicServer(cameraInfoServer);
          
-         LidarDataReceiver lidarDataReceiver = new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, fullRobotModel, robotBoundingBoxes,
+         new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, fullRobotModel, robotBoundingBoxes,
                jointMap, fieldComputerClient, rosNativeNetworkProcessor, ppsTimestampOffsetProvider);
          
          ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);

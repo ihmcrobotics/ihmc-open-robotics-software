@@ -1,7 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.camera;
 
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.media.j3d.Transform3D;
@@ -9,28 +8,30 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import geometry_msgs.Transform;
 import us.ihmc.atlas.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.driving.DRCStereoListener;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.messages.controller.RobotPoseData;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
-import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorControllerStateHandler;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSNativeTransformTools;
 import us.ihmc.graphics3DAdapter.camera.CompressedVideoDataServer;
+import us.ihmc.graphics3DAdapter.camera.CompressedVideoHandler;
 import us.ihmc.graphics3DAdapter.camera.VideoPacket;
 import us.ihmc.graphics3DAdapter.camera.VideoSettings;
+import us.ihmc.graphics3DAdapter.camera.VideoSettingsFactory;
+import us.ihmc.graphics3DAdapter.camera.VideoSettings.VideoCompressionKey;
+import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
-import us.ihmc.utilities.net.NetStateListener;
-import us.ihmc.utilities.net.ObjectCommunicator;
-import us.ihmc.utilities.net.ObjectConsumer;
 
 public abstract class CameraDataReceiver
 {
    private final RobotPoseBuffer robotPoseBuffer;
-   private final CompressedVideoDataServer compressedVideoDataServer;
+   private final CompressedVideoDataServer multiSenseDataServer;
+   private final SideDependentList<CompressedVideoDataServer> fisheyeDataServers = new SideDependentList<>();
+   
    private final ArrayList<DRCStereoListener> stereoListeners = new ArrayList<DRCStereoListener>();
 
    private final Point3d cameraPosition = new Point3d();
@@ -44,52 +45,11 @@ public abstract class CameraDataReceiver
    private final Transform3D cameraPose;
 
    public CameraDataReceiver(RobotPoseBuffer robotPoseBuffer, VideoSettings videoSettings, final DRCNetworkProcessorNetworkingManager networkingManager,
-                             PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
+         PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
    {
       this.robotPoseBuffer = robotPoseBuffer;
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.cameraPose = new Transform3D();
-      final DRCNetworkProcessorControllerStateHandler controllerStateHandler = networkingManager.getControllerStateHandler();
-
-      ObjectCommunicator videoConsumer = new ObjectCommunicator()
-      {
-         @Override
-         public void consumeObject(Object object)
-         {
-            if (object instanceof VideoPacket)
-            {
-               controllerStateHandler.sendVideoPacket((VideoPacket) object);
-            }
-         }
-
-         @Override
-         public boolean isConnected()
-         {
-            return networkingManager.isConnected();
-         }
-
-         @Override
-         public void close()
-         {
-            networkingManager.close();
-         }
-
-         @Override
-         public void attachStateListener(NetStateListener stateListener)
-         {
-            networkingManager.attachStateListener(stateListener);
-         }
-
-         @Override
-         public <T> void attachListener(Class<T> clazz, ObjectConsumer<T> listener)
-         {
-         }
-
-         @Override
-         public void connect() throws IOException
-         {
-         }
-      };
 
       if (DRCLocalConfigParameters.USE_ROS_FOR_MULTISENSE_TRANSFORMS)
       {
@@ -101,8 +61,14 @@ public abstract class CameraDataReceiver
          rosTransformProvider = null;
       }
 
-      compressedVideoDataServer = new CompressedVideoDataServer(videoSettings, videoConsumer);
-      networkingManager.getControllerCommandHandler().setVideoCommandListener(compressedVideoDataServer);
+      multiSenseDataServer = new CompressedVideoDataServer(videoSettings, new MultiSenseHandler(networkingManager));
+      networkingManager.getControllerCommandHandler().setVideoCommandListener(multiSenseDataServer);
+      
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         CompressedVideoDataServer fisheyeCompressor = new CompressedVideoDataServer(VideoSettingsFactory.getFishEyeSettings(), new FishEyeHandler(robotSide, networkingManager));
+         fisheyeDataServers.put(robotSide, fisheyeCompressor);
+      }
 
    }
 
@@ -138,23 +104,12 @@ public abstract class CameraDataReceiver
 
       cameraPose.get(cameraOrientation, tempVector);
       cameraPosition.set(tempVector);
-      compressedVideoDataServer.updateImage(bufferedImage, timeStamp, cameraPosition, cameraOrientation, fov, DRCConfigParameters.MULTISENSE_LEFT_CAMERA);
+      multiSenseDataServer.updateImage(bufferedImage, timeStamp, cameraPosition, cameraOrientation, fov);
    }
 
-   protected void updateFishEyeImage(BufferedImage bufferedImage, long timeStamp, double fov, int sourceId)
+   protected void updateFishEyeImage(RobotSide robotSide, BufferedImage bufferedImage, long timeStamp, double fov)
    {
-      RobotPoseData robotPoseData = robotPoseBuffer.floorEntry(ppsTimestampOffsetProvider.ajustTimeStampToRobotClock(timeStamp));
-
-      if (robotPoseData == null)
-      {
-         return;
-      }
-
-      robotPoseData.getCameraPose().get(cameraOrientation, tempVector);
-      cameraPosition.set(tempVector);
-      compressedVideoDataServer.updateImage(bufferedImage, timeStamp, cameraPosition, cameraOrientation, fov, sourceId);
-
-
+      fisheyeDataServers.get(robotSide).updateImage(bufferedImage, timeStamp, null, null, fov);
    }
 
    protected void getHeadToCameraTransform(long rosTimestamp)
@@ -162,8 +117,7 @@ public abstract class CameraDataReceiver
       if (ppsTimestampOffsetProvider.offsetIsDetermined())
       {
          long robotTimestamp = ppsTimestampOffsetProvider.ajustTimeStampToRobotClock(rosTimestamp);
-         TimeStampedTransform3D transformFromRos = rosTransformProvider.getTimeStampedTransform("/left_camera_frame", "/head", rosTimestamp,
-                                                      robotTimestamp);
+         TimeStampedTransform3D transformFromRos = rosTransformProvider.getTimeStampedTransform("/left_camera_frame", "/head", rosTimestamp, robotTimestamp);
          rosTransformFromHeadBaseToCamera = transformFromRos.getTransform3D();
       }
    }
@@ -179,6 +133,67 @@ public abstract class CameraDataReceiver
    public void registerCameraListener(DRCStereoListener drcStereoListener)
    {
       stereoListeners.add(drcStereoListener);
+   }
+
+   private class FishEyeHandler implements CompressedVideoHandler
+   {
+      private final RobotSide robotSide;
+      private final DRCNetworkProcessorNetworkingManager networkingManager;
+
+      public FishEyeHandler(RobotSide robotSide, DRCNetworkProcessorNetworkingManager networkingManager)
+      {
+         this.robotSide = robotSide;
+         this.networkingManager = networkingManager;
+      }
+
+      @Override
+      public void newVideoPacketAvailable(long timeStamp, byte[] data, Point3d position, Quat4d orientation, double fieldOfView,
+            VideoCompressionKey videoCompressionKey)
+      {
+         networkingManager.getControllerStateHandler().sendSerializableObject(new FisheyePacket(robotSide, data));
+      }
+
+      @Override
+      public void addNetStateListener(CompressedVideoDataServer compressedVideoDataServer)
+      {
+         networkingManager.attachStateListener(compressedVideoDataServer);
+      }
+
+      @Override
+      public boolean isConnected()
+      {
+         return networkingManager.isConnected();
+      }
+   }
+
+   private class MultiSenseHandler implements CompressedVideoHandler
+   {
+      private final DRCNetworkProcessorNetworkingManager networkingManager;
+
+      public MultiSenseHandler(DRCNetworkProcessorNetworkingManager networkingManager)
+      {
+         this.networkingManager = networkingManager;
+      }
+
+      @Override
+      public void newVideoPacketAvailable(long timeStamp, byte[] data, Point3d position, Quat4d orientation, double fieldOfView,
+            VideoCompressionKey videoCompressionKey)
+      {
+         networkingManager.getControllerStateHandler().sendVideoPacket(
+               new VideoPacket(timeStamp, data, position, orientation, fieldOfView, videoCompressionKey));
+      }
+
+      @Override
+      public void addNetStateListener(CompressedVideoDataServer compressedVideoDataServer)
+      {
+         networkingManager.attachStateListener(compressedVideoDataServer);
+      }
+
+      @Override
+      public boolean isConnected()
+      {
+         return networkingManager.isConnected();
+      }
    }
 
 }
