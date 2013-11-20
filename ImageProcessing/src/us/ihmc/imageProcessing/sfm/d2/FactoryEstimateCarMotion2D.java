@@ -15,8 +15,8 @@ import boofcv.factory.feature.tracker.FactoryPointTracker;
 import boofcv.factory.feature.tracker.FactoryPointTrackerTwoPass;
 import boofcv.factory.sfm.FactoryMotion2D;
 import boofcv.factory.sfm.FactoryVisualOdometry;
-import boofcv.struct.image.ImageDataType;
 import boofcv.struct.image.ImageFloat32;
+import boofcv.struct.image.ImageType;
 import georegression.struct.se.Se2_F64;
 import us.ihmc.imageProcessing.sfm.d2.wrappers.MonoOverhead_to_CarMotion2D;
 import us.ihmc.imageProcessing.sfm.d2.wrappers.Mono_to_CarMotion2D;
@@ -64,7 +64,7 @@ public class FactoryEstimateCarMotion2D
 
       // declares the algorithm
       MonocularPlaneVisualOdometry<ImageFloat32> vo = FactoryVisualOdometry.monoPlaneInfinity(100, 2, 1.5, 200, tracker,
-            ImageDataType.single(ImageFloat32.class));
+            ImageType.single(ImageFloat32.class));
 
       if( scale != 1.0 ) {
          vo = new MonocularPlaneVisualOdometryScaleInput<ImageFloat32>(vo,scale);
