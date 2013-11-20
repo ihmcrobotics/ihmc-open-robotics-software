@@ -7,8 +7,8 @@ import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
 import boofcv.io.image.SimpleImageSequence;
 import boofcv.io.wrapper.xuggler.XugglerSimplified;
-import boofcv.struct.image.ImageDataType;
 import boofcv.struct.image.ImageFloat32;
+import boofcv.struct.image.ImageType;
 import boofcv.struct.image.ImageUInt8;
 
 import java.awt.event.MouseEvent;
@@ -91,7 +91,7 @@ public class ImageDifferenceTest implements MouseListener {
    public static void main( String args[] ) {
       String videoFile = "../ImageProcessing/media/videos/leftEye.mp4";
 
-      XugglerSimplified<ImageFloat32> xuggler = new XugglerSimplified<ImageFloat32>(videoFile, ImageDataType.single(ImageFloat32.class));
+      XugglerSimplified<ImageFloat32> xuggler = new XugglerSimplified<ImageFloat32>(videoFile, ImageType.single(ImageFloat32.class));
 
       ImageDifferenceTest app = new ImageDifferenceTest(xuggler);
       app.process();
