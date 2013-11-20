@@ -57,7 +57,7 @@ public class WalkControllerSliderBoard
 
       sliderBoardConfigurationManager.setSlider(2, "desiredICPX", registry, -0.3, 0.3);
       sliderBoardConfigurationManager.setKnob(2, "desiredICPY", registry, -0.3, 0.3);
-      sliderBoardConfigurationManager.setKnob(9, "desiredICPEccentricity", registry, -.9, .9);
+      sliderBoardConfigurationManager.setKnob(9, "desiredICPEccentricity", registry, 0, .9);
       sliderBoardConfigurationManager.setKnob(10, "desiredICPAngle", registry, -Math.PI, Math.PI);
 
       sliderBoardConfigurationManager.setSlider(3, "userDesiredPelvisYaw", registry, -Math.PI, Math.PI);
