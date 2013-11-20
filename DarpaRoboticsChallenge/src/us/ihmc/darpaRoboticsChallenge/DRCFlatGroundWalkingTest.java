@@ -106,6 +106,7 @@ public class DRCFlatGroundWalkingTest
 
       boolean useVelocityAndHeadingScript = false;
       boolean cheatWithGroundHeightAtForFootstep = true;
+      boolean useLoadOfContactPointsForTheFeet = false;
 
       if (checkNothingChanged) maximumWalkTime = 3.0;
       
@@ -121,7 +122,7 @@ public class DRCFlatGroundWalkingTest
       double rampEndX = combinedTerrainObjectAndRampEndX.second();
       
       DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, combinedTerrainObject, drawGroundProfile, useVelocityAndHeadingScript,
-            cheatWithGroundHeightAtForFootstep);
+            cheatWithGroundHeightAtForFootstep, useLoadOfContactPointsForTheFeet);
 
       drcController = track.getDrcController();
       robotVisualizer = track.getRobotVisualizer();
@@ -190,6 +191,7 @@ public class DRCFlatGroundWalkingTest
 
       boolean useVelocityAndHeadingScript = false;
       boolean cheatWithGroundHeightAtForFootstep = true;
+      boolean useLoadOfContactPointsForTheFeet = true;
       
       DRCRobotWalkingControllerParameters drcControlParameters = new DRCRobotWalkingControllerParameters();
       ArmControllerParameters armControllerParameters = new DRCRobotArmControllerParameters();
@@ -203,7 +205,7 @@ public class DRCFlatGroundWalkingTest
       double rampEndX = combinedTerrainObjectAndRampEndX.second();
       
       DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, combinedTerrainObject, drawGroundProfile, useVelocityAndHeadingScript,
-            cheatWithGroundHeightAtForFootstep);
+            cheatWithGroundHeightAtForFootstep, useLoadOfContactPointsForTheFeet);
 
       drcController = track.getDrcController();
       robotVisualizer = track.getRobotVisualizer();
@@ -317,6 +319,7 @@ public class DRCFlatGroundWalkingTest
 
       boolean useVelocityAndHeadingScript = true;
       boolean cheatWithGroundHeightAtForFootstep = false;
+      boolean useLoadOfContactPointsForTheFeet = false;
 
       GroundProfile groundProfile = new FlatGroundProfile();
       boolean drawGroundProfile = false;
@@ -324,7 +327,7 @@ public class DRCFlatGroundWalkingTest
       DRCRobotWalkingControllerParameters drcControlParameters = new DRCRobotWalkingControllerParameters();
       DRCRobotArmControllerParameters armControllerParameters = new DRCRobotArmControllerParameters();
       DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, groundProfile, drawGroundProfile, useVelocityAndHeadingScript,
-            cheatWithGroundHeightAtForFootstep);
+            cheatWithGroundHeightAtForFootstep, useLoadOfContactPointsForTheFeet);
 
       drcController = track.getDrcController();
       SimulationConstructionSet scs = track.getSimulationConstructionSet();
@@ -386,6 +389,7 @@ public class DRCFlatGroundWalkingTest
 
       boolean useVelocityAndHeadingScript = true;
       boolean cheatWithGroundHeightAtForFootstep = false;
+      boolean useLoadOfContactPointsForTheFeet = false;
 
       GroundProfile groundProfile = createBumpyGroundProfile();
       boolean drawGroundProfile = true;
@@ -393,8 +397,7 @@ public class DRCFlatGroundWalkingTest
       DRCRobotWalkingControllerParameters drcControlParameters = new DRCRobotWalkingControllerParameters();
       DRCRobotArmControllerParameters armControllerParameters = new DRCRobotArmControllerParameters();
       DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, groundProfile, drawGroundProfile,
-            useVelocityAndHeadingScript,
-            cheatWithGroundHeightAtForFootstep);
+            useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, useLoadOfContactPointsForTheFeet);
 
       drcController = track.getDrcController();
       SimulationConstructionSet scs = track.getSimulationConstructionSet();
@@ -442,7 +445,7 @@ public class DRCFlatGroundWalkingTest
 
    private DRCFlatGroundWalkingTrack setupSimulationTrack(DRCRobotWalkingControllerParameters drcControlParameters, ArmControllerParameters
          armControllerParameters, GroundProfile groundProfile, boolean drawGroundProfile,
-         boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep)
+         boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, boolean useLoadOfContactPointsForTheFeet)
    {
       AutomaticSimulationRunner automaticSimulationRunner = null;
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
@@ -452,8 +455,8 @@ public class DRCFlatGroundWalkingTest
       int simulationDataBufferSize = 16000;
 
       RobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(0.0);
-      DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel, false, true);
-      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotInterface.getSimulateDT(), true);
+      DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel, false, useLoadOfContactPointsForTheFeet);
+      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotInterface.getSimulateDT(), useLoadOfContactPointsForTheFeet);
       scsInitialSetup.setDrawGroundProfile(drawGroundProfile);
       
       if (cheatWithGroundHeightAtForFootstep)
