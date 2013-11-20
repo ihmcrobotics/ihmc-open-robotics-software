@@ -10,6 +10,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoFramePoint2dInPolygonCoordinate;
 import us.ihmc.commonWalkingControlModules.calculators.EquivalentConstantCoPCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
@@ -75,6 +76,7 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
+import us.ihmc.utilities.math.geometry.Point2dInConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
@@ -114,7 +116,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private boolean VISUALIZE = true;
 
    private static final boolean DO_TRANSITION_WHEN_TIME_IS_UP = false;
-
+   private static final boolean DESIREDICP_FROM_POLYGON_COORDINATE = false;
    private final static HighLevelState controllerState = HighLevelState.WALKING;
    private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OPTIMIZATION;
 
@@ -254,7 +256,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable swingMaxPositionJerk = new DoubleYoVariable("swingMaxPositionJerk", registry);
    private final DoubleYoVariable swingMaxOrientationAcceleration = new DoubleYoVariable("swingMaxOrientationAcceleration", registry);
    private final DoubleYoVariable swingMaxOrientationJerk = new DoubleYoVariable("swingMaxOrientationJerk", registry);
-
+   private final YoFramePoint2dInPolygonCoordinate doubleSupportDesiredICP;
    private final WalkOnTheEdgesManager walkOnTheEdgesManager;
    private final WalkOnTheEdgesProviders walkOnTheEdgesProviders;
 
@@ -405,6 +407,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       singleSupportTimeLeftBeforeShift.set(1.0);   //0.5);   //0.1); 
       
       footLoadThresholdToHoldPosition.set(0.2);
+      
+      doubleSupportDesiredICP = new YoFramePoint2dInPolygonCoordinate("desiredICP", registry);
    }
 
 
@@ -711,6 +715,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue()) && (transferToSide == null))
          {
             desiredICPVelocity.set(0.0, 0.0);
+            if (DESIREDICP_FROM_POLYGON_COORDINATE)
+            {
+               FramePoint2d tpoint = new FramePoint2d(doubleSupportDesiredICP.getCurrentPoint());
+               tpoint.changeFrame(worldFrame);
+               desiredICP.set(tpoint);
+            }
          }
          else
          {
@@ -952,8 +962,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
 
          icpAndMomentumBasedController.updateBipedSupportPolygons(bipedSupportPolygons);    // need to always update biped support polygons after a change to the contact states
-
-
+         doubleSupportDesiredICP.updatePointAndPolygon(bipedSupportPolygons.getSupportPolygonInMidFeetZUp(),desiredICP.getFramePoint2dCopy());
          RobotSide transferToSideToUseInFootstepData = transferToSide;
          if (transferToSideToUseInFootstepData == null) transferToSideToUseInFootstepData = RobotSide.LEFT; //Arbitrary here.
          
