@@ -223,6 +223,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final TransferToAndNextFootstepsDataVisualizer transferToAndNextFootstepsDataVisualizer;
    
    private final BooleanYoVariable doneFinishingSingleSupportTransfer = new BooleanYoVariable("doneFinishingSingleSupportTransfer", registry);
+   private final BooleanYoVariable stayInTransferWalkingState = new BooleanYoVariable("stayInTransferWalkingState", registry);
 
    private final BooleanYoVariable ecmpBasedToeOffHasBeenInitialized = new BooleanYoVariable("ecmpBasedToeOffHasBeenInitialized", registry);
    private final YoFramePoint2d desiredECMP = new YoFramePoint2d("desiredECMP", "", worldFrame, registry);
@@ -1257,6 +1258,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
       public boolean checkCondition()
       {
+         if (stayInTransferWalkingState.getBooleanValue())
+            return false;
+         
+         
          if (!walkOnTheEdgesManager.isEdgeTouchDownDone(robotSide))
             return false;
          
