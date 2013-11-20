@@ -38,8 +38,10 @@ public class LoadCloudWithPoses extends SimpleApplication
 
    public static void main(String[] args)
    {
-      LoadCloudWithPoses test1 = new LoadCloudWithPoses("D:\\lidarLog_5_1.txt");
-      //LoadCloudWithPoses test1 = new LoadCloudWithPoses("D:\\AlexLogs\\lidar_dump_1384211687790.txt");
+      //LoadCloudWithPoses test1 = new LoadCloudWithPoses("D:\\lidarLog_5_1.txt");
+    //LoadCloudWithPoses test1 = new LoadCloudWithPoses("D:\\AlexLogs\\lidar_dump_1384211687790.txt");
+      LoadCloudWithPoses test1 = new LoadCloudWithPoses("C:\\users\\unknownpw\\far_cube.txt");
+      
       test1.start();
    }
 
@@ -65,7 +67,7 @@ public class LoadCloudWithPoses extends SimpleApplication
       {
          try
          {
-            FileWriter fw = new FileWriter("box_all.txt");
+            FileWriter fw = new FileWriter("far_cube.txt");
             for (Point3D_F64 p : clouds[0])
             {
                fw.write(p.x + " " + p.y + " " + p.z + "\n");
@@ -152,7 +154,7 @@ public class LoadCloudWithPoses extends SimpleApplication
 
          int i = 0;
          int scans = 0;
-         while (scans < maxScans && i < doubles.length - 1000)
+         while (scans < maxScans && i < doubles.length - 1200)
          {
             scans++;
 
