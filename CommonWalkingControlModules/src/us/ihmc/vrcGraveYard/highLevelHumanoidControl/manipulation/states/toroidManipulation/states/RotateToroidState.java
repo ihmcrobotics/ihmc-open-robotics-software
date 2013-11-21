@@ -1,0 +1,120 @@
+package us.ihmc.vrcGraveYard.highLevelHumanoidControl.manipulation.states.toroidManipulation.states;
+
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulableToroid;
+import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.FormattingTools;
+import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.*;
+import us.ihmc.vrcGraveYard.highLevelHumanoidControl.manipulation.states.toroidManipulation.ToroidControlModule;
+
+public class RotateToroidState<T extends Enum<T>> extends ToroidManipulationStateInterface<T>
+{
+
+   private final YoVariableRegistry registry;
+
+   private final SideDependentList<SpatialAccelerationVector> handAccelerations = new SideDependentList<SpatialAccelerationVector>();
+   private final SideDependentList<Wrench> handWrenches = new SideDependentList<Wrench>();
+   private final SideDependentList<RigidBody> hands;
+
+   private final ToroidControlModule toroidControlModule;
+   private final SpatialAccelerationVector toroidSpatialAcceleration = new SpatialAccelerationVector();
+
+
+   private final SpatialForceVector toroidWrench = new SpatialForceVector();
+   private final DoubleYoVariable desiredToroidAngle;
+
+
+   public RotateToroidState(T stateEnum, ManipulableToroid toroidUpdater, SideDependentList<RigidBody> hands,
+                            double gravityZ, YoVariableRegistry parentRegistry)
+   {
+      super(stateEnum);
+
+      this.toroidControlModule = new ToroidControlModule(toroidUpdater, parentRegistry);
+      toroidControlModule.setProportionalGain(100.0);
+      toroidControlModule.setDerivativeGain(20.0);
+
+      String stateName = FormattingTools.underscoredToCamelCase(stateEnum.toString(), false) + "State";
+      registry = new YoVariableRegistry(stateName);
+      this.hands = hands;
+      MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
+
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ReferenceFrame handBodyFixedFrame = hands.get(robotSide).getBodyFixedFrame();
+
+         handAccelerations.put(robotSide, new SpatialAccelerationVector());
+         handWrenches.put(robotSide, new Wrench(handBodyFixedFrame, handBodyFixedFrame));
+      }
+
+      desiredToroidAngle = new DoubleYoVariable("desiredToroidAngle", registry);
+
+      parentRegistry.addChild(registry);
+   }
+
+   @Override
+   public SpatialAccelerationVector getDesiredHandAcceleration(RobotSide robotSide)
+   {
+      return handAccelerations.get(robotSide);
+   }
+
+   @Override
+   public Wrench getHandExternalWrench(RobotSide robotSide)
+   {
+      return handWrenches.get(robotSide);
+   }
+
+   @Override
+   public boolean isDone()
+   {
+      return true;
+   }
+
+   @Override
+   public void doAction()
+   {
+      toroidControlModule.doControl(desiredToroidAngle.getDoubleValue(), 0.0, 0.0);
+
+      toroidControlModule.get(toroidSpatialAcceleration);
+      toroidControlModule.get(toroidWrench);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody hand = hands.get(robotSide);
+         RigidBody rootBody = ScrewTools.getRootBody(hand);
+         SpatialAccelerationVector handSpatialAcceleration = handAccelerations.get(robotSide);
+         packHandAccelerationGivenToolAcceleration(handSpatialAcceleration, toroidSpatialAcceleration, robotSide);
+         handSpatialAcceleration.changeBaseFrameNoRelativeAcceleration(rootBody.getBodyFixedFrame());
+
+         Wrench wrench = handWrenches.get(robotSide);
+         wrench.set(toroidWrench);
+         wrench.scale(0.5);
+         wrench.changeFrame(hand.getBodyFixedFrame());
+      }
+   }
+
+   private void packHandAccelerationGivenToolAcceleration(SpatialAccelerationVector handAccelerationToPack, SpatialAccelerationVector toolAcceleration,
+         RobotSide robotSide)
+   {
+      ReferenceFrame endEffectorFrame = hands.get(robotSide).getBodyFixedFrame();//handPositionControlFrames.get(robotSide);
+      handAccelerationToPack.set(toolAcceleration);
+      handAccelerationToPack.changeBodyFrameNoRelativeAcceleration(endEffectorFrame);
+      handAccelerationToPack.changeFrameNoRelativeMotion(endEffectorFrame);
+   }
+
+   @Override
+   public void doTransitionIntoAction()
+   {
+   }
+
+   @Override
+   public void doTransitionOutOfAction()
+   {
+   }
+
+}

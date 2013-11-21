@@ -122,6 +122,7 @@ public class SDFRobot extends Robot implements HumanoidRobot // TODO: make an SD
                count = counters.get(jointName);
 
             Vector3d gcOffset = jointContactPoint.second();
+            System.out.println(jointName);
             jointTransforms.get(jointName).transform(gcOffset);
 
             GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + SDFConversionsHelper.sanitizeJointName(jointName) + "_" + count++, gcOffset,

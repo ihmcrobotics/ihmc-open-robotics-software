@@ -13,7 +13,6 @@ import us.ihmc.atlas.visualization.CenterOfPressureVisualizer;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
-import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.RobotControllerUpdatablesAdapter;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
@@ -68,8 +67,8 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
    public RobotController getController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
                                         CommonWalkingReferenceFrames referenceFrames, double controlDT, double gravity, DoubleYoVariable yoTime,
                                         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, GUISetterUpperRegistry guiSetterUpperRegistry, TwistCalculator twistCalculator,
-                                        CenterOfMassJacobian centerOfMassJacobian, ForceSensorDataHolder forceSensorDataHolder, SideDependentList<HandControllerInterface> handControllers,
-                                        LidarControllerInterface lidarControllerInterface, StateEstimationDataFromController stateEstimationDataFromControllerSink, GlobalDataProducer dataProducer)
+                                        CenterOfMassJacobian centerOfMassJacobian, ForceSensorDataHolder forceSensorDataHolder, LidarControllerInterface lidarControllerInterface,
+                                        StateEstimationDataFromController stateEstimationDataFromControllerSink, GlobalDataProducer dataProducer)
    {
 
       ArrayList<Vector3d> contactPointsArrayList = DRCRobotParameters.DRC_ROBOT_GROUND_CONTACT_POINT_OFFSET_FROM_FOOT;
@@ -104,9 +103,9 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       RobotController highLevelHumanoidController = highLevelHumanoidControllerFactory.create(estimationLink, estimationFrame, fullRobotModel,
             initialPositionControlKpGains, initialPositionControlKdGains, 
             referenceFrames, null, yoTime, gravityZ, twistCalculator, centerOfMassJacobian, bipedFeet,
-            controlDT, footSwitches, handControllers, lidarControllerInterface,
-            stateEstimationDataFromControllerSink, dynamicGraphicObjectsListRegistry, specificRegistry,
-            guiSetterUpperRegistry, null, forceSensorDataHolder);
+            controlDT, footSwitches, lidarControllerInterface, stateEstimationDataFromControllerSink,
+            dynamicGraphicObjectsListRegistry, specificRegistry, guiSetterUpperRegistry,
+            null, forceSensorDataHolder);
       
       highLevelHumanoidController.getYoVariableRegistry().addChild(specificRegistry);
 

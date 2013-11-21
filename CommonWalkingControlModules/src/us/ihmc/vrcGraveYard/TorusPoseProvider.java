@@ -1,8 +1,7 @@
-package us.ihmc.commonWalkingControlModules.packetConsumers;
+package us.ihmc.vrcGraveYard;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import us.ihmc.commonWalkingControlModules.packets.TorusPosePacket;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectConsumer;
