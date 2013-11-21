@@ -230,8 +230,6 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
       alphaFootToPelvisPosition.set(0.0); 
       alphaFootToPelvisVelocity.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(16.0, estimatorDT)); //0.85);
 
-      System.out.println("Set alphaFootToPelvisVelocity + " + alphaFootToPelvisVelocity.getDoubleValue());
-
       alphaPelvisAccelerometerIntegrationToVelocity.set(0.992);
       alphaPelvisAccelerometerIntegrationToPosition.set(0.8);
 
