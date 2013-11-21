@@ -18,9 +18,9 @@ public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>
    
    private final SideDependentList<FramePose> homePositions = new SideDependentList<FramePose>();
    private final SideDependentList<FramePose> desiredHandPoses = new SideDependentList<FramePose>();
+   private double trajectoryTime = 1.0;
 
    private final ReferenceFrame chestFrame;
-   private boolean relativeToWorld = false;
 
    public DesiredHandPoseProvider(FullRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters)
    {
@@ -33,14 +33,25 @@ public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>
 
          desiredHandPoses.put(robotSide, homePositions.get(robotSide));
       }
-
    }
 
    public boolean checkForNewPose(RobotSide robotSide)
    {
       return packets.get(robotSide).get() != null;
+   }
+   
+   public boolean checkFoHomePosition(RobotSide robotSide)
+   {
+      if (!checkForNewPose(robotSide))
+         return false;
       
-      
+      if (!packets.get(robotSide).get().isToHomePosition())
+         return false;
+
+      HandPosePacket object = packets.get(robotSide).getAndSet(null);
+      trajectoryTime = object.getTrajectoryTime();
+      desiredHandPoses.put(robotSide, homePositions.get(robotSide));
+      return true;
    }
 
    public FramePose getDesiredHandPose(RobotSide robotSide)
@@ -49,10 +60,10 @@ public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>
       
       if(object != null)
       {
-        
+         trajectoryTime = object.getTrajectoryTime();
+         
          if(object.isToHomePosition())
          {
-            relativeToWorld = false;
             desiredHandPoses.put(robotSide, homePositions.get(robotSide));
          }
          else
@@ -62,11 +73,9 @@ public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>
             {
             case WORLD:
                referenceFrame = ReferenceFrame.getWorldFrame();
-               relativeToWorld = true;
                break;
             case CHEST:
                referenceFrame = chestFrame;
-               relativeToWorld = false;
                break;
             default:
                throw new RuntimeException("Unkown frame");
@@ -80,9 +89,9 @@ public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>
       return desiredHandPoses.get(robotSide);
    }
    
-   public boolean isRelativeToWorld()
+   public double getTrajectoryTime()
    {
-      return relativeToWorld;
+      return trajectoryTime;
    }
 
    public void consumeObject(HandPosePacket object)
