@@ -187,7 +187,7 @@ public class DRCConfigParameters
    public static final float QUADTREE_HEIGHT_THRESHOLD = 0.05f;
    public static final double LIDAR_BLINDNESS_CYLINDAR_SQUARED_RADIUS = 0.1;
    public static final double LIDAR_Z_CUTOFF_ABOVE_HEAD = -0.5;
-   public static final double LIDAR_X_CUTOFF_AHEAD_OF_FEET = 0.0; //0.25;
+   public static final double LIDAR_X_CUTOFF_AHEAD_OF_PELVIS = 0.0; //0.25;
 
    // near scan
    public static final double NEAR_SCAN_CYL_RADIUS = 4.0; //3.0;
@@ -196,9 +196,6 @@ public class DRCConfigParameters
    public static final float NEAR_SCAN_RESOLUTION = 0.01f; //0.015f;
    public static final long NEAR_SCAN_DECAY_MILLIS = 30000; //10000;    // -1 to turn off decay
    public static final int NEAR_SCAN_CAPACITY = 100000;
-
-   // LIDAR point cloud processing
-   public static final int POINT_CLOUD_PROCESSING_SIZE = 20000;
 
    // Footstep Generator
    public static final double BOUNDING_BOX_FOR_FOOTSTEP_HEIGHT_FINDING_SIDE_LENGTH =
