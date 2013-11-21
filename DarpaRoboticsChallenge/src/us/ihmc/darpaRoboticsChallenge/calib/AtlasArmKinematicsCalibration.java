@@ -12,7 +12,7 @@ import boofcv.struct.calib.IntrinsicParameters;
 import boofcv.struct.image.ImageFloat32;
 import georegression.struct.se.Se3_F64;
 import org.ejml.data.DenseMatrix64F;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 
 import java.awt.image.BufferedImage;
 
@@ -23,7 +23,7 @@ import java.awt.image.BufferedImage;
  */
 public class AtlasArmKinematicsCalibration
 {
-   SDFFullRobotModel robotModel;
+   FullRobotModel robotModel;
 
    PlanarCalibrationDetector detector = FactoryPlanarCalibrationTarget.detectorChessboard(new ConfigChessboard(5, 6));
    PlanarCalibrationTarget target = FactoryPlanarCalibrationTarget.gridChess(5, 6, 0.01);
@@ -37,7 +37,7 @@ public class AtlasArmKinematicsCalibration
 
    Se3_F64 targetToOrigin = new Se3_F64();
 
-   public AtlasArmKinematicsCalibration(SDFFullRobotModel robotModel)
+   public AtlasArmKinematicsCalibration(FullRobotModel robotModel)
    {
       this.robotModel = robotModel;
    }
