@@ -29,6 +29,8 @@ import us.ihmc.utilities.screwTheory.CenterOfMassCalculator;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.Twist;
+import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -75,6 +77,8 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
 
    private final YoFramePoint pelvisPositionKinematics = new YoFramePoint("pelvisPositionKinematics", worldFrame, registry);
    private final YoFrameVector pelvisVelocityKinematics = new YoFrameVector("pelvisVelocityKinematics", worldFrame, registry);
+   private final YoFrameVector pelvisVelocityTwist = new YoFrameVector("pelvisVelocityTwist", worldFrame, registry);
+   private final BooleanYoVariable useTwistToComputePelvisVelocity = new BooleanYoVariable("useTwistToComputePelvisVelocity", registry);
    
    private final DoubleYoVariable alphaPelvisAccelerometerIntegrationToVelocity = new DoubleYoVariable("alphaPelvisAccelerometerIntegrationToVelocity", registry);
    private final DoubleYoVariable alphaPelvisAccelerometerIntegrationToPosition = new DoubleYoVariable("alphaPelvisAccelerometerIntegrationToPosition", registry);
@@ -93,6 +97,7 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
    private final SideDependentList<AlphaFilteredYoFrameVector> footToPelvisPositions;
    private final SideDependentList<FilteredVelocityYoFrameVector> footToPelvisVelocities;
    private final SideDependentList<FilteredVelocityYoFrameVector> footToPelvisAccels;
+   private final SideDependentList<Twist> pelvisToFootTwists = new SideDependentList<Twist>(new Twist(), new Twist());
 
    private final DoubleYoVariable feetSpacing = new DoubleYoVariable("estimatedFeetSpacing", registry);
    private final DoubleYoVariable alphaFeetSpacingVelocity = new DoubleYoVariable("alphaFeetSpacingVelocity", registry);
@@ -150,6 +155,8 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
    
    private final StateMachine<PelvisEstimationState> stateMachine;
 
+   private final TwistCalculator twistCalculator;
+   
    public PelvisStateCalculator(StateEstimationDataFromController stateEstimatorDataFromControllerSource, SDFFullRobotModel estimatorModel,
          FullInverseDynamicsStructure inverseDynamicsStructure, SideDependentList<WrenchBasedFootSwitch> footSwitches,
          SideDependentList<ContactablePlaneBody> bipedFeet, double gravitationalAcceleration, final double estimatorDT,
@@ -158,6 +165,8 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
       this.estimatorDT = estimatorDT;
       this.footSwitches = footSwitches;
       this.bipedFeet = bipedFeet;
+      
+      twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       
       gravityEstimation.reset();
       gravityEstimation.update(Math.abs(gravitationalAcceleration));
@@ -361,6 +370,7 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
       
       pelvisPositionKinematics.setToZero();
       pelvisVelocityKinematics.setToZero();
+      pelvisVelocityTwist.setToZero();
 
       updateKinematics();
       
@@ -401,6 +411,8 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
 
    private void updateKinematics()
    {
+      twistCalculator.compute();
+      
       for(RobotSide robotSide : RobotSide.values)
       {
          tempFramePoint.setToZero(pelvisFrame);
@@ -412,6 +424,9 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
          footToPelvisPositions.get(robotSide).update(tempFrameVector);
          footToPelvisVelocities.get(robotSide).update();
          footToPelvisAccels.get(robotSide).update();
+         
+         Twist pelvisToFootTwist = pelvisToFootTwists.get(robotSide);
+         twistCalculator.packRelativeTwist(pelvisToFootTwist, pelvis, bipedFeet.get(robotSide).getRigidBody());
       }
    }
 
@@ -682,6 +697,15 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
       footToPelvisVelocities.get(robotSide).getFrameVector(tempVelocity);
       tempVelocity.scale(scaleFactor);
       pelvisVelocityKinematics.add(tempVelocity);
+      
+      YoFramePoint2d copPosition2d = copsFilteredInFootFrame.get(robotSide);
+      tempFramePoint.set(copPosition2d.getReferenceFrame(), copPosition2d.getX(), copPosition2d.getY(), 0.0);
+      tempFramePoint.changeFrame(pelvisToFootTwists.get(robotSide).getBaseFrame());
+      pelvisToFootTwists.get(robotSide).changeFrame(pelvisToFootTwists.get(robotSide).getBaseFrame());
+      pelvisToFootTwists.get(robotSide).packVelocityOfPointFixedInBodyFrame(tempVelocity, tempFramePoint);
+      tempVelocity.changeFrame(worldFrame);
+      tempVelocity.scale(-scaleFactor); // We actually want footToPelvis velocity
+      pelvisVelocityTwist.add(tempVelocity);
    }
 
    private void updateFootPosition(RobotSide ignoredSide)
@@ -697,22 +721,6 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
       copsFilteredInFootFrame.get(ignoredSide).setToZero();
    }
 
-   private void defaultActionOutOfStates()
-   {
-      if (linearAccelerationPort != null)
-      {
-         computePelvisStateByIntegratingAccelerometerAndMergeWithKinematics();
-      
-      }   
-      else
-      {
-         pelvisVelocity.set(pelvisVelocityKinematics);
-         pelvisPosition.set(pelvisPositionKinematics);
-      }
-      
-      updateCoMState();
-   }
-   
    private final FrameVector tempIMUAcceleration = new FrameVector();
    private final FrameVector tempPelvisVelocityIntegrated = new FrameVector();
    private final FrameVector tempEstimatedVelocityIMUPart = new FrameVector();
@@ -730,6 +738,25 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
       defaultActionOutOfStates();
    }
    
+   private void defaultActionOutOfStates()
+   {
+      if (linearAccelerationPort != null)
+      {
+         computePelvisStateByIntegratingAccelerometerAndMergeWithKinematics();
+      
+      }   
+      else
+      {
+         if (useTwistToComputePelvisVelocity.getBooleanValue())
+            pelvisVelocity.set(pelvisVelocityTwist);
+         else
+            pelvisVelocity.set(pelvisVelocityKinematics);
+         pelvisPosition.set(pelvisPositionKinematics);
+      }
+      
+      updateCoMState();
+   }
+   
    private void computePelvisStateByIntegratingAccelerometerAndMergeWithKinematics()
    {
       imuAccelerationInWorld.getFrameVector(tempIMUAcceleration);
@@ -740,7 +767,10 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
       tempEstimatedVelocityIMUPart.add(tempIMUAcceleration);
       tempEstimatedVelocityIMUPart.scale(alphaPelvisAccelerometerIntegrationToVelocity.getDoubleValue());
       
-      pelvisVelocity.set(pelvisVelocityKinematics);
+      if (useTwistToComputePelvisVelocity.getBooleanValue())
+         pelvisVelocity.set(pelvisVelocityTwist);
+      else
+         pelvisVelocity.set(pelvisVelocityKinematics);
       pelvisVelocity.scale(1.0 - alphaPelvisAccelerometerIntegrationToVelocity.getDoubleValue());
       pelvisVelocity.add(tempEstimatedVelocityIMUPart);
       
