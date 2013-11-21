@@ -130,7 +130,7 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
    private ControlFlowOutputPort<Vector3d> linearAccelerationPort;
 
    private final double estimatorDT;
-   
+      
    private final DoubleYoVariable alphaGravityEstimation = new DoubleYoVariable("alphaGravityEstimation", registry);
    private final AlphaFilteredYoVariable gravityEstimation = new AlphaFilteredYoVariable("gravityEstimation", registry, alphaGravityEstimation);
 
@@ -224,6 +224,26 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
 
       stateMachine = new StateMachine<PelvisEstimationState>("PelvisEstimationStateMachine", "switchTime", PelvisEstimationState.class, yoTime, registry);
       setupStateMachine();
+
+      alphaGravityEstimation.set(0.99999);
+
+      alphaFootToPelvisPosition.set(0.0); 
+      alphaFootToPelvisVelocity.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(16.0, estimatorDT)); //0.85);
+
+      System.out.println("Set alphaFootToPelvisVelocity + " + alphaFootToPelvisVelocity.getDoubleValue());
+
+      alphaPelvisAccelerometerIntegrationToVelocity.set(0.992);
+      alphaPelvisAccelerometerIntegrationToPosition.set(0.8);
+
+      alphaCoPFilter.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(4.0, estimatorDT));
+      
+      delayTimeBeforeTrustingFoot.set(0.02);
+
+      footVelocityThreshold.set(Double.MAX_VALUE); // 0.01);
+
+      forceZInPercentThresholdToFilterFoot.set(0.3); 
+      
+      slippageCompensatorMode.set(SlippageCompensatorMode.LOAD_THRESHOLD);
       
       parentRegistry.addChild(registry);
 
@@ -307,24 +327,6 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
 
    public void initialize()
    {
-      alphaGravityEstimation.set(0.99999);
-      
-      alphaFootToPelvisPosition.set(0.0); 
-      alphaFootToPelvisVelocity.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(16.0, estimatorDT)); //0.85);
-      
-      alphaPelvisAccelerometerIntegrationToVelocity.set(0.992);
-      alphaPelvisAccelerometerIntegrationToPosition.set(0.8);
-      
-      alphaCoPFilter.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(4.0, estimatorDT));
-      
-      delayTimeBeforeTrustingFoot.set(0.02);
-
-      footVelocityThreshold.set(Double.MAX_VALUE); // 0.01);
-
-      forceZInPercentThresholdToFilterFoot.set(0.3); 
-      
-      slippageCompensatorMode.set(SlippageCompensatorMode.LOAD_THRESHOLD);
-      
       initializeRobotState();
    }
 
@@ -591,7 +593,6 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
             updatePelvisWithKinematics(robotSide, 2);
          }
          
-         System.out.println("Updating in TrustBothFeet at time " + yoTime.getDoubleValue());
          pelvisVelocityBacklashKinematics.update();
       }
 
@@ -632,7 +633,6 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
          correctFootPositionsUsingCoP(trustedSide);
          updatePelvisWithKinematics(trustedSide, 1);
          
-         System.out.println("Updating in TrustOneFoot at time " + yoTime.getDoubleValue());
          pelvisVelocityBacklashKinematics.update();
       }
       
@@ -715,7 +715,7 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
       footToPelvisVelocities.get(robotSide).getFrameVector(tempVelocity);
       tempVelocity.scale(scaleFactor);
       pelvisVelocityKinematics.add(tempVelocity);
-      
+     
       YoFramePoint2d copPosition2d = copsFilteredInFootFrame.get(robotSide);
       tempFramePoint.set(copPosition2d.getReferenceFrame(), copPosition2d.getX(), copPosition2d.getY(), 0.0);
       tempFramePoint.changeFrame(pelvisToFootTwists.get(robotSide).getBaseFrame());
