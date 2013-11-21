@@ -53,8 +53,9 @@ public class HandPosePacketTransformerTest
             robotSide = RobotSide.RIGHT;
 
          Point3d point3d = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
+         double trajectoryTime = RandomTools.generateRandomDouble(random, 1.0, 10.0);
 
-         HandPosePacket starting = new HandPosePacket(robotSide, frame, point3d, quat, i % 2 == 1);
+         HandPosePacket starting = new HandPosePacket(robotSide, frame, point3d, quat, i % 2 == 1, trajectoryTime);
 
          transform3D = RandomTools.generateRandomTransform(random);
 
