@@ -252,6 +252,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable swingKpOrientation = new DoubleYoVariable("swingKpOrientation", registry);
    private final DoubleYoVariable swingZeta = new DoubleYoVariable("swingZeta", registry);
    
+   private final DoubleYoVariable holdKpXY = new DoubleYoVariable("holdKpXY", registry);
+   private final DoubleYoVariable holdKpOrientation = new DoubleYoVariable("holdKpOrientation", registry);
+   private final DoubleYoVariable holdZeta = new DoubleYoVariable("holdZeta", registry);
+   
    private final DoubleYoVariable swingMaxPositionAcceleration = new DoubleYoVariable("swingMaxPositionAcceleration", registry);
    private final DoubleYoVariable swingMaxPositionJerk = new DoubleYoVariable("swingMaxPositionJerk", registry);
    private final DoubleYoVariable swingMaxOrientationAcceleration = new DoubleYoVariable("swingMaxOrientationAcceleration", registry);
@@ -427,10 +431,15 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       singularityEscapeNullspaceMultiplierSupportLegLocking.set(-0.5);
       double minJacobianDeterminantForSingularityEscape = 0.03;
       
+      //TODO: Move these to DRCRobotWalkingControlParameters:
       swingKpXY.set(100.0);
       swingKpZ.set(200.0);
       swingKpOrientation.set(200.0);
       swingZeta.set(1.0);
+      
+      holdKpXY.set(100.0);
+      holdKpOrientation.set(200.0);
+      holdZeta.set(0.1);
 
 //      swingMaxPositionAcceleration.set(10.0); 
 //      swingMaxPositionJerk.set(150.0);
@@ -631,6 +640,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       {
          public void variableChanged(YoVariable v)
          {
+            endEffectorControlModule.setHoldGains(holdKpXY.getDoubleValue(), holdKpOrientation.getDoubleValue(), holdZeta.getDoubleValue());
             endEffectorControlModule.setSwingGains(swingKpXY.getDoubleValue(), swingKpZ.getDoubleValue(), swingKpOrientation.getDoubleValue(), swingZeta.getDoubleValue());
             endEffectorControlModule.setMaxAccelerationAndJerk(swingMaxPositionAcceleration.getDoubleValue(), swingMaxPositionJerk.getDoubleValue(), 
                   swingMaxOrientationAcceleration.getDoubleValue(), swingMaxOrientationJerk.getDoubleValue());

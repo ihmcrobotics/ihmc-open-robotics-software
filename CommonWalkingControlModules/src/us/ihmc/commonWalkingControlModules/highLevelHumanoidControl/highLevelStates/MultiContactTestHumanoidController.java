@@ -110,6 +110,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
          EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(controlDT, foot, jacobianId, kneeJoint, poseTrajectoryGenerator, null,
                                                                 null, null, momentumBasedController, registry);
          endEffectorControlModule.setSwingGains(100.0, 200.0, 200.0, 1.0);
+         endEffectorControlModule.setHoldGains(100.0, 200.0, 0.1);
 
          footEndEffectorControlModules.put(robotSide, endEffectorControlModule);
       }
