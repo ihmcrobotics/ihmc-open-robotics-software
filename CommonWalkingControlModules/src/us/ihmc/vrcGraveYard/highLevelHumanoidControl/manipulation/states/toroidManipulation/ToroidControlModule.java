@@ -1,0 +1,69 @@
+package us.ihmc.vrcGraveYard.highLevelHumanoidControl.manipulation.states.toroidManipulation;
+
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.PDController;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulableToroid;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.SpatialForceVectorProvider;
+import us.ihmc.commonWalkingControlModules.trajectories.SpatialAccelerationProvider;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.utilities.screwTheory.SpatialForceVector;
+import us.ihmc.utilities.screwTheory.Twist;
+
+import javax.vecmath.Vector3d;
+
+/**
+ * @author twan
+ *         Date: 5/13/13
+ */
+public class ToroidControlModule implements SpatialAccelerationProvider, SpatialForceVectorProvider
+{
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final ManipulableToroid toroidUpdater;
+   private final PDController toroidAngleController;
+   private final Twist jointTwist = new Twist();
+   private final Vector3d tempAngularPart = new Vector3d();
+   private final Vector3d tempLinearPart = new Vector3d();
+
+   public ToroidControlModule(ManipulableToroid toroidUpdater, YoVariableRegistry parentRegistry)
+   {
+      this.toroidUpdater = toroidUpdater;
+      this.toroidAngleController = new PDController("toroidAngle", registry);
+      parentRegistry.addChild(registry);
+   }
+
+   public void doControl(double qDesired, double qdDesired, double qddFeedForward)
+   {
+      OneDoFJoint joint = toroidUpdater.getToroidJoint();
+      double q = joint.getQ();
+      double qd = joint.getQd();
+      double qddDesired = toroidAngleController.compute(q, qDesired, qd, qdDesired) + qddFeedForward;
+      joint.setQddDesired(qddDesired);
+   }
+
+   public void get(SpatialAccelerationVector desiredSpatialAcceleration)
+   {
+      OneDoFJoint joint = toroidUpdater.getToroidJoint();
+      joint.packDesiredJointAcceleration(desiredSpatialAcceleration);
+   }
+
+   public void get(SpatialForceVector feedForwardWrench)
+   {
+      OneDoFJoint joint = toroidUpdater.getToroidJoint();
+      joint.packJointTwist(jointTwist);
+      jointTwist.packAngularPart(tempAngularPart);
+      jointTwist.packLinearPart(tempLinearPart);
+      feedForwardWrench.set(jointTwist.getExpressedInFrame(), tempLinearPart, tempAngularPart);
+      feedForwardWrench.scale(toroidUpdater.getDamping());
+   }
+
+   public void setProportionalGain(double proportionalGain)
+   {
+      toroidAngleController.setProportionalGain(proportionalGain);
+   }
+
+   public void setDerivativeGain(double derivativeGain)
+   {
+      toroidAngleController.setDerivativeGain(derivativeGain);
+   }
+}

@@ -40,16 +40,6 @@ public class DRCRobotSDFLoader
 
             break;
 
-         case ATLAS_IROBOT_HANDS :
-            fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_irobot_hands.sdf");
-
-            if (!headless)
-            {
-               resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/irobot_hand_description").getFile());
-            }
-
-            break;
-
          case ATLAS_V3_IROBOT_HANDS :
             fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_v3_irobot_hands.sdf");
 

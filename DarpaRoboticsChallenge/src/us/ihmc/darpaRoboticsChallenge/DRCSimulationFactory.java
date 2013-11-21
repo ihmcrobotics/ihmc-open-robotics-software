@@ -19,7 +19,6 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotDampingParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandModel;
-import us.ihmc.darpaRoboticsChallenge.handControl.SimulatedHandControllerDispatcher;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriterWithAccelerationIntegration;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriterWithTorqueLimits;
@@ -167,9 +166,9 @@ public class DRCSimulationFactory
          sensorReaderFactory = simulatedSensorHolderAndReaderFromRobotFactory;
       }
 
-      SimulatedHandControllerDispatcher handControllerDispatcher = new SimulatedHandControllerDispatcher(simulatedRobot, robotInterface.getTimeStampProvider(),
-            estimationTicksPerControlTick);
-      controller.addRobotController(handControllerDispatcher);
+//      SimulatedHandControllerDispatcher handControllerDispatcher = new SimulatedHandControllerDispatcher(simulatedRobot, robotInterface.getTimeStampProvider(),
+//            estimationTicksPerControlTick);
+//      controller.addRobotController(handControllerDispatcher);
 
       controller.addRobotController(lidarControllerInterface);
 
@@ -179,7 +178,7 @@ public class DRCSimulationFactory
       ThreadSynchronizer threadSynchronizer = new BlockingThreadSynchronizer();
 
       DRCController robotController = new DRCController(robotInterface.getFullRobotModelFactory(), controllerFactory, sensorReaderFactory, drcOutputWriter,
-            handControllerDispatcher, jointMap, lidarControllerInterface, gravity, estimateDT, controlDT, dataProducer, robotInterface.getTimeStampProvider(),
+            jointMap, lidarControllerInterface, gravity, estimateDT, controlDT, dataProducer, robotInterface.getTimeStampProvider(),
             dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, registry, null, threadFactory, threadSynchronizer);
       robotController.initialize();
 

@@ -9,12 +9,10 @@ import us.ihmc.commonWalkingControlModules.controlModules.PelvisDesiredsHandler;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
-import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
-import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -40,10 +38,10 @@ public class VariousWalkingManagers
       this.pelvisDesiredsHandler = pelvisDesiredsHandler;
    }
 
-   public static VariousWalkingManagers create(MomentumBasedController momentumBasedController, SideDependentList<HandControllerInterface> handControllers,
-           DoubleYoVariable yoTime, VariousWalkingProviders variousWalkingProviders, WalkingControllerParameters walkingControllerParameters,
-           ArmControllerParameters armControlParameters,
-           YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public static VariousWalkingManagers create(MomentumBasedController momentumBasedController, DoubleYoVariable yoTime,
+           VariousWalkingProviders variousWalkingProviders, WalkingControllerParameters walkingControllerParameters, ArmControllerParameters armControlParameters,
+           YoVariableRegistry registry,
+           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
@@ -64,9 +62,8 @@ public class VariousWalkingManagers
 
       // Setup arm+hand manipulation state machines
       ManipulationControlModule manipulationControlModule = new ManipulationControlModule(fullRobotModel, twistCalculator, variousWalkingProviders, armControlParameters,
-                                                               walkingControllerParameters, handControllers, yoTime,
-                                                               momentumBasedController, dynamicGraphicObjectsListRegistry,
-                                                               registry);
+                                                               walkingControllerParameters, yoTime, momentumBasedController,
+                                                               dynamicGraphicObjectsListRegistry, registry);
 
       PelvisDesiredsHandler pelvisDesiredsHandler = new PelvisDesiredsHandler(controlDT, yoTime, registry);
 
