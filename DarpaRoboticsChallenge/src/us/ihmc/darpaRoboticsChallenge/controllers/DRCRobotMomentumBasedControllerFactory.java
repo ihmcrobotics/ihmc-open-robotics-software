@@ -61,7 +61,6 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       this.highLevelHumanoidControllerFactory = highLevelHumanoidControllerFactory;
       this.contactTresholdForce = contactTresholdForce;
    }
-   int tick = 0;
 
    @Override
    public RobotController getController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
@@ -117,7 +116,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
          final ForceSensorDataVisualizer forceSensorDataVisualizer=new ForceSensorDataVisualizer(fullRobotModel, forceSensorDataHolder, dynamicGraphicObjectsListRegistry, specificRegistry);
          final CenterOfPressureVisualizer centerOfPressureVisualizer=new CenterOfPressureVisualizer(fullRobotModel, forceSensorDataHolder, dynamicGraphicObjectsListRegistry, specificRegistry);
          final AtlasWristFeetYoVariables wristFeetVariables = new AtlasWristFeetYoVariables(forceSensorDataHolder, specificRegistry);
-         final AtlasWristFeetSensorServer wristFeetNetwork = dataProducer == null ? null : new AtlasWristFeetSensorServer(forceSensorDataHolder,dataProducer);
+         final AtlasWristFeetSensorServer wristFeetNetwork = dataProducer == null ? null : new AtlasWristFeetSensorServer(forceSensorDataHolder, dataProducer, controlDT);
 
          highLevelHumanoidControllerUpdatables.addUpdatable(
             new Updatable()
@@ -125,20 +124,11 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
                @Override
                public void update(double time)
                {
-                  
-                  tick++;
-                  if(tick>50)
-                  
-                  
-                  {
-//                     System.out.println(".");
-                     tick = 0;
                     forceSensorDataVisualizer.visualize();
                     centerOfPressureVisualizer.visualize();
                     wristFeetVariables.update();
                     if( wristFeetNetwork != null)
                        wristFeetNetwork.update();
-                  }
                }
             });
          
