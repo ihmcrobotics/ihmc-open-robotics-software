@@ -44,6 +44,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPositi
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFrameVector;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
+import com.yobotics.simulationconstructionset.util.math.filter.BacklashCompensatingVelocityYoFrameVector;
 import com.yobotics.simulationconstructionset.util.math.filter.FilteredVelocityYoFrameVector;
 import com.yobotics.simulationconstructionset.util.math.filter.GlitchFilteredBooleanYoVariable;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
@@ -75,8 +76,14 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
    private final YoFramePoint centerOfMassPosition = new YoFramePoint("estimatedCenterOfMassPosition", worldFrame, registry);
    private final YoFrameVector centerOfMassVelocity = new YoFrameVector("estimatedCenterOfMassVelocity", worldFrame, registry);
 
-   private final YoFramePoint pelvisPositionKinematics = new YoFramePoint("pelvisPositionKinematics", worldFrame, registry);
+   private final YoFramePoint pelvisPositionKinematics = new YoFramePoint("pelvisPositionKinematics", worldFrame, registry);   
    private final YoFrameVector pelvisVelocityKinematics = new YoFrameVector("pelvisVelocityKinematics", worldFrame, registry);
+   
+   private final DoubleYoVariable alphaPelvisVelocityBacklashKinematics = new DoubleYoVariable("alphaPelvisVelocityBacklashKinematics", registry);
+   private final DoubleYoVariable slopTimePelvisVelocityBacklashKinematics = new DoubleYoVariable("slopTimePelvisVelocityBacklashKinematics", registry);
+   
+   private final BacklashCompensatingVelocityYoFrameVector pelvisVelocityBacklashKinematics;
+   
    private final YoFrameVector pelvisVelocityTwist = new YoFrameVector("pelvisVelocityTwist", worldFrame, registry);
    private final BooleanYoVariable useTwistToComputePelvisVelocity = new BooleanYoVariable("useTwistToComputePelvisVelocity", registry);
    
@@ -166,6 +173,11 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
       this.footSwitches = footSwitches;
       this.bipedFeet = bipedFeet;
       
+      alphaPelvisVelocityBacklashKinematics.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(16.0, estimatorDT));
+      slopTimePelvisVelocityBacklashKinematics.set(0.03);
+      pelvisVelocityBacklashKinematics = BacklashCompensatingVelocityYoFrameVector.createBacklashCompensatingVelocityYoFrameVector("pelvisVelocityBacklashKin", "", 
+            alphaPelvisVelocityBacklashKinematics, estimatorDT, slopTimePelvisVelocityBacklashKinematics, registry, pelvisPositionKinematics);
+
       twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       
       gravityEstimation.reset();
@@ -578,6 +590,9 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
             correctFootPositionsUsingCoP(robotSide);
             updatePelvisWithKinematics(robotSide, 2);
          }
+         
+         System.out.println("Updating in TrustBothFeet at time " + yoTime.getDoubleValue());
+         pelvisVelocityBacklashKinematics.update();
       }
 
       @Override
@@ -616,6 +631,9 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
          updateCoPPosition(trustedSide);
          correctFootPositionsUsingCoP(trustedSide);
          updatePelvisWithKinematics(trustedSide, 1);
+         
+         System.out.println("Updating in TrustOneFoot at time " + yoTime.getDoubleValue());
+         pelvisVelocityBacklashKinematics.update();
       }
       
       private void doActionForIgnoredFoot()
@@ -750,7 +768,7 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
          if (useTwistToComputePelvisVelocity.getBooleanValue())
             pelvisVelocity.set(pelvisVelocityTwist);
          else
-            pelvisVelocity.set(pelvisVelocityKinematics);
+            pelvisVelocity.set(pelvisVelocityBacklashKinematics); //pelvisVelocityKinematics);
          pelvisPosition.set(pelvisPositionKinematics);
       }
       
@@ -770,7 +788,8 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
       if (useTwistToComputePelvisVelocity.getBooleanValue())
          pelvisVelocity.set(pelvisVelocityTwist);
       else
-         pelvisVelocity.set(pelvisVelocityKinematics);
+         pelvisVelocity.set(pelvisVelocityBacklashKinematics);
+      
       pelvisVelocity.scale(1.0 - alphaPelvisAccelerometerIntegrationToVelocity.getDoubleValue());
       pelvisVelocity.add(tempEstimatedVelocityIMUPart);
       
