@@ -1,15 +1,5 @@
 package us.ihmc.graphics3DAdapter.camera;
 
-import java.awt.image.BufferedImage;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
-import us.ihmc.graphics3DAdapter.camera.VideoSettings.VideoCompressionKey;
-import us.ihmc.utilities.net.NetStateListener;
-import us.ihmc.utilities.net.ObjectCommunicator;
-import us.ihmc.utilities.net.ObjectConsumer;
-
 import com.xuggle.ferry.IBuffer;
 import com.xuggle.xuggler.IPacket;
 import com.xuggle.xuggler.IStreamCoder;
@@ -17,6 +7,14 @@ import com.xuggle.xuggler.IStreamCoder.Direction;
 import com.xuggle.xuggler.IVideoPicture;
 import com.xuggle.xuggler.video.ConverterFactory;
 import com.xuggle.xuggler.video.IConverter;
+import us.ihmc.graphics3DAdapter.camera.VideoSettings.VideoCompressionKey;
+import us.ihmc.utilities.net.NetStateListener;
+import us.ihmc.utilities.net.ObjectCommunicator;
+import us.ihmc.utilities.net.ObjectConsumer;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+import java.awt.image.BufferedImage;
 
 public class CompressedVideoDataClient implements NetStateListener
 {
@@ -106,7 +104,6 @@ public class CompressedVideoDataClient implements NetStateListener
    {
       communicator.attachListener(VideoPacket.class, new ObjectConsumer<VideoPacket>()
       {
-         @Override
          public void consumeObject(VideoPacket object)
          {
             CompressedVideoDataClient.this.consumeObject(object.getVideoCompressionKey(), object.getData(), object.getPosition(), object.getOrientation(), object.getFieldOfView());
