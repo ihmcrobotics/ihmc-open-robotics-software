@@ -6,6 +6,7 @@ import us.ihmc.atlas.visualization.WalkControllerSliderBoard;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.FlatGroundWalkingHighLevelHumanoidControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
@@ -58,8 +59,9 @@ public class DRCFlatGroundWalkingTrack
 
       boolean useFastTouchdowns = false;
 
+      FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation();
       FlatGroundWalkingHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory =
-         new FlatGroundWalkingHighLevelHumanoidControllerFactory(drcControlParameters, armControllerParameters, useVelocityAndHeadingScript, useFastTouchdowns);
+         new FlatGroundWalkingHighLevelHumanoidControllerFactory(footstepTimingParameters, drcControlParameters, armControllerParameters, useVelocityAndHeadingScript, useFastTouchdowns);
 
       if (cheatWithGroundHeightAtForFootstep)
       {
