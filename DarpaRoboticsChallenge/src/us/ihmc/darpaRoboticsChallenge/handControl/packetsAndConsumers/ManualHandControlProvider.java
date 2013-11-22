@@ -1,8 +1,7 @@
-package us.ihmc.commonWalkingControlModules.packetConsumers;
+package us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import us.ihmc.commonWalkingControlModules.packets.ManualHandControlPacket;
 import us.ihmc.utilities.net.ObjectConsumer;
 
 public class ManualHandControlProvider implements ObjectConsumer<ManualHandControlPacket>

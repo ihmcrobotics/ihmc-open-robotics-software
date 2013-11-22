@@ -1,3 +1,4 @@
+package us.ihmc.darpaRoboticsChallenge.handControl;
 //package us.ihmc.darpaRoboticsChallenge.handControl;
 //
 //import java.util.ArrayList;
