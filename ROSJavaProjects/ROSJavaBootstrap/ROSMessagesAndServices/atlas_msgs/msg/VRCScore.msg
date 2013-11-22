@@ -1,3 +1,8 @@
+# Potential values for task_type
+uint32 TASK_OTHER = 0
+uint32 TASK_DRIVING = 1
+uint32 TASK_WALKING = 2
+uint32 TASK_MANIPULATION = 3
 # Absolute wall time
 time wall_time
 # Absolute sim time
@@ -12,3 +17,5 @@ int32 completion_score
 int32 falls
 # Optional message to describe events
 string message
+# Which type of task
+uint32 task_type
