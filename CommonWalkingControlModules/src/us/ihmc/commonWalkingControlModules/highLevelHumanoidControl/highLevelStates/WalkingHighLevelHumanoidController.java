@@ -375,7 +375,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       
       maximumConstantJerkFinalToeOffAngleComputer.reinitialize(walkOnTheEdgesProviders.getMaximumToeOffAngle(), referenceTime);
       
-      setupFootControlModules(footPositionTrajectoryGenerators);
+      setupFootControlModules(walkingControllerParameters, footPositionTrajectoryGenerators);
 
       initialPelvisOrientationProvider = new SettableOrientationProvider("initialPelvis", worldFrame, registry);
       finalPelvisOrientationProvider = new SettableOrientationProvider("finalPelvis", worldFrame, registry);
@@ -416,7 +416,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    }
 
 
-   protected void setupFootControlModules(SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators)
+   private void setupFootControlModules(WalkingControllerParameters walkingControllerParameters, SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -432,24 +432,24 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       double minJacobianDeterminantForSingularityEscape = 0.03;
       
       //TODO: Move these to DRCRobotWalkingControlParameters:
-      swingKpXY.set(100.0);
-      swingKpZ.set(200.0);
-      swingKpOrientation.set(200.0);
-      swingZeta.set(1.0);
+      swingKpXY.set(walkingControllerParameters.getSwingKpXY()); //100.0);
+      swingKpZ.set(walkingControllerParameters.getSwingKpZ()); //200.0);
+      swingKpOrientation.set(walkingControllerParameters.getSwingKpOrientation()); //200.0);
+      swingZeta.set(walkingControllerParameters.getSwingZeta()); //1.0);
       
-      holdKpXY.set(100.0);
-      holdKpOrientation.set(100.0);
-      holdZeta.set(0.1);
+      holdKpXY.set(walkingControllerParameters.getHoldKpXY()); //100.0);
+      holdKpOrientation.set(walkingControllerParameters.getHoldKpOrientation()); //100.0);
+      holdZeta.set(walkingControllerParameters.getHoldZeta()); //0.1);
 
-//      swingMaxPositionAcceleration.set(10.0); 
-//      swingMaxPositionJerk.set(150.0);
-//      swingMaxOrientationAcceleration.set(100.0);
-//      swingMaxOrientationJerk.set(1500.0);
+      swingMaxPositionAcceleration.set(walkingControllerParameters.getSwingMaxPositionAcceleration()); //10.0); 
+      swingMaxPositionJerk.set(walkingControllerParameters.getSwingMaxPositionJerk()); //150.0);
+      swingMaxOrientationAcceleration.set(walkingControllerParameters.getSwingMaxOrientationAcceleration()); //100.0);
+      swingMaxOrientationJerk.set(walkingControllerParameters.getswingMaxOrientationJerk()); //1500.0);
 
-      swingMaxPositionAcceleration.set(Double.POSITIVE_INFINITY); 
-      swingMaxPositionJerk.set(Double.POSITIVE_INFINITY);
-      swingMaxOrientationAcceleration.set(Double.POSITIVE_INFINITY);
-      swingMaxOrientationJerk.set(Double.POSITIVE_INFINITY);
+//      swingMaxPositionAcceleration.set(Double.POSITIVE_INFINITY); 
+//      swingMaxPositionJerk.set(Double.POSITIVE_INFINITY);
+//      swingMaxOrientationAcceleration.set(Double.POSITIVE_INFINITY);
+//      swingMaxOrientationJerk.set(Double.POSITIVE_INFINITY);
       
       for (RobotSide robotSide : RobotSide.values)
       {
