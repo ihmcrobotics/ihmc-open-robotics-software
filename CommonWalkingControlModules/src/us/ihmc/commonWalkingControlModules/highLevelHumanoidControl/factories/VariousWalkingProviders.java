@@ -221,7 +221,7 @@ public class VariousWalkingProviders
            SideDependentList<ContactablePlaneBody> bipedFeet, ConstantTransferTimeCalculator transferTimeCalculator,
            ConstantSwingTimeCalculator swingTimeCalculator, YoVariableRegistry registry)
    {
-      DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters);
+      DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters, registry);
 
       LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
 
@@ -300,7 +300,7 @@ public class VariousWalkingProviders
       DesiredComHeightProvider comHeightProvider = null;
       DesiredPelvisPoseProvider pelvisPoseProvider = null;
       DesiredChestOrientationProvider chestOrientationProvider = null;
-      DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters);
+      DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters, registry);
       DesiredFootPoseProvider footPoseProvider = new DesiredFootPoseProvider();
       ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider = new ReinitializeWalkingControllerProvider();
 
@@ -378,7 +378,7 @@ public class VariousWalkingProviders
       FootstepProvider footstepProvider = new DesiredFootstepCalculatorFootstepProviderWrapper(desiredFootstepCalculator, registry);
       DesiredHeadOrientationProvider headOrientationProvider = null;
       DesiredComHeightProvider comHeightProvider = null;
-      DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters);
+      DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters, registry);
 
 
       LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
@@ -410,7 +410,7 @@ public class VariousWalkingProviders
          CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> bipedFeet, ConstantTransferTimeCalculator transferTimeCalculator,
          ConstantSwingTimeCalculator swingTimeCalculator, YoVariableRegistry registry)
    {
-      DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters);
+      DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters, registry);
 
       LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
 

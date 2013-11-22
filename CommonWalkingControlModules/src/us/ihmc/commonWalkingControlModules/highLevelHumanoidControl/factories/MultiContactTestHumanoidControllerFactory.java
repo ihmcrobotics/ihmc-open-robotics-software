@@ -169,7 +169,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
                                                            processedOutputs, momentumOptimizationSettings , oldMomentumControlModule, null, stateEstimationDataFromControllerSink,
                                                            dynamicGraphicObjectsListRegistry);
 
-      DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters);
+      DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters, registry);
       TorusPoseProvider torusPoseProvider = new TorusPoseProvider();
       TorusManipulationProvider torusManipulationProvider = new TorusManipulationProvider();
       DesiredFootPoseProvider footPoseProvider = new DesiredFootPoseProvider();
