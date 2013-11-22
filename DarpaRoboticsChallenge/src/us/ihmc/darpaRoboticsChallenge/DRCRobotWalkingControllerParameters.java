@@ -411,5 +411,62 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
       if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 270.0; //1000.0;
       return 60.0;
    }
+   
+   public double getSwingKpXY()
+   {
+      return 100.0;
+   }
+   
+   public double getSwingKpZ()
+   {
+      return 200.0;
+   }
+   
+   public double getSwingKpOrientation()
+   {
+      return 200.0;
+   }
+   
+   public double getSwingZeta()
+   {
+      return 1.0;
+   }
+   
+
+   public double getHoldKpXY()
+   {
+      return 100.0;
+   }
+   
+   public double getHoldKpOrientation()
+   {
+      return 100.0;
+   }
+   
+   public double getHoldZeta()
+   {
+      return 0.1;
+   }
+
+   public double getSwingMaxPositionAcceleration()
+   {
+      return 10.0;
+   }
+   
+   public double getSwingMaxPositionJerk()
+   {
+      return 150.0;
+   }
+   
+   public double getSwingMaxOrientationAcceleration()
+   {
+      return 100.0;
+   }
+   
+   public double getswingMaxOrientationJerk()
+   {
+      return 1500.0;
+   }
+   
 
 }

@@ -72,5 +72,19 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getMaxAccelerationUpperBody();
    public abstract double getMaxJerkUpperBody();
 
+   public abstract double getSwingKpXY();
+   public abstract double getSwingKpZ();
+   public abstract double getSwingKpOrientation();
+   public abstract double getSwingZeta();
+
+   public abstract double getHoldKpXY();
+   public abstract double getHoldKpOrientation();
+   public abstract double getHoldZeta();
+
+   public abstract double getSwingMaxPositionAcceleration();
+   public abstract double getSwingMaxPositionJerk();
+   public abstract double getSwingMaxOrientationAcceleration();
+   public abstract double getswingMaxOrientationJerk();
+
 
 }
