@@ -22,13 +22,7 @@ public class DRCConfigParameters
       }
    }
 
-   public static final boolean USE_COLLISIONS_MESHS_FOR_VISUALIZATION = false;
-   public static final boolean SEND_HIGH_SPEED_CONFIGURATION_DATA = false;
-
-   public static final boolean USE_SLIDER_FOR_POSE_PLAYBACK = false; // true;
-
-   public static final boolean USE_SUPER_DUPER_HIGH_RESOLUTION_FOR_COMMS = false;
-
+   
    public static final boolean USE_HYDRA = false;
 
    public static final boolean LIMIT_CONTROLLER_OUTPUT_TORQUES = false; // true;//True causes hip oscillations or jerk in simulation
@@ -69,7 +63,6 @@ public class DRCConfigParameters
    public static final int VIDEO_FRAME = 6;
 
    // Networking
-
    public static final String CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP = "10.0.0.51";
    public static final String CONSTELLATION_FIELD_COMPUTER_1_VPN_IP = "10.0.0.52";
    public static final String CONSTELLATION_FIELD_COMPUTER_2_VPN_IP = "10.0.0.53";
@@ -78,19 +71,13 @@ public class DRCConfigParameters
    public static final int CONTROLLER_TO_UI_TCP_PORT = 4893;
 
    public static final int NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT = 4895;
-
    public static final int NETWORK_PROCESSOR_TO_UI_TCP_PORT = 4897;
-
    public static final int NETWORK_PROCESSOR_TO_UI_RAW_PROTOCOL_TCP_PORT = 4898;
-
    public static final int NETWORK_PROCESSOR_CLOUD_DISPATCHER_BACKEND_TCP_PORT = 5000;
-
    public static final int CONTROLLER_CLOUD_DISPATCHER_BACKEND_TCP_PORT = 5002;
-
    public static final int PPS_PROVIDER_PORT = 5050;
 
-   public static final long ROBOT_JOINT_SERVER_UPDATE_MILLIS = 100;
-
+   
    public static final String MULTISENSE_CAMERA_STRING_BASE;
 
    static
@@ -113,6 +100,12 @@ public class DRCConfigParameters
 
    // Video Settings
    public static final boolean STREAM_VIDEO = true;
+
+   // UI
+   public static final int UI_JOINT_CONFIGURATION_UPDATE_MILLIS = 100;
+   public static final boolean USE_COLLISIONS_MESHS_FOR_VISUALIZATION = false;
+   public static final boolean USE_SLIDER_FOR_POSE_PLAYBACK = false;
+   public static final boolean USE_SUPER_DUPER_HIGH_RESOLUTION_FOR_COMMS = false;
 
    // State Estimator
    public static final boolean USE_STATE_ESTIMATOR = true;
@@ -163,8 +156,7 @@ public class DRCConfigParameters
 
    public static final float LIDAR_SCAN_MAX_ROLL = 0.0f; // rolls the LIDAR to
 
-   // simulate a faster
-   // update rate.
+   // simulate a faster update rate.
    public static final float LIDAR_SCAN_MIN_ROLL = 0.0f;
    public static final float LIDAR_ANGLE_INCREMENT = (float) Math.toRadians(0.25);
    public static final float LIDAR_TIME_INCREMENT = 0.0f;
@@ -241,5 +233,4 @@ public class DRCConfigParameters
    public static final double contactTresholdForceForSCS = 5.0;
    public static final double contactTresholdForceForGazebo = 120.0;
    public static final double contactTresholdForceForRealAtlasRobot = 120.0;
-
 }
