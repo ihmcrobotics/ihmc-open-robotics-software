@@ -20,6 +20,7 @@ import java.awt.event.ActionListener;
 
 public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 {
+   private static final boolean ENABLE_CONSOLE_OUTPUT = true;
    private ReconnectingTCPClient netProcClient;
    private final byte[] netProcBuffer;
 
@@ -31,7 +32,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
    private JFrame frame;
    private JPanel netProcPanel, controllerPanel, selectControllerPanel;
-   
+
    private JButton netProcStartButton, netProcStopButton, netProcRestartButton;
    private final JLabel netProcRunningStatusLabel =
       new JLabel("<html><body>Running: <span style=\"color:red;font-style:italic;\">Not Running</span></body></html>", JLabel.CENTER);
@@ -40,9 +41,9 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
    private JButton controllerStartButton, controllerStopButton, controllerRestartButton;
    private final JLabel controllerRunningStatusLabel =
-         new JLabel("<html><body>Running: <span style=\"color:red;font-style:italic;\">Not Running</span></body></html>", JLabel.CENTER);
+      new JLabel("<html><body>Running: <span style=\"color:red;font-style:italic;\">Not Running</span></body></html>", JLabel.CENTER);
    private final JLabel controllerConnectedStatusLabel =
-         new JLabel("<html><body>Connected: <span style=\"color:red;font-style:italic;\">Disconnected</span></body></html>", JLabel.CENTER);
+      new JLabel("<html><body>Connected: <span style=\"color:red;font-style:italic;\">Disconnected</span></body></html>", JLabel.CENTER);
 
    public DRCEnterpriseCloudDispatcherFrontend()
    {
@@ -113,44 +114,48 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
    public void run()
    {
       new Thread(new Runnable()
-      {         
+      {
          public void run()
-         {      
+         {
             netProcClient.connect();
             netProcNotRunningButtonConfiguration();
          }
       }).start();
-      
-      new Thread(new Runnable()
-      {         
-         public void run()
-         {       
-            controllerClient.connect();
-            controllerNotRunningButtonConfiguration();
-         }
-      }).start();
-      
+
       new Thread(new Runnable()
       {
          public void run()
          {
-            while(true)
-               processNetProcSocket();                
+            controllerClient.connect();
+            controllerNotRunningButtonConfiguration();
          }
       }).start();
-      
+
       new Thread(new Runnable()
       {
          public void run()
-         {             
-            while(true)
+         {
+            while (true)
+            {
+               processNetProcSocket();
+            }
+         }
+      }).start();
+
+      new Thread(new Runnable()
+      {
+         public void run()
+         {
+            while (true)
+            {
                processControllerSocket();
+            }
          }
       }).start();
    }
 
    private void processNetProcSocket()
-   {      
+   {
       try
       {
          netProcClient.read(1);
@@ -160,7 +165,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
             case 0x00 :
                netProcRunningButtonConfiguration();
                netProcRunningStatusLabel.setText("<html><body>Network Processor Status: <span style=\"color:green;font-style:italic;"
-                     + "\">Running</span></body></html>");
+                                                 + "\">Running</span></body></html>");
                repaintFrame();
 
                break;
@@ -168,7 +173,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
             case 0x11 :
                netProcNotRunningButtonConfiguration();
                netProcRunningStatusLabel.setText(
-                     "<html><body>Network Processor Status: <span style=\"color:red;font-style:italic;\">Not Running</span></body></html>");
+                   "<html><body>Network Processor Status: <span style=\"color:red;font-style:italic;\">Not Running</span></body></html>");
                repaintFrame();
 
                break;
@@ -184,11 +189,11 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
          netProcClient.reset();
       }
 
-      netProcClient.reset();      
+      netProcClient.reset();
    }
 
    private void processControllerSocket()
-   {      
+   {
       try
       {
          controllerClient.read(1);
@@ -198,7 +203,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
             case 0x00 :
                controllerRunningButtonConfiguration();
                controllerRunningStatusLabel.setText("<html><body>Controller Status: <span style=\"color:green;font-style:italic;"
-                     + "\">Running</span></body></html>");
+                       + "\">Running</span></body></html>");
                repaintFrame();
 
                break;
@@ -206,14 +211,15 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
             case 0x10 :
                controllerDisableAll();
                controllerRunningStatusLabel.setText("<html><body>Controller Status: <span style=\"color:gray;font-style:italic;"
-                     + "\">Restarting</span></body></html>");
+                       + "\">Restarting</span></body></html>");
                repaintFrame();
+
                break;
 
             case 0x11 :
                controllerNotRunningButtonConfiguration();
                controllerRunningStatusLabel.setText(
-                     "<html><body>Controller Status: <span style=\"color:red;font-style:italic;\">Not Running</span></body></html>");
+                   "<html><body>Controller Status: <span style=\"color:red;font-style:italic;\">Not Running</span></body></html>");
                repaintFrame();
 
                break;
@@ -229,7 +235,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
          controllerClient.reset();
       }
 
-      controllerClient.reset();      
+      controllerClient.reset();
    }
 
    private void netProcDisableAll()
@@ -279,18 +285,18 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
       IHMCSwingTools.setNativeLookAndFeel();
 
       frame = new JFrame("DRC Networking Dispatcher");
-      frame.setSize(850, 630);
+      frame.setSize(850, 230);
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      frame.setResizable(false);
       frame.setAlwaysOnTop(true);
       frame.setLocationRelativeTo(null);
 
       JPanel mainPanel = new JPanel(new GridBagLayout());
-//      mainPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+
+//    mainPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 
       GridBagConstraints c = new GridBagConstraints();
 
-      JPanel controlsPanel = new JPanel(new GridLayout(1,3));
+      JPanel controlsPanel = new JPanel(new GridLayout(1, 3));
       ((GridLayout) controlsPanel.getLayout()).setHgap(5);
 
       setupNetProcPanel();
@@ -303,28 +309,36 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
       controlsPanel.add(controllerPanel);
       controlsPanel.add(selectControllerPanel);
 
-      JPanel consolePanel = new JPanel(new BorderLayout());
-      consolePanel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
-      JTextArea console = new JTextArea();
-      console.setEditable(false);
-      consolePanel.add(console, BorderLayout.CENTER);
+
 
       c.gridx = 0;
       c.gridy = 0;
-      c.insets = new Insets(10,10,5,10);
+      c.insets = new Insets(10, 10, 5, 10);
       c.weighty = 0.9;
       c.fill = GridBagConstraints.HORIZONTAL;
       c.ipadx = 180;
       c.ipady = 200;
       mainPanel.add(controlsPanel, c);
 
-      c.gridy++;
-      c.insets = new Insets(5,10,10,10);
-      c.ipady = 400;
-      c.weighty = 0.1;
-      mainPanel.add(consolePanel, c);
+      if (ENABLE_CONSOLE_OUTPUT)
+      {
+         frame.setSize(850, 630);
+         frame.setLocationRelativeTo(null);
+
+         JPanel consolePanel = new JPanel(new BorderLayout());
+         consolePanel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+         JTextArea console = new JTextArea();
+         console.setEditable(false);
+         consolePanel.add(console, BorderLayout.CENTER);
+         c.gridy++;
+         c.insets = new Insets(5, 10, 10, 10);
+         c.ipady = 400;
+         c.weighty = 0.1;
+         mainPanel.add(consolePanel, c);
+      }
 
       frame.getContentPane().add(mainPanel);
+      frame.setResizable(false);
       frame.setVisible(true);
    }
 
@@ -341,8 +355,9 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
          {
             try
             {
-               netProcClient.write(new byte[]{UnsignedByteTools.fromInt(0x00)});
-            } catch (DisconnectedException e)
+               netProcClient.write(new byte[] {UnsignedByteTools.fromInt(0x00)});
+            }
+            catch (DisconnectedException e)
             {
                netProcClient.reset();
             }
@@ -357,8 +372,9 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
          {
             try
             {
-               netProcClient.write(new byte[]{UnsignedByteTools.fromInt(0x10)});
-            } catch (DisconnectedException e)
+               netProcClient.write(new byte[] {UnsignedByteTools.fromInt(0x10)});
+            }
+            catch (DisconnectedException e)
             {
                netProcClient.reset();
             }
@@ -373,8 +389,9 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
          {
             try
             {
-               netProcClient.write(new byte[]{UnsignedByteTools.fromInt(0x11)});
-            } catch (DisconnectedException e)
+               netProcClient.write(new byte[] {UnsignedByteTools.fromInt(0x11)});
+            }
+            catch (DisconnectedException e)
             {
                netProcClient.reset();
             }
@@ -402,8 +419,9 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
          {
             try
             {
-               controllerClient.write(new byte[]{UnsignedByteTools.fromInt(0x00)});
-            } catch (DisconnectedException e)
+               controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x00)});
+            }
+            catch (DisconnectedException e)
             {
                controllerClient.reset();
             }
@@ -418,8 +436,9 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
          {
             try
             {
-               controllerClient.write(new byte[]{UnsignedByteTools.fromInt(0x10)});
-            } catch (DisconnectedException e)
+               controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x10)});
+            }
+            catch (DisconnectedException e)
             {
                controllerClient.reset();
             }
@@ -434,8 +453,9 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
          {
             try
             {
-               controllerClient.write(new byte[]{UnsignedByteTools.fromInt(0x11)});
-            } catch (DisconnectedException e)
+               controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x11)});
+            }
+            catch (DisconnectedException e)
             {
                controllerClient.reset();
             }
@@ -460,11 +480,17 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
    public static void main(String[] args) throws JSAPException
    {
+      if(ENABLE_CONSOLE_OUTPUT)
+      {
+         System.err.println("WARNING: Console Output is being piped over TCP. Do not use this in competition; this will chew through bandwidth.");
+      }
+
       JSAP jsap = new JSAP();
 
       FlaggedOption netProcIPFlag =
          new FlaggedOption("net-proc-ip").setLongFlag("net-proc-ip").setShortFlag('n').setRequired(false).setStringParser(JSAP.STRING_PARSER);
-      FlaggedOption controllerIPFlag = new FlaggedOption("scs-ip").setLongFlag("scs-ip").setShortFlag('s').setRequired(false).setStringParser(JSAP.STRING_PARSER);
+      FlaggedOption controllerIPFlag =
+         new FlaggedOption("scs-ip").setLongFlag("scs-ip").setShortFlag('s').setRequired(false).setStringParser(JSAP.STRING_PARSER);
 
       jsap.registerParameter(netProcIPFlag);
       jsap.registerParameter(controllerIPFlag);
