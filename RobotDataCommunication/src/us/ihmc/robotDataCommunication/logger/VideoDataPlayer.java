@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import javax.swing.JFrame;
@@ -32,8 +33,8 @@ public class VideoDataPlayer
    private final boolean hasTimebase;
    private final boolean interlaced;
    
-   private final TLongArrayList robotTimestamps = new TLongArrayList();
-   private final TLongArrayList videoTimestamps = new TLongArrayList();
+   private long[] robotTimestamps;
+   private long[] videoTimestamps;
    
    private long bmdTimeBaseNum;
    private long bmdTimeBaseDen;
@@ -108,9 +109,9 @@ public class VideoDataPlayer
       
       long videoTimestamp = getVideoTimestamp(timestamp);
       
-      if(currentlyShowingIndex + 1 < robotTimestamps.size())
+      if(currentlyShowingIndex + 1 < robotTimestamps.length)
       {
-         upcomingRobottimestamp = robotTimestamps.get(currentlyShowingIndex + 1);
+         upcomingRobottimestamp = robotTimestamps[currentlyShowingIndex + 1];
       }
       else
       {
@@ -133,18 +134,25 @@ public class VideoDataPlayer
    
    private long getVideoTimestamp(long timestamp)
    {
-      for(int i = robotTimestamps.size() - 1; i >= 0; i--)
+      currentlyShowingIndex = Arrays.binarySearch(robotTimestamps, timestamp);
+      
+      if(currentlyShowingIndex < 0)
       {
-         long nextTimestamp = robotTimestamps.get(i);
-         if(timestamp >= nextTimestamp)
+         int nextIndex = -currentlyShowingIndex + 1;
+         if(Math.abs(robotTimestamps[-currentlyShowingIndex] - timestamp) > Math.abs(robotTimestamps[nextIndex]))
          {
-            currentlyShowingRobottimestamp = nextTimestamp;
-            currentlyShowingIndex = i;
-            break;
+            currentlyShowingIndex = nextIndex;
+         }
+         else
+         {
+            currentlyShowingIndex = - currentlyShowingIndex;
          }
       }
       
-      long videoTimestamp = videoTimestamps.get(currentlyShowingIndex);
+      currentlyShowingRobottimestamp = robotTimestamps[currentlyShowingIndex];
+      
+      
+      long videoTimestamp = videoTimestamps[currentlyShowingIndex];
       
       if(hasTimebase)
       {
@@ -181,7 +189,9 @@ public class VideoDataPlayer
          {
             throw new RuntimeException("Cannot read denumerator");
          }
-                  
+
+         TLongArrayList robotTimestamps = new TLongArrayList();
+         TLongArrayList videoTimestamps = new TLongArrayList();
          while ((line = reader.readLine()) != null)
          {
             String[] stamps = line.split("\\s");
@@ -197,6 +207,9 @@ public class VideoDataPlayer
             videoTimestamps.add(videoStamp);
 
          }
+         
+         this.robotTimestamps = robotTimestamps.toArray();
+         this.videoTimestamps = videoTimestamps.toArray();
 
       }
       catch (FileNotFoundException e)
@@ -266,10 +279,10 @@ public class VideoDataPlayer
       
       long videoOffset = Long.MIN_VALUE;
       
-      for(int i = 0; i < robotTimestamps.size(); i++)
+      for(int i = 0; i < robotTimestamps.length; i++)
       {
-         long robotTimestamp = robotTimestamps.get(i);
-         long videoTimestamp = videoTimestamps.get(i);
+         long robotTimestamp = robotTimestamps[i];
+         long videoTimestamp = videoTimestamps[i];
          
          if(robotTimestamp >= startTimestamp && robotTimestamp <= endTimestamp)
          {
