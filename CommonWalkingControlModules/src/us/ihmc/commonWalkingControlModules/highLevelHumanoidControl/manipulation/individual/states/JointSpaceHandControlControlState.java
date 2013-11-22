@@ -72,7 +72,7 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
       maxJerkArmJointspace = new DoubleYoVariable("maxJerkArmJointspace" + robotSide, registry);
       
       maxIntegralErrorArmJointspace = new DoubleYoVariable("maxIntegralErrorArmJointspace" + robotSide, registry);
-      maxIntegralErrorArmJointspace.set(0.30);
+      maxIntegralErrorArmJointspace.set(armControllerParameters.getArmJointspaceMaxIntegralError());
       
       maxAccelerationArmJointspace.set(armControllerParameters.getArmJointspaceMaxAcceleration());
       maxJerkArmJointspace.set(armControllerParameters.getArmJointspaceMaxJerk());

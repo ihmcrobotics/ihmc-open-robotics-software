@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ManipulationControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.SE3PDGains;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.IndividualHandControlModule;
@@ -23,7 +24,10 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.VariableChangedListener;
+import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.GainCalculator;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
@@ -37,6 +41,8 @@ public class ManipulationControlModule
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final List<DynamicGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<DynamicGraphicReferenceFrame>();
 
+   private final DoubleYoVariable kpArmTaskspace, kdArmTaskspace, kiArmTaskspace, zetaArmTaskspace, maxIntegralErrorArmTaskspace;
+   
    private DirectControlManipulationTaskDispatcher directControlManipulationTaskDispatcher;
 
    private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("onFirstTick", registry);
@@ -44,6 +50,7 @@ public class ManipulationControlModule
 
    private final PipeLine<RobotSide> pipeline = new PipeLine<RobotSide>();
    private final SideDependentList<ReferenceFrame> midHandPositionControlFrames = new SideDependentList<ReferenceFrame>();
+   private final SE3PDGains taskspaceControlGains = new SE3PDGains();
 
    public ManipulationControlModule(FullRobotModel fullRobotModel, TwistCalculator twistCalculator, final VariousWalkingProviders variousWalkingProviders,
                                     ArmControllerParameters armControlParameters, ManipulationControllerParameters parameters,
@@ -76,7 +83,44 @@ public class ManipulationControlModule
       setUpStateMachine(yoTime, fullRobotModel, twistCalculator, parameters, variousWalkingProviders, dynamicGraphicObjectsListRegistry,
                         momentumBasedController, midHandPositionControlFrames, jacobianIds, armControlParameters);
 
+      kpArmTaskspace = new DoubleYoVariable("kpArmTaskspace", registry);
+      kpArmTaskspace.set(armControlParameters.getArmTaskspaceKp());
+
+      zetaArmTaskspace = new DoubleYoVariable("zetaArmTaskspace", registry);
+      zetaArmTaskspace.set(armControlParameters.getArmTaskspaceZeta());
+
+      kdArmTaskspace = new DoubleYoVariable("kdArmTaskspace", registry);
+
+      kiArmTaskspace = new DoubleYoVariable("kiArmTaskspace", registry);
+      kiArmTaskspace.set(armControlParameters.getArmTaskspaceKi());
+
+      maxIntegralErrorArmTaskspace = new DoubleYoVariable("maxIntegralErrorArmTaskspace", registry);
+      maxIntegralErrorArmTaskspace.set(armControlParameters.getArmTaskspaceMaxIntegralError());
+
+      setupVariableListener();
+
       parentRegistry.addChild(registry);
+   }
+
+   private void setupVariableListener()
+   {
+      VariableChangedListener listener = new VariableChangedListener()
+      {
+         public void variableChanged(YoVariable v)
+         {
+            kdArmTaskspace.set(GainCalculator.computeDerivativeGain(kpArmTaskspace.getDoubleValue(), zetaArmTaskspace.getDoubleValue()));
+
+            taskspaceControlGains.set(kpArmTaskspace.getDoubleValue(), zetaArmTaskspace.getDoubleValue(), kiArmTaskspace.getDoubleValue(),
+                  maxIntegralErrorArmTaskspace.getDoubleValue(), kpArmTaskspace.getDoubleValue(), zetaArmTaskspace.getDoubleValue(), kiArmTaskspace.getDoubleValue(),
+                  maxIntegralErrorArmTaskspace.getDoubleValue());
+         }
+      };
+      
+      kpArmTaskspace.addVariableChangedListener(listener);
+      zetaArmTaskspace.addVariableChangedListener(listener);
+      kdArmTaskspace.addVariableChangedListener(listener);
+      
+      listener.variableChanged(null);
    }
 
    public void setHasBeenInitialized(boolean hasBeenInitialized)
@@ -122,7 +166,7 @@ public class ManipulationControlModule
 
       
       directControlManipulationTaskDispatcher = new DirectControlManipulationTaskDispatcher(fullRobotModel, parameters, armControlParameters, handPoseProvider,
-              handLoadBearingProvider, armJointAngleProvider, handPositionControlFrames, individualHandControlModules, pipeline, momentumBasedController,
+              handLoadBearingProvider, armJointAngleProvider, handPositionControlFrames, individualHandControlModules, pipeline, taskspaceControlGains, momentumBasedController,
               registry);
 
 //    HighLevelToroidManipulationState toroidManipulationState = new HighLevelToroidManipulationState(yoTime, fullRobotModel, twistCalculator,
@@ -148,7 +192,7 @@ public class ManipulationControlModule
 
          IndividualHandControlModule individualHandControlModule = new IndividualHandControlModule(yoTime, robotSide, fullRobotModel, twistCalculator,
                                                                       dynamicGraphicObjectsListRegistry, gravityZ, controlDT,
-                                                                      momentumBasedController, jacobianId, armControlParameters, registry);
+                                                                      taskspaceControlGains, momentumBasedController, jacobianId, armControlParameters, registry);
          individualHandControlModules.put(robotSide, individualHandControlModule);
       }
 

@@ -87,16 +87,18 @@ public class IndividualHandControlModule
    private final String name;
    private final RobotSide robotSide;
    private final TwistCalculator twistCalculator;
-   private final SE3PDGains defaultGains = new SE3PDGains();
+   private final SE3PDGains taskspaceControlGains;
    private final Map<ReferenceFrame, YoSE3ConfigurationProvider> currentDesiredConfigurationProviders = new LinkedHashMap<ReferenceFrame,
                                                                                                            YoSE3ConfigurationProvider>();
    private final RigidBody base, endEffector;
    
    private final double controlDT;
+
+   private final DoubleYoVariable maxAccelerationArmTaskspace, maxJerkArmTaskspace;
    
    public IndividualHandControlModule(DoubleYoVariable simulationTime, RobotSide robotSide, FullRobotModel fullRobotModel,
                                       TwistCalculator twistCalculator, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-                                      double gravity, double controlDT,
+                                      double gravity, double controlDT, SE3PDGains taskspaceControlGains,
                                       MomentumBasedController momentumBasedController, int jacobianId, ArmControllerParameters armControlParameters,
                                       YoVariableRegistry parentRegistry)
    {
@@ -113,7 +115,7 @@ public class IndividualHandControlModule
       registry = new YoVariableRegistry(name);
       this.twistCalculator = twistCalculator;
 
-      defaultGains.set(100.0, 1.0, 100.0, 1.0);
+      this.taskspaceControlGains = taskspaceControlGains;
 
       oneDoFJoints = ScrewTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJoint.class);
 
@@ -176,7 +178,16 @@ public class IndividualHandControlModule
 
       taskSpacePositionControlStates.add(taskSpacePositionControlState);
       taskSpacePositionControlStates.add(objectManipulationState);
-
+      
+      maxAccelerationArmTaskspace = new DoubleYoVariable("maxAccelerationArmTaskspace", registry);
+      maxAccelerationArmTaskspace.set(armControlParameters.getArmTaskspaceMaxAcceleration());
+      maxJerkArmTaskspace = new DoubleYoVariable("maxJerkArmTaskspace", registry);
+      maxJerkArmTaskspace.set(armControlParameters.getArmTaskspaceMaxJerk());
+      
+      //Pre-create the rigid body spatial ... control modules
+      getOrCreateRigidBodySpatialAccelerationControlModule(ReferenceFrame.getWorldFrame());
+      getOrCreateRigidBodySpatialAccelerationControlModule(fullRobotModel.getChest().getBodyFixedFrame());
+      
       parentRegistry.addChild(registry);
    }
 
@@ -448,7 +459,7 @@ public class IndividualHandControlModule
 
    public void holdPositionInBase()
    {
-      holdPositionInFrame(base.getBodyFixedFrame(), base, defaultGains);
+      holdPositionInFrame(base.getBodyFixedFrame(), base, taskspaceControlGains);
    }
 
    public void holdPositionInFrame(ReferenceFrame frame, RigidBody base, SE3PDGains gains)
@@ -536,6 +547,9 @@ public class IndividualHandControlModule
 
          handSpatialAccelerationControlModules.put(handPositionControlFrame, ret);
       }
+
+      ret.setOrientationMaxAccelerationAndJerk(maxAccelerationArmTaskspace.getDoubleValue(), maxJerkArmTaskspace.getDoubleValue());
+      ret.setPositionMaxAccelerationAndJerk(maxAccelerationArmTaskspace.getDoubleValue(), maxJerkArmTaskspace.getDoubleValue());
 
       return ret;
    }
