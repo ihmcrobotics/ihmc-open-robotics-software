@@ -1,7 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.processManagement;
 
 import com.martiansoftware.jsap.*;
-
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
@@ -159,7 +158,7 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
 
          if (config.getBoolean(largeHeapForProcessor.getID()))
          {
-            javaArgs = new String[] { "-Xms10240m", "-Xmx10240m" };
+            javaArgs = new String[] { "-Xms4096m", "-Xmx40960m" };
          }
       }
 
