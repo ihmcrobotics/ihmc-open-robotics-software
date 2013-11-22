@@ -20,15 +20,10 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class FootstepPathCoordinator implements FootstepProvider
 {
-   private static final double FOOTSTEP_PATH_SWING_TIME = 0.6;
-   private static final double SLOW_BLIND_WALKING_SWING_TIME = 0.8;
-   private static final double BLIND_WALKING_IN_MUD_SWING_TIME = 2.2; //1.6; //2.5;
-   
-   private static final double FOOTSTEP_PATH_TRANSFER_TIME = 0.25;
-   private static final double SLOW_BLIND_WALKING_TRANSFER_TIME = 0.35;
-   private static final double BLIND_WALKING_IN_MUD_TRANSFER_TIME = 0.6; //1.5;
-   
    private boolean DEBUG = false;
+
+   private final FootstepTimingParameters footstepTimingParameters;
+   
    private final ConcurrentLinkedQueue<Footstep> footstepQueue = new ConcurrentLinkedQueue<Footstep>();
    private final YoVariableRegistry registry = new YoVariableRegistry("FootstepPathCoordinator");
    private final EnumYoVariable<WalkMethod> walkMethod = new EnumYoVariable<WalkMethod>("walkMethod", registry, WalkMethod.class);
@@ -41,12 +36,14 @@ public class FootstepPathCoordinator implements FootstepProvider
    private final ConstantSwingTimeCalculator constantSwingTimeCalculator;
    private final ConstantTransferTimeCalculator constantTransferTimeCalculator;
 
-   public FootstepPathCoordinator(GlobalDataProducer objectCommunicator,
+   public FootstepPathCoordinator(FootstepTimingParameters footstepTimingParameters,
+         GlobalDataProducer objectCommunicator,
                                   BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator,
                                   ConstantSwingTimeCalculator constantSwingTimeCalculator,
                                   ConstantTransferTimeCalculator constantTransferTimeCalculator,
                                   YoVariableRegistry parentRegistry)
    {
+      this.footstepTimingParameters = footstepTimingParameters;
       setWalkMethod(WalkMethod.FOOTSTEP_PATH);
       setPaused(false);
 
@@ -240,8 +237,8 @@ public class FootstepPathCoordinator implements FootstepProvider
    {
       setWalkMethod(WalkMethod.FOOTSTEP_PATH);
 
-      constantSwingTimeCalculator.setSwingTime(FOOTSTEP_PATH_SWING_TIME);
-      constantTransferTimeCalculator.setTransferTime(FOOTSTEP_PATH_TRANSFER_TIME);
+      constantSwingTimeCalculator.setSwingTime(footstepTimingParameters.getFootstepPathSwingTime());
+      constantTransferTimeCalculator.setTransferTime(footstepTimingParameters.getFootstepPathTransferTime());
       
       if (DEBUG)
       {
@@ -338,16 +335,16 @@ public class FootstepPathCoordinator implements FootstepProvider
                stepLength = 0.25; 
                stepWidth = 0.12;
                stepSideward = 0.1;
-               swingTime = BLIND_WALKING_IN_MUD_SWING_TIME;
-               transferTime = BLIND_WALKING_IN_MUD_TRANSFER_TIME; 
+               swingTime = footstepTimingParameters.getBlindWalkingInMudSwingTime();
+               transferTime = footstepTimingParameters.getBlindWalkingInMudTransferTime();
             }
             else
             {
                stepLength = 0.2;
                stepWidth = 0.25;
                stepSideward = 0.1;
-               swingTime = SLOW_BLIND_WALKING_SWING_TIME;
-               transferTime = SLOW_BLIND_WALKING_TRANSFER_TIME; 
+               swingTime = footstepTimingParameters.getSlowBlindWalkingSwingTime();
+               transferTime = footstepTimingParameters.getSlowBlindWalkingTransferTime();
             }
 
             break;
@@ -360,16 +357,16 @@ public class FootstepPathCoordinator implements FootstepProvider
                stepLength = 0.35;
                stepWidth = 0.12;
                stepSideward = 0.3;
-               swingTime = BLIND_WALKING_IN_MUD_SWING_TIME;
-               transferTime = BLIND_WALKING_IN_MUD_TRANSFER_TIME; 
+               swingTime = footstepTimingParameters.getBlindWalkingInMudSwingTime();
+               transferTime = footstepTimingParameters.getBlindWalkingInMudTransferTime(); 
             }
             else
             {
                stepLength = 0.35;
                stepWidth = 0.25;
                stepSideward = 0.25;
-               swingTime = FOOTSTEP_PATH_SWING_TIME;
-               transferTime = FOOTSTEP_PATH_TRANSFER_TIME;  
+               swingTime = footstepTimingParameters.getFootstepPathSwingTime();
+               transferTime = footstepTimingParameters.getFootstepPathTransferTime();
             }
 
             break;
@@ -382,16 +379,16 @@ public class FootstepPathCoordinator implements FootstepProvider
                stepLength = 0.5;
                stepWidth = 0.12;
                stepSideward = 0.5;
-               swingTime = BLIND_WALKING_IN_MUD_SWING_TIME;
-               transferTime = BLIND_WALKING_IN_MUD_TRANSFER_TIME; 
+               swingTime = footstepTimingParameters.getBlindWalkingInMudSwingTime();
+               transferTime = footstepTimingParameters.getBlindWalkingInMudTransferTime(); 
             }
             else
             {
                stepLength = 0.5;
                stepWidth = 0.25;
                stepSideward = 0.6;
-               swingTime = FOOTSTEP_PATH_SWING_TIME;
-               transferTime = FOOTSTEP_PATH_TRANSFER_TIME;
+               swingTime = footstepTimingParameters.getFootstepPathSwingTime();
+               transferTime = footstepTimingParameters.getFootstepPathTransferTime();
             }
 
             break;
@@ -402,8 +399,8 @@ public class FootstepPathCoordinator implements FootstepProvider
             stepLength = 0.0;
             stepWidth = 0.15;
             stepSideward = 0.0;
-            swingTime = SLOW_BLIND_WALKING_SWING_TIME;
-            transferTime = SLOW_BLIND_WALKING_TRANSFER_TIME;
+            swingTime = footstepTimingParameters.getSlowBlindWalkingSwingTime();
+            transferTime = footstepTimingParameters.getSlowBlindWalkingTransferTime();
 
             break;
          }
