@@ -7,6 +7,7 @@ public enum VideoSettings
  * Known BlackMagic Mini Recorder modes
  * 
  * mode = 11 -> 1080p59.94Hz
+ * mode = 12 -> 1080p60Hz
  * mode = 9 -> 1080p60
  * mode = 14 -> 720p59.94Hz
 */   
