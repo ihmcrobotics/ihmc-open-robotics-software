@@ -20,7 +20,7 @@ import com.yobotics.simulationconstructionset.VariableChangedListener;
 import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.GainCalculator;
-import com.yobotics.simulationconstructionset.util.PDController;
+import com.yobotics.simulationconstructionset.util.PIDController;
 import com.yobotics.simulationconstructionset.util.math.filter.RateLimitedYoVariable;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
@@ -30,17 +30,19 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
 {
    private final OneDoFJoint[] oneDoFJoints;
    private final LinkedHashMap<OneDoFJoint, DoubleTrajectoryGenerator> trajectories;
-   private final LinkedHashMap<OneDoFJoint, PDController> pdControllers;
+   private final LinkedHashMap<OneDoFJoint, PIDController> pidControllers;
 
    private final ObjectObjectMap<OneDoFJoint, RateLimitedYoVariable> rateLimitedAccelerations;
 
    
-   private final DoubleYoVariable kpAllArmJoints, kdAllArmJoints, zetaAllArmJoints, maxAccelerationArmJoints, maxJerkArmJoints;
+   private final DoubleYoVariable kpArmJointspace, kdArmJointspace, kiArmJointspace, zetaArmJointspace, maxAccelerationArmJointspace, maxJerkArmJointspace, maxIntegralErrorArmJointspace;
 
    private final DoubleYoVariable moveTimeArmJoint;
 
    private final YoVariableRegistry registry;
    private final MomentumBasedController momentumBasedController;
+   
+   private final double dt;
 
    public JointSpaceHandControlControlState(String namePrefix, IndividualHandControlState stateEnum, RobotSide robotSide,
                                             InverseDynamicsJoint[] controlledJoints, int jacobianId, MomentumBasedController momentumBasedController,
@@ -48,41 +50,49 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
    {
       super(stateEnum);
 
+      this.dt = dt;
+      
       registry = new YoVariableRegistry(namePrefix + FormattingTools.underscoredToCamelCase(this.stateEnum.toString(), true) + "State");
 
       moveTimeArmJoint = new DoubleYoVariable("moveTimeArmJoint", registry);
       moveTimeArmJoint.set(moveTime);
 
-      kpAllArmJoints = new DoubleYoVariable("kpAllArmJoints" + robotSide, registry);
-      kpAllArmJoints.set(armControllerParameters.getKpAllArmJoints());
+      kpArmJointspace = new DoubleYoVariable("kpArmJointspace" + robotSide, registry);
+      kpArmJointspace.set(armControllerParameters.getArmJointspaceKp());
 
-      zetaAllArmJoints = new DoubleYoVariable("zetaAllArmJoints" + robotSide, registry);
-      zetaAllArmJoints.set(armControllerParameters.getZetaAllArmJoints());
+      zetaArmJointspace = new DoubleYoVariable("zetaArmJointspace" + robotSide, registry);
+      zetaArmJointspace.set(armControllerParameters.getArmJointspaceZeta());
 
-      kdAllArmJoints = new DoubleYoVariable("kdAllArmJoints" + robotSide, registry);
+      kdArmJointspace = new DoubleYoVariable("kdArmJointspace" + robotSide, registry);
 
-      maxAccelerationArmJoints = new DoubleYoVariable("maxAccelerationArmJoints" + robotSide, registry);
-      maxJerkArmJoints = new DoubleYoVariable("maxJerkArmJoints" + robotSide, registry);
+      kiArmJointspace = new DoubleYoVariable("kiArmJointspace" + robotSide, registry);
+      kiArmJointspace.set(armControllerParameters.getArmJointspaceKi());
+
+      maxAccelerationArmJointspace = new DoubleYoVariable("maxAccelerationArmJointspace" + robotSide, registry);
+      maxJerkArmJointspace = new DoubleYoVariable("maxJerkArmJointspace" + robotSide, registry);
       
-      maxAccelerationArmJoints.set(armControllerParameters.getMaxAccelerationAllArmJoints());
-      maxJerkArmJoints.set(armControllerParameters.getMaxJerkAllArmJoints());
+      maxIntegralErrorArmJointspace = new DoubleYoVariable("maxIntegralErrorArmJointspace" + robotSide, registry);
+      maxIntegralErrorArmJointspace.set(0.30);
+      
+      maxAccelerationArmJointspace.set(armControllerParameters.getArmJointspaceMaxAcceleration());
+      maxJerkArmJointspace.set(armControllerParameters.getArmJointspaceMaxJerk());
       
       setupVariableListener();
 
       trajectories = new LinkedHashMap<OneDoFJoint, DoubleTrajectoryGenerator>();
-      pdControllers = new LinkedHashMap<OneDoFJoint, PDController>();
+      pidControllers = new LinkedHashMap<OneDoFJoint, PIDController>();
       rateLimitedAccelerations = new ObjectObjectMap<OneDoFJoint, RateLimitedYoVariable>();
       
       this.oneDoFJoints = ScrewTools.filterJoints(controlledJoints, RevoluteJoint.class);
 
       for (OneDoFJoint joint : oneDoFJoints)
       {
-         PDController pdController = new PDController(kpAllArmJoints, kdAllArmJoints, joint.getName() + robotSide.getCamelCaseNameForMiddleOfExpression(),
+         PIDController pidController = new PIDController(kpArmJointspace, kiArmJointspace, kdArmJointspace, maxIntegralErrorArmJointspace, joint.getName() + robotSide.getCamelCaseNameForMiddleOfExpression(),
                                         registry);
-         pdControllers.put(joint, pdController);
+         pidControllers.put(joint, pidController);
          
          
-         RateLimitedYoVariable rateLimitedAcceleration = new RateLimitedYoVariable(joint.getName() + "Acceleration" + robotSide, registry, maxJerkArmJoints, dt);
+         RateLimitedYoVariable rateLimitedAcceleration = new RateLimitedYoVariable(joint.getName() + "Acceleration" + robotSide, registry, maxJerkArmJointspace, dt);
          rateLimitedAccelerations.add(joint, rateLimitedAcceleration);
       }
 
@@ -99,21 +109,22 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
       {
          public void variableChanged(YoVariable v)
          {
-            kdAllArmJoints.set(GainCalculator.computeDerivativeGain(kpAllArmJoints.getDoubleValue(), zetaAllArmJoints.getDoubleValue()));            
+            kdArmJointspace.set(GainCalculator.computeDerivativeGain(kpArmJointspace.getDoubleValue(), zetaArmJointspace.getDoubleValue()));            
          }
       };
 
-      kpAllArmJoints.addVariableChangedListener(listener);
-      zetaAllArmJoints.addVariableChangedListener(listener);
-      kdAllArmJoints.addVariableChangedListener(listener);
+      kpArmJointspace.addVariableChangedListener(listener);
+      zetaArmJointspace.addVariableChangedListener(listener);
+      kdArmJointspace.addVariableChangedListener(listener);
       
       listener.variableChanged(null);
    }
 
    private void setDesiredJointAccelerations()
    {
-      for (OneDoFJoint joint : oneDoFJoints)
+      for (int i = 0 ; i < oneDoFJoints.length; i++)
       {
+         OneDoFJoint joint = oneDoFJoints[i];
          DoubleTrajectoryGenerator trajectoryGenerator = trajectories.get(joint);
          trajectoryGenerator.compute(getTimeInCurrentState());
 
@@ -124,10 +135,10 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
          double currentPosition = joint.getQ();
          double currentVelocity = joint.getQd();
 
-         PDController pdController = pdControllers.get(joint);
-         double desiredAcceleration = feedforwardAcceleration + pdController.compute(currentPosition, desiredPosition, currentVelocity, desiredVelocity);
+         PIDController pidController = pidControllers.get(joint);
+         double desiredAcceleration = feedforwardAcceleration + pidController.computeForAngles(currentPosition, desiredPosition, currentVelocity, desiredVelocity, dt);
 
-         desiredAcceleration = MathTools.clipToMinMax(desiredAcceleration, maxAccelerationArmJoints.getDoubleValue());
+         desiredAcceleration = MathTools.clipToMinMax(desiredAcceleration, maxAccelerationArmJointspace.getDoubleValue());
          
          RateLimitedYoVariable rateLimitedAcceleration = rateLimitedAccelerations.get(joint);
          rateLimitedAcceleration.update(desiredAcceleration);
@@ -146,9 +157,11 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
    @Override
    public void doTransitionIntoAction()
    {
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      for (int i = 0 ; i < oneDoFJoints.length; i++)
       {
-         trajectories.get(oneDoFJoint).initialize();
+         OneDoFJoint joint = oneDoFJoints[i];
+         trajectories.get(joint).initialize();
+         pidControllers.get(joint).setCumulativeError(0.0);
       }
    }
 

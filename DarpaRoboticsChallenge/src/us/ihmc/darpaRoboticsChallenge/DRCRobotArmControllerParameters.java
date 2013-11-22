@@ -4,28 +4,64 @@ import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameter
 
 public class DRCRobotArmControllerParameters implements ArmControllerParameters
 {
-   public double getKpAllArmJoints()
+   public double getArmJointspaceKp()
    {
       if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 80.0;
       return 80.0; 
    }
 
-   public double getZetaAllArmJoints()
+   public double getArmJointspaceZeta()
    {
       if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 0.6;
       return 0.2;  // Lots of natural damping in the arms. Don't need to damp the controllers.
    }
 
-   public double getMaxAccelerationAllArmJoints()
+   public double getArmJointspaceKi()
    {
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 100.0;
+      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 0.0;
+      return 0.0; 
+   }
+
+   public double getArmJointspaceMaxAcceleration()
+   {
+      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return Double.POSITIVE_INFINITY;
       return 6.0;
    }
 
-   public double getMaxJerkAllArmJoints()
+   public double getArmJointspaceMaxJerk()
    {
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 1000.0;
+      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return Double.POSITIVE_INFINITY;
       return 60.0;
+   }
+
+   public double getArmTaskspaceKp()
+   {
+      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 100.0;
+      return 100.0; 
+   }
+
+   public double getArmTaskspaceZeta()
+   {
+      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 1.0;
+      return 1.0; 
+   }
+
+   public double getArmTaskspaceKi()
+   {
+      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 0.0;
+      return 0.0; 
+   }
+
+   public double getArmTaskspaceMaxAcceleration()
+   {
+      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return Double.POSITIVE_INFINITY;
+      return 6.0; 
+   }
+
+   public double getArmTaskspaceMaxJerk()
+   {
+      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return Double.POSITIVE_INFINITY;
+      return 60.0; 
    }
 
 }

@@ -165,8 +165,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       // Setup the pelvis trajectory generator
       pelvisPositionControlFrame = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint();
       boolean visualize = true;
-      this.pelvisController = new RigidBodySpatialAccelerationControlModule("pelvis", twistCalculator, fullRobotModel.getPelvis(), pelvisPositionControlFrame,
-              visualize, controlDT, registry);
+      this.pelvisController = new RigidBodySpatialAccelerationControlModule("pelvis", twistCalculator, fullRobotModel.getPelvis(), pelvisPositionControlFrame, controlDT, registry);
 
       carIngressPelvisPositionKp.set(100.0);
       carIngressPelvisPositionZeta.set(1.0);

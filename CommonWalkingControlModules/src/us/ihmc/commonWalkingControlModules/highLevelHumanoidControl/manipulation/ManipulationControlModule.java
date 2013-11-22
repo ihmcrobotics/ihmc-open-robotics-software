@@ -121,9 +121,9 @@ public class ManipulationControlModule
               momentumBasedController, jacobianIds, armControlParameters);
 
       
-      directControlManipulationTaskDispatcher = new DirectControlManipulationTaskDispatcher(fullRobotModel, parameters, handPoseProvider,
-              handLoadBearingProvider,  armJointAngleProvider, handPositionControlFrames, individualHandControlModules,
-              pipeline, momentumBasedController, registry);
+      directControlManipulationTaskDispatcher = new DirectControlManipulationTaskDispatcher(fullRobotModel, parameters, armControlParameters, handPoseProvider,
+              handLoadBearingProvider, armJointAngleProvider, handPositionControlFrames, individualHandControlModules, pipeline, momentumBasedController,
+              registry);
 
 //    HighLevelToroidManipulationState toroidManipulationState = new HighLevelToroidManipulationState(yoTime, fullRobotModel, twistCalculator,
 //                                                                  handPositionControlFrames, handControllers, jacobians, torusPoseProvider,

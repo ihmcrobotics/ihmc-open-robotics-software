@@ -17,6 +17,8 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class RigidBodySpatialAccelerationControlModule
 {
+   private static final boolean VISUALIZE = true;
+   
    private final YoVariableRegistry registry;
    private final TwistCalculator twistCalculator;
    private final SE3PDController se3pdController;
@@ -30,19 +32,13 @@ public class RigidBodySpatialAccelerationControlModule
    private final BooleanYoVariable limitAccelerations;
    
    public RigidBodySpatialAccelerationControlModule(String namePrefix, TwistCalculator twistCalculator, RigidBody endEffector, ReferenceFrame endEffectorFrame,
-         double dt, YoVariableRegistry parentRegistry)
-   {
-      this(namePrefix, twistCalculator, endEffector, endEffectorFrame, false, dt, parentRegistry);
-   }
-   
-   public RigidBodySpatialAccelerationControlModule(String namePrefix, TwistCalculator twistCalculator, RigidBody endEffector, ReferenceFrame endEffectorFrame,
-           boolean visualize, double dt, YoVariableRegistry parentRegistry)
+           double dt, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.twistCalculator = twistCalculator;
       this.endEffector = endEffector;
       this.endEffectorFrame = endEffectorFrame;
-      this.se3pdController = new SE3PDController(namePrefix, endEffectorFrame, visualize, dt, registry);
+      this.se3pdController = new SE3PDController(namePrefix, endEffectorFrame, VISUALIZE, dt, registry);
       this.acceleration = new SpatialAccelerationVector();
       
       desiredAccelerationLinearViz = new YoFrameVector(namePrefix + "LinearAccelViz", endEffectorFrame, registry);
@@ -160,24 +156,34 @@ public class RigidBodySpatialAccelerationControlModule
       return spatialAcceleration;
    }
 
-   public void setPositionProportionalGains(double kx, double ky, double kz)
+   public void setPositionProportionalGains(double kpx, double kpy, double kpz)
    {
-      se3pdController.setPositionProportionalGains(kx, ky, kz);
+      se3pdController.setPositionProportionalGains(kpx, kpy, kpz);
    }
 
-   public void setPositionDerivativeGains(double bx, double by, double bz)
+   public void setPositionDerivativeGains(double kdx, double kdy, double kdz)
    {
-      se3pdController.setPositionDerivativeGains(bx, by, bz);
+      se3pdController.setPositionDerivativeGains(kdx, kdy, kdz);      
    }
 
-   public void setOrientationProportionalGains(double kx, double ky, double kz)
+   public void setPositionIntegralGains(double kix, double kiy, double kiz, double maxIntegralError)
    {
-      se3pdController.setOrientationProportionalGains(kx, ky, kz);
+      se3pdController.setPositionIntegralGains(kix, kiy, kiz, maxIntegralError);      
    }
 
-   public void setOrientationDerivativeGains(double bx, double by, double bz)
+   public void setOrientationProportionalGains(double kpx, double kpy, double kpz)
    {
-      se3pdController.setOrientationDerivativeGains(bx, by, bz);
+      se3pdController.setOrientationProportionalGains(kpx, kpy, kpz);
+   }
+
+   public void setOrientationDerivativeGains(double kdx, double kdy, double kdz)
+   {
+      se3pdController.setOrientationDerivativeGains(kdx, kdy, kdz);      
+   }
+
+   public void setOrientationIntegralGains(double kix, double kiy, double kiz, double maxIntegralError)
+   {
+      se3pdController.setOrientationIntegralGains(kix, kiy, kiz, maxIntegralError);      
    }
 
    public ReferenceFrame getTrackingFrame()
