@@ -22,7 +22,7 @@ import us.ihmc.utilities.test.LowPassTimingReporter;
 public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, GroundOnlyQuadTreeData> implements HeightMap
 {
    private final ResolutionProvider constantResolution;
-   private final double heightThreshold;
+   private double heightThreshold;
    private int numberOfNodes = 0;
    private int maxNodes = 1;
    private boolean octreeChanged = false;
@@ -54,6 +54,10 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
       numberOfNodes = 1;
 
 //    clearingTimer.setupRecording("GroundOnlyQuadTree", "perform the lidar beam search", 10000L, 20000L);
+   }
+   
+   public void setHeighThreshold(float threshold) {
+      this.heightThreshold = threshold;
    }
 
    public double heightAtPoint(double x, double y)
