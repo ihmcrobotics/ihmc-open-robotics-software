@@ -450,21 +450,25 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
 
    public double getSwingMaxPositionAcceleration()
    {
+      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return Double.POSITIVE_INFINITY;
       return 10.0;
    }
    
    public double getSwingMaxPositionJerk()
    {
+      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return Double.POSITIVE_INFINITY;
       return 150.0;
    }
    
    public double getSwingMaxOrientationAcceleration()
    {
+      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return Double.POSITIVE_INFINITY;
       return 100.0;
    }
    
    public double getswingMaxOrientationJerk()
    {
+      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return Double.POSITIVE_INFINITY;
       return 1500.0;
    }
    
