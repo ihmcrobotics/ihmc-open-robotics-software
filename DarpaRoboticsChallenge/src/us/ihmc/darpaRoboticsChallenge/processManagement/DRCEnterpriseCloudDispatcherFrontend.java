@@ -42,7 +42,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
    private final JLabel netProcConnectedStatusLabel =
       new JLabel("<html><body>Connected: <span style=\"color:red;font-style:italic;\">Disconnected</span></body></html>", JLabel.CENTER);
 
-   private JButton controllerStartButton, controllerStopButton, controllerRestartButton;
+   private JButton controllerStartButton, controllerStopButton;
    private final JLabel controllerRunningStatusLabel =
       new JLabel("<html><body>Running: <span style=\"color:red;font-style:italic;\">Not Running</span></body></html>", JLabel.CENTER);
    private final JLabel controllerConnectedStatusLabel =
@@ -269,21 +269,18 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
    {
       controllerStartButton.setEnabled(false);
       controllerStopButton.setEnabled(false);
-      controllerRestartButton.setEnabled(false);
    }
 
    private void controllerNotRunningButtonConfiguration()
    {
       controllerStartButton.setEnabled(true);
       controllerStopButton.setEnabled(false);
-      controllerRestartButton.setEnabled(false);
    }
 
    private void controllerRunningButtonConfiguration()
    {
       controllerStartButton.setEnabled(false);
       controllerStopButton.setEnabled(true);
-      controllerRestartButton.setEnabled(true);
    }
 
    private void initAndStartSwingGui()
@@ -454,29 +451,11 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
          }
       });
 
-      controllerRestartButton = new JButton("Restart Controller");
-      controllerRestartButton.setEnabled(false);
-      controllerRestartButton.addActionListener(new ActionListener()
-      {
-         public void actionPerformed(ActionEvent actionEvent)
-         {
-            try
-            {
-               controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x11)});
-            }
-            catch (DisconnectedException e)
-            {
-               controllerClient.reset();
-            }
-         }
-      });
-
       controllerPanel.add(new JLabel("<html><body><h2>Controller</h2></body></html>", JLabel.CENTER));
       controllerPanel.add(controllerConnectedStatusLabel);
       controllerPanel.add(controllerRunningStatusLabel);
       controllerPanel.add(controllerStartButton);
       controllerPanel.add(controllerStopButton);
-      controllerPanel.add(controllerRestartButton);
    }
 
    private void setupSelectControllerPanel()
