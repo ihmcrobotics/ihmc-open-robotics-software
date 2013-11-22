@@ -114,7 +114,7 @@ public class DRCRobotSDFLoader
 
    public static void main(String[] args)
    {
-      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_NO_HANDS, false);
+      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_IROBOT_HANDS, false);
       JaxbSDFLoader loader = loadDRCRobot(jointMap, false);
       System.out.println(loader.createRobot(jointMap, true).getName());
       

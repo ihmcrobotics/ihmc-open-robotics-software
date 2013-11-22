@@ -1,8 +1,10 @@
 package us.ihmc.darpaRoboticsChallenge.drcRobot;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -405,6 +407,15 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
    public String[] getIMUSensorsToUse()
    {
       return imuSensorsToUse;
+   }
+
+   @Override
+   public Set<String> getLastSimulatedJoints()
+   {
+      HashSet<String> lastSimulatedJoints = new HashSet<>();
+      lastSimulatedJoints.add("l_arm_wrx");
+      lastSimulatedJoints.add("r_arm_wrx");
+      return lastSimulatedJoints;
    }
 
 

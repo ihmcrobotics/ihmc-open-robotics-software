@@ -101,9 +101,9 @@ public class SCSToInverseDynamicsJointMap
       
       
 
-      if (inverseDynamicsJointsByName.size() != oneDegreeOfFreedomJoints.size())
+      if (inverseDynamicsJointsByName.size() < oneDegreeOfFreedomJoints.size())
       {
-         throw new RuntimeException("oneDoFJoints.length != oneDegreeOfFreedomJoints.size()");
+         throw new RuntimeException("oneDoFJoints.length < oneDegreeOfFreedomJoints.size()");
       }
 
       scsToInverseDynamicsJointMap.addLinkedJoints(floatingRootJoint, sixDoFRootJoint);

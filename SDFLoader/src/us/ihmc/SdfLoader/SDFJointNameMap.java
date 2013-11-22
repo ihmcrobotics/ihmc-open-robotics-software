@@ -1,6 +1,7 @@
 package us.ihmc.SdfLoader;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.vecmath.Vector3d;
 
@@ -39,5 +40,7 @@ public interface SDFJointNameMap extends RobotSpecificJointNames
    public List<Pair<String,Vector3d>> getJointNameGroundContactPointMap();
    
    public boolean enableTorqueVelocityLimits();
+   
+   public Set<String> getLastSimulatedJoints();
 
 }
