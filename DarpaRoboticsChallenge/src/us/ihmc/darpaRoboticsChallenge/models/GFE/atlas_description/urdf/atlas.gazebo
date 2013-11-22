@@ -86,11 +86,11 @@
   </gazebo>
   <gazebo reference="l_leg_lax">
     <provideFeedback>1</provideFeedback>
-    <cfmDamping>1</cfmDamping>
+    <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
   <gazebo reference="r_leg_lax">
     <provideFeedback>1</provideFeedback>
-    <cfmDamping>1</cfmDamping>
+    <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
   <gazebo reference="r_foot">
     <!-- kp and kd for rubber -->
@@ -256,81 +256,81 @@
 
 
   <gazebo reference="back_lbz">
-    <cfmDamping>1</cfmDamping>
+    <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
   <gazebo reference="back_mby">
-    <cfmDamping>1</cfmDamping>
+    <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
   <gazebo reference="back_ubx">
-    <cfmDamping>1</cfmDamping>
+    <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
   <gazebo reference="l_arm_elx">
-    <cfmDamping>1</cfmDamping>
+    <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
   <gazebo reference="l_arm_ely">
-    <cfmDamping>1</cfmDamping>
+    <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
   <gazebo reference="l_arm_mwx">
-    <cfmDamping>1</cfmDamping>
+    <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
   <gazebo reference="l_arm_shx">
-    <cfmDamping>1</cfmDamping>
+    <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
   <gazebo reference="l_arm_usy">
-    <cfmDamping>1</cfmDamping>
+    <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
   <gazebo reference="l_arm_uwy">
-    <cfmDamping>1</cfmDamping>
+    <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
   <gazebo reference="l_leg_kny">
-    <cfmDamping>1</cfmDamping>
+    <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
   <gazebo reference="l_leg_lhy">
-    <cfmDamping>1</cfmDamping>
+    <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
   <gazebo reference="l_leg_mhx">
-    <cfmDamping>1</cfmDamping>
+    <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
   <gazebo reference="l_leg_uay">
-    <cfmDamping>1</cfmDamping>
+    <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
   <gazebo reference="l_leg_uhz">
-    <cfmDamping>1</cfmDamping>
+    <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
   <gazebo reference="neck_ay">
-    <cfmDamping>1</cfmDamping>
+    <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
   <gazebo reference="r_arm_elx">
-    <cfmDamping>1</cfmDamping>
+    <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
   <gazebo reference="r_arm_ely">
-    <cfmDamping>1</cfmDamping>
+    <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
   <gazebo reference="r_arm_mwx">
-    <cfmDamping>1</cfmDamping>
+    <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
   <gazebo reference="r_arm_shx">
-    <cfmDamping>1</cfmDamping>
+    <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
   <gazebo reference="r_arm_usy">
-    <cfmDamping>1</cfmDamping>
+    <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
   <gazebo reference="r_arm_uwy">
-    <cfmDamping>1</cfmDamping>
+    <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
   <gazebo reference="r_leg_kny">
-    <cfmDamping>1</cfmDamping>
+    <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
   <gazebo reference="r_leg_lhy">
-    <cfmDamping>1</cfmDamping>
+    <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
   <gazebo reference="r_leg_mhx">
-    <cfmDamping>1</cfmDamping>
+    <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
   <gazebo reference="r_leg_uay">
-    <cfmDamping>1</cfmDamping>
+    <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
   <gazebo reference="r_leg_uhz">
-    <cfmDamping>1</cfmDamping>
+    <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
 </robot>

@@ -192,7 +192,7 @@
         </noise>
       </ray>
       <plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_gpu_laser.so">
-        <topicName>/multisense_sl/laser/scan</topicName>
+        <topicName>/laser/scan</topicName>
         <frameName>head_hokuyo_frame</frameName>
       </plugin>
     </sensor>
@@ -276,7 +276,7 @@
       <plugin name="stereo_camera_controller" filename="libgazebo_ros_multicamera.so">
         <alwaysOn>true</alwaysOn>
         <updateRate>0.0</updateRate>
-        <cameraName>multisense_sl/camera</cameraName>
+        <cameraName>multisense_sl</cameraName>
         <imageTopicName>image_raw</imageTopicName>
         <cameraInfoTopicName>camera_info</cameraInfoTopicName>
         <frameName>left_camera_optical_frame</frameName>

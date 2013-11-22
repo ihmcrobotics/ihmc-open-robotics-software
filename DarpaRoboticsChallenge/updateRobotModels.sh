@@ -1,6 +1,6 @@
 #!/bin/sh
 
-gazeboPath=/usr/share/gazebo-2.0
+gazeboPath=/usr/share/gazebo-3.0
 
 gazeboStateCommunicatorDir="../GazeboStateCommunicator/launch/models"
 drcsimdir="/opt/ros/groovy/share/atlas_description"
@@ -20,7 +20,7 @@ cp $modelPath/gazebo/media/materials/textures/road1.jpg ../SDFLoader/src/us/ihmc
 
 gzsdf print $gazeboStateCommunicatorDir/atlas_v3/model.sdf > $modelPath/atlas.sdf
 gzsdf print $gazeboStateCommunicatorDir/atlas_v3_sandia_hands/model.sdf > $modelPath/atlas_sandia_hands.sdf
-#cp $gazeboStateCommunicatorDir/atlas_v3_irobot_hands/model.sdf $modelPath/atlas_irobot_hands.sdf
+gzsdf print $gazeboStateCommunicatorDir/atlas_v3_irobot_hands/model.sdf > $modelPath/atlas_irobot_hands.sdf
 
 
 mkdir -p $modelPath/worlds/
