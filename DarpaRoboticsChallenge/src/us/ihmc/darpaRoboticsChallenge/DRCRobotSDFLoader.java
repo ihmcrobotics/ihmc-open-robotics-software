@@ -6,6 +6,8 @@ import java.util.ArrayList;
 
 import javax.xml.bind.JAXBException;
 
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 
@@ -40,18 +42,8 @@ public class DRCRobotSDFLoader
 
             break;
 
-         case ATLAS_V3_IROBOT_HANDS :
-            fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_v3_irobot_hands.sdf");
-
-            if (!headless)
-            {
-               resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/irobot_hand_description").getFile());
-            }
-
-            break;
-
-         case ATLAS_V3_IROBOT_HANDS_ADDED_MASS :
-            fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_v3_irobot_hands_addedmass.sdf");
+         case ATLAS_IROBOT_HANDS :
+            fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_irobot_hands.sdf");
 
             if (!headless)
             {
@@ -61,14 +53,15 @@ public class DRCRobotSDFLoader
             break;
 
          case ATLAS_IHMC_PARAMETERS :
-            fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_ihmc_parameters.sdf");
-
-            if (!headless)
-            {
-               resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/irobot_hand_description").getFile());
-            }
-
-            break;
+            throw new RuntimeException("Fixme: redo atlas_ihmc_parameters.sdf based on new models");
+//            fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_ihmc_parameters.sdf");
+//
+//            if (!headless)
+//            {
+//               resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/irobot_hand_description").getFile());
+//            }
+//
+//            break;
 
          case ATLAS_SANDIA_HANDS :
             fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_sandia_hands.sdf");
@@ -110,9 +103,12 @@ public class DRCRobotSDFLoader
 
    public static void main(String[] args)
    {
-      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_SANDIA_HANDS, false);
+      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_NO_HANDS, false);
       JaxbSDFLoader loader = loadDRCRobot(jointMap, false);
       System.out.println(loader.createRobot(jointMap, true).getName());
+      
+      SimulationConstructionSet scs = new SimulationConstructionSet(loader.createRobot(jointMap, false));
+      scs.startOnAThread();
 
    }
 
