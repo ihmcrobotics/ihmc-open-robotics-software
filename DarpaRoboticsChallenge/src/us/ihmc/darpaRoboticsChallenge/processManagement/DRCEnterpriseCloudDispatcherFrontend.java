@@ -22,7 +22,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 {
    private static final String BLUE_TEAM_ACTION_COMMAND = "blue";
    private static final String RED_TEAM_ACTION_COMMAND = "red";
-   private static final boolean ENABLE_CONSOLE_OUTPUT = true;
+   private static final boolean ENABLE_CONSOLE_OUTPUT = false;
 
    private ReconnectingTCPClient netProcClient;
    private final byte[] netProcBuffer;
