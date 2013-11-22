@@ -21,7 +21,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 {
    public static final String propertyFile = "robotData.log";
-   private static final long connectTimeout = 10000;
+   private static final long connectTimeout = 20000;
    private static final long disconnectTimeout = 5000; 
    private static final String handshakeFilename = "handshake.proto";
    private static final String dataFilename = "robotData.bin";
