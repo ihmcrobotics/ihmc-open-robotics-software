@@ -4,7 +4,6 @@ import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
-
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
@@ -14,11 +13,10 @@ import us.ihmc.utilities.net.tcpServer.DisconnectedException;
 import us.ihmc.utilities.net.tcpServer.ReconnectingTCPClient;
 
 import javax.swing.*;
-
+import javax.swing.border.EtchedBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.concurrent.Semaphore;
 
 public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 {
@@ -32,7 +30,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
    private static String controllerMachineIpAddress = DRCLocalConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
 
    private JFrame frame;
-   private JPanel netProcPanel, controllerPanel;
+   private JPanel netProcPanel, controllerPanel, selectControllerPanel;
    
    private JButton netProcStartButton, netProcStopButton, netProcRestartButton;
    private final JLabel netProcRunningStatusLabel =
@@ -44,7 +42,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
    private final JLabel controllerRunningStatusLabel =
          new JLabel("<html><body>Running: <span style=\"color:red;font-style:italic;\">Not Running</span></body></html>", JLabel.CENTER);
    private final JLabel controllerConnectedStatusLabel =
-         new JLabel("<html><body>Connected: <span style=\"color:red;font-style:italic;\">Disconnected</span></body></html>", JLabel.CENTER);   
+         new JLabel("<html><body>Connected: <span style=\"color:red;font-style:italic;\">Disconnected</span></body></html>", JLabel.CENTER);
 
    public DRCEnterpriseCloudDispatcherFrontend()
    {
@@ -280,25 +278,53 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
    {
       IHMCSwingTools.setNativeLookAndFeel();
 
-      frame = new JFrame("Network Processor Dispatcher");
-      frame.setSize(650, 230);
+      frame = new JFrame("DRC Networking Dispatcher");
+      frame.setSize(850, 630);
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       frame.setResizable(false);
       frame.setAlwaysOnTop(true);
       frame.setLocationRelativeTo(null);
 
-      JPanel panel = new JPanel(new GridLayout(1,2));
-      ((GridLayout) panel.getLayout()).setHgap(5);
-      panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+      JPanel mainPanel = new JPanel(new GridBagLayout());
+//      mainPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+
+      GridBagConstraints c = new GridBagConstraints();
+
+      JPanel controlsPanel = new JPanel(new GridLayout(1,3));
+      ((GridLayout) controlsPanel.getLayout()).setHgap(5);
 
       setupNetProcPanel();
 
       setupControllerPanel();
 
-      panel.add(netProcPanel);
-      panel.add(controllerPanel);
+      setupSelectControllerPanel();
 
-      frame.getContentPane().add(panel);
+      controlsPanel.add(netProcPanel);
+      controlsPanel.add(controllerPanel);
+      controlsPanel.add(selectControllerPanel);
+
+      JPanel consolePanel = new JPanel(new BorderLayout());
+      consolePanel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+      JTextArea console = new JTextArea();
+      console.setEditable(false);
+      consolePanel.add(console, BorderLayout.CENTER);
+
+      c.gridx = 0;
+      c.gridy = 0;
+      c.insets = new Insets(10,10,5,10);
+      c.weighty = 0.9;
+      c.fill = GridBagConstraints.HORIZONTAL;
+      c.ipadx = 180;
+      c.ipady = 200;
+      mainPanel.add(controlsPanel, c);
+
+      c.gridy++;
+      c.insets = new Insets(5,10,10,10);
+      c.ipady = 400;
+      c.weighty = 0.1;
+      mainPanel.add(consolePanel, c);
+
+      frame.getContentPane().add(mainPanel);
       frame.setVisible(true);
    }
 
@@ -422,6 +448,14 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
       controllerPanel.add(controllerStartButton);
       controllerPanel.add(controllerStopButton);
       controllerPanel.add(controllerRestartButton);
+   }
+
+   private void setupSelectControllerPanel()
+   {
+      selectControllerPanel = new JPanel(new GridLayout(6, 1));
+      selectControllerPanel.setBorder(BorderFactory.createEtchedBorder());
+
+      selectControllerPanel.add(new JLabel("<html><body><h2>Select Controller</h2></body></html>", JLabel.CENTER));
    }
 
    public static void main(String[] args) throws JSAPException
