@@ -49,24 +49,7 @@ public class JointConfigurationGatherer
       for (RobotSide robotSide : RobotSide.values)
       {
          final int numberOfHandJoints;
-         if (handModels != null)
-         {
-            HashMap<String, FingerJoint> jointsByName = new HashMap<String, FingerJoint>();
-            for (FingerJoint joint : handModels.get(robotSide))
-            {
-               jointsByName.put(joint.getName().toLowerCase(), joint);
-            }
-
-            String[] handNames = robotSide == RobotSide.LEFT ? DRCJointConfigurationData.leftHandNames : DRCJointConfigurationData.rightHandNames;
-
-            numberOfHandJoints = handNames.length;
-            handJoints.put(robotSide, new FingerJoint[numberOfHandJoints]);
-            for (int i = 0; i < numberOfHandJoints; i++)
-            {
-               handJoints.get(robotSide)[i] = jointsByName.get(handNames[i].toLowerCase());
-            }
-         }
-         else
+        
          {
             numberOfHandJoints = 0;
          }
