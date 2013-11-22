@@ -438,7 +438,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       swingZeta.set(1.0);
       
       holdKpXY.set(100.0);
-      holdKpOrientation.set(200.0);
+      holdKpOrientation.set(100.0);
       holdZeta.set(0.1);
 
 //      swingMaxPositionAcceleration.set(10.0); 
