@@ -20,7 +20,10 @@ import java.awt.event.ActionListener;
 
 public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 {
+   private static final String BLUE_TEAM_ACTION_COMMAND = "blue";
+   private static final String RED_TEAM_ACTION_COMMAND = "red";
    private static final boolean ENABLE_CONSOLE_OUTPUT = true;
+
    private ReconnectingTCPClient netProcClient;
    private final byte[] netProcBuffer;
 
@@ -44,6 +47,9 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
       new JLabel("<html><body>Running: <span style=\"color:red;font-style:italic;\">Not Running</span></body></html>", JLabel.CENTER);
    private final JLabel controllerConnectedStatusLabel =
       new JLabel("<html><body>Connected: <span style=\"color:red;font-style:italic;\">Disconnected</span></body></html>", JLabel.CENTER);
+
+   private ButtonGroup selectControllerRadioButtonGroup;
+   private JRadioButton atlasBDIControllerRadioButton, atlasControllerFactoryRadioButton;
 
    public DRCEnterpriseCloudDispatcherFrontend()
    {
@@ -419,7 +425,10 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
          {
             try
             {
-               controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x00)});
+               if(selectControllerRadioButtonGroup.getSelection().getActionCommand().equals(BLUE_TEAM_ACTION_COMMAND))
+                  controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x00)});
+               if(selectControllerRadioButtonGroup.getSelection().getActionCommand().equals(RED_TEAM_ACTION_COMMAND))
+                  controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x01)});
             }
             catch (DisconnectedException e)
             {
@@ -472,10 +481,30 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
    private void setupSelectControllerPanel()
    {
-      selectControllerPanel = new JPanel(new GridLayout(6, 1));
+      selectControllerPanel = new JPanel(new GridLayout(4, 1));
       selectControllerPanel.setBorder(BorderFactory.createEtchedBorder());
 
+      selectControllerRadioButtonGroup = new ButtonGroup();
+
+      atlasBDIControllerRadioButton = new JRadioButton("Atlas BDI Controller");
+      atlasBDIControllerRadioButton.setActionCommand(BLUE_TEAM_ACTION_COMMAND);
+      atlasBDIControllerRadioButton.setBorder(BorderFactory.createEmptyBorder(0, 35, 0, -35));
+      atlasBDIControllerRadioButton.setHorizontalAlignment(AbstractButton.LEADING);
+      atlasBDIControllerRadioButton.setHorizontalTextPosition(AbstractButton.TRAILING);
+      atlasBDIControllerRadioButton.setSelected(true);
+
+      atlasControllerFactoryRadioButton = new JRadioButton("Atlas Controller Factory");
+      atlasControllerFactoryRadioButton.setActionCommand(RED_TEAM_ACTION_COMMAND);
+      atlasControllerFactoryRadioButton.setBorder(BorderFactory.createEmptyBorder(0,35,0,-35));
+      atlasControllerFactoryRadioButton.setHorizontalAlignment(AbstractButton.LEADING);
+      atlasControllerFactoryRadioButton.setHorizontalTextPosition(AbstractButton.TRAILING);
+
+      selectControllerRadioButtonGroup.add(atlasBDIControllerRadioButton);
+      selectControllerRadioButtonGroup.add(atlasControllerFactoryRadioButton);
+
       selectControllerPanel.add(new JLabel("<html><body><h2>Select Controller</h2></body></html>", JLabel.CENTER));
+      selectControllerPanel.add(atlasBDIControllerRadioButton);
+      selectControllerPanel.add(atlasControllerFactoryRadioButton);
    }
 
    public static void main(String[] args) throws JSAPException
