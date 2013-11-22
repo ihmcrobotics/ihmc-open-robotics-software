@@ -525,14 +525,14 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
       selectControllerRadioButtonGroup = new ButtonGroup();
 
       atlasBDIControllerRadioButton = new JRadioButton("Atlas BDI Controller");
-      atlasBDIControllerRadioButton.setActionCommand(BLUE_TEAM_ACTION_COMMAND);
+      atlasBDIControllerRadioButton.setActionCommand(RED_TEAM_ACTION_COMMAND);
       atlasBDIControllerRadioButton.setBorder(BorderFactory.createEmptyBorder(0, 35, 0, -35));
       atlasBDIControllerRadioButton.setHorizontalAlignment(AbstractButton.LEADING);
       atlasBDIControllerRadioButton.setHorizontalTextPosition(AbstractButton.TRAILING);
       atlasBDIControllerRadioButton.setSelected(true);
 
       atlasControllerFactoryRadioButton = new JRadioButton("Atlas Controller Factory");
-      atlasControllerFactoryRadioButton.setActionCommand(RED_TEAM_ACTION_COMMAND);
+      atlasControllerFactoryRadioButton.setActionCommand(BLUE_TEAM_ACTION_COMMAND);
       atlasControllerFactoryRadioButton.setBorder(BorderFactory.createEmptyBorder(0, 35, 0, -35));
       atlasControllerFactoryRadioButton.setHorizontalAlignment(AbstractButton.LEADING);
       atlasControllerFactoryRadioButton.setHorizontalTextPosition(AbstractButton.TRAILING);
