@@ -198,7 +198,7 @@ public class DRCConfigParameters
 
    static
    {
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS)
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) 
       {
          positionSensorFrequencyHz = Double.POSITIVE_INFINITY;
          velocitySensorFrequencyHz = Double.POSITIVE_INFINITY;

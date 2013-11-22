@@ -305,110 +305,110 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
 
    public double getCaptureKpParallelToMotion()
    {
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 1.0;
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 1.0;
       return 1.0; 
    }
 
    public double getCaptureKpOrthogonalToMotion()
    {      
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 1.0; 
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 1.0; 
       return 1.0; 
    }
    
    public double getCaptureKi()
    {      
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 2.0;
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 2.0;
       return 2.0; 
    }
    
    public double getCaptureFilterBreakFrequencyInHz()
    {
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 16.0; //Double.POSITIVE_INFINITY;
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 16.0; //Double.POSITIVE_INFINITY;
       return 16.0;
    }
    
    public double getCMPRateLimit()
    {
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 100.0;
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 100.0;
       return 3.0; //4.0; //3.0;
    }
 
    public double getCMPAccelerationLimit()
    {
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 1000.0;
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 1000.0;
       return 120.0; //80.0; //40.0;
    }
    
    public double getKpCoMHeight()
    {
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 40.0;
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 40.0;
       return 30.0; //20.0; 
    }
 
    public double getZetaCoMHeight()
    {
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 0.8; //1.0;
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 0.8; //1.0;
       return 0.8;
    }
    
    public double getKpPelvisOrientation()
    {
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 80.0; //100.0;
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 80.0; //100.0;
       return 80.0; //30.0; 
    }
 
    public double getZetaPelvisOrientation()
    {
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 0.8; //1.0;
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 0.8; //1.0;
       return 0.8;
    }
    
 
    public double getMaxAccelerationPelvisOrientation()
    {
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 18.0;
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 18.0;
       return 12.0; 
    }
 
    public double getMaxJerkPelvisOrientation()
    {
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 270.0;
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 270.0;
       return 180.0; 
    }
 
    public double getKpHeadOrientation()
    {
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 40.0;
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 40.0;
       return 15.0; 
    }
 
    public double getZetaHeadOrientation()
    {
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 0.8; //1.0;
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 0.8; //1.0;
       return 0.8;
    }
 
    public double getKpUpperBody()
    {
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 80.0; //100.0;
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 80.0; //100.0;
       return 80.0; //40.0;
    }
 
    public double getZetaUpperBody()
    {
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 0.8; //1.0;
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 0.8; //1.0;
       return 0.8;
    }
    
    public double getMaxAccelerationUpperBody()
    {
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 18.0; //100.0;
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 18.0; //100.0;
       return 6.0;
    }
    
    public double getMaxJerkUpperBody()
    {
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 270.0; //1000.0;
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 270.0; //1000.0;
       return 60.0;
    }
    
@@ -440,37 +440,37 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    
    public double getHoldKpOrientation()
    {
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 100.0;
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 100.0;
       return 100.0;
    }
    
    public double getHoldZeta()
    {
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 1.0;
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 1.0;
       return 0.1;
    }
 
    public double getSwingMaxPositionAcceleration()
    {
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return Double.POSITIVE_INFINITY;
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return Double.POSITIVE_INFINITY;
       return 10.0;
    }
    
    public double getSwingMaxPositionJerk()
    {
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return Double.POSITIVE_INFINITY;
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return Double.POSITIVE_INFINITY;
       return 150.0;
    }
    
    public double getSwingMaxOrientationAcceleration()
    {
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return Double.POSITIVE_INFINITY;
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return Double.POSITIVE_INFINITY;
       return 100.0;
    }
    
    public double getswingMaxOrientationJerk()
    {
-      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return Double.POSITIVE_INFINITY;
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return Double.POSITIVE_INFINITY;
       return 1500.0;
    }
    
