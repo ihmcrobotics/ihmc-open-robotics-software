@@ -17,6 +17,11 @@ import javax.swing.border.EtchedBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
 
 public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 {
@@ -50,6 +55,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
    private ButtonGroup selectControllerRadioButtonGroup;
    private JRadioButton atlasBDIControllerRadioButton, atlasControllerFactoryRadioButton;
+   private final JTextArea netProcConsole, controllerConsole;
 
    public DRCEnterpriseCloudDispatcherFrontend()
    {
@@ -57,8 +63,41 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
       setupControllerSocket();
 
+      if (ENABLE_CONSOLE_OUTPUT)
+      {
+         requestControllerStream();
+
+         requestNetProcStream();
+      }
+
       netProcBuffer = netProcClient.getBuffer();
       controllerBuffer = controllerClient.getBuffer();
+      netProcConsole = new JTextArea();
+      controllerConsole = new JTextArea();
+   }
+
+   private void requestControllerStream()
+   {
+      try
+      {
+         controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x22)});
+      }
+      catch (DisconnectedException e)
+      {
+         controllerClient.reset();
+      }
+   }
+
+   private void requestNetProcStream()
+   {
+      try
+      {
+         netProcClient.write(new byte[] {UnsignedByteTools.fromInt(0x22)});
+      }
+      catch (DisconnectedException e)
+      {
+         netProcClient.reset();
+      }
    }
 
    private void setupNetProcSocket()
@@ -184,6 +223,11 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
                break;
 
+            case 0x22 :
+               startReceivingNetProcConsoleText();
+
+               break;
+
             default :
                System.err.println("Invalid status: " + Integer.toHexString(UnsignedByteTools.toInt(netProcBuffer[0])));
 
@@ -227,6 +271,11 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
                controllerRunningStatusLabel.setText(
                    "<html><body>Controller Status: <span style=\"color:red;font-style:italic;\">Not Running</span></body></html>");
                repaintFrame();
+
+               break;
+
+            case 0x22 :
+               startReceivingControllerConsoleText();
 
                break;
 
@@ -325,19 +374,29 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
       if (ENABLE_CONSOLE_OUTPUT)
       {
-         frame.setSize(850, 630);
+         frame.setSize(850, 660);
          frame.setLocationRelativeTo(null);
 
-         JPanel consolePanel = new JPanel(new BorderLayout());
-         consolePanel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
-         JTextArea console = new JTextArea();
-         console.setEditable(false);
-         consolePanel.add(console, BorderLayout.CENTER);
+         JTabbedPane consoleTabs = new JTabbedPane();
+
+         JPanel controllerConsolePanel = new JPanel(new BorderLayout());
+         controllerConsolePanel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+         controllerConsole.setEditable(false);
+         controllerConsolePanel.add(controllerConsole, BorderLayout.CENTER);
+
+         JPanel netProcConsolePanel = new JPanel(new BorderLayout());
+         netProcConsolePanel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+         netProcConsole.setEditable(false);
+         netProcConsolePanel.add(netProcConsole, BorderLayout.CENTER);
+
+         consoleTabs.addTab("Controller", null, controllerConsolePanel, "View Output from Controller process");
+         consoleTabs.addTab("Network Processor", null, netProcConsolePanel, "View Output from Network Processor process");
+
          c.gridy++;
          c.insets = new Insets(5, 10, 10, 10);
          c.ipady = 400;
          c.weighty = 0.1;
-         mainPanel.add(consolePanel, c);
+         mainPanel.add(consoleTabs, c);
       }
 
       frame.getContentPane().add(mainPanel);
@@ -422,9 +481,9 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
          {
             try
             {
-               if(selectControllerRadioButtonGroup.getSelection().getActionCommand().equals(BLUE_TEAM_ACTION_COMMAND))
+               if (selectControllerRadioButtonGroup.getSelection().getActionCommand().equals(BLUE_TEAM_ACTION_COMMAND))
                   controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x00)});
-               if(selectControllerRadioButtonGroup.getSelection().getActionCommand().equals(RED_TEAM_ACTION_COMMAND))
+               if (selectControllerRadioButtonGroup.getSelection().getActionCommand().equals(RED_TEAM_ACTION_COMMAND))
                   controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x01)});
             }
             catch (DisconnectedException e)
@@ -474,7 +533,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
       atlasControllerFactoryRadioButton = new JRadioButton("Atlas Controller Factory");
       atlasControllerFactoryRadioButton.setActionCommand(RED_TEAM_ACTION_COMMAND);
-      atlasControllerFactoryRadioButton.setBorder(BorderFactory.createEmptyBorder(0,35,0,-35));
+      atlasControllerFactoryRadioButton.setBorder(BorderFactory.createEmptyBorder(0, 35, 0, -35));
       atlasControllerFactoryRadioButton.setHorizontalAlignment(AbstractButton.LEADING);
       atlasControllerFactoryRadioButton.setHorizontalTextPosition(AbstractButton.TRAILING);
 
@@ -486,9 +545,87 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
       selectControllerPanel.add(atlasControllerFactoryRadioButton);
    }
 
+   private void startReceivingControllerConsoleText()
+   {
+      try
+      {
+         Socket clientSocket = new Socket(controllerMachineIpAddress, DRCConfigParameters.CONTROLLER_CLOUD_DISPATCHER_BACKEND_TCP_PORT + 5);
+         clientSocket.setTcpNoDelay(true);
+         DataInputStream inputStream = new DataInputStream(clientSocket.getInputStream());
+
+         final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
+         new Thread(new Runnable()
+         {
+            @Override
+            public void run()
+            {
+               while (true)
+               {
+                  try
+                  {
+                     String line;
+                     if (reader.ready() && (line = reader.readLine()) != null)
+                     {
+                        controllerConsole.append(line);
+                     }
+                  }
+                  catch (IOException e)
+                  {
+                     e.printStackTrace();
+                  }
+               }
+            }
+         }).start();
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+   }
+
+   private void startReceivingNetProcConsoleText()
+   {
+      try
+      {
+         Socket clientSocket = new Socket(netProcMachineIpAddress, DRCConfigParameters.NETWORK_PROCESSOR_CLOUD_DISPATCHER_BACKEND_TCP_PORT + 5);
+         clientSocket.setTcpNoDelay(true);
+         DataInputStream inputStream = new DataInputStream(clientSocket.getInputStream());
+
+         final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
+         new Thread(new Runnable()
+         {
+            @Override
+            public void run()
+            {
+               while (true)
+               {
+                  try
+                  {
+                     String line;
+                     if (reader.ready() && (line = reader.readLine()) != null)
+                     {
+                        netProcConsole.append(line);
+                     }
+                  }
+                  catch (IOException e)
+                  {
+                     e.printStackTrace();
+                  }
+               }
+            }
+         }).start();
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+   }
+
    public static void main(String[] args) throws JSAPException
    {
-      if(ENABLE_CONSOLE_OUTPUT)
+      if (ENABLE_CONSOLE_OUTPUT)
       {
          System.err.println("WARNING: Console Output is being piped over TCP. Do not use this in competition; this will chew through bandwidth.");
       }
