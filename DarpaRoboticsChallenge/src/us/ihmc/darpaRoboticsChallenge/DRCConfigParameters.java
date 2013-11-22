@@ -214,6 +214,7 @@ public class DRCConfigParameters
    public static final boolean USE_IHMCFILTER_JOINT_ANGLES = false;
    public static final boolean USE_IHMCFILTER_JOINT_VELOCITIES = false;
    public static final boolean USE_IHMCFILTER_JOINT_TORQUES = true;
+   public static final String ATLAS_CALIBRATION_FILE = "AtlasNullOffsets.properties";
 
    public static final double JOINT_VELOCITY_SLOP_TIME_FOR_BACKLASH_COMPENSATION = 0.03;
 
