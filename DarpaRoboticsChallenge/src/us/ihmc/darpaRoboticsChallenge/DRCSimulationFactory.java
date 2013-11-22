@@ -89,7 +89,7 @@ public class DRCSimulationFactory
       {
          DRCOutputWriterWithAccelerationIntegration drcOutputWriterWithAccelerationIntegration = new DRCOutputWriterWithAccelerationIntegration(drcOutputWriter, controlDT);
          
-         drcOutputWriterWithAccelerationIntegration.setAlphaDesiredVelocity(0.0);
+         drcOutputWriterWithAccelerationIntegration.setAlphaDesiredVelocity(0.0, 0.0);
          drcOutputWriterWithAccelerationIntegration.setAlphaDesiredPosition(0.0);
          
          drcOutputWriterWithAccelerationIntegration.setVelocityGains(0.0, 0.0, 0.0, 0.0);
