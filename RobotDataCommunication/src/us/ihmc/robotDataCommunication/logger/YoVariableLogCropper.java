@@ -26,6 +26,7 @@ public class YoVariableLogCropper
    private final File handshake;
    
    private FileChannel logChannel;
+   private long numberOfEntries;
    private ByteBuffer logLine;
    private FileInputStream logInputStream;
    
@@ -61,7 +62,9 @@ public class YoVariableLogCropper
       logInputStream = new FileInputStream(logdata);
       logChannel = logInputStream.getChannel();
       
+      
       int bufferSize = logLineLength * 8;
+      numberOfEntries = (int) (logChannel.size() / bufferSize) - 1;
 
       logLine = ByteBuffer.allocate(bufferSize);
       
@@ -92,13 +95,23 @@ public class YoVariableLogCropper
          monitor.setProgress(3);
          if(destination.exists())
          {
-            System.err.println("Destination directory " + destination.getAbsolutePath() + " already exists");
-            return;
+            if(!destination.isDirectory())
+            {
+               monitor.setProgress(0);
+               monitor.setError("Destination " + destination.getAbsolutePath() + " already exists.");
+               return;
+            }
+            else if(destination.list().length > 0)
+            {
+               monitor.setProgress(0);
+               monitor.setError("Destination " + destination.getAbsolutePath() + " is not empty.");
+               return;
+            }
          }
-         
-         if(!destination.mkdir())
+         else if(!destination.mkdir())
          {
-            System.err.println("Cannot make directory " + destination.getAbsolutePath());
+            monitor.setProgress(0);
+            monitor.setError("Cannot make directory " + destination.getAbsolutePath());
             return;
          }
          
@@ -119,30 +132,9 @@ public class YoVariableLogCropper
          FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
          FileChannel outputChannel = fileOutputStream.getChannel();
          
-         ByteBuffer timestampBuffer = ByteBuffer.allocate(8);
+         long position = seek(inStamp, monitor);
+         logChannel.position(position);
          
-         long position = 0;
-         long firstTimestamp = Long.MIN_VALUE;
-         while(logChannel.read(timestampBuffer) > 0)
-         {
-            logChannel.position(position);
-            long timestamp = timestampBuffer.getLong(0);
-            
-            if(firstTimestamp == Long.MIN_VALUE)
-            {
-               firstTimestamp = timestamp;
-            }
-            
-            monitor.setProgress(10 + ((int) (10.0 * ((double)(timestamp - firstTimestamp))/((double)inStamp - firstTimestamp))));
-            
-            if(timestamp >= inStamp)
-            {
-               logChannel.position(position);
-               break;
-            }
-            position += logLine.capacity();
-            timestampBuffer.clear();
-         }
          monitor.setNote("Writing variable data");
          
          logLine.clear();
@@ -180,6 +172,41 @@ public class YoVariableLogCropper
       {
          
       }
+   }
+
+   private long seek(long inStamp, CustomProgressMonitor monitor) throws IOException
+   {
+      ByteBuffer timestampBuffer = ByteBuffer.allocate(8);
+      
+      long head = 0;
+      long tail = numberOfEntries;
+      long position = -1;
+      
+      int maximumIterations = 63 - Long.numberOfLeadingZeros(numberOfEntries);
+      int iteration = 0;
+      
+      
+      while(head < tail)
+      {
+         position = head + (tail - head)/2;
+         
+         timestampBuffer.clear();
+         logChannel.position(position * logLine.capacity());
+         logChannel.read(timestampBuffer);
+         long timestamp = timestampBuffer.getLong(0);
+         
+         monitor.setProgress(10 + (10 * ++iteration)/maximumIterations);
+         
+         if(timestamp < inStamp)
+         {
+            head = position + 1;
+         }
+         else
+         {
+            tail = position;
+         }
+      }
+      return position * logLine.capacity();
    }
    
    public void close()
