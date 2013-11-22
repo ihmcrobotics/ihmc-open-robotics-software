@@ -2,6 +2,7 @@ package us.ihmc.SdfLoader;
 
 import com.yobotics.simulationconstructionset.*;
 import com.yobotics.simulationconstructionset.simulatedSensors.*;
+
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Camera;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.IMU;
@@ -30,10 +31,12 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 
 public class SDFRobot extends Robot implements HumanoidRobot // TODO: make an SDFHumanoidRobot
 {
@@ -100,7 +103,7 @@ public class SDFRobot extends Robot implements HumanoidRobot // TODO: make an SD
 
       for (SDFJointHolder child : rootLink.getChildren())
       {
-         addJointsRecursively(child, rootJoint, MatrixTools.IDENTITY, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
+         addJointsRecursively(child, rootJoint, MatrixTools.IDENTITY, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping, sdfJointNameMap.getLastSimulatedJoints(), false);
       }
 
       for (RobotSide robotSide : RobotSide.values)
@@ -217,7 +220,7 @@ public class SDFRobot extends Robot implements HumanoidRobot // TODO: make an SD
    }
 
    private void addJointsRecursively(SDFJointHolder joint, Joint scsParentJoint, Matrix3d chainRotationIn, boolean useCollisionMeshes,
-         boolean enableTorqueVelocityLimits, boolean enableDamping)
+         boolean enableTorqueVelocityLimits, boolean enableDamping, Set<String> lastSimulatedJoints, boolean asNullJoint)
    {
       Matrix3d rotation = new Matrix3d();
       Vector3d offset = new Vector3d();
@@ -238,95 +241,105 @@ public class SDFRobot extends Robot implements HumanoidRobot // TODO: make an SD
       String sanitizedJointName = SDFConversionsHelper.sanitizeJointName(joint.getName());
 
       Joint scsJoint;
-      switch (joint.getType())
+      
+      if(asNullJoint)
       {
-      case REVOLUTE:
-         PinJoint pinJoint = new PinJoint(sanitizedJointName, offset, this, jointAxis);
-         if (joint.hasLimits())
+         DummyOneDegreeOfFreedomJoint dummyJoint = new DummyOneDegreeOfFreedomJoint(sanitizedJointName, offset, this, jointAxis);
+         oneDoFJoints.put(joint.getName(), dummyJoint);
+         scsJoint = dummyJoint;
+      }
+      else
+      {
+         switch (joint.getType())
          {
-            if (isFinger(joint))
+         case REVOLUTE:
+            PinJoint pinJoint = new PinJoint(sanitizedJointName, offset, this, jointAxis);
+            if (joint.hasLimits())
             {
-               pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 10.0, 2.5);
-            }
-            else
-            {
-               if ((joint.getContactKd() == 0.0) && (joint.getContactKp() == 0.0))
+               if (isFinger(joint))
                {
-                  pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 100.0, 20.0);
+                  pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 10.0, 2.5);
                }
                else
                {
-                  pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 0.0001 * joint.getContactKp(), joint.getContactKd());
-               }
-            }
-         }
-
-         if (enableDamping)
-         {
-            pinJoint.setDamping(joint.getDamping());
-            pinJoint.setStiction(joint.getFriction());
-         }
-         else
-         {
-            pinJoint.setDampingParameterOnly(joint.getDamping());
-            pinJoint.setStictionParameterOnly(joint.getFriction());
-         }
-
-         if (enableTorqueVelocityLimits)
-         {
-            if (!isFinger(joint))
-            {
-               if (!Double.isNaN(joint.getEffortLimit()))
-               {
-                  pinJoint.setTorqueLimits(joint.getEffortLimit());
-               }
-
-               if (!Double.isNaN(joint.getVelocityLimit()))
-               {
-                  if (!isFinger(joint))
+                  if ((joint.getContactKd() == 0.0) && (joint.getContactKp() == 0.0))
                   {
-                     pinJoint.setVelocityLimits(joint.getVelocityLimit(), 500.0);
+                     pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 100.0, 20.0);
+                  }
+                  else
+                  {
+                     pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 0.0001 * joint.getContactKp(), joint.getContactKd());
                   }
                }
             }
-         }
-
-         oneDoFJoints.put(joint.getName(), pinJoint);
-         scsJoint = pinJoint;
-
-         break;
-
-      case PRISMATIC:
-         SliderJoint sliderJoint = new SliderJoint(sanitizedJointName, offset, this, jointAxis);
-         if (joint.hasLimits())
-         {
-            if ((joint.getContactKd() == 0.0) && (joint.getContactKp() == 0.0))
+   
+            if (enableDamping)
             {
-               sliderJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 100.0, 20.0);
+               pinJoint.setDamping(joint.getDamping());
+               pinJoint.setStiction(joint.getFriction());
             }
             else
             {
-               sliderJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 0.0001 * joint.getContactKp(), joint.getContactKd());
+               pinJoint.setDampingParameterOnly(joint.getDamping());
+               pinJoint.setStictionParameterOnly(joint.getFriction());
             }
+   
+            if (enableTorqueVelocityLimits)
+            {
+               if (!isFinger(joint))
+               {
+                  if (!Double.isNaN(joint.getEffortLimit()))
+                  {
+                     pinJoint.setTorqueLimits(joint.getEffortLimit());
+                  }
+   
+                  if (!Double.isNaN(joint.getVelocityLimit()))
+                  {
+                     if (!isFinger(joint))
+                     {
+                        pinJoint.setVelocityLimits(joint.getVelocityLimit(), 500.0);
+                     }
+                  }
+               }
+            }
+   
+            oneDoFJoints.put(joint.getName(), pinJoint);
+            scsJoint = pinJoint;
+   
+            break;
+   
+         case PRISMATIC:
+            SliderJoint sliderJoint = new SliderJoint(sanitizedJointName, offset, this, jointAxis);
+            if (joint.hasLimits())
+            {
+               if ((joint.getContactKd() == 0.0) && (joint.getContactKp() == 0.0))
+               {
+                  sliderJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 100.0, 20.0);
+               }
+               else
+               {
+                  sliderJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 0.0001 * joint.getContactKp(), joint.getContactKd());
+               }
+            }
+   
+            if (enableDamping)
+            {
+               sliderJoint.setDamping(joint.getDamping());
+            }
+            else
+            {
+               sliderJoint.setDampingParameterOnly(joint.getDamping());
+            }
+   
+            oneDoFJoints.put(joint.getName(), sliderJoint);
+   
+            scsJoint = sliderJoint;
+   
+            break;
+   
+         default:
+            throw new RuntimeException("Joint type not implemented: " + joint.getType());
          }
-
-         if (enableDamping)
-         {
-            sliderJoint.setDamping(joint.getDamping());
-         }
-         else
-         {
-            sliderJoint.setDampingParameterOnly(joint.getDamping());
-         }
-
-         oneDoFJoints.put(joint.getName(), sliderJoint);
-
-         scsJoint = sliderJoint;
-
-         break;
-
-      default:
-         throw new RuntimeException("Joint type not implemented: " + joint.getType());
       }
 
       scsJoint.setLink(createLink(joint.getChild(), rotationTransform, useCollisionMeshes));
@@ -338,9 +351,13 @@ public class SDFRobot extends Robot implements HumanoidRobot // TODO: make an SD
 
       addSensors(scsJoint, joint.getChild());
 
+      if(!asNullJoint && lastSimulatedJoints.contains(joint.getName()))
+      {
+         asNullJoint = true;
+      }
       for (SDFJointHolder child : joint.getChild().getChildren())
       {
-         addJointsRecursively(child, scsJoint, chainRotation, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
+         addJointsRecursively(child, scsJoint, chainRotation, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping, lastSimulatedJoints, asNullJoint);
       }
 
    }
