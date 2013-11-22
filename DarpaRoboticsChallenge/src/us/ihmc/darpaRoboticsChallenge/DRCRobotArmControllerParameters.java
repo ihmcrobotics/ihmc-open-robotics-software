@@ -22,6 +22,12 @@ public class DRCRobotArmControllerParameters implements ArmControllerParameters
       return 0.0; 
    }
 
+   public double getArmJointspaceMaxIntegralError()
+   {
+      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 0.0;
+      return 0.0; 
+   }
+
    public double getArmJointspaceMaxAcceleration()
    {
       if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return Double.POSITIVE_INFINITY;
@@ -47,6 +53,12 @@ public class DRCRobotArmControllerParameters implements ArmControllerParameters
    }
 
    public double getArmTaskspaceKi()
+   {
+      if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 0.0;
+      return 0.0; 
+   }
+
+   public double getArmTaskspaceMaxIntegralError()
    {
       if (DRCLocalConfigParameters.USE_VRC_PARAMETERS) return 0.0;
       return 0.0; 
