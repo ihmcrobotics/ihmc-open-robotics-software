@@ -182,8 +182,6 @@ public class DRCConfigParameters
    public static final boolean USE_TABS_IN_UI = true;
 
    // Path parameters
-   public static final double MAXIMUM_HIP_OPENING_ANGLE = Math.toRadians(10.0);
-   public static final double MAXIMUM_HIP_CLOSING_ANGLE = Math.toRadians(5.0);
    public static final double DEFAULT_SPINNING_DIAMETER = 0.4;
 
    // Hand Controller
