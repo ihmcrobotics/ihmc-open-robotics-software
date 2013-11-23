@@ -139,7 +139,7 @@ public class VideoDataPlayer
       if(currentlyShowingIndex < 0)
       {
          int nextIndex = -currentlyShowingIndex + 1;
-         if(Math.abs(robotTimestamps[-currentlyShowingIndex] - timestamp) > Math.abs(robotTimestamps[nextIndex]))
+         if ((nextIndex < robotTimestamps.length) && (Math.abs(robotTimestamps[-currentlyShowingIndex] - timestamp) > Math.abs(robotTimestamps[nextIndex])))
          {
             currentlyShowingIndex = nextIndex;
          }
@@ -149,6 +149,8 @@ public class VideoDataPlayer
          }
       }
       
+      if (currentlyShowingIndex < 0) currentlyShowingIndex = 0;
+      if (currentlyShowingIndex >= robotTimestamps.length) currentlyShowingIndex = robotTimestamps.length - 1;
       currentlyShowingRobottimestamp = robotTimestamps[currentlyShowingIndex];
       
       
