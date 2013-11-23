@@ -814,7 +814,7 @@ public class MomentumBasedController
       yoPlaneContactStates.get(contactablePlaneBody).getContactFramePointsInContact(contactPointListToPack);
    }
 
-   public PlaneContactState getContactState(ContactablePlaneBody contactablePlaneBody)
+   public YoPlaneContactState getContactState(ContactablePlaneBody contactablePlaneBody)
    {
       return yoPlaneContactStates.get(contactablePlaneBody);
    }
