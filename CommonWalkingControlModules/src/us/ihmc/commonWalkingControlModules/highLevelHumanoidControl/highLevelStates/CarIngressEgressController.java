@@ -27,7 +27,6 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvi
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.trajectories.ChangeableConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.PoseTrajectoryGenerator;
@@ -41,7 +40,6 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
@@ -88,13 +86,10 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    private final BooleanYoVariable r_footDoHeelOff = new BooleanYoVariable("r_footDoHeelOff", registry);
    private final SideDependentList<BooleanYoVariable> doToeOff = new SideDependentList<BooleanYoVariable>(l_footDoHeelOff, r_footDoHeelOff);
 
-   private final LinkedHashMap<ContactablePlaneBody, ChangeableConfigurationProvider> initialFootConfigurationProviders =
-      new LinkedHashMap<ContactablePlaneBody, ChangeableConfigurationProvider>();
+   private final SideDependentList<ChangeableConfigurationProvider> initialFootConfigurationProviders = new SideDependentList<ChangeableConfigurationProvider>();
    private final SideDependentList<ChangeableConfigurationProvider> desiredFootConfigurationProviders = new SideDependentList<ChangeableConfigurationProvider>();
-   private final LinkedHashMap<ContactablePlaneBody, StraightLinePositionTrajectoryGenerator> swingPositionTrajectoryGenerators =
-      new LinkedHashMap<ContactablePlaneBody, StraightLinePositionTrajectoryGenerator>();
-   private final LinkedHashMap<ContactablePlaneBody, OrientationInterpolationTrajectoryGenerator> swingOrientationTrajectoryGenerators =
-      new LinkedHashMap<ContactablePlaneBody, OrientationInterpolationTrajectoryGenerator>();
+   private final SideDependentList<StraightLinePositionTrajectoryGenerator> swingFootPositionTrajectoryGenerators = new SideDependentList<StraightLinePositionTrajectoryGenerator>();
+   private final SideDependentList<OrientationInterpolationTrajectoryGenerator> swingFootOrientationTrajectoryGenerators = new SideDependentList<OrientationInterpolationTrajectoryGenerator>();
 
    private final ConstantDoubleProvider footTrajectoryTimeProvider = new ConstantDoubleProvider(1.0);
    private final ConstantDoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(2.0);
@@ -301,10 +296,10 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          
          PoseTrajectoryGenerator poseTrajectoryGenerator = new WrapperForPositionAndOrientationTrajectoryGenerators(positionTrajectoryGenerator, orientationTrajectoryGenerator);
 
-         initialFootConfigurationProviders.put(foot, initialConfigurationProvider);
+         initialFootConfigurationProviders.put(robotSide, initialConfigurationProvider);
          desiredFootConfigurationProviders.put(robotSide, desiredConfigurationProvider);
-         swingPositionTrajectoryGenerators.put(foot, positionTrajectoryGenerator);
-         swingOrientationTrajectoryGenerators.put(foot, orientationTrajectoryGenerator);
+         swingFootPositionTrajectoryGenerators.put(robotSide, positionTrajectoryGenerator);
+         swingFootOrientationTrajectoryGenerators.put(robotSide, orientationTrajectoryGenerator);
 
          DoubleProvider onToesInitialPitchProvider = new ConstantDoubleProvider(0.0);
          DoubleProvider onToesInitialPitchVelocityProvider = new ConstantDoubleProvider(0.0);
@@ -313,9 +308,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          DoubleTrajectoryGenerator onToesTrajectory = new ThirdOrderPolynomialTrajectoryGenerator(sideString + bodyName, onToesInitialPitchProvider,
                                                          onToesInitialPitchVelocityProvider, onToesFinalPitchProvider, trajectoryTimeProvider, registry);
 
-         OneDoFJoint kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE);
-         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(controlDT, foot, jacobianId, kneeJoint, poseTrajectoryGenerator, null,
-                                                                onToesTrajectory, null, momentumBasedController, registry);
+         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(controlDT, foot, jacobianId, robotSide, poseTrajectoryGenerator, null,
+                                                                onToesTrajectory, null, walkingControllerParameters, null, momentumBasedController, registry);
          endEffectorControlModule.setSwingGains(100.0, 200.0, 200.0, 1.0);
          endEffectorControlModule.setHoldGains(100.0, 200.0, 0.1);
 
@@ -562,8 +556,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          if (footPoseProvider.checkForNewPose(robotSide) && !requestedFootLoadBearing.get(robotSide).getBooleanValue())
          {
             FramePose oldFootPose = new FramePose(foot.getBodyFrame());
-            desiredFootConfigurationProviders.get(foot).get(oldFootPose);
-            initialFootConfigurationProviders.get(foot).set(oldFootPose);
+            desiredFootConfigurationProviders.get(robotSide).get(oldFootPose);
+            initialFootConfigurationProviders.get(robotSide).set(oldFootPose);
             
             FramePose newFootPose = footPoseProvider.getDesiredFootPose(robotSide);
             desiredFootConfigurationProviders.get(robotSide).set(newFootPose);
