@@ -501,15 +501,18 @@ public class WalkOnTheEdgesManager
    private FrameConvexPolygon2d getOnToesSupportPolygonCopy(ContactablePlaneBody trailingFoot, ContactablePlaneBody leadingFoot)
    {
       List<FramePoint> toePoints = getToePointsCopy(trailingFoot);
+      FramePoint singleToePoint = FramePoint.average(toePoints);
+      singleToePoint.changeFrame(worldFrame);
       List<FramePoint> leadingFootPoints = leadingFoot.getContactPointsCopy();
 
       List<FramePoint2d> allPoints = new ArrayList<FramePoint2d>();
-      for (FramePoint framePoint : toePoints)
-      {
-         framePoint.changeFrame(worldFrame);
-         allPoints.add(framePoint.toFramePoint2d());
-      }
-
+      allPoints.add(singleToePoint.toFramePoint2d());
+//      for (FramePoint framePoint : toePoints)
+//      {
+//         framePoint.changeFrame(worldFrame);
+//         allPoints.add(framePoint.toFramePoint2d());
+//      }
+      
       for (FramePoint framePoint : leadingFootPoints)
       {
          framePoint.changeFrame(worldFrame);

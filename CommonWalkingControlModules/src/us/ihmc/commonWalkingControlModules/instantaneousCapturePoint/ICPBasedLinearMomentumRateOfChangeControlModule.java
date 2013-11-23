@@ -112,18 +112,21 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
       momentumRateOfChangeData.setLinearMomentumRateOfChange(linearMomentumRateOfChange);
    }
 
+   private final FramePoint cmp3d = new FramePoint();
+   private final FrameVector groundReactionForce = new FrameVector();
+   
    private FrameVector computeGroundReactionForce(FramePoint2d cmp2d, double fZ)
    {
       centerOfMass.setToZero(centerOfMassFrame);
-      FramePoint cmp3d = WrenchDistributorTools.computePseudoCMP3d(centerOfMass, cmp2d, fZ, totalMass, capturePointInputPort.getData().getOmega0());
+      WrenchDistributorTools.computePseudoCMP3d(cmp3d, centerOfMass, cmp2d, fZ, totalMass, capturePointInputPort.getData().getOmega0());
       
       visualizer.setPseudoCMP(cmp3d);
       
       centerOfMass.setToZero(centerOfMassFrame);
-      FrameVector ret = WrenchDistributorTools.computeForce(centerOfMass, cmp3d, fZ);
-      ret.changeFrame(centerOfMassFrame);
+      WrenchDistributorTools.computeForce(groundReactionForce, centerOfMass, cmp3d, fZ);
+      groundReactionForce.changeFrame(centerOfMassFrame);
 
-      return ret;
+      return groundReactionForce;
    }
 
    public void setGains(double captureKpParallelToMotion, double captureKpOrthogonalToMotion, double captureKi,
@@ -135,6 +138,11 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
    public void waitUntilComputationIsDone()
    {
       // empty
+   }
+   
+   public void getDesiredCMP(FramePoint2d desiredCMPToPack)
+   {
+      controlledCMP.getFramePoint2dAndChangeFrame(desiredCMPToPack);
    }
 
    public ControlFlowOutputPort<MomentumRateOfChangeData> getMomentumRateOfChangeOutputPort()
