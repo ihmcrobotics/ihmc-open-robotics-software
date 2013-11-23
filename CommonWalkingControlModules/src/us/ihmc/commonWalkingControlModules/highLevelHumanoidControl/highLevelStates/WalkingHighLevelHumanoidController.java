@@ -30,7 +30,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPBasedMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.InstantaneousCapturePointPlanner;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointTrajectoryData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -76,7 +75,6 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
-import us.ihmc.utilities.math.geometry.Point2dInConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
@@ -1190,8 +1188,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          Transform3D supportFootToWorldTransform = footToWorldTransform.get(supportSide);
          double footHeight = DesiredFootstepCalculatorTools.computeMinZPointInFrame(supportFootToWorldTransform, supportFoot, worldFrame).getZ();
          double comHeight = centerOfMass.getZ() - footHeight;
-         double omega0 = CapturePointCalculator.computeOmega0ConstantHeight(gravity, comHeight);
-         icpAndMomentumBasedController.setOmega0(omega0);
          icpAndMomentumBasedController.computeCapturePoint();
 
          if (walkingControllerParameters.resetDesiredICPToCurrentAtStartOfSwing())

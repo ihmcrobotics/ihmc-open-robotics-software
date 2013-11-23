@@ -121,17 +121,9 @@ public class ICPAndMomentumBasedController
    {
    }
 
-   // TODO: visibility changed for "public"
    public double getOmega0()
    {
       return omega0.getDoubleValue();
-   }
-
-   protected void setOmega0(double omega0)
-   {
-      if (Double.isNaN(omega0))
-         throw new RuntimeException("omega0 is NaN");
-      this.omega0.set(omega0);
    }
 
    private final FramePoint centerOfMassPosition = new FramePoint(worldFrame);
@@ -201,7 +193,7 @@ public class ICPAndMomentumBasedController
          if (admissibleGroundReactionWrench.getLinearPartCopy().getZ() == 0.0)
             admissibleGroundReactionWrench.set(gravitationalWrench);    // FIXME: hack to resolve circularity
 
-         setOmega0(omega0Calculator.computeOmega0(cops, admissibleGroundReactionWrench));
+         omega0.set(omega0Calculator.computeOmega0(cops, admissibleGroundReactionWrench));
       }
    }
 
