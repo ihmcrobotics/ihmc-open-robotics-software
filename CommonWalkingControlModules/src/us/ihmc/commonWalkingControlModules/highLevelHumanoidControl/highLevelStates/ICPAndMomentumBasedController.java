@@ -20,8 +20,8 @@ import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 
@@ -50,7 +50,7 @@ public class ICPAndMomentumBasedController
    private final YoFrameVector2d desiredICPVelocity;
    private final EnumYoVariable<RobotSide> supportLeg;
    private final DoubleYoVariable controlledCoMHeightAcceleration;
-   private final YoFramePoint capturePoint;
+   private final YoFramePoint yoCapturePoint;
    private final DoubleYoVariable omega0;
    private final Omega0CalculatorInterface omega0Calculator;
 
@@ -78,13 +78,13 @@ public class ICPAndMomentumBasedController
       }
 
       omega0 = new DoubleYoVariable("omega0", registry);
-      capturePoint = new YoFramePoint("capturePoint", worldFrame, registry);
+      yoCapturePoint = new YoFramePoint("capturePoint", worldFrame, registry);
       this.controlledCoMHeightAcceleration = new DoubleYoVariable("controlledCoMHeightAcceleration", registry);
       this.bipedFeet = bipedFeet;
       this.bipedSupportPolygons = bipedSupportPolygons;
 
-      desiredICP = new YoFramePoint2d("desiredICP", "", ReferenceFrame.getWorldFrame(), registry);
-      desiredICPVelocity = new YoFrameVector2d("desiredICPVelocity", "", ReferenceFrame.getWorldFrame(), registry);
+      desiredICP = new YoFramePoint2d("desiredICP", "", worldFrame, registry);
+      desiredICPVelocity = new YoFrameVector2d("desiredICPVelocity", "", worldFrame, registry);
 
       supportLeg = EnumYoVariable.create("supportLeg", "", RobotSide.class, registry, true);
 
@@ -102,7 +102,7 @@ public class ICPAndMomentumBasedController
          FootPolygonVisualizer footPolygonVisualizer = new FootPolygonVisualizer(feetContactStates, dynamicGraphicObjectsListRegistry, registry);
          momentumBasedController.addUpdatable(footPolygonVisualizer);
          
-         DynamicGraphicPosition capturePointViz = capturePoint.createDynamicGraphicPosition("Capture Point", 0.01, YoAppearance.Blue(),
+         DynamicGraphicPosition capturePointViz = yoCapturePoint.createDynamicGraphicPosition("Capture Point", 0.01, YoAppearance.Blue(),
                                                      GraphicType.ROTATED_CROSS);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("Capture Point", capturePointViz);
          dynamicGraphicObjectsListRegistry.registerArtifact("Capture Point", capturePointViz.createArtifact());
@@ -134,31 +134,29 @@ public class ICPAndMomentumBasedController
       this.omega0.set(omega0);
    }
 
+   private final FramePoint centerOfMassPosition = new FramePoint(worldFrame);
+   private final FrameVector centerOfMassVelocity = new FrameVector(worldFrame);
+
+   private final FramePoint2d capturePoint2d = new FramePoint2d(worldFrame);
+   private final FramePoint2d centerOfMassPosition2d = new FramePoint2d(worldFrame);
+   private final FrameVector2d centerOfMassVelocity2d = new FrameVector2d(worldFrame);
+   
    protected void computeCapturePoint()
    {
-      FramePoint centerOfMass = computeCenterOfMass();
-      FrameVector centerOfMassVelocity = computeCenterOfMassVelocity();
-      FramePoint2d capturePoint = CapturePointCalculator.computeCapturePoint(centerOfMass, centerOfMassVelocity, getOmega0());
-      capturePoint.changeFrame(this.capturePoint.getReferenceFrame());
-      this.capturePoint.set(capturePoint.getX(), capturePoint.getY(), 0.0);
+      centerOfMassPosition.setToZero(momentumBasedController.getCenterOfMassFrame());
+      momentumBasedController.getCenterOfMassJacobian().packCenterOfMassVelocity(centerOfMassVelocity);
+      
+      centerOfMassPosition.changeFrame(worldFrame);
+      centerOfMassVelocity.changeFrame(worldFrame);
+
+      centerOfMassPosition2d.set(centerOfMassPosition.getX(), centerOfMassPosition.getY());
+      centerOfMassVelocity2d.set(centerOfMassVelocity.getX(), centerOfMassVelocity.getY());
+      
+      CapturePointCalculator.computeCapturePoint(capturePoint2d, centerOfMassPosition2d, centerOfMassVelocity2d, getOmega0());
+      capturePoint2d.changeFrame(yoCapturePoint.getReferenceFrame());
+      yoCapturePoint.set(capturePoint2d.getX(), capturePoint2d.getY(), 0.0);
    }
 
-   private FramePoint computeCenterOfMass()
-   {
-      ReferenceFrame centerOfMassFrame = momentumBasedController.getCenterOfMassFrame();
-
-      return new FramePoint(centerOfMassFrame);
-   }
-
-   private FrameVector computeCenterOfMassVelocity()
-   {
-      CenterOfMassJacobian centerOfMassJacobian = momentumBasedController.getCenterOfMassJacobian();
-
-      FrameVector ret = new FrameVector(ReferenceFrame.getWorldFrame());
-      centerOfMassJacobian.packCenterOfMassVelocity(ret);
-
-      return ret;
-   }
 
    private final SideDependentList<List<FramePoint>> footContactPoints = new SideDependentList<List<FramePoint>>(new ArrayList<FramePoint>(), new ArrayList<FramePoint>());
    
@@ -245,7 +243,7 @@ public class ICPAndMomentumBasedController
 
    public YoFramePoint getCapturePoint()
    {
-      return capturePoint;
+      return yoCapturePoint;
    }
 
    public YoFramePoint2d getDesiredICP()
@@ -272,7 +270,4 @@ public class ICPAndMomentumBasedController
    {
       return updatables;
    }
-
-
-
 }
