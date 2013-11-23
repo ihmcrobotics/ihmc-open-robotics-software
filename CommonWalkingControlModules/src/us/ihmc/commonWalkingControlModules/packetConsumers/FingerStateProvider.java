@@ -15,7 +15,6 @@ public class FingerStateProvider implements ObjectConsumer<FingerStatePacket>
 
    public void consumeObject(FingerStatePacket packet)
    {
-      System.out.println("Got fingerstatepacket");
       packetQueue.add(packet);
    }
 
