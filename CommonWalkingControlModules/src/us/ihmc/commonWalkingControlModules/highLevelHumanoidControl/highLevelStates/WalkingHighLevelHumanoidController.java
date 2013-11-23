@@ -809,13 +809,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
       }
 
+      private final FramePoint2d desiredCMP = new FramePoint2d();
+      
       public void initializeECMPbasedToeOffIfNotInitializedYet()
       {
          // the only case left for determining the contact state of the trailing foot
          if ((!ecmpBasedToeOffHasBeenInitialized.getBooleanValue()) && (transferToSide != null))
          {
             RobotSide trailingLeg = transferToSide.getOppositeSide();
-            walkOnTheEdgesManager.updateToeOffStatusBasedOnECMP(trailingLeg, desiredECMP.getFramePoint2dCopy());
+            icpBasedMomentumRateOfChangeControlModule.getDesiredCMP(desiredCMP);
+            walkOnTheEdgesManager.updateToeOffStatusBasedOnECMP(trailingLeg, desiredCMP);
 
             if (walkOnTheEdgesManager.doToeOff())
             {

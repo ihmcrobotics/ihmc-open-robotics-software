@@ -33,21 +33,36 @@ public class WrenchDistributorTools
 
    public static FramePoint computePseudoCMP3d(FramePoint centerOfMass, FramePoint2d cmp, double fZ, double totalMass, double omega0)
    {
+      FramePoint pseudoCMP3d = new FramePoint();
+      
+      computePseudoCMP3d(pseudoCMP3d, centerOfMass, cmp, fZ, totalMass, omega0);
+      
+      return pseudoCMP3d;
+   }
+
+   public static void computePseudoCMP3d(FramePoint pseudoCMP3dToPack, FramePoint centerOfMass, FramePoint2d cmp, double fZ, double totalMass, double omega0)
+   {
       double zCMP = centerOfMass.getZ() - fZ / (totalMass * MathTools.square(omega0));
-      FramePoint ret = cmp.toFramePoint();
-      ret.changeFrame(centerOfMass.getReferenceFrame());
-      ret.setZ(zCMP);
-      return ret;
+      pseudoCMP3dToPack.set(cmp.getReferenceFrame(), cmp.getX(), cmp.getY(), 0.0);
+      pseudoCMP3dToPack.changeFrame(centerOfMass.getReferenceFrame());
+      pseudoCMP3dToPack.setZ(zCMP);
    }
 
    public static FrameVector computeForce(FramePoint centerOfMass, FramePoint cmp, double fZ)
    {
-      cmp.changeFrame(centerOfMass.getReferenceFrame());
       FrameVector force = new FrameVector(centerOfMass);
-      force.sub(cmp);
-      force.scale(fZ / force.getZ());
+      
+      computeForce(force, centerOfMass, cmp, fZ);
 
       return force;
+   }
+
+   public static void computeForce(FrameVector forceToPack, FramePoint centerOfMass, FramePoint cmp, double fZ)
+   {
+      cmp.changeFrame(centerOfMass.getReferenceFrame());
+      forceToPack.setAndChangeFrame(centerOfMass);
+      forceToPack.sub(cmp);
+      forceToPack.scale(fZ / forceToPack.getZ());
    }
 
    public static void getSupportVectors(List<FrameVector> normalizedSupportVectorsToPack, double mu, ReferenceFrame contactPlaneFrame)

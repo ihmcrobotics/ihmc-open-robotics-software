@@ -302,4 +302,9 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
    {
 //    empty
    }
+
+   public void getDesiredCMP(FramePoint2d desiredCMPToPack)
+   {
+      controlledCMP.getFramePoint2dAndChangeFrame(desiredCMPToPack);
+   }
 }
