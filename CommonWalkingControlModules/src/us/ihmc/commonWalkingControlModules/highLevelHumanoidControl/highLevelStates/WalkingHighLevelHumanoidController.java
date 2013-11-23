@@ -78,7 +78,6 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -373,7 +372,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       
       maximumConstantJerkFinalToeOffAngleComputer.reinitialize(walkOnTheEdgesProviders.getMaximumToeOffAngle(), referenceTime);
       
-      setupFootControlModules(walkingControllerParameters, footPositionTrajectoryGenerators);
+      setupFootControlModules(walkingControllerParameters, footPositionTrajectoryGenerators, dynamicGraphicObjectsListRegistry);
 
       initialPelvisOrientationProvider = new SettableOrientationProvider("initialPelvis", worldFrame, registry);
       finalPelvisOrientationProvider = new SettableOrientationProvider("finalPelvis", worldFrame, registry);
@@ -414,7 +413,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    }
 
 
-   private void setupFootControlModules(WalkingControllerParameters walkingControllerParameters, SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators)
+   private void setupFootControlModules(WalkingControllerParameters walkingControllerParameters, SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -468,7 +467,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                                                                    swingOrientationTrajectoryGenerator);
          
          int jacobianId = legJacobianIds.get(robotSide);
-         OneDoFJoint kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE);
          
          EndEffectorControlModule endEffectorControlModule;
 
@@ -477,15 +475,17 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (WalkOnTheEdgesProviders.TOEOFF_MOTION_TYPE_USED != ToeOffMotionType.FREE)
          {
             DoubleTrajectoryGenerator onToesPitchTrajectoryGenerator = walkOnTheEdgesProviders.getToeOffPitchTrajectoryGenerators(robotSide);
-            endEffectorControlModule = new EndEffectorControlModule(controlDT, bipedFoot, jacobianId, kneeJoint, swingPoseTrajectoryGenerator,
-                                          heelPitchTrajectoryGenerator, onToesPitchTrajectoryGenerator, requestHoldPosition, momentumBasedController, registry);
+            endEffectorControlModule = new EndEffectorControlModule(controlDT, bipedFoot, jacobianId, robotSide, swingPoseTrajectoryGenerator,
+                                          heelPitchTrajectoryGenerator, onToesPitchTrajectoryGenerator, requestHoldPosition, walkingControllerParameters,
+                                          dynamicGraphicObjectsListRegistry, momentumBasedController, registry);
          }
          else
          {
             // Let the toe pitch motion free. It seems to work better.
             DoubleProvider maximumToeOffAngleProvider = walkOnTheEdgesProviders.getMaximumToeOffAngleProvider();
-            endEffectorControlModule = new EndEffectorControlModule(controlDT, bipedFoot, jacobianId, kneeJoint, swingPoseTrajectoryGenerator,
-                                          heelPitchTrajectoryGenerator, maximumToeOffAngleProvider, requestHoldPosition, momentumBasedController, registry);
+            endEffectorControlModule = new EndEffectorControlModule(controlDT, bipedFoot, jacobianId, robotSide, swingPoseTrajectoryGenerator,
+                                          heelPitchTrajectoryGenerator, maximumToeOffAngleProvider, requestHoldPosition, walkingControllerParameters,
+                                          dynamicGraphicObjectsListRegistry, momentumBasedController, registry);
          }
          
                   

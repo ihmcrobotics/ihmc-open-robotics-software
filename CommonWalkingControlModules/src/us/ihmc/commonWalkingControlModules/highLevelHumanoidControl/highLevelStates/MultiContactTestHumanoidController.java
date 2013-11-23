@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.CoMBasedMomen
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.trajectories.ChangeableConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
@@ -106,9 +105,8 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
          swingPositionTrajectoryGenerators.put(foot, positionTrajectoryGenerator);
          swingOrientationTrajectoryGenerators.put(foot, orientationTrajectoryGenerator);
 
-         OneDoFJoint kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE);
-         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(controlDT, foot, jacobianId, kneeJoint, poseTrajectoryGenerator, null,
-                                                                null, null, momentumBasedController, registry);
+         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(controlDT, foot, jacobianId, robotSide, poseTrajectoryGenerator, null,
+                                                                null, null, walkingControllerParameters, null, momentumBasedController, registry);
          endEffectorControlModule.setSwingGains(100.0, 200.0, 200.0, 1.0);
          endEffectorControlModule.setHoldGains(100.0, 200.0, 0.1);
 
