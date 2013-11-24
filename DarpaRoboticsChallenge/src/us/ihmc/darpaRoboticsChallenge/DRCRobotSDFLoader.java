@@ -43,36 +43,21 @@ public class DRCRobotSDFLoader
             break;
 
          case ATLAS_IROBOT_HANDS :
-            fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_irobot_hands.sdf");
-
-            if (!headless)
-            {
-               resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/irobot_hand_description").getFile());
-            }
-
-            break;
+        	 fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_irobot_hands.sdf");
 
          case ATLAS_IROBOT_HANDS_ADDED_MASS :
-            
-            fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_irobot_hands_addedmass.sdf");
-
-            if (!headless)
-            {
-               resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/irobot_hand_description").getFile());
-            }
-
-            break;
+    	 	 fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_irobot_hands_addedmass.sdf");
+        	 break;
+         case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXZ:
+    	 	 fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_irobot_hands_addedmass_comxz.sdf");
+        	 break;
+         case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXYZ:
+    	 	 fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_irobot_hands_addedmass_comxyz.sdf");
+        	 break;
 
          case ATLAS_IHMC_PARAMETERS :
             throw new RuntimeException("Fixme: redo atlas_ihmc_parameters.sdf based on new models");
 //            fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_ihmc_parameters.sdf");
-//
-//            if (!headless)
-//            {
-//               resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/irobot_hand_description").getFile());
-//            }
-//
-//            break;
 
          case ATLAS_SANDIA_HANDS :
             fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_sandia_hands.sdf");
@@ -92,6 +77,12 @@ public class DRCRobotSDFLoader
          default :
             throw new RuntimeException("DRCRobotSDFLoader: Unimplemented enumeration case : " + selectedModel);
       }
+      
+      if (!headless && selectedModel.hasIRobotHands())
+      {
+         resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/irobot_hand_description").getFile());
+      }
+
 
       JaxbSDFLoader jaxbSDFLoader;
       try

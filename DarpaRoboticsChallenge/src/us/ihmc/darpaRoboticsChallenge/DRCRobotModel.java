@@ -5,7 +5,7 @@ import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandModel;
 public enum DRCRobotModel
 {
    ATLAS_NO_HANDS, ATLAS_NO_HANDS_ADDED_MASS, ATLAS_SANDIA_HANDS, ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, ATLAS_IROBOT_HANDS,
-   ATLAS_IROBOT_HANDS_ADDED_MASS, ATLAS_CALIBRATION, ATLAS_IHMC_PARAMETERS;
+   ATLAS_IROBOT_HANDS_ADDED_MASS,  ATLAS_IROBOT_HANDS_ADDED_MASS_COMXZ, ATLAS_IROBOT_HANDS_ADDED_MASS_COMXYZ,ATLAS_CALIBRATION, ATLAS_IHMC_PARAMETERS, ATLAS_;
 
    public static DRCRobotModel getDefaultRobotModel()
    {
@@ -19,6 +19,8 @@ public enum DRCRobotModel
          case ATLAS_IROBOT_HANDS :
          case ATLAS_IROBOT_HANDS_ADDED_MASS :
          case ATLAS_IHMC_PARAMETERS :
+         case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXZ:
+         case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXYZ:
             return true;
 
          default :
@@ -33,6 +35,8 @@ public enum DRCRobotModel
          case ATLAS_IROBOT_HANDS :
          case ATLAS_IROBOT_HANDS_ADDED_MASS :
          case ATLAS_IHMC_PARAMETERS :
+         case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXZ:
+         case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXYZ:
             return DRCHandModel.IROBOT;
 
          case ATLAS_SANDIA_HANDS :
@@ -55,6 +59,8 @@ public enum DRCRobotModel
          case ATLAS_NO_HANDS_ADDED_MASS :
          case ATLAS_IROBOT_HANDS :
          case ATLAS_IROBOT_HANDS_ADDED_MASS :
+         case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXZ:
+         case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXYZ:
          case ATLAS_IHMC_PARAMETERS :
          case ATLAS_SANDIA_HANDS :
          case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS :
