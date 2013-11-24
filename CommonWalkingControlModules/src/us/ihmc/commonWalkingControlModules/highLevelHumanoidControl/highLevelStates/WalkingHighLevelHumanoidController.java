@@ -954,7 +954,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
          else
          {
-            setFlatFootContactState(transferToSide); // still need to determine contact state for trailing leg. This is done in doAction as soon as the previous ICP trajectory is done
+            setFlatFootContactStates(); // still need to determine contact state for trailing leg. This is done in doAction as soon as the previous ICP trajectory is done
          }
          
          walkOnTheEdgesManager.reset();
