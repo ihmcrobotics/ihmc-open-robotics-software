@@ -137,8 +137,7 @@ public class RigidBodySpatialAccelerationControlModule
       endEffectorOrientation.setAndChangeFrame(endEffectorOrientationIn);
       endEffectorOrientation.changeFrame(endEffectorFrame);
 
-      poseToPack.setPosition(endEffectorPosition);
-      poseToPack.setOrientation(endEffectorOrientation);
+      poseToPack.setIncludingFrame(endEffectorPosition, endEffectorOrientation);
    }
 
    public void packDesiredEndEffectorTwist(Twist twistToPack, FrameVector linearVelocityOfOrigin, FrameVector angularVelocity, RigidBody base)
