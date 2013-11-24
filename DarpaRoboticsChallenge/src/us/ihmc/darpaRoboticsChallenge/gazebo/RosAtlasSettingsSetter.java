@@ -25,6 +25,9 @@ import atlas_msgs.SetJointDampingResponse;
 import cern.colt.Arrays;
 import dynamic_reconfigure.Config;
 import dynamic_reconfigure.DoubleParameter;
+import dynamic_reconfigure.Reconfigure;
+import dynamic_reconfigure.ReconfigureRequest;
+import dynamic_reconfigure.ReconfigureResponse;
 
 public class RosAtlasSettingsSetter
 {
@@ -37,7 +40,7 @@ public class RosAtlasSettingsSetter
    
    NodeConfiguration nodeConfig = NodeConfiguration.newPrivate();
    
-   private final RosServiceClient<Config, Config> fishEyeClient = new RosServiceClient<Config, Config>(Config._TYPE);
+   private final RosServiceClient<ReconfigureRequest, ReconfigureResponse> fishEyeClient = new RosServiceClient<ReconfigureRequest, ReconfigureResponse>(Reconfigure._TYPE);
    
    public RosAtlasSettingsSetter(String rosMasterURI)
    {
@@ -60,21 +63,21 @@ public class RosAtlasSettingsSetter
    
    public void setFishEyeParameters()
    {
-      
-      fishEyeClient.waitTillConnected();
       System.out.println("got here");
-      Config request = fishEyeClient.getMessage();
+      fishEyeClient.waitTillConnected();
+    
+      ReconfigureRequest request = fishEyeClient.getMessage();
       DoubleParameter frameRateDoubleParam = nodeConfig.getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
       frameRateDoubleParam.setName("prop_frame_rate");
       frameRateDoubleParam.setValue(30.0);
-      request.getDoubles().add(frameRateDoubleParam);
-       
-      fishEyeClient.call(request, new ServiceResponseListener<Config>()
+      request.getConfig().getDoubles().add(frameRateDoubleParam);
+           
+      fishEyeClient.call(request, new ServiceResponseListener<ReconfigureResponse>()
       {
 
-         public void onSuccess(Config response)
+         public void onSuccess(ReconfigureResponse response)
          {
-            System.out.println("success" + response.getDoubles().get(0).getValue());
+            System.out.println("success" + response.getConfig().getDoubles().get(0).getValue());
          }
 
          public void onFailure(RemoteException e)
