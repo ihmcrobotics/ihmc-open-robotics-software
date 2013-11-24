@@ -131,10 +131,10 @@ public class RigidBodySpatialAccelerationControlModule
 
    public void packDesiredEndEffectorPoseFromDesiredPositions(FramePose poseToPack, FramePoint endEffectorPositionIn, FrameOrientation endEffectorOrientationIn)
    {
-      endEffectorPosition.set(endEffectorPositionIn);
+      endEffectorPosition.setAndChangeFrame(endEffectorPositionIn);
       endEffectorPosition.changeFrame(endEffectorFrame);
 
-      endEffectorOrientation.set(endEffectorOrientationIn);
+      endEffectorOrientation.setAndChangeFrame(endEffectorOrientationIn);
       endEffectorOrientation.changeFrame(endEffectorFrame);
 
       poseToPack.setPosition(endEffectorPosition);
