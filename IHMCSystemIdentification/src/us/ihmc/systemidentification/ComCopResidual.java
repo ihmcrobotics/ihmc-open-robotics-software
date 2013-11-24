@@ -40,6 +40,7 @@ import com.yobotics.simulationconstructionset.Robot;
 
 public class ComCopResidual implements FunctionNtoM
 {
+   static boolean lockComY=false;
    private Robot robot;
    private Link targetLink;
    private DataBuffer dataBuffer;
@@ -127,7 +128,16 @@ public class ComCopResidual implements FunctionNtoM
    @Override
    public void process(double[] inParameter, double[] outError)
    {
-      targetLink.setComOffset(new Vector3d(inParameter));
+      if (lockComY)
+      {
+         Vector3d lastCom = new Vector3d();
+         targetLink.getComOffset(lastCom);
+         targetLink.setComOffset(inParameter[0],lastCom.y,inParameter[2]);
+      }
+      else
+      {
+         targetLink.setComOffset(new Vector3d(inParameter));
+      }
       ArrayList<Point3d> com = new ArrayList<>(selectedFrames.length);
       ArrayList<Point3d> cop = new ArrayList<>(selectedFrames.length);
       
@@ -143,9 +153,7 @@ public class ComCopResidual implements FunctionNtoM
    @Override
    public int getN()
    {
-      // dim parameter
-
-      return 3; //x,y,z
+       return 3; //x,y,z
    }
 
    
