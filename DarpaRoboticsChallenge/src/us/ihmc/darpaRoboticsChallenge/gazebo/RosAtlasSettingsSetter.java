@@ -2,8 +2,13 @@ package us.ihmc.darpaRoboticsChallenge.gazebo;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.ros.exception.RemoteException;
+import org.ros.internal.message.RawMessage;
+import org.ros.message.MessageFactory;
+import org.ros.node.NodeConfiguration;
 import org.ros.node.service.ServiceResponseListener;
 
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
@@ -18,6 +23,8 @@ import atlas_msgs.SetJointDamping;
 import atlas_msgs.SetJointDampingRequest;
 import atlas_msgs.SetJointDampingResponse;
 import cern.colt.Arrays;
+import dynamic_reconfigure.Config;
+import dynamic_reconfigure.DoubleParameter;
 
 public class RosAtlasSettingsSetter
 {
@@ -27,7 +34,11 @@ public class RosAtlasSettingsSetter
          SetJointDamping._TYPE);
    private final RosServiceClient<atlas_msgs.SetJointDampingRequest, atlas_msgs.SetJointDampingResponse> sandiaHandDampingClient = new RosServiceClient<SetJointDampingRequest, SetJointDampingResponse>(
          SetJointDamping._TYPE);
-
+   
+   NodeConfiguration nodeConfig = NodeConfiguration.newPrivate();
+   
+   private final RosServiceClient<Config, Config> fishEyeClient = new RosServiceClient<Config, Config>(Config._TYPE);
+   
    public RosAtlasSettingsSetter(String rosMasterURI)
    {
       try
@@ -40,10 +51,37 @@ public class RosAtlasSettingsSetter
       }
 
       rosMainNode.attachPublisher("/atlas/mode", modePublisher);
-      rosMainNode.attachServiceClient("/atlas/set_joint_damping", atlasDampingClient);
-      rosMainNode.attachServiceClient("/sandia_hands/set_joint_damping", sandiaHandDampingClient);
+      //rosMainNode.attachServiceClient("/atlas/set_joint_damping", atlasDampingClient);
+     // rosMainNode.attachServiceClient("/sandia_hands/set_joint_damping", sandiaHandDampingClient);
+      rosMainNode.attachServiceClient("blackfly/set_parameters", fishEyeClient);
       rosMainNode.execute();
 
+   }
+   
+   public void setFishEyeParameters()
+   {
+      
+      fishEyeClient.waitTillConnected();
+      System.out.println("got here");
+      Config request = fishEyeClient.getMessage();
+      DoubleParameter frameRateDoubleParam = nodeConfig.getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
+      frameRateDoubleParam.setName("prop_frame_rate");
+      frameRateDoubleParam.setValue(30.0);
+      request.getDoubles().add(frameRateDoubleParam);
+       
+      fishEyeClient.call(request, new ServiceResponseListener<Config>()
+      {
+
+         public void onSuccess(Config response)
+         {
+            System.out.println("success" + response.getDoubles().get(0).getValue());
+         }
+
+         public void onFailure(RemoteException e)
+         {
+            throw new RuntimeException(e);
+         }
+      });
    }
 
    public void setPositionControlDampingParameters()
@@ -141,7 +179,8 @@ public class RosAtlasSettingsSetter
    public static void main(String[] args)
    {
       RosAtlasSettingsSetter rosAtlasSettingsSetter = new RosAtlasSettingsSetter(DRCConfigParameters.ROS_MASTER_URI);
-      rosAtlasSettingsSetter.setAtlasDampingParameters();
+      //rosAtlasSettingsSetter.setAtlasDampingParameters();
+      rosAtlasSettingsSetter.setFishEyeParameters();
       System.exit(0);
    }
 }
