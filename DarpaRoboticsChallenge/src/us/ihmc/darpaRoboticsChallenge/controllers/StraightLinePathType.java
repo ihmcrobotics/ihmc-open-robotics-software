@@ -6,11 +6,11 @@ public enum StraightLinePathType
 
    private static final String STRAIGHT_PATH_NAME = "Forward Path";
    private static final double STRAIGHT_STEP_LENGTH = 0.4;
-   private static final double STRAIGHT_STEP_WIDTH = 0.2;
+   private static final double STRAIGHT_STEP_WIDTH = 0.25;
    private static final String REVERSE_PATH_NAME = "Reverse Path";
    private static final double REVERSE_ANGLE = Math.PI;
    private static final double REVERSE_STEP_LENGTH = 0.15;
-   private static final double REVERSE_STEP_WIDTH = 0.2;
+   private static final double REVERSE_STEP_WIDTH = 0.25;
    private static final String RIGHT_SHUFFLE_PATH_NAME = "Right Shuffle Path";
    private static final String LEFT_SHUFFLE_PATH_NAME = "Left Shuffle Path";
    private static final double SHUFFLE_STEP_LENGTH = 0.15;
