@@ -1,7 +1,7 @@
 <GraphGroup>
 	<Cols>1</Cols>
 	<Graph>
-		<Variables>root.remoteroot.AtlasSliderBoardController.testedQ,root.remoteroot.AtlasSliderBoardController.ll_neck_ry.ll_neck_ry_q_d</Variables>
+		<Variables>root.remoteroot.AtlasSliderBoardController.testedQ</Variables>
 		<GraphConfiguration>
 			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remoteroot.AtlasSliderBoardController.testedQ_des,root.remoteroot.AtlasSliderBoardController.testedQ</Variables>
+		<Variables>root.remoteroot.AtlasSliderBoardController.testedQ_des</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -40,16 +40,16 @@
 		<Variables>root.remoteroot.AtlasSliderBoardController.testedF,root.remoteroot.AtlasSliderBoardController.testedF_des</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
-			<ScalingMethod>2</ScalingMethod>
+			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
 			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>80.0</MaxScaling>
+			<MaxScaling>1.0</MaxScaling>
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.remoteroot.AtlasSliderBoardController.ll_l_leg_aky.ll_l_leg_aky_ff_const,root.remoteroot.AtlasSliderBoardController.ll_l_leg_akx.ll_l_leg_akx_ff_const</Variables>
 		<GraphConfiguration>
 			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -61,7 +61,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remoteroot.AtlasSliderBoardController.ll_neck_ry.ll_neck_ry_f</Variables>
+		<Variables>root.remoteroot.AtlasSliderBoardController.ll_r_leg_aky.ll_r_leg_aky_ff_const,root.remoteroot.AtlasSliderBoardController.ll_r_leg_akx.ll_r_leg_akx_ff_const</Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -73,26 +73,114 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remoteroot.AtlasSliderBoardController.ll_neck_ry.ll_neck_ry_ferr_filt</Variables>
+		<Variables>root.remoteroot.AtlasSliderBoardController.ll_l_leg_aky.ll_l_leg_aky_f,root.remoteroot.AtlasSliderBoardController.ll_l_leg_akx.ll_l_leg_akx_f</Variables>
 		<GraphConfiguration>
 			<Name>config7</Name>
-			<ScalingMethod>2</ScalingMethod>
+			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
 			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>0.1</MaxScaling>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remoteroot.AtlasSliderBoardController.ll_r_leg_aky.ll_r_leg_aky_f,root.remoteroot.AtlasSliderBoardController.ll_r_leg_akx.ll_r_leg_akx_f</Variables>
+		<GraphConfiguration>
+			<Name>config8</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-<Entry Boxes>requestedBehavior,testedJoint,testedKp,testedKi,testedKd,testedKiAlpha,testedCutoffDamp,testedCutoffLowPass,ll_neck_ry_k_f_p,ll_neck_ry_q_d,kp__JOINT_NECK_RY</Entry Boxes>
+<Entry Boxes>requestedBehavior,testedJoint,testedKp,testedKi,testedKd,testedKiAlpha,testedCutoffDamp,testedCutoffLowPass,requestedTest</Entry Boxes>
 
 <Number of ViewPorts>1</Number of ViewPorts>
  <Main Viewport> 
 <Visible> true</Visible>
 </Main Viewport>
 
-<Graph Array Window Size>0</Graph Array Window Size>
+<Graph Array Window Size>1</Graph Array Window Size><Graph Array Window1>
+<GraphGroup>
+	<Cols>1</Cols>
+	<Graph>
+		<Variables>root.remoteroot.AtlasSliderBoardController.ll_l_leg_aky.ll_l_leg_aky_f,root.remoteroot.AtlasSliderBoardController.ll_l_leg_akx.ll_l_leg_akx_f</Variables>
+		<GraphConfiguration>
+			<Name>config9</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>10.0</MaxScaling>
+			<MinScaling>-10.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remoteroot.AtlasSliderBoardController.ll_r_leg_aky.ll_r_leg_aky_f,root.remoteroot.AtlasSliderBoardController.ll_r_leg_akx.ll_r_leg_akx_f</Variables>
+		<GraphConfiguration>
+			<Name>config10</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remoteroot.AtlasSliderBoardController.ll_l_leg_aky.ll_l_leg_aky_psi_pos,root.remoteroot.AtlasSliderBoardController.ll_l_leg_aky.ll_l_leg_aky_psi_neg</Variables>
+		<GraphConfiguration>
+			<Name>config11</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remoteroot.AtlasSliderBoardController.ll_l_leg_akx.ll_l_leg_akx_psi_pos,root.remoteroot.AtlasSliderBoardController.ll_l_leg_akx.ll_l_leg_akx_psi_neg</Variables>
+		<GraphConfiguration>
+			<Name>config12</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remoteroot.AtlasSliderBoardController.ll_r_leg_aky.ll_r_leg_aky_psi_pos,root.remoteroot.AtlasSliderBoardController.ll_r_leg_aky.ll_r_leg_aky_psi_neg</Variables>
+		<GraphConfiguration>
+			<Name>config13</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remoteroot.AtlasSliderBoardController.ll_r_leg_akx.ll_r_leg_akx_psi_pos,root.remoteroot.AtlasSliderBoardController.ll_r_leg_akx.ll_r_leg_akx_psi_neg</Variables>
+		<GraphConfiguration>
+			<Name>config14</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window1>
 
 <Extra Panels>
 <Main Viewport>
