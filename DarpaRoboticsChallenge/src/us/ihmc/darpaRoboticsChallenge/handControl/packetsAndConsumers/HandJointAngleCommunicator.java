@@ -1,8 +1,7 @@
-package us.ihmc.darpaRoboticsChallenge.handControl;
+package us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers;
 
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
-import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAnglePacket;
 import us.ihmc.iRobotHandControl.IRobotHandSensorData;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.AsyncContinuousExecutor;
