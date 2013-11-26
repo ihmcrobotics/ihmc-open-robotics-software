@@ -166,12 +166,7 @@ public class DRCNetworkProcessor
             networkingManager.getControllerStateHandler().sendHandJointAnglePacket(object); }
       });
       
-      this.fieldComputerClient.attachListener(AtlasWristFeetSensorPacket.class,new ObjectConsumer<AtlasWristFeetSensorPacket>()
-      {
-         @Override
-         public void consumeObject(AtlasWristFeetSensorPacket object)
-         {networkingManager.getControllerStateHandler().sendAtlasWristFeetSensorPacket(object); }
-      });
+      
 
       if (DRCLocalConfigParameters.USING_REAL_HEAD)
       {
