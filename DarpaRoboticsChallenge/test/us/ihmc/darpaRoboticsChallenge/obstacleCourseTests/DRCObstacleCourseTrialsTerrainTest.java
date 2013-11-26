@@ -56,7 +56,7 @@ public class DRCObstacleCourseTrialsTerrainTest
    }
 
 
-   @Ignore
+   
    @Test
    public void testWalkingOntoAndOverSlopes() throws SimulationExceededMaximumTimeException
    {
@@ -96,7 +96,6 @@ public class DRCObstacleCourseTrialsTerrainTest
       BambooTools.reportTestFinishedMessage();
    }
 
-   @Ignore
    @Test
    public void testWalkingOverSlopesInOneGo() throws SimulationExceededMaximumTimeException
    {
@@ -118,7 +117,7 @@ public class DRCObstacleCourseTrialsTerrainTest
       FootstepDataList footstepDataList = createFootstepsForWalkingOverTheSlopesInOneGo(scriptedFootstepGenerator);
       drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
 
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(45.0);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(25.0);
 
       drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
