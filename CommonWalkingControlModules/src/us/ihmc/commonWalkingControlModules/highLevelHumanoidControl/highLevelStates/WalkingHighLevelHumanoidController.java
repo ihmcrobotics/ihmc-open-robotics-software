@@ -1727,7 +1727,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       {
          EndEffectorControlModule endEffectorControlModule = footEndEffectorControlModules.get(robotSide);
          
-         if (endEffectorControlModule.getCurrentConstraintType() == ConstraintType.FULL && endEffectorControlModule.isInSingularityNeighborhood())
+         if (endEffectorControlModule.isInFlatSupportState() && endEffectorControlModule.isInSingularityNeighborhood())
          {
             // Can't achieve a desired height acceleration
             zddDesired = 0.0;
