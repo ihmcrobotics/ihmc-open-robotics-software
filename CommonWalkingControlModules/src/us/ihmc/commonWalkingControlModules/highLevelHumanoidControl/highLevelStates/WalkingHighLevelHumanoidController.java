@@ -1709,6 +1709,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          
          zdCurrent = comVelocity.getZ(); // Just use com velocity for now for damping...
       }
+      
+      // Check if we're getting closer to straight leg configuration, in such case, slow down progressively and finally ignore the desireds when they're too high
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         EndEffectorControlModule endEffectorControlModule = footEndEffectorControlModules.get(robotSide);
+         endEffectorControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(comXYVelocity, comHeightDataBeforeSmoothing, zCurrent, referenceFrames.getPelvisZUpFrame());
+         endEffectorControlModule.correctCoMHeightTrajectoryGeneratorForUnreachableFootStep(comHeightDataBeforeSmoothing);
+      }
 
       coMHeightTimeDerivativesSmoother.smooth(comHeightDataAfterSmoothing, comHeightDataBeforeSmoothing);
       
@@ -1727,8 +1735,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          
          if (endEffectorControlModule.isInFlatSupportState() && endEffectorControlModule.isInSingularityNeighborhood())
          {
-            // Can't achieve a desired height acceleration
-            zddDesired = 0.0;
+            // Ignore the desired height acceleration only if EndEffectorControlModule is not taking care of singularity during support
+            if (!EndEffectorControlModule.USE_SINGULARITY_AVOIDANCE_SUPPORT)
+               zddDesired = 0.0;
+            
             double zTreshold = 0.01;
 
             if (zDesired >= zCurrent - zTreshold)
