@@ -1697,7 +1697,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       comXYTimeDerivatives.setCoMXYAcceleration(comXYAcceleration);
 
       coMHeightTimeDerivativesCalculator.computeCoMHeightTimeDerivatives(comHeightDataBeforeSmoothing, comXYTimeDerivatives, coMHeightPartialDerivatives);
-
+      
       double zCurrent = comPosition.getZ();
       double zdCurrent = comVelocity.getZ();
       
@@ -1710,6 +1710,25 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          zdCurrent = comVelocity.getZ(); // Just use com velocity for now for damping...
       }
       
+      RobotSide loadedLegThatMayCollapse = getSupportLeg();
+      
+      if (loadedLegThatMayCollapse == null)
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            if (footSwitches.get(robotSide).computeFootLoadPercentage() > 0.80)
+            {
+               loadedLegThatMayCollapse = robotSide;
+               break;
+            }
+         }
+      }
+      
+      if (loadedLegThatMayCollapse != null)
+      {
+         footEndEffectorControlModules.get(loadedLegThatMayCollapse).correctCoMForCollapsingAvoidanceInSingleSupport(comXYVelocity, comHeightDataBeforeSmoothing, zCurrent, referenceFrames.getPelvisZUpFrame());
+      }
+
       // Check if we're getting closer to straight leg configuration, in such case, slow down progressively and finally ignore the desireds when they're too high
       for (RobotSide robotSide : RobotSide.values)
       {
