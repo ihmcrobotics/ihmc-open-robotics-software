@@ -42,30 +42,38 @@ public class RosAtlasSettingsSetter
    
    private final RosServiceClient<ReconfigureRequest, ReconfigureResponse> fishEyeClient = new RosServiceClient<ReconfigureRequest, ReconfigureResponse>(Reconfigure._TYPE);
    
-   public RosAtlasSettingsSetter(String rosMasterURI)
+   public RosAtlasSettingsSetter(String rosMasterURI, final RosMainNode rosMainNode)
    {
-      try
-      {
-         rosMainNode = new RosMainNode(new URI(rosMasterURI), "RosAtlasSettingsSetter");
-      }
-      catch (URISyntaxException e)
-      {
-         throw new RuntimeException(e);
-      }
+      this.rosMainNode = rosMainNode;
 
-      rosMainNode.attachPublisher("/atlas/mode", modePublisher);
-      //rosMainNode.attachServiceClient("/atlas/set_joint_damping", atlasDampingClient);
-     // rosMainNode.attachServiceClient("/sandia_hands/set_joint_damping", sandiaHandDampingClient);
       rosMainNode.attachServiceClient("blackfly/set_parameters", fishEyeClient);
-      rosMainNode.execute();
+    
 
    }
    
+   public RosAtlasSettingsSetter(String rosMasterURI)
+   {
+    try
+    { 
+       rosMainNode = new RosMainNode(new URI(rosMasterURI), "RosAtlasSettingsSetter");
+    }
+    catch (URISyntaxException e)
+    {
+       throw new RuntimeException(e);
+    }
+
+    //rosMainNode.attachPublisher("/atlas/mode", modePublisher);
+    //rosMainNode.attachServiceClient("/atlas/set_joint_damping", atlasDampingClient);
+   // rosMainNode.attachServiceClient("/sandia_hands/set_joint_damping", sandiaHandDampingClient);
+    rosMainNode.attachServiceClient("blackfly/set_parameters", fishEyeClient);
+    rosMainNode.execute();
+   }
+
    public void setFishEyeFrameRate(double frameRate)
    {
       System.out.println("got here");
       fishEyeClient.waitTillConnected();
-    
+      System.out.println("got here");
       ReconfigureRequest request = fishEyeClient.getMessage();
       DoubleParameter frameRateDoubleParam = nodeConfig.getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
       frameRateDoubleParam.setName("prop_frame_rate");
@@ -77,7 +85,7 @@ public class RosAtlasSettingsSetter
 
          public void onSuccess(ReconfigureResponse response)
          {
-            System.out.println("success" + response.getConfig().getDoubles().get(0).getValue());
+            System.out.println("success" + response.getConfig().getDoubles().get(1).getValue());
          }
 
          public void onFailure(RemoteException e)
@@ -181,6 +189,7 @@ public class RosAtlasSettingsSetter
 
    public static void main(String[] args)
    {
+      
       RosAtlasSettingsSetter rosAtlasSettingsSetter = new RosAtlasSettingsSetter(DRCConfigParameters.ROS_MASTER_URI);
       //rosAtlasSettingsSetter.setAtlasDampingParameters();
       rosAtlasSettingsSetter.setFishEyeFrameRate(10.0);
