@@ -85,22 +85,17 @@ public class ManualDetectCameraCalibrationBox
          }
       }
 
-      @Override
       public void mouseClicked(MouseEvent e) {}
 
-      @Override
       public void mousePressed(MouseEvent e) {
          selected.add( new Point2D_I32(e.getX(),e.getY()));
          repaint();
       }
 
-      @Override
       public void mouseReleased(MouseEvent e) {}
 
-      @Override
       public void mouseEntered(MouseEvent e) {}
 
-      @Override
       public void mouseExited(MouseEvent e) {}
    }
 
