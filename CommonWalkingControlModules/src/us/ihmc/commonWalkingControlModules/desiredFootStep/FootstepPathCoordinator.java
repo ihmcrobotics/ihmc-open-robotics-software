@@ -60,6 +60,10 @@ public class FootstepPathCoordinator implements FootstepProvider
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
    }
+   
+   public void setSpeed(double speed) {
+      footstepTimingParameters.setSpeed(speed);
+   }
 
    public Footstep poll()
    {
