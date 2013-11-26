@@ -44,7 +44,7 @@ public class DRCRobotSDFLoader
 
          case ATLAS_IROBOT_HANDS :
         	 fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_irobot_hands.sdf");
-
+        	 break;
          case ATLAS_IROBOT_HANDS_ADDED_MASS :
     	 	 fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_irobot_hands_addedmass.sdf");
         	 break;
@@ -82,6 +82,11 @@ public class DRCRobotSDFLoader
       {
          resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/irobot_hand_description").getFile());
       }
+      
+      if(fileInputStream==null)
+      {
+    	  System.err.println("failed to load sdf file");
+      }
 
 
       JaxbSDFLoader jaxbSDFLoader;
@@ -105,7 +110,7 @@ public class DRCRobotSDFLoader
 
    public static void main(String[] args)
    {
-      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_IROBOT_HANDS, false);
+      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_IROBOT_HANDS_ADDED_MASS_COMXZ, false);
       JaxbSDFLoader loader = loadDRCRobot(jointMap, false);
       System.out.println(loader.createRobot(jointMap, true).getName());
       

@@ -21,6 +21,7 @@ public enum DRCRobotModel
          case ATLAS_IHMC_PARAMETERS :
          case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXZ:
          case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXYZ:
+         case ATLAS_CALIBRATION :
             return true;
 
          default :
@@ -37,6 +38,7 @@ public enum DRCRobotModel
          case ATLAS_IHMC_PARAMETERS :
          case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXZ:
          case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXYZ:
+         case ATLAS_CALIBRATION :
             return DRCHandModel.IROBOT;
 
          case ATLAS_SANDIA_HANDS :
@@ -45,7 +47,6 @@ public enum DRCRobotModel
 
          case ATLAS_NO_HANDS :
          case ATLAS_NO_HANDS_ADDED_MASS :
-         case ATLAS_CALIBRATION :
          default :
             return DRCHandModel.NONE;
       }
