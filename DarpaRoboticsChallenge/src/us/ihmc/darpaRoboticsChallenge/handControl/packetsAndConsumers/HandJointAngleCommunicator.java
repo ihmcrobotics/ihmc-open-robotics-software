@@ -14,7 +14,7 @@ import com.yobotics.simulationconstructionset.robotController.RawOutputWriter;
 // fills a ring buffer with pose and joint data and in a worker thread passes it to the appropriate consumer 
 public class HandJointAngleCommunicator implements RawOutputWriter
 {
-   private final int WORKER_SLEEP_TIME_MILLIS = 1;
+   private final int WORKER_SLEEP_TIME_MILLIS = 250;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -22,6 +22,7 @@ public class HandJointAngleCommunicator implements RawOutputWriter
    private final ConcurrentRingBuffer<HandJointAnglePacket> packetRingBuffer;
    private final double[][] fingers = new double[3][];
    private final RobotSide side;
+   private HandJointAnglePacket currentPacket;
 
    public HandJointAngleCommunicator(RobotSide side, ObjectCommunicator networkProcessorCommunicator)
    {
@@ -41,15 +42,13 @@ public class HandJointAngleCommunicator implements RawOutputWriter
          {
             if (packetRingBuffer.poll())
             {
-               HandJointAnglePacket packet;
-               while ((packet = packetRingBuffer.read()) != null)
+               while ((currentPacket = packetRingBuffer.read()) != null)
                {
                   if (networkProcessorCommunicator == null)
                   {
                      System.out.println("Net Proc Comm");
                   }
-
-                  networkProcessorCommunicator.consumeObject(packet);
+                  networkProcessorCommunicator.consumeObject(currentPacket);
                }
                packetRingBuffer.flush();
             }
@@ -96,7 +95,6 @@ public class HandJointAngleCommunicator implements RawOutputWriter
       {
          return;
       }
-
       packet.setAll(side, fingers[0], fingers[1], fingers[2]);
       packetRingBuffer.commit();
    }
