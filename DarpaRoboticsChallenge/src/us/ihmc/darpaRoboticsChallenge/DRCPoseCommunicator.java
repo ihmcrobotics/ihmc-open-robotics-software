@@ -34,6 +34,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
    private final ObjectCommunicator networkProcessorCommunicator;
    private final JointConfigurationGatherer jointConfigurationGathererAndProducer;
    private final TimestampProvider timeProvider;
+   private State currentState;
 
    private final ConcurrentRingBuffer<State> stateRingBuffer;
 
@@ -63,19 +64,18 @@ public class DRCPoseCommunicator implements RawOutputWriter
          {
             if (stateRingBuffer.poll())
             {
-               State state;
-               while ((state = stateRingBuffer.read()) != null)
+               while ((currentState = stateRingBuffer.read()) != null)
                {
                   if (networkProcessorCommunicator == null)
                   {
                      System.out.println("Net Proc Comm");
                   }
-                  if (state.poseData == null)
+                  if (currentState.poseData == null)
                   {
                      System.out.println("Pose Data");
                   }
-                  networkProcessorCommunicator.consumeObject(state.poseData);
-                  networkProcessorCommunicator.consumeObject(state.jointData);
+                  networkProcessorCommunicator.consumeObject(currentState.poseData);
+                  networkProcessorCommunicator.consumeObject(currentState.jointData);
                }
                stateRingBuffer.flush();
             }
