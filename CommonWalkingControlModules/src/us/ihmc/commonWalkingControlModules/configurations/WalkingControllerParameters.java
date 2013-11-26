@@ -25,6 +25,8 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract double getLegLength();
    
+   public abstract double getMinLegLengthBeforeCollapsingSingleSupport();
+   
    public abstract double minimumHeightAboveAnkle();
    public abstract double nominalHeightAboveAnkle();
    public abstract double maximumHeightAboveAnkle();
