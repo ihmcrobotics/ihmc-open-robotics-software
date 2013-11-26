@@ -45,8 +45,12 @@ public class RosAtlasSettingsSetter
    public RosAtlasSettingsSetter(String rosMasterURI, final RosMainNode rosMainNode)
    {
       this.rosMainNode = rosMainNode;
-
-      rosMainNode.attachServiceClient("blackfly/set_parameters", fishEyeClient);
+      try{
+         rosMainNode.attachServiceClient("blackfly/set_parameters", fishEyeClient);
+      } catch (Exception e)
+      {
+         System.err.println("Could Not connect to FishEye Node");
+      }
     
 
    }
@@ -65,7 +69,12 @@ public class RosAtlasSettingsSetter
     //rosMainNode.attachPublisher("/atlas/mode", modePublisher);
     //rosMainNode.attachServiceClient("/atlas/set_joint_damping", atlasDampingClient);
    // rosMainNode.attachServiceClient("/sandia_hands/set_joint_damping", sandiaHandDampingClient);
-    rosMainNode.attachServiceClient("blackfly/set_parameters", fishEyeClient);
+    try{
+       rosMainNode.attachServiceClient("blackfly/set_parameters", fishEyeClient);
+    } catch (Exception e)
+    {
+       System.err.println("Could Not connect to FishEye Node");
+    }
     rosMainNode.execute();
    }
 
