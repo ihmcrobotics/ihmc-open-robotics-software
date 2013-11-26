@@ -613,7 +613,6 @@ public class MomentumBasedController
    {
       YoPlaneContactState yoPlaneContactState = yoPlaneContactStates.get(contactableBody);
       yoPlaneContactState.setContactPointsInContact(newContactPointStates);
-      yoPlaneContactState.setContactNormalVector(null);
    }
 
    public void setPlaneContactState(ContactablePlaneBody contactableBody, boolean[] newContactPointStates, FrameVector normalContactVector)
@@ -627,7 +626,6 @@ public class MomentumBasedController
    {
       YoPlaneContactState yoPlaneContactState = yoPlaneContactStates.get(contactableBody);
       yoPlaneContactState.setFullyConstrained();
-      yoPlaneContactState.setContactNormalVector(null);
    }
 
    public void setPlaneContactStateFullyConstrained(ContactablePlaneBody contactableBody, double coefficientOfFriction, FrameVector normalContactVector)
@@ -642,7 +640,6 @@ public class MomentumBasedController
    {
       YoPlaneContactState yoPlaneContactState = yoPlaneContactStates.get(contactableBody);
       yoPlaneContactState.clear();
-      yoPlaneContactState.setContactNormalVector(null);
    }
 
    public void setCylindricalContactInContact(ContactableCylinderBody contactableCylinderBody, boolean setInContact)

@@ -1787,7 +1787,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private void setOnToesContactState(RobotSide robotSide)
    {
       EndEffectorControlModule footEndEffectorControlModule = footEndEffectorControlModules.get(robotSide);
-      if (footEndEffectorControlModule.getCurrentConstraintType() == ConstraintType.HOLD_POSITION || footEndEffectorControlModule.getCurrentConstraintType() == ConstraintType.FULL)
+      if (footEndEffectorControlModule.isInFlatSupportState())
       {
          footNormalContactVector.set(feet.get(robotSide).getPlaneFrame(), 0.0, 0.0, 1.0);
          footNormalContactVector.changeFrame(worldFrame);
