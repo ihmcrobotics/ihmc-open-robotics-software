@@ -72,6 +72,7 @@ public class DRCDemo01NavigationEnvironment implements
 	public DRCDemo01NavigationEnvironment() {
 		combinedTerrainObject = new CombinedTerrainObject("Rocks with a wall");
 
+		//addCalibrationCube();
 		setUpPath1Rocks();
 		// setUpPath2SmallCones();
 		setUpPath3RampsWithLargeBlocks();
@@ -91,6 +92,12 @@ public class DRCDemo01NavigationEnvironment implements
 		// testRotatableRampsSetupForGraphicsAndCollision();
 		// addFalseStair();
 	}
+
+   public void addCalibrationCube()
+   {
+      AppearanceDefinition app = YoAppearance.Beige();
+      setUpSlopedBox(2, 2, .25, .5, .5, .5, 0, 0, app);
+   }
 
 	private void addFalseStair() {
 		final double courseAngle = 3 * 45. / 2;
