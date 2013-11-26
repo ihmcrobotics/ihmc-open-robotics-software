@@ -1656,11 +1656,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    // Temporary objects to reduce garbage collection.
    private final CoMHeightPartialDerivativesData coMHeightPartialDerivatives = new CoMHeightPartialDerivativesData();
    private final ContactStatesAndUpcomingFootstepData centerOfMassHeightInputData = new ContactStatesAndUpcomingFootstepData();
+   private final FramePoint comPosition = new FramePoint();
+   private final FrameVector comVelocity = new FrameVector(worldFrame);
+   private final FrameVector2d comXYVelocity = new FrameVector2d();
+   private final FrameVector2d comXYAcceleration = new FrameVector2d();
+   private final CoMHeightTimeDerivativesData comHeightDataBeforeSmoothing = new CoMHeightTimeDerivativesData();
+   private final CoMHeightTimeDerivativesData comHeightDataAfterSmoothing = new CoMHeightTimeDerivativesData();
+   private final CoMXYTimeDerivativesData comXYTimeDerivatives = new CoMXYTimeDerivativesData();
 
    private double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity)
    {
-      ReferenceFrame frame = worldFrame;
-
       centerOfMassHeightInputData.setCenterOfMassAndPelvisZUpFrames(momentumBasedController.getCenterOfMassFrame(), momentumBasedController.getPelvisZUpFrame());
 
       List<? extends PlaneContactState> contactStatesList = getContactStatesList();
@@ -1674,24 +1679,18 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       centerOfMassHeightTrajectoryGenerator.solve(coMHeightPartialDerivatives, centerOfMassHeightInputData);
 
-      FramePoint comPosition = new FramePoint(referenceFrames.getCenterOfMassFrame());
-      FrameVector comVelocity = new FrameVector(frame);
+      comPosition.setToZero(referenceFrames.getCenterOfMassFrame());
       centerOfMassJacobian.packCenterOfMassVelocity(comVelocity);
-      comPosition.changeFrame(frame);
-      comVelocity.changeFrame(frame);
+      comPosition.changeFrame(worldFrame);
+      comVelocity.changeFrame(worldFrame);
 
       // TODO: use current omega0 instead of previous
-      FrameVector2d comXYVelocity = comVelocity.toFrameVector2d();
-      FrameVector2d comXYAcceleration = new FrameVector2d(desiredICPVelocity);
+      comXYVelocity.set(comVelocity.getReferenceFrame(), comVelocity.getX(), comVelocity.getY());
+      comXYAcceleration.setAndChangeFrame(desiredICPVelocity);
       comXYAcceleration.sub(comXYVelocity);
       comXYAcceleration.scale(icpAndMomentumBasedController.getOmega0());    // MathTools.square(omega0.getDoubleValue()) * (com.getX() - copX);
 
       // FrameVector2d comd2dSquared = new FrameVector2d(comXYVelocity.getReferenceFrame(), comXYVelocity.getX() * comXYVelocity.getX(), comXYVelocity.getY() * comXYVelocity.getY());
-
-      CoMHeightTimeDerivativesData comHeightDataBeforeSmoothing = new CoMHeightTimeDerivativesData();
-      CoMHeightTimeDerivativesData comHeightDataAfterSmoothing = new CoMHeightTimeDerivativesData();
-
-      CoMXYTimeDerivativesData comXYTimeDerivatives = new CoMXYTimeDerivativesData();
 
       comXYTimeDerivatives.setCoMXYPosition(comPosition.toFramePoint2d());
       comXYTimeDerivatives.setCoMXYVelocity(comXYVelocity);
@@ -1699,29 +1698,28 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       coMHeightTimeDerivativesCalculator.computeCoMHeightTimeDerivatives(comHeightDataBeforeSmoothing, comXYTimeDerivatives, coMHeightPartialDerivatives);
 
-      coMHeightTimeDerivativesSmoother.smooth(comHeightDataAfterSmoothing, comHeightDataBeforeSmoothing);
-
-      FramePoint centerOfMassHeightPoint = new FramePoint(worldFrame);
-      comHeightDataAfterSmoothing.getComHeight(centerOfMassHeightPoint);
-      double zDesired = centerOfMassHeightPoint.getZ();
-
-      double zdDesired = comHeightDataAfterSmoothing.getComHeightVelocity();
-      double zddFeedForward = comHeightDataAfterSmoothing.getComHeightAcceleration();
-
       double zCurrent = comPosition.getZ();
       double zdCurrent = comVelocity.getZ();
       
       if (controlPelvisHeightInsteadOfCoMHeight.getBooleanValue())
       {
          FramePoint pelvisPosition = new FramePoint(referenceFrames.getPelvisFrame());
-         pelvisPosition.changeFrame(frame);
+         pelvisPosition.changeFrame(worldFrame);
          zCurrent = pelvisPosition.getZ(); 
          
          zdCurrent = comVelocity.getZ(); // Just use com velocity for now for damping...
       }
 
-      double zddDesired = centerOfMassHeightController.compute(zCurrent, zDesired, zdCurrent, zdDesired) + zddFeedForward;
+      coMHeightTimeDerivativesSmoother.smooth(comHeightDataAfterSmoothing, comHeightDataBeforeSmoothing);
+      
+      FramePoint desiredCenterOfMassHeightPoint = new FramePoint(worldFrame);
+      comHeightDataAfterSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
+      double zDesired = desiredCenterOfMassHeightPoint.getZ();
 
+      double zdDesired = comHeightDataAfterSmoothing.getComHeightVelocity();
+      double zddFeedForward = comHeightDataAfterSmoothing.getComHeightAcceleration();
+
+      double zddDesired = centerOfMassHeightController.compute(zCurrent, zDesired, zdCurrent, zdDesired) + zddFeedForward;
       
       for (RobotSide robotSide : RobotSide.values)
       {
