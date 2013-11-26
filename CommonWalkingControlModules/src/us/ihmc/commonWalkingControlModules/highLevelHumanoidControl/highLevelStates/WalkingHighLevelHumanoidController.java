@@ -453,7 +453,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          String sideString = robotSide.getCamelCaseNameForStartOfExpression();
 
          PositionTrajectoryGenerator swingPositionTrajectoryGenerator = footPositionTrajectoryGenerators.get(robotSide);
-         DoubleTrajectoryGenerator heelPitchTrajectoryGenerator = walkOnTheEdgesProviders.getFootTouchdownPitchTrajectoryGenerator(robotSide);
 
          OrientationProvider initialOrientationProvider = new CurrentOrientationProvider(worldFrame, bipedFoot.getBodyFrame());
          SettableOrientationProvider finalFootOrientationProvider = new SettableOrientationProvider(sideString + "FinalFootOrientation", worldFrame, registry);
@@ -466,6 +465,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          PoseTrajectoryGenerator swingPoseTrajectoryGenerator = new WrapperForPositionAndOrientationTrajectoryGenerators(swingPositionTrajectoryGenerator,
                                                                    swingOrientationTrajectoryGenerator);
          
+         DoubleTrajectoryGenerator footTouchdownPitchTrajectoryGenerator = walkOnTheEdgesProviders.getFootTouchdownPitchTrajectoryGenerator(robotSide);
+         
          int jacobianId = legJacobianIds.get(robotSide);
          
          EndEffectorControlModule endEffectorControlModule;
@@ -474,9 +475,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          
          if (WalkOnTheEdgesProviders.TOEOFF_MOTION_TYPE_USED != ToeOffMotionType.FREE)
          {
-            DoubleTrajectoryGenerator onToesPitchTrajectoryGenerator = walkOnTheEdgesProviders.getToeOffPitchTrajectoryGenerators(robotSide);
+            DoubleTrajectoryGenerator toeOffPitchTrajectoryGenerator = walkOnTheEdgesProviders.getToeOffPitchTrajectoryGenerators(robotSide);
             endEffectorControlModule = new EndEffectorControlModule(controlDT, bipedFoot, jacobianId, robotSide, swingPoseTrajectoryGenerator,
-                                          heelPitchTrajectoryGenerator, onToesPitchTrajectoryGenerator, requestHoldPosition, walkingControllerParameters,
+                                          footTouchdownPitchTrajectoryGenerator, toeOffPitchTrajectoryGenerator, requestHoldPosition, walkingControllerParameters,
                                           dynamicGraphicObjectsListRegistry, momentumBasedController, registry);
          }
          else
@@ -484,7 +485,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             // Let the toe pitch motion free. It seems to work better.
             DoubleProvider maximumToeOffAngleProvider = walkOnTheEdgesProviders.getMaximumToeOffAngleProvider();
             endEffectorControlModule = new EndEffectorControlModule(controlDT, bipedFoot, jacobianId, robotSide, swingPoseTrajectoryGenerator,
-                                          heelPitchTrajectoryGenerator, maximumToeOffAngleProvider, requestHoldPosition, walkingControllerParameters,
+                                          footTouchdownPitchTrajectoryGenerator, maximumToeOffAngleProvider, requestHoldPosition, walkingControllerParameters,
                                           dynamicGraphicObjectsListRegistry, momentumBasedController, registry);
          }
          
@@ -682,23 +683,21 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          doNotIntegrateAnkleAccelerations();
          
          checkForReinitialization();
-         RobotSide trailingLegSide;
-         RobotSide leadingLegSide;
 
          if (transferToSide == null)
          {
-            trailingLegSide = RobotSide.LEFT;
-            leadingLegSide = RobotSide.RIGHT;
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               EndEffectorControlModule footEndEffectorControlModule = footEndEffectorControlModules.get(robotSide);
+               if (footEndEffectorControlModule.isInEdgeTouchdownState() && walkOnTheEdgesManager.isEdgeTouchDownDone(robotSide))
+                  setFlatFootContactState(robotSide);
+            }
          }
          else
          {
-            trailingLegSide = transferToSide.getOppositeSide();
-            leadingLegSide = transferToSide;
-         }
-
-         if ((footEndEffectorControlModules.get(transferToSide) != null) && walkOnTheEdgesManager.isEdgeTouchDownDone(leadingLegSide))
-         {
-            setFlatFootContactState(transferToSide);
+            EndEffectorControlModule footEndEffectorControlModule = footEndEffectorControlModules.get(transferToSide);
+            if (footEndEffectorControlModule.isInEdgeTouchdownState() && walkOnTheEdgesManager.isEdgeTouchDownDone(transferToSide))
+               setFlatFootContactState(transferToSide);
          }
 
          // note: this has to be done before the ICP trajectory generator is initialized, since it is using nextFootstep
@@ -936,13 +935,17 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             System.out.println("WalkingHighLevelHumanoidController: enteringDoubleSupportState");
          setSupportLeg(null);    // TODO: check if necessary
 
-         if (walkOnTheEdgesManager.stayOnToes())   
+         if (walkOnTheEdgesManager.stayOnToes())
          {
             setOnToesContactStates();
          }
          else if (transferToSide == null)
          {
-            setFlatFootContactStates();
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               if (!footEndEffectorControlModules.get(robotSide).isInEdgeTouchdownState())
+                  setFlatFootContactState(robotSide);
+            }
          }
          else if (walkOnTheEdgesManager.willLandOnToes())
          {
@@ -954,7 +957,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
          else
          {
-            setFlatFootContactStates(); // still need to determine contact state for trailing leg. This is done in doAction as soon as the previous ICP trajectory is done
+            if (footEndEffectorControlModules.get(transferToSide.getOppositeSide()).getCurrentConstraintType() == ConstraintType.UNCONSTRAINED) // That case happens when doing 2 steps on same side
+               setFlatFootContactState(transferToSide.getOppositeSide());
+            setFlatFootContactState(transferToSide); // still need to determine contact state for trailing leg. This is done in doAction as soon as the previous ICP trajectory is done
          }
          
          walkOnTheEdgesManager.reset();
@@ -968,7 +973,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
 
          icpAndMomentumBasedController.updateBipedSupportPolygons(bipedSupportPolygons);    // need to always update biped support polygons after a change to the contact states
-         doubleSupportDesiredICP.updatePointAndPolygon(bipedSupportPolygons.getSupportPolygonInMidFeetZUp(),desiredICP.getFramePoint2dCopy());
+         if (DESIREDICP_FROM_POLYGON_COORDINATE)
+         {
+            doubleSupportDesiredICP.updatePointAndPolygon(bipedSupportPolygons.getSupportPolygonInMidFeetZUp(),desiredICP.getFramePoint2dCopy());
+         }
          RobotSide transferToSideToUseInFootstepData = transferToSide;
          if (transferToSideToUseInFootstepData == null) transferToSideToUseInFootstepData = RobotSide.LEFT; //Arbitrary here.
          
@@ -1795,14 +1803,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       footNormalContactVector.set(worldFrame, 0.0, 0.0, 1.0);
       footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.TOES_TOUCHDOWN, footNormalContactVector);
    }
-
    
-   private void setFlatFootContactStates()
-   {
-      for (RobotSide robotSide : RobotSide.values)
-         setFlatFootContactState(robotSide);
-   }
-
    private void setFlatFootContactState(RobotSide robotSide)
    {
       footNormalContactVector.set(feet.get(robotSide).getPlaneFrame(), 0.0, 0.0, 1.0);
