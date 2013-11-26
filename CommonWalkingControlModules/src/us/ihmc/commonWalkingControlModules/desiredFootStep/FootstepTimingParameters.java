@@ -4,47 +4,66 @@ public class FootstepTimingParameters
 {
    private double footstepPathSwingTime = 0.6;
    private double slowBlindWalkingSwingTime = 0.8;
-   private double blindWalkingInMudSwingTime = 2.2; 
-   
+   private double blindWalkingInMudSwingTime = 2.2;
+
    private double footstepPathTransferTime = 0.25;
    private double slowBlindWalkingTransferTime = 0.35;
-   private double blindWalkingInMudTransferTime = 0.6; 
-   
+   private double blindWalkingInMudTransferTime = 0.6;
+
    public FootstepTimingParameters()
    {
-      
+
    }
-   
+
    public static FootstepTimingParameters createForSlowWalkingOnRobot()
    {
       FootstepTimingParameters footstepTimingParameters = new FootstepTimingParameters();
-      
+
       footstepTimingParameters.setFootstepPathSwingTime(1.5);
       footstepTimingParameters.setSlowBlindWalkingSwingTime(1.5);
       footstepTimingParameters.setBlindWalkingInMudSwingTime(1.5);
-      
+
       footstepTimingParameters.setFootstepPathTransferTime(1.5);
       footstepTimingParameters.setSlowBlindWalkingTransferTime(1.5);
       footstepTimingParameters.setBlindWalkingInMudTransferTime(1.5);
-      
+
       return footstepTimingParameters;
    }
-   
+
    public static FootstepTimingParameters createForFastWalkingInSimulation()
    {
       FootstepTimingParameters footstepTimingParameters = new FootstepTimingParameters();
-      
+
       footstepTimingParameters.setFootstepPathSwingTime(0.6);
       footstepTimingParameters.setSlowBlindWalkingSwingTime(0.8);
       footstepTimingParameters.setBlindWalkingInMudSwingTime(2.2);
-      
+
       footstepTimingParameters.setFootstepPathTransferTime(0.25);
       footstepTimingParameters.setSlowBlindWalkingTransferTime(0.35);
       footstepTimingParameters.setBlindWalkingInMudTransferTime(0.6);
-      
+
       return footstepTimingParameters;
    }
-   
+
+   public void setSpeed(double speed)
+   {
+      double range = 3.0; //as in double speed or half-speed
+      scale(Math.pow(range, -2*(speed-.5)));
+   }
+
+   public void scale(double scalar)
+   {
+      System.out.println("scalar: " + scalar);
+      
+      footstepPathSwingTime *= scalar;
+      slowBlindWalkingSwingTime *= scalar;
+      blindWalkingInMudSwingTime *= scalar;
+
+      footstepPathTransferTime *= scalar;
+      slowBlindWalkingTransferTime *= scalar;
+      blindWalkingInMudTransferTime *= scalar;
+   }
+
    public double getFootstepPathSwingTime()
    {
       return footstepPathSwingTime;
@@ -104,6 +123,5 @@ public class FootstepTimingParameters
    {
       this.blindWalkingInMudTransferTime = blindWalkingInMudTransferTime;
    }
-   
 
 }

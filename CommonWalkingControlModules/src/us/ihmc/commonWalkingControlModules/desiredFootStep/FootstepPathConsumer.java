@@ -84,7 +84,8 @@ public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
             System.out.println("FootstepPathConsumer received " + footstep);
          }
       }
-
+      
+      footstepPathCoordinator.setSpeed(footstepList.speed);
       footstepPathCoordinator.updatePath(footsteps);
    }
 
