@@ -271,6 +271,11 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    {
       return DRCRobotParameters.DRC_ROBOT_SHIN_LENGTH + DRCRobotParameters.DRC_ROBOT_THIGH_LENGTH;
    }
+   
+   public double getMinLegLengthBeforeCollapsingSingleSupport()
+   {
+      return DRCRobotParameters.DRC_ROBOT_MIN_LEG_LENGTH_BEFORE_COLLAPSING_SINGLE_SUPPORT;
+   }
 
    public double getFinalToeOffPitchAngularVelocity()
    {
