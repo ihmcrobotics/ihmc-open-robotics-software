@@ -3,8 +3,6 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -62,7 +60,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    {
       if (normalContactVector == null)
       {
-         this.contactNormalFrameVector.setAndChangeFrame(planeFrame, new Vector3d(0.0, 0.0, 1.0));
+         this.contactNormalFrameVector.set(planeFrame, 0.0, 0.0, 1.0);
       }
       else
       {
