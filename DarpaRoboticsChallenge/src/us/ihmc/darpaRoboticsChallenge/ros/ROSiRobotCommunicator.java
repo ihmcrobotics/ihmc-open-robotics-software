@@ -67,18 +67,9 @@ public class ROSiRobotCommunicator extends AbstractNodeMain
    {
       this.connectedNode = connectedNode;
 
-      setupNodeConfiguration();
-
       setupPublishers();
 
       setupMessages();
-   }
-
-   private void setupNodeConfiguration()
-   {
-      NodeConfiguration nodeConfiguration = RosTools.createNodeConfiguration(master);
-      NodeMainExecutor nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
-      nodeMainExecutor.execute(this, nodeConfiguration);
    }
 
    private void setupPublishers()
