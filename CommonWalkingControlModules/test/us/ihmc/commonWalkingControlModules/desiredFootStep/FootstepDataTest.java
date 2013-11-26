@@ -94,6 +94,7 @@ public class FootstepDataTest
    @Test(timeout = 6000)
    public void testPassingFootstepPath() throws IOException
    {
+      Random random = new Random(1582l);
       // setup comms
       int port = 8833;
       QueueBasedStreamingDataProducer<FootstepDataList> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepDataList>();
@@ -106,7 +107,7 @@ public class FootstepDataTest
 
       // create test footsteps
       ArrayList<Footstep> sentFootsteps = createRandomFootsteps(50);
-      FootstepDataList footstepsData = convertFootstepsToFootstepData(sentFootsteps, null);
+      FootstepDataList footstepsData = convertFootstepsToFootstepData(sentFootsteps, null, random.nextDouble());
  
       queueBasedStreamingDataProducer.queueDataToSend(footstepsData);
       ThreadTools.sleep(100);
@@ -183,9 +184,11 @@ public class FootstepDataTest
       pathQueueBasedStreamingDataProducer.startProducingData();
       pauseQueueBasedStreamingDataProducer.startProducingData();
 
+      Random random = new Random(777);
+
       // send test footstep path
       ArrayList<Footstep> sentFootsteps = createRandomFootsteps(50);
-      FootstepDataList footstepsData = convertFootstepsToFootstepData(sentFootsteps, null);
+      FootstepDataList footstepsData = convertFootstepsToFootstepData(sentFootsteps, null, random.nextDouble());
 
       pathQueueBasedStreamingDataProducer.queueDataToSend(footstepsData);
       ThreadTools.sleep(100);
@@ -193,7 +196,6 @@ public class FootstepDataTest
       // send some commands
       ArrayList<Boolean> commands = new ArrayList<Boolean>();
       int numberToTest = 3;
-      Random random = new Random(777);
       for (int i = 0; i < numberToTest; i++)
       {
          boolean isPaused = random.nextBoolean();
@@ -205,7 +207,7 @@ public class FootstepDataTest
 
       // send another footstep path
       ArrayList<Footstep> sentFootsteps2 = createRandomFootsteps(50);
-      footstepsData = convertFootstepsToFootstepData(sentFootsteps2, null);
+      footstepsData = convertFootstepsToFootstepData(sentFootsteps2, null, random.nextDouble());
 
       pathQueueBasedStreamingDataProducer.queueDataToSend(footstepsData);
       sentFootsteps.addAll(sentFootsteps2);
@@ -375,9 +377,9 @@ public class FootstepDataTest
       }
    }
 
-   private static FootstepDataList convertFootstepsToFootstepData(ArrayList<Footstep> footsteps, TrajectoryParameters trajectoryParameters)
+   private static FootstepDataList convertFootstepsToFootstepData(ArrayList<Footstep> footsteps, TrajectoryParameters trajectoryParameters, double speed)
    {
-      FootstepDataList footstepsData = new FootstepDataList(trajectoryParameters);
+      FootstepDataList footstepsData = new FootstepDataList(trajectoryParameters, speed);
 
       for (Footstep footstep : footsteps)
       {
