@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
+import us.ihmc.robotSide.RobotSide;
+
 public interface ArmControllerParameters
 {
    public abstract double getArmJointspaceKp();
@@ -15,4 +17,8 @@ public interface ArmControllerParameters
    public abstract double getArmTaskspaceMaxIntegralError();
    public abstract double getArmTaskspaceMaxAcceleration();
    public abstract double getArmTaskspaceMaxJerk();
+
+   public abstract boolean useDecoupledTaskspaceControl();
+   public abstract String[] getDefaultHandOrientationJointNames(RobotSide robotSide);
+   public abstract String[] getDefaultHandPositionJointNames(RobotSide robotSide);
 }

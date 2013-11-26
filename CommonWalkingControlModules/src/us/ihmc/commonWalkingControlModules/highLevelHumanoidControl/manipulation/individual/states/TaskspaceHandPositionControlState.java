@@ -30,24 +30,24 @@ import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectory
 public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
 {
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final SpatialAccelerationVector handAcceleration = new SpatialAccelerationVector();
+   protected final SpatialAccelerationVector handAcceleration = new SpatialAccelerationVector();
 
    // viz stuff:
    private final Collection<DynamicGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<DynamicGraphicReferenceFrame>();
-   private final PoseReferenceFrame desiredPositionFrame;
+   protected final PoseReferenceFrame desiredPositionFrame;
 
    // temp stuff:
-   private final FramePoint desiredPosition = new FramePoint(worldFrame);
-   private final FrameVector desiredVelocity = new FrameVector(worldFrame);
-   private final FrameVector desiredAcceleration = new FrameVector(worldFrame);
+   protected final FramePoint desiredPosition = new FramePoint(worldFrame);
+   protected final FrameVector desiredVelocity = new FrameVector(worldFrame);
+   protected final FrameVector desiredAcceleration = new FrameVector(worldFrame);
 
-   private final FrameOrientation desiredOrientation = new FrameOrientation(worldFrame);
-   private final FrameVector desiredAngularVelocity = new FrameVector(worldFrame);
-   private final FrameVector desiredAngularAcceleration = new FrameVector(worldFrame);
+   protected final FrameOrientation desiredOrientation = new FrameOrientation(worldFrame);
+   protected final FrameVector desiredAngularVelocity = new FrameVector(worldFrame);
+   protected final FrameVector desiredAngularAcceleration = new FrameVector(worldFrame);
 
-   private PositionTrajectoryGenerator positionTrajectoryGenerator;
-   private OrientationTrajectoryGenerator orientationTrajectoryGenerator;
-   private RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule;
+   protected PositionTrajectoryGenerator positionTrajectoryGenerator;
+   protected OrientationTrajectoryGenerator orientationTrajectoryGenerator;
+   protected RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule;
 
    public TaskspaceHandPositionControlState(String namePrefix, IndividualHandControlState stateEnum, RobotSide robotSide, MomentumBasedController momentumBasedController,
                                             int jacobianId, RigidBody base, RigidBody endEffector,
