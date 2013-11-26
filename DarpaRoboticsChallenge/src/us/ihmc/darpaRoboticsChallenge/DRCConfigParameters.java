@@ -5,6 +5,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 public class DRCConfigParameters
 {
    public static final boolean USE_RED_TEAM_CONTROLLER = false;
+   public final static boolean USE_MANIPULATION_DECOUPLED_TASKSPACE_CONTROL = false;
 
    public static final boolean CORRUPT_SIMULATION_MODEL = false;
 
