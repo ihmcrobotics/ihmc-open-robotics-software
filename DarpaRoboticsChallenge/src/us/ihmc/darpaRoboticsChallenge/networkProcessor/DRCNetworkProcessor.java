@@ -218,7 +218,7 @@ public class DRCNetworkProcessor
 
          if (config.getBoolean(simulateController.getID()))
          {
-            System.err.println("Simulating DRC Controller");
+            System.err.println("WARNING WARNING WARNING :: Simulating DRC Controller - WILL NOT WORK ON REAL ROBOT. Do not use -d argument when running on real robot.");
             ObjectCommunicator objectCommunicator = new LocalObjectCommunicator();
 
             new DummyController(rosMasterURI, objectCommunicator);
