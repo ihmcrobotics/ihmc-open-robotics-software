@@ -61,7 +61,7 @@ public class RosAtlasSettingsSetter
 
    }
    
-   public void setFishEyeParameters()
+   public void setFishEyeFrameRate(double frameRate)
    {
       System.out.println("got here");
       fishEyeClient.waitTillConnected();
@@ -69,7 +69,7 @@ public class RosAtlasSettingsSetter
       ReconfigureRequest request = fishEyeClient.getMessage();
       DoubleParameter frameRateDoubleParam = nodeConfig.getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
       frameRateDoubleParam.setName("prop_frame_rate");
-      frameRateDoubleParam.setValue(30.0);
+      frameRateDoubleParam.setValue(frameRate);
       request.getConfig().getDoubles().add(frameRateDoubleParam);
            
       fishEyeClient.call(request, new ServiceResponseListener<ReconfigureResponse>()
@@ -86,7 +86,7 @@ public class RosAtlasSettingsSetter
          }
       });
    }
-
+      
    public void setPositionControlDampingParameters()
    {
       atlasDampingClient.waitTillConnected();
@@ -183,7 +183,7 @@ public class RosAtlasSettingsSetter
    {
       RosAtlasSettingsSetter rosAtlasSettingsSetter = new RosAtlasSettingsSetter(DRCConfigParameters.ROS_MASTER_URI);
       //rosAtlasSettingsSetter.setAtlasDampingParameters();
-      rosAtlasSettingsSetter.setFishEyeParameters();
+      rosAtlasSettingsSetter.setFishEyeFrameRate(10.0);
       System.exit(0);
    }
 }
