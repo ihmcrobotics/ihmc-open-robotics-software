@@ -138,14 +138,14 @@ public class CVXMomentumOptimizerWithGRFSmootherNative
    private final double[] rho = new double[rhoSize];
    private final double[] phi = new double[phiSize];
    private final double[] vd = new double[nDoF];
-   private final CVXMomentumOptimizerWithGRFSmootherNativeOutput cvxMomentumOptimizerWithGRFSmootherNativeInput;
+   private final CVXMomentumOptimizerWithGRFSmootherNativeOutput cvxMomentumOptimizerWithGRFSmootherNativeOutput;
 
    public CVXMomentumOptimizerWithGRFSmootherNative(int nDoF, int rhoSize, int phiSize)
    {
       CheckTools.checkRange(nDoF, 0, CVXMomentumOptimizerWithGRFSmootherNative.nDoF);
       CheckTools.checkRange(rhoSize, 0, CVXMomentumOptimizerWithGRFSmootherNative.rhoSize);
       CheckTools.checkRange(phiSize, 0, CVXMomentumOptimizerWithGRFSmootherNative.phiSize);
-      cvxMomentumOptimizerWithGRFSmootherNativeInput = new CVXMomentumOptimizerWithGRFSmootherNativeOutput(nDoF, rhoSize, phiSize);
+      cvxMomentumOptimizerWithGRFSmootherNativeOutput = new CVXMomentumOptimizerWithGRFSmootherNativeOutput(nDoF, rhoSize, phiSize);
    }
 
    public void solve(CVXMomentumOptimizerWithGRFSmootherNativeInput cvxMomentumOptimizerWithGRFSmootherNativeInput) throws NoConvergenceException
@@ -175,7 +175,7 @@ public class CVXMomentumOptimizerWithGRFSmootherNative
 
    public CVXMomentumOptimizerWithGRFSmootherNativeOutput getOutput()
    {
-      return cvxMomentumOptimizerWithGRFSmootherNativeInput;
+      return cvxMomentumOptimizerWithGRFSmootherNativeOutput;
    }
 
    private void solve(double[] A, double[] b, double[] C, double[] Js, double[] ps, double[] Ws, double[] Lambda, double[] Qrho, double[] Qphi, double[] c,
@@ -215,11 +215,11 @@ public class CVXMomentumOptimizerWithGRFSmootherNative
          phiDoubleBuffer.rewind();
          phiDoubleBuffer.get(phi);
 
-         cvxMomentumOptimizerWithGRFSmootherNativeInput.setJointAccelerations(vd);
-         cvxMomentumOptimizerWithGRFSmootherNativeInput.setOptVal(getOptValNative());
-         cvxMomentumOptimizerWithGRFSmootherNativeInput.setRho(rho);
-         cvxMomentumOptimizerWithGRFSmootherNativeInput.setPhi(phi);
-         cvxMomentumOptimizerWithGRFSmootherNativeInput.setNumberOfIterations(numberOfIterations);
+         cvxMomentumOptimizerWithGRFSmootherNativeOutput.setJointAccelerations(vd);
+         cvxMomentumOptimizerWithGRFSmootherNativeOutput.setOptVal(getOptValNative());
+         cvxMomentumOptimizerWithGRFSmootherNativeOutput.setRho(rho);
+         cvxMomentumOptimizerWithGRFSmootherNativeOutput.setPhi(phi);
+         cvxMomentumOptimizerWithGRFSmootherNativeOutput.setNumberOfIterations(numberOfIterations);
       }
 
       if (numberOfIterations < 0)
