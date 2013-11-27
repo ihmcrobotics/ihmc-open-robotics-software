@@ -148,9 +148,9 @@ public class DRCFlatGroundWalkingTest
 //          fail("Desired Heading too large of error: " + desiredHeading.getDoubleValue());
 //       }
 
-         if (Math.abs(comError.getDoubleValue()) > 0.02)
+         if (Math.abs(comError.getDoubleValue()) > 0.025)
          {
-            fail("Math.abs(comError.getDoubleValue()) > 0.02: " + comError.getDoubleValue() + " at t = " + scs.getTime());
+            fail("Math.abs(comError.getDoubleValue()) > 0.025: " + comError.getDoubleValue() + " at t = " + scs.getTime());
          }
       }
 
@@ -198,7 +198,7 @@ public class DRCFlatGroundWalkingTest
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotInterface.getSimulateDT(), useLoadOfContactPointsForTheFeet);
       scsInitialSetup.setDrawGroundProfile(drawGroundProfile);
       
-//      if (cheatWithGroundHeightAtForFootstep)
+      if (cheatWithGroundHeightAtForFootstep)
          scsInitialSetup.setInitializeEstimatorToActual(true);
 
       DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(drcControlParameters, armControllerParameters, robotInterface, robotInitialSetup, guiInitialSetup,
