@@ -158,7 +158,8 @@ public class SelectRobotPath {
       double polyX0 = x0;
       double polyX1 = x1;
 
-      for( Point2D_F64 p : polyF.vertexes ) {
+      for( int i = 0; i < polyF.size(); i++ ) {
+         Point2D_F64 p = polyF.vertexes.get(i);
          if( p.y <= y ) {
             if( polyX0 > p.x )
                polyX0 = p.x;
@@ -247,7 +248,7 @@ public class SelectRobotPath {
       polyF = new Polygon2D_F64(poly.size());
       for( int i = 0; i < poly.size(); i++ ) {
          PointIndex_I32 p = poly.get(i);
-         polyF.vertexes[i].set(p.x,p.y);
+         polyF.vertexes.data[i].set(p.x,p.y);
       }
    }
 

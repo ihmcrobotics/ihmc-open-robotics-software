@@ -155,7 +155,7 @@ public class ManualDetectCameraCalibrationBox
          Polygon2D_F64 poly = new Polygon2D_F64(4);
          for( int j = 0; j < 4; j++ ) {
             Point2D_I32 p = gui.selected.get(j);
-            poly.vertexes[j].set(p.x,p.y);
+            poly.vertexes.data[j].set(p.x,p.y);
          }
          gui.reset();
 
