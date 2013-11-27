@@ -102,6 +102,17 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
       return quadTreeChanged || octreeChanged;
    }
 
+   // TODO this is disgusting
+   public boolean addPoint(double x, double y, double z, boolean validQuadtree) {
+      boolean updateQuatreeState = this.updateQuadtree;
+      
+      this.updateQuadtree &= validQuadtree;
+      boolean result = addPoint(x,y,z);
+      this.updateQuadtree = updateQuatreeState;
+      
+      return result;
+   }
+   
    public boolean addPoint(double x, double y, double z)
    {
       octreeChanged = false;
