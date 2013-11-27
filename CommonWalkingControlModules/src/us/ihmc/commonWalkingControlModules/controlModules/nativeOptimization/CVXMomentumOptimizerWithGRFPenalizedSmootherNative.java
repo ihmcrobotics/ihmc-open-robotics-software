@@ -8,11 +8,11 @@ import us.ihmc.utilities.CheckTools;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 
 /**
- * see csrc/CVXMomentumOptimizerWithGRFSmoother/description.cvxgen for problem description
+ * see csrc/CVXMomentumOptimizerWithGRFPenalizedSmoother/description.cvxgen for problem description
  */
 public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
 {
-   public static final int nSupportVectors = 3;
+   public static final int nSupportVectors = 4 ;
    public static final int nPointsPerPlane = 4;
    public static final int nPlanes = 4;
    public static final int wrenchLength = 6;
@@ -51,6 +51,10 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
 
    private static native ByteBuffer getWRhoSmootherBuffer();
 
+   private static native ByteBuffer getrhoPreviousMeanBuffer();
+
+   private static native ByteBuffer getWRhoCoPPenaltyBuffer();
+
    private static native int solveNative();
 
    private static native double getOptValNative();
@@ -75,6 +79,9 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
    private static final DoubleBuffer rhoPreviousDoubleBuffer;
    private static final DoubleBuffer WRhoSmootherDoubleBuffer;
 
+   private static final DoubleBuffer rhoPreviousMeanDoubleBuffer;
+   private static final DoubleBuffer WRhoCoPPenaltyDoubleBuffer;
+
    public static DoubleBuffer setupBuffer(ByteBuffer buffer)
    {
       buffer.order(ByteOrder.nativeOrder());
@@ -90,7 +97,7 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
 
    static
    {
-      System.loadLibrary("CVXMomentumOptimizerWithGRFSmoother");
+      System.loadLibrary("CVXMomentumOptimizerWithGRFPenalizedSmoother");
 
       initialize();
 
@@ -110,48 +117,54 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
 
       rhoPreviousDoubleBuffer = setupBuffer(getrhoPreviousBuffer());
       WRhoSmootherDoubleBuffer = setupBuffer(getWRhoSmootherBuffer());
+
+      rhoPreviousMeanDoubleBuffer = setupBuffer(getrhoPreviousMeanBuffer());
+      WRhoCoPPenaltyDoubleBuffer = setupBuffer(getWRhoCoPPenaltyBuffer());
    }
 
    private final double[] rho = new double[rhoSize];
    private final double[] vd = new double[nDoF];
-   private final CVXMomentumOptimizerWithGRFPenalizedSmootherNativeOutput cvxMomentumOptimizerWithGRFSmootherPenalizedNativeOutput;
+   private final CVXMomentumOptimizerWithGRFPenalizedSmootherNativeOutput cvxMomentumOptimizerWithGRFPenalizedSmootherNativeOutput;
 
    public CVXMomentumOptimizerWithGRFPenalizedSmootherNative(int nDoF, int rhoSize)
    {
       CheckTools.checkRange(nDoF, 0, CVXMomentumOptimizerWithGRFPenalizedSmootherNative.nDoF);
       CheckTools.checkRange(rhoSize, 0, CVXMomentumOptimizerWithGRFPenalizedSmootherNative.rhoSize);
-      cvxMomentumOptimizerWithGRFSmootherPenalizedNativeOutput = new CVXMomentumOptimizerWithGRFPenalizedSmootherNativeOutput(nDoF, rhoSize);
+      cvxMomentumOptimizerWithGRFPenalizedSmootherNativeOutput = new CVXMomentumOptimizerWithGRFPenalizedSmootherNativeOutput(nDoF, rhoSize);
    }
 
-   public void solve(CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput cvxMomentumOptimizerWithGRFSmootherPenalizedNativeInput)
+   public void solve(CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput cvxMomentumOptimizerWithGRFPenalizedSmootherNativeInput)
          throws NoConvergenceException
          {
-      double[] A = cvxMomentumOptimizerWithGRFSmootherPenalizedNativeInput.getA();
-      double[] b = cvxMomentumOptimizerWithGRFSmootherPenalizedNativeInput.getB();
-      double[] C = cvxMomentumOptimizerWithGRFSmootherPenalizedNativeInput.getC();
-      double[] Js = cvxMomentumOptimizerWithGRFSmootherPenalizedNativeInput.getJs();
-      double[] ps = cvxMomentumOptimizerWithGRFSmootherPenalizedNativeInput.getPs();
-      double[] Ws = cvxMomentumOptimizerWithGRFSmootherPenalizedNativeInput.getWs();
-      double[] Lambda = cvxMomentumOptimizerWithGRFSmootherPenalizedNativeInput.getLambda();
-      double[] Qrho = cvxMomentumOptimizerWithGRFSmootherPenalizedNativeInput.getQrho();
-      double[] c = cvxMomentumOptimizerWithGRFSmootherPenalizedNativeInput.getc();
-      double[] rhoMin = cvxMomentumOptimizerWithGRFSmootherPenalizedNativeInput.getRhoMin();
-      double[] WRho = cvxMomentumOptimizerWithGRFSmootherPenalizedNativeInput.getWRho();
+      double[] A = cvxMomentumOptimizerWithGRFPenalizedSmootherNativeInput.getA();
+      double[] b = cvxMomentumOptimizerWithGRFPenalizedSmootherNativeInput.getB();
+      double[] C = cvxMomentumOptimizerWithGRFPenalizedSmootherNativeInput.getC();
+      double[] Js = cvxMomentumOptimizerWithGRFPenalizedSmootherNativeInput.getJs();
+      double[] ps = cvxMomentumOptimizerWithGRFPenalizedSmootherNativeInput.getPs();
+      double[] Ws = cvxMomentumOptimizerWithGRFPenalizedSmootherNativeInput.getWs();
+      double[] Lambda = cvxMomentumOptimizerWithGRFPenalizedSmootherNativeInput.getLambda();
+      double[] Qrho = cvxMomentumOptimizerWithGRFPenalizedSmootherNativeInput.getQrho();
+      double[] c = cvxMomentumOptimizerWithGRFPenalizedSmootherNativeInput.getc();
+      double[] rhoMin = cvxMomentumOptimizerWithGRFPenalizedSmootherNativeInput.getRhoMin();
+      double[] WRho = cvxMomentumOptimizerWithGRFPenalizedSmootherNativeInput.getWRho();
 
-      double[] rhoPrevious = cvxMomentumOptimizerWithGRFSmootherPenalizedNativeInput.getRhoPrevious();
-      double[] WRhoSmoother = cvxMomentumOptimizerWithGRFSmootherPenalizedNativeInput.getWRhoSmoother();
+      double[] rhoPrevious = cvxMomentumOptimizerWithGRFPenalizedSmootherNativeInput.getRhoPrevious();
+      double[] WRhoSmoother = cvxMomentumOptimizerWithGRFPenalizedSmootherNativeInput.getWRhoSmoother();
 
-      solve(A, b, C, Js, ps, Ws, Lambda, Qrho, c, rhoMin, WRho, rhoPrevious, WRhoSmoother);
+      double[] rhoPreviousMean = cvxMomentumOptimizerWithGRFPenalizedSmootherNativeInput.getRhoPreviousMean();
+      double[] WRhoCoPPenalty = cvxMomentumOptimizerWithGRFPenalizedSmootherNativeInput.getWRhoCoPPenalty();
+
+      solve(A, b, C, Js, ps, Ws, Lambda, Qrho, c, rhoMin, WRho, rhoPrevious, WRhoSmoother, rhoPreviousMean, WRhoCoPPenalty);
 
          }
 
    public CVXMomentumOptimizerWithGRFPenalizedSmootherNativeOutput getOutput()
    {
-      return cvxMomentumOptimizerWithGRFSmootherPenalizedNativeOutput;
+      return cvxMomentumOptimizerWithGRFPenalizedSmootherNativeOutput;
    }
 
    private void solve(double[] A, double[] b, double[] C, double[] Js, double[] ps, double[] Ws, double[] Lambda, double[] Qrho, double[] c, double[] rhoMin,
-         double[] WRho, double[] rhoPrevious, double[] WRhoSmoother)
+         double[] WRho, double[] rhoPrevious, double[] WRhoSmoother, double[] rhoPreviousMean, double[] WRhoCoPPenalty)
                throws NoConvergenceException
                {
       int numberOfIterations;
@@ -172,6 +185,9 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
          setBufferToArray(rhoPreviousDoubleBuffer, rhoPrevious);
          setBufferToArray(WRhoSmootherDoubleBuffer, WRhoSmoother);
 
+         setBufferToArray(rhoPreviousMeanDoubleBuffer, rhoPreviousMean);
+         setBufferToArray(WRhoCoPPenaltyDoubleBuffer, WRhoCoPPenalty);
+
          numberOfIterations = solveNative();
 
          rhoDoubleBuffer.rewind();
@@ -180,10 +196,10 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
          vdDoubleBuffer.rewind();
          vdDoubleBuffer.get(vd);
 
-         cvxMomentumOptimizerWithGRFSmootherPenalizedNativeOutput.setJointAccelerations(vd);
-         cvxMomentumOptimizerWithGRFSmootherPenalizedNativeOutput.setOptVal(getOptValNative());
-         cvxMomentumOptimizerWithGRFSmootherPenalizedNativeOutput.setRho(rho);
-         cvxMomentumOptimizerWithGRFSmootherPenalizedNativeOutput.setNumberOfIterations(numberOfIterations);
+         cvxMomentumOptimizerWithGRFPenalizedSmootherNativeOutput.setJointAccelerations(vd);
+         cvxMomentumOptimizerWithGRFPenalizedSmootherNativeOutput.setOptVal(getOptValNative());
+         cvxMomentumOptimizerWithGRFPenalizedSmootherNativeOutput.setRho(rho);
+         cvxMomentumOptimizerWithGRFPenalizedSmootherNativeOutput.setNumberOfIterations(numberOfIterations);
       }
 
       if (numberOfIterations < 0)
@@ -209,7 +225,10 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
       double[] rhoPrevious = new double[rhoSize];
       double[] WRhoSmoother = new double[rhoSize];
 
-      load_default_data(A, b, C, Js, ps, Ws, Lambda, Qrho, c, rhoMin, WRho, rhoPrevious, WRhoSmoother);
+      double[] rhoPreviousMean = new double[rhoSize];
+      double[] WRhoCoPPenalty = new double[rhoSize];
+
+      load_default_data(A, b, C, Js, ps, Ws, Lambda, Qrho, c, rhoMin, WRho, rhoPrevious, WRhoSmoother, rhoPreviousMean, WRhoCoPPenalty);
 
       CVXMomentumOptimizerWithGRFPenalizedSmootherNative momentumOptimizerNative = new CVXMomentumOptimizerWithGRFPenalizedSmootherNative(nDoF, rhoSize);
 
@@ -228,12 +247,12 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
             time = System.nanoTime();
          }
 
-         momentumOptimizerNative.solve(A, b, C, Js, ps, Ws, Lambda, Qrho, c, rhoMin, WRho, rhoPrevious, WRhoSmoother);
+         momentumOptimizerNative.solve(A, b, C, Js, ps, Ws, Lambda, Qrho, c, rhoMin, WRho, rhoPrevious, WRhoSmoother, rhoPreviousMean, WRhoCoPPenalty);
       }
    }
 
    private static void load_default_data(double[] A, double[] b, double[] C, double[] Js, double[] ps, double[] Ws, double[] Lambda, double[] Qrho, double[] c,
-         double[] rhoMin, double[] WRho, double[] rhoPrevious, double[] WRhoSmoother)
+         double[] rhoMin, double[] WRho, double[] rhoPrevious, double[] WRhoSmoother, double[] rhoPreviousMean, double[] WRhoCoPPenalty)
    {
       A[0] = 0.20319161029830202;
       A[1] = 0.8325912904724193;
@@ -2232,6 +2251,8 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
       {
          rhoPrevious[i] = rhoMin[i];
          WRhoSmoother[i] = WRho[i];
+         rhoPreviousMean[i] = rhoMin[i];
+         WRhoCoPPenalty[i] = WRho[i];
       }
    }
 }

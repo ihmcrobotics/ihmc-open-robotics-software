@@ -182,7 +182,7 @@ JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModule
 /*
  * Class:     us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative
  * Method:    solveNative
- * Signature: (D)I
+ * Signature: ()I
  */
 JNIEXPORT jint JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_CVXWithCylinderNative_solveNative
   (JNIEnv *, jclass);

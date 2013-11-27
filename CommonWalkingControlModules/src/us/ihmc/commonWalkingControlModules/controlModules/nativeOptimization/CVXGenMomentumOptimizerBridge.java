@@ -204,6 +204,8 @@ public class CVXGenMomentumOptimizerBridge
             momentumOptimizerWithGRFPenalizedSmootherNativeInput.setSecondaryConstraintRightHandSide(pSecondary);
             momentumOptimizerWithGRFPenalizedSmootherNativeInput.setSecondaryConstraintWeight(weightMatrixSecondary);
             momentumOptimizerWithGRFPenalizedSmootherNativeInput.setGroundReactionForceRegularization(wrenchMatrixCalculator.getWRho());
+            momentumOptimizerWithGRFPenalizedSmootherNativeInput.setRhoPreviousAverage(rhoPrevious);
+            momentumOptimizerWithGRFPenalizedSmootherNativeInput.setCenterOfPressureRegularization(wRhoSmoother);
             wrenchMatrixCalculator.packWRhoSmoother(wRhoSmoother);
             momentumOptimizerWithGRFPenalizedSmootherNativeInput.setRateOfChangeOfGroundReactionForceRegularization(wRhoSmoother);
 
@@ -262,12 +264,20 @@ public class CVXGenMomentumOptimizerBridge
 
          case GRF_PENALIZED_SMOOTHER :
          {
-            CVXMomentumOptimizerWithGRFPenalizedSmootherNativeOutput momentumOptimizerWithGRFPenalizedSmootherNativeOutput =
-               momentumOptimizerWithGRFPenalizedSmootherNative.getOutput();
-            outputRho = momentumOptimizerWithGRFPenalizedSmootherNativeOutput.getRho();
-            outputJointAccelerations = momentumOptimizerWithGRFPenalizedSmootherNativeOutput.getJointAccelerations();
-            outputOptVal = momentumOptimizerWithGRFPenalizedSmootherNativeOutput.getOptVal();
+            rhoPrevious.set(outputRho);
 
+            try
+            {
+               momentumOptimizerWithGRFPenalizedSmootherNative.solve(momentumOptimizerWithGRFPenalizedSmootherNativeInput);
+            }
+            finally
+            {
+               CVXMomentumOptimizerWithGRFPenalizedSmootherNativeOutput momentumOptimizerWithGRFPenalizedSmootherNativeOutput =
+                  momentumOptimizerWithGRFPenalizedSmootherNative.getOutput();
+               outputRho = momentumOptimizerWithGRFPenalizedSmootherNativeOutput.getRho();
+               outputJointAccelerations = momentumOptimizerWithGRFPenalizedSmootherNativeOutput.getJointAccelerations();
+               outputOptVal = momentumOptimizerWithGRFPenalizedSmootherNativeOutput.getOptVal();
+            }
             break;
          }
 
