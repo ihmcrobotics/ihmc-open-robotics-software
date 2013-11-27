@@ -37,8 +37,6 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
    
    private final DoubleYoVariable kpArmJointspace, kdArmJointspace, kiArmJointspace, zetaArmJointspace, maxAccelerationArmJointspace, maxJerkArmJointspace, maxIntegralErrorArmJointspace;
 
-   private final DoubleYoVariable moveTimeArmJoint;
-
    private final YoVariableRegistry registry;
    private final MomentumBasedController momentumBasedController;
    
@@ -53,9 +51,6 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
       this.dt = dt;
       
       registry = new YoVariableRegistry(namePrefix + FormattingTools.underscoredToCamelCase(this.stateEnum.toString(), true) + "State");
-
-      moveTimeArmJoint = new DoubleYoVariable("moveTimeArmJoint", registry);
-      moveTimeArmJoint.set(moveTime);
 
       kpArmJointspace = new DoubleYoVariable("kpArmJointspace" + robotSide, registry);
       kpArmJointspace.set(armControllerParameters.getArmJointspaceKp());
