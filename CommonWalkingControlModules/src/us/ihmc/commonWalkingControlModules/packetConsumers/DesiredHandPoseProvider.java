@@ -2,9 +2,6 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.packets.HandPosePacket;
@@ -14,6 +11,8 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectConsumer;
 
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+
 public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>
 {
    private final SideDependentList<AtomicReference<HandPosePacket>> packets = new SideDependentList<AtomicReference<HandPosePacket>>();
@@ -22,15 +21,14 @@ public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>
    private final SideDependentList<FramePose> desiredHandPoses = new SideDependentList<FramePose>();
    private double trajectoryTime = 1.0;
 
-   private final BooleanYoVariable useChestFrameForArms;
-   
    private final ReferenceFrame chestFrame;
+   
+   private final SideDependentList<ReferenceFrame> packetReferenceFrames;
 
    public DesiredHandPoseProvider(FullRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters, YoVariableRegistry registry)
    {
-      useChestFrameForArms = new BooleanYoVariable("useChestFrameForArms", registry);
-      
       chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
+      packetReferenceFrames = new SideDependentList<ReferenceFrame>(chestFrame, chestFrame);
       for (RobotSide robotSide : RobotSide.values)
       {
          packets.put(robotSide, new AtomicReference<HandPosePacket>());
@@ -74,32 +72,31 @@ public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>
          }
          else
          {
-            ReferenceFrame referenceFrame;
             switch(object.getReferenceFrame())
             {
             case WORLD:
-               referenceFrame = ReferenceFrame.getWorldFrame();
+               packetReferenceFrames.put(robotSide, ReferenceFrame.getWorldFrame());
                break;
             case CHEST:
-               referenceFrame = chestFrame;
+               packetReferenceFrames.put(robotSide, chestFrame);
                break;
             default:
                throw new RuntimeException("Unkown frame");
             }
             
-            FramePose pose = new FramePose(referenceFrame, object.getPosition(), object.getOrientation());
-            
-            if (useChestFrameForArms.getBooleanValue())
-            {
-               referenceFrame = chestFrame;
-               pose.changeFrame(referenceFrame);
-            }
+            FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), object.getPosition(), object.getOrientation());
+            pose.changeFrame(packetReferenceFrames.get(robotSide));
             
             desiredHandPoses.put(robotSide, pose);
          }
       }
 
       return desiredHandPoses.get(robotSide);
+   }
+   
+   public ReferenceFrame getDesiredReferenceFrame(RobotSide robotSide)
+   {
+      return packetReferenceFrames.get(robotSide);
    }
    
    public double getTrajectoryTime()
