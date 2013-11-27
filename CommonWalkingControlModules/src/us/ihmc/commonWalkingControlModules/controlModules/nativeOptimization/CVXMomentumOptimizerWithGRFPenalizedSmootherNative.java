@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 
+import us.ihmc.utilities.CheckTools;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 
 /**
@@ -56,40 +57,23 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
 
    private static final Object solveConch = new Object();
 
-//
-// private static final DoubleBuffer ADoubleBuffer;
-// private static final DoubleBuffer bDoubleBuffer;
-// private static final DoubleBuffer CDoubleBuffer;
-// private static final DoubleBuffer JsDoubleBuffer;
-// private static final DoubleBuffer psDoubleBuffer;
-// private static final DoubleBuffer WsDoubleBuffer;
-// private static final DoubleBuffer LambdaDoubleBuffer;
-// private static final DoubleBuffer QrhoDoubleBuffer;
-// private static final DoubleBuffer cDoubleBuffer;
-// private static final DoubleBuffer rhoMinDoubleBuffer;
-// private static final DoubleBuffer rhoDoubleBuffer;
-// private static final DoubleBuffer vdDoubleBuffer;
-// private static final DoubleBuffer WRhoDoubleBuffer;
-//
-// private static final DoubleBuffer rhoPreviousDoubleBuffer;
-// private static final DoubleBuffer WRhoSmootherDoubleBuffer;
 
+   private static final DoubleBuffer ADoubleBuffer;
+   private static final DoubleBuffer bDoubleBuffer;
+   private static final DoubleBuffer CDoubleBuffer;
+   private static final DoubleBuffer JsDoubleBuffer;
+   private static final DoubleBuffer psDoubleBuffer;
+   private static final DoubleBuffer WsDoubleBuffer;
+   private static final DoubleBuffer LambdaDoubleBuffer;
+   private static final DoubleBuffer QrhoDoubleBuffer;
+   private static final DoubleBuffer cDoubleBuffer;
+   private static final DoubleBuffer rhoMinDoubleBuffer;
+   private static final DoubleBuffer rhoDoubleBuffer;
+   private static final DoubleBuffer vdDoubleBuffer;
+   private static final DoubleBuffer WRhoDoubleBuffer;
 
-   private DoubleBuffer ADoubleBuffer;
-   private DoubleBuffer bDoubleBuffer;
-   private DoubleBuffer CDoubleBuffer;
-   private DoubleBuffer JsDoubleBuffer;
-   private DoubleBuffer psDoubleBuffer;
-   private DoubleBuffer WsDoubleBuffer;
-   private DoubleBuffer LambdaDoubleBuffer;
-   private DoubleBuffer QrhoDoubleBuffer;
-   private DoubleBuffer cDoubleBuffer;
-   private DoubleBuffer rhoMinDoubleBuffer;
-   private DoubleBuffer rhoDoubleBuffer;
-   private DoubleBuffer vdDoubleBuffer;
-   private DoubleBuffer WRhoDoubleBuffer;
-   private DoubleBuffer rhoPreviousDoubleBuffer;
-   private DoubleBuffer WRhoSmootherDoubleBuffer;
+   private static final DoubleBuffer rhoPreviousDoubleBuffer;
+   private static final DoubleBuffer WRhoSmootherDoubleBuffer;
 
    public static DoubleBuffer setupBuffer(ByteBuffer buffer)
    {
@@ -106,26 +90,26 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
 
    static
    {
-//    //    System.loadLibrary("CVXMomentumOptimizerWithGRFSmoother");
-//    
-//        initialize();
-//    
-//          ADoubleBuffer = setupBuffer(getABuffer());
-//          bDoubleBuffer = setupBuffer(getbBuffer());
-//          CDoubleBuffer = setupBuffer(getCBuffer());
-//          JsDoubleBuffer = setupBuffer(getJsBuffer());
-//          psDoubleBuffer = setupBuffer(getpsBuffer());
-//          WsDoubleBuffer = setupBuffer(getWsBuffer());
-//          LambdaDoubleBuffer = setupBuffer(getLambdaBuffer());
-//          QrhoDoubleBuffer = setupBuffer(getQrhoBuffer());
-//          cDoubleBuffer = setupBuffer(getcBuffer());
-//          rhoMinDoubleBuffer = setupBuffer(getrhoMinBuffer());
-//          rhoDoubleBuffer = setupBuffer(getrhoBuffer());
-//          vdDoubleBuffer = setupBuffer(getvdBuffer());
-//          WRhoDoubleBuffer = setupBuffer(getWRhoBuffer());
-//    
-//          rhoPreviousDoubleBuffer = setupBuffer(getrhoPreviousBuffer());
-//          WRhoSmootherDoubleBuffer = setupBuffer(getWRhoSmootherBuffer());
+      System.loadLibrary("CVXMomentumOptimizerWithGRFSmoother");
+
+      initialize();
+
+      ADoubleBuffer = setupBuffer(getABuffer());
+      bDoubleBuffer = setupBuffer(getbBuffer());
+      CDoubleBuffer = setupBuffer(getCBuffer());
+      JsDoubleBuffer = setupBuffer(getJsBuffer());
+      psDoubleBuffer = setupBuffer(getpsBuffer());
+      WsDoubleBuffer = setupBuffer(getWsBuffer());
+      LambdaDoubleBuffer = setupBuffer(getLambdaBuffer());
+      QrhoDoubleBuffer = setupBuffer(getQrhoBuffer());
+      cDoubleBuffer = setupBuffer(getcBuffer());
+      rhoMinDoubleBuffer = setupBuffer(getrhoMinBuffer());
+      rhoDoubleBuffer = setupBuffer(getrhoBuffer());
+      vdDoubleBuffer = setupBuffer(getvdBuffer());
+      WRhoDoubleBuffer = setupBuffer(getWRhoBuffer());
+
+      rhoPreviousDoubleBuffer = setupBuffer(getrhoPreviousBuffer());
+      WRhoSmootherDoubleBuffer = setupBuffer(getWRhoSmootherBuffer());
    }
 
    private final double[] rho = new double[rhoSize];
@@ -134,15 +118,14 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
 
    public CVXMomentumOptimizerWithGRFPenalizedSmootherNative(int nDoF, int rhoSize)
    {
-//    CheckTools.checkRange(nDoF, 0, CVXMomentumOptimizerWithGRFPenalizedSmootherNative.nDoF);
-
-//    CheckTools.checkRange(rhoSize, 0, CVXMomentumOptimizerWithGRFPenalizedSmootherNative.rhoSize);
+      CheckTools.checkRange(nDoF, 0, CVXMomentumOptimizerWithGRFPenalizedSmootherNative.nDoF);
+      CheckTools.checkRange(rhoSize, 0, CVXMomentumOptimizerWithGRFPenalizedSmootherNative.rhoSize);
       cvxMomentumOptimizerWithGRFSmootherPenalizedNativeOutput = new CVXMomentumOptimizerWithGRFPenalizedSmootherNativeOutput(nDoF, rhoSize);
    }
 
    public void solve(CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput cvxMomentumOptimizerWithGRFSmootherPenalizedNativeInput)
-           throws NoConvergenceException
-   {
+         throws NoConvergenceException
+         {
       double[] A = cvxMomentumOptimizerWithGRFSmootherPenalizedNativeInput.getA();
       double[] b = cvxMomentumOptimizerWithGRFSmootherPenalizedNativeInput.getB();
       double[] C = cvxMomentumOptimizerWithGRFSmootherPenalizedNativeInput.getC();
@@ -160,7 +143,7 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
 
       solve(A, b, C, Js, ps, Ws, Lambda, Qrho, c, rhoMin, WRho, rhoPrevious, WRhoSmoother);
 
-   }
+         }
 
    public CVXMomentumOptimizerWithGRFPenalizedSmootherNativeOutput getOutput()
    {
@@ -168,9 +151,9 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
    }
 
    private void solve(double[] A, double[] b, double[] C, double[] Js, double[] ps, double[] Ws, double[] Lambda, double[] Qrho, double[] c, double[] rhoMin,
-                      double[] WRho, double[] rhoPrevious, double[] WRhoSmoother)
-           throws NoConvergenceException
-   {
+         double[] WRho, double[] rhoPrevious, double[] WRhoSmoother)
+               throws NoConvergenceException
+               {
       int numberOfIterations;
       synchronized (solveConch)
       {
@@ -207,7 +190,7 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
       {
          throw new NoConvergenceException();
       }
-   }
+               }
 
    public static void main(String[] args) throws NoConvergenceException
    {
@@ -240,7 +223,7 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
             double timePerSolveMillis = deltaTimeSeconds / nSolves * 1e3;
             System.out.println("10000 iterations took " + deltaTimeSeconds + " seconds. Time per solve (ms): " + timePerSolveMillis);
 
-//          System.out.println(Arrays.toString(momentumOptimizerNative.getRho()));
+            //          System.out.println(Arrays.toString(momentumOptimizerNative.getRho()));
 
             time = System.nanoTime();
          }
@@ -250,7 +233,7 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
    }
 
    private static void load_default_data(double[] A, double[] b, double[] C, double[] Js, double[] ps, double[] Ws, double[] Lambda, double[] Qrho, double[] c,
-           double[] rhoMin, double[] WRho, double[] rhoPrevious, double[] WRhoSmoother)
+         double[] rhoMin, double[] WRho, double[] rhoPrevious, double[] WRhoSmoother)
    {
       A[0] = 0.20319161029830202;
       A[1] = 0.8325912904724193;

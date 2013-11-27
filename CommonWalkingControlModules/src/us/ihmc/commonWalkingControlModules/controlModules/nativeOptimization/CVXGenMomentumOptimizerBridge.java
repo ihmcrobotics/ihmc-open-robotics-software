@@ -14,8 +14,8 @@ public class CVXGenMomentumOptimizerBridge
    private final CVXMomentumOptimizerWithGRFSmootherNative momentumOptimizerWithGRFSmootherNative;
    private final CVXMomentumOptimizerWithGRFSmootherNativeInput momentumOptimizerWithGRFSmootherNativeInput;
 
-   private final CVXMomentumOptimizerWithGRFPenalizedSmootherNative momentumOptimizerWithGRFPenalizedSmootherNative;
-   private final CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput momentumOptimizerWithGRFPenalizedSmootherNativeInput;
+   private CVXMomentumOptimizerWithGRFPenalizedSmootherNative momentumOptimizerWithGRFPenalizedSmootherNative;
+   private CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput momentumOptimizerWithGRFPenalizedSmootherNativeInput;
    private final int rhoSize;
    private final int phiSize;
 
@@ -68,9 +68,17 @@ public class CVXGenMomentumOptimizerBridge
 
       momentumOptimizerWithGRFSmootherNative = new CVXMomentumOptimizerWithGRFSmootherNative(nDoF, rhoSize, phiSize);
       momentumOptimizerWithGRFSmootherNativeInput = new CVXMomentumOptimizerWithGRFSmootherNativeInput();
-
-      momentumOptimizerWithGRFPenalizedSmootherNative = new CVXMomentumOptimizerWithGRFPenalizedSmootherNative(nDoF, rhoSize);
-      momentumOptimizerWithGRFPenalizedSmootherNativeInput = new CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput();
+      
+      try
+      {
+         momentumOptimizerWithGRFPenalizedSmootherNative = new CVXMomentumOptimizerWithGRFPenalizedSmootherNative(nDoF, rhoSize);
+         momentumOptimizerWithGRFPenalizedSmootherNativeInput = new CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput();
+      }
+      catch (UnsatisfiedLinkError e)
+      {
+         momentumOptimizerWithGRFPenalizedSmootherNative = null;
+         momentumOptimizerWithGRFPenalizedSmootherNativeInput = null;
+      }
 
       outputRho = new DenseMatrix64F(rhoSize, 1);
       rhoPrevious = new DenseMatrix64F(rhoSize, 1);
