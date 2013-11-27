@@ -402,6 +402,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       controllerInitializationTime = new DoubleYoVariable("controllerInitializationTime", registry);
       alreadyBeenInDoubleSupportOnce = new BooleanYoVariable("alreadyBeenInDoubleSupportOnce", registry);
 
+      // TODO: Fix low level stuff so that we are truly controlling pelvis height and not CoM height.
       controlPelvisHeightInsteadOfCoMHeight.set(true);
       
       minimumICPFromCenterDuringSingleSupport.set(0.01);   //0.04);  //0.01); 
