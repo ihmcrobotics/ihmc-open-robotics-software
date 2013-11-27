@@ -40,7 +40,6 @@ public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
 
    public void consumeObject(FootstepDataList footstepList)
    {
-      System.out.println("got FootstepDataList with speed: " + footstepList.speed);
       ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
       
       TrajectoryParameters trajectoryParameters = null;

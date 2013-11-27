@@ -47,8 +47,8 @@ public class FootstepTimingParameters
 
    public void setSpeed(double speed)
    {
-      double range = 3.0; //as in double speed or half-speed
-      scale(Math.pow(range, -2*(speed-.5)));
+      double range = 2.0; //as in double speed or half-speed
+      scale(Math.pow(range, -2.0*(speed-0.5)));
    }
 
    public void scale(double scalar)
