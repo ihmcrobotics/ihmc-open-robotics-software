@@ -402,7 +402,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       controllerInitializationTime = new DoubleYoVariable("controllerInitializationTime", registry);
       alreadyBeenInDoubleSupportOnce = new BooleanYoVariable("alreadyBeenInDoubleSupportOnce", registry);
 
-      controlPelvisHeightInsteadOfCoMHeight.set(false);
+      controlPelvisHeightInsteadOfCoMHeight.set(true);
       
       minimumICPFromCenterDuringSingleSupport.set(0.01);   //0.04);  //0.01); 
       singleSupportTimeLeftBeforeShift.set(1.0);   //0.5);   //0.1); 
