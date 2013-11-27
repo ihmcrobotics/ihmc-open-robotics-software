@@ -22,6 +22,8 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput
    private final double[] WRho;
    private final double[] rhoPrevious;
    private final double[] WRhoSmoother;
+   private final double[] rhoPreviousMean;
+   private final double[] WRhoCoPPenalty;
 
    // conversion helpers
    private final DenseMatrix64F AMatrix;
@@ -37,6 +39,8 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput
    private final DenseMatrix64F WRhoMatrix;
    private final DenseMatrix64F rhoPreviousMatrix;
    private final DenseMatrix64F WRhoSmootherMatrix;
+   private final DenseMatrix64F rhoPreviousMeanMatrix;
+   private final DenseMatrix64F WRhoCoPPenaltyMatrix;
 
    public CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput()
    {
@@ -57,6 +61,8 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput
       WRhoMatrix = new DenseMatrix64F(rhoSize, rhoSize);
       rhoPreviousMatrix = new DenseMatrix64F(rhoSize, 1);
       WRhoSmootherMatrix = new DenseMatrix64F(rhoSize, rhoSize);
+      rhoPreviousMeanMatrix = new DenseMatrix64F(rhoSize, 1);
+      WRhoCoPPenaltyMatrix = new DenseMatrix64F(rhoSize, rhoSize);
 
       A = new double[AMatrix.getNumElements()];
       b = new double[bMatrix.getNumElements()];
@@ -69,8 +75,10 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput
       c = new double[cMatrix.getNumElements()];
       rhoMin = new double[rhoMinMatrix.getNumElements()];
       WRho = new double[WRhoMatrix.getNumRows()];    // diagonal
-      rhoPrevious = new double[rhoMinMatrix.getNumElements()];
+      rhoPrevious = new double[rhoPreviousMatrix.getNumElements()];
       WRhoSmoother = new double[WRhoSmootherMatrix.getNumRows()];    // diagonal
+      rhoPreviousMean = new double[rhoPreviousMeanMatrix.getNumElements()];
+      WRhoCoPPenalty = new double[WRhoCoPPenaltyMatrix.getNumRows()];    // diagonal
    }
 
    public void reset()
@@ -88,6 +96,8 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput
       WRhoMatrix.zero();
       rhoPreviousMatrix.zero();
       WRhoSmootherMatrix.zero();
+      rhoPreviousMeanMatrix.zero();
+      WRhoCoPPenaltyMatrix.zero();
 
       Arrays.fill(A, 0.0);
       Arrays.fill(b, 0.0);
@@ -102,6 +112,8 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput
       Arrays.fill(WRho, 0.0);
       Arrays.fill(rhoPrevious, 0.0);
       Arrays.fill(WRhoSmoother, 0.0);
+      Arrays.fill(rhoPreviousMean, 0.0);
+      Arrays.fill(WRhoCoPPenalty, 0.0);
    }
 
    public double[] getA()
@@ -167,6 +179,16 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput
    public double[] getWRhoSmoother()
    {
       return WRhoSmoother;
+   }
+
+   public double[] getRhoPreviousMean()
+   {
+      return rhoPreviousMean;
+   }
+
+   public double[] getWRhoCoPPenalty()
+   {
+      return WRhoCoPPenalty;
    }
 
    public void setCentroidalMomentumMatrix(DenseMatrix64F A)
@@ -250,6 +272,19 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput
       // diagonal
       CommonOps.insert(WRhoSmoother, this.WRhoSmootherMatrix, 0, 0);
       MatrixTools.extractDiagonal(this.WRhoSmootherMatrix, this.WRhoSmoother);
+   }
+
+   public void setRhoPreviousAverage(DenseMatrix64F rhoPreviousMean)
+   {
+      CommonOps.insert(rhoPreviousMean, this.rhoPreviousMeanMatrix, 0, 0);
+      MatrixTools.denseMatrixToArrayColumnMajor(this.rhoPreviousMeanMatrix, this.rhoPreviousMean);
+   }
+
+   public void setCenterOfPressureRegularization(DenseMatrix64F WRhoCoPPenalty)
+   {
+      // diagonal
+      CommonOps.insert(WRhoCoPPenalty, this.WRhoCoPPenaltyMatrix, 0, 0);
+      MatrixTools.extractDiagonal(this.WRhoCoPPenaltyMatrix, this.WRhoCoPPenalty);
    }
 
 }
