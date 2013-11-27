@@ -44,7 +44,7 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
 
    public JointSpaceHandControlControlState(String namePrefix, IndividualHandControlState stateEnum, RobotSide robotSide,
                                             InverseDynamicsJoint[] controlledJoints, MomentumBasedController momentumBasedController,
-                                            ArmControllerParameters armControllerParameters, double dt, double moveTime, YoVariableRegistry parentRegistry)
+                                            ArmControllerParameters armControllerParameters, double dt, YoVariableRegistry parentRegistry)
    {
       super(stateEnum);
 
