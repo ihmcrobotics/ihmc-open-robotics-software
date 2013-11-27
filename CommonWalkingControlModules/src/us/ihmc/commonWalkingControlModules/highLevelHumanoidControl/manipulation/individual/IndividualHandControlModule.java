@@ -165,7 +165,7 @@ public class IndividualHandControlModule
 
       double moveTime = 1.0;
       jointSpaceHandControlState = new JointSpaceHandControlControlState(namePrefix, IndividualHandControlState.JOINT_SPACE, robotSide, controlledJointsInJointSpaceState,
-            jacobianId, momentumBasedController, armControlParameters, controlDT, moveTime, registry);
+            momentumBasedController, armControlParameters, controlDT, moveTime, registry);
 
       objectManipulationState = new ObjectManipulationState(namePrefix, IndividualHandControlState.OBJECT_MANIPULATION, robotSide, momentumBasedController, jacobianId,
               toolBody, base, endEffector, dynamicGraphicObjectsListRegistry, parentRegistry);
