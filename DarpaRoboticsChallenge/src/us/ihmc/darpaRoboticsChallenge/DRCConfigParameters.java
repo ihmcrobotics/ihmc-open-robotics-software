@@ -80,24 +80,50 @@ public class DRCConfigParameters
 
    
    public static final String MULTISENSE_CAMERA_STRING_BASE;
+   // ROS Topics
+   public static final String FISHEYE_RIGHT_CAMERA_TOPIC;
+   public static final String FISHEYE_LEFT_CAMERA_TOPIC ;
+   public static final String MULTISENSE_LEFT_CAMERA_TOPIC; 
+   public static final String MULTISENSE_RIGHT_CAMERA_TOPIC;
+
 
    static
    {
       if (DRCLocalConfigParameters.USING_REAL_HEAD)
       {
          MULTISENSE_CAMERA_STRING_BASE = "/multisense_sl";
+         // ROS Topics
+         FISHEYE_RIGHT_CAMERA_TOPIC = "/blackfly/camera/right/compressed";
+         FISHEYE_LEFT_CAMERA_TOPIC = "/blackfly/camera/left/compressed";
+         MULTISENSE_LEFT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/left/image_rect_color/compressed";
+         MULTISENSE_RIGHT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/right/image_rect/compressed";
       }
       else
       {
-         MULTISENSE_CAMERA_STRING_BASE = "/multisense_sl/camera";
+    	  
+    	  final boolean USE_NEW_GAZEBO = false;
+    	  
+    	  if(USE_NEW_GAZEBO)
+    	  {
+	         MULTISENSE_CAMERA_STRING_BASE = "/multisense_sl";
+	         // ROS Topics
+	         FISHEYE_RIGHT_CAMERA_TOPIC = "/l_situational_awareness_camera/image_raw/compressed";
+	         FISHEYE_LEFT_CAMERA_TOPIC =  "/r_situational_awareness_camera/image_raw/compressed";
+	         MULTISENSE_LEFT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/left/image_raw/compressed";
+	         MULTISENSE_RIGHT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/right/image_raw/compressed";
+    	  }
+    	  else
+    	  {
+    		 MULTISENSE_CAMERA_STRING_BASE = "/multisense_sl/camera";
+	         FISHEYE_RIGHT_CAMERA_TOPIC = "/blackfly/camera/right/compressed";
+	         FISHEYE_LEFT_CAMERA_TOPIC = "/blackfly/camera/left/compressed";
+	         MULTISENSE_LEFT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/left/image_rect_color/compressed";
+	         MULTISENSE_RIGHT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/right/image_rect/compressed";
+    	  }
+
       }
    }
 
-   // ROS Topics
-   public static final String FISHEYE_RIGHT_CAMERA_TOPIC = "/blackfly/camera/right/compressed";
-   public static final String FISHEYE_LEFT_CAMERA_TOPIC = "/blackfly/camera/left/compressed";
-   public static final String MULTISENSE_LEFT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/left/image_rect_color/compressed";
-   public static final String MULTISENSE_RIGHT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/right/image_rect/compressed";
 
    // Video Settings
    public static final boolean STREAM_VIDEO = true;
