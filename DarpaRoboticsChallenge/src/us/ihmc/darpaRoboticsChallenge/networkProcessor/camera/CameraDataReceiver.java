@@ -30,7 +30,7 @@ public abstract class CameraDataReceiver
 {
    private final RobotPoseBuffer robotPoseBuffer;
    private final CompressedVideoDataServer multiSenseDataServer;
-   private final SideDependentList<CompressedVideoDataServer> fisheyeDataServers = new SideDependentList<>();
+  // private final SideDependentList<CompressedVideoDataServer> fisheyeDataServers = new SideDependentList<>();
    
    private final ArrayList<DRCStereoListener> stereoListeners = new ArrayList<DRCStereoListener>();
 
@@ -63,12 +63,12 @@ public abstract class CameraDataReceiver
 
       multiSenseDataServer = new CompressedVideoDataServer(videoSettings, new MultiSenseHandler(networkingManager));
       networkingManager.getControllerCommandHandler().setVideoCommandListener(multiSenseDataServer);
-      
-      for(RobotSide robotSide : RobotSide.values)
-      {
-         CompressedVideoDataServer fisheyeCompressor = new CompressedVideoDataServer(VideoSettingsFactory.getFishEyeSettings(), new FishEyeHandler(robotSide, networkingManager));
-         fisheyeDataServers.put(robotSide, fisheyeCompressor);
-      }
+//      
+//      for(RobotSide robotSide : RobotSide.values)
+//      {
+//         CompressedVideoDataServer fisheyeCompressor = new CompressedVideoDataServer(VideoSettingsFactory.getFishEyeSettings(), new FishEyeHandler(robotSide, networkingManager));
+//         fisheyeDataServers.put(robotSide, fisheyeCompressor);
+//      }
 
    }
 
@@ -107,10 +107,10 @@ public abstract class CameraDataReceiver
       multiSenseDataServer.updateImage(bufferedImage, timeStamp, cameraPosition, cameraOrientation, fov);
    }
 
-   protected void updateFishEyeImage(RobotSide robotSide, BufferedImage bufferedImage, long timeStamp, double fov)
-   {
-      fisheyeDataServers.get(robotSide).updateImage(bufferedImage, timeStamp, null, null, fov);
-   }
+//   protected void updateFishEyeImage(RobotSide robotSide, BufferedImage bufferedImage, long timeStamp, double fov)
+//   {
+//      fisheyeDataServers.get(robotSide).updateImage(bufferedImage, timeStamp, null, null, fov);
+//   }
 
    protected void getHeadToCameraTransform(long rosTimestamp)
    {
@@ -135,38 +135,38 @@ public abstract class CameraDataReceiver
       stereoListeners.add(drcStereoListener);
    }
 
-   private class FishEyeHandler implements CompressedVideoHandler
-   {
-      private final RobotSide robotSide;
-      private final DRCNetworkProcessorNetworkingManager networkingManager;
+//   private class FishEyeHandler implements CompressedVideoHandler
+//   {
+//      private final RobotSide robotSide;
+//      private final DRCNetworkProcessorNetworkingManager networkingManager;
+//
+//      public FishEyeHandler(RobotSide robotSide, DRCNetworkProcessorNetworkingManager networkingManager)
+//      {
+//         this.robotSide = robotSide;
+//         this.networkingManager = networkingManager;
+//      }
+//
+//      @Override
+//      public void newVideoPacketAvailable(long timeStamp, byte[] data, Point3d position, Quat4d orientation, double fieldOfView,
+//            VideoCompressionKey videoCompressionKey)
+//      {
+//         networkingManager.getControllerStateHandler().sendSerializableObject(new FisheyePacket(robotSide, data));
+//      }
+//
+//      @Override
+//      public void addNetStateListener(CompressedVideoDataServer compressedVideoDataServer)
+//      {
+//         networkingManager.attachStateListener(compressedVideoDataServer);
+//      }
+//
+//      @Override
+//      public boolean isConnected()
+//      {
+//         return networkingManager.isConnected();
+//      }
+//   }
 
-      public FishEyeHandler(RobotSide robotSide, DRCNetworkProcessorNetworkingManager networkingManager)
-      {
-         this.robotSide = robotSide;
-         this.networkingManager = networkingManager;
-      }
-
-      @Override
-      public void newVideoPacketAvailable(long timeStamp, byte[] data, Point3d position, Quat4d orientation, double fieldOfView,
-            VideoCompressionKey videoCompressionKey)
-      {
-         networkingManager.getControllerStateHandler().sendSerializableObject(new FisheyePacket(robotSide, data));
-      }
-
-      @Override
-      public void addNetStateListener(CompressedVideoDataServer compressedVideoDataServer)
-      {
-         networkingManager.attachStateListener(compressedVideoDataServer);
-      }
-
-      @Override
-      public boolean isConnected()
-      {
-         return networkingManager.isConnected();
-      }
-   }
-
-   private class MultiSenseHandler implements CompressedVideoHandler
+   private class MultiSenseHandler extends CompressedVideoHandler
    {
       private final DRCNetworkProcessorNetworkingManager networkingManager;
 
@@ -194,6 +194,8 @@ public abstract class CameraDataReceiver
       {
          return networkingManager.isConnected();
       }
+
+     
    }
 
 }
