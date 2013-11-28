@@ -121,8 +121,8 @@ public class HighLevelHumanoidControllerFactoryHelper
 
       return walkingStatusReporter;
    }
-   
-   
+
+
    public static InverseDynamicsJoint[] computeJointsToOptimizeFor(FullRobotModel fullRobotModel, InverseDynamicsJoint lidarJoint)
    {
       List<InverseDynamicsJoint> joints = new ArrayList<InverseDynamicsJoint>();
@@ -139,21 +139,21 @@ public class HighLevelHumanoidControllerFactoryHelper
       {
          joints.remove(lidarJoint);
       }
-      
+
       return joints.toArray(new InverseDynamicsJoint[joints.size()]);
    }
 
    public static OldMomentumControlModule createOldMomentumControlModule(WalkingControllerParameters walkingControllerParameters,
-         FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, double gravityZ, TwistCalculator twistCalculator, double controlDT,
-         LidarControllerInterface lidarControllerInterface, YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, double gravityZ, TwistCalculator twistCalculator, double controlDT,
+           LidarControllerInterface lidarControllerInterface, YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       GroundReactionWrenchDistributor groundReactionWrenchDistributor = null;
       ContactPointGroundReactionWrenchDistributor contactPointGroundReactionWrenchDistributor =
-            new ContactPointGroundReactionWrenchDistributor(referenceFrames.getCenterOfMassFrame(), registry);
+         new ContactPointGroundReactionWrenchDistributor(referenceFrames.getCenterOfMassFrame(), registry);
       double[] diagonalCWeights = new double[]
-            {
-                  1.0, 1.0, 1.0, 10.0, 10.0, 10.0
-            };
+      {
+         1.0, 1.0, 1.0, 10.0, 10.0, 10.0
+      };
       contactPointGroundReactionWrenchDistributor.setWeights(diagonalCWeights, 5.0, 0.001);
       groundReactionWrenchDistributor = contactPointGroundReactionWrenchDistributor;
 
@@ -161,19 +161,20 @@ public class HighLevelHumanoidControllerFactoryHelper
       jacobianSolver.setAlpha(5e-2);
 
       OldMomentumControlModule oldMomentumControlModule = new OldMomentumControlModule(fullRobotModel.getRootJoint(), gravityZ,
-            groundReactionWrenchDistributor, referenceFrames.getCenterOfMassFrame(), controlDT, twistCalculator, jacobianSolver, registry,
-            dynamicGraphicObjectsListRegistry);
+                                                             groundReactionWrenchDistributor, referenceFrames.getCenterOfMassFrame(), controlDT,
+                                                             twistCalculator, jacobianSolver, registry, dynamicGraphicObjectsListRegistry);
       oldMomentumControlModule.setGroundReactionWrenchBreakFrequencyHertz(walkingControllerParameters.getGroundReactionWrenchBreakFrequencyHertz());
 
       return oldMomentumControlModule;
    }
 
    public static MomentumOptimizationSettings createMomentumOptimizationSettings(FullRobotModel fullRobotModel,
-         LidarControllerInterface lidarControllerInterface, YoVariableRegistry registry)
+           LidarControllerInterface lidarControllerInterface, YoVariableRegistry registry)
    {
       OneDoFJoint lidarJoint = null;
-      if (lidarControllerInterface != null) lidarJoint = lidarControllerInterface.getLidarJoint();
-      
+      if (lidarControllerInterface != null)
+         lidarJoint = lidarControllerInterface.getLidarJoint();
+
       InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, lidarJoint);
 
       MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(jointsToOptimizeFor, registry);
@@ -184,9 +185,10 @@ public class HighLevelHumanoidControllerFactoryHelper
       momentumOptimizationSettings.setMomentumWeight(1.0, 1.0, 10.0, 10.0);
       momentumOptimizationSettings.setRhoMin(0.0);
       momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.01);
+      momentumOptimizationSettings.setRhoPenalizerPlaneContactRegularization(0.0);
       momentumOptimizationSettings.setMomentumOptimizerToUse(MomentumOptimizer.GRF_SMOOTHER);
 
       return momentumOptimizationSettings;
    }
-  
+
 }

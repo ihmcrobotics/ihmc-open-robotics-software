@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -26,6 +27,7 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
    private final Map<EndEffector, SpatialForceVector> spatialForceVectors = new LinkedHashMap<EndEffector, SpatialForceVector>();
    private final DenseMatrix64F tempVectorMatrix = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
    private final DenseMatrix64F tempSum = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
+   private List<? extends EndEffector> endEffectors;
 
    private final DynamicGraphicVector[][][] graphicWrenches = new DynamicGraphicVector[2][][];
    private final DoubleYoVariable[][][] graphicYoDoubles = new DoubleYoVariable[2][][];
@@ -48,14 +50,19 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
    private final DenseMatrix64F qRho;
    private final DenseMatrix64F qPhi;
 
+   private final DenseMatrix64F rhoMean;
+   private final DenseMatrix64F rhoDelta;
+
 
    public CylinderAndPlaneContactSpatialForceVectorCalculator(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry,
-                                                              DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, int rhoSize, int phiSize)
+           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, int rhoSize, int phiSize)
    {
       int wrenchLength = Wrench.SIZE;
 
       qRho = new DenseMatrix64F(wrenchLength, rhoSize);
       qPhi = new DenseMatrix64F(wrenchLength, phiSize);
+      rhoMean = new DenseMatrix64F(rhoSize, 1);
+      rhoDelta = new DenseMatrix64F(4, 1);
 
       visualize = dynamicGraphicObjectsListRegistry != null;
       String name = getClass().getSimpleName();
@@ -88,12 +95,12 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
                graphicYoDoubles[q][i][j] = new DoubleYoVariable(name + "rhoOptimizerOutputVectorsElement" + q + i + j, registry);
             }
 
-            double greenLevel = 0.25 * i / (double) rhoSize;
-            graphicWrenches[q][i][LINEAR] = new DynamicGraphicVector( "RhoGraphicOutput" + q + i + "Linear", graphicYoDoubles[q][i][X],
+            double greenLevel = 0.25 * i / rhoSize;
+            graphicWrenches[q][i][LINEAR] = new DynamicGraphicVector("RhoGraphicOutput" + q + i + "Linear", graphicYoDoubles[q][i][X],
                     graphicYoDoubles[q][i][Y], graphicYoDoubles[q][i][Z], graphicYoDoubles[q][i][x], graphicYoDoubles[q][i][y], graphicYoDoubles[q][i][z],
                     scaleFactor, new YoAppearanceRGBColor(0.5, greenLevel, 0.0, 0.7));
             dynamicGraphicVectorsRhoLinear.add(graphicWrenches[q][i][LINEAR]);
-            graphicWrenches[q][i][ANGULAR] = new DynamicGraphicVector( "RhoGraphicOutput" + q + i + "Angular", graphicYoDoubles[q][i][X],
+            graphicWrenches[q][i][ANGULAR] = new DynamicGraphicVector("RhoGraphicOutput" + q + i + "Angular", graphicYoDoubles[q][i][X],
                     graphicYoDoubles[q][i][Y], graphicYoDoubles[q][i][Z], graphicYoDoubles[q][i][xx], graphicYoDoubles[q][i][yy], graphicYoDoubles[q][i][zz],
                     scaleFactor, new YoAppearanceRGBColor(0.5, greenLevel, 0.6, 0.7));
             dynamicGraphicVectorsRhoAngular.add(graphicWrenches[q][i][ANGULAR]);
@@ -103,17 +110,17 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
 
          for (int i = 0; i < phiSize; i++)
          {
-            double greenLevel = 0.25 * i / (double) phiSize;
+            double greenLevel = 0.25 * i / phiSize;
             for (int j = 0; j < 9; j++)
             {
-               graphicYoDoubles[q][i][j] = new DoubleYoVariable( "rhoOptimizerOutputVectorsElement" + q + i + j, registry);
+               graphicYoDoubles[q][i][j] = new DoubleYoVariable("rhoOptimizerOutputVectorsElement" + q + i + j, registry);
             }
 
-            graphicWrenches[q][i][LINEAR] = new DynamicGraphicVector( "PhiGraphicOutput" + q + i + "Linear", graphicYoDoubles[q][i][X],
+            graphicWrenches[q][i][LINEAR] = new DynamicGraphicVector("PhiGraphicOutput" + q + i + "Linear", graphicYoDoubles[q][i][X],
                     graphicYoDoubles[q][i][Y], graphicYoDoubles[q][i][Z], graphicYoDoubles[q][i][x], graphicYoDoubles[q][i][y], graphicYoDoubles[q][i][z],
                     scaleFactor, new YoAppearanceRGBColor(1.0, greenLevel, 0.0, 0.7));
             dynamicGraphicVectorsPhiLinear.add(graphicWrenches[q][i][LINEAR]);
-            graphicWrenches[q][i][ANGULAR] = new DynamicGraphicVector( "PhiGraphicOutput" + q + i + "Angular", graphicYoDoubles[q][i][X],
+            graphicWrenches[q][i][ANGULAR] = new DynamicGraphicVector("PhiGraphicOutput" + q + i + "Angular", graphicYoDoubles[q][i][X],
                     graphicYoDoubles[q][i][Y], graphicYoDoubles[q][i][Z], graphicYoDoubles[q][i][xx], graphicYoDoubles[q][i][yy], graphicYoDoubles[q][i][zz],
                     scaleFactor, new YoAppearanceRGBColor(1.0, greenLevel, 0.6, 0.7));
             dynamicGraphicVectorsPhiAngular.add(graphicWrenches[q][i][ANGULAR]);
@@ -123,7 +130,7 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("OptimizerOutputVectorsRhoLinear ", dynamicGraphicVectorsRhoLinear);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("OptimizerOutputVectorsRhoAngular", dynamicGraphicVectorsRhoAngular);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("OptimizerOutputVectorsPhiLinear ", dynamicGraphicVectorsPhiLinear);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects( "OptimizerOutputVectorsPhiAngular", dynamicGraphicVectorsPhiAngular);
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("OptimizerOutputVectorsPhiAngular", dynamicGraphicVectorsPhiAngular);
       }
    }
 
@@ -141,6 +148,9 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
    {
       int iRho = 0;
       int phiLocation = 0;
+      rhoMean.zero();
+      rhoDelta.reshape(endEffectors.size(), 1);
+      this.endEffectors = endEffectors;
 
       for (int i = 0; i < endEffectors.size(); i++)
       {
@@ -153,7 +163,7 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
             {
                packQrho(iRho, tempVectorMatrix);
                double rhoOfI = rho.get(iRho);
-               
+
                for (int j = 0; j < SpatialForceVector.SIZE; j++)
                {
                   tempVectorMatrix.times(j, rhoOfI);
@@ -161,6 +171,23 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
                }
 
                iRho++;
+
+            }
+
+            DenseMatrix64F rhoSingleEndEffector = CommonOps.extract(rho, (iRho - model.getRhoSize()), iRho, 0, 1);
+            double rhoMax = CommonOps.elementMax(rhoSingleEndEffector);
+            double rhoMin = CommonOps.elementMin(rhoSingleEndEffector);
+            double rhoSum = CommonOps.elementSum(rhoSingleEndEffector);
+
+
+            double rhoOfIAverage = rhoSum / model.getRhoSize();
+            double rhoDeltaValue = (rhoMax - rhoMin) / rhoOfIAverage;
+            rhoDelta.set(i, rhoDeltaValue);
+
+
+            for (int index = (iRho - model.getRhoSize()); index < iRho; index++)
+            {
+               rhoMean.set(index, rhoOfIAverage);
             }
 
             for (int iPhiModel = 0; iPhiModel < model.getPhiSize(); iPhiModel++)
@@ -193,6 +220,7 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
          int q = 0;
          iRho = 0;
          phiLocation = 0;
+
          for (int i = 0; i < endEffectors.size(); i++)
          {
             EndEffector endEffector = endEffectors.get(i);
@@ -244,6 +272,38 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
       }
    }
 
+   public void packWRhoPenalizer(DenseMatrix64F wRhoPenalizerToPack, double wRhoMaxPenalty)
+   {
+      CommonOps.setIdentity(wRhoPenalizerToPack);
+      CommonOps.scale(wRhoMaxPenalty, wRhoPenalizerToPack);
+      double rhoDeltaSum = CommonOps.elementSum(rhoDelta);
+
+      if (endEffectors == null)
+      {
+         return;
+      }
+
+      int iRho = 0;
+
+      for (int i = 0; i < endEffectors.size(); i++)
+      {
+         EndEffector endEffector = endEffectors.get(i);
+         if (endEffector.isLoadBearing())
+         {
+            double scalar = 10.0 * rhoDelta.get(i) / (rhoDeltaSum - rhoDelta.get(i));
+
+            OptimizerContactModel model = endEffector.getContactModel();
+            for (int index = iRho; index < (iRho + model.getRhoSize()); index++)
+            {
+               wRhoPenalizerToPack.set(index, index, wRhoMaxPenalty * scalar);
+            }
+
+            iRho++;
+         }
+      }
+
+   }
+
    public void packQphi(int i, DenseMatrix64F tempVector)
    {
       for (int j = 0; j < SpatialForceVector.SIZE; j++)
@@ -258,6 +318,11 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
       {
          tempVector.set(j, qRho.get(j, i));
       }
+   }
+
+   public void packRhoMean(DenseMatrix64F rhoMeanToPack)
+   {
+      rhoMeanToPack.set(rhoMean);
    }
 
    private void packYoDoubles(int i, int q, SpatialForceVector currentBasisVector, FramePoint localPoint)
