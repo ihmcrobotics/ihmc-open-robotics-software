@@ -69,36 +69,37 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final MomentumRateOfChangeData momentumRateOfChangeData;
    private final DampedLeastSquaresSolver hardMotionConstraintSolver;
-   
+
    private final DenseMatrix64F dampedLeastSquaresFactorMatrix;
    private final DenseMatrix64F bOriginal = new DenseMatrix64F(Momentum.SIZE, 1);
 
-   public OptimizationMomentumControlModule(InverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame,
-         double controlDT, double gravityZ, MomentumOptimizationSettings momentumOptimizationSettings, TwistCalculator twistCalculator,
-         GeometricJacobianHolder geometricJacobianHolder, Collection<? extends PlaneContactState> planeContactStates,
-         Collection<? extends CylindricalContactState> cylindricalContactStates,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+   public OptimizationMomentumControlModule(InverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame, double controlDT, double gravityZ,
+           MomentumOptimizationSettings momentumOptimizationSettings, TwistCalculator twistCalculator, GeometricJacobianHolder geometricJacobianHolder,
+           Collection<? extends PlaneContactState> planeContactStates, Collection<? extends CylindricalContactState> cylindricalContactStates,
+           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.jointsToOptimizeFor = momentumOptimizationSettings.getJointsToOptimizeFor();
       this.centroidalMomentumHandler = new CentroidalMomentumHandler(rootJoint, centerOfMassFrame, controlDT, registry);
       this.externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, rootJoint);
       this.primaryMotionConstraintHandler = new MotionConstraintHandler("primary", jointsToOptimizeFor, twistCalculator, geometricJacobianHolder, registry);
-      this.secondaryMotionConstraintHandler = new MotionConstraintHandler("secondary", jointsToOptimizeFor, twistCalculator, geometricJacobianHolder,registry);
+      this.secondaryMotionConstraintHandler = new MotionConstraintHandler("secondary", jointsToOptimizeFor, twistCalculator, geometricJacobianHolder, registry);
 
       int nDoF = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
 
       momentumOptimizer = new CVXGenMomentumOptimizerBridge(nDoF, momentumOptimizationSettings);
-      
+
       int rhoSize = momentumOptimizer.getRhoSize();
       int phiSize = momentumOptimizer.getPhiSize();
-      dynamicGraphicObjectsListRegistry = null; // don't visualize vectors
+      dynamicGraphicObjectsListRegistry = null;    // don't visualize vectors
       double wRhoCylinderContacts = momentumOptimizationSettings.getRhoCylinderContactRegularization();
       double wPhiCylinderContacts = momentumOptimizationSettings.getPhiCylinderContactRegularization();
       double wRhoPlaneContacts = momentumOptimizationSettings.getRhoPlaneContactRegularization();
       double wRhoSmoother = momentumOptimizationSettings.getRateOfChangeOfRhoPlaneContactRegularization();
-      
+      double wRhoPenalizer = momentumOptimizationSettings.getPenalizerOfRhoPlaneContactRegularization();
+
       this.wrenchMatrixCalculator = new CylinderAndPlaneContactMatrixCalculatorAdapter(centerOfMassFrame, rhoSize, phiSize, wRhoCylinderContacts,
-            wPhiCylinderContacts, wRhoPlaneContacts, wRhoSmoother, planeContactStates, cylindricalContactStates, dynamicGraphicObjectsListRegistry, registry);
+              wPhiCylinderContacts, wRhoPlaneContacts, wRhoSmoother, wRhoPenalizer, planeContactStates, cylindricalContactStates,
+              dynamicGraphicObjectsListRegistry, registry);
 
       this.momentumOptimizationSettings = momentumOptimizationSettings;
 
@@ -112,22 +113,24 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       parentRegistry.addChild(registry);
       reset();
    }
-   
+
    public void setPrimaryMotionConstraintListener(MotionConstraintListener motionConstraintListener)
    {
       primaryMotionConstraintHandler.setMotionConstraintListener(motionConstraintListener);
    }
-   
+
    public void setSecondaryMotionConstraintListener(MotionConstraintListener motionConstraintListener)
    {
       secondaryMotionConstraintHandler.setMotionConstraintListener(motionConstraintListener);
    }
 
+   @Override
    public void initialize()
    {
       centroidalMomentumHandler.initialize();
    }
 
+   @Override
    public void reset()
    {
       momentumRateOfChangeData.setEmpty();
@@ -135,17 +138,20 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       secondaryMotionConstraintHandler.reset();
       externalWrenchHandler.reset();
    }
-   
+
    private MomentumControlModuleSolverListener momentumControlModuleSolverListener;
-   
+
    public void setMomentumControlModuleSolverListener(MomentumControlModuleSolverListener momentumControlModuleSolverListener)
    {
-      if (this.momentumControlModuleSolverListener != null) throw new RuntimeException("MomentumControlModuleSolverListener is already set!");
+      if (this.momentumControlModuleSolverListener != null)
+         throw new RuntimeException("MomentumControlModuleSolverListener is already set!");
       this.momentumControlModuleSolverListener = momentumControlModuleSolverListener;
    }
 
+   @Override
    public MomentumModuleSolution compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates,
-                       Map<ContactableCylinderBody, ? extends CylindricalContactState> cylinderContactStates, RobotSide upcomingSupportLeg) throws MomentumControlModuleException
+           Map<ContactableCylinderBody, ? extends CylindricalContactState> cylinderContactStates, RobotSide upcomingSupportLeg)
+           throws MomentumControlModuleException
 
    {
       wrenchMatrixCalculator.setRhoMinScalar(momentumOptimizationSettings.getRhoMinScalar());
@@ -161,7 +167,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       DenseMatrix64F pPrimary = primaryMotionConstraintHandler.getRightHandSide();
 
       DenseMatrix64F a = centroidalMomentumHandler.getCentroidalMomentumMatrixPart(jointsToOptimizeFor);
-      DenseMatrix64F b = centroidalMomentumHandler.getMomentumDotEquationRightHandSide(momentumRateOfChangeData); 
+      DenseMatrix64F b = centroidalMomentumHandler.getMomentumDotEquationRightHandSide(momentumRateOfChangeData);
       bOriginal.set(b);
 
       equalityConstraintEnforcer.setConstraint(jPrimary, pPrimary);
@@ -179,7 +185,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
        * too computationally expensive!
        */
       momentumOptimizationSettings.packDampedLeastSquaresFactorMatrix(dampedLeastSquaresFactorMatrix);
-      
+
       secondaryMotionConstraintHandler.compute();
       DenseMatrix64F jSecondary = secondaryMotionConstraintHandler.getJacobian();
       DenseMatrix64F pSecondary = secondaryMotionConstraintHandler.getRightHandSide();
@@ -188,9 +194,10 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       equalityConstraintEnforcer.constrainEquation(jSecondary, pSecondary);
 
       DenseMatrix64F momentumDotWeight = momentumOptimizationSettings.getMomentumDotWeight(momentumRateOfChangeData.getMomentumSubspace());
-      
-      momentumOptimizer.setInputs(a, b, wrenchMatrixCalculator, wrenchEquationRightHandSide, momentumDotWeight, dampedLeastSquaresFactorMatrix, jSecondary, pSecondary, weightMatrixSecondary);
-      
+
+      momentumOptimizer.setInputs(a, b, wrenchMatrixCalculator, wrenchEquationRightHandSide, momentumDotWeight, dampedLeastSquaresFactorMatrix, jSecondary,
+                                  pSecondary, weightMatrixSecondary);
+
       NoConvergenceException noConvergenceException = null;
       try
       {
@@ -201,28 +208,30 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
          noConvergenceException = e;
       }
 
-      Map<RigidBody, Wrench> groundReactionWrenches = wrenchMatrixCalculator.computeWrenches(momentumOptimizer.getOutputRho(), momentumOptimizer.getOutputPhi());
+      Map<RigidBody, Wrench> groundReactionWrenches = wrenchMatrixCalculator.computeWrenches(momentumOptimizer.getOutputRho(),
+                                                         momentumOptimizer.getOutputPhi());
 
       externalWrenchHandler.computeExternalWrenches(groundReactionWrenches);
 
 
       DenseMatrix64F jointAccelerations = equalityConstraintEnforcer.constrainResult(momentumOptimizer.getOutputJointAccelerations());
-      
+
       updateMomentumControlModuleSolverListener(jPrimary, pPrimary, a, b, jSecondary, pSecondary, weightMatrixSecondary, jointAccelerations);
-      
+
       ScrewTools.setDesiredAccelerations(jointsToOptimizeFor, jointAccelerations);
 
       centroidalMomentumHandler.computeCentroidalMomentumRate(jointsToOptimizeFor, jointAccelerations);
 
       SpatialForceVector centroidalMomentumRateSolution = centroidalMomentumHandler.getCentroidalMomentumRate();
       Map<RigidBody, Wrench> externalWrenchSolution = externalWrenchHandler.getExternalWrenches();
-      MomentumModuleSolution momentumModuleSolution = new MomentumModuleSolution(jointsToOptimizeFor, jointAccelerations, centroidalMomentumRateSolution, externalWrenchSolution);
-      
+      MomentumModuleSolution momentumModuleSolution = new MomentumModuleSolution(jointsToOptimizeFor, jointAccelerations, centroidalMomentumRateSolution,
+                                                         externalWrenchSolution);
+
       if (noConvergenceException != null)
       {
          throw new MomentumControlModuleException(noConvergenceException, momentumModuleSolution);
       }
-       
+
       return momentumModuleSolution;
    }
 
@@ -245,41 +254,44 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
          converged.set(false);
          hasNotConvergedInPast.set(true);
          hasNotConvergedCounts.increment();
+
          throw e;
       }
    }
 
    private void updateMomentumControlModuleSolverListener(DenseMatrix64F jPrimary, DenseMatrix64F pPrimary, DenseMatrix64F a, DenseMatrix64F b,
-         DenseMatrix64F jSecondary, DenseMatrix64F pSecondary, DenseMatrix64F weightMatrixSecondary, DenseMatrix64F jointAccelerations)
+           DenseMatrix64F jSecondary, DenseMatrix64F pSecondary, DenseMatrix64F weightMatrixSecondary, DenseMatrix64F jointAccelerations)
    {
       if (momentumControlModuleSolverListener != null)
       {
          momentumControlModuleSolverListener.setPrimaryMotionConstraintJMatrix(jPrimary);
          momentumControlModuleSolverListener.setPrimaryMotionConstraintPVector(pPrimary);
          momentumControlModuleSolverListener.setCentroidalMomentumMatrix(a, b, momentumRateOfChangeData.getMomentumSubspace());
-         
+
          DenseMatrix64F checkJQEqualsZeroAfterSetConstraint = equalityConstraintEnforcer.checkJQEqualsZeroAfterSetConstraint();
          momentumControlModuleSolverListener.setCheckJQEqualsZeroAfterSetConstraint(checkJQEqualsZeroAfterSetConstraint);
-         
-//         equalityConstraintEnforcer.computeCheck();
-//         DenseMatrix64F checkCopy = equalityConstraintEnforcer.getCheckCopy();
-//         momentumControlModuleSolverListener.setPrimaryMotionConstraintCheck(checkCopy);
-         
+
+//       equalityConstraintEnforcer.computeCheck();
+//       DenseMatrix64F checkCopy = equalityConstraintEnforcer.getCheckCopy();
+//       momentumControlModuleSolverListener.setPrimaryMotionConstraintCheck(checkCopy);
+
          momentumControlModuleSolverListener.setSecondaryMotionConstraintJMatrix(jSecondary);
          momentumControlModuleSolverListener.setSecondaryMotionConstraintPVector(pSecondary);
          momentumControlModuleSolverListener.setSecondaryMotionConstraintWeightMatrix(weightMatrixSecondary);
-         
+
          momentumControlModuleSolverListener.setJointAccelerationSolution(jointsToOptimizeFor, jointAccelerations);
          momentumControlModuleSolverListener.setOptimizationValue(momentumOptimizer.getOutputOptVal());
          momentumControlModuleSolverListener.reviewSolution();
       }
    }
 
+   @Override
    public void resetGroundReactionWrenchFilter()
    {
       // empty for now
    }
 
+   @Override
    public void setDesiredJointAcceleration(DesiredJointAccelerationCommand desiredJointAccelerationCommand)
    {
       if (desiredJointAccelerationCommand.getHasWeight())
@@ -292,6 +304,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       }
    }
 
+   @Override
    public void setDesiredSpatialAcceleration(DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand)
    {
       if (desiredSpatialAccelerationCommand.getHasWeight())
@@ -303,43 +316,48 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
          primaryMotionConstraintHandler.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);    // weight is arbitrary,
       }
    }
-  
+
+   @Override
    public void setDesiredPointAcceleration(DesiredPointAccelerationCommand desiredPointAccelerationCommand)
    {
       GeometricJacobian rootToEndEffectorJacobian = desiredPointAccelerationCommand.getRootToEndEffectorJacobian();
       FramePoint bodyFixedPoint = desiredPointAccelerationCommand.getContactPoint();
       FrameVector desiredAccelerationWithRespectToBase = desiredPointAccelerationCommand.getDesiredAcceleration();
       DenseMatrix64F selectionMatrix = desiredPointAccelerationCommand.getSelectionMatrix();
-      
+
       if (selectionMatrix != null)
       {
-         primaryMotionConstraintHandler.setDesiredPointAcceleration(rootToEndEffectorJacobian, bodyFixedPoint, desiredAccelerationWithRespectToBase, selectionMatrix, Double.POSITIVE_INFINITY);
+         primaryMotionConstraintHandler.setDesiredPointAcceleration(rootToEndEffectorJacobian, bodyFixedPoint, desiredAccelerationWithRespectToBase,
+                 selectionMatrix, Double.POSITIVE_INFINITY);
       }
       else
       {
-         primaryMotionConstraintHandler.setDesiredPointAcceleration(rootToEndEffectorJacobian, bodyFixedPoint, desiredAccelerationWithRespectToBase, Double.POSITIVE_INFINITY);
+         primaryMotionConstraintHandler.setDesiredPointAcceleration(rootToEndEffectorJacobian, bodyFixedPoint, desiredAccelerationWithRespectToBase,
+                 Double.POSITIVE_INFINITY);
       }
    }
-   
+
+   @Override
    public void setDesiredRateOfChangeOfMomentum(DesiredRateOfChangeOfMomentumCommand desiredRateOfChangeOfMomentumCommand)
    {
       this.momentumRateOfChangeData.set(desiredRateOfChangeOfMomentumCommand.getMomentumRateOfChangeData());
    }
 
+   @Override
    public void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench)
    {
       externalWrenchHandler.setExternalWrenchToCompensateFor(rigidBody, wrench);
    }
-   
 
-//   public SpatialForceVector getDesiredCentroidalMomentumRate()
-//   {
-//      return centroidalMomentumHandler.getCentroidalMomentumRate();
-//   }
+
+// public SpatialForceVector getDesiredCentroidalMomentumRate()
+// {
+//    return centroidalMomentumHandler.getCentroidalMomentumRate();
+// }
 //
-//   public Map<RigidBody, Wrench> getExternalWrenches()
-//   {
-//      return externalWrenchHandler.getExternalWrenches();
-//   }
-   
+// public Map<RigidBody, Wrench> getExternalWrenches()
+// {
+//    return externalWrenchHandler.getExternalWrenches();
+// }
+
 }

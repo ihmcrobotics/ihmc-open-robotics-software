@@ -280,7 +280,7 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput
       MatrixTools.denseMatrixToArrayColumnMajor(this.rhoPreviousMeanMatrix, this.rhoPreviousMean);
    }
 
-   public void setCenterOfPressureRegularization(DenseMatrix64F WRhoCoPPenalty)
+   public void setCenterOfPressurePenalizedRegularization(DenseMatrix64F WRhoCoPPenalty)
    {
       // diagonal
       CommonOps.insert(WRhoCoPPenalty, this.WRhoCoPPenaltyMatrix, 0, 0);

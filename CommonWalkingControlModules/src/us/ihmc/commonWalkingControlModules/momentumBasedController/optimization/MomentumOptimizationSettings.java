@@ -1,9 +1,5 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.EnumYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -11,6 +7,10 @@ import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVX
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXGenMomentumOptimizerBridge.MomentumOptimizer;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.Momentum;
+
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.EnumYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 /**
  * @author twan
@@ -26,19 +26,21 @@ public class MomentumOptimizationSettings
    private final DoubleYoVariable rhoMin = new DoubleYoVariable("rhoMin", registry);
    private final DoubleYoVariable lambda = new DoubleYoVariable("lambda", registry);
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
-   
-   private final EnumYoVariable<MomentumOptimizer> activeMomentumOptimizer = new EnumYoVariable<CVXGenMomentumOptimizerBridge.MomentumOptimizer>("activeMomentumOptimizer", registry, MomentumOptimizer.class);
-   
+
+   private final EnumYoVariable<MomentumOptimizer> activeMomentumOptimizer =
+      new EnumYoVariable<CVXGenMomentumOptimizerBridge.MomentumOptimizer>("activeMomentumOptimizer", registry, MomentumOptimizer.class);
+
    private final double[] momentumWeightDiagonal = new double[Momentum.SIZE];
    private final DenseMatrix64F C = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
    private double wRhoCylinder;
    private double wPhiCylinder;
    private double wRhoPlane;
    private double wRhoSmoother;
+   private double wRhoPenalizer;
 
    private final DenseMatrix64F momentumSubspaceProjector = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
    private final DenseMatrix64F tempMatrix = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
-   private final Momentum tempMomentum = new Momentum(); // just to make sure that the ordering of force and torque are correct
+   private final Momentum tempMomentum = new Momentum();    // just to make sure that the ordering of force and torque are correct
 
    public MomentumOptimizationSettings(InverseDynamicsJoint[] jointsToOptimizeFor, YoVariableRegistry parentRegistry)
    {
@@ -135,16 +137,26 @@ public class MomentumOptimizationSettings
       return wRhoSmoother;
    }
 
+   public double getPenalizerOfRhoPlaneContactRegularization()
+   {
+      return wRhoPenalizer;
+   }
+
+   public void setRhoPenalizerPlaneContactRegularization(double wRhoPenalizer)
+   {
+      this.wRhoPenalizer = wRhoPenalizer;
+   }
+
    public void setRateOfChangeOfRhoPlaneContactRegularization(double wRhoSmoother)
    {
       this.wRhoSmoother = wRhoSmoother;
    }
-   
+
    public void setMomentumOptimizerToUse(MomentumOptimizer momentumOptimizerToUse)
    {
       activeMomentumOptimizer.set(momentumOptimizerToUse);
    }
-   
+
    public MomentumOptimizer getMomentumOptimizerToUse()
    {
       return activeMomentumOptimizer.getEnumValue();

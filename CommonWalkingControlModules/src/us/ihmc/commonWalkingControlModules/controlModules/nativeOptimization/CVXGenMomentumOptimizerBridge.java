@@ -21,6 +21,8 @@ public class CVXGenMomentumOptimizerBridge
 
    private final DenseMatrix64F rhoPrevious;
    private final DenseMatrix64F wRhoSmoother;
+   private final DenseMatrix64F rhoPreviousMean;
+   private final DenseMatrix64F wRhoPenalizer;
 
    private DenseMatrix64F outputRho, outputPhi, outputJointAccelerations;
    private double outputOptVal;
@@ -68,7 +70,7 @@ public class CVXGenMomentumOptimizerBridge
 
       momentumOptimizerWithGRFSmootherNative = new CVXMomentumOptimizerWithGRFSmootherNative(nDoF, rhoSize, phiSize);
       momentumOptimizerWithGRFSmootherNativeInput = new CVXMomentumOptimizerWithGRFSmootherNativeInput();
-      
+
       try
       {
          momentumOptimizerWithGRFPenalizedSmootherNative = new CVXMomentumOptimizerWithGRFPenalizedSmootherNative(nDoF, rhoSize);
@@ -83,6 +85,8 @@ public class CVXGenMomentumOptimizerBridge
       outputRho = new DenseMatrix64F(rhoSize, 1);
       rhoPrevious = new DenseMatrix64F(rhoSize, 1);
       wRhoSmoother = new DenseMatrix64F(rhoSize, rhoSize);
+      rhoPreviousMean = new DenseMatrix64F(rhoSize, 1);
+      wRhoPenalizer = new DenseMatrix64F(rhoSize, rhoSize);
    }
 
    public void setActiveMomentumOptimizer(MomentumOptimizer activeMomentumOptimizer)
@@ -204,10 +208,15 @@ public class CVXGenMomentumOptimizerBridge
             momentumOptimizerWithGRFPenalizedSmootherNativeInput.setSecondaryConstraintRightHandSide(pSecondary);
             momentumOptimizerWithGRFPenalizedSmootherNativeInput.setSecondaryConstraintWeight(weightMatrixSecondary);
             momentumOptimizerWithGRFPenalizedSmootherNativeInput.setGroundReactionForceRegularization(wrenchMatrixCalculator.getWRho());
-            momentumOptimizerWithGRFPenalizedSmootherNativeInput.setRhoPreviousAverage(rhoPrevious);
-            momentumOptimizerWithGRFPenalizedSmootherNativeInput.setCenterOfPressureRegularization(wRhoSmoother);
             wrenchMatrixCalculator.packWRhoSmoother(wRhoSmoother);
             momentumOptimizerWithGRFPenalizedSmootherNativeInput.setRateOfChangeOfGroundReactionForceRegularization(wRhoSmoother);
+
+            wrenchMatrixCalculator.packRhoPreviousAverageForEndEffectors(rhoPreviousMean);
+
+//          System.out.println(" rhoPreviousMean " + rhoPreviousMean);
+            wrenchMatrixCalculator.packWRhoPenalizer(wRhoPenalizer);
+            momentumOptimizerWithGRFPenalizedSmootherNativeInput.setRhoPreviousAverage(rhoPreviousMean);
+            momentumOptimizerWithGRFPenalizedSmootherNativeInput.setCenterOfPressurePenalizedRegularization(wRhoPenalizer);
 
             break;
          }
@@ -278,6 +287,7 @@ public class CVXGenMomentumOptimizerBridge
                outputJointAccelerations = momentumOptimizerWithGRFPenalizedSmootherNativeOutput.getJointAccelerations();
                outputOptVal = momentumOptimizerWithGRFPenalizedSmootherNativeOutput.getOptVal();
             }
+
             break;
          }
 
