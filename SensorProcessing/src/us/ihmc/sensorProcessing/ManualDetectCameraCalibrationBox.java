@@ -1,7 +1,7 @@
 package us.ihmc.sensorProcessing;
 
 import boofcv.abst.calib.ConfigChessboard;
-import boofcv.abst.calib.PlanarCalibrationDetector;
+import boofcv.alg.feature.detect.chess.DetectChessCalibrationPoints;
 import boofcv.alg.geo.PerspectiveOps;
 import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
 import boofcv.alg.geo.calibration.Zhang99ComputeTargetHomography;
@@ -10,6 +10,7 @@ import boofcv.core.image.ConvertBufferedImage;
 import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
 import boofcv.gui.image.ShowImages;
 import boofcv.io.image.UtilImageIO;
+import boofcv.misc.BoofMiscOps;
 import boofcv.struct.calib.IntrinsicParameters;
 import boofcv.struct.image.ImageFloat32;
 import georegression.geometry.GeometryMath_F64;
@@ -104,7 +105,16 @@ public class ManualDetectCameraCalibrationBox
       ImageFloat32 gray = ConvertBufferedImage.convertFrom(image, (ImageFloat32) null);
 
       // Detects the target and calibration point inside the target
-      PlanarCalibrationDetector detector = FactoryPlanarCalibrationTarget.detectorChessboard(new ConfigChessboard(5, 7));
+      ConfigChessboard config = new ConfigChessboard(5, 7);
+//      config.binaryAdaptiveBias = -20;
+//      PlanarCalibrationDetector detector = FactoryPlanarCalibrationTarget.detectorChessboard(config);
+
+      DetectChessCalibrationPoints detector = new DetectChessCalibrationPoints(5,7,4,1,ImageFloat32.class);
+
+      detector.setUserBinaryThreshold(config.binaryGlobalThreshold);
+      detector.setUserAdaptiveBias(config.binaryAdaptiveBias);
+      detector.setUserAdaptiveRadius(config.binaryAdaptiveRadius);
+
       // specify target's shape.  This also specifies where the center of the target's coordinate system is.
       // Look at source code to be sure, but it is probably the target's center.  You can change this by
       // creating your own target.. Note z=0 is assumed
@@ -119,7 +129,7 @@ public class ManualDetectCameraCalibrationBox
 
       // detect calibration points
       if( !detector.process(gray) )
-         throw new RuntimeException("Failed to detect target");
+         return null;
 
       gui.addCalibPoints( detector.getPoints() );
 
@@ -135,12 +145,13 @@ public class ManualDetectCameraCalibrationBox
    }
 
    public static void main( String args[] ) {
-      String directory = "../SensorProcessing/";
+      String directory = "/home/pja/Desktop/camera_lidar_logs/AlexLogs/";
 
-      BufferedImage image = UtilImageIO.loadImage(directory + "tri_target_scaled.jpg");
+      BufferedImage image = UtilImageIO.loadImage(directory + "hack.jpg");
 
-      IntrinsicParameters intrinsic = new IntrinsicParameters(image.getWidth()/2,image.getHeight()/2,0,
-            image.getWidth()/2,image.getHeight()/2,image.getWidth(),image.getHeight(),false,null);
+      IntrinsicParameters intrinsic = BoofMiscOps.loadXML(directory+"intrinsic.xml");
+//            new IntrinsicParameters(image.getWidth()/2,image.getHeight()/2,0,
+//            image.getWidth()/2,image.getHeight()/2,image.getWidth(),image.getHeight(),false,null);
 
       java.util.List<PlaneNormal3D_F64> planes = new ArrayList<PlaneNormal3D_F64>();
 
@@ -174,10 +185,16 @@ public class ManualDetectCameraCalibrationBox
             }
          }
 
-         UtilImageIO.saveImage(copy,"Image"+i+".jpg");
+         UtilImageIO.saveImage(copy,"Image"+i+".png");
 
          PlaneNormal3D_F64 plane = new PlaneNormal3D_F64();
          Se3_F64 targetToCamera = detectTarget(copy,intrinsic,gui);
+         if( targetToCamera == null ) {
+            System.err.println("Failed to detect the target");
+            i = i-1;
+            gui.repaint();
+            continue;
+         }
 
          plane.p.set(0,0,0);
          plane.n.set(0,1,0);
