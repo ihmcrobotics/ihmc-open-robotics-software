@@ -410,7 +410,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       
       footLoadThresholdToHoldPosition.set(0.2);
       
-      doubleSupportDesiredICP = new YoFramePoint2dInPolygonCoordinate("desiredICP", registry);
+      if (DESIREDICP_FROM_POLYGON_COORDINATE)
+      {
+         doubleSupportDesiredICP = new YoFramePoint2dInPolygonCoordinate("desiredICP", registry);
+      }
+      else
+      {
+         doubleSupportDesiredICP = null;
+      }
    }
 
 
