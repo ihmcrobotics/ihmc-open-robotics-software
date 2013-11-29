@@ -124,13 +124,11 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       secondaryMotionConstraintHandler.setMotionConstraintListener(motionConstraintListener);
    }
 
-   @Override
    public void initialize()
    {
       centroidalMomentumHandler.initialize();
    }
 
-   @Override
    public void reset()
    {
       momentumRateOfChangeData.setEmpty();
@@ -148,7 +146,6 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       this.momentumControlModuleSolverListener = momentumControlModuleSolverListener;
    }
 
-   @Override
    public MomentumModuleSolution compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates,
            Map<ContactableCylinderBody, ? extends CylindricalContactState> cylinderContactStates, RobotSide upcomingSupportLeg)
            throws MomentumControlModuleException
@@ -285,13 +282,13 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       }
    }
 
-   @Override
+   
    public void resetGroundReactionWrenchFilter()
    {
       // empty for now
    }
 
-   @Override
+   
    public void setDesiredJointAcceleration(DesiredJointAccelerationCommand desiredJointAccelerationCommand)
    {
       if (desiredJointAccelerationCommand.getHasWeight())
@@ -304,7 +301,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       }
    }
 
-   @Override
+   
    public void setDesiredSpatialAcceleration(DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand)
    {
       if (desiredSpatialAccelerationCommand.getHasWeight())
@@ -317,7 +314,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       }
    }
 
-   @Override
+   
    public void setDesiredPointAcceleration(DesiredPointAccelerationCommand desiredPointAccelerationCommand)
    {
       GeometricJacobian rootToEndEffectorJacobian = desiredPointAccelerationCommand.getRootToEndEffectorJacobian();
@@ -337,13 +334,13 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       }
    }
 
-   @Override
+   
    public void setDesiredRateOfChangeOfMomentum(DesiredRateOfChangeOfMomentumCommand desiredRateOfChangeOfMomentumCommand)
    {
       this.momentumRateOfChangeData.set(desiredRateOfChangeOfMomentumCommand.getMomentumRateOfChangeData());
    }
 
-   @Override
+   
    public void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench)
    {
       externalWrenchHandler.setExternalWrenchToCompensateFor(rigidBody, wrench);
