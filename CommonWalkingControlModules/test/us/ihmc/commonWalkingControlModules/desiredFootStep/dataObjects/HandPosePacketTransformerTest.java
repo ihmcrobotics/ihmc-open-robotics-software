@@ -55,7 +55,15 @@ public class HandPosePacketTransformerTest
          Point3d point3d = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
          double trajectoryTime = RandomTools.generateRandomDouble(random, 1.0, 10.0);
 
-         HandPosePacket starting = new HandPosePacket(robotSide, frame, point3d, quat, i % 2 == 1, trajectoryTime);
+         double randomShoulderPitchAngle = RandomTools.generateRandomDouble(random, 0.0, Math.PI);
+         double randomShoulderRollAngle = RandomTools.generateRandomDouble(random, 0.0, Math.PI);
+         double randomElbowPitchAngle = RandomTools.generateRandomDouble(random, 0.0, Math.PI);
+         double randomElbowRollAngle = RandomTools.generateRandomDouble(random, 0.0, Math.PI);
+         double randomWristPitchAngle = RandomTools.generateRandomDouble(random, 0.0, Math.PI);
+         double randomWristRollAngle = RandomTools.generateRandomDouble(random, 0.0, Math.PI);
+
+         HandPosePacket starting = new HandPosePacket(robotSide, frame, point3d, quat, i % 2 == 1, trajectoryTime, randomShoulderPitchAngle,
+                                      randomShoulderRollAngle, randomElbowPitchAngle, randomElbowRollAngle, randomWristPitchAngle, randomWristRollAngle);
 
          transform3D = RandomTools.generateRandomTransform(random);
 
@@ -69,27 +77,26 @@ public class HandPosePacketTransformerTest
    {
       // RobotSide robotSide;
       assertTrue(starting.getRobotSide().equals(ending.getRobotSide()));
-      
+
       // boolean toHomePosition;
       assertTrue(starting.isToHomePosition() == ending.isToHomePosition());
 
-      if(!ending.isToHomePosition())
+      if (!ending.isToHomePosition())
       {
-      
          // Frame referenceFrame;
          assertTrue(starting.getReferenceFrame().equals(ending.getReferenceFrame()));
-   
-   
-   
+
+
+
          // Point3d position;
          double distance = getDistanceBetweenPoints(starting.getPosition(), transform3D, ending.getPosition());
          assertEquals("not equal", 0.0, distance, 1e-6);
-   
+
          // Quat4d orientation;
          Quat4d startQuat = starting.getOrientation();
          Quat4d endQuat = ending.getOrientation();
          assertTrue(areOrientationsEqualWithTransform(startQuat, transform3D, endQuat));
-   
+
       }
    }
 
