@@ -61,7 +61,8 @@ public class DRCObstacleCourseTrialsWalkingTaskTest
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_CYLINDER_BLOCKS;
+      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS;
+//    DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_CYLINDER_BLOCKS;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie);
 
@@ -92,7 +93,8 @@ public class DRCObstacleCourseTrialsWalkingTaskTest
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_CYLINDER_BLOCKS;
+      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS;
+//    DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_CYLINDER_BLOCKS;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie);
 

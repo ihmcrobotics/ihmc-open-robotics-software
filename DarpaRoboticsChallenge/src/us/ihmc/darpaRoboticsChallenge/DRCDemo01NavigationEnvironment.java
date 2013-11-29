@@ -77,6 +77,7 @@ public class DRCDemo01NavigationEnvironment implements
 		// setUpPath2SmallCones();
 		setUpPath3RampsWithLargeBlocks();
 		setUpPath4DRCTrialsTrainingWalkingCourse();
+		// setUpPath4DRCTrialsTrainingWalkingCourseDifficult();
 		setUpPathDRCTrialsLadder();
 		setUpTrialsQuals();
 
@@ -410,7 +411,7 @@ public class DRCDemo01NavigationEnvironment implements
 		combinedTerrainObject.addTerrainObject(newBox2);
 	}
 
-	private void setUpPath4DRCTrialsTrainingWalkingCourse() {
+	private void setUpPath4DRCTrialsTrainingWalkingCourseDifficult() {
 		double courseAngleDeg = 45.0;
 		double startDistance = 4.0;
 		AppearanceDefinition color = YoAppearance.Gray();
@@ -462,7 +463,7 @@ public class DRCDemo01NavigationEnvironment implements
 		setUpStraightHurdles(courseAngleDeg, startDistance, new int[] { 6, 5 });
 
 		startDistance += sectionLength / 2;
-		setUpZigZagHurdles(courseAngleDeg, startDistance, new int[] { 8, 7 });
+		setUpZigZagHurdles(courseAngleDeg, startDistance, new int[] { 8, 7 }, 45.0);
 
 		startDistance += sectionLength / 4;
 
@@ -480,6 +481,35 @@ public class DRCDemo01NavigationEnvironment implements
 				sectionLength);
 
 	}
+	
+	private void setUpPath4DRCTrialsTrainingWalkingCourse() {
+      double courseAngleDeg = 45.0;
+      double startDistance = 4.0;
+      AppearanceDefinition color = YoAppearance.Gray();
+
+      final double sectionLength = 2.4384; // 8 ft
+
+      // 1. Ramp and Zigzag Hurdle (Pitch Ramp 15degrees)
+      int numberOfRamps = 1;
+      setUpMultipleUpDownRamps(courseAngleDeg, startDistance, numberOfRamps,
+            sectionLength/2, color);
+
+      startDistance += sectionLength;
+      setUpZigZagHurdles(courseAngleDeg, startDistance, new int[] { 9 }, -45.0);
+
+      startDistance += sectionLength / 4;
+
+      // 2a. Ascend Flat Top Steps
+      // 2b. Descend Flat Top Steps
+      // 3a. Ascend Pitch/Roll 15 deg Top Steps
+      // 3b. Descend Pitch/Roll 15 deg Top Steps
+      setUpCinderBlockFieldActual(courseAngleDeg, startDistance);
+      startDistance += sectionLength * 5;
+      
+     // 4. Two cinder block high hurdle for testcase purposes only, not part of actual trial obstacle course
+      setUpZigZagHurdles(courseAngleDeg, startDistance, new int[] { 8, 7 }, 45.0);
+
+   }
 
 	private void setUpTrialsQuals() 
 	{
@@ -640,9 +670,9 @@ public class DRCDemo01NavigationEnvironment implements
 		combinedTerrainObject.addTerrainObject(truss);
 	}
 
-	private void setUpCinderBlockField(double courseAngle, double startDistance) {
+	private void setUpCinderBlockFieldActual(double courseAngle, double startDistance) {
 		int nBlocksWide = 6;
-		int nBlocksLong = 31;
+		int nBlocksLong = 21;
 
 		double[][] blockAngle = new double[nBlocksLong][nBlocksWide];
 		int[][] blockHeight = new int[nBlocksLong][nBlocksWide];
@@ -656,72 +686,33 @@ public class DRCDemo01NavigationEnvironment implements
 		}
 
 		blockHeight = new int[][] {
-				{ 0, 0, -1, -1, 0, 0 }, // 5. Footfalls and Holes
-				{ 0, 0, -1, -1, 0, 0 },
-				{ -1, -1, 0, 0, -1, -1 },
-				{ -1, 0, 0, 0, 0, -1 },
-				{ 0, -1, 0, -1, 0, 0 },
-				{ 1, 0, -1, 0, -1, 0 },
-				{ 0, 1, 0, -1, 0, -1 }, // 6.7. Ascend/Descend Flat Top Steps
-				{ 2, 0, 1, 0, 1, -1 },
-				{ 3, 2, 0, 1, 0, 1 },
-				{ 2, 3, 2, 0, 1, -1 },
-				{ 1, 2, 3, 2, 0, 1 },
-				{ 1, 1, 2, 3, 2, 0 },
-				{ 1, 1, 1, 2, 3, 2 },
-				{ 0, 0, 1, 1, 2, 3 },
-				{ 0, 0, 0, 1, 1, 2 },
-				{ 0, 0, 0, 0, 1, 1 },
-				{ 0, 0, 0, 0, 0, 1 },
-				{ 0, 0, 0, 0, 0, 0 },
-				{ 0, 0, 0, 0, 0, 0 }, // 8.9. Ascend/descend Pitch/Roll 15 deg Top Steps
-				{ 1, 0, 1, 0, 1, 0 }, // 1 angled...
-				{ 0, 1, 0, 1, 0, 1 }, { 0, 0, 0, 0, 1, 2 },
-				{ 0, 0, 0, 1, 2, 3 }, { 0, 0, 1, 2, 3, 2 },
-				{ 0, 1, 2, 3, 2, 1 }, { 1, 2, 3, 2, 1, 0 },
-				{ 2, 3, 2, 1, 0, 0 }, { 3, 2, 1, 0, 0, 0 },
-				{ 2, 1, 0, 0, 0, 0 }, { 1, 0, 0, 0, 0, 0 },
-				{ 0, 0, 0, 0, 0, 0 } };
-
-		int[] full90Diags = { -1, -3, -5, 1, 7, 8, 9, 13, 15, 17, 19, 21, 23 };
-		int[] alternating0_90DiagsAndUprightSkewed = { 10, 12, 14, 16, 18, 20,
-				22 };
-
-		for (int i = 0; i < full90Diags.length; i++) {
-			for (int j = Math.max(0, -full90Diags[i]); j < nBlocksWide; j++) {
-				int col = j;
-				int row = full90Diags[i] + col;
-				if (row < nBlocksLong)
-					blockAngle[row][col] = 90;
-			}
-		}
-
-		for (int i = 0; i < alternating0_90DiagsAndUprightSkewed.length; i++) {
-			for (int j = 0; j < nBlocksWide; j++) {
-				int col = j;
-				int row = alternating0_90DiagsAndUprightSkewed[i] + col;
-				blockType[row][col] = BLOCKTYPE.UPRIGHTSKEW;
-				if (j % 2 == 1)
-					blockAngle[row][col] = 90;
-			}
-		}
-
-		final int flatSkewedRow = 19;
-		for (int col = 0; col < nBlocksWide - 1; col++) {
-			boolean evenCol = col % 2 == 0;
-			int row = flatSkewedRow + (evenCol ? 0 : 1);
-			blockType[row][col] = BLOCKTYPE.FLATSKEW;
-			if (evenCol)
-				blockAngle[row][col] = 90;
-			else
-				blockAngle[row][col] = 0;
-		}
+		      { -1,-1, -1, -1, -1, 0},
+				{ -1, -1, -1, -1, 0, 1 }, 
+				{ -1, -1, -1, 0, 1, 2 },
+				{ -1, -1, 0, 1, 2, 3 }, 
+				{ -1, 0, 1, 2, 3, 2 },
+				{ 0, 1, 2, 3, 2, 1 }, 
+				{ 1, 2, 3, 2, 1, 0 },
+				{ 2, 3, 2, 1, 0, -1 }, 
+				{ 3, 2, 1, 0, -1, 0 },
+				{ 2, 1, 0, -1, 0, 0 }, 
+				{ 1, 0, -1, 0, 0, 1 },
+				{ 0, -1, 0, 0, 1, 2 },
+	         { -1, 0, 0, 1, 2, 3},
+	         { 0, 0, 1, 2, 3, 2},
+	         { 0, 1, 2, 3, 2, 1 }, 
+	         { 1, 2, 3, 2, 1, 0 },
+	         { 2, 3, 2, 1, 0, -1 }, 
+	         { 3, 2, 1, 0, -1, -1 },
+	         { 2, 1, 0, -1, -1, -1 }, 
+	         { 1, 0, -1, -1, -1, -1 },
+	         { 0, -1, -1, -1, -1, -1 } };
 
 		final int NORTH = -90;
 		final int SOUTH = 90;
 		final int WEST = 0;
 		final int EAST = 180;
-		final int startAngled = 19;
+		final int startAngled = 9;
 		for (int i = startAngled; i < nBlocksLong; i++) {
 			for (int j = Math.max(0, startAngled + (nBlocksWide - 1) - i); j < nBlocksWide; j++) {
 				boolean evenRow = (i - startAngled) % 2 == 0;
@@ -776,6 +767,143 @@ public class DRCDemo01NavigationEnvironment implements
 			}
 		}
 	}
+	
+	private void setUpCinderBlockField(double courseAngle, double startDistance) {
+      int nBlocksWide = 6;
+      int nBlocksLong = 31;
+
+      double[][] blockAngle = new double[nBlocksLong][nBlocksWide];
+      int[][] blockHeight = new int[nBlocksLong][nBlocksWide];
+      BLOCKTYPE[][] blockType = new BLOCKTYPE[nBlocksLong][nBlocksWide];
+      for (int i = 0; i < nBlocksLong; i++) {
+         for (int j = 0; j < nBlocksWide; j++) {
+            blockHeight[i][j] = -1; // (int) Math.round(Math.random()*4-1);
+            blockAngle[i][j] = 0; // (int) Math.round(Math.random()*3)*45;
+            blockType[i][j] = BLOCKTYPE.FLAT;
+         }
+      }
+
+      blockHeight = new int[][] {
+            { 0, 0, -1, -1, 0, 0 }, // 5. Footfalls and Holes
+            { 0, 0, -1, -1, 0, 0 },
+            { -1, -1, 0, 0, -1, -1 },
+            { -1, 0, 0, 0, 0, -1 },
+            { 0, -1, 0, -1, 0, 0 },
+            { 1, 0, -1, 0, -1, 0 },
+            { 0, 1, 0, -1, 0, -1 }, // 6.7. Ascend/Descend Flat Top Steps
+            { 2, 0, 1, 0, 1, -1 },
+            { 3, 2, 0, 1, 0, 1 },
+            { 2, 3, 2, 0, 1, -1 },
+            { 1, 2, 3, 2, 0, 1 },
+            { 1, 1, 2, 3, 2, 0 },
+            { 1, 1, 1, 2, 3, 2 },
+            { 0, 0, 1, 1, 2, 3 },
+            { 0, 0, 0, 1, 1, 2 },
+            { 0, 0, 0, 0, 1, 1 },
+            { 0, 0, 0, 0, 0, 1 },
+            { 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0 }, // 8.9. Ascend/descend Pitch/Roll 15 deg Top Steps
+            { 1, 0, 1, 0, 1, 0 }, // 1 angled...
+            { 0, 1, 0, 1, 0, 1 }, { 0, 0, 0, 0, 1, 2 },
+            { 0, 0, 0, 1, 2, 3 }, { 0, 0, 1, 2, 3, 2 },
+            { 0, 1, 2, 3, 2, 1 }, { 1, 2, 3, 2, 1, 0 },
+            { 2, 3, 2, 1, 0, 0 }, { 3, 2, 1, 0, 0, 0 },
+            { 2, 1, 0, 0, 0, 0 }, { 1, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0 } };
+
+      int[] full90Diags = { -1, -3, -5, 1, 7, 8, 9, 13, 15, 17, 19, 21, 23 };
+      int[] alternating0_90DiagsAndUprightSkewed = { 10, 12, 14, 16, 18, 20,
+            22 };
+
+      for (int i = 0; i < full90Diags.length; i++) {
+         for (int j = Math.max(0, -full90Diags[i]); j < nBlocksWide; j++) {
+            int col = j;
+            int row = full90Diags[i] + col;
+            if (row < nBlocksLong)
+               blockAngle[row][col] = 90;
+         }
+      }
+
+      for (int i = 0; i < alternating0_90DiagsAndUprightSkewed.length; i++) {
+         for (int j = 0; j < nBlocksWide; j++) {
+            int col = j;
+            int row = alternating0_90DiagsAndUprightSkewed[i] + col;
+            blockType[row][col] = BLOCKTYPE.UPRIGHTSKEW;
+            if (j % 2 == 1)
+               blockAngle[row][col] = 90;
+         }
+      }
+
+      final int flatSkewedRow = 19;
+      for (int col = 0; col < nBlocksWide - 1; col++) {
+         boolean evenCol = col % 2 == 0;
+         int row = flatSkewedRow + (evenCol ? 0 : 1);
+         blockType[row][col] = BLOCKTYPE.FLATSKEW;
+         if (evenCol)
+            blockAngle[row][col] = 90;
+         else
+            blockAngle[row][col] = 0;
+      }
+
+      final int NORTH = -90;
+      final int SOUTH = 90;
+      final int WEST = 0;
+      final int EAST = 180;
+      final int startAngled = 19;
+      for (int i = startAngled; i < nBlocksLong; i++) {
+         for (int j = Math.max(0, startAngled + (nBlocksWide - 1) - i); j < nBlocksWide; j++) {
+            boolean evenRow = (i - startAngled) % 2 == 0;
+            boolean evenCol = j % 2 == 0;
+            blockType[i][j] = BLOCKTYPE.ANGLED;
+            if (evenRow) {
+               if (evenCol)
+                  blockAngle[i][j] = WEST;
+               else
+                  blockAngle[i][j] = NORTH;
+            } else {
+               if (evenCol)
+                  blockAngle[i][j] = SOUTH;
+               else
+                  blockAngle[i][j] = EAST;
+            }
+         }
+      }
+
+      startDistance += cinderBlockLength / 2;
+
+      for (int i = 0; i < nBlocksLong; i++) {
+         for (int j = 0; j < nBlocksWide; j++) {
+            double xCenter = startDistance + i * cinderBlockLength;
+            double yCenter = (nBlocksWide * cinderBlockLength) / 2 - j
+                  * cinderBlockLength - cinderBlockLength / 2;
+            double[] point = { xCenter, yCenter };
+            double[] rotatedPoint = rotateAroundOrigin(point, courseAngle);
+            int h = blockHeight[i][j];
+            double deg = blockAngle[i][j] + courseAngle;
+            switch (blockType[i][j]) {
+            case FLAT:
+               setUpCinderBlockSquare(rotatedPoint, h, deg);
+
+               break;
+
+            case FLATSKEW:
+               setUpFlatSkewedBlockSquare(rotatedPoint, h, deg);
+
+               break;
+
+            case UPRIGHTSKEW:
+               setUpSkewedUprightBlockSquare(rotatedPoint, h, deg);
+
+               break;
+
+            case ANGLED:
+               setUpRampBlock(rotatedPoint, h, deg);
+
+               break;
+            }
+         }
+      }
+   }
 
 	private void setUpMultipleUpDownRamps(double courseAngleDegrees,
 			double startDistance, int numberOfRamps,
@@ -847,19 +975,19 @@ public class DRCDemo01NavigationEnvironment implements
 	}
 
 	private void setUpZigZagHurdles(double courseAngle, double startDistance,
-			int[] numberZigZagHurdles) {
+			int[] numberZigZagHurdles, double orientation) {
 		double xOffset = cinderBlockLength / 4 * Math.cos(Math.toRadians(45));
 		double yOffset = cinderBlockLength * Math.cos(Math.toRadians(45));
 
 		for (int i = 0; i < numberZigZagHurdles.length; i++) {
 			int start45sign = Math
-					.round((float) numberZigZagHurdles[i] / 2.0 + .25) % 2 == 0 ? 1: -1;// start45 when n=3,4,7,8,11,12,...
+					.round(numberZigZagHurdles[i] / 2.0 + .25) % 2 == 0 ? 1: -1;// start45 when n=3,4,7,8,11,12,...
 			int startXsign = Math
-					.round(((float) numberZigZagHurdles[i] + 1.) / 2.0 + .25) % 2 == 0 ? -1: 1;// start x+ when n=1, 4,5, 8,9, ...
+					.round((numberZigZagHurdles[i] + 1.) / 2.0 + .25) % 2 == 0 ? -1: 1;// start x+ when n=1, 4,5, 8,9, ...
 			for (int j = 0; j < numberZigZagHurdles[i]; j++) {
 				int evenBlockSign = (j % 2 == 0) ? 1 : -1;
 				double signedXOffset = xOffset * evenBlockSign * startXsign;
-				double signedAngleOffset = 45 * evenBlockSign * start45sign;
+				double signedAngleOffset = orientation * evenBlockSign * start45sign;
 				double[] point = {
 						startDistance + signedXOffset,
 						((numberZigZagHurdles[i] - 1) * yOffset) / 2 - j
