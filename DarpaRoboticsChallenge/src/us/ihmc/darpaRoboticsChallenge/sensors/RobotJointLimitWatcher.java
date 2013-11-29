@@ -18,12 +18,14 @@ import java.util.ArrayList;
  */
 public class RobotJointLimitWatcher implements RobotController
 {
-   private final YoVariableRegistry registry;
+   protected final YoVariableRegistry registry;
 
-   private DoubleYoVariable[] variablesToTrack;
+   protected DoubleYoVariable[] variablesToTrack;
 
-   private YoVariableLimitChecker[] limitCheckers;
-   private OneDoFJoint[] oneDoFJoints;
+   protected YoVariableLimitChecker[] limitCheckers;
+   protected OneDoFJoint[] oneDoFJoints;
+
+   protected YoVariableRegistry doNotRegister = new YoVariableRegistry("DoNotRegister");
 
    public RobotJointLimitWatcher(OneDoFJoint[] oneDoFJoints)
    {
@@ -35,7 +37,6 @@ public class RobotJointLimitWatcher implements RobotController
       variablesToTrack = new DoubleYoVariable[numberOfJoints];
       limitCheckers = new YoVariableLimitChecker[numberOfJoints];
 
-      YoVariableRegistry doNotRegister = new YoVariableRegistry("DoNotRegister");
       for (int i = 0; i < numberOfJoints; i++)
       {
          OneDoFJoint oneDoFJoint = oneDoFJoints[i];
@@ -47,7 +48,7 @@ public class RobotJointLimitWatcher implements RobotController
          double lowerLimit = oneDoFJoint.getJointLimitLower() + thresholdAmount;
          double upperLimit = oneDoFJoint.getJointLimitUpper() - thresholdAmount;
 
-         limitCheckers[i] = new YoVariableLimitChecker(variablesToTrack[i], lowerLimit, upperLimit, registry);
+         limitCheckers[i] = new YoVariableLimitChecker(variablesToTrack[i], "limit", lowerLimit, upperLimit, registry);
       }
    }
 
@@ -77,19 +78,5 @@ public class RobotJointLimitWatcher implements RobotController
    public String getDescription()
    {
       return null;    // To change body of implemented methods use File | Settings | File Templates.
-   }
-
-   public ArrayList<Pair<String, YoVariableLimitChecker.Status>> getStatus()
-   {
-      ArrayList<Pair<String, YoVariableLimitChecker.Status>> ret = new ArrayList<Pair<String, YoVariableLimitChecker.Status>>();
-
-      for (int i = 0; i < limitCheckers.length; i++)
-      {
-         Pair<String, YoVariableLimitChecker.Status> pair = new Pair<String, YoVariableLimitChecker.Status>(oneDoFJoints[i].getName(),
-                                                               limitCheckers[i].getStatus());
-         ret.add(pair);
-      }
-
-      return ret;
    }
 }
