@@ -20,11 +20,15 @@ import us.ihmc.utilities.math.geometry.stringStretcher2d.StringStretcher2d;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.VariableChangedListener;
+import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.trajectory.CubicPolynomialTrajectoryGenerator;
+import com.yobotics.simulationconstructionset.util.trajectory.YoVariableDoubleProvider;
 
 public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGenerator
 {
@@ -38,8 +42,18 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final DesiredComHeightProvider desiredComHeightProvider;
    
    private final BooleanYoVariable hasBeenInitializedWithNextStep = new BooleanYoVariable("hasBeenInitializedWithNextStep", registry);
-   
+
    private final DoubleYoVariable offsetHeightAboveGround = new DoubleYoVariable("offsetHeightAboveGround", registry);
+   
+   private final DoubleYoVariable offsetHeightAboveGroundPrevValue = new DoubleYoVariable("offsetHeightAboveGroundPrevValue", registry);
+   private final DoubleYoVariable offsetHeightAboveGroundChangedTime = new DoubleYoVariable("offsetHeightAboveGroundChangedTime", registry);
+   private final YoVariableDoubleProvider offsetHeightAboveGroundInitialPositionProvider = new YoVariableDoubleProvider(offsetHeightAboveGroundPrevValue);
+   private final YoVariableDoubleProvider offsetHeightAboveGroundFinalPositionProvider = new YoVariableDoubleProvider(offsetHeightAboveGround);
+   private final YoVariableDoubleProvider offsetHeightAboveGroundTrajectoryOutput = new YoVariableDoubleProvider("offsetHeightAboveGroundTrajectoryOutput", registry);
+   private final YoVariableDoubleProvider offsetHeightAboveGroundTrajectoryTimeProvider = new YoVariableDoubleProvider("offsetHeightAboveGroundTrajectoryTimeProvider", registry);
+   private final CubicPolynomialTrajectoryGenerator offsetHeightAboveGroundTrajectory = new CubicPolynomialTrajectoryGenerator(
+         "offsetHeightAboveGroundTrajectory", offsetHeightAboveGroundInitialPositionProvider, offsetHeightAboveGroundFinalPositionProvider,
+         offsetHeightAboveGroundTrajectoryTimeProvider, registry);
 
    private final DoubleYoVariable minimumHeightAboveGround = new DoubleYoVariable("minimumHeightAboveGround", registry);
    private final DoubleYoVariable nominalHeightAboveGround = new DoubleYoVariable("nominalHeightAboveGround", registry);
@@ -67,14 +81,29 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private WalkOnTheEdgesManager walkOnTheEdgesManager;
    private double extraCoMMaxHeightWithToes = 0.0;
    
-   public LookAheadCoMHeightTrajectoryGenerator(DesiredComHeightProvider desiredComHeightProvider, double minimumHeightAboveGround, 
-         double nominalHeightAboveGround, double maximumHeightAboveGround, 
-         double doubleSupportPercentageIn, 
+   private final DoubleYoVariable yoTime;
+   
+   public LookAheadCoMHeightTrajectoryGenerator(DesiredComHeightProvider desiredComHeightProvider, double minimumHeightAboveGround,
+         double nominalHeightAboveGround, double maximumHeightAboveGround, double doubleSupportPercentageIn, final DoubleYoVariable yoTime,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.desiredComHeightProvider = desiredComHeightProvider;
       
-      setOffsetHeightAboveGround(0.0);
+      this.yoTime = yoTime;
+      offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
+      offsetHeightAboveGroundTrajectoryTimeProvider.set(0.5);
+      offsetHeightAboveGround.set(0.0);
+      offsetHeightAboveGroundPrevValue.set(0.0);
+      offsetHeightAboveGround.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable v)
+         {
+            offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
+            offsetHeightAboveGroundTrajectory.initialize();
+         }
+      });
+      
       setMinimumHeightAboveGround(minimumHeightAboveGround);
       setNominalHeightAboveGround(nominalHeightAboveGround);
       setMaximumHeightAboveGround(maximumHeightAboveGround);
@@ -174,11 +203,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       extraCoMMaxHeightWithToes = walkOnTheEdgesManager.getExtraCoMMaxHeightWithToes();
    }
    
-   private void setOffsetHeightAboveGround(double offsetHeightAboveGround)
-   {
-      this.offsetHeightAboveGround.set(offsetHeightAboveGround);
-   }
-
    public void setMinimumHeightAboveGround(double minimumHeightAboveGround)
    {
       this.minimumHeightAboveGround.set(minimumHeightAboveGround);
@@ -228,7 +252,10 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
 
    private void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
    {
-      if (desiredComHeightProvider != null) offsetHeightAboveGround.set(desiredComHeightProvider.getComHeightOffset());
+      if (desiredComHeightProvider != null && desiredComHeightProvider.isNewComHeightInformationAvailable())
+      {
+         offsetHeightAboveGround.set(desiredComHeightProvider.getComHeightOffset());
+      }
       
       Footstep transferFromFootstep = transferToAndNextFootstepsData.getTransferFromFootstep();
       Footstep transferToFootstep = transferToAndNextFootstepsData.getTransferToFootstep();
@@ -576,8 +603,14 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
 
    private void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, Point2d queryPoint)
    {
-      // +++JEP: Comment this line out if you want to use the offsetHeight parameter in the gui...
-      if (desiredComHeightProvider != null) offsetHeightAboveGround.set(desiredComHeightProvider.getComHeightOffset());
+      if (desiredComHeightProvider != null && desiredComHeightProvider.isNewComHeightInformationAvailable())
+      {
+         offsetHeightAboveGround.set(desiredComHeightProvider.getComHeightOffset());
+      }
+      offsetHeightAboveGroundTrajectory.compute(yoTime.getDoubleValue() - offsetHeightAboveGroundChangedTime.getDoubleValue());
+      offsetHeightAboveGroundTrajectoryOutput.set(offsetHeightAboveGroundTrajectory.getValue());
+      
+      offsetHeightAboveGroundPrevValue.set(offsetHeightAboveGroundTrajectory.getValue());
       
 //      if (projectionSegment == null)
 //      {
@@ -589,7 +622,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       double splineQuery = projectionSegment.percentageAlongLineSegment(queryPoint) * projectionSegment.length();
 
       double[] splineOutput = spline.getZSlopeAndSecondDerivative(splineQuery);
-      double z = splineOutput[0] + offsetHeightAboveGround.getDoubleValue();
+      double z = splineOutput[0] + offsetHeightAboveGroundTrajectoryOutput.getValue();
       double dzds = splineOutput[1];
       double ddzdds = splineOutput[2];
 
