@@ -18,114 +18,119 @@ import us.ihmc.utilities.screwTheory.SpatialForceVector;
 
 public class OptimizerPlaneContactModel implements OptimizerContactModel
 {
-	private double rhoMin;
-	private static final int VECTORS = 3;
-	private static final int MAXPOINTS = 4;
+   private double rhoMin;
+   private static final int VECTORS = 4;
+   private static final int MAXPOINTS = 4;
    private int numberOfPointsInContact = MAXPOINTS;
-	private static final int MAX_RHO_SIZE = MAXPOINTS * VECTORS;
-	private static final double ANGLE_INCREMENT = 2 * Math.PI / ((double) VECTORS);
-	private double mu = 0.3;
-	private double wRho;
-	private final DenseMatrix64F[] rhoQ = new DenseMatrix64F[MAX_RHO_SIZE];
-	private SpatialForceVector tempForceVector= new SpatialForceVector();
-	private final Matrix3d tempTransformLinearPart = new Matrix3d();
-	private final Vector3d tempLinearPart = new Vector3d();
-	private final Vector3d tempArm = new Vector3d();
-	private final FramePoint tempFramePoint = new FramePoint();
-	private final FrameVector tempContactNormalVector = new FrameVector();
+   private static final int MAX_RHO_SIZE = MAXPOINTS * VECTORS;
+   private static final double ANGLE_INCREMENT = 2 * Math.PI / (VECTORS);
+   private double mu = 0.3;
+   private double wRho;
+   private final DenseMatrix64F[] rhoQ = new DenseMatrix64F[MAX_RHO_SIZE];
+   private final SpatialForceVector tempForceVector = new SpatialForceVector();
+   private final Matrix3d tempTransformLinearPart = new Matrix3d();
+   private final Vector3d tempLinearPart = new Vector3d();
+   private final Vector3d tempArm = new Vector3d();
+   private final FramePoint tempFramePoint = new FramePoint();
+   private final FrameVector tempContactNormalVector = new FrameVector();
 
-	public OptimizerPlaneContactModel()
-	{
-		for (int i = 0; i < MAXPOINTS; i++)
-		{
-			for (int j = 0; j < VECTORS; j++)
-			{
-				int rhoPosition = i * VECTORS + j;
-				rhoQ[rhoPosition]= new DenseMatrix64F(6,1);
-			}
-		}
-	}
+   public OptimizerPlaneContactModel()
+   {
+      for (int i = 0; i < MAXPOINTS; i++)
+      {
+         for (int j = 0; j < VECTORS; j++)
+         {
+            int rhoPosition = i * VECTORS + j;
+            rhoQ[rhoPosition] = new DenseMatrix64F(6, 1);
+         }
+      }
+   }
 
-	private final AxisAngle4d normalContactVectorRotation = new AxisAngle4d();
-	
-	public void setup(PlaneContactState plane, double wRho, double rhoMin)
-	{
-		if (!plane.inContact())
-			return;
-		
-		this.mu = plane.getCoefficientOfFriction();
-		numberOfPointsInContact = plane.getNumberOfContactPointsInContact();
-		plane.getContactNormalFrameVector(tempContactNormalVector);
-		tempContactNormalVector.changeFrame(plane.getPlaneFrame());
-		tempContactNormalVector.normalize();
-		GeometryTools.getRotationBasedOnNormal(normalContactVectorRotation, tempContactNormalVector.getVector());
-		
-		if (numberOfPointsInContact > MAXPOINTS)
-		{
-			throw new RuntimeException("Unhandled number of contact points: " + numberOfPointsInContact);
-		}
+   private final AxisAngle4d normalContactVectorRotation = new AxisAngle4d();
 
-		int i = -1;
-		
-		for (ContactPoint contactPoint : plane.getContactPoints())
-		{
-			if (!contactPoint.isInContact())
-			   continue;
-			
-			i++;
-			
-			tempFramePoint.setAndChangeFrame(contactPoint.getPosition());
-			
-			for (int j = 0; j < VECTORS; j++)
-			{
-				int rhoPosition = i * VECTORS + j;
+   public void setup(PlaneContactState plane, double wRho, double rhoMin)
+   {
+      if (!plane.inContact())
+         return;
 
-				double angle = j * ANGLE_INCREMENT;
-				// Compute the linear part considering a normal contact vector pointing up
-            tempLinearPart.set(Math.cos(angle)*mu, Math.sin(angle)*mu, 1);
-				// Transforming the result to consider the actual normal contact vector
+      this.mu = plane.getCoefficientOfFriction();
+      numberOfPointsInContact = plane.getNumberOfContactPointsInContact();
+      plane.getContactNormalFrameVector(tempContactNormalVector);
+      tempContactNormalVector.changeFrame(plane.getPlaneFrame());
+      tempContactNormalVector.normalize();
+      GeometryTools.getRotationBasedOnNormal(normalContactVectorRotation, tempContactNormalVector.getVector());
+
+      if (numberOfPointsInContact > MAXPOINTS)
+      {
+         throw new RuntimeException("Unhandled number of contact points: " + numberOfPointsInContact);
+      }
+
+      int i = -1;
+
+      for (ContactPoint contactPoint : plane.getContactPoints())
+      {
+         if (!contactPoint.isInContact())
+            continue;
+
+         i++;
+
+         tempFramePoint.setAndChangeFrame(contactPoint.getPosition());
+
+         for (int j = 0; j < VECTORS; j++)
+         {
+            int rhoPosition = i * VECTORS + j;
+
+            double angle = j * ANGLE_INCREMENT;
+
+            // Compute the linear part considering a normal contact vector pointing up
+            tempLinearPart.set(Math.cos(angle) * mu, Math.sin(angle) * mu, 1);
+
+            // Transforming the result to consider the actual normal contact vector
             tempTransformLinearPart.set(normalContactVectorRotation);
-				tempTransformLinearPart.transform(tempLinearPart);
-				tempLinearPart.normalize();
+            tempTransformLinearPart.transform(tempLinearPart);
+            tempLinearPart.normalize();
 
-				tempArm.set(tempFramePoint.getX(), tempFramePoint.getY(), tempFramePoint.getZ());
-				tempForceVector.setUsingArm(plane.getPlaneFrame(), tempLinearPart, tempArm);
-				tempForceVector.changeFrame(plane.getFrameAfterParentJoint());
-				
-				tempForceVector.packMatrix(rhoQ[rhoPosition]);
-			}
-		}
-		
+            tempArm.set(tempFramePoint.getX(), tempFramePoint.getY(), tempFramePoint.getZ());
+            tempForceVector.setUsingArm(plane.getPlaneFrame(), tempLinearPart, tempArm);
+            tempForceVector.changeFrame(plane.getFrameAfterParentJoint());
+
+            tempForceVector.packMatrix(rhoQ[rhoPosition]);
+         }
+      }
+
       this.wRho = wRho;
       this.rhoMin = rhoMin;
-	}
+   }
 
    @Deprecated
-	public void setup(double coefficientOfFriction, List<FramePoint> contactPoints, FrameVector normalContactVector, ReferenceFrame endEffectorFrame, double wRho, double rhoMin)
-	{
-		this.mu = coefficientOfFriction;
-		numberOfPointsInContact = contactPoints.size();
+   public void setup(double coefficientOfFriction, List<FramePoint> contactPoints, FrameVector normalContactVector, ReferenceFrame endEffectorFrame,
+                     double wRho, double rhoMin)
+   {
+      this.mu = coefficientOfFriction;
+      numberOfPointsInContact = contactPoints.size();
       tempContactNormalVector.setAndChangeFrame(normalContactVector);
       tempContactNormalVector.changeFrame(contactPoints.get(0).getReferenceFrame());
       tempContactNormalVector.normalize();
       GeometryTools.getRotationBasedOnNormal(normalContactVectorRotation, tempContactNormalVector.getVector());
 
-		if (numberOfPointsInContact > MAXPOINTS)
-		{
-			throw new RuntimeException("Unhandled number of contact points: " + numberOfPointsInContact);
-		}
+      if (numberOfPointsInContact > MAXPOINTS)
+      {
+         throw new RuntimeException("Unhandled number of contact points: " + numberOfPointsInContact);
+      }
 
-		for (int i = 0; i < numberOfPointsInContact; i++)
-		{
-		   tempFramePoint.setAndChangeFrame(contactPoints.get(i));
-			
-			for (int j = 0; j < VECTORS; j++)
-			{
-				int rhoPosition = i * VECTORS + j;
+      for (int i = 0; i < numberOfPointsInContact; i++)
+      {
+         tempFramePoint.setAndChangeFrame(contactPoints.get(i));
 
-				double angle = j * ANGLE_INCREMENT;
+         for (int j = 0; j < VECTORS; j++)
+         {
+            int rhoPosition = i * VECTORS + j;
+
+            double angle = j * ANGLE_INCREMENT;
+
             // Compute the linear part considering a normal contact vector pointing up
-            tempLinearPart.set(Math.cos(angle)*mu, Math.sin(angle)*mu, 1);
+            tempLinearPart.set(Math.cos(angle) * mu, Math.sin(angle) * mu, 1);
+
             // Transforming the result to consider the actual normal contact vector
             tempTransformLinearPart.set(normalContactVectorRotation);
             tempTransformLinearPart.transform(tempLinearPart);
@@ -133,57 +138,67 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
 
             tempArm.set(tempFramePoint.getX(), tempFramePoint.getY(), tempFramePoint.getZ());
             tempForceVector.setUsingArm(tempFramePoint.getReferenceFrame(), tempLinearPart, tempArm);
-				tempForceVector.changeFrame(endEffectorFrame);
+            tempForceVector.changeFrame(endEffectorFrame);
 
-				tempForceVector.packMatrix(rhoQ[rhoPosition]);
-			}
-		}
-		this.wRho = wRho;
-		this.rhoMin = rhoMin;
-	}
+            tempForceVector.packMatrix(rhoQ[rhoPosition]);
+         }
+      }
 
-	public int getRhoSize()
-	{
-		return VECTORS*numberOfPointsInContact;
-	}
+      this.wRho = wRho;
+      this.rhoMin = rhoMin;
+   }
 
-	public int getPhiSize()
-	{
-		return 0;
-	}
+   @Override
+   public int getRhoSize()
+   {
+      return VECTORS * numberOfPointsInContact;
+   }
 
-	public double getRhoMin(int i)
-	{
-		return rhoMin;
-	}
+   @Override
+   public int getPhiSize()
+   {
+      return 0;
+   }
 
-	public double getPhiMin(int i)
-	{
-		return 0;
-	}
+   @Override
+   public double getRhoMin(int i)
+   {
+      return rhoMin;
+   }
 
-	public double getPhiMax(int i)
-	{
-		return 0;
-	}
+   @Override
+   public double getPhiMin(int i)
+   {
+      return 0;
+   }
 
-	public void packQRhoBodyFrame(int i, SpatialForceVector spatialForceVector, ReferenceFrame referenceFrame)
-	{
-		spatialForceVector.set(referenceFrame, rhoQ[i]);
-	}
+   @Override
+   public double getPhiMax(int i)
+   {
+      return 0;
+   }
 
-	public void packQPhiBodyFrame(int i, SpatialForceVector spatialForceVector, ReferenceFrame referenceFrame)
-	{
-	}
+   @Override
+   public void packQRhoBodyFrame(int i, SpatialForceVector spatialForceVector, ReferenceFrame referenceFrame)
+   {
+      spatialForceVector.set(referenceFrame, rhoQ[i]);
+   }
 
-	public double getWPhi()
-	{
-		return Double.NaN;
-	}
+   @Override
+   public void packQPhiBodyFrame(int i, SpatialForceVector spatialForceVector, ReferenceFrame referenceFrame)
+   {
+   }
 
-	public double getWRho()
-	{
-		return wRho;
-	}
+   @Override
+   public double getWPhi()
+   {
+      return Double.NaN;
+   }
+
+   @Override
+   public double getWRho()
+   {
+      return wRho;
+   }
 
 }

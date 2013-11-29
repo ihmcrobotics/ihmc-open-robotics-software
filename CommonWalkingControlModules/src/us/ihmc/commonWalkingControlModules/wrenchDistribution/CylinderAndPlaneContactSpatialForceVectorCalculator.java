@@ -25,6 +25,7 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
 {
    private final ReferenceFrame centerOfMassFrame;
    private final Map<EndEffector, SpatialForceVector> spatialForceVectors = new LinkedHashMap<EndEffector, SpatialForceVector>();
+
    private final DenseMatrix64F tempVectorMatrix = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
    private final DenseMatrix64F tempSum = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
    private List<? extends EndEffector> endEffectors;
@@ -51,7 +52,7 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
    private final DenseMatrix64F qPhi;
 
    private final DenseMatrix64F rhoMean;
-   private final DenseMatrix64F rhoDelta;
+   private final DenseMatrix64F rhoMeanLoadedEndEffectors;
 
 
    public CylinderAndPlaneContactSpatialForceVectorCalculator(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry,
@@ -62,7 +63,7 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
       qRho = new DenseMatrix64F(wrenchLength, rhoSize);
       qPhi = new DenseMatrix64F(wrenchLength, phiSize);
       rhoMean = new DenseMatrix64F(rhoSize, 1);
-      rhoDelta = new DenseMatrix64F(4, 1);
+      rhoMeanLoadedEndEffectors = new DenseMatrix64F(4, 1);
 
       visualize = dynamicGraphicObjectsListRegistry != null;
       String name = getClass().getSimpleName();
@@ -146,12 +147,26 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
 
    public void computeWrenches(List<? extends EndEffector> endEffectors, DenseMatrix64F rho, DenseMatrix64F phi)
    {
-      int iRho = 0;
-      int phiLocation = 0;
-      rhoMean.zero();
-      rhoDelta.reshape(endEffectors.size(), 1);
       this.endEffectors = endEffectors;
 
+      int iRho = 0;
+      int phiLocation = 0;
+
+      rhoMean.zero();
+
+      int loadedEndEffectors = 0;
+      for (int i = 0; i < endEffectors.size(); i++)
+      {
+         if (endEffectors.get(i).isLoadBearing())
+         {
+            loadedEndEffectors++;
+         }
+      }
+
+      rhoMeanLoadedEndEffectors.reshape(loadedEndEffectors, 1);
+      rhoMeanLoadedEndEffectors.zero();
+
+      int loadedEndEffector = 0;
       for (int i = 0; i < endEffectors.size(); i++)
       {
          EndEffector endEffector = endEffectors.get(i);
@@ -171,23 +186,17 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
                }
 
                iRho++;
-
             }
 
-            DenseMatrix64F rhoSingleEndEffector = CommonOps.extract(rho, (iRho - model.getRhoSize()), iRho, 0, 1);
-            double rhoMax = CommonOps.elementMax(rhoSingleEndEffector);
-            double rhoMin = CommonOps.elementMin(rhoSingleEndEffector);
-            double rhoSum = CommonOps.elementSum(rhoSingleEndEffector);
 
-
-            double rhoOfIAverage = rhoSum / model.getRhoSize();
-            double rhoDeltaValue = (rhoMax - rhoMin) / rhoOfIAverage;
-            rhoDelta.set(i, rhoDeltaValue);
-
+            DenseMatrix64F rhosSingleEndEffector = CommonOps.extract(rho, (iRho - model.getRhoSize()), iRho, 0, 1);
+            double rhosSum = CommonOps.elementSum(rhosSingleEndEffector);
+            double rhosAverage = rhosSum / model.getRhoSize();
+            rhoMeanLoadedEndEffectors.set(loadedEndEffector, rhosAverage);
 
             for (int index = (iRho - model.getRhoSize()); index < iRho; index++)
             {
-               rhoMean.set(index, rhoOfIAverage);
+               rhoMean.set(index, rhosAverage);
             }
 
             for (int iPhiModel = 0; iPhiModel < model.getPhiSize(); iPhiModel++)
@@ -206,6 +215,8 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
 
             SpatialForceVector spatialForceVector = getOrCreateSpatialForceVector(endEffector);
             spatialForceVector.set(centerOfMassFrame, tempSum);
+
+            loadedEndEffector++;
          }
          else
          {
@@ -276,32 +287,56 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
    {
       CommonOps.setIdentity(wRhoPenalizerToPack);
       CommonOps.scale(wRhoMaxPenalty, wRhoPenalizerToPack);
-      double rhoDeltaSum = CommonOps.elementSum(rhoDelta);
 
       if (endEffectors == null)
       {
          return;
       }
 
-      int iRho = 0;
-
-      for (int i = 0; i < endEffectors.size(); i++)
+      if (rhoMeanLoadedEndEffectors.getNumElements() == 1)
       {
-         EndEffector endEffector = endEffectors.get(i);
-         if (endEffector.isLoadBearing())
+         return;
+      }
+      else if (rhoMeanLoadedEndEffectors.getNumElements() == 2)
+      {
+         int iRho = 0;
+         int iEndEffectorLoaded = 0;
+         for (int i = 0; i < endEffectors.size(); i++)
          {
-            double scalar = 10.0 * rhoDelta.get(i) / (rhoDeltaSum - rhoDelta.get(i));
-
-            OptimizerContactModel model = endEffector.getContactModel();
-            for (int index = iRho; index < (iRho + model.getRhoSize()); index++)
+            EndEffector endEffector = endEffectors.get(i);
+            if (endEffector.isLoadBearing())
             {
-               wRhoPenalizerToPack.set(index, index, wRhoMaxPenalty * scalar);
-            }
+               double meanRhoLoadedOne = rhoMeanLoadedEndEffectors.get(iEndEffectorLoaded);
+               double meanRhoLoadedTwo = rhoMeanLoadedEndEffectors.get(iEndEffectorLoaded + 1);
 
-            iRho++;
+               double penaltyScalingOne;
+               double penaltyScalingTwo;
+
+               double loadFactorOne = meanRhoLoadedOne / (meanRhoLoadedOne + meanRhoLoadedTwo);
+               double loadFactorTwo = 1.0 - loadFactorOne;
+               penaltyScalingOne = loadFactorTwo;
+               penaltyScalingTwo = loadFactorOne;
+
+               int numberBiasVectors = endEffector.getContactModel().getRhoSize();
+               for (int index = iRho; index < (iRho + numberBiasVectors); index++)
+               {
+                  wRhoPenalizerToPack.set(index, index, wRhoMaxPenalty * penaltyScalingOne);
+                  wRhoPenalizerToPack.set((index + numberBiasVectors), (index + numberBiasVectors), wRhoMaxPenalty * penaltyScalingTwo);
+               }
+
+               iRho++;
+               iEndEffectorLoaded++;
+
+               return;
+            }
          }
       }
-
+      else
+      {
+         throw new RuntimeException(
+             "The used optimizer that tries to keep the CoP in the middle of the endeffectors currently only works if the loaded endeffectors are feet only. In "
+             + getClass().toString());
+      }
    }
 
    public void packQphi(int i, DenseMatrix64F tempVector)

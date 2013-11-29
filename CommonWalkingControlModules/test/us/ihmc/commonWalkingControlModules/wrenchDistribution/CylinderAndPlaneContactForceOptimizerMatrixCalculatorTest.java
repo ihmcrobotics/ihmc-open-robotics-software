@@ -31,7 +31,7 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
    private static final double HIGH_ACCURACY_THRESHOLD = 1.00;    // Newtons
    private static final double ROBOT_WEIGHT = 9.81 * 100;    // Newtons
    private static final boolean DEBUG = true;
-   private ReferenceFrame comFrame = ReferenceFrame.constructAWorldFrame("com");
+   private final ReferenceFrame comFrame = ReferenceFrame.constructAWorldFrame("com");
 
    @Test
    public void test4limbsTogether()
@@ -161,10 +161,10 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
       leftFootContactPoints.add(new FramePoint(leftFootPlaneFrame, -footLengthBackward, footHalfWidth, 0));
       leftFootContactPoints.add(new FramePoint(leftFootPlaneFrame, -footLengthBackward, -footHalfWidth, 0));
       endEffectorsWithDefinedContactModels.add(leftFoot);
-      
+
       FrameVector normalContactVector = new FrameVector(leftFootPlaneFrame, 0.0, 0.0, 1.0);
 
-      planeContactModel.setup(0.3, leftFootContactPoints, normalContactVector, leftFootFrame, Double.NaN, 0.15); // TODO: don't use NaN. Currently not being used for anything though
+      planeContactModel.setup(0.3, leftFootContactPoints, normalContactVector, leftFootFrame, Double.NaN, 0.15);    // TODO: don't use NaN. Currently not being used for anything though
    }
 
    public void addFootAtPose(List<EndEffector> endEffectorsWithDefinedContactModels, String name, FramePose pose)
@@ -187,7 +187,7 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
 
       FrameVector normalContactVector = new FrameVector(leftFootPlaneFrame, 0.0, 0.0, 1.0);
 
-      planeContactModel.setup(0.3, contactPoints, normalContactVector, footFrame, Double.NaN, 0.15); // TODO: don't use NaN. Currently not being used for anything though
+      planeContactModel.setup(0.3, contactPoints, normalContactVector, footFrame, Double.NaN, 0.15);    // TODO: don't use NaN. Currently not being used for anything though
 
       footFrame.updatePose(pose);
    }
@@ -208,7 +208,7 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
 
       endEffectorsWithDefinedContactModels.add(leftHand);
 
-      cylinderCon.setup(mu, cylinderRadius, cylinderHalfHandWidth, cylinderTensileGripStrength, gripWeaknessFactor, leftHandFrame, Double.NaN, Double.NaN); // TODO: don't use NaN. Currently not being used for anything though
+      cylinderCon.setup(mu, cylinderRadius, cylinderHalfHandWidth, cylinderTensileGripStrength, gripWeaknessFactor, leftHandFrame, Double.NaN, Double.NaN);    // TODO: don't use NaN. Currently not being used for anything though
    }
 
    public void addHandAtPose(List<EndEffector> endEffectorsWithDefinedContactModels, String name, FramePose pose)
@@ -227,7 +227,7 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
 
       endEffectorsWithDefinedContactModels.add(leftHand);
 
-      cylinderCon.setup(mu, cylinderRadius, cylinderHalfHandWidth, cylinderTensileGripStrength, gripWeaknessFactor, handFrame, Double.NaN, Double.NaN); // TODO: don't use NaN. Currently not being used for anything though
+      cylinderCon.setup(mu, cylinderRadius, cylinderHalfHandWidth, cylinderTensileGripStrength, gripWeaknessFactor, handFrame, Double.NaN, Double.NaN);    // TODO: don't use NaN. Currently not being used for anything though
       handFrame.updatePose(pose);
    }
 
@@ -236,11 +236,11 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
    {
       int rhoSize = CylinderAndPlaneContactForceOptimizerNative.rhoSize;
       int phiSize = CylinderAndPlaneContactForceOptimizerNative.phiSize;
-      CylinderAndPlaneContactMatrixCalculator calc = new CylinderAndPlaneContactMatrixCalculator(comFrame,
-                                                                      new YoVariableRegistry("rootRegistry"), new DynamicGraphicObjectsListRegistry(), rhoSize, phiSize);
-      CylinderAndPlaneContactSpatialForceVectorCalculator vectorCalc =
-         new CylinderAndPlaneContactSpatialForceVectorCalculator(comFrame,
-               new YoVariableRegistry("rootRegistry"), new DynamicGraphicObjectsListRegistry(), rhoSize, phiSize);
+      CylinderAndPlaneContactMatrixCalculator calc = new CylinderAndPlaneContactMatrixCalculator(comFrame, new YoVariableRegistry("rootRegistry"),
+                                                        new DynamicGraphicObjectsListRegistry(), rhoSize, phiSize);
+      CylinderAndPlaneContactSpatialForceVectorCalculator vectorCalc = new CylinderAndPlaneContactSpatialForceVectorCalculator(comFrame,
+                                                                          new YoVariableRegistry("rootRegistry"), new DynamicGraphicObjectsListRegistry(),
+                                                                          rhoSize, phiSize);
       CylinderAndPlaneContactForceOptimizerNativeInput nativeSolverInput = new CylinderAndPlaneContactForceOptimizerNativeInput();
       CylinderAndPlaneContactForceOptimizerNativeOutput nativeSolverOutput;
       CylinderAndPlaneContactForceOptimizerNative nativeSolver = new CylinderAndPlaneContactForceOptimizerNative(new YoVariableRegistry("rootRegistry"));
