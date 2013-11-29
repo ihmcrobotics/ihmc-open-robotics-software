@@ -212,8 +212,6 @@ public class CVXGenMomentumOptimizerBridge
             momentumOptimizerWithGRFPenalizedSmootherNativeInput.setRateOfChangeOfGroundReactionForceRegularization(wRhoSmoother);
 
             wrenchMatrixCalculator.packRhoPreviousAverageForEndEffectors(rhoPreviousMean);
-
-//          System.out.println(" rhoPreviousMean " + rhoPreviousMean);
             wrenchMatrixCalculator.packWRhoPenalizer(wRhoPenalizer);
             momentumOptimizerWithGRFPenalizedSmootherNativeInput.setRhoPreviousAverage(rhoPreviousMean);
             momentumOptimizerWithGRFPenalizedSmootherNativeInput.setCenterOfPressurePenalizedRegularization(wRhoPenalizer);
