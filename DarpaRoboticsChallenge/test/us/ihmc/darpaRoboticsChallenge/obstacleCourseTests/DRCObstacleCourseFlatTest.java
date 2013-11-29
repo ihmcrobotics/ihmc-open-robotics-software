@@ -255,7 +255,7 @@ public class DRCObstacleCourseFlatTest
 
       
       final DoubleYoVariable pelvisOrientationError = (DoubleYoVariable) simulationConstructionSet.getVariable(
-            "WalkingHighLevelHumanoidController.RootJointAngularAccelerationControlModule.pelvisAxisAngleOrientationController", "pelvisOrientationError");
+            "WalkingHighLevelHumanoidController.RootJointAngularAccelerationControlModule.pelvisAxisAngleOrientationController", "pelvisOrientationErrorMagnitude");
       
       SimulationDoneCriterion checkPelvisOrientationError = new SimulationDoneCriterion()
       {
