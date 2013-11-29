@@ -97,37 +97,6 @@ public class DRCObstacleCourseTrialsTerrainTest
    }
 
    @Test
-   public void testWalkingOverSlopesInOneGo() throws SimulationExceededMaximumTimeException
-   {
-      BambooTools.reportTestStartedMessage();
-
-      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DRC_TRIALS_TRAINING_WALKING;
-      DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoSlopesTest", selectedLocation, selectedEnvironment, checkNothingChanged,
-              createMovie);
-
-      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
-      ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
-
-      setupCameraForWalkingOntoSlopes(simulationConstructionSet);
-
-      ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
-
-      FootstepDataList footstepDataList = createFootstepsForWalkingOverTheSlopesInOneGo(scriptedFootstepGenerator);
-      drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
-
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(25.0);
-
-      drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
-      drcSimulationTestHelper.checkNothingChanged();
-
-      assertTrue(success);
-
-      BambooTools.reportTestFinishedMessage();
-   }
-
-   @Test
    public void testWalkingOntoAndOverSlopesSideways() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -221,80 +190,6 @@ public class DRCObstacleCourseTrialsTerrainTest
       };
 
       RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.LEFT, footstepLocationsAndOrientations.length);
-
-      return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
-   }
-
-   private FootstepDataList createFootstepsForWalkingOverTheSlopesInOneGo(ScriptedFootstepGenerator scriptedFootstepGenerator)
-   {
-      double[][][] footstepLocationsAndOrientations = new double[][][]
-      {
-         {
-            {2.3042952395272107, 2.099103639312993, 0.08300550115576277}, {0.008564712511807942, 0.020796880999479492, 0.39719493301084063, 0.9174586206640588}
-         },
-         {
-            {2.2438392223423667, 2.4301081835735907, 0.08403924179877988}, {-2.3541587312585044E-5, 6.52874227824117E-5, 0.3826816600080084, 0.9238802640368833}
-         },
-         {
-            {2.559957386054418, 2.3968313267771966, 0.08368946845620837}, {0.020708747923442607, -0.008521572992644433, 0.39719568008053274, 0.9174606924977972}
-         },
-         {
-            {2.510944183358525, 2.71733237800806, 0.08573501648545975}, {-2.3541587312643723E-5, 6.528742278226826E-5, 0.3826816600080083, 0.9238802640368833}
-         },
-         {
-            {2.8326089239049694, 2.689602000226789, 0.09142682048335463}, {-0.008609706068681243, -0.020665608404279303, 0.3971977519142708, 0.9174599454281049}
-         },
-         {
-            {2.772493724911711, 2.98733761407194, 0.10631548779912296}, {0.05009344659025468, -0.11569658425567451, 0.3814764712443284, 0.9157404921085744}
-         },
-         {
-            {3.073622258730516, 2.939977143309511, 0.15201480268475412}, {0.06882173350957592, -0.12492489579563805, 0.39690338131292324, 0.9067111145836662}
-         },
-         {
-            {2.981204100121291, 3.22650456802866, 0.19488817010700143}, {0.05009344659025461, -0.11569658425567463, 0.38147647124432826, 0.9157404921085744}
-         },
-         {
-            {3.1478581820011984, 3.077098056356127, 0.19780760848662082}, {0.027655797469679846, -0.10797053956021793, 0.39482152866572157, 0.91197230218656}
-         },
-         {
-            {3.1978146686477316, 3.490781378124674, 0.21920041678533939}, {-0.022122479179226193, 0.13204979941530764, 0.3801610263565129, 0.9151781468265643}
-         },
-         {
-            {3.3718549202145276, 3.325866285074077, 0.21902384088506444}, {-0.069544360689838, 0.1286465338790443, 0.40007058881209756, 0.9047414963317927}
-         },
-         {
-            {3.3537557389708916, 3.6140416694284205, 0.1632400370292026}, {-0.05085584995787939, 0.11948685679992167, 0.38462614904803605, 0.9138923892043388}
-         },
-         {
-            {3.553037582619451, 3.4644533438527967, 0.14766935679714555}, {-0.02833712041897954, 0.11185077742051305, 0.3978926496409115, 0.9101471587378175}
-         },
-         {
-            {3.590341927483232, 3.8921459196255994, 0.1054025098673869}, {0.05121228832443446, -0.11547318705195618, 0.38034423542331747, 0.916177661360989}
-         },
-         {
-            {3.7559171159136944, 3.7304646882065513, 0.1111273005664001}, {0.06993266865319621, -0.12474423743929339, 0.3957572123950205, 0.9071518758830045}
-         },
-         {
-            {3.787138855941054, 4.114780949956089, 0.18245412905276812}, {0.05121228832443444, -0.11547318705195635, 0.3803442354233172, 0.916177661360989}
-         },
-         {
-            {3.9694344486636455, 3.95876822138877, 0.18963931728265956}, {0.05786280916869607, -0.0956702181547433, 0.3973823852421062, 0.9108163067120754}
-         },
-         {
-            {4.062521781233412, 4.400590147135958, 0.20540085578980427}, {-0.05166464606966071, 0.11915439876125945, 0.38358407269941464, 0.9143283068863556}
-         },
-         {
-            {4.219699221659784, 4.25282703993481, 0.20816320433604793}, {-0.08710349428188968, 0.08707483700493901, 0.4040318177114087, 0.906415602425986}
-         },
-         {
-            {4.139674102665004, 4.4851238194914425, 0.17471865565945816}, {-0.038855976356443125, 0.0904190923684487, 0.3863454391072473, 0.9170887647974332}
-         },
-         {
-            {4.27064450721793, 4.321769835013736, 0.18785385709416594}, {-0.07027779971217145, 0.12839647920949127, 0.39993352251567393, 0.9047809417546478}
-         },
-      };
-
-      RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.RIGHT, footstepLocationsAndOrientations.length);
 
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }
