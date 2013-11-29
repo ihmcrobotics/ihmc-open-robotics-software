@@ -15,6 +15,7 @@ import us.ihmc.utilities.math.MatrixTools;
 
 public class SDFLinkHolder
 {
+   private static final boolean DEBUG = false;
    
    // From SDF File
    private final String name;
@@ -113,7 +114,7 @@ public class SDFLinkHolder
       
       jointFrameToInertialFrame.get(inertialFrameRotation, CoMOffset);
       
-      if(!inertialFrameRotation.epsilonEquals(MatrixTools.IDENTITY, 1e-5))
+      if(!inertialFrameRotation.epsilonEquals(MatrixTools.IDENTITY, 1e-5) && DEBUG)
       {
          System.err.println("Warning: Non-zero rotation of the inertial matrix on link " + name);
       }
