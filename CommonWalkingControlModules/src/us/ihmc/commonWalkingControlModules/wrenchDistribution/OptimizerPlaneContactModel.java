@@ -148,54 +148,54 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
       this.rhoMin = rhoMin;
    }
 
-   @Override
+   
    public int getRhoSize()
    {
       return VECTORS * numberOfPointsInContact;
    }
 
-   @Override
+   
    public int getPhiSize()
    {
       return 0;
    }
 
-   @Override
+   
    public double getRhoMin(int i)
    {
       return rhoMin;
    }
 
-   @Override
+   
    public double getPhiMin(int i)
    {
       return 0;
    }
 
-   @Override
+   
    public double getPhiMax(int i)
    {
       return 0;
    }
 
-   @Override
+   
    public void packQRhoBodyFrame(int i, SpatialForceVector spatialForceVector, ReferenceFrame referenceFrame)
    {
       spatialForceVector.set(referenceFrame, rhoQ[i]);
    }
 
-   @Override
+   
    public void packQPhiBodyFrame(int i, SpatialForceVector spatialForceVector, ReferenceFrame referenceFrame)
    {
    }
 
-   @Override
+   
    public double getWPhi()
    {
       return Double.NaN;
    }
 
-   @Override
+   
    public double getWRho()
    {
       return wRho;
