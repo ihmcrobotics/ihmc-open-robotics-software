@@ -74,7 +74,7 @@ public class DRCObstacleCourseRampsTest
       
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.RAMP_TOP;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingDownRampWithMediumSteps", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie);
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingDownRampWithMediumSteps", "", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie);
       
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
@@ -145,7 +145,7 @@ public class DRCObstacleCourseRampsTest
    {
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.RAMP_BOTTOM;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingUpRampTest", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie);
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingUpRampTest", "", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
