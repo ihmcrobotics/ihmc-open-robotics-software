@@ -63,16 +63,10 @@ public class ScriptBasedFootstepProvider implements FootstepProvider
       if (loadedScriptFile) return;
       
 //      //TODO: Get to work for more than just left foot frame.
-      ReferenceFrame leftFootFrame = bipedFeet.get(RobotSide.LEFT).getBodyFrame();
-      Transform3D transformFromLeftFootToWorldFrame = leftFootFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());      
+      ReferenceFrame leftFootFrame = bipedFeet.get(RobotSide.LEFT).getPlaneFrame();
+      Transform3D transformFromLeftFootPlaneFrameToWorldFrame = leftFootFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());      
       
-      //TODO: Why does z translation need to be zero here?
-      Vector3d translation = new Vector3d();
-      transformFromLeftFootToWorldFrame.get(translation);
-      translation.setZ(0.0);
-      transformFromLeftFootToWorldFrame.setTranslation(translation);
-      
-      ArrayList<ScriptObject> scriptObjectsList = scriptFileLoader.readIntoList(transformFromLeftFootToWorldFrame); 
+      ArrayList<ScriptObject> scriptObjectsList = scriptFileLoader.readIntoList(transformFromLeftFootPlaneFrameToWorldFrame); 
       scriptObjects.addAll(scriptObjectsList);
 
       loadedScriptFile = true;
