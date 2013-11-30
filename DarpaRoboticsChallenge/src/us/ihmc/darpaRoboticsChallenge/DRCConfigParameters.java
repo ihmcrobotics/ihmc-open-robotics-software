@@ -86,7 +86,7 @@ public class DRCConfigParameters
    public static final String MULTISENSE_LEFT_CAMERA_TOPIC; 
    public static final String MULTISENSE_RIGHT_CAMERA_TOPIC;
 
-   public static final boolean USE_NEW_GAZEBO = false;
+   public static final int GAZEBO_VER = DRCLocalConfigParameters.GAZEBO_VER;
 
    static
    {
@@ -103,7 +103,7 @@ public class DRCConfigParameters
       {
     	  
     	  
-    	  if(USE_NEW_GAZEBO)
+    	  if(GAZEBO_VER >= 3)
     	  {
 	         MULTISENSE_CAMERA_STRING_BASE = "/multisense_sl/camera";
 	         // ROS Topics
