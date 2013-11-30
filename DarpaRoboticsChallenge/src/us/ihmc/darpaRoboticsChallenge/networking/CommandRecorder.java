@@ -29,6 +29,7 @@ public class CommandRecorder
       this.timestampProvider = timestampProvider;
    }
 
+
    public synchronized void startRecording(String originalFilename, Transform3D recordTransform)
    {
       try
@@ -52,11 +53,11 @@ public class CommandRecorder
          startTime = timestampProvider.getTimestamp();
          this.recordTransform.set(recordTransform);
          isRecording = true;
-         System.out.println("Started recording to " + proposedFilename);
+         System.out.println("CommandRecorder: Started recording to " + proposedFilename);
       }
       catch (IOException e)
       {
-         System.out.println("CommandRecorder; fileanme =" + originalFilename);
+         System.out.println("CommandRecorder: fileanme =" + originalFilename);
          throw new RuntimeException(e);
       }
    }
@@ -78,10 +79,10 @@ public class CommandRecorder
       }
       catch (Exception e1)
       {
-         System.err.print("Failed stop recording.");
+         System.err.print("CommandRecorder: Failed stop recording.");
       }
       
-      System.out.println("Stopped recording");
+      System.out.println("CommandRecorder: Stopped recording");
       startTime = Long.MIN_VALUE;
    }
 
