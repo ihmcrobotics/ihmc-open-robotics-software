@@ -2,6 +2,11 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 public class FootstepTimingParameters
 {
+   private static final double SWING_RANGE = 2.0;
+   private static final double TRANSFER_RANGE = 3.0;
+
+   private double speed = 0.0;
+   
    private double footstepPathSwingTime = 0.6;
    private double slowBlindWalkingSwingTime = 0.8;
    private double blindWalkingInMudSwingTime = 2.2;
@@ -9,7 +14,7 @@ public class FootstepTimingParameters
    private double footstepPathTransferTime = 0.25;
    private double slowBlindWalkingTransferTime = 0.35;
    private double blindWalkingInMudTransferTime = 0.6;
-
+   
    public FootstepTimingParameters()
    {
 
@@ -45,26 +50,15 @@ public class FootstepTimingParameters
       return footstepTimingParameters;
    }
 
+   // Expects 0 to 1
    public void setSpeed(double speed)
    {
-      double range = 2.0; //as in double speed or half-speed
-      scale(Math.pow(range, -2.0*(speed-0.5)));
-   }
-
-   public void scale(double scalar)
-   {
-      footstepPathSwingTime *= scalar;
-      slowBlindWalkingSwingTime *= scalar;
-      blindWalkingInMudSwingTime *= scalar;
-
-      footstepPathTransferTime *= scalar;
-      slowBlindWalkingTransferTime *= scalar;
-      blindWalkingInMudTransferTime *= scalar;
+      this.speed = -2.0*(speed-0.5);
    }
 
    public double getFootstepPathSwingTime()
    {
-      return footstepPathSwingTime;
+      return footstepPathSwingTime * Math.pow(SWING_RANGE, speed);
    }
 
    public void setFootstepPathSwingTime(double footstepPathSwingTime)
@@ -74,7 +68,7 @@ public class FootstepTimingParameters
 
    public double getSlowBlindWalkingSwingTime()
    {
-      return slowBlindWalkingSwingTime;
+      return slowBlindWalkingSwingTime * Math.pow(SWING_RANGE, speed);
    }
 
    public void setSlowBlindWalkingSwingTime(double slowBlindWalkingSwingTime)
@@ -84,7 +78,7 @@ public class FootstepTimingParameters
 
    public double getBlindWalkingInMudSwingTime()
    {
-      return blindWalkingInMudSwingTime;
+      return blindWalkingInMudSwingTime * Math.pow(SWING_RANGE, speed);
    }
 
    public void setBlindWalkingInMudSwingTime(double blindWalkingInMudSwingTime)
@@ -94,7 +88,7 @@ public class FootstepTimingParameters
 
    public double getFootstepPathTransferTime()
    {
-      return footstepPathTransferTime;
+      return footstepPathTransferTime * Math.pow(TRANSFER_RANGE, speed);
    }
 
    public void setFootstepPathTransferTime(double footstepPathTransferTime)
@@ -104,7 +98,7 @@ public class FootstepTimingParameters
 
    public double getSlowBlindWalkingTransferTime()
    {
-      return slowBlindWalkingTransferTime;
+      return slowBlindWalkingTransferTime * Math.pow(TRANSFER_RANGE, speed);
    }
 
    public void setSlowBlindWalkingTransferTime(double slowBlindWalkingTransferTime)
@@ -114,7 +108,7 @@ public class FootstepTimingParameters
 
    public double getBlindWalkingInMudTransferTime()
    {
-      return blindWalkingInMudTransferTime;
+      return blindWalkingInMudTransferTime * Math.pow(TRANSFER_RANGE, speed);
    }
 
    public void setBlindWalkingInMudTransferTime(double blindWalkingInMudTransferTime)
