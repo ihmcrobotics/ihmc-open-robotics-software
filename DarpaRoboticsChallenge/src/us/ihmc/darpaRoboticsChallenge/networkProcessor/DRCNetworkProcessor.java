@@ -93,8 +93,7 @@ public class DRCNetworkProcessor
          {
             rosNativeNetworkProcessor = null;
          }
-         new GazeboCameraReceiver(robotPoseBuffer, videoSettings, rosMainNode, networkingManager,
-               DRCSensorParameters.DEFAULT_FIELD_OF_VIEW, ppsTimestampOffsetProvider);
+         new GazeboCameraReceiver(robotPoseBuffer, videoSettings, rosMainNode, networkingManager,ppsTimestampOffsetProvider);
          CameraInfoReceiver cameraInfoServer = new MultiSenseCameraInfoReciever(rosMainNode, networkingManager.getControllerStateHandler());
          networkingManager.getControllerCommandHandler().setIntrinsicServer(cameraInfoServer);
          
