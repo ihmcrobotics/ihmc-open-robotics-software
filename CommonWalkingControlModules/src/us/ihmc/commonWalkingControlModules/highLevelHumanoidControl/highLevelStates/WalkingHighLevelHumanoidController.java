@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.endEffector.LegSingularityAndKneeCollapseAvoidanceControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
@@ -1742,31 +1743,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          zdCurrent = comVelocity.getZ(); // Just use com velocity for now for damping...
       }
       
-      RobotSide loadedLegThatMayCollapse = getSupportLeg();
-      
-      if (loadedLegThatMayCollapse == null)
-      {
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            if (footSwitches.get(robotSide).computeFootLoadPercentage() > 0.80)
-            {
-               loadedLegThatMayCollapse = robotSide;
-               break;
-            }
-         }
-      }
-      
-      if (loadedLegThatMayCollapse != null)
-      {
-         footEndEffectorControlModules.get(loadedLegThatMayCollapse).correctCoMForCollapsingAvoidanceInSingleSupport(comXYVelocity, comHeightDataBeforeSmoothing, zCurrent, referenceFrames.getPelvisZUpFrame());
-      }
-
-      // Check if we're getting closer to straight leg configuration, in such case, slow down progressively and finally ignore the desireds when they're too high
+      // Correct, if necessary, the CoM height trajectory to avoid singularity or knee collapsing
       for (RobotSide robotSide : RobotSide.values)
       {
          EndEffectorControlModule endEffectorControlModule = footEndEffectorControlModules.get(robotSide);
-         endEffectorControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(comXYVelocity, comHeightDataBeforeSmoothing, zCurrent, referenceFrames.getPelvisZUpFrame());
-         endEffectorControlModule.correctCoMHeightTrajectoryGeneratorForUnreachableFootStep(comHeightDataBeforeSmoothing);
+         endEffectorControlModule.correctCoMHeightTrajectory(comXYVelocity, comHeightDataBeforeSmoothing, zCurrent, referenceFrames.getPelvisZUpFrame(), footSwitches.get(robotSide).computeFootLoadPercentage());
       }
 
       coMHeightTimeDerivativesSmoother.smooth(comHeightDataAfterSmoothing, comHeightDataBeforeSmoothing);
@@ -1787,7 +1768,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (endEffectorControlModule.isInFlatSupportState() && endEffectorControlModule.isInSingularityNeighborhood())
          {
             // Ignore the desired height acceleration only if EndEffectorControlModule is not taking care of singularity during support
-            if (!EndEffectorControlModule.USE_SINGULARITY_AVOIDANCE_SUPPORT)
+            if (!LegSingularityAndKneeCollapseAvoidanceControlModule.USE_SINGULARITY_AVOIDANCE_SUPPORT)
                zddDesired = 0.0;
             
             double zTreshold = 0.01;
