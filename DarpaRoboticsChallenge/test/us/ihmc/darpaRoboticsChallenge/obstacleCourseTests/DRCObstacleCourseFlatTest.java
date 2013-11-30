@@ -103,7 +103,7 @@ public class DRCObstacleCourseFlatTest
 
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", "scripts/SimpleFlatGroundScript.xml", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, false);
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", "scripts/ExerciseAndJUnitScripts/SimpleFlatGroundScript.xml", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, false);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingUpToRamp(simulationConstructionSet);
