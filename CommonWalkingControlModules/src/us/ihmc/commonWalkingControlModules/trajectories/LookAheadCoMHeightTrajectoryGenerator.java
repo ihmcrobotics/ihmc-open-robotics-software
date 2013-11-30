@@ -96,7 +96,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       offsetHeightAboveGroundPrevValue.set(0.0);
       offsetHeightAboveGround.addVariableChangedListener(new VariableChangedListener()
       {
-         @Override
          public void variableChanged(YoVariable v)
          {
             offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
