@@ -93,14 +93,14 @@ public class DRCNetworkProcessor
             rosNativeNetworkProcessor = null;
          }
          new GazeboCameraReceiver(robotPoseBuffer, videoSettings, rosMainNode, networkingManager,
-               DRCSensorParameters.FIELD_OF_VIEW, ppsTimestampOffsetProvider);
+               DRCSensorParameters.DEFAULT_FIELD_OF_VIEW, ppsTimestampOffsetProvider);
          MultiSenseCameraInfoReciever cameraInfoServer = new MultiSenseCameraInfoReciever(rosMainNode, networkingManager.getControllerStateHandler());
          networkingManager.getControllerCommandHandler().setIntrinsicServer(cameraInfoServer);
          
          new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, fullRobotModel, robotBoundingBoxes,
                jointMap, fieldComputerClient, rosNativeNetworkProcessor, ppsTimestampOffsetProvider);
          
-         new FishEyeDataReceiver(robotPoseBuffer, videoSettings, rosMainNode, networkingManager, DRCSensorParameters.FIELD_OF_VIEW, ppsTimestampOffsetProvider);
+         new FishEyeDataReceiver(robotPoseBuffer, videoSettings, rosMainNode, networkingManager, DRCSensorParameters.DEFAULT_FIELD_OF_VIEW, ppsTimestampOffsetProvider);
          
          ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
          
