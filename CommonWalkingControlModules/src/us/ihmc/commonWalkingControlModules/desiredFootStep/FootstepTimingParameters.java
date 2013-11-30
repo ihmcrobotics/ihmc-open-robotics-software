@@ -53,8 +53,6 @@ public class FootstepTimingParameters
 
    public void scale(double scalar)
    {
-      System.out.println("scalar: " + scalar);
-      
       footstepPathSwingTime *= scalar;
       slowBlindWalkingSwingTime *= scalar;
       blindWalkingInMudSwingTime *= scalar;
