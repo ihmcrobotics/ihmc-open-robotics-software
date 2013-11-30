@@ -62,7 +62,7 @@ public class DRCDemo03
       HighLevelState initialBehavior = HighLevelState.DRIVING;
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation();
 
-      ControllerFactory controllerFactory = DRCObstacleCourseSimulation.createDRCMultiControllerFactory(dataProducer, footstepTimingParameters, drivingControllerParameters, 
+      ControllerFactory controllerFactory = DRCObstacleCourseSimulation.createDRCMultiControllerFactory(null, dataProducer, footstepTimingParameters, drivingControllerParameters, 
             armControllerParameters, initialBehavior);
 
       
