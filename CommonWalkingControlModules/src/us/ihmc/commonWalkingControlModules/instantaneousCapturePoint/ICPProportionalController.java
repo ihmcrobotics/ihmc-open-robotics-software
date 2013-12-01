@@ -180,7 +180,9 @@ public class ICPProportionalController
          smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, desiredCMP);
          if (desiredCMP.containsNaN())
          {
-            throw new RuntimeException("desiredCMP.containsNaN()!");
+            //TODO: Track down why we get NaNs and fix them, rather than just setting CMP to ICP...
+            desiredCMP.set(capturePoint);
+//            throw new RuntimeException("desiredCMP.containsNaN()!");
          }
          if (smartCMPProjector.getWasCMPProjected())
          {
