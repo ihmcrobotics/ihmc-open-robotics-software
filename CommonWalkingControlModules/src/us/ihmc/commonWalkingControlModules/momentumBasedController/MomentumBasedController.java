@@ -309,7 +309,7 @@ public class MomentumBasedController
       momentumControlModuleBridge = new MomentumControlModuleBridge(optimizationMomentumControlModule, oldMomentumControlModule, centerOfMassFrame, registry);
       
       passiveQKneeThreshold.set(0.3);
-      passiveKneeMaxTorque.set(25.0);
+      passiveKneeMaxTorque.set(35.0);
       passiveKneeKv.set(5.0);
    }
 
