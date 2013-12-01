@@ -8,6 +8,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotDampingParameters;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap;
+import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.maps.ObjectObjectMap;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -24,32 +25,36 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
    private static final int TICKS_TO_DELAY = 0;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   
+
    private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
    private final RobotVisualizer robotVisualizer;
    private final ObjectObjectMap<OneDoFJoint, DoubleYoVariable> rawJointTorques;
    private final ObjectObjectMap<OneDoFJoint, DelayedDoubleYoVariable> delayedJointTorques;
-   
+
    private final ArrayList<RawOutputWriter> rawOutputWriters = new ArrayList<RawOutputWriter>();
 
    double[] prevError;
-   public DRCSimulationOutputWriter(SDFRobot robot, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, RobotVisualizer robotVisualizer)
+
+   public DRCSimulationOutputWriter(SDFRobot robot, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+                                    RobotVisualizer robotVisualizer)
    {
       super(robot);
       this.dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistry;
       this.robotVisualizer = robotVisualizer;
-      
+
       rawJointTorques = new ObjectObjectMap<OneDoFJoint, DoubleYoVariable>();
       delayedJointTorques = new ObjectObjectMap<OneDoFJoint, DelayedDoubleYoVariable>();
-      
+
       parentRegistry.addChild(registry);
    }
 
+   @Override
    public void writeAfterController(long timestamp)
    {
       // Do not write here, because it will set the robot's torques while the simulation is running
    }
 
+   @Override
    public void writeAfterEstimator(long timestamp)
    {
       if (robotVisualizer != null)
@@ -58,13 +63,13 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
       }
    }
 
+   @Override
    public void writeAfterSimulationTick()
    {
       for (int i = 0; i < revoluteJoints.size(); i++)
       {
-         
          Pair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair = revoluteJoints.get(i);
-         
+
          OneDegreeOfFreedomJoint pinJoint = jointPair.first();
          OneDoFJoint revoluteJoint = jointPair.second();
 
@@ -84,58 +89,65 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
          pinJoint.setKd(revoluteJoint.getKd());
          pinJoint.setqDesired(revoluteJoint.getqDesired());
          pinJoint.setQdDesired(revoluteJoint.getQdDesired());
-         
+
       }
-      
-      for (int i=0; i<rawOutputWriters.size(); i++)
+
+      for (int i = 0; i < rawOutputWriters.size(); i++)
       {
          rawOutputWriters.get(i).write();
       }
-      
-      if(dynamicGraphicObjectsListRegistry != null)
+
+      if (dynamicGraphicObjectsListRegistry != null)
       {
          dynamicGraphicObjectsListRegistry.update();
       }
    }
 
+   @Override
    public void setFullRobotModel(SDFFullRobotModel fullRobotModel)
    {
       super.setFullRobotModel(fullRobotModel);
-      
-  
-      
+
+
+
       OneDoFJoint[] joints = ROSAtlasJointMap.getJointMap(fullRobotModel.getOneDoFJointsAsMap());
-      for(int i = 0; i < joints.length; i++)
+      for (int i = 0; i < joints.length; i++)
       {
          OneDoFJoint oneDoFJoint = joints[i];
          oneDoFJoint.setDampingParameter(DRCRobotDampingParameters.getAtlasDamping(i));
-         
-         DoubleYoVariable rawJointTorque = new DoubleYoVariable("raw_tau_"+oneDoFJoint.getName(), registry);
+
+         DoubleYoVariable rawJointTorque = new DoubleYoVariable("raw_tau_" + oneDoFJoint.getName(), registry);
          rawJointTorques.add(oneDoFJoint, rawJointTorque);
-         
-         DelayedDoubleYoVariable delayedJointTorque = new DelayedDoubleYoVariable("delayed_tau_" + oneDoFJoint.getName(), "", rawJointTorque, TICKS_TO_DELAY, registry);
+
+         DelayedDoubleYoVariable delayedJointTorque = new DelayedDoubleYoVariable("delayed_tau_" + oneDoFJoint.getName(), "", rawJointTorque, TICKS_TO_DELAY,
+                                                         registry);
          delayedJointTorques.add(oneDoFJoint, delayedJointTorque);
       }
-      
-      prevError = new double[revoluteJoints.size()];
-      
 
-      if(robotVisualizer != null)
+      prevError = new double[revoluteJoints.size()];
+
+
+      if (robotVisualizer != null)
       {
          robotVisualizer.setFullRobotModel(fullRobotModel);
       }
-      
+
    }
 
+   @Override
    public void setEstimatorModel(SDFFullRobotModel estimatorModel)
    {
-      
    }
-   
+
 
    public void addRawOutputWriter(RawOutputWriter rawOutputWriter)
    {
       rawOutputWriters.add(rawOutputWriter);
+   }
+
+   @Override
+   public void setForceSensorDataHolderForController(ForceSensorDataHolder forceSensorDataHolderForEstimator)
+   {
    }
 
 }
