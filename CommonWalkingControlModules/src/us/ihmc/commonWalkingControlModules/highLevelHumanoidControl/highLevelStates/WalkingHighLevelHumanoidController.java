@@ -1768,7 +1768,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (endEffectorControlModule.isInFlatSupportState() && endEffectorControlModule.isInSingularityNeighborhood())
          {
             // Ignore the desired height acceleration only if EndEffectorControlModule is not taking care of singularity during support
-            if (!LegSingularityAndKneeCollapseAvoidanceControlModule.USE_SINGULARITY_AVOIDANCE_SUPPORT)
+//            if (!LegSingularityAndKneeCollapseAvoidanceControlModule.USE_SINGULARITY_AVOIDANCE_SUPPORT)
                zddDesired = 0.0;
             
             double zTreshold = 0.01;
@@ -1846,7 +1846,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    
    private void setFlatFootContactState(RobotSide robotSide)
    {
-      footNormalContactVector.set(feet.get(robotSide).getPlaneFrame(), 0.0, 0.0, 1.0);
+//      footNormalContactVector.set(feet.get(robotSide).getPlaneFrame(), 0.0, 0.0, 1.0);
+      footNormalContactVector.set(worldFrame, 0.0, 0.0, 1.0);
       footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.FULL, footNormalContactVector);
    }
 
