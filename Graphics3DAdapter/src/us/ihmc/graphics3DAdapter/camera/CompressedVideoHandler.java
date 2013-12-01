@@ -6,7 +6,7 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.graphics3DAdapter.camera.VideoSettings.VideoCompressionKey;
 
-public abstract class CompressedVideoHandler
+public interface CompressedVideoHandler
 {
    public abstract void newVideoPacketAvailable(long timeStamp, byte[] data, Point3d position, Quat4d orientation, double fieldOfView,
          VideoCompressionKey videoCompressionKey);
