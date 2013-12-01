@@ -23,11 +23,14 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 
 public class YoVariableLogVisualizer
 {
+   private static final String defaultLogReadingDirectory = "/media/remote/RobotLogs";
+
    private final JaxbSDFLoader loader;
    private final SDFJointNameMap jointNameMap;
    private final String timeVariableName;
    private final int bufferSize;
    protected final SimulationConstructionSet scs;
+
    public YoVariableLogVisualizer(JaxbSDFLoader loader, SDFJointNameMap jointNameMap, String timeVariableName, 
          int bufferSize, boolean showOverheadView, File logFile) throws IOException
    {
@@ -38,7 +41,7 @@ public class YoVariableLogVisualizer
 
       if (logFile == null)
       {
-         final JFileChooser fileChooser = new JFileChooser(new File(YoVariableLoggerOptions.defaultLogDirectory));
+         final JFileChooser fileChooser = new JFileChooser(new File(defaultLogReadingDirectory));
          sortByDateHack(fileChooser);  
          
          fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
