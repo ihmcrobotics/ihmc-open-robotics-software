@@ -461,7 +461,7 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    public double getHoldZeta()
    {
       if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 1.0;
-      return 0.1;
+      return 0.2;
    }
 
    public double getSwingMaxPositionAcceleration()
