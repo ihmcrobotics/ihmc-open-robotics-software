@@ -25,9 +25,9 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       GroundOnlyQuadTree quadTree1 = new GroundOnlyQuadTree(xMin, yMin, xMax, yMax, 1.0, 0.1, 100000);
       GroundOnlyQuadTree quadTree = quadTree1;
       assertNull(quadTree.get(0.2f, 0.2f));
-      quadTree.put(0.5f, 0.5f, 20.0f);
+      quadTree.addToQuadtree(0.5f, 0.5f, 20.0f);
       assertEquals(20.0f, quadTree.get(0.5f, 0.5f), epsilon);
-      quadTree.put(0.5f, 0.5f, 1.0f);
+      quadTree.addToQuadtree(0.5f, 0.5f, 1.0f);
       assertEquals(1.0f, quadTree.get(0.5f, 0.5f), epsilon);
       assertEquals(true, quadTree.getLeafNodeAtLocation(0.5f, 0.5f).getMetaData().getIsStuffAboveMe());
    }
@@ -112,7 +112,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
          float y = point[1];
          float value = valuesToSet[i];
          System.out.println("Running test " + i + " putting a point at (" + x + "," + y + ") which is " + value);
-         quadTree.put(x, y, value);
+         quadTree.addToQuadtree(x, y, value);
          String wrongQuantityString = "test index " + i;
          for (int j = 0; j < testLocations.length; j++)
          {
@@ -169,14 +169,14 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       // first point
       // should remain a single quad and should all have the same value
       double expected = 1.0;
-      quadTree.put(1.0f, 1.0f, (float) expected);
+      quadTree.addToQuadtree(1.0f, 1.0f, (float) expected);
       verifyLevelOneAtHeight(quadTree, expected);
       assertTrue(quadTree.listAllLeafNodes().size() == 1);
 
       // second point
       // should become four quads and each has a different value
       expected = 0.5;
-      quadTree.put(1.0f, 3.0f, (float) expected);
+      quadTree.addToQuadtree(1.0f, 3.0f, (float) expected);
       assertTrue(quadTree.listAllLeafNodes().size() == 4);
       double actual = quadTree.get(1.0, 1.0);
       expected = 1.0;
@@ -197,7 +197,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       // first point
       // should remain a single quad and should all have the same value
       double expected = 1.0;
-      quadTree.put(1.0f, 1.0f, (float) expected);
+      quadTree.addToQuadtree(1.0f, 1.0f, (float) expected);
       assertTrue(quadTree.listAllLeafNodes().size() == 1);
       verifyLevelOneAtHeight(quadTree, expected);
 
@@ -207,7 +207,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       Random random = new Random(777);
       for (int i = 0; i < numberOfPoints; i++)
       {
-         quadTree.put(1.0f, 3.0f, (float) expected + (ALTERNATE_HEIGHT_THRESHOLD * random.nextFloat()));
+         quadTree.addToQuadtree(1.0f, 3.0f, (float) expected + (ALTERNATE_HEIGHT_THRESHOLD * random.nextFloat()));
          assertTrue(quadTree.listAllLeafNodes().size() == 1);
          verifyLevelOneAtHeight(quadTree, expected);
       }
@@ -223,7 +223,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
 
       // first point
       double expected = 1.0;
-      quadTree.put(1.0f, 1.0f, (float) expected);
+      quadTree.addToQuadtree(1.0f, 1.0f, (float) expected);
       assertTrue(quadTree.listAllLeafNodes().size() == 1);
       double actual = quadTree.get(1.0, 1.0);
       assertEquals(expected, actual, epsilon);
@@ -235,7 +235,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       assertEquals(expected, actual, epsilon);
 
       // second point in different quad
-      quadTree.put(1.0f, 3.0f, (float) 0.5);
+      quadTree.addToQuadtree(1.0f, 3.0f, (float) 0.5);
       assertTrue(quadTree.listAllLeafNodes().size() == 4);
       actual = quadTree.get(1.0, 1.0);
       expected = 1.0;
@@ -247,7 +247,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       assertNull(quadTree.get(3.0, 3.0));
 
       // third point in different quad
-      quadTree.put(3.0f, 3.0f, (float) 1.5);
+      quadTree.addToQuadtree(3.0f, 3.0f, (float) 1.5);
       assertTrue(quadTree.listAllLeafNodes().size() == 4);
       actual = quadTree.get(1.0, 1.0);
       expected = 1.0;
@@ -261,7 +261,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       assertNull(quadTree.get(3.0, 1.0));
 
       // fourth point in different quad
-      quadTree.put(3.0f, 1.0f, (float) 0.0);
+      quadTree.addToQuadtree(3.0f, 1.0f, (float) 0.0);
       assertTrue(quadTree.listAllLeafNodes().size() == 4);
       actual = quadTree.get(1.0, 1.0);
       expected = 1.0;
@@ -277,7 +277,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       assertEquals(expected, actual, epsilon);
 
       // fifth point (second point in same quad)
-      quadTree.put(0.5f, 0.5f, (float) 0.5);
+      quadTree.addToQuadtree(0.5f, 0.5f, (float) 0.5);
       assertTrue(quadTree.listAllLeafNodes().size() == 7);
       actual = quadTree.get(1.0, 1.0);
       expected = 1.0;
@@ -301,7 +301,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       assertNull(quadTree.get(1.5, 0.5));
 
       // sixth point (second point in same sub-quad)
-      quadTree.put(0.25f, 0.25f, (float) 0.25);
+      quadTree.addToQuadtree(0.25f, 0.25f, (float) 0.25);
       assertTrue(quadTree.listAllLeafNodes().size() == 10);
       actual = quadTree.get(1.0, 1.0);
       expected = 1.0;
@@ -333,7 +333,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       assertNull(quadTree.get(0.75, 0.25));
 
       // seventh point (third point in same sub-sub-quad and below resolution)
-      quadTree.put(0.1f, 0.1f, (float) -7.0);
+      quadTree.addToQuadtree(0.1f, 0.1f, (float) -7.0);
       assertTrue(quadTree.listAllLeafNodes().size() == 10);
       actual = quadTree.get(0.25, 0.25);
       expected = -7.0;
@@ -365,7 +365,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       assertNull(quadTree.get(0.75, 0.25));
 
       // point close in height
-      quadTree.put(1.1f, 3.1f, (float) 0.495);
+      quadTree.addToQuadtree(1.1f, 3.1f, (float) 0.495);
       assertTrue(quadTree.listAllLeafNodes().size() == 10);
       actual = quadTree.get(1.0, 3.0);
       expected = 0.5;
@@ -525,25 +525,25 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       assertEquals(expectedCount, actualCount);
 
       // add point
-      quadTree.put(1.0f, 1.0f, (float) 1.0);
+      quadTree.addToQuadtree(1.0f, 1.0f, (float) 1.0);
       actualCount = quadTree.countNodes();
       expectedCount = 1;
       assertEquals(expectedCount, actualCount);
 
       // add point
-      quadTree.put(1.0f, 3.0f, (float) 0.5);
+      quadTree.addToQuadtree(1.0f, 3.0f, (float) 0.5);
       actualCount = quadTree.countNodes();
       expectedCount = 5;
       assertEquals(expectedCount, actualCount);
 
       // add point
-      quadTree.put(3.0f, 3.0f, (float) 1.5);
+      quadTree.addToQuadtree(3.0f, 3.0f, (float) 1.5);
       actualCount = quadTree.countNodes();
       expectedCount = 5;
       assertEquals(expectedCount, actualCount);
 
       // add point
-      quadTree.put(3.0f, 1.0f, (float) 0.75);
+      quadTree.addToQuadtree(3.0f, 1.0f, (float) 0.75);
       actualCount = quadTree.countNodes();
       expectedCount = 5;
       assertEquals(expectedCount, actualCount);
@@ -563,7 +563,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       assertEquals(expected, actual, epsilon);
 
       // change values
-      quadTree.put(3.0f, 3.0f, (float) 0.5);
+      quadTree.addToQuadtree(3.0f, 3.0f, (float) 0.5);
       actualCount = quadTree.countNodes();
       expectedCount = 5;
       assertEquals(expectedCount, actualCount);
@@ -583,7 +583,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       assertEquals(expected, actual, epsilon);
 
       // change values
-      quadTree.put(3.0f, 1.0f, (float) 0.5);
+      quadTree.addToQuadtree(3.0f, 1.0f, (float) 0.5);
       actualCount = quadTree.countNodes();
       expectedCount = 5;
       assertEquals(expectedCount, actualCount);
@@ -603,7 +603,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       assertEquals(expected, actual, epsilon);
 
       // change values
-      quadTree.put(1.0f, 1.0f, (float) 0.5);
+      quadTree.addToQuadtree(1.0f, 1.0f, (float) 0.5);
 
       // test values
       expected = 0.5;
@@ -615,7 +615,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       assertEquals(expectedCount, actualCount);
 
       // change values
-      quadTree.put(1.0f, 3.0f, (float) 1.5);
+      quadTree.addToQuadtree(1.0f, 3.0f, (float) 1.5);
 
       // shouldn'e change because it is higher
       assertEquals(expectedCount, actualCount);
@@ -626,7 +626,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       assertEquals(expectedCount, actualCount);
 
       // change value to divide
-      quadTree.put(1.0f, 1.0f, (float) 0.45);
+      quadTree.addToQuadtree(1.0f, 1.0f, (float) 0.45);
       actualCount = quadTree.countNodes();
       expectedCount = 5;
       assertEquals(expectedCount, actualCount);
@@ -658,7 +658,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
 
       // first point
       expected = 1.0;
-      quadTree.put(0.9f, 0.90f, (float) expected);
+      quadTree.addToQuadtree(0.9f, 0.90f, (float) expected);
       assertTrue(quadTree.listAllLeafNodes().size() == 1);
       verifyLevelOneAtHeight(quadTree, expected);
 
@@ -669,7 +669,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
 
       // first point again
       expected = 1.0;
-      quadTree.put(0.9f, 0.90f, (float) expected);
+      quadTree.addToQuadtree(0.9f, 0.90f, (float) expected);
       assertTrue(quadTree.listAllLeafNodes().size() == 1);
       verifyLevelOneAtHeight(quadTree, expected);
    }
