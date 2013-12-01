@@ -98,7 +98,11 @@ public class ICPProportionalController
    public FramePoint2d doProportionalControl(FramePoint2d capturePoint, FramePoint2d desiredCapturePoint, FramePoint2d finalDesiredCapturePoint, FrameVector2d desiredCapturePointVelocity,
            double omega0, boolean projectIntoSupportPolygon, FrameConvexPolygon2d supportPolygon)
    {      
-      desiredCapturePointVelocity.changeFrame(desiredCapturePoint.getReferenceFrame());
+      capturePoint.changeFrame(worldFrame);
+      desiredCapturePoint.changeFrame(worldFrame);
+      finalDesiredCapturePoint.changeFrame(worldFrame);
+      desiredCapturePointVelocity.changeFrame(worldFrame);
+      
       FramePoint2d desiredCMP = new FramePoint2d(capturePoint);
 
       icpPosition.set(capturePoint.getX(), capturePoint.getY(), 0.0);
@@ -178,10 +182,14 @@ public class ICPProportionalController
       if (projectIntoSupportPolygon)
       {
          smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, desiredCMP);
+         capturePoint.changeFrame(worldFrame);
+         desiredCMP.changeFrame(worldFrame);
+         
          if (desiredCMP.containsNaN())
          {
             //TODO: Track down why we get NaNs and fix them, rather than just setting CMP to ICP...
             desiredCMP.set(capturePoint);
+            System.err.println("ICPProportionalController: desiredCMP contained NaN. Set it to capturePoint...");
 //            throw new RuntimeException("desiredCMP.containsNaN()!");
          }
          if (smartCMPProjector.getWasCMPProjected())
@@ -190,6 +198,7 @@ public class ICPProportionalController
          }
       }
       
+      desiredCMP.changeFrame(rawCMPOutput.getReferenceFrame());
       rawCMPOutput.set(desiredCMP);
       
       filteredCMPOutput.update();
