@@ -10,7 +10,7 @@ public class DRCConfigParameters
    public static final boolean CORRUPT_SIMULATION_MODEL = false;
 
    public static final boolean USE_DUMMY_DRIVNG = false;
-   public static final boolean RESTART_FOR_FANCY_CONTROL = true; // Enable for testing standup
+   public static final boolean RESTART_FOR_FANCY_CONTROL = true;    // Enable for testing standup
 
    public static final boolean ALLOW_LAG_SIMULATION = true;
    public static final boolean ENABLE_LAG_SIMULATION_ON_START = false;
@@ -23,10 +23,10 @@ public class DRCConfigParameters
       }
    }
 
-   
+
    public static final boolean USE_HYDRA = false;
 
-   public static final boolean LIMIT_CONTROLLER_OUTPUT_TORQUES = false; // true;//True causes hip oscillations or jerk in simulation
+   public static final boolean LIMIT_CONTROLLER_OUTPUT_TORQUES = false;    // true;//True causes hip oscillations or jerk in simulation
 
    // Limit the controller to use only a certain percentage of maximum torque that the robot can provide
    public static final double MAX_TORQUE_TO_USE_IN_PERCENT = 0.98;
@@ -39,7 +39,7 @@ public class DRCConfigParameters
          System.err.println("Warning! Using Perfect Sensors!");
    }
 
-   public static final String[] JOINTS_TO_IGNORE_FOR_GAZEBO = { "hokuyo_joint" };
+   public static final String[] JOINTS_TO_IGNORE_FOR_GAZEBO = {"hokuyo_joint"};
    public static final boolean SHOW_SCS_GUI_FOR_GAZEBO = true;
 
    public static final boolean SHOW_BANDWIDTH_DIALOG = false;
@@ -78,12 +78,13 @@ public class DRCConfigParameters
    public static final int CONTROLLER_CLOUD_DISPATCHER_BACKEND_TCP_PORT = 5002;
    public static final int PPS_PROVIDER_PORT = 5050;
 
-   
+
    public static final String MULTISENSE_CAMERA_STRING_BASE;
+
    // ROS Topics
    public static final String FISHEYE_RIGHT_CAMERA_TOPIC;
-   public static final String FISHEYE_LEFT_CAMERA_TOPIC ;
-   public static final String MULTISENSE_LEFT_CAMERA_TOPIC; 
+   public static final String FISHEYE_LEFT_CAMERA_TOPIC;
+   public static final String MULTISENSE_LEFT_CAMERA_TOPIC;
    public static final String MULTISENSE_RIGHT_CAMERA_TOPIC;
 
    public static final int GAZEBO_VER = DRCLocalConfigParameters.GAZEBO_VER;
@@ -93,6 +94,7 @@ public class DRCConfigParameters
       if (DRCLocalConfigParameters.USING_REAL_HEAD)
       {
          MULTISENSE_CAMERA_STRING_BASE = "/multisense_sl";
+
          // ROS Topics
          FISHEYE_RIGHT_CAMERA_TOPIC = "/blackfly/camera/right/compressed";
          FISHEYE_LEFT_CAMERA_TOPIC = "/blackfly/camera/left/compressed";
@@ -101,25 +103,24 @@ public class DRCConfigParameters
       }
       else
       {
-    	  
-    	  
-    	  if(GAZEBO_VER >= 3)
-    	  {
-	         MULTISENSE_CAMERA_STRING_BASE = "/multisense_sl/camera";
-	         // ROS Topics
-	         FISHEYE_RIGHT_CAMERA_TOPIC = "/l_situational_awareness_camera/image_raw/compressed";
-	         FISHEYE_LEFT_CAMERA_TOPIC =  "/r_situational_awareness_camera/image_raw/compressed";
-	         MULTISENSE_LEFT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/left/image_rect_color/compressed";
-	         MULTISENSE_RIGHT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/right/image_rect_color/compressed";
-    	  }
-    	  else
-    	  {
-    		 MULTISENSE_CAMERA_STRING_BASE = "/multisense_sl/camera";
-	         FISHEYE_RIGHT_CAMERA_TOPIC = "/blackfly/camera/right/compressed";
-	         FISHEYE_LEFT_CAMERA_TOPIC = "/blackfly/camera/left/compressed";
-	         MULTISENSE_LEFT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/left/image_rect_color/compressed";
-	         MULTISENSE_RIGHT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/right/image_rect_color/compressed";
-    	  }
+         if (GAZEBO_VER >= 3)
+         {
+            MULTISENSE_CAMERA_STRING_BASE = "/multisense_sl/camera";
+
+            // ROS Topics
+            FISHEYE_RIGHT_CAMERA_TOPIC = "/l_situational_awareness_camera/image_raw/compressed";
+            FISHEYE_LEFT_CAMERA_TOPIC = "/r_situational_awareness_camera/image_raw/compressed";
+            MULTISENSE_LEFT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/left/image_rect_color/compressed";
+            MULTISENSE_RIGHT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/right/image_rect_color/compressed";
+         }
+         else
+         {
+            MULTISENSE_CAMERA_STRING_BASE = "/multisense_sl/camera";
+            FISHEYE_RIGHT_CAMERA_TOPIC = "/blackfly/camera/right/compressed";
+            FISHEYE_LEFT_CAMERA_TOPIC = "/blackfly/camera/left/compressed";
+            MULTISENSE_LEFT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/left/image_rect_color/compressed";
+            MULTISENSE_RIGHT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/right/image_rect_color/compressed";
+         }
 
       }
    }
@@ -140,7 +141,7 @@ public class DRCConfigParameters
    public static final double NOISE_FILTER_ALPHA = 1e-1;
    public static final double POSITION_NOISE_STD = 0.01;
    public static final double QUATERNION_NOISE_STD = 0.01;
-   public static final boolean ASSUME_PERFECT_IMU = true; // assume perfect orientation, angular velocity and linear acceleration output from IMU
+   public static final boolean ASSUME_PERFECT_IMU = true;    // assume perfect orientation, angular velocity and linear acceleration output from IMU
    public static final boolean USE_SIMPLE_PELVIS_POSITION_ESTIMATOR = true;
 
 
@@ -149,7 +150,7 @@ public class DRCConfigParameters
    public static final double LIDAR_SPINDLE_VELOCITY = 5.1;
 
    // the useful children are "Static Link Graphic" and "atlas", but you don't really need atlas. ~30% faster without atlas.
-   public static final String[] SCS_LIDAR_NODES_TO_INTERSECT = new String[] { "Static Link Graphic"};
+   public static final String[] SCS_LIDAR_NODES_TO_INTERSECT = new String[] {"Static Link Graphic"};
 
    public static final boolean STREAM_POLAR_LIDAR = true;
    public static final int LIDAR_UPDATE_RATE_OVERRIDE = 30;
@@ -181,32 +182,33 @@ public class DRCConfigParameters
    public static final float LIDAR_MIN_DISTANCE = 0.2f;
    public static final float LIDAR_MAX_DISTANCE = 20.0f;
 
-   public static final float LIDAR_SCAN_MAX_ROLL = 0.0f; // rolls the LIDAR to
+   public static final float LIDAR_SCAN_MAX_ROLL = 0.0f;    // rolls the LIDAR to
 
    // simulate a faster update rate.
    public static final float LIDAR_SCAN_MIN_ROLL = 0.0f;
    public static final float LIDAR_ANGLE_INCREMENT = (float) Math.toRadians(0.25);
    public static final float LIDAR_TIME_INCREMENT = 0.0f;
    public static final float LIDAR_SCAN_TIME = 0.0f;
-   public static final double LIDAR_NOISE_LEVEL_OVERRIDE = 0.005; // DRCGazebo
+   public static final double LIDAR_NOISE_LEVEL_OVERRIDE = 0.005;    // DRCGazebo
 
    // will simulate with: 0.005
    public static final boolean DEBUG_GAZEBO_LIDAR = false;
 
    // LIDAR Processor
    public static final boolean LIDAR_PROCESSOR_TIMING_REPORTING_ON = false;
-   public static final double GRID_RESOLUTION = 0.025; // in meters
+   public static final double GRID_RESOLUTION = 0.025;    // in meters
    public static final double OCTREE_RESOLUTION_WHEN_NOT_USING_RESOLUTION_SPHERE = 0.05;
 
    // Footstep Generator
-   public static final double BOUNDING_BOX_FOR_FOOTSTEP_HEIGHT_FINDING_SIDE_LENGTH = (1 + 0.3)
-         * 2
-         * Math.sqrt(DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD * DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD + 0.25 * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH
-               * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH);
+   public static final double BOUNDING_BOX_FOR_FOOTSTEP_HEIGHT_FINDING_SIDE_LENGTH =
+      (1 + 0.3) * 2
+      * Math.sqrt(DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD * DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD
+                  + 0.25 * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH);
 
    public static final int JOINT_CONFIGURATION_RATE_IN_MS = 10;
 
    public static final boolean USE_TABS_IN_UI = true;
+   public static final boolean DO_AUTOMATED_STANDPREP = false;
 
    // Path parameters
    public static final double DEFAULT_SPINNING_DIAMETER = 0.4;
@@ -223,7 +225,7 @@ public class DRCConfigParameters
 
    static
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) 
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT)
       {
          positionSensorFrequencyHz = Double.POSITIVE_INFINITY;
          velocitySensorFrequencyHz = Double.POSITIVE_INFINITY;
@@ -250,11 +252,11 @@ public class DRCConfigParameters
    public static final double LINEAR_ACCELERATION_FILTER_FREQ_HZ = velocitySensorFrequencyHz;
 
    // State Estimator Filter Parameters
-   public static final double pointVelocityXYMeasurementStandardDeviation = 2.0; // 8.0; //2.0;
-   public static final double pointVelocityZMeasurementStandardDeviation = 2.0; // 8.0; //2.0;
+   public static final double pointVelocityXYMeasurementStandardDeviation = 2.0;    // 8.0; //2.0;
+   public static final double pointVelocityZMeasurementStandardDeviation = 2.0;    // 8.0; //2.0;
 
-   public static final double pointPositionXYMeasurementStandardDeviation = 0.1; // 0.4; //0.1;
-   public static final double pointPositionZMeasurementStandardDeviation = 0.1; // 0.4; //0.1;
+   public static final double pointPositionXYMeasurementStandardDeviation = 0.1;    // 0.4; //0.1;
+   public static final double pointPositionZMeasurementStandardDeviation = 0.1;    // 0.4; //0.1;
 
    public static final double contactTresholdForceForSCS = 5.0;
    public static final double contactTresholdForceForGazebo = 120.0;
