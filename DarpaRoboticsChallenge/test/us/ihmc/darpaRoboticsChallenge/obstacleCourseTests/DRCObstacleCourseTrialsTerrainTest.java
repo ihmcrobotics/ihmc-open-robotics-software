@@ -56,7 +56,100 @@ public class DRCObstacleCourseTrialsTerrainTest
    }
 
 
+   @Test
+   public void testTrialsTerrainSlopeScript() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DRC_TRIALS_TRAINING_WALKING;
+      DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", "scripts/DRCTrialsSlopeLeftFootPose.xml", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, false);
+
+      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
+      setupCameraForWalkingOntoSlopes(simulationConstructionSet);
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(30.0);
+      
+      drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
+      drcSimulationTestHelper.checkNothingChanged();
+
+      assertTrue(success);
+      
+      BambooTools.reportTestFinishedMessage();
+   }
    
+   @Test
+   public void testTrialsTerrainZigzagHurdlesScript() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_ZIGZAG_BLOCKS;
+      DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", "scripts/DRCTrialsZigzagHurdlesLeftFootPose.xml", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, false);
+
+      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
+      setupCameraForWalkingOverHurdles(simulationConstructionSet);
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(30.0);
+      
+      drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
+      drcSimulationTestHelper.checkNothingChanged();
+
+      assertTrue(success);
+      
+      BambooTools.reportTestFinishedMessage();
+   }
+   
+   @Test
+   public void testTrialsTerrainCinderblockFieldPartOneScript() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_CINDERBLOCK_FIELD;
+      DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", "scripts/DRCTrialsCinderblockFieldPartOneLeftFootPose.xml", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, false);
+
+      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
+      setupCameraForWalkingOverCinderblockField(simulationConstructionSet);
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(30.0);
+      
+      drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
+      drcSimulationTestHelper.checkNothingChanged();
+
+      assertTrue(success);
+      
+      BambooTools.reportTestFinishedMessage();
+   }
+   
+   @Ignore //flaky test (60% success ratio so far), should improve before adding it to the build
+   @Test
+   public void testTrialsTerrainCinderblockFieldScript() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_CINDERBLOCK_FIELD;
+      DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", "scripts/DRCTrialsCinderblockFieldLeftFootPose.xml", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, false);
+
+      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
+      setupCameraForWalkingOverCinderblockField(simulationConstructionSet);
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(60.0);
+      
+      drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
+      drcSimulationTestHelper.checkNothingChanged();
+
+      assertTrue(success);
+      
+      BambooTools.reportTestFinishedMessage();
+   }
+   
+/*   // Is now a scripted test
    @Test
    public void testWalkingOntoAndOverSlopes() throws SimulationExceededMaximumTimeException
    {
@@ -95,7 +188,7 @@ public class DRCObstacleCourseTrialsTerrainTest
 
       BambooTools.reportTestFinishedMessage();
    }
-
+*/
    @Test
    public void testWalkingOntoAndOverSlopesSideways() throws SimulationExceededMaximumTimeException
    {
@@ -137,13 +230,31 @@ public class DRCObstacleCourseTrialsTerrainTest
 
    private void setupCameraForWalkingOntoSlopes(SimulationConstructionSet scs)
    {
+      Point3d cameraFix = new Point3d(0.5, 4.2, 1.0);
+      Point3d cameraPosition = new Point3d(-0.8, 4.8, 1.5);
+
+      drcSimulationTestHelper.setupCameraForUnitTest(scs, cameraFix, cameraPosition);
+   }
+   
+   //TODO: Create proper camera view 
+   private void setupCameraForWalkingOverHurdles(SimulationConstructionSet scs)
+   {
       Point3d cameraFix = new Point3d(0.1, 3.2, 0.5);
-      Point3d cameraPosition = new Point3d(-2.8, 4.8, 1.5);
+      Point3d cameraPosition = new Point3d(-2.8, 8.8, 1.5);
+
+      drcSimulationTestHelper.setupCameraForUnitTest(scs, cameraFix, cameraPosition);
+   }
+   
+   //TODO: Create proper camera view 
+   private void setupCameraForWalkingOverCinderblockField(SimulationConstructionSet scs)
+   {
+      Point3d cameraFix = new Point3d(0.1, 3.2, 0.5);
+      Point3d cameraPosition = new Point3d(-2.8, 8.8, 1.5);
 
       drcSimulationTestHelper.setupCameraForUnitTest(scs, cameraFix, cameraPosition);
    }
 
-
+   /*   // Is now a scripted test
    private FootstepDataList createFootstepsForWalkingToTheSlopesNormally(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
@@ -193,6 +304,7 @@ public class DRCObstacleCourseTrialsTerrainTest
 
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }
+*/
 
    private FootstepDataList createFootstepsForWalkingToTheSlopesSideways(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
