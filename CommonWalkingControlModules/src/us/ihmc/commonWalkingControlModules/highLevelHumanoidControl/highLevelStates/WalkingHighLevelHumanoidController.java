@@ -434,9 +434,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       //TODO: Move these to DRCRobotWalkingControlParameters:
 
       singularityEscapeNullspaceMultiplierSwingLeg.set(100.0);
-      singularityEscapeNullspaceMultiplierSupportLeg.set(20.0);
-      singularityEscapeNullspaceMultiplierSupportLegLocking.set(-0.5);
-      double minJacobianDeterminantForSingularityEscape = 0.03;
+      singularityEscapeNullspaceMultiplierSupportLeg.set(30.0);
+      singularityEscapeNullspaceMultiplierSupportLegLocking.set(0.0);//-0.5);
+      double minJacobianDeterminantForSingularityEscape = 0.035;
       
       swingKpXY.set(walkingControllerParameters.getSwingKpXY()); 
       swingKpZ.set(walkingControllerParameters.getSwingKpZ()); 
