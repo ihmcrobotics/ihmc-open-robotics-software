@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 import static com.yobotics.simulationconstructionset.util.statemachines.StateMachineTools.addRequestedStateTransition;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,6 +75,9 @@ public class IndividualHandControlModule
 
    private final Map<ReferenceFrame, ConstantPositionTrajectoryGenerator> holdPositionTrajectoryGenerators;
    private final Map<ReferenceFrame, ConstantOrientationTrajectoryGenerator> holdOrientationTrajectoryGenerators;
+
+   private final List<OneDoFJoint> armJointList;
+   private final Map<OneDoFJoint, Double> armJointPositionMap;
 
    private final TaskspaceHandPositionControlState taskSpacePositionControlState;
    private final JointSpaceHandControlControlState jointSpaceHandControlState;
@@ -191,10 +195,21 @@ public class IndividualHandControlModule
       maxJerkArmTaskspace = new DoubleYoVariable("maxJerkArmTaskspace", registry);
       maxJerkArmTaskspace.set(armControlParameters.getArmTaskspaceMaxJerk());
       
-      //Pre-create the rigid body spatial ... control modules
+      //Pre-create the RigidBodySpatialAccelerationControlModules
       getOrCreateRigidBodySpatialAccelerationControlModule(ReferenceFrame.getWorldFrame());
       getOrCreateRigidBodySpatialAccelerationControlModule(fullRobotModel.getChest().getBodyFixedFrame());
-      
+
+      InverseDynamicsJoint[] inverseDynamicsJointPath = ScrewTools.createJointPath(fullRobotModel.getChest(), fullRobotModel.getHand(robotSide));
+      OneDoFJoint[] oneDoFJoints = ScrewTools.filterJoints(inverseDynamicsJointPath, OneDoFJoint.class);
+      armJointList = Arrays.asList(oneDoFJoints);
+
+      armJointPositionMap = new LinkedHashMap<OneDoFJoint, Double>();
+      for (int i = 0; i < armJointList.size(); i++)
+      {
+         OneDoFJoint joint = armJointList.get(i);
+         armJointPositionMap.put(joint, joint.getQ());
+      }
+
       parentRegistry.addChild(registry);
    }
 
@@ -479,6 +494,18 @@ public class IndividualHandControlModule
       OrientationTrajectoryGenerator orientationTrajectory = getOrCreateConstantOrientationTrajectoryGenerator(frame);
 
       executeTaskSpaceTrajectory(positionTrajectory, orientationTrajectory, endEffectorFrame, base, isHoldingObject(), gains);
+   }
+
+   public void holdPositionInJointSpace()
+   {
+      for (int i = 0; i < armJointList.size(); i++)
+      {
+         OneDoFJoint joint = armJointList.get(i);
+         armJointPositionMap.put(joint, joint.getQ());
+      }
+      
+      double epsilon = 1e-2;
+      moveUsingQuinticSplines(armJointPositionMap, epsilon);
    }
 
    private void checkLimitsValid(Map<OneDoFJoint, Double> minJointPositions, Map<OneDoFJoint, Double> maxJointPositions)

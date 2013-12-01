@@ -38,6 +38,8 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicRefere
  */
 public class ManipulationControlModule
 {
+   public static final boolean HOLD_POSE_IN_JOINT_SPACE_WHEN_PREPARE_FOR_LOCOMOTION = true;
+   
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final List<DynamicGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<DynamicGraphicReferenceFrame>();
 
