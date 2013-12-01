@@ -56,7 +56,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
-      this.icpProportionalController = new ICPProportionalController(controlDT, registry);
+      this.icpProportionalController = new ICPProportionalController(controlDT, registry, dynamicGraphicObjectsListRegistry);
       this.centerOfMassFrame = centerOfMassFrame;
       this.visualizer = new CapturabilityBasedDesiredCoPVisualizer(registry, dynamicGraphicObjectsListRegistry);
       this.totalMass = totalMass;

@@ -11,9 +11,9 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.filter.AccelerationLimitedYoFrameVector2d;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFrameVector2d;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
@@ -22,7 +22,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
 
 public class ICPProportionalController
-{
+{   
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final FrameVector2d tempControl = new FrameVector2d(worldFrame);
@@ -46,9 +46,7 @@ public class ICPProportionalController
    private final AccelerationLimitedYoFrameVector2d rateLimitedCMPOutput;
 
    private final DoubleYoVariable maxDistanceBetweenICPAndCMP = new DoubleYoVariable("maxDistanceBetweenICPAndCMP", registry);
-   private final BooleanYoVariable cmpProjected = new BooleanYoVariable("cmpProjected", registry);
-   private final FrameLineSegment2d cmpToICP = new FrameLineSegment2d();
-
+   
    private final YoFramePoint icpPosition;
    private final DoubleYoVariable alphaICPVelocity;
    private final FilteredVelocityYoFrameVector icpVelocity;
@@ -66,8 +64,12 @@ public class ICPProportionalController
    
    private final FrameVector2d tempICPErrorIntegrated = new FrameVector2d(worldFrame);
 
-   public ICPProportionalController(double controlDT, YoVariableRegistry parentRegistry)
+   private final SmartCMPProjector smartCMPProjector;
+
+   public ICPProportionalController(double controlDT, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
+      smartCMPProjector = new SmartCMPProjector(parentRegistry, dynamicGraphicObjectsListRegistry);
+
       this.controlDT = controlDT;
       
       rateLimitedCMPOutput = AccelerationLimitedYoFrameVector2d.createAccelerationLimitedYoFrameVector2d("rateLimitedCMPOutput", "", registry, rateLimitCMP, accelerationLimitCMP, controlDT, filteredCMPOutput);
@@ -92,10 +94,10 @@ public class ICPProportionalController
    private final FrameVector2d desICPToFinalDesICPVector = new FrameVector2d();
    private final FrameLineSegment2d desiredICPToFinalDesiredICPSegment = new FrameLineSegment2d();
    private final FramePoint2d icpProjected = new FramePoint2d();
-   
+      
    public FramePoint2d doProportionalControl(FramePoint2d capturePoint, FramePoint2d desiredCapturePoint, FramePoint2d finalDesiredCapturePoint, FrameVector2d desiredCapturePointVelocity,
            double omega0, boolean projectIntoSupportPolygon, FrameConvexPolygon2d supportPolygon)
-   {
+   {      
       desiredCapturePointVelocity.changeFrame(desiredCapturePoint.getReferenceFrame());
       FramePoint2d desiredCMP = new FramePoint2d(capturePoint);
 
@@ -175,9 +177,12 @@ public class ICPProportionalController
       
       if (projectIntoSupportPolygon)
       {
-         projectIntoSupportPolygonIfOutside(capturePoint, desiredCapturePoint, supportPolygon, desiredCMP);
-         
-         if (cmpProjected.getBooleanValue())
+         smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, desiredCMP);
+         if (desiredCMP.containsNaN())
+         {
+            throw new RuntimeException("desiredCMP.containsNaN()!");
+         }
+         if (smartCMPProjector.getWasCMPProjected())
          {
             icpErrorIntegrated.scale(0.9); //Bleed off quickly when projecting. 0.9 is a pretty arbitrary magic number.
          }
@@ -212,36 +217,7 @@ public class ICPProportionalController
       }
    }
 
-   private void projectIntoSupportPolygonIfOutside(FramePoint2d capturePoint, FramePoint2d desiredCapturePoint, FrameConvexPolygon2d supportPolygon,
-         FramePoint2d desiredCMP)
-   {
-      desiredCMP.changeFrame(supportPolygon.getReferenceFrame());
-
-      if (supportPolygon.isPointInside(desiredCMP))
-      {
-         cmpProjected.set(false);
-      }
-      else
-      {
-         // Don't just project the cmp onto the support polygon.
-         // Instead, find the first intersection from the cmp to the support polygon
-         // along the line segment from the cmp to the capture point. 
-         cmpProjected.set(true);
-
-         capturePoint.changeFrame(desiredCMP.getReferenceFrame());
-
-         cmpToICP.setAndChangeFrame(desiredCMP, capturePoint);
-         FramePoint2d[] intersections = supportPolygon.intersectionWith(cmpToICP); 
-
-         if ((intersections != null) && (intersections[0] != null))
-         {
-            desiredCMP.set(intersections[0]);
-         }
-      }
-      
-      desiredCMP.changeFrame(desiredCapturePoint.getReferenceFrame());
-   }
-
+   
    public void setGains(double captureKpParallelToMotion, double captureKpOrthogonalToMotion, double captureKi, double filterBreakFrequencyHertz, double rateLimitCMP, double accelerationLimitCMP)
    {
       this.captureKpParallelToMotion.set(captureKpParallelToMotion);
