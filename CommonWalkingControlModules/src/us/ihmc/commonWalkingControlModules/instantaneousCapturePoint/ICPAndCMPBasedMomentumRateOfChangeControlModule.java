@@ -79,7 +79,7 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
-      this.icpProportionalController = new ICPProportionalController(controlDT, registry);
+      this.icpProportionalController = new ICPProportionalController(controlDT, registry, dynamicGraphicObjectsListRegistry);
       this.groundReactionMomentControlModule = new GroundReactionMomentControlModule(pelvisFrame, registry);
       this.groundReactionMomentControlModule.setGains(10.0, 100.0);    // kPelvisYaw was 0.0 for M3 movie TODO: move to setGains method
 
