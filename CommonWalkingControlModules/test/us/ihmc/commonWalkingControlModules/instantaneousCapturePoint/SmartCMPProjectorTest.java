@@ -20,7 +20,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 
 public class SmartCMPProjectorTest
 {
-   private static final boolean SHOW_SCS = true;
+   private static final boolean SHOW_SCS = false;
 
    @Test
    public void testSimpleProjections()
