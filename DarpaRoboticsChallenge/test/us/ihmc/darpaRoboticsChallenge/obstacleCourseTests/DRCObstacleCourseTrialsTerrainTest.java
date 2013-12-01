@@ -125,21 +125,20 @@ public class DRCObstacleCourseTrialsTerrainTest
       BambooTools.reportTestFinishedMessage();
    }
    
-   @Ignore //flaky test (60% success ratio so far), should improve before adding it to the build
    @Test
-   public void testTrialsTerrainCinderblockFieldScript() throws SimulationExceededMaximumTimeException
+   public void testTrialsTerrainCinderblockFieldPartTwoScript() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_CINDERBLOCK_FIELD;
+      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_SLANTED_CINDERBLOCK_FIELD;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", "scripts/DRCTrialsCinderblockFieldLeftFootPose.xml", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, false);
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", "scripts/DRCTrialsCinderblockFieldPartTwoLeftFootPose.xml", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, false);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingOverCinderblockField(simulationConstructionSet);
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(60.0);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(30.0);
       
       drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
