@@ -15,8 +15,6 @@ import us.ihmc.utilities.math.MatrixTools;
 
 public class SDFLinkHolder
 {
-   private static final boolean DEBUG = false;
-   
    // From SDF File
    private final String name;
    private final Transform3D transformToModelReferenceFrame;
@@ -63,30 +61,23 @@ public class SDFLinkHolder
      if(sdfLink.getCollisions() != null)
      {
         collisions = sdfLink.getCollisions();
-        if(sdfLink.getCollisions().get(0) != null)
-        {
-           if(sdfLink.getCollisions().get(0).getSurface() != null)
-           {
-              if(sdfLink.getCollisions().get(0).getSurface().getContact() != null)
-              {
-                 if(sdfLink.getCollisions().get(0).getSurface().getContact().getOde() != null)
-                 {
-                    if(sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getKp() != null)
-                       contactKp = Double.parseDouble(sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getKp());
-                    if(sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getKd() != null)
-                       contactKd = Double.parseDouble(sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getKd());
-                    if(sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getMaxVel() != null)
-                       contactMaxVel = Double.parseDouble(sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getMaxVel());
-                    
-                 }
-              }
-           }
-        }
-     }
-     else
-     {
-        collisions = new ArrayList<Collision>();
-     }
+        
+        if((sdfLink.getCollisions().get(0) != null) && (sdfLink.getCollisions().get(0).getSurface() != null)
+                 && (sdfLink.getCollisions().get(0).getSurface().getContact() != null)
+                 && (sdfLink.getCollisions().get(0).getSurface().getContact().getOde() != null))
+         {
+            if (sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getKp() != null)
+               contactKp = Double.parseDouble(sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getKp());
+            if (sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getKd() != null)
+               contactKd = Double.parseDouble(sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getKd());
+            if (sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getMaxVel() != null)
+               contactMaxVel = Double.parseDouble(sdfLink.getCollisions().get(0).getSurface().getContact().getOde().getMaxVel());
+         }
+      }
+      else
+      {
+         collisions = new ArrayList<Collision>();
+      }
    }
 
    public Transform3D getTransformFromModelReferenceFrame()
@@ -102,9 +93,9 @@ public class SDFLinkHolder
       {
          modelFrameToJointFrame.set(joint.getTransformFromChildLink()); // H_4^3
       }
-      Transform3D modelFrameToInertialFrame = inertialFrameWithRespectToLinkFrame; // H_4^5
-      Transform3D jointFrameToModelFrame = new Transform3D(); // H_3^4
+      Transform3D jointFrameToModelFrame = new Transform3D();    // H_3^4
       jointFrameToModelFrame.invert(modelFrameToJointFrame);
+      Transform3D modelFrameToInertialFrame = inertialFrameWithRespectToLinkFrame;    // H_4^5
       
       Transform3D jointFrameToInertialFrame = new Transform3D();
       jointFrameToInertialFrame.mul(jointFrameToModelFrame, modelFrameToInertialFrame);
@@ -114,11 +105,18 @@ public class SDFLinkHolder
       
       jointFrameToInertialFrame.get(inertialFrameRotation, CoMOffset);
       
-      if(!inertialFrameRotation.epsilonEquals(MatrixTools.IDENTITY, 1e-5) && DEBUG)
+      if(!inertialFrameRotation.epsilonEquals(MatrixTools.IDENTITY, 1e-5))
       {
-         System.err.println("Warning: Non-zero rotation of the inertial matrix on link " + name);
+         inertialFrameRotation.transpose();
+         inertia.mul(inertialFrameRotation);
+         inertialFrameRotation.transpose();
+         inertialFrameRotation.mul(inertia);
+
+         inertia.set(inertialFrameRotation);
+         inertialFrameWithRespectToLinkFrame.set(MatrixTools.IDENTITY);
+//         System.err.println("Warning: Non-zero rotation of the inertial matrix on link " + name);
       }
-      
+
       this.CoMOffset.set(CoMOffset);
    }
 
