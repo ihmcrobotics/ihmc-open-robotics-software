@@ -20,25 +20,20 @@ public class SmartCMPProjector
 {
    private boolean VISUALIZE = false;
 
-   private final DynamicGraphicPosition closestEdgeViz, projectedToPointViz, preProjectedCMPViz, edgeOneViz, edgeTwoViz;
+   private final DynamicGraphicPosition icpViz, moveAwayFromEdgeViz, projectedCMPViz, preProjectedCMPViz, edgeOneViz, edgeTwoViz;
    private final BooleanYoVariable cmpProjected;
    private final DoubleYoVariable cmpEdgeProjectionInside;
    private final DoubleYoVariable minICPToCMPProjection;
 
    private final FrameLine2d icpToCMPLine = new FrameLine2d(ReferenceFrame.getWorldFrame(), new Point2d(), new Point2d(1.0, 0.0));
+ private final FramePoint2d moveAwayFromEdge = new FramePoint2d();
+ private final FramePoint2d otherEdge = new FramePoint2d();
+ private final FrameVector2d insideEdgeDirection = new FrameVector2d();
 
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    
-   public void setCMPEdgeProjectionInside(double cmpEdgeProjectionInside)
-   {
-      this.cmpEdgeProjectionInside.set(cmpEdgeProjectionInside);
-   }
-   
-   public void setMinICPToCMPProjection(double minICPToCMPProjection)
-   {
-      this.minICPToCMPProjection.set(minICPToCMPProjection);
-   }
-   
-   public SmartCMPProjector(YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+ 
+   public SmartCMPProjector(YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       cmpProjected = new BooleanYoVariable("cmpProjected", registry);
       cmpEdgeProjectionInside = new DoubleYoVariable("cmpEdgeProjectionInside", registry);
@@ -51,40 +46,57 @@ public class SmartCMPProjector
 
       if (VISUALIZE)
       {
-         closestEdgeViz = new DynamicGraphicPosition("closestEdgeViz", "", registry, 0.01, YoAppearance.CadetBlue(), GraphicType.BALL_WITH_CROSS);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CMPProjection", closestEdgeViz);
-         dynamicGraphicObjectsListRegistry.registerArtifact("CMPProjection", closestEdgeViz.createArtifact());
+         double VizBallSize = 0.3;
+
+         icpViz = new DynamicGraphicPosition("icpViz", "", registry, VizBallSize, YoAppearance.Blue(), GraphicType.BALL_WITH_CROSS);
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CMPProjection", icpViz);
+         dynamicGraphicObjectsListRegistry.registerArtifact("CMPProjection", icpViz.createArtifact());
          
-         projectedToPointViz = new DynamicGraphicPosition("projectedToPointViz", "", registry, 0.01, YoAppearance.Gold(), GraphicType.BALL_WITH_CROSS);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CMPProjection", projectedToPointViz);
-         dynamicGraphicObjectsListRegistry.registerArtifact("CMPProjection", projectedToPointViz.createArtifact());
+         moveAwayFromEdgeViz = new DynamicGraphicPosition("moveAwayFromEdgeViz", "", registry, VizBallSize, YoAppearance.CadetBlue(), GraphicType.BALL_WITH_CROSS);
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CMPProjection", moveAwayFromEdgeViz);
+         dynamicGraphicObjectsListRegistry.registerArtifact("CMPProjection", moveAwayFromEdgeViz.createArtifact());
          
-         preProjectedCMPViz = new DynamicGraphicPosition("preProjectedCMPViz", "", registry, 0.01, YoAppearance.Red(), GraphicType.BALL);
+         projectedCMPViz = new DynamicGraphicPosition("projectedCMPViz", "", registry, VizBallSize, YoAppearance.Gold(), GraphicType.BALL_WITH_CROSS);
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CMPProjection", projectedCMPViz);
+         dynamicGraphicObjectsListRegistry.registerArtifact("CMPProjection", projectedCMPViz.createArtifact());
+         
+         preProjectedCMPViz = new DynamicGraphicPosition("preProjectedCMPViz", "", registry, VizBallSize, YoAppearance.Red(), GraphicType.BALL);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CMPProjection", preProjectedCMPViz);
          dynamicGraphicObjectsListRegistry.registerArtifact("CMPProjection", preProjectedCMPViz.createArtifact());
          
-         edgeOneViz = new DynamicGraphicPosition("edgeOneViz", "", registry, 0.005, YoAppearance.Pink(), GraphicType.BALL);
+         edgeOneViz = new DynamicGraphicPosition("edgeOneViz", "", registry, VizBallSize, YoAppearance.Pink(), GraphicType.BALL);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CMPProjection", edgeOneViz);
          dynamicGraphicObjectsListRegistry.registerArtifact("CMPProjection", edgeOneViz.createArtifact());
          
-         edgeTwoViz = new DynamicGraphicPosition("edgeTwoViz", "", registry, 0.005, YoAppearance.Beige(), GraphicType.BALL);
+         edgeTwoViz = new DynamicGraphicPosition("edgeTwoViz", "", registry, VizBallSize, YoAppearance.Beige(), GraphicType.BALL);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CMPProjection", edgeTwoViz);
          dynamicGraphicObjectsListRegistry.registerArtifact("CMPProjection", edgeTwoViz.createArtifact());
       }
       else
       {
-         closestEdgeViz = null;
-         projectedToPointViz = null;
+         icpViz = null;
+         
+         moveAwayFromEdgeViz = null;
+         projectedCMPViz = null;
          preProjectedCMPViz = null;
          edgeOneViz = null;
          edgeTwoViz = null;
       }
+      
+      if (parentRegistry != null) parentRegistry.addChild(registry);
    }
    
-   private final FramePoint2d moveAwayFromEdge = new FramePoint2d();
-   private final FramePoint2d otherEdge = new FramePoint2d();
-   private final FrameVector2d insideEdgeDirection = new FrameVector2d();
-
+   
+   public void setCMPEdgeProjectionInside(double cmpEdgeProjectionInside)
+   {
+      this.cmpEdgeProjectionInside.set(cmpEdgeProjectionInside);
+   }
+   
+   public void setMinICPToCMPProjection(double minICPToCMPProjection)
+   {
+      this.minICPToCMPProjection.set(minICPToCMPProjection);
+   }
+   
    private final FrameVector2d cmpToICPVector = new FrameVector2d();
    public void projectCMPIntoSupportPolygonIfOutside(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon,
          FramePoint2d desiredCMP)
@@ -96,13 +108,16 @@ public class SmartCMPProjector
       cmpProjected.set(false);
       
       if (VISUALIZE)
-      {
-         projectedToPointViz.setPositionToNaN();
+      {         
+         projectedCMPViz.setPositionToNaN();
          edgeOneViz.setPositionToNaN();
          edgeTwoViz.setPositionToNaN();
          
          FramePoint2d desiredCMPInWorld = desiredCMP.changeFrameCopy(ReferenceFrame.getWorldFrame());
-         preProjectedCMPViz.setPosition(desiredCMPInWorld.getX(), desiredCMPInWorld.getY(), 0.0);
+         preProjectedCMPViz.setPosition(desiredCMPInWorld.getX() + 0.001, desiredCMPInWorld.getY(), 0.001);
+         
+         FramePoint2d capturePointInWorld = capturePoint.changeFrameCopy(ReferenceFrame.getWorldFrame());
+         icpViz.setPosition(capturePointInWorld.getX() - 0.001, capturePointInWorld.getY(), 0.001);
       }
       
       boolean isCapturePointInside = supportPolygon.isPointInside(capturePoint);
@@ -114,7 +129,7 @@ public class SmartCMPProjector
 
          cmpToICPVector.setToZero(capturePoint.getReferenceFrame());
          cmpToICPVector.sub(capturePoint, desiredCMP);
-         if (cmpToICPVector.lengthSquared() < 0.003 * 0.003) 
+         if (cmpToICPVector.lengthSquared() < 0.001 * 0.001) 
          {
             // If CMP And ICP are really close, do nothing. Not much you can do anyway.
             desiredCMP.changeFrame(returnFrame);
@@ -137,7 +152,7 @@ public class SmartCMPProjector
             if (intersections.length > 0)
             {
                FramePoint2d intersection0InWorld = intersections[0].changeFrameCopy(ReferenceFrame.getWorldFrame());
-               edgeOneViz.setPosition(intersection0InWorld.getX(), intersection0InWorld.getY(), 0.0);
+               edgeOneViz.setPosition(intersection0InWorld.getX(), intersection0InWorld.getY() + 0.001, 0.0005);
             }
             else
             {
@@ -147,7 +162,7 @@ public class SmartCMPProjector
             if (intersections.length > 1)
             {
                FramePoint2d intersection1InWorld = intersections[1].changeFrameCopy(ReferenceFrame.getWorldFrame());
-               edgeTwoViz.setPosition(intersection1InWorld.getX(), intersection1InWorld.getY(), 0.0);
+               edgeTwoViz.setPosition(intersection1InWorld.getX(), intersection1InWorld.getY() - 0.001, 0.0005);
             }
             else
             {
@@ -176,6 +191,9 @@ public class SmartCMPProjector
                   moveAwayFromEdge.setAndChangeFrame(intersections[1]);
                   otherEdge.setAndChangeFrame(intersections[0]);
                }
+               
+               insideEdgeDirection.setToZero(otherEdge.getReferenceFrame());
+               insideEdgeDirection.sub(otherEdge, moveAwayFromEdge);
             }
             else
             {
@@ -197,30 +215,40 @@ public class SmartCMPProjector
             }     
          }
          
-         double distanceToEdge = moveAwayFromEdge.distance(desiredCMP);
+         double distanceFromCMPToMoveAwayFromEdge = moveAwayFromEdge.distance(desiredCMP);
+         double distanceFromCMPToOtherEdge = otherEdge.distance(desiredCMP);
 
          
          if (VISUALIZE)
          {
-            FramePoint2d closestEdgeInWorld = moveAwayFromEdge.changeFrameCopy(ReferenceFrame.getWorldFrame());
-            closestEdgeViz.setPosition(closestEdgeInWorld.getX(), closestEdgeInWorld.getY(), 0.0);
+            FramePoint2d moveAwayFromEdgeInWorld = moveAwayFromEdge.changeFrameCopy(ReferenceFrame.getWorldFrame());
+            moveAwayFromEdgeViz.setPosition(moveAwayFromEdgeInWorld.getX()-0.002, moveAwayFromEdgeInWorld.getY() + 0.002, 0.0);
          }
 
-         if ((isCMPInside) && (distanceToEdge > cmpEdgeProjectionInside.getDoubleValue()))
+         if ((isCMPInside) && (distanceFromCMPToMoveAwayFromEdge > cmpEdgeProjectionInside.getDoubleValue()))
          {
          // Point is inside and far enough away from the edge. Don't project
             desiredCMP.changeFrame(returnFrame);
             return;
          }
+         
+         if (!isCMPInside && (distanceFromCMPToOtherEdge < distanceFromCMPToMoveAwayFromEdge))
+         {
+            // Point is outside but close to ICP, just project to ICP
+            desiredCMP.set(otherEdge);
+            desiredCMP.changeFrame(returnFrame);
+            return;
+         }
 
+         
          // Stay cmpEdgeProjectionDistance away from the edge if possible.
          // By possible, we mean if you were to move inside by cmpEdgeProjectionDistance,
          // Make sure you are still at least minCMPProjectionDistance from the ICP,
          // unless that would put you over the edge. Then just use the edge and hope for 
          // the best.
          cmpProjected.set(true);
-         double distanceToICP = moveAwayFromEdge.distance(capturePoint);
-         double distanceToMove = distanceToICP - minICPToCMPProjection.getDoubleValue();
+         double distanceFromICPToMoveAwayFromEdge = moveAwayFromEdge.distance(capturePoint);
+         double distanceToMove = distanceFromICPToMoveAwayFromEdge - minICPToCMPProjection.getDoubleValue();
 
          if (isCMPInside)
          {
@@ -231,6 +259,8 @@ public class SmartCMPProjector
          if (distanceToMove < 0.0) distanceToMove = 0.0;
          if (distanceToMove > cmpEdgeProjectionInside.getDoubleValue()) distanceToMove = cmpEdgeProjectionInside.getDoubleValue();
          
+         double edgeToEdgeDistance = moveAwayFromEdge.distance(otherEdge);
+         if (distanceToMove > edgeToEdgeDistance) distanceToMove = edgeToEdgeDistance;
          insideEdgeDirection.normalize();
          insideEdgeDirection.scale(distanceToMove);
          
@@ -241,7 +271,7 @@ public class SmartCMPProjector
          if (VISUALIZE)
          {
             FramePoint2d desiredCMPInWorld = desiredCMP.changeFrameCopy(ReferenceFrame.getWorldFrame());
-            projectedToPointViz.setPosition(desiredCMPInWorld.getX(), desiredCMPInWorld.getY(), 0.0);
+            projectedCMPViz.setPosition(desiredCMPInWorld.getX(), desiredCMPInWorld.getY(), 0.0);
          }
          
       desiredCMP.changeFrame(returnFrame);
