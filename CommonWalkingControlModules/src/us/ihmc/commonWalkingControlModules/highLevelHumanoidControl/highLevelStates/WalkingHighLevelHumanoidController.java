@@ -710,14 +710,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             for (RobotSide robotSide : RobotSide.values)
             {
                EndEffectorControlModule footEndEffectorControlModule = footEndEffectorControlModules.get(robotSide);
-               if (footEndEffectorControlModule.isInEdgeTouchdownState() && walkOnTheEdgesManager.isEdgeTouchDownDone(robotSide))
+               if (footEndEffectorControlModule.isInEdgeTouchdownState() && walkOnTheEdgesManager.isEdgeTouchDownDone(robotSide) || footEndEffectorControlModule.getCurrentConstraintType() == ConstraintType.TOES)
                   setFlatFootContactState(robotSide);
             }
          }
          else
          {
             EndEffectorControlModule footEndEffectorControlModule = footEndEffectorControlModules.get(transferToSide);
-            if (footEndEffectorControlModule.isInEdgeTouchdownState() && walkOnTheEdgesManager.isEdgeTouchDownDone(transferToSide))
+            if (footEndEffectorControlModule.isInEdgeTouchdownState() && walkOnTheEdgesManager.isEdgeTouchDownDone(transferToSide) || footEndEffectorControlModule.getCurrentConstraintType() == ConstraintType.TOES)
                setFlatFootContactState(transferToSide);
          }
 
@@ -851,7 +851,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             RobotSide trailingLeg = transferToSide.getOppositeSide();
             icpBasedMomentumRateOfChangeControlModule.getDesiredCMP(desiredCMP);
-            walkOnTheEdgesManager.updateToeOffStatusBasedOnECMP(trailingLeg, desiredCMP);
+            walkOnTheEdgesManager.updateToeOffStatusBasedOnECMP(trailingLeg, desiredCMP, desiredICP.getFramePoint2dCopy());
 
             if (walkOnTheEdgesManager.doToeOff())
             {
