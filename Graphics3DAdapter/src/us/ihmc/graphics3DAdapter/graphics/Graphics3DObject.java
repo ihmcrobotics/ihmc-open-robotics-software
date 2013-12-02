@@ -321,7 +321,7 @@ public class Graphics3DObject
 
    public void addCoordinateSystem(double length)
    {
-      addCoordinateSystem(length, YoAppearance.Black());
+      addCoordinateSystem(length, YoAppearance.Gray());
    }
 
    public void addCoordinateSystem(double length, AppearanceDefinition arrowAppearance)
@@ -339,15 +339,13 @@ public class Graphics3DObject
     */
    public void addCoordinateSystem(double length, AppearanceDefinition xAxisAppearance, AppearanceDefinition yAxisAppearance, AppearanceDefinition zAxisAppearance, AppearanceDefinition arrowAppearance)
    {
-      AppearanceDefinition headAppearance = YoAppearance.Gray();
-      
       rotate(Math.PI/2.0, Y);
-      addArrow(length, YoAppearance.Red(), headAppearance);
+      addArrow(length, YoAppearance.Red(), arrowAppearance);
       rotate(-Math.PI/2.0, Y);
       rotate(-Math.PI/2.0, X);
-      addArrow(length, YoAppearance.White(), headAppearance);
+      addArrow(length, YoAppearance.White(), arrowAppearance);
       rotate(Math.PI/2.0, X);
-      addArrow(length, YoAppearance.Blue(), headAppearance);
+      addArrow(length, YoAppearance.Blue(), arrowAppearance);
    }
    
    public void addArrow(double length, AppearanceDefinition baseAppearance, AppearanceDefinition headAppearance)
