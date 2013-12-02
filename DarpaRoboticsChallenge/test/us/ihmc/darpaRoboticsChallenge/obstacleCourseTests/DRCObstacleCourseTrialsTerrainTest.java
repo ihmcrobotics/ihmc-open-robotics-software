@@ -92,7 +92,7 @@ public class DRCObstacleCourseTrialsTerrainTest
       setupCameraForWalkingOverHurdles(simulationConstructionSet);
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(30.0);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(20.0);
       
       drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
@@ -115,7 +115,7 @@ public class DRCObstacleCourseTrialsTerrainTest
       setupCameraForWalkingOverCinderblockField(simulationConstructionSet);
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(30.0);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(40.0);
       
       drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
@@ -138,7 +138,7 @@ public class DRCObstacleCourseTrialsTerrainTest
       setupCameraForWalkingOverCinderblockField(simulationConstructionSet);
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(30.0);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(40.0);
       
       drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
@@ -161,7 +161,7 @@ public class DRCObstacleCourseTrialsTerrainTest
       setupCameraForWalkingOverCinderblockField(simulationConstructionSet);
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(30.0);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(25.0);
       
       drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
