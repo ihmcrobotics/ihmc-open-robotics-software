@@ -115,6 +115,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private static final boolean DO_TRANSITION_WHEN_TIME_IS_UP = false;
    private static final boolean DESIREDICP_FROM_POLYGON_COORDINATE = false;
+   private static final boolean USE_WORLDFRAME_SURFACE_NORMAL_WHEN_FULLY_CONSTRAINED = true;
+   
    private final static HighLevelState controllerState = HighLevelState.WALKING;
    private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OPTIMIZATION;
 
@@ -127,6 +129,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private static enum WalkingState {LEFT_SUPPORT, RIGHT_SUPPORT, TRANSFER_TO_LEFT_SUPPORT, TRANSFER_TO_RIGHT_SUPPORT, DOUBLE_SUPPORT}
 
    private final static boolean DEBUG = false;
+
    private final StateMachine<WalkingState> stateMachine;
    private final CenterOfMassJacobian centerOfMassJacobian;
 
@@ -1846,8 +1849,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    
    private void setFlatFootContactState(RobotSide robotSide)
    {
-//      footNormalContactVector.set(feet.get(robotSide).getPlaneFrame(), 0.0, 0.0, 1.0);
-      footNormalContactVector.set(worldFrame, 0.0, 0.0, 1.0);
+      if (USE_WORLDFRAME_SURFACE_NORMAL_WHEN_FULLY_CONSTRAINED)
+         footNormalContactVector.set(worldFrame, 0.0, 0.0, 1.0);
+      else
+         footNormalContactVector.set(feet.get(robotSide).getPlaneFrame(), 0.0, 0.0, 1.0);
       footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.FULL, footNormalContactVector);
    }
 
