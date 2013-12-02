@@ -23,8 +23,6 @@ import us.ihmc.utilities.net.ObjectConsumer;
  */
 public class SCSCameraDataReceiver extends CameraDataReceiver implements ObjectConsumer<LocalVideoPacket>
 {
-
-   private long numPacket = 0;
    SCSCameraInfoReceiver scsCameraInfoReceiver;
    
    public SCSCameraDataReceiver(RobotPoseBuffer robotPoseBuffer, VideoSettings videoSettings, ObjectCommunicator scsCommunicator, DRCNetworkProcessorNetworkingManager networkingManager, PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
@@ -50,7 +48,9 @@ class SCSCameraInfoReceiver implements CameraInfoReceiver
    private IntrinsicCameraParametersPacket leftParamPacket=null;
    private DRCNetworkProcessorControllerStateHandler stateHandler;
    private double lastFov=Double.NaN;
-
+   private int numPacket=0;
+   private final int numInitialPacketsToIgnore=5;
+   
    public SCSCameraInfoReceiver(DRCNetworkProcessorControllerStateHandler stateHandler)
    {
       this.stateHandler = stateHandler;
@@ -70,9 +70,9 @@ class SCSCameraInfoReceiver implements CameraInfoReceiver
          @Override
          public void run()
          {
-            while(leftParamPacket==null)
+            while(leftParamPacket==null || numPacket<numInitialPacketsToIgnore)
             {
-               System.out.println("waiting for intrinsic information ...");
+               System.out.println("waiting for intrinsic information (ignoring first "+numInitialPacketsToIgnore+" packets)...");
                try
                {
                   Thread.sleep(100);
@@ -83,7 +83,7 @@ class SCSCameraInfoReceiver implements CameraInfoReceiver
                }
             }
             stateHandler.sendSerializableObject(leftParamPacket);
-            System.out.println("send SCS Intrinsic Parameter Packet");
+            System.out.println("SCSCameraInfoReceiver:send SCS Intrinsic Parameter Packet(packet "+numPacket+")");
          
          }
       }.start();
@@ -91,9 +91,10 @@ class SCSCameraInfoReceiver implements CameraInfoReceiver
    
    public void setIntrinsicPacket(LocalVideoPacket videoObject)
    {
+      numPacket++;
       if(videoObject.getFieldOfView()!=lastFov)
       {
-         System.err.println("SCS FoV changed:" + lastFov + " -> " + videoObject.getFieldOfView());
+         System.err.println("SCSCameraInfoReceiver:SCS FoV changed (packet "+ numPacket +"):" + lastFov + " -> " + videoObject.getFieldOfView());
          lastFov=videoObject.getFieldOfView();
       }
       BufferedImage img = videoObject.getImage();
