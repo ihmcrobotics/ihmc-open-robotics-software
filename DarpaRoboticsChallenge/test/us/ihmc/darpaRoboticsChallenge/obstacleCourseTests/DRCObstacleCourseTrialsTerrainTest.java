@@ -63,7 +63,7 @@ public class DRCObstacleCourseTrialsTerrainTest
 
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DRC_TRIALS_TRAINING_WALKING;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", "scripts/DRCTrialsSlopeLeftFootPose.xml", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, false);
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSlopeTest", "scripts/DRCTrialsSlopeLeftFootPose.xml", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, false);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingOntoSlopes(simulationConstructionSet);
@@ -86,7 +86,7 @@ public class DRCObstacleCourseTrialsTerrainTest
 
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_ZIGZAG_BLOCKS;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", "scripts/DRCTrialsZigzagHurdlesLeftFootPose.xml", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, false);
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCZigzagHurdlesTest", "scripts/DRCTrialsZigzagHurdlesLeftFootPose.xml", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, false);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingOverHurdles(simulationConstructionSet);
@@ -109,7 +109,7 @@ public class DRCObstacleCourseTrialsTerrainTest
 
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_CINDERBLOCK_FIELD;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", "scripts/DRCTrialsCinderblockFieldPartOneLeftFootPose.xml", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, false);
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCCinderblockFieldPartOneTest", "scripts/DRCTrialsCinderblockFieldPartOneLeftFootPose.xml", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, false);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingOverCinderblockField(simulationConstructionSet);
@@ -132,7 +132,30 @@ public class DRCObstacleCourseTrialsTerrainTest
 
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_SLANTED_CINDERBLOCK_FIELD;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", "scripts/DRCTrialsCinderblockFieldPartTwoLeftFootPose.xml", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, false);
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCCinderblockfieldPartTwoTest", "scripts/DRCTrialsCinderblockFieldPartTwoLeftFootPose.xml", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, false);
+
+      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
+      setupCameraForWalkingOverCinderblockField(simulationConstructionSet);
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(30.0);
+      
+      drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
+      drcSimulationTestHelper.checkNothingChanged();
+
+      assertTrue(success);
+      
+      BambooTools.reportTestFinishedMessage();
+   }
+   
+   @Test
+   public void testTrialsTerrainUpSlantedCinderblocksScript() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_SLANTED_CINDERBLOCK_FIELD;
+      DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSlantedCinderblockTest", "scripts/DRCTrialsUpSlantedCinderblocks.xml", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, false);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingOverCinderblockField(simulationConstructionSet);

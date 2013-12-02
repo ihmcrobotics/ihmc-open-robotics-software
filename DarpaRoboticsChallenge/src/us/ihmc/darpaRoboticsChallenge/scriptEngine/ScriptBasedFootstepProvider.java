@@ -17,7 +17,9 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepD
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PauseCommand;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandPoseProvider;
+import us.ihmc.commonWalkingControlModules.packets.ComHeightPacket;
 import us.ihmc.commonWalkingControlModules.packets.HandPosePacket;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -40,6 +42,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider
    private final ConcurrentLinkedQueue<ScriptObject> scriptObjects = new ConcurrentLinkedQueue<ScriptObject>();
 
    private final DesiredHandPoseProvider desiredHandPoseProvider; 
+   private final DesiredComHeightProvider desiredComHeightProvider;
    private final ConcurrentLinkedQueue<Footstep> footstepQueue = new ConcurrentLinkedQueue<Footstep>();
    
    private final DoubleYoVariable time;
@@ -56,6 +59,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider
       
       this.scriptFileLoader = scriptFileLoader;
       desiredHandPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters, registry);
+      desiredComHeightProvider = new DesiredComHeightProvider();
    }
    
    private void loadScriptFileIfNecessary()
@@ -102,6 +106,13 @@ public class ScriptBasedFootstepProvider implements FootstepProvider
       {
          PauseCommand pauseCommand = (PauseCommand) scriptObject;
          setupTimesForNewScriptEvent(0.5);
+      }
+      
+      else if (scriptObject instanceof ComHeightPacket )
+      {
+         ComHeightPacket comHeightPacket = (ComHeightPacket) scriptObject;
+         desiredComHeightProvider.getComHeightPacketConsumer().consumeObject(comHeightPacket);
+         setupTimesForNewScriptEvent(3.0); // Arbitrary three second duration to allow for changing the CoM height. Might be possible to lower this a little bit. 
       }
    }
    
@@ -206,6 +217,11 @@ public class ScriptBasedFootstepProvider implements FootstepProvider
    public DesiredHandPoseProvider getDesiredHandPoseProvider()
    {
       return desiredHandPoseProvider;
+   }
+   
+   public DesiredComHeightProvider getDesiredComHeightProvider()
+   {
+      return desiredComHeightProvider;
    }
 
 }
