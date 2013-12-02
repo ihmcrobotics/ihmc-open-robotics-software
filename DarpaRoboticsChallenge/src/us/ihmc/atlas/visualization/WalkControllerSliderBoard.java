@@ -82,9 +82,10 @@ public class WalkControllerSliderBoard
       final AtlasLimits atlasLimits = AtlasLimits.getHighLevelLimits(generalizedSDFRobotModel);
 
       final EnumYoVariable<?> testedJoint = ((EnumYoVariable<?>) registry.getVariable("testedJoint"));
-      if (testedJoint == null) throw new RuntimeException("testedJoint == null");
-      ForceControllerTunerListener.setupSliderBoard(sliderBoardConfigurationManager, testedJoint, atlasLimits, registry);
-
+      if (testedJoint != null)
+      {
+         ForceControllerTunerListener.setupSliderBoard(sliderBoardConfigurationManager, testedJoint, atlasLimits, registry);
+      }
       
       sliderBoardMode.set(SliderBoardMode.WalkingGains);
 
