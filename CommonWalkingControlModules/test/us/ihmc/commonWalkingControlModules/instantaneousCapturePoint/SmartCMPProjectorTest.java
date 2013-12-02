@@ -338,6 +338,46 @@ public class SmartCMPProjectorTest
       ThreadTools.sleepForever();
    }
    
+   @Ignore
+   @Test
+   public void testTroublesomeSix()
+   {
+      Vizzy viz = new Vizzy();
+
+      double[][] pointList = new double[][]
+            {
+            {-0.8598263783206956, 8.812003858355197},
+            {2.9111689851050997, -2.8275592421317626},
+            {-7.99259023564723, -6.327559047941249},
+            {-4.898907389671077, 3.467436032944315}
+            };
+      FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(worldFrame, pointList);
+      viz.addConvexPolygon(supportPolygon);
+
+      // Test simple projection away from edge, but not too far.
+      FramePoint2d capturePoint = new FramePoint2d(worldFrame, -1.9885683919677177, -5.49168161377456);
+      FramePoint2d desiredCMP = new FramePoint2d(worldFrame, 9.549202437801455, -5.225841656143075);
+
+      double cmpEdgeProjectionInside = 0.06786518148922357;
+      double minICPToCMPProjection = 0.1617081901379216;
+
+      SmartCMPProjector smartCMPProjector = new SmartCMPProjector(viz.getYoVariableRegistry(), viz.getDynamicGraphicObjectsListRegistry());
+      smartCMPProjector.setCMPEdgeProjectionInside(cmpEdgeProjectionInside);
+      smartCMPProjector.setMinICPToCMPProjection(minICPToCMPProjection);
+
+      viz.start();
+
+      FramePoint2d projectedCMP = new FramePoint2d(desiredCMP);
+
+      smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, projectedCMP);
+      tickAndUpdate(viz.getSimulationConstructionSet());
+      
+      assertSolutionIsReasonable(cmpEdgeProjectionInside, minICPToCMPProjection, supportPolygon,
+            capturePoint, desiredCMP, projectedCMP);
+      
+      ThreadTools.sleepForever();
+   }
+   
    @Test
    public void testSimpleProjectionAwayFromEdgeButNotTooFar()
    {
@@ -500,26 +540,6 @@ public class SmartCMPProjectorTest
 
       if (originalCMPIsInside || capturePointIsInside)
       {
-         if (!projectedCMPIsInside)
-         {
-     
-               System.err.println("\n\nsupportPolygon = " + supportPolygon);
-               System.err.println("cmpEdgeProjectionInside = " + cmpEdgeProjectionInside);
-               System.err.println("minICPToCMPProjection = " + minICPToCMPProjection);
-               System.err.println("cmpEdgeProjectionInside = " + cmpEdgeProjectionInside);
-               System.err.println("capturePoint = " + capturePoint);
-               System.err.println("desiredCMP = " + desiredCMP);
-               System.err.println("projectedCMP = " + projectedCMP);
-
-               System.err.println("originalCMPIsInside = " + originalCMPIsInside);
-               System.err.println("capturePointIsInside = " + capturePointIsInside);
-               System.err.println("projectedCMPIsInside = " + projectedCMPIsInside);
-               
-//               System.err.println("distanceFromProjectedToCapturePoint = " + distanceFromProjectedToCapturePoint);
-//               System.err.println("distanceFromOriginalToCapturePoint = " + distanceFromOriginalToCapturePoint);
-
-         }
-         
        assertTrue(projectedCMPIsInside);
       }
 
@@ -544,17 +564,46 @@ public class SmartCMPProjectorTest
          assertTrue(distanceFromProjectedToCapturePoint <= distanceFromOriginalToCapturePoint);
       }
 
-      if (distanceFromProjectedToCapturePoint < 1e-7)
+      if (distanceFromProjectedToCapturePoint > 1e-7)
       {
          FrameVector2d originalToCapturePoint = new FrameVector2d(capturePoint);
          originalToCapturePoint.sub(desiredCMP);
 
          FrameVector2d projectedToCapturePoint = new FrameVector2d(capturePoint);
-         originalToCapturePoint.sub(projectedCMP);
+         projectedToCapturePoint.sub(projectedCMP);
 
-         assertTrue(originalToCapturePoint.dot(projectedToCapturePoint) >= 0.0);
+      // Cross product should be zero, meaning the original, projected, and icp are colinear.
          double cross = originalToCapturePoint.cross(projectedToCapturePoint);
-         assertTrue(Math.abs(cross) < 1e-7);
+         boolean threePointsAreColinear = Math.abs(cross) < 1e-7;
+         assertTrue(threePointsAreColinear);
+         
+         // Dot product should be positive, meaning that the cmp doesn't change sides.
+         // Except when both are outside, then it might change sides.
+         
+         if (originalCMPIsInside || capturePointIsInside)
+         {
+
+            boolean stayedOnSameSide = originalToCapturePoint.dot(projectedToCapturePoint) >= 0.0;
+            if (!stayedOnSameSide)
+            {
+               System.err.println("\n\nsupportPolygon = " + supportPolygon);
+               System.err.println("cmpEdgeProjectionInside = " + cmpEdgeProjectionInside);
+               System.err.println("minICPToCMPProjection = " + minICPToCMPProjection);
+               System.err.println("capturePoint = " + capturePoint);
+               System.err.println("desiredCMP = " + desiredCMP);
+               System.err.println("projectedCMP = " + projectedCMP);
+
+               System.err.println("originalCMPIsInside = " + originalCMPIsInside);
+               System.err.println("capturePointIsInside = " + capturePointIsInside);
+               System.err.println("projectedCMPIsInside = " + projectedCMPIsInside);
+
+               //                  System.err.println("distanceFromProjectedToCapturePoint = " + distanceFromProjectedToCapturePoint);
+               //                  System.err.println("distanceFromOriginalToCapturePoint = " + distanceFromOriginalToCapturePoint);
+            }
+
+            assertTrue(stayedOnSameSide);
+         }
+         
       }
    }
 
