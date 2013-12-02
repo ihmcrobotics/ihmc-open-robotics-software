@@ -121,6 +121,8 @@ public class ManipulationControlModule
       kpArmTaskspace.addVariableChangedListener(listener);
       zetaArmTaskspace.addVariableChangedListener(listener);
       kdArmTaskspace.addVariableChangedListener(listener);
+      kiArmTaskspace.addVariableChangedListener(listener);
+      maxIntegralErrorArmTaskspace.addVariableChangedListener(listener);
       
       listener.variableChanged(null);
    }
