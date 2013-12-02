@@ -217,6 +217,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final BipedSupportPolygons bipedSupportPolygons;
    private final YoFramePoint capturePoint;
    private final YoFramePoint2d desiredICP;
+   private final DoubleYoVariable icpStandOffsetX = new DoubleYoVariable("icpStandOffsetX", registry);
+   private final DoubleYoVariable icpStandOffsetY = new DoubleYoVariable("icpStandOffsetY", registry);
    private final YoFrameVector2d desiredICPVelocity;
 
    private final DoubleYoVariable controlledCoMHeightAcceleration;
@@ -736,6 +738,19 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue()) && (transferToSide == null))
          {
             desiredICPVelocity.set(0.0, 0.0);
+            
+            // Hack for now to put the ICP in the middle of the feet. 
+            // Need to fix up the ICP trajectory stuff so that it smoothly gets there.
+            FramePoint2d midFeetPoint = new FramePoint2d(referenceFrames.getMidFeetZUpFrame());
+            midFeetPoint.setX(midFeetPoint.getX() + icpStandOffsetX.getDoubleValue());
+            midFeetPoint.setY(midFeetPoint.getY() + icpStandOffsetY.getDoubleValue());
+            
+            midFeetPoint.changeFrame(worldFrame);
+            FramePoint2d morphedTowardMidFeet = FramePoint2d.morph(desiredICP.getFramePoint2dCopy(), midFeetPoint, 0.03);
+            desiredICP.set(morphedTowardMidFeet);
+            
+            
+            
             if (DESIREDICP_FROM_POLYGON_COORDINATE)
             {
                FramePoint2d tpoint = new FramePoint2d(doubleSupportDesiredICP.getCurrentPoint());
@@ -983,12 +998,22 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          
          walkOnTheEdgesManager.reset();
 
-         if (!instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue()) && (transferToSide != null))
+         if (transferToSide != null)
          {
-            Footstep transferToFootstep = createFootstepFromFootAndContactablePlaneBody(referenceFrames.getFootFrame(transferToSide), feet.get(transferToSide));
-            TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(transferToFootstep, transferToSide);
+            if (!instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue()))
+            {
+               Footstep transferToFootstep = createFootstepFromFootAndContactablePlaneBody(referenceFrames.getFootFrame(transferToSide), feet.get(transferToSide));
+               TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(transferToFootstep, transferToSide);
 
-            instantaneousCapturePointPlanner.reInitializeSingleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue());
+               instantaneousCapturePointPlanner.reInitializeSingleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue());
+            }
+         }
+         else
+         {
+//          Do something smart here when going to DoubleSupport state.
+
+//            instantaneousCapturePointPlanner.initializeForStoppingInDoubleSupport(yoTime.getDoubleValue());
+
          }
 
          icpAndMomentumBasedController.updateBipedSupportPolygons(bipedSupportPolygons);    // need to always update biped support polygons after a change to the contact states
