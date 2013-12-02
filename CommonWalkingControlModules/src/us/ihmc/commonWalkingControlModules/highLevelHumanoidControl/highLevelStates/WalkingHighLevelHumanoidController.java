@@ -250,7 +250,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable swingKpXY = new DoubleYoVariable("swingKpXY", registry);
    private final DoubleYoVariable swingKpZ = new DoubleYoVariable("swingKpZ", registry);
    private final DoubleYoVariable swingKpOrientation = new DoubleYoVariable("swingKpOrientation", registry);
-   private final DoubleYoVariable swingZeta = new DoubleYoVariable("swingZeta", registry);
+   private final DoubleYoVariable swingZetaXYZ = new DoubleYoVariable("swingZetaXYZ", registry);
+   private final DoubleYoVariable swingZetaOrientation = new DoubleYoVariable("swingZetaOrientation", registry);
    
    private final DoubleYoVariable holdKpXY = new DoubleYoVariable("holdKpXY", registry);
    private final DoubleYoVariable holdKpOrientation = new DoubleYoVariable("holdKpOrientation", registry);
@@ -443,7 +444,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       swingKpXY.set(walkingControllerParameters.getSwingKpXY()); 
       swingKpZ.set(walkingControllerParameters.getSwingKpZ()); 
       swingKpOrientation.set(walkingControllerParameters.getSwingKpOrientation()); 
-      swingZeta.set(walkingControllerParameters.getSwingZeta());
+      swingZetaXYZ.set(walkingControllerParameters.getSwingZetaXYZ());
+      swingZetaOrientation.set(walkingControllerParameters.getSwingZetaOrientation());
       
       holdKpXY.set(walkingControllerParameters.getHoldKpXY());
       holdKpOrientation.set(walkingControllerParameters.getHoldKpOrientation());
@@ -651,7 +653,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          public void variableChanged(YoVariable v)
          {
             endEffectorControlModule.setHoldGains(holdKpXY.getDoubleValue(), holdKpOrientation.getDoubleValue(), holdZeta.getDoubleValue());
-            endEffectorControlModule.setSwingGains(swingKpXY.getDoubleValue(), swingKpZ.getDoubleValue(), swingKpOrientation.getDoubleValue(), swingZeta.getDoubleValue());
+            endEffectorControlModule.setSwingGains(swingKpXY.getDoubleValue(), swingKpZ.getDoubleValue(), swingKpOrientation.getDoubleValue(), swingZetaXYZ.getDoubleValue(), swingZetaOrientation.getDoubleValue());
             endEffectorControlModule.setMaxAccelerationAndJerk(swingMaxPositionAcceleration.getDoubleValue(), swingMaxPositionJerk.getDoubleValue(), 
                   swingMaxOrientationAcceleration.getDoubleValue(), swingMaxOrientationJerk.getDoubleValue());
          }};
@@ -659,7 +661,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          swingKpXY.addVariableChangedListener(ret);
          swingKpZ.addVariableChangedListener(ret);
          swingKpOrientation.addVariableChangedListener(ret);
-         swingZeta.addVariableChangedListener(ret);
+         swingZetaXYZ.addVariableChangedListener(ret);
+         swingZetaOrientation.addVariableChangedListener(ret);
          
          swingMaxPositionAcceleration.addVariableChangedListener(ret);
          swingMaxPositionJerk.addVariableChangedListener(ret);

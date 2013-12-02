@@ -79,7 +79,8 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getSwingKpXY();
    public abstract double getSwingKpZ();
    public abstract double getSwingKpOrientation();
-   public abstract double getSwingZeta();
+   public abstract double getSwingZetaXYZ();
+   public abstract double getSwingZetaOrientation();
 
    public abstract double getHoldKpXY();
    public abstract double getHoldKpOrientation();

@@ -441,11 +441,17 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
       return 200.0;
    }
    
-   public double getSwingZeta()
+   public double getSwingZetaXYZ()
    {
-      return 0.5;
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 0.7;
+      return 0.3;
    }
    
+   public double getSwingZetaOrientation()
+   {
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 0.7;
+      return 0.7; 
+   }
 
    public double getHoldKpXY()
    {
