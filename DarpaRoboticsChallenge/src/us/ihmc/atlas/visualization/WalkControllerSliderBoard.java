@@ -80,11 +80,12 @@ public class WalkControllerSliderBoard
       
  
       final AtlasLimits atlasLimits = AtlasLimits.getHighLevelLimits(generalizedSDFRobotModel);
+
+      final EnumYoVariable<?> testedJoint = ((EnumYoVariable<?>) registry.getVariable("testedJoint"));
+      if (testedJoint == null) throw new RuntimeException("testedJoint == null");
+      ForceControllerTunerListener.setupSliderBoard(sliderBoardConfigurationManager, testedJoint, atlasLimits, registry);
+
       
-      final EnumYoVariable<AtlasJointId> selectedJoint = new EnumYoVariable<AtlasJointId>("testedJoint", registry, AtlasJointId.class);
-      ForceControllerTunerListener.setupSliderBoard(sliderBoardConfigurationManager, selectedJoint, atlasLimits, registry);
-
-
       sliderBoardMode.set(SliderBoardMode.WalkingGains);
 
       VariableChangedListener listener = new VariableChangedListener()
@@ -94,7 +95,7 @@ public class WalkControllerSliderBoard
          {
             if (sliderBoardMode.getEnumValue() == SliderBoardMode.ForceGains)
             {
-               sliderBoardConfigurationManager.loadConfiguration(selectedJoint.getEnumValue().toString()); 
+               sliderBoardConfigurationManager.loadConfiguration(testedJoint.getEnumValue().toString()); 
             }
             
             else
