@@ -104,6 +104,7 @@ public class DRCNetworkProcessor
          
          ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
          
+         
          rosMainNode.execute();
       }
       else
@@ -122,6 +123,8 @@ public class DRCNetworkProcessor
       //         DrivingProcessorFactory.createDrivingProcessor(networkingManager, cameraDataReceiver, timestampProvider, fieldComputerClient,
       //                 transformForDrivingProviderListener);
       //      }
+      
+      connect();
    }
 
    public DRCNetworkProcessor(LocalObjectCommunicator scsCommunicator, ObjectCommunicator drcNetworkObjectCommunicator)
@@ -131,6 +134,8 @@ public class DRCNetworkProcessor
             ppsTimestampOffsetProvider);
       new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, fullRobotModel, robotBoundingBoxes, jointMap, fieldComputerClient,
             ppsTimestampOffsetProvider);
+      
+      connect();
 
    }
 
@@ -178,7 +183,10 @@ public class DRCNetworkProcessor
          ppsTimestampOffsetProvider = new AlwaysZeroOffsetPPSTimestampOffsetProvider();
          videoSettings = VideoSettingsFactory.get32kBitSettingsSquare();
       }
+   }
 
+   private void connect()
+   {
       try
       {
          this.fieldComputerClient.connect();
@@ -187,6 +195,7 @@ public class DRCNetworkProcessor
       {
          throw new RuntimeException(e);
       }
+      networkingManager.connect();
    }
 
    public static void main(String[] args) throws URISyntaxException, JSAPException
