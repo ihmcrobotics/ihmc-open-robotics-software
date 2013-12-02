@@ -7,6 +7,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.Wrench;
 
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
@@ -27,7 +28,8 @@ public class EndEffectorOutput
    private final FramePoint tempFramePoint;
    private final DynamicGraphicVector linearVectorGraphic;
    private final DynamicGraphicVector angularVectorGraphic;
-
+   // Only for visualization
+   private final DoubleYoVariable wRhoPenalizer;
 
    public EndEffectorOutput(String nameSuffix, ReferenceFrame centerOfMassFrame, ReferenceFrame endEffectorFrame, YoVariableRegistry parentRegistry)
    {
@@ -41,10 +43,13 @@ public class EndEffectorOutput
       this.wrenchLinear = new YoFrameVector("WrenchLinear", endEffectorFrame.getRootFrame(), this.registry);
       this.wrenchAngular = new YoFrameVector("wrenchAngular", endEffectorFrame.getRootFrame(), this.registry);
       this.wrenchOrigin = new YoFramePoint("WrenchOrigin", endEffectorFrame.getRootFrame(), this.registry);
-      linearVectorGraphic=new DynamicGraphicVector(name+"linear", wrenchOrigin,wrenchLinear, VECTOR_SCALE, new YoAppearanceRGBColor(1.0, 0.0, 0.0, 0.2), true);
-      angularVectorGraphic = new DynamicGraphicVector(name+"angular", wrenchOrigin,wrenchAngular, VECTOR_SCALE, new YoAppearanceRGBColor(0.5, 0.0, 0.5, 0.2), true);
+      linearVectorGraphic = new DynamicGraphicVector(name + "linear", wrenchOrigin, wrenchLinear, VECTOR_SCALE, new YoAppearanceRGBColor(1.0, 0.0, 0.0, 0.2), true);
+      angularVectorGraphic = new DynamicGraphicVector(name + "angular", wrenchOrigin, wrenchAngular, VECTOR_SCALE,
+            new YoAppearanceRGBColor(0.5, 0.0, 0.5, 0.2), true);
       this.tempFrameVector = new FrameVector(endEffectorFrame);
       this.tempFramePoint = new FramePoint(endEffectorFrame);
+
+      wRhoPenalizer = new DoubleYoVariable(name + "WRhoPenalizer", registry);
    }
 
    public void setExternallyActingSpatialForceVector(SpatialForceVector spatialForceVector)
@@ -75,12 +80,19 @@ public class EndEffectorOutput
    {
       return this.resultingWrench;
    }
+
    public DynamicGraphicVector getWrenchLinearVectorGraphic()
    {
       return linearVectorGraphic;
    }
+
    public DynamicGraphicVector getWrenchAngularVectorGraphic()
    {
       return angularVectorGraphic;
+   }
+
+   public void setWRhoPenalizer(double wRhoPenalizer)
+   {
+      this.wRhoPenalizer.set(wRhoPenalizer);
    }
 }

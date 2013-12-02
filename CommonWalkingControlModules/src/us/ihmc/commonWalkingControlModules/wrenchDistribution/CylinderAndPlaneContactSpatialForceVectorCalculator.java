@@ -290,11 +290,16 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
 
       if (endEffectors == null)
       {
+         wRhoPenalizerToPack.zero();
          return;
       }
 
       if (rhoMeanLoadedEndEffectors.getNumElements() == 1)
       {
+         wRhoPenalizerToPack.zero();
+         // For visualization
+         for (int i = 0; i < endEffectors.size(); i++)
+            endEffectors.get(i).setWRhoPenalizer(0.0);
          return;
       }
       else if (rhoMeanLoadedEndEffectors.getNumElements() == 2)
@@ -317,6 +322,10 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
                penaltyScalingOne = loadFactorTwo;
                penaltyScalingTwo = loadFactorOne;
 
+               // For visualization
+               endEffectors.get(iEndEffectorLoaded).setWRhoPenalizer(wRhoMaxPenalty * penaltyScalingOne);
+               endEffectors.get(iEndEffectorLoaded + 1).setWRhoPenalizer(wRhoMaxPenalty * penaltyScalingTwo);
+               
                int numberBiasVectors = endEffector.getContactModel().getRhoSize();
                for (int index = iRho; index < (iRho + numberBiasVectors); index++)
                {
