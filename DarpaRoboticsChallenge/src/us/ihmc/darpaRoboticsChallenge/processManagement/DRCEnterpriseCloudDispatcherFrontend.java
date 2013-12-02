@@ -4,7 +4,6 @@ import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
-
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
@@ -15,7 +14,6 @@ import us.ihmc.utilities.net.tcpServer.ReconnectingTCPClient;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
-
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -24,8 +22,6 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 
 public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 {
@@ -336,7 +332,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
       frame = new JFrame("DRC Networking Dispatcher");
       frame.setSize(850, 230);
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      frame.setAlwaysOnTop(true);
+//      frame.setAlwaysOnTop(true);
       frame.setLocationRelativeTo(null);
 
       JPanel mainPanel = new JPanel(new GridBagLayout());
