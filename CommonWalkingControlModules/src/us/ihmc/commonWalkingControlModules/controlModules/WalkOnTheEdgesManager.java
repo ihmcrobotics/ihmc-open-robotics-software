@@ -117,7 +117,7 @@ public class WalkOnTheEdgesManager
 
       onToesTriangleAreaLimit.set(0.01);
 
-      extraCoMMaxHeightWithToes.set(0.06);
+      extraCoMMaxHeightWithToes.set(0.08);
 
       minStepLengthForToeOff.set(Math.max(0.10, footLength));
       minStepHeightForToeOff.set(0.10);
@@ -127,7 +127,7 @@ public class WalkOnTheEdgesManager
       parentRegistry.addChild(registry);
    }
 
-   public void updateToeOffStatusBasedOnECMP(RobotSide trailingLeg, FramePoint2d desiredECMP)
+   public void updateToeOffStatusBasedOnECMP(RobotSide trailingLeg, FramePoint2d desiredECMP, FramePoint2d desiredICP)
    {
       if (!doToeOffIfPossible.getBooleanValue() || stayOnToes.getBooleanValue() || TOEOFF_TRIGGER_METHOD != SwitchToToeOffMethods.USE_ECMP)
       {
@@ -138,11 +138,14 @@ public class WalkOnTheEdgesManager
 
       ContactablePlaneBody trailingFoot = feet.get(trailingLeg);
       ContactablePlaneBody leadingFoot = feet.get(trailingLeg.getOppositeSide());
-      FrameConvexPolygon2d OnToesSupportPolygon = getOnToesSupportPolygonCopy(trailingFoot, leadingFoot);
-//      isDesiredECMPOKForToeOff.set(Math.abs(OnToesSupportPolygon.distance(desiredECMP)) < 0.06);
-      isDesiredECMPOKForToeOff.set(OnToesSupportPolygon.isPointInside(desiredECMP));
+      FrameConvexPolygon2d onToesSupportPolygon = getOnToesSupportPolygonCopy(trailingFoot, leadingFoot);
+//      isDesiredECMPOKForToeOff.set(Math.abs(onToesSupportPolygon.distance(desiredECMP)) < 0.06);
+      isDesiredECMPOKForToeOff.set(onToesSupportPolygon.isPointInside(desiredECMP));
+      
+      FrameConvexPolygon2d leadingFootSupportPolygon = getFootSupportPolygonCopy(leadingFoot);
+      isDesiredICPOKForToeOff.set(leadingFootSupportPolygon.isPointInside(desiredICP));
 
-      if (!isDesiredECMPOKForToeOff.getBooleanValue())
+      if (!isDesiredECMPOKForToeOff.getBooleanValue() && !isDesiredICPOKForToeOff.getBooleanValue())
       {
          doToeOff.set(false);
          return;
@@ -514,6 +517,20 @@ public class WalkOnTheEdgesManager
 //      }
       
       for (FramePoint framePoint : leadingFootPoints)
+      {
+         framePoint.changeFrame(worldFrame);
+         allPoints.add(framePoint.toFramePoint2d());
+      }
+
+      return new FrameConvexPolygon2d(allPoints);
+   }
+
+   private FrameConvexPolygon2d getFootSupportPolygonCopy(ContactablePlaneBody foot)
+   {
+      List<FramePoint> footPoints = foot.getContactPointsCopy();
+
+      List<FramePoint2d> allPoints = new ArrayList<FramePoint2d>();
+      for (FramePoint framePoint : footPoints)
       {
          framePoint.changeFrame(worldFrame);
          allPoints.add(framePoint.toFramePoint2d());
