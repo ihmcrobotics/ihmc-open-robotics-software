@@ -16,7 +16,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.endEffector.LegSingularityAndKneeCollapseAvoidanceControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
@@ -1746,12 +1745,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          zdCurrent = comVelocity.getZ(); // Just use com velocity for now for damping...
       }
       
-      // Correct, if necessary, the CoM height trajectory to avoid singularity or knee collapsing
+      ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
+      // Correct, if necessary, the CoM height trajectory to avoid straight knee
       for (RobotSide robotSide : RobotSide.values)
-      {
-         EndEffectorControlModule endEffectorControlModule = footEndEffectorControlModules.get(robotSide);
-         endEffectorControlModule.correctCoMHeightTrajectory(comXYVelocity, comHeightDataBeforeSmoothing, zCurrent, referenceFrames.getPelvisZUpFrame(), footSwitches.get(robotSide).computeFootLoadPercentage());
-      }
+         footEndEffectorControlModules.get(robotSide).correctCoMHeightTrajectoryForSupportLeg(desiredICPVelocity, comHeightDataBeforeSmoothing, zCurrent, pelvisZUpFrame, footSwitches.get(robotSide).computeFootLoadPercentage());
+      
+      // Do that after to make sure the swing foot will land
+      for (RobotSide robotSide : RobotSide.values)
+         footEndEffectorControlModules.get(robotSide).correctCoMHeightTrajectoryForUnreachableFootStep(comHeightDataBeforeSmoothing);
 
       coMHeightTimeDerivativesSmoother.smooth(comHeightDataAfterSmoothing, comHeightDataBeforeSmoothing);
       
