@@ -63,6 +63,7 @@ public class EstimateMotionFromBox
       if( !Intersection3D_F64.intersect(leftG,rightG,line) )
          throw new RuntimeException("left and right plane's don't intersect");
       Intersection3D_F64.intersect(top,line,p);
+      System.out.println("Intersection of all planes: "+p);
    }
 
    private void createRotation( PlaneNormal3D_F64 left , PlaneNormal3D_F64 right , DenseMatrix64F R ) {
