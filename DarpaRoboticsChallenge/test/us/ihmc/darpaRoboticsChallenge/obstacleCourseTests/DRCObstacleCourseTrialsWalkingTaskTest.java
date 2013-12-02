@@ -10,7 +10,6 @@ import org.junit.Test;
 
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
-import us.ihmc.commonWalkingControlModules.packets.ComHeightPacket;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCEnvironmentModel;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
@@ -25,7 +24,7 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 
 public class DRCObstacleCourseTrialsWalkingTaskTest
 {
-   private static final boolean KEEP_SCS_UP = true;
+   private static final boolean KEEP_SCS_UP = false;
 
    private static final boolean createMovie = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
