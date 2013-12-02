@@ -112,7 +112,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider
       {
          ComHeightPacket comHeightPacket = (ComHeightPacket) scriptObject;
          desiredComHeightProvider.getComHeightPacketConsumer().consumeObject(comHeightPacket);
-         setupTimesForNewScriptEvent(3.0); // Arbitrary three second duration to allow for changing the CoM height. Might be possible to lower this a little bit. 
+         setupTimesForNewScriptEvent(2.0); // Arbitrary two second duration to allow for changing the CoM height. Might be possible to lower this a little bit. 
       }
    }
    
