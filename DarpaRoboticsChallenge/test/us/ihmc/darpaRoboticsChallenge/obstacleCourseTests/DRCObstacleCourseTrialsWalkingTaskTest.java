@@ -95,12 +95,12 @@ public class DRCObstacleCourseTrialsWalkingTaskTest
       setupCameraForWalkingOverCinderBlocks(simulationConstructionSet);
 
       ThreadTools.sleep(0);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1);
 
       BooleanYoVariable doToeTouchdownIfPossible = (BooleanYoVariable) simulationConstructionSet.getVariable("doToeTouchdownIfPossible");
       doToeTouchdownIfPossible.set(true);
       
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10.0);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(13.0);
 
       drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
