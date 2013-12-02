@@ -49,6 +49,11 @@ public class EndEffector
       this.loadBearing = inContact;
    }
 
+   public void setWRhoPenalizer(double wRhoPenalizer)
+   {
+      output.setWRhoPenalizer(wRhoPenalizer);
+   }
+
    public EndEffectorOutput getOutput()
    {
       return this.output;
