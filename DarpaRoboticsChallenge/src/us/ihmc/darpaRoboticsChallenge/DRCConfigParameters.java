@@ -208,7 +208,7 @@ public class DRCConfigParameters
    public static final int JOINT_CONFIGURATION_RATE_IN_MS = 10;
 
    public static final boolean USE_TABS_IN_UI = true;
-   public static final boolean DO_AUTOMATED_STANDPREP = false;
+   public static final boolean DO_AUTOMATED_STANDPREP = true;
 
    // Path parameters
    public static final double DEFAULT_SPINNING_DIAMETER = 0.4;
