@@ -30,6 +30,7 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
    private final DenseMatrix64F tempSum = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
    private List<? extends EndEffector> endEffectors;
 
+   private final YoVariableRegistry registry;
    private final DynamicGraphicVector[][][] graphicWrenches = new DynamicGraphicVector[2][][];
    private final DoubleYoVariable[][][] graphicYoDoubles = new DoubleYoVariable[2][][];
    private final FramePoint tempPoint;
@@ -51,9 +52,9 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
    private final DenseMatrix64F qRho;
    private final DenseMatrix64F qPhi;
 
+   private final DoubleYoVariable rhoTotal;
    private final DenseMatrix64F rhoMean;
    private final DenseMatrix64F rhoMeanLoadedEndEffectors;
-
 
    public CylinderAndPlaneContactSpatialForceVectorCalculator(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, int rhoSize, int phiSize)
@@ -67,12 +68,14 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
 
       visualize = dynamicGraphicObjectsListRegistry != null;
       String name = getClass().getSimpleName();
-      YoVariableRegistry registry = new YoVariableRegistry(name);
+      registry = new YoVariableRegistry(name);
       parentRegistry.addChild(registry);
       this.centerOfMassFrame = centerOfMassFrame;
       this.tempPoint = new FramePoint(centerOfMassFrame);
       this.tempVector = new FrameVector(centerOfMassFrame);
       this.tempSpatialVector = new SpatialForceVector(centerOfMassFrame);
+      
+      rhoTotal = new DoubleYoVariable(name + "RhoTotal", registry);
 
       if (visualize)
       {
@@ -153,6 +156,7 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
       int phiLocation = 0;
 
       rhoMean.zero();
+      rhoTotal.set(0.0);
 
       int loadedEndEffectors = 0;
       for (int i = 0; i < endEffectors.size(); i++)
@@ -192,6 +196,7 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
             DenseMatrix64F rhosSingleEndEffector = CommonOps.extract(rho, (iRho - model.getRhoSize()), iRho, 0, 1);
             double rhosSum = CommonOps.elementSum(rhosSingleEndEffector);
             double rhosAverage = rhosSum / model.getRhoSize();
+            rhoTotal.add(rhosAverage);
             rhoMeanLoadedEndEffectors.set(loadedEndEffector, rhosAverage);
 
             for (int index = (iRho - model.getRhoSize()); index < iRho; index++)
@@ -294,57 +299,33 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
          return;
       }
 
-      if (rhoMeanLoadedEndEffectors.getNumElements() == 1)
+      int iRho = 0;
+      for (int i = 0; i < endEffectors.size(); i++)
       {
-         wRhoPenalizerToPack.zero();
-         // For visualization
-         for (int i = 0; i < endEffectors.size(); i++)
-            endEffectors.get(i).setWRhoPenalizer(0.0);
-         return;
-      }
-      else if (rhoMeanLoadedEndEffectors.getNumElements() == 2)
-      {
-         int iRho = 0;
-         int iEndEffectorLoaded = 0;
-         for (int i = 0; i < endEffectors.size(); i++)
+         EndEffector endEffector = endEffectors.get(i);
+         if (endEffector.isLoadBearing())
          {
-            EndEffector endEffector = endEffectors.get(i);
-            if (endEffector.isLoadBearing())
+            double penaltyScaling = 0.0;
+            double meanRhoLoaded = rhoMeanLoadedEndEffectors.get(i);
+
+            if (rhoTotal.getDoubleValue() > 1e-3)
+               penaltyScaling = Math.max(0.0, 1.0 - meanRhoLoaded / rhoTotal.getDoubleValue());
+
+            // For visualization only
+            endEffector.setWRhoPenalizer(wRhoMaxPenalty * penaltyScaling);
+
+            int rhoSize = endEffector.getContactModel().getRhoSize();
+            for (int index = 0; index < rhoSize; index++)
             {
-               double meanRhoLoadedOne = rhoMeanLoadedEndEffectors.get(iEndEffectorLoaded);
-               double meanRhoLoadedTwo = rhoMeanLoadedEndEffectors.get(iEndEffectorLoaded + 1);
-
-               double penaltyScalingOne;
-               double penaltyScalingTwo;
-
-               double loadFactorOne = meanRhoLoadedOne / (meanRhoLoadedOne + meanRhoLoadedTwo);
-               double loadFactorTwo = 1.0 - loadFactorOne;
-               penaltyScalingOne = loadFactorTwo;
-               penaltyScalingTwo = loadFactorOne;
-
-               // For visualization
-               endEffectors.get(iEndEffectorLoaded).setWRhoPenalizer(wRhoMaxPenalty * penaltyScalingOne);
-               endEffectors.get(iEndEffectorLoaded + 1).setWRhoPenalizer(wRhoMaxPenalty * penaltyScalingTwo);
-               
-               int numberBiasVectors = endEffector.getContactModel().getRhoSize();
-               for (int index = iRho; index < (iRho + numberBiasVectors); index++)
-               {
-                  wRhoPenalizerToPack.set(index, index, wRhoMaxPenalty * penaltyScalingOne);
-                  wRhoPenalizerToPack.set((index + numberBiasVectors), (index + numberBiasVectors), wRhoMaxPenalty * penaltyScalingTwo);
-               }
-
+               wRhoPenalizerToPack.set(iRho, iRho, wRhoMaxPenalty * penaltyScaling);
                iRho++;
-               iEndEffectorLoaded++;
-
-               return;
             }
          }
-      }
-      else
-      {
-         throw new RuntimeException(
-             "The used optimizer that tries to keep the CoP in the middle of the endeffectors currently only works if the loaded endeffectors are feet only. In "
-             + getClass().toString());
+         else
+         {
+            // For visualization only
+            endEffector.setWRhoPenalizer(0.0);
+         }
       }
    }
 
