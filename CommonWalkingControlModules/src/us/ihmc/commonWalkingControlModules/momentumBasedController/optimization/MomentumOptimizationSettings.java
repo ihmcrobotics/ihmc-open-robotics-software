@@ -10,6 +10,8 @@ import us.ihmc.utilities.screwTheory.Momentum;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
+import com.yobotics.simulationconstructionset.VariableChangedListener;
+import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 /**
@@ -46,6 +48,19 @@ public class MomentumOptimizationSettings
    {
       this.jointsToOptimizeFor = jointsToOptimizeFor;
       parentRegistry.addChild(registry);
+      
+      activeMomentumOptimizer.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable v)
+         {
+            if (activeMomentumOptimizer.getEnumValue() != MomentumOptimizer.GRF_PENALIZED_SMOOTHER)
+            {
+               System.err.println(getClass().getSimpleName() + ": Cannot switch to MomentumOptimizer: " + activeMomentumOptimizer.getEnumValue() + " until it is updated to consider 4 basis vectors.");
+               activeMomentumOptimizer.set(MomentumOptimizer.GRF_PENALIZED_SMOOTHER);
+            }
+         }
+      });
    }
 
    public void setMomentumWeight(double linearMomentumXYWeight, double linearMomentumZWeight, double angularMomentumXYWeight, double angularMomentumZWeight)

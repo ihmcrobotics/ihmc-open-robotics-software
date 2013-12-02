@@ -186,7 +186,7 @@ public class HighLevelHumanoidControllerFactoryHelper
       momentumOptimizationSettings.setRhoMin(4.0);
       momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.01);
       momentumOptimizationSettings.setRhoPenalizerPlaneContactRegularization(0.02);
-      momentumOptimizationSettings.setMomentumOptimizerToUse(MomentumOptimizer.GRF_SMOOTHER);
+      momentumOptimizationSettings.setMomentumOptimizerToUse(MomentumOptimizer.GRF_PENALIZED_SMOOTHER);
 
       return momentumOptimizationSettings;
    }

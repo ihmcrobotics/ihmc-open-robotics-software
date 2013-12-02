@@ -27,9 +27,7 @@ public class CVXGenMomentumOptimizerBridge
    private DenseMatrix64F outputRho, outputPhi, outputJointAccelerations;
    private double outputOptVal;
 
-   public enum MomentumOptimizer {NO_GRF_SMOOTHER, GRF_SMOOTHER, GRF_PENALIZED_SMOOTHER}
-
-   ;
+   public enum MomentumOptimizer {NO_GRF_SMOOTHER, GRF_SMOOTHER, GRF_PENALIZED_SMOOTHER};
    private MomentumOptimizer activeMomentumOptimizer;
 
    private final MomentumOptimizationSettings momentumOptimizationSettings;
@@ -71,27 +69,14 @@ public class CVXGenMomentumOptimizerBridge
       momentumOptimizerWithGRFSmootherNative = new CVXMomentumOptimizerWithGRFSmootherNative(nDoF, rhoSize, phiSize);
       momentumOptimizerWithGRFSmootherNativeInput = new CVXMomentumOptimizerWithGRFSmootherNativeInput();
 
-      try
-      {
-         momentumOptimizerWithGRFPenalizedSmootherNative = new CVXMomentumOptimizerWithGRFPenalizedSmootherNative(nDoF, rhoSize);
-         momentumOptimizerWithGRFPenalizedSmootherNativeInput = new CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput();
-      }
-      catch (UnsatisfiedLinkError e)
-      {
-         momentumOptimizerWithGRFPenalizedSmootherNative = null;
-         momentumOptimizerWithGRFPenalizedSmootherNativeInput = null;
-      }
+      momentumOptimizerWithGRFPenalizedSmootherNative = new CVXMomentumOptimizerWithGRFPenalizedSmootherNative(nDoF, rhoSize);
+      momentumOptimizerWithGRFPenalizedSmootherNativeInput = new CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput();
 
       outputRho = new DenseMatrix64F(rhoSize, 1);
       rhoPrevious = new DenseMatrix64F(rhoSize, 1);
       wRhoSmoother = new DenseMatrix64F(rhoSize, rhoSize);
       rhoPreviousMean = new DenseMatrix64F(rhoSize, 1);
       wRhoPenalizer = new DenseMatrix64F(rhoSize, rhoSize);
-   }
-
-   public void setActiveMomentumOptimizer(MomentumOptimizer activeMomentumOptimizer)
-   {
-      this.activeMomentumOptimizer = activeMomentumOptimizer;
    }
 
    public void setRateOfChangeOfGroundReactionForceRegularization(DenseMatrix64F wRhoSmoother)
