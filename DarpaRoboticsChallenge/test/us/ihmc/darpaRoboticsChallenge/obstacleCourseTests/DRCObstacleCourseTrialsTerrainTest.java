@@ -149,6 +149,29 @@ public class DRCObstacleCourseTrialsTerrainTest
    }
    
    @Test
+   public void testTrialsTerrainUpFlatCinderblocksScript() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_CINDERBLOCK_FIELD;
+      DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCFlatCinderblockTest", "scripts/DRCTrialsUpFlatCinderblocks.xml", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, false);
+
+      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
+      setupCameraForWalkingOverCinderblockField(simulationConstructionSet);
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(25.0);
+      
+      drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
+      drcSimulationTestHelper.checkNothingChanged();
+
+      assertTrue(success);
+      
+      BambooTools.reportTestFinishedMessage();
+   }
+   
+   @Test
    public void testTrialsTerrainUpSlantedCinderblocksScript() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
