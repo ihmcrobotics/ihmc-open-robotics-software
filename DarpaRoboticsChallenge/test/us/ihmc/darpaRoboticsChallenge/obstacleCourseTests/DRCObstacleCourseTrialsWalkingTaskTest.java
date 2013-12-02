@@ -25,7 +25,7 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 
 public class DRCObstacleCourseTrialsWalkingTaskTest
 {
-   private static final boolean KEEP_SCS_UP = false;
+   private static final boolean KEEP_SCS_UP = true;
 
    private static final boolean createMovie = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
@@ -62,23 +62,17 @@ public class DRCObstacleCourseTrialsWalkingTaskTest
       BambooTools.reportTestStartedMessage();
 
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS;
-//    DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_CYLINDER_BLOCKS;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", "", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie);
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", "scripts/ExerciseAndJUnitScripts/TwoCinderBlocksStepOn_LeftFootTest.xml", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
-      ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
 
       setupCameraForWalkingOverCinderBlocks(simulationConstructionSet);
 
       ThreadTools.sleep(0);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 
-      FootstepDataList footstepDataList = createFootstepsForSteppingOntoCinderBlocks(scriptedFootstepGenerator);
-      drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
-      drcSimulationTestHelper.sendComHeightPacketToListeners(new ComHeightPacket(0.05));
-      
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0);
 
       drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
@@ -94,34 +88,21 @@ public class DRCObstacleCourseTrialsWalkingTaskTest
       BambooTools.reportTestStartedMessage();
 
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS;
-//    DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_CYLINDER_BLOCKS;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", "", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie);
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", "scripts/ExerciseAndJUnitScripts/TwoCinderBlocksStepOver_LeftFootTest.xml", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
-      ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
 
       setupCameraForWalkingOverCinderBlocks(simulationConstructionSet);
 
       ThreadTools.sleep(0);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 
-      FootstepDataList footstepDataList = createFootstepsForSteppingOntoCinderBlocks(scriptedFootstepGenerator);
-      drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
-      drcSimulationTestHelper.sendComHeightPacketToListeners(new ComHeightPacket(0.05));
       BooleanYoVariable doToeTouchdownIfPossible = (BooleanYoVariable) simulationConstructionSet.getVariable("doToeTouchdownIfPossible");
       doToeTouchdownIfPossible.set(true);
       
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10.0);
 
-      if (success)
-      {
-         footstepDataList = createFootstepsForSteppingOffOfCinderBlocks(scriptedFootstepGenerator);
-         drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
-
-         success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
-      }
-      
       drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
 
@@ -132,8 +113,8 @@ public class DRCObstacleCourseTrialsWalkingTaskTest
    
    private void setupCameraForWalkingOverCinderBlocks(SimulationConstructionSet scs)
    {
-      Point3d cameraFix = new Point3d(7.2037, 7.0714, 0.75);
-      Point3d cameraPosition = new Point3d(2.8791, 12.8496, 2.4045);
+      Point3d cameraFix = new Point3d(13.2664, 13.03, 0.75);
+      Point3d cameraPosition = new Point3d(9.50, 15.59, 1.87);
 
       drcSimulationTestHelper.setupCameraForUnitTest(scs, cameraFix, cameraPosition);
    }
