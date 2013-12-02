@@ -51,7 +51,6 @@ public class MomentumOptimizationSettings
       
       activeMomentumOptimizer.addVariableChangedListener(new VariableChangedListener()
       {
-         @Override
          public void variableChanged(YoVariable v)
          {
             if (activeMomentumOptimizer.getEnumValue() != MomentumOptimizer.GRF_PENALIZED_SMOOTHER)
