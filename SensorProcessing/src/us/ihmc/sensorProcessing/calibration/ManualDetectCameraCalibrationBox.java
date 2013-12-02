@@ -1,4 +1,4 @@
-package us.ihmc.sensorProcessing;
+package us.ihmc.sensorProcessing.calibration;
 
 import boofcv.abst.calib.ConfigChessboard;
 import boofcv.alg.feature.detect.chess.DetectChessCalibrationPoints;
@@ -118,7 +118,7 @@ public class ManualDetectCameraCalibrationBox
       // specify target's shape.  This also specifies where the center of the target's coordinate system is.
       // Look at source code to be sure, but it is probably the target's center.  You can change this by
       // creating your own target.. Note z=0 is assumed
-      PlanarCalibrationTarget target = FactoryPlanarCalibrationTarget.gridChess(5, 7, 10);
+      PlanarCalibrationTarget target = FactoryPlanarCalibrationTarget.gridChess(5, 7, 0.03);
       // Computes the homography
       Zhang99ComputeTargetHomography computeH = new Zhang99ComputeTargetHomography(target);
       // decomposes the homography
@@ -197,7 +197,7 @@ public class ManualDetectCameraCalibrationBox
          }
 
          plane.p.set(0,0,0);
-         plane.n.set(0,1,0);
+         plane.n.set(0,0,1);
 
          SePointOps_F64.transform(targetToCamera, plane.p, plane.p);
          GeometryMath_F64.mult(targetToCamera.getR(), plane.n, plane.n);
