@@ -64,7 +64,7 @@ public class VariousWalkingProviderFromScriptFactory implements VariousWalkingPr
       
       DesiredHighLevelStateProvider highLevelStateProvider = null; 
       DesiredHeadOrientationProvider headOrientationProvider = new UserDesiredHeadOrientationProvider(referenceFrames.getPelvisZUpFrame(), registry); 
-      DesiredComHeightProvider desiredComHeightProvider = null;
+      DesiredComHeightProvider desiredComHeightProvider = footstepProvider.getDesiredComHeightProvider();
       DesiredPelvisPoseProvider pelvisPoseProvider = null;
       DesiredChestOrientationProvider chestOrientationProvider = null; 
       DesiredFootPoseProvider footPoseProvider = null; 
