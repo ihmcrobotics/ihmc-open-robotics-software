@@ -1,5 +1,6 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
+import georegression.geometry.UtilPlane3D_F64;
 import georegression.struct.plane.PlaneGeneral3D_F64;
 import georegression.struct.plane.PlaneNormal3D_F64;
 import georegression.struct.point.Point3D_F64;
@@ -10,6 +11,7 @@ import georegression.struct.shapes.Sphere3D_F64;
 import java.awt.Color;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,6 +39,7 @@ import bubo.ptcloud.tools.PointCloudShapeTools;
 import bubo.ptcloud.wrapper.ConfigMultiShapeRansac;
 import bubo.ptcloud.wrapper.ConfigRemoveFalseShapes;
 import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
+
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.KeyInput;
 import com.jme3.input.RawInputListener;
@@ -59,13 +62,16 @@ import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.shape.Box;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.shadow.EdgeFilteringMode;
+
 import georegression.struct.plane.PlaneGeneral3D_F64;
 import georegression.struct.plane.PlaneNormal3D_F64;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.point.Vector3D_F64;
 import georegression.struct.shapes.Cylinder3D_F64;
 import georegression.struct.shapes.Sphere3D_F64;
+
 import org.ddogleg.struct.FastQueue;
+
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 import us.ihmc.sensorProcessing.pointClouds.shape.ExpectationMaximizationFitter.ScoringFunction;
 
@@ -88,7 +94,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
    private List<Point3D_F64> ransacCloud;
 
    private Node boundsNode = new Node("meshBounds");
-   private float boxExtent = .75f;
+   private float boxExtent = 10.5f;
    private static Vector3f initialTranslation;
 
    private float translateSpeed = 0.1f;
@@ -132,7 +138,13 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       //String file = "../SensorProcessing/wall.txt";
       //initialTranslation= new Vector3f(2.2372246f, -2.1972656f, 0.12291837f);
 
-      String file = "../SensorProcessing/ladder_10.txt";
+      //String file = "../SensorProcessing/ladder_10.txt";
+      //initialTranslation = new Vector3f(2.2372246f, -2.1972656f, 0.12291837f);
+
+      //String file = "\\\\CLOUDCONTROLLER\\export\\camera_lidar_logs\\AlexLogs\\peter.txt";
+      //initialTranslation = new Vector3f(2.2372246f, -2.1972656f, 0.12291837f);
+
+      String file = "C:/users/unknownpw/Desktop/output.txt";
       initialTranslation = new Vector3f(2.2372246f, -2.1972656f, 0.12291837f);
 
       ShapesFromPointCloudFileApp test1 = new ShapesFromPointCloudFileApp(file);
@@ -293,7 +305,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
          public void run()
          {
             long time = System.currentTimeMillis();
-            PointCloudShapeFinder shapeFinder = applyRansac(cloud,false);
+            PointCloudShapeFinder shapeFinder = applyRansac(cloud, false);
             System.out.println("Ransac time: " + (System.currentTimeMillis() - time));
             time = System.currentTimeMillis();
 
@@ -302,7 +314,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
             List<Point3D_F64> unmatched = new ArrayList<Point3D_F64>();
             shapeFinder.getUnmatched(unmatched);
 
-            filter(found, .25, 4);
+            filter(found, 100, 3);
 
             List<PlaneGeneral3D_F64> planes = new ArrayList<PlaneGeneral3D_F64>();
             for (Shape s : found)
@@ -318,15 +330,14 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
             List<Point3D_F64> allPoints = new ArrayList<Point3D_F64>();
             for (Shape s : found)
                allPoints.addAll(s.points);
-            List<Shape> emFitShapes = getEMFitShapes(planes, cloud, scorer, 25, .9999);
+            List<Shape> emFitShapes = getEMFitShapes(planes, allPoints, scorer, 25, .9999);
 
             System.out.println("EM Fit time: " + (System.currentTimeMillis() - time));
 
-            List<Shape> allShapes = new ArrayList<PointCloudShapeFinder.Shape>();
-            for (int i = 0; i < emFitShapes.size(); i++)
+            for (Shape s : emFitShapes)
             {
-               allShapes.add(found.get(i));
-               allShapes.add(emFitShapes.get(i));
+               PlaneNormal3D_F64 p = UtilPlane3D_F64.convert((PlaneGeneral3D_F64) s.parameters, null);
+               System.out.println(p.p + " " + p.n);
             }
 
             double minZ = Double.POSITIVE_INFINITY;
@@ -388,19 +399,18 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
                //CubeCalibration.weightedLinearFit(p, ExpectationMaximizationFitter.getNormalSingularityError(), 5);
                //scores[i] = CubeCalibration.score(p);
                //scores[i] = PointCloudTools.getAverageError(p);
-               scores[i] = Math.acos(Math.abs(p.normal.dot(new Vector3D_F64(0,0,1)) / (p.normal.norm())));
+               scores[i] = Math.acos(Math.abs(p.normal.dot(new Vector3D_F64(0, 0, 1)) / (p.normal.norm())));
                //if (scores[i] > Math.PI)
                //   scores[i] -= 2*Math.PI;
                //scores[i] = Math.abs(scores[i]);
-               
-               
+
             }
 
             double maxScore = 0;
             for (int i = 0; i < scores.length; i++)
                if (scores[i] > maxScore)
                   maxScore = scores[i];
-            
+
             System.out.println(Arrays.toString(scores));
 
             //maxScore = .04;
@@ -408,8 +418,6 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
             for (int i = 0; i < scores.length; i++)
                scores[i] /= maxScore;
 
-
-            
             ArrayList<PointVectorNN> subset = new ArrayList<PointVectorNN>();
             ArrayList<ColorRGBA> colorSubset = new ArrayList<ColorRGBA>();
             for (int i = 0; i < scores.length; i++)
@@ -460,6 +468,22 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       }
 
       return emFitShapes;
+   }
+
+   private void filter(List<Shape> shapes, double max)
+   {
+      Collections.sort(shapes, new Comparator<Shape>()
+      {
+         public int compare(Shape o1, Shape o2)
+         {
+            return o1.points.size() - o2.points.size();
+         }
+      });
+
+      while (shapes.size() > max)
+      {
+         shapes.remove(0);
+      }
    }
 
    private void filter(List<Shape> shapes, double alpha, double max)
@@ -519,7 +543,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       {
          public void run()
          {
-            PointCloudShapeFinder shapeFinder = applyRansac(cloud,false);
+            PointCloudShapeFinder shapeFinder = applyRansac(cloud, false);
 
             List<PointCloudShapeFinder.Shape> found = new ArrayList<Shape>(shapeFinder.getFound());
 
@@ -529,7 +553,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
             System.out.println("Unmatched points " + unmatched.size());
             System.out.println("total shapes found: " + found.size());
 
-            //filter(found, .25, 200);
+            //filter(found, .25, 4);
 
             renderShapes(found);
 
@@ -733,21 +757,23 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(20, 0.8, 0.02, shapeTypes);
       configRansac.randomSeed = rand.nextLong();
 
-      configRansac.minModelAccept = 20;
+      configRansac.minModelAccept = 40;
       configRansac.octreeSplit = 25;
 
       configRansac.maximumAllowedIterations = 1500;
-      configRansac.ransacExtension = 15;
-    
-      PointCloudShapeFinder shapeFinder; 
+      configRansac.ransacExtension = 50;
 
-      if(fitSinglePlane){
-    	  ConfigMultiShapeRansac configMultiRansac = ConfigMultiShapeRansac.createDefault(20, 0.8, 0.20, shapeTypes);
-    	  shapeFinder = FactoryPointCloudShape.ransacSingle(configNormal, configMultiRansac);
+      PointCloudShapeFinder shapeFinder;
+
+      if (fitSinglePlane)
+      {
+         ConfigMultiShapeRansac configMultiRansac = ConfigMultiShapeRansac.createDefault(20, 0.8, 0.20, shapeTypes);
+         shapeFinder = FactoryPointCloudShape.ransacSingle(configNormal, configMultiRansac);
       }
-      else{
-    	  ConfigRemoveFalseShapes configMerge = new ConfigRemoveFalseShapes(0.7);
-    	  shapeFinder = FactoryPointCloudShape.ransacOctree(configNormal, configRansac, configMerge);
+      else
+      {
+         ConfigRemoveFalseShapes configMerge = new ConfigRemoveFalseShapes(0.7);
+         shapeFinder = FactoryPointCloudShape.ransacOctree(configNormal, configRansac, configMerge);
       }
 
       shapeFinder.process(cloud, null);
@@ -963,24 +989,26 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       zUp.attachChild(boundsNode);
 
    }
-   public   List<PointCloudShapeFinder.Shape> run_ransac(List<Point3D_F64> cloud, boolean fitSinglePlane){
-	   PointCloudShapeFinder shapeFinder = applyRansac(cloud,fitSinglePlane);
 
-       List<PointCloudShapeFinder.Shape> found = new ArrayList<Shape>(shapeFinder.getFound());
+   public List<PointCloudShapeFinder.Shape> run_ransac(List<Point3D_F64> cloud, boolean fitSinglePlane)
+   {
+      PointCloudShapeFinder shapeFinder = applyRansac(cloud, fitSinglePlane);
 
-       List<Point3D_F64> unmatched = new ArrayList<Point3D_F64>();
-       shapeFinder.getUnmatched(unmatched);
+      List<PointCloudShapeFinder.Shape> found = new ArrayList<Shape>(shapeFinder.getFound());
 
-       System.out.println("Unmatched points " + unmatched.size());
-       System.out.println("total shapes found: " + found.size());
+      List<Point3D_F64> unmatched = new ArrayList<Point3D_F64>();
+      shapeFinder.getUnmatched(unmatched);
 
-       //filter(found, .25, 200);
+      System.out.println("Unmatched points " + unmatched.size());
+      System.out.println("total shapes found: " + found.size());
+
+      //filter(found, .25, 200);
 
       // renderShapes(found);
-       System.out.println("RANSAC COMPLETE THANK YOU FOR YOUR PATIENCE");
-       return found;
+      System.out.println("RANSAC COMPLETE THANK YOU FOR YOUR PATIENCE");
+      return found;
    }
-   
+
    private List<Point3D_F64> readPointCloud(int maxLines, Vector3f min, Vector3f max)
    {
       List<Point3D_F64> cloud = new ArrayList<Point3D_F64>();
@@ -1000,6 +1028,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
                cloud.add(pt.copy());
          }
 
+         in.close();
       }
       catch (FileNotFoundException e)
       {
@@ -1195,14 +1224,34 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
 
       }
 
+      if (evt.getKeyChar() == '=' && evt.isPressed())
+      {
+         System.out.println("Saving!");
+         try
+         {
+            FileWriter fw = new FileWriter(fileName.substring(0, fileName.length() - 4) + "_filtered.txt");
+            for (Point3D_F64 p : ransacCloud)
+            {
+               fw.write(p.x + " " + p.y + " " + p.z + "\n");
+            }
+            fw.close();
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
+         }
+      }
+
       if (evt.getKeyChar() == 'f' && evt.isPressed())
       {
          Thread boundsThread = new Thread(new Runnable()
          {
             public void run()
             {
-               System.out.println("Filter! : " + fullCloud.size());
-               List<Point3D_F64> filterCloud = fullCloud;
+               //System.out.println("Filter! : " + fullCloud.size());
+               //List<Point3D_F64> filterCloud = fullCloud;
+               System.out.println("Filter! : " + ransacCloud.size());
+               List<Point3D_F64> filterCloud = ransacCloud;
 
                ConfigSurfaceNormals stairNormalsConfig = new ConfigSurfaceNormals(25, 50, .1);
 
@@ -1215,11 +1264,11 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
                System.out.println("Thin time: " + (System.currentTimeMillis() - time) + " size: " + filterCloud.size());
 
                time = System.currentTimeMillis();
-               filterCloud = PointCloudTools.filterByNormalOrientation(filterCloud, stairNormalsConfig, new Vector3D_F64(0, 0, 1), .5);
+               //filterCloud = PointCloudTools.filterByNormalOrientation(filterCloud, stairNormalsConfig, new Vector3D_F64(0, 0, 1), .5);
                System.out.println("Orient time: " + (System.currentTimeMillis() - time) + " size: " + filterCloud.size());
 
                time = System.currentTimeMillis();
-               filterCloud = PointCloudTools.filterByResidual(filterCloud, stairNormalsConfig, .015);
+               //filterCloud = PointCloudTools.filterByResidual(filterCloud, stairNormalsConfig, .015);
                System.out.println("Residual time: " + (System.currentTimeMillis() - time) + " size: " + filterCloud.size());
 
                final List<Point3D_F64> finalCloud = filterCloud;
@@ -1274,6 +1323,8 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
             {
                fullCloudCopy.remove(p);
             }
+
+            System.out.println(ransacCloud.size());
 
             //ransacCloud = getSphere(1);
             enqueue(new Callable<Object>()
