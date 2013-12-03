@@ -42,16 +42,16 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
    private JPanel netProcPanel, controllerPanel, selectControllerPanel;
 
    private JButton netProcStartButton, netProcStopButton, netProcRestartButton, connectNetProcConsoleButton;
-   private final JLabel netProcRunningStatusLabel = new JLabel(
-         "<html><body>Running: <span style=\"color:red;font-style:italic;\">Not Running</span></body></html>", JLabel.CENTER);
-   private final JLabel netProcConnectedStatusLabel = new JLabel(
-         "<html><body>Connected: <span style=\"color:red;font-style:italic;\">Disconnected</span></body></html>", JLabel.CENTER);
+   private final JLabel netProcRunningStatusLabel =
+      new JLabel("<html><body>Running: <span style=\"color:red;font-style:italic;\">Not Running</span></body></html>", JLabel.CENTER);
+   private final JLabel netProcConnectedStatusLabel =
+      new JLabel("<html><body>Connected: <span style=\"color:red;font-style:italic;\">Disconnected</span></body></html>", JLabel.CENTER);
 
    private JButton controllerStartButton, controllerStopButton, connectControllerConsoleButton;
-   private final JLabel controllerRunningStatusLabel = new JLabel(
-         "<html><body>Running: <span style=\"color:red;font-style:italic;\">Not Running</span></body></html>", JLabel.CENTER);
-   private final JLabel controllerConnectedStatusLabel = new JLabel(
-         "<html><body>Connected: <span style=\"color:red;font-style:italic;\">Disconnected</span></body></html>", JLabel.CENTER);
+   private final JLabel controllerRunningStatusLabel =
+      new JLabel("<html><body>Running: <span style=\"color:red;font-style:italic;\">Not Running</span></body></html>", JLabel.CENTER);
+   private final JLabel controllerConnectedStatusLabel =
+      new JLabel("<html><body>Connected: <span style=\"color:red;font-style:italic;\">Disconnected</span></body></html>", JLabel.CENTER);
 
    private ButtonGroup selectControllerRadioButtonGroup;
    private JRadioButton atlasBDIControllerRadioButton, atlasControllerFactoryRadioButton;
@@ -73,7 +73,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
    {
       try
       {
-         controllerClient.write(new byte[] { UnsignedByteTools.fromInt(0x22) });
+         controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x22)});
       }
       catch (DisconnectedException e)
       {
@@ -85,7 +85,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
    {
       try
       {
-         netProcClient.write(new byte[] { UnsignedByteTools.fromInt(0x22) });
+         netProcClient.write(new byte[] {UnsignedByteTools.fromInt(0x22)});
       }
       catch (DisconnectedException e)
       {
@@ -200,31 +200,31 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
          switch (UnsignedByteTools.toInt(netProcBuffer[0]))
          {
-         case 0x00:
-            netProcRunningButtonConfiguration();
-            netProcRunningStatusLabel.setText("<html><body>Network Processor Status: <span style=\"color:green;font-style:italic;"
-                  + "\">Running</span></body></html>");
-            repaintFrame();
+            case 0x00 :
+               netProcRunningButtonConfiguration();
+               netProcRunningStatusLabel.setText("<html><body>Network Processor Status: <span style=\"color:green;font-style:italic;"
+                                                 + "\">Running</span></body></html>");
+               repaintFrame();
 
-            break;
+               break;
 
-         case 0x11:
-            netProcNotRunningButtonConfiguration();
-            netProcRunningStatusLabel
-                  .setText("<html><body>Network Processor Status: <span style=\"color:red;font-style:italic;\">Not Running</span></body></html>");
-            repaintFrame();
+            case 0x11 :
+               netProcNotRunningButtonConfiguration();
+               netProcRunningStatusLabel.setText(
+                   "<html><body>Network Processor Status: <span style=\"color:red;font-style:italic;\">Not Running</span></body></html>");
+               repaintFrame();
 
-            break;
+               break;
 
-         case 0x22:
-            startReceivingNetProcConsoleText();
+            case 0x22 :
+               startReceivingNetProcConsoleText();
 
-            break;
+               break;
 
-         default:
-            System.err.println("Invalid status: " + Integer.toHexString(UnsignedByteTools.toInt(netProcBuffer[0])));
+            default :
+               System.err.println("Invalid status: " + Integer.toHexString(UnsignedByteTools.toInt(netProcBuffer[0])));
 
-            break;
+               break;
          }
       }
       catch (DisconnectedException e)
@@ -243,39 +243,39 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
          switch (UnsignedByteTools.toInt(controllerBuffer[0]))
          {
-         case 0x00:
-            controllerRunningButtonConfiguration();
-            controllerRunningStatusLabel.setText("<html><body>Controller Status: <span style=\"color:green;font-style:italic;"
-                  + "\">Running</span></body></html>");
-            repaintFrame();
+            case 0x00 :
+               controllerRunningButtonConfiguration();
+               controllerRunningStatusLabel.setText("<html><body>Controller Status: <span style=\"color:green;font-style:italic;"
+                       + "\">Running</span></body></html>");
+               repaintFrame();
 
-            break;
+               break;
 
-         case 0x10:
-            controllerDisableAll();
-            controllerRunningStatusLabel.setText("<html><body>Controller Status: <span style=\"color:gray;font-style:italic;"
-                  + "\">Restarting</span></body></html>");
-            repaintFrame();
+            case 0x10 :
+               controllerDisableAll();
+               controllerRunningStatusLabel.setText("<html><body>Controller Status: <span style=\"color:gray;font-style:italic;"
+                       + "\">Restarting</span></body></html>");
+               repaintFrame();
 
-            break;
+               break;
 
-         case 0x11:
-            controllerNotRunningButtonConfiguration();
-            controllerRunningStatusLabel
-                  .setText("<html><body>Controller Status: <span style=\"color:red;font-style:italic;\">Not Running</span></body></html>");
-            repaintFrame();
+            case 0x11 :
+               controllerNotRunningButtonConfiguration();
+               controllerRunningStatusLabel.setText(
+                   "<html><body>Controller Status: <span style=\"color:red;font-style:italic;\">Not Running</span></body></html>");
+               repaintFrame();
 
-            break;
+               break;
 
-         case 0x22:
-            startReceivingControllerConsoleText();
+            case 0x22 :
+               startReceivingControllerConsoleText();
 
-            break;
+               break;
 
-         default:
-            System.err.println("Invalid status: " + Integer.toHexString(UnsignedByteTools.toInt(controllerBuffer[0])));
+            default :
+               System.err.println("Invalid status: " + Integer.toHexString(UnsignedByteTools.toInt(controllerBuffer[0])));
 
-            break;
+               break;
          }
       }
       catch (DisconnectedException e)
@@ -332,12 +332,13 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
       frame = new JFrame("DRC Networking Dispatcher");
       frame.setSize(850, 230);
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//      frame.setAlwaysOnTop(true);
+
+//    frame.setAlwaysOnTop(true);
       frame.setLocationRelativeTo(null);
 
       JPanel mainPanel = new JPanel(new GridBagLayout());
 
-      //    mainPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+      // mainPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 
       GridBagConstraints c = new GridBagConstraints();
 
@@ -408,7 +409,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
          {
             try
             {
-               netProcClient.write(new byte[] { UnsignedByteTools.fromInt(0x00) });
+               netProcClient.write(new byte[] {UnsignedByteTools.fromInt(0x00)});
             }
             catch (DisconnectedException e)
             {
@@ -425,7 +426,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
          {
             try
             {
-               netProcClient.write(new byte[] { UnsignedByteTools.fromInt(0x10) });
+               netProcClient.write(new byte[] {UnsignedByteTools.fromInt(0x10)});
             }
             catch (DisconnectedException e)
             {
@@ -442,7 +443,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
          {
             try
             {
-               netProcClient.write(new byte[] { UnsignedByteTools.fromInt(0x11) });
+               netProcClient.write(new byte[] {UnsignedByteTools.fromInt(0x11)});
             }
             catch (DisconnectedException e)
             {
@@ -472,12 +473,12 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
          {
             try
             {
-               if (selectControllerRadioButtonGroup.getSelection().getActionCommand().contains(BLUE_TEAM_ACTION_COMMAND))
-                  controllerClient.write(new byte[] { UnsignedByteTools.fromInt(0x00) });
+               if (selectControllerRadioButtonGroup.getSelection() == null)
+                  JOptionPane.showMessageDialog(frame, "Please select a Controller type!", "No Controller Selected", JOptionPane.ERROR_MESSAGE);
+               else if (selectControllerRadioButtonGroup.getSelection().getActionCommand().contains(BLUE_TEAM_ACTION_COMMAND))
+                  controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x00)});
                else if (selectControllerRadioButtonGroup.getSelection().getActionCommand().contains(RED_TEAM_ACTION_COMMAND))
-                  controllerClient.write(new byte[] { UnsignedByteTools.fromInt(0x01) });
-               else
-                  System.out.println("No valid combo");
+                  controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x01)});
             }
             catch (DisconnectedException e)
             {
@@ -494,7 +495,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
          {
             try
             {
-               controllerClient.write(new byte[] { UnsignedByteTools.fromInt(0x10) });
+               controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x10)});
             }
             catch (DisconnectedException e)
             {
@@ -522,7 +523,6 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
       atlasBDIControllerRadioButton.setBorder(BorderFactory.createEmptyBorder(0, 35, 0, -35));
       atlasBDIControllerRadioButton.setHorizontalAlignment(AbstractButton.LEADING);
       atlasBDIControllerRadioButton.setHorizontalTextPosition(AbstractButton.TRAILING);
-      atlasBDIControllerRadioButton.setSelected(true);
 
       atlasControllerFactoryRadioButton = new JRadioButton("Atlas Controller Factory");
       atlasControllerFactoryRadioButton.setActionCommand(BLUE_TEAM_ACTION_COMMAND);
@@ -573,6 +573,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
             catch (IOException e)
             {
                e.printStackTrace();
+
                try
                {
                   clientSocket.close();
@@ -602,6 +603,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
                DataInputStream inputStream = new DataInputStream(clientSocket.getInputStream());
                final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
                connectNetProcConsoleButton.setEnabled(false);
+
                while (true)
                {
                   final String line;
@@ -621,6 +623,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
             catch (IOException e)
             {
                e.printStackTrace();
+
                try
                {
                   clientSocket.close();
@@ -643,10 +646,10 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
       JSAP jsap = new JSAP();
 
-      FlaggedOption netProcIPFlag = new FlaggedOption("net-proc-ip").setLongFlag("net-proc-ip").setShortFlag('n').setRequired(false)
-            .setStringParser(JSAP.STRING_PARSER);
-      FlaggedOption controllerIPFlag = new FlaggedOption("scs-ip").setLongFlag("scs-ip").setShortFlag('s').setRequired(false)
-            .setStringParser(JSAP.STRING_PARSER);
+      FlaggedOption netProcIPFlag =
+         new FlaggedOption("net-proc-ip").setLongFlag("net-proc-ip").setShortFlag('n').setRequired(false).setStringParser(JSAP.STRING_PARSER);
+      FlaggedOption controllerIPFlag =
+         new FlaggedOption("scs-ip").setLongFlag("scs-ip").setShortFlag('s').setRequired(false).setStringParser(JSAP.STRING_PARSER);
 
       jsap.registerParameter(netProcIPFlag);
       jsap.registerParameter(controllerIPFlag);
