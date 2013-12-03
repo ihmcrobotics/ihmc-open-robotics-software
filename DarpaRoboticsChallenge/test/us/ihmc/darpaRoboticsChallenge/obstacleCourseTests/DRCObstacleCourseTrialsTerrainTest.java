@@ -220,7 +220,7 @@ public class DRCObstacleCourseTrialsTerrainTest
       setupCameraForWalkingOverCinderblockField(simulationConstructionSet);
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(45.0);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(55.0);
       
       drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
