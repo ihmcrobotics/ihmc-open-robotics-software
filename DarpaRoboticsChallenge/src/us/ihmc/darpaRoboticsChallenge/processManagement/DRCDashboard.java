@@ -107,8 +107,8 @@ public class DRCDashboard
    private void initExcludedMachines()
    {
       excludedMachines.add(LocalCloudMachines.LOCALHOST);
-      excludedMachines.add(LocalCloudMachines.CLOUDMINION_5);
       excludedMachines.add(LocalCloudMachines.CLOUDMINION_6);
+      excludedMachines.add(LocalCloudMachines.CLOUDMINION_7);
    }
 
    private boolean isMachineExcluded(LocalCloudMachines machine)
