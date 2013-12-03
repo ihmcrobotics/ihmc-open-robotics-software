@@ -1691,6 +1691,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       momentumBasedController.doSecondaryControl();
       
       momentumBasedController.doPassiveKneeControl();
+      momentumBasedController.doProportionalControlOnCoP();
    }
 
    // TODO: connect ports instead

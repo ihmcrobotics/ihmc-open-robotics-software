@@ -65,6 +65,8 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFrameVector2d;
+import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.filter.RateLimitedYoVariable;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
@@ -142,7 +144,9 @@ public class MomentumBasedController
    private final GeometricJacobianHolder robotJacobianHolder = new GeometricJacobianHolder();
    
    private final SideDependentList<FootSwitchInterface> footSwitches;
-   private final SideDependentList<YoFrameVector2d> desiredTorquesForCoPControl;
+   private final DoubleYoVariable alphaCoPControl = new DoubleYoVariable("alphaCoPControl", registry);
+   private final DoubleYoVariable maxAnkleTorqueCoPControl = new DoubleYoVariable("maxAnkleTorqueCoPControl", registry);
+   private final SideDependentList<AlphaFilteredYoFrameVector2d> desiredTorquesForCoPControl;
    private final SideDependentList<YoFrameVector2d> yoCoPError;
    private final SideDependentList<DoubleYoVariable> yoCoPErrorMagnitude = new SideDependentList<DoubleYoVariable>(
          new DoubleYoVariable("leftFootCoPErrorMagnitude", registry),
@@ -325,12 +329,15 @@ public class MomentumBasedController
       passiveKneeMaxTorque.set(35.0);
       passiveKneeKv.set(5.0);
 
-      desiredTorquesForCoPControl = new SideDependentList<YoFrameVector2d>();
+      desiredTorquesForCoPControl = new SideDependentList<AlphaFilteredYoFrameVector2d>();
       yoCoPError = new SideDependentList<YoFrameVector2d>();
+      
+      alphaCoPControl.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(16.0, controlDT));
+      maxAnkleTorqueCoPControl.set(10.0);
       
       for (RobotSide robotSide : RobotSide.values)
       {
-         desiredTorquesForCoPControl.put(robotSide, new YoFrameVector2d("desired" + robotSide.getCamelCaseNameForMiddleOfExpression() + "AnkleTorqueForCoPControl", feet.get(robotSide).getPlaneFrame(), registry));
+         desiredTorquesForCoPControl.put(robotSide, AlphaFilteredYoFrameVector2d.createAlphaFilteredYoFrameVector2d("desired" + robotSide.getCamelCaseNameForMiddleOfExpression() + "AnkleTorqueForCoPControl", "", registry, alphaCoPControl, feet.get(robotSide).getPlaneFrame()));
          yoCoPError.put(robotSide, new YoFrameVector2d(robotSide.getCamelCaseNameForStartOfExpression() + "FootCoPError", feet.get(robotSide).getPlaneFrame(), registry));
       }
    }
@@ -488,7 +495,7 @@ public class MomentumBasedController
       {
          ContactablePlaneBody contactablePlaneBody = feet.get(robotSide);
          ReferenceFrame planeFrame = contactablePlaneBody.getPlaneFrame();
-         YoFrameVector2d desiredTorqueForCoPControl = desiredTorquesForCoPControl.get(robotSide);
+         AlphaFilteredYoFrameVector2d desiredTorqueForCoPControl = desiredTorquesForCoPControl.get(robotSide);
          
          FramePoint2d cop = planeContactWrenchProcessor.getCops().get(contactablePlaneBody);
          
@@ -512,8 +519,10 @@ public class MomentumBasedController
          yoCoPError.get(robotSide).set(copError);
          yoCoPErrorMagnitude.get(robotSide).set(copError.length());
          
-         desiredTorqueForCoPControl.set(copError);
-         desiredTorqueForCoPControl.scale(gainCoPX.getDoubleValue(), gainCoPY.getDoubleValue());
+         copError.scale(gainCoPX.getDoubleValue(), -gainCoPY.getDoubleValue());
+         copError.clipMaxLength(maxAnkleTorqueCoPControl.getDoubleValue());
+         
+         desiredTorqueForCoPControl.update(copError);
          
          OneDoFJoint anklePitchJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
          anklePitchJoint.setTau(anklePitchJoint.getTau() + desiredTorqueForCoPControl.getX());
