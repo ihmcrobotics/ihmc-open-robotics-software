@@ -350,8 +350,8 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
       setupSelectControllerPanel();
 
-      controlsPanel.add(netProcPanel);
       controlsPanel.add(controllerPanel);
+      controlsPanel.add(netProcPanel);
       controlsPanel.add(selectControllerPanel);
 
       c.gridx = 0;
