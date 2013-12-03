@@ -140,6 +140,8 @@ public class MomentumBasedController
 
    private final GeometricJacobianHolder robotJacobianHolder = new GeometricJacobianHolder();
    
+   private final SideDependentList<FootSwitchInterface> footSwitches;
+   
    public MomentumBasedController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
          CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
          DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator, SideDependentList<ContactablePlaneBody> feet,
@@ -150,6 +152,8 @@ public class MomentumBasedController
          StateEstimationDataFromController stateEstimationDataFromControllerSink, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
+      
+      this.footSwitches = footSwitches;
 
       if (SPY_ON_MOMENTUM_BASED_CONTROLLER)
          momentumBasedControllerSpy = new MomentumBasedControllerSpy(registry);
@@ -881,5 +885,10 @@ public class MomentumBasedController
    public GeometricJacobian getJacobian(int jacobianId)
    {
       return robotJacobianHolder.getJacobian(jacobianId);
+   }
+
+   public FootSwitchInterface getFootSwitch(RobotSide robotSide)
+   {
+      return footSwitches.get(robotSide);
    }
 }
