@@ -32,6 +32,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
+import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.stateEstimation.DesiredCoMAndAngularAccelerationGrabber;
 import us.ihmc.commonWalkingControlModules.stateEstimation.PointPositionGrabber;
 import us.ihmc.commonWalkingControlModules.stateEstimation.PointPositionGrabberInterface;
@@ -140,13 +141,13 @@ public class MomentumBasedController
    private final GeometricJacobianHolder robotJacobianHolder = new GeometricJacobianHolder();
    
    public MomentumBasedController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
-         CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime, double gravityZ,
-         TwistCalculator twistCalculator, SideDependentList<ContactablePlaneBody> feet, SideDependentList<ContactablePlaneBody> handsWithFingersBentBack,
-         SideDependentList<ContactableCylinderBody> graspingHands, SideDependentList<ContactablePlaneBody> thighs, ContactablePlaneBody pelvis,
-         ContactablePlaneBody pelvisBack, double controlDT, ProcessedOutputsInterface processedOutputs,
-         MomentumOptimizationSettings momentumOptimizationSettings, OldMomentumControlModule oldMomentumControlModule,
-         ArrayList<Updatable> updatables, StateEstimationDataFromController stateEstimationDataFromControllerSink,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
+         DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator, SideDependentList<ContactablePlaneBody> feet,
+         SideDependentList<ContactablePlaneBody> handsWithFingersBentBack, SideDependentList<ContactableCylinderBody> graspingHands,
+         SideDependentList<ContactablePlaneBody> thighs, ContactablePlaneBody pelvis, ContactablePlaneBody pelvisBack, double controlDT,
+         ProcessedOutputsInterface processedOutputs, MomentumOptimizationSettings momentumOptimizationSettings,
+         OldMomentumControlModule oldMomentumControlModule, ArrayList<Updatable> updatables,
+         StateEstimationDataFromController stateEstimationDataFromControllerSink, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 

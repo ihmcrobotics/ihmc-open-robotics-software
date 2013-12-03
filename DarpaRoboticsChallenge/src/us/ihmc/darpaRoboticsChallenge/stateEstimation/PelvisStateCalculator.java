@@ -656,7 +656,7 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
          AlphaFilteredYoFramePoint2d copFilteredInFootFrame = copsFilteredInFootFrame.get(trustedSide);
          ReferenceFrame footFrame = footFrames.get(trustedSide);
          
-         footSwitches.get(trustedSide).packCoP(tempCoP);
+         footSwitches.get(trustedSide).computeAndPackCoP(tempCoP);
          
          if (tempCoP.containsNaN())
          {
