@@ -145,7 +145,7 @@ public class WalkOnTheEdgesManager
       FrameConvexPolygon2d leadingFootSupportPolygon = getFootSupportPolygonCopy(leadingFoot);
       isDesiredICPOKForToeOff.set(leadingFootSupportPolygon.isPointInside(desiredICP));
 
-      if (!isDesiredECMPOKForToeOff.getBooleanValue() && !isDesiredICPOKForToeOff.getBooleanValue())
+      if (!isDesiredECMPOKForToeOff.getBooleanValue() || !isDesiredICPOKForToeOff.getBooleanValue())
       {
          doToeOff.set(false);
          return;
