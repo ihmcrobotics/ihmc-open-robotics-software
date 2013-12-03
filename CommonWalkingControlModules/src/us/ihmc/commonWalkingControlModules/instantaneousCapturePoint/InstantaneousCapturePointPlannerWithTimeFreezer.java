@@ -166,4 +166,8 @@ public class InstantaneousCapturePointPlannerWithTimeFreezer implements Instanta
       return time - timeDelay.getDoubleValue();
    }
 
+   public void setDoHeelToToeTransfer(boolean doHeelToToeTransfer)
+   {
+      instantaneousCapturePointPlanner.setDoHeelToToeTransfer(doHeelToToeTransfer);
+   }
 }
