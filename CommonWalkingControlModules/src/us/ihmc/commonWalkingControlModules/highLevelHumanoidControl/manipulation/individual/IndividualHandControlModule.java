@@ -93,8 +93,7 @@ public class IndividualHandControlModule
    private final RobotSide robotSide;
    private final TwistCalculator twistCalculator;
    private final SE3PDGains taskspaceControlGains;
-   private final Map<ReferenceFrame, YoSE3ConfigurationProvider> currentDesiredConfigurationProviders = new LinkedHashMap<ReferenceFrame,
-                                                                                                           YoSE3ConfigurationProvider>();
+   private final Map<ReferenceFrame, YoSE3ConfigurationProvider> currentDesiredConfigurationProviders = new LinkedHashMap<ReferenceFrame, YoSE3ConfigurationProvider>();
    private final RigidBody base, endEffector;
    
    private final double controlDT;
@@ -103,7 +102,7 @@ public class IndividualHandControlModule
    
    public IndividualHandControlModule(DoubleYoVariable simulationTime, RobotSide robotSide, FullRobotModel fullRobotModel,
                                       TwistCalculator twistCalculator, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-                                      double gravity, double controlDT, SE3PDGains taskspaceControlGains,
+                                      double gravity, double controlDT, ReferenceFrame midHandPositionControlFrame, SE3PDGains taskspaceControlGains,
                                       MomentumBasedController momentumBasedController, int jacobianId, ArmControllerParameters armControlParameters,
                                       YoVariableRegistry parentRegistry)
    {
@@ -198,6 +197,7 @@ public class IndividualHandControlModule
       //Pre-create the RigidBodySpatialAccelerationControlModules
       getOrCreateRigidBodySpatialAccelerationControlModule(ReferenceFrame.getWorldFrame());
       getOrCreateRigidBodySpatialAccelerationControlModule(fullRobotModel.getChest().getBodyFixedFrame());
+      getOrCreateRigidBodySpatialAccelerationControlModule(midHandPositionControlFrame);
 
       InverseDynamicsJoint[] inverseDynamicsJointPath = ScrewTools.createJointPath(fullRobotModel.getChest(), fullRobotModel.getHand(robotSide));
       OneDoFJoint[] oneDoFJoints = ScrewTools.filterJoints(inverseDynamicsJointPath, OneDoFJoint.class);

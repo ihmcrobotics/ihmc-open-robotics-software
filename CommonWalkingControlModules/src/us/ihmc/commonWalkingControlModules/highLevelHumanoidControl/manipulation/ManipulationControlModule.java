@@ -195,7 +195,7 @@ public class ManipulationControlModule
          double controlDT = momentumBasedController.getControlDT();
 
          IndividualHandControlModule individualHandControlModule = new IndividualHandControlModule(yoTime, robotSide, fullRobotModel, twistCalculator,
-                                                                      dynamicGraphicObjectsListRegistry, gravityZ, controlDT,
+                                                                      dynamicGraphicObjectsListRegistry, gravityZ, controlDT, midHandPositionControlFrames.get(robotSide),
                                                                       taskspaceControlGains, momentumBasedController, jacobianId, armControlParameters, registry);
          individualHandControlModules.put(robotSide, individualHandControlModule);
       }
