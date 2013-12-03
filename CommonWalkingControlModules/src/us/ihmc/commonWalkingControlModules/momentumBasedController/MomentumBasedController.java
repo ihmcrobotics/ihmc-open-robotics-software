@@ -44,6 +44,7 @@ import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
@@ -66,6 +67,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.filter.RateLimitedYoVariable;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
 
 public class MomentumBasedController
 {
@@ -74,7 +76,6 @@ public class MomentumBasedController
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
    private final ReferenceFrame centerOfMassFrame;
-
    private final FullRobotModel fullRobotModel;
    private final CenterOfMassJacobian centerOfMassJacobian;
    private final CommonWalkingReferenceFrames referenceFrames;
@@ -141,6 +142,13 @@ public class MomentumBasedController
    private final GeometricJacobianHolder robotJacobianHolder = new GeometricJacobianHolder();
    
    private final SideDependentList<FootSwitchInterface> footSwitches;
+   private final SideDependentList<YoFrameVector2d> desiredTorquesForCoPControl;
+   private final SideDependentList<YoFrameVector2d> yoCoPError;
+   private final SideDependentList<DoubleYoVariable> yoCoPErrorMagnitude = new SideDependentList<DoubleYoVariable>(
+         new DoubleYoVariable("leftFootCoPErrorMagnitude", registry),
+         new DoubleYoVariable("rightFootCoPErrorMagnitude", registry));
+   private final DoubleYoVariable gainCoPX = new DoubleYoVariable("gainCoPX", registry);
+   private final DoubleYoVariable gainCoPY = new DoubleYoVariable("gainCoPY", registry);
    
    public MomentumBasedController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
          CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
@@ -316,6 +324,15 @@ public class MomentumBasedController
       passiveQKneeThreshold.set(0.3);
       passiveKneeMaxTorque.set(35.0);
       passiveKneeKv.set(5.0);
+
+      desiredTorquesForCoPControl = new SideDependentList<YoFrameVector2d>();
+      yoCoPError = new SideDependentList<YoFrameVector2d>();
+      
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         desiredTorquesForCoPControl.put(robotSide, new YoFrameVector2d("desired" + robotSide.getCamelCaseNameForMiddleOfExpression() + "AnkleTorqueForCoPControl", feet.get(robotSide).getPlaneFrame(), registry));
+         yoCoPError.put(robotSide, new YoFrameVector2d(robotSide.getCamelCaseNameForStartOfExpression() + "FootCoPError", feet.get(robotSide).getPlaneFrame(), registry));
+      }
    }
 
    public SideDependentList<ContactablePlaneBody> getFeet()
@@ -460,6 +477,52 @@ public class MomentumBasedController
          }
       }
    }
+
+   private final FramePoint2d copDesired = new FramePoint2d();
+   private final FramePoint2d copActual = new FramePoint2d();
+   private final FrameVector2d copError = new FrameVector2d();
+   
+   public final void doProportionalControlOnCoP()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ContactablePlaneBody contactablePlaneBody = feet.get(robotSide);
+         ReferenceFrame planeFrame = contactablePlaneBody.getPlaneFrame();
+         YoFrameVector2d desiredTorqueForCoPControl = desiredTorquesForCoPControl.get(robotSide);
+         
+         FramePoint2d cop = planeContactWrenchProcessor.getCops().get(contactablePlaneBody);
+         
+         if (cop == null || cop.containsNaN())
+         {
+            desiredTorqueForCoPControl.setToZero();
+            return;
+         }
+         
+         copDesired.setAndChangeFrame(cop);
+         footSwitches.get(robotSide).computeAndPackCoP(copActual);
+         
+         if (copActual.containsNaN())
+         {
+            desiredTorqueForCoPControl.setToZero();
+            return;
+         }
+         
+         copError.setToZero(planeFrame);
+         copError.sub(copDesired, copActual);
+         yoCoPError.get(robotSide).set(copError);
+         yoCoPErrorMagnitude.get(robotSide).set(copError.length());
+         
+         desiredTorqueForCoPControl.set(copError);
+         desiredTorqueForCoPControl.scale(gainCoPX.getDoubleValue(), gainCoPY.getDoubleValue());
+         
+         OneDoFJoint anklePitchJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
+         anklePitchJoint.setTau(anklePitchJoint.getTau() + desiredTorqueForCoPControl.getX());
+         
+         OneDoFJoint ankleRollJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL);
+         ankleRollJoint.setTau(ankleRollJoint.getTau() + desiredTorqueForCoPControl.getY());
+      }
+   }
+
    
    public void requestResetEstimatorPositionsToCurrent()
    {
