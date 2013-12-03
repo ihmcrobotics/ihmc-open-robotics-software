@@ -103,7 +103,10 @@ public class DRCObstacleCourseFlatTest
 
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", "scripts/ExerciseAndJUnitScripts/SimpleFlatGroundScript.xml", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, false);
+      
+      String scriptName = "scripts/ExerciseAndJUnitScripts/SimpleFlatGroundScript.xml"; 
+      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", fileName, selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, false);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingUpToRamp(simulationConstructionSet);
@@ -118,7 +121,6 @@ public class DRCObstacleCourseFlatTest
       
       BambooTools.reportTestFinishedMessage();
    }
-  
    
    @Test
    public void testStandingOnUnevenTerrainForACoupleSeconds() throws SimulationExceededMaximumTimeException
