@@ -554,11 +554,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                                                              stopWalkingStateTransitionActions);
          singleSupportState.addStateTransition(toDoubleSupport2);
 
-         SingleSupportToDoubleSupportCondition singleSupportToDoubleSupportCondition = new SingleSupportToDoubleSupportCondition(swingEndEffectorControlModule);
-         StateTransition<WalkingState> toDoubleSupportWhenNoFootstepsAvailable = new StateTransition<WalkingState>(doubleSupportState.getStateEnum(),
-               singleSupportToDoubleSupportCondition, resetSwingTrajectoryDoneAction);
-         singleSupportState.addStateTransition(toDoubleSupportWhenNoFootstepsAvailable);
-
          ContactablePlaneBody sameSideFoot = feet.get(robotSide);
          SingleSupportToTransferToCondition doneWithSingleSupportAndTransferToOppositeSideCondition = new SingleSupportToTransferToCondition(sameSideFoot, swingEndEffectorControlModule);
          StateTransition<WalkingState> toTransferOppositeSide = new StateTransition<WalkingState>(transferStateEnums.get(robotSide.getOppositeSide()),
@@ -1348,25 +1343,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    }
 
 
-   private class SingleSupportToDoubleSupportCondition extends DoneWithSingleSupportCondition
-   {      
-      public SingleSupportToDoubleSupportCondition(EndEffectorControlModule endEffectorControlModule)
-      {
-         super(endEffectorControlModule);
-      }
-      
-      public boolean checkCondition()
-      {
-         Footstep nextFootstep = upcomingFootstepList.getNextNextFootstep(); 
-         if (nextFootstep != null) return false; 
-         
-         boolean condition = super.checkCondition();
-         return condition;
-      }
-   
-   }
-   
-   
    private class SingleSupportToTransferToCondition extends DoneWithSingleSupportCondition
    {
       private final ContactablePlaneBody nextSwingFoot;
@@ -1381,7 +1357,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       public boolean checkCondition()
       {
          Footstep nextFootstep = upcomingFootstepList.getNextNextFootstep(); 
-         if (nextFootstep == null) return false;
+         if (nextFootstep == null) return super.checkCondition();
          
          ContactablePlaneBody nextSwingFoot = nextFootstep.getBody();
          if (this.nextSwingFoot != nextSwingFoot ) return false;
@@ -1485,7 +1461,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
    }
 
-
    private class StopWalkingCondition extends DoneWithSingleSupportCondition
    {
       public StopWalkingCondition(EndEffectorControlModule endEffectorControlModule)
@@ -1502,7 +1477,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          return readyToStopWalking;
       }
    }
-
 
    public class ResetICPTrajectoryAction implements StateTransitionAction
    {
