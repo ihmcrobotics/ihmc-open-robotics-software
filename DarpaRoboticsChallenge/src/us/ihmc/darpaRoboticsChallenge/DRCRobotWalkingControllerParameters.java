@@ -344,7 +344,7 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    public double getCMPRateLimit()
    {
       if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 100.0;
-      return 3.0; //4.0; //3.0;
+      return 6.0; //3.0; //4.0; //3.0;
    }
 
    public double getCMPAccelerationLimit()
@@ -362,7 +362,7 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    public double getZetaCoMHeight()
    {
       if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 0.8; //1.0;
-      return 0.5;
+      return 0.25;
    }
    
    public double getKpPelvisOrientation()
@@ -374,7 +374,7 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    public double getZetaPelvisOrientation()
    {
       if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 0.8; //1.0;
-      return 0.5;
+      return 0.25;
    }
    
 
@@ -399,7 +399,7 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    public double getZetaHeadOrientation()
    {
       if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 0.8; //1.0;
-      return 0.5;
+      return 0.25;
    }
 
    public double getKpUpperBody()
@@ -411,7 +411,7 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    public double getZetaUpperBody()
    {
       if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 0.8; //1.0;
-      return 0.5;
+      return 0.25;
    }
    
    public double getMaxAccelerationUpperBody()
@@ -444,7 +444,7 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    public double getSwingZetaXYZ()
    {
       if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 0.7;
-      return 0.3;
+      return 0.25;
    }
    
    public double getSwingZetaOrientation()
