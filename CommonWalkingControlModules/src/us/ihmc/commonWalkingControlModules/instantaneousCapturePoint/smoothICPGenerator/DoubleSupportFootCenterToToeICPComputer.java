@@ -244,6 +244,9 @@ public class DoubleSupportFootCenterToToeICPComputer
 
          JojosICPutilities.extrapolateDCMposAndVel(singleSupportEndICP, singleSupportEndICPVelocity, constantToeCentersOfPressure.get(0).getPoint3dCopy(),
                toeShiftToDoubleSupportDuration, omega0, toeICPCornerFramePoints.get(0).getPoint3dCopy());
+               
+         doubleSupportPolynomialTrajectory.initialize(singleSupportDuration, singleSupportStartICP, singleSupportStartICPVelocity, singleSupportEndICP,
+               singleSupportEndICPVelocity);
       }
       else
       {
