@@ -174,7 +174,7 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
       this.bipedFeet = bipedFeet;
       
       alphaPelvisVelocityBacklashKinematics.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(16.0, estimatorDT));
-      slopTimePelvisVelocityBacklashKinematics.set(0.03);
+      slopTimePelvisVelocityBacklashKinematics.set(0.045); //0.03);
       pelvisVelocityBacklashKinematics = BacklashCompensatingVelocityYoFrameVector.createBacklashCompensatingVelocityYoFrameVector("pelvisVelocityBacklashKin", "", 
             alphaPelvisVelocityBacklashKinematics, estimatorDT, slopTimePelvisVelocityBacklashKinematics, registry, pelvisPositionKinematics);
 

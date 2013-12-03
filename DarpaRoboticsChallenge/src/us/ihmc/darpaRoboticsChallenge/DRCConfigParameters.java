@@ -243,7 +243,7 @@ public class DRCConfigParameters
    public static final boolean USE_IHMCFILTER_JOINT_TORQUES = true;
    public static final String ATLAS_CALIBRATION_FILE = "AtlasCalibration/AtlasNullOffsets.properties";
 
-   public static final double JOINT_VELOCITY_SLOP_TIME_FOR_BACKLASH_COMPENSATION = 0.03;
+   public static final double JOINT_VELOCITY_SLOP_TIME_FOR_BACKLASH_COMPENSATION = 0.045; //0.03;
 
    public static final double JOINT_POSITION_FILTER_FREQ_HZ = positionSensorFrequencyHz;
    public static final double JOINT_VELOCITY_FILTER_FREQ_HZ = velocitySensorFrequencyHz;
