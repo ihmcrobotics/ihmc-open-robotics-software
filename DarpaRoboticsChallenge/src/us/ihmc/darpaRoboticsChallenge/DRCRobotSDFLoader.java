@@ -52,6 +52,9 @@ public class DRCRobotSDFLoader
             fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_v3_irobot_hands_extension.sdf");
             break;
          case ATLAS_IROBOT_HANDS_WITH_EXTENSION_ROTATED_ADDED_MASS :
+            fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_v3_irobot_hands_extension_rotated_added_mass.sdf");
+            break;
+         case ATLAS_IROBOT_LEFT_HAND_WITH_EXTENSION_ROTATED_RIGHT_HAND_HOOK_ADDED_MASS :
             fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_v3_irobot_left_hand_extension_rotated_added_mass.sdf");
             break;
          case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXZ:
