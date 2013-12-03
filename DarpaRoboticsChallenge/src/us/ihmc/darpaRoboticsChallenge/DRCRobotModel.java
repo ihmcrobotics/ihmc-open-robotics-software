@@ -4,32 +4,58 @@ import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandModel;
 
 public enum DRCRobotModel
 {
-   ATLAS_NO_HANDS, ATLAS_NO_HANDS_ADDED_MASS, ATLAS_SANDIA_HANDS, ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, ATLAS_IROBOT_HANDS,
-   ATLAS_IROBOT_HANDS_ADDED_MASS,  ATLAS_IROBOT_HANDS_WITH_EXTENSION, ATLAS_IROBOT_HANDS_WITH_EXTENSION_ROTATED_ADDED_MASS, ATLAS_IROBOT_HANDS_ADDED_MASS_COMXZ, ATLAS_IROBOT_HANDS_ADDED_MASS_COMXYZ,ATLAS_CALIBRATION,ATLAS_RHOOK_HAND, ATLAS_IHMC_PARAMETERS, ATLAS_, ATLAS_IROBOT_LEFT_HAND_WITH_EXTENSION_ROTATED_RIGHT_HAND_HOOK_ADDED_MASS;
+   ATLAS_NO_HANDS, ATLAS_NO_HANDS_ADDED_MASS, ATLAS_SANDIA_HANDS, ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, ATLAS_IROBOT_HANDS, ATLAS_IROBOT_HANDS_ADDED_MASS, ATLAS_IROBOT_HANDS_WITH_EXTENSION, 
+   ATLAS_IROBOT_HANDS_WITH_EXTENSION_ROTATED_ADDED_MASS, ATLAS_IROBOT_HANDS_ADDED_MASS_COMXZ, ATLAS_IROBOT_HANDS_ADDED_MASS_COMXYZ, ATLAS_CALIBRATION, ATLAS_RHOOK_HAND, ATLAS_IHMC_PARAMETERS, ATLAS_, 
+   ATLAS_IROBOT_LEFT_HAND_WITH_EXTENSION_ROTATED_RIGHT_HAND_HOOK_ADDED_MASS;
 
    public static DRCRobotModel getDefaultRobotModel()
    {
       return DRCLocalConfigParameters.robotModelToUse;
    }
-   
+
    public boolean hasIRobotHands()
    {
       switch (this)
       {
-         case ATLAS_IROBOT_HANDS :
-         case ATLAS_IROBOT_HANDS_ADDED_MASS :
-         case ATLAS_IROBOT_HANDS_WITH_EXTENSION:
-         case ATLAS_IHMC_PARAMETERS:
-         case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXZ:
-         case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXYZ:
-         case ATLAS_CALIBRATION :
-         case ATLAS_RHOOK_HAND:
-         case ATLAS_IROBOT_HANDS_WITH_EXTENSION_ROTATED_ADDED_MASS:
-         case ATLAS_IROBOT_LEFT_HAND_WITH_EXTENSION_ROTATED_RIGHT_HAND_HOOK_ADDED_MASS:
-            return true;
+      case ATLAS_IROBOT_HANDS:
+      case ATLAS_IROBOT_HANDS_ADDED_MASS:
+      case ATLAS_IROBOT_HANDS_WITH_EXTENSION:
+      case ATLAS_IHMC_PARAMETERS:
+      case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXZ:
+      case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXYZ:
+      case ATLAS_CALIBRATION:
+      case ATLAS_RHOOK_HAND:
+      case ATLAS_IROBOT_HANDS_WITH_EXTENSION_ROTATED_ADDED_MASS:
+      case ATLAS_IROBOT_LEFT_HAND_WITH_EXTENSION_ROTATED_RIGHT_HAND_HOOK_ADDED_MASS:
+         return true;
 
-         default :
-            return false;
+      default:
+         return false;
+      }
+   }
+
+   public boolean hasIRobotHandsOnExtensions()
+   {
+      switch (this)
+      {
+      case ATLAS_IROBOT_HANDS_WITH_EXTENSION:
+      case ATLAS_IROBOT_HANDS_WITH_EXTENSION_ROTATED_ADDED_MASS:
+         return true;
+
+      default:
+         return false;
+      }
+   }
+
+   public boolean hasHookHands()
+   {
+      switch (this)
+      {
+      case ATLAS_RHOOK_HAND:
+         return true;
+
+      default:
+         return false;
       }
    }
 
@@ -37,26 +63,26 @@ public enum DRCRobotModel
    {
       switch (this)
       {
-         case ATLAS_IROBOT_HANDS :
-         case ATLAS_IROBOT_HANDS_ADDED_MASS :
-         case ATLAS_IROBOT_HANDS_WITH_EXTENSION:
-         case ATLAS_IHMC_PARAMETERS :
-         case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXZ:
-         case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXYZ:
-         case ATLAS_CALIBRATION :
-         case ATLAS_RHOOK_HAND:
-         case ATLAS_IROBOT_HANDS_WITH_EXTENSION_ROTATED_ADDED_MASS:
-         case ATLAS_IROBOT_LEFT_HAND_WITH_EXTENSION_ROTATED_RIGHT_HAND_HOOK_ADDED_MASS:
-            return DRCHandModel.IROBOT;
+      case ATLAS_IROBOT_HANDS:
+      case ATLAS_IROBOT_HANDS_ADDED_MASS:
+      case ATLAS_IROBOT_HANDS_WITH_EXTENSION:
+      case ATLAS_IHMC_PARAMETERS:
+      case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXZ:
+      case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXYZ:
+      case ATLAS_CALIBRATION:
+      case ATLAS_RHOOK_HAND:
+      case ATLAS_IROBOT_HANDS_WITH_EXTENSION_ROTATED_ADDED_MASS:
+      case ATLAS_IROBOT_LEFT_HAND_WITH_EXTENSION_ROTATED_RIGHT_HAND_HOOK_ADDED_MASS:
+         return DRCHandModel.IROBOT;
 
-         case ATLAS_SANDIA_HANDS :
-         case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS :
-            return DRCHandModel.SANDIA;
+      case ATLAS_SANDIA_HANDS:
+      case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS:
+         return DRCHandModel.SANDIA;
 
-         case ATLAS_NO_HANDS :
-         case ATLAS_NO_HANDS_ADDED_MASS :
-         default :
-            return DRCHandModel.NONE;
+      case ATLAS_NO_HANDS:
+      case ATLAS_NO_HANDS_ADDED_MASS:
+      default:
+         return DRCHandModel.NONE;
       }
    }
 
@@ -64,24 +90,23 @@ public enum DRCRobotModel
    {
       switch (this)
       {
-         case ATLAS_NO_HANDS :
-         case ATLAS_NO_HANDS_ADDED_MASS :
-         case ATLAS_IROBOT_HANDS :
-         case ATLAS_IROBOT_HANDS_ADDED_MASS :
-         case ATLAS_IROBOT_HANDS_WITH_EXTENSION:
-         case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXZ:
-         case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXYZ:
-         case ATLAS_IHMC_PARAMETERS :
-         case ATLAS_SANDIA_HANDS :
-         case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS :
-         case ATLAS_CALIBRATION :
-         case ATLAS_RHOOK_HAND:
-         case ATLAS_IROBOT_HANDS_WITH_EXTENSION_ROTATED_ADDED_MASS:
-         case ATLAS_IROBOT_LEFT_HAND_WITH_EXTENSION_ROTATED_RIGHT_HAND_HOOK_ADDED_MASS:
-            return "atlas";
+      case ATLAS_NO_HANDS:
+      case ATLAS_NO_HANDS_ADDED_MASS:
+      case ATLAS_IROBOT_HANDS:
+      case ATLAS_IROBOT_HANDS_ADDED_MASS:
+      case ATLAS_IROBOT_HANDS_WITH_EXTENSION:
+      case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXZ:
+      case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXYZ:
+      case ATLAS_IHMC_PARAMETERS:
+      case ATLAS_SANDIA_HANDS:
+      case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS:
+      case ATLAS_CALIBRATION:
+      case ATLAS_RHOOK_HAND:
+      case ATLAS_IROBOT_HANDS_WITH_EXTENSION_ROTATED_ADDED_MASS:
+         return "atlas";
 
-         default :
-            throw new RuntimeException("Unkown model");
+      default:
+         throw new RuntimeException("Unkown model");
       }
    }
 
