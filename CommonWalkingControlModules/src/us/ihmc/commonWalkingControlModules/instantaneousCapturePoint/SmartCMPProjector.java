@@ -100,10 +100,13 @@ public class SmartCMPProjector
 
    private final FrameVector2d cmpToICPVector = new FrameVector2d();
 
-   public void sort(FramePoint2d reference, FramePoint2d[] points)
+   
+   // orders a pair of points by nearest then farthest from reference point
+   public void order(FramePoint2d reference, FramePoint2d[] points)
    {
-      if (points.length != 2)
-         return;
+      if (points.length != 2) {
+         throw new RuntimeException("requires two points, got: " + points.length);
+      }
 
       if (reference.distance(points[0]) < reference.distance(points[1]))
          return;
@@ -113,6 +116,9 @@ public class SmartCMPProjector
       points[1] = temp;
    }
    
+   
+   // Merges the intersections formed by projections of to collinear but opposing rays from a single point.
+   // This assumes intersection with a convex polygon and removes duplicate points.
    private FramePoint2d[] merge(FramePoint2d[] one, FramePoint2d[] two, double epsilon)
    {
       if (one.length == 0) {
@@ -226,10 +232,10 @@ public class SmartCMPProjector
          return;
       }
       
-      // special case where both are outside and on same side of polygon, just project CMP to nearest edge.
       if (icpAwayFromCMPIntersections.length == 2)
       {
-         sort(desiredCMP, icpAwayFromCMPIntersections);
+         // special case where both are outside and on same side of polygon, just project CMP to nearest edge.
+         order(desiredCMP, icpAwayFromCMPIntersections);
          desiredCMP.set(intersections[0]);
          desiredCMP.changeFrame(returnFrame);
          return;
@@ -242,7 +248,7 @@ public class SmartCMPProjector
       }
       else
       {
-         sort(capturePoint, intersections);
+         order(capturePoint, intersections);
          moveAwayFromEdge.setAndChangeFrame(intersections[1]);
          otherEdge.setAndChangeFrame(intersections[0]);
       }
