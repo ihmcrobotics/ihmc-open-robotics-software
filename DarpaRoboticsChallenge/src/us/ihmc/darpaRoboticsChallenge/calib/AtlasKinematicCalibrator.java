@@ -102,7 +102,7 @@ public class AtlasKinematicCalibrator
          {
             joint.setQ(qmap.get(joint.getName()));
          }
-         else if (joint.getName()=="neck_ry")
+         else if (joint.getName().equals("neck_ry"))
          {
             //special treatment 
             joint.setQ(qmap.get("neck_ay"));
@@ -115,6 +115,8 @@ public class AtlasKinematicCalibrator
       }
 
    }
+   
+   
    
    private void displayRobot()
    {
