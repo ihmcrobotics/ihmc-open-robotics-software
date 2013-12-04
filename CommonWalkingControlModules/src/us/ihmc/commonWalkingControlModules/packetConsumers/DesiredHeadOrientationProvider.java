@@ -19,6 +19,7 @@ public class DesiredHeadOrientationProvider
    private final ReferenceFrame headOrientationFrame;
 
    private double desiredJointForExtendedNeckPitchRangeAngle;
+   private double desiredNeckPitchAngle;
    
    private final ReferenceFrame lookAtFrame = ReferenceFrame.getWorldFrame();
    private final FramePoint pointToTrack = new FramePoint(lookAtFrame);
@@ -84,6 +85,7 @@ public class DesiredHeadOrientationProvider
       {
          headOrientation.set(packet.getQuaternion());
          desiredJointForExtendedNeckPitchRangeAngle = packet.getDesiredJointForExtendedNeckPitchRangeAngle();
+         desiredNeckPitchAngle = packet.getDesiredNeckPitchAngle();
          return true;
       }
       else
@@ -111,6 +113,11 @@ public class DesiredHeadOrientationProvider
    public double getDesiredExtendedNeckPitchJointAngle()
    {
       return desiredJointForExtendedNeckPitchRangeAngle;
+   }
+   
+   public double getDesiredNeckPitchAngle()
+   {
+      return desiredNeckPitchAngle;
    }
 
 }
