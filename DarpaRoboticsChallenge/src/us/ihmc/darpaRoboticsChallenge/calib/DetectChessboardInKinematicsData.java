@@ -37,7 +37,7 @@ public class DetectChessboardInKinematicsData
 
    public static void main(String[] args) throws IOException
    {
-      File directory = new File("../DarpaRoboticsChallenge/data/");
+      File directory = new File("../DarpaRoboticsChallenge/data/chessboard_joints_20131204");
 
       if( !directory.isDirectory() )
          throw new RuntimeException("Not directory");
@@ -45,7 +45,7 @@ public class DetectChessboardInKinematicsData
       IntrinsicParameters intrinsic = BoofMiscOps.loadXML("../DarpaRoboticsChallenge/data/calibration_images/intrinsic_ros.xml");
       DenseMatrix64F K = PerspectiveOps.calibrationMatrix(intrinsic, null);
 
-      PlanarCalibrationTarget target = FactoryPlanarCalibrationTarget.gridChess(boardWidth, boardHeight, 10);
+      PlanarCalibrationTarget target = FactoryPlanarCalibrationTarget.gridChess(boardWidth, boardHeight, 0.03);
 
       // Computes the homography
       Zhang99ComputeTargetHomography computeH = new Zhang99ComputeTargetHomography(target);
