@@ -83,20 +83,28 @@ public class DRCRobotArmControllerParameters implements ArmControllerParameters
       return DRCConfigParameters.USE_MANIPULATION_DECOUPLED_TASKSPACE_CONTROL;
    }
    
-   public String[] getDefaultHandOrientationJointNames(RobotSide robotSide)
+   public String[] getDefaultDecoupledArmControlHandOrientationJointNames(RobotSide robotSide)
    {
       if (robotSide == RobotSide.LEFT)
-         return new String[]{jointNames[l_arm_ely], jointNames[l_arm_wry], jointNames[l_arm_wrx]};
+         return new String[]{jointNames[l_arm_wrx], jointNames[l_arm_wry]};
       else
-         return new String[]{jointNames[r_arm_ely], jointNames[r_arm_wry], jointNames[r_arm_wrx]};
+         return new String[]{jointNames[r_arm_wrx], jointNames[r_arm_wry]};
    }
 
-   public String[] getDefaultHandPositionJointNames(RobotSide robotSide)
+   public String[] getDefaultDecoupledArmControlHandPositionJointNames(RobotSide robotSide)
    {
       if (robotSide == RobotSide.LEFT)
-         return new String[]{jointNames[l_arm_shy], jointNames[l_arm_shx], jointNames[l_arm_elx]};
+         return new String[]{jointNames[l_arm_shx], jointNames[l_arm_elx]};
       else
-         return new String[]{jointNames[r_arm_shy], jointNames[r_arm_shx], jointNames[r_arm_elx]};
+         return new String[]{jointNames[r_arm_shx], jointNames[r_arm_elx]};
+   }
+
+   public String[] getDefaultDecoupledArmControlHandJointspaceJointNames(RobotSide robotSide)
+   {
+      if (robotSide == RobotSide.LEFT)
+         return new String[]{jointNames[l_arm_shy], jointNames[l_arm_ely]};
+      else
+         return new String[]{jointNames[r_arm_shy], jointNames[r_arm_ely]};
    }
 
 }
