@@ -10,6 +10,7 @@ import java.util.Map;
 
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
@@ -42,7 +43,7 @@ public class AtlasKinematicCalibrator
 
    public void loadJointAnglesFromFile()
    {
-      String calib_file = "/home/unknownid/workspace/DarpaRoboticsChallenge/data/coupledWristLog_20131204";
+      String calib_file = "data/coupledWristLog_20131204";
       BufferedReader reader = null;
       try
       {
@@ -128,6 +129,12 @@ public class AtlasKinematicCalibrator
       SDFFullRobotModelVisualizer visualizer = new SDFFullRobotModelVisualizer(robot, 1, 0.003);
       visualizer.setFullRobotModel(fullRobotModel);
       visualizer.update(1);
+      
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+      scs.setGroundVisible(false);
+      visualizer.registerSCS(scs);
+      scs.startOnAThread();
+      
       
    }
 
