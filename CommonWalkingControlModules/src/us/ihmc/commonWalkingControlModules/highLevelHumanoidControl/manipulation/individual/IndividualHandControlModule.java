@@ -175,7 +175,7 @@ public class IndividualHandControlModule
       if (armControlParameters.useDecoupledTaskspaceControl())
       {
          taskSpacePositionControlState = new TaskspaceHandDecoupledPositionOrientationControlState(namePrefix, IndividualHandControlState.TASK_SPACE_POSITION, robotSide, momentumBasedController,
-               armControlParameters, base, endEffector, dynamicGraphicObjectsListRegistry, registry);
+               armControlParameters, base, endEffector, trajectoryTimeProvider, dynamicGraphicObjectsListRegistry, registry);
       }
       else
       {
@@ -318,13 +318,13 @@ public class IndividualHandControlModule
    }
 
    public void executeTaskSpaceTrajectory(PositionTrajectoryGenerator positionTrajectory, OrientationTrajectoryGenerator orientationTrajectory,
-           ReferenceFrame frameToControlPoseOf, RigidBody base, boolean estimateMassProperties, SE3PDGains gains)
+           Map<OneDoFJoint, Double> finalDesiredJointAngles, ReferenceFrame frameToControlPoseOf, RigidBody base, boolean estimateMassProperties, SE3PDGains gains)
    {
       TaskspaceHandPositionControlState state = estimateMassProperties ? objectManipulationState : taskSpacePositionControlState;
       RigidBodySpatialAccelerationControlModule rigidBodySpatialAccelerationControlModule =
          getOrCreateRigidBodySpatialAccelerationControlModule(frameToControlPoseOf);
       rigidBodySpatialAccelerationControlModule.setGains(gains);
-      state.setTrajectory(positionTrajectory, orientationTrajectory, base, rigidBodySpatialAccelerationControlModule);
+      state.setTrajectory(positionTrajectory, orientationTrajectory, finalDesiredJointAngles, base, rigidBodySpatialAccelerationControlModule);
       requestedState.set(state.getStateEnum());
       stateMachine.checkTransitionConditions();
    }
@@ -337,8 +337,8 @@ public class IndividualHandControlModule
       stateMachine.checkTransitionConditions();
    }
 
-   public void moveInStraightLine(FramePose finalDesiredPose, double time, RigidBody base, ReferenceFrame frameToControlPoseOf, ReferenceFrame trajectoryFrame,
-                                  boolean holdObject, SE3PDGains gains)
+   public void moveInStraightLine(FramePose finalDesiredPose, double time, RigidBody base, ReferenceFrame frameToControlPoseOf,
+         Map<OneDoFJoint, Double> finalDesiredJointAngles, ReferenceFrame trajectoryFrame, boolean holdObject, SE3PDGains gains)
    {
       FramePose pose = computeDesiredFramePose(frameToControlPoseOf, trajectoryFrame);
 
@@ -346,7 +346,7 @@ public class IndividualHandControlModule
       finalConfigurationProvider.set(finalDesiredPose);
       trajectoryTimeProvider.set(time);
       executeTaskSpaceTrajectory(getOrCreateStraightLinePositionTrajectoryGenerator(trajectoryFrame),
-                                 getOrCreateOrientationInterpolationTrajectoryGenerator(trajectoryFrame), frameToControlPoseOf, base, holdObject, gains);
+                                 getOrCreateOrientationInterpolationTrajectoryGenerator(trajectoryFrame), finalDesiredJointAngles, frameToControlPoseOf, base, holdObject, gains);
    }
 
    private FramePose computeDesiredFramePose(ReferenceFrame frameToControlPoseOf, ReferenceFrame trajectoryFrame)
@@ -493,7 +493,13 @@ public class IndividualHandControlModule
       PositionTrajectoryGenerator positionTrajectory = getOrCreateConstantPositionTrajectoryGenerator(frame);
       OrientationTrajectoryGenerator orientationTrajectory = getOrCreateConstantOrientationTrajectoryGenerator(frame);
 
-      executeTaskSpaceTrajectory(positionTrajectory, orientationTrajectory, endEffectorFrame, base, isHoldingObject(), gains);
+      for (int i = 0; i < armJointList.size(); i++)
+      {
+         OneDoFJoint joint = armJointList.get(i);
+         armJointPositionMap.put(joint, joint.getQ());
+      }
+      
+      executeTaskSpaceTrajectory(positionTrajectory, orientationTrajectory, armJointPositionMap, endEffectorFrame, base, isHoldingObject(), gains);
    }
 
    public void holdPositionInJointSpace()
