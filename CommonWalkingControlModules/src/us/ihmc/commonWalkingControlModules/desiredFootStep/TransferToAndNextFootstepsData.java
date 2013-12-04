@@ -2,10 +2,15 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import java.util.ArrayList;
 
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class TransferToAndNextFootstepsData
@@ -19,7 +24,8 @@ public class TransferToAndNextFootstepsData
    private Footstep nextFootstep;
    private Footstep nextNextFootstep;
   
-   
+   private Point3d currentDesiredICP;
+   private Vector3d currentDesiredICPVelocity;
 
    private double w0;
    private double estimatedStepTime;
@@ -53,6 +59,25 @@ public class TransferToAndNextFootstepsData
    public void setTransferToFootstep(Footstep transferToFootstep)
    {
       this.transferToFootstep = transferToFootstep;
+   }
+   
+   public void setCurrentDesiredICP(FramePoint2d currentICP, FrameVector2d currentICPVelocity) 
+   {
+      currentDesiredICP = new Point3d(currentICP.getX(), currentICP.getY(), 0.0);
+      currentICP.getReferenceFrame().getTransformToDesiredFrame(ReferenceFrame.getWorldFrame()).transform(currentDesiredICP);
+      
+      currentDesiredICPVelocity = new Vector3d(currentICPVelocity.getX(), currentICPVelocity.getY(), 0.0);
+      currentICPVelocity.getReferenceFrame().getTransformToDesiredFrame(ReferenceFrame.getWorldFrame()).transform(currentDesiredICPVelocity);
+   }
+
+   public Point3d getCurrentDesiredICP() 
+   {
+      return currentDesiredICP;
+   }
+   
+   public Vector3d getCurrentDesiredICPVelocity() 
+   {
+      return currentDesiredICPVelocity;
    }
    
    public FrameConvexPolygon2d getTransferToFootPolygonInSoleFrame()

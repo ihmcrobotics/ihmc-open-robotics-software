@@ -944,7 +944,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          transferToAndNextFootstepsData.setDoubleSupportInitialTransferDuration(doubleSupportInitialTransferDuration);
          boolean stopIfReachedEnd = (upcomingFootstepList.getNumberOfFootstepsToProvide() <= 3);    // TODO: Magic Number
          transferToAndNextFootstepsData.setStopIfReachedEnd(stopIfReachedEnd);
-
+         transferToAndNextFootstepsData.setCurrentDesiredICP(desiredICP.getFramePoint2dCopy(), desiredICPVelocity.getFrameVector2dCopy());
+         
          if (VISUALIZE)
          {
             transferToAndNextFootstepsDataVisualizer.visualizeFootsteps(transferToAndNextFootstepsData);
