@@ -112,14 +112,15 @@ public class DetectChessboardInKinematicsData
 
          // render and display the results
          Graphics2D g2 = orig.createGraphics();
-         for( Point2D_F64 p : points )
-            VisualizeFeatures.drawPoint(g2, (int) p.x, (int) p.y, 3, Color.RED);
+         for( int i = 0; i < points.size(); i++ ) {
+            Point2D_F64 p = points.get(i);
+            if( i == 0 )
+               VisualizeFeatures.drawPoint(g2, (int) p.x, (int) p.y, 3, Color.YELLOW);
+            else
+               VisualizeFeatures.drawPoint(g2, (int) p.x, (int) p.y, 3, Color.RED);
+         }
 
          UtilImageIO.saveImage(orig,f.getAbsolutePath() + "/detected.jpg");
-
-         File hack = new File(f,"detected.png");
-         if( hack.exists())
-            hack.delete();
       }
 
 
