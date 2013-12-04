@@ -320,7 +320,7 @@ public class FootCenterToToeEvaluator
             dummyReferenceFrameList.add(ReferenceFrame.getWorldFrame()); 
          }
          
-         smoothICPComputer.initializeDoubleSupport(footLocations, dummyReferenceFrameList, singleSupportDuration, doubleSupportDuration, omega0, initialTime);
+         smoothICPComputer.initializeDoubleSupport(footLocations, dummyReferenceFrameList, singleSupportDuration, doubleSupportDuration, omega0, null, null, initialTime);
          smoothICPComputer.computeICPPositionVelocityAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration, initialECMPPosition, initialTime);
 
 
