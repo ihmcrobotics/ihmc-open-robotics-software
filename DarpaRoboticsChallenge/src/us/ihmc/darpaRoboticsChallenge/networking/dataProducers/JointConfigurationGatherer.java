@@ -4,10 +4,6 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.concurrent.Builder;
-import us.ihmc.concurrent.ConcurrentCopier;
-import us.ihmc.robotSide.RobotSide;
-import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
@@ -74,6 +70,7 @@ public class JointConfigurationGatherer
       }
 
       double[] jointAngles = jointConfigurationData.getJointAngles();
+      double[] jointOutAngles = jointConfigurationData.getJointOutAngles();
 
 //      double[] leftHandAngles = handAngles.get(RobotSide.LEFT).getCopyForReading();
 //      double[] rightHandAngles = handAngles.get(RobotSide.RIGHT).getCopyForReading();
@@ -84,6 +81,7 @@ public class JointConfigurationGatherer
       for (int i = 0; i < atlasJoints.length; i++)
       {
          jointAngles[i] = atlasJoints[i].getQ();
+         jointOutAngles[i] = atlasJoints[i].getSecondaryQ();
       }
 
 //      if ((leftHandAngles != null) && (rightHandAngles != null))

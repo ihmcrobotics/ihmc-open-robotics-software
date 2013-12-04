@@ -14,12 +14,18 @@ public class DRCConfigParameters
 
    public static final boolean ALLOW_LAG_SIMULATION = true;
    public static final boolean ENABLE_LAG_SIMULATION_ON_START = false;
+   public static boolean CALIBRATE_ARM_MODE = true;
 
    static
    {
       if (ALLOW_LAG_SIMULATION)
       {
          System.err.println("Warning: Allowing simulation of lag");
+      }
+      
+      if(CALIBRATE_ARM_MODE)
+      {
+         System.err.println("Warning: Calibrate arm mode is on, qout is disabled");
       }
    }
 

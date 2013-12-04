@@ -31,7 +31,6 @@ import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingMa
 import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.DRCJointConfigurationData;
 import us.ihmc.graphics3DAdapter.camera.VideoSettings;
 import us.ihmc.graphics3DAdapter.camera.VideoSettingsFactory;
-import us.ihmc.sensorProcessing.sensorData.AtlasWristFeetSensorPacket;
 import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
 import us.ihmc.utilities.net.KryoObjectClient;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
@@ -93,7 +92,7 @@ public class DRCNetworkProcessor
          {
             rosNativeNetworkProcessor = null;
          }
-         new GazeboCameraReceiver(robotPoseBuffer, videoSettings, rosMainNode, networkingManager,ppsTimestampOffsetProvider);
+         GazeboCameraReceiver cameraReceiver = new GazeboCameraReceiver(robotPoseBuffer, videoSettings, rosMainNode, networkingManager,ppsTimestampOffsetProvider);
          CameraInfoReceiver cameraInfoServer = new MultiSenseCameraInfoReciever(rosMainNode, networkingManager.getControllerStateHandler());
          networkingManager.getControllerCommandHandler().setIntrinsicServer(cameraInfoServer);
          
@@ -106,6 +105,11 @@ public class DRCNetworkProcessor
          
          
          rosMainNode.execute();
+         
+         if(DRCConfigParameters.CALIBRATE_ARM_MODE)
+         {
+            new ArmCalibrationHelper(fieldComputerClient, networkingManager, cameraReceiver);
+         }
       }
       else
       {
@@ -130,10 +134,15 @@ public class DRCNetworkProcessor
    public DRCNetworkProcessor(LocalObjectCommunicator scsCommunicator, ObjectCommunicator drcNetworkObjectCommunicator)
    {
       this(drcNetworkObjectCommunicator);
-      new SCSCameraDataReceiver(robotPoseBuffer, videoSettings, scsCommunicator, networkingManager,
+      SCSCameraDataReceiver cameraReceiver = new SCSCameraDataReceiver(robotPoseBuffer, videoSettings, scsCommunicator, networkingManager,
             ppsTimestampOffsetProvider);
       new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, fullRobotModel, robotBoundingBoxes, jointMap, fieldComputerClient,
             ppsTimestampOffsetProvider);
+      
+      if(DRCConfigParameters.CALIBRATE_ARM_MODE)
+      {
+         new ArmCalibrationHelper(fieldComputerClient, networkingManager, cameraReceiver);
+      }
       
       connect();
 
