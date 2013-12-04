@@ -206,8 +206,6 @@ public class ManualDetectCameraCalibrationBox
 
          System.out.println(plane);
       }
-
-      System.out.println("Pointless change to test git-svn");
       // TODO do something with planes
    }
 }
