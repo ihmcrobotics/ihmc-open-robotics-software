@@ -8,9 +8,11 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
+import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
@@ -28,6 +30,7 @@ public abstract class DegenerateOrientationControlModule
    private final IntegerYoVariable jacobianIndex;
 
    private final ArrayList<RigidBodyOrientationControlModule> rigidBodyOrientationControlModules = new ArrayList<RigidBodyOrientationControlModule>();
+   private final ArrayList<OrientationInterpolationTrajectoryGenerator> orientationTrajectoryGenerators = new ArrayList<OrientationInterpolationTrajectoryGenerator>();
    private final ArrayList<RigidBody> bases = new ArrayList<RigidBody>();
    private final IntegerYoVariable baseIndex;
    
@@ -73,7 +76,7 @@ public abstract class DegenerateOrientationControlModule
    
    public void reset()
    {
-      for (int i=0; i<rigidBodyOrientationControlModules.size(); i++)
+      for (int i = 0; i < rigidBodyOrientationControlModules.size(); i++)
       {
          rigidBodyOrientationControlModules.get(i).reset();
       }
@@ -118,9 +121,11 @@ public abstract class DegenerateOrientationControlModule
 
    protected abstract void packDesiredFrameOrientation(FrameOrientation orientationToPack);
 
-   FrameOrientation desiredOrientation = new FrameOrientation();
-   FrameVector desiredAngularVelocity = new FrameVector();
-   FrameVector feedForwardAngularAcceleration = new FrameVector();
+   private final FrameOrientation desiredOrientation = new FrameOrientation();
+   private final FrameVector desiredAngularVelocity = new FrameVector();
+   private final FrameVector feedForwardAngularAcceleration = new FrameVector();
+   private final Vector3d zeroLinearAcceleration = new Vector3d();
+   private final FrameVector controlledAngularAcceleration = new FrameVector();
 
    public void compute()
    {
@@ -134,17 +139,18 @@ public abstract class DegenerateOrientationControlModule
       GeometricJacobian jacobian = jacobians.get(localJacobianIndex);
       DenseMatrix64F selectionMatrix = selectionMatrices.get(localJacobianIndex);
 
-      FrameVector angularAcceleration = new FrameVector(jacobian.getJacobianFrame());
+      ReferenceFrame expressedInFrame = jacobian.getJacobianFrame();
+      controlledAngularAcceleration.setToZero(expressedInFrame);
 
       int localBaseIndex = baseIndex.getIntegerValue();
       if (localBaseIndex == -1) return;
 
       RigidBodyOrientationControlModule rigidBodyOrientationControlModule = rigidBodyOrientationControlModules.get(localBaseIndex);
-      rigidBodyOrientationControlModule.compute(angularAcceleration, desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+      rigidBodyOrientationControlModule.compute(controlledAngularAcceleration, desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
 
-      spatialAcceleration.set(rigidBodyOrientationControlModule.getEndEffector().getBodyFixedFrame(),
-                              rigidBodyOrientationControlModule.getBase().getBodyFixedFrame(), jacobian.getJacobianFrame(), new Vector3d(),
-                              angularAcceleration.getVector());
+      ReferenceFrame endEffectorFrame = rigidBodyOrientationControlModule.getEndEffector().getBodyFixedFrame();
+      ReferenceFrame baseFrame = rigidBodyOrientationControlModule.getBase().getBodyFixedFrame();
+      spatialAcceleration.set(endEffectorFrame, baseFrame, expressedInFrame, zeroLinearAcceleration, controlledAngularAcceleration.getVector());
 
       computeSelectionMatrix(jacobian, selectionMatrix);
    }
@@ -253,6 +259,4 @@ public abstract class DegenerateOrientationControlModule
       DenseMatrix64F jacobianMatrix = jacobian.getJacobianMatrix();
       CommonOps.pinv(jacobianMatrix, selectionMatrix);
    }
-
-
 }

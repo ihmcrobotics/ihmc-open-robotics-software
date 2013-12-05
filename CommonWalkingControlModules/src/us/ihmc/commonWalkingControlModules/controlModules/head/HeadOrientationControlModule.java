@@ -22,7 +22,8 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
    private final YoFrameQuaternion orientationToTrack;
    private final YoFramePoint pointToTrack;
    private final ReferenceFrame chestFrame;
-   private final ReferenceFrame headOrientationFrame;
+   private final ReferenceFrame headFrame;
+   private final ReferenceFrame headOrientationExpressedInFrame;
    private final OriginAndPointFrame pointTrackingFrame;
    private final DynamicGraphicReferenceFrame pointTrackingFrameFiz;
 
@@ -36,8 +37,8 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
    private final RigidBody head; 
    
    public HeadOrientationControlModule(double controlDT, RigidBody pelvis, RigidBody elevator, RigidBody head, TwistCalculator twistCalculator,
-         ReferenceFrame headOrientationFrame, ReferenceFrame chestFrame, HeadOrientationControllerParameters headOrientationControllerParameters, YoVariableRegistry parentRegistry,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         ReferenceFrame headOrientationExpressedInFrame, ReferenceFrame chestFrame, HeadOrientationControllerParameters headOrientationControllerParameters,
+         YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       super("head", new RigidBody[] {}, head, new GeometricJacobian[]{}, twistCalculator, controlDT, parentRegistry);
 
@@ -46,8 +47,9 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
       pointTrackingFrame = new OriginAndPointFrame("headPointTrackingFrame", ReferenceFrame.getWorldFrame());
 
       this.chestFrame = chestFrame;
-      this.headOrientationFrame = headOrientationFrame;
-      orientationToTrack = new YoFrameQuaternion("headOrientationToTrack", headOrientationFrame, registry);
+      this.headFrame = head.getBodyFixedFrame();
+      this.headOrientationExpressedInFrame = headOrientationExpressedInFrame;
+      orientationToTrack = new YoFrameQuaternion("headOrientationToTrack", headOrientationExpressedInFrame, registry);
       pointToTrack = new YoFramePoint("headPointToTrack", ReferenceFrame.getWorldFrame(), registry);
       
       if (dynamicGraphicObjectsListRegistry != null)
@@ -70,13 +72,14 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
       return head;
    }
    
+   private final FramePoint headPosition = new FramePoint();
+   
    @Override
    protected void packDesiredFrameOrientation(FrameOrientation orientationToPack)
    {
       FramePoint positionToPointAt = pointToTrack.getFramePointCopy();
-      GeometricJacobian jacobian = super.getJacobian();
-      ReferenceFrame headFrame = jacobian.getEndEffectorFrame(); // TODO: change to midEyeFrame?
-      pointTrackingFrame.setOriginAndPositionToPointAt(new FramePoint(headFrame), positionToPointAt);
+      headPosition.setToZero(headFrame);
+      pointTrackingFrame.setOriginAndPositionToPointAt(headPosition, positionToPointAt);
 
       switch (headTrackingMode.getEnumValue())
       {
@@ -172,6 +175,6 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
 
    public ReferenceFrame getHeadOrientationFrame()
    {
-      return headOrientationFrame;
+      return headOrientationExpressedInFrame;
    }
 }
