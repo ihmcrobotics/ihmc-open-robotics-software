@@ -13,6 +13,8 @@ import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.YoVariablesUpdatedListener;
 import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake;
 import us.ihmc.robotDataCommunication.jointState.JointState;
+import us.ihmc.robotDataCommunication.logger.util.CookieJar;
+import us.ihmc.robotDataCommunication.logger.util.PipedCommandExecutor;
 
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -197,6 +199,28 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
             directory.delete();
          }
          
+         
+      }
+      else if(options.isEnableCookieJar())
+      {
+         System.out.println("Creating cookiejar");
+         File cookieJarDirectory = new File(directory, "cookieJar");
+         cookieJarDirectory.mkdir();
+         CookieJar cookieJar = new CookieJar();
+         cookieJar.setDirectory(cookieJarDirectory.getAbsolutePath());
+         cookieJar.setHost(options.getCookieJarHost());
+         cookieJar.setUser(options.getCookieJarUser());
+         cookieJar.setRemoteDirectory(options.getCookieJarRemoteDirectory());
+         
+         PipedCommandExecutor executor = new PipedCommandExecutor(cookieJar);
+         try
+         {
+            executor.execute();
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
+         }
          
       }
    }

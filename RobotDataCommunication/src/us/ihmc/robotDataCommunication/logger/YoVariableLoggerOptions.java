@@ -18,6 +18,12 @@ public class YoVariableLoggerOptions
    private String videoCodec = defaultVideoCodec;
    private int videoQuality = defaultVideoQuality;
 
+   private boolean enableCookieJar = false;
+   private String cookieJarUser = "";
+   private String cookieJarHost = "";
+   private String cookieJarRemoteDirectory = "";
+   private String cookieJarDirectory = "";
+
    private boolean disableVideo = false;
 
    public static YoVariableLoggerOptions parse(String[] args) throws JSAPException
@@ -82,4 +88,50 @@ public class YoVariableLoggerOptions
    {
       this.disableVideo = disableVideo;
    }
+
+   public void setEnableCookieJar(boolean enableCookieJar)
+   {
+      this.enableCookieJar = enableCookieJar;
+   }
+
+   public void setCookieJarUser(String cookieJarUser)
+   {
+      this.cookieJarUser = cookieJarUser;
+   }
+
+   public void setCookieJarHost(String cookieJarHost)
+   {
+      this.cookieJarHost = cookieJarHost;
+   }
+
+   public void setCookieJarRemoteDirectory(String cookieJarRemoteDirectory)
+   {
+      this.cookieJarRemoteDirectory = cookieJarRemoteDirectory;
+   }
+
+   public void setCookieJarDirectory(String cookieJarDirectory)
+   {
+      this.cookieJarDirectory = cookieJarDirectory;
+   }
+
+   public boolean isEnableCookieJar()
+   {
+      return enableCookieJar;
+   }
+
+   public String getCookieJarUser()
+   {
+      return cookieJarUser;
+   }
+
+   public String getCookieJarHost()
+   {
+      return cookieJarHost;
+   }
+
+   public String getCookieJarRemoteDirectory()
+   {
+      return cookieJarRemoteDirectory;
+   }
+
 }

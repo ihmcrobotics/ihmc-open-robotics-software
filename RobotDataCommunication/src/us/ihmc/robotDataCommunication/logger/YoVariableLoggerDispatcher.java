@@ -125,6 +125,12 @@ public class YoVariableLoggerDispatcher
    public static void main(String[] args) throws JSAPException
    {
       YoVariableLoggerOptions options = YoVariableLoggerOptions.parse(args);
+      // Temporary Atlas variables
+      options.setEnableCookieJar(true);
+      options.setCookieJarHost("10.66.171.20");
+      options.setCookieJarUser("root");
+      options.setCookieJarRemoteDirectory("atlas");
+      
       new YoVariableLoggerDispatcher(options);
    }
 
