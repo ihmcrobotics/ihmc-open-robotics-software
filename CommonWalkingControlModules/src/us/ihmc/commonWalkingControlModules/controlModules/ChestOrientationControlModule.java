@@ -34,21 +34,23 @@ public class ChestOrientationControlModule extends DegenerateOrientationControlM
       return chest;
    }
 
-   protected FrameOrientation getDesiredFrameOrientationCopy()
+   @Override
+   protected void packDesiredFrameOrientation(FrameOrientation orientationToPack)
    {
-      FrameOrientation ret = new FrameOrientation(desiredOrientation.getReferenceFrame());
-      desiredOrientation.get(ret);
-      return ret;
+      orientationToPack.setToZero(desiredOrientation.getReferenceFrame());
+      desiredOrientation.get(orientationToPack);
    }
 
-   protected FrameVector getDesiredAngularVelocityCopy()
+   @Override
+   protected void packDesiredAngularVelocity(FrameVector angularVelocityToPack)
    {
-      return desiredAngularVelocity.getFrameVectorCopy();
+      desiredAngularVelocity.getFrameVectorAndChangeFrameOfPackedVector(angularVelocityToPack);
    }
 
-   protected FrameVector getDesiredAngularAccelerationFeedForwardCopy()
+   @Override
+   protected void packDesiredAngularAccelerationFeedForward(FrameVector angularAccelerationToPack)
    {
-      return feedForwardAngularAcceleration.getFrameVectorCopy();
+      feedForwardAngularAcceleration.getFrameVectorAndChangeFrameOfPackedVector(angularAccelerationToPack);
    }
 
    public void setDesireds(FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector feedForwardAngularAcceleration)

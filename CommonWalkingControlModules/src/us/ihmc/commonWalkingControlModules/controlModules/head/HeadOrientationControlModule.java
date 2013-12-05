@@ -71,20 +71,19 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
    }
    
    @Override
-   protected FrameOrientation getDesiredFrameOrientationCopy()
+   protected void packDesiredFrameOrientation(FrameOrientation orientationToPack)
    {
       FramePoint positionToPointAt = pointToTrack.getFramePointCopy();
       GeometricJacobian jacobian = super.getJacobian();
-      ReferenceFrame headFrame = jacobian .getEndEffectorFrame(); // TODO: change to midEyeFrame?
+      ReferenceFrame headFrame = jacobian.getEndEffectorFrame(); // TODO: change to midEyeFrame?
       pointTrackingFrame.setOriginAndPositionToPointAt(new FramePoint(headFrame), positionToPointAt);
 
-      FrameOrientation frameOrientation;
       switch (headTrackingMode.getEnumValue())
       {
          case ORIENTATION :
          {
-            frameOrientation = new FrameOrientation(orientationToTrack.getReferenceFrame());
-            orientationToTrack.get(frameOrientation);
+            orientationToPack.setToZero(orientationToTrack.getReferenceFrame());
+            orientationToTrack.get(orientationToPack);
 
             break;
          }
@@ -94,18 +93,16 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
             pointTrackingFrame.update();
             pointTrackingFrameFiz.update();
 
-            frameOrientation = new FrameOrientation(pointTrackingFrame);
+            orientationToPack.setToZero(pointTrackingFrame);
             break;
          }
 
          default :
             throw new RuntimeException("Case " + headTrackingMode.getEnumValue() + " not handled.");
       }
-      frameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+      orientationToPack.changeFrame(ReferenceFrame.getWorldFrame());
 
-      enforceLimits(frameOrientation);
-
-      return frameOrientation;
+      enforceLimits(orientationToPack);
    }
 
    private void enforceLimits(FrameOrientation orientation)
@@ -148,15 +145,15 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
    }
 
    @Override
-   protected FrameVector getDesiredAngularVelocityCopy()
+   protected void packDesiredAngularVelocity(FrameVector angularVelocityToPack)
    {
-      return new FrameVector(ReferenceFrame.getWorldFrame());
+      angularVelocityToPack.setToZero(ReferenceFrame.getWorldFrame());
    }
 
    @Override
-   protected FrameVector getDesiredAngularAccelerationFeedForwardCopy()
+   protected void packDesiredAngularAccelerationFeedForward(FrameVector angularAccelerationToPack)
    {
-      return new FrameVector(ReferenceFrame.getWorldFrame());
+      angularAccelerationToPack.setToZero(ReferenceFrame.getWorldFrame());
    }
 
    public void setOrientationToTrack(FrameOrientation orientation)

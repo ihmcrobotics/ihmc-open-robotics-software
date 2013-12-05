@@ -86,9 +86,4 @@ public class ChestOrientationManager
       double timeSinceLastUpdate = momentumBasedController.getYoTime().getDoubleValue() - timeLastUpdated.getDoubleValue();
       return timeSinceLastUpdate < 1.5 * momentumBasedController.getControlDT();
    }
-
-   public FrameOrientation getDesiredChestOrientation()
-   {
-      return chestOrientationControlModule.getDesiredFrameOrientationCopy();
-   }
 }
