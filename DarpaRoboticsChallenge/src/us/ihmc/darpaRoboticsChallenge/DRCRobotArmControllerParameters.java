@@ -51,7 +51,7 @@ public class DRCRobotArmControllerParameters implements ArmControllerParameters
    public double getArmTaskspaceZeta()
    {
       if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT)  return 1.0;
-      return 1.0; 
+      return 0.6; 
    }
 
    public double getArmTaskspaceKi()
