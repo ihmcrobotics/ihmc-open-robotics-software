@@ -3,12 +3,14 @@ package us.ihmc.darpaRoboticsChallenge.obstacleCourseTests;
 import static org.junit.Assert.assertTrue;
 
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.commonWalkingControlModules.packets.ComHeightPacket;
@@ -27,7 +29,7 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 
 public class DRCObstacleCourseFlatTest
 {
-   private static final boolean KEEP_SCS_UP = false;
+   private static final boolean KEEP_SCS_UP = true; //false;
 
    private static final boolean createMovie = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
@@ -106,8 +108,7 @@ public class DRCObstacleCourseFlatTest
       
       String scriptName = "scripts/ExerciseAndJUnitScripts/SimpleFlatGroundScript.xml"; 
       String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", fileName, selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, false);
-
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSimpleFlatGroundScriptTest", fileName, selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, false);
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingUpToRamp(simulationConstructionSet);
 
@@ -121,6 +122,44 @@ public class DRCObstacleCourseFlatTest
       
       BambooTools.reportTestFinishedMessage();
    }
+   
+   
+   @Test
+   public void testSideStepsWithSlipping() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
+      DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
+      
+      String scriptName = "scripts/ExerciseAndJUnitScripts/LongSideStepsLeft.xml"; 
+      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSideStepsWithSlippingTest", fileName, selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, false);
+
+      SDFRobot robot = drcSimulationTestHelper.getRobot();
+
+      SlipOnNextStepPerturber slipOnEachStepPerturber = new SlipOnNextStepPerturber(robot, RobotSide.LEFT);
+      slipOnEachStepPerturber.setAmountToSlipNextStep(new Vector3d(0.0, -0.08, 0.0));
+      slipOnEachStepPerturber.setSlipAfterStepTimeDelta(0.1);
+      robot.setController(slipOnEachStepPerturber, 10);
+      
+      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
+      setupCameraForSideStepSlipping(simulationConstructionSet);
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      
+      slipOnEachStepPerturber.setSlipNextStep(true);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(12.0);
+
+      drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
+      drcSimulationTestHelper.checkNothingChanged();
+
+      assertTrue(success);
+      
+      BambooTools.reportTestFinishedMessage();
+   }
+   
    
    @Test
    public void testStandingOnUnevenTerrainForACoupleSeconds() throws SimulationExceededMaximumTimeException
@@ -308,6 +347,14 @@ public class DRCObstacleCourseFlatTest
    {
       Point3d cameraFix = new Point3d(1.8375, -0.16, 0.89);
       Point3d cameraPosition = new Point3d(1.10, 8.30, 1.37);
+
+      drcSimulationTestHelper.setupCameraForUnitTest(scs, cameraFix, cameraPosition);
+   }
+   
+   private void setupCameraForSideStepSlipping(SimulationConstructionSet scs)
+   {
+      Point3d cameraFix = new Point3d(2.0, 0.4, 0.75);
+      Point3d cameraPosition = new Point3d(7.5, 0.4, 0.75);
 
       drcSimulationTestHelper.setupCameraForUnitTest(scs, cameraFix, cameraPosition);
    }
