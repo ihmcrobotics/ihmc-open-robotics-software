@@ -139,7 +139,7 @@ public class DRCObstacleCourseFlatTest
       SDFRobot robot = drcSimulationTestHelper.getRobot();
 
       SlipOnNextStepPerturber slipOnEachStepPerturber = new SlipOnNextStepPerturber(robot, RobotSide.LEFT);
-      slipOnEachStepPerturber.setAmountToSlipNextStep(new Vector3d(0.0, -0.08, 0.0));
+      slipOnEachStepPerturber.setAmountToSlipNextStep(new Vector3d(0.08, -0.12, 0.0));
       slipOnEachStepPerturber.setSlipAfterStepTimeDelta(0.1);
       robot.setController(slipOnEachStepPerturber, 10);
       
@@ -147,10 +147,10 @@ public class DRCObstacleCourseFlatTest
       setupCameraForSideStepSlipping(simulationConstructionSet);
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       
       slipOnEachStepPerturber.setSlipNextStep(true);
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(12.0);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(14.0);
 
       drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();

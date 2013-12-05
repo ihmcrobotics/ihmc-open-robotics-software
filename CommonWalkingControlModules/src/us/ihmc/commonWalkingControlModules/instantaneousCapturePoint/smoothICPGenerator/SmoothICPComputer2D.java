@@ -25,6 +25,9 @@ public class SmoothICPComputer2D extends DoubleSupportFootCenterToToeICPComputer
 {
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    
+   private final DoubleYoVariable percentToScaleBackOnVelocity = new DoubleYoVariable("percentToScaleBackOnVelocity", registry);
+   private final DoubleYoVariable deltaFootDistance = new DoubleYoVariable("deltaFootDistance", registry);
+   
    private final YoFramePoint initialFootPlacement = new YoFramePoint("initialFootPlacement", worldFrame, registry);
    private final YoFramePoint currentFootPlacement = new YoFramePoint("currentFootPlacement", worldFrame, registry);
    private final EnumYoVariable<RobotSide> currentTransferToSide = new EnumYoVariable<RobotSide>("currentTransferToSide", registry, RobotSide.class);
@@ -65,6 +68,7 @@ public class SmoothICPComputer2D extends DoubleSupportFootCenterToToeICPComputer
          double deltaX = currentFootPlacement.getX() - initialFootPlacement.getX();
          double deltaY = currentFootPlacement.getY() - initialFootPlacement.getY();
          deltaFootPosition.update(deltaX, deltaY, 0.0);
+         deltaFootDistance.set(deltaFootPosition.length());
          
          //TODO: Do the delta proportionally to how long remaining better...
          
@@ -80,6 +84,19 @@ public class SmoothICPComputer2D extends DoubleSupportFootCenterToToeICPComputer
          deltaVectorTemp.setX(deltaFootPosition.getX());
          deltaVectorTemp.setY(deltaFootPosition.getY());
          icpPostionToPackTemp.add(deltaVectorTemp);
+         
+         // Scale back on the velocity if the foot slipped a lot.
+         // And when coming to the end of the trajectory.
+         // This is very hackish. We should make the trajectories better so we don't have
+         // to do this...
+         percentToScaleBackOnVelocity.set(1.0 - deltaFootDistance.getDoubleValue()/0.04);
+         percentToScaleBackOnVelocity.set(MathTools.clipToMinMax(percentToScaleBackOnVelocity.getDoubleValue(), 0.0, 1.0));
+         
+         // At 85% in, should be at zero velocity.
+         double percentToScaleDownAtEnd = 1.0 - percentIn/0.85;
+         percentToScaleDownAtEnd = MathTools.clipToMinMax(percentToScaleDownAtEnd, 0.0, 1.0);
+         percentToScaleBackOnVelocity.set(percentToScaleBackOnVelocity.getDoubleValue() * percentToScaleDownAtEnd);
+         icpVelocityToPackTemp.scale(percentToScaleBackOnVelocity.getDoubleValue());
       }
       
       icpPostionToPack.checkReferenceFrameMatch(worldFrame);

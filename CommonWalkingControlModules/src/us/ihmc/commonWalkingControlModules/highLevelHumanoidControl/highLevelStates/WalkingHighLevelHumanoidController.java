@@ -169,6 +169,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable footLoadThresholdToHoldPosition = new DoubleYoVariable("footLoadThresholdToHoldPosition", registry);
    private final SideDependentList<BooleanYoVariable> requestSupportFootToHoldPosition = new SideDependentList<BooleanYoVariable>();
 
+   private final DoubleYoVariable maxICPErrorBeforeSingleSupport = new DoubleYoVariable("maxICPErrorBeforeSingleSupport", registry);
+   
    private final DoubleYoVariable minOrbitalEnergyForSingleSupport = new DoubleYoVariable("minOrbitalEnergyForSingleSupport", registry);
    private final DoubleYoVariable amountToBeInsideSingleSupport = new DoubleYoVariable("amountToBeInsideSingleSupport", registry);
    private final DoubleYoVariable amountToBeInsideDoubleSupport = new DoubleYoVariable("amountToBeInsideDoubleSupport", registry);
@@ -389,6 +391,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       readyToGrabNextFootstep.set(true);
 
       dwellInSingleSupportDuration.set(0.2);
+      
+      maxICPErrorBeforeSingleSupport.set(0.015); // Don't transition to single support until ICP is within 1.5 cm of desired.
       
       minOrbitalEnergyForSingleSupport.set(0.007);    // 0.008
       amountToBeInsideSingleSupport.set(0.0);
@@ -1312,7 +1316,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    public class DoneWithTransferCondition implements StateTransitionCondition
    {
-      RobotSide robotSide;
+      private final RobotSide robotSide;
+      private final FramePoint2d capturePoint2d = new FramePoint2d();
+      private final FramePoint2d desiredICP2d = new FramePoint2d();
+
       public DoneWithTransferCondition(RobotSide robotSide)
       {
          this.robotSide = robotSide;
@@ -1338,7 +1345,15 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
          else
          {
-            return icpTrajectoryHasBeenInitialized.getBooleanValue() && instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue());
+            boolean icpTrajectoryIsDone = icpTrajectoryHasBeenInitialized.getBooleanValue() && instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue());
+            if (!icpTrajectoryIsDone) return false;
+
+            capturePoint.getFramePoint2dAndChangeFrameOfPackedPoint(capturePoint2d);
+            desiredICP.getFramePoint2dAndChangeFrame(desiredICP2d);
+            
+            double distanceFromDesiredToActual = capturePoint2d.distance(desiredICP2d);
+            boolean closeEnough = distanceFromDesiredToActual < maxICPErrorBeforeSingleSupport.getDoubleValue();
+            return closeEnough;
          }
       }
    }
