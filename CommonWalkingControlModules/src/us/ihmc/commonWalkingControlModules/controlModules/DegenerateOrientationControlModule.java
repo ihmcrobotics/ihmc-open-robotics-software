@@ -112,17 +112,21 @@ public abstract class DegenerateOrientationControlModule
       return index;
    }
 
-   protected abstract FrameVector getDesiredAngularAccelerationFeedForwardCopy();
+   protected abstract void packDesiredAngularAccelerationFeedForward(FrameVector angularAccelerationToPack);
 
-   protected abstract FrameVector getDesiredAngularVelocityCopy();
+   protected abstract void packDesiredAngularVelocity(FrameVector angularVelocityToPack);
 
-   protected abstract FrameOrientation getDesiredFrameOrientationCopy();
+   protected abstract void packDesiredFrameOrientation(FrameOrientation orientationToPack);
+
+   FrameOrientation desiredOrientation = new FrameOrientation();
+   FrameVector desiredAngularVelocity = new FrameVector();
+   FrameVector feedForwardAngularAcceleration = new FrameVector();
 
    public void compute()
    {
-      FrameOrientation desiredOrientation = getDesiredFrameOrientationCopy();
-      FrameVector desiredAngularVelocity = getDesiredAngularVelocityCopy();
-      FrameVector feedForwardAngularAcceleration = getDesiredAngularAccelerationFeedForwardCopy();
+      packDesiredFrameOrientation(desiredOrientation);
+      packDesiredAngularVelocity(desiredAngularVelocity);
+      packDesiredAngularAccelerationFeedForward(feedForwardAngularAcceleration);
 
       int localJacobianIndex = this.jacobianIndex.getIntegerValue();
       if (localJacobianIndex == -1) return;
