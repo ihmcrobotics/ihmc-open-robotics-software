@@ -25,6 +25,7 @@ public class RobotJointLimitWatcher implements RobotController
    protected YoVariableLimitChecker[] limitCheckers;
    protected OneDoFJoint[] oneDoFJoints;
 
+
    protected YoVariableRegistry doNotRegister = new YoVariableRegistry("DoNotRegister");
 
    public RobotJointLimitWatcher(OneDoFJoint[] oneDoFJoints)
