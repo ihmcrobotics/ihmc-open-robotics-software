@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import us.ihmc.commonWalkingControlModules.packets.FingerStatePacket;
+import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.net.ObjectConsumer;
 
 /**
@@ -26,5 +27,10 @@ public class FingerStateProvider implements ObjectConsumer<FingerStatePacket>
    public boolean isNewFingerStateAvailable()
    {
       return !packetQueue.isEmpty();
+   }
+   
+   public RobotSide getSide()
+   {
+      return packetQueue.peek().getRobotSide();
    }
 }
