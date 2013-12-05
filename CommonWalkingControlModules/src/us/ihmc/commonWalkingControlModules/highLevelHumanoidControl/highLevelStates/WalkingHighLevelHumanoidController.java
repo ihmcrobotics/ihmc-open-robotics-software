@@ -392,7 +392,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       dwellInSingleSupportDuration.set(0.2);
       
-      maxICPErrorBeforeSingleSupport.set(0.015); // Don't transition to single support until ICP is within 1.5 cm of desired.
+      maxICPErrorBeforeSingleSupport.set(0.03); // Don't transition to single support until ICP is within 1.5 cm of desired.
       
       minOrbitalEnergyForSingleSupport.set(0.007);    // 0.008
       amountToBeInsideSingleSupport.set(0.0);
