@@ -23,6 +23,7 @@ import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModelVisualizer;
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.atlas.api.AtlasJointId;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
@@ -117,7 +118,8 @@ public class AtlasKinematicCalibrator
          if(joints[i].getName().matches(".*arm.*"))
          {
             armJoints.add(joints[i]);
-            System.out.println("arm "+ i + " "+joints[i].getName());
+            if(DEBUG)
+               System.out.println("arm "+ i + " "+joints[i].getName());
          }
          
       }
@@ -254,7 +256,9 @@ public class AtlasKinematicCalibrator
       Map<String,Double> qoffset= residualFunc.prmArrayToJointMap(prm);
       for(String jointName: qoffset.keySet())
       {
-         System.out.println(jointName + " "+ qoffset.get(jointName));
+         //      jointAngleOffsetPreTransmission.put(AtlasJointId.JOINT_L_ARM_ELX, 0.0);
+         System.out.println("jointAngleOffsetPreTransmission.put(AtlasJointId.JOINT_" + jointName.toUpperCase()+", "+qoffset.get(jointName)+");");
+         //System.out.println(jointName + " "+ qoffset.get(jointName));
       }
       System.out.println("wristSpacing "+prm[prm.length-1]);
       
