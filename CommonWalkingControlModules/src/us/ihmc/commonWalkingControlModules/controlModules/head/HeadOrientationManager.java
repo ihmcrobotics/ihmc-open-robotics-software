@@ -47,7 +47,7 @@ public class HeadOrientationManager
       }
    }
    
-   public int createJacobian(FullRobotModel fullRobotModel, RigidBody base, String[] headOrientationControlJointNames)
+   public int createJacobian(FullRobotModel fullRobotModel, String[] headOrientationControlJointNames)
    {
       InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
       InverseDynamicsJoint[] headOrientationControlJoints = ScrewTools.findJointsWithNames(allJoints, headOrientationControlJointNames);
