@@ -95,7 +95,7 @@ public class DRCObstacleCourseTrialsTerrainTest
       setupCameraForWalkingOverHurdles(simulationConstructionSet);
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(20.0);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(15.0);
       
       drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
@@ -117,7 +117,7 @@ public class DRCObstacleCourseTrialsTerrainTest
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCCinderblockFieldPartOneTest", fileName, selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, false);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
-      setupCameraForWalkingOverCinderblockField(simulationConstructionSet);
+      setupCameraForWalkingOverFlatCinderblockField(simulationConstructionSet);
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(40.0);
@@ -142,7 +142,7 @@ public class DRCObstacleCourseTrialsTerrainTest
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCCinderblockfieldPartTwoTest", fileName, selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, false);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
-      setupCameraForWalkingOverCinderblockField(simulationConstructionSet);
+      setupCameraForWalkingOverSlantedCinderblockField(simulationConstructionSet);
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(40.0);
@@ -167,7 +167,7 @@ public class DRCObstacleCourseTrialsTerrainTest
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCFlatCinderblockTest", fileName, selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, false);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
-      setupCameraForWalkingOverCinderblockField(simulationConstructionSet);
+      setupCameraForWalkingOverFlatCinderblockField(simulationConstructionSet);
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(25.0);
@@ -192,7 +192,7 @@ public class DRCObstacleCourseTrialsTerrainTest
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSlantedCinderblockTest", fileName, selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, false);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
-      setupCameraForWalkingOverCinderblockField(simulationConstructionSet);
+      setupCameraForWalkingOverSlantedCinderblockField(simulationConstructionSet);
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(25.0);
@@ -220,7 +220,7 @@ public class DRCObstacleCourseTrialsTerrainTest
       setupCameraForWalkingOverCinderblockField(simulationConstructionSet);
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(55.0);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(50.0);
       
       drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
@@ -311,26 +311,40 @@ public class DRCObstacleCourseTrialsTerrainTest
 
    private void setupCameraForWalkingOntoSlopes(SimulationConstructionSet scs)
    {
-      Point3d cameraFix = new Point3d(0.5, 4.2, 1.0);
-      Point3d cameraPosition = new Point3d(-0.8, 4.8, 1.5);
+      Point3d cameraFix = new Point3d(3.6214, 2.5418, 0.5);
+      Point3d cameraPosition = new Point3d(6.6816, -0.5441, 1.5);
 
       drcSimulationTestHelper.setupCameraForUnitTest(scs, cameraFix, cameraPosition);
    }
    
-   //TODO: Create proper camera view 
    private void setupCameraForWalkingOverHurdles(SimulationConstructionSet scs)
    {
-      Point3d cameraFix = new Point3d(0.1, 3.2, 0.5);
-      Point3d cameraPosition = new Point3d(-2.8, 8.8, 1.5);
+      Point3d cameraFix = new Point3d(4.9246, 4.0338, 0.5);
+      Point3d cameraPosition = new Point3d(8.1885, 1.1641, 1.5);
+
+      drcSimulationTestHelper.setupCameraForUnitTest(scs, cameraFix, cameraPosition);
+   }
+    
+   private void setupCameraForWalkingOverCinderblockField(SimulationConstructionSet scs)
+   {
+      Point3d cameraFix = new Point3d(7.8655, 6.8947, 0.5);
+      Point3d cameraPosition = new Point3d(10.2989, 18.7661, 3.2746);
 
       drcSimulationTestHelper.setupCameraForUnitTest(scs, cameraFix, cameraPosition);
    }
    
-   //TODO: Create proper camera view 
-   private void setupCameraForWalkingOverCinderblockField(SimulationConstructionSet scs)
+   private void setupCameraForWalkingOverSlantedCinderblockField(SimulationConstructionSet scs)
    {
-      Point3d cameraFix = new Point3d(0.1, 3.2, 0.5);
-      Point3d cameraPosition = new Point3d(-2.8, 8.8, 1.5);
+      Point3d cameraFix = new Point3d(9.7689, 9.0724, 0.5);
+      Point3d cameraPosition = new Point3d(8.0254, 16.6036, 2.5378);
+
+      drcSimulationTestHelper.setupCameraForUnitTest(scs, cameraFix, cameraPosition);
+   }
+   
+   private void setupCameraForWalkingOverFlatCinderblockField(SimulationConstructionSet scs)
+   {
+      Point3d cameraFix = new Point3d(7.447, 7.0966, 0.5);
+      Point3d cameraPosition = new Point3d(6.3809, 14.6839, 2.7821);
 
       drcSimulationTestHelper.setupCameraForUnitTest(scs, cameraFix, cameraPosition);
    }
