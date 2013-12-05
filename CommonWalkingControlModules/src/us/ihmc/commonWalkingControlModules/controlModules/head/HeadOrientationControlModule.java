@@ -19,6 +19,8 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 public class HeadOrientationControlModule extends DegenerateOrientationControlModule
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   
    private final YoFrameQuaternion orientationToTrack;
    private final YoFramePoint pointToTrack;
    private final ReferenceFrame chestFrame;
@@ -34,7 +36,7 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
    private final DoubleYoVariable pitchUpperLimit = new DoubleYoVariable("pitchUpperLimit", registry);
    private final DoubleYoVariable rollLimit = new DoubleYoVariable("rollLimit", registry);
    
-   private final RigidBody head; 
+   private final RigidBody head;
    
    public HeadOrientationControlModule(double controlDT, RigidBody pelvis, RigidBody elevator, RigidBody head, TwistCalculator twistCalculator,
          ReferenceFrame headOrientationExpressedInFrame, ReferenceFrame chestFrame, HeadOrientationControllerParameters headOrientationControllerParameters,
@@ -44,13 +46,13 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
 
       this.head = head;
       
-      pointTrackingFrame = new OriginAndPointFrame("headPointTrackingFrame", ReferenceFrame.getWorldFrame());
+      pointTrackingFrame = new OriginAndPointFrame("headPointTrackingFrame", worldFrame);
 
       this.chestFrame = chestFrame;
       this.headFrame = head.getBodyFixedFrame();
       this.headOrientationExpressedInFrame = headOrientationExpressedInFrame;
       orientationToTrack = new YoFrameQuaternion("headOrientationToTrack", headOrientationExpressedInFrame, registry);
-      pointToTrack = new YoFramePoint("headPointToTrack", ReferenceFrame.getWorldFrame(), registry);
+      pointToTrack = new YoFramePoint("headPointToTrack", worldFrame, registry);
       
       if (dynamicGraphicObjectsListRegistry != null)
       {
@@ -103,7 +105,7 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
          default :
             throw new RuntimeException("Case " + headTrackingMode.getEnumValue() + " not handled.");
       }
-      orientationToPack.changeFrame(ReferenceFrame.getWorldFrame());
+      orientationToPack.changeFrame(worldFrame);
 
       enforceLimits(orientationToPack);
    }
@@ -150,13 +152,13 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
    @Override
    protected void packDesiredAngularVelocity(FrameVector angularVelocityToPack)
    {
-      angularVelocityToPack.setToZero(ReferenceFrame.getWorldFrame());
+      angularVelocityToPack.setToZero(worldFrame);
    }
 
    @Override
    protected void packDesiredAngularAccelerationFeedForward(FrameVector angularAccelerationToPack)
    {
-      angularAccelerationToPack.setToZero(ReferenceFrame.getWorldFrame());
+      angularAccelerationToPack.setToZero(worldFrame);
    }
 
    public void setOrientationToTrack(FrameOrientation orientation)

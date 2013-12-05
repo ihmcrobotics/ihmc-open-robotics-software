@@ -8,7 +8,6 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
-import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -30,7 +29,6 @@ public abstract class DegenerateOrientationControlModule
    private final IntegerYoVariable jacobianIndex;
 
    private final ArrayList<RigidBodyOrientationControlModule> rigidBodyOrientationControlModules = new ArrayList<RigidBodyOrientationControlModule>();
-   private final ArrayList<OrientationInterpolationTrajectoryGenerator> orientationTrajectoryGenerators = new ArrayList<OrientationInterpolationTrajectoryGenerator>();
    private final ArrayList<RigidBody> bases = new ArrayList<RigidBody>();
    private final IntegerYoVariable baseIndex;
    
@@ -107,7 +105,7 @@ public abstract class DegenerateOrientationControlModule
       
       rigidBodyOrientationControlModules.add(rigidBodyOrientationControlModule);
       
-      int index = bases.size()-1;
+      int index = bases.size() - 1;
       if (index != rigidBodyOrientationControlModules.size() - 1) throw new RuntimeException("RepInvariant Violation");
       
       baseIndex.set(index);
