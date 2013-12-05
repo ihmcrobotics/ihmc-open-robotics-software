@@ -92,8 +92,8 @@ public class SmoothICPComputer2D extends DoubleSupportFootCenterToToeICPComputer
          percentToScaleBackOnVelocity.set(1.0 - deltaFootDistance.getDoubleValue()/0.04);
          percentToScaleBackOnVelocity.set(MathTools.clipToMinMax(percentToScaleBackOnVelocity.getDoubleValue(), 0.0, 1.0));
          
-         // At 85% in, should be at zero velocity.
-         double percentToScaleDownAtEnd = 1.0 - percentIn/0.85;
+         // At 95% in, should be at zero velocity.
+         double percentToScaleDownAtEnd = 1.0 - (percentIn)/0.95;
          percentToScaleDownAtEnd = MathTools.clipToMinMax(percentToScaleDownAtEnd, 0.0, 1.0);
          percentToScaleBackOnVelocity.set(percentToScaleBackOnVelocity.getDoubleValue() * percentToScaleDownAtEnd);
          icpVelocityToPackTemp.scale(percentToScaleBackOnVelocity.getDoubleValue());
