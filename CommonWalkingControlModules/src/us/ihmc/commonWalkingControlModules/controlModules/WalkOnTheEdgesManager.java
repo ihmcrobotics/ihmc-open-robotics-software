@@ -64,6 +64,7 @@ public class WalkOnTheEdgesManager
    private FrameConvexPolygon2d onToesTriangle;
 
    private final BooleanYoVariable isDesiredICPOKForToeOff = new BooleanYoVariable("isDesiredICPOKForToeOff", registry);
+   private final BooleanYoVariable isCurrentICPOKForToeOff = new BooleanYoVariable("isCurrentICPOKForToeOff", registry);
    private final BooleanYoVariable isDesiredECMPOKForToeOff = new BooleanYoVariable("isDesiredECMPOKForToeOff", registry);
 
    private final DoubleYoVariable minStepLengthForToeOff = new DoubleYoVariable("minStepLengthForToeOff", registry);
@@ -127,7 +128,7 @@ public class WalkOnTheEdgesManager
       parentRegistry.addChild(registry);
    }
 
-   public void updateToeOffStatusBasedOnECMP(RobotSide trailingLeg, FramePoint2d desiredECMP, FramePoint2d desiredICP)
+   public void updateToeOffStatusBasedOnECMP(RobotSide trailingLeg, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP)
    {
       if (!doToeOffIfPossible.getBooleanValue() || stayOnToes.getBooleanValue() || TOEOFF_TRIGGER_METHOD != SwitchToToeOffMethods.USE_ECMP)
       {
@@ -142,10 +143,17 @@ public class WalkOnTheEdgesManager
 //      isDesiredECMPOKForToeOff.set(Math.abs(onToesSupportPolygon.distance(desiredECMP)) < 0.06);
       isDesiredECMPOKForToeOff.set(onToesSupportPolygon.isPointInside(desiredECMP));
       
+      if (!isDesiredECMPOKForToeOff.getBooleanValue())
+      {
+         doToeOff.set(false);
+         return;
+      }
+
       FrameConvexPolygon2d leadingFootSupportPolygon = getFootSupportPolygonCopy(leadingFoot);
       isDesiredICPOKForToeOff.set(leadingFootSupportPolygon.isPointInside(desiredICP));
+      isCurrentICPOKForToeOff.set(leadingFootSupportPolygon.isPointInside(currentICP));
 
-      if (!isDesiredECMPOKForToeOff.getBooleanValue() || !isDesiredICPOKForToeOff.getBooleanValue())
+      if (!isDesiredICPOKForToeOff.getBooleanValue() || !isCurrentICPOKForToeOff.getBooleanValue())
       {
          doToeOff.set(false);
          return;

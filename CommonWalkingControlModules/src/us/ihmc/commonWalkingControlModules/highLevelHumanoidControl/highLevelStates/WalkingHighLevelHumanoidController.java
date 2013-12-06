@@ -850,7 +850,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             RobotSide trailingLeg = transferToSide.getOppositeSide();
             icpBasedMomentumRateOfChangeControlModule.getDesiredCMP(desiredCMP);
-            walkOnTheEdgesManager.updateToeOffStatusBasedOnECMP(trailingLeg, desiredCMP, desiredICP.getFramePoint2dCopy());
+            walkOnTheEdgesManager.updateToeOffStatusBasedOnECMP(trailingLeg, desiredCMP, desiredICP.getFramePoint2dCopy(), capturePoint2d);
 
             if (walkOnTheEdgesManager.doToeOff())
             {
