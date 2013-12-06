@@ -40,8 +40,7 @@ public class VariousWalkingManagers
 
    public static VariousWalkingManagers create(MomentumBasedController momentumBasedController, DoubleYoVariable yoTime,
            VariousWalkingProviders variousWalkingProviders, WalkingControllerParameters walkingControllerParameters, ArmControllerParameters armControlParameters,
-           YoVariableRegistry registry,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
@@ -54,7 +53,7 @@ public class VariousWalkingManagers
                                                                      desiredHeadOrientationProvider, walkingControllerParameters);
 
       HeadOrientationManager headOrientationManager = new HeadOrientationManager(momentumBasedController, headOrientationControlModule,
-                                                         desiredHeadOrientationProvider);
+                                                         desiredHeadOrientationProvider, walkingControllerParameters.getTrajectoryTimeHeadOrientation(), registry);
 
 
       ChestOrientationControlModule chestOrientationControlModule = setupChestOrientationControlModule(controlDT, fullRobotModel, twistCalculator, registry);
