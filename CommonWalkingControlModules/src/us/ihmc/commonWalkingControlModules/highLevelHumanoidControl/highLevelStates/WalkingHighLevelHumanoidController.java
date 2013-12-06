@@ -278,6 +278,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final WalkOnTheEdgesManager walkOnTheEdgesManager;
    private final WalkOnTheEdgesProviders walkOnTheEdgesProviders;
 
+   private final BooleanYoVariable doPrepareManipulationForLocomotion = new BooleanYoVariable("doPrepareManipulationForLocomotion", registry);
+   
    public WalkingHighLevelHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          SideDependentList<FootSwitchInterface> footSwitches, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
          CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators,
@@ -307,6 +309,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       this.variousWalkingManagers = variousWalkingManagers;
       
       setupManagers(variousWalkingManagers);
+      
+      doPrepareManipulationForLocomotion.set(walkingControllerParameters.doPrepareManipulationForLocomotion());
       
       FootstepProvider footstepProvider = variousWalkingProviders.getFootstepProvider();
       HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = variousWalkingProviders.getMapFromFootstepsToTrajectoryParameters();
@@ -1064,7 +1068,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             System.out.println("WalkingHighLevelHumanoidController: leavingDoubleSupportState");
          
          desiredICPVelocity.set(0.0, 0.0);
-         manipulationControlModule.prepareForLocomotion();
+         
+         if (doPrepareManipulationForLocomotion.getBooleanValue())
+            manipulationControlModule.prepareForLocomotion();
       }
    }
 
