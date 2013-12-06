@@ -146,6 +146,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable desiredCoMHeightVelocityAfterSmoothing = new DoubleYoVariable("desiredCoMHeightVelocityAfterSmoothing", registry);
    private final DoubleYoVariable desiredCoMHeightAccelerationAfterSmoothing = new DoubleYoVariable("desiredCoMHeightAccelerationAfterSmoothing", registry);
 
+
    private final PDController centerOfMassHeightController;
    private final SideDependentList<WalkingState> singleSupportStateEnums = new SideDependentList<WalkingState>(WalkingState.LEFT_SUPPORT,
                                                                               WalkingState.RIGHT_SUPPORT);
@@ -749,61 +750,36 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          initializeICPPlannerIfNecessary();
 
 
-         if (instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue()) && (transferToSide == null))
+
+         desiredICPLocal.setToZero(desiredICP.getReferenceFrame());
+         desiredICPVelocityLocal.setToZero(desiredICPVelocity.getReferenceFrame());
+         ecmpLocal.setToZero(worldFrame);
+         capturePoint.getFramePoint2dAndChangeFrameOfPackedPoint(capturePoint2d);
+         
+         instantaneousCapturePointPlanner.getICPPositionAndVelocity(
+               desiredICPLocal, desiredICPVelocityLocal, ecmpLocal, 
+               capturePoint2d, yoTime.getDoubleValue());
+         
+         
+         if (transferToSide != null)
          {
-            desiredICPVelocity.set(0.0, 0.0);
-            
-            // Hack for now to put the ICP in the middle of the feet. 
-            // Need to fix up the ICP trajectory stuff so that it smoothly gets there.
-            FramePoint2d midFeetPoint = new FramePoint2d(referenceFrames.getMidFeetZUpFrame());
-            midFeetPoint.setX(midFeetPoint.getX() + icpStandOffsetX.getDoubleValue());
-            midFeetPoint.setY(midFeetPoint.getY() + icpStandOffsetY.getDoubleValue());
-            
-            midFeetPoint.changeFrame(worldFrame);
-            FramePoint2d morphedTowardMidFeet = FramePoint2d.morph(desiredICP.getFramePoint2dCopy(), midFeetPoint, 0.03);
-            desiredICP.set(morphedTowardMidFeet);
-            
-            
-            
-            if (DESIREDICP_FROM_POLYGON_COORDINATE)
-            {
-               FramePoint2d tpoint = new FramePoint2d(doubleSupportDesiredICP.getCurrentPoint());
-               tpoint.changeFrame(worldFrame);
-               desiredICP.set(tpoint);
-            }
+            moveICPToInsideOfFootAtEndOfSwing(transferToSide.getOppositeSide(), 0.0, desiredICPLocal);
+            limitICPToMiddleOfFootOrInside(transferToSide, desiredICPLocal);
          }
          else
          {
-            desiredICPLocal.setToZero(desiredICP.getReferenceFrame());
-            desiredICPVelocityLocal.setToZero(desiredICPVelocity.getReferenceFrame());
-            ecmpLocal.setToZero(worldFrame);
-            capturePoint.getFramePoint2dAndChangeFrameOfPackedPoint(capturePoint2d);
-            
-            instantaneousCapturePointPlanner.getICPPositionAndVelocity(
-                  desiredICPLocal, desiredICPVelocityLocal, ecmpLocal, 
-                  capturePoint2d, yoTime.getDoubleValue());
-            
-            
-            if (transferToSide != null)
-            {
-               moveICPToInsideOfFootAtEndOfSwing(transferToSide.getOppositeSide(), 0.0, desiredICPLocal);
-               limitICPToMiddleOfFootOrInside(transferToSide, desiredICPLocal);
-            }
-            else
-            {
-               limitICPToMiddleOfFootOrInside(RobotSide.LEFT, desiredICPLocal);
-               limitICPToMiddleOfFootOrInside(RobotSide.RIGHT, desiredICPLocal);
-            }
-            
-            desiredICP.set(desiredICPLocal);
-            desiredICPVelocity.set(desiredICPVelocityLocal);
+            limitICPToMiddleOfFootOrInside(RobotSide.LEFT, desiredICPLocal);
+            limitICPToMiddleOfFootOrInside(RobotSide.RIGHT, desiredICPLocal);
+         }
+         
+         desiredICP.set(desiredICPLocal);
+         desiredICPVelocity.set(desiredICPVelocityLocal);
 
-            desiredECMP.set(ecmpLocal);
+         desiredECMP.set(ecmpLocal);
 
-            if (VISUALIZE)
-            {
-               ecmpViz.set(desiredECMP.getX(), desiredECMP.getY(), 0.0);
-            }
+         if (VISUALIZE)
+         {
+            ecmpViz.set(desiredECMP.getX(), desiredECMP.getY(), 0.0);
          }
          
          initializeECMPbasedToeOffIfNotInitializedYet();
@@ -1070,7 +1046,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          desiredICPVelocity.set(0.0, 0.0);
          
          if (doPrepareManipulationForLocomotion.getBooleanValue())
-            manipulationControlModule.prepareForLocomotion();
+         manipulationControlModule.prepareForLocomotion();
       }
    }
 
@@ -1773,7 +1749,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       comXYTimeDerivatives.setCoMXYAcceleration(comXYAcceleration);
 
       coMHeightTimeDerivativesCalculator.computeCoMHeightTimeDerivatives(comHeightDataBeforeSmoothing, comXYTimeDerivatives, coMHeightPartialDerivatives);
-
+      
       desiredCoMHeightFromTrajectory.set(desiredCenterOfMassHeightPoint.getZ());
       desiredCoMHeightVelocityFromTrajectory.set(comHeightDataBeforeSmoothing.getComHeightVelocity());
       desiredCoMHeightAccelerationFromTrajectory.set(comHeightDataBeforeSmoothing.getComHeightAcceleration());
@@ -1791,14 +1767,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
       
       correctCoMHeight(desiredICPVelocity, zCurrent, comHeightDataBeforeSmoothing);
-
+      
       comHeightDataBeforeSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
       desiredCoMHeightBeforeSmoothing.set(desiredCenterOfMassHeightPoint.getZ());
       desiredCoMHeightVelocityBeforeSmoothing.set(comHeightDataBeforeSmoothing.getComHeightVelocity());
       desiredCoMHeightAccelerationBeforeSmoothing.set(comHeightDataBeforeSmoothing.getComHeightAcceleration());
-      
-      coMHeightTimeDerivativesSmoother.smooth(comHeightDataAfterSmoothing, comHeightDataBeforeSmoothing);
 
+      coMHeightTimeDerivativesSmoother.smooth(comHeightDataAfterSmoothing, comHeightDataBeforeSmoothing);
+      
       correctCoMHeight(desiredICPVelocity, zCurrent, comHeightDataAfterSmoothing);
       
       comHeightDataAfterSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
