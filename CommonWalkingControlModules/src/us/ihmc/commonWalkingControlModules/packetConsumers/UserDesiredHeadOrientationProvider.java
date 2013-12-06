@@ -32,7 +32,7 @@ public class UserDesiredHeadOrientationProvider extends DesiredHeadOrientationPr
 
       userDesiredHeadPitch.addVariableChangedListener(new VariableChangedListener()
       {
-         @Override
+         
          public void variableChanged(YoVariable v)
          {
             desiredJointForExtendedNeckPitchRangeAngle.set(userDesiredHeadPitch.getDoubleValue());
@@ -46,7 +46,6 @@ public class UserDesiredHeadOrientationProvider extends DesiredHeadOrientationPr
    {
       VariableChangedListener variableChangedListener = new VariableChangedListener()
       {
-         @Override
          public void variableChanged(YoVariable v)
          {
             isNewHeadOrientationInformationAvailable.set(true);
