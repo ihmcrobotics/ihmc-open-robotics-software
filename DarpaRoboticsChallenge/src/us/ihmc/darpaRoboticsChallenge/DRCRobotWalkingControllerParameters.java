@@ -498,6 +498,9 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
       if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return Double.POSITIVE_INFINITY;
       return 1500.0;
    }
-   
 
+   public boolean doPrepareManipulationForLocomotion()
+   {
+      return DRCConfigParameters.HOLD_HANDS_IN_CHEST_FRAME_WHEN_WALKING;
+   }
 }
