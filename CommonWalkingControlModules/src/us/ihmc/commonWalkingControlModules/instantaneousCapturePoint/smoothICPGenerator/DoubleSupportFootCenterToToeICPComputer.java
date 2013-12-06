@@ -25,9 +25,9 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 public class DoubleSupportFootCenterToToeICPComputer
 {
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
- 
+
    private static final boolean VISUALIZE = false;
-   
+
    private final double isDoneThreshold = -1e-4;
 
    private final int maxNumberOfConsideredFootsteps;
@@ -63,7 +63,7 @@ public class DoubleSupportFootCenterToToeICPComputer
    private final Vector3d desiredICPVelocity = new Vector3d();
    private final Vector3d desiredICPAcceleration = new Vector3d();
    private final Point3d desiredECMP = new Point3d();
-   
+
    private final Point3d smoothDesiredICPPosition = new Point3d();
    private final Vector3d smoothDesiredICPVelocity = new Vector3d();
    private final Vector3d smoothDesiredICPAcceleration = new Vector3d();
@@ -85,7 +85,7 @@ public class DoubleSupportFootCenterToToeICPComputer
 
    private final DoubleYoVariable omega0 = new DoubleYoVariable("icpPlannerOmega0", registry);
    private final double dt;
-   
+
    private final double maxFrontalToeOffset = 0.1;
    private final BooleanYoVariable doHeelToToeTransfer = new BooleanYoVariable("doHeelToToeTransfer", registry);
 
@@ -98,35 +98,33 @@ public class DoubleSupportFootCenterToToeICPComputer
    private Vector3d singleSupportStartICPVelocity = new Vector3d();
    private Point3d singleSupportEndICP = new Point3d();
 
-
    private Vector3d singleSupportEndICPVelocity = new Vector3d();
 
    private final Point3d doubleSupportEndICP = new Point3d();
    private final Vector3d doubleSupportEndICPVelocity = new Vector3d();
 
    private final DoubleSupportPolynomialTrajectory doubleSupportPolynomialTrajectory;
-   
-   public DoubleSupportFootCenterToToeICPComputer(double dt, double doubleSupportFirstStepFraction, int maxNumberOfConsideredFootsteps, YoVariableRegistry parentRegistry,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+
+   public DoubleSupportFootCenterToToeICPComputer(double dt, double doubleSupportFirstStepFraction, int maxNumberOfConsideredFootsteps,
+         YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.dt = dt;
-     
+
       int numberOfCoefficientsForDoubleSupport = 5; // 5 will set acceleration at end to 0.0
-      doubleSupportPolynomialTrajectory = new DoubleSupportPolynomialTrajectory("icpDouble", numberOfCoefficientsForDoubleSupport, ReferenceFrame.getWorldFrame(), registry);
-      
+      doubleSupportPolynomialTrajectory = new DoubleSupportPolynomialTrajectory("icpDouble", numberOfCoefficientsForDoubleSupport,
+            ReferenceFrame.getWorldFrame(), registry);
+
       //Don't set setDoHeelToToeTransfer to true unless you make the VRC Task 2 work with it on first, especially the mud!      
       this.doubleSupportInitialTransferDuration.set(1.0);
 
-
       this.setDoHeelToToeTransfer(false);
-//      doHeelToToeTransfer.set(true);
-      
+      //      doHeelToToeTransfer.set(true);
+
       this.singleSupportToePercentage = 0.5;
 
-  
       comPositionVector.set(0.0, 0.0, 0.0);
       comVelocityVector.set(0.0, 0.0, 0.0);
-      
+
       hasBeenInitialized.set(false);
 
       parentRegistry.addChild(registry);
@@ -141,7 +139,7 @@ public class DoubleSupportFootCenterToToeICPComputer
       DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("ICPComputer");
       ArtifactList artifactList = new ArtifactList("ICPComputer");
       double icpCornerPointSize = 0.004;
-      
+
       for (int i = 0; i < maxNumberOfConsideredFootsteps - 1; i++)
       {
          String icpCornerPointsName = "icpCornerPoints" + i;
@@ -150,20 +148,22 @@ public class DoubleSupportFootCenterToToeICPComputer
 
          if (VISUALIZE)
          {
-            DynamicGraphicPosition icpCornerPointViz = yoFramePoint.createDynamicGraphicPosition(icpCornerPointsName, icpCornerPointSize, YoAppearance.Black(), GraphicType.SOLID_BALL);
+            DynamicGraphicPosition icpCornerPointViz = yoFramePoint.createDynamicGraphicPosition(icpCornerPointsName, icpCornerPointSize, YoAppearance.Black(),
+                  GraphicType.SOLID_BALL);
             dynamicGraphicObjectsList.add(icpCornerPointViz);
             artifactList.add(icpCornerPointViz.createArtifact());
          }
-         
+
          if (doHeelToToeTransfer.getBooleanValue())
          {
             String toeICPCornerPointsName = "toeICPCornerPointsName" + i;
             YoFramePoint yoToeFramePoint = new YoFramePoint(toeICPCornerPointsName, ReferenceFrame.getWorldFrame(), registry);
             toeICPCornerFramePoints.add(yoToeFramePoint);
-            
+
             if (VISUALIZE)
             {
-               DynamicGraphicPosition toeICPCornerPointViz = yoToeFramePoint.createDynamicGraphicPosition(toeICPCornerPointsName, icpCornerPointSize, YoAppearance.Black(), GraphicType.SOLID_BALL);
+               DynamicGraphicPosition toeICPCornerPointViz = yoToeFramePoint.createDynamicGraphicPosition(toeICPCornerPointsName, icpCornerPointSize,
+                     YoAppearance.Black(), GraphicType.SOLID_BALL);
                dynamicGraphicObjectsList.add(toeICPCornerPointViz);
                artifactList.add(toeICPCornerPointViz.createArtifact());
             }
@@ -178,7 +178,8 @@ public class DoubleSupportFootCenterToToeICPComputer
 
          if (VISUALIZE)
          {
-            DynamicGraphicPosition constantFootCenterCentersOfPressureViz = yoFramePoint.createDynamicGraphicPosition(constantCoPName, icpCornerPointSize, YoAppearance.Black(), GraphicType.SOLID_BALL);
+            DynamicGraphicPosition constantFootCenterCentersOfPressureViz = yoFramePoint.createDynamicGraphicPosition(constantCoPName, icpCornerPointSize,
+                  YoAppearance.Black(), GraphicType.SOLID_BALL);
             dynamicGraphicObjectsList.add(constantFootCenterCentersOfPressureViz);
             artifactList.add(constantFootCenterCentersOfPressureViz.createArtifact());
          }
@@ -188,16 +189,17 @@ public class DoubleSupportFootCenterToToeICPComputer
             String constantToeCoPName = "constantToeCoP" + i;
             YoFramePoint toeFramePoint = new YoFramePoint(constantToeCoPName, ReferenceFrame.getWorldFrame(), registry);
             constantToeCentersOfPressure.add(toeFramePoint);
-            
+
             if (VISUALIZE)
             {
-               DynamicGraphicPosition constantToeCentersOfPressureViz = toeFramePoint.createDynamicGraphicPosition(constantToeCoPName, icpCornerPointSize, YoAppearance.Black(), GraphicType.SOLID_BALL);
+               DynamicGraphicPosition constantToeCentersOfPressureViz = toeFramePoint.createDynamicGraphicPosition(constantToeCoPName, icpCornerPointSize,
+                     YoAppearance.Black(), GraphicType.SOLID_BALL);
                dynamicGraphicObjectsList.add(constantToeCentersOfPressureViz);
                artifactList.add(constantToeCentersOfPressureViz.createArtifact());
             }
          }
       }
-      
+
       if (VISUALIZE)
       {
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
@@ -206,13 +208,13 @@ public class DoubleSupportFootCenterToToeICPComputer
 
    }
 
-   public void initializeSingleSupport(ArrayList<FramePoint> footLocationList, ArrayList<ReferenceFrame> soleFrameList, double singleSupportDuration, double doubleSupportDuration, double omega0,
-         double initialTime)
+   public void initializeSingleSupport(ArrayList<FramePoint> footLocationList, ArrayList<ReferenceFrame> soleFrameList, double singleSupportDuration,
+         double doubleSupportDuration, double omega0, double initialTime)
    {
       this.omega0.set(omega0);
 
       isInitialTransfer.set(false);
-      comeToStop.set(false);
+      comeToStop.set(footLocationList.size() <= 2);
       atAStop.set(false);
 
       this.doubleSupportDuration.set(doubleSupportDuration);
@@ -232,19 +234,18 @@ public class DoubleSupportFootCenterToToeICPComputer
          double secondDoubleSupportFractionDuration = doubleSupportDuration * (1 - doubleSupportFirstStepFraction);
 
          NewDoubleSupportICPComputer.computeConstantCentersOfPressureAndCornerPointsForFootCenterAndToe(constantFootCenterCentersOfPressure,
-               constantToeCentersOfPressure, footCenterICPCornerFramePoints, toeICPCornerFramePoints, maxFrontalToeOffset, footLocationList, soleFrameList, 
+               constantToeCentersOfPressure, footCenterICPCornerFramePoints, toeICPCornerFramePoints, maxFrontalToeOffset, footLocationList, soleFrameList,
                maxNumberOfConsideredFootsteps, isInitialTransfer.getBooleanValue(), this.omega0.getDoubleValue(), toeToFootCenterShiftDuration,
                footCenterToToeShiftDuration);
 
          upcomingCornerPoint = footCenterICPCornerFramePoints.get(1).getPoint3dCopy();
-         
 
          JojosICPutilities.extrapolateDCMposAndVel(singleSupportStartICP, singleSupportStartICPVelocity, constantFootCenterCentersOfPressure.get(0)
                .getPoint3dCopy(), secondDoubleSupportFractionDuration, omega0, footCenterICPCornerFramePoints.get(0).getPoint3dCopy());
 
          JojosICPutilities.extrapolateDCMposAndVel(singleSupportEndICP, singleSupportEndICPVelocity, constantToeCentersOfPressure.get(0).getPoint3dCopy(),
                toeShiftToDoubleSupportDuration, omega0, toeICPCornerFramePoints.get(0).getPoint3dCopy());
-               
+
          doubleSupportPolynomialTrajectory.initialize(singleSupportDuration, singleSupportStartICP, singleSupportStartICPVelocity, singleSupportEndICP,
                singleSupportEndICPVelocity);
       }
@@ -270,13 +271,14 @@ public class DoubleSupportFootCenterToToeICPComputer
       }
    }
 
-   public void initializeDoubleSupportInitialTransfer(ArrayList<FramePoint> footLocationList,  ArrayList<ReferenceFrame> soleFrameList, Point3d initialICPPosition, double singleSupportDuration,
-         double doubleSupportDuration, double doubleSupportInitialTransferDuration, double omega0, double initialTime)
+   public void initializeDoubleSupportInitialTransfer(ArrayList<FramePoint> footLocationList, ArrayList<ReferenceFrame> soleFrameList,
+         Point3d initialICPPosition, double singleSupportDuration, double doubleSupportDuration, double doubleSupportInitialTransferDuration, double omega0,
+         double initialTime)
    {
       this.omega0.set(omega0);
 
       isInitialTransfer.set(true);
-      comeToStop.set(footLocationList.size() < 3);
+      comeToStop.set(footLocationList.size() <= 2);
 
       this.doubleSupportDuration.set(doubleSupportDuration);
       this.singleSupportDuration.set(singleSupportDuration);
@@ -292,7 +294,7 @@ public class DoubleSupportFootCenterToToeICPComputer
       if (doHeelToToeTransfer.getBooleanValue())
       {
          NewDoubleSupportICPComputer.computeConstantCentersOfPressureAndCornerPointsForFootCenterAndToe(constantFootCenterCentersOfPressure,
-               constantToeCentersOfPressure, footCenterICPCornerFramePoints, toeICPCornerFramePoints, maxFrontalToeOffset, footLocationList, soleFrameList, 
+               constantToeCentersOfPressure, footCenterICPCornerFramePoints, toeICPCornerFramePoints, maxFrontalToeOffset, footLocationList, soleFrameList,
                maxNumberOfConsideredFootsteps, isInitialTransfer.getBooleanValue(), this.omega0.getDoubleValue(), toeToFootCenterShiftDuration,
                footCenterToToeShiftDuration);
       }
@@ -315,7 +317,6 @@ public class DoubleSupportFootCenterToToeICPComputer
       }
 
       upcomingCornerPoint = footCenterICPCornerFramePoints.get(1).getPoint3dCopy();
-      
 
       singleSupportEndICP.set(initialICPPosition);
       singleSupportEndICPVelocity.set(0.0, 0.0, 0.0);
@@ -330,24 +331,32 @@ public class DoubleSupportFootCenterToToeICPComputer
       }
       else
       {
-         Point3d cornerPoint1 = footCenterICPCornerFramePoints.get(1).getPoint3dCopy();
-         Point3d transferToFoot = constantFootCenterCentersOfPressure.get(1).getPoint3dCopy();
+         if (comeToStop.getBooleanValue())
+         {
+            footLocationList.get(1).getPoint(doubleSupportEndICP); // for some reason this is always mid-foot. You tell me man.
+            doubleSupportEndICPVelocity.set(0, 0, 0);
+         }
+         else
+         {
+            Point3d cornerPoint1 = footCenterICPCornerFramePoints.get(1).getPoint3dCopy();
+            Point3d transferToFoot = constantFootCenterCentersOfPressure.get(1).getPoint3dCopy();
 
-         NewDoubleSupportICPComputer.computeSingleSupportStartICPAndVelocity(doubleSupportEndICP, doubleSupportEndICPVelocity, transferToFoot, cornerPoint1,
-               doubleSupportDuration, doubleSupportFirstStepFraction, this.omega0.getDoubleValue());
+            NewDoubleSupportICPComputer.computeSingleSupportStartICPAndVelocity(doubleSupportEndICP, doubleSupportEndICPVelocity, transferToFoot, cornerPoint1,
+                  doubleSupportDuration, doubleSupportFirstStepFraction, this.omega0.getDoubleValue());
+         }
       }
 
-      doubleSupportPolynomialTrajectory.initialize(doubleSupportInitialTransferDuration, singleSupportEndICP, singleSupportEndICPVelocity, doubleSupportEndICP, doubleSupportEndICPVelocity);
+      doubleSupportPolynomialTrajectory.initialize(doubleSupportInitialTransferDuration, singleSupportEndICP, singleSupportEndICPVelocity, doubleSupportEndICP,
+            doubleSupportEndICPVelocity);
    }
 
-   public void initializeDoubleSupport(ArrayList<FramePoint> footLocationList, ArrayList<ReferenceFrame> soleFrameList, double singleSupportDuration, double doubleSupportDuration, double omega0, Point3d currentDesiredICP, Vector3d currentDesiredICPVelocity,
-         double initialTime)
+   public void initializeDoubleSupport(ArrayList<FramePoint> footLocationList, ArrayList<ReferenceFrame> soleFrameList, double singleSupportDuration,
+         double doubleSupportDuration, double omega0, Point3d currentDesiredICP, Vector3d currentDesiredICPVelocity, double initialTime)
    {
-      if (atAStop.getBooleanValue())
-      {         
-         double doubleSupportInitialTransferDuration = this.doubleSupportInitialTransferDuration.getDoubleValue(); 
+      if (atAStop.getBooleanValue() || comeToStop.getBooleanValue())
+      {
+         double doubleSupportInitialTransferDuration = this.doubleSupportInitialTransferDuration.getDoubleValue();
 
-         
          // ALesman: this no longer happens because we now always want to initialize from the existing desired icp
          if (currentDesiredICP == null || currentDesiredICPVelocity == null || hasBeenInitialized.getBooleanValue())
          {
@@ -375,15 +384,14 @@ public class DoubleSupportFootCenterToToeICPComputer
       this.omega0.set(omega0);
 
       isInitialTransfer.set(false);
-      comeToStop.set(footLocationList.size() < 3);
-      atAStop.set(footLocationList.size() < 3);
+      comeToStop.set(footLocationList.size() <= 2);
+      atAStop.set(footLocationList.size() <= 2);
 
       NewDoubleSupportICPComputer.computeConstantCentersOfPressure(constantFootCenterCentersOfPressure, footLocationList, maxNumberOfConsideredFootsteps,
             isInitialTransfer.getBooleanValue());
 
       this.doubleSupportDuration.set(doubleSupportDuration);
       this.singleSupportDuration.set(singleSupportDuration);
-
 
       this.isDoubleSupport.set(true);
 
@@ -425,7 +433,8 @@ public class DoubleSupportFootCenterToToeICPComputer
 
       upcomingCornerPoint = footCenterICPCornerFramePoints.get(1).getPoint3dCopy();
 
-      doubleSupportPolynomialTrajectory.initialize(doubleSupportDuration, singleSupportEndICP, singleSupportEndICPVelocity, doubleSupportEndICP, doubleSupportEndICPVelocity);
+      doubleSupportPolynomialTrajectory.initialize(doubleSupportDuration, singleSupportEndICP, singleSupportEndICPVelocity, doubleSupportEndICP,
+            doubleSupportEndICPVelocity);
    }
 
    public Point3d getDoubleSupportStartICP()
@@ -448,8 +457,8 @@ public class DoubleSupportFootCenterToToeICPComputer
       return doubleSupportEndICPVelocity;
    }
 
-   public void computeICPPositionVelocityAcceleration(Point3d icpPositionToPack, Vector3d icpVelocityToPack, Vector3d icpAccelToPack, 
-         Point3d ecmpToPack, double time)
+   public void computeICPPositionVelocityAcceleration(Point3d icpPositionToPack, Vector3d icpVelocityToPack, Vector3d icpAccelToPack, Point3d ecmpToPack,
+         double time)
    {
       computeTimeInStateAndEstimatedTimeRemaining(time);
 
@@ -462,20 +471,19 @@ public class DoubleSupportFootCenterToToeICPComputer
       desiredICPVelocity.set(icpVelocityToPack);
       desiredICPAcceleration.set(icpAccelToPack);
       desiredECMP.set(ecmpToPack);
-      
-      
+
       desiredICPPositionFramePoint.set(icpPositionToPack);
       desiredICPVelocityFrameVector.set(icpVelocityToPack);
       desiredICPAccelerationFrameVector.set(icpAccelToPack);
       desiredECMPFramePoint.set(ecmpToPack);
-      
+
       computeDesiredICPAndCOMVelocityAbsolutes(icpVelocityToPack, dt); // NOTE: if simulation-tick is other than 5ms, change that value!
    }
-   
-   
+
    public void computeDesiredICPAndCOMVelocityAbsolutes(Vector3d icpVelocityToPack, double simDT)
    {
-      desiredICPvelAbsolute.set(Math.sqrt(Math.pow(icpVelocityToPack.getX(), 2) + Math.pow(icpVelocityToPack.getY(), 2) + Math.pow(icpVelocityToPack.getZ(), 2)));
+      desiredICPvelAbsolute
+            .set(Math.sqrt(Math.pow(icpVelocityToPack.getX(), 2) + Math.pow(icpVelocityToPack.getY(), 2) + Math.pow(icpVelocityToPack.getZ(), 2)));
 
       JojosICPutilities.discreteIntegrateCoMAndGetCoMVelocity(simDT, omega0.getDoubleValue(), desiredICPPosition, comPositionVector, comVelocityVector);
 
@@ -486,11 +494,9 @@ public class DoubleSupportFootCenterToToeICPComputer
             + Math.pow(desiredComVelocityFrameVector.getZ(), 2)));
 
    }
-   
-   
 
-   private void getDesiredICPPosVelAccSingleSupport(Point3d icpPositionToPack, Vector3d icpVelocityToPack, Vector3d icpAccelerationToPack, 
-         Point3d ecmpToPack, double timeInState)
+   private void getDesiredICPPosVelAccSingleSupport(Point3d icpPositionToPack, Vector3d icpVelocityToPack, Vector3d icpAccelerationToPack, Point3d ecmpToPack,
+         double timeInState)
    {
       if (doHeelToToeTransfer.getBooleanValue())
       {
@@ -499,9 +505,9 @@ public class DoubleSupportFootCenterToToeICPComputer
       else
       {
          constantCenterOfPressure = constantFootCenterCentersOfPressure.get(0).getPoint3dCopy();
-         
-         JojosICPutilities.extrapolateDCMPosVelAcc(icpPositionToPack, icpVelocityToPack, icpAccelerationToPack, 
-               constantCenterOfPressure, timeInState, omega0.getDoubleValue(), singleSupportStartICP);
+
+         JojosICPutilities.extrapolateDCMPosVelAcc(icpPositionToPack, icpVelocityToPack, icpAccelerationToPack, constantCenterOfPressure, timeInState,
+               omega0.getDoubleValue(), singleSupportStartICP);
 
          ecmpToPack.set(constantCenterOfPressure);
       }
@@ -514,46 +520,22 @@ public class DoubleSupportFootCenterToToeICPComputer
       return timeInState.getDoubleValue();
    }
 
-   private void getDesiredICPPosVelAccDoubleSupport(Point3d icpPositionToPack, Vector3d icpVelocityToPack, Vector3d icpAccelToPack, 
-         Point3d ecmpToPack, double timeInState)
+   private void getDesiredICPPosVelAccDoubleSupport(Point3d icpPositionToPack, Vector3d icpVelocityToPack, Vector3d icpAccelToPack, Point3d ecmpToPack,
+         double timeInState)
    {
-      if (comeToStop.getBooleanValue() && (timeInState > doubleSupportDuration.getDoubleValue()))
-      {
-         //if (true) return;
-         /*
-         computePolynomialDesiredICPPosVelAccAndECMP(icpPositionToPack, icpVelocityToPack, icpAccelToPack, ecmpToPack, timeInState); //, doubleSupportParameterMatrix);
-         doubleSupportEndICP.set(footLocationList.get(0).getPointCopy());
-         doubleSupportEndICP.add(footLocationList.get(1).getPointCopy());
-         doubleSupportEndICP.scale(0.5);
-         doubleSupportEndICPVelocity.set(0, 0, 0);
-         doubleSupportPolynomialTrajectory.initialize(0.50, icpPositionToPack, icpVelocityToPack, doubleSupportEndICP, doubleSupportEndICPVelocity);
-         timeInState = 0;
-         computePolynomialDesiredICPPosVelAccAndECMP(icpPositionToPack, icpVelocityToPack, icpAccelToPack, ecmpToPack, timeInState); //, doubleSupportParameterMatrix);
-          */
-         
-         icpPositionToPack.set(doubleSupportEndICP);
-         icpVelocityToPack.set(0.0, 0.0, 0.0);
-         icpAccelToPack.set(0.0, 0.0, 0.0);
-         ecmpToPack.set(icpPositionToPack);
-         
-      }
-
-      else
-      {
-         computePolynomialDesiredICPPosVelAccAndECMP(icpPositionToPack, icpVelocityToPack, icpAccelToPack, ecmpToPack, timeInState); //, doubleSupportParameterMatrix);
-      }
+      computePolynomialDesiredICPPosVelAccAndECMP(icpPositionToPack, icpVelocityToPack, icpAccelToPack, ecmpToPack, timeInState); //, doubleSupportParameterMatrix);
    }
-   
+
    private final Vector3d tempVector = new Vector3d();
 
-   private void computePolynomialDesiredICPPosVelAccAndECMP(Point3d icpPositionToPack, Vector3d icpVelocityToPack, Vector3d icpAccelToPack, 
-         Point3d ecmpToPack, double timeInState) //, DenseMatrix64F parameterMatrix)
+   private void computePolynomialDesiredICPPosVelAccAndECMP(Point3d icpPositionToPack, Vector3d icpVelocityToPack, Vector3d icpAccelToPack, Point3d ecmpToPack,
+         double timeInState) //, DenseMatrix64F parameterMatrix)
    {
       doubleSupportPolynomialTrajectory.compute(timeInState);
       doubleSupportPolynomialTrajectory.getPosition(icpPositionToPack);
       doubleSupportPolynomialTrajectory.getVelocity(icpVelocityToPack);
       doubleSupportPolynomialTrajectory.getAcceleration(icpAccelToPack);
-      
+
       tempVector.set(icpVelocityToPack);
       tempVector.scale(-1.0 / omega0.getDoubleValue());
       ecmpToPack.set(icpPositionToPack);
@@ -562,7 +544,7 @@ public class DoubleSupportFootCenterToToeICPComputer
 
    private final ArrayList<FramePoint> footLocationList = new ArrayList<FramePoint>();
    private final ArrayList<ReferenceFrame> soleFrameList = new ArrayList<ReferenceFrame>();
-   
+
    public void initializeSingleSupport(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double initialTime)
    {
       footLocationList.clear();
@@ -571,7 +553,7 @@ public class DoubleSupportFootCenterToToeICPComputer
       transferToAndNextFootstepsData.getFootLocationList(footLocationList, soleFrameList, icpForwardFromCenter.getDoubleValue());
       double singleSupportDuration = transferToAndNextFootstepsData.getSingleSupportDuration();
       double doubleSupportDuration = transferToAndNextFootstepsData.getDoubleSupportDuration();
-//      double omega0 = transferToAndNextFootstepsData.getW0();
+      //      double omega0 = transferToAndNextFootstepsData.getW0();
       this.omega0.set(transferToAndNextFootstepsData.getW0());
 
       initializeSingleSupport(footLocationList, soleFrameList, singleSupportDuration, doubleSupportDuration, omega0.getDoubleValue(), initialTime);
@@ -580,28 +562,29 @@ public class DoubleSupportFootCenterToToeICPComputer
    public void reInitializeSingleSupport(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double currentTime)
    {
       footLocationList.clear();
-      soleFrameList.clear(); 
+      soleFrameList.clear();
 
       transferToAndNextFootstepsData.getFootLocationList(footLocationList, soleFrameList, icpForwardFromCenter.getDoubleValue());
       double singleSupportDuration = transferToAndNextFootstepsData.getSingleSupportDuration();
       double doubleSupportDuration = transferToAndNextFootstepsData.getDoubleSupportDuration();
-//      double omega0 = transferToAndNextFootstepsData.getW0();
+      //      double omega0 = transferToAndNextFootstepsData.getW0();
       this.omega0.set(transferToAndNextFootstepsData.getW0());
 
-      initializeSingleSupport(footLocationList, soleFrameList, singleSupportDuration, doubleSupportDuration, omega0.getDoubleValue(), initialTime.getDoubleValue());
+      initializeSingleSupport(footLocationList, soleFrameList, singleSupportDuration, doubleSupportDuration, omega0.getDoubleValue(),
+            initialTime.getDoubleValue());
    }
 
    public void initializeDoubleSupportInitialTransfer(TransferToAndNextFootstepsData transferToAndNextFootstepsData, Point3d initialICPPosition,
          double initialTime)
    {
       footLocationList.clear();
-      soleFrameList.clear(); 
+      soleFrameList.clear();
 
       transferToAndNextFootstepsData.getFootLocationList(footLocationList, soleFrameList, icpForwardFromCenter.getDoubleValue());
       double singleSupportDuration = transferToAndNextFootstepsData.getSingleSupportDuration();
       double doubleSupportDuration = transferToAndNextFootstepsData.getDoubleSupportDuration();
       double doubleSupportInitialTransferDuration = transferToAndNextFootstepsData.getDoubleSupportInitialTransferDuration();
-//      double omega0 = transferToAndNextFootstepsData.getW0();
+      //      double omega0 = transferToAndNextFootstepsData.getW0();
       this.omega0.set(transferToAndNextFootstepsData.getW0());
 
       initializeDoubleSupportInitialTransfer(footLocationList, soleFrameList, initialICPPosition, singleSupportDuration, doubleSupportDuration,
@@ -611,14 +594,15 @@ public class DoubleSupportFootCenterToToeICPComputer
    public void initializeDoubleSupport(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double initialTime)
    {
       footLocationList.clear();
-      soleFrameList.clear(); 
+      soleFrameList.clear();
 
       transferToAndNextFootstepsData.getFootLocationList(footLocationList, soleFrameList, icpForwardFromCenter.getDoubleValue());
       double singleSupportDuration = transferToAndNextFootstepsData.getSingleSupportDuration();
       double doubleSupportDuration = transferToAndNextFootstepsData.getDoubleSupportDuration();
       this.omega0.set(transferToAndNextFootstepsData.getW0());
 
-      initializeDoubleSupport(footLocationList, soleFrameList, singleSupportDuration, doubleSupportDuration, omega0.getDoubleValue(), transferToAndNextFootstepsData.getCurrentDesiredICP(), transferToAndNextFootstepsData.getCurrentDesiredICPVelocity(), initialTime);
+      initializeDoubleSupport(footLocationList, soleFrameList, singleSupportDuration, doubleSupportDuration, omega0.getDoubleValue(),
+            transferToAndNextFootstepsData.getCurrentDesiredICP(), transferToAndNextFootstepsData.getCurrentDesiredICPVelocity(), initialTime);
    }
 
    private void computeTimeInStateAndEstimatedTimeRemaining(double time)
@@ -641,12 +625,11 @@ public class DoubleSupportFootCenterToToeICPComputer
          estimatedTimeRemainingForState.set(singleSupportDuration.getDoubleValue() - timeInState.getDoubleValue());
    }
 
-
    public boolean isDone(double time)
    {
       computeTimeInStateAndEstimatedTimeRemaining(time);
 
-      return (estimatedTimeRemainingForState.getDoubleValue() <= isDoneThreshold);  
+      return (estimatedTimeRemainingForState.getDoubleValue() <= isDoneThreshold);
    }
 
    public double getEstimatedTimeRemainingForState(double time)
@@ -662,18 +645,17 @@ public class DoubleSupportFootCenterToToeICPComputer
    public void reset(double time)
    {
       atAStop.set(true);
-      
-      
+
       ///////////////////// Deleting all but the first two ReferenceFrames in soleFrameList
       ArrayList<ReferenceFrame> tempFrameList = new ArrayList<ReferenceFrame>();
-      
+
       for (int i = 0; i < 2; i++)
       {
          tempFrameList.add(soleFrameList.get(i));
       }
-      
-      soleFrameList.clear(); 
-      
+
+      soleFrameList.clear();
+
       for (int i = 0; i < 2; i++)
       {
          soleFrameList.add(tempFrameList.get(i));
@@ -731,7 +713,7 @@ public class DoubleSupportFootCenterToToeICPComputer
    {
       return doHeelToToeTransfer.getBooleanValue();
    }
-   
+
    public void setDoHeelToToeTransfer(boolean doHeelToToeTransfer)
    {
       this.doHeelToToeTransfer.set(doHeelToToeTransfer);
