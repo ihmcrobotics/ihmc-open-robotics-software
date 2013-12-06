@@ -801,6 +801,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          desiredPelvisAngularAcceleration.set(0.0, 0.0, 0.0);
       }
 
+      boolean initializedAtStart = false;
       public void initializeICPPlannerIfNecessary()
       {
          if (!icpTrajectoryHasBeenInitialized.getBooleanValue() && instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue()))
@@ -821,6 +822,18 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                {
                   setOnToesContactState(trailingLeg);
                }
+            }
+            else if (!initializedAtStart)
+            {
+               FramePoint2d finalDesiredICP = finalDesiredICPAndTrajectoryTime.first();
+               finalDesiredICP.changeFrame(desiredICP.getReferenceFrame());
+
+               desiredICP.set(finalDesiredICP);
+               
+               TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForDoubleSupport(RobotSide.LEFT, true);
+               instantaneousCapturePointPlanner.initializeDoubleSupport(transferToAndNextFootstepsData, 0.1);
+               
+               initializedAtStart = true;
             }
 
             icpAndMomentumBasedController.updateBipedSupportPolygons(bipedSupportPolygons);    // need to always update biped support polygons after a change to the contact states
