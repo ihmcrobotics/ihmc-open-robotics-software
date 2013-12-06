@@ -1850,11 +1850,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
       
-      RobotSide[] temp;
+      RobotSide[] leadingLegFirst;
       if (trailingLeg.getEnumValue() != null)
-         temp = new RobotSide[]{trailingLeg.getEnumValue().getOppositeSide(), trailingLeg.getEnumValue()};
+         leadingLegFirst = new RobotSide[]{trailingLeg.getEnumValue().getOppositeSide(), trailingLeg.getEnumValue()};
       else
-         temp = RobotSide.values;
+         leadingLegFirst = RobotSide.values;
             
       for (RobotSide robotSide : RobotSide.values)
          legLengths.put(robotSide, footEndEffectorControlModules.get(robotSide).updateAndGetLegLength());
@@ -1868,27 +1868,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
 
       // Correct, if necessary, the CoM height trajectory to avoid straight knee
-      for (RobotSide robotSide : temp)
+      for (RobotSide robotSide : leadingLegFirst)
       {
          EndEffectorControlModule footEndEffectorControlModule = footEndEffectorControlModules.get(robotSide);
-//         boolean areBothFeetInFlatContact = footEndEffectorControlModule.isInFlatSupportState() && footEndEffectorControlModules.get(robotSide.getOppositeSide()).isInFlatSupportState();
-//         
-//         if (areBothFeetInFlatContact)
-//         {
-//            if (legLengths.get(robotSide) > legLengths.get(robotSide.getOppositeSide()))
-//            {
-               footEndEffectorControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(desiredICPVelocity, comHeightData,
-                     zCurrent, pelvisZUpFrame);
-//               break;
-//            }
-//         }
-//         else
-//         {
-//            footEndEffectorControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(desiredICPVelocity, comHeightData,
-//                  zCurrent, pelvisZUpFrame);
-//         }
+         footEndEffectorControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(desiredICPVelocity, comHeightData,
+               zCurrent, pelvisZUpFrame);
       }
-      
+
       // Do that after to make sure the swing foot will land
       for (RobotSide robotSide : RobotSide.values)
          footEndEffectorControlModules.get(robotSide).correctCoMHeightTrajectoryForUnreachableFootStep(comHeightData);
