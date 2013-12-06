@@ -42,23 +42,32 @@ public class HeadOrientationManager
       this.momentumBasedController = momentumBasedController;
       this.yoTime = momentumBasedController.getYoTime();
       this.desiredHeadOrientationProvider = desiredHeadOrientationProvider;
-      headOrientationExpressedInFrame = desiredHeadOrientationProvider.getHeadOrientationExpressedInFrame();
       
       this.headOrientationControlModule = headOrientationControlModule;
       
-      registry = new YoVariableRegistry(getClass().getSimpleName());
-      
-      receivedNewHeadOrientationTime = new DoubleYoVariable("receivedNewHeadOrientationTime", registry);
-
-      isTrackingOrientation = new BooleanYoVariable("isTrackingOrientation", registry);
-      
-      DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(trajectoryTime);
-      OrientationProvider initialOrientationProvider = new CurrentOrientationProvider(headOrientationExpressedInFrame, headOrientationControlModule.getHead().getBodyFixedFrame());
-      finalOrientationProvider = new SettableOrientationProvider("headFinalOrientation", headOrientationExpressedInFrame, registry);
-      orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("headOrientation",
-            headOrientationExpressedInFrame, trajectoryTimeProvider, initialOrientationProvider, finalOrientationProvider,
-            registry);
-      parentRegistry.addChild(registry);
+      if (desiredHeadOrientationProvider != null)
+      {
+         headOrientationExpressedInFrame = desiredHeadOrientationProvider.getHeadOrientationExpressedInFrame();
+         registry = new YoVariableRegistry(getClass().getSimpleName());
+         receivedNewHeadOrientationTime = new DoubleYoVariable("receivedNewHeadOrientationTime", registry);
+         isTrackingOrientation = new BooleanYoVariable("isTrackingOrientation", registry);
+         DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(trajectoryTime);
+         OrientationProvider initialOrientationProvider = new CurrentOrientationProvider(headOrientationExpressedInFrame, headOrientationControlModule.getHead().getBodyFixedFrame());
+         finalOrientationProvider = new SettableOrientationProvider("headFinalOrientation", headOrientationExpressedInFrame, registry);
+         orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("headOrientation",
+               headOrientationExpressedInFrame, trajectoryTimeProvider, initialOrientationProvider, finalOrientationProvider,
+               registry);
+         parentRegistry.addChild(registry);
+      }
+      else
+      {
+         headOrientationExpressedInFrame = null;
+         registry = null;
+         receivedNewHeadOrientationTime = null;
+         isTrackingOrientation = null;
+         finalOrientationProvider = null;
+         orientationTrajectoryGenerator = null;
+      }
    }
 
    private final FrameOrientation desiredOrientation = new FrameOrientation();
@@ -67,7 +76,7 @@ public class HeadOrientationManager
    {
       checkForNewDesiredOrientationInformation();
       
-      if (isTrackingOrientation.getBooleanValue())
+      if (desiredHeadOrientationProvider != null && isTrackingOrientation.getBooleanValue())
       {
          double deltaTime = yoTime.getDoubleValue() - receivedNewHeadOrientationTime.getDoubleValue();
          orientationTrajectoryGenerator.compute(deltaTime);
