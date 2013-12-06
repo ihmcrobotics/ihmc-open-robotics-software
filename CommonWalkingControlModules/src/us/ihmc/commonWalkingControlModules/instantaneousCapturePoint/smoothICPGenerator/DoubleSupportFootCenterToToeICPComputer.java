@@ -126,6 +126,7 @@ public class DoubleSupportFootCenterToToeICPComputer
       comVelocityVector.set(0.0, 0.0, 0.0);
 
       hasBeenInitialized.set(false);
+      isInitialTransfer.set(true);
 
       parentRegistry.addChild(registry);
 
@@ -277,7 +278,6 @@ public class DoubleSupportFootCenterToToeICPComputer
    {
       this.omega0.set(omega0);
 
-      isInitialTransfer.set(true);
       comeToStop.set(footLocationList.size() <= 2);
 
       this.doubleSupportDuration.set(doubleSupportDuration);
@@ -301,7 +301,7 @@ public class DoubleSupportFootCenterToToeICPComputer
       else
       {
          NewDoubleSupportICPComputer.computeConstantCentersOfPressure(constantFootCenterCentersOfPressure, footLocationList, maxNumberOfConsideredFootsteps,
-               isInitialTransfer.getBooleanValue());
+               isInitialTransfer.getBooleanValue() || comeToStop.getBooleanValue());
 
          int numberOfCornerPoints = maxNumberOfConsideredFootsteps - 1;
 
@@ -333,7 +333,7 @@ public class DoubleSupportFootCenterToToeICPComputer
       {
          if (comeToStop.getBooleanValue())
          {
-            footLocationList.get(1).getPoint(doubleSupportEndICP); // for some reason this is always mid-foot. You tell me man.
+            footLocationList.get(1).getPoint(doubleSupportEndICP); // center because of computeConstantCentersOfPressure
             doubleSupportEndICPVelocity.set(0, 0, 0);
          }
          else
@@ -346,8 +346,16 @@ public class DoubleSupportFootCenterToToeICPComputer
          }
       }
 
-      doubleSupportPolynomialTrajectory.initialize(doubleSupportInitialTransferDuration, singleSupportEndICP, singleSupportEndICPVelocity, doubleSupportEndICP,
-            doubleSupportEndICPVelocity);
+      if (isInitialTransfer.getBooleanValue())
+      {
+         doubleSupportPolynomialTrajectory.initialize(doubleSupportInitialTransferDuration, singleSupportEndICP, singleSupportEndICPVelocity,
+               doubleSupportEndICP, doubleSupportEndICPVelocity);
+      }
+      else
+      {
+         doubleSupportPolynomialTrajectory.initialize(doubleSupportDuration, singleSupportEndICP, singleSupportEndICPVelocity, doubleSupportEndICP,
+               doubleSupportEndICPVelocity);
+      }
    }
 
    public void initializeDoubleSupport(ArrayList<FramePoint> footLocationList, ArrayList<ReferenceFrame> soleFrameList, double singleSupportDuration,
@@ -358,7 +366,7 @@ public class DoubleSupportFootCenterToToeICPComputer
          double doubleSupportInitialTransferDuration = this.doubleSupportInitialTransferDuration.getDoubleValue();
 
          // ALesman: this no longer happens because we now always want to initialize from the existing desired icp
-         if (currentDesiredICP == null || currentDesiredICPVelocity == null || hasBeenInitialized.getBooleanValue())
+         if (currentDesiredICP == null || currentDesiredICPVelocity == null)
          {
             this.computeICPPositionVelocityAcceleration(desiredICPPosition, desiredICPVelocity, desiredICPAcceleration, desiredECMP, initialTime);
          }
@@ -366,7 +374,7 @@ public class DoubleSupportFootCenterToToeICPComputer
          {
             desiredICPPosition.set(currentDesiredICP);
             desiredICPVelocity.set(currentDesiredICPVelocity);
-            hasBeenInitialized.set(false);
+            hasBeenInitialized.set(true);
          }
 
          initializeDoubleSupportInitialTransfer(footLocationList, soleFrameList, desiredICPPosition, singleSupportDuration, doubleSupportDuration,
