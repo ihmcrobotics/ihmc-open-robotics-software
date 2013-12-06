@@ -200,11 +200,11 @@
 <Visible> true</Visible>
 </Main Viewport>
 
-<Graph Array Window Size>1</Graph Array Window Size><Graph Array Window1>
+<Graph Array Window Size>2</Graph Array Window Size><Graph Array Window1>
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.atlas.qdiff_l_arm_wrx,root.atlas.qdiff_r_arm_wrx</Variables>
+		<Variables>root.atlas.leftPoseEEYaw,root.atlas.rightPoseEEYaw</Variables>
 		<GraphConfiguration>
 			<Name>config17</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -216,7 +216,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdiff_l_arm_wry,root.atlas.qdiff_r_arm_wry</Variables>
+		<Variables>root.atlas.leftPoseEEPitch,root.atlas.rightPoseEEPitch</Variables>
 		<GraphConfiguration>
 			<Name>config18</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -228,7 +228,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdiff_l_arm_elx,root.atlas.qdiff_r_arm_elx</Variables>
+		<Variables>root.atlas.leftPoseEERoll,root.atlas.rightPoseEERoll</Variables>
 		<GraphConfiguration>
 			<Name>config19</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -240,7 +240,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdiff_l_arm_ely,root.atlas.qdiff_r_arm_ely</Variables>
+		<Variables>root.atlas.residual0Yaw,root.atlas.residualYaw</Variables>
 		<GraphConfiguration>
 			<Name>config20</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -252,7 +252,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdiff_l_arm_shx,root.atlas.qdiff_r_arm_shx</Variables>
+		<Variables>root.atlas.residual0Pitch,root.atlas.residualPitch</Variables>
 		<GraphConfiguration>
 			<Name>config21</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -264,7 +264,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdiff_l_arm_shy,root.atlas.qdiff_r_arm_shy</Variables>
+		<Variables>root.atlas.residual0Roll,root.atlas.residualRoll</Variables>
 		<GraphConfiguration>
 			<Name>config22</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -276,7 +276,83 @@
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-</Graph Array Window1>
+</Graph Array Window1><Graph Array Window2>
+<GraphGroup>
+	<Cols>2</Cols>
+	<Graph>
+		<Variables>root.atlas.qdiff_l_arm_wrx,root.atlas.qdiff_r_arm_wrx</Variables>
+		<GraphConfiguration>
+			<Name>config23</Name>
+			<ScalingMethod>0</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.qdiff_l_arm_wry,root.atlas.qdiff_r_arm_wry</Variables>
+		<GraphConfiguration>
+			<Name>config24</Name>
+			<ScalingMethod>0</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.qdiff_l_arm_elx,root.atlas.qdiff_r_arm_elx</Variables>
+		<GraphConfiguration>
+			<Name>config25</Name>
+			<ScalingMethod>0</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.qdiff_l_arm_ely,root.atlas.qdiff_r_arm_ely</Variables>
+		<GraphConfiguration>
+			<Name>config26</Name>
+			<ScalingMethod>0</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.qdiff_l_arm_shx,root.atlas.qdiff_r_arm_shx</Variables>
+		<GraphConfiguration>
+			<Name>config27</Name>
+			<ScalingMethod>0</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.qdiff_l_arm_shy,root.atlas.qdiff_r_arm_shy</Variables>
+		<GraphConfiguration>
+			<Name>config28</Name>
+			<ScalingMethod>0</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window2>
 
 <Extra Panels>
 <Main Viewport>
@@ -285,8 +361,8 @@
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>0.0</Camera X>
- <Camera Y>-6.0</Camera Y>
+ <Camera X>-0.23431539990253292</Camera X>
+ <Camera Y>-5.995422945328254</Camera Y>
  <Camera Z>1.0</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>

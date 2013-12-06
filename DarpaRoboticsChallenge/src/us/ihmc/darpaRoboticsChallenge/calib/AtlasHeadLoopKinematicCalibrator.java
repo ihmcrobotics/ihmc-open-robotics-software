@@ -67,7 +67,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    }
    
    @Override
-   protected void updateDynamicGraphicsObjects()
+   protected void updateDynamicGraphicsObjects(int index)
    {
       FramePoint
       leftEE=new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM)  ,0, 0.13,0),
@@ -79,6 +79,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       
       yposeLeftEE.set(new FramePose(leftEE, new FrameOrientation(leftEE.getReferenceFrame())).changeFrameCopy(CalibUtil.world));
       yposeRightEE.set(new FramePose(rightEE,new FrameOrientation(rightEE.getReferenceFrame())).changeFrameCopy(CalibUtil.world));
+      updateBoard(index);
    }
 
    private void updateBoard(int index)
@@ -238,8 +239,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 //            CalibUtil.setRobotModelFromData(calib.fullRobotModel, CalibUtil.addQ(calib.q.get(i),qoffset));
 //            yoResidual0.setXYZYawPitchRoll(Arrays.copyOfRange(residual0, i*RESIDUAL_DOF, i*RESIDUAL_DOF+6));
 //            yoResidual.setXYZYawPitchRoll(Arrays.copyOfRange(residual, i*RESIDUAL_DOF, i*RESIDUAL_DOF+6));
-            calib.updateBoard(i);
-            calib.displayUpdate();
+            calib.displayUpdate(i);
          }
       } //viz
       
