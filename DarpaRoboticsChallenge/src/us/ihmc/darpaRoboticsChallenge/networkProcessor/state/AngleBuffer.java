@@ -9,7 +9,7 @@ public class AngleBuffer implements PendableBuffer
    private double[] angles;
 
    private int currentIndex;
-   private long oldestTimeStamp;
+   private long oldestTimestamp;
    private long newestTimestamp;
 
    public AngleBuffer(int size)
@@ -39,17 +39,17 @@ public class AngleBuffer implements PendableBuffer
 
       if (timestamps[currentIndex] == Long.MIN_VALUE)
       {
-         oldestTimeStamp = newestTimestamp;
+         oldestTimestamp = newestTimestamp;
       }
       else
       {
-         oldestTimeStamp = timestamps[currentIndex];
+         oldestTimestamp = timestamps[currentIndex];
       }
    }
 
    public synchronized boolean isInRange(long timestamp)
    {
-      return ((timestamp >= oldestTimeStamp) && (timestamp <= newestTimestamp));
+      return ((timestamp >= oldestTimestamp) && (timestamp <= newestTimestamp));
    }
 
    public synchronized double interpolate(long timestamp)
@@ -102,5 +102,10 @@ public class AngleBuffer implements PendableBuffer
    public long newestTimestamp()
    {
       return newestTimestamp;
+   }
+   
+   public long oldestTimestamp()
+   {
+      return oldestTimestamp;
    }
 }
