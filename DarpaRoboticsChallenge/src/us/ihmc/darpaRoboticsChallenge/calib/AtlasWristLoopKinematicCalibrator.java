@@ -92,7 +92,7 @@ public class AtlasWristLoopKinematicCalibrator extends AtlasKinematicCalibrator
    public KinematicCalibrationWristLoopResidual getArmLoopResidualObject()
    {
       ArrayList<String> calJointNames = CalibUtil.toStringArrayList(getArmJoints());
-      return new KinematicCalibrationWristLoopResidual(fullRobotModel, calJointNames, q);
+      return new KinematicCalibrationWristLoopResidual(fullRobotModel, calJointNames, (ArrayList)q);
    }
    
    public void loadData(String calib_file)
@@ -118,8 +118,8 @@ public class AtlasWristLoopKinematicCalibrator extends AtlasKinematicCalibrator
          {
             if (line.matches("^entry.*"))
             {
-               Map<String, Double> q_ = new HashMap<>();
-               Map<String, Double> qout_ = new HashMap<>();
+               Map<String, Object> q_ = new HashMap<>();
+               Map<String, Object> qout_ = new HashMap<>();
 
                for (int i = 0; i < numJoints; i++)
                {
@@ -188,7 +188,7 @@ public class AtlasWristLoopKinematicCalibrator extends AtlasKinematicCalibrator
          
          for(int i=0;i<calib.q.size();i++)
          {
-            CalibUtil.setRobotModelFromData(calib.fullRobotModel, CalibUtil.addQ(calib.q.get(i),qoffset));
+            CalibUtil.setRobotModelFromData(calib.fullRobotModel, CalibUtil.addQ((Map)calib.q.get(i),qoffset));
             yoResidual0.setXYZYawPitchRoll(Arrays.copyOfRange(residual0, i*RESIDUAL_DOF, i*RESIDUAL_DOF+6));
             yoResidual.setXYZYawPitchRoll(Arrays.copyOfRange(residual, i*RESIDUAL_DOF, i*RESIDUAL_DOF+6));         
             calib.displayUpdate();
