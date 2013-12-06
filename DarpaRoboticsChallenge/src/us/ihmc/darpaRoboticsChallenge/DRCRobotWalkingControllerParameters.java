@@ -343,14 +343,14 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    
    public double getCMPRateLimit()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 100.0;
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 60.0; 
       return 6.0; //3.0; //4.0; //3.0;
    }
 
    public double getCMPAccelerationLimit()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 1000.0;
-      return 120.0; //80.0; //40.0;
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 2000.0;
+      return 200.0; //80.0; //40.0;
    }
    
    public double getKpCoMHeight()
