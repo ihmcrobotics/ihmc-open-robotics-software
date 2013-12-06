@@ -95,6 +95,8 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
    private final VariousWalkingProviders variousWalkingProviders;
 //   private final VariousWalkingManagers variousWalkingManagers;
+   
+   protected final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
 
    private final DoubleYoVariable kpPelvisOrientation = new DoubleYoVariable("kpPelvisOrientation", registry);
    private final DoubleYoVariable zetaPelvisOrientation = new DoubleYoVariable("zetaPelvisOrientation", registry);
@@ -110,6 +112,8 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
       this.variousWalkingProviders = variousWalkingProviders;
 //      this.variousWalkingManagers = variousWalkingManagers;
+      
+      this.dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistry;
 
       // Getting parameters from the momentumBasedController
       this.momentumBasedController = momentumBasedController;
@@ -168,6 +172,8 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       {
          DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(walkingControllerParameters.getTrajectoryTimeHeadOrientation());
          extendedNeckPitchTrajectory = new OneDoFJointQuinticTrajectoryGenerator("extendedNeckPitchTrajectory", jointForExtendedNeckPitchRange, trajectoryTimeProvider, registry);
+         extendedNeckPitchTrajectory.setFinalPosition(0.0);
+         extendedNeckPitchTrajectory.initialize();
          extendedNeckPitchReceivedTime = new DoubleYoVariable("extendedNeckPitchReceived", registry);
       }
       else
@@ -357,7 +363,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       {
          double kpHead = this.kpUpperBody.getDoubleValue();
          double kdHead = GainCalculator.computeDerivativeGain(kpHead, zetaUpperBody.getDoubleValue());
-         double angle = 0.0;
 
          double maxAcceleration = maxAccelerationUpperBody.getDoubleValue();
          double maxJerk = maxJerkUpperBody.getDoubleValue();
@@ -389,7 +394,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
          }
          else
          {
-            momentumBasedController.doPDControl(jointForExtendedNeckPitchRange, kpHead, kdHead, angle, 0.0, maxAcceleration, maxJerk);
+            momentumBasedController.doPDControl(jointForExtendedNeckPitchRange, kpHead, kdHead, 0.0, 0.0, maxAcceleration, maxJerk);
          }
       }
 

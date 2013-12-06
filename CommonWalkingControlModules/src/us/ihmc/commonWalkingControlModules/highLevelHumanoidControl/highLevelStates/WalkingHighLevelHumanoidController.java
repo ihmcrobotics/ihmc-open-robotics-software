@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManage
 import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controlModules.endEffector.LegSingularityAndKneeCollapseAvoidanceControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
@@ -135,7 +136,15 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator;
    private final CoMHeightTimeDerivativesCalculator coMHeightTimeDerivativesCalculator = new CoMHeightTimeDerivativesCalculator();
    private final CoMHeightTimeDerivativesSmoother coMHeightTimeDerivativesSmoother;
-
+   private final DoubleYoVariable desiredCoMHeightFromTrajectory = new DoubleYoVariable("desiredCoMHeightFromTrajectory", registry);
+   private final DoubleYoVariable desiredCoMHeightVelocityFromTrajectory = new DoubleYoVariable("desiredCoMHeightVelocityFromTrajectory", registry);
+   private final DoubleYoVariable desiredCoMHeightAccelerationFromTrajectory = new DoubleYoVariable("desiredCoMHeightAccelerationFromTrajectory", registry);
+   private final DoubleYoVariable desiredCoMHeightBeforeSmoothing = new DoubleYoVariable("desiredCoMHeightBeforeSmoothing", registry);
+   private final DoubleYoVariable desiredCoMHeightVelocityBeforeSmoothing = new DoubleYoVariable("desiredCoMHeightVelocityBeforeSmoothing", registry);
+   private final DoubleYoVariable desiredCoMHeightAccelerationBeforeSmoothing = new DoubleYoVariable("desiredCoMHeightAccelerationBeforeSmoothing", registry);
+   private final DoubleYoVariable desiredCoMHeightAfterSmoothing = new DoubleYoVariable("desiredCoMHeightAfterSmoothing", registry);
+   private final DoubleYoVariable desiredCoMHeightVelocityAfterSmoothing = new DoubleYoVariable("desiredCoMHeightVelocityAfterSmoothing", registry);
+   private final DoubleYoVariable desiredCoMHeightAccelerationAfterSmoothing = new DoubleYoVariable("desiredCoMHeightAccelerationAfterSmoothing", registry);
 
    private final PDController centerOfMassHeightController;
    private final SideDependentList<WalkingState> singleSupportStateEnums = new SideDependentList<WalkingState>(WalkingState.LEFT_SUPPORT,
@@ -683,6 +692,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
    }
 
+   private EnumYoVariable<RobotSide> trailingLeg = new EnumYoVariable<RobotSide>("trailingLeg", "", registry, RobotSide.class, true);
+   
    private class DoubleSupportState extends State<WalkingState>
    {
       private final RobotSide transferToSide;
@@ -963,6 +974,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       {
          desiredECMPinSupportPolygon.set(false);
          ecmpBasedToeOffHasBeenInitialized.set(false);
+         trailingLeg.set(transferToSide);
 
          icpTrajectoryHasBeenInitialized.set(false);
          if (DEBUG)
@@ -1143,6 +1155,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       public void doTransitionIntoAction()
       {
          hasICPPlannerFinished.set(false);
+         trailingLeg.set(null);
          
          footSwitches.get(swingSide).reset();
 
@@ -1266,6 +1279,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (DEBUG)
             System.out.println("WalkingHighLevelHumanoidController: nextFootstep will change now!");
          readyToGrabNextFootstep.set(true);
+         
+//         instantaneousCapturePointPlanner.setDoHeelToToeTransfer(walkOnTheEdgesManager.willDoToeOff(transferToAndNextFootstepsData));
       }
 
       private void switchTrajectoryParametersMapping(Footstep oldFootstep, Footstep newFootstep)
@@ -1717,6 +1732,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final CoMHeightTimeDerivativesData comHeightDataBeforeSmoothing = new CoMHeightTimeDerivativesData();
    private final CoMHeightTimeDerivativesData comHeightDataAfterSmoothing = new CoMHeightTimeDerivativesData();
    private final CoMXYTimeDerivativesData comXYTimeDerivatives = new CoMXYTimeDerivativesData();
+   private final FramePoint desiredCenterOfMassHeightPoint = new FramePoint(worldFrame);
 
    private double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity)
    {
@@ -1751,7 +1767,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       comXYTimeDerivatives.setCoMXYAcceleration(comXYAcceleration);
 
       coMHeightTimeDerivativesCalculator.computeCoMHeightTimeDerivatives(comHeightDataBeforeSmoothing, comXYTimeDerivatives, coMHeightPartialDerivatives);
-      
+
+      desiredCoMHeightFromTrajectory.set(desiredCenterOfMassHeightPoint.getZ());
+      desiredCoMHeightVelocityFromTrajectory.set(comHeightDataBeforeSmoothing.getComHeightVelocity());
+      desiredCoMHeightAccelerationFromTrajectory.set(comHeightDataBeforeSmoothing.getComHeightAcceleration());
+
       double zCurrent = comPosition.getZ();
       double zdCurrent = comVelocity.getZ();
       
@@ -1764,24 +1784,27 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          zdCurrent = comVelocity.getZ(); // Just use com velocity for now for damping...
       }
       
-      ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
-      // Correct, if necessary, the CoM height trajectory to avoid straight knee
-      for (RobotSide robotSide : RobotSide.values)
-         footEndEffectorControlModules.get(robotSide).correctCoMHeightTrajectoryForSupportLeg(desiredICPVelocity, comHeightDataBeforeSmoothing, zCurrent, pelvisZUpFrame, footSwitches.get(robotSide).computeFootLoadPercentage());
-      
-      // Do that after to make sure the swing foot will land
-      for (RobotSide robotSide : RobotSide.values)
-         footEndEffectorControlModules.get(robotSide).correctCoMHeightTrajectoryForUnreachableFootStep(comHeightDataBeforeSmoothing);
+      correctCoMHeight(desiredICPVelocity, zCurrent, comHeightDataBeforeSmoothing);
 
-      coMHeightTimeDerivativesSmoother.smooth(comHeightDataAfterSmoothing, comHeightDataBeforeSmoothing);
+      comHeightDataBeforeSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
+      desiredCoMHeightBeforeSmoothing.set(desiredCenterOfMassHeightPoint.getZ());
+      desiredCoMHeightVelocityBeforeSmoothing.set(comHeightDataBeforeSmoothing.getComHeightVelocity());
+      desiredCoMHeightAccelerationBeforeSmoothing.set(comHeightDataBeforeSmoothing.getComHeightAcceleration());
       
-      FramePoint desiredCenterOfMassHeightPoint = new FramePoint(worldFrame);
+      coMHeightTimeDerivativesSmoother.smooth(comHeightDataAfterSmoothing, comHeightDataBeforeSmoothing);
+
+      correctCoMHeight(desiredICPVelocity, zCurrent, comHeightDataAfterSmoothing);
+      
       comHeightDataAfterSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
       double zDesired = desiredCenterOfMassHeightPoint.getZ();
 
       double zdDesired = comHeightDataAfterSmoothing.getComHeightVelocity();
       double zddFeedForward = comHeightDataAfterSmoothing.getComHeightAcceleration();
 
+      desiredCoMHeightAfterSmoothing.set(zDesired);
+      desiredCoMHeightVelocityAfterSmoothing.set(zdDesired);
+      desiredCoMHeightAccelerationAfterSmoothing.set(zddFeedForward);
+      
       double zddDesired = centerOfMassHeightController.compute(zCurrent, zDesired, zdCurrent, zdDesired) + zddFeedForward;
       
       for (RobotSide robotSide : RobotSide.values)
@@ -1791,7 +1814,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (endEffectorControlModule.isInFlatSupportState() && endEffectorControlModule.isInSingularityNeighborhood())
          {
             // Ignore the desired height acceleration only if EndEffectorControlModule is not taking care of singularity during support
-//            if (!LegSingularityAndKneeCollapseAvoidanceControlModule.USE_SINGULARITY_AVOIDANCE_SUPPORT)
+            if (!LegSingularityAndKneeCollapseAvoidanceControlModule.USE_SINGULARITY_AVOIDANCE_SUPPORT)
                zddDesired = 0.0;
             
             double zTreshold = 0.01;
@@ -1813,6 +1836,56 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       zddDesired = MathTools.clipToMinMax(zddDesired, -gravity + epsilon, Double.POSITIVE_INFINITY);
 
       return zddDesired;
+   }
+
+   private final SideDependentList<Double> legLengths = new SideDependentList<Double>();
+
+   private void correctCoMHeight(FrameVector2d desiredICPVelocity, double zCurrent, CoMHeightTimeDerivativesData comHeightData)
+   {
+      ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
+      
+      RobotSide[] temp;
+      if (trailingLeg.getEnumValue() != null)
+         temp = new RobotSide[]{trailingLeg.getEnumValue().getOppositeSide(), trailingLeg.getEnumValue()};
+      else
+         temp = RobotSide.values;
+            
+      for (RobotSide robotSide : RobotSide.values)
+         legLengths.put(robotSide, footEndEffectorControlModules.get(robotSide).updateAndGetLegLength());
+      
+      
+      // Correct, if necessary, the CoM height trajectory to avoid the knee to collapse
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         footEndEffectorControlModules.get(robotSide).correctCoMHeightTrajectoryForCollapseAvoidance(desiredICPVelocity, comHeightData,
+               zCurrent, pelvisZUpFrame, footSwitches.get(robotSide).computeFootLoadPercentage());
+      }
+
+      // Correct, if necessary, the CoM height trajectory to avoid straight knee
+      for (RobotSide robotSide : temp)
+      {
+         EndEffectorControlModule footEndEffectorControlModule = footEndEffectorControlModules.get(robotSide);
+//         boolean areBothFeetInFlatContact = footEndEffectorControlModule.isInFlatSupportState() && footEndEffectorControlModules.get(robotSide.getOppositeSide()).isInFlatSupportState();
+//         
+//         if (areBothFeetInFlatContact)
+//         {
+//            if (legLengths.get(robotSide) > legLengths.get(robotSide.getOppositeSide()))
+//            {
+               footEndEffectorControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(desiredICPVelocity, comHeightData,
+                     zCurrent, pelvisZUpFrame);
+//               break;
+//            }
+//         }
+//         else
+//         {
+//            footEndEffectorControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(desiredICPVelocity, comHeightData,
+//                  zCurrent, pelvisZUpFrame);
+//         }
+      }
+      
+      // Do that after to make sure the swing foot will land
+      for (RobotSide robotSide : RobotSide.values)
+         footEndEffectorControlModules.get(robotSide).correctCoMHeightTrajectoryForUnreachableFootStep(comHeightData);
    }
 
    private List<PlaneContactState> getContactStatesList()
