@@ -21,7 +21,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.OrientationTr
 import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAngularAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
-import us.ihmc.commonWalkingControlModules.trajectories.OneDoFJointQuinticTrajectoryGenerator;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -42,7 +41,9 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameQuaternion
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.CubicPolynomialTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.YoVariableDoubleProvider;
 
 public abstract class AbstractHighLevelHumanoidControlPattern extends State<HighLevelState>
 {
@@ -171,22 +172,27 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       if (jointForExtendedNeckPitchRange != null && desiredHeadOrientationProvider != null)
       {
          DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(walkingControllerParameters.getTrajectoryTimeHeadOrientation());
-         extendedNeckPitchTrajectory = new OneDoFJointQuinticTrajectoryGenerator("extendedNeckPitchTrajectory", jointForExtendedNeckPitchRange, trajectoryTimeProvider, registry);
-         extendedNeckPitchTrajectory.setFinalPosition(0.0);
+         extendedNeckPitchInitialAngle = new YoVariableDoubleProvider("extendedNeckPitchInitialAngle", registry);
+         extendedNeckPitchFinalAngle = new YoVariableDoubleProvider("extendedNeckPitchFinalAngle", registry);
+         extendedNeckPitchTrajectory = new CubicPolynomialTrajectoryGenerator("extendedNeckPitchTrajectory", extendedNeckPitchInitialAngle, extendedNeckPitchFinalAngle, trajectoryTimeProvider, registry);
          extendedNeckPitchTrajectory.initialize();
          extendedNeckPitchReceivedTime = new DoubleYoVariable("extendedNeckPitchReceived", registry);
       }
       else
       {
+         extendedNeckPitchInitialAngle = null;
+         extendedNeckPitchFinalAngle = null;
          extendedNeckPitchTrajectory = null;
          extendedNeckPitchReceivedTime = null;
       }
    }
 
-   private final OneDoFJointQuinticTrajectoryGenerator extendedNeckPitchTrajectory;
+   private final CubicPolynomialTrajectoryGenerator extendedNeckPitchTrajectory;
    private final DoubleYoVariable extendedNeckPitchReceivedTime;
    private final DoubleYoVariable extendedNeckPitchDesiredAngle = new DoubleYoVariable("extendedNeckPitchDesiredAngle", registry);
    private final DoubleYoVariable extendedNeckPitchDesiredVelocity = new DoubleYoVariable("extendedNeckPitchDesiredVelocity", registry);
+   private final YoVariableDoubleProvider extendedNeckPitchInitialAngle;
+   private final YoVariableDoubleProvider extendedNeckPitchFinalAngle;
    
    public void setUpperBodyControlGains(double kpUpperBody, double zetaUpperBody, double maxAcceleration, double maxJerk)
    {
@@ -234,8 +240,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
    {
       // TODO should find a default setup for the foot control modules
    }
-
-
 
    protected OneDoFJoint setupJointForExtendedNeckPitchRange()
    {
@@ -374,7 +378,8 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
             double desiredExtendedNeckPitchJointAngle = desiredHeadOrientationProvider.getDesiredExtendedNeckPitchJointAngle();
             if (!Double.isNaN(desiredExtendedNeckPitchJointAngle))
             {
-               extendedNeckPitchTrajectory.setFinalPosition(desiredExtendedNeckPitchJointAngle);
+               extendedNeckPitchInitialAngle.set(extendedNeckPitchFinalAngle.getValue());
+               extendedNeckPitchFinalAngle.set(desiredExtendedNeckPitchJointAngle);
                extendedNeckPitchTrajectory.initialize();
                extendedNeckPitchTrajectory.compute(0.0);
                extendedNeckPitchReceivedTime.set(yoTime.getDoubleValue());
