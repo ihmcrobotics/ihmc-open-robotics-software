@@ -72,8 +72,7 @@ public class ICPProportionalController
 
       this.controlDT = controlDT;
       
-      rateLimitedCMPOutput = AccelerationLimitedYoFrameVector2d.createAccelerationLimitedYoFrameVector2d("rateLimitedCMPOutput", "", registry, rateLimitCMP, accelerationLimitCMP, controlDT, filteredCMPOutput);
-
+      rateLimitedCMPOutput = AccelerationLimitedYoFrameVector2d.createAccelerationLimitedYoFrameVector2d("rateLimitedCMPOutput", "", registry, rateLimitCMP, accelerationLimitCMP, controlDT, filteredCMPOutput);      
       icpVelocityDirectionFrame = new Vector2dZUpFrame("icpVelocityDirectionFrame", worldFrame);
       
       icpPosition = new YoFramePoint("icpPosition", ReferenceFrame.getWorldFrame(), registry);
@@ -237,6 +236,16 @@ public class ICPProportionalController
       this.alphaCMP.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequencyHertz, controlDT));
       this.rateLimitCMP.set(rateLimitCMP);
       this.accelerationLimitCMP.set(accelerationLimitCMP);
+      
+      rateLimitedCMPOutput.setGainsByPolePlacement(2.0 * Math.PI * filterBreakFrequencyHertz, 1.0);
+      
+      double frequencyRatios = filterBreakFrequencyHertz/(accelerationLimitCMP/rateLimitCMP);
+      
+      if (frequencyRatios > 0.5)
+      {
+         System.err.println("Warning. Shouldn't have frequency ratios greater than 0.5 in ICPProportionalController!!");
+         System.err.println("frequencyRatios = " + frequencyRatios);
+      }
    }
 
    public class Vector2dZUpFrame extends ReferenceFrame
