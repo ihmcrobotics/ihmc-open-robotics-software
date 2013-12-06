@@ -75,10 +75,15 @@ public class AtlasKinematicCalibrator
     */
    protected void createDisplay()
    {
+      createDisplay(8192);
+   }
+
+   protected void createDisplay(int bufferSize)
+   {
       visualizer = new SDFFullRobotModelVisualizer(robot, 1, 0.01); //100hz sample rate
       visualizer.setFullRobotModel(fullRobotModel);
 
-      scs = new SimulationConstructionSet(robot,256);
+      scs = new SimulationConstructionSet(robot,bufferSize);
       scs.setGroundVisible(false);
       visualizer.registerSCS(scs);
       addDynamicGraphicObjects();
