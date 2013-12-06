@@ -402,6 +402,11 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
       return 0.4;
    }
 
+   public double getTrajectoryTimeHeadOrientation()
+   {
+      return 1.5;
+   }
+
    public double getKpUpperBody()
    {
       if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 80.0; //100.0;
