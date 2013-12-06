@@ -9,7 +9,7 @@ public class HeadToSubFrameTransformBuffer implements PendableBuffer
    private final int size;
    private final TimeStampedTransform3D[] transforms;
    private int currentIndex;
-   private long oldestTimeStamp;
+   private long oldestTimestamp;
    private long newestTimestamp;
 
    public HeadToSubFrameTransformBuffer(int size)
@@ -38,11 +38,11 @@ public class HeadToSubFrameTransformBuffer implements PendableBuffer
 
       if (transforms[currentIndex].getTimeStamp() == Long.MIN_VALUE)
       {
-         oldestTimeStamp = newestTimestamp;
+         oldestTimestamp = newestTimestamp;
       }
       else
       {
-         oldestTimeStamp = transforms[currentIndex].getTimeStamp();
+         oldestTimestamp = transforms[currentIndex].getTimeStamp();
       }
    }
 
@@ -61,17 +61,17 @@ public class HeadToSubFrameTransformBuffer implements PendableBuffer
 
       if (transforms[currentIndex].getTimeStamp() == Long.MIN_VALUE)
       {
-         oldestTimeStamp = newestTimestamp;
+         oldestTimestamp = newestTimestamp;
       }
       else
       {
-         oldestTimeStamp = transforms[currentIndex].getTimeStamp();
+         oldestTimestamp = transforms[currentIndex].getTimeStamp();
       }
    }
 
    public synchronized boolean isInRange(long timestamp)
    {
-      return ((timestamp >= oldestTimeStamp) && (timestamp <= newestTimestamp));
+      return ((timestamp >= oldestTimestamp) && (timestamp <= newestTimestamp));
    }
 
    public synchronized TimeStampedTransform3D interpolate(long timestamp)
@@ -127,5 +127,10 @@ public class HeadToSubFrameTransformBuffer implements PendableBuffer
    public long newestTimestamp()
    {
       return newestTimestamp;
+   }
+   
+   public long oldestTimestamp()
+   {
+      return oldestTimestamp;
    }
 }
