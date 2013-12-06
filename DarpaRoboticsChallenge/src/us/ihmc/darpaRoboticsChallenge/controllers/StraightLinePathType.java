@@ -14,7 +14,7 @@ public enum StraightLinePathType
    private static final String RIGHT_SHUFFLE_PATH_NAME = "Right Shuffle Path";
    private static final String LEFT_SHUFFLE_PATH_NAME = "Left Shuffle Path";
    private static final double SHUFFLE_STEP_LENGTH = 0.15;
-   private static final double SHUFFLE_STEP_WIDTH = 0.3;
+   private static final double SHUFFLE_STEP_WIDTH = 0.18;
    private static final double LEFT_SHUFFLE_ANGLE = -Math.PI / 2;
 
    public String getTypeName()
@@ -83,13 +83,13 @@ public enum StraightLinePathType
       return angle;
    }
 
-   public double getStepWidth()
+   public double getStepWidth(double stepLengthMultiplier)
    {
       double width = Double.NaN;
       switch (this)
       {
          case LEFT_SHUFFLE :
-            width = SHUFFLE_STEP_WIDTH;
+            width = SHUFFLE_STEP_WIDTH + getStepLength(stepLengthMultiplier);
 
             break;
 
@@ -99,7 +99,7 @@ public enum StraightLinePathType
             break;
 
          case RIGHT_SHUFFLE :
-            width = SHUFFLE_STEP_WIDTH;
+            width = SHUFFLE_STEP_WIDTH + getStepLength(stepLengthMultiplier);
 
             break;
 
