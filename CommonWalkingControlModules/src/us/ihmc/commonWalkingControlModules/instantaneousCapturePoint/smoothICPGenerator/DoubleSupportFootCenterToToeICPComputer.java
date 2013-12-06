@@ -333,7 +333,13 @@ public class DoubleSupportFootCenterToToeICPComputer
       {
          if (comeToStop.getBooleanValue())
          {
-            footLocationList.get(1).getPoint(doubleSupportEndICP); // center because of computeConstantCentersOfPressure
+            if (atAStop.getBooleanValue())
+            {
+               constantFootCenterCentersOfPressure.get(0).getPoint(doubleSupportEndICP);
+            } else
+            {
+               footLocationList.get(1).getPoint(doubleSupportEndICP); // center because of magic
+            }
             doubleSupportEndICPVelocity.set(0, 0, 0);
          }
          else
@@ -356,6 +362,8 @@ public class DoubleSupportFootCenterToToeICPComputer
          doubleSupportPolynomialTrajectory.initialize(doubleSupportDuration, singleSupportEndICP, singleSupportEndICPVelocity, doubleSupportEndICP,
                doubleSupportEndICPVelocity);
       }
+      
+      atAStop.set(comeToStop.getBooleanValue());
    }
 
    public void initializeDoubleSupport(ArrayList<FramePoint> footLocationList, ArrayList<ReferenceFrame> soleFrameList, double singleSupportDuration,
@@ -393,7 +401,6 @@ public class DoubleSupportFootCenterToToeICPComputer
 
       isInitialTransfer.set(false);
       comeToStop.set(footLocationList.size() <= 2);
-      atAStop.set(footLocationList.size() <= 2);
 
       NewDoubleSupportICPComputer.computeConstantCentersOfPressure(constantFootCenterCentersOfPressure, footLocationList, maxNumberOfConsideredFootsteps,
             isInitialTransfer.getBooleanValue());
@@ -652,8 +659,6 @@ public class DoubleSupportFootCenterToToeICPComputer
 
    public void reset(double time)
    {
-      atAStop.set(true);
-
       ///////////////////// Deleting all but the first two ReferenceFrames in soleFrameList
       ArrayList<ReferenceFrame> tempFrameList = new ArrayList<ReferenceFrame>();
 
