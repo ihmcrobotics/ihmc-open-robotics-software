@@ -1,28 +1,21 @@
 package us.ihmc.darpaRoboticsChallenge.calib;
 
-import java.awt.Color;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 
+import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.robotSide.RobotSide;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
-import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.DataBuffer;
+import com.yobotics.simulationconstructionset.IndexChangedListener;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
 
 public class AtlasWristLoopKinematicCalibrator extends AtlasCalibrationDataViewer
@@ -32,6 +25,50 @@ public class AtlasWristLoopKinematicCalibrator extends AtlasCalibrationDataViewe
    {
       super();
    }
+   
+   public void attachIndexChangedListener()
+   {
+      final DataBuffer dataBuffer = scs.getDataBuffer();
+      dataBuffer.attachIndexChangedListener(new IndexChangedListener()
+      {
+         @Override
+         public void indexChanged(int newIndex, double newTime)
+         {
+            System.out.println("showing yoIndex: "+ yoIndex.getIntegerValue() + "newIndex: "+newIndex);
+            debugPrint(yoIndex.getIntegerValue());
+         }
+      });
+   }
+
+   private void debugPrint(int index)
+   {
+      CalibUtil.setRobotModelFromData(fullRobotModel, (Map)q.get(index));
+      FramePose leftEE  = new FramePose(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT,  LimbName.ARM),new Point3d(+0.01,+0.13,0), CalibUtil.quat0);
+      FramePose rightEE = new FramePose(fullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM),new Point3d(+0.01,-0.13,0), CalibUtil.quat0);
+
+      leftEE.changeFrame(ReferenceFrame.getWorldFrame());
+      rightEE.changeFrame(ReferenceFrame.getWorldFrame());
+
+      Quat4d qLeft =leftEE.getOrientationCopy().getQuaternion();
+      Quat4d qRight =rightEE.getOrientationCopy().getQuaternion();
+
+      AxisAngle4d axLeft = new AxisAngle4d(), axRight = new AxisAngle4d();
+      axLeft.set(qLeft);
+      axRight.set(qRight);
+      System.out.println("qLeft:"+qLeft);
+      System.out.println("qRight:"+qRight);
+      System.out.println("axLeft:"+axLeft);
+      System.out.println("axRight:"+axRight);
+      
+      Quat4d qDiff = new Quat4d(qLeft);
+      qDiff.inverse();
+      qDiff.mul(qRight);
+      AxisAngle4d axDiff = new AxisAngle4d();
+      axDiff.set(qDiff);
+      System.out.println("axDiff:"+axDiff);
+      System.out.println();
+   }
+
    
    private ArrayList<OneDoFJoint> getArmJoints()
    {
@@ -49,22 +86,24 @@ public class AtlasWristLoopKinematicCalibrator extends AtlasCalibrationDataViewe
       return armJoints;
    }
    
-   public KinematicCalibrationWristLoopResidual getArmLoopResidualObject()
-   {
-      ArrayList<String> calJointNames = CalibUtil.toStringArrayList(getArmJoints());
-      return new KinematicCalibrationWristLoopResidual(fullRobotModel, calJointNames, (ArrayList)q);
-   }
+  
    
    
    
    public static void main(String[] arg) 
    {
+  
       AtlasWristLoopKinematicCalibrator calib = new AtlasWristLoopKinematicCalibrator();
       calib.loadData("data/coupledWristLog_20131204");
       
       // calJointNames order is the prm order
-      KinematicCalibrationWristLoopResidual residualFunc = calib.getArmLoopResidualObject();
+      ArrayList<String> calJointNames = CalibUtil.toStringArrayList(calib.getArmJoints());
+      KinematicCalibrationWristLoopResidual residualFunc = new KinematicCalibrationWristLoopResidual(calib.fullRobotModel, calJointNames, (ArrayList)calib.q);
+
       double[] prm = new double[residualFunc.getN()];
+      
+      //initial
+      
       double[] residual0 = residualFunc.calcResiduals(prm);
       calib.calibrate(residualFunc,prm, 100);
       double[] residual = residualFunc.calcResiduals(prm);
@@ -80,21 +119,24 @@ public class AtlasWristLoopKinematicCalibrator extends AtlasCalibrationDataViewe
       System.out.println("wristSpacing "+prm[prm.length-1]);
       
       //push data to visualizer
-      boolean start_scs=false;
+      boolean start_scs=true;
       if(start_scs)
       {
          //Yovariables for display
          YoFramePose yoResidual0 = new YoFramePose("residual0", "", ReferenceFrame.getWorldFrame(),calib.registry);
          YoFramePose yoResidual = new YoFramePose("residual", "",ReferenceFrame.getWorldFrame(),calib.registry);
-
-         calib.createDisplay();
+         
+         calib.createDisplay(calib.q.size());
+         calib.attachIndexChangedListener();
+         calib.createQoutYoVariables();
          
          for(int i=0;i<calib.q.size();i++)
          {
             CalibUtil.setRobotModelFromData(calib.fullRobotModel, CalibUtil.addQ((Map)calib.q.get(i),qoffset));
             yoResidual0.setXYZYawPitchRoll(Arrays.copyOfRange(residual0, i*RESIDUAL_DOF, i*RESIDUAL_DOF+6));
-            yoResidual.setXYZYawPitchRoll(Arrays.copyOfRange(residual, i*RESIDUAL_DOF, i*RESIDUAL_DOF+6));         
-            calib.displayUpdate();
+            yoResidual.setXYZYawPitchRoll(Arrays.copyOfRange(residual, i*RESIDUAL_DOF, i*RESIDUAL_DOF+6));      
+            calib.updateQoutYoVariables(i);
+            calib.displayUpdate(i);
          }
       } 
       

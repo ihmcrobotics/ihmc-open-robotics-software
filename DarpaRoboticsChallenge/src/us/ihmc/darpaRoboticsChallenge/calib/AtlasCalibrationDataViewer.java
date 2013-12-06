@@ -22,6 +22,7 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
@@ -32,6 +33,9 @@ public class AtlasCalibrationDataViewer extends AtlasKinematicCalibrator
    //YoVariables for Display
    private final YoFramePoint ypLeftEE, ypRightEE;
    private final YoFramePose yposeLeftEE, yposeRightEE;
+   Map<String,DoubleYoVariable> yoQout= new HashMap<>();
+   Map<String,DoubleYoVariable> yoQdiff= new HashMap<>();
+   
    public AtlasCalibrationDataViewer()
    {
       super();
@@ -60,7 +64,7 @@ public class AtlasCalibrationDataViewer extends AtlasKinematicCalibrator
    }
    
    @Override
-   protected void updateDynamicGraphicsObjects()
+   protected void updateDynamicGraphicsObjects(int index)
    {
       FramePoint
       leftEE=new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM)  ,0, 0.13,0),
@@ -74,7 +78,26 @@ public class AtlasCalibrationDataViewer extends AtlasKinematicCalibrator
       yposeRightEE.set(new FramePose(rightEE,new FrameOrientation(rightEE.getReferenceFrame())).changeFrameCopy(CalibUtil.world));
    }
    
+   public void createQoutYoVariables()
+   {
+      Map<String,Double> qout0 = (Map)qout.get(0);
+      for(String jointName: qout0.keySet())
+      {
+         yoQout.put(jointName, new DoubleYoVariable("qout_"+jointName, registry));
+         yoQdiff.put(jointName, new DoubleYoVariable("qdiff_"+jointName, registry));
+      }
+
+   }
    
+   public void updateQoutYoVariables(int index)
+   {
+      for(String jointName: qout.get(0).keySet())
+      {
+         yoQout.get(jointName).set((double)qout.get(index).get(jointName));
+         yoQdiff.get(jointName).set((double)qout.get(index).get(jointName)-(double)q.get(index).get(jointName));
+      }
+      
+   }
    
    public void loadData(String calib_file)
    {
@@ -150,27 +173,15 @@ public class AtlasCalibrationDataViewer extends AtlasKinematicCalibrator
    {
       AtlasWristLoopKinematicCalibrator calib = new AtlasWristLoopKinematicCalibrator();
       calib.loadData("data/manip_motions/log4.zip");
-      
-      Map<String,Double> qout0 = (Map)calib.qout.get(0);
-      Map<String,DoubleYoVariable> yoQout= new HashMap<>();
-      Map<String,DoubleYoVariable> yoQdiff= new HashMap<>();
-      for(String jointName: qout0.keySet())
-      {
-         yoQout.put(jointName, new DoubleYoVariable("qout_"+jointName, calib.registry));
-         yoQdiff.put(jointName, new DoubleYoVariable("qdiff_"+jointName, calib.registry));
-      }
+      calib.createQoutYoVariables();
       
       calib.createDisplay(calib.q.size());
       
       for(int i=0;i<calib.q.size();i++)
       {
          CalibUtil.setRobotModelFromData(calib.fullRobotModel, (Map)calib.q.get(i));
-         for(String jointName: qout0.keySet())
-         {
-            yoQout.get(jointName).set((double)calib.qout.get(i).get(jointName));
-            yoQdiff.get(jointName).set((double)calib.q.get(i).get(jointName)-(double)calib.qout.get(i).get(jointName));
-         }
-         calib.displayUpdate();
+         calib.updateQoutYoVariables(i);
+         calib.displayUpdate(i);
       }
       
    }

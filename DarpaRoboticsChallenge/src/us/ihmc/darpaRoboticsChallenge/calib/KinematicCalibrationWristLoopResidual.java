@@ -91,16 +91,45 @@ public class KinematicCalibrationWristLoopResidual implements FunctionNtoM
          if (AtlasKinematicCalibrator.RESIDUAL_DOF==6)
          {
 
-            double scaleRadToCM = 0.01/(Math.PI/2); //30deg -> 1cm
+            boolean QUAT_DIFF=false;
+            double scaleRadToCM = 1;//0.01/(Math.PI/2); //30deg -> 1cm
+            if(QUAT_DIFF)
+            {
               Quat4d qErr = leftEE.getOrientationCopy().getQuaternion();
               qErr.inverse();
               qErr.mul(rightEE.getOrientationCopy().getQuaternion());
+              //qErr.normalize();
               AxisAngle4d axErr = new AxisAngle4d();
               axErr.set(qErr);
               output[outputCounter++] = scaleRadToCM*axErr.getX()*axErr.getAngle();
               output[outputCounter++] = scaleRadToCM*axErr.getY()*axErr.getAngle();
               output[outputCounter++] = scaleRadToCM*axErr.getZ()*axErr.getAngle();
             }
+            else
+            {
+               assert(leftEE.getReferenceFrame()==rightEE.getReferenceFrame());
+               AxisAngle4d axLeft = new AxisAngle4d(), axRight = new AxisAngle4d();
+               axLeft.set(leftEE.getOrientationCopy().getQuaternion());
+               axRight.set(rightEE.getOrientationCopy().getQuaternion());
+               
+               if( axLeft.angle < 0 ) {
+                  axLeft.angle *= -1;
+                  axLeft.x *= -1;
+                  axLeft.y *= -1;
+                  axLeft.z *= -1;
+               }
+               if( axRight.angle < 0 ) {
+                  axRight.angle *= -1;
+                  axRight.x *= -1;
+                  axRight.y *= -1;
+                  axRight.z *= -1;
+               }
+               
+               output[outputCounter++] = scaleRadToCM* (axLeft.x*axLeft.angle - axRight.x*axRight.angle); 
+               output[outputCounter++] = scaleRadToCM* (axLeft.y*axLeft.angle - axRight.y*axRight.angle);
+               output[outputCounter++] = scaleRadToCM* (axLeft.z*axLeft.angle - axRight.z*axRight.angle);
+            }
+          }
       }
    }
    

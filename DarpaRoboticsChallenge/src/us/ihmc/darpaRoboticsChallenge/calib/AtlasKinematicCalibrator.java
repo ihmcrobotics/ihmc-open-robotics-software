@@ -36,6 +36,7 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
+import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
@@ -57,7 +58,8 @@ public class AtlasKinematicCalibrator
   
    protected final YoVariableRegistry registry;
    protected SimulationConstructionSet scs;
-  
+   IntegerYoVariable yoIndex;
+ 
 
    public AtlasKinematicCalibrator()
    {
@@ -68,6 +70,8 @@ public class AtlasKinematicCalibrator
       registry= robot.getRobotsYoVariableRegistry();
       fullRobotModel = robotLoader.createFullRobotModel(jointMap);
       joints = fullRobotModel.getOneDoFJoints();
+      yoIndex =  new IntegerYoVariable("index", registry);
+
    }
    
    /**
@@ -100,13 +104,14 @@ public class AtlasKinematicCalibrator
    /**
     * do not override, use updateDynamicGraphicObjects
     */
-   protected void displayUpdate()
+   protected void displayUpdate(int index)
    {
-      updateDynamicGraphicsObjects();
+      yoIndex.set(index);
+      updateDynamicGraphicsObjects(index);
       visualizer.update(1);
    }
    
-   protected void updateDynamicGraphicsObjects()
+   protected void updateDynamicGraphicsObjects(int index)
    {
       
    }
