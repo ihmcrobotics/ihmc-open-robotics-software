@@ -162,7 +162,7 @@ public class DetectChessboardInKinematicsData
          out.println("# target-to-camera Rotation matrix then Translation");
          for( int i = 0; i < 3; i++ ) {
             for( int j = 0; j < 3; j++ ) {
-               out.printf("%f ",targetToCamera.getR().get(j,i));
+               out.printf("%f ",targetToCamera.getR().get(i,j));
             }
             out.println();
          }
@@ -186,7 +186,7 @@ public class DetectChessboardInKinematicsData
 
          UtilImageIO.saveImage(orig,f.getAbsolutePath() + "/detected.jpg");
 //         if( num++ == 0 )
-            ShowImages.showWindow(orig,f.getName());
+//            ShowImages.showWindow(orig,f.getName());
       }
 
 
