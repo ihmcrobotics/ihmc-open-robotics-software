@@ -270,6 +270,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable holdKpXY = new DoubleYoVariable("holdKpXY", registry);
    private final DoubleYoVariable holdKpOrientation = new DoubleYoVariable("holdKpOrientation", registry);
    private final DoubleYoVariable holdZeta = new DoubleYoVariable("holdZeta", registry);
+
+   private final DoubleYoVariable toeOffKpXY = new DoubleYoVariable("toeOffKpXY", registry);
+   private final DoubleYoVariable toeOffKpOrientation = new DoubleYoVariable("toeOffKpOrientation", registry);
+   private final DoubleYoVariable toeOffZeta = new DoubleYoVariable("toeOffZeta", registry);
    
    private final DoubleYoVariable swingMaxPositionAcceleration = new DoubleYoVariable("swingMaxPositionAcceleration", registry);
    private final DoubleYoVariable swingMaxPositionJerk = new DoubleYoVariable("swingMaxPositionJerk", registry);
@@ -471,6 +475,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       holdKpOrientation.set(walkingControllerParameters.getHoldKpOrientation());
       holdZeta.set(walkingControllerParameters.getHoldZeta());
 
+      toeOffKpXY.set(walkingControllerParameters.getToeOffKpXY());
+      toeOffKpOrientation.set(walkingControllerParameters.getToeOffKpOrientation());
+      toeOffZeta.set(walkingControllerParameters.getToeOffZeta());
+
       swingMaxPositionAcceleration.set(walkingControllerParameters.getSwingMaxPositionAcceleration());
       swingMaxPositionJerk.set(walkingControllerParameters.getSwingMaxPositionJerk());
       swingMaxOrientationAcceleration.set(walkingControllerParameters.getSwingMaxOrientationAcceleration());
@@ -523,7 +531,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
          
                   
-         VariableChangedListener swingGainsChangedListener = createSwingGainsChangedListener(endEffectorControlModule);
+         VariableChangedListener swingGainsChangedListener = createEndEffectorGainsChangedListener(endEffectorControlModule);
          swingGainsChangedListener.variableChanged(null);
 
          endEffectorControlModule.setParameters(minJacobianDeterminantForSingularityEscape, singularityEscapeNullspaceMultiplierSwingLeg.getDoubleValue());
@@ -661,7 +669,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    }
    
    
-   private VariableChangedListener createSwingGainsChangedListener(final EndEffectorControlModule endEffectorControlModule)
+   private VariableChangedListener createEndEffectorGainsChangedListener(final EndEffectorControlModule endEffectorControlModule)
    {
       VariableChangedListener ret = new VariableChangedListener()
       {
@@ -669,6 +677,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             endEffectorControlModule.setHoldGains(holdKpXY.getDoubleValue(), holdKpOrientation.getDoubleValue(), holdZeta.getDoubleValue());
             endEffectorControlModule.setSwingGains(swingKpXY.getDoubleValue(), swingKpZ.getDoubleValue(), swingKpOrientation.getDoubleValue(), swingZetaXYZ.getDoubleValue(), swingZetaOrientation.getDoubleValue());
+            endEffectorControlModule.setToeOffGains(toeOffKpXY.getDoubleValue(), toeOffKpOrientation.getDoubleValue(), toeOffZeta.getDoubleValue());
             endEffectorControlModule.setMaxAccelerationAndJerk(swingMaxPositionAcceleration.getDoubleValue(), swingMaxPositionJerk.getDoubleValue(), 
                   swingMaxOrientationAcceleration.getDoubleValue(), swingMaxOrientationJerk.getDoubleValue());
          }};
@@ -683,6 +692,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          swingMaxPositionJerk.addVariableChangedListener(ret);
          swingMaxOrientationAcceleration.addVariableChangedListener(ret);
          swingMaxOrientationJerk.addVariableChangedListener(ret);
+
+         holdKpXY.addVariableChangedListener(ret);
+         holdKpOrientation.addVariableChangedListener(ret);
+         holdZeta.addVariableChangedListener(ret);
+
+         toeOffKpXY.addVariableChangedListener(ret);
+         toeOffKpOrientation.addVariableChangedListener(ret);
+         toeOffZeta.addVariableChangedListener(ret);
    
       return ret;
    }
