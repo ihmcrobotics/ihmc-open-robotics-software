@@ -60,7 +60,6 @@ public class AtlasCalibrationDataViewer extends AtlasKinematicCalibrator
       DynamicGraphicCoordinateSystem dgPoseRightEE = new DynamicGraphicCoordinateSystem("dgposeRightEE", yposeRightEE, 5*scale);
       scs.addDynamicGraphicObject(dgPoseLeftEE);
       scs.addDynamicGraphicObject(dgPoseRightEE);
-
    }
    
    @Override

@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.calib;
 
 import static java.lang.Double.parseDouble;
 import georegression.geometry.RotationMatrixGenerator;
+import georegression.struct.point.Vector3D_F64;
 import georegression.struct.se.Se3_F64;
 
 import java.awt.BorderLayout;
@@ -35,6 +36,9 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+
+import boofcv.misc.BoofMiscOps;
+import boofcv.struct.calib.IntrinsicParameters;
 
 import com.yobotics.simulationconstructionset.IndexChangedListener;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
@@ -103,6 +107,12 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
             lblDisplay.repaint();
          }
       });
+      
+      String intrinsicFile = "../DarpaRoboticsChallenge/data/calibration_images/intrinsic_ros.xml";
+      IntrinsicParameters intrinsic = BoofMiscOps.loadXML(intrinsicFile);
+      double fovh=Math.atan(intrinsic.getCx()/intrinsic.getFx())+Math.atan((intrinsic.width-intrinsic.getCx())/intrinsic.getFx());
+      System.out.println("Set fov to " + Math.toDegrees(fovh) + " from " + intrinsicFile)    ;
+      scs.setFieldOfView(fovh);
    }
    
    @Override
@@ -137,12 +147,6 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       Transform3D targetToCamera = new Transform3D((Transform3D)mEntry.get(TARGET_TO_CAMERA_KEY)); //in camera frame
       System.out.println("Original Rot\n"+targetToCamera);
 
-      //inverse the rotation matrix ..
-      Matrix3d invRot = new Matrix3d();
-      targetToCamera.get(invRot);
-      invRot.invert();
-      targetToCamera.setRotation(invRot);
-      
       //update
       yposeBoard.set(new FramePose(cameraImageFrame, targetToCamera).changeFrameCopy(CalibUtil.world));
       System.out.println("Index: "+ index);
@@ -215,27 +219,14 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
          targetToCamera.getT().set( parseDouble(s[0]),parseDouble(s[1]),parseDouble(s[2]));
 
          System.out.println("targetToCamera:" + targetToCamera);
-         
-
-//         Se3_F64 cameraToJMonkey = new Se3_F64();
-//         RotationMatrixGenerator.eulerXYZ(-Math.PI / 2, 0, -Math.PI / 2, cameraToJMonkey.getR());
-//         System.out.println();
-         //load targetToCamera transform
-//         Se3_F64 targetToEye = targetToCamera.concat(cameraToJMonkey,null);
-//         System.out.println("T in camera robot: "+targetToEye.getT());
-         Se3_F64 targetToEye = targetToCamera;
 
          //copy Translation and Rotation
          Transform3D transform = new Transform3D();
-         Vector3d T = new Vector3d();
-         T.x = targetToEye.getT().getX();
-         T.y = targetToEye.getT().getY();
-         T.z = targetToEye.getT().getZ();
-         transform.setTranslation(T);
-         
-         
+         Vector3D_F64 T = targetToCamera.T;
+         transform.setTranslation(new Vector3d(T.x, T.y, T.z));
+        
          Matrix3d matrix3d = new Matrix3d();
-         MatrixTools.denseMatrixToMatrix3d(targetToEye.getR(),matrix3d,0,0);
+         MatrixTools.denseMatrixToMatrix3d(targetToCamera.getR(),matrix3d,0,0);
          transform.setRotation(matrix3d);
          mEntry.put(TARGET_TO_CAMERA_KEY,transform);                 
 
@@ -245,8 +236,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
          
          // load joint angles
          Properties properties = new Properties();
-         properties.load(new FileReader(new File(f,"q.m")));
-         
+         properties.load(new FileReader(new File(f,"q.m")));         
          Map<String,Double> qEntry = new HashMap<>();
          for(Map.Entry e : properties.entrySet() ) {
             qEntry.put((String)e.getKey(),Double.parseDouble((String)e.getValue()));
@@ -255,10 +245,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
          //storage
          metaData.add(mEntry);
          q.add(qEntry);
-         
       }
-
-
    }
    
    
