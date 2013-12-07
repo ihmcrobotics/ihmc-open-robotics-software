@@ -131,8 +131,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
          // parse targetToCamera transform
          BufferedReader reader = new BufferedReader(new FileReader(fileTarget));
 
-         Se3_F64 rotateTarget = new Se3_F64();
-         Se3_F64 translateToCamera = new Se3_F64();
+         Se3_F64 targetToCamera = new Se3_F64();
 
          // skip comments
          reader.readLine();
@@ -141,18 +140,17 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
          String row2[] = reader.readLine().split(" ");
 
          for( int col = 0; col < 3; col++ ) {
-            rotateTarget.getR().set(0,col, parseDouble(row0[col]));
-            rotateTarget.getR().set(1,col, parseDouble(row1[col]));
-            rotateTarget.getR().set(2,col, parseDouble(row2[col]));
+            targetToCamera.getR().set(0,col, parseDouble(row0[col]));
+            targetToCamera.getR().set(1,col, parseDouble(row1[col]));
+            targetToCamera.getR().set(2,col, parseDouble(row2[col]));
          }
 
          reader.readLine();
          String s[] = reader.readLine().split(" ");
-         translateToCamera.getT().set( parseDouble(s[0]),parseDouble(s[1]),parseDouble(s[2]));
+         targetToCamera.getT().set( parseDouble(s[0]),parseDouble(s[1]),parseDouble(s[2]));
 
-         Se3_F64 foo = rotateTarget.concat(translateToCamera,null);
-
-         System.out.println("T in camera      : " + foo.getT());
+         Se3_F64 cameraToJMonkey = new Se3_F64();
+         RotationMatrixGenerator.eulerXYZ(-Math.PI / 2, 0, -Math.PI / 2, cameraToJMonkey.getR());
 
          // load joint angles
          Properties properties = new Properties();
@@ -165,19 +163,8 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
             entries.put((String)e.getKey(),Double.parseDouble((String)e.getValue()));
          }
 
-         Se3_F64 cameraToEye = new Se3_F64();
-         RotationMatrixGenerator.eulerXYZ(-Math.PI / 2, 0, -Math.PI / 2, cameraToEye.getR());
+         Se3_F64 targetToEye = targetToCamera.concat(cameraToJMonkey,null);
 
-//         cameraToEye.getR().print();
-//
-//         CommonOps.transpose(cameraToEye.getR());
-//
-//         System.out.println("targetToCamera");
-//         targetToCamera.print();
-//         System.out.println("cameraToEye");
-//         cameraToEye.print();
-
-         Se3_F64 targetToEye = foo.concat(cameraToEye, null);
 
          System.out.println("T in camera robot: "+targetToEye.getT());
 
