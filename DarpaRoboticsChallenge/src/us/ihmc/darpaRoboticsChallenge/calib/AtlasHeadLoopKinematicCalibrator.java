@@ -7,8 +7,6 @@ import georegression.struct.se.Se3_F64;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -23,12 +21,8 @@ import java.util.Properties;
 import javax.imageio.ImageIO;
 import javax.media.j3d.Transform3D;
 import javax.swing.ImageIcon;
-import javax.swing.JCheckBox;
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -60,11 +54,10 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    private final YoFramePoint ypLeftEE, ypRightEE;
    private final YoFramePose yposeLeftEE, yposeRightEE, yposeBoard,yposeLeftCamera;
    private final ArrayList<Map<String,Object>> metaData;
-   final ReferenceFrame cameraFrame;
    
    private ImageIcon iiDisplay = null;
-   private boolean alignCamera = true;
 
+   private final IntrinsicParameters intrinsic = new IntrinsicParameters();
    
    public AtlasHeadLoopKinematicCalibrator()
    {
@@ -76,7 +69,6 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       yposeBoard = new YoFramePose("board","",ReferenceFrame.getWorldFrame(),registry);
       yposeLeftCamera = new YoFramePose("leftCamera","",ReferenceFrame.getWorldFrame(),registry);
 
-      cameraFrame = fullRobotModel.getCameraFrame("stereo_camera_left");
       metaData = new ArrayList<>();
     }
 
@@ -95,7 +87,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       DynamicGraphicCoordinateSystem dgPoseLeftEE = new DynamicGraphicCoordinateSystem("dgposeLeftEE", yposeLeftEE, 5*scale);
       DynamicGraphicCoordinateSystem dgPoseRightEE = new DynamicGraphicCoordinateSystem("dgposeRightEE", yposeRightEE, 5*scale);
       DynamicGraphicCoordinateSystem dgPoseBoard = new DynamicGraphicCoordinateSystem("dgposeBoard", yposeBoard, 5*scale);
-      DynamicGraphicCoordinateSystem dgPoseLeftCamera = new DynamicGraphicCoordinateSystem("dgposeLeftCamera", yposeLeftCamera, 5*scale);
+      DynamicGraphicCoordinateSystem dgPoseLeftCamera = new DynamicGraphicCoordinateSystem("dgposeLeftCamera", yposeLeftCamera, 30*scale);
       scs.addDynamicGraphicObject(dgPoseLeftEE);
       scs.addDynamicGraphicObject(dgPoseRightEE);
       scs.addDynamicGraphicObject(dgPoseBoard);
@@ -115,33 +107,14 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
          {
             updateBoard((newIndex+q.size()-1) % q.size());
             lblDisplay.repaint();
-            if(alignCamera)
-               scsAlignCameraToRobotCamera();
          }
       });
-      //scs.getStandardSimulationGUI().selectPanel("Image");
       
-      //Set Camera Info
       String intrinsicFile = "../DarpaRoboticsChallenge/data/calibration_images/intrinsic_ros.xml";
       IntrinsicParameters intrinsic = BoofMiscOps.loadXML(intrinsicFile);
       double fovh=Math.atan(intrinsic.getCx()/intrinsic.getFx())+Math.atan((intrinsic.width-intrinsic.getCx())/intrinsic.getFx());
-      System.out.println("Set fov to " + Math.toDegrees(fovh) + "degs from " + intrinsicFile)    ;
+      System.out.println("Set fov to " + Math.toDegrees(fovh) + " from " + intrinsicFile)    ;
       scs.setFieldOfView(fovh);
-      scs.maximizeMainWindow();
-      
-      JCheckBox chkAlignCamera = new JCheckBox("AlignCamera", alignCamera);
-      chkAlignCamera.addItemListener(new ItemListener()
-      {
-         
-         @Override
-         public void itemStateChanged(ItemEvent e)
-         {
-            alignCamera = !alignCamera;
-            if(alignCamera)
-               scsAlignCameraToRobotCamera();
-         }
-      });
-      scs.addCheckBox(chkAlignCamera);
    }
    
    @Override
@@ -161,19 +134,11 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       
       updateBoard(index);
    }
-   
-   private void scsAlignCameraToRobotCamera()
-   {
-      //Camera Pos(behind the eye 10cm), Fix(Eye farme origin)
-      FramePoint cameraPos = new FramePoint(cameraFrame,-0.01,0,0).changeFrameCopy(CalibUtil.world);
-      FramePoint cameraFix = new FramePoint(cameraFrame).changeFrameCopy(CalibUtil.world);
-      scs.setCameraPosition(cameraPos.getX(), cameraPos.getY(), cameraPos.getZ());
-      scs.setCameraFix(cameraFix.getX(), cameraFix.getY(), cameraFix.getZ());
-   }
 
    private void updateBoard(int index)
    {
       //update camera pose display
+      ReferenceFrame cameraFrame = fullRobotModel.getCameraFrame("stereo_camera_left");
       Transform3D imageToCamera = new Transform3D(new double[]{ 0,0,1,0,  -1,0,0,0,  0,-1,0,0,  0,0,0,1});
       ReferenceFrame cameraImageFrame = ReferenceFrame.
             constructBodyFrameWithUnchangingTransformToParent("cameraImage", cameraFrame,imageToCamera); 
@@ -182,12 +147,12 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       //update board
       Map<String,Object> mEntry = metaData.get(index);
       Transform3D targetToCamera = new Transform3D((Transform3D)mEntry.get(TARGET_TO_CAMERA_KEY)); //in camera frame
-//      System.out.println("Original Rot\n"+targetToCamera);
+      System.out.println("Original Rot\n"+targetToCamera);
 
       //update
       yposeBoard.set(new FramePose(cameraImageFrame, targetToCamera).changeFrameCopy(CalibUtil.world));
-//      System.out.println("Index: "+ index);
-//      System.out.println(targetToCamera);
+      System.out.println("Index: "+ index);
+      System.out.println(targetToCamera);
 
       //image update
       iiDisplay.setImage((BufferedImage)mEntry.get(CAMERA_IMAGE_KEY));
@@ -254,6 +219,8 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
          reader.readLine();
          String s[] = reader.readLine().split(" ");
          targetToCamera.getT().set( parseDouble(s[0]),parseDouble(s[1]),parseDouble(s[2]));
+
+         System.out.println("targetToCamera:" + targetToCamera);
 
          //copy Translation and Rotation
          Transform3D transform = new Transform3D();
