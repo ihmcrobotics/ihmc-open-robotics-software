@@ -31,6 +31,10 @@ public class FingerStateProvider implements ObjectConsumer<FingerStatePacket>
    
    public RobotSide getSide()
    {
-      return packetQueue.peek().getRobotSide();
+      if(isNewFingerStateAvailable())
+      {
+         return packetQueue.peek().getRobotSide();
+      }
+      return null;
    }
 }
