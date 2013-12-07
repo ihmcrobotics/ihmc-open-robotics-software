@@ -785,8 +785,17 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
          else
          {
-            limitICPToMiddleOfFootOrInside(RobotSide.LEFT, desiredICPLocal);
-            limitICPToMiddleOfFootOrInside(RobotSide.RIGHT, desiredICPLocal);
+            desiredICPLocal.changeFrame(referenceFrames.getMidFeetZUpFrame());
+            desiredICPLocal.setX(desiredICPLocal.getX() + icpStandOffsetX.getDoubleValue());
+            desiredICPLocal.setY(desiredICPLocal.getY() + icpStandOffsetY.getDoubleValue());            
+            
+            FrameConvexPolygon2d supportPolygonInMidFeetZUp = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
+            supportPolygonInMidFeetZUp.orthogonalProjection(desiredICPLocal);
+            supportPolygonInMidFeetZUp.pullPointTowardsCentroid(desiredICPLocal, 0.10);
+            
+            desiredICPLocal.changeFrame(worldFrame);
+//            limitICPToMiddleOfFootOrInside(RobotSide.LEFT, desiredICPLocal);
+//            limitICPToMiddleOfFootOrInside(RobotSide.RIGHT, desiredICPLocal);
          }
          
          desiredICP.set(desiredICPLocal);
