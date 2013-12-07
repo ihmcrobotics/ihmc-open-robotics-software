@@ -19,6 +19,7 @@ public interface ArmControllerParameters
    public abstract double getArmTaskspaceMaxJerk();
 
    public abstract boolean useDecoupledTaskspaceControl();
+   public abstract boolean useInverseKinematicsTaskspaceControl();
    public abstract String[] getDefaultDecoupledArmControlHandOrientationJointNames(RobotSide robotSide);
    public abstract String[] getDefaultDecoupledArmControlHandPositionJointNames(RobotSide robotSide);
    public abstract String[] getDefaultDecoupledArmControlHandJointspaceJointNames(RobotSide robotSide);

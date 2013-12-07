@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameter
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.SE3PDGains;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.InverseKinematicsTaskspaceHandPositionControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.JointSpaceHandControlControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LoadBearingCylindricalHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LoadBearingPlaneHandControlState;
@@ -177,6 +178,11 @@ public class IndividualHandControlModule
          taskSpacePositionControlState = new TaskspaceHandDecoupledPositionOrientationControlState(namePrefix, IndividualHandControlState.TASK_SPACE_POSITION, robotSide, momentumBasedController,
                armControlParameters, base, endEffector, trajectoryTimeProvider, dynamicGraphicObjectsListRegistry, registry);
       }
+      else if(armControlParameters.useInverseKinematicsTaskspaceControl())
+      {
+         taskSpacePositionControlState = new InverseKinematicsTaskspaceHandPositionControlState(namePrefix, IndividualHandControlState.TASK_SPACE_POSITION, robotSide, momentumBasedController, 
+               jacobianId, base, endEffector, dynamicGraphicObjectsListRegistry, armControlParameters, controlDT, registry);
+      }
       else
       {
          taskSpacePositionControlState = new TaskspaceHandPositionControlState(namePrefix, IndividualHandControlState.TASK_SPACE_POSITION, robotSide, momentumBasedController,
@@ -324,7 +330,7 @@ public class IndividualHandControlModule
       RigidBodySpatialAccelerationControlModule rigidBodySpatialAccelerationControlModule =
          getOrCreateRigidBodySpatialAccelerationControlModule(frameToControlPoseOf);
       rigidBodySpatialAccelerationControlModule.setGains(gains);
-      state.setTrajectory(positionTrajectory, orientationTrajectory, finalDesiredJointAngles, base, rigidBodySpatialAccelerationControlModule);
+      state.setTrajectory(positionTrajectory, orientationTrajectory, finalDesiredJointAngles, base, rigidBodySpatialAccelerationControlModule, frameToControlPoseOf);
       requestedState.set(state.getStateEnum());
       stateMachine.checkTransitionConditions();
    }

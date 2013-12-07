@@ -124,7 +124,7 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
    }
 
    public void setTrajectory(PositionTrajectoryGenerator positionTrajectoryGenerator, OrientationTrajectoryGenerator orientationTrajectoryGenerator,
-         Map<OneDoFJoint, Double> finalDesiredJointAngles, RigidBody base, RigidBodySpatialAccelerationControlModule rigidBodySpatialAccelerationControlModule)
+         Map<OneDoFJoint, Double> finalDesiredJointAngles, RigidBody base, RigidBodySpatialAccelerationControlModule rigidBodySpatialAccelerationControlModule, ReferenceFrame frameToControlPoseOf)
    {
       this.positionTrajectoryGenerator = positionTrajectoryGenerator;
       this.orientationTrajectoryGenerator = orientationTrajectoryGenerator;
