@@ -46,7 +46,7 @@ public class AtlasCalibrationDataViewer extends AtlasKinematicCalibrator
     }
 
    @Override
-   protected void addDynamicGraphicObjects()
+   protected void setupDynamicGraphicObjects()
    {
       double transparency = 0.5;
       double scale=0.02;

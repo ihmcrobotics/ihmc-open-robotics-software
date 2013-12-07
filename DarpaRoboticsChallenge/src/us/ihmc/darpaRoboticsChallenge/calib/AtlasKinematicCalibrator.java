@@ -50,8 +50,8 @@ public class AtlasKinematicCalibrator
    protected final SDFFullRobotModel fullRobotModel;
    
    protected final OneDoFJoint[] joints;
-   protected final ArrayList<Map<String, Object>> q = new ArrayList<>();
-   protected final ArrayList<Map<String, Object>> qout = new ArrayList<>();
+   protected final ArrayList<Map<String, Double>> q = new ArrayList<>();
+   protected final ArrayList<Map<String, Double>> qout = new ArrayList<>();
    private SDFFullRobotModelVisualizer visualizer=null;
    final static int RESIDUAL_DOF = 6;
    final static boolean DEBUG=false;
@@ -90,14 +90,14 @@ public class AtlasKinematicCalibrator
       scs = new SimulationConstructionSet(robot,bufferSize);
       scs.setGroundVisible(false);
       visualizer.registerSCS(scs);
-      addDynamicGraphicObjects();
+      setupDynamicGraphicObjects();
 
       scs.startOnAThread();
       
    }
    
    
-   protected void addDynamicGraphicObjects()
+   protected void setupDynamicGraphicObjects()
    {
       
    }
