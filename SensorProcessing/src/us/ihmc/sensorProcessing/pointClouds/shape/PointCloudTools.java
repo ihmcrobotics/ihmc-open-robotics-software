@@ -323,13 +323,13 @@ public class PointCloudTools
             //out[point.neighbors.size + 1] = Math.log((TAU_MAX + in[2]) / TAU_MAX);
          }
 
-         public int getN()
+         public int getInputsN()
          {
             // phi, theta, tau
             return 2;
          }
 
-         public int getM()
+         public int getOutputsM()
          {
             // two log boundary functions
             return neighbors.length + 2;

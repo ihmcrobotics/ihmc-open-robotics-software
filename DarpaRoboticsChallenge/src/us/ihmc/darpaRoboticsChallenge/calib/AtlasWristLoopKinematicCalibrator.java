@@ -88,7 +88,7 @@ public class AtlasWristLoopKinematicCalibrator extends AtlasCalibrationDataViewe
       ArrayList<String> calJointNames = CalibUtil.toStringArrayList(calib.getArmJoints());
       KinematicCalibrationWristLoopResidual residualFunc = new KinematicCalibrationWristLoopResidual(calib.fullRobotModel, calJointNames, (ArrayList)calib.q);
 
-      double[] prm = new double[residualFunc.getN()];
+      double[] prm = new double[residualFunc.getInputsN()];
       
       //initial
       double[] residual0 = residualFunc.calcResiduals(prm);
