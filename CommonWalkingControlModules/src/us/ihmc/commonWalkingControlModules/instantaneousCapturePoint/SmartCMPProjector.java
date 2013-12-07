@@ -38,8 +38,8 @@ public class SmartCMPProjector
       cmpEdgeProjectionInside = new DoubleYoVariable("cmpEdgeProjectionInside", registry);
       minICPToCMPProjection = new DoubleYoVariable("minICPToCMPProjection", registry);
 
-      cmpEdgeProjectionInside.set(0.06);
-      minICPToCMPProjection.set(0.04);
+      cmpEdgeProjectionInside.set(0.04); //0.06);
+      minICPToCMPProjection.set(0.06); //0.04);
 
       if (dynamicGraphicObjectsListRegistry == null)
          VISUALIZE = false;
