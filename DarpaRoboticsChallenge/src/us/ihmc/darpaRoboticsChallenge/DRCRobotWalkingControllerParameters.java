@@ -503,4 +503,19 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    {
       return DRCConfigParameters.HOLD_HANDS_IN_CHEST_FRAME_WHEN_WALKING;
    }
+
+   public double getToeOffKpXY()
+   {
+      return 100.0;
+   }
+
+   public double getToeOffKpOrientation()
+   {
+      return 200.0;
+   }
+
+   public double getToeOffZeta()
+   {
+      return 0.4;
+   }
 }
