@@ -8,7 +8,7 @@ public class DRCConfigParameters
    public static final boolean USE_MANIPULATION_DECOUPLED_TASKSPACE_CONTROL = false;
    public static final boolean USE_INVERSE_KINEMATICS_TASKSPACE_CONTROL = false;
 // When false and desired hand pose from the GUI is in world, the robot will hold the desired hand pose in world when walking. BE CAREFUL with that option! 
-   public static final boolean HOLD_HANDS_IN_CHEST_FRAME_WHEN_WALKING = false;
+   public static final boolean HOLD_HANDS_IN_CHEST_FRAME_WHEN_WALKING = true;
 
    public static final boolean CORRUPT_SIMULATION_MODEL = false;
 
@@ -38,7 +38,7 @@ public class DRCConfigParameters
    public static final boolean LIMIT_CONTROLLER_OUTPUT_TORQUES = false;    // true;//True causes hip oscillations or jerk in simulation
 
    // Limit the controller to use only a certain percentage of maximum torque that the robot can provide
-   public static final double MAX_TORQUE_TO_USE_IN_PERCENT = 0.98;
+   public static final double MAX_TORQUE_TO_USE_IN_PERCENT = 1.2;
 
    public static final boolean USE_PERFECT_SENSORS = false;
 
