@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.OrientationTrajectoryGen
 import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
@@ -25,6 +26,8 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 
 public class TrajectoryBasedNumericalInverseKinematicsCalculator
@@ -41,6 +44,7 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
    private final TwistCalculator twistCalculator;
    private final FramePoint endEffectorPositionInFrameToControlPoseOf;
    private final FrameOrientation endEffectorOrientationInFrameToControlPoseOf;
+   
 
    // TODO: YoVariableize desired variables
    private final FramePoint desiredPosition = new FramePoint(worldFrame);
@@ -100,8 +104,14 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
 
    private final Vector3d desiredVelocityVector = new Vector3d();
    private final Vector3d desiredAngularVelocityVector = new Vector3d();
+   
+   
+   // Visualization
+   
+   private final FramePose desiredTrajectoryPose = new FramePose();
+   private final YoFramePose yoDesiredTrajectoryPose = new YoFramePose("desiredTrajectoryPose", "", worldFrame, registry);
 
-   public TrajectoryBasedNumericalInverseKinematicsCalculator(RigidBody base, RigidBody endEffector, double controlDT, TwistCalculator twistCalculator, YoVariableRegistry parentRegistry)
+   public TrajectoryBasedNumericalInverseKinematicsCalculator(RigidBody base, RigidBody endEffector, double controlDT, TwistCalculator twistCalculator, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.base = base;
       this.dt = controlDT;
@@ -144,6 +154,8 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
       ikVelocityErrorGain.set(250.0);
       ikAlpha.set(0.05);
 
+      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("", yoDesiredTrajectoryPose.createDynamicGraphicCoordinateSystem(endEffector.getName() + "DesiredTrajectoryPose", 0.2));
+      
       parentRegistry.addChild(registry);
    }
 
@@ -248,6 +260,12 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
       positionTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
       orientationTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
+      desiredTrajectoryPose.set(desiredPosition.getReferenceFrame());
+      desiredTrajectoryPose.setPosition(desiredPosition);
+      desiredTrajectoryPose.setOrientation(desiredOrientation);
+      desiredTrajectoryPose.changeFrame(worldFrame);
+      yoDesiredTrajectoryPose.set(desiredTrajectoryPose);
+      
       trajectoryFrame = desiredPosition.getReferenceFrame();
       
       desiredPosition.changeFrame(baseFrame);

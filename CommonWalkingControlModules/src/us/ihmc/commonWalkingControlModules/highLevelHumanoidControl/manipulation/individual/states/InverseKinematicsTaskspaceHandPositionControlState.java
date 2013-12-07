@@ -46,7 +46,7 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
    {
       super(namePrefix, stateEnum, robotSide, momentumBasedController, jacobianId, base, endEffector, dynamicGraphicObjectsListRegistry, parentRegistry);
       this.controlDT = controlDT;
-      inverseKinematicsCalculator = new TrajectoryBasedNumericalInverseKinematicsCalculator(base, endEffector, controlDT, momentumBasedController.getTwistCalculator(), parentRegistry);
+      inverseKinematicsCalculator = new TrajectoryBasedNumericalInverseKinematicsCalculator(base, endEffector, controlDT, momentumBasedController.getTwistCalculator(), parentRegistry, dynamicGraphicObjectsListRegistry);
 
       kpArmJointspace = new DoubleYoVariable("kpArmJointspace" + robotSide, registry);
       kpArmJointspace.set(armControllerParameters.getArmJointspaceKp());
