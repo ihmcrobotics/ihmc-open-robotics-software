@@ -3,8 +3,10 @@ package us.ihmc.darpaRoboticsChallenge.testTools;
 import static org.junit.Assert.assertFalse;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
@@ -21,6 +23,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseSimulation;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.AsyncContinuousExecutor;
+import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimerTaskScheduler;
 
@@ -195,6 +198,11 @@ public class DRCSimulationTestHelper
    public void setupCameraForUnitTest(SimulationConstructionSet scs, Point3d cameraFix, Point3d cameraPosition)
    {
       CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
+      
+      Random randomForSlightlyMovingCameraSoThatYouTubeVideosAreDifferent = new Random();
+      Vector3d randomCameraOffset = RandomTools.generateRandomVector(randomForSlightlyMovingCameraSoThatYouTubeVideosAreDifferent, 0.05);
+      cameraFix.add(randomCameraOffset);
+      
       cameraConfiguration.setCameraFix(cameraFix);
       cameraConfiguration.setCameraPosition(cameraPosition);
       cameraConfiguration.setCameraTracking(false, true, true, false);
