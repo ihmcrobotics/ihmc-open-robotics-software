@@ -1,16 +1,33 @@
 package us.ihmc.darpaRoboticsChallenge.calib;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
+import static java.lang.Double.parseDouble;
 import georegression.geometry.RotationMatrixGenerator;
 import georegression.struct.se.Se3_F64;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
+import javax.imageio.ImageIO;
+import javax.media.j3d.Transform3D;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
-import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -19,23 +36,23 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-import java.awt.*;
-import java.io.*;
-import java.util.*;
-
-import static java.lang.Double.parseDouble;
+import com.yobotics.simulationconstructionset.IndexChangedListener;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
 
 public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 {
    public static String TARGET_TO_CAMERA_KEY = "targetToCamera";
-
+   public static String CAMERA_IMAGE_KEY = "cameraImage";   
    //YoVariables for Display
    private final YoFramePoint ypLeftEE, ypRightEE;
-   private final YoFramePose yposeLeftEE, yposeRightEE, yposeBoard;
-
+   private final YoFramePose yposeLeftEE, yposeRightEE, yposeBoard,yposeLeftCamera;
+   private final ArrayList<Map<String,Object>> metaData;
+   
+   private ImageIcon iiDisplay = null;
+   
    public AtlasHeadLoopKinematicCalibrator()
    {
       super();
@@ -44,11 +61,15 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       yposeLeftEE = new YoFramePose("leftPoseEE", "", ReferenceFrame.getWorldFrame(), registry);
       yposeRightEE = new YoFramePose("rightPoseEE", "", ReferenceFrame.getWorldFrame(), registry);
       yposeBoard = new YoFramePose("board","",ReferenceFrame.getWorldFrame(),registry);
+      yposeLeftCamera = new YoFramePose("leftCamera","",ReferenceFrame.getWorldFrame(),registry);
+
+      metaData = new ArrayList<>();
     }
 
    @Override
-   protected void addDynamicGraphicObjects()
+   protected void setupDynamicGraphicObjects()
    {
+      //standard SCS Dynamic Graphics Object - automatically updated to the associated yoVariables
       double transparency = 0.5;
       double scale=0.02;
       DynamicGraphicPosition dgpLeftEE = new DynamicGraphicPosition("dgpLeftEE", ypLeftEE, scale, new YoAppearanceRGBColor(Color.BLUE, transparency));
@@ -60,15 +81,34 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       DynamicGraphicCoordinateSystem dgPoseLeftEE = new DynamicGraphicCoordinateSystem("dgposeLeftEE", yposeLeftEE, 5*scale);
       DynamicGraphicCoordinateSystem dgPoseRightEE = new DynamicGraphicCoordinateSystem("dgposeRightEE", yposeRightEE, 5*scale);
       DynamicGraphicCoordinateSystem dgPoseBoard = new DynamicGraphicCoordinateSystem("dgposeBoard", yposeBoard, 5*scale);
+      DynamicGraphicCoordinateSystem dgPoseLeftCamera = new DynamicGraphicCoordinateSystem("dgposeLeftCamera", yposeLeftCamera, 30*scale);
       scs.addDynamicGraphicObject(dgPoseLeftEE);
       scs.addDynamicGraphicObject(dgPoseRightEE);
       scs.addDynamicGraphicObject(dgPoseBoard);
+      scs.addDynamicGraphicObject(dgPoseLeftCamera);
 
+      //Homemade Image Display Panel - updated by the IndexChangedListener 
+      iiDisplay = new ImageIcon();
+      JPanel panel = new JPanel(new BorderLayout());
+      final JLabel lblDisplay= new JLabel("", iiDisplay, JLabel.CENTER);
+      panel.add(lblDisplay, BorderLayout.CENTER);
+      scs.addExtraJpanel(panel,"Image");
+      scs.getStandardSimulationGUI().selectPanel("Image");
+      scs.getDataBuffer().attachIndexChangedListener(new IndexChangedListener()
+      {
+         @Override
+         public void indexChanged(int newIndex, double newTime)
+         {
+            updateBoard((newIndex+q.size()-1) % q.size());
+            lblDisplay.repaint();
+         }
+      });
    }
    
    @Override
    protected void updateDynamicGraphicsObjects(int index)
    {
+      /*put yo-variablized objects here */
       FramePoint
       leftEE=new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM)  ,0, 0.13,0),
       rightEE=new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM),0,-0.13,0);
@@ -79,15 +119,37 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       
       yposeLeftEE.set(new FramePose(leftEE, new FrameOrientation(leftEE.getReferenceFrame())).changeFrameCopy(CalibUtil.world));
       yposeRightEE.set(new FramePose(rightEE,new FrameOrientation(rightEE.getReferenceFrame())).changeFrameCopy(CalibUtil.world));
+      
       updateBoard(index);
    }
 
    private void updateBoard(int index)
    {
+      //update camera pose display
       ReferenceFrame cameraFrame = fullRobotModel.getCameraFrame("stereo_camera_left");
-      Transform3D targetToCamera = (Transform3D)q.get(index).get(TARGET_TO_CAMERA_KEY); //in camera frame
+      Transform3D imageToCamera = new Transform3D(new double[]{ 0,0,1,0,  -1,0,0,0,  0,-1,0,0,  0,0,0,1});
+      ReferenceFrame cameraImageFrame = ReferenceFrame.
+            constructBodyFrameWithUnchangingTransformToParent("cameraImage", cameraFrame,imageToCamera); 
+      yposeLeftCamera.set(new FramePose(cameraImageFrame).changeFrameCopy(CalibUtil.world));
+      
+      //update board
+      Map<String,Object> mEntry = metaData.get(index);
+      Transform3D targetToCamera = new Transform3D((Transform3D)mEntry.get(TARGET_TO_CAMERA_KEY)); //in camera frame
+      System.out.println("Original Rot\n"+targetToCamera);
+
+      //inverse the rotation matrix ..
+      Matrix3d invRot = new Matrix3d();
+      targetToCamera.get(invRot);
+      invRot.invert();
+      targetToCamera.setRotation(invRot);
+      
+      //update
+      yposeBoard.set(new FramePose(cameraImageFrame, targetToCamera).changeFrameCopy(CalibUtil.world));
+      System.out.println("Index: "+ index);
       System.out.println(targetToCamera);
-      yposeBoard.set(new FramePose(cameraFrame, targetToCamera).changeFrameCopy(CalibUtil.world));
+
+      //image update
+      iiDisplay.setImage((BufferedImage)mEntry.get(CAMERA_IMAGE_KEY));
    }
    
    private ArrayList<OneDoFJoint> getArmJoints()
@@ -117,7 +179,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       File[] files = new File(directory).listFiles();
 
       Arrays.sort(files);
-
+//      files = new File[]{files[3],files[20]};
       for( File f : files ) {
          if( !f.isDirectory() )
             continue;
@@ -127,14 +189,16 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
          if( !fileTarget.exists() || fileTarget.length() == 0 )
             continue;
 
+         Map<String,Object> mEntry = new HashMap<String, Object>();
 
          // parse targetToCamera transform
          BufferedReader reader = new BufferedReader(new FileReader(fileTarget));
 
          Se3_F64 targetToCamera = new Se3_F64();
 
-         // skip comments
-         reader.readLine();
+         reader.readLine();         // skip comments
+
+         //read rotation
          String row0[] = reader.readLine().split(" ");
          String row1[] = reader.readLine().split(" ");
          String row2[] = reader.readLine().split(" ");
@@ -145,43 +209,53 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
             targetToCamera.getR().set(2,col, parseDouble(row2[col]));
          }
 
+         //read translation
          reader.readLine();
          String s[] = reader.readLine().split(" ");
          targetToCamera.getT().set( parseDouble(s[0]),parseDouble(s[1]),parseDouble(s[2]));
 
-         Se3_F64 cameraToJMonkey = new Se3_F64();
-         RotationMatrixGenerator.eulerXYZ(-Math.PI / 2, 0, -Math.PI / 2, cameraToJMonkey.getR());
+         System.out.println("targetToCamera:" + targetToCamera);
+         
 
-         // load joint angles
-         Properties properties = new Properties();
-         properties.load(new FileReader(new File(f,"q.m")));
+//         Se3_F64 cameraToJMonkey = new Se3_F64();
+//         RotationMatrixGenerator.eulerXYZ(-Math.PI / 2, 0, -Math.PI / 2, cameraToJMonkey.getR());
+//         System.out.println();
+         //load targetToCamera transform
+//         Se3_F64 targetToEye = targetToCamera.concat(cameraToJMonkey,null);
+//         System.out.println("T in camera robot: "+targetToEye.getT());
+         Se3_F64 targetToEye = targetToCamera;
 
-         Map<String,Object> entries = new HashMap<>();
-
-         for( Map.Entry e : properties.entrySet() ) {
-
-            entries.put((String)e.getKey(),Double.parseDouble((String)e.getValue()));
-         }
-
-         Se3_F64 targetToEye = targetToCamera.concat(cameraToJMonkey,null);
-
-
-         System.out.println("T in camera robot: "+targetToEye.getT());
-
+         //copy Translation and Rotation
          Transform3D transform = new Transform3D();
-
-         Matrix3d matrix3d = new Matrix3d();
          Vector3d T = new Vector3d();
          T.x = targetToEye.getT().getX();
          T.y = targetToEye.getT().getY();
          T.z = targetToEye.getT().getZ();
-
+         transform.setTranslation(T);
+         
+         
+         Matrix3d matrix3d = new Matrix3d();
          MatrixTools.denseMatrixToMatrix3d(targetToEye.getR(),matrix3d,0,0);
          transform.setRotation(matrix3d);
-         transform.setTranslation(T);
+         mEntry.put(TARGET_TO_CAMERA_KEY,transform);                 
 
-         entries.put(TARGET_TO_CAMERA_KEY,transform);
-         q.add(entries);
+         //load image
+         mEntry.put(CAMERA_IMAGE_KEY,ImageIO.read(new File(f,"/detected.jpg")));
+
+         
+         // load joint angles
+         Properties properties = new Properties();
+         properties.load(new FileReader(new File(f,"q.m")));
+         
+         Map<String,Double> qEntry = new HashMap<>();
+         for(Map.Entry e : properties.entrySet() ) {
+            qEntry.put((String)e.getKey(),Double.parseDouble((String)e.getValue()));
+         }
+
+         //storage
+         metaData.add(mEntry);
+         q.add(qEntry);
+         
       }
 
 
@@ -218,7 +292,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 //         YoFramePose yoResidual0 = new YoFramePose("residual0", "", ReferenceFrame.getWorldFrame(),calib.registry);
 //         YoFramePose yoResidual = new YoFramePose("residual", "",ReferenceFrame.getWorldFrame(),calib.registry);
 
-         calib.createDisplay();
+         calib.createDisplay(calib.q.size());
          
          for(int i=0;i<calib.q.size();i++)
          {
