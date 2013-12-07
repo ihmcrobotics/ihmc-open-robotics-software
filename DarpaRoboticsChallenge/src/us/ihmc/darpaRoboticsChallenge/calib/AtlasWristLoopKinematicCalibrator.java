@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
-import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
 
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.robotSide.RobotSide;
@@ -48,26 +46,16 @@ public class AtlasWristLoopKinematicCalibrator extends AtlasCalibrationDataViewe
 
       leftEE.changeFrame(ReferenceFrame.getWorldFrame());
       rightEE.changeFrame(ReferenceFrame.getWorldFrame());
-
-      Quat4d qLeft =leftEE.getOrientationCopy().getQuaternion();
-      Quat4d qRight =rightEE.getOrientationCopy().getQuaternion();
-
-      AxisAngle4d axLeft = new AxisAngle4d(), axRight = new AxisAngle4d();
-      axLeft.set(qLeft);
-      axRight.set(qRight);
-      System.out.println("qLeft:"+qLeft);
-      System.out.println("qRight:"+qRight);
-      System.out.println("axLeft:"+axLeft);
-      System.out.println("axRight:"+axRight);
-      
-      Quat4d qDiff = new Quat4d(qLeft);
-      qDiff.inverse();
-      qDiff.mul(qRight);
-      AxisAngle4d axDiff = new AxisAngle4d();
-      axDiff.set(qDiff);
-      System.out.println("axDiff:"+axDiff);
-      System.out.println();
+      {
+         
+         System.out.println("r_axLeft: " + CalibUtil.Matrix3dToAxisAngle3d(leftEE.getOrientationCopy().getMatrix3d()));
+         System.out.println("r_axRight: " + CalibUtil.Matrix3dToAxisAngle3d(rightEE.getOrientationCopy().getMatrix3d()));
+         System.out.println("r_axDiff: "+ CalibUtil.RotationDiff(
+               leftEE.getOrientationCopy().getMatrix3d(),
+               rightEE.getOrientationCopy().getMatrix3d()));
+      }
    }
+
 
    
    private ArrayList<OneDoFJoint> getArmJoints()
@@ -103,7 +91,6 @@ public class AtlasWristLoopKinematicCalibrator extends AtlasCalibrationDataViewe
       double[] prm = new double[residualFunc.getN()];
       
       //initial
-      
       double[] residual0 = residualFunc.calcResiduals(prm);
       calib.calibrate(residualFunc,prm, 100);
       double[] residual = residualFunc.calcResiduals(prm);

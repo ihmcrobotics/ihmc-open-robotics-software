@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -92,7 +93,7 @@ public class KinematicCalibrationWristLoopResidual implements FunctionNtoM
          {
 
             boolean QUAT_DIFF=false;
-            double scaleRadToCM = 1;//0.01/(Math.PI/2); //30deg -> 1cm
+            double scaleRadToCM = 0.01/(Math.PI/8); //30deg -> 1cm
             if(QUAT_DIFF)
             {
               Quat4d qErr = leftEE.getOrientationCopy().getQuaternion();
@@ -108,26 +109,12 @@ public class KinematicCalibrationWristLoopResidual implements FunctionNtoM
             else
             {
                assert(leftEE.getReferenceFrame()==rightEE.getReferenceFrame());
-               AxisAngle4d axLeft = new AxisAngle4d(), axRight = new AxisAngle4d();
-               axLeft.set(leftEE.getOrientationCopy().getQuaternion());
-               axRight.set(rightEE.getOrientationCopy().getQuaternion());
-               
-               if( axLeft.angle < 0 ) {
-                  axLeft.angle *= -1;
-                  axLeft.x *= -1;
-                  axLeft.y *= -1;
-                  axLeft.z *= -1;
-               }
-               if( axRight.angle < 0 ) {
-                  axRight.angle *= -1;
-                  axRight.x *= -1;
-                  axRight.y *= -1;
-                  axRight.z *= -1;
-               }
-               
-               output[outputCounter++] = scaleRadToCM* (axLeft.x*axLeft.angle - axRight.x*axRight.angle); 
-               output[outputCounter++] = scaleRadToCM* (axLeft.y*axLeft.angle - axRight.y*axRight.angle);
-               output[outputCounter++] = scaleRadToCM* (axLeft.z*axLeft.angle - axRight.z*axRight.angle);
+               Matrix3d  mLeft =leftEE.getOrientationCopy().getMatrix3d();
+               Matrix3d mRight = rightEE.getOrientationCopy().getMatrix3d();
+               Vector3d vDiff = CalibUtil.RotationDiff(mLeft,mRight);
+               output[outputCounter++] = scaleRadToCM * vDiff.x;
+               output[outputCounter++] = scaleRadToCM * vDiff.y;
+               output[outputCounter++] = scaleRadToCM * vDiff.z;
             }
           }
       }

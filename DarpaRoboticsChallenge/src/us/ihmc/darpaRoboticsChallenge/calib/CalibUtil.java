@@ -1,13 +1,21 @@
 package us.ihmc.darpaRoboticsChallenge.calib;
 
+import georegression.geometry.RotationMatrixGenerator;
+import georegression.struct.so.Rodrigues_F64;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
@@ -65,5 +73,29 @@ public class CalibUtil
          }
       }
 
+   }
+   
+   public static Vector3d Matrix3dToAxisAngle3d(Matrix3d m)
+   {
+      DenseMatrix64F md = new DenseMatrix64F(3,3);
+      MatrixTools.matrix3DToDenseMatrix(m, md, 0, 0);
+      return Matrix3dToAxisAngle3d(md);
+   }
+   public static Vector3d Matrix3dToAxisAngle3d(DenseMatrix64F md)
+   {    
+      Rodrigues_F64 r = RotationMatrixGenerator.matrixToRodrigues(md, null);
+      r.unitAxisRotation.scale(r.theta);
+      Vector3d angleAxis=new Vector3d(r.unitAxisRotation.x, r.unitAxisRotation.y, r.unitAxisRotation.z);
+      return angleAxis;      
+   }
+   public static Vector3d RotationDiff(Matrix3d r1, Matrix3d r2)
+   {
+      DenseMatrix64F m1 = new DenseMatrix64F(3,3), m2=new DenseMatrix64F(3,3);
+      MatrixTools.matrix3DToDenseMatrix(r1, m1, 0, 0);
+      MatrixTools.matrix3DToDenseMatrix(r2, m2, 0, 0);
+
+      DenseMatrix64F mDiff = new DenseMatrix64F(3,3);
+      CommonOps.multTransB(m1, m2, mDiff);
+      return Matrix3dToAxisAngle3d(mDiff);
    }
 }
