@@ -1,12 +1,17 @@
 package us.ihmc.darpaRoboticsChallenge.calib;
 
 import static java.lang.Double.parseDouble;
+
+import boofcv.alg.geo.PerspectiveOps;
+import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
+import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
 import georegression.geometry.RotationMatrixGenerator;
+import georegression.struct.point.Point2D_F64;
+import georegression.struct.point.Point3D_F64;
 import georegression.struct.point.Vector3D_F64;
 import georegression.struct.se.Se3_F64;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
+import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
@@ -31,8 +36,10 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.robotSide.RobotSide;
@@ -65,6 +72,8 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    private ImageIcon iiDisplay = null;
    private boolean alignCamera = true;
 
+   private IntrinsicParameters intrinsic;
+   private PlanarCalibrationTarget calibGrid = FactoryPlanarCalibrationTarget.gridChess(5, 4, 0.03);
 
    public AtlasHeadLoopKinematicCalibrator()
    {
@@ -113,7 +122,9 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
          @Override
          public void indexChanged(int newIndex, double newTime)
          {
-            updateBoard((newIndex+q.size()-1) % q.size());
+            int index =  (newIndex+q.size()-1) % q.size();
+            CalibUtil.setRobotModelFromData(fullRobotModel, (Map)q.get(index));
+            updateBoard(index);
             lblDisplay.repaint();
             if(alignCamera)
                scsAlignCameraToRobotCamera();
@@ -176,7 +187,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       //update camera pose display
       Transform3D imageToCamera = new Transform3D(new double[]{ 0,0,1,0,  -1,0,0,0,  0,-1,0,0,  0,0,0,1});
       ReferenceFrame cameraImageFrame = ReferenceFrame.
-            constructBodyFrameWithUnchangingTransformToParent("cameraImage", cameraFrame,imageToCamera);
+            constructBodyFrameWithUnchangingTransformToParent("cameraImage", cameraFrame, imageToCamera);
       yposeLeftCamera.set(new FramePose(cameraImageFrame).changeFrameCopy(CalibUtil.world));
 
       //update board
@@ -190,7 +201,95 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 //      System.out.println(targetToCamera);
 
       //image update
-      iiDisplay.setImage((BufferedImage)mEntry.get(CAMERA_IMAGE_KEY));
+      BufferedImage work = renderEEinImage(cameraImageFrame, (BufferedImage)mEntry.get(CAMERA_IMAGE_KEY));
+
+      Transform3D kinematicsTargetToCamera = computeKinematicsTargetToCamera(cameraImageFrame);
+      renderCalibrationPoints(kinematicsTargetToCamera,work);
+
+      iiDisplay.setImage(work);
+   }
+
+   private BufferedImage renderEEinImage(ReferenceFrame cameraImageFrame, BufferedImage original)
+   {
+      BufferedImage work = new BufferedImage(original.getWidth(),original.getHeight(),original.getType());
+      Graphics2D g2 = work.createGraphics();
+      g2.drawImage(original,0,0,null);
+
+      FramePoint leftEEtoCamera=new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM)  ,0, 0.13,0);
+      leftEEtoCamera.changeFrame(cameraImageFrame);
+      Point3d leftEEinImageFrame = leftEEtoCamera.getPoint();
+
+      Point2D_F64 norm = new Point2D_F64(leftEEinImageFrame.x/leftEEinImageFrame.z,leftEEinImageFrame.y/leftEEinImageFrame.z);
+      Point2D_F64 pixel = new Point2D_F64();
+
+      PerspectiveOps.convertNormToPixel(intrinsic, norm, pixel);
+
+      // visualization
+      int r = 10;
+      int w = r*2+1;
+      int x = (int)(pixel.x+0.5);
+      int y = (int)(pixel.y+0.5);
+
+      g2.setColor(Color.BLACK);
+      g2.fillOval(x - r - 2, y - r - 2, w + 4, w + 4);
+      g2.setColor(Color.orange);
+      g2.fillOval(x-r,y-r,w,w);
+
+      return work;
+   }
+
+   private Transform3D computeKinematicsTargetToCamera(  ReferenceFrame cameraImageFrame ) {
+      Transform3D targetToEE = new Transform3D();
+      Matrix3d rotX = new Matrix3d(1,0,0,  0,0,-1, 0,1,0);
+      Matrix3d rotZ = new Matrix3d(0,-1,0, 1,0,0,  0,0,1);
+      Matrix3d rot = new Matrix3d();
+      rot.mul(rotX,rotZ);
+
+      targetToEE.setRotation(rot);
+      targetToEE.setTranslation(new Vector3d(-0.061, 0.13, 0.205));
+
+      ReferenceFrame leftEEFrame=fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM);
+      ReferenceFrame boardFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("boardFrame",leftEEFrame,targetToEE);
+      return boardFrame.getTransformToDesiredFrame(cameraImageFrame);
+
+//      FramePoint leftEEtoCamera=new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM)  ,0, 0.13,0);
+//      leftEEtoCamera.changeFrame(cameraImageFrame);
+   }
+
+   private void renderCalibrationPoints( Transform3D targetToCamera , BufferedImage output ) {
+
+      Graphics2D g2 = output.createGraphics();
+
+      // dot size
+      int r = 4;
+      int w = r*2+1;
+
+      // Points in chessboard frame
+      Point2D_F64 norm = new Point2D_F64();
+      Point2D_F64 pixel = new Point2D_F64();
+
+      int index = 0;
+      for( Point2D_F64 p : calibGrid.points ) {
+         // convert to camera frame
+         Point3d p3 = new Point3d(p.x,p.y,0);
+         targetToCamera.transform(p3);
+
+         // convert to pixels
+         norm.set( p3.x/p3.z , p3.y/p3.z );
+         PerspectiveOps.convertNormToPixel(intrinsic, norm, pixel);
+
+         int x = (int)(pixel.x+0.5);
+         int y = (int)(pixel.y+0.5);
+
+         if( index++ == 0 ) {
+            g2.setColor(Color.CYAN);
+         } else {
+            g2.setColor(Color.BLUE);
+         }
+         g2.fillOval(x-r,y-r,w,w);
+      }
+
+
    }
 
    private ArrayList<OneDoFJoint> getArmJoints()
@@ -217,6 +316,9 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 //
    public void loadData(String directory ) throws IOException
    {
+
+      intrinsic = BoofMiscOps.loadXML("../DarpaRoboticsChallenge/data/calibration_images/intrinsic_ros.xml");
+
       File[] files = new File(directory).listFiles();
 
       Arrays.sort(files);
@@ -253,7 +355,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
          //read translation
          reader.readLine();
          String s[] = reader.readLine().split(" ");
-         targetToCamera.getT().set( parseDouble(s[0]),parseDouble(s[1]),parseDouble(s[2]));
+         targetToCamera.getT().set(parseDouble(s[0]), parseDouble(s[1]), parseDouble(s[2]));
 
          //copy Translation and Rotation
          Transform3D transform = new Transform3D();
