@@ -107,4 +107,10 @@ public class DRCRobotArmControllerParameters implements ArmControllerParameters
          return new String[]{jointNames[r_arm_shy], jointNames[r_arm_ely]};
    }
 
+   @Override
+   public boolean useInverseKinematicsTaskspaceControl()
+   {
+      return DRCConfigParameters.USE_INVERSE_KINEMATICS_TASKSPACE_CONTROL;
+   }
+
 }

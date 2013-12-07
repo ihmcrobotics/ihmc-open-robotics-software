@@ -6,8 +6,9 @@ public class DRCConfigParameters
 {
    public static final boolean USE_RED_TEAM_CONTROLLER = false;
    public static final boolean USE_MANIPULATION_DECOUPLED_TASKSPACE_CONTROL = false;
+   public static final boolean USE_INVERSE_KINEMATICS_TASKSPACE_CONTROL = false;
 // When false and desired hand pose from the GUI is in world, the robot will hold the desired hand pose in world when walking. BE CAREFUL with that option! 
-   public static final boolean HOLD_HANDS_IN_CHEST_FRAME_WHEN_WALKING = true;
+   public static final boolean HOLD_HANDS_IN_CHEST_FRAME_WHEN_WALKING = false;
 
    public static final boolean CORRUPT_SIMULATION_MODEL = false;
 
