@@ -188,7 +188,7 @@ public class DRCConfigParameters
 
    public static final boolean OVERRIDE_DRC_LIDAR_CONFIG = true;
    public static final float LIDAR_MIN_DISTANCE = 0.2f;
-   public static final float LIDAR_MAX_DISTANCE = 20.0f;
+   public static final float LIDAR_MAX_DISTANCE = 10.0f;
 
    public static final float LIDAR_SCAN_MAX_ROLL = 0.0f;    // rolls the LIDAR to
 
