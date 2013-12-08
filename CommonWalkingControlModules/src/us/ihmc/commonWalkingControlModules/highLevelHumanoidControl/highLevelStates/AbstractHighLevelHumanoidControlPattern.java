@@ -378,7 +378,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
             double desiredExtendedNeckPitchJointAngle = desiredHeadOrientationProvider.getDesiredExtendedNeckPitchJointAngle();
             if (!Double.isNaN(desiredExtendedNeckPitchJointAngle))
             {
-               extendedNeckPitchInitialAngle.set(extendedNeckPitchFinalAngle.getValue());
+               extendedNeckPitchInitialAngle.set(extendedNeckPitchTrajectory.getValue());
                extendedNeckPitchFinalAngle.set(desiredExtendedNeckPitchJointAngle);
                extendedNeckPitchTrajectory.initialize();
                extendedNeckPitchTrajectory.compute(0.0);

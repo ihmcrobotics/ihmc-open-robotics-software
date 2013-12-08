@@ -57,6 +57,7 @@ public class HeadOrientationManager
          orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("headOrientation",
                headOrientationExpressedInFrame, trajectoryTimeProvider, initialOrientationProvider, finalOrientationProvider,
                registry);
+         orientationTrajectoryGenerator.setContinuouslyUpdateFinalOrientation(true);
          parentRegistry.addChild(registry);
       }
       else
@@ -97,9 +98,6 @@ public class HeadOrientationManager
    private void checkForNewDesiredOrientationInformation()
    {
       if (desiredHeadOrientationProvider == null)
-         return;
-      
-      if (isTrackingOrientation.getBooleanValue())
          return;
       
       if (desiredHeadOrientationProvider.isNewHeadOrientationInformationAvailable())
