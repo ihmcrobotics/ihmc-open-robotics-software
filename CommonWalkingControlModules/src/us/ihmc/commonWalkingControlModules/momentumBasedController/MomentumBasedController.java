@@ -484,6 +484,10 @@ public class MomentumBasedController
             tauKnee += passiveKneeTorque.get(robotSide).getDoubleValue();
             kneeJoint.setTau(tauKnee);
          }
+         else
+         {
+            passiveKneeTorque.get(robotSide).set(0.0);
+         }
       }
    }
 
