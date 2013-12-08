@@ -64,6 +64,11 @@ public class WalkControllerSliderBoard
       sliderBoardConfigurationManager.setKnob(9, "desiredICPEccentricity", registry, 0, .9);
       sliderBoardConfigurationManager.setKnob(10, "desiredICPAngle", registry, -Math.PI, Math.PI);
 
+//      sliderBoardConfigurationManager.setSlider(3, "hipXJointStiffness", registry, 3000, 20000.0);
+//      sliderBoardConfigurationManager.setSlider(4, "hipZJointStiffness", registry, 3000, 20000.0);
+//      sliderBoardConfigurationManager.setSlider(5, "hipYJointStiffness", registry, 3000, 20000.0);
+//      sliderBoardConfigurationManager.setSlider(6, "otherJointsStiffness", registry, 3000, 20000.0);
+      
       sliderBoardConfigurationManager.setSlider(3, "userDesiredPelvisYaw", registry, -Math.PI, Math.PI);
       sliderBoardConfigurationManager.setKnob(3, "userSetDesiredPelvis", registry, 0.0, 1.0);
       sliderBoardConfigurationManager.setSlider(4, "userDesiredPelvisPitch", registry, -0.4, 0.4);
