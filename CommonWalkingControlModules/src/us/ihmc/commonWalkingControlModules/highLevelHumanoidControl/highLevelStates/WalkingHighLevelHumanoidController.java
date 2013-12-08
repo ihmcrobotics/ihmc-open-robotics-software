@@ -1807,11 +1807,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       coMHeightTimeDerivativesCalculator.computeCoMHeightTimeDerivatives(comHeightDataBeforeSmoothing, comXYTimeDerivatives, coMHeightPartialDerivatives);
       
+      comHeightDataBeforeSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
       desiredCoMHeightFromTrajectory.set(desiredCenterOfMassHeightPoint.getZ());
       desiredCoMHeightVelocityFromTrajectory.set(comHeightDataBeforeSmoothing.getComHeightVelocity());
       desiredCoMHeightAccelerationFromTrajectory.set(comHeightDataBeforeSmoothing.getComHeightAcceleration());
 
-      correctCoMHeight(desiredICPVelocity, zCurrent, comHeightDataBeforeSmoothing);
+      correctCoMHeight(desiredICPVelocity, zCurrent, comHeightDataBeforeSmoothing, false);
       
       comHeightDataBeforeSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
       desiredCoMHeightBeforeSmoothing.set(desiredCenterOfMassHeightPoint.getZ());
@@ -1825,7 +1826,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       desiredCoMHeightVelocityAfterSmoothing.set(comHeightDataAfterSmoothing.getComHeightVelocity());
       desiredCoMHeightAccelerationAfterSmoothing.set(comHeightDataAfterSmoothing.getComHeightAcceleration());
       
-      correctCoMHeight(desiredICPVelocity, zCurrent, comHeightDataAfterSmoothing);
+      correctCoMHeight(desiredICPVelocity, zCurrent, comHeightDataAfterSmoothing, true);
 
       comHeightDataAfterSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
       desiredCoMHeightCorrected.set(desiredCenterOfMassHeightPoint.getZ());
@@ -1873,7 +1874,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final SideDependentList<Double> legLengths = new SideDependentList<Double>();
 
-   private void correctCoMHeight(FrameVector2d desiredICPVelocity, double zCurrent, CoMHeightTimeDerivativesData comHeightData)
+   private void correctCoMHeight(FrameVector2d desiredICPVelocity, double zCurrent, CoMHeightTimeDerivativesData comHeightData, boolean checkForKneeCollapsing)
    {
       ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
       
@@ -1888,10 +1889,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       
       
       // Correct, if necessary, the CoM height trajectory to avoid the knee to collapse
-      for (RobotSide robotSide : RobotSide.values)
+      if (checkForKneeCollapsing)
       {
-         footEndEffectorControlModules.get(robotSide).correctCoMHeightTrajectoryForCollapseAvoidance(desiredICPVelocity, comHeightData,
-               zCurrent, pelvisZUpFrame, footSwitches.get(robotSide).computeFootLoadPercentage());
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            footEndEffectorControlModules.get(robotSide).correctCoMHeightTrajectoryForCollapseAvoidance(desiredICPVelocity, comHeightData,
+                  zCurrent, pelvisZUpFrame, footSwitches.get(robotSide).computeFootLoadPercentage());
+         }
       }
 
       // Correct, if necessary, the CoM height trajectory to avoid straight knee
