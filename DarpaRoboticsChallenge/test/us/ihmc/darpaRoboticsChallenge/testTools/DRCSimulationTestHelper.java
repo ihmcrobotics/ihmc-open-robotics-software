@@ -170,6 +170,7 @@ public class DRCSimulationTestHelper
       }
       catch(Exception e)
       {
+         System.err.println("Caught exception in SimulationTestHelper.simulateAndBlockAndCatchExceptions. Exception = /n" + e);
          return false;
       }
    }
