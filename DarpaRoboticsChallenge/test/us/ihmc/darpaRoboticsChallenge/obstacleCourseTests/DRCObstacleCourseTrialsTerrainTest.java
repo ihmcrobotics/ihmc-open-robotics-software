@@ -100,12 +100,12 @@ public class DRCObstacleCourseTrialsTerrainTest
 
       SDFRobot robot = drcSimulationTestHelper.getRobot();
       SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(robot, 1201L);
-      slipRandomOnEachStepPerturber.setSlipParameters(0.03, 0.03, 0.0, 0.05, 0.05, 0.005, 0.01, 0.5, 0.01, 0.5, 0);
+      slipRandomOnEachStepPerturber.setSlipParameters(0.03, 0.03, 0.0, 0.05, 0.05, 0.005, 0.01, 0.5, 0.01, 0.03, 0);
       robot.setController(slipRandomOnEachStepPerturber, 10);
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      slipRandomOnEachStepPerturber.setProbabilityOfSlipInPercentage(50);
+      slipRandomOnEachStepPerturber.setProbabilityOfSlipInPercentage(60);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(29.0);
 
       drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
