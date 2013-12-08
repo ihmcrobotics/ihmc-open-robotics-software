@@ -10,6 +10,14 @@ public class JojosICPutilities
    {
    }
    
+   public static Point3d extrapolateDCMPosWithTransferRatio(Point3d constantCenterOfPressure, double time, double omega0, Point3d initialICP, double transferRatio) {
+      Point3d newInitial = new Point3d(initialICP);
+      newInitial.sub(constantCenterOfPressure);
+      newInitial.scale(transferRatio);
+      newInitial.add(constantCenterOfPressure);
+      return extrapolateDCMpos(constantCenterOfPressure, time, omega0, newInitial);
+   }
+   
    public static Point3d extrapolateDCMpos(Point3d constantCenterOfPressure, double time, double omega0, Point3d initialICP)
    {
       double exponentialTerm = Math.exp(time * omega0);
