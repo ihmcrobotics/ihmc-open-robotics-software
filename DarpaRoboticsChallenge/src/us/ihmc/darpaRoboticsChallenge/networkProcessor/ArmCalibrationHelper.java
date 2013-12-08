@@ -18,7 +18,7 @@ import us.ihmc.utilities.net.ObjectConsumer;
 
 public class ArmCalibrationHelper implements DRCStereoListener
 {
-   private final static String basedir = "calibration";
+   private final static String basedir = "/tmp/calibration";
 
    private final ReentrantLock lock = new ReentrantLock();
 
@@ -34,6 +34,28 @@ public class ArmCalibrationHelper implements DRCStereoListener
       cameraDataReceiver.registerCameraListener(this);
       networkingManager.getControllerCommandHandler().setArmCalibrationHelper(this);
       fieldComputerClient.attachListener(DRCJointConfigurationData.class, new JointAngleConsumer());
+      new Thread(new Runnable()
+      {
+         
+         @Override
+         public void run()
+         {
+            // TODO Auto-generated method stub
+            while(true)
+            {
+               try
+               {
+                  Thread.sleep(1000);
+               }
+               catch (InterruptedException e)
+               {
+                  // TODO Auto-generated catch block
+                  e.printStackTrace();
+               }
+               calibrateArm();
+            }
+         }
+      }).start();;
    }
 
    @Override
