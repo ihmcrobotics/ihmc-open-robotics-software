@@ -14,24 +14,18 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public class NewDoubleSupportICPComputer
 {
-   public static Point3d[] computeICPCornerPoints(int numberOfCornerPoints, ArrayList<Point3d> constantEquivalentCoPs, double steppingTime, double omega0)
-   {
-      return computeICPCornerPoints(numberOfCornerPoints, constantEquivalentCoPs, steppingTime, omega0, 1.0);
-   }
-   
-   public static Point3d[] computeICPCornerPoints(int numberOfCornerPoints, ArrayList<Point3d> constantEquivalentCoPs, double steppingTime, double omega0, double transferRatio)
+   public static Point3d[] computeICPCornerPoints(int numberOfCornerPoints, ArrayList<Point3d> constantEquivalentCoPs, double steppingTime, double omega0) 
    {
       Point3d[] icpCornerPoints = new Point3d[numberOfCornerPoints];
 
-      Point3d icpCornerPoint = JojosICPutilities.extrapolateDCMPosWithTransferRatio(constantEquivalentCoPs.get(numberOfCornerPoints - 1), -steppingTime, omega0,
-                                  constantEquivalentCoPs.get(numberOfCornerPoints), transferRatio);
+      Point3d icpCornerPoint = JojosICPutilities.extrapolateDCMpos(constantEquivalentCoPs.get(numberOfCornerPoints - 1), -steppingTime, omega0,
+                                  constantEquivalentCoPs.get(numberOfCornerPoints));
 
       icpCornerPoints[numberOfCornerPoints - 1] = icpCornerPoint;
 
       for (int i = numberOfCornerPoints - 1; i > 0; i--)
       {
-         icpCornerPoint = JojosICPutilities.extrapolateDCMPosWithTransferRatio(constantEquivalentCoPs.get(i - 1), -steppingTime, omega0, icpCornerPoints[i], transferRatio);
-
+         icpCornerPoint = JojosICPutilities.extrapolateDCMpos(constantEquivalentCoPs.get(i - 1), -steppingTime, omega0, icpCornerPoints[i]);
          icpCornerPoints[i - 1] = icpCornerPoint;
       }
 
