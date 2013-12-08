@@ -174,11 +174,11 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
    }
 
    public void setGains(double kAngularMomentumXY, double kPelvisAxisAngle, double captureKpParallelToMotion, double captureKpOrthogonalToMotion, 
-         double captureKi, double filterBreakFrequencyHertz, double rateLimitCMP, double accelerationLimitCMP)
+         double captureKi, double captureKiBleedoff, double filterBreakFrequencyHertz, double rateLimitCMP, double accelerationLimitCMP)
    {
       this.kAngularMomentumXY.set(kAngularMomentumXY);
       this.kPelvisAxisAngle.set(kPelvisAxisAngle);
-      this.icpProportionalController.setGains(captureKpParallelToMotion, captureKpOrthogonalToMotion, captureKi, filterBreakFrequencyHertz, rateLimitCMP, accelerationLimitCMP);
+      this.icpProportionalController.setGains(captureKpParallelToMotion, captureKpOrthogonalToMotion, captureKi, captureKiBleedoff, filterBreakFrequencyHertz, rateLimitCMP, accelerationLimitCMP);
    }
 
    private FrameVector2d determineDesiredDeltaCMP(FrameOrientation desiredPelvisOrientation, Momentum momentum)

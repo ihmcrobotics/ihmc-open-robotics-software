@@ -56,6 +56,8 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getCaptureKpParallelToMotion();
    public abstract double getCaptureKpOrthogonalToMotion();
    public abstract double getCaptureKi();
+   public abstract double getCaptureKiBleedoff();
+
    public abstract double getCaptureFilterBreakFrequencyInHz();
    public abstract double getCMPRateLimit();
    public abstract double getCMPAccelerationLimit();

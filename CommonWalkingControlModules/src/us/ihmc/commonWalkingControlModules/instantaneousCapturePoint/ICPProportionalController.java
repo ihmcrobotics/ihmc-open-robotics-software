@@ -59,6 +59,7 @@ public class ICPProportionalController
 
    private final DoubleYoVariable captureKd = new DoubleYoVariable("captureKd", registry);
    private final DoubleYoVariable captureKi = new DoubleYoVariable("captureKi", registry);
+   private final DoubleYoVariable captureKiBleedoff = new DoubleYoVariable("captureKiBleedoff", registry);
    
    private final Vector2dZUpFrame icpVelocityDirectionFrame;
    
@@ -149,6 +150,7 @@ public class ICPProportionalController
       tempICPErrorIntegrated.scale(controlDT);
       tempICPErrorIntegrated.scale(captureKi.getDoubleValue());
       
+      icpErrorIntegrated.scale(captureKiBleedoff.getDoubleValue());
       icpErrorIntegrated.add(tempICPErrorIntegrated);
 
       length = icpErrorIntegrated.length();
@@ -228,11 +230,13 @@ public class ICPProportionalController
    }
 
    
-   public void setGains(double captureKpParallelToMotion, double captureKpOrthogonalToMotion, double captureKi, double filterBreakFrequencyHertz, double rateLimitCMP, double accelerationLimitCMP)
+   public void setGains(double captureKpParallelToMotion, double captureKpOrthogonalToMotion, double captureKi, double captureKiBleedoff, double filterBreakFrequencyHertz, double rateLimitCMP, double accelerationLimitCMP)
    {
       this.captureKpParallelToMotion.set(captureKpParallelToMotion);
       this.captureKpOrthogonalToMotion.set(captureKpOrthogonalToMotion);
       this.captureKi.set(captureKi);
+      this.captureKiBleedoff.set(captureKiBleedoff);
+      
       this.alphaCMP.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequencyHertz, controlDT));
       this.rateLimitCMP.set(rateLimitCMP);
       this.accelerationLimitCMP.set(accelerationLimitCMP);
