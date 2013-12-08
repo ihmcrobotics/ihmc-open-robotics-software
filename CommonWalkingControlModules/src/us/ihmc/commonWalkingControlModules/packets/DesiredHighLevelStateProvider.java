@@ -7,7 +7,7 @@ import us.ihmc.utilities.net.ObjectConsumer;
 
 public class DesiredHighLevelStateProvider implements ObjectConsumer<HighLevelStatePacket>
 {
-   private final AtomicReference<HighLevelState> highLevelState = new AtomicReference<HighLevelState>(HighLevelState.WALKING);
+   private final AtomicReference<HighLevelState> highLevelState = new AtomicReference<HighLevelState>(null);
    
    public DesiredHighLevelStateProvider()
    {
