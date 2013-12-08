@@ -478,7 +478,9 @@ public class MomentumBasedController
          double qdKnee = kneeJoint.getQd();
          if (qKnee < kneeLimit)
          {
-            passiveKneeTorque.get(robotSide).set(maxPassiveTorque * MathTools.square(1.0 - qKnee / kneeLimit) - kdKnee * qdKnee);
+            double percent = 1.0 - qKnee / kneeLimit;
+            percent = MathTools.clipToMinMax(percent,  0.0, 1.0);
+            passiveKneeTorque.get(robotSide).set(maxPassiveTorque * MathTools.square(percent) - kdKnee * qdKnee);
             tauKnee += passiveKneeTorque.get(robotSide).getDoubleValue();
             kneeJoint.setTau(tauKnee);
          }
