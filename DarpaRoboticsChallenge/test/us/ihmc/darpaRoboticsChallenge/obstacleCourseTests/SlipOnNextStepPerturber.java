@@ -51,6 +51,11 @@ public class SlipOnNextStepPerturber extends ModularRobotController
       this.addRobotController(groundContactPointsSlipper);
    }
 
+   public void setPercentToSlipPerTick(double percentToSlipPerTick)
+   {
+      groundContactPointsSlipper.setPercentToSlipPerTick(percentToSlipPerTick);
+   }
+   
    public void setSlipAfterStepTimeDelta(double slipAfterTimeDelta)
    {
       this.slipAfterTimeDelta.set(slipAfterTimeDelta);
