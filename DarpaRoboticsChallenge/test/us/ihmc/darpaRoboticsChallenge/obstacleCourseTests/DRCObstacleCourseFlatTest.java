@@ -139,7 +139,7 @@ public class DRCObstacleCourseFlatTest
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       SDFRobot robot = drcSimulationTestHelper.getRobot();
       setupCameraForWalkingUpToRamp(simulationConstructionSet);
-      SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(robot, 1000L);
+      SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(robot, 1002L);
       slipRandomOnEachStepPerturber.setSlipParameters(0.01, 0.01, 0.0, 0.07, 0.07, 0.005, 0.01, 1.0, 0.01, 1.0, 0);
       robot.setController(slipRandomOnEachStepPerturber, 10);
 
@@ -374,7 +374,7 @@ public class DRCObstacleCourseFlatTest
 
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingUpToRampLongStepsTest", "", selectedLocation, selectedEnvironment, checkNothingChanged,
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingUpToRampLongStepsAndOccasionallyStraightKneesTest", "", selectedLocation, selectedEnvironment, checkNothingChanged,
               createMovie);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
