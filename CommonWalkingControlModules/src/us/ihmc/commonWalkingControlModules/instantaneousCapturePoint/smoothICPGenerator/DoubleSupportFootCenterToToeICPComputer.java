@@ -104,10 +104,13 @@ public class DoubleSupportFootCenterToToeICPComputer
    private final Vector3d doubleSupportEndICPVelocity = new Vector3d();
 
    private final DoubleSupportPolynomialTrajectory doubleSupportPolynomialTrajectory;
+   
+   private final DoubleYoVariable landingTransferPercentage = new DoubleYoVariable("landingTransferPercentage", registry);
 
    public DoubleSupportFootCenterToToeICPComputer(double dt, double doubleSupportFirstStepFraction, int maxNumberOfConsideredFootsteps,
          YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
+      
       this.dt = dt;
 
       int numberOfCoefficientsForDoubleSupport = 5; // 5 will set acceleration at end to 0.0
@@ -121,6 +124,8 @@ public class DoubleSupportFootCenterToToeICPComputer
       //      doHeelToToeTransfer.set(true);
 
       this.singleSupportToePercentage = 0.5;
+      
+      this.landingTransferPercentage.set(.25);
 
       comPositionVector.set(0.0, 0.0, 0.0);
       comVelocityVector.set(0.0, 0.0, 0.0);
@@ -132,7 +137,7 @@ public class DoubleSupportFootCenterToToeICPComputer
 
       this.atAStop.set(true);
 
-      this.doubleSupportFirstStepFraction = doubleSupportFirstStepFraction;
+      this.doubleSupportFirstStepFraction = 1.0;//doubleSupportFirstStepFraction;
       this.maxNumberOfConsideredFootsteps = maxNumberOfConsideredFootsteps;
 
       this.numberOfCornerPoints = maxNumberOfConsideredFootsteps - 1;
@@ -257,7 +262,7 @@ public class DoubleSupportFootCenterToToeICPComputer
          ArrayList<Point3d> constantCentersOfPressurePoint3ds = convertToListOfPoint3ds(constantFootCenterCentersOfPressure);
 
          Point3d[] icpCornerPoints = NewDoubleSupportICPComputer.computeICPCornerPoints(numberOfCornerPoints, constantCentersOfPressurePoint3ds,
-               steppingDuration, this.omega0.getDoubleValue());
+               singleSupportDuration, this.omega0.getDoubleValue(), landingTransferPercentage.getDoubleValue());
 
          for (int i = 0; i < icpCornerPoints.length; i++)
          {
@@ -308,7 +313,7 @@ public class DoubleSupportFootCenterToToeICPComputer
          ArrayList<Point3d> constantCentersOfPressurePoint3ds = convertToListOfPoint3ds(constantFootCenterCentersOfPressure);
 
          Point3d[] icpCornerPoints = NewDoubleSupportICPComputer.computeICPCornerPoints(numberOfCornerPoints, constantCentersOfPressurePoint3ds,
-               steppingDuration, this.omega0.getDoubleValue());
+               singleSupportDuration, this.omega0.getDoubleValue(), landingTransferPercentage.getDoubleValue());
 
          for (int i = 0; i < icpCornerPoints.length; i++)
          {
@@ -433,7 +438,7 @@ public class DoubleSupportFootCenterToToeICPComputer
          ArrayList<Point3d> constantCentersOfPressurePoint3ds = convertToListOfPoint3ds(constantFootCenterCentersOfPressure);
 
          Point3d[] icpCornerPoints = NewDoubleSupportICPComputer.computeICPCornerPoints(numberOfCornerPoints, constantCentersOfPressurePoint3ds,
-               steppingDuration, this.omega0.getDoubleValue());
+               singleSupportDuration, this.omega0.getDoubleValue(), landingTransferPercentage.getDoubleValue());
 
          Point3d cornerPoint0 = icpCornerPoints[0];
          Point3d cornerPoint1 = icpCornerPoints[1];
