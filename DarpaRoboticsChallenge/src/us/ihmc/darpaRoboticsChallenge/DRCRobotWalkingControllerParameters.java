@@ -331,13 +331,13 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    
    public double getCaptureKi()
    {      
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 2.0;
-      return 2.0; 
+      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 4.0;
+      return 4.0; 
    }
    
    public double getCaptureKiBleedoff()
    {      
-      return 0.99; 
+      return 0.9; 
    }
    
    public double getCaptureFilterBreakFrequencyInHz()
