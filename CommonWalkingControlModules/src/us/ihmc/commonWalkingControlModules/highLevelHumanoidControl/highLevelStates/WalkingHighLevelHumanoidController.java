@@ -80,6 +80,7 @@ import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.Twist;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -142,6 +143,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable desiredCoMHeightBeforeSmoothing = new DoubleYoVariable("desiredCoMHeightBeforeSmoothing", registry);
    private final DoubleYoVariable desiredCoMHeightVelocityBeforeSmoothing = new DoubleYoVariable("desiredCoMHeightVelocityBeforeSmoothing", registry);
    private final DoubleYoVariable desiredCoMHeightAccelerationBeforeSmoothing = new DoubleYoVariable("desiredCoMHeightAccelerationBeforeSmoothing", registry);
+   private final DoubleYoVariable desiredCoMHeightCorrected = new DoubleYoVariable("desiredCoMHeightCorrected", registry);
+   private final DoubleYoVariable desiredCoMHeightVelocityCorrected = new DoubleYoVariable("desiredCoMHeightVelocityCorrected", registry);
+   private final DoubleYoVariable desiredCoMHeightAccelerationCorrected = new DoubleYoVariable("desiredCoMHeightAccelerationCorrected", registry);
    private final DoubleYoVariable desiredCoMHeightAfterSmoothing = new DoubleYoVariable("desiredCoMHeightAfterSmoothing", registry);
    private final DoubleYoVariable desiredCoMHeightVelocityAfterSmoothing = new DoubleYoVariable("desiredCoMHeightVelocityAfterSmoothing", registry);
    private final DoubleYoVariable desiredCoMHeightAccelerationAfterSmoothing = new DoubleYoVariable("desiredCoMHeightAccelerationAfterSmoothing", registry);
@@ -1757,6 +1761,20 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity)
    {
+      double zCurrent = comPosition.getZ();
+      double zdCurrent = comVelocity.getZ();
+      
+      if (controlPelvisHeightInsteadOfCoMHeight.getBooleanValue())
+      {
+         FramePoint pelvisPosition = new FramePoint(referenceFrames.getPelvisFrame());
+         pelvisPosition.changeFrame(worldFrame);
+         zCurrent = pelvisPosition.getZ(); 
+         Twist pelvisTwist = new Twist();
+         twistCalculator.packTwistOfBody(pelvisTwist, fullRobotModel.getPelvis());
+         pelvisTwist.changeFrame(worldFrame);
+         zdCurrent = comVelocity.getZ(); // Just use com velocity for now for damping...
+      }
+      
       centerOfMassHeightInputData.setCenterOfMassAndPelvisZUpFrames(momentumBasedController.getCenterOfMassFrame(), momentumBasedController.getPelvisZUpFrame());
 
       List<? extends PlaneContactState> contactStatesList = getContactStatesList();
@@ -1793,18 +1811,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       desiredCoMHeightVelocityFromTrajectory.set(comHeightDataBeforeSmoothing.getComHeightVelocity());
       desiredCoMHeightAccelerationFromTrajectory.set(comHeightDataBeforeSmoothing.getComHeightAcceleration());
 
-      double zCurrent = comPosition.getZ();
-      double zdCurrent = comVelocity.getZ();
-      
-      if (controlPelvisHeightInsteadOfCoMHeight.getBooleanValue())
-      {
-         FramePoint pelvisPosition = new FramePoint(referenceFrames.getPelvisFrame());
-         pelvisPosition.changeFrame(worldFrame);
-         zCurrent = pelvisPosition.getZ(); 
-         
-         zdCurrent = comVelocity.getZ(); // Just use com velocity for now for damping...
-      }
-      
       correctCoMHeight(desiredICPVelocity, zCurrent, comHeightDataBeforeSmoothing);
       
       comHeightDataBeforeSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
@@ -1814,18 +1820,24 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       coMHeightTimeDerivativesSmoother.smooth(comHeightDataAfterSmoothing, comHeightDataBeforeSmoothing);
       
+      comHeightDataAfterSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
+      desiredCoMHeightAfterSmoothing.set(desiredCenterOfMassHeightPoint.getZ());
+      desiredCoMHeightVelocityAfterSmoothing.set(comHeightDataAfterSmoothing.getComHeightVelocity());
+      desiredCoMHeightAccelerationAfterSmoothing.set(comHeightDataAfterSmoothing.getComHeightAcceleration());
+      
       correctCoMHeight(desiredICPVelocity, zCurrent, comHeightDataAfterSmoothing);
+
+      comHeightDataAfterSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
+      desiredCoMHeightCorrected.set(desiredCenterOfMassHeightPoint.getZ());
+      desiredCoMHeightVelocityCorrected.set(comHeightDataAfterSmoothing.getComHeightVelocity());
+      desiredCoMHeightAccelerationCorrected.set(comHeightDataAfterSmoothing.getComHeightAcceleration());
       
       comHeightDataAfterSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
+      
       double zDesired = desiredCenterOfMassHeightPoint.getZ();
-
       double zdDesired = comHeightDataAfterSmoothing.getComHeightVelocity();
       double zddFeedForward = comHeightDataAfterSmoothing.getComHeightAcceleration();
 
-      desiredCoMHeightAfterSmoothing.set(zDesired);
-      desiredCoMHeightVelocityAfterSmoothing.set(zdDesired);
-      desiredCoMHeightAccelerationAfterSmoothing.set(zddFeedForward);
-      
       double zddDesired = centerOfMassHeightController.compute(zCurrent, zDesired, zdCurrent, zdDesired) + zddFeedForward;
       
       for (RobotSide robotSide : RobotSide.values)
