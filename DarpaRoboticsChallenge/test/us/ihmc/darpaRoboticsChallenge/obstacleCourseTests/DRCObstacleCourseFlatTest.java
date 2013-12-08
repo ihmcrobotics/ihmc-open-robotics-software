@@ -140,7 +140,7 @@ public class DRCObstacleCourseFlatTest
       SDFRobot robot = drcSimulationTestHelper.getRobot();
       setupCameraForWalkingUpToRamp(simulationConstructionSet);
       SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(robot, 1000L);
-      slipRandomOnEachStepPerturber.initialize(0.01, 0.01, 0.0, 0.07, 0.07, 0.005, 0.01, 1.0, 0.02, 1.0, 0);
+      slipRandomOnEachStepPerturber.setSlipParameters(0.01, 0.01, 0.0, 0.07, 0.07, 0.005, 0.01, 1.0, 0.01, 1.0, 0);
       robot.setController(slipRandomOnEachStepPerturber, 10);
 
       ThreadTools.sleep(1000);
@@ -237,7 +237,7 @@ public class DRCObstacleCourseFlatTest
       SDFRobot robot = drcSimulationTestHelper.getRobot();
 
       SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(robot, 1000L);
-      slipRandomOnEachStepPerturber.initialize(0.0, 0.0, 0.0, 0.04, 0.04, 0.01, 0.01, 1.0, 0.02, 1.0, 0);
+      slipRandomOnEachStepPerturber.setSlipParameters(0.0, 0.0, 0.0, 0.04, 0.04, 0.01, 0.01, 1.0, 0.02, 1.0, 0);
       robot.setController(slipRandomOnEachStepPerturber, 10);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
