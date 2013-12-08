@@ -20,6 +20,7 @@ import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.VariableChangedListener;
 import com.yobotics.simulationconstructionset.YoVariable;
@@ -38,6 +39,8 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
    private final HashMap<OneDoFJoint, RateLimitedYoVariable> rateLimitedAccelerations = new HashMap<OneDoFJoint, RateLimitedYoVariable>();
    private final DoubleYoVariable kpArmJointspace, kdArmJointspace, kiArmJointspace, zetaArmJointspace, maxAccelerationArmJointspace, maxJerkArmJointspace,
          maxIntegralErrorArmJointspace;
+   
+   private final BooleanYoVariable inverseKinematicsSolutionIsValid;
 
    public InverseKinematicsTaskspaceHandPositionControlState(String namePrefix, IndividualHandControlState stateEnum, RobotSide robotSide,
          MomentumBasedController momentumBasedController, int jacobianId, RigidBody base, RigidBody endEffector,
@@ -47,6 +50,8 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
       super(namePrefix, stateEnum, robotSide, momentumBasedController, jacobianId, base, endEffector, dynamicGraphicObjectsListRegistry, parentRegistry);
       this.controlDT = controlDT;
       inverseKinematicsCalculator = new TrajectoryBasedNumericalInverseKinematicsCalculator(base, endEffector, controlDT, momentumBasedController.getTwistCalculator(), parentRegistry, dynamicGraphicObjectsListRegistry);
+      
+      inverseKinematicsSolutionIsValid = new BooleanYoVariable("inverseKinematicsSolutionIsValid", registry);
 
       kpArmJointspace = new DoubleYoVariable("kpArmJointspace" + robotSide, registry);
       kpArmJointspace.set(armControllerParameters.getArmJointspaceKp());
@@ -111,7 +116,7 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
    {
       super.doTransitionIntoAction();
       inverseKinematicsCalculator.initialize();
-
+      inverseKinematicsSolutionIsValid.set(true);
    }
 
    @Override
@@ -122,7 +127,10 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
    @Override
    public void doAction()
    {
-      inverseKinematicsCalculator.compute(getTimeInCurrentState());
+      if(inverseKinematicsSolutionIsValid.getBooleanValue())
+      {
+         inverseKinematicsSolutionIsValid.set(inverseKinematicsCalculator.compute(getTimeInCurrentState()));         
+      }
 
       RevoluteJoint[] revoluteJoints = inverseKinematicsCalculator.getRevoluteJointsInOrder();
       DenseMatrix64F desiredJointAngles = inverseKinematicsCalculator.getDesiredJointAngles();
@@ -150,17 +158,11 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
       }
    }
 
-//   @Override
-//   public boolean isDone()
-//   {
-//      return positionTrajectoryGenerator.isDone() && orientationTrajectoryGenerator.isDone();
-//   }
-
-//   public ReferenceFrame getFrameToControlPoseOf()
-//   {
-//      return handSpatialAccelerationControlModule.getTrackingFrame();
-//   }
-   
+   @Override
+   public boolean isDone()
+   {
+      return super.isDone() || !inverseKinematicsSolutionIsValid.getBooleanValue();
+   }
    @Override
    public void setTrajectory(PositionTrajectoryGenerator positionTrajectoryGenerator, OrientationTrajectoryGenerator orientationTrajectoryGenerator,
          Map<OneDoFJoint, Double> finalDesiredJointAngles, RigidBody base, RigidBodySpatialAccelerationControlModule rigidBodySpatialAccelerationControlModule, ReferenceFrame frameToControlPoseOf)

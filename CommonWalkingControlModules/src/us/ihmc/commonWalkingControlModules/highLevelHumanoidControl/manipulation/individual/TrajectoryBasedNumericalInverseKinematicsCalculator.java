@@ -69,8 +69,10 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
    private final RevoluteJoint[] revoluteJointsCopyForIK;
    
    private final DoubleYoVariable ikPositionErrorGain = new DoubleYoVariable("ikPositionErrorGain", registry);
-   private final DoubleYoVariable ikVelocityErrorGain = new DoubleYoVariable("ikVelocityErrorGain", registry);
+   private final DoubleYoVariable ikOrientationErrorGain = new DoubleYoVariable("ikOrientationErrorGain", registry);
    private final DoubleYoVariable ikAlpha = new DoubleYoVariable("ikAlpha", registry);
+   private final DoubleYoVariable maximumIKError = new DoubleYoVariable("maximumIKError", registry);
+   private final DoubleYoVariable maximumAngleOutsideLimits = new DoubleYoVariable("maximumAngleOutsideLimits", registry);
    
    private ReferenceFrame trajectoryFrame;
    
@@ -151,13 +153,21 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
       desiredTwist = new Twist(endEffectorFrameForIK, baseFrame, baseFrame);
 
       ikPositionErrorGain.set(100.0);
-      ikVelocityErrorGain.set(250.0);
+      ikOrientationErrorGain.set(100.0);
       ikAlpha.set(0.05);
-
-      if (dynamicGraphicObjectsListRegistry != null)
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("", yoDesiredTrajectoryPose.createDynamicGraphicCoordinateSystem(endEffector.getName() + "DesiredTrajectoryPose", 0.2));
+      maximumIKError.set(0.06);
+      maximumAngleOutsideLimits.set(0.1);
       
-      parentRegistry.addChild(registry);
+
+      if(dynamicGraphicObjectsListRegistry != null)
+      {
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("", yoDesiredTrajectoryPose.createDynamicGraphicCoordinateSystem(endEffector.getName() + "DesiredTrajectoryPose", 0.2));         
+      }
+      
+      if(parentRegistry != null)
+      {
+         parentRegistry.addChild(registry);         
+      }
    }
 
    public void initialize()
@@ -184,9 +194,9 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
    }
 
 
-   public void compute(double time)
+   public boolean compute(double time)
    {
-      updateError();
+      boolean inverseKinematicsIsValid = updateError();
 
       updateTrajectories(time);
 
@@ -194,7 +204,7 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
       desiredAngularVelocity.getVector(desiredAngularVelocityVector);
 
       linearError.scale(ikPositionErrorGain.getDoubleValue());
-      angularError.scale(ikVelocityErrorGain.getDoubleValue());
+      angularError.scale(ikOrientationErrorGain.getDoubleValue());
       desiredVelocityVector.add(linearError);
       desiredAngularVelocityVector.add(angularError);
 
@@ -208,14 +218,30 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
       solver.solve(twistMatrix, inverseKinematicsStep);
 
       CommonOps.addEquals(desiredAngles, dt, inverseKinematicsStep);
-
+      
       for (int i = 0; i < revoluteJointsCopyForIK.length; i++)
       {
-         revoluteJointsCopyForIK[i].setQ(desiredAngles.get(i, 0));
+         double q = desiredAngles.get(i, 0);
+         if(q < (revoluteJoints[i].getJointLimitLower() - maximumAngleOutsideLimits.getDoubleValue())
+               || q > (revoluteJoints[i].getJointLimitUpper() + maximumAngleOutsideLimits.getDoubleValue()))
+         {
+            inverseKinematicsIsValid = false;
+         }
+         
+         revoluteJointsCopyForIK[i].setQ(q);
       }
       updateFrames();
       
-      updateDesiredVelocities();
+      if(inverseKinematicsIsValid)
+      {
+         updateDesiredVelocities();         
+      }
+      else
+      {
+         desiredAngularVelocities.zero();
+      }
+      
+      return inverseKinematicsIsValid;
    }
 
    private void transformTwistToEndEffectorFrame()
@@ -225,7 +251,7 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
       desiredTwist.changeBodyFrameNoRelativeTwist(endEffectorFrame);
 //      desiredTwist.changeFrame(baseFrame);
       
-      if(trajectoryFrame == worldFrame)
+      if(trajectoryFrame == worldFrame && twistCalculator != null)
       {
          twistCalculator.packTwistOfBody(baseTwist, base);
          desiredTwist.sub(baseTwist);
@@ -278,7 +304,7 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
    }
 
 
-   private void updateError()
+   private boolean updateError()
    {
 
       frameToControlPoseOfForIk.update();
@@ -308,6 +334,16 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
       }
       angularError.scale(0.5);
 
+      
+      if(linearError.length() > maximumIKError.getDoubleValue() || angularError.length() > maximumIKError.getDoubleValue())
+      {
+         return false;
+      }
+      else
+      {
+         return true;
+      }
+      
    }
 
    public RevoluteJoint[] getRevoluteJointsInOrder()
