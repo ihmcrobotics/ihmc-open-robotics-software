@@ -154,7 +154,8 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
       ikVelocityErrorGain.set(250.0);
       ikAlpha.set(0.05);
 
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("", yoDesiredTrajectoryPose.createDynamicGraphicCoordinateSystem(endEffector.getName() + "DesiredTrajectoryPose", 0.2));
+      if (dynamicGraphicObjectsListRegistry != null)
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("", yoDesiredTrajectoryPose.createDynamicGraphicCoordinateSystem(endEffector.getName() + "DesiredTrajectoryPose", 0.2));
       
       parentRegistry.addChild(registry);
    }
