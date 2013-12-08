@@ -24,7 +24,7 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 
 public class DRCObstacleCourseTrialsTerrainTest
 {
-   private static final boolean KEEP_SCS_UP = false;
+   private static final boolean KEEP_SCS_UP = true;
 
    private static final boolean createMovie = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
@@ -135,6 +135,40 @@ public class DRCObstacleCourseTrialsTerrainTest
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(15.0);
 
+      drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
+      drcSimulationTestHelper.checkNothingChanged();
+
+      assertTrue(success);
+
+      BambooTools.reportTestFinishedMessage();
+   }
+   
+   @Test
+   public void testTrialsTerrainZigzagHurdlesScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsZigzagHurdlesLeftFootPose.xml";
+      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
+      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_ZIGZAG_BLOCKS;
+      DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCZigzagHurdlesTest", fileName, selectedLocation, selectedEnvironment, checkNothingChanged,
+              createMovie, false);
+
+      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
+      setupCameraForWalkingOverHurdles(simulationConstructionSet);
+      
+      
+      SDFRobot robot = drcSimulationTestHelper.getRobot();
+      SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(robot, 1201L);
+      slipRandomOnEachStepPerturber.setSlipParameters(0.04, 0.04, 0.0, 0.1, 0.1, 0.005, 0.01, 0.5, 0.01, 0.03, 0);
+      robot.setController(slipRandomOnEachStepPerturber, 10);
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      slipRandomOnEachStepPerturber.setProbabilityOfSlipInPercentage(100);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(14.0);
+      
       drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
 
