@@ -200,8 +200,9 @@ public class DRCObstacleCourseFlatTest
       SDFRobot robot = drcSimulationTestHelper.getRobot();
 
       SlipOnNextStepPerturber slipOnEachStepPerturber = new SlipOnNextStepPerturber(robot, RobotSide.LEFT);
-      slipOnEachStepPerturber.setAmountToSlipNextStep(new Vector3d(0.08, -0.12, 0.0));
-      slipOnEachStepPerturber.setSlipAfterStepTimeDelta(0.1);
+      slipOnEachStepPerturber.setAmountToSlipNextStep(new Vector3d(0.08, -0.10, 0.0));
+      slipOnEachStepPerturber.setSlipAfterStepTimeDelta(0.05);
+      slipOnEachStepPerturber.setPercentToSlipPerTick(0.1);
       robot.setController(slipOnEachStepPerturber, 10);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
