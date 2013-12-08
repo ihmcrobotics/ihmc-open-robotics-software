@@ -50,7 +50,7 @@ public class KinematicCalibrationWristLoopResidual implements FunctionNtoM
    
    public double[] calcResiduals(double[] input)
    {
-      double[] output = new double[getOutputsM()];
+      double[] output = new double[getNumOfOutputsM()];
       process(input, output);
       return output;
    }
@@ -122,14 +122,14 @@ public class KinematicCalibrationWristLoopResidual implements FunctionNtoM
    
    
    @Override
-   public int getInputsN()
+   public int getNumOfInputsN()
    {
       //dim parameter
       return calJointNames.size() + 1; //+3 for constant offset
    }
    
    @Override
-   public int getOutputsM()
+   public int getNumOfOutputsM()
    {
       //dim error
        return qdata.size()*AtlasKinematicCalibrator.RESIDUAL_DOF;
