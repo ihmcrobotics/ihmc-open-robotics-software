@@ -8,7 +8,7 @@ import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
 @RunWith(Suite.class)
 @Suite.SuiteClasses(
 {
-//   us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseFlatTest.class,
+   us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseFlatTest.class,
 //   us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCoursePlatformTest.class,
    us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseRampsTest.class
 //   us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseRocksTest.class,
