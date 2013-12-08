@@ -1,5 +1,5 @@
 <GraphGroup>
-	<Cols>1</Cols>
+	<Cols>2</Cols>
 	<Graph>
 		<Variables>root.atlas.t</Variables>
 		<GraphConfiguration>
@@ -125,9 +125,9 @@ Plotter,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>4.599824412222302</Camera X>
- <Camera Y>0.15239968732357895</Camera Y>
- <Camera Z>1.13382473820315</Camera Z>
+ <Camera X>3.81603863969385</Camera X>
+ <Camera Y>-0.04728710642031267</Camera Y>
+ <Camera Z>0.9526755502416142</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -151,8 +151,8 @@ Plotter,
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>1.8125134132999206</Fix X>
-<Fix Y>-0.13386571743229841</Fix Y>
-<Fix Z>0.9245350511763186</Fix Z>
+<Fix X>1.6761125437443276</Fix X>
+<Fix Y>-0.05797105303880701</Fix Y>
+<Fix Z>0.6890276616362487</Fix Z>
 </Fix Position>
 </Canvas 1>
