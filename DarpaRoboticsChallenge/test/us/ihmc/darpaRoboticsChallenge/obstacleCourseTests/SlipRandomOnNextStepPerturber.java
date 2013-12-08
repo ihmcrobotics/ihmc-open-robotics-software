@@ -219,8 +219,8 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
       double randomSlipDeltaX = pseudoRandomRealNumberWithinRange(minMagnitudeToSlipNextStep.getX(), maxMagnitudeToSlipNextStep.getX());
       double randomSlipDeltaY = pseudoRandomRealNumberWithinRange(minMagnitudeToSlipNextStep.getY(), maxMagnitudeToSlipNextStep.getY());
       double randomSlipDeltaZ = pseudoRandomRealNumberWithinRange(minMagnitudeToSlipNextStep.getZ(), maxMagnitudeToSlipNextStep.getZ());
-      double randomSlipAfterTimeDelta = pseudoRandomRealNumberWithinRange(minSlipAfterTimeDelta.getDoubleValue(), maxSlipAfterTimeDelta.getDoubleValue());
-      double randomPercentToSlipPerTick = pseudoRandomRealNumberWithinRange(minSlipPercentSlipPerTick.getDoubleValue(),
+      double randomSlipAfterTimeDelta = pseudoRandomPositiveNumberWithinRange(minSlipAfterTimeDelta.getDoubleValue(), maxSlipAfterTimeDelta.getDoubleValue());
+      double randomPercentToSlipPerTick = pseudoRandomPositiveNumberWithinRange(minSlipPercentSlipPerTick.getDoubleValue(),
                                              maxSlipPercentSlipPerTick.getDoubleValue());
 
       nextSlipAfterTimeDelta.set(randomSlipAfterTimeDelta);
@@ -231,8 +231,15 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
    private double pseudoRandomRealNumberWithinRange(double minRange, double maxRange)
    {
       double realUnitPsuedoRandom = (random.nextDouble() * 2.0 - 1.0);
-      System.out.println("realUnitPsuedoRandom " + realUnitPsuedoRandom);
       double value = realUnitPsuedoRandom * (maxRange - minRange) + MathTools.sign(realUnitPsuedoRandom) * minRange;
+
+      return value;
+   }
+
+   private double pseudoRandomPositiveNumberWithinRange(double minRange, double maxRange)
+   {
+      double posUnitPsuedoRandom = random.nextDouble();
+      double value = posUnitPsuedoRandom * (maxRange - minRange) + minRange;
 
       return value;
    }
