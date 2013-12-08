@@ -7,6 +7,7 @@ public class DRCConfigParameters
    public static final boolean USE_RED_TEAM_CONTROLLER = false;
    public static final boolean USE_MANIPULATION_DECOUPLED_TASKSPACE_CONTROL = false;
    public static final boolean USE_INVERSE_KINEMATICS_TASKSPACE_CONTROL = false;
+
 // When false and desired hand pose from the GUI is in world, the robot will hold the desired hand pose in world when walking. BE CAREFUL with that option! 
    public static final boolean HOLD_HANDS_IN_CHEST_FRAME_WHEN_WALKING = true;
 
@@ -18,7 +19,8 @@ public class DRCConfigParameters
    public static final boolean ALLOW_LAG_SIMULATION = true;
    public static final boolean ENABLE_LAG_SIMULATION_ON_START = false;
    public static boolean CALIBRATE_ARM_MODE = false;
-   public static boolean ENABLE_QOUT_ENCODER = CALIBRATE_ARM_MODE; 
+   public static boolean ENABLE_QOUT_ENCODER = CALIBRATE_ARM_MODE;
+
 
    static
    {
@@ -26,8 +28,8 @@ public class DRCConfigParameters
       {
          System.err.println("Warning: Allowing simulation of lag");
       }
-      
-      if(CALIBRATE_ARM_MODE)
+
+      if (CALIBRATE_ARM_MODE)
       {
          System.err.println("Warning: Calibrate arm mode is on, qout is disabled");
       }
@@ -42,6 +44,9 @@ public class DRCConfigParameters
    public static final double MAX_TORQUE_TO_USE_IN_PERCENT = 1.2;
 
    public static final boolean USE_PERFECT_SENSORS = false;
+
+   // Add more contact points on the feet
+   public static boolean CREATE_LOAD_OF_CONTACT_POINTS_FEET = false;
 
    static
    {
@@ -253,7 +258,7 @@ public class DRCConfigParameters
    public static final boolean USE_IHMCFILTER_JOINT_TORQUES = true;
    public static final String ATLAS_CALIBRATION_FILE = "AtlasCalibration/AtlasNullOffsets.properties";
 
-   public static final double JOINT_VELOCITY_SLOP_TIME_FOR_BACKLASH_COMPENSATION = 0.06; //0.045; //0.03;
+   public static final double JOINT_VELOCITY_SLOP_TIME_FOR_BACKLASH_COMPENSATION = 0.06;    // 0.045; //0.03;
 
    public static final double JOINT_POSITION_FILTER_FREQ_HZ = positionSensorFrequencyHz;
    public static final double JOINT_VELOCITY_FILTER_FREQ_HZ = velocitySensorFrequencyHz;
