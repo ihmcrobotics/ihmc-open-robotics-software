@@ -92,11 +92,11 @@ public class KinematicCalibrationHeadLoopResidualTest
 
       KinematicCalibrationHeadLoopResidual alg = new KinematicCalibrationHeadLoopResidual(fullRobotModel,isleft,intrinsic,calibGrid,qdata,q);
 
-      assertEquals(qoffset.size()+6,alg.getInputsN());
-      assertEquals(numPoses*calibGrid.points.size()*2,alg.getOutputsM());
+      assertEquals(qoffset.size()+6,alg.getNumOfInputsN());
+      assertEquals(numPoses*calibGrid.points.size()*2,alg.getNumOfOutputsM());
 
-      double input[] = new double[ alg.getInputsN() ];
-      double output[] = new double[ alg.getOutputsM() ];
+      double input[] = new double[ alg.getNumOfInputsN() ];
+      double output[] = new double[ alg.getNumOfOutputsM() ];
 
       for( int i = 0; i < input.length; i++ ) {
          input[i] = 0;
@@ -132,11 +132,11 @@ public class KinematicCalibrationHeadLoopResidualTest
 
       KinematicCalibrationHeadLoopResidual alg = new KinematicCalibrationHeadLoopResidual(fullRobotModel,isleft,intrinsic,calibGrid,qdata,q);
 
-      assertEquals(qoffset.size()+6,alg.getInputsN());
-      assertEquals(numPoses*calibGrid.points.size()*2,alg.getOutputsM());
+      assertEquals(qoffset.size()+6,alg.getNumOfInputsN());
+      assertEquals(numPoses*calibGrid.points.size()*2,alg.getNumOfOutputsM());
 
-      double input[] = new double[ alg.getInputsN() ];
-      double output[] = new double[ alg.getOutputsM() ];
+      double input[] = new double[ alg.getNumOfInputsN() ];
+      double output[] = new double[ alg.getNumOfOutputsM() ];
 
       for( int i = 0; i < input.length; i++ ) {
          input[i] = 0;
@@ -180,7 +180,7 @@ public class KinematicCalibrationHeadLoopResidualTest
 
       UnconstrainedLeastSquares optimizer = FactoryOptimization.leastSquaresLM(1e-3, true);
 
-      double input[] = new double[ function.getInputsN() ];
+      double input[] = new double[ function.getNumOfInputsN() ];
 
       for( int i = 0; i < input.length; i++ ) {
          input[i] = 0;

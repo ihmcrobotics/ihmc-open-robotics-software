@@ -19,7 +19,7 @@ public class LinkComID
       UnconstrainedLeastSquares optimizer = FactoryOptimization.leastSquaresLM(1e-3, true);
       optimizer.setFunction(residual, null);
 
-      double[] prm = new double[residual.getInputsN()];
+      double[] prm = new double[residual.getNumOfInputsN()];
       residual.getCurrentLinkCom().set(prm);
 
       optimizer.initialize(prm, 0, 0);

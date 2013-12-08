@@ -145,14 +145,14 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
    }
    
    @Override
-   public int getInputsN()
+   public int getNumOfInputsN()
    {
       //dim parameter
       return calJointNames.size() + 6;
    }
    
    @Override
-   public int getOutputsM()
+   public int getNumOfOutputsM()
    {
        return qdata.size()*calibGrid.points.size()*2;
    }

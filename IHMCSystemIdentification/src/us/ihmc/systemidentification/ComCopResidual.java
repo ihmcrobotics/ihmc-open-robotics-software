@@ -151,14 +151,14 @@ public class ComCopResidual implements FunctionNtoM
    }
 
    @Override
-   public int getInputsN()
+   public int getNumOfInputsN()
    {
        return 3; //x,y,z
    }
 
    
    @Override
-   public int getOutputsM()
+   public int getNumOfOutputsM()
    {
       // dim error
       return getNumSamples() *2; //x and y, 2d
