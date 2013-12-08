@@ -6,6 +6,7 @@ import java.util.Random;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -215,20 +216,25 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
 
    private void generateRandomSlipParamters()
    {
-      double randomSlipDeltaX = (random.nextDouble() * 2.0 - 1.0) * (maxMagnitudeToSlipNextStep.getX() - minMagnitudeToSlipNextStep.getX())
-                                + minMagnitudeToSlipNextStep.getX();
-      double randomSlipDeltaY = (random.nextDouble() * 2.0 - 1.0) * (maxMagnitudeToSlipNextStep.getY() - minMagnitudeToSlipNextStep.getY())
-                                + minMagnitudeToSlipNextStep.getY();
-      double randomSlipDeltaZ = (random.nextDouble() * 2.0 - 1.0) * (maxMagnitudeToSlipNextStep.getZ() - minMagnitudeToSlipNextStep.getZ())
-                                + minMagnitudeToSlipNextStep.getZ();
-      double randomSlipAfterTimeDelta = random.nextDouble() * (maxSlipAfterTimeDelta.getDoubleValue() - minSlipAfterTimeDelta.getDoubleValue())
-                                        + minSlipAfterTimeDelta.getDoubleValue();
-      double randomPercentToSlipPerTick = random.nextDouble() * (maxSlipPercentSlipPerTick.getDoubleValue() - minSlipPercentSlipPerTick.getDoubleValue())
-                                          + minSlipPercentSlipPerTick.getDoubleValue();
+      double randomSlipDeltaX = pseudoRandomRealNumberWithinRange(minMagnitudeToSlipNextStep.getX(), maxMagnitudeToSlipNextStep.getX());
+      double randomSlipDeltaY = pseudoRandomRealNumberWithinRange(minMagnitudeToSlipNextStep.getY(), maxMagnitudeToSlipNextStep.getY());
+      double randomSlipDeltaZ = pseudoRandomRealNumberWithinRange(minMagnitudeToSlipNextStep.getZ(), maxMagnitudeToSlipNextStep.getZ());
+      double randomSlipAfterTimeDelta = pseudoRandomRealNumberWithinRange(minSlipAfterTimeDelta.getDoubleValue(), maxSlipAfterTimeDelta.getDoubleValue());
+      double randomPercentToSlipPerTick = pseudoRandomRealNumberWithinRange(minSlipPercentSlipPerTick.getDoubleValue(),
+                                             maxSlipPercentSlipPerTick.getDoubleValue());
 
       nextSlipAfterTimeDelta.set(randomSlipAfterTimeDelta);
       nextSlipPercentSlipPerTick.set(randomPercentToSlipPerTick);
       nextAmountToSlip.set(randomSlipDeltaX, randomSlipDeltaY, randomSlipDeltaZ);
+   }
+
+   private double pseudoRandomRealNumberWithinRange(double minRange, double maxRange)
+   {
+      double realUnitPsuedoRandom = (random.nextDouble() * 2.0 - 1.0);
+      System.out.println("realUnitPsuedoRandom " + realUnitPsuedoRandom);
+      double value = realUnitPsuedoRandom * (maxRange - minRange) + MathTools.sign(realUnitPsuedoRandom) * minRange;
+
+      return value;
    }
 
    private boolean slipOnNextStep()
