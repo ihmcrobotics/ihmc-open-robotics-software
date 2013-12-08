@@ -113,11 +113,11 @@ public class DetectChessboardInKinematicsData
          if( orig.getWidth() != intrinsic.width || orig.getHeight() != intrinsic.height )
             throw new IllegalArgumentException("Unexpected image size "+orig.getWidth()+" "+orig.getHeight());
 
-         File output = new File(f,"target.txt");
-         if( output.exists() )
-            output.delete();
+         File outputTarget = new File(f,"target.txt");
+         if( outputTarget.exists() )
+            outputTarget.delete();
 
-         output.createNewFile();
+         outputTarget.createNewFile();
 
          // process the image and check for failure condition
          if( !detector.process(input) ) {
@@ -157,7 +157,7 @@ public class DetectChessboardInKinematicsData
          System.out.println(" Average pixel error = "+(totalError/target.points.size()));
 
          // save the results
-         PrintStream out = new PrintStream(output);
+         PrintStream out = new PrintStream(outputTarget);
 
          out.println("# target-to-camera Rotation matrix then Translation");
          for( int i = 0; i < 3; i++ ) {
@@ -171,7 +171,13 @@ public class DetectChessboardInKinematicsData
             out.printf("%f ",targetToCamera.getT().getIndex(i));
          }
          out.println();
+         out.println();
+         out.println("# List of detected calibration points in pixels");
+         for( Point2D_F64 p : observations ) {
+            out.printf("%f %f\n",p.x,p.y);
+         }
          out.close();
+
 
          // render and display the results
          for( int i = 0; i < observations.size(); i++ ) {

@@ -63,6 +63,8 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 {
    public static String TARGET_TO_CAMERA_KEY = "targetToCamera";
    public static String CAMERA_IMAGE_KEY = "cameraImage";
+   public static String CHESSBOARD_DETECTIONS_KEY = "chessboardDetections";
+
    //YoVariables for Display
    private final YoFramePoint ypLeftEE, ypRightEE;
    private final YoFramePose yposeLeftEE, yposeRightEE, yposeBoard,yposeLeftCamera;
@@ -243,7 +245,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       Matrix3d rotX = new Matrix3d(1,0,0,  0,0,-1, 0,1,0);
       Matrix3d rotZ = new Matrix3d(0,-1,0, 1,0,0,  0,0,1);
       Matrix3d rot = new Matrix3d();
-      rot.mul(rotX,rotZ);
+      rot.mul(rotX, rotZ);
 
       targetToEE.setRotation(rot);
       targetToEE.setTranslation(new Vector3d(-0.061, 0.13, 0.205));
@@ -316,73 +318,99 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 //
    public void loadData(String directory ) throws IOException
    {
-
       intrinsic = BoofMiscOps.loadXML("../DarpaRoboticsChallenge/data/calibration_images/intrinsic_ros.xml");
 
       File[] files = new File(directory).listFiles();
 
       Arrays.sort(files);
+
 //      files = new File[]{files[3],files[20]};
       for( File f : files ) {
          if( !f.isDirectory() )
             continue;
          System.out.println("datafolder:" + f.toString());
-         File fileTarget = new File(f,"target.txt");
-
-         if( !fileTarget.exists() || fileTarget.length() == 0 )
-            continue;
 
          Map<String,Object> mEntry = new HashMap<String, Object>();
-
-         // parse targetToCamera transform
-         BufferedReader reader = new BufferedReader(new FileReader(fileTarget));
-
-         Se3_F64 targetToCamera = new Se3_F64();
-
-         reader.readLine();         // skip comments
-
-         //read rotation
-         String row0[] = reader.readLine().split(" ");
-         String row1[] = reader.readLine().split(" ");
-         String row2[] = reader.readLine().split(" ");
-
-         for( int col = 0; col < 3; col++ ) {
-            targetToCamera.getR().set(0,col, parseDouble(row0[col]));
-            targetToCamera.getR().set(1,col, parseDouble(row1[col]));
-            targetToCamera.getR().set(2,col, parseDouble(row2[col]));
-         }
-
-         //read translation
-         reader.readLine();
-         String s[] = reader.readLine().split(" ");
-         targetToCamera.getT().set(parseDouble(s[0]), parseDouble(s[1]), parseDouble(s[2]));
-
-         //copy Translation and Rotation
-         Transform3D transform = new Transform3D();
-         Vector3D_F64 T = targetToCamera.T;
-         transform.setTranslation(new Vector3d(T.x, T.y, T.z));
-
-         Matrix3d matrix3d = new Matrix3d();
-         MatrixTools.denseMatrixToMatrix3d(targetToCamera.getR(),matrix3d,0,0);
-         transform.setRotation(matrix3d);
-         mEntry.put(TARGET_TO_CAMERA_KEY,transform);
-
-         //load image
-         mEntry.put(CAMERA_IMAGE_KEY,ImageIO.read(new File(f,"/detected.jpg")));
-
-
-         // load joint angles
-         Properties properties = new Properties();
-         properties.load(new FileReader(new File(f,"q.m")));
          Map<String,Double> qEntry = new HashMap<>();
-         for(Map.Entry e : properties.entrySet() ) {
-            qEntry.put((String)e.getKey(),Double.parseDouble((String)e.getValue()));
-         }
 
-         //storage
+         if( !loadData(f,mEntry,qEntry) )
+            continue;
+
          metaData.add(mEntry);
          q.add(qEntry);
+
       }
+   }
+
+   public static boolean loadData(File f , Map<String,Object> mEntry ,Map<String,Double> qEntry ) throws IOException
+   {
+      File fileTarget = new File(f,"target.txt");
+
+      if( !fileTarget.exists() || fileTarget.length() == 0 )
+         return false;
+
+      // parse targetToCamera transform
+      BufferedReader reader = new BufferedReader(new FileReader(fileTarget));
+
+      Se3_F64 targetToCamera = new Se3_F64();
+
+      reader.readLine();         // skip comments
+
+      //read rotation
+      String row0[] = reader.readLine().split(" ");
+      String row1[] = reader.readLine().split(" ");
+      String row2[] = reader.readLine().split(" ");
+
+      for( int col = 0; col < 3; col++ ) {
+         targetToCamera.getR().set(0,col, parseDouble(row0[col]));
+         targetToCamera.getR().set(1,col, parseDouble(row1[col]));
+         targetToCamera.getR().set(2,col, parseDouble(row2[col]));
+      }
+
+      //read translation
+      reader.readLine();
+      String s[] = reader.readLine().split(" ");
+      targetToCamera.getT().set(parseDouble(s[0]), parseDouble(s[1]), parseDouble(s[2]));
+
+      // read calibration point stuff
+      reader.readLine();
+      reader.readLine();
+      ArrayList<Point2D_F64> detections = new ArrayList<>();
+      while( true ) {
+         String line = reader.readLine();
+         if( line == null )
+            break;
+         s = line.split(" ");
+         Point2D_F64 p = new Point2D_F64();
+         p.x = Double.parseDouble(s[0]);
+         p.y = Double.parseDouble(s[1]);
+         detections.add(p);
+      }
+      mEntry.put(CHESSBOARD_DETECTIONS_KEY,detections);
+
+      //copy Translation and Rotation
+      Transform3D transform = new Transform3D();
+      Vector3D_F64 T = targetToCamera.T;
+      transform.setTranslation(new Vector3d(T.x, T.y, T.z));
+
+      Matrix3d matrix3d = new Matrix3d();
+      MatrixTools.denseMatrixToMatrix3d(targetToCamera.getR(),matrix3d,0,0);
+      transform.setRotation(matrix3d);
+      mEntry.put(TARGET_TO_CAMERA_KEY,transform);
+
+      //load image
+      mEntry.put(CAMERA_IMAGE_KEY,ImageIO.read(new File(f,"/detected.jpg")));
+
+
+      // load joint angles
+      Properties properties = new Properties();
+      properties.load(new FileReader(new File(f,"q.m")));
+
+      for(Map.Entry e : properties.entrySet() ) {
+         qEntry.put((String)e.getKey(),Double.parseDouble((String)e.getValue()));
+      }
+
+      return true;
    }
 
 
