@@ -73,7 +73,7 @@ public class DRCObstacleCourseTrialsWalkingTaskTest
       ThreadTools.sleep(0);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(9.5);
 
       drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
