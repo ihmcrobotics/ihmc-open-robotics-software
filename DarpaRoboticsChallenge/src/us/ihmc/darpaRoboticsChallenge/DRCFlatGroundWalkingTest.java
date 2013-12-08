@@ -150,9 +150,9 @@ public class DRCFlatGroundWalkingTest
 
          //TODO: Reduce the error tolerance from 2.5 cm to under 1 cm after we change things so that we are truly 
          // controlling pelvis height, not CoM height.
-         if (Math.abs(comError.getDoubleValue()) > 0.05)
+         if (Math.abs(comError.getDoubleValue()) > 0.06)
          {
-            fail("Math.abs(comError.getDoubleValue()) > 0.05: " + comError.getDoubleValue() + " at t = " + scs.getTime());
+            fail("Math.abs(comError.getDoubleValue()) > 0.06: " + comError.getDoubleValue() + " at t = " + scs.getTime());
          }
       }
 
