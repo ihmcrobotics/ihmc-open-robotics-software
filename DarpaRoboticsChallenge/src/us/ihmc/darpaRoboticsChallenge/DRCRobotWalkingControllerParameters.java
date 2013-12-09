@@ -172,9 +172,9 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    }
 
 // USE THESE FOR Real Atlas Robot and sims when controlling pelvis height instead of CoM.
-   private final double minimumHeightAboveGround = 0.595;                                       
-   private double nominalHeightAboveGround = 0.675; 
-   private final double maximumHeightAboveGround = 0.735; 
+   private final double minimumHeightAboveGround = 0.595 + 0.03;                                       
+   private double nominalHeightAboveGround = 0.675 + 0.03; 
+   private final double maximumHeightAboveGround = 0.735 + 0.03; 
    
 // USE THESE FOR DRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
 //   private final double minimumHeightAboveGround = 0.785;                                       
