@@ -18,10 +18,7 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import javax.media.j3d.Transform3D;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Peter Abeles
@@ -29,6 +26,7 @@ import java.util.Map;
 public class StandaloneAtlasHeadLoopKinematicsCalibrator
 {
    public static final String DATA_NAME = "DATA_NAME";
+   public static final boolean useQOut = false;
 
    private final ArrayList<Map<String,Object>> metaData;
    final ReferenceFrame cameraFrame;
@@ -40,6 +38,7 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
 
    protected final OneDoFJoint[] joints;
    protected final ArrayList<Map<String, Double>> q = new ArrayList<>();
+   protected final ArrayList<Map<String, Double>> qout = new ArrayList<>();
 
 
    private IntrinsicParameters intrinsic;
@@ -83,10 +82,9 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
    }
 
 
-   private double[] computeErrorStatistics(KinematicCalibrationHeadLoopResidual function, double[] found)
+   private void computeErrorStatistics(double []output, double[] found)
    {
-      double output[] = new double[function.getNumOfOutputsM()];
-      function.process(found,output);
+
       double averageError = 0;
       double errors[] = new double[ output.length/2];
       for( int i = 0; i < output.length; i+= 2 ){
@@ -109,7 +107,6 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
       System.out.println("95% pixel error     "+errors[(int)(errors.length*0.95)]);
       System.out.println();
       System.out.println();
-      return output;
    }
 
    private void printCode( java.util.List<String> jointNames , double found[]) {
@@ -119,12 +116,36 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
       }
    }
 
+   private void initializeWithQ( double input[] , KinematicCalibrationHeadLoopResidual function ) {
+      Map<String, Double> dataQ = q.get(0);
+      Map<String, Double> dataQout = qout.get(0);
+
+      List<String> keys = function.getCalJointNames();
+
+      for( int i = 0;i < keys.size(); i++ ) {
+         String s = keys.get(i);
+         double valQ = dataQ.get(s);
+         double valQout = dataQout.get(s);
+
+         double difference = valQ-valQout;
+         input[i] = difference;
+      }
+   }
+
    public void optimizeData() {
-      KinematicCalibrationHeadLoopResidual function = new KinematicCalibrationHeadLoopResidual(fullRobotModel,true,intrinsic,calibGrid,metaData,q);
+
+      ArrayList<Map<String, Double>> jointMeas = useQOut ? qout : q;
+
+      KinematicCalibrationHeadLoopResidual function = new KinematicCalibrationHeadLoopResidual(fullRobotModel,true,intrinsic,calibGrid,metaData,jointMeas);
 
       UnconstrainedLeastSquares optimizer = FactoryOptimization.leastSquaresLM(1e-3, true);
 
       double input[] = new double[ function.getNumOfInputsN() ];
+
+      // if using qout you need to give it an initial estimate
+      if( useQOut ) {
+         initializeWithQ(input,function);
+      }
 
       optimizer.setFunction(function,null);
       optimizer.initialize(input,1e-12,1e-12);
@@ -138,9 +159,11 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
       }
 
       double found[] = optimizer.getParameters();
+      double output[] = new double[function.getNumOfOutputsM()];
 
-      double[] output = computeErrorStatistics(function, found);
+      function.process(found,output);
 
+      computeErrorStatistics(output, found);
 //      computePerImageError(output);
 
       java.util.List<String> jointNames = function.getCalJointNames();
@@ -152,10 +175,10 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
          qbias.put(jointNames.get(i), found[i]);
          System.out.println(jointNames.get(i) + " bias: " + Math.toDegrees(found[i])+" deg");
       }
-      System.out.println("board to wrist tranX:" + found[found.length-4]);
-      System.out.println("board to wrist tranY:" + found[found.length-3]);
-      System.out.println("board to wrist tranZ:" + found[found.length-2]);
-      System.out.println("board to wrist  rotY:" + Math.toDegrees(found[found.length-1])+" deg");
+      System.out.println("board to wrist tranX: " + found[found.length-4]);
+      System.out.println("board to wrist tranY: " + found[found.length-3]);
+      System.out.println("board to wrist tranZ: " + found[found.length-2]);
+      System.out.println("board to wrist  rotY: " + Math.toDegrees(found[found.length-1])+" deg");
 
       printCode(jointNames,found);
    }
@@ -174,15 +197,17 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
             continue;
          System.out.println("datafolder:" + f.toString());
 
-         Map<String,Object> mEntry = new HashMap<String, Object>();
+         Map<String,Object> mEntry = new HashMap<>();
          Map<String,Double> qEntry = new HashMap<>();
+         Map<String,Double> qoutEntry = new HashMap<>();
 
-         if( !AtlasHeadLoopKinematicCalibrator.loadData(f, mEntry, qEntry, true) )
+         if( !AtlasHeadLoopKinematicCalibrator.loadData(f, mEntry, qEntry, qoutEntry, true) )
             continue;
          mEntry.put(DATA_NAME,f.getName());
 
          metaData.add(mEntry);
          q.add(qEntry);
+         qout.add(qoutEntry);
       }
       System.out.println("loaded "+q.size()+" data files");
    }
@@ -190,7 +215,8 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
    public static void main(String[] arg) throws InterruptedException, IOException
    {
       StandaloneAtlasHeadLoopKinematicsCalibrator calib = new StandaloneAtlasHeadLoopKinematicsCalibrator();
-      calib.loadData("data/calibration20131208");
+//      calib.loadData("data/calibration20131208");
+      calib.loadData("data/armCalibratoin20131209/calibration_left2");
 //      calib.loadData("data/chessboard_joints_20131204");
       calib.optimizeData();
 

@@ -351,10 +351,11 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
             continue;
          System.out.println("datafolder:" + f.toString());
 
-         Map<String,Object> mEntry = new HashMap<String, Object>();
+         Map<String,Object> mEntry = new HashMap<>();
          Map<String,Double> qEntry = new HashMap<>();
+         Map<String,Double> qoutEntry = new HashMap<>();
 
-         if( !loadData(f,mEntry,qEntry,true) )
+         if( !loadData(f,mEntry,qEntry,qoutEntry,true) )
             continue;
 
          metaData.add(mEntry);
@@ -363,7 +364,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       }
    }
 
-   public static boolean loadData(File f , Map<String,Object> mEntry ,Map<String,Double> qEntry , boolean loadImages ) throws IOException
+   public static boolean loadData(File f , Map<String,Object> mEntry ,Map<String,Double> qEntry, Map<String,Double> qoutEntry , boolean loadImages ) throws IOException
    {
       File fileTarget = new File(f,"target.txt");
 
@@ -430,6 +431,13 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 
       for(Map.Entry e : properties.entrySet() ) {
          qEntry.put((String)e.getKey(),Double.parseDouble((String)e.getValue()));
+      }
+
+      properties = new Properties();
+      properties.load(new FileReader(new File(f,"qout.m")));
+
+      for(Map.Entry e : properties.entrySet() ) {
+         qoutEntry.put((String)e.getKey(),Double.parseDouble((String)e.getValue()));
       }
 
       return true;

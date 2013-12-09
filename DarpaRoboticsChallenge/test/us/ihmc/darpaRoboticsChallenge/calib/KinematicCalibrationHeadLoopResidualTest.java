@@ -207,11 +207,12 @@ public class KinematicCalibrationHeadLoopResidualTest
 
    private void generateData( Map<String, Double> qoffset , List<Map<String,Object>> qdatas, List<Map<String, Double>> qs , int N ) throws IOException
    {
-      Map<String,Object> seed_qdata = new HashMap<String, Object>();
+      Map<String,Object> seed_qdata = new HashMap<>();
       Map<String,Double> seed_q = new HashMap<>();
+      Map<String,Double> seed_qout = new HashMap<>();
 
       // load data which will act as a seed
-      if( !AtlasHeadLoopKinematicCalibrator.loadData(new File("data/chessboard_joints_20131204/1272635929936818000"),seed_qdata,seed_q,false) )
+      if( !AtlasHeadLoopKinematicCalibrator.loadData(new File("data/chessboard_joints_20131204/1272635929936818000"),seed_qdata,seed_q,seed_qout,false) )
          throw new RuntimeException("Couldn't find the data directory");
 
       for( int i = 0; i < N; i++ ) {
