@@ -23,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TaskspaceHandDecoupledPositionOrientationControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TaskspaceHandPositionControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.sensors.MassMatrixEstimatingToolRigidBody;
 import us.ihmc.commonWalkingControlModules.trajectories.ChangeableConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantOrientationTrajectoryGenerator;
@@ -101,11 +102,10 @@ public class IndividualHandControlModule
 
    private final DoubleYoVariable maxAccelerationArmTaskspace, maxJerkArmTaskspace;
    
-   public IndividualHandControlModule(DoubleYoVariable simulationTime, RobotSide robotSide, FullRobotModel fullRobotModel,
-                                      TwistCalculator twistCalculator, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-                                      double gravity, double controlDT, ReferenceFrame midHandPositionControlFrame, SE3PDGains taskspaceControlGains,
-                                      MomentumBasedController momentumBasedController, int jacobianId, ArmControllerParameters armControlParameters,
-                                      YoVariableRegistry parentRegistry)
+   public IndividualHandControlModule(DoubleYoVariable simulationTime, RobotSide robotSide, FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, double gravity, double controlDT, ReferenceFrame midHandPositionControlFrame,
+         SE3PDGains taskspaceControlGains, MomentumBasedController momentumBasedController, int jacobianId, ArmControllerParameters armControlParameters,
+         ControlStatusProducer controlStatusProducer, YoVariableRegistry parentRegistry)
    {
       this.controlDT = controlDT;
       
@@ -181,7 +181,7 @@ public class IndividualHandControlModule
       else if(armControlParameters.useInverseKinematicsTaskspaceControl())
       {
          taskSpacePositionControlState = new InverseKinematicsTaskspaceHandPositionControlState(namePrefix, IndividualHandControlState.TASK_SPACE_POSITION, robotSide, momentumBasedController, 
-               jacobianId, base, endEffector, dynamicGraphicObjectsListRegistry, armControlParameters, controlDT, registry);
+               jacobianId, base, endEffector, dynamicGraphicObjectsListRegistry, armControlParameters, controlStatusProducer, controlDT, registry);
       }
       else
       {

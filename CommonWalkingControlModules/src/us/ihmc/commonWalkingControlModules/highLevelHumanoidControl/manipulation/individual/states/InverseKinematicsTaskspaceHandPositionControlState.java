@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccele
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.IndividualHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TrajectoryBasedNumericalInverseKinematicsCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationTrajectoryGenerator;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.MathTools;
@@ -34,6 +35,8 @@ import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectory
 public class InverseKinematicsTaskspaceHandPositionControlState extends TaskspaceHandPositionControlState
 {
    private final double controlDT;
+   private final ControlStatusProducer controlStatusProducer;
+   private final RobotSide robotSide;
    private final TrajectoryBasedNumericalInverseKinematicsCalculator inverseKinematicsCalculator;
    private final LinkedHashMap<OneDoFJoint, PIDController> pidControllers = new LinkedHashMap<OneDoFJoint, PIDController>();
    private final HashMap<OneDoFJoint, RateLimitedYoVariable> rateLimitedAccelerations = new HashMap<OneDoFJoint, RateLimitedYoVariable>();
@@ -44,11 +47,13 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
 
    public InverseKinematicsTaskspaceHandPositionControlState(String namePrefix, IndividualHandControlState stateEnum, RobotSide robotSide,
          MomentumBasedController momentumBasedController, int jacobianId, RigidBody base, RigidBody endEffector,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, ArmControllerParameters armControllerParameters, double controlDT,
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, ArmControllerParameters armControllerParameters, ControlStatusProducer controlStatusProducer, double controlDT,
          YoVariableRegistry parentRegistry)
    {
       super(namePrefix, stateEnum, robotSide, momentumBasedController, jacobianId, base, endEffector, dynamicGraphicObjectsListRegistry, parentRegistry);
       this.controlDT = controlDT;
+      this.controlStatusProducer = controlStatusProducer;
+      this.robotSide = robotSide;
       inverseKinematicsCalculator = new TrajectoryBasedNumericalInverseKinematicsCalculator(base, endEffector, controlDT, momentumBasedController.getTwistCalculator(), parentRegistry, dynamicGraphicObjectsListRegistry);
       
       inverseKinematicsSolutionIsValid = new BooleanYoVariable("inverseKinematicsSolutionIsValid", registry);
@@ -129,7 +134,11 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
    {
       if(inverseKinematicsSolutionIsValid.getBooleanValue())
       {
-         inverseKinematicsSolutionIsValid.set(inverseKinematicsCalculator.compute(getTimeInCurrentState()));         
+         inverseKinematicsSolutionIsValid.set(inverseKinematicsCalculator.compute(getTimeInCurrentState()));
+         if(!inverseKinematicsSolutionIsValid.getBooleanValue())
+         {
+            controlStatusProducer.notifyHandTrajectoryInfeasible(robotSide);
+         }
       }
 
       RevoluteJoint[] revoluteJoints = inverseKinematicsCalculator.getRevoluteJointsInOrder();
