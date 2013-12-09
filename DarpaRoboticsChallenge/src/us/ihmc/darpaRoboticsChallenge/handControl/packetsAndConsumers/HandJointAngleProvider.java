@@ -10,6 +10,7 @@ import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
+import com.yobotics.simulationconstructionset.graphics.GraphicsRobot;
 import com.yobotics.simulationconstructionset.graphics.GraphicsUpdatable;
 
 public class HandJointAngleProvider implements ObjectConsumer<HandJointAnglePacket>
@@ -33,7 +34,7 @@ public class HandJointAngleProvider implements ObjectConsumer<HandJointAnglePack
       }
    }
 
-   public void addGraphicsUpdateable(GraphicsUpdatable updateable)
+   public void addGraphicsUpdateable(GraphicsRobot updateable)
    {
       graphicsToUpdate.add(updateable);
    }
