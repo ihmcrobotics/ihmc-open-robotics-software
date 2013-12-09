@@ -39,6 +39,9 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProv
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ReinitializeWalkingControllerProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredHeadOrientationProvider;
+import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
+import us.ihmc.commonWalkingControlModules.packetProviders.NetworkControlStatusProducer;
+import us.ihmc.commonWalkingControlModules.packetProviders.SystemErrControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.packets.ArmJointAnglePacket;
 import us.ihmc.commonWalkingControlModules.packets.BumStatePacket;
 import us.ihmc.commonWalkingControlModules.packets.ComHeightPacket;
@@ -85,6 +88,9 @@ public class VariousWalkingProviders
    private final DesiredPelvisLoadBearingProvider desiredPelvisLoadBearingProvider;
    private final DesiredThighLoadBearingProvider desiredThighLoadBearingProvider;
    private final DesiredArmJointAngleProvider desiredArmJointAngleProvider;
+   
+   // TODO: Shouldn't really be in providers but this class is the easiest to access
+   private final ControlStatusProducer controlStatusProducer;
 
    public VariousWalkingProviders(FootstepProvider footstepProvider, HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters,
          DesiredHeadOrientationProvider desiredHeadOrientationProvider, DesiredComHeightProvider desiredComHeightProvider,
@@ -94,7 +100,7 @@ public class VariousWalkingProviders
          DesiredFootPoseProvider footPoseProvider, DesiredFootStateProvider footStateProvider,
          DesiredHighLevelStateProvider desiredHighLevelStateProvider, DesiredThighLoadBearingProvider thighLoadBearingProvider,
          DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider, DesiredArmJointAngleProvider desiredArmJointAngleProvider,
-         ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider)
+         ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider, ControlStatusProducer controlStatusProducer)
    {
       this.desiredHighLevelStateProvider = desiredHighLevelStateProvider;
       this.footstepProvider = footstepProvider;
@@ -113,6 +119,8 @@ public class VariousWalkingProviders
       this.desiredPelvisLoadBearingProvider = pelvisLoadBearingProvider;
       
       this.desiredArmJointAngleProvider = desiredArmJointAngleProvider;
+      
+      this.controlStatusProducer = controlStatusProducer;
       
    }
    
@@ -272,10 +280,12 @@ public class VariousWalkingProviders
       objectCommunicator.attachListener(BumStatePacket.class, pelvisLoadBearingProvider);
 
       
+      ControlStatusProducer controlStatusProducer = new NetworkControlStatusProducer(objectCommunicator);
+      
       VariousWalkingProviders variousProvidersFactory = new VariousWalkingProviders(footstepPathCoordinator, mapFromFootstepsToTrajectoryParameters,
             headOrientationProvider, desiredComHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider,
             chestOrientationProvider, footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider,
-            pelvisLoadBearingProvider, armJointAngleProvider, reinitializeWalkingControllerProvider);
+            pelvisLoadBearingProvider, armJointAngleProvider, reinitializeWalkingControllerProvider, controlStatusProducer);
 
       return variousProvidersFactory;
    }
@@ -313,14 +323,12 @@ public class VariousWalkingProviders
 
       DesiredArmJointAngleProvider armJointAngleProvider = new DesiredArmJointAngleProvider();
       
-      
+      ControlStatusProducer controlStatusProducer = new SystemErrControlStatusProducer();
+
       VariousWalkingProviders variousProvidersFactory = new VariousWalkingProviders(footstepProvider, mapFromFootstepsToTrajectoryParameters,
-                                                           headOrientationProvider, comHeightProvider,
-                                                           pelvisPoseProvider, handPoseProvider,
-                                                           handLoadBearingProvider,
-                                                           chestOrientationProvider, footPoseProvider, footLoadBearingProvider,
-            highLevelStateProvider, thighLoadBearingProvider,
-                                                           pelvisLoadBearingProvider, armJointAngleProvider, reinitializeWalkingControllerProvider);
+            headOrientationProvider, comHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, chestOrientationProvider,
+            footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider, armJointAngleProvider,
+            reinitializeWalkingControllerProvider, controlStatusProducer);
 
       return variousProvidersFactory;
 
@@ -352,14 +360,13 @@ public class VariousWalkingProviders
       
       DesiredArmJointAngleProvider armJointAngleProvider = null;
       
+      ControlStatusProducer controlStatusProducer = new SystemErrControlStatusProducer();
+      
       
       VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepProvider, mapFromFootstepsToTrajectoryParameters,
-                                                           headOrientationProvider, comHeightProvider,
-                                                           pelvisPoseProvider, handPoseProvider,
-                                                           handLoadBearingProvider,
-                                                           chestOrientationProvider, footPoseProvider, footLoadBearingProvider,
-            highLevelStateProvider, thighLoadBearingProvider,
-                                                           pelvisLoadBearingProvider, armJointAngleProvider, reinitializeWalkingControllerProvider);
+            headOrientationProvider, comHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, chestOrientationProvider,
+            footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider, armJointAngleProvider,
+            reinitializeWalkingControllerProvider, controlStatusProducer);
 
       return variousWalkingProviders;
    }
@@ -397,13 +404,13 @@ public class VariousWalkingProviders
       DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = null;     
       DesiredArmJointAngleProvider armJointAngleProvider = null;
       
+      ControlStatusProducer controlStatusProducer = new SystemErrControlStatusProducer();
+      
      
       VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepProvider, mapFromFootstepsToTrajectoryParameters,
-                                                           headOrientationProvider, comHeightProvider, pelvisPoseProvider, handPoseProvider,
-                                                           handLoadBearingProvider,
-                                                           chestOrientationProvider, footPoseProvider, footLoadBearingProvider,
-                                                           highLevelStateProvider, thighLoadBearingProvider,
-                                                           pelvisLoadBearingProvider, armJointAngleProvider, reinitializeWalkingControllerProvider);
+            headOrientationProvider, comHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, chestOrientationProvider,
+            footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider, armJointAngleProvider,
+            reinitializeWalkingControllerProvider, controlStatusProducer);
 
       return variousWalkingProviders;
    }
@@ -433,12 +440,18 @@ public class VariousWalkingProviders
       DesiredArmJointAngleProvider armJointAngleProvider = null; 
 
 
+      ControlStatusProducer controlStatusProducer = new SystemErrControlStatusProducer();
       
       VariousWalkingProviders variousProvidersFactory = new VariousWalkingProviders(footstepPathCoordinator, mapFromFootstepsToTrajectoryParameters,
-            headOrientationProvider, desiredComHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider,
-            chestOrientationProvider, footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider,
-            pelvisLoadBearingProvider, armJointAngleProvider, reinitializeWalkingControllerProvider);
+            headOrientationProvider, desiredComHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, chestOrientationProvider,
+            footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider, armJointAngleProvider,
+            reinitializeWalkingControllerProvider, controlStatusProducer);
 
       return variousProvidersFactory;
+   }
+
+   public ControlStatusProducer getControlStatusProducer()
+   {
+      return controlStatusProducer;
    }
 }

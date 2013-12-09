@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredArmJointAngleProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -83,7 +84,7 @@ public class ManipulationControlModule
       createFrameVisualizers(dynamicGraphicObjectsListRegistry, midHandPositionControlFrames, "midHandPositionControlFrames", false);
 
       setUpStateMachine(yoTime, fullRobotModel, twistCalculator, parameters, variousWalkingProviders, dynamicGraphicObjectsListRegistry,
-                        momentumBasedController, midHandPositionControlFrames, jacobianIds, armControlParameters);
+                        momentumBasedController, midHandPositionControlFrames, jacobianIds, armControlParameters, variousWalkingProviders.getControlStatusProducer());
 
       kpArmTaskspace = new DoubleYoVariable("kpArmTaskspace", registry);
       kpArmTaskspace.set(armControlParameters.getArmTaskspaceKp());
@@ -158,7 +159,7 @@ public class ManipulationControlModule
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
                                   MomentumBasedController momentumBasedController,
                                   SideDependentList<ReferenceFrame> handPositionControlFrames, SideDependentList<Integer> jacobianIds, 
-                                  ArmControllerParameters armControlParameters)
+                                  ArmControllerParameters armControlParameters, ControlStatusProducer controlStatusProducer)
    {
       DesiredHandPoseProvider handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
       DesiredHandLoadBearingProvider handLoadBearingProvider = variousWalkingProviders.getDesiredHandLoadBearingProvider();
@@ -166,7 +167,7 @@ public class ManipulationControlModule
 
 
       individualHandControlModules = createIndividualHandControlModules(yoTime, fullRobotModel, twistCalculator, dynamicGraphicObjectsListRegistry,
-              momentumBasedController, jacobianIds, armControlParameters);
+              momentumBasedController, jacobianIds, armControlParameters, controlStatusProducer);
 
       
       directControlManipulationTaskDispatcher = new DirectControlManipulationTaskDispatcher(fullRobotModel, parameters, armControlParameters, handPoseProvider,
@@ -183,7 +184,7 @@ public class ManipulationControlModule
    private SideDependentList<IndividualHandControlModule> createIndividualHandControlModules(DoubleYoVariable yoTime, FullRobotModel fullRobotModel,
            TwistCalculator twistCalculator, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
            MomentumBasedController momentumBasedController,
-           SideDependentList<Integer> jacobianIds, ArmControllerParameters armControlParameters)
+           SideDependentList<Integer> jacobianIds, ArmControllerParameters armControlParameters, ControlStatusProducer controlStatusProducer)
    {
       SideDependentList<IndividualHandControlModule> individualHandControlModules = new SideDependentList<IndividualHandControlModule>();
 
@@ -196,7 +197,7 @@ public class ManipulationControlModule
 
          IndividualHandControlModule individualHandControlModule = new IndividualHandControlModule(yoTime, robotSide, fullRobotModel, twistCalculator,
                                                                       dynamicGraphicObjectsListRegistry, gravityZ, controlDT, midHandPositionControlFrames.get(robotSide),
-                                                                      taskspaceControlGains, momentumBasedController, jacobianId, armControlParameters, registry);
+                                                                      taskspaceControlGains, momentumBasedController, jacobianId, armControlParameters, controlStatusProducer, registry);
          individualHandControlModules.put(robotSide, individualHandControlModule);
       }
 
