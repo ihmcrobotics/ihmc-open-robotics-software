@@ -71,7 +71,7 @@ public class KinematicCalibrationHeadLoopResidualTest
       matAxisY.set(axisY);
 
       Matrix3d rotFull = new Matrix3d();
-      rotFull.mul(matAxisY, KinematicCalibrationHeadLoopResidual.TARGET_ROT_XZ);
+      rotFull.mul(matAxisY, KinematicCalibrationHeadLoopResidual.TARGET_LEFT_ROT);
 
       targetToEE = new Transform3D();
       targetToEE.setTranslation(tran);

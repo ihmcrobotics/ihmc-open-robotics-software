@@ -27,6 +27,7 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
 {
    public static final String DATA_NAME = "DATA_NAME";
    public static final boolean useQOut = false;
+   public static final boolean useLeftArm = false;
 
    private final ArrayList<Map<String, Object>> metaData;
    final ReferenceFrame cameraFrame;
@@ -144,7 +145,7 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
 
       ArrayList<Map<String, Double>> jointMeas = useQOut ? qout : q;
 
-      KinematicCalibrationHeadLoopResidual function = new KinematicCalibrationHeadLoopResidual(fullRobotModel, true, intrinsic, calibGrid, metaData, jointMeas);
+      KinematicCalibrationHeadLoopResidual function = new KinematicCalibrationHeadLoopResidual(fullRobotModel, useLeftArm, intrinsic, calibGrid, metaData, jointMeas);
 
       UnconstrainedLeastSquares optimizer = FactoryOptimization.leastSquaresLM(1e-3, true);
 
@@ -179,7 +180,7 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
 
       java.util.List<String> jointNames = function.getCalJointNames();
 
-      targetToEE = KinematicCalibrationHeadLoopResidual.computeTargetToEE(found, jointNames.size());
+      targetToEE = KinematicCalibrationHeadLoopResidual.computeTargetToEE(found, jointNames.size(),useLeftArm);
 
       for (int i = 0; i < jointNames.size(); i++)
       {
@@ -228,7 +229,7 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
    {
       StandaloneAtlasHeadLoopKinematicsCalibrator calib = new StandaloneAtlasHeadLoopKinematicsCalibrator();
 //      calib.loadData("data/calibration20131208");
-      calib.loadData("data/armCalibratoin20131209/calibration_left2");
+      calib.loadData("data/armCalibratoin20131209/calibration_right");
 //      calib.loadData("data/chessboard_joints_20131204");
       calib.optimizeData();
 

@@ -50,11 +50,15 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    public static String CAMERA_IMAGE_KEY = "cameraImage";
    public static String CHESSBOARD_DETECTIONS_KEY = "chessboardDetections";
 
+   public static final boolean useLeftArm = false;
+
    //YoVariables for Display
    private final YoFramePoint ypLeftEE, ypRightEE;
    private final YoFramePose yposeLeftEE, yposeRightEE, yposeBoard, yposeLeftCamera;
    private final ArrayList<Map<String, Object>> metaData;
    final ReferenceFrame cameraFrame;
+
+   public static final RobotSide activeSide = useLeftArm ? RobotSide.LEFT : RobotSide.RIGHT;
 
    Transform3D targetToEE = new Transform3D();
 
@@ -207,11 +211,13 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       Graphics2D g2 = work.createGraphics();
       g2.drawImage(original, 0, 0, null);
 
-      FramePoint leftEEtoCamera = new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM), 0, 0.13, 0); // todo look at this later
-      leftEEtoCamera.changeFrame(cameraImageFrame);
-      Point3d leftEEinImageFrame = leftEEtoCamera.getPoint();
+      double magicNumber = useLeftArm ? 0.13 : -0.13;
 
-      Point2D_F64 norm = new Point2D_F64(leftEEinImageFrame.x / leftEEinImageFrame.z, leftEEinImageFrame.y / leftEEinImageFrame.z);
+      FramePoint activeArmEEtoCamera = new FramePoint(fullRobotModel.getEndEffectorFrame(activeSide, LimbName.ARM), 0, magicNumber, 0); // todo look at this later
+      activeArmEEtoCamera.changeFrame(cameraImageFrame);
+      Point3d activeArmEEinImageFrame = activeArmEEtoCamera.getPoint();
+
+      Point2D_F64 norm = new Point2D_F64(activeArmEEinImageFrame.x / activeArmEEinImageFrame.z, activeArmEEinImageFrame.y / activeArmEEinImageFrame.z);
       Point2D_F64 pixel = new Point2D_F64();
 
       PerspectiveOps.convertNormToPixel(intrinsic, norm, pixel);
@@ -232,19 +238,19 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 
    private Transform3D computeKinematicsTargetToCamera(ReferenceFrame cameraImageFrame)
    {
-//      Transform3D targetToEE = new Transform3D();
-//      Matrix3d rotX = new Matrix3d(1,0,0,  0,0,-1, 0,1,0);
-//      Matrix3d rotZ = new Matrix3d(0,-1,0, 1,0,0,  0,0,1);
-//      Matrix3d rot = new Matrix3d();
-//      rot.mul(rotX, rotZ);
+
+//      DenseMatrix64F rotY = RotationMatrixGenerator.rotY(Math.PI/2,null);
+//      DenseMatrix64F rotZ = RotationMatrixGenerator.rotZ(-Math.PI / 2, null);
+//      DenseMatrix64F rot = new DenseMatrix64F(3,3);
+//      CommonOps.mult(rotZ, rotY, rot);
 //
 //      System.out.println(rot);
-//
+
 //      targetToEE.setRotation(rot);
 //      targetToEE.setTranslation(new Vector3d(-0.061, 0.13, 0.205));
 
-      ReferenceFrame leftEEFrame = fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM);
-      ReferenceFrame boardFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("boardFrame", leftEEFrame, targetToEE);
+      ReferenceFrame activeArmEEFrame = fullRobotModel.getEndEffectorFrame(activeSide, LimbName.ARM);
+      ReferenceFrame boardFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("boardFrame", activeArmEEFrame, targetToEE);
       return boardFrame.getTransformToDesiredFrame(cameraImageFrame);
 
 //      FramePoint leftEEtoCamera=new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM)  ,0, 0.13,0);
@@ -309,7 +315,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 
    public void optimizeData()
    {
-      KinematicCalibrationHeadLoopResidual function = new KinematicCalibrationHeadLoopResidual(fullRobotModel, true, intrinsic, calibGrid, metaData, q);
+      KinematicCalibrationHeadLoopResidual function = new KinematicCalibrationHeadLoopResidual(fullRobotModel, useLeftArm, intrinsic, calibGrid, metaData, q);
 
       UnconstrainedLeastSquares optimizer = FactoryOptimization.leastSquaresLM(1e-3, true);
 
@@ -333,7 +339,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 
       java.util.List<String> jointNames = function.getCalJointNames();
 
-      targetToEE = KinematicCalibrationHeadLoopResidual.computeTargetToEE(found, jointNames.size());
+      targetToEE = KinematicCalibrationHeadLoopResidual.computeTargetToEE(found, jointNames.size(), useLeftArm);
 
       for (int i = 0; i < jointNames.size(); i++)
       {
@@ -459,7 +465,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    public static void main(String[] arg) throws InterruptedException, IOException
    {
       AtlasHeadLoopKinematicCalibrator calib = new AtlasHeadLoopKinematicCalibrator();
-      calib.loadData("data/chessboard_joints_20131204");
+      calib.loadData("data/armCalibratoin20131209/calibration_right");
       calib.optimizeData();
 
       // calJointNames order is the prm order
