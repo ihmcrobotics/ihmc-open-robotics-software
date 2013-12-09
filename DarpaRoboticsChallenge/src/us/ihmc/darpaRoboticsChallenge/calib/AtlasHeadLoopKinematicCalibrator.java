@@ -64,7 +64,8 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    private boolean alignCamera = true;
 
    private IntrinsicParameters intrinsic;
-   private PlanarCalibrationTarget calibGrid = FactoryPlanarCalibrationTarget.gridChess(5, 4, 0.03);
+   private PlanarCalibrationTarget calibGrid = FactoryPlanarCalibrationTarget.gridChess(
+         DetectChessboardInKinematicsData.boardWidth, DetectChessboardInKinematicsData.boardHeight, 0.03);
 
    public AtlasHeadLoopKinematicCalibrator()
    {
@@ -206,7 +207,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       Graphics2D g2 = work.createGraphics();
       g2.drawImage(original,0,0,null);
 
-      FramePoint leftEEtoCamera=new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM)  ,0, 0.13,0);
+      FramePoint leftEEtoCamera=new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM)  ,0, 0.13,0); // todo look at this later
       leftEEtoCamera.changeFrame(cameraImageFrame);
       Point3d leftEEinImageFrame = leftEEtoCamera.getPoint();
 
@@ -309,9 +310,9 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       double input[] = new double[ function.getNumOfInputsN() ];
 
       // give it an initial estimate for the translation
-      input[input.length-4]=-0.061;
-      input[input.length-3]=0.13;
-      input[input.length-2]=0.205;
+//      input[input.length-4]=-0.061;
+//      input[input.length-3]=0.13;
+//      input[input.length-2]=0.205;
 
       optimizer.setFunction(function,null);
       optimizer.initialize(input,1e-12,1e-12);
@@ -329,7 +330,11 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       targetToEE = KinematicCalibrationHeadLoopResidual.computeTargetToEE(found,jointNames.size());
 
       for(int i=0;i<jointNames.size();i++)
-         qbias.put(jointNames.get(i), input[i]);
+      {
+         qbias.put(jointNames.get(i), found[i]);
+         System.out.println(jointNames.get(i) + " bias: " + Math.toDegrees(found[i]));
+      }
+      System.out.println("board to wrist rotY:" + found[found.length-1]);
    }
 
    public void loadData(String directory ) throws IOException

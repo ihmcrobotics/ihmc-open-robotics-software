@@ -40,7 +40,8 @@ public class KinematicCalibrationHeadLoopResidualTest
    Random random = new Random(23234);
 
    IntrinsicParameters intrinsic;
-   PlanarCalibrationTarget calibGrid = FactoryPlanarCalibrationTarget.gridChess(5, 4, 0.03);
+   PlanarCalibrationTarget calibGrid = FactoryPlanarCalibrationTarget.gridChess(
+         DetectChessboardInKinematicsData.boardWidth, DetectChessboardInKinematicsData.boardHeight, 0.03);
 
    DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_NO_HANDS_ADDED_MASS, false);
    JaxbSDFLoader robotLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
@@ -70,7 +71,7 @@ public class KinematicCalibrationHeadLoopResidualTest
       matAxisY.set(axisY);
 
       Matrix3d rotFull = new Matrix3d();
-      rotFull.mul(matAxisY,KinematicCalibrationHeadLoopResidual.TARGET_ROT_XY);
+      rotFull.mul(matAxisY,KinematicCalibrationHeadLoopResidual.TARGET_ROT_XZ);
 
       targetToEE = new Transform3D();
       targetToEE.setTranslation(tran);

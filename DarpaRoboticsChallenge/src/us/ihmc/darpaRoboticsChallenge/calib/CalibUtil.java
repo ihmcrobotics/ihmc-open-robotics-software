@@ -83,7 +83,7 @@ public class CalibUtil
          {
             double bias = 0;
             if( qbias.containsKey(joint.getName())) {
-               bias += qbias.get(joint.getName());
+               bias = qbias.get(joint.getName());
             }
 
             joint.setQ(qmap.get(joint.getName())+bias);
