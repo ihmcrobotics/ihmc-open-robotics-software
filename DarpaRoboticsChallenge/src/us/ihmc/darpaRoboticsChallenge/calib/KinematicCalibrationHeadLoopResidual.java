@@ -38,19 +38,19 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
    // normial orientation of the target.  only rotation around y is optimized
    public static final Matrix3d TARGET_ROT_XZ = new Matrix3d(
          -1.0, 0.0, 0.0,
-          0.0, 0.0, 1.0,
-          0.0, 1.0, 0.0);
+         0.0, 0.0, 1.0,
+         0.0, 1.0, 0.0);
 
 //   -1.000   0.000   0.000
 //         0.000   0.000   1.000
 //         -0.000   1.000  -0.000
 
    public KinematicCalibrationHeadLoopResidual(SDFFullRobotModel fullRobotModel,
-                                               boolean isLeft ,
+                                               boolean isLeft,
                                                IntrinsicParameters intrinsic,
                                                PlanarCalibrationTarget calibGrid,
                                                ArrayList<Map<String, Object>> qdata,
-                                               ArrayList<Map<String, Double>> q )
+                                               ArrayList<Map<String, Double>> q)
    {
       this.fullRobotModel = fullRobotModel;
       this.qdata = qdata;
@@ -58,23 +58,24 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
       this.intrinsic = intrinsic;
       this.calibGrid = calibGrid;
 
-      this.calJointNames = getOrderedArmJointsNames(fullRobotModel,isLeft);
+      this.calJointNames = getOrderedArmJointsNames(fullRobotModel, isLeft);
 
    }
 
-   public static List<String> getOrderedArmJointsNames( SDFFullRobotModel fullRobotModel , boolean isLeft )
+   public static List<String> getOrderedArmJointsNames(SDFFullRobotModel fullRobotModel, boolean isLeft)
    {
-      final OneDoFJoint[] joints =fullRobotModel.getOneDoFJoints();
+      final OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
 
       String filter = isLeft ? "l_arm" : "r_arm";
 
       ArrayList<OneDoFJoint> armJoints = new ArrayList<OneDoFJoint>();
-      for(int i=0;i<joints.length;i++)
+      for (int i = 0; i < joints.length; i++)
       {
-         if(joints[i].getName().contains(filter))
+         if (joints[i].getName().contains(filter))
          {
             armJoints.add(joints[i]);
-         } else if( joints[i].getName().contains("neck")) {
+         } else if (joints[i].getName().contains("neck"))
+         {
             armJoints.add(joints[i]);
          }
 
@@ -84,44 +85,45 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
       return ret;
    }
 
-   @Override 
+   @Override
    public void process(double[] input, double[] output)
    {
       //convert input into map
-      int inputCounter=0;
-      for(int i=0;i<calJointNames.size();i++)
+      int inputCounter = 0;
+      for (int i = 0; i < calJointNames.size(); i++)
          qoffset.put(calJointNames.get(i), input[inputCounter++]);
 
-      Transform3D targetToEE = computeTargetToEE(input,inputCounter);
+      Transform3D targetToEE = computeTargetToEE(input, inputCounter);
 
       ReferenceFrame cameraFrame = fullRobotModel.getCameraFrame("stereo_camera_left");
-      Transform3D imageToCamera = new Transform3D(new double[]{ 0,0,1,0,  -1,0,0,0,  0,-1,0,0,  0,0,0,1});
+      Transform3D imageToCamera = new Transform3D(new double[]{0, 0, 1, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 1});
       ReferenceFrame cameraImageFrame = ReferenceFrame.
             constructBodyFrameWithUnchangingTransformToParent("cameraImage", cameraFrame, imageToCamera);
 
       //compute error
       int offset = 0;
-      for(int i=0;i<qdata.size();i++)
+      for (int i = 0; i < qdata.size(); i++)
       {
-         CalibUtil.addQ(q.get(i),qoffset, qbuffer);
-         CalibUtil.setRobotModelFromData(fullRobotModel,qbuffer);
+         CalibUtil.addQ(q.get(i), qoffset, qbuffer);
+         CalibUtil.setRobotModelFromData(fullRobotModel, qbuffer);
 
-         List<Point2D_F64> observations = (List)qdata.get(i).get(AtlasHeadLoopKinematicCalibrator.CHESSBOARD_DETECTIONS_KEY);
+         List<Point2D_F64> observations = (List) qdata.get(i).get(AtlasHeadLoopKinematicCalibrator.CHESSBOARD_DETECTIONS_KEY);
 
-         Transform3D targetToCamera = computeKinematicsTargetToCamera(cameraImageFrame,targetToEE);
+         Transform3D targetToCamera = computeKinematicsTargetToCamera(cameraImageFrame, targetToEE);
 
          computeError(observations, targetToCamera, output, offset);
 
-         offset += observations.size()*2;
+         offset += observations.size() * 2;
       }
    }
 
-   public static Transform3D computeTargetToEE( double param[] , int offset ) {
+   public static Transform3D computeTargetToEE(double param[], int offset)
+   {
       // Apply rotation around Y to the nominal rotation
       Vector3d tran = new Vector3d();
 
-      tran.set(param[offset],param[offset+1],param[offset+2]);
-      AxisAngle4d axisY = new AxisAngle4d(new Vector3d(0,1,0),param[offset+3]);
+      tran.set(param[offset], param[offset + 1], param[offset + 2]);
+      AxisAngle4d axisY = new AxisAngle4d(new Vector3d(0, 1, 0), param[offset + 3]);
       Matrix3d matAxisY = new Matrix3d();
       matAxisY.set(axisY);
 
@@ -135,35 +137,38 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
       return targetToEE;
    }
 
-   private Transform3D computeKinematicsTargetToCamera(  ReferenceFrame cameraImageFrame , Transform3D targetToEE ) {
+   private Transform3D computeKinematicsTargetToCamera(ReferenceFrame cameraImageFrame, Transform3D targetToEE)
+   {
 
-      ReferenceFrame leftEEFrame=fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM);
-      ReferenceFrame boardFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("boardFrame",leftEEFrame,targetToEE);
+      ReferenceFrame leftEEFrame = fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM);
+      ReferenceFrame boardFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("boardFrame", leftEEFrame, targetToEE);
       return boardFrame.getTransformToDesiredFrame(cameraImageFrame);
    }
 
-   private void computeError( List<Point2D_F64> observations , Transform3D targetToCamera , double []output , int offset ) {
+   private void computeError(List<Point2D_F64> observations, Transform3D targetToCamera, double[] output, int offset)
+   {
 
       // Points in chessboard frame
       Point2D_F64 norm = new Point2D_F64();
       Point2D_F64 expectedPixel = new Point2D_F64();
 
-      for( int i = 0; i < calibGrid.points.size(); i++ ) {
+      for (int i = 0; i < calibGrid.points.size(); i++)
+      {
          Point2D_F64 p = calibGrid.points.get(i);
 
          // convert to camera frame
-         Point3d p3 = new Point3d(p.x,p.y,0);
+         Point3d p3 = new Point3d(p.x, p.y, 0);
          targetToCamera.transform(p3);
 
          // convert to pixels
-         norm.set( p3.x/p3.z , p3.y/p3.z );
+         norm.set(p3.x / p3.z, p3.y / p3.z);
          PerspectiveOps.convertNormToPixel(intrinsic, norm, expectedPixel);
 
          Point2D_F64 observedPixel = observations.get(i);
 
          // Errors
-         output[i*2 + offset     ] = observedPixel.x - expectedPixel.x;
-         output[i*2 + offset + 1 ] = observedPixel.y - expectedPixel.y;
+         output[i * 2 + offset] = observedPixel.x - expectedPixel.x;
+         output[i * 2 + offset + 1] = observedPixel.y - expectedPixel.y;
       }
    }
 
@@ -178,10 +183,10 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
       //dim parameter
       return calJointNames.size() + 4;
    }
-   
+
    @Override
    public int getNumOfOutputsM()
    {
-       return qdata.size()*calibGrid.points.size()*2;
+      return qdata.size() * calibGrid.points.size() * 2;
    }
 }

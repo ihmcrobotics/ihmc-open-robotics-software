@@ -47,7 +47,7 @@ public class KinematicCalibrationHeadLoopResidualTest
    JaxbSDFLoader robotLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
    SDFFullRobotModel fullRobotModel = robotLoader.createFullRobotModel(jointMap);
 
-   Transform3D imageToCamera = new Transform3D(new double[]{ 0,0,1,0,  -1,0,0,0,  0,-1,0,0,  0,0,0,1});
+   Transform3D imageToCamera = new Transform3D(new double[]{0, 0, 1, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 1});
 
    ReferenceFrame cameraFrame = fullRobotModel.getCameraFrame("stereo_camera_left");
 
@@ -57,21 +57,21 @@ public class KinematicCalibrationHeadLoopResidualTest
          constructBodyFrameWithUnchangingTransformToParent("cameraImage", cameraFrame, imageToCamera);
 
    boolean isleft = true;
-   List<String> calJointNames = KinematicCalibrationHeadLoopResidual.getOrderedArmJointsNames(fullRobotModel,isleft);
+   List<String> calJointNames = KinematicCalibrationHeadLoopResidual.getOrderedArmJointsNames(fullRobotModel, isleft);
 
-   double targetToEE_param[] = new double[]{0.1,-0.1,0.05,0.05};
+   double targetToEE_param[] = new double[]{0.1, -0.1, 0.05, 0.05};
 
    public KinematicCalibrationHeadLoopResidualTest()
    {
       intrinsic = ConfigurationLoader.loadXML("/us/ihmc/darpaRoboticsChallenge/calib/intrinsic_ros.xml");
 
-      Vector3d tran = new Vector3d(targetToEE_param[0],targetToEE_param[1],targetToEE_param[2]);
-      AxisAngle4d axisY = new AxisAngle4d(new Vector3d(0,1,0),targetToEE_param[3]);
+      Vector3d tran = new Vector3d(targetToEE_param[0], targetToEE_param[1], targetToEE_param[2]);
+      AxisAngle4d axisY = new AxisAngle4d(new Vector3d(0, 1, 0), targetToEE_param[3]);
       Matrix3d matAxisY = new Matrix3d();
       matAxisY.set(axisY);
 
       Matrix3d rotFull = new Matrix3d();
-      rotFull.mul(matAxisY,KinematicCalibrationHeadLoopResidual.TARGET_ROT_XZ);
+      rotFull.mul(matAxisY, KinematicCalibrationHeadLoopResidual.TARGET_ROT_XZ);
 
       targetToEE = new Transform3D();
       targetToEE.setTranslation(tran);
@@ -84,34 +84,37 @@ public class KinematicCalibrationHeadLoopResidualTest
       // No offsets to make things easy
       Map<String, Double> qoffset = new HashMap<>();
 
-      for( String s : calJointNames ) {
-         qoffset.put(s,0.0);
+      for (String s : calJointNames)
+      {
+         qoffset.put(s, 0.0);
       }
 
-      ArrayList<Map<String,Object>>  qdata = new ArrayList<>();
+      ArrayList<Map<String, Object>> qdata = new ArrayList<>();
       ArrayList<Map<String, Double>> q = new ArrayList<>();
 
       int numPoses = 6;
-      generateData(qoffset,qdata,q,numPoses);
+      generateData(qoffset, qdata, q, numPoses);
 
-      KinematicCalibrationHeadLoopResidual alg = new KinematicCalibrationHeadLoopResidual(fullRobotModel,isleft,intrinsic,calibGrid,qdata,q);
+      KinematicCalibrationHeadLoopResidual alg = new KinematicCalibrationHeadLoopResidual(fullRobotModel, isleft, intrinsic, calibGrid, qdata, q);
 
-      assertEquals(qoffset.size()+4,alg.getNumOfInputsN());
-      assertEquals(numPoses*calibGrid.points.size()*2,alg.getNumOfOutputsM());
+      assertEquals(qoffset.size() + 4, alg.getNumOfInputsN());
+      assertEquals(numPoses * calibGrid.points.size() * 2, alg.getNumOfOutputsM());
 
-      double input[] = new double[ alg.getNumOfInputsN() ];
-      double output[] = new double[ alg.getNumOfOutputsM() ];
+      double input[] = new double[alg.getNumOfInputsN()];
+      double output[] = new double[alg.getNumOfOutputsM()];
 
-      for( int i = 0; i < input.length; i++ ) {
+      for (int i = 0; i < input.length; i++)
+      {
          input[i] = 0;
       }
-      System.arraycopy(targetToEE_param,0,input,input.length-4,4);
+      System.arraycopy(targetToEE_param, 0, input, input.length - 4, 4);
 
-      alg.process(input,output);
+      alg.process(input, output);
 
       // perfect data.  The residual should be zero
-      for( int i = 0; i < output.length; i++ ) {
-         assertEquals(0,output[i],1e-8);
+      for (int i = 0; i < output.length; i++)
+      {
+         assertEquals(0, output[i], 1e-8);
       }
    }
 
@@ -124,33 +127,36 @@ public class KinematicCalibrationHeadLoopResidualTest
       // some small offests, which won't be provided to the algorithm
       Map<String, Double> qoffset = new HashMap<>();
 
-      for( String s : calJointNames ) {
-         qoffset.put(s, random.nextGaussian()*0.001);
+      for (String s : calJointNames)
+      {
+         qoffset.put(s, random.nextGaussian() * 0.001);
       }
 
-      ArrayList<Map<String,Object>>  qdata = new ArrayList<>();
+      ArrayList<Map<String, Object>> qdata = new ArrayList<>();
       ArrayList<Map<String, Double>> q = new ArrayList<>();
 
       int numPoses = 6;
-      generateData(qoffset,qdata,q,numPoses);
+      generateData(qoffset, qdata, q, numPoses);
 
-      KinematicCalibrationHeadLoopResidual alg = new KinematicCalibrationHeadLoopResidual(fullRobotModel,isleft,intrinsic,calibGrid,qdata,q);
+      KinematicCalibrationHeadLoopResidual alg = new KinematicCalibrationHeadLoopResidual(fullRobotModel, isleft, intrinsic, calibGrid, qdata, q);
 
-      assertEquals(qoffset.size()+4,alg.getNumOfInputsN());
-      assertEquals(numPoses*calibGrid.points.size()*2,alg.getNumOfOutputsM());
+      assertEquals(qoffset.size() + 4, alg.getNumOfInputsN());
+      assertEquals(numPoses * calibGrid.points.size() * 2, alg.getNumOfOutputsM());
 
-      double input[] = new double[ alg.getNumOfInputsN() ];
-      double output[] = new double[ alg.getNumOfOutputsM() ];
+      double input[] = new double[alg.getNumOfInputsN()];
+      double output[] = new double[alg.getNumOfOutputsM()];
 
-      for( int i = 0; i < input.length; i++ ) {
+      for (int i = 0; i < input.length; i++)
+      {
          input[i] = 0;
       }
-      System.arraycopy(targetToEE_param,0,input,input.length-4,4);
+      System.arraycopy(targetToEE_param, 0, input, input.length - 4, 4);
 
-      alg.process(input,output);
+      alg.process(input, output);
 
       // perfect data.  The residual should be zero
-      for( int i = 0; i < output.length; i++ ) {
+      for (int i = 0; i < output.length; i++)
+      {
 
          // the error should not be nearly zero
          assertTrue(Math.abs(output[i]) > 1e-8);
@@ -168,70 +174,75 @@ public class KinematicCalibrationHeadLoopResidualTest
       // some small offests, which won't be provided to the algorithm
       Map<String, Double> qoffset = new HashMap<>();
 
-      for( String s : calJointNames ) {
-         qoffset.put(s, random.nextGaussian()*0.04);
+      for (String s : calJointNames)
+      {
+         qoffset.put(s, random.nextGaussian() * 0.04);
       }
 
-      ArrayList<Map<String,Object>>  qdata = new ArrayList<>();
+      ArrayList<Map<String, Object>> qdata = new ArrayList<>();
       ArrayList<Map<String, Double>> q = new ArrayList<>();
 
       int numPoses = 20;
-      generateData(qoffset,qdata,q,numPoses);
+      generateData(qoffset, qdata, q, numPoses);
 
-      KinematicCalibrationHeadLoopResidual function = new KinematicCalibrationHeadLoopResidual(fullRobotModel,isleft,intrinsic,calibGrid,qdata,q);
+      KinematicCalibrationHeadLoopResidual function = new KinematicCalibrationHeadLoopResidual(fullRobotModel, isleft, intrinsic, calibGrid, qdata, q);
 
       UnconstrainedLeastSquares optimizer = FactoryOptimization.leastSquaresLM(1e-3, true);
 
-      double input[] = new double[ function.getNumOfInputsN() ];
+      double input[] = new double[function.getNumOfInputsN()];
 
-      optimizer.setFunction(function,null);
-      optimizer.initialize(input,1e-12,1e-12);
+      optimizer.setFunction(function, null);
+      optimizer.initialize(input, 1e-12, 1e-12);
 
-      UtilOptimize.process(optimizer,500);
+      UtilOptimize.process(optimizer, 500);
 
       double[] found = optimizer.getParameters();
 
-      for( int i = 0; i < calJointNames.size(); i++ ) {
+      for (int i = 0; i < calJointNames.size(); i++)
+      {
          double expected = qoffset.get(calJointNames.get(i));
 //         System.out.println(calJointNames.get(i)+" expected "+expected+"  found "+found[i]);
-         assertEquals(expected,found[i],1e-5);
+         assertEquals(expected, found[i], 1e-5);
       }
 
-      for( int i = 0; i < targetToEE_param.length; i++ ) {
+      for (int i = 0; i < targetToEE_param.length; i++)
+      {
          double expected = targetToEE_param[i];
 //         System.out.println(i+" expected "+expected+"  found "+found[i+calJointNames.size()]);
-         assertEquals(expected,found[i+calJointNames.size()],1e-5);
+         assertEquals(expected, found[i + calJointNames.size()], 1e-5);
       }
 
    }
 
-   private void generateData( Map<String, Double> qoffset , List<Map<String,Object>> qdatas, List<Map<String, Double>> qs , int N ) throws IOException
+   private void generateData(Map<String, Double> qoffset, List<Map<String, Object>> qdatas, List<Map<String, Double>> qs, int N) throws IOException
    {
-      Map<String,Object> seed_qdata = new HashMap<>();
-      Map<String,Double> seed_q = new HashMap<>();
-      Map<String,Double> seed_qout = new HashMap<>();
+      Map<String, Object> seed_qdata = new HashMap<>();
+      Map<String, Double> seed_q = new HashMap<>();
+      Map<String, Double> seed_qout = new HashMap<>();
 
       // load data which will act as a seed
-      if( !AtlasHeadLoopKinematicCalibrator.loadData(new File("data/chessboard_joints_20131204/1272635929936818000"),seed_qdata,seed_q,seed_qout,false) )
+      if (!AtlasHeadLoopKinematicCalibrator.loadData(new File("data/chessboard_joints_20131204/1272635929936818000"), seed_qdata, seed_q, seed_qout, false))
          throw new RuntimeException("Couldn't find the data directory");
 
-      for( int i = 0; i < N; i++ ) {
-         Map<String,Object> qdata = new HashMap<String, Object>();
-         Map<String,Double> q = new HashMap<>();
-         Map<String,Double> qactual = new HashMap<>();
+      for (int i = 0; i < N; i++)
+      {
+         Map<String, Object> qdata = new HashMap<String, Object>();
+         Map<String, Double> q = new HashMap<>();
+         Map<String, Double> qactual = new HashMap<>();
 
          // randomize joint angles around the seed
-         for( int j = 0; j < calJointNames.size(); j++ ) {
-            double v = seed_q.get(calJointNames.get(j)) + random.nextGaussian()*0.1;
+         for (int j = 0; j < calJointNames.size(); j++)
+         {
+            double v = seed_q.get(calJointNames.get(j)) + random.nextGaussian() * 0.1;
             double offset = qoffset.get(calJointNames.get(j));
-            q.put(calJointNames.get(j),v);
-            qactual.put(calJointNames.get(j),v+offset);
+            q.put(calJointNames.get(j), v);
+            qactual.put(calJointNames.get(j), v + offset);
          }
 
-         CalibUtil.setRobotModelFromData(fullRobotModel,qactual);
+         CalibUtil.setRobotModelFromData(fullRobotModel, qactual);
 
-         Transform3D targetToCamera = computeKinematicsTargetToCamera(fullRobotModel,cameraImageFrame,targetToEE);
-         List<Point2D_F64> observations = generatePerfectObservations( targetToCamera );
+         Transform3D targetToCamera = computeKinematicsTargetToCamera(fullRobotModel, cameraImageFrame, targetToEE);
+         List<Point2D_F64> observations = generatePerfectObservations(targetToCamera);
 
          qdata.put(AtlasHeadLoopKinematicCalibrator.CHESSBOARD_DETECTIONS_KEY, observations);
 
@@ -240,30 +251,33 @@ public class KinematicCalibrationHeadLoopResidualTest
       }
    }
 
-   private Transform3D computeKinematicsTargetToCamera(  SDFFullRobotModel fullRobotModel, ReferenceFrame cameraImageFrame , Transform3D targetToEE ) {
+   private Transform3D computeKinematicsTargetToCamera(SDFFullRobotModel fullRobotModel, ReferenceFrame cameraImageFrame, Transform3D targetToEE)
+   {
 
-      ReferenceFrame leftEEFrame=fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM);
-      ReferenceFrame boardFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("boardFrame",leftEEFrame,targetToEE);
+      ReferenceFrame leftEEFrame = fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM);
+      ReferenceFrame boardFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("boardFrame", leftEEFrame, targetToEE);
       return boardFrame.getTransformToDesiredFrame(cameraImageFrame);
    }
 
-   private List<Point2D_F64> generatePerfectObservations(Transform3D targetToCamera) {
+   private List<Point2D_F64> generatePerfectObservations(Transform3D targetToCamera)
+   {
 
       List<Point2D_F64> observations = new ArrayList<>();
 
       // Points in chessboard frame
       Point2D_F64 norm = new Point2D_F64();
 
-      for( int i = 0; i < calibGrid.points.size(); i++ ) {
+      for (int i = 0; i < calibGrid.points.size(); i++)
+      {
          Point2D_F64 p = calibGrid.points.get(i);
          // convert to camera frame
-         Point3d p3 = new Point3d(p.x,p.y,0);
+         Point3d p3 = new Point3d(p.x, p.y, 0);
          targetToCamera.transform(p3);
 
          Point2D_F64 observationPixel = new Point2D_F64();
 
          // convert to pixels
-         norm.set( p3.x/p3.z , p3.y/p3.z );
+         norm.set(p3.x / p3.z, p3.y / p3.z);
          PerspectiveOps.convertNormToPixel(intrinsic, norm, observationPixel);
 
          observations.add(observationPixel);
