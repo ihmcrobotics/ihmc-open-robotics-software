@@ -99,8 +99,8 @@ public class DetectChessboardInKinematicsData
 
    public static void main(String[] args) throws IOException
    {
-      File directory = new File("../DarpaRoboticsChallenge/data/calibration20131208");
-//      File directory = new File("../DarpaRoboticsChallenge/data/armCalibratoin20131209/calibration_left2");
+//      File directory = new File("../DarpaRoboticsChallenge/data/calibration20131208");
+      File directory = new File("../DarpaRoboticsChallenge/data/armCalibratoin20131209/calibration_right");
 
       if (!directory.isDirectory())
          throw new RuntimeException("Not directory");

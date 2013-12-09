@@ -23,6 +23,9 @@ import java.util.*;
  */
 public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
 {
+   // which side of the robot is being optimized
+   boolean isLeft;
+
    //robot model and data
    private final SDFFullRobotModel fullRobotModel;
    private final ArrayList<Map<String, Object>> qdata;
@@ -36,14 +39,20 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
    PlanarCalibrationTarget calibGrid;
 
    // normial orientation of the target.  only rotation around y is optimized
-   public static final Matrix3d TARGET_ROT_XZ = new Matrix3d(
+   public static final Matrix3d TARGET_LEFT_ROT = new Matrix3d(
          -1.0, 0.0, 0.0,
          0.0, 0.0, 1.0,
          0.0, 1.0, 0.0);
 
-//   -1.000   0.000   0.000
-//         0.000   0.000   1.000
-//         -0.000   1.000  -0.000
+   public static final Matrix3d TARGET_RIGHT_ROT = new Matrix3d(
+          0, 1, 0,
+          0, 0,-1,
+         -1, 0, 0);
+
+
+   private Matrix3d targetRotation;
+
+   public final RobotSide activeSide;
 
    public KinematicCalibrationHeadLoopResidual(SDFFullRobotModel fullRobotModel,
                                                boolean isLeft,
@@ -57,6 +66,14 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
       this.q = q;
       this.intrinsic = intrinsic;
       this.calibGrid = calibGrid;
+      this.isLeft = isLeft;
+      this.activeSide = isLeft ? RobotSide.LEFT : RobotSide.RIGHT;
+
+      if( isLeft ) {
+         targetRotation = TARGET_LEFT_ROT;
+      } else {
+         targetRotation = TARGET_RIGHT_ROT;
+      }
 
       this.calJointNames = getOrderedArmJointsNames(fullRobotModel, isLeft);
 
@@ -93,7 +110,7 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
       for (int i = 0; i < calJointNames.size(); i++)
          qoffset.put(calJointNames.get(i), input[inputCounter++]);
 
-      Transform3D targetToEE = computeTargetToEE(input, inputCounter);
+      Transform3D targetToEE = computeTargetToEE(input, inputCounter,isLeft);
 
       ReferenceFrame cameraFrame = fullRobotModel.getCameraFrame("stereo_camera_left");
       Transform3D imageToCamera = new Transform3D(new double[]{0, 0, 1, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 1});
@@ -117,7 +134,7 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
       }
    }
 
-   public static Transform3D computeTargetToEE(double param[], int offset)
+   public static Transform3D computeTargetToEE(double param[], int offset, boolean isLeft)
    {
       // Apply rotation around Y to the nominal rotation
       Vector3d tran = new Vector3d();
@@ -128,7 +145,8 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
       matAxisY.set(axisY);
 
       Matrix3d rotFull = new Matrix3d();
-      rotFull.mul(matAxisY, TARGET_ROT_XZ);
+      Matrix3d targetRotation = isLeft ? TARGET_LEFT_ROT : TARGET_RIGHT_ROT;
+      rotFull.mul(matAxisY, targetRotation);
 
       Transform3D targetToEE = new Transform3D();
       targetToEE.setTranslation(tran);
@@ -140,8 +158,8 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
    private Transform3D computeKinematicsTargetToCamera(ReferenceFrame cameraImageFrame, Transform3D targetToEE)
    {
 
-      ReferenceFrame leftEEFrame = fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM);
-      ReferenceFrame boardFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("boardFrame", leftEEFrame, targetToEE);
+      ReferenceFrame activeArmEEFrame = fullRobotModel.getEndEffectorFrame(activeSide, LimbName.ARM);
+      ReferenceFrame boardFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("boardFrame", activeArmEEFrame, targetToEE);
       return boardFrame.getTransformToDesiredFrame(cameraImageFrame);
    }
 
