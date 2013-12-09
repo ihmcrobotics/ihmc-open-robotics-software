@@ -6,6 +6,7 @@ import java.util.Map;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.IndividualHandControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.trajectories.OneDoFJointQuinticTrajectoryGenerator;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.maps.ObjectObjectMap;
@@ -15,6 +16,7 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.VariableChangedListener;
 import com.yobotics.simulationconstructionset.YoVariable;
@@ -29,7 +31,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGe
 public class JointSpaceHandControlControlState extends State<IndividualHandControlState>
 {
    private final OneDoFJoint[] oneDoFJoints;
-   private final LinkedHashMap<OneDoFJoint, DoubleTrajectoryGenerator> trajectories;
+   private final LinkedHashMap<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator> trajectories;
    private final LinkedHashMap<OneDoFJoint, PIDController> pidControllers;
 
    private final ObjectObjectMap<OneDoFJoint, RateLimitedYoVariable> rateLimitedAccelerations;
@@ -37,8 +39,12 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
    
    private final DoubleYoVariable kpArmJointspace, kdArmJointspace, kiArmJointspace, zetaArmJointspace, maxAccelerationArmJointspace, maxJerkArmJointspace, maxIntegralErrorArmJointspace;
 
+   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredPositions = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
+   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredVelocities = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
+   
    private final YoVariableRegistry registry;
    private final MomentumBasedController momentumBasedController;
+   private final BooleanYoVariable initialized;
    
    private final double dt;
 
@@ -74,9 +80,12 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
       
       setupVariableListener();
 
-      trajectories = new LinkedHashMap<OneDoFJoint, DoubleTrajectoryGenerator>();
+      trajectories = new LinkedHashMap<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator>();
       pidControllers = new LinkedHashMap<OneDoFJoint, PIDController>();
       rateLimitedAccelerations = new ObjectObjectMap<OneDoFJoint, RateLimitedYoVariable>();
+      initialized = new BooleanYoVariable("jointSpaceHandControlStateInitialized", registry);
+      initialized.set(false);
+      
       
       this.oneDoFJoints = ScrewTools.filterJoints(controlledJoints, RevoluteJoint.class);
 
@@ -89,6 +98,12 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
          
          RateLimitedYoVariable rateLimitedAcceleration = new RateLimitedYoVariable(joint.getName() + "Acceleration" + robotSide, registry, maxJerkArmJointspace, dt);
          rateLimitedAccelerations.add(joint, rateLimitedAcceleration);
+         
+         DoubleYoVariable desiredPosition = new DoubleYoVariable(joint.getName() + "QDesired", registry);
+         DoubleYoVariable desiredVelocity = new DoubleYoVariable(joint.getName() + "QdDesired", registry);
+         
+         desiredPositions.put(joint, desiredPosition);
+         desiredVelocities.put(joint, desiredVelocity);
       }
 
       this.momentumBasedController = momentumBasedController;
@@ -120,18 +135,23 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
       for (int i = 0 ; i < oneDoFJoints.length; i++)
       {
          OneDoFJoint joint = oneDoFJoints[i];
+         DoubleYoVariable desiredPosition = desiredPositions.get(joint);
+         DoubleYoVariable desiredVelocity = desiredVelocities.get(joint);
          DoubleTrajectoryGenerator trajectoryGenerator = trajectories.get(joint);
          trajectoryGenerator.compute(getTimeInCurrentState());
 
-         double desiredPosition = trajectoryGenerator.getValue();
-         double desiredVelocity = trajectoryGenerator.getVelocity();
+//         double desiredPosition = trajectoryGenerator.getValue();
+//         double desiredVelocity = trajectoryGenerator.getVelocity();
+         
+         desiredPosition.set(trajectoryGenerator.getValue());
+         desiredVelocity.set(trajectoryGenerator.getVelocity());
          double feedforwardAcceleration = trajectoryGenerator.getAcceleration();
 
          double currentPosition = joint.getQ();
          double currentVelocity = joint.getQd();
 
          PIDController pidController = pidControllers.get(joint);
-         double desiredAcceleration = feedforwardAcceleration + pidController.computeForAngles(currentPosition, desiredPosition, currentVelocity, desiredVelocity, dt);
+         double desiredAcceleration = feedforwardAcceleration + pidController.computeForAngles(currentPosition, desiredPosition.getDoubleValue(), currentVelocity, desiredVelocity.getDoubleValue(), dt);
 
          desiredAcceleration = MathTools.clipToMinMax(desiredAcceleration, maxAccelerationArmJointspace.getDoubleValue());
          
@@ -152,11 +172,23 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
    @Override
    public void doTransitionIntoAction()
    {
-      for (int i = 0 ; i < oneDoFJoints.length; i++)
+      if(initialized.getBooleanValue() && getPreviousState() == this)
       {
-         OneDoFJoint joint = oneDoFJoints[i];
-         trajectories.get(joint).initialize();
-         pidControllers.get(joint).setCumulativeError(0.0);
+         for (int i = 0 ; i < oneDoFJoints.length; i++)
+         {
+            OneDoFJoint joint = oneDoFJoints[i];
+            trajectories.get(joint).reinitialize(desiredPositions.get(joint).getDoubleValue(), desiredVelocities.get(joint).getDoubleValue());
+         }
+      }
+      else
+      {
+         for (int i = 0 ; i < oneDoFJoints.length; i++)
+         {
+            OneDoFJoint joint = oneDoFJoints[i];
+            trajectories.get(joint).initialize();
+            pidControllers.get(joint).setCumulativeError(0.0);
+         }
+         initialized.set(true);
       }
    }
 
@@ -177,7 +209,7 @@ public class JointSpaceHandControlControlState extends State<IndividualHandContr
       return true;
    }
 
-   public void setTrajectories(Map<OneDoFJoint, ? extends DoubleTrajectoryGenerator> trajectories)
+   public void setTrajectories(Map<OneDoFJoint, ? extends OneDoFJointQuinticTrajectoryGenerator> trajectories)
    {
       this.trajectories.clear();
       this.trajectories.putAll(trajectories);
