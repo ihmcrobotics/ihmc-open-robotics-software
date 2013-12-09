@@ -36,7 +36,14 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
    PlanarCalibrationTarget calibGrid;
 
    // normial orientation of the target.  only rotation around y is optimized
-   public static final Matrix3d TARGET_ROT_XY = new Matrix3d(0.0, -1.0, 0.0,0.0, 0.0, -1.0, 1.0, 0.0, 0.0);
+   public static final Matrix3d TARGET_ROT_XZ = new Matrix3d(
+         -1.0, 0.0, 0.0,
+          0.0, 0.0, 1.0,
+          0.0, 1.0, 0.0);
+
+//   -1.000   0.000   0.000
+//         0.000   0.000   1.000
+//         -0.000   1.000  -0.000
 
    public KinematicCalibrationHeadLoopResidual(SDFFullRobotModel fullRobotModel,
                                                boolean isLeft ,
@@ -119,7 +126,7 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
       matAxisY.set(axisY);
 
       Matrix3d rotFull = new Matrix3d();
-      rotFull.mul(matAxisY,TARGET_ROT_XY);
+      rotFull.mul(matAxisY, TARGET_ROT_XZ);
 
       Transform3D targetToEE = new Transform3D();
       targetToEE.setTranslation(tran);
