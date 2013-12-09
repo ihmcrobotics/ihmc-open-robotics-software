@@ -39,6 +39,8 @@ import java.util.List;
  */
 public class DetectChessboardInKinematicsData
 {
+   public static final boolean DELETE_BAD_DATA = true;
+
    public static final int boardWidth = 4;
    public static final int boardHeight = 5;
 
@@ -77,6 +79,9 @@ public class DetectChessboardInKinematicsData
    }
 
    public static void deleteDirectory( File dir ) {
+      if( !DELETE_BAD_DATA )
+         return;
+
       File[] files = dir.listFiles();
       for( File f : files ) {
          if( !f.delete() ) {
@@ -90,6 +95,7 @@ public class DetectChessboardInKinematicsData
    public static void main(String[] args) throws IOException
    {
       File directory = new File("../DarpaRoboticsChallenge/data/calibration20131208");
+//      File directory = new File("../DarpaRoboticsChallenge/data/armCalibratoin20131209/calibration_left2");
 
       if( !directory.isDirectory() )
          throw new RuntimeException("Not directory");
@@ -134,7 +140,7 @@ public class DetectChessboardInKinematicsData
          // process the image and check for failure condition
          if( !detector.process(input) ) {
             System.out.println("  Failed to detect target!");
-//            deleteDirectory(f);
+            deleteDirectory(f);
             continue;
          }
 
@@ -167,7 +173,14 @@ public class DetectChessboardInKinematicsData
             totalError += expected.distance(obsPixel);
          }
 
-         System.out.println(" Average pixel error = "+(totalError/target.points.size()));
+         double averageError = totalError/target.points.size();
+         System.out.println(" Average pixel error = "+averageError);
+
+         if( averageError > 0.8 ) {
+            System.out.println("  Pixel error is too large.  Deleting image!");
+            deleteDirectory(f);
+            continue;
+         }
 
          // save the results
          PrintStream out = new PrintStream(outputTarget);
