@@ -211,7 +211,7 @@ public class KinematicCalibrationHeadLoopResidualTest
       Map<String,Double> seed_q = new HashMap<>();
 
       // load data which will act as a seed
-      if( !AtlasHeadLoopKinematicCalibrator.loadData(new File("data/chessboard_joints_20131204/1272635929936818000"),seed_qdata,seed_q) )
+      if( !AtlasHeadLoopKinematicCalibrator.loadData(new File("data/chessboard_joints_20131204/1272635929936818000"),seed_qdata,seed_q,false) )
          throw new RuntimeException("Couldn't find the data directory");
 
       for( int i = 0; i < N; i++ ) {

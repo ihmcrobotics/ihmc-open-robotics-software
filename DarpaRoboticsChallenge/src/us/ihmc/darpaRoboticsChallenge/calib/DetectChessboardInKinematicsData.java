@@ -2,22 +2,17 @@ package us.ihmc.darpaRoboticsChallenge.calib;
 
 import boofcv.abst.calib.ConfigChessboard;
 import boofcv.abst.calib.PlanarCalibrationDetector;
-import boofcv.abst.geo.RefinePnP;
 import boofcv.alg.geo.PerspectiveOps;
 import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
 import boofcv.alg.geo.calibration.Zhang99ComputeTargetHomography;
 import boofcv.alg.geo.calibration.Zhang99DecomposeHomography;
 import boofcv.core.image.ConvertBufferedImage;
 import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
-import boofcv.factory.geo.FactoryMultiView;
 import boofcv.gui.feature.VisualizeFeatures;
-import boofcv.gui.image.ShowImages;
 import boofcv.io.image.UtilImageIO;
 import boofcv.misc.BoofMiscOps;
 import boofcv.struct.calib.IntrinsicParameters;
-import boofcv.struct.geo.Point2D3D;
 import boofcv.struct.image.ImageFloat32;
-import georegression.geometry.GeometryMath_F64;
 import georegression.struct.point.Point2D_F64;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.point.Vector2D_F64;
@@ -32,6 +27,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -79,9 +76,20 @@ public class DetectChessboardInKinematicsData
       renderVector(g2,targetToCamera,axisZ,intrinsic,Color.BLUE);
    }
 
+   public static void deleteDirectory( File dir ) {
+      File[] files = dir.listFiles();
+      for( File f : files ) {
+         if( !f.delete() ) {
+            throw new RuntimeException("Can't delete file: "+f.getName());
+         }
+      }
+      if( !dir.delete() )
+         System.out.println("Can't delete directory: "+dir.getName());
+   }
+
    public static void main(String[] args) throws IOException
    {
-      File directory = new File("../DarpaRoboticsChallenge/data/chessboard_joints_20131204");
+      File directory = new File("../DarpaRoboticsChallenge/data/calibration20131208");
 
       if( !directory.isDirectory() )
          throw new RuntimeException("Not directory");
@@ -101,7 +109,11 @@ public class DetectChessboardInKinematicsData
 
       File files[] = directory.listFiles();
 
-      for( File f : files ) {
+      List<File> fileList = new ArrayList<>();
+      fileList.addAll(Arrays.asList(files));
+      Collections.sort(fileList);
+
+      for( File f : fileList ) {
          if( !f.isDirectory() )
             continue;
 
@@ -121,7 +133,8 @@ public class DetectChessboardInKinematicsData
 
          // process the image and check for failure condition
          if( !detector.process(input) ) {
-            System.err.println("Failed to detect target in "+f.getName());
+            System.out.println("  Failed to detect target!");
+//            deleteDirectory(f);
             continue;
          }
 

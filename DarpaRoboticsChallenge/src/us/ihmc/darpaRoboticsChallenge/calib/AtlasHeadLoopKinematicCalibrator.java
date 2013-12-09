@@ -354,7 +354,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
          Map<String,Object> mEntry = new HashMap<String, Object>();
          Map<String,Double> qEntry = new HashMap<>();
 
-         if( !loadData(f,mEntry,qEntry) )
+         if( !loadData(f,mEntry,qEntry,true) )
             continue;
 
          metaData.add(mEntry);
@@ -363,7 +363,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       }
    }
 
-   public static boolean loadData(File f , Map<String,Object> mEntry ,Map<String,Double> qEntry ) throws IOException
+   public static boolean loadData(File f , Map<String,Object> mEntry ,Map<String,Double> qEntry , boolean loadImages ) throws IOException
    {
       File fileTarget = new File(f,"target.txt");
 
@@ -420,7 +420,8 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       mEntry.put(TARGET_TO_CAMERA_KEY,transform);
 
       //load image
-      mEntry.put(CAMERA_IMAGE_KEY,ImageIO.read(new File(f,"/detected.jpg")));
+      if( loadImages )
+         mEntry.put(CAMERA_IMAGE_KEY,ImageIO.read(new File(f,"/detected.jpg")));
 
 
       // load joint angles
