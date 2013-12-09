@@ -523,4 +523,9 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    {
       return 0.4;
    }
+
+   public boolean isRunningOnRealRobot()
+   {
+      return DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT;
+   }
 }

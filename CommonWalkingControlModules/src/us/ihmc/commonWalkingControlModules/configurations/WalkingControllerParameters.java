@@ -99,4 +99,6 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getToeOffZeta();
 
    public abstract boolean doPrepareManipulationForLocomotion();
+
+   public abstract boolean isRunningOnRealRobot();
 }
