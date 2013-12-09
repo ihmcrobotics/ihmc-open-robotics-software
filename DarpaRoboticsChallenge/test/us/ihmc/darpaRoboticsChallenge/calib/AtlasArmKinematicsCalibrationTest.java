@@ -16,10 +16,11 @@ public class AtlasArmKinematicsCalibrationTest
 {
 
    @Test
-   public void estimateCameraPose() {
+   public void estimateCameraPose()
+   {
       BufferedImage image = UtilImageIO.loadImage("../DarpaRoboticsChallenge/data/atlas_chessboard.jpg");
 
-      if( image == null )
+      if (image == null)
          fail("can't find the test image.");
 
       AtlasArmKinematicsCalibration alg = new AtlasArmKinematicsCalibration(null);
@@ -30,15 +31,15 @@ public class AtlasArmKinematicsCalibrationTest
       // just make up some parameters
       int w = image.getWidth();
       int h = image.getHeight();
-      IntrinsicParameters param = new IntrinsicParameters(500,500,0,w/2,h/2,w,h,false,null);
+      IntrinsicParameters param = new IntrinsicParameters(500, 500, 0, w / 2, h / 2, w, h, false, null);
       alg.setIntrinsic(param);
 
       assertTrue(alg.estimateCameraPose(image));
 
       Se3_F64 pose = alg.getTargetToOrigin();
 
-      assertTrue(pose.T.x != 0 );
-      assertTrue(pose.T.y != 0 );
+      assertTrue(pose.T.x != 0);
+      assertTrue(pose.T.y != 0);
       assertTrue(pose.T.z > 0.2);
    }
 }

@@ -52,8 +52,8 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 
    //YoVariables for Display
    private final YoFramePoint ypLeftEE, ypRightEE;
-   private final YoFramePose yposeLeftEE, yposeRightEE, yposeBoard,yposeLeftCamera;
-   private final ArrayList<Map<String,Object>> metaData;
+   private final YoFramePose yposeLeftEE, yposeRightEE, yposeBoard, yposeLeftCamera;
+   private final ArrayList<Map<String, Object>> metaData;
    final ReferenceFrame cameraFrame;
 
    Transform3D targetToEE = new Transform3D();
@@ -71,11 +71,11 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    {
       super();
       ypLeftEE = new YoFramePoint("leftEE", ReferenceFrame.getWorldFrame(), registry);
-      ypRightEE = new YoFramePoint("rightEE", ReferenceFrame.getWorldFrame(),registry);
+      ypRightEE = new YoFramePoint("rightEE", ReferenceFrame.getWorldFrame(), registry);
       yposeLeftEE = new YoFramePose("leftPoseEE", "", ReferenceFrame.getWorldFrame(), registry);
       yposeRightEE = new YoFramePose("rightPoseEE", "", ReferenceFrame.getWorldFrame(), registry);
-      yposeBoard = new YoFramePose("board","",ReferenceFrame.getWorldFrame(),registry);
-      yposeLeftCamera = new YoFramePose("leftCamera","",ReferenceFrame.getWorldFrame(),registry);
+      yposeBoard = new YoFramePose("board", "", ReferenceFrame.getWorldFrame(), registry);
+      yposeLeftCamera = new YoFramePose("leftCamera", "", ReferenceFrame.getWorldFrame(), registry);
 
       cameraFrame = fullRobotModel.getCameraFrame("stereo_camera_left");
       metaData = new ArrayList<>();
@@ -86,17 +86,17 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    {
       //standard SCS Dynamic Graphics Object - automatically updated to the associated yoVariables
       double transparency = 0.5;
-      double scale=0.02;
+      double scale = 0.02;
       DynamicGraphicPosition dgpLeftEE = new DynamicGraphicPosition("dgpLeftEE", ypLeftEE, scale, new YoAppearanceRGBColor(Color.BLUE, transparency));
       DynamicGraphicPosition dgpRightEE = new DynamicGraphicPosition("dgpRightEE", ypRightEE, scale, new YoAppearanceRGBColor(Color.RED, transparency));
 
       scs.addDynamicGraphicObject(dgpLeftEE);
       scs.addDynamicGraphicObject(dgpRightEE);
 
-      DynamicGraphicCoordinateSystem dgPoseLeftEE = new DynamicGraphicCoordinateSystem("dgposeLeftEE", yposeLeftEE, 5*scale);
-      DynamicGraphicCoordinateSystem dgPoseRightEE = new DynamicGraphicCoordinateSystem("dgposeRightEE", yposeRightEE, 5*scale);
-      DynamicGraphicCoordinateSystem dgPoseBoard = new DynamicGraphicCoordinateSystem("dgposeBoard", yposeBoard, 5*scale);
-      DynamicGraphicCoordinateSystem dgPoseLeftCamera = new DynamicGraphicCoordinateSystem("dgposeLeftCamera", yposeLeftCamera, 5*scale);
+      DynamicGraphicCoordinateSystem dgPoseLeftEE = new DynamicGraphicCoordinateSystem("dgposeLeftEE", yposeLeftEE, 5 * scale);
+      DynamicGraphicCoordinateSystem dgPoseRightEE = new DynamicGraphicCoordinateSystem("dgposeRightEE", yposeRightEE, 5 * scale);
+      DynamicGraphicCoordinateSystem dgPoseBoard = new DynamicGraphicCoordinateSystem("dgposeBoard", yposeBoard, 5 * scale);
+      DynamicGraphicCoordinateSystem dgPoseLeftCamera = new DynamicGraphicCoordinateSystem("dgposeLeftCamera", yposeLeftCamera, 5 * scale);
       scs.addDynamicGraphicObject(dgPoseLeftEE);
       scs.addDynamicGraphicObject(dgPoseRightEE);
       scs.addDynamicGraphicObject(dgPoseBoard);
@@ -105,20 +105,20 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       //Homemade Image Display Panel - updated by the IndexChangedListener 
       iiDisplay = new ImageIcon();
       JPanel panel = new JPanel(new BorderLayout());
-      final JLabel lblDisplay= new JLabel("", iiDisplay, JLabel.CENTER);
+      final JLabel lblDisplay = new JLabel("", iiDisplay, JLabel.CENTER);
       panel.add(lblDisplay, BorderLayout.CENTER);
-      scs.addExtraJpanel(panel,"Image");
+      scs.addExtraJpanel(panel, "Image");
       scs.getStandardSimulationGUI().selectPanel("Image");
       scs.getDataBuffer().attachIndexChangedListener(new IndexChangedListener()
       {
          @Override
          public void indexChanged(int newIndex, double newTime)
          {
-            int index =  (newIndex+q.size()-1) % q.size();
-            CalibUtil.setRobotModelFromData(fullRobotModel, q.get(index),qbias);
+            int index = (newIndex + q.size() - 1) % q.size();
+            CalibUtil.setRobotModelFromData(fullRobotModel, q.get(index), qbias);
             updateBoard(index);
             lblDisplay.repaint();
-            if(alignCamera)
+            if (alignCamera)
                scsAlignCameraToRobotCamera();
          }
       });
@@ -127,8 +127,8 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       //Set Camera Info
       String intrinsicFile = "../DarpaRoboticsChallenge/data/calibration_images/intrinsic_ros.xml";
       IntrinsicParameters intrinsic = BoofMiscOps.loadXML(intrinsicFile);
-      double fovh=Math.atan(intrinsic.getCx()/intrinsic.getFx())+Math.atan((intrinsic.width-intrinsic.getCx())/intrinsic.getFx());
-      System.out.println("Set fov to " + Math.toDegrees(fovh) + "degs from " + intrinsicFile)    ;
+      double fovh = Math.atan(intrinsic.getCx() / intrinsic.getFx()) + Math.atan((intrinsic.width - intrinsic.getCx()) / intrinsic.getFx());
+      System.out.println("Set fov to " + Math.toDegrees(fovh) + "degs from " + intrinsicFile);
       scs.setFieldOfView(fovh);
       scs.maximizeMainWindow();
 
@@ -140,7 +140,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
          public void itemStateChanged(ItemEvent e)
          {
             alignCamera = !alignCamera;
-            if(alignCamera)
+            if (alignCamera)
                scsAlignCameraToRobotCamera();
          }
       });
@@ -152,15 +152,15 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    {
       /*put yo-variablized objects here */
       FramePoint
-            leftEE=new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM)  ,0, 0.13,0),
-            rightEE=new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM),0,-0.13,0);
+            leftEE = new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM), 0, 0.13, 0),
+            rightEE = new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM), 0, -0.13, 0);
 
 
       ypLeftEE.set(leftEE.changeFrameCopy(CalibUtil.world));
       ypRightEE.set(rightEE.changeFrameCopy(CalibUtil.world));
 
       yposeLeftEE.set(new FramePose(leftEE, new FrameOrientation(leftEE.getReferenceFrame())).changeFrameCopy(CalibUtil.world));
-      yposeRightEE.set(new FramePose(rightEE,new FrameOrientation(rightEE.getReferenceFrame())).changeFrameCopy(CalibUtil.world));
+      yposeRightEE.set(new FramePose(rightEE, new FrameOrientation(rightEE.getReferenceFrame())).changeFrameCopy(CalibUtil.world));
 
       updateBoard(index);
    }
@@ -168,7 +168,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    private void scsAlignCameraToRobotCamera()
    {
       //Camera Pos(behind the eye 10cm), Fix(Eye farme origin)
-      FramePoint cameraPos = new FramePoint(cameraFrame,-0.01,0,0).changeFrameCopy(CalibUtil.world);
+      FramePoint cameraPos = new FramePoint(cameraFrame, -0.01, 0, 0).changeFrameCopy(CalibUtil.world);
       FramePoint cameraFix = new FramePoint(cameraFrame).changeFrameCopy(CalibUtil.world);
       scs.setCameraPosition(cameraPos.getX(), cameraPos.getY(), cameraPos.getZ());
       scs.setCameraFix(cameraFix.getX(), cameraFix.getY(), cameraFix.getZ());
@@ -177,14 +177,14 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    private void updateBoard(int index)
    {
       //update camera pose display
-      Transform3D imageToCamera = new Transform3D(new double[]{ 0,0,1,0,  -1,0,0,0,  0,-1,0,0,  0,0,0,1});
+      Transform3D imageToCamera = new Transform3D(new double[]{0, 0, 1, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 1});
       ReferenceFrame cameraImageFrame = ReferenceFrame.
             constructBodyFrameWithUnchangingTransformToParent("cameraImage", cameraFrame, imageToCamera);
       yposeLeftCamera.set(new FramePose(cameraImageFrame).changeFrameCopy(CalibUtil.world));
 
       //update board
-      Map<String,Object> mEntry = metaData.get(index);
-      Transform3D targetToCamera = new Transform3D((Transform3D)mEntry.get(TARGET_TO_CAMERA_KEY)); //in camera frame
+      Map<String, Object> mEntry = metaData.get(index);
+      Transform3D targetToCamera = new Transform3D((Transform3D) mEntry.get(TARGET_TO_CAMERA_KEY)); //in camera frame
 //      System.out.println("Original Rot\n"+targetToCamera);
 
       //update
@@ -193,44 +193,45 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 //      System.out.println(targetToCamera);
 
       //image update
-      BufferedImage work = renderEEinImage(cameraImageFrame, (BufferedImage)mEntry.get(CAMERA_IMAGE_KEY));
+      BufferedImage work = renderEEinImage(cameraImageFrame, (BufferedImage) mEntry.get(CAMERA_IMAGE_KEY));
 
       Transform3D kinematicsTargetToCamera = computeKinematicsTargetToCamera(cameraImageFrame);
-      renderCalibrationPoints(kinematicsTargetToCamera,work);
+      renderCalibrationPoints(kinematicsTargetToCamera, work);
 
       iiDisplay.setImage(work);
    }
 
    private BufferedImage renderEEinImage(ReferenceFrame cameraImageFrame, BufferedImage original)
    {
-      BufferedImage work = new BufferedImage(original.getWidth(),original.getHeight(),original.getType());
+      BufferedImage work = new BufferedImage(original.getWidth(), original.getHeight(), original.getType());
       Graphics2D g2 = work.createGraphics();
-      g2.drawImage(original,0,0,null);
+      g2.drawImage(original, 0, 0, null);
 
-      FramePoint leftEEtoCamera=new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM)  ,0, 0.13,0); // todo look at this later
+      FramePoint leftEEtoCamera = new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM), 0, 0.13, 0); // todo look at this later
       leftEEtoCamera.changeFrame(cameraImageFrame);
       Point3d leftEEinImageFrame = leftEEtoCamera.getPoint();
 
-      Point2D_F64 norm = new Point2D_F64(leftEEinImageFrame.x/leftEEinImageFrame.z,leftEEinImageFrame.y/leftEEinImageFrame.z);
+      Point2D_F64 norm = new Point2D_F64(leftEEinImageFrame.x / leftEEinImageFrame.z, leftEEinImageFrame.y / leftEEinImageFrame.z);
       Point2D_F64 pixel = new Point2D_F64();
 
       PerspectiveOps.convertNormToPixel(intrinsic, norm, pixel);
 
       // visualization
       int r = 10;
-      int w = r*2+1;
-      int x = (int)(pixel.x+0.5);
-      int y = (int)(pixel.y+0.5);
+      int w = r * 2 + 1;
+      int x = (int) (pixel.x + 0.5);
+      int y = (int) (pixel.y + 0.5);
 
       g2.setColor(Color.BLACK);
       g2.fillOval(x - r - 2, y - r - 2, w + 4, w + 4);
       g2.setColor(Color.orange);
-      g2.fillOval(x-r,y-r,w,w);
+      g2.fillOval(x - r, y - r, w, w);
 
       return work;
    }
 
-   private Transform3D computeKinematicsTargetToCamera(  ReferenceFrame cameraImageFrame ) {
+   private Transform3D computeKinematicsTargetToCamera(ReferenceFrame cameraImageFrame)
+   {
 //      Transform3D targetToEE = new Transform3D();
 //      Matrix3d rotX = new Matrix3d(1,0,0,  0,0,-1, 0,1,0);
 //      Matrix3d rotZ = new Matrix3d(0,-1,0, 1,0,0,  0,0,1);
@@ -242,45 +243,49 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 //      targetToEE.setRotation(rot);
 //      targetToEE.setTranslation(new Vector3d(-0.061, 0.13, 0.205));
 
-      ReferenceFrame leftEEFrame=fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM);
-      ReferenceFrame boardFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("boardFrame",leftEEFrame,targetToEE);
+      ReferenceFrame leftEEFrame = fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM);
+      ReferenceFrame boardFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("boardFrame", leftEEFrame, targetToEE);
       return boardFrame.getTransformToDesiredFrame(cameraImageFrame);
 
 //      FramePoint leftEEtoCamera=new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM)  ,0, 0.13,0);
 //      leftEEtoCamera.changeFrame(cameraImageFrame);
    }
 
-   private void renderCalibrationPoints( Transform3D targetToCamera , BufferedImage output ) {
+   private void renderCalibrationPoints(Transform3D targetToCamera, BufferedImage output)
+   {
 
       Graphics2D g2 = output.createGraphics();
 
       // dot size
       int r = 4;
-      int w = r*2+1;
+      int w = r * 2 + 1;
 
       // Points in chessboard frame
       Point2D_F64 norm = new Point2D_F64();
       Point2D_F64 pixel = new Point2D_F64();
 
       int index = 0;
-      for( Point2D_F64 p : calibGrid.points ) {
+      for (Point2D_F64 p : calibGrid.points)
+      {
          // convert to camera frame
-         Point3d p3 = new Point3d(p.x,p.y,0);
+         Point3d p3 = new Point3d(p.x, p.y, 0);
          targetToCamera.transform(p3);
 
          // convert to pixels
-         norm.set( p3.x/p3.z , p3.y/p3.z );
+         norm.set(p3.x / p3.z, p3.y / p3.z);
          PerspectiveOps.convertNormToPixel(intrinsic, norm, pixel);
 
-         int x = (int)(pixel.x+0.5);
-         int y = (int)(pixel.y+0.5);
+         int x = (int) (pixel.x + 0.5);
+         int y = (int) (pixel.y + 0.5);
 
-         if( index++ == 0 ) {
+         if (index++ == 0)
+         {
             g2.setColor(Color.CYAN);
-         } else {
+         } else
+         {
             g2.setColor(Color.BLUE);
          }
-         g2.fillOval(x-r,y-r,w,w);
+         g2.fillOval(x - r, y - r, w, w);
       }
 
 
@@ -289,55 +294,56 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    private ArrayList<OneDoFJoint> getArmJoints()
    {
       ArrayList<OneDoFJoint> armJoints = new ArrayList<OneDoFJoint>();
-      for(int i=0;i<joints.length;i++)
+      for (int i = 0; i < joints.length; i++)
       {
-         if(joints[i].getName().matches(".*arm.*"))
+         if (joints[i].getName().matches(".*arm.*"))
          {
             armJoints.add(joints[i]);
-            if(DEBUG)
-               System.out.println("arm "+ i + " "+joints[i].getName());
+            if (DEBUG)
+               System.out.println("arm " + i + " " + joints[i].getName());
          }
 
       }
       return armJoints;
    }
 
-   public void optimizeData() {
-      KinematicCalibrationHeadLoopResidual function = new KinematicCalibrationHeadLoopResidual(fullRobotModel,true,intrinsic,calibGrid,metaData,q);
+   public void optimizeData()
+   {
+      KinematicCalibrationHeadLoopResidual function = new KinematicCalibrationHeadLoopResidual(fullRobotModel, true, intrinsic, calibGrid, metaData, q);
 
       UnconstrainedLeastSquares optimizer = FactoryOptimization.leastSquaresLM(1e-3, true);
 
-      double input[] = new double[ function.getNumOfInputsN() ];
+      double input[] = new double[function.getNumOfInputsN()];
 
       // give it an initial estimate for the translation
 //      input[input.length-4]=-0.061;
 //      input[input.length-3]=0.13;
 //      input[input.length-2]=0.205;
 
-      optimizer.setFunction(function,null);
-      optimizer.initialize(input,1e-12,1e-12);
+      optimizer.setFunction(function, null);
+      optimizer.initialize(input, 1e-12, 1e-12);
 
-      System.out.println("Initial optimziation error = "+optimizer.getFunctionValue());
+      System.out.println("Initial optimziation error = " + optimizer.getFunctionValue());
 
       UtilOptimize.process(optimizer, 500);
 
       double found[] = optimizer.getParameters();
 
-      System.out.println("Final optimziation error =   "+optimizer.getFunctionValue());
+      System.out.println("Final optimziation error =   " + optimizer.getFunctionValue());
 
       java.util.List<String> jointNames = function.getCalJointNames();
 
-      targetToEE = KinematicCalibrationHeadLoopResidual.computeTargetToEE(found,jointNames.size());
+      targetToEE = KinematicCalibrationHeadLoopResidual.computeTargetToEE(found, jointNames.size());
 
-      for(int i=0;i<jointNames.size();i++)
+      for (int i = 0; i < jointNames.size(); i++)
       {
          qbias.put(jointNames.get(i), found[i]);
          System.out.println(jointNames.get(i) + " bias: " + Math.toDegrees(found[i]));
       }
-      System.out.println("board to wrist rotY:" + found[found.length-1]);
+      System.out.println("board to wrist rotY:" + found[found.length - 1]);
    }
 
-   public void loadData(String directory ) throws IOException
+   public void loadData(String directory) throws IOException
    {
       intrinsic = BoofMiscOps.loadXML("../DarpaRoboticsChallenge/data/calibration_images/intrinsic_ros.xml");
 
@@ -346,16 +352,17 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       Arrays.sort(files);
 
 //      files = new File[]{files[3],files[20]};
-      for( File f : files ) {
-         if( !f.isDirectory() )
+      for (File f : files)
+      {
+         if (!f.isDirectory())
             continue;
          System.out.println("datafolder:" + f.toString());
 
-         Map<String,Object> mEntry = new HashMap<>();
-         Map<String,Double> qEntry = new HashMap<>();
-         Map<String,Double> qoutEntry = new HashMap<>();
+         Map<String, Object> mEntry = new HashMap<>();
+         Map<String, Double> qEntry = new HashMap<>();
+         Map<String, Double> qoutEntry = new HashMap<>();
 
-         if( !loadData(f,mEntry,qEntry,qoutEntry,true) )
+         if (!loadData(f, mEntry, qEntry, qoutEntry, true))
             continue;
 
          metaData.add(mEntry);
@@ -364,11 +371,12 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       }
    }
 
-   public static boolean loadData(File f , Map<String,Object> mEntry ,Map<String,Double> qEntry, Map<String,Double> qoutEntry , boolean loadImages ) throws IOException
+   public static boolean loadData(File f, Map<String, Object> mEntry, Map<String, Double> qEntry, Map<String, Double> qoutEntry,
+                                  boolean loadImages) throws IOException
    {
-      File fileTarget = new File(f,"target.txt");
+      File fileTarget = new File(f, "target.txt");
 
-      if( !fileTarget.exists() || fileTarget.length() == 0 )
+      if (!fileTarget.exists() || fileTarget.length() == 0)
          return false;
 
       // parse targetToCamera transform
@@ -383,10 +391,11 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       String row1[] = reader.readLine().split(" ");
       String row2[] = reader.readLine().split(" ");
 
-      for( int col = 0; col < 3; col++ ) {
-         targetToCamera.getR().set(0,col, parseDouble(row0[col]));
-         targetToCamera.getR().set(1,col, parseDouble(row1[col]));
-         targetToCamera.getR().set(2,col, parseDouble(row2[col]));
+      for (int col = 0; col < 3; col++)
+      {
+         targetToCamera.getR().set(0, col, parseDouble(row0[col]));
+         targetToCamera.getR().set(1, col, parseDouble(row1[col]));
+         targetToCamera.getR().set(2, col, parseDouble(row2[col]));
       }
 
       //read translation
@@ -398,9 +407,10 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       reader.readLine();
       reader.readLine();
       ArrayList<Point2D_F64> detections = new ArrayList<>();
-      while( true ) {
+      while (true)
+      {
          String line = reader.readLine();
-         if( line == null )
+         if (line == null)
             break;
          s = line.split(" ");
          Point2D_F64 p = new Point2D_F64();
@@ -408,7 +418,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
          p.y = Double.parseDouble(s[1]);
          detections.add(p);
       }
-      mEntry.put(CHESSBOARD_DETECTIONS_KEY,detections);
+      mEntry.put(CHESSBOARD_DETECTIONS_KEY, detections);
 
       //copy Translation and Rotation
       Transform3D transform = new Transform3D();
@@ -416,28 +426,30 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       transform.setTranslation(new Vector3d(T.x, T.y, T.z));
 
       Matrix3d matrix3d = new Matrix3d();
-      MatrixTools.denseMatrixToMatrix3d(targetToCamera.getR(),matrix3d,0,0);
+      MatrixTools.denseMatrixToMatrix3d(targetToCamera.getR(), matrix3d, 0, 0);
       transform.setRotation(matrix3d);
-      mEntry.put(TARGET_TO_CAMERA_KEY,transform);
+      mEntry.put(TARGET_TO_CAMERA_KEY, transform);
 
       //load image
-      if( loadImages )
-         mEntry.put(CAMERA_IMAGE_KEY,ImageIO.read(new File(f,"/detected.jpg")));
+      if (loadImages)
+         mEntry.put(CAMERA_IMAGE_KEY, ImageIO.read(new File(f, "/detected.jpg")));
 
 
       // load joint angles
       Properties properties = new Properties();
-      properties.load(new FileReader(new File(f,"q.m")));
+      properties.load(new FileReader(new File(f, "q.m")));
 
-      for(Map.Entry e : properties.entrySet() ) {
-         qEntry.put((String)e.getKey(),Double.parseDouble((String)e.getValue()));
+      for (Map.Entry e : properties.entrySet())
+      {
+         qEntry.put((String) e.getKey(), Double.parseDouble((String) e.getValue()));
       }
 
       properties = new Properties();
-      properties.load(new FileReader(new File(f,"qout.m")));
+      properties.load(new FileReader(new File(f, "qout.m")));
 
-      for(Map.Entry e : properties.entrySet() ) {
-         qoutEntry.put((String)e.getKey(),Double.parseDouble((String)e.getValue()));
+      for (Map.Entry e : properties.entrySet())
+      {
+         qoutEntry.put((String) e.getKey(), Double.parseDouble((String) e.getValue()));
       }
 
       return true;
@@ -468,8 +480,8 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 //      System.out.println("wristSpacing "+prm[prm.length-1]);
 //
       //push data to visualizer
-      boolean start_scs=true;
-      if(start_scs)
+      boolean start_scs = true;
+      if (start_scs)
       {
          //Yovariables for display
 //         YoFramePose yoResidual0 = new YoFramePose("residual0", "", ReferenceFrame.getWorldFrame(),calib.registry);
@@ -477,9 +489,9 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 
          calib.createDisplay(calib.q.size());
 
-         for(int i=0;i<calib.q.size();i++)
+         for (int i = 0; i < calib.q.size(); i++)
          {
-            CalibUtil.setRobotModelFromData(calib.fullRobotModel, (Map)calib.q.get(i) );
+            CalibUtil.setRobotModelFromData(calib.fullRobotModel, (Map) calib.q.get(i));
 //            CalibUtil.setRobotModelFromData(calib.fullRobotModel, CalibUtil.addQ(calib.q.get(i),qoffset));
 //            yoResidual0.setXYZYawPitchRoll(Arrays.copyOfRange(residual0, i*RESIDUAL_DOF, i*RESIDUAL_DOF+6));
 //            yoResidual.setXYZYawPitchRoll(Arrays.copyOfRange(residual, i*RESIDUAL_DOF, i*RESIDUAL_DOF+6));

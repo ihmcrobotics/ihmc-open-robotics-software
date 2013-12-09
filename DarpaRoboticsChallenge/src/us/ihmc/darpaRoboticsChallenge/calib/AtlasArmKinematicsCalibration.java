@@ -31,7 +31,7 @@ public class AtlasArmKinematicsCalibration
    Zhang99ComputeTargetHomography computeH = new Zhang99ComputeTargetHomography(target);
    Zhang99DecomposeHomography decomposeH = new Zhang99DecomposeHomography();
 
-   ImageFloat32 gray = new ImageFloat32(1,1);
+   ImageFloat32 gray = new ImageFloat32(1, 1);
 
    boolean hasIntrinsic = false;
 
@@ -44,23 +44,24 @@ public class AtlasArmKinematicsCalibration
 
    public void setIntrinsic(IntrinsicParameters intrinsic)
    {
-      DenseMatrix64F K = PerspectiveOps.calibrationMatrix(intrinsic,null);
+      DenseMatrix64F K = PerspectiveOps.calibrationMatrix(intrinsic, null);
       decomposeH.setCalibrationMatrix(K);
       hasIntrinsic = true;
    }
 
-   public boolean estimateCameraPose( BufferedImage leftEye ) {
+   public boolean estimateCameraPose(BufferedImage leftEye)
+   {
 
-      if( !hasIntrinsic )
+      if (!hasIntrinsic)
          return false;
 
       gray.reshape(leftEye.getWidth(), leftEye.getHeight());
       ConvertBufferedImage.convertFrom(leftEye, gray);
 
-      if( !detector.process(gray) )
+      if (!detector.process(gray))
          return false;
 
-      if( !computeH.computeHomography(detector.getPoints()) )
+      if (!computeH.computeHomography(detector.getPoints()))
          return false;
 
       DenseMatrix64F H = computeH.getHomography();
