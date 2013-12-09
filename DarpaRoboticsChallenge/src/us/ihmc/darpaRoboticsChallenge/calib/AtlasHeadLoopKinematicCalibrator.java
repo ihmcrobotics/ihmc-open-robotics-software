@@ -34,11 +34,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
+import javax.vecmath.*;
 
+import georegression.struct.so.Quaternion_F64;
+import georegression.struct.so.Rodrigues_F64;
 import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
@@ -246,6 +245,8 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       Matrix3d rotZ = new Matrix3d(0,-1,0, 1,0,0,  0,0,1);
       Matrix3d rot = new Matrix3d();
       rot.mul(rotX, rotZ);
+
+      System.out.println(rot);
 
       targetToEE.setRotation(rot);
       targetToEE.setTranslation(new Vector3d(-0.061, 0.13, 0.205));

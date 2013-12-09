@@ -32,6 +32,9 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
    IntrinsicParameters intrinsic;
    PlanarCalibrationTarget calibGrid;
 
+   // normial orientation of the target.  only rotation around y is optimized
+   public static final Matrix3d TARGET_ROT_XY = new Matrix3d(0.0, -1.0, 0.0,0.0, 0.0, -1.0, 1.0, 0.0, 0.0);
+
    public KinematicCalibrationHeadLoopResidual(SDFFullRobotModel fullRobotModel,
                                                boolean isLeft ,
                                                IntrinsicParameters intrinsic,
@@ -79,16 +82,20 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
       for(int i=0;i<calJointNames.size();i++)
          qoffset.put(calJointNames.get(i), input[inputCounter++]);
 
-      //remember to change getN()
+      // Apply rotation around Y to the nominal rotation
       Vector3d tran = new Vector3d();
-      Vector3d axisRotation = new Vector3d();
 
       tran.set(input[inputCounter++],input[inputCounter++],input[inputCounter++]);
-      axisRotation.set(input[inputCounter++],input[inputCounter++],input[inputCounter++]);
+      AxisAngle4d axisY = new AxisAngle4d(new Vector3d(0,1,0),input[inputCounter]);
+      Matrix3d matAxisY = new Matrix3d();
+      matAxisY.set(axisY);
+
+      Matrix3d rotFull = new Matrix3d();
+      rotFull.mul(matAxisY,TARGET_ROT_XY);
 
       Transform3D targetToEE = new Transform3D();
       targetToEE.setTranslation(tran);
-      targetToEE.setRotation(new AxisAngle4d(axisRotation,axisRotation.length()));
+      targetToEE.setRotation(rotFull);
 
       ReferenceFrame cameraFrame = fullRobotModel.getCameraFrame("stereo_camera_left");
       Transform3D imageToCamera = new Transform3D(new double[]{ 0,0,1,0,  -1,0,0,0,  0,-1,0,0,  0,0,0,1});
@@ -148,7 +155,7 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
    public int getNumOfInputsN()
    {
       //dim parameter
-      return calJointNames.size() + 6;
+      return calJointNames.size() + 4;
    }
    
    @Override

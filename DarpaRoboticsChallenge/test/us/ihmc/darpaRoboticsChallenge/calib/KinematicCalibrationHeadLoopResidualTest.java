@@ -12,22 +12,24 @@ import org.ddogleg.optimization.UtilOptimize;
 import org.junit.Test;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.taskExecutor.ArrayDeque15;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.imageProcessing.configuration.ConfigurationLoader;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
@@ -39,7 +41,7 @@ import static org.junit.Assert.assertTrue;
 public class KinematicCalibrationHeadLoopResidualTest
 {
 
-   Random random = new Random();
+   Random random = new Random(23234);
 
    IntrinsicParameters intrinsic;
    PlanarCalibrationTarget calibGrid = FactoryPlanarCalibrationTarget.gridChess(5, 4, 0.03);
@@ -60,18 +62,23 @@ public class KinematicCalibrationHeadLoopResidualTest
    boolean isleft = true;
    List<String> calJointNames = KinematicCalibrationHeadLoopResidual.getOrderedArmJointsNames(fullRobotModel,isleft);
 
-   double targetToEE_param[] = new double[]{0.1,-0.1,0.05,0.05,0.1,0.13};
+   double targetToEE_param[] = new double[]{0.1,-0.1,0.05,0.05};
 
    public KinematicCalibrationHeadLoopResidualTest()
    {
-      intrinsic = BoofMiscOps.loadXML("../DarpaRoboticsChallenge/data/calibration_images/intrinsic_ros.xml");
+      intrinsic = ConfigurationLoader.loadXML("/us/ihmc/darpaRoboticsChallenge/calib/intrinsic_ros.xml");
+
+      Vector3d tran = new Vector3d(targetToEE_param[0],targetToEE_param[1],targetToEE_param[2]);
+      AxisAngle4d axisY = new AxisAngle4d(new Vector3d(0,1,0),targetToEE_param[3]);
+      Matrix3d matAxisY = new Matrix3d();
+      matAxisY.set(axisY);
+
+      Matrix3d rotFull = new Matrix3d();
+      rotFull.mul(matAxisY,KinematicCalibrationHeadLoopResidual.TARGET_ROT_XY);
 
       targetToEE = new Transform3D();
-      Vector3d tran = new Vector3d(targetToEE_param[0],targetToEE_param[1],targetToEE_param[2]);
-      Vector3d axisRotation = new Vector3d(targetToEE_param[3],targetToEE_param[4],targetToEE_param[5]);
-
       targetToEE.setTranslation(tran);
-      targetToEE.setRotation(new AxisAngle4d(axisRotation,axisRotation.length()));
+      targetToEE.setRotation(rotFull);
    }
 
    @Test
@@ -92,7 +99,7 @@ public class KinematicCalibrationHeadLoopResidualTest
 
       KinematicCalibrationHeadLoopResidual alg = new KinematicCalibrationHeadLoopResidual(fullRobotModel,isleft,intrinsic,calibGrid,qdata,q);
 
-      assertEquals(qoffset.size()+6,alg.getNumOfInputsN());
+      assertEquals(qoffset.size()+4,alg.getNumOfInputsN());
       assertEquals(numPoses*calibGrid.points.size()*2,alg.getNumOfOutputsM());
 
       double input[] = new double[ alg.getNumOfInputsN() ];
@@ -101,7 +108,7 @@ public class KinematicCalibrationHeadLoopResidualTest
       for( int i = 0; i < input.length; i++ ) {
          input[i] = 0;
       }
-      System.arraycopy(targetToEE_param,0,input,input.length-6,6);
+      System.arraycopy(targetToEE_param,0,input,input.length-4,4);
 
       alg.process(input,output);
 
@@ -132,7 +139,7 @@ public class KinematicCalibrationHeadLoopResidualTest
 
       KinematicCalibrationHeadLoopResidual alg = new KinematicCalibrationHeadLoopResidual(fullRobotModel,isleft,intrinsic,calibGrid,qdata,q);
 
-      assertEquals(qoffset.size()+6,alg.getNumOfInputsN());
+      assertEquals(qoffset.size()+4,alg.getNumOfInputsN());
       assertEquals(numPoses*calibGrid.points.size()*2,alg.getNumOfOutputsM());
 
       double input[] = new double[ alg.getNumOfInputsN() ];
@@ -141,7 +148,7 @@ public class KinematicCalibrationHeadLoopResidualTest
       for( int i = 0; i < input.length; i++ ) {
          input[i] = 0;
       }
-      System.arraycopy(targetToEE_param,0,input,input.length-6,6);
+      System.arraycopy(targetToEE_param,0,input,input.length-4,4);
 
       alg.process(input,output);
 
@@ -166,8 +173,6 @@ public class KinematicCalibrationHeadLoopResidualTest
 
       for( String s : calJointNames ) {
          qoffset.put(s, random.nextGaussian()*0.04);
-         if( s.compareTo("l_arm_wrx") == 0 )
-            qoffset.put(s, -0.1);
       }
 
       ArrayList<Map<String,Object>>  qdata = new ArrayList<>();
@@ -185,7 +190,7 @@ public class KinematicCalibrationHeadLoopResidualTest
       for( int i = 0; i < input.length; i++ ) {
          input[i] = 0;
       }
-      System.arraycopy(targetToEE_param,0,input,input.length-6,6);
+      System.arraycopy(targetToEE_param,0,input,input.length-targetToEE_param.length,targetToEE_param.length);
 
       optimizer.setFunction(function,null);
       optimizer.initialize(input,1e-12,1e-12);
@@ -196,14 +201,14 @@ public class KinematicCalibrationHeadLoopResidualTest
 
       for( int i = 0; i < calJointNames.size(); i++ ) {
          double expected = qoffset.get(calJointNames.get(i));
-         System.out.println(calJointNames.get(i)+" expected "+expected+"  found "+found[i]);
-//         assertEquals(expected,found[i],1e-8);
+//         System.out.println(calJointNames.get(i)+" expected "+expected+"  found "+found[i]);
+         assertEquals(expected,found[i],1e-5);
       }
 
       for( int i = 0; i < targetToEE_param.length; i++ ) {
          double expected = targetToEE_param[i];
-         System.out.println(i+" expected "+expected+"  found "+found[i+calJointNames.size()]);
-//         assertEquals(expected,found[i+calJointNames.size()],1e-8);
+//         System.out.println(i+" expected "+expected+"  found "+found[i+calJointNames.size()]);
+         assertEquals(expected,found[i+calJointNames.size()],1e-5);
       }
 
    }
@@ -235,7 +240,7 @@ public class KinematicCalibrationHeadLoopResidualTest
          Transform3D targetToCamera = computeKinematicsTargetToCamera(fullRobotModel,cameraImageFrame,targetToEE);
          List<Point2D_F64> observations = generatePerfectObservations( targetToCamera );
 
-         qdata.put(AtlasHeadLoopKinematicCalibrator.CHESSBOARD_DETECTIONS_KEY,observations);
+         qdata.put(AtlasHeadLoopKinematicCalibrator.CHESSBOARD_DETECTIONS_KEY, observations);
 
          qdatas.add(qdata);
          qs.add(q);
