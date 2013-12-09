@@ -1899,6 +1899,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          legLengths.put(robotSide, footEndEffectorControlModules.get(robotSide).updateAndGetLegLength());
       
       
+      // Correct, if necessary, the CoM height trajectory to avoid straight knee
+      for (RobotSide robotSide : leadingLegFirst)
+      {
+         EndEffectorControlModule footEndEffectorControlModule = footEndEffectorControlModules.get(robotSide);
+         footEndEffectorControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(desiredICPVelocity, comHeightData,
+               zCurrent, pelvisZUpFrame);
+      }
+
       // Correct, if necessary, the CoM height trajectory to avoid the knee to collapse
       if (checkForKneeCollapsing)
       {
@@ -1907,14 +1915,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             footEndEffectorControlModules.get(robotSide).correctCoMHeightTrajectoryForCollapseAvoidance(desiredICPVelocity, comHeightData,
                   zCurrent, pelvisZUpFrame, footSwitches.get(robotSide).computeFootLoadPercentage());
          }
-      }
-
-      // Correct, if necessary, the CoM height trajectory to avoid straight knee
-      for (RobotSide robotSide : leadingLegFirst)
-      {
-         EndEffectorControlModule footEndEffectorControlModule = footEndEffectorControlModules.get(robotSide);
-         footEndEffectorControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(desiredICPVelocity, comHeightData,
-               zCurrent, pelvisZUpFrame);
       }
 
       // Do that after to make sure the swing foot will land
