@@ -432,7 +432,7 @@ public class IndividualHandControlModule
 //         requestedState.set(loadBearingPlaneFingersBentBackState.getStateEnum());
    }
 
-   public void executeJointSpaceTrajectory(Map<OneDoFJoint, ? extends DoubleTrajectoryGenerator> trajectories)
+   public void executeJointSpaceTrajectory(Map<OneDoFJoint, ? extends OneDoFJointQuinticTrajectoryGenerator> trajectories)
    {
       jointSpaceHandControlState.setTrajectories(trajectories);
       requestedState.set(jointSpaceHandControlState.getStateEnum());
