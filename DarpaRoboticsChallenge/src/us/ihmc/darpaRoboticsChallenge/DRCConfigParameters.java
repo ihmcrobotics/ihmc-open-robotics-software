@@ -19,6 +19,7 @@ public class DRCConfigParameters
    public static final boolean ALLOW_LAG_SIMULATION = true;
    public static final boolean ENABLE_LAG_SIMULATION_ON_START = false;
    public static boolean CALIBRATE_ARM_MODE = false;
+   public static boolean USE_CALIBRATED_JOINT_BIAS = false;
    public static boolean ENABLE_QOUT_ENCODER = CALIBRATE_ARM_MODE;
 
 
