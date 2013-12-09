@@ -112,6 +112,13 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
       return output;
    }
 
+   private void printCode( java.util.List<String> jointNames , double found[]) {
+      for(int i=0;i<jointNames.size();i++)
+      {
+         System.out.println("jointAngleOffsetPreTransmission.put(AtlasJointId.JOINT_"+jointNames.get(i).toUpperCase()+", "+found[i]+");");
+      }
+   }
+
    public void optimizeData() {
       KinematicCalibrationHeadLoopResidual function = new KinematicCalibrationHeadLoopResidual(fullRobotModel,true,intrinsic,calibGrid,metaData,q);
 
@@ -134,7 +141,7 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
 
       double[] output = computeErrorStatistics(function, found);
 
-      computePerImageError(output);
+//      computePerImageError(output);
 
       java.util.List<String> jointNames = function.getCalJointNames();
 
@@ -149,6 +156,8 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
       System.out.println("board to wrist tranY:" + found[found.length-3]);
       System.out.println("board to wrist tranZ:" + found[found.length-2]);
       System.out.println("board to wrist  rotY:" + Math.toDegrees(found[found.length-1])+" deg");
+
+      printCode(jointNames,found);
    }
 
    public void loadData(String directory ) throws IOException
