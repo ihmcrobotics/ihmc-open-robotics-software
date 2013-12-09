@@ -1,12 +1,13 @@
 package us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.iRobotHandControl.IRobotHandSensorData;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.net.ObjectCommunicator;
-import us.ihmc.utilities.net.TimestampProvider;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RawOutputWriter;
@@ -21,6 +22,7 @@ public class HandJointAngleCommunicator implements RawOutputWriter
    private final ObjectCommunicator networkProcessorCommunicator;
    private final ConcurrentRingBuffer<HandJointAnglePacket> packetRingBuffer;
    private final double[][] fingers = new double[3][];
+   private final AtomicBoolean connected = new AtomicBoolean();
    private final RobotSide side;
    private HandJointAnglePacket currentPacket;
 
@@ -84,6 +86,7 @@ public class HandJointAngleCommunicator implements RawOutputWriter
       fingers[0] = sensorDataFromHand.getIndexJointAngles();
       fingers[1] = sensorDataFromHand.getMiddleJointAngles();
       fingers[2] = sensorDataFromHand.getThumbJointAngles();
+      connected.set(true);
    }
 
    // puts the state data into the ring buffer for the output thread
@@ -95,7 +98,7 @@ public class HandJointAngleCommunicator implements RawOutputWriter
       {
          return;
       }
-      packet.setAll(side, fingers[0], fingers[1], fingers[2]);
+      packet.setAll(side, connected.get(), fingers[0], fingers[1], fingers[2]);
       packetRingBuffer.commit();
    }
 
@@ -107,4 +110,9 @@ public class HandJointAngleCommunicator implements RawOutputWriter
          return new HandJointAnglePacket();
       }
    };
+
+   public void setHandDisconnected()
+   {
+      connected.set(true);
+   }
 }
