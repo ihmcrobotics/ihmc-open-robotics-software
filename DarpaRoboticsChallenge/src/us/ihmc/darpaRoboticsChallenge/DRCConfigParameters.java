@@ -48,6 +48,7 @@ public class DRCConfigParameters
 
    // Add more contact points on the feet
    public static boolean CREATE_LOAD_OF_CONTACT_POINTS_FEET = false;
+   public static boolean USE_SIX_CONTACT_POINTS_PER_FOOT = false;
 
    static
    {
