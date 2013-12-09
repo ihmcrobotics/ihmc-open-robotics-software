@@ -443,7 +443,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       // TODO: Fix low level stuff so that we are truly controlling pelvis height and not CoM height.
       controlPelvisHeightInsteadOfCoMHeight.set(true);
       
-      moveICPAwayAtEndOfSwingDistance.set(0.0); //0.06);    
+      moveICPAwayAtEndOfSwingDistance.set(0.06);   
       singleSupportTimeLeftBeforeShift.set(0.5);
       
       footLoadThresholdToHoldPosition.set(0.2);
@@ -470,7 +470,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       //TODO: Pull these up to a higher level.
       //TODO: Move these to DRCRobotWalkingControlParameters:
 
-      singularityEscapeNullspaceMultiplierSwingLeg.set(100.0);
+      singularityEscapeNullspaceMultiplierSwingLeg.set(50.0);
       singularityEscapeNullspaceMultiplierSupportLeg.set(30.0);
       singularityEscapeNullspaceMultiplierSupportLegLocking.set(0.0);//-0.5);
       double minJacobianDeterminantForSingularityEscape = 0.035;
