@@ -1,44 +1,21 @@
 package us.ihmc.darpaRoboticsChallenge.calib;
 
-import static java.lang.Double.parseDouble;
-
 import boofcv.alg.geo.PerspectiveOps;
 import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
 import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
-import georegression.geometry.RotationMatrixGenerator;
+import boofcv.misc.BoofMiscOps;
+import boofcv.struct.calib.IntrinsicParameters;
+import com.yobotics.simulationconstructionset.IndexChangedListener;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
 import georegression.struct.point.Point2D_F64;
-import georegression.struct.point.Point3D_F64;
 import georegression.struct.point.Vector3D_F64;
 import georegression.struct.se.Se3_F64;
-
-import java.awt.*;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-
-import javax.imageio.ImageIO;
-import javax.media.j3d.Transform3D;
-import javax.swing.ImageIcon;
-import javax.swing.JCheckBox;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.vecmath.*;
-
-import georegression.struct.so.Quaternion_F64;
-import georegression.struct.so.Rodrigues_F64;
-import org.ejml.data.DenseMatrix64F;
+import org.ddogleg.optimization.FactoryOptimization;
+import org.ddogleg.optimization.UnconstrainedLeastSquares;
+import org.ddogleg.optimization.UtilOptimize;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.robotSide.RobotSide;
@@ -49,14 +26,23 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
-import boofcv.misc.BoofMiscOps;
-import boofcv.struct.calib.IntrinsicParameters;
+import javax.imageio.ImageIO;
+import javax.media.j3d.Transform3D;
+import javax.swing.*;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+import java.awt.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.*;
 
-import com.yobotics.simulationconstructionset.IndexChangedListener;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
+import static java.lang.Double.parseDouble;
 
 public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 {
@@ -69,6 +55,10 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    private final YoFramePose yposeLeftEE, yposeRightEE, yposeBoard,yposeLeftCamera;
    private final ArrayList<Map<String,Object>> metaData;
    final ReferenceFrame cameraFrame;
+
+   Transform3D targetToEE = new Transform3D();
+
+   protected final Map<String, Double> qbias = new HashMap<>();
 
    private ImageIcon iiDisplay = null;
    private boolean alignCamera = true;
@@ -124,7 +114,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
          public void indexChanged(int newIndex, double newTime)
          {
             int index =  (newIndex+q.size()-1) % q.size();
-            CalibUtil.setRobotModelFromData(fullRobotModel, (Map)q.get(index));
+            CalibUtil.setRobotModelFromData(fullRobotModel, q.get(index),qbias);
             updateBoard(index);
             lblDisplay.repaint();
             if(alignCamera)
@@ -240,16 +230,16 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    }
 
    private Transform3D computeKinematicsTargetToCamera(  ReferenceFrame cameraImageFrame ) {
-      Transform3D targetToEE = new Transform3D();
-      Matrix3d rotX = new Matrix3d(1,0,0,  0,0,-1, 0,1,0);
-      Matrix3d rotZ = new Matrix3d(0,-1,0, 1,0,0,  0,0,1);
-      Matrix3d rot = new Matrix3d();
-      rot.mul(rotX, rotZ);
-
-      System.out.println(rot);
-
-      targetToEE.setRotation(rot);
-      targetToEE.setTranslation(new Vector3d(-0.061, 0.13, 0.205));
+//      Transform3D targetToEE = new Transform3D();
+//      Matrix3d rotX = new Matrix3d(1,0,0,  0,0,-1, 0,1,0);
+//      Matrix3d rotZ = new Matrix3d(0,-1,0, 1,0,0,  0,0,1);
+//      Matrix3d rot = new Matrix3d();
+//      rot.mul(rotX, rotZ);
+//
+//      System.out.println(rot);
+//
+//      targetToEE.setRotation(rot);
+//      targetToEE.setTranslation(new Vector3d(-0.061, 0.13, 0.205));
 
       ReferenceFrame leftEEFrame=fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM);
       ReferenceFrame boardFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("boardFrame",leftEEFrame,targetToEE);
@@ -311,12 +301,37 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       return armJoints;
    }
 
-   //   public KinematicCalibrationWristLoopResidual getArmLoopResidualObject()
-//   {
-//      ArrayList<String> calJointNames = CalibUtil.toStringArrayList(getArmJoints());
-//      return new KinematicCalibrationWristLoopResidual(fullRobotModel, calJointNames, q);
-//   }
-//
+   public void optimizeData() {
+      KinematicCalibrationHeadLoopResidual function = new KinematicCalibrationHeadLoopResidual(fullRobotModel,true,intrinsic,calibGrid,metaData,q);
+
+      UnconstrainedLeastSquares optimizer = FactoryOptimization.leastSquaresLM(1e-3, true);
+
+      double input[] = new double[ function.getNumOfInputsN() ];
+
+      // give it an initial estimate for the translation
+      input[input.length-4]=-0.061;
+      input[input.length-3]=0.13;
+      input[input.length-2]=0.205;
+
+      optimizer.setFunction(function,null);
+      optimizer.initialize(input,1e-12,1e-12);
+
+      System.out.println("Initial optimziation error = "+optimizer.getFunctionValue());
+
+      UtilOptimize.process(optimizer, 500);
+
+      double found[] = optimizer.getParameters();
+
+      System.out.println("Final optimziation error =   "+optimizer.getFunctionValue());
+
+      java.util.List<String> jointNames = function.getCalJointNames();
+
+      targetToEE = KinematicCalibrationHeadLoopResidual.computeTargetToEE(found,jointNames.size());
+
+      for(int i=0;i<jointNames.size();i++)
+         qbias.put(jointNames.get(i), input[i]);
+   }
+
    public void loadData(String directory ) throws IOException
    {
       intrinsic = BoofMiscOps.loadXML("../DarpaRoboticsChallenge/data/calibration_images/intrinsic_ros.xml");
@@ -419,6 +434,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    {
       AtlasHeadLoopKinematicCalibrator calib = new AtlasHeadLoopKinematicCalibrator();
       calib.loadData("data/chessboard_joints_20131204");
+      calib.optimizeData();
 
       // calJointNames order is the prm order
 //      KinematicCalibrationWristLoopResidual residualFunc = calib.getArmLoopResidualObject();

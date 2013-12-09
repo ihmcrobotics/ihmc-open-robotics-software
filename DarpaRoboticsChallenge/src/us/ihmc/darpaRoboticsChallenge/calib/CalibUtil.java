@@ -2,22 +2,19 @@ package us.ihmc.darpaRoboticsChallenge.calib;
 
 import georegression.geometry.RotationMatrixGenerator;
 import georegression.struct.so.Rodrigues_F64;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CalibUtil
 {
@@ -65,6 +62,31 @@ public class CalibUtil
          if (qmap.containsKey(joint.getName()))
          {
             joint.setQ(qmap.get(joint.getName()));
+         }
+         else if (AtlasKinematicCalibrator.DEBUG)
+         {
+            System.out.println("model contain joints not in data " + joint.getName());
+            joint.setQ(0);
+         }
+      }
+
+   }
+
+   public static void setRobotModelFromData(SDFFullRobotModel fullRobotModel, Map<String, Double> qmap, Map<String, Double> qbias)
+   {
+      OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
+
+      for (int i = 0; i < joints.length; i++)
+      {
+         OneDoFJoint joint = joints[i];
+         if (qmap.containsKey(joint.getName()))
+         {
+            double bias = 0;
+            if( qbias.containsKey(joint.getName())) {
+               bias += qbias.get(joint.getName());
+            }
+
+            joint.setQ(qmap.get(joint.getName())+bias);
          }
          else if (AtlasKinematicCalibrator.DEBUG)
          {
