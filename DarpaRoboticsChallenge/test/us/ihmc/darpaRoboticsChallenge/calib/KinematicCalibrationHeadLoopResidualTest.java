@@ -3,7 +3,6 @@ package us.ihmc.darpaRoboticsChallenge.calib;
 import boofcv.alg.geo.PerspectiveOps;
 import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
 import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
-import boofcv.misc.BoofMiscOps;
 import boofcv.struct.calib.IntrinsicParameters;
 import georegression.struct.point.Point2D_F64;
 import org.ddogleg.optimization.FactoryOptimization;
@@ -26,10 +25,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
@@ -186,11 +182,6 @@ public class KinematicCalibrationHeadLoopResidualTest
       UnconstrainedLeastSquares optimizer = FactoryOptimization.leastSquaresLM(1e-3, true);
 
       double input[] = new double[ function.getNumOfInputsN() ];
-
-      for( int i = 0; i < input.length; i++ ) {
-         input[i] = 0;
-      }
-      System.arraycopy(targetToEE_param,0,input,input.length-targetToEE_param.length,targetToEE_param.length);
 
       optimizer.setFunction(function,null);
       optimizer.initialize(input,1e-12,1e-12);

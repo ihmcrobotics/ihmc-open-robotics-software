@@ -12,7 +12,10 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 import javax.media.j3d.Transform3D;
-import javax.vecmath.*;
+import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 import java.util.*;
 
 /**
@@ -82,20 +85,7 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
       for(int i=0;i<calJointNames.size();i++)
          qoffset.put(calJointNames.get(i), input[inputCounter++]);
 
-      // Apply rotation around Y to the nominal rotation
-      Vector3d tran = new Vector3d();
-
-      tran.set(input[inputCounter++],input[inputCounter++],input[inputCounter++]);
-      AxisAngle4d axisY = new AxisAngle4d(new Vector3d(0,1,0),input[inputCounter]);
-      Matrix3d matAxisY = new Matrix3d();
-      matAxisY.set(axisY);
-
-      Matrix3d rotFull = new Matrix3d();
-      rotFull.mul(matAxisY,TARGET_ROT_XY);
-
-      Transform3D targetToEE = new Transform3D();
-      targetToEE.setTranslation(tran);
-      targetToEE.setRotation(rotFull);
+      Transform3D targetToEE = computeTargetToEE(input,inputCounter);
 
       ReferenceFrame cameraFrame = fullRobotModel.getCameraFrame("stereo_camera_left");
       Transform3D imageToCamera = new Transform3D(new double[]{ 0,0,1,0,  -1,0,0,0,  0,-1,0,0,  0,0,0,1});
@@ -117,6 +107,25 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
 
          offset += observations.size()*2;
       }
+   }
+
+   public static Transform3D computeTargetToEE( double param[] , int offset ) {
+      // Apply rotation around Y to the nominal rotation
+      Vector3d tran = new Vector3d();
+
+      tran.set(param[offset],param[offset+1],param[offset+2]);
+      AxisAngle4d axisY = new AxisAngle4d(new Vector3d(0,1,0),param[offset+3]);
+      Matrix3d matAxisY = new Matrix3d();
+      matAxisY.set(axisY);
+
+      Matrix3d rotFull = new Matrix3d();
+      rotFull.mul(matAxisY,TARGET_ROT_XY);
+
+      Transform3D targetToEE = new Transform3D();
+      targetToEE.setTranslation(tran);
+      targetToEE.setRotation(rotFull);
+
+      return targetToEE;
    }
 
    private Transform3D computeKinematicsTargetToCamera(  ReferenceFrame cameraImageFrame , Transform3D targetToEE ) {
@@ -150,7 +159,12 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
          output[i*2 + offset + 1 ] = observedPixel.y - expectedPixel.y;
       }
    }
-   
+
+   public List<String> getCalJointNames()
+   {
+      return calJointNames;
+   }
+
    @Override
    public int getNumOfInputsN()
    {
