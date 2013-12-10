@@ -131,7 +131,7 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
       if (!networkProcessorSpawner.hasRunningProcesses())
       {
          networkProcessorSpawner.setInheritEnvironment(true);
-         networkProcessorSpawner.spawn("/home/unknownid/atlas/runNetworkProcessor.sh");
+         networkProcessorSpawner.spawn("/home/unknownid/atlas/runStandaloneNetworkProcessor.sh");
 
          try
          {
