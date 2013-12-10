@@ -84,7 +84,8 @@ public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
          }
       }
       
-      footstepPathCoordinator.setSpeed(footstepList.speed);
+      footstepPathCoordinator.setSwingTime(footstepList.swingTime);
+      footstepPathCoordinator.setTransferTime(footstepList.transferTime);
       footstepPathCoordinator.updatePath(footsteps);
    }
 

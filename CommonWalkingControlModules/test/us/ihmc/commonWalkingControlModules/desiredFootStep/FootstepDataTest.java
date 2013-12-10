@@ -107,7 +107,7 @@ public class FootstepDataTest
 
       // create test footsteps
       ArrayList<Footstep> sentFootsteps = createRandomFootsteps(50);
-      FootstepDataList footstepsData = convertFootstepsToFootstepData(sentFootsteps, null, random.nextDouble());
+      FootstepDataList footstepsData = convertFootstepsToFootstepData(sentFootsteps, null, random.nextDouble(), random.nextDouble());
  
       queueBasedStreamingDataProducer.queueDataToSend(footstepsData);
       ThreadTools.sleep(100);
@@ -188,7 +188,7 @@ public class FootstepDataTest
 
       // send test footstep path
       ArrayList<Footstep> sentFootsteps = createRandomFootsteps(50);
-      FootstepDataList footstepsData = convertFootstepsToFootstepData(sentFootsteps, null, random.nextDouble());
+      FootstepDataList footstepsData = convertFootstepsToFootstepData(sentFootsteps, null, random.nextDouble(), random.nextDouble());
 
       pathQueueBasedStreamingDataProducer.queueDataToSend(footstepsData);
       ThreadTools.sleep(100);
@@ -207,7 +207,7 @@ public class FootstepDataTest
 
       // send another footstep path
       ArrayList<Footstep> sentFootsteps2 = createRandomFootsteps(50);
-      footstepsData = convertFootstepsToFootstepData(sentFootsteps2, null, random.nextDouble());
+      footstepsData = convertFootstepsToFootstepData(sentFootsteps2, null, random.nextDouble(), random.nextDouble());
 
       pathQueueBasedStreamingDataProducer.queueDataToSend(footstepsData);
       sentFootsteps.addAll(sentFootsteps2);
@@ -377,9 +377,9 @@ public class FootstepDataTest
       }
    }
 
-   private static FootstepDataList convertFootstepsToFootstepData(ArrayList<Footstep> footsteps, TrajectoryParameters trajectoryParameters, double speed)
+   private static FootstepDataList convertFootstepsToFootstepData(ArrayList<Footstep> footsteps, TrajectoryParameters trajectoryParameters, double swingTime, double transferTime)
    {
-      FootstepDataList footstepsData = new FootstepDataList(trajectoryParameters, speed);
+      FootstepDataList footstepsData = new FootstepDataList(trajectoryParameters, swingTime, transferTime);
 
       for (Footstep footstep : footsteps)
       {

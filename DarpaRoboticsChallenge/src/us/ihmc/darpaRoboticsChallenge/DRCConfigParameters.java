@@ -10,6 +10,24 @@ public class DRCConfigParameters
 
 // When false and desired hand pose from the GUI is in world, the robot will hold the desired hand pose in world when walking. BE CAREFUL with that option! 
    public static final boolean HOLD_HANDS_IN_CHEST_FRAME_WHEN_WALKING = true;
+   
+   public static final double DEFAULT_SWING_TIME;
+   public static final double DEFAULT_TRANSFER_TIME;
+   
+   static
+   {
+      if (DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT)
+      {
+         DEFAULT_SWING_TIME = 1.5;
+         DEFAULT_TRANSFER_TIME = 1.5;
+      }
+      else 
+      {
+         DEFAULT_SWING_TIME = 0.6;
+         DEFAULT_TRANSFER_TIME = 0.2;
+      }
+   }
+   
 
    public static final boolean CORRUPT_SIMULATION_MODEL = false;
 
