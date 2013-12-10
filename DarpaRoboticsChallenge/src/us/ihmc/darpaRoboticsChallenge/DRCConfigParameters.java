@@ -124,6 +124,8 @@ public class DRCConfigParameters
 
    public static final int GAZEBO_VER = DRCLocalConfigParameters.GAZEBO_VER;
 
+   public static boolean LIDAR_ADJUSTMENT_ACTIVE = false;
+
    static
    {
       if (DRCLocalConfigParameters.USING_REAL_HEAD)
