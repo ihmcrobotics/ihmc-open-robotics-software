@@ -28,6 +28,7 @@ public class DRCObstacleCourseTrialsWalkingTaskTest
 
    private static final boolean createMovie = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
+   private static final boolean showGUI = KEEP_SCS_UP || createMovie;
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
@@ -64,7 +65,7 @@ public class DRCObstacleCourseTrialsWalkingTaskTest
       String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", fileName, selectedLocation, selectedEnvironment, checkNothingChanged, createMovie);
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", fileName, selectedLocation, selectedEnvironment, checkNothingChanged, showGUI, createMovie);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
 
@@ -93,7 +94,7 @@ public class DRCObstacleCourseTrialsWalkingTaskTest
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
       
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", fileName, selectedLocation, selectedEnvironment, checkNothingChanged, createMovie);
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", fileName, selectedLocation, selectedEnvironment, checkNothingChanged, showGUI, createMovie);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
 
