@@ -212,6 +212,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable swingAboveSupportAnkle = new DoubleYoVariable("swingAboveSupportAnkle", registry);
    private final BooleanYoVariable readyToGrabNextFootstep = new BooleanYoVariable("readyToGrabNextFootstep", registry);
 
+   private final DoubleYoVariable moveICPAwayDuringSwingDistance = new DoubleYoVariable("moveICPAwayDuringSwingDistance", registry);
    private final DoubleYoVariable moveICPAwayAtEndOfSwingDistance = new DoubleYoVariable("moveICPAwayAtEndOfSwingDistance", registry);
    private final DoubleYoVariable singleSupportTimeLeftBeforeShift = new DoubleYoVariable("singleSupportTimeLeftBeforeShift", registry);
    
@@ -443,8 +444,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       // TODO: Fix low level stuff so that we are truly controlling pelvis height and not CoM height.
       controlPelvisHeightInsteadOfCoMHeight.set(true);
       
-      moveICPAwayAtEndOfSwingDistance.set(0.06);   
-      singleSupportTimeLeftBeforeShift.set(0.5);
+      moveICPAwayDuringSwingDistance.set(0.03);   
+      moveICPAwayAtEndOfSwingDistance.set(0.08);   
+      singleSupportTimeLeftBeforeShift.set(0.3);
       
       footLoadThresholdToHoldPosition.set(0.2);
       
@@ -791,7 +793,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (transferToSide != null)
          {            
             FramePoint2d stanceFootLocation = new FramePoint2d(referenceFrames.getAnkleZUpFrame(transferToSide));
-            moveICPToInsideOfFootAtEndOfSwing(transferToSide.getOppositeSide(),  stanceFootLocation, 0.0, desiredICPLocal);
+            moveICPToInsideOfFootAtEndOfSwing(transferToSide.getOppositeSide(),  stanceFootLocation, swingTimeCalculationProvider.getValue(), 0.0, desiredICPLocal);
          }
          else
          {
@@ -1158,7 +1160,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          double swingTimeRemaining = swingTimeCalculationProvider.getValue() - stateMachine.timeInCurrentState();
          
          FramePoint2d transferToFootstepLocation = transferToFootstep.getFramePoint2dCopy();
-         moveICPToInsideOfFootAtEndOfSwing(supportSide, transferToFootstepLocation, swingTimeRemaining, desiredICPLocal);
+         moveICPToInsideOfFootAtEndOfSwing(supportSide, transferToFootstepLocation, swingTimeCalculationProvider.getValue(), swingTimeRemaining, desiredICPLocal);
          
          desiredICP.set(desiredICPLocal);
          desiredICPVelocity.set(desiredICPVelocityLocal);
@@ -2090,7 +2092,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    
    private final FramePoint2d stanceToSwingPoint = new FramePoint2d();
    private final FrameVector2d stanceToSwingVector = new FrameVector2d();
-   private void moveICPToInsideOfFootAtEndOfSwing(RobotSide supportSide, FramePoint2d upcomingFootstepLocation, double swingTimeRemaining, FramePoint2d desiredICPToMove)
+   private void moveICPToInsideOfFootAtEndOfSwing(RobotSide supportSide, FramePoint2d upcomingFootstepLocation, double swingTime, double swingTimeRemaining, FramePoint2d desiredICPToMove)
    {      
       swingTimeRemainingForICPMoveViz.set(swingTimeRemaining);
       
@@ -2115,13 +2117,39 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       distanceFromLineToOriginalICP.set(stanceToSwingVector.dot(stanceAnkleToOriginalICPVector));
       double timeToUseBeforeShift = singleSupportTimeLeftBeforeShift.getDoubleValue();
       if (timeToUseBeforeShift < 0.01) timeToUseBeforeShift = 0.01;
-      double percent = (1.0 - swingTimeRemaining / timeToUseBeforeShift);
-      percent = MathTools.clipToMinMax(percent,  0.0, 1.0);
-
-      double maxDistanceToMove = moveICPAwayAtEndOfSwingDistance.getDoubleValue();
-      maxDistanceToMove = MathTools.clipToMinMax(maxDistanceToMove, 0.0, stanceToSwingDistance/2.0);
       
-      amountToMoveICPAway.set(percent * maxDistanceToMove);
+      double deltaTime = swingTime-timeToUseBeforeShift;
+      double percent;
+      if (deltaTime <= 1e-7) percent = 1.0;
+      else
+      {
+         percent = (swingTime-swingTimeRemaining) / (deltaTime);
+      }
+      percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
+
+      double maxDistanceToMove = moveICPAwayDuringSwingDistance.getDoubleValue();
+      maxDistanceToMove = MathTools.clipToMinMax(maxDistanceToMove, 0.0, stanceToSwingDistance / 2.0);
+      double duringSwingDistance = (percent * maxDistanceToMove);
+      
+      if (swingTimeRemaining > timeToUseBeforeShift)
+      {
+         amountToMoveICPAway.set(duringSwingDistance);
+      }
+      else
+      {
+         percent = (1.0 - swingTimeRemaining / timeToUseBeforeShift);
+         percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
+         
+         maxDistanceToMove = moveICPAwayAtEndOfSwingDistance.getDoubleValue();
+         maxDistanceToMove = MathTools.clipToMinMax(maxDistanceToMove, 0.0, stanceToSwingDistance / 2.0);
+
+         maxDistanceToMove -= moveICPAwayDuringSwingDistance.getDoubleValue();
+         maxDistanceToMove = MathTools.clipToMinMax(maxDistanceToMove, 0.0, maxDistanceToMove);
+         
+         amountToMoveICPAway.set(duringSwingDistance + (percent * maxDistanceToMove));
+      }
+      
+      
       if (distanceFromLineToOriginalICP.getDoubleValue() > amountToMoveICPAway.getDoubleValue()) 
       {
          desiredICPToMove.changeFrame(desiredICP.getReferenceFrame());
