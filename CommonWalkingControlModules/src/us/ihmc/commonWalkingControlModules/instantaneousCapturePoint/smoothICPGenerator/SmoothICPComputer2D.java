@@ -167,7 +167,7 @@ public class SmoothICPComputer2D extends DoubleSupportFootCenterToToeICPComputer
    {
       if (transferToSide != null)
       {
-         footLocationTemp.setToZero(referenceFrames.getAnkleZUpFrame(transferToSide));
+         footLocationTemp.setToZero(referenceFrames.getSoleFrame(transferToSide));
          footLocationTemp.changeFrame(ReferenceFrame.getWorldFrame());
          
          footPlacementToPack.set(footLocationTemp);
