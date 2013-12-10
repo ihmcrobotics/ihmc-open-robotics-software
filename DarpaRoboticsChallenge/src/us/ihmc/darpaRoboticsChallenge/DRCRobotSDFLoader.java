@@ -85,6 +85,7 @@ public class DRCRobotSDFLoader
 
          case ATLAS_CALIBRATION :
             fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_calibration.sdf");
+            break;
             
          case ATLAS_RHOOK_HAND :
             fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_irobot_hands_and_rhook_addedmass.sdf");
