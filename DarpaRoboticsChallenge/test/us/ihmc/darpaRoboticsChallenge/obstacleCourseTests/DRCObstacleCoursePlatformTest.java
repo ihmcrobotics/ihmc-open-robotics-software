@@ -27,6 +27,7 @@ public class DRCObstacleCoursePlatformTest
 
    private static final boolean createMovie = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
+   private static final boolean showGUI = KEEP_SCS_UP || createMovie;
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
@@ -61,7 +62,7 @@ public class DRCObstacleCoursePlatformTest
 
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.SMALL_PLATFORM;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", "", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie);
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", "", selectedLocation, selectedEnvironment, checkNothingChanged, showGUI, createMovie);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
@@ -99,7 +100,7 @@ public class DRCObstacleCoursePlatformTest
 
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.MEDIUM_PLATFORM;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoMediumPlatformToesTouchingTest", "", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie);
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoMediumPlatformToesTouchingTest", "", selectedLocation, selectedEnvironment, checkNothingChanged, showGUI, createMovie);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
@@ -130,7 +131,7 @@ public class DRCObstacleCoursePlatformTest
       
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.ON_MEDIUM_PLATFORM;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoMediumPlatformToesTouchingTest", "", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie);
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoMediumPlatformToesTouchingTest", "", selectedLocation, selectedEnvironment, checkNothingChanged, showGUI, createMovie);
    
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();

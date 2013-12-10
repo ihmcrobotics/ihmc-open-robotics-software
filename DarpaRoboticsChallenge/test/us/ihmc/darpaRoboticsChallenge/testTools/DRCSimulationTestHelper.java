@@ -9,6 +9,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.atlas.visualization.SliderBoardFactory;
+import us.ihmc.atlas.visualization.WalkControllerSliderBoard;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.BlindWalkingPacket;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
@@ -19,6 +21,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCController;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCEnvironmentModel;
+import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseSimulation;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.robotSide.RobotSide;
@@ -44,17 +47,18 @@ public class DRCSimulationTestHelper
    
    private final boolean createMovie;
 
-   public DRCSimulationTestHelper(String name, String scriptFilename, DRCDemo01StartingLocation selectedLocation, DRCEnvironmentModel selectedEnvironment, boolean checkNothingChanged, boolean createMovie)
+   public DRCSimulationTestHelper(String name, String scriptFilename, DRCDemo01StartingLocation selectedLocation, DRCEnvironmentModel selectedEnvironment, boolean checkNothingChanged, boolean showGUI, boolean createMovie)
    {
-      this(name, scriptFilename, selectedLocation, selectedEnvironment, checkNothingChanged, createMovie, false);
+      this(name, scriptFilename, selectedLocation, selectedEnvironment, checkNothingChanged, showGUI, createMovie, false);
    }
    
-   public DRCSimulationTestHelper(String name, String scriptFilename, DRCDemo01StartingLocation selectedLocation, DRCEnvironmentModel selectedEnvironment, boolean checkNothingChanged, boolean createMovie, boolean createLoadOfContactPointForTheFeet)
+   public DRCSimulationTestHelper(String name, String scriptFilename, DRCDemo01StartingLocation selectedLocation, DRCEnvironmentModel selectedEnvironment, boolean checkNothingChanged, boolean showGUI, boolean createMovie, boolean createLoadOfContactPointForTheFeet)
    {
       networkObjectCommunicator = new ScriptedFootstepDataListObjectCommunicator("Team");
 
       this.checkNothingChanged = checkNothingChanged;
       this.createMovie = createMovie;
+      if (createMovie) showGUI = true;
       
       boolean startOutsidePen = false;
       boolean automaticallyStartSimulation = false;
@@ -62,7 +66,10 @@ public class DRCSimulationTestHelper
 
       boolean initializeEstimatorToActual = true;
       
-      drcSimulation = DRCDemo01.startDRCSim(scriptFilename, networkObjectCommunicator, selectedLocation, selectedEnvironment, initializeEstimatorToActual,
+      SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
+      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, sliderBoardFactory);
+      
+      drcSimulation = DRCDemo01.startDRCSim(scriptFilename, networkObjectCommunicator, selectedLocation, guiInitialSetup, selectedEnvironment, initializeEstimatorToActual,
             startOutsidePen, automaticallyStartSimulation, startDRCNetworkProcessor, createLoadOfContactPointForTheFeet);
       
       blockingSimulationRunner = new BlockingSimulationRunner(drcSimulation.getSimulationConstructionSet(), 60.0 * 10.0);

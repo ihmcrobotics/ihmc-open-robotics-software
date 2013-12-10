@@ -33,7 +33,8 @@ public class DRCObstacleCourseFlatTest
 
    private static final boolean createMovie = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
-
+   private static final boolean showGUI = KEEP_SCS_UP || createMovie;
+   
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
@@ -79,7 +80,7 @@ public class DRCObstacleCourseFlatTest
 
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", "", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie);
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", "", selectedLocation, selectedEnvironment, checkNothingChanged, showGUI, createMovie);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingUpToRamp(simulationConstructionSet);
@@ -313,7 +314,7 @@ public class DRCObstacleCourseFlatTest
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCRotatedStepsInTheAirTest", "", selectedLocation, selectedEnvironment, checkNothingChanged,
-              createMovie);
+              showGUI, createMovie);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
@@ -344,7 +345,7 @@ public class DRCObstacleCourseFlatTest
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingUpToRampShortStepsTest", "", selectedLocation, selectedEnvironment, checkNothingChanged,
-              createMovie);
+            showGUI, createMovie);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
@@ -375,7 +376,7 @@ public class DRCObstacleCourseFlatTest
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingUpToRampLongStepsTest", "", selectedLocation, selectedEnvironment, checkNothingChanged,
-              createMovie);
+            showGUI, createMovie);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
@@ -408,7 +409,7 @@ public class DRCObstacleCourseFlatTest
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingUpToRampLongStepsAndOccasionallyStraightKneesTest", "", selectedLocation, selectedEnvironment, checkNothingChanged,
-              createMovie);
+            showGUI, createMovie);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
@@ -443,7 +444,7 @@ public class DRCObstacleCourseFlatTest
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT_BUT_ALMOST_PI;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCTurningInPlaceAndPassingPITest", "", selectedLocation, selectedEnvironment,
-              checkNothingChanged, createMovie);
+            showGUI, checkNothingChanged, createMovie);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();

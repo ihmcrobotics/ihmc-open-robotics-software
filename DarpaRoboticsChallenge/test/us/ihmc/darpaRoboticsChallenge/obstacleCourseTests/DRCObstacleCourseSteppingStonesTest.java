@@ -27,6 +27,7 @@ public class DRCObstacleCourseSteppingStonesTest
 
    private static final boolean createMovie = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
+   private static final boolean showGUI = KEEP_SCS_UP || createMovie;
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
@@ -64,7 +65,7 @@ public class DRCObstacleCourseSteppingStonesTest
 
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.EASY_STEPPING_STONES;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingEasySteppingStonesTest", "", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie);
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingEasySteppingStonesTest", "", selectedLocation, selectedEnvironment, checkNothingChanged, showGUI, createMovie);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
