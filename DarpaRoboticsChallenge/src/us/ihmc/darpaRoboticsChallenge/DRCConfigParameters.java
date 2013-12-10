@@ -183,6 +183,9 @@ public class DRCConfigParameters
 
    // LIDAR Configuration - LIDAR filtering parameters now in LidarFilterParameters
    public static final double LIDAR_SPINDLE_VELOCITY = 5.1;
+   
+   /** LIDAR near scan configuration - enable or disable positioning the rotation origin on the near scan point cloud */
+   public static final boolean LIDAR_ENABLE_NEAR_SCAN_MOUSE_COLLISIONS = DRCLocalConfigParameters.LIDAR_ENABLE_NEAR_SCAN_MOUSE_COLLISIONS; 
 
    // the useful children are "Static Link Graphic" and "atlas", but you don't really need atlas. ~30% faster without atlas.
    public static final String[] SCS_LIDAR_NODES_TO_INTERSECT = new String[] {"Static Link Graphic"};
