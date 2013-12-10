@@ -2144,7 +2144,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          maxDistanceToMove = MathTools.clipToMinMax(maxDistanceToMove, 0.0, stanceToSwingDistance / 2.0);
 
          maxDistanceToMove -= moveICPAwayDuringSwingDistance.getDoubleValue();
-         maxDistanceToMove = MathTools.clipToMinMax(maxDistanceToMove, 0.0, maxDistanceToMove);
+         if (maxDistanceToMove < 0.0) maxDistanceToMove = 0.0;
          
          amountToMoveICPAway.set(duringSwingDistance + (percent * maxDistanceToMove));
       }
