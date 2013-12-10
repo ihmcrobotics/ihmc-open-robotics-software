@@ -30,7 +30,8 @@ public class RemoteAtlasVisualizer
 //      SliderBoardFactory sliderBoardFactory = GainControllerSliderBoard.getFactory();
       SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
 //      SliderBoardFactory sliderBoardFactory = PositionControllerSliderBoard.getFactory();
-      
+//      SliderBoardFactory sliderBoardFactory = JointAngleOffsetSliderBoard.getFactory();
+
       SliderBoardControllerListener scsYoVariablesUpdatedListener = new SliderBoardControllerListener(robotLoader, jointMap, bufferSize, sliderBoardFactory);
       scsYoVariablesUpdatedListener.addButton("requestStop", 1.0);
       
