@@ -44,18 +44,21 @@ public class HandJointAngleProvider implements ObjectConsumer<HandJointAnglePack
       synchronized (lock)
       {
          EnumMap<iRobotHandJointNameMinimal, OneDoFJoint> joints = handJoints.get(object.getRobotSide());
-
-         for (iRobotHandJointNameMinimal jointName : iRobotHandJointNameMinimal.values())
+         if(joints != null)
          {
-            if(jointName != null)
+            for (iRobotHandJointNameMinimal jointName : iRobotHandJointNameMinimal.values())
             {
-               joints.get(jointName).setQ(object.getJointAngle(jointName));
+               if(jointName != null)
+               {
+                  joints.get(jointName).setQ(object.getJointAngle(jointName));
+               }
             }
-         }
-
-         for (GraphicsUpdatable graphicsUpdatable : graphicsToUpdate)
-         {
-            graphicsUpdatable.update();
+            
+   
+            for (GraphicsUpdatable graphicsUpdatable : graphicsToUpdate)
+            {
+               graphicsUpdatable.update();
+            }
          }
       }
    }
