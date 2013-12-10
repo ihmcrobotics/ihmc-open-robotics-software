@@ -29,7 +29,6 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 
 public class ScriptedFootstepGenerator
 {
-   private static final double DEFAULT_SPEED = 0.5;
    private final SideDependentList<ContactablePlaneBody> bipedFeet;
 
    public ScriptedFootstepGenerator(ReferenceFrames referenceFrames, FullRobotModel fullRobotModel)
@@ -44,12 +43,12 @@ public class ScriptedFootstepGenerator
 
    public FootstepDataList generateFootstepsFromLocationsAndOrientations(RobotSide[] robotSides, double[][][] footstepLocationsAndOrientations)
    {
-      return generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations, DEFAULT_SPEED);
+      return generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations, 0.0, 0.0);
    }
    
-   public FootstepDataList generateFootstepsFromLocationsAndOrientations(RobotSide[] robotSides, double[][][] footstepLocationsAndOrientations, double speed)
+   public FootstepDataList generateFootstepsFromLocationsAndOrientations(RobotSide[] robotSides, double[][][] footstepLocationsAndOrientations, double swingTime, double transferTime)
    {
-      FootstepDataList footstepDataList = new FootstepDataList(new SimpleTwoWaypointTrajectoryParameters(), speed);
+      FootstepDataList footstepDataList = new FootstepDataList(new SimpleTwoWaypointTrajectoryParameters(), swingTime, transferTime);
 
       for (int i = 0; i < robotSides.length; i++)
       {

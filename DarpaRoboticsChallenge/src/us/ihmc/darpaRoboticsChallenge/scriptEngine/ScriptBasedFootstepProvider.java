@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.media.j3d.Transform3D;
-import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
