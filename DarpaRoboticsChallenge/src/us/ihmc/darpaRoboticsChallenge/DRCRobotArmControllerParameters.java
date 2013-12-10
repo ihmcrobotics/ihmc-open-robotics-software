@@ -27,7 +27,7 @@ public class DRCRobotArmControllerParameters implements ArmControllerParameters
    public double getArmJointspaceMaxIntegralError()
    {
       if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT)  return 0.0;
-      return 0.4; //0.0;
+      return 0.2; //0.0;
    }
 
    public double getArmJointspaceMaxAcceleration()
