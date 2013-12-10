@@ -303,6 +303,39 @@ public class DRCObstacleCourseFlatTest
    // }
    // }
 
+   
+   @Ignore("Added for fixing DRC-866. Does not work for fast walking")
+   @Test
+   public void testRotatedStepInTheAir() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
+      DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCRotatedStepsInTheAirTest", "", selectedLocation, selectedEnvironment, checkNothingChanged,
+              createMovie);
+
+      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
+      ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
+
+      setupCameraForWalkingUpToRamp(simulationConstructionSet);
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+
+      FootstepDataList footstepDataList = createFootstepsForRotatedStepInTheAir(scriptedFootstepGenerator);
+      drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
+
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(8.0);
+
+      drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
+      drcSimulationTestHelper.checkNothingChanged();
+
+      assertTrue(success);
+
+      BambooTools.reportTestFinishedMessage();
+   }
+   
    @Test
    public void testWalkingUpToRampWithShortSteps() throws SimulationExceededMaximumTimeException
    {
@@ -475,6 +508,25 @@ public class DRCObstacleCourseFlatTest
       drcSimulationTestHelper.setupCameraForUnitTest(scs, cameraFix, cameraPosition);
    }
 
+
+   private FootstepDataList createFootstepsForRotatedStepInTheAir(ScriptedFootstepGenerator scriptedFootstepGenerator)
+   {
+      double[][][] footstepLocationsAndOrientations = new double[][][]
+            {
+            {
+               {0.4, 0.10, 0.28},
+               {0.6, 0.0, 0.0, 0.8}
+            },
+            {
+               {0.48, -0.10329823409587219, 0.08400000000000005},
+               {-1.705361817083927E-23, 6.776242118837171E-21, 0.0025166698394258787, 0.9999968331814453}
+            }
+            };
+
+      RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.LEFT, footstepLocationsAndOrientations.length);
+
+      return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
+   }
 
 
    private FootstepDataList createFootstepsForWalkingUpToRampShortSteps(ScriptedFootstepGenerator scriptedFootstepGenerator)
