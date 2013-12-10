@@ -1,14 +1,12 @@
 package us.ihmc.darpaRoboticsChallenge.processManagement;
 
-import com.martiansoftware.jsap.*;
+import com.martiansoftware.jsap.JSAPException;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
 import us.ihmc.utilities.net.tcpServer.DisconnectedException;
 import us.ihmc.utilities.net.tcpServer.ReconnectingTCPServer;
-import us.ihmc.utilities.processManagement.JavaProcessSpawner;
+import us.ihmc.utilities.processManagement.ShellOutProcessSpawner;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -18,15 +16,10 @@ import java.net.Socket;
 
 public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runnable
 {
-   private JavaProcessSpawner networkProcessorSpawner = new JavaProcessSpawner(true);
+   private ShellOutProcessSpawner networkProcessorSpawner = new ShellOutProcessSpawner(true);
    private ReconnectingTCPServer commandServer;
 
    private final byte[] buffer;
-
-   private static String scsMachineIPAddress = DRCLocalConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
-   private static String rosMasterURI = DRCConfigParameters.ROS_MASTER_URI;
-
-   private static String[] javaArgs = new String[] {"-Xms2048m", "-Xmx2048m"};
 
    public DRCNetworkProcessorEnterpriseCloudDispatcherBackend()
    {
@@ -137,7 +130,8 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
    {
       if (!networkProcessorSpawner.hasRunningProcesses())
       {
-         networkProcessorSpawner.spawn(DRCNetworkProcessor.class, javaArgs, new String[] {"--ros-uri", rosMasterURI, "--scs-ip", scsMachineIPAddress});
+         networkProcessorSpawner.setInheritEnvironment(true);
+         networkProcessorSpawner.spawn("/home/unknownid/atlas/runNetworkProcessor.sh");
 
          try
          {
@@ -175,41 +169,6 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
 
    public static void main(String[] args) throws JSAPException
    {
-      JSAP jsap = new JSAP();
-
-      FlaggedOption scsIPFlag =
-         new FlaggedOption("scs-ip").setLongFlag("scs-ip").setShortFlag(JSAP.NO_SHORTFLAG).setRequired(false).setStringParser(JSAP.STRING_PARSER);
-      FlaggedOption rosURIFlag =
-         new FlaggedOption("ros-uri").setLongFlag("ros-uri").setShortFlag(JSAP.NO_SHORTFLAG).setRequired(false).setStringParser(JSAP.STRING_PARSER);
-
-      Switch largeHeapForProcessor = new Switch("large-heap").setLongFlag("large-heap").setShortFlag('h');
-
-      jsap.registerParameter(scsIPFlag);
-      jsap.registerParameter(rosURIFlag);
-      jsap.registerParameter(largeHeapForProcessor);
-
-      JSAPResult config = jsap.parse(args);
-
-      if (config.success())
-      {
-         if (config.getString(scsIPFlag.getID()) != null)
-         {
-            scsMachineIPAddress = config.getString(scsIPFlag.getID());
-         }
-
-         if (config.getString(rosURIFlag.getID()) != null)
-         {
-            rosMasterURI = config.getString(rosURIFlag.getID());
-         }
-
-         if (config.getBoolean(largeHeapForProcessor.getID()))
-         {
-            javaArgs = new String[] {"-Xms4096m", "-Xmx40960m"};
-         }
-      }
-
-      Thread t = new Thread(new DRCNetworkProcessorEnterpriseCloudDispatcherBackend());
-
-      t.start();
+      new Thread(new DRCNetworkProcessorEnterpriseCloudDispatcherBackend()).start();
    }
 }
