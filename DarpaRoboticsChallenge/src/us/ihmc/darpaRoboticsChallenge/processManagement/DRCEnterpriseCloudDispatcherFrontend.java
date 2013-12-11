@@ -13,6 +13,7 @@ import us.ihmc.utilities.gui.IHMCSwingTools;
 import us.ihmc.utilities.net.NetStateListener;
 import us.ihmc.utilities.net.tcpServer.DisconnectedException;
 import us.ihmc.utilities.net.tcpServer.ReconnectingTCPClient;
+import us.ihmc.utilities.processManagement.ExitListener;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 
 import javax.swing.*;
@@ -62,6 +63,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
    private JScrollPane robotModelScrollPane;
 
    private final JavaProcessSpawner uiSpawner = new JavaProcessSpawner(true);
+   private JButton spawnUIButton;
 
    public DRCEnterpriseCloudDispatcherFrontend()
    {
@@ -336,7 +338,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
       IHMCSwingTools.setNativeLookAndFeel();
 
       frame = new JFrame("DRC Networking Dispatcher");
-      frame.setSize(1100, 330);
+      frame.setSize(1150, 350);
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 //    frame.setAlwaysOnTop(true);
@@ -374,8 +376,8 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
       mainPanel.add(controlsPanel, c);
 
       JPanel panel = new JPanel();
-      JButton uiButton = new JButton("Start Operator UI");
-      uiButton.addActionListener(new ActionListener()
+      spawnUIButton = new JButton("Start Operator UI");
+      spawnUIButton.addActionListener(new ActionListener()
       {
          @Override
          public void actionPerformed(ActionEvent e)
@@ -383,10 +385,18 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
             String[] javaArgs = new String[]{"-Xms4096m", "-Xmx4096m"};
             String[] programArgs = new String[]{"-m", selectRobotModelRadioButtonGroup.getSelection().getActionCommand()};
 
-            uiSpawner.spawn(DRCOperatorUserInterface.class, javaArgs, programArgs);
+            uiSpawner.spawn(DRCOperatorUserInterface.class, javaArgs, programArgs, new ExitListener()
+            {
+               @Override
+               public void exited(int statusValue)
+               {
+                  spawnUIButton.setEnabled(true);
+               }
+            });
+            spawnUIButton.setEnabled(false);
          }
       });
-      panel.add(uiButton);
+      panel.add(spawnUIButton);
 
       c.gridy++;
       mainPanel.add(panel, c);
