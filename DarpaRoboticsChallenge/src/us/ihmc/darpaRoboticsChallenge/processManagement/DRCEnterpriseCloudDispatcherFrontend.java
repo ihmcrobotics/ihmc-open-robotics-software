@@ -6,6 +6,7 @@ import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
 import us.ihmc.utilities.gui.IHMCSwingTools;
 import us.ihmc.utilities.net.NetStateListener;
@@ -39,7 +40,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
    private static String controllerMachineIpAddress = DRCLocalConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
 
    private JFrame frame;
-   private JPanel netProcPanel, controllerPanel, selectControllerPanel;
+   private JPanel netProcPanel, controllerPanel, selectControllerPanel, selectRobotModelPanel;
 
    private JButton netProcStartButton, netProcStopButton, netProcRestartButton, connectNetProcConsoleButton;
    private final JLabel netProcRunningStatusLabel =
@@ -53,9 +54,10 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
    private final JLabel controllerConnectedStatusLabel =
       new JLabel("<html><body>Connected: <span style=\"color:red;font-style:italic;\">Disconnected</span></body></html>", JLabel.CENTER);
 
-   private ButtonGroup selectControllerRadioButtonGroup;
+   private ButtonGroup selectControllerRadioButtonGroup, selectRobotModelRadioButtonGroup;
    private JRadioButton atlasBDIControllerRadioButton, atlasControllerFactoryRadioButton;
    private final JTextArea netProcConsole, controllerConsole;
+   private JScrollPane robotModelScrollPane;
 
    public DRCEnterpriseCloudDispatcherFrontend()
    {
@@ -330,7 +332,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
       IHMCSwingTools.setNativeLookAndFeel();
 
       frame = new JFrame("DRC Networking Dispatcher");
-      frame.setSize(850, 230);
+      frame.setSize(1100, 230);
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 //    frame.setAlwaysOnTop(true);
@@ -342,7 +344,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
       GridBagConstraints c = new GridBagConstraints();
 
-      JPanel controlsPanel = new JPanel(new GridLayout(1, 3));
+      JPanel controlsPanel = new JPanel(new GridLayout(1, 4));
       ((GridLayout) controlsPanel.getLayout()).setHgap(5);
 
       setupNetProcPanel();
@@ -351,9 +353,12 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
       setupSelectControllerPanel();
 
+      setupSelectRobotModelPanel();
+
       controlsPanel.add(controllerPanel);
       controlsPanel.add(netProcPanel);
       controlsPanel.add(selectControllerPanel);
+      controlsPanel.add(robotModelScrollPane);
 
       c.gridx = 0;
       c.gridy = 0;
@@ -366,7 +371,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
       if (ENABLE_CONSOLE_OUTPUT)
       {
-         frame.setSize(850, 660);
+         frame.setSize(1100, 660);
          frame.setLocationRelativeTo(null);
 
          JTabbedPane consoleTabs = new JTabbedPane();
@@ -409,7 +414,14 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
          {
             try
             {
-               netProcClient.write(new byte[] {UnsignedByteTools.fromInt(0x00)});
+               if ((selectControllerRadioButtonGroup.getSelection() == null) || (selectRobotModelRadioButtonGroup.getSelection() == null))
+                  JOptionPane.showMessageDialog(frame, "Please complete the Controller/Robot Model configuration!", "Bad Deploy Configuration",
+                                                JOptionPane.ERROR_MESSAGE);
+               else
+               {
+                  DRCRobotModel model = DRCRobotModel.valueOf(selectRobotModelRadioButtonGroup.getSelection().getActionCommand());
+                  netProcClient.write(new byte[] {UnsignedByteTools.fromInt(0x00), UnsignedByteTools.fromInt(model.ordinal())});
+               }
             }
             catch (DisconnectedException e)
             {
@@ -473,12 +485,19 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
          {
             try
             {
-               if (selectControllerRadioButtonGroup.getSelection() == null)
-                  JOptionPane.showMessageDialog(frame, "Please select a Controller type!", "No Controller Selected", JOptionPane.ERROR_MESSAGE);
+               if ((selectControllerRadioButtonGroup.getSelection() == null) || (selectRobotModelRadioButtonGroup.getSelection() == null))
+                  JOptionPane.showMessageDialog(frame, "Please complete the Controller/Robot Model configuration!", "Bad Deploy Configuration",
+                                                JOptionPane.ERROR_MESSAGE);
                else if (selectControllerRadioButtonGroup.getSelection().getActionCommand().contains(BLUE_TEAM_ACTION_COMMAND))
-                  controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x00)});
+               {
+                  DRCRobotModel model = DRCRobotModel.valueOf(selectRobotModelRadioButtonGroup.getSelection().getActionCommand());
+                  controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x00), UnsignedByteTools.fromInt(model.ordinal())});
+               }
                else if (selectControllerRadioButtonGroup.getSelection().getActionCommand().contains(RED_TEAM_ACTION_COMMAND))
-                  controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x01)});
+               {
+                  DRCRobotModel model = DRCRobotModel.valueOf(selectRobotModelRadioButtonGroup.getSelection().getActionCommand());
+                  controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x01), UnsignedByteTools.fromInt(model.ordinal())});
+               }
             }
             catch (DisconnectedException e)
             {
@@ -509,6 +528,26 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
       controllerPanel.add(controllerRunningStatusLabel);
       controllerPanel.add(controllerStartButton);
       controllerPanel.add(controllerStopButton);
+   }
+
+   private void setupSelectRobotModelPanel()
+   {
+      selectRobotModelPanel = new JPanel(new GridLayout(DRCRobotModel.values().length + 1, 1));
+      robotModelScrollPane = new JScrollPane(selectRobotModelPanel);
+
+      selectRobotModelRadioButtonGroup = new ButtonGroup();
+
+      selectRobotModelPanel.add(new JLabel("<html><body style=\"margin-left: 32px;\"><h2>Select Robot Model</h2></body></html>"));
+
+      for (DRCRobotModel model : DRCRobotModel.values())
+      {
+         JRadioButton nextButton = new JRadioButton(model.name());
+         nextButton.setActionCommand(model.name());
+         nextButton.setHorizontalAlignment(AbstractButton.LEADING);
+         nextButton.setHorizontalTextPosition(AbstractButton.TRAILING);
+         selectRobotModelRadioButtonGroup.add(nextButton);
+         selectRobotModelPanel.add(nextButton);
+      }
    }
 
    private void setupSelectControllerPanel()
