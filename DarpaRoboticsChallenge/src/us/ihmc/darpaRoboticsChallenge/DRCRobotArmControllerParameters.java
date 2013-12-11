@@ -113,4 +113,10 @@ public class DRCRobotArmControllerParameters implements ArmControllerParameters
       return DRCConfigParameters.USE_INVERSE_KINEMATICS_TASKSPACE_CONTROL;
    }
 
+   @Override
+   public boolean doLowLevelPositionControl()
+   {
+      return DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT && DRCConfigParameters.USE_LOW_LEVEL_POSITION_CONTROL_FOR_HANDS;
+   }
+
 }

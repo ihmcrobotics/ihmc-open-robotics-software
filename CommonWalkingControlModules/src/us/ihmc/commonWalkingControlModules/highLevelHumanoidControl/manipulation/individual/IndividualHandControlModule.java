@@ -14,10 +14,12 @@ import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameter
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.SE3PDGains;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.AbstractJointSpaceHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.InverseKinematicsTaskspaceHandPositionControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.JointSpaceHandControlControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LoadBearingCylindricalHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LoadBearingPlaneHandControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LowLevelJointSpaceHandControlControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.ObjectManipulationState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.PointPositionHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TaskspaceHandDecoupledPositionOrientationControlState;
@@ -54,7 +56,6 @@ import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
-import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.YoVariableDoubleProvider;
 
@@ -82,7 +83,7 @@ public class IndividualHandControlModule
    private final Map<OneDoFJoint, Double> armJointPositionMap;
 
    private final TaskspaceHandPositionControlState taskSpacePositionControlState;
-   private final JointSpaceHandControlControlState jointSpaceHandControlState;
+   private final AbstractJointSpaceHandControlState jointSpaceHandControlState;
    private final LoadBearingCylindricalHandControlState loadBearingCylindricalState;
    private final ObjectManipulationState objectManipulationState;
    private final LoadBearingPlaneHandControlState loadBearingPlaneFingersBentBackState;
@@ -167,8 +168,16 @@ public class IndividualHandControlModule
       loadBearingPlaneFingersBentBackState = new LoadBearingPlaneHandControlState(namePrefix, IndividualHandControlState.LOAD_BEARING_PLANE_FINGERS_BENT_BACK, robotSide,
               momentumBasedController, fullRobotModel.getElevator(), endEffector, jacobianId, registry);
 
-      jointSpaceHandControlState = new JointSpaceHandControlControlState(namePrefix, IndividualHandControlState.JOINT_SPACE, robotSide, controlledJointsInJointSpaceState,
-            momentumBasedController, armControlParameters, controlDT, registry);
+      if(armControlParameters.doLowLevelPositionControl())
+      {
+         jointSpaceHandControlState = new LowLevelJointSpaceHandControlControlState(namePrefix, IndividualHandControlState.JOINT_SPACE, robotSide, controlledJointsInJointSpaceState,
+               momentumBasedController, armControlParameters, controlDT, registry);
+      }
+      else
+      {
+         jointSpaceHandControlState = new JointSpaceHandControlControlState(namePrefix, IndividualHandControlState.JOINT_SPACE, robotSide, controlledJointsInJointSpaceState,
+               momentumBasedController, armControlParameters, controlDT, registry);         
+      }
 
       objectManipulationState = new ObjectManipulationState(namePrefix, IndividualHandControlState.OBJECT_MANIPULATION, robotSide, momentumBasedController, jacobianId,
               toolBody, base, endEffector, dynamicGraphicObjectsListRegistry, parentRegistry);

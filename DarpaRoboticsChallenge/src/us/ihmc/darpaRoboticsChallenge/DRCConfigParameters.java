@@ -4,6 +4,8 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 
 public class DRCConfigParameters
 {
+   public static final boolean USE_LOW_LEVEL_POSITION_CONTROL_FOR_HANDS = true;
+   
    public static final boolean USE_RED_TEAM_CONTROLLER = false;
    public static final boolean USE_MANIPULATION_DECOUPLED_TASKSPACE_CONTROL = false;
    public static final boolean USE_INVERSE_KINEMATICS_TASKSPACE_CONTROL = false;
