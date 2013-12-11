@@ -471,7 +471,7 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    public double getHoldKpOrientation()
    {
       if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 100.0;
-      return 100.0;
+      return 200.0;
    }
    
    public double getHoldZeta()

@@ -128,6 +128,7 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
    private final SideDependentList<BooleanYoVariable> areFeetTrusted = new SideDependentList<BooleanYoVariable>();
    
    private final BooleanYoVariable imuDriftCompensationActivated = new BooleanYoVariable("imuDriftCompensationActivated", registry);
+   private final BooleanYoVariable isIMUDriftYawRateEstimationActivated = new BooleanYoVariable("isIMUDriftYawRateEstimationActivated", registry);
    private final BooleanYoVariable isIMUDriftYawRateEstimated = new BooleanYoVariable("isIMUDriftYawRateEstimated", registry);
    private final DoubleYoVariable alphaFilterIMUDrift = new DoubleYoVariable("alphaFilterIMUDrift", registry);
    private final DoubleYoVariable imuDriftYawRate = new DoubleYoVariable("estimatedIMUDriftYawRate", registry);
@@ -275,15 +276,16 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
       
       imuDriftCompensationActivated.set(false);
       isIMUDriftYawRateEstimated.set(false);
-      alphaFilterIMUDrift.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(16.0, estimatorDT));
-      alphaFilterFootAngularVelocity.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(16.0, estimatorDT));
-      alphaFilterFootAngularVelocityAverage.set(0.0);
+      isIMUDriftYawRateEstimationActivated.set(false);
+      alphaFilterIMUDrift.set(0.99);
+      alphaFilterFootAngularVelocity.set(0.99);
+      alphaFilterFootAngularVelocityAverage.set(0.99);
       imuDriftYawRate.set(0.0);
       imuDriftYawRateFiltered.reset();
       imuDriftYawRateFiltered.update();
       imuDriftYawAngle.set(0.0);
       rootJointYawAngleCorrected.set(0.0);
-      footAngularVelocityDifferenceThresholdToEstimateIMUDrift.set(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, 0.3);
+      footAngularVelocityDifferenceThresholdToEstimateIMUDrift.set(0.03, 0.03, 0.03);
       
       parentRegistry.addChild(registry);
 
@@ -383,6 +385,16 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
       }
    }
 
+   public void startIMUDriftEstimation()
+   {
+      isIMUDriftYawRateEstimationActivated.set(true);
+   }
+   
+   public void startIMUDriftCompensation()
+   {
+      imuDriftCompensationActivated.set(true);
+   }
+   
    public void initialize()
    {
       initializeRobotState();
@@ -400,7 +412,17 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
       updateFootOrientations();
       resetFootAngularVelocitiesFiltered();
       updateFootOrientations();
-      estimateIMUDriftYaw();
+      
+      if (isIMUDriftYawRateEstimationActivated.getBooleanValue())
+      {
+         isIMUDriftYawRateEstimated.set(true);
+         estimateIMUDriftYaw();
+      }
+      else
+      {
+         isIMUDriftYawRateEstimated.set(false);
+      }
+      
       if (imuDriftCompensationActivated.getBooleanValue())
          compensateIMUDriftYaw();
       
@@ -448,6 +470,14 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
    private void defaultActionIntoStates()
    {
       yoTime.add(estimatorDT); //Hack to have a yoTime for the state machine
+      
+      if (!isIMUDriftYawRateEstimationActivated.getBooleanValue())
+      {
+         resetFootAngularVelocitiesFiltered();
+         updateFootOrientations();
+         resetFootAngularVelocitiesFiltered();
+         isIMUDriftYawRateEstimated.set(false);
+      }
       
       updateFootOrientations();
 
@@ -670,10 +700,14 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
          boolean isAngularVelocityXLowEnough = Math.abs(footAngularVelocityDifference.getX()) < footAngularVelocityDifferenceThresholdToEstimateIMUDrift.getX();
          boolean isAngularVelocityYLowEnough = Math.abs(footAngularVelocityDifference.getY()) < footAngularVelocityDifferenceThresholdToEstimateIMUDrift.getY();
          boolean isAngularVelocityZLowEnough = Math.abs(footAngularVelocityDifference.getZ()) < footAngularVelocityDifferenceThresholdToEstimateIMUDrift.getZ();
-         if (isAngularVelocityXLowEnough && isAngularVelocityYLowEnough && isAngularVelocityZLowEnough)
+         if (isIMUDriftYawRateEstimationActivated.getBooleanValue() && isAngularVelocityXLowEnough && isAngularVelocityYLowEnough && isAngularVelocityZLowEnough)
          {
             isIMUDriftYawRateEstimated.set(true);
             estimateIMUDriftYaw();
+         }
+         else
+         {
+            isIMUDriftYawRateEstimated.set(false);
          }
       }
 
@@ -909,6 +943,19 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
    {
       imuDriftYawRate.set(footAngularVelocityAverageFiltered.getZ());
       imuDriftYawRateFiltered.update();
+
+      imuDriftYawAngle.add(imuDriftYawRateFiltered.getDoubleValue() * estimatorDT);
+      imuDriftYawAngle.set(AngleTools.trimAngleMinusPiToPi(imuDriftYawAngle.getDoubleValue()));
+
+      rootJoint.packRotation(rootJointYawPitchRoll);
+      rootJointYawPitchRoll[0] -= imuDriftYawAngle.getDoubleValue();
+      rootJointYawPitchRoll[0] = AngleTools.trimAngleMinusPiToPi(rootJointYawPitchRoll[0]);
+      rootJointYawAngleCorrected.set(rootJointYawPitchRoll[0]);
+
+      rootJoint.packJointTwist(rootJointTwist);
+      rootJointTwist.packAngularPart(rootJointAngularVelocity);
+      rootJointAngularVelocity.changeFrame(worldFrame);
+      rootJointYawRateCorrected.set(rootJointAngularVelocity.getZ() - imuDriftYawRateFiltered.getDoubleValue());
    }
    
    private final double[] rootJointYawPitchRoll = new double[]{0.0, 0.0, 0.0};
@@ -917,9 +964,6 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
    
    private void compensateIMUDriftYaw()
    {
-      imuDriftYawAngle.add(imuDriftYawRateFiltered.getDoubleValue() * estimatorDT);
-      imuDriftYawAngle.set(AngleTools.trimAngleMinusPiToPi(imuDriftYawAngle.getDoubleValue()));
-      
       rootJoint.packRotation(rootJointYawPitchRoll);
       rootJointYawPitchRoll[0] -= imuDriftYawAngle.getDoubleValue();
       rootJointYawPitchRoll[0] = AngleTools.trimAngleMinusPiToPi(rootJointYawPitchRoll[0]);
