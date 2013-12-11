@@ -7,11 +7,13 @@ import com.martiansoftware.jsap.JSAPResult;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.userInterface.DRCOperatorUserInterface;
 import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
 import us.ihmc.utilities.gui.IHMCSwingTools;
 import us.ihmc.utilities.net.NetStateListener;
 import us.ihmc.utilities.net.tcpServer.DisconnectedException;
 import us.ihmc.utilities.net.tcpServer.ReconnectingTCPClient;
+import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
@@ -58,6 +60,8 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
    private JRadioButton atlasBDIControllerRadioButton, atlasControllerFactoryRadioButton;
    private final JTextArea netProcConsole, controllerConsole;
    private JScrollPane robotModelScrollPane;
+
+   private final JavaProcessSpawner uiSpawner = new JavaProcessSpawner(true);
 
    public DRCEnterpriseCloudDispatcherFrontend()
    {
@@ -332,7 +336,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
       IHMCSwingTools.setNativeLookAndFeel();
 
       frame = new JFrame("DRC Networking Dispatcher");
-      frame.setSize(1100, 230);
+      frame.setSize(1100, 330);
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 //    frame.setAlwaysOnTop(true);
@@ -368,6 +372,24 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
       c.ipadx = 180;
       c.ipady = 200;
       mainPanel.add(controlsPanel, c);
+
+      JPanel panel = new JPanel();
+      JButton uiButton = new JButton("Start Operator UI");
+      uiButton.addActionListener(new ActionListener()
+      {
+         @Override
+         public void actionPerformed(ActionEvent e)
+         {
+            String[] javaArgs = new String[]{"-Xms4096m", "-Xmx4096m"};
+            String[] programArgs = new String[]{"-m", selectRobotModelRadioButtonGroup.getSelection().getActionCommand()};
+
+            uiSpawner.spawn(DRCOperatorUserInterface.class, javaArgs, programArgs);
+         }
+      });
+      panel.add(uiButton);
+
+      c.gridy++;
+      mainPanel.add(panel, c);
 
       if (ENABLE_CONSOLE_OUTPUT)
       {
