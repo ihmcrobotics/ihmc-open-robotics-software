@@ -24,11 +24,10 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.GainCalculator;
 import com.yobotics.simulationconstructionset.util.PIDController;
 import com.yobotics.simulationconstructionset.util.math.filter.RateLimitedYoVariable;
-import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
 
 
-public class JointSpaceHandControlControlState extends State<IndividualHandControlState>
+public class JointSpaceHandControlControlState extends AbstractJointSpaceHandControlState
 {
    private final OneDoFJoint[] oneDoFJoints;
    private final LinkedHashMap<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator> trajectories;

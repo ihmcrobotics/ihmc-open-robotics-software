@@ -23,4 +23,7 @@ public interface ArmControllerParameters
    public abstract String[] getDefaultDecoupledArmControlHandOrientationJointNames(RobotSide robotSide);
    public abstract String[] getDefaultDecoupledArmControlHandPositionJointNames(RobotSide robotSide);
    public abstract String[] getDefaultDecoupledArmControlHandJointspaceJointNames(RobotSide robotSide);
+   
+   
+   public abstract boolean doLowLevelPositionControl();
 }
