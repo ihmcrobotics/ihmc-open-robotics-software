@@ -13,6 +13,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.GroundContactPoint;
 import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.perturbance.GroundContactPointsSlipper;
 
@@ -27,6 +28,7 @@ public class SlipOnNextStepPerturber extends ModularRobotController
    private final BooleanYoVariable slipNextStep;
    private final DoubleYoVariable slipAfterTimeDelta, touchdownTimeForSlip;
    private final YoFrameVector amountToSlipNextStep;
+   private final YoFrameOrientation rotationToSlipNextStep;
 
    public SlipOnNextStepPerturber(SDFRobot robot, RobotSide robotSide)
    {
@@ -39,6 +41,7 @@ public class SlipOnNextStepPerturber extends ModularRobotController
       this.slipNextStep = new BooleanYoVariable(sideString + "SlipNextStep", registry);
 
       amountToSlipNextStep = new YoFrameVector(sideString + "AmountToSlipNextStep", ReferenceFrame.getWorldFrame(), registry);
+      rotationToSlipNextStep = new YoFrameOrientation(sideString + "RotationToSlipNextStep", ReferenceFrame.getWorldFrame(), registry);
       slipState = new EnumYoVariable<SlipState>(sideString + "SlipState", registry, SlipState.class);
       slipState.set(SlipState.NOT_SLIPPING);
 
@@ -70,6 +73,11 @@ public class SlipOnNextStepPerturber extends ModularRobotController
    {
       this.amountToSlipNextStep.set(amountToSlipNextStep);
    }
+   
+   public void setRotationToSlipNextStep(double yaw, double pitch, double roll) 
+   {
+      rotationToSlipNextStep.setYawPitchRoll(yaw, pitch, roll);
+   }
 
    public void doControl()
    {
@@ -100,7 +108,7 @@ public class SlipOnNextStepPerturber extends ModularRobotController
             if (robot.getTime() > touchdownTimeForSlip.getDoubleValue() + slipAfterTimeDelta.getDoubleValue())
             {
                slipState.set(SlipState.SLIPPING);
-               startSlipping(amountToSlipNextStep.getVector3dCopy());
+               startSlipping(amountToSlipNextStep.getVector3dCopy(), rotationToSlipNextStep.getYawPitchRoll());
             }
 
             break;
@@ -127,12 +135,13 @@ public class SlipOnNextStepPerturber extends ModularRobotController
          }
       }
    }
-
-   private void startSlipping(Vector3d slipAmount)
+   
+   private void startSlipping(Vector3d slipAmount, double[] yawPitchRoll)
    {
       groundContactPointsSlipper.setDoSlip(true);
       groundContactPointsSlipper.setPercentToSlipPerTick(0.01);
       groundContactPointsSlipper.setSlipAmount(slipAmount);
+      groundContactPointsSlipper.setSlipRotation(yawPitchRoll);
    }
 
    private boolean footTouchedDown()
