@@ -15,6 +15,8 @@ public class AtlasWirstBasedDrillDetector
    int countWindow = 0;
    double data[];
    double magnitude[];
+   
+   boolean detected = false;
 
    GeneralPurposeFFT_F64_1D fft;
 
@@ -50,8 +52,6 @@ public class AtlasWirstBasedDrillDetector
    public boolean addMeasurement(double measurement)
    {
 
-      boolean detected = false;
-
       data[count++] = measurement;
       if (count >= windowSize)
       {
@@ -70,6 +70,8 @@ public class AtlasWirstBasedDrillDetector
 
          if (countWindow >= numWindows)
          {
+            countWindow = 0;
+            detected = false;
             for (int j = 0; j < windowSize; j++)
             {
                magnitude[j] /= numWindows;
@@ -77,8 +79,9 @@ public class AtlasWirstBasedDrillDetector
 
             double stdev = computeStdev(magnitude, windowSize * 3 / 8, windowSize * 5 / 8);
 
-            if (stdev > threshold)
+            if (stdev > threshold) {
                detected = true;
+            }
 
             for (int j = 0; j < windowSize; j++)
             {
