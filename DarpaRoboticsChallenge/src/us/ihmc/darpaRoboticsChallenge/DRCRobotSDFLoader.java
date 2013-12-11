@@ -67,7 +67,7 @@ public class DRCRobotSDFLoader
         	 break;
          case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXYZ:
     	 	 fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_irobot_hands_addedmass_comxyz.sdf");
-        	 break;
+        	 break; 
 
          case ATLAS_IHMC_PARAMETERS :
             throw new RuntimeException("Fixme: redo atlas_ihmc_parameters.sdf based on new models");
@@ -95,7 +95,10 @@ public class DRCRobotSDFLoader
             fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_hook_hands_addedmass.sdf");
             
             break;
-
+            
+         case DRC_TASK_HOSE:
+            fileInputStream = myClass.getResourceAsStream("models/GFE/drc_task_hose.sdf");
+            break;
          default :
             throw new RuntimeException("DRCRobotSDFLoader: Unimplemented enumeration case : " + selectedModel);
       }
