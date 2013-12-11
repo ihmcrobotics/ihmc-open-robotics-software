@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
@@ -11,6 +12,7 @@ import us.ihmc.atlas.PPSTimestampOffsetProvider;
 import us.ihmc.atlas.RealRobotPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCNetClassList;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotDataReceiver;
@@ -216,6 +218,12 @@ public class DRCNetworkProcessor
             .setStringParser(JSAP.STRING_PARSER);
       Switch simulateController = new Switch("simulate-controller").setShortFlag('d').setLongFlag(JSAP.NO_LONGFLAG);
 
+      FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true)
+            .setStringParser(JSAP.STRING_PARSER);
+      
+      robotModel.setHelp("Robot models: " + Arrays.toString(DRCRobotModel.values()));
+      jsap.registerParameter(robotModel);
+      
       jsap.registerParameter(scsIPFlag);
       jsap.registerParameter(rosURIFlag);
       jsap.registerParameter(simulateController);
@@ -233,6 +241,19 @@ public class DRCNetworkProcessor
          {
             rosMasterURI = config.getString(rosURIFlag.getID());
          }
+         
+         try
+         {
+            DRCRobotModel model = DRCRobotModel.valueOf(config.getString("robotModel"));
+            DRCLocalConfigParameters.robotModelToUse = model;
+         }
+         catch(IllegalArgumentException e)
+         {
+            System.err.println("Incorrect robot model " + config.getString("robotModel"));
+            System.out.println(jsap.getHelp());
+            return;
+         }
+         
 
          if (config.getBoolean(simulateController.getID()))
          {
@@ -249,7 +270,9 @@ public class DRCNetworkProcessor
       }
       else
       {
-         new DRCNetworkProcessor(new URI(rosMasterURI));
+         System.err.println("Invalid parameters");
+         System.out.println(jsap.getHelp());
+         return;
       }
    }
 }
