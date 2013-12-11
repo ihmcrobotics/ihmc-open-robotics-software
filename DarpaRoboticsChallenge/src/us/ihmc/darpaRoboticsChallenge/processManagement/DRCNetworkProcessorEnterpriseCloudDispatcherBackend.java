@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.processManagement;
 import com.martiansoftware.jsap.*;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
@@ -27,6 +28,8 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
    private static String rosMasterURI = DRCConfigParameters.ROS_MASTER_URI;
 
    private static String[] javaArgs = new String[] {"-Xms2048m", "-Xmx2048m"};
+
+   private static DRCRobotModel robotModel;
 
    public DRCNetworkProcessorEnterpriseCloudDispatcherBackend()
    {
@@ -53,6 +56,8 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
             switch (UnsignedByteTools.toInt(buffer[0]))
             {
                case 0x00 :
+                  commandServer.read(1);
+                  robotModel = DRCRobotModel.values()[UnsignedByteTools.toInt(buffer[1])];
                   spawnNetworkProcessor();
 
                   break;
@@ -137,7 +142,7 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
    {
       if (!networkProcessorSpawner.hasRunningProcesses())
       {
-         networkProcessorSpawner.spawn(DRCNetworkProcessor.class, javaArgs, new String[] {"--ros-uri", rosMasterURI, "--scs-ip", scsMachineIPAddress});
+         networkProcessorSpawner.spawn(DRCNetworkProcessor.class, javaArgs, new String[] {"--ros-uri", rosMasterURI, "--scs-ip", scsMachineIPAddress, "-m", robotModel.toString()});
 
          try
          {
