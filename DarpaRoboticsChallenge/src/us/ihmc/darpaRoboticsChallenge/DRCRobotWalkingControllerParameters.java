@@ -528,4 +528,14 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    {
       return DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT;
    }
+
+   public double getDefaultTransferTime()
+   {
+      return DRCConfigParameters.DEFAULT_TRANSFER_TIME;
+   }
+
+   public double getDefaultSwingTime()
+   {
+      return DRCConfigParameters.DEFAULT_SWING_TIME;
+   }
 }

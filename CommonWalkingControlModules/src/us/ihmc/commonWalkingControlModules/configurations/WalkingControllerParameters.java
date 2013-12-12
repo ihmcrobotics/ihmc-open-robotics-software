@@ -101,4 +101,7 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract boolean doPrepareManipulationForLocomotion();
 
    public abstract boolean isRunningOnRealRobot();
+
+   public abstract double getDefaultTransferTime();
+   public abstract double getDefaultSwingTime();
 }

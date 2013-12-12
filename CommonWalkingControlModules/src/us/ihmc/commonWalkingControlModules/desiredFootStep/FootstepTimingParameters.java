@@ -1,44 +1,46 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+
 public class FootstepTimingParameters
 {
-   private double footstepPathSwingTime = 0.6;
-   private double slowBlindWalkingSwingTime = 0.8;
-   private double blindWalkingInMudSwingTime = 2.2;
+   private double footstepPathSwingTime;
+   private double slowBlindWalkingSwingTime;
+   private double blindWalkingInMudSwingTime;
 
-   private double footstepPathTransferTime = 0.25;
-   private double slowBlindWalkingTransferTime = 0.35;
-   private double blindWalkingInMudTransferTime = 0.6;
+   private double footstepPathTransferTime;
+   private double slowBlindWalkingTransferTime;
+   private double blindWalkingInMudTransferTime;
    
-   public FootstepTimingParameters()
+   private FootstepTimingParameters()
    {
 
    }
 
-   public static FootstepTimingParameters createForSlowWalkingOnRobot()
+   public static FootstepTimingParameters createForSlowWalkingOnRobot(WalkingControllerParameters walkingControllerParameters)
    {
       FootstepTimingParameters footstepTimingParameters = new FootstepTimingParameters();
 
-      footstepTimingParameters.setFootstepPathSwingTime(1.5);
-      footstepTimingParameters.setSlowBlindWalkingSwingTime(1.5);
-      footstepTimingParameters.setBlindWalkingInMudSwingTime(1.5);
+      footstepTimingParameters.setFootstepPathSwingTime(walkingControllerParameters.getDefaultSwingTime());
+      footstepTimingParameters.setSlowBlindWalkingSwingTime(walkingControllerParameters.getDefaultSwingTime());
+      footstepTimingParameters.setBlindWalkingInMudSwingTime(walkingControllerParameters.getDefaultSwingTime());
 
-      footstepTimingParameters.setFootstepPathTransferTime(1.5);
-      footstepTimingParameters.setSlowBlindWalkingTransferTime(1.5);
-      footstepTimingParameters.setBlindWalkingInMudTransferTime(1.5);
+      footstepTimingParameters.setFootstepPathTransferTime(walkingControllerParameters.getDefaultTransferTime());
+      footstepTimingParameters.setSlowBlindWalkingTransferTime(walkingControllerParameters.getDefaultTransferTime());
+      footstepTimingParameters.setBlindWalkingInMudTransferTime(walkingControllerParameters.getDefaultTransferTime());
 
       return footstepTimingParameters;
    }
 
-   public static FootstepTimingParameters createForFastWalkingInSimulation()
+   public static FootstepTimingParameters createForFastWalkingInSimulation(WalkingControllerParameters walkingControllerParameters)
    {
       FootstepTimingParameters footstepTimingParameters = new FootstepTimingParameters();
 
-      footstepTimingParameters.setFootstepPathSwingTime(0.6);
+      footstepTimingParameters.setFootstepPathSwingTime(walkingControllerParameters.getDefaultSwingTime());
       footstepTimingParameters.setSlowBlindWalkingSwingTime(0.8);
       footstepTimingParameters.setBlindWalkingInMudSwingTime(2.2);
 
-      footstepTimingParameters.setFootstepPathTransferTime(0.25);
+      footstepTimingParameters.setFootstepPathTransferTime(walkingControllerParameters.getDefaultTransferTime());
       footstepTimingParameters.setSlowBlindWalkingTransferTime(0.35);
       footstepTimingParameters.setBlindWalkingInMudTransferTime(0.6);
 
@@ -123,4 +125,19 @@ public class FootstepTimingParameters
       this.blindWalkingInMudTransferTime = blindWalkingInMudTransferTime;
    }
 
+   @Deprecated
+   public static FootstepTimingParameters createForFastWalkingInSimulationForTest()
+   {
+      FootstepTimingParameters footstepTimingParameters = new FootstepTimingParameters();
+
+      footstepTimingParameters.setFootstepPathSwingTime(0.6);
+      footstepTimingParameters.setSlowBlindWalkingSwingTime(0.8);
+      footstepTimingParameters.setBlindWalkingInMudSwingTime(2.2);
+
+      footstepTimingParameters.setFootstepPathTransferTime(0.3);
+      footstepTimingParameters.setSlowBlindWalkingTransferTime(0.35);
+      footstepTimingParameters.setBlindWalkingInMudTransferTime(0.6);
+
+      return footstepTimingParameters;
+   }
 }
