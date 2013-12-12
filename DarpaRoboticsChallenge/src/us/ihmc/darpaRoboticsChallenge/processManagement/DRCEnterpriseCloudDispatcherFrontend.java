@@ -382,18 +382,24 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
          @Override
          public void actionPerformed(ActionEvent e)
          {
-            String[] javaArgs = new String[]{"-Xms4096m", "-Xmx4096m"};
-            String[] programArgs = new String[]{"-m", selectRobotModelRadioButtonGroup.getSelection().getActionCommand()};
-
-            uiSpawner.spawn(DRCOperatorUserInterface.class, javaArgs, programArgs, new ExitListener()
+            if (selectRobotModelRadioButtonGroup.getSelection() == null)
+               JOptionPane.showMessageDialog(frame, "Please complete the Controller/Robot Model configuration!", "Bad Deploy Configuration",
+                                             JOptionPane.ERROR_MESSAGE);
+            else
             {
-               @Override
-               public void exited(int statusValue)
+               String[] javaArgs = new String[] {"-Xms4096m", "-Xmx4096m"};
+               String[] programArgs = new String[] {"-m", selectRobotModelRadioButtonGroup.getSelection().getActionCommand()};
+
+               uiSpawner.spawn(DRCOperatorUserInterface.class, javaArgs, programArgs, new ExitListener()
                {
-                  spawnUIButton.setEnabled(true);
-               }
-            });
-            spawnUIButton.setEnabled(false);
+                  @Override
+                  public void exited(int statusValue)
+                  {
+                     spawnUIButton.setEnabled(true);
+                  }
+               });
+               spawnUIButton.setEnabled(false);
+            }
          }
       });
       panel.add(spawnUIButton);
