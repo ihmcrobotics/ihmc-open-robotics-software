@@ -6,75 +6,87 @@ import us.ihmc.robotSide.RobotSide;
 
 public class DRCRobotArmControllerParameters implements ArmControllerParameters
 {
+   private final boolean runningOnRealRobot;
+   
+   public DRCRobotArmControllerParameters()
+   {
+      this(false);
+   }
+   
+   public DRCRobotArmControllerParameters(boolean runningOnRealRobot)
+   {
+      this.runningOnRealRobot = runningOnRealRobot;
+   }
+   
    public double getArmJointspaceKp()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT)  return 80.0;
+      if (!runningOnRealRobot)  return 80.0;
       return 80.0; 
    }
 
    public double getArmJointspaceZeta()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT)  return 0.6;
+      if (!runningOnRealRobot)  return 0.6;
       return 0.2;  // Lots of natural damping in the arms. Don't need to damp the controllers.
    }
 
    public double getArmJointspaceKi()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT)  return 0.0;
+      if (!runningOnRealRobot)  return 0.0;
       return 20.0; //0.0 
    }
 
    public double getArmJointspaceMaxIntegralError()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT)  return 0.0;
+      if (!runningOnRealRobot)  return 0.0;
       return 0.2; //0.0;
    }
 
    public double getArmJointspaceMaxAcceleration()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT)  return Double.POSITIVE_INFINITY;
+      if (!runningOnRealRobot)  return Double.POSITIVE_INFINITY;
       return 20.0;
    }
 
    public double getArmJointspaceMaxJerk()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT)  return Double.POSITIVE_INFINITY;
+      if (!runningOnRealRobot)  return Double.POSITIVE_INFINITY;
       return 100.0;
    }
 
    public double getArmTaskspaceKp()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT)  return 100.0;
+      if (!runningOnRealRobot)  return 100.0;
       return 100.0; 
    }
 
    public double getArmTaskspaceZeta()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT)  return 1.0;
+      if (!runningOnRealRobot)  return 1.0;
       return 0.6; 
    }
 
    public double getArmTaskspaceKi()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT)  return 0.0;
+      if (!runningOnRealRobot)  return 0.0;
       return 0.0; 
    }
 
    public double getArmTaskspaceMaxIntegralError()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT)  return 0.0;
+      if (!runningOnRealRobot)  return 0.0;
       return 0.0; 
    }
 
    public double getArmTaskspaceMaxAcceleration()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT)  return Double.POSITIVE_INFINITY;
+      if (!runningOnRealRobot)  return Double.POSITIVE_INFINITY;
       return 10.0; 
    }
 
    public double getArmTaskspaceMaxJerk()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT)  return Double.POSITIVE_INFINITY;
+      if (!runningOnRealRobot)  return Double.POSITIVE_INFINITY;
       return 100.0; 
    }
 
@@ -116,7 +128,7 @@ public class DRCRobotArmControllerParameters implements ArmControllerParameters
    @Override
    public boolean doLowLevelPositionControl()
    {
-      return DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT && DRCConfigParameters.USE_LOW_LEVEL_POSITION_CONTROL_FOR_HANDS;
+      return runningOnRealRobot && DRCConfigParameters.USE_LOW_LEVEL_POSITION_CONTROL_FOR_HANDS;
    }
 
 }

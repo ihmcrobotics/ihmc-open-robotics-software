@@ -25,12 +25,21 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 public class DRCRobotWalkingControllerParameters implements WalkingControllerParameters
 {   
+   private final boolean runningOnRealRobot;
+   
    private final SideDependentList<Transform3D> handControlFramesWithRespectToFrameAfterWrist = new SideDependentList<Transform3D>();
    private final SideDependentList<Transform3D> handPosesWithRespectToChestFrame = new SideDependentList<Transform3D>();
    private final double minElbowRollAngle = 0.5;
 
    public DRCRobotWalkingControllerParameters()
    {
+      this(false);
+   }
+   
+   public DRCRobotWalkingControllerParameters(boolean runningOnRealRobot)
+   {
+      this.runningOnRealRobot = runningOnRealRobot;
+      
       for(RobotSide robotSide : RobotSide.values)
       {
          Transform3D rotationPart = new Transform3D();
@@ -319,19 +328,19 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
 
    public double getCaptureKpParallelToMotion()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 1.0;
+      if (!runningOnRealRobot) return 1.0;
       return 1.0; 
    }
 
    public double getCaptureKpOrthogonalToMotion()
    {      
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 1.0; 
+      if (!runningOnRealRobot) return 1.0; 
       return 1.0; 
    }
    
    public double getCaptureKi()
    {      
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 4.0;
+      if (!runningOnRealRobot) return 4.0;
       return 4.0; 
    }
    
@@ -342,68 +351,68 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    
    public double getCaptureFilterBreakFrequencyInHz()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 16.0; //Double.POSITIVE_INFINITY;
+      if (!runningOnRealRobot) return 16.0; //Double.POSITIVE_INFINITY;
       return 16.0;
    }
    
    public double getCMPRateLimit()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 60.0; 
+      if (!runningOnRealRobot) return 60.0; 
       return 6.0; //3.0; //4.0; //3.0;
    }
 
    public double getCMPAccelerationLimit()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 2000.0;
+      if (!runningOnRealRobot) return 2000.0;
       return 200.0; //80.0; //40.0;
    }
    
    public double getKpCoMHeight()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 40.0;
+      if (!runningOnRealRobot) return 40.0;
       return 40.0; //20.0; 
    }
 
    public double getZetaCoMHeight()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 0.8; //1.0;
+      if (!runningOnRealRobot) return 0.8; //1.0;
       return 0.4;
    }
    
    public double getKpPelvisOrientation()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 80.0; //100.0;
+      if (!runningOnRealRobot) return 80.0; //100.0;
       return 80.0; //30.0; 
    }
 
    public double getZetaPelvisOrientation()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 0.8; //1.0;
+      if (!runningOnRealRobot) return 0.8; //1.0;
       return 0.25;
    }
    
 
    public double getMaxAccelerationPelvisOrientation()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 18.0;
+      if (!runningOnRealRobot) return 18.0;
       return 12.0; 
    }
 
    public double getMaxJerkPelvisOrientation()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 270.0;
+      if (!runningOnRealRobot) return 270.0;
       return 180.0; 
    }
 
    public double getKpHeadOrientation()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 40.0;
+      if (!runningOnRealRobot) return 40.0;
       return 40.0; 
    }
 
    public double getZetaHeadOrientation()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 0.8; //1.0;
+      if (!runningOnRealRobot) return 0.8; //1.0;
       return 0.4;
    }
 
@@ -414,25 +423,25 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
 
    public double getKpUpperBody()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 80.0; //100.0;
+      if (!runningOnRealRobot) return 80.0; //100.0;
       return 80.0; //40.0;
    }
 
    public double getZetaUpperBody()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 0.8; //1.0;
+      if (!runningOnRealRobot) return 0.8; //1.0;
       return 0.25;
    }
    
    public double getMaxAccelerationUpperBody()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 18.0; //100.0;
+      if (!runningOnRealRobot) return 18.0; //100.0;
       return 6.0;
    }
    
    public double getMaxJerkUpperBody()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 270.0; //1000.0;
+      if (!runningOnRealRobot) return 270.0; //1000.0;
       return 60.0;
    }
    
@@ -453,13 +462,13 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    
    public double getSwingZetaXYZ()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 0.7;
+      if (!runningOnRealRobot) return 0.7;
       return 0.25;
    }
    
    public double getSwingZetaOrientation()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 0.7;
+      if (!runningOnRealRobot) return 0.7;
       return 0.7; 
    }
 
@@ -470,37 +479,37 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    
    public double getHoldKpOrientation()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 100.0;
+      if (!runningOnRealRobot) return 100.0;
       return 200.0;
    }
    
    public double getHoldZeta()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return 1.0;
+      if (!runningOnRealRobot) return 1.0;
       return 0.2;
    }
 
    public double getSwingMaxPositionAcceleration()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return Double.POSITIVE_INFINITY;
+      if (!runningOnRealRobot) return Double.POSITIVE_INFINITY;
       return 10.0;
    }
    
    public double getSwingMaxPositionJerk()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return Double.POSITIVE_INFINITY;
+      if (!runningOnRealRobot) return Double.POSITIVE_INFINITY;
       return 150.0;
    }
    
    public double getSwingMaxOrientationAcceleration()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return Double.POSITIVE_INFINITY;
+      if (!runningOnRealRobot) return Double.POSITIVE_INFINITY;
       return 100.0;
    }
    
    public double getswingMaxOrientationJerk()
    {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT) return Double.POSITIVE_INFINITY;
+      if (!runningOnRealRobot) return Double.POSITIVE_INFINITY;
       return 1500.0;
    }
 
@@ -526,7 +535,7 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
 
    public boolean isRunningOnRealRobot()
    {
-      return DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT;
+      return runningOnRealRobot;
    }
 
    public double getDefaultTransferTime()
