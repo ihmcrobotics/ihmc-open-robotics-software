@@ -140,7 +140,7 @@ public class SlipOnNextStepPerturber extends ModularRobotController
    {
       groundContactPointsSlipper.setDoSlip(true);
       groundContactPointsSlipper.setPercentToSlipPerTick(0.01);
-      groundContactPointsSlipper.setSlipAmount(slipAmount);
+      groundContactPointsSlipper.setSlipTranslation(slipAmount);
       groundContactPointsSlipper.setSlipRotation(yawPitchRoll);
    }
 
