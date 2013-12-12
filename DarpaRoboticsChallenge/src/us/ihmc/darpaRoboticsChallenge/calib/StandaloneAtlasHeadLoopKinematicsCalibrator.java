@@ -49,7 +49,7 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
    public StandaloneAtlasHeadLoopKinematicsCalibrator()
    {
       //load robot
-      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_NO_HANDS_ADDED_MASS, false);
+      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.DRC_NO_HANDS, false);
       JaxbSDFLoader robotLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       fullRobotModel = robotLoader.createFullRobotModel(jointMap);
       joints = fullRobotModel.getOneDoFJoints();
