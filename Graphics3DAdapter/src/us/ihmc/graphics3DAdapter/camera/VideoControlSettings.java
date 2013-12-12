@@ -8,4 +8,7 @@ public interface VideoControlSettings
    public boolean crop();
    public VideoCompressionKey getVideoQualitySetting();
    public int getFps();
+   
+   public int cropX();
+   public int cropY();
 }
