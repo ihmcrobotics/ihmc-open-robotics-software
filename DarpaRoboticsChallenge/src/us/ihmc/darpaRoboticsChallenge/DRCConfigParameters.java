@@ -240,7 +240,7 @@ public class DRCConfigParameters
    public static final boolean LIDAR_PROCESSOR_TIMING_REPORTING_ON = false;
    public static final double GRID_RESOLUTION = 0.025;    // in meters
    public static final double OCTREE_RESOLUTION_WHEN_NOT_USING_RESOLUTION_SPHERE = 0.025;
-   public static final double FOOTSTEP_FITTING_BUFFER_SIZE = 0.02;
+   public static final double FOOTSTEP_FITTING_BUFFER_SIZE = -0.01;
 
    // Footstep Generator
    public static final double BOUNDING_BOX_FOR_FOOTSTEP_HEIGHT_FINDING_SIDE_LENGTH =
