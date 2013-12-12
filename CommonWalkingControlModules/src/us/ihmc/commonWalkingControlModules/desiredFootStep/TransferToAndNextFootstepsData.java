@@ -140,37 +140,37 @@ public class TransferToAndNextFootstepsData
       this.estimatedStepTime = estimatedStepTime;
    }
 
-   public void getFootLocationList(ArrayList<FramePoint> footLocationListToPack, ArrayList<ReferenceFrame> soleFrameListToPack, double centimetersForwardFromCenter)
+   public void getFootLocationList(ArrayList<FramePoint> footLocationListToPack, ArrayList<ReferenceFrame> soleFrameListToPack, double centimetersForwardFromCenter, double centimetersInFromCenter)
    {
       if (transferFromFootstep != null)
       {
-         getFootLocationFromFootstepInWorldFramePlusSoleframe(footLocationListToPack, soleFrameListToPack, transferFromFootstep, centimetersForwardFromCenter);
+         getFootLocationFromFootstepInWorldFramePlusSoleframe(footLocationListToPack, soleFrameListToPack, transferFromFootstep, transferToSide.getOppositeSide(), centimetersForwardFromCenter, centimetersInFromCenter);
       }
       else return;
       
       if (transferToFootstep != null)
       {
-         getFootLocationFromFootstepInWorldFramePlusSoleframe(footLocationListToPack, soleFrameListToPack, transferToFootstep, centimetersForwardFromCenter);
+         getFootLocationFromFootstepInWorldFramePlusSoleframe(footLocationListToPack, soleFrameListToPack, transferToFootstep, transferToSide, centimetersForwardFromCenter, centimetersInFromCenter);
       }
       else return;
 
       if (nextFootstep != null)
       {
-         getFootLocationFromFootstepInWorldFramePlusSoleframe(footLocationListToPack, soleFrameListToPack, nextFootstep, centimetersForwardFromCenter);
+         getFootLocationFromFootstepInWorldFramePlusSoleframe(footLocationListToPack, soleFrameListToPack, nextFootstep, transferToSide.getOppositeSide(), centimetersForwardFromCenter, centimetersInFromCenter);
       }
       else return;
 
       if (nextNextFootstep != null)
       {
-         getFootLocationFromFootstepInWorldFramePlusSoleframe(footLocationListToPack, soleFrameListToPack, nextNextFootstep, centimetersForwardFromCenter);
+         getFootLocationFromFootstepInWorldFramePlusSoleframe(footLocationListToPack, soleFrameListToPack, nextNextFootstep, transferToSide, centimetersForwardFromCenter, centimetersInFromCenter);
       }
       else return;
    }
 
    private static void getFootLocationFromFootstepInWorldFramePlusSoleframe(ArrayList<FramePoint> footLocationListToPack, 
-         ArrayList<ReferenceFrame> soleFrameListToPack, Footstep footstep, double centimetersForwardFromCenter)
+         ArrayList<ReferenceFrame> soleFrameListToPack, Footstep footstep, RobotSide side, double centimetersForwardFromCenter, double centimetersInFromCenter)
    {
-      FramePoint centerOfFootstep = FootstepUtils.getCenterOfFootstep(footstep, centimetersForwardFromCenter);
+      FramePoint centerOfFootstep = FootstepUtils.getCenterOfFootstep(footstep, side, centimetersForwardFromCenter, centimetersInFromCenter);
       ReferenceFrame soleFrame = footstep.getSoleReferenceFrame(); 
       footLocationListToPack.add(centerOfFootstep);
       soleFrameListToPack.add(soleFrame);

@@ -42,6 +42,7 @@ public class DoubleSupportFootCenterToToeICPComputer
    private final ArrayList<YoFramePoint> toeICPCornerFramePoints = new ArrayList<YoFramePoint>();
 
    private final DoubleYoVariable icpForwardFromCenter = new DoubleYoVariable("icpForwardFromCenter", registry);
+   private final DoubleYoVariable icpInFromCenter = new DoubleYoVariable("icpInFromCenter", registry);
 
    private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("icpPlannerHasBeenInitialized", registry);
 
@@ -568,7 +569,7 @@ public class DoubleSupportFootCenterToToeICPComputer
       footLocationList.clear();
       soleFrameList.clear();
 
-      transferToAndNextFootstepsData.getFootLocationList(footLocationList, soleFrameList, icpForwardFromCenter.getDoubleValue());
+      transferToAndNextFootstepsData.getFootLocationList(footLocationList, soleFrameList, icpForwardFromCenter.getDoubleValue(), icpInFromCenter.getDoubleValue());
       double singleSupportDuration = transferToAndNextFootstepsData.getSingleSupportDuration();
       double doubleSupportDuration = transferToAndNextFootstepsData.getDoubleSupportDuration();
       //      double omega0 = transferToAndNextFootstepsData.getW0();
@@ -582,7 +583,7 @@ public class DoubleSupportFootCenterToToeICPComputer
       footLocationList.clear();
       soleFrameList.clear();
 
-      transferToAndNextFootstepsData.getFootLocationList(footLocationList, soleFrameList, icpForwardFromCenter.getDoubleValue());
+      transferToAndNextFootstepsData.getFootLocationList(footLocationList, soleFrameList, icpForwardFromCenter.getDoubleValue(), icpInFromCenter.getDoubleValue());
       double singleSupportDuration = transferToAndNextFootstepsData.getSingleSupportDuration();
       double doubleSupportDuration = transferToAndNextFootstepsData.getDoubleSupportDuration();
       //      double omega0 = transferToAndNextFootstepsData.getW0();
@@ -598,7 +599,7 @@ public class DoubleSupportFootCenterToToeICPComputer
       footLocationList.clear();
       soleFrameList.clear();
 
-      transferToAndNextFootstepsData.getFootLocationList(footLocationList, soleFrameList, icpForwardFromCenter.getDoubleValue());
+      transferToAndNextFootstepsData.getFootLocationList(footLocationList, soleFrameList, icpForwardFromCenter.getDoubleValue(), icpInFromCenter.getDoubleValue());
       double singleSupportDuration = transferToAndNextFootstepsData.getSingleSupportDuration();
       double doubleSupportDuration = transferToAndNextFootstepsData.getDoubleSupportDuration();
       double doubleSupportInitialTransferDuration = transferToAndNextFootstepsData.getDoubleSupportInitialTransferDuration();
@@ -614,7 +615,7 @@ public class DoubleSupportFootCenterToToeICPComputer
       footLocationList.clear();
       soleFrameList.clear();
 
-      transferToAndNextFootstepsData.getFootLocationList(footLocationList, soleFrameList, icpForwardFromCenter.getDoubleValue());
+      transferToAndNextFootstepsData.getFootLocationList(footLocationList, soleFrameList, icpForwardFromCenter.getDoubleValue(), icpInFromCenter.getDoubleValue());
       double singleSupportDuration = transferToAndNextFootstepsData.getSingleSupportDuration();
       double doubleSupportDuration = transferToAndNextFootstepsData.getDoubleSupportDuration();
       this.omega0.set(transferToAndNextFootstepsData.getW0());
@@ -734,5 +735,10 @@ public class DoubleSupportFootCenterToToeICPComputer
    public void setDoHeelToToeTransfer(boolean doHeelToToeTransfer)
    {
       this.doHeelToToeTransfer.set(doHeelToToeTransfer);
+   }
+   
+   public void setICPInFromCenter(double icpInFromCenter)
+   {
+      this.icpInFromCenter.set(icpInFromCenter);
    }
 }
