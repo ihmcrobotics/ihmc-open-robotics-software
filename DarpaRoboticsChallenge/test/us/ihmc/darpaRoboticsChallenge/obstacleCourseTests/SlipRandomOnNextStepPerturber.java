@@ -14,12 +14,16 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.GroundContactPoint;
 import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.perturbance.GroundContactPointsSlipper;
 
 public class SlipRandomOnNextStepPerturber extends ModularRobotController
 {
-   private enum SlipState {NO_CONTACT, CONTACT_WILL_SLIP, CONTACT_SLIP, CONTACT_DONE_SLIP, CONTACT}
+   private enum SlipState
+   {
+      NO_CONTACT, CONTACT_WILL_SLIP, CONTACT_SLIP, CONTACT_DONE_SLIP, CONTACT
+   }
 
    private final GroundContactPointsSlipper groundContactPointsSlipper;
    private final SDFRobot robot;
@@ -30,12 +34,15 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
    private final EnumMap<RobotSide, EnumYoVariable<SlipState>> slipStateMap = new EnumMap<RobotSide, EnumYoVariable<SlipState>>(RobotSide.class);
    private final EnumMap<RobotSide, List<GroundContactPoint>> groundContactPointsMap = new EnumMap<RobotSide, List<GroundContactPoint>>(RobotSide.class);
 
-   private final YoFrameVector maxMagnitudeToSlipNextStep;
-   private final YoFrameVector minMagnitudeToSlipNextStep;
-   private final YoFrameVector nextAmountToSlip;
+   private final YoFrameVector maxTranslationToSlipNextStep;
+   private final YoFrameVector minTranslationToSlipNextStep;
+   private final YoFrameVector nextTranslationToSlip;
 
-// private final YoFrameVector amountToSlipNextStep;
-   private int probabilitySlip = 0;
+   private final YoFrameOrientation maxRotationToSlipNextStep;
+   private final YoFrameOrientation minRotationToSlipNextStep;
+   private final YoFrameOrientation nextRotationToSlip;
+
+   private double probabilitySlip = 0.0;
    private final Random random = new Random();
 
    public SlipRandomOnNextStepPerturber(SDFRobot robot, long randomSeed)
@@ -54,11 +61,11 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
       for (RobotSide robotSide : RobotSide.values())
       {
          DoubleYoVariable touchdownTimeForSlip = new DoubleYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "TouchdownTimeForSlip"
-                                                    + robotSide.getCamelCaseNameForMiddleOfExpression(), registry);
+               + robotSide.getCamelCaseNameForMiddleOfExpression(), registry);
          touchdownTimeForSlipMap.put(robotSide, touchdownTimeForSlip);
 
          EnumYoVariable<SlipState> slipState = new EnumYoVariable<SlipState>(name + "SlipState" + robotSide.getCamelCaseNameForMiddleOfExpression(), registry,
-                                                  SlipState.class);
+               SlipState.class);
          slipState.set(SlipState.NO_CONTACT);
          slipStateMap.put(robotSide, slipState);
 
@@ -74,28 +81,34 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
 
       this.slipNextStep = new BooleanYoVariable(name + "SlipNextStep", registry);
 
-      maxMagnitudeToSlipNextStep = new YoFrameVector(name + "MaxMagnitudeToSlipNextStep", ReferenceFrame.getWorldFrame(), registry);
-      minMagnitudeToSlipNextStep = new YoFrameVector(name + "MinMagnitudeToSlipNextStep", ReferenceFrame.getWorldFrame(), registry);
-      nextAmountToSlip = new YoFrameVector(name + "NextAmountToSlip", ReferenceFrame.getWorldFrame(), registry);
+      maxTranslationToSlipNextStep = new YoFrameVector(name + "MaxTranslationToSlipNextStep", ReferenceFrame.getWorldFrame(), registry);
+      minTranslationToSlipNextStep = new YoFrameVector(name + "MinTranslationToSlipNextStep", ReferenceFrame.getWorldFrame(), registry);
+      nextTranslationToSlip = new YoFrameVector(name + "NextTranslationToSlip", ReferenceFrame.getWorldFrame(), registry);
 
-//    amountToSlipNextStep = new YoFrameVector(name + "AmountToSlipNextStep", ReferenceFrame.getWorldFrame(), registry);
+      maxRotationToSlipNextStep = new YoFrameOrientation(name + "MaxRotationToSlipNextStep", ReferenceFrame.getWorldFrame(), registry);
+      minRotationToSlipNextStep = new YoFrameOrientation(name + "MinRotationToSlipNextStep", ReferenceFrame.getWorldFrame(), registry);
+      nextRotationToSlip = new YoFrameOrientation(name + "NextRotationToSlip", ReferenceFrame.getWorldFrame(), registry);
+
       groundContactPointsSlipper = new GroundContactPointsSlipper();
       this.addRobotController(groundContactPointsSlipper);
-      setSlipParameters(0.0, 0.0, 0.0, 0.01, 0.01, 0.0, 0.01, 0.01, 0.05, 0.05, 100);
+
+      setTranslationRangeToSlipNextStep(new double[] { 0.0, 0.0, 0.0 }, new double[] { 0.05, 0.05, 0.0 });
+      setRotationRangeToSlipNextStep(new double[] { 0.0, 0.0, 0.0 }, new double[] { 0.3, 0.15, 0.1 });
+      setSlipAfterStepTimeDeltaRange(0.01, 0.10);
+      setSlipPercentSlipPerTickRange(0.01, 0.05);
+      setProbabilityOfSlip(1.0);
    }
 
-
-   public void setSlipParameters(double minSlipMagnitudeInX, double minSlipMagnitudeInY, double minSlipMagnitudeInZ, double maxSlipMagnitudeInX,
-                                 double maxSlipMagnitudeInY, double maxSlipMagnitudeInZ, double minSlipAfterStepTimeDelta, double maxSlipAfterStepTimeDelta,
-                                 double minSlipPercentSlipPerTick, double maxSlipPercentSlipPerTick, int slipProbability)
+   public void setSlipParameters(double[] slipXYZMin, double[] slipXYZMax, double[] slipYPRMin, double[] slipYPRMax, double minSlipAfterStepTimeDelta,
+         double maxSlipAfterStepTimeDelta, double minSlipPercentSlipPerTick, double maxSlipPercentSlipPerTick, double slipProbability)
    {
+      setTranslationRangeToSlipNextStep(slipXYZMin, slipXYZMax);
+      setRotationRangeToSlipNextStep(slipYPRMin, slipYPRMax);
+
       setSlipAfterStepTimeDeltaRange(minSlipAfterStepTimeDelta, maxSlipAfterStepTimeDelta);
       setSlipPercentSlipPerTickRange(minSlipPercentSlipPerTick, maxSlipPercentSlipPerTick);
-      setMagnitudeRangeToSlipNextStep(minSlipMagnitudeInX, minSlipMagnitudeInY, minSlipMagnitudeInZ, maxSlipMagnitudeInX, maxSlipMagnitudeInY,
-                                      maxSlipMagnitudeInZ);
-      setProbabilityOfSlipInPercentage(slipProbability);
+      setProbabilityOfSlip(slipProbability);
    }
-
 
    public void setSlipAfterStepTimeDeltaRange(double minSlipAfterStepTimeDelta, double maxSlipAfterStepTimeDelta)
    {
@@ -109,27 +122,39 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
       this.maxSlipPercentSlipPerTick.set(maxSlipPercentSlipPerTick);
    }
 
-   public void setMagnitudeRangeToSlipNextStep(double minSlipMagnitudeInX, double minSlipMagnitudeInY, double minSlipMagnitudeInZ, double maxSlipMagnitudeInX,
-           double maxSlipMagnitudeInY, double maxSlipMagnitudeInZ)
+   public void setTranslationRangeToSlipNextStep(double[] slipXYZMin, double[] slipXYZMax)
    {
-      boolean positive = ((minSlipMagnitudeInX <= 0) || (minSlipMagnitudeInY <= 0) || (minSlipMagnitudeInZ <= 0) || (maxSlipMagnitudeInX <= 0)
-                          || (maxSlipMagnitudeInY <= 0) || (maxSlipMagnitudeInZ <= 0));
-      boolean maxmin = ((minSlipMagnitudeInX <= maxSlipMagnitudeInX) || (minSlipMagnitudeInY <= maxSlipMagnitudeInY)
-                        || (minSlipMagnitudeInZ <= maxSlipMagnitudeInZ));
-
-      if (!positive ||!maxmin)
-      {
-         throw new RuntimeException("Slip min/max magnitude should be given in given in abs values. And min < max. In " + getClass().getName());
-      }
-
-
-      this.minMagnitudeToSlipNextStep.set(minSlipMagnitudeInX, minSlipMagnitudeInY, minSlipMagnitudeInZ);
-      this.maxMagnitudeToSlipNextStep.set(maxSlipMagnitudeInX, maxSlipMagnitudeInY, maxSlipMagnitudeInZ);
+      assertValidLimits(slipXYZMin, slipXYZMax);
+      this.minTranslationToSlipNextStep.set(slipXYZMin[0], slipXYZMin[1], slipXYZMin[2]);
+      this.maxTranslationToSlipNextStep.set(slipXYZMax[0], slipXYZMax[1], slipXYZMax[2]);
    }
 
-   public void setProbabilityOfSlipInPercentage(int slipProbability)
+   public void setRotationRangeToSlipNextStep(double[] slipYPRMin, double[] slipYPRMax)
    {
-      if ((slipProbability < 0) || (slipProbability > 100))
+      assertValidLimits(slipYPRMin, slipYPRMax);
+      this.minRotationToSlipNextStep.setYawPitchRoll(slipYPRMin[0], slipYPRMin[1], slipYPRMin[2]);
+      this.maxRotationToSlipNextStep.setYawPitchRoll(slipYPRMax[0], slipYPRMax[1], slipYPRMax[2]);
+   }
+
+   public void assertValidLimits(double[] min, double[] max)
+   {
+      if (min.length != 3 || max.length != 3)
+      {
+         throw new RuntimeException("Slip min/max distance and rotation should contain 3 elements " + getClass().getName());
+      }
+
+      for (int i = 0; i < 3; i++)
+      {
+         if (min[i] < 0.0 || min[i] > max[i])
+         {
+            throw new RuntimeException("Slip min/max magnitude should be given in given in abs values. And min < max. In " + getClass().getName());
+         }
+      }
+   }
+
+   public void setProbabilityOfSlip(double slipProbability)
+   {
+      if ((slipProbability < 0.0) || (slipProbability > 1.0))
       {
          throw new RuntimeException("Probability prob = " + slipProbability + ", should be set between 0 and 100. In " + getClass().getName());
       }
@@ -146,62 +171,63 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
       {
          switch (slipStateMap.get(robotSide).getEnumValue())
          {
-            case NO_CONTACT :
+         case NO_CONTACT:
+         {
+            if (footTouchedDown(robotSide))
             {
-               if (footTouchedDown(robotSide))
+               if (doSlipThisStance())
                {
-                  if (doSlipThisStance())
-                  {
-                     slipStateMap.get(robotSide).set(SlipState.CONTACT_WILL_SLIP);
-                     touchdownTimeForSlipMap.get(robotSide).set(robot.getTime());
-                  }
-                  else    // Wait till foot lift back up before allowing a slip.
-                  {
-                     slipStateMap.get(robotSide).set(SlipState.CONTACT);
-                  }
+                  slipStateMap.get(robotSide).set(SlipState.CONTACT_WILL_SLIP);
+                  touchdownTimeForSlipMap.get(robotSide).set(robot.getTime());
                }
-
-               break;
+               else
+               // Wait till foot lift back up before allowing a slip.
+               {
+                  slipStateMap.get(robotSide).set(SlipState.CONTACT);
+               }
             }
 
-            case CONTACT_WILL_SLIP :
-            {
-               if (robot.getTime() > (touchdownTimeForSlipMap.get(robotSide).getDoubleValue() + nextSlipAfterTimeDelta.getDoubleValue()))
-               {
-                  if (slipStateMap.get(robotSide.getOppositeSide()).getEnumValue() == SlipState.CONTACT_SLIP)
-                  {
-                     // Stop other foot from slipping, two slipping feet no implemented yet
-                     groundContactPointsSlipper.setDoSlip(false);
-                     slipStateMap.get(robotSide.getOppositeSide()).set(SlipState.CONTACT_DONE_SLIP);
-                  }
+            break;
+         }
 
-                  slipStateMap.get(robotSide).set(SlipState.CONTACT_SLIP);
-                  startSlipping(robotSide);
+         case CONTACT_WILL_SLIP:
+         {
+            if (robot.getTime() > (touchdownTimeForSlipMap.get(robotSide).getDoubleValue() + nextSlipAfterTimeDelta.getDoubleValue()))
+            {
+               if (slipStateMap.get(robotSide.getOppositeSide()).getEnumValue() == SlipState.CONTACT_SLIP)
+               {
+                  // Stop other foot from slipping, two slipping feet no implemented yet
+                  groundContactPointsSlipper.setDoSlip(false);
+                  slipStateMap.get(robotSide.getOppositeSide()).set(SlipState.CONTACT_DONE_SLIP);
                }
 
-               break;
+               slipStateMap.get(robotSide).set(SlipState.CONTACT_SLIP);
+               startSlipping(robotSide);
             }
 
-            case CONTACT_SLIP :
+            break;
+         }
+
+         case CONTACT_SLIP:
+         {
+            if (groundContactPointsSlipper.isDoneSlipping())
             {
-               if (groundContactPointsSlipper.isDoneSlipping())
-               {
-                  slipStateMap.get(robotSide).set(SlipState.CONTACT_DONE_SLIP);
-               }
-
-               break;
+               slipStateMap.get(robotSide).set(SlipState.CONTACT_DONE_SLIP);
             }
 
-            case CONTACT_DONE_SLIP :
-            case CONTACT :
+            break;
+         }
+
+         case CONTACT_DONE_SLIP:
+         case CONTACT:
+         {
+            if (footLiftedUp(robotSide))
             {
-               if (footLiftedUp(robotSide))
-               {
-                  slipStateMap.get(robotSide).set(SlipState.NO_CONTACT);
-               }
-
-               break;
+               slipStateMap.get(robotSide).set(SlipState.NO_CONTACT);
             }
+
+            break;
+         }
 
          }
       }
@@ -213,25 +239,42 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
       groundContactPointsSlipper.setGroundContactPoints(groundContactPointsMap.get(robotSide));
       groundContactPointsSlipper.setPercentToSlipPerTick(nextSlipPercentSlipPerTick.getDoubleValue());
       groundContactPointsSlipper.setDoSlip(true);
-      groundContactPointsSlipper.setSlipAmount(nextAmountToSlip.getVector3dCopy());
+      groundContactPointsSlipper.setSlipTranslation(nextTranslationToSlip.getVector3dCopy());
+      groundContactPointsSlipper.setSlipRotation(nextRotationToSlip.getYawPitchRoll());
 
-      System.out.println("Slip of " + robotSide.getLowerCaseName() + " foot with amount" + nextAmountToSlip.getVector3dCopy().toString()
-                         + " with slippercentage per tick " + nextSlipPercentSlipPerTick.getDoubleValue() + ", " + nextSlipAfterTimeDelta.getDoubleValue()
-                         + " [s] after touchdown.");
+      //      System.out.println("Slip of " + robotSide.getLowerCaseName() + " foot with amount" + nextTranslationToSlip.getVector3dCopy().toString()
+      //                         + " with rotation amount " + nextRotationToSlip.getFrameOrientationCopy().toStringAsYawPitchRoll()
+      //                         + " with slippercentage per tick " + nextSlipPercentSlipPerTick.getDoubleValue() + ", " + nextSlipAfterTimeDelta.getDoubleValue()
+      //                         + " [s] after touchdown.");
    }
 
    private void generateRandomSlipParamters()
    {
-      double randomSlipDeltaX = pseudoRandomRealNumberWithinRange(minMagnitudeToSlipNextStep.getX(), maxMagnitudeToSlipNextStep.getX());
-      double randomSlipDeltaY = pseudoRandomRealNumberWithinRange(minMagnitudeToSlipNextStep.getY(), maxMagnitudeToSlipNextStep.getY());
-      double randomSlipDeltaZ = pseudoRandomRealNumberWithinRange(minMagnitudeToSlipNextStep.getZ(), maxMagnitudeToSlipNextStep.getZ());
+      double randomSlipTranslateX = pseudoRandomRealNumberWithinRange(minTranslationToSlipNextStep.getX(), maxTranslationToSlipNextStep.getX());
+      double randomSlipTranslateY = pseudoRandomRealNumberWithinRange(minTranslationToSlipNextStep.getY(), maxTranslationToSlipNextStep.getY());
+      double randomSlipTranslateZ = pseudoRandomRealNumberWithinRange(minTranslationToSlipNextStep.getZ(), maxTranslationToSlipNextStep.getZ());
+      nextTranslationToSlip.set(randomSlipTranslateX, randomSlipTranslateY, randomSlipTranslateZ);
+
+      nextRotationToSlip.setYawPitchRoll(pseudoRandomRealNumberWithinRange(minRotationToSlipNextStep.getYawPitchRoll(),
+            maxRotationToSlipNextStep.getYawPitchRoll()));
+
       double randomSlipAfterTimeDelta = pseudoRandomPositiveNumberWithinRange(minSlipAfterTimeDelta.getDoubleValue(), maxSlipAfterTimeDelta.getDoubleValue());
       double randomPercentToSlipPerTick = pseudoRandomPositiveNumberWithinRange(minSlipPercentSlipPerTick.getDoubleValue(),
-                                             maxSlipPercentSlipPerTick.getDoubleValue());
+            maxSlipPercentSlipPerTick.getDoubleValue());
 
       nextSlipAfterTimeDelta.set(randomSlipAfterTimeDelta);
       nextSlipPercentSlipPerTick.set(randomPercentToSlipPerTick);
-      nextAmountToSlip.set(randomSlipDeltaX, randomSlipDeltaY, randomSlipDeltaZ);
+
+   }
+
+   private double[] pseudoRandomRealNumberWithinRange(double[] min, double[] max)
+   {
+      double[] randoms = new double[3];
+      for (int i = 0; i < randoms.length; i++)
+      {
+         randoms[i] = pseudoRandomRealNumberWithinRange(min[i], max[i]);
+      }
+      return randoms;
    }
 
    private double pseudoRandomRealNumberWithinRange(double minRange, double maxRange)
@@ -252,17 +295,7 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
 
    private boolean doSlipThisStance()
    {
-      if (probabilitySlip == 0)
-      {
-         slipNextStep.set(false);
-      }
-      else
-      {
-         int value = (int) Math.round((100.0 / probabilitySlip));
-         boolean bool = (random.nextInt(value) == 0);
-         slipNextStep.set(bool);
-      }
-
+      slipNextStep.set(random.nextDouble() < probabilitySlip);
       return slipNextStep.getBooleanValue();
    }
 

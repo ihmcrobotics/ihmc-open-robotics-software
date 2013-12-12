@@ -141,12 +141,17 @@ public class DRCObstacleCourseFlatTest
       SDFRobot robot = drcSimulationTestHelper.getRobot();
       setupCameraForWalkingUpToRamp(simulationConstructionSet);
       SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(robot, 1002L);
-      slipRandomOnEachStepPerturber.setSlipParameters(0.01, 0.01, 0.0, 0.07, 0.07, 0.005, 0.01, 1.0, 0.01, 1.0, 0);
+      slipRandomOnEachStepPerturber.setTranslationRangeToSlipNextStep(new double[]{0.01, 0.01, 0.0}, new double[]{0.07, 0.07, 0.005});
+      slipRandomOnEachStepPerturber.setRotationRangeToSlipNextStep(new double[]{0.03, 0.0, 0.0}, new double[]{0.4, 0.0, 0.0});
+      slipRandomOnEachStepPerturber.setSlipAfterStepTimeDeltaRange(0.005, 0.5);
+      slipRandomOnEachStepPerturber.setSlipPercentSlipPerTickRange(0.005, 0.5);
+      slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.0);
+
       robot.setController(slipRandomOnEachStepPerturber, 10);
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      slipRandomOnEachStepPerturber.setProbabilityOfSlipInPercentage(50);
+      slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.5);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(20.0);
 
 
@@ -240,7 +245,12 @@ public class DRCObstacleCourseFlatTest
       SDFRobot robot = drcSimulationTestHelper.getRobot();
 
       SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(robot, 1000L);
-      slipRandomOnEachStepPerturber.setSlipParameters(0.0, 0.0, 0.0, 0.04, 0.04, 0.01, 0.01, 1.0, 0.02, 1.0, 0);
+      slipRandomOnEachStepPerturber.setTranslationRangeToSlipNextStep(new double[]{0.0, 0.0, 0.0}, new double[]{0.04, 0.04, 0.01});
+      slipRandomOnEachStepPerturber.setRotationRangeToSlipNextStep(new double[]{0.0, 0.0, 0.0}, new double[]{0.2, 0.05, 0.02});
+      slipRandomOnEachStepPerturber.setSlipAfterStepTimeDeltaRange(0.01, 1.0);
+      slipRandomOnEachStepPerturber.setSlipPercentSlipPerTickRange(0.02, 1.0);
+      slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.0);
+      
       robot.setController(slipRandomOnEachStepPerturber, 10);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -248,7 +258,7 @@ public class DRCObstacleCourseFlatTest
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
-      slipRandomOnEachStepPerturber.setProbabilityOfSlipInPercentage(50);
+      slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.5);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(14.0);
 
       drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
