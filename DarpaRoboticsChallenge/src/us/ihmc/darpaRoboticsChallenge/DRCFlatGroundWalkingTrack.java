@@ -59,7 +59,7 @@ public class DRCFlatGroundWalkingTrack
 
       boolean useFastTouchdowns = false;
 
-      FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation();
+      FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(drcControlParameters);
       FlatGroundWalkingHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory =
          new FlatGroundWalkingHighLevelHumanoidControllerFactory(footstepTimingParameters, drcControlParameters, armControllerParameters, useVelocityAndHeadingScript, useFastTouchdowns);
 
