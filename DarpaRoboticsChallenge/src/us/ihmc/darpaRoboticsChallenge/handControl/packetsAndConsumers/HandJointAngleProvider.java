@@ -49,8 +49,12 @@ public class HandJointAngleProvider implements ObjectConsumer<HandJointAnglePack
             for (iRobotHandJointNameMinimal jointName : iRobotHandJointNameMinimal.values())
             {
                if(jointName != null)
-               {
-                  joints.get(jointName).setQ(object.getJointAngle(jointName));
+               {                  
+                  OneDoFJoint oneDoFJoint = joints.get(jointName);
+                  if(oneDoFJoint != null)
+                  {
+                     oneDoFJoint.setQ(object.getJointAngle(jointName));
+                  }
                }
             }
             
