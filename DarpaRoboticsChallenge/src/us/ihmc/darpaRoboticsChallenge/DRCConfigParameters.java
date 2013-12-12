@@ -26,7 +26,7 @@ public class DRCConfigParameters
       else 
       {
          DEFAULT_SWING_TIME = 0.6;
-         DEFAULT_TRANSFER_TIME = 0.2;
+         DEFAULT_TRANSFER_TIME = 0.25;
       }
    }
    
