@@ -87,7 +87,8 @@ public class DRCSimulationFactory
       }
       if (DRCLocalConfigParameters.INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
       {
-         DRCOutputWriterWithAccelerationIntegration drcOutputWriterWithAccelerationIntegration = new DRCOutputWriterWithAccelerationIntegration(drcOutputWriter, controlDT);
+         boolean runningOnRealRobot = false;
+         DRCOutputWriterWithAccelerationIntegration drcOutputWriterWithAccelerationIntegration = new DRCOutputWriterWithAccelerationIntegration(drcOutputWriter, controlDT, runningOnRealRobot);
          
          drcOutputWriterWithAccelerationIntegration.setAlphaDesiredVelocity(0.0, 0.0);
          drcOutputWriterWithAccelerationIntegration.setAlphaDesiredPosition(0.0);
