@@ -9,6 +9,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
+import us.ihmc.commonWalkingControlModules.terrain.CommonTerrain;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -17,8 +18,10 @@ import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.math.geometry.Box3d;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 
+import com.martiansoftware.jsap.JSAPException;
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Robot;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.CylinderTerrainObject;
@@ -27,6 +30,7 @@ import com.yobotics.simulationconstructionset.util.ground.RotatableCinderBlockTe
 import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.TrussWithSimpleCollisions;
+import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class DRCDemo01NavigationEnvironment implements
 		CommonAvatarEnvironmentInterface {
@@ -73,22 +77,22 @@ public class DRCDemo01NavigationEnvironment implements
 		combinedTerrainObject = new CombinedTerrainObject("Rocks with a wall");
 
 		//addCalibrationCube();
-		setUpPath1Rocks();
+//		setUpPath1Rocks();
 		// setUpPath2SmallCones();
-		setUpPath3RampsWithLargeBlocks();
+//		setUpPath3RampsWithLargeBlocks();
 		setUpPath4DRCTrialsTrainingWalkingCourse();
 		// setUpPath4DRCTrialsTrainingWalkingCourseDifficult();
-		setUpPathDRCTrialsLadder();
-		setUpTrialsQuals();
+//		setUpPathDRCTrialsLadder();
+//		setUpTrialsQuals();
 
-		setUpPath5NarrowDoor();
-		setUpPath6Barriers();
-		setUpPath7Stairs();
-		setUpPath8RampsWithSteppingStones();
+//		setUpPath5NarrowDoor();
+//		setUpPath6Barriers();
+//		setUpPath7Stairs();
+//		setUpPath8RampsWithSteppingStones();
 
 		setUpGround();
 
-		conditionallyAddLimboBar();
+//		conditionallyAddLimboBar();
 
 		// testRotatableRampsSetupForGraphicsAndCollision();
 		// addFalseStair();
@@ -375,15 +379,16 @@ public class DRCDemo01NavigationEnvironment implements
 
 		final double sectionLength = 2.4384; // 8 ft
 		int numberOfRamps = 2;
+      double rampLength = 46.5 * INCHES_TO_M;
 		setUpMultipleUpDownRamps(courseAngleDeg, startDistance, numberOfRamps,
-				sectionLength, color);
+				sectionLength, rampLength, color);
 
 		courseAngleDeg = 90.0;
 		startDistance = 4.0;
 		color = YoAppearance.Orange();
 
 		setUpMultipleUpDownRamps(courseAngleDeg, startDistance, numberOfRamps,
-				sectionLength, color);
+				sectionLength, rampLength, color);
 
 		color = YoAppearance.Gray();
 		float rampHeight = 0.625f;
@@ -416,7 +421,7 @@ public class DRCDemo01NavigationEnvironment implements
 		double startDistance = 4.0;
 		AppearanceDefinition color = YoAppearance.Gray();
 
-		final double sectionLength = 2.4384; // 8 ft
+		final double sectionWidth = 2.4384; // 8 ft
 
 		// need basics:
 		// basic ramp
@@ -434,8 +439,9 @@ public class DRCDemo01NavigationEnvironment implements
 
 		// 2. Ramps (Pitch Ramps 15degrees)
 		int numberOfRamps = 2;
+      double rampLength = 46.5 * INCHES_TO_M;
 		setUpMultipleUpDownRamps(courseAngleDeg, startDistance, numberOfRamps,
-				sectionLength, color);
+				sectionWidth, rampLength, color);
 
 		// 3. Tripping Hazards
 		// Diagonal 2x4s and 4x4s
@@ -448,7 +454,7 @@ public class DRCDemo01NavigationEnvironment implements
 		// 2x4 and 4x4 (not standard sizes)
 		int[] numberOfStepOvers = { 5, 3 };
 		startDistance = setUpTripHazards(courseAngleDeg, startDistance,
-				numberOfStepOvers, sectionLength, color);
+				numberOfStepOvers, sectionWidth, color);
 
 		// 4. Hurdles
 		// 15cm (6 in) and 30 cm (12 in)
@@ -459,13 +465,13 @@ public class DRCDemo01NavigationEnvironment implements
 		// 2nd section: midway (centered at 2ft from start of second section,
 		// 45deg zig zag pattern, two high. 8 on bottom, 4 directly on top or 7
 		// overlapped.
-		startDistance += sectionLength + sectionLength / 4;
+		startDistance += sectionWidth + sectionWidth / 4;
 		setUpStraightHurdles(courseAngleDeg, startDistance, new int[] { 6, 5 });
 
-		startDistance += sectionLength / 2;
+		startDistance += sectionWidth / 2;
 		setUpZigZagHurdles(courseAngleDeg, startDistance, new int[] { 8, 7 }, 45.0);
 
-		startDistance += sectionLength / 4;
+		startDistance += sectionWidth / 4;
 
 		// 5. Footfalls and Holes
 		// 80 cm (32 in) and 40 cm (16 in) squares
@@ -474,37 +480,41 @@ public class DRCDemo01NavigationEnvironment implements
 		// 8. Ascend Pitch/Roll 15 deg Top Steps
 		// 9. Descend Pitch/Roll 15 deg Top Steps
 		setUpCinderBlockField(courseAngleDeg, startDistance);
-		startDistance += sectionLength * 5;
+		startDistance += sectionWidth * 5;
 
 		// 10. Step-Over Obstacles
 		setUpStepOverObstacles(courseAngleDeg, startDistance, color,
-				sectionLength);
+				sectionWidth);
 
 	}
+
+   private static final double INCHES_TO_M = 2.54 / 100.0;
+   private static final double FEET_TO_M = 30.48 / 100.0;
 	
 	private void setUpPath4DRCTrialsTrainingWalkingCourse() {
       double courseAngleDeg = 45.0;
       double startDistance = 4.0;
       AppearanceDefinition color = YoAppearance.Gray();
 
-      final double sectionLength = 2.4384; // 8 ft
+      final double sectionWidth = 8 * FEET_TO_M;
 
       // 1. Ramp and Zigzag Hurdle (Pitch Ramp 15degrees)
       int numberOfRamps = 1;
+      double rampLength = 46.5 * INCHES_TO_M;
       setUpMultipleUpDownRamps(courseAngleDeg, startDistance, numberOfRamps,
-            sectionLength/2, color);
+            sectionWidth, rampLength / 2.0, color);
 
-      startDistance += sectionLength;
+      startDistance += sectionWidth;
       setUpZigZagHurdles(courseAngleDeg, startDistance, new int[] { 9 }, -45.0);
 
-      startDistance += sectionLength / 4;
+      startDistance += sectionWidth / 4;
 
       // 2a. Ascend Flat Top Steps
       // 2b. Descend Flat Top Steps
       // 3a. Ascend Pitch/Roll 15 deg Top Steps
       // 3b. Descend Pitch/Roll 15 deg Top Steps
       setUpCinderBlockFieldActual(courseAngleDeg, startDistance);
-      startDistance += sectionLength * 5;
+      startDistance += sectionWidth * 5;
       
      // 4. Two cinder block high hurdle for testcase purposes only, not part of actual trial obstacle course
       setUpZigZagHurdles(courseAngleDeg, startDistance, new int[] { 8, 7 }, 45.0);
@@ -670,104 +680,129 @@ public class DRCDemo01NavigationEnvironment implements
 		combinedTerrainObject.addTerrainObject(truss);
 	}
 
-	private void setUpCinderBlockFieldActual(double courseAngle, double startDistance) {
-		int nBlocksWide = 6;
-		int nBlocksLong = 21;
+   private void setUpCinderBlockFieldActual(double courseAngle, double startDistance)
+   {
+      int nBlocksWide = 6;
+      int nBlocksLong = 21;
 
-		double[][] blockAngle = new double[nBlocksLong][nBlocksWide];
-		int[][] blockHeight = new int[nBlocksLong][nBlocksWide];
-		BLOCKTYPE[][] blockType = new BLOCKTYPE[nBlocksLong][nBlocksWide];
-		for (int i = 0; i < nBlocksLong; i++) {
-			for (int j = 0; j < nBlocksWide; j++) {
-				blockHeight[i][j] = -1; // (int) Math.round(Math.random()*4-1);
-				blockAngle[i][j] = 0; // (int) Math.round(Math.random()*3)*45;
-				blockType[i][j] = BLOCKTYPE.FLAT;
-			}
-		}
+      double[][] blockAngle = new double[nBlocksLong][nBlocksWide];
+      int[][] blockHeight = new int[nBlocksLong][nBlocksWide];
+      BLOCKTYPE[][] blockType = new BLOCKTYPE[nBlocksLong][nBlocksWide];
+      for (int i = 0; i < nBlocksLong; i++)
+      {
+         for (int j = 0; j < nBlocksWide; j++)
+         {
+            blockHeight[i][j] = -1; // (int) Math.round(Math.random()*4-1);
+            blockAngle[i][j] = 0; // (int) Math.round(Math.random()*3)*45;
+            blockType[i][j] = BLOCKTYPE.FLAT;
+         }
+      }
 
-		blockHeight = new int[][] {
-		      { -1,-1, -1, -1, -1, 0},
-				{ -1, -1, -1, -1, 0, 1 }, 
-				{ -1, -1, -1, 0, 1, 2 },
-				{ -1, -1, 0, 1, 2, 3 }, 
-				{ -1, 0, 1, 2, 3, 2 },
-				{ 0, 1, 2, 3, 2, 1 }, 
-				{ 1, 2, 3, 2, 1, 0 },
-				{ 2, 3, 2, 1, 0, -1 }, 
-				{ 3, 2, 1, 0, -1, 0 },
-				{ 2, 1, 0, -1, 0, 0 }, 
-				{ 1, 0, -1, 0, 0, 1 },
-				{ 0, -1, 0, 0, 1, 2 },
-	         { -1, 0, 0, 1, 2, 3},
-	         { 0, 0, 1, 2, 3, 2},
-	         { 0, 1, 2, 3, 2, 1 }, 
-	         { 1, 2, 3, 2, 1, 0 },
-	         { 2, 3, 2, 1, 0, -1 }, 
-	         { 3, 2, 1, 0, -1, -1 },
-	         { 2, 1, 0, -1, -1, -1 }, 
-	         { 1, 0, -1, -1, -1, -1 },
-	         { 0, -1, -1, -1, -1, -1 } };
+      blockHeight = new int[][] {
+            { 0, -1, -1, -1, -1, -1 }, // Flat upstairs
+            { 1, 0, -1, -1, -1, -1 },
+            { 2, 1, 0, -1, -1, -1 },
+            { 3, 2, 1, 0, -1, -1 }, // Flat downstairs
+            { 2, 3, 2, 1, 0, -1 },
+            { 1, 2, 3, 2, 1, 0 },
+            { 0, 1, 2, 3, 2, 1},
+            { -1, 0, 1, 2, 3, 2 },
+            { -1, -1, 0, 1, 2, 3 }, // Slanted upstairs
+            { 0, -1, -1, 0, 1, 2 },
+            { 1, 0, -1, -1, 0, 1 },
+            { 2, 1, 0, -1, -1, 0 },
+            { 3, 2, 1, 0, -1, -1 },
+            { 2, 3, 2, 1, 0, -1 },
+            { 1, 2, 3, 2, 1, 0 },
+            { 0, 1, 2, 3, 2, 1 },
+            { -1, 0, 1, 2, 3, 2 },
+            { -1, -1, 0, 1, 2, 3 },
+            { -1, -1, -1, 0, 1, 2 },
+            { -1, -1, -1, -1, 0, 1 },
+            { -1, -1, -1, -1, -1, 0 }
+            };
 
-		final int NORTH = -90;
-		final int SOUTH = 90;
-		final int WEST = 0;
-		final int EAST = 180;
-		final int startAngled = 9;
-		for (int i = startAngled; i < nBlocksLong; i++) {
-			for (int j = Math.max(0, startAngled + (nBlocksWide - 1) - i); j < nBlocksWide; j++) {
-				boolean evenRow = (i - startAngled) % 2 == 0;
-				boolean evenCol = j % 2 == 0;
-				blockType[i][j] = BLOCKTYPE.ANGLED;
-				if (evenRow) {
-					if (evenCol)
-						blockAngle[i][j] = WEST;
-					else
-						blockAngle[i][j] = NORTH;
-				} else {
-					if (evenCol)
-						blockAngle[i][j] = SOUTH;
-					else
-						blockAngle[i][j] = EAST;
-				}
-			}
-		}
+      final int NORTH = -90;
+      final int SOUTH = 90;
+      final int WEST = 0;
+      final int EAST = 180;
+      final int startAngled = 8;
+      int indexRow = startAngled;
 
-		startDistance += cinderBlockLength / 2;
+//      blockAngle[indexRow++][5] = SOUTH;
+//      blockAngle[indexRow++][5] = NORTH;
+//      blockAngle[indexRow++][5] = NORTH;
+//      blockAngle[indexRow++][5] = NORTH;
+//      blockAngle[indexRow++][5] = NORTH;
+//      blockAngle[indexRow++][5] = NORTH;
+//      blockAngle[indexRow++][5] = NORTH;
+//      blockAngle[indexRow++][5] = NORTH;
+//      blockAngle[indexRow++][5] = NORTH;
+//      blockAngle[indexRow++][5] = NORTH;
+//      blockAngle[indexRow++][5] = NORTH;
+      
+      for (int i = startAngled; i < nBlocksLong; i++)
+      {
+         for (int j = Math.max(0, startAngled + (nBlocksWide - 1) - i); j < nBlocksWide; j++)
+         {
+            boolean evenRow = (i - startAngled) % 2 == 0;
+            boolean evenCol = j % 2 == 0;
+            blockType[i][j] = BLOCKTYPE.ANGLED;
+            if (evenRow)
+            {
+               if (evenCol)
+                  blockAngle[i][j] = WEST;
+               else
+                  blockAngle[i][j] = NORTH;
+            }
+            else
+            {
+               if (evenCol)
+                  blockAngle[i][j] = SOUTH;
+               else
+                  blockAngle[i][j] = EAST;
+            }
+         }
+      }
 
-		for (int i = 0; i < nBlocksLong; i++) {
-			for (int j = 0; j < nBlocksWide; j++) {
-				double xCenter = startDistance + i * cinderBlockLength;
-				double yCenter = (nBlocksWide * cinderBlockLength) / 2 - j
-						* cinderBlockLength - cinderBlockLength / 2;
-				double[] point = { xCenter, yCenter };
-				double[] rotatedPoint = rotateAroundOrigin(point, courseAngle);
-				int h = blockHeight[i][j];
-				double deg = blockAngle[i][j] + courseAngle;
-				switch (blockType[i][j]) {
-				case FLAT:
-					setUpCinderBlockSquare(rotatedPoint, h, deg);
+      startDistance += cinderBlockLength / 2;
 
-					break;
+      for (int i = 0; i < nBlocksLong; i++)
+      {
+         for (int j = 0; j < nBlocksWide; j++)
+         {
+            double xCenter = startDistance + i * cinderBlockLength;
+            double yCenter = (nBlocksWide * cinderBlockLength) / 2 - j * cinderBlockLength - cinderBlockLength / 2;
+            double[] point = { xCenter, yCenter };
+            double[] rotatedPoint = rotateAroundOrigin(point, courseAngle);
+            int h = blockHeight[i][j];
+            double deg = blockAngle[i][j] + courseAngle;
+            switch (blockType[i][j])
+            {
+            case FLAT:
+               setUpCinderBlockSquare(rotatedPoint, h, deg);
 
-				case FLATSKEW:
-					setUpFlatSkewedBlockSquare(rotatedPoint, h, deg);
+               break;
 
-					break;
+            case FLATSKEW:
+               setUpFlatSkewedBlockSquare(rotatedPoint, h, deg);
 
-				case UPRIGHTSKEW:
-					setUpSkewedUprightBlockSquare(rotatedPoint, h, deg);
+               break;
 
-					break;
+            case UPRIGHTSKEW:
+               setUpSkewedUprightBlockSquare(rotatedPoint, h, deg);
 
-				case ANGLED:
-					setUpRampBlock(rotatedPoint, h, deg);
+               break;
 
-					break;
-				}
-			}
-		}
-	}
-	
+            case ANGLED:
+               setUpRampBlock(rotatedPoint, h, deg);
+
+               break;
+            }
+         }
+      }
+   }
+
 	private void setUpCinderBlockField(double courseAngle, double startDistance) {
       int nBlocksWide = 6;
       int nBlocksLong = 31;
@@ -775,8 +810,10 @@ public class DRCDemo01NavigationEnvironment implements
       double[][] blockAngle = new double[nBlocksLong][nBlocksWide];
       int[][] blockHeight = new int[nBlocksLong][nBlocksWide];
       BLOCKTYPE[][] blockType = new BLOCKTYPE[nBlocksLong][nBlocksWide];
-      for (int i = 0; i < nBlocksLong; i++) {
-         for (int j = 0; j < nBlocksWide; j++) {
+      for (int i = 0; i < nBlocksLong; i++)
+      {
+         for (int j = 0; j < nBlocksWide; j++)
+         {
             blockHeight[i][j] = -1; // (int) Math.round(Math.random()*4-1);
             blockAngle[i][j] = 0; // (int) Math.round(Math.random()*3)*45;
             blockType[i][j] = BLOCKTYPE.FLAT;
@@ -812,11 +849,12 @@ public class DRCDemo01NavigationEnvironment implements
             { 0, 0, 0, 0, 0, 0 } };
 
       int[] full90Diags = { -1, -3, -5, 1, 7, 8, 9, 13, 15, 17, 19, 21, 23 };
-      int[] alternating0_90DiagsAndUprightSkewed = { 10, 12, 14, 16, 18, 20,
-            22 };
+      int[] alternating0_90DiagsAndUprightSkewed = { 10, 12, 14, 16, 18, 20, 22 };
 
-      for (int i = 0; i < full90Diags.length; i++) {
-         for (int j = Math.max(0, -full90Diags[i]); j < nBlocksWide; j++) {
+      for (int i = 0; i < full90Diags.length; i++)
+      {
+         for (int j = Math.max(0, -full90Diags[i]); j < nBlocksWide; j++)
+         {
             int col = j;
             int row = full90Diags[i] + col;
             if (row < nBlocksLong)
@@ -824,8 +862,10 @@ public class DRCDemo01NavigationEnvironment implements
          }
       }
 
-      for (int i = 0; i < alternating0_90DiagsAndUprightSkewed.length; i++) {
-         for (int j = 0; j < nBlocksWide; j++) {
+      for (int i = 0; i < alternating0_90DiagsAndUprightSkewed.length; i++)
+      {
+         for (int j = 0; j < nBlocksWide; j++)
+         {
             int col = j;
             int row = alternating0_90DiagsAndUprightSkewed[i] + col;
             blockType[row][col] = BLOCKTYPE.UPRIGHTSKEW;
@@ -835,7 +875,8 @@ public class DRCDemo01NavigationEnvironment implements
       }
 
       final int flatSkewedRow = 19;
-      for (int col = 0; col < nBlocksWide - 1; col++) {
+      for (int col = 0; col < nBlocksWide - 1; col++)
+      {
          boolean evenCol = col % 2 == 0;
          int row = flatSkewedRow + (evenCol ? 0 : 1);
          blockType[row][col] = BLOCKTYPE.FLATSKEW;
@@ -850,17 +891,22 @@ public class DRCDemo01NavigationEnvironment implements
       final int WEST = 0;
       final int EAST = 180;
       final int startAngled = 19;
-      for (int i = startAngled; i < nBlocksLong; i++) {
-         for (int j = Math.max(0, startAngled + (nBlocksWide - 1) - i); j < nBlocksWide; j++) {
+      for (int i = startAngled; i < nBlocksLong; i++)
+      {
+         for (int j = Math.max(0, startAngled + (nBlocksWide - 1) - i); j < nBlocksWide; j++)
+         {
             boolean evenRow = (i - startAngled) % 2 == 0;
             boolean evenCol = j % 2 == 0;
             blockType[i][j] = BLOCKTYPE.ANGLED;
-            if (evenRow) {
+            if (evenRow)
+            {
                if (evenCol)
                   blockAngle[i][j] = WEST;
                else
                   blockAngle[i][j] = NORTH;
-            } else {
+            }
+            else
+            {
                if (evenCol)
                   blockAngle[i][j] = SOUTH;
                else
@@ -871,16 +917,18 @@ public class DRCDemo01NavigationEnvironment implements
 
       startDistance += cinderBlockLength / 2;
 
-      for (int i = 0; i < nBlocksLong; i++) {
-         for (int j = 0; j < nBlocksWide; j++) {
+      for (int i = 0; i < nBlocksLong; i++)
+      {
+         for (int j = 0; j < nBlocksWide; j++)
+         {
             double xCenter = startDistance + i * cinderBlockLength;
-            double yCenter = (nBlocksWide * cinderBlockLength) / 2 - j
-                  * cinderBlockLength - cinderBlockLength / 2;
+            double yCenter = (nBlocksWide * cinderBlockLength) / 2 - j * cinderBlockLength - cinderBlockLength / 2;
             double[] point = { xCenter, yCenter };
             double[] rotatedPoint = rotateAroundOrigin(point, courseAngle);
             int h = blockHeight[i][j];
             double deg = blockAngle[i][j] + courseAngle;
-            switch (blockType[i][j]) {
+            switch (blockType[i][j])
+            {
             case FLAT:
                setUpCinderBlockSquare(rotatedPoint, h, deg);
 
@@ -907,9 +955,8 @@ public class DRCDemo01NavigationEnvironment implements
 
 	private void setUpMultipleUpDownRamps(double courseAngleDegrees,
 			double startDistance, int numberOfRamps,
-			final double sectionLength, AppearanceDefinition color) {
+			final double sectionLength, double rampLength, AppearanceDefinition color) {
 		for (int i = 1; i <= 2 * numberOfRamps; i = i + 2) {
-			double rampLength = sectionLength / (numberOfRamps * 2);
 			double rampAngle = Math.toRadians(15);
 			double rampHeight = rampLength * Math.tan(rampAngle);
 			double rampCenter = startDistance + rampLength * (i - 1)
@@ -974,28 +1021,26 @@ public class DRCDemo01NavigationEnvironment implements
 		}
 	}
 
-	private void setUpZigZagHurdles(double courseAngle, double startDistance,
-			int[] numberZigZagHurdles, double orientation) {
-		double xOffset = cinderBlockLength / 4 * Math.cos(Math.toRadians(45));
-		double yOffset = cinderBlockLength * Math.cos(Math.toRadians(45));
+   private void setUpZigZagHurdles(double courseAngle, double startDistance, int[] numberZigZagHurdles, double orientation)
+   {
+      double xOffset = cinderBlockLength / 4 * Math.cos(Math.toRadians(45));
+      double yOffset = cinderBlockLength * Math.cos(Math.toRadians(45));
 
-		for (int i = 0; i < numberZigZagHurdles.length; i++) {
-			int start45sign = Math
-					.round(numberZigZagHurdles[i] / 2.0 + .25) % 2 == 0 ? 1: -1;// start45 when n=3,4,7,8,11,12,...
-			int startXsign = Math
-					.round((numberZigZagHurdles[i] + 1.) / 2.0 + .25) % 2 == 0 ? -1: 1;// start x+ when n=1, 4,5, 8,9, ...
-			for (int j = 0; j < numberZigZagHurdles[i]; j++) {
-				int evenBlockSign = (j % 2 == 0) ? 1 : -1;
-				double signedXOffset = xOffset * evenBlockSign * startXsign;
-				double signedAngleOffset = orientation * evenBlockSign * start45sign;
-				double[] point = {
-						startDistance + signedXOffset,
-						((numberZigZagHurdles[i] - 1) * yOffset) / 2 - j
-								* yOffset };
-				double[] newPoint = rotateAroundOrigin(point, courseAngle);
-				setUpCinderBlock(newPoint, i, courseAngle + signedAngleOffset);
-			}
-		}
+      for (int i = 0; i < numberZigZagHurdles.length; i++)
+      {
+         int start45sign = Math.round(numberZigZagHurdles[i] / 2.0 + 0.25) % 2 == 0 ? -1 : 1;// start45 when n=3,4,7,8,11,12,...
+         int startXsign = Math.round((numberZigZagHurdles[i] + 1.) / 2.0 + 0.25) % 2 == 0 ? 1 : -1;// start x+ when n=1, 4,5, 8,9, ...
+
+         for (int j = 0; j < numberZigZagHurdles[i]; j++)
+         {
+            int evenBlockSign = (j % 2 == 0) ? 1 : -1;
+            double signedXOffset = xOffset * evenBlockSign * startXsign;
+            double signedAngleOffset = orientation * evenBlockSign * start45sign;
+            double[] point = { startDistance + signedXOffset, ((numberZigZagHurdles[i] - 1) * yOffset) / 2 - j * yOffset };
+            double[] newPoint = rotateAroundOrigin(point, courseAngle);
+            setUpCinderBlock(newPoint, i, courseAngle + signedAngleOffset);
+         }
+      }
 	}
 
 	private void setUpRampBlock(double[] point, int h, double deg) {
@@ -1324,33 +1369,31 @@ public class DRCDemo01NavigationEnvironment implements
 	// slanted block (square block on ramp, with # of square block support
 	// layers: 0-3 typ)
 
-	private void setUpCinderBlock(double xCenter, double yCenter,
-			int numberFlatSupports, double yawDegrees) {
-		double[] centerPoint = { xCenter, yCenter };
-		setUpCinderBlock(centerPoint, numberFlatSupports, yawDegrees);
-	}
+   private void setUpCinderBlock(double xCenter, double yCenter, int numberFlatSupports, double yawDegrees)
+   {
+      double[] centerPoint = { xCenter, yCenter };
+      setUpCinderBlock(centerPoint, numberFlatSupports, yawDegrees);
+   }
 
-	private void setUpCinderBlock(double[] centerPoint, int numberFlatSupports,
-			double yawDegrees) {
-		if (numberFlatSupports < 0)
-			return;
+   private void setUpCinderBlock(double[] centerPoint, int numberFlatSupports, double yawDegrees)
+   {
+      if (numberFlatSupports < 0)
+         return;
 
-		AppearanceDefinition app = cinderBlockAppearance;
+      AppearanceDefinition app = cinderBlockAppearance;
 
-		double xCenter = centerPoint[0];
-		double yCenter = centerPoint[1];
+      double xCenter = centerPoint[0];
+      double yCenter = centerPoint[1];
 
-		// wall
-		Transform3D location = new Transform3D();
-		location.rotZ(Math.toRadians(yawDegrees));
+      // wall
+      Transform3D location = new Transform3D();
+      location.rotZ(Math.toRadians(yawDegrees));
 
-		location.setTranslation(new Vector3d(xCenter, yCenter,
-				cinderBlockHeight / 2 + numberFlatSupports * cinderBlockHeight));
-		RotatableCinderBlockTerrainObject newBox = new RotatableCinderBlockTerrainObject(
-				new Box3d(location, cinderBlockLength, cinderBlockWidth,
-						cinderBlockHeight), app);
-		combinedTerrainObject.addTerrainObject(newBox);
-	}
+      location.setTranslation(new Vector3d(xCenter, yCenter, cinderBlockHeight * (0.5 + numberFlatSupports)));
+      RotatableCinderBlockTerrainObject newBox = new RotatableCinderBlockTerrainObject(new Box3d(location, cinderBlockLength, cinderBlockWidth,
+            cinderBlockHeight), app);
+      combinedTerrainObject.addTerrainObject(newBox);
+   }
 
 	private void setUpSlopedBox(double xCenter, double yCenter, double zCenter,
 			double xLength, double yLength, double zLength,
@@ -1537,4 +1580,14 @@ public class DRCDemo01NavigationEnvironment implements
 
 	}
 
+   public static void main(String[] args) throws SimulationExceededMaximumTimeException
+   {
+      SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("blop"));
+      DRCDemo01NavigationEnvironment commonAvatarEnvironmentInterface = new DRCDemo01NavigationEnvironment();
+      TerrainObject environmentTerrain = commonAvatarEnvironmentInterface.getTerrainObject();
+      scs.addStaticLinkGraphics(environmentTerrain.getLinkGraphics());
+      scs.setGroundVisible(false);
+      Thread simThread = new Thread(scs, "SCS simulation thread");
+      simThread.start();
+   }
 }
