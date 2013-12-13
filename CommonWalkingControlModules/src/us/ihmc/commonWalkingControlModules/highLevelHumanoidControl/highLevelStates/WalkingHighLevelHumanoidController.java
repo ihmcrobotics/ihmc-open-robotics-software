@@ -1894,23 +1894,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       RobotSide[] leadingLegFirst;
       if (trailingLeg.getEnumValue() != null)
          leadingLegFirst = new RobotSide[]{trailingLeg.getEnumValue().getOppositeSide(), trailingLeg.getEnumValue()};
-      else
+      else 
          leadingLegFirst = RobotSide.values;
             
       for (RobotSide robotSide : RobotSide.values)
          legLengths.put(robotSide, footEndEffectorControlModules.get(robotSide).updateAndGetLegLength());
       
-      
-      // Correct, if necessary, the CoM height trajectory to avoid straight knee
-      if (checkForStraightKnee)
-      {
-         for (RobotSide robotSide : leadingLegFirst)
-         {
-            EndEffectorControlModule footEndEffectorControlModule = footEndEffectorControlModules.get(robotSide);
-            footEndEffectorControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(desiredICPVelocity, comHeightData,
-                  zCurrent, pelvisZUpFrame);
-         }
-      }
       
       // Correct, if necessary, the CoM height trajectory to avoid the knee to collapse
       if (checkForKneeCollapsing)
@@ -1922,6 +1911,17 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
       }
 
+      // Correct, if necessary, the CoM height trajectory to avoid straight knee
+      if (checkForStraightKnee)
+      {
+         for (RobotSide robotSide : leadingLegFirst)
+         {
+            EndEffectorControlModule footEndEffectorControlModule = footEndEffectorControlModules.get(robotSide);
+            footEndEffectorControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(desiredICPVelocity, comHeightData,
+                  zCurrent, pelvisZUpFrame);
+         }
+      }
+      
       // Do that after to make sure the swing foot will land
       for (RobotSide robotSide : RobotSide.values)
          footEndEffectorControlModules.get(robotSide).correctCoMHeightTrajectoryForUnreachableFootStep(comHeightData);
