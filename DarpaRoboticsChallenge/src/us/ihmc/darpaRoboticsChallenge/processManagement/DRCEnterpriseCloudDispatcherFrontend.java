@@ -40,7 +40,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
    private final byte[] controllerBuffer;
 
    private static String netProcMachineIpAddress = DRCLocalConfigParameters.NET_PROC_MACHINE_IP_ADDRESS;
-   private static String controllerMachineIpAddress = DRCLocalConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
+   private static String controllerMachineIpAddress = DRCLocalConfigParameters.ROBOT_CONTROLLER_MACHINE_IP_ADDRESS_FOR_DISPATCHER;
 
    private JFrame frame;
    private JPanel netProcPanel, controllerPanel, selectControllerPanel, selectRobotModelPanel;
