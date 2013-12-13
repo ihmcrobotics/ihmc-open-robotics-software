@@ -418,7 +418,7 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
 
    public double getTrajectoryTimeHeadOrientation()
    {
-      return 1.5;
+      return 3.0;
    }
 
    public double getKpUpperBody()
