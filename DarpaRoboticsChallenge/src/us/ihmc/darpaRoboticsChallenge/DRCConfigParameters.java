@@ -169,10 +169,10 @@ public class DRCConfigParameters
    public static final boolean STREAM_VIDEO = true;
 
    // UI
-   public static final int UI_JOINT_CONFIGURATION_UPDATE_MILLIS = 20;
+   public static final int UI_JOINT_CONFIGURATION_UPDATE_MILLIS = 100;
    public static final boolean USE_COLLISIONS_MESHS_FOR_VISUALIZATION = false;
    public static final boolean USE_SLIDER_FOR_POSE_PLAYBACK = false;
-   public static final boolean USE_SUPER_DUPER_HIGH_RESOLUTION_FOR_COMMS = true;
+   public static final boolean USE_SUPER_DUPER_HIGH_RESOLUTION_FOR_COMMS = false;
 
    // State Estimator
    public static final boolean USE_STATE_ESTIMATOR = true;
@@ -184,7 +184,7 @@ public class DRCConfigParameters
    public static final boolean USE_SIMPLE_PELVIS_POSITION_ESTIMATOR = true;
 
 
-
+ 
    // LIDAR Configuration - LIDAR filtering parameters now in LidarFilterParameters
    public static final double LIDAR_SPINDLE_VELOCITY = 5.1;
    
