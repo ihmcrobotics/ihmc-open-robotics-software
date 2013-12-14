@@ -49,7 +49,7 @@ public class AtlasKinematicCalibrator
    }
 
    /**
-    * do not override, use addDynamicGraphicObjects
+    * ido not override, use addDynamicGraphicObjects
     */
    protected void createDisplay()
    {
@@ -67,7 +67,7 @@ public class AtlasKinematicCalibrator
       setupDynamicGraphicObjects();
 
       scs.startOnAThread();
-
+      scs.maximizeMainWindow();
    }
 
 
@@ -84,13 +84,13 @@ public class AtlasKinematicCalibrator
       yoIndex.set(index);
       updateDynamicGraphicsObjects(index);
       visualizer.update(1);
-      System.out.println("***display update");
    }
 
    protected void updateDynamicGraphicsObjects(int index)
    {
 
    }
+
 
 
    public void calibrate(FunctionNtoM residualFunc, double[] prm, int maxIter)
@@ -111,7 +111,6 @@ public class AtlasKinematicCalibrator
       System.arraycopy(optimizer.getParameters(), 0, prm, 0, prm.length);
       System.out.println("Optimiztion finished.");
    }
-
 
 }
   
