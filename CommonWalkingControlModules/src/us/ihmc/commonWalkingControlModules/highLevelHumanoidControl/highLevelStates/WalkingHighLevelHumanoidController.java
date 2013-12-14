@@ -802,7 +802,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             RobotSide previousSupport = previousSupportSide.getEnumValue();
             if (previousSupport !=null)
             {
-               FramePoint2d stanceFootLocation = new FramePoint2d(referenceFrames.getAnkleZUpFrame(previousSupport));
+               FramePoint2d stanceFootLocation = new FramePoint2d(referenceFrames.getAnkleZUpFrame(previousSupport.getOppositeSide()));
                moveICPToInsideOfFootAtEndOfSwing(previousSupport,  stanceFootLocation, swingTimeCalculationProvider.getValue(), 0.0, desiredICPLocal);
             }
             desiredICPLocal.changeFrame(referenceFrames.getMidFeetZUpFrame());
