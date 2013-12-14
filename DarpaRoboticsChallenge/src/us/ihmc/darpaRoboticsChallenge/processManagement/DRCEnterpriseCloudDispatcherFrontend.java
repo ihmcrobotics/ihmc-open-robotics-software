@@ -17,7 +17,11 @@ import us.ihmc.utilities.processManagement.ExitListener;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.PlainDocument;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -64,6 +68,9 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
    private final JavaProcessSpawner uiSpawner = new JavaProcessSpawner(true);
    private JButton spawnUIButton;
+   private JPanel handIPPanel;
+   private JTextField leftHandField;
+   private JTextField rightHandField;
 
    public DRCEnterpriseCloudDispatcherFrontend()
    {
@@ -338,7 +345,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
       IHMCSwingTools.setNativeLookAndFeel();
 
       frame = new JFrame("DRC Networking Dispatcher");
-      frame.setSize(1150, 350);
+      frame.setSize(1310, 345);
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 //    frame.setAlwaysOnTop(true);
@@ -350,7 +357,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
       GridBagConstraints c = new GridBagConstraints();
 
-      JPanel controlsPanel = new JPanel(new GridLayout(1, 4));
+      JPanel controlsPanel = new JPanel(new GridLayout(1, 5));
       ((GridLayout) controlsPanel.getLayout()).setHgap(5);
 
       setupNetProcPanel();
@@ -361,10 +368,13 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
       setupSelectRobotModelPanel();
 
+      setupHandIPPanel();
+
       controlsPanel.add(controllerPanel);
       controlsPanel.add(netProcPanel);
       controlsPanel.add(selectControllerPanel);
       controlsPanel.add(robotModelScrollPane);
+      controlsPanel.add(handIPPanel);
 
       c.gridx = 0;
       c.gridy = 0;
@@ -382,7 +392,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
          @Override
          public void actionPerformed(ActionEvent e)
          {
-            if (selectRobotModelRadioButtonGroup.getSelection() == null)
+            if (verifyEverythingIsConfigured())
                JOptionPane.showMessageDialog(frame, "Please complete the Controller/Robot Model configuration!", "Bad Deploy Configuration",
                                              JOptionPane.ERROR_MESSAGE);
             else
@@ -439,6 +449,68 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
       frame.setVisible(true);
    }
 
+   private boolean isStringInteger(String str)
+   {
+      try
+      {
+         Integer.parseInt(str);
+      }
+      catch (NumberFormatException e)
+      {
+         return false;
+      }
+
+      // only got here if we didn't return false
+      return true;
+   }
+
+   private void setupHandIPPanel()
+   {
+      handIPPanel = new JPanel(new BorderLayout());
+      handIPPanel.setBorder(BorderFactory.createEtchedBorder());
+
+      handIPPanel.add(new JLabel("<html><body><h2>Hand Configuration</h2></body></html>", JLabel.CENTER), BorderLayout.NORTH);
+
+      JLabel leftHandLabel = new JLabel("Left Hand Number:");
+      JLabel rightHandLabel = new JLabel("Right Hand Number:");
+
+      leftHandField = new JTextField(2);
+      leftHandField.setDocument(new PlainDocument()
+      {
+         @Override
+         public void insertString(int offs, String str, AttributeSet a) throws BadLocationException
+         {
+            if ((getLength() + str.length() <= 2) && isStringInteger(str))
+               super.insertString(offs, str, a);
+         }
+      });
+      leftHandField.setText("45");
+
+      rightHandField = new JTextField(2);
+      rightHandField.setDocument(new PlainDocument()
+      {
+         @Override
+         public void insertString(int offs, String str, AttributeSet a) throws BadLocationException
+         {
+            if ((getLength() + str.length() <= 2) && isStringInteger(str))
+               super.insertString(offs, str, a);
+         }
+      });
+      rightHandField.setText("40");
+
+      JPanel leftPanel = new JPanel();
+      leftPanel.setBorder(new EmptyBorder(40, 0, 0, 0));
+      leftPanel.add(leftHandLabel);
+      leftPanel.add(leftHandField);
+      handIPPanel.add(leftPanel, BorderLayout.CENTER);
+
+      JPanel rightPanel = new JPanel();
+      rightPanel.setBorder(new EmptyBorder(0, 0, 80, 0));
+      rightPanel.add(rightHandLabel);
+      rightPanel.add(rightHandField);
+      handIPPanel.add(rightPanel, BorderLayout.SOUTH);
+   }
+
    private void setupNetProcPanel()
    {
       netProcPanel = new JPanel(new GridLayout(6, 1));
@@ -452,7 +524,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
          {
             try
             {
-               if ((selectControllerRadioButtonGroup.getSelection() == null) || (selectRobotModelRadioButtonGroup.getSelection() == null))
+               if (verifyEverythingIsConfigured())
                   JOptionPane.showMessageDialog(frame, "Please complete the Controller/Robot Model configuration!", "Bad Deploy Configuration",
                                                 JOptionPane.ERROR_MESSAGE);
                else
@@ -523,18 +595,24 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
          {
             try
             {
-               if ((selectControllerRadioButtonGroup.getSelection() == null) || (selectRobotModelRadioButtonGroup.getSelection() == null))
+               if (verifyEverythingIsConfigured())
                   JOptionPane.showMessageDialog(frame, "Please complete the Controller/Robot Model configuration!", "Bad Deploy Configuration",
                                                 JOptionPane.ERROR_MESSAGE);
                else if (selectControllerRadioButtonGroup.getSelection().getActionCommand().contains(BLUE_TEAM_ACTION_COMMAND))
                {
                   DRCRobotModel model = DRCRobotModel.valueOf(selectRobotModelRadioButtonGroup.getSelection().getActionCommand());
-                  controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x00), UnsignedByteTools.fromInt(model.ordinal())});
+                  int leftHandIP = Integer.parseInt(leftHandField.getText());
+                  int rightHandIP = Integer.parseInt(rightHandField.getText());
+                  controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x00), UnsignedByteTools.fromInt(model.ordinal()),
+                                                     UnsignedByteTools.fromInt(leftHandIP), UnsignedByteTools.fromInt(rightHandIP)});
                }
                else if (selectControllerRadioButtonGroup.getSelection().getActionCommand().contains(RED_TEAM_ACTION_COMMAND))
                {
                   DRCRobotModel model = DRCRobotModel.valueOf(selectRobotModelRadioButtonGroup.getSelection().getActionCommand());
-                  controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x01), UnsignedByteTools.fromInt(model.ordinal())});
+                  int leftHandIP = Integer.parseInt(leftHandField.getText());
+                  int rightHandIP = Integer.parseInt(rightHandField.getText());
+                  controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x01), UnsignedByteTools.fromInt(model.ordinal()),
+                                                     UnsignedByteTools.fromInt(leftHandIP), UnsignedByteTools.fromInt(rightHandIP)});
                }
             }
             catch (DisconnectedException e)
@@ -566,6 +644,12 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
       controllerPanel.add(controllerRunningStatusLabel);
       controllerPanel.add(controllerStartButton);
       controllerPanel.add(controllerStopButton);
+   }
+
+   private boolean verifyEverythingIsConfigured()
+   {
+      return (selectControllerRadioButtonGroup.getSelection() == null) || (selectRobotModelRadioButtonGroup.getSelection() == null)
+             || (leftHandField.getText().isEmpty()) || (rightHandField.getText().isEmpty());
    }
 
    private void setupSelectRobotModelPanel()
