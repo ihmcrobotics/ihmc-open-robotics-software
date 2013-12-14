@@ -212,6 +212,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable swingAboveSupportAnkle = new DoubleYoVariable("swingAboveSupportAnkle", registry);
    private final BooleanYoVariable readyToGrabNextFootstep = new BooleanYoVariable("readyToGrabNextFootstep", registry);
 
+   private final EnumYoVariable<RobotSide> previousSupportSide = new EnumYoVariable<RobotSide>("previousSupportSide", registry, RobotSide.class);
+
    private final DoubleYoVariable moveICPAwayDuringSwingDistance = new DoubleYoVariable("moveICPAwayDuringSwingDistance", registry);
    private final DoubleYoVariable moveICPAwayAtEndOfSwingDistance = new DoubleYoVariable("moveICPAwayAtEndOfSwingDistance", registry);
    private final DoubleYoVariable singleSupportTimeLeftBeforeShift = new DoubleYoVariable("singleSupportTimeLeftBeforeShift", registry);
@@ -797,6 +799,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
          else
          {
+            RobotSide previousSupport = previousSupportSide.getEnumValue();
+            if (previousSupport !=null)
+            {
+               FramePoint2d stanceFootLocation = new FramePoint2d(referenceFrames.getAnkleZUpFrame(previousSupport));
+               moveICPToInsideOfFootAtEndOfSwing(previousSupport,  stanceFootLocation, swingTimeCalculationProvider.getValue(), 0.0, desiredICPLocal);
+            }
             desiredICPLocal.changeFrame(referenceFrames.getMidFeetZUpFrame());
             desiredICPLocal.setX(desiredICPLocal.getX() + icpStandOffsetX.getDoubleValue());
             desiredICPLocal.setY(desiredICPLocal.getY() + icpStandOffsetY.getDoubleValue());            
@@ -1003,6 +1011,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       @Override
       public void doTransitionIntoAction()
       {
+         icpStandOffsetX.set(0.0);
+         icpStandOffsetY.set(0.0);
+         
          desiredECMPinSupportPolygon.set(false);
          ecmpBasedToeOffHasBeenInitialized.set(false);
          trailingLeg.set(transferToSide);
@@ -1081,6 +1092,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       @Override
       public void doTransitionOutOfAction()
       {
+         icpStandOffsetX.set(0.0);
+         icpStandOffsetY.set(0.0);
+         
          // Before swinging a foot, relatch where all the other foot positions are. 
          // Otherwise there might be a jump.
          momentumBasedController.requestResetEstimatorPositionsToCurrent();
@@ -1334,6 +1348,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             System.out.println("WalkingHighLevelController: leavingDoubleSupportState");
 
          upcomingFootstepList.notifyComplete();
+         previousSupportSide.set(swingSide.getOppositeSide());
 
          // ContactableBody swingFoot = contactablePlaneBodies.get(swingSide);
          // Footstep desiredFootstep = desiredFootstepCalculator.updateAndGetDesiredFootstep(swingSide.getOppositeSide());
