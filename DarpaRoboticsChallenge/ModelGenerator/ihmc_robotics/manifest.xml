@@ -1,0 +1,14 @@
+<package>
+  <description brief="ihmc_robotics">
+
+     ihmc_robotics
+
+  </description>
+  <author>unknownpw</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/ihmc_robotics</url>
+
+</package>
+
+

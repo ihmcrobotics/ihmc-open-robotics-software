@@ -1,11 +1,15 @@
 package us.ihmc.darpaRoboticsChallenge.calib;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
+import java.awt.Color;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.tools.zip.ZipFile;
+
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.robotSide.RobotSide;
@@ -14,13 +18,11 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
-import java.awt.*;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
 
 public class AtlasCalibrationDataViewer extends AtlasKinematicCalibrator
 {
@@ -165,13 +167,23 @@ public class AtlasCalibrationDataViewer extends AtlasKinematicCalibrator
       calib.createQoutYoVariables();
 
       calib.createDisplay(calib.q.size());
+      
 
-      for (int i = 0; i < calib.q.size(); i++)
-      {
-         CalibUtil.setRobotModelFromData(calib.fullRobotModel, (Map) calib.q.get(i));
-         calib.updateQoutYoVariables(i);
-         calib.displayUpdate(i);
-      }
+      Map<String, Double> q0 = new HashMap<String, Double>();
+      
+      for(String key: calib.q.get(0).keySet())
+         q0.put(key,new Double(0));
+
+      
+      CalibUtil.setRobotModelFromData(calib.fullRobotModel,q0);
+      return;
+//    
+//      for(int i=0;i<calib.q.size();i++)
+//      {
+//         CalibUtil.setRobotModelFromData(calib.fullRobotModel, (Map)calib.q.get(i));
+//         calib.updateQoutYoVariables(i);
+//         calib.displayUpdate(i);
+//      }
 
    }
 

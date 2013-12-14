@@ -39,8 +39,8 @@ public class AtlasWristLoopKinematicCalibrator extends AtlasCalibrationDataViewe
    private void debugPrint(int index)
    {
       CalibUtil.setRobotModelFromData(fullRobotModel, (Map) q.get(index));
-      FramePose leftEE = new FramePose(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM), new Point3d(+0.01, +0.13, 0), CalibUtil.quat0);
-      FramePose rightEE = new FramePose(fullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM), new Point3d(+0.01, -0.13, 0), CalibUtil.quat0);
+      FramePose leftEE = new FramePose(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM), new Point3d(+0.00179, +0.13516, +0.01176), CalibUtil.quat0);
+      FramePose rightEE = new FramePose(fullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM), new Point3d(+0.00179,-0.13516, -0.01176), CalibUtil.quat0);
 
       leftEE.changeFrame(ReferenceFrame.getWorldFrame());
       rightEE.changeFrame(ReferenceFrame.getWorldFrame());
@@ -76,7 +76,8 @@ public class AtlasWristLoopKinematicCalibrator extends AtlasCalibrationDataViewe
    {
 
       AtlasWristLoopKinematicCalibrator calib = new AtlasWristLoopKinematicCalibrator();
-      calib.loadData("data/coupledWristLog_20131204");
+      //calib.loadData("data/coupledWristLog_20131204");
+      calib.loadData("data/coupledWristLog_20131206_1");
 
       // calJointNames order is the prm order
       ArrayList<String> calJointNames = CalibUtil.toStringArrayList(calib.getArmJoints());
