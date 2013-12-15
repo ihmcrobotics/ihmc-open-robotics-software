@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source /opt/ros/groovy/setup.bash
-export ROS_PACKAGE_PATH=/home/unknownid/ros:$ROS_PACKAGE_PATH	
+export ROS_PACKAGE_PATH=$PWD/../:$ROS_PACKAGE_PATH
 
 #rosrun xacro xacro.py ../atlas_description/robots/atlas_v3.urdf.xacro > atlas_v3.urdf
 #gzsdf print atlas_v3.urdf > atlas_v3.sdf
@@ -38,7 +38,7 @@ do
 done
 
 
-cp sdf/*sdf ~/workspace/DarpaRoboticsChallenge/src/us/ihmc/darpaRoboticsChallenge/models/GFE/
+echo cp sdf/*sdf ~/workspace/DarpaRoboticsChallenge/src/us/ihmc/darpaRoboticsChallenge/models/GFE/
 
 
 #roslauch ./show_in_rviz.launch &
