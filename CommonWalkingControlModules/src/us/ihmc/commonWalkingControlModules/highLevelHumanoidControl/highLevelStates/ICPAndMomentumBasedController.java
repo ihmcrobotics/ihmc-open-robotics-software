@@ -107,6 +107,8 @@ public class ICPAndMomentumBasedController
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("Capture Point", capturePointViz);
          dynamicGraphicObjectsListRegistry.registerArtifact("Capture Point", capturePointViz.createArtifact());
       }
+      
+      capturePointOffsetY.set(0.0);
    }
    
    public void updateUpdatables(double time)
@@ -133,6 +135,10 @@ public class ICPAndMomentumBasedController
    private final FramePoint2d centerOfMassPosition2d = new FramePoint2d(worldFrame);
    private final FrameVector2d centerOfMassVelocity2d = new FrameVector2d(worldFrame);
    
+   //
+   private final DoubleYoVariable capturePointOffsetY = new DoubleYoVariable("capturePointOffsetY", registry);
+   private final FrameVector2d capturePointOffsetHack2d = new FrameVector2d();
+   
    protected void computeCapturePoint()
    {
       centerOfMassPosition.setToZero(momentumBasedController.getCenterOfMassFrame());
@@ -145,6 +151,12 @@ public class ICPAndMomentumBasedController
       centerOfMassVelocity2d.set(centerOfMassVelocity.getX(), centerOfMassVelocity.getY());
       
       CapturePointCalculator.computeCapturePoint(capturePoint2d, centerOfMassPosition2d, centerOfMassVelocity2d, getOmega0());
+      
+      ReferenceFrame midFeetZUpFrame = momentumBasedController.getReferenceFrames().getMidFeetZUpFrame();
+      capturePointOffsetHack2d.set(midFeetZUpFrame, 0.0, capturePointOffsetY.getDoubleValue());
+      capturePointOffsetHack2d.changeFrame(capturePoint2d.getReferenceFrame());
+      capturePoint2d.add(capturePointOffsetHack2d);
+      
       capturePoint2d.changeFrame(yoCapturePoint.getReferenceFrame());
       yoCapturePoint.set(capturePoint2d.getX(), capturePoint2d.getY(), 0.0);
    }
