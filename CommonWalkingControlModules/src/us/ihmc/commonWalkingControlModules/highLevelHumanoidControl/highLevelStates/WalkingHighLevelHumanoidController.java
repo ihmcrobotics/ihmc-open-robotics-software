@@ -160,6 +160,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final YoFramePoint2d transferToFootstep = new YoFramePoint2d("transferToFootstep", worldFrame, registry);
 
+   private final BooleanYoVariable resetIntegratorsAfterSwing = new BooleanYoVariable("resetIntegratorsAfterSwing", registry);
+
    private final DoubleYoVariable stopInDoubleSupporTrajectoryTime = new DoubleYoVariable("stopInDoubleSupporTrajectoryTime", registry);
    private final DoubleYoVariable dwellInSingleSupportDuration = new DoubleYoVariable("dwellInSingleSupportDuration", 
          "Amount of time to stay in single support after the ICP trajectory is done if you haven't registered a touchdown yet", registry);
@@ -423,7 +425,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       dwellInSingleSupportDuration.set(0.2);
       
-      maxICPErrorBeforeSingleSupport.set(0.03); // Don't transition to single support until ICP is within 1.5 cm of desired.
+      maxICPErrorBeforeSingleSupport.set(0.02); //0.03); // Don't transition to single support until ICP is within 1.5 cm of desired.
       
       minOrbitalEnergyForSingleSupport.set(0.007);    // 0.008
       amountToBeInsideSingleSupport.set(0.0);
@@ -446,9 +448,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       // TODO: Fix low level stuff so that we are truly controlling pelvis height and not CoM height.
       controlPelvisHeightInsteadOfCoMHeight.set(true);
       
-      moveICPAwayDuringSwingDistance.set(0.03);   
-      moveICPAwayAtEndOfSwingDistance.set(0.08);   
-      singleSupportTimeLeftBeforeShift.set(0.3);
+      moveICPAwayDuringSwingDistance.set(0.012); //0.03);   
+      moveICPAwayAtEndOfSwingDistance.set(0.04); //0.08);   
+      singleSupportTimeLeftBeforeShift.set(0.26);
       
       footLoadThresholdToHoldPosition.set(0.2);
       
@@ -460,6 +462,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       {
          doubleSupportDesiredICP = null;
       }
+      
+      resetIntegratorsAfterSwing.set(true);
    }
 
 
@@ -1354,6 +1358,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          // Footstep desiredFootstep = desiredFootstepCalculator.updateAndGetDesiredFootstep(swingSide.getOppositeSide());
          // contactStates.get(swingFoot).setContactPoints(desiredFootstep.getExpectedContactPoints());
          // updateFootStateMachines(swingFoot);
+         
+         resetLoadedLegIntegrators(swingSide);
       }
    }
 
@@ -2095,12 +2101,25 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       fullRobotModel.getLegJoint(swingSide.getOppositeSide(), LegJointName.ANKLE_ROLL).setIntegrateDesiredAccelerations(false);
    }
    
-   public void doNotIntegrateAnkleAccelerations()
+   private void doNotIntegrateAnkleAccelerations()
    {
       fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.ANKLE_PITCH).setIntegrateDesiredAccelerations(false);
       fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.ANKLE_ROLL).setIntegrateDesiredAccelerations(false);
       fullRobotModel.getLegJoint(RobotSide.RIGHT, LegJointName.ANKLE_PITCH).setIntegrateDesiredAccelerations(false);
       fullRobotModel.getLegJoint(RobotSide.RIGHT, LegJointName.ANKLE_ROLL).setIntegrateDesiredAccelerations(false);
+   }
+   
+   private void resetLoadedLegIntegrators(RobotSide robotSide)
+   {
+      if (resetIntegratorsAfterSwing.getBooleanValue())
+      {
+         fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH).resetDesiredAccelerationIntegrator();
+         fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_ROLL).resetDesiredAccelerationIntegrator();
+         fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW).resetDesiredAccelerationIntegrator();
+         fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE).resetDesiredAccelerationIntegrator();
+         fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH).resetDesiredAccelerationIntegrator();
+         fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL).resetDesiredAccelerationIntegrator();
+      }
    }
    
    private final FrameVector2d stanceAnkleToOriginalICPVector = new FrameVector2d();
