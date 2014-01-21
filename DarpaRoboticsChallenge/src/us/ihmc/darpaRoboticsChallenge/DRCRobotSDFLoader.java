@@ -76,10 +76,10 @@ public class DRCRobotSDFLoader
             fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_sandia_hands.sdf");
             break;
 //
-//         case ATLAS_NO_HANDS_ADDED_MASS :
-//            fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_addedmass.sdf");
-//
-//            break;
+         case ATLAS_NO_HANDS_ADDED_MASS :
+            fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_addedmass.sdf");
+
+            break;
 //
 //         case ATLAS_CALIBRATION :
 //            fileInputStream = myClass.getResourceAsStream("models/GFE/atlas_calibration.sdf");
@@ -150,7 +150,7 @@ public class DRCRobotSDFLoader
 
    public static void main(String[] args)
    {
-      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.DRC_NO_HANDS, false);
+      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_NO_HANDS_ADDED_MASS, false);
       JaxbSDFLoader loader = loadDRCRobot(jointMap, false);
       System.out.println(loader.createRobot(jointMap, true).getName());
       

@@ -5,6 +5,7 @@ import us.ihmc.atlas.visualization.SliderBoardControllerListener;
 import us.ihmc.atlas.visualization.SliderBoardFactory;
 import us.ihmc.atlas.visualization.WalkControllerSliderBoard;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.robotDataCommunication.YoVariableClient;
@@ -24,7 +25,7 @@ public class RemoteAtlasVisualizer
    {
       System.out.println("Connecting to host " + host);
       
-      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCLocalConfigParameters.robotModelToUse, false);
+      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCLocalConfigParameters.defaultModel, false);
       JaxbSDFLoader robotLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
 //      SDFRobot robot = robotLoader.createRobot(jointMap, false);
 //      SliderBoardFactory sliderBoardFactory = GainControllerSliderBoard.getFactory();
