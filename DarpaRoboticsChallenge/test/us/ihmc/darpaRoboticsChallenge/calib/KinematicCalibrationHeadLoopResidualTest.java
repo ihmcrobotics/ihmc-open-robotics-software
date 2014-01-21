@@ -43,7 +43,7 @@ public class KinematicCalibrationHeadLoopResidualTest
    PlanarCalibrationTarget calibGrid = FactoryPlanarCalibrationTarget.gridChess(
          DetectChessboardInKinematicsData.boardWidth, DetectChessboardInKinematicsData.boardHeight, 0.03);
 
-   DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.DRC_NO_HANDS, false);
+   DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_NO_HANDS_ADDED_MASS, false);
    JaxbSDFLoader robotLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
    SDFFullRobotModel fullRobotModel = robotLoader.createFullRobotModel(jointMap);
 
