@@ -10,12 +10,12 @@ public class Graphics3DTranslateInstruction implements Graphics3DPrimitiveInstru
 
    public Graphics3DTranslateInstruction(Vector3d translation)
    {
-      this.translation = translation;
+      this.translation.set(translation);
    }
 
    public Graphics3DTranslateInstruction(double tx, double ty, double tz)
    {
-      translation = new Vector3d(tx, ty, tz);
+      translation.set(tx, ty, tz);
    }
 
    public Vector3d getTranslation()
