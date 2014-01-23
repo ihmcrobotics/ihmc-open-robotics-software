@@ -1,12 +1,15 @@
 package com.yobotics.simulationconstructionset;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import org.junit.Test;
@@ -16,9 +19,12 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.RotationalInertiaCalculator;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.test.JUnitTools;
 
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
@@ -354,7 +360,10 @@ public class RobotTest
 
       double mass = link.getMass();
       Vector3d offsetToCoM = new Vector3d(link.getComOffset());
-      offsetToCoM.sub(pinJoint.getOffset());    // c - p
+      
+      Vector3d offset = new Vector3d();
+      pinJoint.getOffset(offset);
+      offsetToCoM.sub(offset);    // c - p
       Vector3d temp3 = new Vector3d(jointAxis);
       temp3.scale(offsetToCoM.dot(jointAxis));    // ((c - p) . a) * a
       Vector3d comToJointAxis = new Vector3d();
@@ -440,7 +449,10 @@ public class RobotTest
    {
       Link ret = new Link("link12");
       Vector3d comOffset12 = new Vector3d(link11.getComOffset());
-      comOffset12.sub(pin1.getOffset());
+      
+      Vector3d offset = new Vector3d();
+      pin1.getOffset(offset);
+      comOffset12.sub(offset);
       ret.setComOffset(comOffset12);
       ret.setMass(link11.getMass());
       Matrix3d link1moi = new Matrix3d();
@@ -517,5 +529,481 @@ public class RobotTest
       robot.computeAngularMomentum(angularMomentum);
 
       return angularMomentum;
+   }
+   
+   @Test
+   public void testFreezeJointAtZero() throws UnreasonableAccelerationException
+   {
+      Robot robot = new Robot("robot");
+      
+      Vector3d jointOffset1 = new Vector3d(0.12, 1.17, 3.125);
+      double mass1 = 1.12;
+      Vector3d comOffset1 = new Vector3d(0.1, 1.11, 3.79);
+      
+      Matrix3d momentOfInertia1 = new Matrix3d();
+      momentOfInertia1.setM00(1.95);
+      momentOfInertia1.setM11(3.93);
+      momentOfInertia1.setM22(7.91);
+      
+      Vector3d jointOffset2 = new Vector3d(-0.4, 1.76, 1.1);
+      double mass2 = 1.12;
+      Vector3d comOffset2 = new Vector3d();
+      Matrix3d momentOfInertia2 = new Matrix3d();
+      momentOfInertia1.setM00(51.95);
+      momentOfInertia1.setM11(0.93);
+      momentOfInertia1.setM22(7.51);
+      
+      SliderJoint joint1 = new SliderJoint("joint1", jointOffset1, robot, Axis.X);
+      Link link1 = new Link("link1");
+      link1.setMass(mass1);
+      link1.setMomentOfInertia(momentOfInertia1);
+      link1.setComOffset(comOffset1);
+      joint1.setLink(link1);
+      
+      PinJoint joint2 = new PinJoint("joint2", jointOffset2, robot, Axis.X);
+      Link link2 = new Link("link2");
+      link2.setMass(mass2);
+      link2.setMomentOfInertia(momentOfInertia2);
+      link2.setComOffset(comOffset2);
+      joint2.setLink(link2);
+      
+      robot.addRootJoint(joint1);
+      joint1.addJoint(joint2);
+      
+      robot.freezeJointAtZero(joint2);
+      
+      Point3d comPoint = new Point3d();
+      double totalMass = robot.computeCenterOfMass(comPoint);
+      
+      double epsilon = 1e-7;
+      assertEquals(mass1+mass2, totalMass, epsilon);
+      
+      Vector3d jointOffset = new Vector3d();
+      joint1.getOffset(jointOffset); 
+      JUnitTools.assertTuple3dEquals(jointOffset1, jointOffset, epsilon);
+      
+      Link link = joint1.getLink();
+      Vector3d comOffset = new Vector3d();
+      link.getComOffset(comOffset);
+      
+      Vector3d temp = new Vector3d(comOffset1);
+      temp.scale(mass1);
+      Vector3d expectedCoMOffset = new Vector3d(temp);
+      temp.set(comOffset2);
+      temp.add(jointOffset2);
+      temp.scale(mass2);
+      expectedCoMOffset.add(temp);
+      expectedCoMOffset.scale(1.0/(mass1 + mass2));
+      JUnitTools.assertTuple3dEquals(expectedCoMOffset, comOffset, epsilon);
+      
+      Matrix3d momentOfInertia = new Matrix3d();
+      link.getMomentOfInertia(momentOfInertia);
+      
+      Matrix3d expectedMomentOfInertia = new Matrix3d();
+     
+      Vector3d deltaR1 = new Vector3d();
+      deltaR1.sub(comOffset, comOffset1);
+      Matrix3d tempMatrix = new Matrix3d();
+
+      parallelAxisTheorem(momentOfInertia1, mass1, deltaR1, tempMatrix);
+      expectedMomentOfInertia.set(tempMatrix);
+      
+      Vector3d deltaR2 = new Vector3d();
+      deltaR2.sub(comOffset, comOffset2);
+      deltaR2.sub(jointOffset2);
+      parallelAxisTheorem(momentOfInertia2, mass2, deltaR2, tempMatrix);
+
+      expectedMomentOfInertia.add(tempMatrix);
+      
+      JUnitTools.assertMatrix3dEquals("", expectedMomentOfInertia, momentOfInertia, epsilon);
+
+      
+      Robot expectedRobot = new Robot("expectedRobot");
+      SliderJoint expectedJoint = new SliderJoint("expected", jointOffset, expectedRobot, Axis.X);
+      Link expectedLink = new Link("expectedLink");
+      expectedLink.setMass(totalMass);
+      expectedLink.setComOffset(expectedCoMOffset);
+      expectedLink.setMomentOfInertia(expectedMomentOfInertia);
+      expectedJoint.setLink(expectedLink);
+      expectedRobot.addRootJoint(expectedJoint);
+      
+      double qInitial = 0.35;
+      double qdInitial = -1.11;
+      expectedJoint.setInitialState(qInitial, qdInitial);
+      joint1.setInitialState(qInitial, qdInitial);
+      
+      double dt = 0.0001;
+      for (int i=0; i<1000; i++)
+      {
+         robot.doDynamicsAndIntegrate(dt);
+         expectedRobot.doDynamicsAndIntegrate(dt);
+      }
+      
+      assertFalse(Double.isNaN(expectedJoint.getQ().getDoubleValue()));
+
+      assertEquals(expectedJoint.getQ().getDoubleValue(), joint1.getQ().getDoubleValue(), epsilon);
+      assertEquals(expectedJoint.getQD().getDoubleValue(), joint1.getQD().getDoubleValue(), epsilon);
+      assertEquals(expectedJoint.getQDD().getDoubleValue(), joint1.getQDD().getDoubleValue(), epsilon);
+   }
+   
+   
+   @Test
+   public void testFreezeJointAtZeroTwo() throws UnreasonableAccelerationException
+   {
+      Robot robotOne = createTestRobot();
+      Robot robotTwo = createTestRobot();
+      
+      FloatingJoint rootJointOne = (FloatingJoint) robotOne.getRootJoints().get(0);
+      ArrayList<Joint> childrenJointsOne = new ArrayList<Joint>();
+      rootJointOne.getChildrenJoints(childrenJointsOne);
+      robotOne.freezeJointAtZero(childrenJointsOne.get(0));
+      robotOne.freezeJointAtZero(childrenJointsOne.get(1));
+      
+      FloatingJoint rootJointTwo = (FloatingJoint) robotTwo.getRootJoints().get(0);
+      ArrayList<Joint> childrenJointsTwo = new ArrayList<Joint>();
+      rootJointTwo.getChildrenJoints(childrenJointsTwo);
+      robotOne.freezeJointAtZero(childrenJointsTwo.get(0));
+      robotOne.freezeJointAtZero(childrenJointsTwo.get(1));
+
+      Vector3d positionOne = new Vector3d(3.4, 5.7, 2.2);
+      Vector3d velocityOne = new Vector3d(12.4, 15.9, 0.2);
+      
+      rootJointOne.setPosition(positionOne);
+      rootJointOne.setVelocity(velocityOne);
+      
+      Vector3d positionTwo = new Vector3d(positionOne);
+      Vector3d velocityTwo = new Vector3d(velocityOne);
+      
+      rootJointTwo.setPosition(positionTwo);
+      rootJointTwo.setVelocity(velocityTwo);
+      
+      double dt = 0.0001;
+      double epsilon = 1e-7;
+      for (int i=0; i<1000; i++)
+      {
+         robotOne.doDynamicsAndIntegrate(dt);
+         robotTwo.doDynamicsAndIntegrate(dt);
+      }
+
+      rootJointOne.getPositionAndVelocity(positionOne, velocityOne);
+      rootJointTwo.getPositionAndVelocity(positionTwo, velocityTwo);
+      
+      assertFalse(Double.isNaN(positionOne.getX()));
+
+      JUnitTools.assertTuple3dEquals(positionOne, positionTwo, epsilon);
+      JUnitTools.assertTuple3dEquals(velocityOne, velocityTwo, epsilon);
+   }
+
+   private Robot createTestRobot()
+   {
+      Robot robot = new Robot("robot");
+      
+      Vector3d rootOffset = new Vector3d(5.12, 6.17, 7.125);
+      double rootMass = 10.12;
+      Vector3d rootCoMOffset = new Vector3d(2.1, -1.11, 3.72);
+      Matrix3d rootMomentOfInertia = new Matrix3d();
+      rootMomentOfInertia.setM00(71.95);
+      rootMomentOfInertia.setM11(83.93);
+      rootMomentOfInertia.setM22(97.91);
+      
+      FloatingJoint rootJoint = new FloatingJoint("root", rootOffset, robot);
+      Link rootLink = new Link("rootLink");
+      rootLink.setMass(rootMass);
+      rootLink.setComOffset(rootCoMOffset);
+      rootLink.setMomentOfInertia(rootMomentOfInertia);
+      
+      rootJoint.setLink(rootLink);
+      robot.addRootJoint(rootJoint);
+      
+      Vector3d jointOffset1 = new Vector3d(0.12, 1.17, 3.125);
+      double mass1 = 1.12;
+      Vector3d comOffset1 = new Vector3d(0.1, 1.11, 3.79);
+      
+      Matrix3d momentOfInertia1 = new Matrix3d();
+      momentOfInertia1.setM00(1.95);
+      momentOfInertia1.setM11(3.93);
+      momentOfInertia1.setM22(7.91);
+      
+      Vector3d jointOffset2 = new Vector3d(-0.4, 1.76, 1.1);
+      double mass2 = 1.12;
+      Vector3d comOffset2 = new Vector3d();
+      Matrix3d momentOfInertia2 = new Matrix3d();
+      momentOfInertia1.setM00(51.95);
+      momentOfInertia1.setM11(0.93);
+      momentOfInertia1.setM22(7.51);
+      
+      PinJoint joint1 = new PinJoint("joint1", jointOffset1, robot, Axis.X);
+      Link link1 = new Link("link1");
+      link1.setMass(mass1);
+      link1.setMomentOfInertia(momentOfInertia1);
+      link1.setComOffset(comOffset1);
+      joint1.setLink(link1);
+      
+      PinJoint joint2 = new PinJoint("joint2", jointOffset2, robot, Axis.X);
+      Link link2 = new Link("link2");
+      link2.setMass(mass2);
+      link2.setMomentOfInertia(momentOfInertia2);
+      link2.setComOffset(comOffset2);
+      joint2.setLink(link2);
+      
+      rootJoint.addJoint(joint1);
+      rootJoint.addJoint(joint2);
+      
+      return robot;
+   }
+   
+   private void parallelAxisTheorem(Matrix3d inputInertia, double mass, Vector3d vector1, Matrix3d outputInertia)
+   {
+      outputInertia.set(inputInertia);
+      
+      double dotProduct = vector1.dot(vector1);
+
+      for (int i=0; i<3; i++)
+      {
+         for (int j=0; j<3; j++)
+         {
+            double elementValueAdjustment = 0.0;
+            if (i == j) elementValueAdjustment = dotProduct; 
+            elementValueAdjustment = elementValueAdjustment - getElement(i, vector1) * getElement(j, vector1);
+            elementValueAdjustment = elementValueAdjustment * mass;
+            
+            double elementValue = outputInertia.getElement(i, j);
+            elementValue = elementValue + elementValueAdjustment;
+            outputInertia.setElement(i, j, elementValue);
+         }
+      }
+   }
+   
+   private double getElement(int index, Tuple3d tuple)
+   {
+      if (index == 0) return tuple.getX();
+      if (index == 1) return tuple.getY();
+      if (index == 2) return tuple.getZ();
+      throw new RuntimeException();
+   }
+   
+   @Test
+   public void testChangeLinkParameters() throws UnreasonableAccelerationException
+   {      
+      Vector3d jointOffset1 = new Vector3d(0.12, 1.17, 3.125);
+      double mass1 = 1.12;
+      Vector3d comOffset1 = new Vector3d(0.1, 1.11, 3.79);
+      
+      Matrix3d momentOfInertia1 = new Matrix3d();
+      momentOfInertia1.setM00(1.95);
+      momentOfInertia1.setM11(3.93);
+      momentOfInertia1.setM22(7.91);
+      
+      Vector3d jointOffset2 = new Vector3d(-0.4, 1.76, 1.1);
+      double mass2 = 3.14;
+      Vector3d comOffset2 = new Vector3d(0.1, 0.2, -1.79);
+      Matrix3d momentOfInertia2 = new Matrix3d();
+      momentOfInertia2.setM00(5.95);
+      momentOfInertia2.setM11(0.93);
+      momentOfInertia2.setM22(7.51);
+      
+      Vector3d jointOffset3 = new Vector3d(-0.33, 1.71, 2.1);
+      double mass3 = 4.12;
+      Vector3d comOffset3 = new Vector3d(0.2, 0.3, 12.79);
+      Matrix3d momentOfInertia3 = new Matrix3d();
+      momentOfInertia3.setM00(3.33);
+      momentOfInertia3.setM11(7.7);
+      momentOfInertia3.setM22(0.8);
+      
+      // Create the first robot
+      Robot robotOne = new Robot("robotOne");
+
+      PinJoint joint1 = new PinJoint("joint1", jointOffset1, robotOne, Axis.X);
+      Link link1 = new Link("link1");
+      link1.setMass(mass1);
+      link1.setMomentOfInertia(momentOfInertia1);
+      link1.setComOffset(comOffset1);
+      joint1.setLink(link1);
+      
+      PinJoint joint2 = new PinJoint("joint2", jointOffset2, robotOne, Axis.Y);
+      Link link2 = new Link("link2");
+      link2.setMass(mass2);
+      link2.setMomentOfInertia(momentOfInertia2);
+      link2.setComOffset(comOffset2);
+      joint2.setLink(link2);
+      
+      PinJoint joint3 = new PinJoint("joint3", jointOffset3, robotOne, Axis.Y);
+      Link link3 = new Link("link3");
+      link3.setMass(mass3);
+      link3.setMomentOfInertia(momentOfInertia3);
+      link3.setComOffset(comOffset3);
+      joint3.setLink(link3);
+      
+      robotOne.addRootJoint(joint1);
+      joint1.addJoint(joint2);
+      joint2.addJoint(joint3);
+      
+      // Change the link stuff:
+      jointOffset1.scale(0.77);
+      joint1.changeOffsetVector(jointOffset1);
+      
+      mass1 = mass1 * 1.5;
+      comOffset1.scale(0.33);
+      momentOfInertia1.mul(0.789);
+
+      link1.setMass(mass1);
+      link1.setComOffset(comOffset1);
+      link1.setMomentOfInertia(momentOfInertia1);
+      
+      jointOffset2.scale(3.33);
+      joint2.changeOffsetVector(jointOffset2);
+      
+      mass2 = mass2 + 4.5;
+      comOffset2.scale(3.91);
+      momentOfInertia2.mul(3.33);
+      
+      Link newLink2 = new Link(joint2.getLink().getName());
+      newLink2.setMass(mass2);
+      newLink2.setComOffset(comOffset2);
+      newLink2.setMomentOfInertia(momentOfInertia2);
+      joint2.setLink(newLink2);
+      
+      jointOffset3.scale(0.33);
+      joint3.changeOffsetVector(jointOffset3);
+      
+      mass3 = mass3 + 11.5;
+      comOffset3.scale(2.33);
+      momentOfInertia3.mul(4.789);
+
+      link3.setMass(mass3);
+      link3.setComOffset(comOffset3);
+      link3.setMomentOfInertia(momentOfInertia3);
+      
+      // Make an identical robot straight up, without changing link stuff:
+      Robot robotTwo = new Robot("robotTwo");
+
+      PinJoint joint1B = new PinJoint("joint1", jointOffset1, robotTwo, Axis.X);
+      Link link1B = new Link("link1");
+      link1B.setMass(mass1);
+      link1B.setMomentOfInertia(momentOfInertia1);
+      link1B.setComOffset(comOffset1);
+      joint1B.setLink(link1B);
+      
+      PinJoint joint2B = new PinJoint("joint2", jointOffset2, robotTwo, Axis.Y);
+      Link link2B = new Link("link2");
+      link2B.setMass(mass2);
+      link2B.setMomentOfInertia(momentOfInertia2);
+      link2B.setComOffset(comOffset2);
+      joint2B.setLink(link2B);
+      
+      PinJoint joint3B = new PinJoint("joint3", jointOffset3, robotTwo, Axis.Y);
+      Link link3B = new Link("link3");
+      link3B.setMass(mass3);
+      link3B.setMomentOfInertia(momentOfInertia3);
+      link3B.setComOffset(comOffset3);
+      joint3B.setLink(link3B);
+      
+      robotTwo.addRootJoint(joint1B);
+      joint1B.addJoint(joint2B);
+      joint2B.addJoint(joint3B);
+      
+      // Make sure the two robots are dynamically consistent:
+      joint1.setInitialState(0.11, 0.33);
+      joint2.setInitialState(0.15, 0.34);
+      joint1.setTau(7.7);
+      joint2.setTau(4.0);
+      
+      joint1B.setInitialState(0.11, 0.33);
+      joint2B.setInitialState(0.15, 0.34);
+      joint1B.setTau(7.7);
+      joint2B.setTau(4.0);
+      
+      double DT = 0.00001;
+      for (int i=0; i<100; i++)
+      {
+         robotOne.doDynamicsAndIntegrate(DT);
+         robotTwo.doDynamicsAndIntegrate(DT);
+      }
+      
+      double epsilon = 1e-7;
+      
+      assertFalse(Double.isNaN(joint1.getQ().getDoubleValue()));
+      
+      assertEquals(joint1.getQ().getDoubleValue(), joint1B.getQ().getDoubleValue(), epsilon);
+      assertEquals(joint1.getQD().getDoubleValue(), joint1B.getQD().getDoubleValue(), epsilon);
+      assertEquals(joint1.getQDD().getDoubleValue(), joint1B.getQDD().getDoubleValue(), epsilon);
+      
+      assertEquals(joint2.getQ().getDoubleValue(), joint2B.getQ().getDoubleValue(), epsilon);
+      assertEquals(joint2.getQD().getDoubleValue(), joint2B.getQD().getDoubleValue(), epsilon);
+      assertEquals(joint2.getQDD().getDoubleValue(), joint2B.getQDD().getDoubleValue(), epsilon);
+   }
+   
+   @Test
+   public void testConservationOfEnergyAndMomentum() throws UnreasonableAccelerationException
+   {
+      String name = "robot";
+      boolean startWithFloatingJoint = true;
+      int numberOfPinJoints = 4;
+      Random random = new Random(1776L);
+      Robot robot = RandomRobotGenerator.generateRandomLinearChainRobot(name, startWithFloatingJoint, numberOfPinJoints, random);
+      robot.setGravity(0.0, 0.0, 0.0);
+      
+      RandomRobotGenerator.setRandomJointPositions(robot, random);
+      RandomRobotGenerator.setRandomJointVelocities(robot, random);
+      
+      double simulateDT = 0.00001;
+      robot.doDynamicsAndIntegrate(simulateDT);
+      
+      Vector3d angularMomentumStart = new Vector3d();
+      Vector3d linearMomentumStart = new Vector3d();
+      
+      robot.computeAngularMomentum(angularMomentumStart);
+      robot.computeLinearMomentum(linearMomentumStart);
+      double translationalKineticEnergyStart = robot.computeTranslationalKineticEnergy();
+      double rotationalKineticEnergyStart = robot.computeRotationalKineticEnergy();
+      double totalEnergyStart = translationalKineticEnergyStart + rotationalKineticEnergyStart;
+      
+      YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
+      DoubleYoVariable translationalKineticEnergy = new DoubleYoVariable("translationalKineticEnergy", registry);
+      DoubleYoVariable rotationalKineticEnergy = new DoubleYoVariable("rotationalKineticEnergy", registry);
+      DoubleYoVariable totalEnergy = new DoubleYoVariable("totalEnergy", registry);
+      YoFrameVector angularMomentum = new YoFrameVector("angularMomentum", ReferenceFrame.getWorldFrame(), registry);
+      YoFrameVector linearMomentum = new YoFrameVector("linearMomentum", ReferenceFrame.getWorldFrame(), registry);
+
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+      int recordFrequency = 1;
+      scs.setDT(simulateDT, recordFrequency );
+      scs.startOnAThread();
+      
+//      scs.simulate(1.0);
+//      ThreadTools.sleepForever();
+      Vector3d temp = new Vector3d();
+      for (int i=0; i<8000; i++)
+      {
+         translationalKineticEnergy.set(robot.computeTranslationalKineticEnergy());
+         rotationalKineticEnergy.set(robot.computeRotationalKineticEnergy());
+         totalEnergy.set(translationalKineticEnergy.getDoubleValue() + rotationalKineticEnergy.getDoubleValue());
+         
+         robot.computeAngularMomentum(temp);
+         angularMomentum.set(temp);
+         robot.computeLinearMomentum(temp);
+         linearMomentum.set(temp);
+
+         robot.doDynamicsAndIntegrate(simulateDT);
+         scs.tickAndUpdate();
+      }
+      
+      Vector3d angularMomentum2 = new Vector3d();
+      Vector3d linearMomentum2 = new Vector3d();
+      
+      robot.computeAngularMomentum(angularMomentum2);
+      robot.computeLinearMomentum(linearMomentum2);
+      double translationalKineticEnergy2 = robot.computeTranslationalKineticEnergy();
+      double rotationalKineticEnergy2 = robot.computeRotationalKineticEnergy();
+      double totalEnergyEnd = translationalKineticEnergy2 + rotationalKineticEnergy2;
+
+      ThreadTools.sleepForever();
+
+      double epsilon = 1e-7;
+      JUnitTools.assertTuple3dEquals(angularMomentumStart, angularMomentum2, epsilon);
+      JUnitTools.assertTuple3dEquals(linearMomentumStart, linearMomentum2, epsilon);
+      assertEquals(totalEnergyStart, totalEnergyEnd, epsilon);
+      
+      ThreadTools.sleepForever();
    }
 }

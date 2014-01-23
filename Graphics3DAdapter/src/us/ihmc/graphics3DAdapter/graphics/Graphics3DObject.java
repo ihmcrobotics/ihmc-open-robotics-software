@@ -66,6 +66,12 @@ public class Graphics3DObject
       return graphics3DInstructions;
    }
    
+   public Graphics3DObject(Graphics3DObject graphics3DObject)
+   {
+      this();
+      combine(graphics3DObject);
+   }
+   
    /**
     * Merge this with the specified Graphics3DObject.
     *
@@ -75,6 +81,27 @@ public class Graphics3DObject
    {
       this.identity();
       this.graphics3DInstructions.addAll(Graphics3DObject.getGraphics3DInstructions());
+   }
+   
+   public void combine(Graphics3DObject Graphics3DObject, Vector3d offset)
+   {
+      this.identity();
+      this.translate(offset);
+
+      ArrayList<Graphics3DPrimitiveInstruction> graphics3dInstructionsToAdd = Graphics3DObject.getGraphics3DInstructions();
+      
+      for (Graphics3DPrimitiveInstruction graphics3dInstructionToAdd : graphics3dInstructionsToAdd)
+      {
+         this.graphics3DInstructions.add(graphics3dInstructionToAdd);
+
+         // Somewhat hackish. Need to translate the offset after each identity instruction. Otherwise not.
+         // But this won't do the correct thing for instructions that might do identity in them.
+         // We really need a hiarchical, programmatic, tree like way for doing the instructions...
+         if (graphics3dInstructionToAdd instanceof Graphics3DIdentityInstruction)
+         {
+            this.translate(offset);
+         }
+      }
    }
    
    public void addInstruction(Graphics3DPrimitiveInstruction instruction)
