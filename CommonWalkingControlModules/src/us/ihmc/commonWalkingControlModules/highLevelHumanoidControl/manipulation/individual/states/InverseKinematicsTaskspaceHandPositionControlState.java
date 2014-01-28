@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
 
@@ -172,11 +171,12 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
    {
       return super.isDone() || !inverseKinematicsSolutionIsValid.getBooleanValue();
    }
+   
    @Override
    public void setTrajectory(PositionTrajectoryGenerator positionTrajectoryGenerator, OrientationTrajectoryGenerator orientationTrajectoryGenerator,
-         Map<OneDoFJoint, Double> finalDesiredJointAngles, RigidBody base, RigidBodySpatialAccelerationControlModule rigidBodySpatialAccelerationControlModule, ReferenceFrame frameToControlPoseOf)
+         RigidBody base, RigidBodySpatialAccelerationControlModule rigidBodySpatialAccelerationControlModule, ReferenceFrame frameToControlPoseOf)
    {
-      super.setTrajectory(positionTrajectoryGenerator, orientationTrajectoryGenerator, finalDesiredJointAngles, base, rigidBodySpatialAccelerationControlModule, frameToControlPoseOf);
+      super.setTrajectory(positionTrajectoryGenerator, orientationTrajectoryGenerator, base, rigidBodySpatialAccelerationControlModule, frameToControlPoseOf);
       inverseKinematicsCalculator.setTrajectory(positionTrajectoryGenerator, orientationTrajectoryGenerator, frameToControlPoseOf);
    }
 }
