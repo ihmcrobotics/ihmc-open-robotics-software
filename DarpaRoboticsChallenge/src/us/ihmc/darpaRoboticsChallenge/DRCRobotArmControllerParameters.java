@@ -1,8 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.*;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
-import us.ihmc.robotSide.RobotSide;
 
 public class DRCRobotArmControllerParameters implements ArmControllerParameters
 {
@@ -88,35 +86,6 @@ public class DRCRobotArmControllerParameters implements ArmControllerParameters
    {
       if (!runningOnRealRobot)  return Double.POSITIVE_INFINITY;
       return 100.0; 
-   }
-
-   public boolean useDecoupledTaskspaceControl()
-   {
-      return DRCConfigParameters.USE_MANIPULATION_DECOUPLED_TASKSPACE_CONTROL;
-   }
-   
-   public String[] getDefaultDecoupledArmControlHandOrientationJointNames(RobotSide robotSide)
-   {
-      if (robotSide == RobotSide.LEFT)
-         return new String[]{jointNames[l_arm_wrx], jointNames[l_arm_wry]};
-      else
-         return new String[]{jointNames[r_arm_wrx], jointNames[r_arm_wry]};
-   }
-
-   public String[] getDefaultDecoupledArmControlHandPositionJointNames(RobotSide robotSide)
-   {
-      if (robotSide == RobotSide.LEFT)
-         return new String[]{jointNames[l_arm_shx], jointNames[l_arm_elx]};
-      else
-         return new String[]{jointNames[r_arm_shx], jointNames[r_arm_elx]};
-   }
-
-   public String[] getDefaultDecoupledArmControlHandJointspaceJointNames(RobotSide robotSide)
-   {
-      if (robotSide == RobotSide.LEFT)
-         return new String[]{jointNames[l_arm_shy], jointNames[l_arm_ely]};
-      else
-         return new String[]{jointNames[r_arm_shy], jointNames[r_arm_ely]};
    }
 
    @Override
