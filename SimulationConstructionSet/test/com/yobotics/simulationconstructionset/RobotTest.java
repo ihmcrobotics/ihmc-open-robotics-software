@@ -19,7 +19,6 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.RotationalInertiaCalculator;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.test.JUnitTools;
@@ -942,22 +941,28 @@ public class RobotTest
       Random random = new Random(1776L);
       Robot robot = RandomRobotGenerator.generateRandomLinearChainRobot(name, startWithFloatingJoint, numberOfPinJoints, random);
       robot.setGravity(0.0, 0.0, 0.0);
-      
+
       RandomRobotGenerator.setRandomJointPositions(robot, random);
       RandomRobotGenerator.setRandomJointVelocities(robot, random);
-      
+
       double simulateDT = 0.00001;
-      robot.doDynamicsAndIntegrate(simulateDT);
-      
+      int numberOfTicksToSimulate = 8000;
+
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, SHOW_GUI);
+      int recordFrequency = 1;
+      scs.setDT(simulateDT, recordFrequency);
+      scs.startOnAThread();
+
       Vector3d angularMomentumStart = new Vector3d();
       Vector3d linearMomentumStart = new Vector3d();
-      
+
+      robot.doDynamicsAndIntegrate(simulateDT);
       robot.computeAngularMomentum(angularMomentumStart);
       robot.computeLinearMomentum(linearMomentumStart);
       double translationalKineticEnergyStart = robot.computeTranslationalKineticEnergy();
       double rotationalKineticEnergyStart = robot.computeRotationalKineticEnergy();
       double totalEnergyStart = translationalKineticEnergyStart + rotationalKineticEnergyStart;
-      
+
       YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
       DoubleYoVariable translationalKineticEnergy = new DoubleYoVariable("translationalKineticEnergy", registry);
       DoubleYoVariable rotationalKineticEnergy = new DoubleYoVariable("rotationalKineticEnergy", registry);
@@ -965,57 +970,37 @@ public class RobotTest
       YoFrameVector angularMomentum = new YoFrameVector("angularMomentum", ReferenceFrame.getWorldFrame(), registry);
       YoFrameVector linearMomentum = new YoFrameVector("linearMomentum", ReferenceFrame.getWorldFrame(), registry);
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
-      int recordFrequency = 1;
-      scs.setDT(simulateDT, recordFrequency );
-      scs.startOnAThread();
-      
-      //MDF
-      robot.computeAngularMomentum(angularMomentumStart);
-      robot.computeLinearMomentum(linearMomentumStart);
-      translationalKineticEnergyStart = robot.computeTranslationalKineticEnergy();
-      rotationalKineticEnergyStart = robot.computeRotationalKineticEnergy();
-      totalEnergyStart = translationalKineticEnergyStart + rotationalKineticEnergyStart;
-      //end MDF
-      
-//      scs.simulate(1.0);
-//      ThreadTools.sleepForever();
       Vector3d temp = new Vector3d();
-      for (int i=0; i<8000; i++)
+      for (int i = 0; i < numberOfTicksToSimulate; i++)
       {
          translationalKineticEnergy.set(robot.computeTranslationalKineticEnergy());
          rotationalKineticEnergy.set(robot.computeRotationalKineticEnergy());
          totalEnergy.set(translationalKineticEnergy.getDoubleValue() + rotationalKineticEnergy.getDoubleValue());
-         
+
          robot.computeAngularMomentum(temp);
          angularMomentum.set(temp);
          robot.computeLinearMomentum(temp);
          linearMomentum.set(temp);
 
+         robot.updateVelocities();
          robot.doDynamicsAndIntegrate(simulateDT);
          scs.tickAndUpdate();
       }
-      
-      Vector3d angularMomentum2 = new Vector3d();
-      Vector3d linearMomentum2 = new Vector3d();
-      
-      robot.computeAngularMomentum(angularMomentum2);
-      robot.computeLinearMomentum(linearMomentum2);
-      double translationalKineticEnergy2 = robot.computeTranslationalKineticEnergy();
-      double rotationalKineticEnergy2 = robot.computeRotationalKineticEnergy();
-      double totalEnergyEnd = translationalKineticEnergy2 + rotationalKineticEnergy2;
 
-//      ThreadTools.sleepForever();
+      Vector3d angularMomentumEnd = new Vector3d();
+      Vector3d linearMomentumEnd = new Vector3d();
 
-      double epsilon = 1e-7;      
+      robot.computeAngularMomentum(angularMomentumEnd);
+      robot.computeLinearMomentum(linearMomentumEnd);
+      double translationalKineticEnergyEnd = robot.computeTranslationalKineticEnergy();
+      double rotationalKineticEnergyEnd = robot.computeRotationalKineticEnergy();
+      double totalEnergyEnd = translationalKineticEnergyEnd + rotationalKineticEnergyEnd;
+
+      double epsilon = 1e-7;
       assertEquals("Total energy must be conserved", totalEnergyStart, totalEnergyEnd, epsilon);
-//    epsilon = 1e-7;      
-      epsilon = 0.15;//MDF
-      JUnitTools.assertTuple3dEquals("Angular momentum should be conserved", angularMomentumStart, angularMomentum2, epsilon);
-//      epsilon = 1e-7;      
-      epsilon = 0.05;//MDF
-      JUnitTools.assertTuple3dEquals("Linear momentum should be conserved", linearMomentumStart, linearMomentum2, epsilon);
       
-//      ThreadTools.sleepForever();
+      epsilon = 6e-5;
+      JUnitTools.assertTuple3dEquals("Angular momentum should be conserved", angularMomentumStart, angularMomentumEnd, epsilon);
+      JUnitTools.assertTuple3dEquals("Linear momentum should be conserved", linearMomentumStart, linearMomentumEnd, epsilon);
    }
 }
