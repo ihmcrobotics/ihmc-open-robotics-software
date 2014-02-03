@@ -135,7 +135,7 @@ public class DRCOptimizationMomentumControlModuleTest
          MomentumModuleSolution momentumModuleSolution;
          try
          {
-            momentumModuleSolution = momentumControlModule.compute(contactStates, null, null);
+            momentumModuleSolution = momentumControlModule.compute(contactStates, null);
          }
          catch (MomentumControlModuleException momentumControlModuleException)
          {
@@ -214,7 +214,7 @@ public class DRCOptimizationMomentumControlModuleTest
          constrainFeet(elevator, feet, momentumControlModule, taskspaceConstraintDataMap);
          constrainPelvis(random, fullRobotModel, momentumControlModule, taskspaceConstraintDataMap);
 
-         MomentumModuleSolution momentumModuleSolution = momentumControlModule.compute(contactStates, null, null);
+         MomentumModuleSolution momentumModuleSolution = momentumControlModule.compute(contactStates, null);
          Map<RigidBody, Wrench> externalWrenchSolution = momentumModuleSolution.getExternalWrenchSolution();
          
          assertWrenchesSumUpToMomentumDot(externalWrenchSolution.values(), momentumModuleSolution.getCentroidalMomentumRateSolution(),

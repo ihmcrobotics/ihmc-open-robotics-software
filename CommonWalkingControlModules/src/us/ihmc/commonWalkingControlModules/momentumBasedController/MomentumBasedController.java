@@ -370,8 +370,7 @@ public class MomentumBasedController
       MomentumModuleSolution momentumModuleSolution;
       try
       {
-         momentumModuleSolution = momentumControlModuleBridge.compute(this.yoPlaneContactStates, null,
-               upcomingSupportLeg.getEnumValue());
+         momentumModuleSolution = momentumControlModuleBridge.compute(this.yoPlaneContactStates, upcomingSupportLeg.getEnumValue());
       }
       catch (MomentumControlModuleException momentumControlModuleException)
       {
