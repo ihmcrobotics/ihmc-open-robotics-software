@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.wrenchDistribution;
+package us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.wrenchDistribution;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,6 +6,8 @@ import java.util.List;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.EndEffector;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.OptimizerContactModel;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;

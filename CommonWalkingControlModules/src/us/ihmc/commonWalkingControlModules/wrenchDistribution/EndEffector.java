@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.bipedSupportPolygons.CylindricalContactState;
+import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.wrenchDistribution.OptimizerCylinderContactModel;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;

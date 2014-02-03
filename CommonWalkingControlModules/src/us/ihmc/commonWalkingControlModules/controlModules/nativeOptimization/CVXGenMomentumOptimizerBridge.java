@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylinderAndPlaneContactMatrixCalculatorAdapter;
+import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.wrenchDistribution.CylinderAndPlaneContactMatrixCalculatorAdapter;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 
 public class CVXGenMomentumOptimizerBridge
