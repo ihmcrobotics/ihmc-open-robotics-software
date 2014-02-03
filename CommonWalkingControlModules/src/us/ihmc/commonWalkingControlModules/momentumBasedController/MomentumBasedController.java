@@ -35,8 +35,6 @@ import us.ihmc.commonWalkingControlModules.stateEstimation.DesiredCoMAndAngularA
 import us.ihmc.commonWalkingControlModules.stateEstimation.PointPositionGrabber;
 import us.ihmc.commonWalkingControlModules.stateEstimation.PointPositionGrabberInterface;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
-import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.bipedSupportPolygons.ContactableCylinderBody;
-import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.bipedSupportPolygons.YoCylindricalContactState;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromController;
@@ -87,7 +85,6 @@ public class MomentumBasedController
    private final ContactablePlaneBody pelvis, pelvisBack;
 
    private final List<ContactablePlaneBody> listOfAllContactablePlaneBodies;
-   private final List<ContactableCylinderBody> listOfAllContactableCylinderBodies;
    
    private final DoubleYoVariable leftPassiveKneeTorque = new DoubleYoVariable("leftPassiveKneeTorque", registry);
    private final DoubleYoVariable rightPassiveKneeTorque = new DoubleYoVariable("rightPassiveKneeTorque", registry);
@@ -100,7 +97,6 @@ public class MomentumBasedController
    private final List<YoPlaneContactState> yoPlaneContactStateList = new ArrayList<YoPlaneContactState>();
    
    private final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> yoPlaneContactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
-   private final LinkedHashMap<ContactableCylinderBody, YoCylindricalContactState> yoCylindricalContactStates = new LinkedHashMap<ContactableCylinderBody, YoCylindricalContactState>();
    private final List<ModifiableContactState> modifiableContactStates = new ArrayList<ModifiableContactState>();
 
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
@@ -277,28 +273,7 @@ public class MomentumBasedController
          }
       }
 
-      //TODO Clean cylindrical stuff
-      this.listOfAllContactableCylinderBodies = new ArrayList<ContactableCylinderBody>();
-
-//      if (graspingHands != null)
-//      {
-//         this.listOfAllContactableCylinderBodies.addAll(graspingHands.values());
-//      }
-
-      //    coefficientOfFriction = 0.0;
-      for (ContactableCylinderBody contactableCylinderBody : this.listOfAllContactableCylinderBodies)
-      {
-         RigidBody rigidBody = contactableCylinderBody.getRigidBody();
-
-         // YoCylindricalContactState: used to enable load bearing with hands by grasping a cylinder
-         YoCylindricalContactState cylindricalContactState = new YoCylindricalContactState(rigidBody.getName(),
-               rigidBody.getParentJoint().getFrameAfterJoint(), contactableCylinderBody.getCylinderFrame(), registry, dynamicGraphicObjectsListRegistry);
-         cylindricalContactState.set(coefficientOfFriction, contactableCylinderBody, false);
-         yoCylindricalContactStates.put(contactableCylinderBody, cylindricalContactState);
-      }
-
       modifiableContactStates.addAll(yoPlaneContactStateList);
-      modifiableContactStates.addAll(yoCylindricalContactStates.values());
 
       this.planeContactWrenchProcessor = new PlaneContactWrenchProcessor(this.listOfAllContactablePlaneBodies, dynamicGraphicObjectsListRegistry, registry);
 
@@ -318,7 +293,7 @@ public class MomentumBasedController
       if (momentumOptimizationSettings != null)
       {
          optimizationMomentumControlModule = new OptimizationMomentumControlModule(fullRobotModel.getRootJoint(), referenceFrames.getCenterOfMassFrame(),
-               controlDT, gravityZ, momentumOptimizationSettings, twistCalculator, robotJacobianHolder, yoPlaneContactStateList, yoCylindricalContactStates.values(), dynamicGraphicObjectsListRegistry, registry);
+               controlDT, gravityZ, momentumOptimizationSettings, twistCalculator, robotJacobianHolder, yoPlaneContactStateList, null, dynamicGraphicObjectsListRegistry, registry);
       }
 
       momentumControlModuleBridge = new MomentumControlModuleBridge(optimizationMomentumControlModule, oldMomentumControlModule, centerOfMassFrame, registry);
@@ -401,7 +376,7 @@ public class MomentumBasedController
       MomentumModuleSolution momentumModuleSolution;
       try
       {
-         momentumModuleSolution = momentumControlModuleBridge.compute(this.yoPlaneContactStates, this.yoCylindricalContactStates,
+         momentumModuleSolution = momentumControlModuleBridge.compute(this.yoPlaneContactStates, null,
                upcomingSupportLeg.getEnumValue());
       }
       catch (MomentumControlModuleException momentumControlModuleException)
@@ -556,14 +531,6 @@ public class MomentumBasedController
                      contactState.getCoefficientOfFriction(), contactState.getContactNormalFrameVectorCopy());
             }
          }
-
-         for (ContactableCylinderBody contactableCylinderBody : yoCylindricalContactStates.keySet())
-         {
-            YoCylindricalContactState contactState = yoCylindricalContactStates.get(contactableCylinderBody);
-            if (contactState.isInContact())
-               momentumBasedControllerSpy.setCylindricalContactInContact(contactableCylinderBody, contactState.isInContact());
-         }
-
          momentumBasedControllerSpy.doSecondaryControl();
       }
    }
@@ -721,12 +688,6 @@ public class MomentumBasedController
    {
       YoPlaneContactState yoPlaneContactState = yoPlaneContactStates.get(contactableBody);
       yoPlaneContactState.clear();
-   }
-
-   public void setCylindricalContactInContact(ContactableCylinderBody contactableCylinderBody, boolean setInContact)
-   {
-      YoCylindricalContactState yoCylindricalContactState = yoCylindricalContactStates.get(contactableCylinderBody);
-      yoCylindricalContactState.setInContact(setInContact);
    }
 
    public ReferenceFrame getCenterOfMassFrame()
@@ -921,18 +882,6 @@ public class MomentumBasedController
          pointPositionGrabber.setDelayTimeBeforeTrustingContacts(delayTimeBeforeTrustingContacts);
    }
 
-   public void setCylindricalContactStateProperties(ContactableCylinderBody contactableCylinderBody, double coefficientOfFriction, double gripStrength,
-         double cylinderRadius, double halfHandWidth, double gripWeaknessFactor, boolean inContact)
-   {
-      yoCylindricalContactStates.get(contactableCylinderBody).set(coefficientOfFriction, gripStrength, cylinderRadius, halfHandWidth, gripWeaknessFactor,
-            inContact);
-   }
-
-   public void setCylindricalContactStateProperties(ContactableCylinderBody contactableCylinderBody, double coefficientOfFriction, boolean inContact)
-   {
-      yoCylindricalContactStates.get(contactableCylinderBody).set(coefficientOfFriction, contactableCylinderBody, inContact);
-   }
-   
    public int getOrCreateGeometricJacobian(RigidBody ancestor, RigidBody descendant, ReferenceFrame jacobianFrame)
    {
       return robotJacobianHolder.getOrCreateGeometricJacobian(ancestor, descendant, jacobianFrame);
