@@ -16,8 +16,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.D
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
-import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.bipedSupportPolygons.ContactableCylinderBody;
-import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.bipedSupportPolygons.CylindricalContactState;
 import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.wrenchDistribution.CylinderAndPlaneContactMatrixCalculatorAdapter;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
@@ -75,8 +73,8 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
    public OptimizationMomentumControlModule(InverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame, double controlDT, double gravityZ,
            MomentumOptimizationSettings momentumOptimizationSettings, TwistCalculator twistCalculator, GeometricJacobianHolder geometricJacobianHolder,
-           Collection<? extends PlaneContactState> planeContactStates, Collection<? extends CylindricalContactState> cylindricalContactStates,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+           Collection<? extends PlaneContactState> planeContactStates, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+           YoVariableRegistry parentRegistry)
    {
       this.jointsToOptimizeFor = momentumOptimizationSettings.getJointsToOptimizeFor();
       this.centroidalMomentumHandler = new CentroidalMomentumHandler(rootJoint, centerOfMassFrame, controlDT, registry);
@@ -98,7 +96,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       double wRhoPenalizer = momentumOptimizationSettings.getPenalizerOfRhoPlaneContactRegularization();
 
       this.wrenchMatrixCalculator = new CylinderAndPlaneContactMatrixCalculatorAdapter(centerOfMassFrame, rhoSize, phiSize, wRhoCylinderContacts,
-              wPhiCylinderContacts, wRhoPlaneContacts, wRhoSmoother, wRhoPenalizer, planeContactStates, cylindricalContactStates,
+              wPhiCylinderContacts, wRhoPlaneContacts, wRhoSmoother, wRhoPenalizer, planeContactStates, null,
               dynamicGraphicObjectsListRegistry, registry);
 
       this.momentumOptimizationSettings = momentumOptimizationSettings;
