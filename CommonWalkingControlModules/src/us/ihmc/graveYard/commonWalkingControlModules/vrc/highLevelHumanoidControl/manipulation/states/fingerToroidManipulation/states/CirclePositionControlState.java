@@ -1,4 +1,4 @@
-package us.ihmc.vrcGraveYard.highLevelHumanoidControl.manipulation.states.fingerToroidManipulation.states;
+package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.fingerToroidManipulation.states;
 
 import us.ihmc.commonWalkingControlModules.controlModules.SE3PDGains;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.IndividualHandControlModule;
@@ -7,12 +7,12 @@ import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolation
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SE3ConfigurationProvider;
+import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.fingerToroidManipulation.FingerToroidManipulationState;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.vrcGraveYard.highLevelHumanoidControl.manipulation.states.fingerToroidManipulation.FingerToroidManipulationState;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.statemachines.State;

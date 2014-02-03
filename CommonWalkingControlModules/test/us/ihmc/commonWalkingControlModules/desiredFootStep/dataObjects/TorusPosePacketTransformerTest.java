@@ -12,11 +12,11 @@ import javax.vecmath.Quat4d;
 
 import org.junit.Test;
 
+import us.ihmc.graveYard.commonWalkingControlModules.vrc.TorusPosePacket;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.vrcGraveYard.TorusPosePacket;
 
 /**
  * Created with IntelliJ IDEA.

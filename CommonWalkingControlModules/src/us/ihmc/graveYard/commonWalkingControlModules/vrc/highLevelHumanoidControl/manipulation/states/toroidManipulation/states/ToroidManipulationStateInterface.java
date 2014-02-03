@@ -1,4 +1,4 @@
-package us.ihmc.vrcGraveYard.highLevelHumanoidControl.manipulation.states.toroidManipulation.states;
+package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.toroidManipulation.states;
 
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import us.ihmc.robotSide.RobotSide;

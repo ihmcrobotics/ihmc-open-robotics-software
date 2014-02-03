@@ -1,4 +1,4 @@
-package us.ihmc.vrcGraveYard.highLevelHumanoidControl.manipulation.states.toroidManipulation;
+package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.toroidManipulation;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.PDController;
