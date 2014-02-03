@@ -287,7 +287,7 @@ public class MomentumBasedController
       if (momentumOptimizationSettings != null)
       {
          optimizationMomentumControlModule = new OptimizationMomentumControlModule(fullRobotModel.getRootJoint(), referenceFrames.getCenterOfMassFrame(),
-               controlDT, gravityZ, momentumOptimizationSettings, twistCalculator, robotJacobianHolder, yoPlaneContactStateList, null, dynamicGraphicObjectsListRegistry, registry);
+               controlDT, gravityZ, momentumOptimizationSettings, twistCalculator, robotJacobianHolder, yoPlaneContactStateList, dynamicGraphicObjectsListRegistry, registry);
       }
 
       momentumControlModuleBridge = new MomentumControlModuleBridge(optimizationMomentumControlModule, oldMomentumControlModule, centerOfMassFrame, registry);

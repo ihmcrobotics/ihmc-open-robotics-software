@@ -39,7 +39,6 @@ import us.ihmc.darpaRoboticsChallenge.DRCSimulationVisualizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup;
-import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.bipedSupportPolygons.CylindricalContactState;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -127,7 +126,7 @@ public class SimpleStanceController implements RobotController
       contactStates = createContactStates(feet, registry, coefficientOfFriction);
       
       this.momentumControlModule = new OptimizationMomentumControlModule(rootJoint, referenceFrames.getCenterOfMassFrame(), controlDT, gravityZ,
-            momentumOptimizationSettings, twistCalculator, null, contactStates.values(), new ArrayList<CylindricalContactState>(), null, registry);
+            momentumOptimizationSettings, twistCalculator, null, contactStates.values(), null, registry);
 
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
 
