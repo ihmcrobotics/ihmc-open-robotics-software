@@ -167,7 +167,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       
       // The controllers do not extend the MomentumBasedController anymore. Instead, it is passed through the constructor.
       MomentumBasedController momentumBasedController = new MomentumBasedController(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian,
-                                                           referenceFrames, footSwitches, yoTime, gravityZ, twistCalculator, feet, hands, null, null, null, null, controlDT,
+                                                           referenceFrames, footSwitches, yoTime, gravityZ, twistCalculator, feet, hands, null, null, null, controlDT,
                                                            processedOutputs, momentumOptimizationSettings , oldMomentumControlModule, null, stateEstimationDataFromControllerSink,
                                                            dynamicGraphicObjectsListRegistry);
 

@@ -20,7 +20,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.OrientationTr
 import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAngularAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
-import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.bipedSupportPolygons.ContactableCylinderBody;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -87,7 +86,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
    private final DoubleYoVariable maxJerkUpperBody = new DoubleYoVariable("maxJerkUpperBody", registry);
    
    protected final SideDependentList<? extends ContactablePlaneBody> feet, handPalms;
-   protected final SideDependentList<ContactableCylinderBody> graspingHands;
 
    protected final DoubleYoVariable coefficientOfFriction = new DoubleYoVariable("coefficientOfFriction", registry);
    private final RootJointAngularAccelerationControlModule rootJointAccelerationControlModule;
@@ -127,7 +125,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
       feet = momentumBasedController.getContactablePlaneFeet();
       handPalms = momentumBasedController.getContactablePlaneHandsWithFingersBentBack();
-      graspingHands = momentumBasedController.getContactableCylinderHands();
 
       this.desiredHeadOrientationProvider = variousWalkingProviders.getDesiredHeadOrientationProvider();
       this.headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
