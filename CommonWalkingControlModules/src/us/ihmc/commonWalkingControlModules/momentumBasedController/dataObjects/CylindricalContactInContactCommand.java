@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableCylinderBody;
+import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.bipedSupportPolygons.ContactableCylinderBody;
 
 public class CylindricalContactInContactCommand
 {
