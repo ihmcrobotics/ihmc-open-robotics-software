@@ -86,7 +86,6 @@ public class MomentumBasedController
    private final SideDependentList<ContactablePlaneBody> feet, handsWithFingersBentBack, thighs;
    private final ContactablePlaneBody pelvis, pelvisBack;
 
-   private final SideDependentList<ContactableCylinderBody> graspingHands;
    private final List<ContactablePlaneBody> listOfAllContactablePlaneBodies;
    private final List<ContactableCylinderBody> listOfAllContactableCylinderBodies;
    
@@ -157,8 +156,7 @@ public class MomentumBasedController
    public MomentumBasedController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
          CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
          DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator, SideDependentList<ContactablePlaneBody> feet,
-         SideDependentList<ContactablePlaneBody> handsWithFingersBentBack, SideDependentList<ContactableCylinderBody> graspingHands,
-         SideDependentList<ContactablePlaneBody> thighs, ContactablePlaneBody pelvis, ContactablePlaneBody pelvisBack, double controlDT,
+         SideDependentList<ContactablePlaneBody> handsWithFingersBentBack, SideDependentList<ContactablePlaneBody> thighs, ContactablePlaneBody pelvis, ContactablePlaneBody pelvisBack, double controlDT,
          ProcessedOutputsInterface processedOutputs, MomentumOptimizationSettings momentumOptimizationSettings,
          OldMomentumControlModule oldMomentumControlModule, ArrayList<Updatable> updatables,
          StateEstimationDataFromController stateEstimationDataFromControllerSink, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
@@ -185,7 +183,6 @@ public class MomentumBasedController
       // Initialize the contactable bodies
       this.feet = feet;
       this.handsWithFingersBentBack = handsWithFingersBentBack;
-      this.graspingHands = graspingHands; // Cylindrical contact used to bear load while grasping a cylinder
       this.thighs = thighs;
       this.pelvis = pelvis;
       this.pelvisBack = pelvisBack;
@@ -280,12 +277,13 @@ public class MomentumBasedController
          }
       }
 
+      //TODO Clean cylindrical stuff
       this.listOfAllContactableCylinderBodies = new ArrayList<ContactableCylinderBody>();
 
-      if (graspingHands != null)
-      {
-         this.listOfAllContactableCylinderBodies.addAll(graspingHands.values());
-      }
+//      if (graspingHands != null)
+//      {
+//         this.listOfAllContactableCylinderBodies.addAll(graspingHands.values());
+//      }
 
       //    coefficientOfFriction = 0.0;
       for (ContactableCylinderBody contactableCylinderBody : this.listOfAllContactableCylinderBodies)
@@ -867,16 +865,6 @@ public class MomentumBasedController
    public ContactablePlaneBody getContactablePlaneHandWithFingersBentBack(RobotSide robotSide)
    {
       return handsWithFingersBentBack.get(robotSide);
-   }
-
-   public SideDependentList<ContactableCylinderBody> getContactableCylinderHands()
-   {
-      return graspingHands;
-   }
-
-   public ContactableCylinderBody getContactableCylinderHand(RobotSide robotSide)
-   {
-      return graspingHands.get(robotSide);
    }
 
    public SideDependentList<ContactablePlaneBody> getContactablePlaneThighs()
