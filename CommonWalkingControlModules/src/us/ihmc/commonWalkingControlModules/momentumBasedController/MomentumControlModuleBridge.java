@@ -21,8 +21,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleSolverListener;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleSolverVisualizer;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
-import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.bipedSupportPolygons.ContactableCylinderBody;
-import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.bipedSupportPolygons.CylindricalContactState;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -236,8 +234,7 @@ public class MomentumControlModuleBridge implements MomentumControlModule
       momentumModuleDataObject.setExternalWrenchToCompensateFor(rigidBody, wrench);
    }
 
-   public MomentumModuleSolution compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates,
-                       Map<ContactableCylinderBody, ? extends CylindricalContactState> cylinderContactStates, RobotSide upcomingSupportSide)
+   public MomentumModuleSolution compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, RobotSide upcomingSupportSide)
            throws MomentumControlModuleException
    {
       MomentumModuleSolution inactiveSolution = null;
@@ -245,7 +242,7 @@ public class MomentumControlModuleBridge implements MomentumControlModule
       if (TRY_BOTH_AND_COMPARE)
       {
          setMomentumModuleDataObject(inactiveMomentumControlModule, momentumModuleDataObject);
-         inactiveSolution = inactiveMomentumControlModule.compute(contactStates, cylinderContactStates, upcomingSupportSide);
+         inactiveSolution = inactiveMomentumControlModule.compute(contactStates, upcomingSupportSide);
       
          momentumModuleSolutionComparer.setMomentumModuleDataObject(momentumModuleDataObject);
          if (this.isUsingOptimizationMomentumControlModule()) momentumModuleSolutionComparer.setOldSolution("Old Solution", inactiveSolution);
@@ -253,7 +250,7 @@ public class MomentumControlModuleBridge implements MomentumControlModule
       }
       
       setMomentumModuleDataObject(activeMomentumControlModule, momentumModuleDataObject);
-      MomentumModuleSolution activeSolution = activeMomentumControlModule.compute(contactStates, cylinderContactStates, upcomingSupportSide);  
+      MomentumModuleSolution activeSolution = activeMomentumControlModule.compute(contactStates, upcomingSupportSide);  
   
       if (allMomentumModuleListener != null)
       {

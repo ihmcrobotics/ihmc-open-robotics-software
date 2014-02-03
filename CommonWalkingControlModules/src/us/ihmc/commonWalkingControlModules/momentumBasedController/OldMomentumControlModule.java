@@ -23,8 +23,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.M
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributor;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributorInputData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributorOutputData;
-import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.bipedSupportPolygons.ContactableCylinderBody;
-import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.bipedSupportPolygons.CylindricalContactState;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -136,8 +134,7 @@ public class OldMomentumControlModule implements MomentumControlModule
       externalWrenchesToCompensateFor.clear();
    }
 
-   public MomentumModuleSolution compute(Map<ContactablePlaneBody, ? extends PlaneContactState> planeContactStates,
-         Map<ContactableCylinderBody, ? extends CylindricalContactState> cylinderContactStates, RobotSide upcomingSupportLeg)
+   public MomentumModuleSolution compute(Map<ContactablePlaneBody, ? extends PlaneContactState> planeContactStates, RobotSide upcomingSupportLeg)
    {
       solver.compute();
       solver.solve(rootJointAccelerationData.getAccelerationSubspace(), rootJointAccelerationData.getAccelerationMultipliers(),
@@ -181,15 +178,6 @@ public class OldMomentumControlModule implements MomentumControlModule
          }
       }
 
-      if (null != cylinderContactStates)
-      {
-         for (ContactableCylinderBody contactableCylinderBody : cylinderContactStates.keySet())
-         {
-            CylindricalContactState cylinderContact = cylinderContactStates.get(contactableCylinderBody);
-            wrenchDistributorInput.addCylinderContact(cylinderContact);
-         }
-      }
-
       wrenchDistributorInput.setSpatialForceVectorAndUpcomingSupportSide(totalGroundReactionWrench, upcomingSupportLeg);
 
       groundReactionWrenchDistributor.solve(distributedWrenches, wrenchDistributorInput);
@@ -211,29 +199,6 @@ public class OldMomentumControlModule implements MomentumControlModule
             externalWrenches.put(rigidBody, groundReactionWrench);
             WrenchDistributorTools.computeWrench(groundReactionWrench, force, cop, normalTorque);
             groundReactionWrench.changeFrame(rigidBody.getBodyFixedFrame());
-         }
-      }
-
-      if (cylinderContactStates != null)
-      {
-         for (ContactableCylinderBody contactableCylinderBody : cylinderContactStates.keySet())
-         {
-            if (cylinderContactStates.get(contactableCylinderBody).isInContact())
-            {
-               Wrench bodyWrench = distributedWrenches.getWrenchOfNonPlaneContact(cylinderContactStates.get(contactableCylinderBody));
-               if (bodyWrench == null)
-               {
-                  System.err.println("Wrench from cylinder not found! Crashing!");
-                  throw new RuntimeException("Wrench not found. OptimizationBasedForceDistributor failed to provide it");
-               }
-               else
-               {
-                  {
-                     bodyWrench.changeFrame(contactableCylinderBody.getBodyFrame());
-                     externalWrenches.put(contactableCylinderBody.getRigidBody(), bodyWrench);
-                  }
-               }
-            }
          }
       }
 

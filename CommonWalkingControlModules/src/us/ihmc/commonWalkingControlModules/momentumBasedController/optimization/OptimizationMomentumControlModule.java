@@ -146,8 +146,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       this.momentumControlModuleSolverListener = momentumControlModuleSolverListener;
    }
 
-   public MomentumModuleSolution compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates,
-           Map<ContactableCylinderBody, ? extends CylindricalContactState> cylinderContactStates, RobotSide upcomingSupportLeg)
+   public MomentumModuleSolution compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, RobotSide upcomingSupportLeg)
            throws MomentumControlModuleException
 
    {
