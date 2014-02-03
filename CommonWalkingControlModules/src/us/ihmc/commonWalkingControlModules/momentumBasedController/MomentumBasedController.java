@@ -12,7 +12,6 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointVisualizer;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ModifiableContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
@@ -84,8 +83,10 @@ public class MomentumBasedController
    private final SideDependentList<ContactablePlaneBody> feet, handsWithFingersBentBack, thighs;
    private final ContactablePlaneBody pelvis, pelvisBack;
 
-   private final List<ContactablePlaneBody> listOfAllContactablePlaneBodies;
-   
+   private final List<ContactablePlaneBody> contactablePlaneBodyList;
+   private final List<YoPlaneContactState> yoPlaneContactStateList = new ArrayList<YoPlaneContactState>();
+   private final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> yoPlaneContactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
+
    private final DoubleYoVariable leftPassiveKneeTorque = new DoubleYoVariable("leftPassiveKneeTorque", registry);
    private final DoubleYoVariable rightPassiveKneeTorque = new DoubleYoVariable("rightPassiveKneeTorque", registry);
    private final SideDependentList<DoubleYoVariable> passiveKneeTorque = new SideDependentList<DoubleYoVariable>(leftPassiveKneeTorque, rightPassiveKneeTorque);
@@ -93,11 +94,6 @@ public class MomentumBasedController
    private final DoubleYoVariable passiveQKneeThreshold = new DoubleYoVariable("passiveQKneeThreshold", registry);
    private final DoubleYoVariable passiveKneeMaxTorque = new DoubleYoVariable("passiveKneeMaxTorque", registry);
    private final DoubleYoVariable passiveKneeKv = new DoubleYoVariable("passiveKneeKv", registry);
-
-   private final List<YoPlaneContactState> yoPlaneContactStateList = new ArrayList<YoPlaneContactState>();
-   
-   private final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> yoPlaneContactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
-   private final List<ModifiableContactState> modifiableContactStates = new ArrayList<ModifiableContactState>();
 
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
    private final DoubleYoVariable yoTime;
@@ -212,30 +208,30 @@ public class MomentumBasedController
       double coefficientOfFriction = 1.0; // TODO: magic number...
 
       // TODO: get rid of the null checks
-      this.listOfAllContactablePlaneBodies = new ArrayList<ContactablePlaneBody>();
+      this.contactablePlaneBodyList = new ArrayList<ContactablePlaneBody>();
 
       if (feet != null)
       {
-         this.listOfAllContactablePlaneBodies.addAll(feet.values()); //leftSole and rightSole
+         this.contactablePlaneBodyList.addAll(feet.values()); //leftSole and rightSole
       }
 
       if (handsWithFingersBentBack != null)
       {
-         this.listOfAllContactablePlaneBodies.addAll(handsWithFingersBentBack.values());
+         this.contactablePlaneBodyList.addAll(handsWithFingersBentBack.values());
       }
 
       if (thighs != null)
       {
-         this.listOfAllContactablePlaneBodies.addAll(thighs.values());
+         this.contactablePlaneBodyList.addAll(thighs.values());
       }
 
       if (pelvis != null)
-         this.listOfAllContactablePlaneBodies.add(pelvis);
+         this.contactablePlaneBodyList.add(pelvis);
 
       if (pelvisBack != null)
-         this.listOfAllContactablePlaneBodies.add(pelvisBack);
+         this.contactablePlaneBodyList.add(pelvisBack);
 
-      for (ContactablePlaneBody contactablePlaneBody : this.listOfAllContactablePlaneBodies)
+      for (ContactablePlaneBody contactablePlaneBody : this.contactablePlaneBodyList)
       {
          RigidBody rigidBody = contactablePlaneBody.getRigidBody();
          YoPlaneContactState contactState = new YoPlaneContactState(contactablePlaneBody.getPlaneFrame().getName(), rigidBody,
@@ -273,9 +269,7 @@ public class MomentumBasedController
          }
       }
 
-      modifiableContactStates.addAll(yoPlaneContactStateList);
-
-      this.planeContactWrenchProcessor = new PlaneContactWrenchProcessor(this.listOfAllContactablePlaneBodies, dynamicGraphicObjectsListRegistry, registry);
+      this.planeContactWrenchProcessor = new PlaneContactWrenchProcessor(this.contactablePlaneBodyList, dynamicGraphicObjectsListRegistry, registry);
 
       if (dynamicGraphicObjectsListRegistry != null)
       {
@@ -521,9 +515,9 @@ public class MomentumBasedController
    {
       if (momentumBasedControllerSpy != null)
       {
-         for (int i = 0; i < listOfAllContactablePlaneBodies.size(); i++)
+         for (int i = 0; i < contactablePlaneBodyList.size(); i++)
          {
-            ContactablePlaneBody contactablePlaneBody = listOfAllContactablePlaneBodies.get(i);
+            ContactablePlaneBody contactablePlaneBody = contactablePlaneBodyList.get(i);
             YoPlaneContactState contactState = yoPlaneContactStates.get(contactablePlaneBody);
             if (contactState.inContact())
             {
@@ -855,9 +849,9 @@ public class MomentumBasedController
 
    public void clearContacts()
    {
-      for (int i = 0; i < modifiableContactStates.size(); i++)
+      for (int i = 0; i < yoPlaneContactStateList.size(); i++)
       {
-         modifiableContactStates.get(i).clear();
+         yoPlaneContactStateList.get(i).clear();
       }
    }
 
