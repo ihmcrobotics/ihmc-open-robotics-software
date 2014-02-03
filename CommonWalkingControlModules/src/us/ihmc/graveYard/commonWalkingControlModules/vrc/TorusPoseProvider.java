@@ -1,4 +1,4 @@
-package us.ihmc.vrcGraveYard;
+package us.ihmc.graveYard.commonWalkingControlModules.vrc;
 
 import java.util.concurrent.atomic.AtomicReference;
 

@@ -1,16 +1,16 @@
-package us.ihmc.vrcGraveYard.highLevelHumanoidControl.manipulation.states.toroidManipulation.states;
+package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.toroidManipulation.states;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulableToroid;
+import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.toroidManipulation.ToroidControlModule;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.*;
-import us.ihmc.vrcGraveYard.highLevelHumanoidControl.manipulation.states.toroidManipulation.ToroidControlModule;
 
 public class RotateToroidState<T extends Enum<T>> extends ToroidManipulationStateInterface<T>
 {

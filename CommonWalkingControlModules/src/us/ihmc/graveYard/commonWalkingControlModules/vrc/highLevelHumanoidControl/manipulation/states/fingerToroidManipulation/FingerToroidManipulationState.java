@@ -1,4 +1,4 @@
-package us.ihmc.vrcGraveYard.highLevelHumanoidControl.manipulation.states.fingerToroidManipulation;
+package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.fingerToroidManipulation;
 
 /**
  * @author twan

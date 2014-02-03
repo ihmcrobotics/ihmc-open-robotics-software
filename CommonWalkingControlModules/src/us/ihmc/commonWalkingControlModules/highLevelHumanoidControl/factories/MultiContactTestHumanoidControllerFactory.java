@@ -44,6 +44,8 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenc
 import us.ihmc.commonWalkingControlModules.sensors.FingerForceSensors;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointGroundReactionWrenchDistributor;
+import us.ihmc.graveYard.commonWalkingControlModules.vrc.TorusManipulationProvider;
+import us.ihmc.graveYard.commonWalkingControlModules.vrc.TorusPoseProvider;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
@@ -58,8 +60,6 @@ import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
-import us.ihmc.vrcGraveYard.TorusManipulationProvider;
-import us.ihmc.vrcGraveYard.TorusPoseProvider;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;

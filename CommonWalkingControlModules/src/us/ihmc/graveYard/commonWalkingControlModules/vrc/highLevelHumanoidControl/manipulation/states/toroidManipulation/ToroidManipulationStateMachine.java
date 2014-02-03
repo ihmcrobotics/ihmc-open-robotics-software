@@ -1,4 +1,4 @@
-package us.ihmc.vrcGraveYard.highLevelHumanoidControl.manipulation.states.toroidManipulation;
+package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.toroidManipulation;
 
 import java.util.EnumMap;
 
@@ -15,6 +15,10 @@ import us.ihmc.commonWalkingControlModules.trajectories.OrientationTrajectoryGen
 import us.ihmc.commonWalkingControlModules.trajectories.ProviderBasedConstantOrientationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SE3ConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
+import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.toroidManipulation.states.HandControlState;
+import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.toroidManipulation.states.RotateToroidState;
+import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.toroidManipulation.states.ToroidManipulationState;
+import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.toroidManipulation.states.ToroidManipulationStateInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.FormattingTools;
@@ -25,10 +29,6 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
-import us.ihmc.vrcGraveYard.highLevelHumanoidControl.manipulation.states.toroidManipulation.states.HandControlState;
-import us.ihmc.vrcGraveYard.highLevelHumanoidControl.manipulation.states.toroidManipulation.states.RotateToroidState;
-import us.ihmc.vrcGraveYard.highLevelHumanoidControl.manipulation.states.toroidManipulation.states.ToroidManipulationState;
-import us.ihmc.vrcGraveYard.highLevelHumanoidControl.manipulation.states.toroidManipulation.states.ToroidManipulationStateInterface;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;

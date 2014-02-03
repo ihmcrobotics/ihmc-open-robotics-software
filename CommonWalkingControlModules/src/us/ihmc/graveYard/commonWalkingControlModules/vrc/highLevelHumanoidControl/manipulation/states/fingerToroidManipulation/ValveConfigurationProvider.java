@@ -1,4 +1,4 @@
-package us.ihmc.vrcGraveYard.highLevelHumanoidControl.manipulation.states.fingerToroidManipulation;
+package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.fingerToroidManipulation;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulableToroid;
