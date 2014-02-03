@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 import java.util.LinkedHashMap;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
+import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.bipedSupportPolygons.CylindricalContactState;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.screwTheory.RigidBody;

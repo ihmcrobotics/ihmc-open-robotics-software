@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
+package us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.bipedSupportPolygons;
 
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;

@@ -1,6 +1,6 @@
-package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
+package us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.bipedSupportPolygons;
 
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.CylindricalContactState;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ModifiableContactState;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
