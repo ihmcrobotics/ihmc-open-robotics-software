@@ -12,7 +12,8 @@ import us.ihmc.utilities.exeptions.NoConvergenceException;
  */
 public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
 {
-   public static final int nSupportVectors = 4 ;
+   // These are the max dimensions for which the solver has been configured. Make sure to update them when changing the solver.
+   public static final int nSupportVectors = 4;
    public static final int nPointsPerPlane = 4;
    public static final int nPlanes = 4;
    public static final int wrenchLength = 6;
