@@ -116,7 +116,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private static final boolean DO_TRANSITION_WHEN_TIME_IS_UP = false;
    private static final boolean DESIREDICP_FROM_POLYGON_COORDINATE = false;
-   private static final boolean USE_WORLDFRAME_SURFACE_NORMAL_WHEN_FULLY_CONSTRAINED = false;
+   private static final boolean USE_WORLDFRAME_SURFACE_NORMAL_WHEN_FULLY_CONSTRAINED = true; 
    
    private final static HighLevelState controllerState = HighLevelState.WALKING;
    private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OPTIMIZATION;
