@@ -103,7 +103,7 @@ public class DRCOptimizationMomentumControlModuleTest
       InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, lidarJoint);
 
       double controlDT = 1e-4;
-      MomentumOptimizationSettings optimizationSettings = createOptimizationSettings(jointsToOptimizeFor, 0.0, 1e-3, 1e-9, 0.0);
+      MomentumOptimizationSettings optimizationSettings = createOptimizationSettings(jointsToOptimizeFor, 0.0, 1e-3, 1e-9, 0.0, 0.00);
       double gravityZ = 9.81;
       TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), rootJoint.getSuccessor());
       twistCalculator.compute();
@@ -188,7 +188,7 @@ public class DRCOptimizationMomentumControlModuleTest
       InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, lidarJoint);
 
       double controlDT = DRCConfigParameters.CONTROL_DT;
-      MomentumOptimizationSettings optimizationSettings = createOptimizationSettings(jointsToOptimizeFor, 0.0, 0.0, 1e-5, 0.0);
+      MomentumOptimizationSettings optimizationSettings = createOptimizationSettings(jointsToOptimizeFor, 0.0, 0.0, 1e-5, 0.0, 0.0);
       double gravityZ = 9.81;
       TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), rootJoint.getSuccessor());
       twistCalculator.compute();
@@ -343,12 +343,13 @@ public class DRCOptimizationMomentumControlModuleTest
       return bipedFeet;
    }
 
-   private static MomentumOptimizationSettings createOptimizationSettings(InverseDynamicsJoint[] jointsToOptimizeFor, double momentumWeight, double lambda, double wRho, double rhoMin)
+   private static MomentumOptimizationSettings createOptimizationSettings(InverseDynamicsJoint[] jointsToOptimizeFor, double momentumWeight, double lambda, double wRho, double rhoMin, double wPhi)
    {
       MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(jointsToOptimizeFor, new YoVariableRegistry("test1"));
       momentumOptimizationSettings.setMomentumWeight(momentumWeight, momentumWeight, momentumWeight, momentumWeight);
       momentumOptimizationSettings.setDampedLeastSquaresFactor(lambda);
       momentumOptimizationSettings.setRhoPlaneContactRegularization(wRho);
+      momentumOptimizationSettings.setPhiCylinderContactRegularization(wPhi);
       momentumOptimizationSettings.setRhoMin(rhoMin);
 
       return momentumOptimizationSettings;
