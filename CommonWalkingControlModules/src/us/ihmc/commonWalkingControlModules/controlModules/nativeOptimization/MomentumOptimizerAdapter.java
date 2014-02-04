@@ -11,6 +11,9 @@ public class MomentumOptimizerAdapter
    private CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput momentumOptimizerWithGRFPenalizedSmootherNativeInput;
 
    private final int rhoSize;
+   private final int nSupportVectors;
+   private final int nPointsPerPlane;
+   private final int nPlanes;
 
    private final DenseMatrix64F rhoPrevious;
    private final DenseMatrix64F wRhoSmoother;
@@ -23,6 +26,9 @@ public class MomentumOptimizerAdapter
    public MomentumOptimizerAdapter(int nDoF)
    {
       rhoSize = CVXMomentumOptimizerWithGRFPenalizedSmootherNative.rhoSize;
+      nSupportVectors = CVXMomentumOptimizerWithGRFPenalizedSmootherNative.nSupportVectors;
+      nPointsPerPlane = CVXMomentumOptimizerWithGRFPenalizedSmootherNative.nPointsPerPlane;
+      nPlanes = CVXMomentumOptimizerWithGRFPenalizedSmootherNative.nPlanes;
 
       momentumOptimizerWithGRFPenalizedSmootherNative = new CVXMomentumOptimizerWithGRFPenalizedSmootherNative(nDoF, rhoSize);
       momentumOptimizerWithGRFPenalizedSmootherNativeInput = new CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput();
@@ -42,6 +48,21 @@ public class MomentumOptimizerAdapter
    public int getRhoSize()
    {
       return rhoSize;
+   }
+
+   public int getNSupportVectors()
+   {
+      return nSupportVectors;
+   }
+
+   public int getNPointsPerPlane()
+   {
+      return nPointsPerPlane;
+   }
+
+   public int getNPlanes()
+   {
+      return nPlanes;
    }
 
    public void setInputs(DenseMatrix64F a, DenseMatrix64F b, CylinderAndPlaneContactMatrixCalculatorAdapter wrenchMatrixCalculator,
