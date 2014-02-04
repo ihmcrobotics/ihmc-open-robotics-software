@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules;
+package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 
 import java.util.ArrayList;
 import java.util.List;

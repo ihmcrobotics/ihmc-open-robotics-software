@@ -16,7 +16,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.D
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
-import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.wrenchDistribution.CylinderAndPlaneContactMatrixCalculatorAdapter;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.PlaneContactWrenchMatrixCalculator;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.utilities.math.DampedLeastSquaresSolver;
@@ -54,9 +54,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    private final MotionConstraintHandler primaryMotionConstraintHandler;
    private final MotionConstraintHandler secondaryMotionConstraintHandler;
 
-// private final ContactPointWrenchMatrixCalculator contactPointWrenchMatrixCalculator;
-
-   private final CylinderAndPlaneContactMatrixCalculatorAdapter wrenchMatrixCalculator;
+   private final PlaneContactWrenchMatrixCalculator wrenchMatrixCalculator;
 
    private final MomentumOptimizerAdapter momentumOptimizer;
    private final MomentumOptimizationSettings momentumOptimizationSettings;
@@ -87,17 +85,14 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       momentumOptimizer = new MomentumOptimizerAdapter(nDoF);
 
       int rhoSize = momentumOptimizer.getRhoSize();
-      int phiSize = momentumOptimizer.getPhiSize();
-      dynamicGraphicObjectsListRegistry = null;    // don't visualize vectors
-      double wRhoCylinderContacts = momentumOptimizationSettings.getRhoCylinderContactRegularization();
-      double wPhiCylinderContacts = momentumOptimizationSettings.getPhiCylinderContactRegularization();
+      int nPointsPerPlane = momentumOptimizer.getNPointsPerPlane();
+      int nSupportVectors = momentumOptimizer.getNSupportVectors();
       double wRhoPlaneContacts = momentumOptimizationSettings.getRhoPlaneContactRegularization();
       double wRhoSmoother = momentumOptimizationSettings.getRateOfChangeOfRhoPlaneContactRegularization();
       double wRhoPenalizer = momentumOptimizationSettings.getPenalizerOfRhoPlaneContactRegularization();
 
-      this.wrenchMatrixCalculator = new CylinderAndPlaneContactMatrixCalculatorAdapter(centerOfMassFrame, rhoSize, phiSize, wRhoCylinderContacts,
-              wPhiCylinderContacts, wRhoPlaneContacts, wRhoSmoother, wRhoPenalizer, planeContactStates, null,
-              dynamicGraphicObjectsListRegistry, registry);
+      wrenchMatrixCalculator = new PlaneContactWrenchMatrixCalculator(centerOfMassFrame, rhoSize, nPointsPerPlane, nSupportVectors, wRhoPlaneContacts,
+            wRhoSmoother, wRhoPenalizer, planeContactStates, registry);
 
       this.momentumOptimizationSettings = momentumOptimizationSettings;
 
@@ -202,8 +197,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
          noConvergenceException = e;
       }
 
-      Map<RigidBody, Wrench> groundReactionWrenches = wrenchMatrixCalculator.computeWrenches(momentumOptimizer.getOutputRho(),
-                                                         momentumOptimizer.getOutputPhi());
+      Map<RigidBody, Wrench> groundReactionWrenches = wrenchMatrixCalculator.computeWrenches(momentumOptimizer.getOutputRho());
 
       externalWrenchHandler.computeExternalWrenches(groundReactionWrenches);
 
