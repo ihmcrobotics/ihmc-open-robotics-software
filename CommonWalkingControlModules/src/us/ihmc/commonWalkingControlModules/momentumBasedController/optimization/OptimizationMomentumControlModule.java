@@ -85,10 +85,10 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       momentumOptimizer = new MomentumOptimizerAdapter(nDoF);
 
       int rhoSize = momentumOptimizer.getRhoSize();
-      int phiSize = momentumOptimizer.getPhiSize();
+      int phiSize = 0;
       dynamicGraphicObjectsListRegistry = null;    // don't visualize vectors
-      double wRhoCylinderContacts = momentumOptimizationSettings.getRhoCylinderContactRegularization();
-      double wPhiCylinderContacts = momentumOptimizationSettings.getPhiCylinderContactRegularization();
+      double wRhoCylinderContacts = 0.0;
+      double wPhiCylinderContacts = 0.0;
       double wRhoPlaneContacts = momentumOptimizationSettings.getRhoPlaneContactRegularization();
       double wRhoSmoother = momentumOptimizationSettings.getRateOfChangeOfRhoPlaneContactRegularization();
       double wRhoPenalizer = momentumOptimizationSettings.getPenalizerOfRhoPlaneContactRegularization();
