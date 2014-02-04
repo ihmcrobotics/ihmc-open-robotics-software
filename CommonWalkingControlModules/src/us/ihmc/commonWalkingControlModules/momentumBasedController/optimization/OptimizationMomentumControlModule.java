@@ -7,7 +7,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
-import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXGenMomentumOptimizerBridge;
+import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.MomentumOptimizerAdapter;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
@@ -58,7 +58,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
    private final CylinderAndPlaneContactMatrixCalculatorAdapter wrenchMatrixCalculator;
 
-   private final CVXGenMomentumOptimizerBridge momentumOptimizer;
+   private final MomentumOptimizerAdapter momentumOptimizer;
    private final MomentumOptimizationSettings momentumOptimizationSettings;
 
    private final BooleanYoVariable converged = new BooleanYoVariable("converged", registry);
@@ -84,7 +84,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
       int nDoF = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
 
-      momentumOptimizer = new CVXGenMomentumOptimizerBridge(nDoF);
+      momentumOptimizer = new MomentumOptimizerAdapter(nDoF);
 
       int rhoSize = momentumOptimizer.getRhoSize();
       int phiSize = momentumOptimizer.getPhiSize();

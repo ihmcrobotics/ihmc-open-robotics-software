@@ -5,7 +5,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.wrenchDistribution.CylinderAndPlaneContactMatrixCalculatorAdapter;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 
-public class CVXGenMomentumOptimizerBridge
+public class MomentumOptimizerAdapter
 {
    private CVXMomentumOptimizerWithGRFPenalizedSmootherNative momentumOptimizerWithGRFPenalizedSmootherNative;
    private CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput momentumOptimizerWithGRFPenalizedSmootherNativeInput;
@@ -20,7 +20,7 @@ public class CVXGenMomentumOptimizerBridge
    private DenseMatrix64F outputRho, outputPhi, outputJointAccelerations;
    private double outputOptVal;
 
-   public CVXGenMomentumOptimizerBridge(int nDoF)
+   public MomentumOptimizerAdapter(int nDoF)
    {
       rhoSize = CVXMomentumOptimizerWithGRFPenalizedSmootherNative.rhoSize;
 
