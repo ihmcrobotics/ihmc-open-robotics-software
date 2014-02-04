@@ -18,7 +18,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXGenMomentumOptimizerBridge.MomentumOptimizer;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CoMBasedMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
@@ -167,7 +166,6 @@ public class SimpleStanceController implements RobotController
       momentumOptimizationSettings.setRhoPlaneContactRegularization(wRho);
       momentumOptimizationSettings.setPhiCylinderContactRegularization(wPhi);
       momentumOptimizationSettings.setRhoMin(rhoMin);
-      momentumOptimizationSettings.setMomentumOptimizerToUse(MomentumOptimizer.NO_GRF_SMOOTHER);
 
       return momentumOptimizationSettings;
    }

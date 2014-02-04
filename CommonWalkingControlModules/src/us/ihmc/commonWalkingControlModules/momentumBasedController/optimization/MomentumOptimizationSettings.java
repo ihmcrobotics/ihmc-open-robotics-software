@@ -3,15 +3,10 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXGenMomentumOptimizerBridge;
-import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXGenMomentumOptimizerBridge.MomentumOptimizer;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.Momentum;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.EnumYoVariable;
-import com.yobotics.simulationconstructionset.VariableChangedListener;
-import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 /**
@@ -29,9 +24,6 @@ public class MomentumOptimizationSettings
    private final DoubleYoVariable lambda = new DoubleYoVariable("lambda", registry);
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
 
-   private final EnumYoVariable<MomentumOptimizer> activeMomentumOptimizer =
-      new EnumYoVariable<CVXGenMomentumOptimizerBridge.MomentumOptimizer>("activeMomentumOptimizer", registry, MomentumOptimizer.class);
-
    private final double[] momentumWeightDiagonal = new double[Momentum.SIZE];
    private final DenseMatrix64F C = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
    private double wRhoCylinder;
@@ -48,18 +40,6 @@ public class MomentumOptimizationSettings
    {
       this.jointsToOptimizeFor = jointsToOptimizeFor;
       parentRegistry.addChild(registry);
-      
-      activeMomentumOptimizer.addVariableChangedListener(new VariableChangedListener()
-      {
-         public void variableChanged(YoVariable v)
-         {
-            if (activeMomentumOptimizer.getEnumValue() != MomentumOptimizer.GRF_PENALIZED_SMOOTHER)
-            {
-               System.err.println(getClass().getSimpleName() + ": Cannot switch to MomentumOptimizer: " + activeMomentumOptimizer.getEnumValue() + " until it is updated to consider 4 basis vectors.");
-               activeMomentumOptimizer.set(MomentumOptimizer.GRF_PENALIZED_SMOOTHER);
-            }
-         }
-      });
    }
 
    public void setMomentumWeight(double linearMomentumXYWeight, double linearMomentumZWeight, double angularMomentumXYWeight, double angularMomentumZWeight)
@@ -164,16 +144,6 @@ public class MomentumOptimizationSettings
    public void setRateOfChangeOfRhoPlaneContactRegularization(double wRhoSmoother)
    {
       this.wRhoSmoother = wRhoSmoother;
-   }
-
-   public void setMomentumOptimizerToUse(MomentumOptimizer momentumOptimizerToUse)
-   {
-      activeMomentumOptimizer.set(momentumOptimizerToUse);
-   }
-
-   public MomentumOptimizer getMomentumOptimizerToUse()
-   {
-      return activeMomentumOptimizer.getEnumValue();
    }
 
    public InverseDynamicsJoint[] getJointsToOptimizeFor()
