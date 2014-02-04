@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.wrenchDistribution;
+package us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.wrenchDistribution;
 
 import java.util.List;
 
