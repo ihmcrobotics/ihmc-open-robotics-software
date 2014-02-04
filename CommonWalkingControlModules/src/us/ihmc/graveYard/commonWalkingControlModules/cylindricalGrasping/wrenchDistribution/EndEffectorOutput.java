@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.wrenchDistribution;
+package us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.wrenchDistribution;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.utilities.math.geometry.FramePoint;

@@ -16,6 +16,8 @@ import us.ihmc.commonWalkingControlModules.wrenchDistribution.*;
 import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.bipedSupportPolygons.CylindricalContactState;
 import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.wrenchDistribution.CylinderAndPlaneContactMatrixCalculator;
 import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.wrenchDistribution.CylinderAndPlaneContactSpatialForceVectorCalculator;
+import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.wrenchDistribution.EndEffector;
+import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.wrenchDistribution.EndEffectorOutput;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
