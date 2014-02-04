@@ -84,7 +84,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
       int nDoF = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
 
-      momentumOptimizer = new CVXGenMomentumOptimizerBridge(nDoF, momentumOptimizationSettings);
+      momentumOptimizer = new CVXGenMomentumOptimizerBridge(nDoF);
 
       int rhoSize = momentumOptimizer.getRhoSize();
       int phiSize = momentumOptimizer.getPhiSize();
