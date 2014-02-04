@@ -44,11 +44,6 @@ public class MomentumOptimizerAdapter
       return rhoSize;
    }
 
-   public int getPhiSize()
-   {
-      return 0; //TODO delete that
-   }
-
    public void setInputs(DenseMatrix64F a, DenseMatrix64F b, CylinderAndPlaneContactMatrixCalculatorAdapter wrenchMatrixCalculator,
                          DenseMatrix64F wrenchEquationRightHandSide, DenseMatrix64F momentumDotWeight, DenseMatrix64F dampedLeastSquaresFactorMatrix,
                          DenseMatrix64F jSecondary, DenseMatrix64F pSecondary, DenseMatrix64F weightMatrixSecondary)

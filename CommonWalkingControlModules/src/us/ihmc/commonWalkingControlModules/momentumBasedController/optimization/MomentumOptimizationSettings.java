@@ -26,8 +26,6 @@ public class MomentumOptimizationSettings
 
    private final double[] momentumWeightDiagonal = new double[Momentum.SIZE];
    private final DenseMatrix64F C = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
-   private double wRhoCylinder; 
-   private double wPhiCylinder;
    private double wRhoPlane;
    private double wRhoSmoother;
    private double wRhoPenalizer;
@@ -48,16 +46,6 @@ public class MomentumOptimizationSettings
       this.linearMomentumZWeight.set(linearMomentumZWeight);
       this.angularMomentumXYWeight.set(angularMomentumXYWeight);
       this.angularMomentumZWeight.set(angularMomentumZWeight);
-   }
-
-   public void setRhoCylinderContactRegularization(double wRho)
-   {
-      this.wRhoCylinder = wRho;
-   }
-
-   public void setPhiCylinderContactRegularization(double wPhi)
-   {
-      this.wPhiCylinder = wPhi;
    }
 
    public void setRhoPlaneContactRegularization(double wRho)
@@ -93,16 +81,6 @@ public class MomentumOptimizationSettings
       CommonOps.mult(momentumSubspaceProjector, tempMatrix, C);
 
       return C;
-   }
-
-   public double getRhoCylinderContactRegularization()
-   {
-      return wRhoCylinder;
-   }
-
-   public double getPhiCylinderContactRegularization()
-   {
-      return wPhiCylinder;
    }
 
    public double getRhoPlaneContactRegularization()
