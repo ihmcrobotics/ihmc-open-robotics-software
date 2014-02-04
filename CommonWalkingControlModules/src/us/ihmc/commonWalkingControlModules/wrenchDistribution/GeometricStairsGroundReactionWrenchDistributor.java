@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controlModules;
+package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -9,10 +9,11 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.LegStrengthCalculator;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointCalculator;
+import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
+import us.ihmc.commonWalkingControlModules.controlModules.LegStrengthCalculatorTools;
+import us.ihmc.commonWalkingControlModules.controlModules.NewGeometricVirtualToePointCalculator;
+import us.ihmc.commonWalkingControlModules.controlModules.TeeterTotterLegStrengthCalculator;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributor;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributorInputData;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributorOutputData;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.MathTools;
