@@ -34,7 +34,7 @@ public class PlaneContactWrenchMatrixCalculator
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    
    private final IntegerYoVariable numberOfLoadedEndEffectors = new IntegerYoVariable("numberOfLoadedEndEffectors", registry);
-   private final DoubleYoVariable wRhoPlaneContacts = new DoubleYoVariable("wRhoPlaneContacts", registry);
+   private final DoubleYoVariable wRho = new DoubleYoVariable("wRho", registry);
    private final DoubleYoVariable wRhoSmoother = new DoubleYoVariable("wRhoSmoother", registry);
    private final DoubleYoVariable wRhoPenalizer = new DoubleYoVariable("wRhoPenalizer", registry);
    private final DoubleYoVariable rhoMinScalar = new DoubleYoVariable("rhoMinScalarInAdapter", registry);
@@ -46,7 +46,7 @@ public class PlaneContactWrenchMatrixCalculator
 
    private final DenseMatrix64F rhoMin;
    private final DenseMatrix64F qRho;
-   private final DenseMatrix64F wRho;
+   private final DenseMatrix64F wRhoMatrix;
    private final DenseMatrix64F wRhoSmootherMatrix;
    private final DenseMatrix64F wRhoPenalizerMatrix;
 
@@ -59,6 +59,7 @@ public class PlaneContactWrenchMatrixCalculator
    private final int nPointsPerPlane;
    private final double supportVectorAngleIncrement;
 
+   // Temporary variables
    private final SpatialForceVector currentBasisVector = new SpatialForceVector();
    private final FrameVector tempContactNormalVector = new FrameVector();
    private final AxisAngle4d normalContactVectorRotation = new AxisAngle4d();
@@ -70,7 +71,9 @@ public class PlaneContactWrenchMatrixCalculator
    private final DenseMatrix64F tempSum = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
    private final DenseMatrix64F tempVector = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
 
-   public PlaneContactWrenchMatrixCalculator(ReferenceFrame centerOfMassFrame, int rhoSize, int maxNPointsPerPlane, int maxNSupportVectors, double wRhoPlaneContacts,
+   private final Wrench tempWrench = new Wrench();
+
+   public PlaneContactWrenchMatrixCalculator(ReferenceFrame centerOfMassFrame, int rhoSize, int maxNPointsPerPlane, int maxNSupportVectors, double wRho,
          double wRhoSmoother, double wRhoPenalizer, Collection<? extends PlaneContactState> planeContactStates, YoVariableRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
@@ -80,7 +83,7 @@ public class PlaneContactWrenchMatrixCalculator
       this.nPointsPerPlane = maxNPointsPerPlane;
       this.supportVectorAngleIncrement = 2.0 * Math.PI / maxNSupportVectors;
       
-      this.wRhoPlaneContacts.set(wRhoPlaneContacts);
+      this.wRho.set(wRho);
       this.wRhoSmoother.set(wRhoSmoother);
       this.wRhoPenalizer.set(wRhoPenalizer);
 
@@ -90,9 +93,9 @@ public class PlaneContactWrenchMatrixCalculator
 
       qRho = new DenseMatrix64F(Wrench.SIZE, rhoSize);
       rhoMin = new DenseMatrix64F(rhoSize, 1);
-      wRho = new DenseMatrix64F(rhoSize, rhoSize);
-      CommonOps.setIdentity(wRho);
-      CommonOps.scale(wRhoPlaneContacts, wRho);
+      wRhoMatrix = new DenseMatrix64F(rhoSize, rhoSize);
+      CommonOps.setIdentity(wRhoMatrix);
+      CommonOps.scale(wRho, wRhoMatrix);
       
       wRhoSmootherMatrix = new DenseMatrix64F(rhoSize, rhoSize);
       CommonOps.setIdentity(wRhoSmootherMatrix);
@@ -152,7 +155,7 @@ public class PlaneContactWrenchMatrixCalculator
                
                currentBasisVector.packMatrixColumn(qRho, iRho);
                rhoMin.set(iRho, 0, rhoMinScalar.getDoubleValue());
-               wRho.set(iRho, iRho, wRhoPlaneContacts.getDoubleValue());
+               wRhoMatrix.set(iRho, iRho, wRho.getDoubleValue());
                wRhoSmootherMatrix.set(iRho, iRho, wRhoSmoother.getDoubleValue());
                iRho++;
             }
@@ -194,8 +197,6 @@ public class PlaneContactWrenchMatrixCalculator
       currentBasisVector.changeFrame(centerOfMassFrame);
    }
 
-   private final Wrench tempWrench = new Wrench();
-   
    /**
     * Computes from rho the corresponding wrenches to be applied on the contactable bodies.
     * Also computes the weighting matrix wRhoPenalizer and saves the average of rho for each end effector.
@@ -287,7 +288,7 @@ public class PlaneContactWrenchMatrixCalculator
 
    public DenseMatrix64F getWRho()
    {
-      return wRho;
+      return wRhoMatrix;
    }
 
    public DenseMatrix64F getWRhoSmoother()
