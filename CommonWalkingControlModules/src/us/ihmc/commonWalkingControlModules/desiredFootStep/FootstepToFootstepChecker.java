@@ -23,6 +23,7 @@ public class FootstepToFootstepChecker
    private static double MAXIMUM_DELTA_Y = 0.6;
    private static double MAXIMUM_DELTA_Z = 0.3;
 
+   //TODO: The maximum delta pitch/roll are smaller than risk regions for a single raw step (see DRCOperatorInterfaceConfig)  
    private static double MAXIMUM_ROLL = Math.toRadians(15.0);
    private static double MAXIMUM_PITCH = Math.toRadians(15.0);
    private static double MAXIMUM_YAW = Math.toRadians(90.0);
@@ -35,7 +36,12 @@ public class FootstepToFootstepChecker
       FrameVector startToEnd = new FrameVector(endingFramePose.getPositionCopy());
       startToEnd.sub(startingFramePose.getPositionCopy());
 
-
+      //TODO: THIS is in global coordinates, but should be in the stance foot (startingFootstep) frame.
+      //TODO: This is a rectangular region, The rectangular region allows steps to be farther away at an angle.
+      //       A circular region would be the same in global or local coordinates. (added benefit) 
+      //TODO: This has equal X and Y dimensions, but if allowable distance is direction dependent, then it needs to be a different shape (e.g. elliptical).
+      //TODO: This function will not always notify of values that are "Outside allowable range" resulting in an 'OutsideSerializableValuesException' when sending footsteps.
+      //       Make these two checks consistent. (Can also make consistent with single step validity graphics)
       double deltaX = Math.abs(startToEnd.getX());
       double deltaY = Math.abs(startToEnd.getY());
       double deltaZ = Math.abs(startToEnd.getZ());
@@ -43,7 +49,7 @@ public class FootstepToFootstepChecker
       double deltaYaw = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(endingFramePose.getYaw(), startingFramePose.getYaw()));
       double deltaPitch = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(endingFramePose.getPitch(), startingFramePose.getPitch()));
       double deltaRoll = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(endingFramePose.getRoll(), startingFramePose.getRoll()));
-
+      
       boolean ret;
 
       if (deltaX > MAXIMUM_DELTA_X)
