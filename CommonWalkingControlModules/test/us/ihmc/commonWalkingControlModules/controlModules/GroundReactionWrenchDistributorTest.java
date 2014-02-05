@@ -309,6 +309,7 @@ public class GroundReactionWrenchDistributorTest
       testNonFlatGroundExample(centerOfMassFrame, distributor, parentRegistry);
    }
 
+   @Ignore // Cylindrical grasping stuff has been put the grave yard.
    @Test
    public void testSimpleExampleWithCylindersUsingOptimizationBasedWrenchDistributor()
    {
@@ -363,6 +364,7 @@ public class GroundReactionWrenchDistributorTest
       testTroublesomeExampleTwo(centerOfMassFrame, distributor, parentRegistry);
    }
 
+   @Ignore // Cylindrical grasping stuff has been put the grave yard.
    @Test
    public void testRandomMultiContactOptimizationBased()
    {
