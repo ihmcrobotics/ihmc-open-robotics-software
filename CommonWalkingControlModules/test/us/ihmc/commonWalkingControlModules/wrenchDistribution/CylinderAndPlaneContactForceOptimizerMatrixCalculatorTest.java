@@ -10,6 +10,7 @@ import javax.vecmath.Quat4d;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CylinderAndPlaneContactForceOptimizerNative;
@@ -39,6 +40,7 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
    private static final boolean DEBUG = true;
    private final ReferenceFrame comFrame = ReferenceFrame.constructAWorldFrame("com");
 
+   @Ignore // Cylindrical grasping stuff has been put the grave yard.
    @Test
    public void test4limbsTogether()
    {
