@@ -57,6 +57,7 @@ public class DRCConfigParameters
 
 
    public static final boolean USE_HYDRA = false;
+   public static final boolean USE_MINI_ATLAS = false;
 
    public static final boolean LIMIT_CONTROLLER_OUTPUT_TORQUES = false;    // true;//True causes hip oscillations or jerk in simulation
 
