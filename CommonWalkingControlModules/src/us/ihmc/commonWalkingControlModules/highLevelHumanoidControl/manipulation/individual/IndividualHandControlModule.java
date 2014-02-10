@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.JointSpaceHandControlControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LoadBearingCylindricalHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LoadBearingPlaneHandControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LowLevelInverseKinematicsTaskspaceHandPositionControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LowLevelJointSpaceHandControlControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.ObjectManipulationState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.PointPositionHandControlState;
@@ -183,8 +184,16 @@ public class IndividualHandControlModule
 
       if(armControlParameters.useInverseKinematicsTaskspaceControl())
       {
-         taskSpacePositionControlState = new InverseKinematicsTaskspaceHandPositionControlState(namePrefix, IndividualHandControlState.TASK_SPACE_POSITION, robotSide, momentumBasedController, 
-               jacobianId, base, endEffector, dynamicGraphicObjectsListRegistry, armControlParameters, controlStatusProducer, controlDT, registry);
+         if(armControlParameters.doLowLevelPositionControl())
+         {            
+            taskSpacePositionControlState = new LowLevelInverseKinematicsTaskspaceHandPositionControlState(namePrefix, IndividualHandControlState.TASK_SPACE_POSITION, robotSide, momentumBasedController, 
+                  jacobianId, base, endEffector, dynamicGraphicObjectsListRegistry, armControlParameters, controlStatusProducer, controlDT, registry);
+         }
+         else
+         {
+            taskSpacePositionControlState = new InverseKinematicsTaskspaceHandPositionControlState(namePrefix, IndividualHandControlState.TASK_SPACE_POSITION, robotSide, momentumBasedController, 
+                  jacobianId, base, endEffector, dynamicGraphicObjectsListRegistry, armControlParameters, controlStatusProducer, controlDT, registry);
+         }
       }
       else
       {
