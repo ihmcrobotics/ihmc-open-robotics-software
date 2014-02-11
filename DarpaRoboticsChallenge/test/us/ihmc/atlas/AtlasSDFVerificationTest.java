@@ -32,7 +32,7 @@ public class AtlasSDFVerificationTest
    private static final boolean SIMULATE_FOREVER = false;
 
    private static final boolean CREATE_MOVIE = BambooTools.doMovieCreation();
-   private static final boolean checkNothingChanged = BambooTools.getCheckNothingjChanged();
+   private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
 
    private static final double SIM_DURATION = 15.0;
 
