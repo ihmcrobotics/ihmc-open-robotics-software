@@ -23,10 +23,9 @@ public class FootstepToFootstepChecker
    private static double MAXIMUM_DELTA_R_SQUARED = MAXIMUM_DELTA_R*MAXIMUM_DELTA_R;
    private static double MAXIMUM_DELTA_Z = 0.3;
 
-   //TODO: The maximum delta pitch/roll are smaller than risk regions for a single raw step (see DRCOperatorInterfaceConfig)  
-   private static double MAXIMUM_ROLL = Math.toRadians(15.0);//0.26
-   private static double MAXIMUM_PITCH = Math.toRadians(15.0);
-   private static double MAXIMUM_YAW = Math.toRadians(90.0);//1.57
+   private static double MAXIMUM_DELTA_ROLL = Math.toRadians(15.0);//0.26
+   private static double MAXIMUM_DELTA_PITCH = Math.toRadians(15.0);//0.26   
+   private static double MAXIMUM_DELTA_YAW = Math.toRadians(90.0);//1.57 radians
 
    public static boolean isFootstepToFootstepChangeLarge(Footstep startingFootstep, Footstep endingFootstep)
    {
@@ -36,8 +35,39 @@ public class FootstepToFootstepChecker
       FrameVector startToEnd = new FrameVector(endingFramePose.getPositionCopy());
       startToEnd.sub(startingFramePose.getPositionCopy());
 
-      //TODO: This has equal X and Y dimensions, but if allowable distance is direction dependent, then it needs to be a different shape (e.g. elliptical).
+      //TODO: Best would be to base on kinematic and dynamic reachability (which would be robot dependent and not so much magic tuned numbers)
+      //      Would also catch unspecified kinematic coupling (e.g. coupling that may occur based on yaw and step height and others?)
+
+      //TODO: Make max values consistent with other values used in other files 
+      //The maximum delta pitch/roll are smaller than risk regions for a single raw step (see DRCOperatorInterfaceConfig)  
+      //   defaultMaxPitchRiskColor;
+      //      rollSlope  -> 0.28 - (-0.28) = 0.56
+      //      pitchSlope -> 0.32 - (-0.5)  = 0.82
+      //
+      //   defaultHighPitchRiskColor;
+      //      rollSlope  -> 0.22 - (-0.22) = 0.44
+      //      pitchSlope -> 0.25 - (-0.3)  = 0.55
+      //
+      //   defaultMidPitchRiskColor;
+      //      rollSlope  -> 0.15 - (-0.15) = 0.30
+      //      pitchSlope -> 0.15 - (-0.2)  = 0.35
+      //
+      //   defaultLowPitchRiskColor;
+      //      rollSlope  -> 0.15 - (-0.15) = 0.30
+      //      pitchSlope -> 0.15 - (-0.15) = 0.30
+      //For yaw, turning footstep generators use an opening and a closing angle:
+      //  StraightLinePath (values used for creating steps): 
+      //    private double maximumHipOpeningAngle = Math.toRadians(10.0);
+      //    private double maximumHipClosingAngle = Math.toRadians(5.0);
+      //  DRCRobotBasedFootstepGeneratorTest (used only in this test)
+      //    footstepGenerator.setTurningStepsHipOpeningStepAngle(Math.PI / 6);//15 degrees
+      //  TurningThenStraightFootstepGenerator default (never used except maybe in Test above):
+      //      turningWalkingOpeningAngleIncrement.set(Math.PI * 0.8);//144 degrees
+      //      turningWalkingClosingAngleIncrement.set(Math.PI * 0.15);// 27 degrees
+      //This has equal X and Y dimensions, but if allowable distance is direction dependent, then it needs to be a different shape (e.g. elliptical).
       //      This is in global coordinates, but should be in the stance foot (startingFootstep) frame if changed to non-circular.
+      //SemiCircularStepValidityMetric does something similar to this for tests. It suggests a 1.2 rad max (35.42 deg) and 1.5m radius which may both be arbitrary
+      
       //TODO: This function will not always notify of values that are "Outside allowable range" resulting in an 'OutsideSerializableValuesException' when sending footsteps.
       //       us.ihmc.utilities.fixedPointRepresentation.OutsideSerializableValuesException
       //     From FootstepDataListSerializer:
@@ -45,11 +75,10 @@ public class FootstepToFootstepChecker
       //      public static final double[] XYZ_MIN = { -1.0, -1.0, -1.5 };
       //     This range is based on subsequent footsteps, not stance/step pairs. So this is most likely violated when making large steps with the same side to opposite extremes
       //      For example -0.6 to 0.6 is a 1.2 difference which is larger than the allowable serializable range. This is unlikely to be done in practice.
-
+      
       double deltaX = Math.abs(startToEnd.getX());
       double deltaY = Math.abs(startToEnd.getY());
       double deltaZ = Math.abs(startToEnd.getZ());
-
       double deltaRSquared = deltaX*deltaX + deltaY*deltaY;
       
       double deltaYaw = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(endingFramePose.getYaw(), startingFramePose.getYaw()));
@@ -62,11 +91,11 @@ public class FootstepToFootstepChecker
          ret = true;
       else if (deltaZ > MAXIMUM_DELTA_Z)
          ret = true;
-      else if (deltaYaw > MAXIMUM_YAW)
+      else if (deltaYaw > MAXIMUM_DELTA_YAW)
          ret = true;
-      else if (deltaPitch > MAXIMUM_PITCH)
+      else if (deltaPitch > MAXIMUM_DELTA_PITCH)
          ret = true;
-      else if (deltaRoll > MAXIMUM_ROLL)
+      else if (deltaRoll > MAXIMUM_DELTA_ROLL)
          ret = true;
       else
          ret = false;
@@ -120,7 +149,4 @@ public class FootstepToFootstepChecker
       else
          System.out.println("FootstepToFootstepChecker: " + ret + ", x" + x + ", y" + y + ", z" + z + ", r" + Math.sqrt(r2) + ", y" + yaw + ", p" + pitch + ", r" + roll);
    }
-
-   
-
 }
