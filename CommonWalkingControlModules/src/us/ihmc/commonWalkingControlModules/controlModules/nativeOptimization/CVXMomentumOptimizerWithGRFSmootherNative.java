@@ -19,7 +19,7 @@ public class CVXMomentumOptimizerWithGRFSmootherNative
    public static final int nCylinderVectors = 8;
    public static final int nCylinderBoundedVariables = 5;
    public static final int wrenchLength = 6;
-   public static final int nDoF = 34;
+   public static final int nDoF = 38;
    public static final int rhoSize = nSupportVectors * nPointsPerPlane * nPlanes + nCylinderVectors * nCylinders;
    public static final int phiSize = nCylinders * nCylinderBoundedVariables;
 

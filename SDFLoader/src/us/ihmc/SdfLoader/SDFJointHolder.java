@@ -1,19 +1,19 @@
 package us.ihmc.SdfLoader;
 
+import java.io.IOException;
+
 import javax.media.j3d.Transform3D;
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import com.jcraft.jsch.IO;
 import us.ihmc.SdfLoader.xmlDescription.SDFJoint;
-
-import java.io.IOException;
 
 public class SDFJointHolder
 {
    // Data from SDF
    private final String name;
    private final JointType type;
-   private final Vector3d axis;
+   private final Vector3d axisInModelFrame;
    
    private final boolean hasLimits;
    private final double upperLimit;
@@ -32,7 +32,11 @@ public class SDFJointHolder
    private SDFLinkHolder child;
 
    //Calculated 
-   private Transform3D transformFromParentJoint = null;
+   private Transform3D transformToParentJoint = null;
+   private final Matrix3d linkRotation = new Matrix3d();
+   private final Vector3d offsetFromParentJoint = new Vector3d();
+   private final Vector3d axisInParentFrame = new Vector3d();
+   private final Vector3d axisInJointFrame = new Vector3d();
    
    private double contactKp;
    private double contactKd;
@@ -56,7 +60,7 @@ public class SDFJointHolder
          throw new IOException("Joint type " + typeString + " not implemented yet");
       }
 
-      axis = SDFConversionsHelper.stringToNormalizedVector3d(sdfJoint.getAxis().getXyz());
+      axisInModelFrame = SDFConversionsHelper.stringToNormalizedVector3d(sdfJoint.getAxis().getXyz());
       
       if(sdfJoint.getAxis().getLimit() != null)
       {
@@ -156,11 +160,13 @@ public class SDFJointHolder
       Transform3D modelToParentLink = getParent().getTransformFromModelReferenceFrame();
       Transform3D modelToChildLink = getChild().getTransformFromModelReferenceFrame();
 
+      Transform3D rotationTransform = new Transform3D();
       Transform3D parentLinkToParentJoint;
       
       SDFJointHolder parentJoint = parent.getJoint();
       if (parentJoint != null)
       {
+         rotationTransform.setRotation(parentJoint.getLinkRotation());
          parentLinkToParentJoint = parentJoint.getTransformFromChildLink();
       }
       else
@@ -172,6 +178,9 @@ public class SDFJointHolder
       Transform3D modelToChildJoint = new Transform3D();
 
       modelToParentJoint.mul(modelToParentLink, parentLinkToParentJoint);
+      
+      modelToChildLink.get(linkRotation);
+      
       modelToChildJoint.mul(modelToChildLink, transformFromChildLink);
 
       Transform3D parentJointToModel = new Transform3D();
@@ -180,7 +189,16 @@ public class SDFJointHolder
       Transform3D parentJointToChildJoint = new Transform3D();
       parentJointToChildJoint.mul(parentJointToModel, modelToChildJoint);
 
-      transformFromParentJoint = parentJointToChildJoint;
+      transformToParentJoint = parentJointToChildJoint;
+      
+      parentJointToChildJoint.get(offsetFromParentJoint);
+      rotationTransform.transform(offsetFromParentJoint);
+      
+      linkRotation.transform(axisInModelFrame, axisInParentFrame);
+      
+      Transform3D transformFromParentJoint = new Transform3D(modelToChildJoint);
+      transformFromParentJoint.transform(axisInParentFrame, axisInJointFrame);
+      
    }
 
    public String getName()
@@ -193,9 +211,9 @@ public class SDFJointHolder
       return type;
    }
 
-   public Vector3d getAxis()
+   public Vector3d getAxisInModelFrame()
    {
-      return axis;
+      return axisInModelFrame;
    }
 
    public double getUpperLimit()
@@ -230,7 +248,7 @@ public class SDFJointHolder
 
    public Transform3D getTransformToParentJoint()
    {
-      return transformFromParentJoint;
+      return transformToParentJoint;
    }
 
    public double getContactKp()
@@ -273,5 +291,23 @@ public class SDFJointHolder
       return velocityLimit;
    }
    
+   public Matrix3d getLinkRotation()
+   {
+      return linkRotation;
+   }
    
+   public Vector3d getOffsetFromParentJoint()
+   {
+      return offsetFromParentJoint;
+   }
+   
+   public Vector3d getAxisInParentFrame()
+   {
+      return axisInParentFrame;
+   }
+   
+   public Vector3d getAxisInJointFrame()
+   {
+      return axisInJointFrame;
+   }
 }

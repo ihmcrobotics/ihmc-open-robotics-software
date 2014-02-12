@@ -110,11 +110,11 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
 
 
 
-      OneDoFJoint[] joints = ROSAtlasJointMap.getJointMap(fullRobotModel.getOneDoFJointsAsMap());
+      OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
       for (int i = 0; i < joints.length; i++)
       {
          OneDoFJoint oneDoFJoint = joints[i];
-         oneDoFJoint.setDampingParameter(DRCRobotDampingParameters.getAtlasDamping(i));
+//         oneDoFJoint.setDampingParameter(DRCRobotDampingParameters.getAtlasDamping(i));
 
          DoubleYoVariable rawJointTorque = new DoubleYoVariable("raw_tau_" + oneDoFJoint.getName(), registry);
          rawJointTorques.add(oneDoFJoint, rawJointTorque);

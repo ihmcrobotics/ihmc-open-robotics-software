@@ -5,6 +5,7 @@ import us.ihmc.atlas.visualization.SliderBoardFactory;
 import us.ihmc.atlas.visualization.WalkControllerSliderBoard;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.FlatGroundWalkingHighLevelHumanoidControllerFactory;
@@ -16,6 +17,8 @@ import us.ihmc.darpaRoboticsChallenge.remote.RemoteAtlasVisualizer;
 import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.robotDataCommunication.YoVariableServer;
+import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
 
 import com.martiansoftware.jsap.JSAPException;
@@ -35,7 +38,7 @@ public class DRCFlatGroundWalkingTrack
    private final DRCController drcController;
    private final YoVariableServer robotVisualizer;
 
-   public DRCFlatGroundWalkingTrack(DRCRobotWalkingControllerParameters drcControlParameters, ArmControllerParameters armControllerParameters, 
+   public DRCFlatGroundWalkingTrack(WalkingControllerParameters drcControlParameters, ArmControllerParameters armControllerParameters, 
          DRCRobotInterface robotInterface,
                                     RobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
                                     boolean useVelocityAndHeadingScript, AutomaticSimulationRunner automaticSimulationRunner, double timePerRecordTick,
@@ -77,7 +80,14 @@ public class DRCFlatGroundWalkingTrack
          robotVisualizer = null;
       }
       
-      ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory);
+      SideDependentList<String> footForceSensorNames = new SideDependentList<>();
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         footForceSensorNames.put(robotSide, robotInterface.getJointMap().getJointBeforeFootName(robotSide));
+         
+      }
+      
+      ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.contactTresholdForceForSCS, footForceSensorNames);
       Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, null, robotInterface, robotInitialSetup, scsInitialSetup, guiInitialSetup, null, robotVisualizer, dynamicGraphicObjectsListRegistry);
       drcSimulation = humanoidSimulation.first();
       drcController = humanoidSimulation.second();
@@ -154,8 +164,8 @@ public class DRCFlatGroundWalkingTrack
       boolean useVelocityAndHeadingScript = true;
       boolean cheatWithGroundHeightAtForFootstep = false;
 
-      DRCRobotWalkingControllerParameters drcControlParameters = new DRCRobotWalkingControllerParameters();
-      DRCRobotArmControllerParameters armControlParameters = new DRCRobotArmControllerParameters();
+      WalkingControllerParameters drcControlParameters = new DRCRobotWalkingControllerParameters();
+      ArmControllerParameters armControlParameters = new DRCRobotArmControllerParameters();
       
       new DRCFlatGroundWalkingTrack(drcControlParameters, armControlParameters, robotInterface, robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript,
                                     automaticSimulationRunner, DRCConfigParameters.CONTROL_DT, 16000, cheatWithGroundHeightAtForFootstep);

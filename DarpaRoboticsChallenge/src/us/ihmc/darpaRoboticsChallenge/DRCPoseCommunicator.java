@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge;
 import javax.media.j3d.Transform3D;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -39,7 +40,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
    private final ConcurrentRingBuffer<State> stateRingBuffer;
 
    public DRCPoseCommunicator(SDFFullRobotModel estimatorModel, JointConfigurationGatherer jointConfigurationGathererAndProducer,
-         DRCRobotJointMap jointMap, ObjectCommunicator networkProcessorCommunicator, TimestampProvider timestampProvider)
+         SDFJointNameMap jointMap, ObjectCommunicator networkProcessorCommunicator, TimestampProvider timestampProvider)
    {
       this.networkProcessorCommunicator = networkProcessorCommunicator;
       this.jointConfigurationGathererAndProducer = jointConfigurationGathererAndProducer;

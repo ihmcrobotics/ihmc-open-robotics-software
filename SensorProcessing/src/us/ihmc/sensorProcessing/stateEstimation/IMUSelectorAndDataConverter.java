@@ -56,7 +56,7 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
    {
       OrientationSensorConfiguration selectedOrientationSensorConfiguration = null;
       if ((orientationSensorConfigurations.size() != 1) || (angularVelocitySensorConfigurations.size() != 1))
-         throw new RuntimeException("We are assuming there is only 1 IMU for right now..");
+         throw new RuntimeException("We are assuming there is only 1 IMU for right now.. Got " + orientationSensorConfigurations.size());
 
       imuSimulatedDriftYawAcceleration = new DoubleYoVariable("imuSimulatedDriftYawAcceleration", registry);
       imuSimulatedDriftYawVelocity = new DoubleYoVariable("imuSimulatedDriftYawVelocity", registry);
