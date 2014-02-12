@@ -185,9 +185,6 @@ public class AtlasSDFVerificationTest
             String name = line.substring(0, line.indexOf(":"));
             double value = Double.parseDouble(line.substring(line.indexOf(":") + 1));
 
-            System.out.println(name);
-            System.out.println(value);
-
             if (hasVariableChangedSignificantly(yoVariables, name, value))
             {
                return false;
