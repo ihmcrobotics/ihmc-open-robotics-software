@@ -1,4 +1,4 @@
-# Produced by CVXGEN, 2013-11-26 19:46:51 -0500.
+# Produced by CVXGEN, 2014-02-11 21:41:08 -0500.
 # CVXGEN is Copyright (C) 2006-2012 Jacob Mattingley, jem@cvxgen.com.
 # The code in this file is Copyright (C) 2006-2012 Jacob Mattingley.
 # CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
@@ -8,11 +8,12 @@
 # Description: A description of the CVXGEN problem.
 
 dimensions
-  nSupportVectors = 4 # number of basis vectors for approximation of friciton cones
-  nPointsPerContact = 4 # points per plane contact
-  nPlanes = 4 # number of plane contacts
+  #  nSupportVectors = 4 # number of basis vectors for approximation of friciton cones
+  #  nPointsPerContact = 4 # points per plane contact
+  #  nPlanes = 4 # number of plane contacts
+  rhoSize = 64 #nPlanes * nSupportVectors * nPointsPerContact
   wrenchLength = 6 # universal constant for physical space
-  nDoF = 34 # size of the robot actuator joint acceleration space.
+  nDoF = 38 # size of the robot actuator joint acceleration space.
 end
 
 parameters
@@ -26,20 +27,20 @@ parameters
 
   Lambda (nDoF, nDoF) diagonal psd # JointAccelerationRegularization
 
-  Qrho (wrenchLength, nPlanes * nSupportVectors * nPointsPerContact ) # ContactPointWrenchMatrix
+  Qrho (wrenchLength, rhoSize) # ContactPointWrenchMatrix
   c (wrenchLength, 1) # WrenchEquationRightHandSide
-  rhoMin (nSupportVectors * nPointsPerContact * nPlanes ) positive
-  WRho (nPlanes * nSupportVectors * nPointsPerContact, nPlanes * nSupportVectors * nPointsPerContact ) diagonal psd # GroundReactionForceRegularization
+  rhoMin (rhoSize) positive
+  WRho (rhoSize, rhoSize) diagonal psd # GroundReactionForceRegularization
 
-  rhoPrevious (nSupportVectors * nPointsPerContact * nPlanes ) positive
-  WRhoSmoother (nPlanes * nSupportVectors * nPointsPerContact, nPlanes * nSupportVectors * nPointsPerContact ) diagonal psd # RateOfChangeOfGroundReactionForceRegularization
+  rhoPrevious (rhoSize) positive
+  WRhoSmoother (rhoSize, rhoSize) diagonal psd # RateOfChangeOfGroundReactionForceRegularization
 
-  rhoPreviousMean (nSupportVectors * nPointsPerContact * nPlanes ) positive
-  WRhoCoPPenalty (nPlanes * nSupportVectors * nPointsPerContact, nPlanes * nSupportVectors * nPointsPerContact ) diagonal psd # CoPRegularization
+  rhoPreviousMean (rhoSize) positive
+  WRhoCoPPenalty (rhoSize, rhoSize) diagonal psd # CoPRegularization
 end
 
 variables
-  rho (nSupportVectors * nPointsPerContact * nPlanes ) # magnitude of each ground reaction force component
+  rho (rhoSize) # magnitude of each ground reaction force component
   vd (nDoF) # JointAccelerations
 end
 

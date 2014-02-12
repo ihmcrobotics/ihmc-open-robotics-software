@@ -6,6 +6,7 @@ import java.util.List;
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotInterface;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Robot;
@@ -158,6 +159,11 @@ public abstract class DRCWorld implements CommonAvatarEnvironmentInterface, DRCR
 
    public void addSelectableListenerToSelectables(SelectableObjectListener selectedListener)
    {
+   }
+   
+   public String[] getForceSensorNames()
+   {
+      return DRCRobotParameters.DRC_ROBOT_FORCESENSOR_NAMES;
    }
 
 }

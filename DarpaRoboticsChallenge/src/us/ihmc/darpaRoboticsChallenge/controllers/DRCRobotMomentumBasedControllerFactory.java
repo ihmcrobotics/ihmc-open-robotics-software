@@ -49,17 +49,20 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 {
    private final HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory;
    private final double contactTresholdForce;
+   private final SideDependentList<String> footSensorNames;
    
-   public DRCRobotMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory)
+   public DRCRobotMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory, double contactTresholdForce, SideDependentList<String> footSensorNames)
    {
       this.highLevelHumanoidControllerFactory = highLevelHumanoidControllerFactory;
       this.contactTresholdForce = DRCConfigParameters.contactTresholdForceForSCS;
+      this.footSensorNames = footSensorNames;
    }
    
    public DRCRobotMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory, double contactTresholdForce)
    {
       this.highLevelHumanoidControllerFactory = highLevelHumanoidControllerFactory;
-      this.contactTresholdForce = contactTresholdForce;
+      this.contactTresholdForce = DRCConfigParameters.contactTresholdForceForSCS;
+      this.footSensorNames = new SideDependentList<String>("l_leg_akx", "r_leg_akx");
    }
 
    @Override
@@ -113,24 +116,6 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       {
          RobotControllerUpdatablesAdapter  highLevelHumanoidControllerUpdatables = new RobotControllerUpdatablesAdapter(highLevelHumanoidController);
 
-         final ForceSensorDataVisualizer forceSensorDataVisualizer=new ForceSensorDataVisualizer(fullRobotModel, forceSensorDataHolder, dynamicGraphicObjectsListRegistry, specificRegistry);
-         final CenterOfPressureVisualizer centerOfPressureVisualizer=new CenterOfPressureVisualizer(fullRobotModel, forceSensorDataHolder, dynamicGraphicObjectsListRegistry, specificRegistry);
-         final AtlasWristFeetYoVariables wristFeetVariables = new AtlasWristFeetYoVariables(forceSensorDataHolder, specificRegistry);
-         final AtlasWristFeetSensorServer wristFeetNetwork = dataProducer == null ? null : new AtlasWristFeetSensorServer(forceSensorDataHolder, dataProducer, controlDT);
-
-         highLevelHumanoidControllerUpdatables.addUpdatable(
-            new Updatable()
-            {
-               @Override
-               public void update(double time)
-               {
-                    forceSensorDataVisualizer.visualize();
-                    centerOfPressureVisualizer.visualize();
-                    wristFeetVariables.update();
-                    if( wristFeetNetwork != null)
-                       wristFeetNetwork.update();
-               }
-            });
          
          highLevelHumanoidController = highLevelHumanoidControllerUpdatables;
       }
@@ -144,7 +129,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       
       for (RobotSide robotSide : RobotSide.values)
       {
-         ForceSensorData footForceSensor = forceSensorDataHolder.getByName(robotSide.getShortLowerCaseName() + "_leg_akx");
+         ForceSensorData footForceSensor = forceSensorDataHolder.getByName(footSensorNames.get(robotSide));
          WrenchBasedFootSwitch wrenchBasedFootSwitch = new WrenchBasedFootSwitch(bipedFeet.get(robotSide).getName(), footForceSensor, 0.02, totalRobotWeight, bipedFeet.get(robotSide),
                                                           dynamicGraphicObjectsListRegistry, contactTresholdForce, registry);
          footSwitches.put(robotSide, wrenchBasedFootSwitch);

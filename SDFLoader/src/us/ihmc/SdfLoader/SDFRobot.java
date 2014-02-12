@@ -1,7 +1,18 @@
 package us.ihmc.SdfLoader;
 
-import com.yobotics.simulationconstructionset.*;
-import com.yobotics.simulationconstructionset.simulatedSensors.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Set;
+
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Camera;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.IMU;
@@ -17,27 +28,38 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.InertiaTools;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.lidar.polarLidar.geometry.LIDARScanDefinition;
 import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
-import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.RigidBodyInertia;
 
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-import java.util.*;
+import com.yobotics.simulationconstructionset.CameraMount;
+import com.yobotics.simulationconstructionset.DummyOneDegreeOfFreedomJoint;
+import com.yobotics.simulationconstructionset.ExternalForcePoint;
+import com.yobotics.simulationconstructionset.FloatingJoint;
+import com.yobotics.simulationconstructionset.GroundContactPoint;
+import com.yobotics.simulationconstructionset.IMUMount;
+import com.yobotics.simulationconstructionset.Joint;
+import com.yobotics.simulationconstructionset.Link;
+import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
+import com.yobotics.simulationconstructionset.PinJoint;
+import com.yobotics.simulationconstructionset.Robot;
+import com.yobotics.simulationconstructionset.SliderJoint;
+import com.yobotics.simulationconstructionset.simulatedSensors.FastPolarRayCastLIDAR;
+import com.yobotics.simulationconstructionset.simulatedSensors.RayTraceLIDARSensor;
+import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorLimitationParameters;
+import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorNoiseParameters;
+import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorUpdateParameters;
 
 public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an SDFHumanoidRobot
 {
+  
    private static final boolean DEBUG = false;
    private static final boolean SHOW_CONTACT_POINTS = true;
    private static final boolean USE_POLAR_LIDAR_MODEL = true;
-   private static final boolean SHOW_COM_REFERENCE_FRAMES = false;
+   private static final boolean SHOW_COM_REFERENCE_FRAMES = true;
 
    private static final long serialVersionUID = 5864358637898048080L;
 
@@ -100,10 +122,14 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
          Set<String> lastSimulatedJoints;
 
          if (sdfJointNameMap != null)
+         {
             lastSimulatedJoints = sdfJointNameMap.getLastSimulatedJoints();
+         }
          else
+         {
             lastSimulatedJoints = new HashSet<>();
-         addJointsRecursively(child, rootJoint, MatrixTools.IDENTITY, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping,
+         }  
+         addJointsRecursively(child, rootJoint, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping,
                               lastSimulatedJoints, false);
       }
 
@@ -136,7 +162,9 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
 
             Joint joint;
             if (jointName.equals(rootJoint.getName()))
+            {
                joint = rootJoint;
+            }
             else
             {
                joint = oneDoFJoints.get(jointName);
@@ -220,24 +248,16 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
       return oneDoFJoints.values();
    }
 
-   private void addJointsRecursively(SDFJointHolder joint, Joint scsParentJoint, Matrix3d chainRotationIn, boolean useCollisionMeshes,
+   private void addJointsRecursively(SDFJointHolder joint, Joint scsParentJoint, boolean useCollisionMeshes,
                                      boolean enableTorqueVelocityLimits, boolean enableDamping, Set<String> lastSimulatedJoints, boolean asNullJoint)
    {
-      Matrix3d rotation = new Matrix3d();
-      Vector3d offset = new Vector3d();
-      joint.getTransformToParentJoint().get(rotation, offset);
-      Vector3d jointAxis = new Vector3d(joint.getAxis());
+      Vector3d jointAxis = new Vector3d(joint.getAxisInModelFrame());
+      Vector3d offset = new Vector3d(joint.getOffsetFromParentJoint());
+      
+      Transform3D visualTransform = new Transform3D();
+      visualTransform.setRotation(joint.getLinkRotation());
 
-      Matrix3d chainRotation = new Matrix3d(chainRotationIn);
-      chainRotation.mul(rotation);
-
-      Transform3D rotationTransform = new Transform3D();
-      rotationTransform.setRotation(chainRotationIn);
-      rotationTransform.transform(offset);
-
-      Transform3D jointTransform = new Transform3D();
-      jointTransform.setRotation(chainRotation);
-      jointTransforms.put(joint.getName(), jointTransform);
+      jointTransforms.put(joint.getName(), new Transform3D(visualTransform));
 
       String sanitizedJointName = SDFConversionsHelper.sanitizeJointName(joint.getName());
 
@@ -343,7 +363,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
          }
       }
 
-      scsJoint.setLink(createLink(joint.getChild(), rotationTransform, useCollisionMeshes));
+      scsJoint.setLink(createLink(joint.getChild(), visualTransform, useCollisionMeshes));
       scsParentJoint.addJoint(scsJoint);
 
       if (DEBUG)
@@ -359,7 +379,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
 
       for (SDFJointHolder child : joint.getChild().getChildren())
       {
-         addJointsRecursively(child, scsJoint, chainRotation, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping, lastSimulatedJoints, asNullJoint);
+         addJointsRecursively(child, scsJoint, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping, lastSimulatedJoints, asNullJoint);
       }
 
    }
@@ -579,8 +599,8 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
       }
 
       double mass = link.getMass();
-      Matrix3d inertia = link.getInertia();
-      Vector3d CoMOffset = link.getCoMOffset();
+      Matrix3d inertia = InertiaTools.rotate(rotationTransform, link.getInertia());
+      Vector3d CoMOffset = new Vector3d(link.getCoMOffset());
 
       if (link.getJoint() != null)
       {
@@ -590,16 +610,12 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
          }
       }
 
-      RigidBodyInertia rigidBodyInertia = new RigidBodyInertia(ReferenceFrame.getWorldFrame(), inertia, mass);
-      ReferenceFrame jointFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("toroidFrame", ReferenceFrame.getWorldFrame(),
-            rotationTransform);
-      rigidBodyInertia.changeFrame(jointFrame);
 
       rotationTransform.transform(CoMOffset);
 
       scsLink.setComOffset(CoMOffset);
       scsLink.setMass(mass);
-      scsLink.setMomentOfInertia(rigidBodyInertia.getMassMomentOfInertiaPartCopy());
+      scsLink.setMomentOfInertia(inertia);
 
       if (SHOW_COM_REFERENCE_FRAMES)
       {

@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.media.j3d.Transform3D;
-import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFJointNameMap.JointRole;
@@ -33,7 +32,6 @@ import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.containers.ContainerTools;
-import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -72,7 +70,6 @@ public class SDFFullRobotModel implements FullRobotModel
    private final HashMap<String, ReferenceFrame> lidarBaseFrames = new HashMap<String, ReferenceFrame>();
    private final HashMap<String, Transform3D> lidarBaseToSensorTransform = new HashMap<String, Transform3D>();
    private final HashMap<String, FrameVector> lidarAxis = new HashMap<String, FrameVector>();
-   private final OneDoFJoint lidarJoint;
 
    public SDFFullRobotModel(SDFLinkHolder rootLink, SDFJointNameMap sdfJointNameMap)
    {
@@ -96,7 +93,7 @@ public class SDFFullRobotModel implements FullRobotModel
       addSensorDefinitions(rootJoint, rootLink);
       for (SDFJointHolder sdfJoint : rootLink.getChildren())
       {
-         addJointsRecursively(sdfJoint, pelvis, MatrixTools.IDENTITY);
+         addJointsRecursively(sdfJoint, pelvis);
       }
 
       Set<RigidBody> excludeBodiesForUpperBody = new LinkedHashSet<RigidBody>();
@@ -121,7 +118,6 @@ public class SDFFullRobotModel implements FullRobotModel
          }
       }
 
-      lidarJoint = getOneDoFJointByName(sdfJointNameMap.getLidarJointName());
 
       lowerBody = ScrewTools.computeRigidBodiesInOrder(elevator, excludeBodiesForLowerBody);
       upperBody = ScrewTools.computeRigidBodiesInOrder(pelvis, excludeBodiesForUpperBody);
@@ -195,34 +191,33 @@ public class SDFFullRobotModel implements FullRobotModel
       }
    }
 
-   private void addJointsRecursively(SDFJointHolder joint, RigidBody parentBody, Matrix3d chainRotationIn)
+   private void addJointsRecursively(SDFJointHolder joint, RigidBody parentBody)
    {
-//      System.out.println("Adding joint " + joint.getName() + " to " + parentBody.getName());
-	   
-	   
-	  Matrix3d rotation = new Matrix3d();
-      joint.getTransformToParentJoint().get(rotation);
 
-      Matrix3d chainRotation = new Matrix3d(chainRotationIn);
-      chainRotation.mul(rotation);
-
-      Transform3D orientationTransform = new Transform3D();
-      orientationTransform.set(chainRotation);
-      orientationTransform.invert();
-
-      Vector3d jointAxis = new Vector3d(joint.getAxis());
-      orientationTransform.transform(jointAxis);
-	   
+      Vector3d jointAxis = new Vector3d(joint.getAxisInModelFrame());
 	   
       OneDoFJoint inverseDynamicsJoint;
+           
+      
+      
+      ReferenceFrame parentFrame;
+      if (parentBody.isRootBody())
+         parentFrame = parentBody.getBodyFixedFrame();
+      else
+         parentFrame = parentBody.getParentJoint().getFrameAfterJoint();
+
+      ReferenceFrame frameBeforeJoint = ScrewTools.createOffsetFrame(parentFrame, joint.getTransformToParentJoint(), "bla");
+      FrameVector jointAxisFrame = new FrameVector(ReferenceFrame.getWorldFrame(), jointAxis);
+      jointAxisFrame.changeFrame(frameBeforeJoint);
+      
       
       switch(joint.getType())
       {
       case REVOLUTE:
-         inverseDynamicsJoint = ScrewTools.addRevoluteJoint(joint.getName(), parentBody, joint.getTransformToParentJoint(), jointAxis);
+         inverseDynamicsJoint = ScrewTools.addRevoluteJoint(joint.getName(), parentBody, joint.getTransformToParentJoint(), jointAxisFrame.getVector());
          break;
       case PRISMATIC:
-         inverseDynamicsJoint = ScrewTools.addPrismaticJoint(joint.getName(), parentBody, joint.getTransformToParentJoint(), jointAxis);
+         inverseDynamicsJoint = ScrewTools.addPrismaticJoint(joint.getName(), parentBody, joint.getTransformToParentJoint(), jointAxisFrame.getVector());
          break;
       default:
          throw new RuntimeException("Joint type not implemented: " + joint.getType());
@@ -237,10 +232,14 @@ public class SDFFullRobotModel implements FullRobotModel
 
       oneDoFJoints.put(joint.getName(), inverseDynamicsJoint);
       
-      
       SDFLinkHolder childLink = joint.getChild();
+      Vector3d comOffset = childLink.getCoMOffset();
+
+//      FrameVector comOffsetFrame = new FrameVector(ReferenceFrame.getWorldFrame(), comOffset);
+//      comOffsetFrame.changeFrame(parentFrame);
+      
       RigidBody rigidBody = ScrewTools.addRigidBody(childLink.getName(), inverseDynamicsJoint, childLink.getInertia(), childLink.getMass(),
-            childLink.getCoMOffset());
+            comOffset);
 //      System.out.println("Adding rigid body " + childLink.getName() + "; Mass: " + childLink.getMass() + "; ixx: " + childLink.getInertia().m00 + "; iyy: " + childLink.getInertia().m11
 //            + "; izz: " + childLink.getInertia().m22 + "; COM Offset: " + childLink.getCoMOffset());
 
@@ -299,7 +298,7 @@ public class SDFFullRobotModel implements FullRobotModel
 
       for (SDFJointHolder sdfJoint : childLink.getChildren())
       {
-         addJointsRecursively(sdfJoint, rigidBody, chainRotation);
+         addJointsRecursively(sdfJoint, rigidBody);
       }
 
    }
@@ -483,8 +482,4 @@ public class SDFFullRobotModel implements FullRobotModel
       return lidarAxis.get(name);
    }
 
-   public InverseDynamicsJoint getLidarJoint()
-   {
-      return lidarJoint;
-   }
 }

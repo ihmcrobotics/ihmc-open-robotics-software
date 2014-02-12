@@ -17,7 +17,7 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
    public static final int nPointsPerPlane = 4;
    public static final int nPlanes = 4;
    public static final int wrenchLength = 6;
-   public static final int nDoF = 34;
+   public static final int nDoF = 38;
    public static final int rhoSize = nSupportVectors * nPointsPerPlane * nPlanes;
 
    private static native void initialize();

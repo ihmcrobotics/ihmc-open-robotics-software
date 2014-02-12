@@ -11,21 +11,21 @@
 %
 % with variables
 %      rho  64 x 1
-%       vd  34 x 1
+%       vd  38 x 1
 %
 % and parameters
-%        A   6 x 34
+%        A   6 x 38
 %        C   6 x 6    PSD, diagonal
-%       Js  34 x 34
-%   Lambda  34 x 34   PSD, diagonal
+%       Js  38 x 38
+%   Lambda  38 x 38   PSD, diagonal
 %     Qrho   6 x 64
 %     WRho  64 x 64   PSD, diagonal
 % WRhoCoPPenalty  64 x 64   PSD, diagonal
 % WRhoSmoother  64 x 64   PSD, diagonal
-%       Ws  34 x 34   PSD, diagonal
+%       Ws  38 x 38   PSD, diagonal
 %        b   6 x 1
 %        c   6 x 1
-%       ps  34 x 1
+%       ps  38 x 1
 %   rhoMin  64 x 1    positive
 % rhoPrevious  64 x 1    positive
 % rhoPreviousMean  64 x 1    positive
@@ -39,7 +39,7 @@
 %
 % Specify params.A, ..., params.rhoPreviousMean, then run
 %   [vars, status] = csolve(params, settings)
-% Produced by CVXGEN, 2013-11-26 19:46:51 -0500.
+% Produced by CVXGEN, 2014-02-11 21:41:08 -0500.
 % CVXGEN is Copyright (C) 2006-2012 Jacob Mattingley, jem@cvxgen.com.
 % The code in this file is Copyright (C) 2006-2012 Jacob Mattingley.
 % CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial

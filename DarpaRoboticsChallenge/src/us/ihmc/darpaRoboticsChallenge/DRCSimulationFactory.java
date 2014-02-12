@@ -6,6 +6,7 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
+import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
@@ -65,7 +66,7 @@ public class DRCSimulationFactory
    {
       GUISetterUpperRegistry guiSetterUpperRegistry = new GUISetterUpperRegistry();
 
-      DRCRobotJointMap jointMap = robotInterface.getJointMap();
+      SDFJointNameMap jointMap = robotInterface.getJointMap();
             
 
 
@@ -132,7 +133,7 @@ public class DRCSimulationFactory
       ArrayList<OneDegreeOfFreedomJoint> forceTorqueSensorJoints = new ArrayList<OneDegreeOfFreedomJoint>();
       // TODO: Get from SDF file
 
-      for (String name : DRCRobotParameters.DRC_ROBOT_FORCESENSOR_NAMES)
+      for (String name : robotInterface.getForceSensorNames())
       {
          forceTorqueSensorJoints.add(simulatedRobot.getOneDoFJoint(name));
       }
@@ -228,10 +229,10 @@ public class DRCSimulationFactory
 
    private static void setupJointDamping(SDFRobot simulatedRobot)
    {
-      for (int i = 0; i < ROSAtlasJointMap.numberOfJoints; i++)
-      {
-         simulatedRobot.getOneDoFJoint(ROSAtlasJointMap.jointNames[i]).setDamping(DRCRobotDampingParameters.getAtlasDamping(i));
-      }
+//      for (int i = 0; i < ROSAtlasJointMap.numberOfJoints; i++)
+//      {
+//         simulatedRobot.getOneDoFJoint(ROSAtlasJointMap.jointNames[i]).setDamping(DRCRobotDampingParameters.getAtlasDamping(i));
+//      }
 
       for (RobotSide robotSide : RobotSide.values)
       {

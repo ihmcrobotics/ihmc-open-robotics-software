@@ -374,7 +374,7 @@ public class SimpleStanceController implements RobotController
          joints.removeAll(fingerJoints);
       }
 
-      joints.remove(fullRobotModel.getLidarJoint());
+//      joints.remove(fullRobotModel.getLidarJoint());
 
       return joints.toArray(new InverseDynamicsJoint[joints.size()]);
    }

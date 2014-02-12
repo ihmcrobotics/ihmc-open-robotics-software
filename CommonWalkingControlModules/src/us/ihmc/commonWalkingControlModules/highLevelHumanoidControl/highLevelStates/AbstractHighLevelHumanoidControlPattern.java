@@ -352,7 +352,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
    protected void doLidarJointControl()
    {
-      if (lidarControllerInterface != null)
+      if (lidarControllerInterface != null && lidarControllerInterface.getLidarJoint() != null)
          momentumBasedController.setOneDoFJointAcceleration(lidarControllerInterface.getLidarJoint(), 0.0);
    }
 

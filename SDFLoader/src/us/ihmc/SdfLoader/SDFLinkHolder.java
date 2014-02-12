@@ -11,6 +11,7 @@ import us.ihmc.SdfLoader.xmlDescription.Collision;
 import us.ihmc.SdfLoader.xmlDescription.SDFLink;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.SdfLoader.xmlDescription.SDFVisual;
+import us.ihmc.utilities.InertiaTools;
 import us.ihmc.utilities.math.MatrixTools;
 
 public class SDFLinkHolder
@@ -113,8 +114,8 @@ public class SDFLinkHolder
          inertialFrameRotation.mul(inertia);
 
          inertia.set(inertialFrameRotation);
+//         inertia.set(InertiaTools.rotate(inertialFrameRotation, inertia));
          inertialFrameWithRespectToLinkFrame.set(MatrixTools.IDENTITY);
-//         System.err.println("Warning: Non-zero rotation of the inertial matrix on link " + name);
       }
 
       this.CoMOffset.set(CoMOffset);

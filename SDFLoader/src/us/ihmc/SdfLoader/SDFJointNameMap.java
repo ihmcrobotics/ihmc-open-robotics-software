@@ -43,4 +43,10 @@ public interface SDFJointNameMap extends RobotSpecificJointNames
    
    public Set<String> getLastSimulatedJoints();
 
+   public String[] getIMUSensorsToUse();
+
+   public String getLidarSensorName();
+
+   public String getLeftCameraName();
+
 }
