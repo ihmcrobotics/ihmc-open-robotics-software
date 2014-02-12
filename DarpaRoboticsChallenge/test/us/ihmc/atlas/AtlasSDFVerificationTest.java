@@ -1,7 +1,6 @@
 package us.ihmc.atlas;
 
-import com.yobotics.simulationconstructionset.ExternalForcePoint;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.*;
 import com.yobotics.simulationconstructionset.time.GlobalTimer;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
@@ -16,12 +15,16 @@ import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimerTaskScheduler;
+import us.ihmc.utilities.math.MathTools;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by dstephen on 2/11/14.
@@ -29,12 +32,11 @@ import static org.junit.Assert.assertFalse;
 public class AtlasSDFVerificationTest
 {
    private static final boolean KEEP_SCS_UP = false;
-   private static final boolean SIMULATE_FOREVER = false;
 
    private static final boolean CREATE_MOVIE = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
 
-   private static final double SIM_DURATION = 15.0;
+   private static final double SIM_DURATION = 5.0;
 
    private BlockingSimulationRunner blockingSimulationRunner;
 
@@ -78,7 +80,7 @@ public class AtlasSDFVerificationTest
    }
 
    @Test
-   public void testSimpleLegSwing() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+   public void testSimpleLegSwing() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException, IOException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -86,7 +88,7 @@ public class AtlasSDFVerificationTest
       JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap, false);
       SDFRobot sdfRobot = loader.createRobot(jointMap, true);
 
-      pinRobotInAir(jointMap, sdfRobot);
+      pinRobotInAir(sdfRobot);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot);
 
@@ -109,7 +111,7 @@ public class AtlasSDFVerificationTest
 //    fail();
    }
 
-   private void pinRobotInAir(DRCRobotJointMap jointMap, SDFRobot sdfRobot)
+   private void pinRobotInAir(SDFRobot sdfRobot)
    {
       sdfRobot.setPositionInWorld(new Vector3d(sdfRobot.getPositionInWorld().x, sdfRobot.getPositionInWorld().y, sdfRobot.getPositionInWorld().z + 0.5));
       ExternalForcePoint fp = new ExternalForcePoint("gravityCompensation", sdfRobot);
@@ -134,23 +136,108 @@ public class AtlasSDFVerificationTest
       assertFalse("Had to write new base file. On next run nothing should change", writeNewBaseFile);
    }
 
-   private void simulate(SimulationConstructionSet scs) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+   private void simulate(SimulationConstructionSet scs) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException, IOException
    {
       scs.startOnAThread();
 
-      if (SIMULATE_FOREVER)
+      blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
+      double timeIncrement = 1.0;
+      while (scs.getTime() < SIM_DURATION)
       {
-         ThreadTools.sleepForever();
+         blockingSimulationRunner.simulateAndBlock(timeIncrement);
+      }
+
+      HashMap<String, Double> yoVariables = getDoubleYoVariables(scs.getRobots()[0]);
+
+      boolean result = verifyDump(yoVariables);
+
+      writeLatestDump(yoVariables);
+
+      assertTrue(result);
+   }
+
+   private HashMap<String, Double> getDoubleYoVariables(Robot robot)
+   {
+      HashMap<String, Double> yoVariables = new HashMap<>();
+
+      for (YoVariable var : robot.getAllVariables())
+      {
+         if (var instanceof DoubleYoVariable)
+         {
+            yoVariables.put(var.getName(), ((DoubleYoVariable) var).getDoubleValue());
+         }
+      }
+
+      return yoVariables;
+   }
+
+   private boolean verifyDump(HashMap<String, Double> yoVariables) throws IOException
+   {
+      File dumpFile = new File("sdfVerify.dump");
+
+      if (dumpFile.exists())
+      {
+         BufferedReader reader = new BufferedReader(new FileReader(dumpFile));
+         String line;
+
+         while ((line = reader.readLine()) != null)
+         {
+            String name = line.substring(0, line.indexOf(":"));
+            double value = Double.parseDouble(line.substring(line.indexOf(":") + 1));
+
+            System.out.println(name);
+            System.out.println(value);
+
+            if (hasVariableChangedSignificantly(yoVariables, name, value))
+            {
+               return false;
+            }
+         }
+
+         return true;
       }
       else
       {
-         blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
-         double timeIncrement = 1.0;
-         while (scs.getTime() < SIM_DURATION)
+         System.err.println("Couldn't find variable dump in project root, skipping verification step. Try running test again.");
+
+         return true;
+      }
+   }
+
+   private boolean hasVariableChangedSignificantly(HashMap<String, Double> yoVariables, String name, double value)
+   {
+      if (yoVariables.containsKey(name))
+      {
+
+         if (!MathTools.epsilonEquals(yoVariables.get(name).doubleValue(), value, 1e-10))
          {
-            blockingSimulationRunner.simulateAndBlock(timeIncrement);
+            System.err.println("Values for " + name + "out of range");
+            System.err.println("Current: " + yoVariables.get(name).doubleValue());
+            System.err.println("Dumped: " + value);
+
+            return true;
          }
       }
+      else
+      {
+         System.out.println("No variable named: " + name);
+
+         return true;
+      }
+
+      return false;
+   }
+
+   private void writeLatestDump(HashMap<String, Double> yoVariables) throws FileNotFoundException
+   {
+      PrintWriter writer = new PrintWriter(new FileOutputStream("sdfVerify.dump"));
+      for (String name : yoVariables.keySet())
+      {
+         String line = name + ":" + yoVariables.get(name).doubleValue();
+         writer.println(line);
+      }
+      writer.flush();
+      writer.close();
    }
 
    private NothingChangedVerifier setupNothingChangedVerifier(SimulationConstructionSet scs)
