@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.media.j3d.Transform3D;
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFJointNameMap.JointRole;
@@ -30,6 +31,7 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.IMUDefinition;
+import us.ihmc.utilities.InertiaTools;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.containers.ContainerTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -195,29 +197,33 @@ public class SDFFullRobotModel implements FullRobotModel
    {
 
       Vector3d jointAxis = new Vector3d(joint.getAxisInModelFrame());
+      Vector3d offset = new Vector3d(joint.getOffsetFromParentJoint());
 	   
-      OneDoFJoint inverseDynamicsJoint;
+      Transform3D visualTransform = new Transform3D();
+      visualTransform.setRotation(joint.getLinkRotation());
            
       
       
-      ReferenceFrame parentFrame;
-      if (parentBody.isRootBody())
-         parentFrame = parentBody.getBodyFixedFrame();
-      else
-         parentFrame = parentBody.getParentJoint().getFrameAfterJoint();
+      OneDoFJoint inverseDynamicsJoint;
+      
+//      ReferenceFrame parentFrame;
+//      if (parentBody.isRootBody())
+//         parentFrame = parentBody.getBodyFixedFrame();
+//      else
+//         parentFrame = parentBody.getParentJoint().getFrameAfterJoint();
 
-      ReferenceFrame frameBeforeJoint = ScrewTools.createOffsetFrame(parentFrame, joint.getTransformToParentJoint(), "bla");
-      FrameVector jointAxisFrame = new FrameVector(ReferenceFrame.getWorldFrame(), jointAxis);
-      jointAxisFrame.changeFrame(frameBeforeJoint);
+//      ReferenceFrame frameBeforeJoint = ScrewTools.createOffsetFrame(parentFrame, joint.getTransformToParentJoint(), "bla");
+//      FrameVector jointAxisFrame = new FrameVector(ReferenceFrame.getWorldFrame(), jointAxis);
+//      jointAxisFrame.changeFrame(frameBeforeJoint);
       
       
       switch(joint.getType())
       {
       case REVOLUTE:
-         inverseDynamicsJoint = ScrewTools.addRevoluteJoint(joint.getName(), parentBody, joint.getTransformToParentJoint(), jointAxisFrame.getVector());
+         inverseDynamicsJoint = ScrewTools.addRevoluteJoint(joint.getName(), parentBody, offset, jointAxis);
          break;
       case PRISMATIC:
-         inverseDynamicsJoint = ScrewTools.addPrismaticJoint(joint.getName(), parentBody, joint.getTransformToParentJoint(), jointAxisFrame.getVector());
+         inverseDynamicsJoint = ScrewTools.addPrismaticJoint(joint.getName(), parentBody, offset, jointAxis);
          break;
       default:
          throw new RuntimeException("Joint type not implemented: " + joint.getType());
@@ -233,12 +239,13 @@ public class SDFFullRobotModel implements FullRobotModel
       oneDoFJoints.put(joint.getName(), inverseDynamicsJoint);
       
       SDFLinkHolder childLink = joint.getChild();
-      Vector3d comOffset = childLink.getCoMOffset();
-
-//      FrameVector comOffsetFrame = new FrameVector(ReferenceFrame.getWorldFrame(), comOffset);
-//      comOffsetFrame.changeFrame(parentFrame);
       
-      RigidBody rigidBody = ScrewTools.addRigidBody(childLink.getName(), inverseDynamicsJoint, childLink.getInertia(), childLink.getMass(),
+      double mass = childLink.getMass();
+      Vector3d comOffset = new Vector3d(childLink.getCoMOffset());
+      Matrix3d inertia = InertiaTools.rotate(visualTransform, childLink.getInertia());
+      visualTransform.transform(comOffset);
+
+      RigidBody rigidBody = ScrewTools.addRigidBody(childLink.getName(), inverseDynamicsJoint, inertia, mass,
             comOffset);
 //      System.out.println("Adding rigid body " + childLink.getName() + "; Mass: " + childLink.getMass() + "; ixx: " + childLink.getInertia().m00 + "; iyy: " + childLink.getInertia().m11
 //            + "; izz: " + childLink.getInertia().m22 + "; COM Offset: " + childLink.getCoMOffset());

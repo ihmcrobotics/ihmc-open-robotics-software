@@ -12,8 +12,32 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+	<Graph>
+		<Variables>root.V1.DRCControllerDispatcher.DRCMomentumBasedController.HighLevelHumanoidControllerManager.WalkingHighLevelHumanoidController.CoMHeightTimeDerivativesSmoother.smoothComHeight,root.V1.DRCControllerDispatcher.DRCMomentumBasedController.HighLevelHumanoidControllerManager.WalkingHighLevelHumanoidController.positionError_comHeight,root.V1.DRCControllerDispatcher.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.finalDesiredPelvisLinearAccelerationZ,root.V1.DRCControllerDispatcher.DRCMomentumBasedController.HighLevelHumanoidControllerManager.WalkingHighLevelHumanoidController.RootJointAngularAccelerationControlModule.v1PelvisAxisAngleOrientationController.v1PelvisOrientationErrorMagnitude</Variables>
+		<GraphConfiguration>
+			<Name>config2</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.V1.DRCControllerDispatcher.DRCMomentumBasedController.HighLevelHumanoidControllerManager.WalkingHighLevelHumanoidController.RootJointAngularAccelerationControlModule.v1PelvisAxisAngleOrientationController.v1PelvisOrientationErrorMagnitude</Variables>
+		<GraphConfiguration>
+			<Name>config3</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
 </GraphGroup>
-<Entry Boxes></Entry Boxes>
+<Entry Boxes>walk</Entry Boxes>
 
 <Number of ViewPorts>1</Number of ViewPorts>
  <Main Viewport> 
@@ -24,14 +48,14 @@
 
 <Extra Panels>
 <Main Viewport>
-Plotter,Plotter,
+Plotter,
 </Main Viewport></Extra Panels>
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>3.0667094479027877</Camera X>
- <Camera Y>-8.002325302125744</Camera Y>
- <Camera Z>2.6167381600737314</Camera Z>
+ <Camera X>3.1686881108185476</Camera X>
+ <Camera Y>-1.73036817314499</Camera Y>
+ <Camera Z>0.5460543485944049</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -55,8 +79,8 @@ Plotter,Plotter,
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>-0.1921724175277597</Fix X>
-<Fix Y>0.620882513500641</Fix Y>
-<Fix Z>0.6224555068983031</Fix Z>
+<Fix X>0.08797945488362946</Fix X>
+<Fix Y>0.017645896573029063</Fix Y>
+<Fix Z>0.7168365064642979</Fix Z>
 </Fix Position>
 </Canvas 1>
