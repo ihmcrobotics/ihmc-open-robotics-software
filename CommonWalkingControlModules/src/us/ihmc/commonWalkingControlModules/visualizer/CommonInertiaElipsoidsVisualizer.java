@@ -5,12 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.utilities.InertiaTools;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -18,12 +17,14 @@ import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.RigidBodyInertia;
 
+import com.mathworks.jama.Matrix;
+import com.mathworks.jama.SingularValueDecomposition;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicEllipsoid;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicShape;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
@@ -65,7 +66,7 @@ public class CommonInertiaElipsoidsVisualizer implements Updatable, RobotControl
    }  
    public CommonInertiaElipsoidsVisualizer(RigidBody rootBody, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
       {
-      inertiaEllipsoidGhostOffset.set(-0.5, 0.0, 0.0);
+      inertiaEllipsoidGhostOffset.set(0, 0.0, 0.0);
 
       findMinimumAndMaximumMassOfRigidBodies(rootBody);
       addRigidBodyAndChilderenToVisualization(rootBody);
@@ -131,22 +132,24 @@ public class CommonInertiaElipsoidsVisualizer implements Updatable, RobotControl
          Matrix3d inertiaMatrix = inertia.getMassMomentOfInertiaPartCopy();
          double mass = inertia.getMass();
          
-         Vector3d principalMomentsOfInertia = new Vector3d(inertiaMatrix.m00, inertiaMatrix.m11, inertiaMatrix.m22);
-         Vector3d radii = InertiaTools.getInertiaEllipsoidRadii(principalMomentsOfInertia, mass);
-         if(radii.length() > 1e-4)
-         {
+//         Vector3d principalMomentsOfInertia = new Vector3d(inertiaMatrix.m00, inertiaMatrix.m11, inertiaMatrix.m22);
+//         Vector3d radii = InertiaTools.getInertiaEllipsoidRadii(principalMomentsOfInertia, mass);
+//         if(radii.length() > 1e-4)
+//         {
             String rigidBodyName = currentRigidBody.getName();
             YoFramePoint comPosition = new YoFramePoint("centerOfMassPosition", rigidBodyName, worldFrame, registry);
             YoFrameOrientation comOrientation = new YoFrameOrientation("rigidBodyOrientation", rigidBodyName, worldFrame, registry);
             RigidBodyVisualizationData comData = new RigidBodyVisualizationData(currentRigidBody, comPosition, comOrientation);
             centerOfMassData.add(comData);
             
-            Color color = getColor(mass); 
-            AppearanceDefinition appearance = YoAppearance.Color(color);
+            AppearanceDefinition appearance = YoAppearance.Orange();
+            appearance.setTransparency(0.6);
             
-            DynamicGraphicEllipsoid comViz = new DynamicGraphicEllipsoid(rigidBodyName + "CoMPosition", comPosition, comOrientation, appearance, radii);  
+            
+//            new DynamicGraphicShape(rigidBodyName, linkGraphics, framePose, scale)
+            DynamicGraphicShape comViz = new DynamicGraphicShape(rigidBodyName + "CoMEllipsoid", createEllipsoid(inertiaMatrix, mass, appearance), comPosition, comOrientation, 1.0);  
             dynamicGraphicObjects.add(comViz);
-         }
+//         }
       }
       
       if(currentRigidBody.hasChildrenJoints())
@@ -210,5 +213,40 @@ public class CommonInertiaElipsoidsVisualizer implements Updatable, RobotControl
    public void doControl()
    {
       update();
+   }
+   
+   private Graphics3DObject createEllipsoid(Matrix3d inertia, double mass, AppearanceDefinition appearance)
+   {
+      double[][] moiArray = new double[][]
+            { {inertia.m00, inertia.m01, inertia.m02}, 
+            {inertia.m10, inertia.m11, inertia.m12}, 
+            {inertia.m20, inertia.m21, inertia.m22} };
+
+       
+
+       Matrix Inertia = new Matrix(moiArray);
+       SingularValueDecomposition inertiaSvd = new SingularValueDecomposition(Inertia);
+
+       Matrix S = inertiaSvd.getS();
+//       @SuppressWarnings("unused") Matrix U = inertiaSvd.getU();
+       Matrix V = inertiaSvd.getV();
+
+       // System.out.println("S:\n " + MatrixToString(S));
+       // System.out.println("U:\n " + MatrixToString(U));
+       // System.out.println("V:\n " + MatrixToString(V));
+
+       Matrix3d rotationMatrix3d = new Matrix3d(V.getRowPackedCopy());
+
+       // Moment of inertia of an ellipsoid is 1/5 * mass * (ry^2+rz^2, rx^2+rz^2, rx^2+ry^2).  Backing this out:
+       double a = 5.0 * S.get(0, 0) / mass, b = 5.0 * S.get(1, 1) / mass, c = 5.0 * S.get(2, 2) / mass;
+       double rx = Math.sqrt(0.5 * (-a + b + c)), ry = Math.sqrt(0.5 * (a - b + c)), rz = Math.sqrt(0.5 * (a + b - c));
+       
+       
+       Graphics3DObject graphics = new Graphics3DObject();
+       graphics.identity();
+       graphics.rotate(rotationMatrix3d);
+       graphics.addEllipsoid(rx, ry, rz, appearance);
+
+       return graphics;
    }
 }
