@@ -1,9 +1,18 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.VariableChangedListener;
+import com.yobotics.simulationconstructionset.YoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.GainCalculator;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameQuaternion;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
+import com.yobotics.simulationconstructionset.util.statemachines.State;
+import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.CubicPolynomialTrajectoryGenerator;
+import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.YoVariableDoubleProvider;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
@@ -24,25 +33,11 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.ScrewTools;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.utilities.screwTheory.*;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.VariableChangedListener;
-import com.yobotics.simulationconstructionset.YoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.GainCalculator;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameQuaternion;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
-import com.yobotics.simulationconstructionset.util.statemachines.State;
-import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.CubicPolynomialTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.YoVariableDoubleProvider;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public abstract class AbstractHighLevelHumanoidControlPattern extends State<HighLevelState>
 {
@@ -84,7 +79,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
    private final DoubleYoVariable zetaUpperBody = new DoubleYoVariable("zetaUpperBody", registry);
    private final DoubleYoVariable maxAccelerationUpperBody = new DoubleYoVariable("maxAccelerationUpperBody", registry);
    private final DoubleYoVariable maxJerkUpperBody = new DoubleYoVariable("maxJerkUpperBody", registry);
-   
+
    protected final SideDependentList<? extends ContactablePlaneBody> feet, handPalms;
 
    protected final DoubleYoVariable coefficientOfFriction = new DoubleYoVariable("coefficientOfFriction", registry);
@@ -93,8 +88,9 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
 
    private final VariousWalkingProviders variousWalkingProviders;
-//   private final VariousWalkingManagers variousWalkingManagers;
-   
+
+// private final VariousWalkingManagers variousWalkingManagers;
+
    protected final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
 
    private final DoubleYoVariable kpPelvisOrientation = new DoubleYoVariable("kpPelvisOrientation", registry);
@@ -110,8 +106,9 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       super(controllerState);
 
       this.variousWalkingProviders = variousWalkingProviders;
-//      this.variousWalkingManagers = variousWalkingManagers;
-      
+
+//    this.variousWalkingManagers = variousWalkingManagers;
+
       this.dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistry;
 
       // Getting parameters from the momentumBasedController
@@ -138,8 +135,8 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       setupLegJacobians(fullRobotModel);
       coefficientOfFriction.set(1.0);
 
-      setUpperBodyControlGains(walkingControllerParameters.getKpUpperBody(), walkingControllerParameters.getZetaUpperBody(), 
-            walkingControllerParameters.getMaxAccelerationUpperBody(), walkingControllerParameters.getMaxJerkUpperBody());
+      setUpperBodyControlGains(walkingControllerParameters.getKpUpperBody(), walkingControllerParameters.getZetaUpperBody(),
+                               walkingControllerParameters.getMaxAccelerationUpperBody(), walkingControllerParameters.getMaxJerkUpperBody());
 
       // Setup foot control modules:
 //    setupFootControlModules(); //TODO: get rid of that?
@@ -156,22 +153,23 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       zetaPelvisOrientation.set(walkingControllerParameters.getZetaPelvisOrientation());
       maxAccelerationPelvisOrientation.set(walkingControllerParameters.getMaxAccelerationPelvisOrientation());
       maxJerkPelvisOrientation.set(walkingControllerParameters.getMaxJerkPelvisOrientation());
-      
-      
+
+
       rootJointAccelerationControlModule = new RootJointAngularAccelerationControlModule(controlDT, momentumBasedController, registry);
       VariableChangedListener pelvisOrientationGainsChangedListener = createPelvisOrientationGainsChangedListener();
       pelvisOrientationGainsChangedListener.variableChanged(null);
 
       // Setup joint constraints
       positionControlJoints = setupJointConstraints();
-      
 
-      if (jointForExtendedNeckPitchRange != null && desiredHeadOrientationProvider != null)
+
+      if ((jointForExtendedNeckPitchRange != null) && (desiredHeadOrientationProvider != null))
       {
          DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(walkingControllerParameters.getTrajectoryTimeHeadOrientation());
          extendedNeckPitchInitialAngle = new YoVariableDoubleProvider("extendedNeckPitchInitialAngle", registry);
          extendedNeckPitchFinalAngle = new YoVariableDoubleProvider("extendedNeckPitchFinalAngle", registry);
-         extendedNeckPitchTrajectory = new CubicPolynomialTrajectoryGenerator("extendedNeckPitchTrajectory", extendedNeckPitchInitialAngle, extendedNeckPitchFinalAngle, trajectoryTimeProvider, registry);
+         extendedNeckPitchTrajectory = new CubicPolynomialTrajectoryGenerator("extendedNeckPitchTrajectory", extendedNeckPitchInitialAngle,
+                 extendedNeckPitchFinalAngle, trajectoryTimeProvider, registry);
          extendedNeckPitchTrajectory.initialize();
          extendedNeckPitchReceivedTime = new DoubleYoVariable("extendedNeckPitchReceived", registry);
       }
@@ -190,7 +188,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
    private final DoubleYoVariable extendedNeckPitchDesiredVelocity = new DoubleYoVariable("extendedNeckPitchDesiredVelocity", registry);
    private final YoVariableDoubleProvider extendedNeckPitchInitialAngle;
    private final YoVariableDoubleProvider extendedNeckPitchFinalAngle;
-   
+
    public void setUpperBodyControlGains(double kpUpperBody, double zetaUpperBody, double maxAcceleration, double maxJerk)
    {
       this.kpUpperBody.set(kpUpperBody);
@@ -210,7 +208,8 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
             rootJointAccelerationControlModule.setProportionalGains(kpPelvisOrientation.getDoubleValue(), kpPelvisOrientation.getDoubleValue(),
                     kpPelvisOrientation.getDoubleValue());
             rootJointAccelerationControlModule.setDerivativeGains(dPelvisOrientation, dPelvisOrientation, dPelvisOrientation);
-            rootJointAccelerationControlModule.setMaxAccelerationAndJerk(maxAccelerationPelvisOrientation.getDoubleValue(), maxJerkPelvisOrientation.getDoubleValue());
+            rootJointAccelerationControlModule.setMaxAccelerationAndJerk(maxAccelerationPelvisOrientation.getDoubleValue(),
+                    maxJerkPelvisOrientation.getDoubleValue());
          }
       };
 
@@ -218,7 +217,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       zetaPelvisOrientation.addVariableChangedListener(listener);
       maxAccelerationPelvisOrientation.addVariableChangedListener(listener);
       maxJerkPelvisOrientation.addVariableChangedListener(listener);
-      
+
       return listener;
    }
 
@@ -277,17 +276,21 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
          unconstrainedJoints.removeAll(Arrays.asList(legJoints));
 
          // Arm joints
-         RigidBody hand = fullRobotModel.getHand(robotSide);
-         InverseDynamicsJoint[] armJoints = ScrewTools.createJointPath(chest, hand);
-         unconstrainedJoints.removeAll(Arrays.asList(armJoints));
+         if (fullRobotModel.getHand(robotSide) != null)
+         {
+            RigidBody hand = fullRobotModel.getHand(robotSide);
+            InverseDynamicsJoint[] armJoints = ScrewTools.createJointPath(chest, hand);
+            unconstrainedJoints.removeAll(Arrays.asList(armJoints));
 
-         // Hand joints
-         InverseDynamicsJoint[] handJoints = ScrewTools.computeSubtreeJoints(hand);
-         OneDoFJoint[] handJointsArray = new OneDoFJoint[ScrewTools.computeNumberOfJointsOfType(OneDoFJoint.class, handJoints)];
-         ScrewTools.filterJoints(handJoints, handJointsArray, OneDoFJoint.class);
-         List<OneDoFJoint> handJointsList = Arrays.asList(handJointsArray);
-         unconstrainedJoints.removeAll(handJointsList);
-         torqueControlJoints.addAll(handJointsList);
+            // Hand joints
+            InverseDynamicsJoint[] handJoints = ScrewTools.computeSubtreeJoints(hand);
+            OneDoFJoint[] handJointsArray = new OneDoFJoint[ScrewTools.computeNumberOfJointsOfType(OneDoFJoint.class, handJoints)];
+            ScrewTools.filterJoints(handJoints, handJointsArray, OneDoFJoint.class);
+            List<OneDoFJoint> handJointsList = Arrays.asList(handJointsArray);
+            unconstrainedJoints.removeAll(handJointsList);
+            torqueControlJoints.addAll(handJointsList);
+         }
+
       }
 
       // Lidar joint
@@ -352,60 +355,64 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
    protected void doLidarJointControl()
    {
-      if (lidarControllerInterface != null && lidarControllerInterface.getLidarJoint() != null)
+      if ((lidarControllerInterface != null) && (lidarControllerInterface.getLidarJoint() != null))
          momentumBasedController.setOneDoFJointAcceleration(lidarControllerInterface.getLidarJoint(), 0.0);
    }
 
    protected void doHeadControl()
    {
-      headOrientationManager.compute();
-
-      if (jointForExtendedNeckPitchRange != null)
+      if (headOrientationManager != null)
       {
-         double kpHead = this.kpUpperBody.getDoubleValue();
-         double kdHead = GainCalculator.computeDerivativeGain(kpHead, zetaUpperBody.getDoubleValue());
+         headOrientationManager.compute();
 
-         double maxAcceleration = maxAccelerationUpperBody.getDoubleValue();
-         double maxJerk = maxJerkUpperBody.getDoubleValue();
-
-         
-         if (desiredHeadOrientationProvider != null && extendedNeckPitchTrajectory != null)
+         if (jointForExtendedNeckPitchRange != null)
          {
-            double qDesired, qdDesired;
-            double desiredExtendedNeckPitchJointAngle = desiredHeadOrientationProvider.getDesiredExtendedNeckPitchJointAngle();
-            if (!Double.isNaN(desiredExtendedNeckPitchJointAngle))
+            double kpHead = this.kpUpperBody.getDoubleValue();
+            double kdHead = GainCalculator.computeDerivativeGain(kpHead, zetaUpperBody.getDoubleValue());
+
+            double maxAcceleration = maxAccelerationUpperBody.getDoubleValue();
+            double maxJerk = maxJerkUpperBody.getDoubleValue();
+
+
+            if ((desiredHeadOrientationProvider != null) && (extendedNeckPitchTrajectory != null))
             {
-               extendedNeckPitchInitialAngle.set(extendedNeckPitchTrajectory.getValue());
-               extendedNeckPitchFinalAngle.set(desiredExtendedNeckPitchJointAngle);
-               extendedNeckPitchTrajectory.initialize();
-               extendedNeckPitchTrajectory.compute(0.0);
-               extendedNeckPitchReceivedTime.set(yoTime.getDoubleValue());
+               double qDesired, qdDesired;
+               double desiredExtendedNeckPitchJointAngle = desiredHeadOrientationProvider.getDesiredExtendedNeckPitchJointAngle();
+               if (!Double.isNaN(desiredExtendedNeckPitchJointAngle))
+               {
+                  extendedNeckPitchInitialAngle.set(extendedNeckPitchTrajectory.getValue());
+                  extendedNeckPitchFinalAngle.set(desiredExtendedNeckPitchJointAngle);
+                  extendedNeckPitchTrajectory.initialize();
+                  extendedNeckPitchTrajectory.compute(0.0);
+                  extendedNeckPitchReceivedTime.set(yoTime.getDoubleValue());
+               }
+               else
+               {
+                  extendedNeckPitchTrajectory.compute(yoTime.getDoubleValue() - extendedNeckPitchReceivedTime.getDoubleValue());
+               }
+
+               qDesired = extendedNeckPitchTrajectory.getValue();
+               qdDesired = extendedNeckPitchTrajectory.getVelocity();
+
+               extendedNeckPitchDesiredAngle.set(qDesired);
+               extendedNeckPitchDesiredVelocity.set(qdDesired);
+
+               momentumBasedController.doPDControl(jointForExtendedNeckPitchRange, kpHead, kdHead, qDesired, qdDesired, maxAcceleration, maxJerk);
             }
             else
             {
-               extendedNeckPitchTrajectory.compute(yoTime.getDoubleValue() - extendedNeckPitchReceivedTime.getDoubleValue());
+               momentumBasedController.doPDControl(jointForExtendedNeckPitchRange, kpHead, kdHead, 0.0, 0.0, maxAcceleration, maxJerk);
             }
-            
-            qDesired = extendedNeckPitchTrajectory.getValue();
-            qdDesired = extendedNeckPitchTrajectory.getVelocity();
-            
-            extendedNeckPitchDesiredAngle.set(qDesired);
-            extendedNeckPitchDesiredVelocity.set(qdDesired);
-            
-            momentumBasedController.doPDControl(jointForExtendedNeckPitchRange, kpHead, kdHead, qDesired, qdDesired, maxAcceleration, maxJerk);
-         }
-         else
-         {
-            momentumBasedController.doPDControl(jointForExtendedNeckPitchRange, kpHead, kdHead, 0.0, 0.0, maxAcceleration, maxJerk);
          }
       }
-
-
    }
 
    protected void doChestControl()
    {
-      chestOrientationManager.compute();
+      if (chestOrientationManager != null)
+      {
+         chestOrientationManager.compute();
+      }
    }
 
    protected void doFootControl()
@@ -418,7 +425,8 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
    protected void doArmControl()
    {
-      manipulationControlModule.doControl();
+      if (manipulationControlModule != null)
+         manipulationControlModule.doControl();
    }
 
    protected void doCoMControl()
@@ -442,7 +450,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       double kdUpperBody = GainCalculator.computeDerivativeGain(kpUpperBody, zetaUpperBody.getDoubleValue());
       double maxJerkUpperBody = this.maxJerkUpperBody.getDoubleValue();
       double maxAccelerationUpperBody = this.maxAccelerationUpperBody.getDoubleValue();
-      
+
       momentumBasedController.doPDControl(positionControlJoints, kpUpperBody, kdUpperBody, maxAccelerationUpperBody, maxJerkUpperBody);
    }
 
