@@ -1,16 +1,12 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.VariableChangedListener;
-import com.yobotics.simulationconstructionset.YoVariable;
-import com.yobotics.simulationconstructionset.util.GainCalculator;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.ThirdOrderPolynomialTrajectoryGenerator;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
@@ -25,19 +21,39 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModuleBridge.MomentumControlModuleType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
-import us.ihmc.commonWalkingControlModules.packetConsumers.*;
-import us.ihmc.commonWalkingControlModules.trajectories.*;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredChestOrientationProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBearingProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
+import us.ihmc.commonWalkingControlModules.trajectories.ChangeableConfigurationProvider;
+import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.PoseTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.SettableOrientationProvider;
+import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.WrapperForPositionAndOrientationTrajectoryGenerators;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.math.geometry.*;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.VariableChangedListener;
+import com.yobotics.simulationconstructionset.YoVariable;
+import com.yobotics.simulationconstructionset.util.GainCalculator;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
+import com.yobotics.simulationconstructionset.util.trajectory.ThirdOrderPolynomialTrajectoryGenerator;
 
 public class CarIngressEgressController extends AbstractHighLevelHumanoidControlPattern
 {
@@ -428,83 +444,80 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
    protected void doPelvisControl()
    {
-      if (pelvisPoseProvider != null)
+      if (pelvisPoseProvider != null && pelvisPoseProvider.checkForNewPose())
       {
-         if (pelvisPoseProvider.checkForNewPose())
-         {
-            double time = yoTime.getDoubleValue() - pelvisTrajectoryStartTime;
-            pelvisPositionTrajectoryGenerator.compute(time);
-            pelvisOrientationTrajectoryGenerator.compute(time);
-
-            FramePoint previousDesiredPosition = new FramePoint(pelvisPositionControlFrame);
-            FrameOrientation previousDesiredOrientation = new FrameOrientation(pelvisPositionControlFrame);
-            pelvisPositionTrajectoryGenerator.get(previousDesiredPosition);
-            pelvisOrientationTrajectoryGenerator.get(previousDesiredOrientation);
-
-            FramePose previousDesiredPelvisConfiguration = new FramePose(previousDesiredPosition, previousDesiredOrientation);
-            initialPelvisConfigurationProvider.set(previousDesiredPelvisConfiguration);
-
-            desiredPelvisConfigurationProvider.set(pelvisPoseProvider.getDesiredPelvisPose());
-            pelvisTrajectoryStartTime = yoTime.getDoubleValue();
-
-            pelvisPositionTrajectoryGenerator.initialize();
-            pelvisOrientationTrajectoryGenerator.initialize();
-         }
-
          double time = yoTime.getDoubleValue() - pelvisTrajectoryStartTime;
          pelvisPositionTrajectoryGenerator.compute(time);
          pelvisOrientationTrajectoryGenerator.compute(time);
 
-         FramePoint desiredPosition = new FramePoint(pelvisPositionControlFrame);
-         FrameVector desiredVelocity = new FrameVector(pelvisPositionControlFrame);
-         FrameVector desiredPelvisAcceleration = new FrameVector(pelvisPositionControlFrame);
+         FramePoint previousDesiredPosition = new FramePoint(pelvisPositionControlFrame);
+         FrameOrientation previousDesiredOrientation = new FrameOrientation(pelvisPositionControlFrame);
+         pelvisPositionTrajectoryGenerator.get(previousDesiredPosition);
+         pelvisOrientationTrajectoryGenerator.get(previousDesiredOrientation);
 
-         pelvisPositionTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredPelvisAcceleration);
+         FramePose previousDesiredPelvisConfiguration = new FramePose(previousDesiredPosition, previousDesiredOrientation);
+         initialPelvisConfigurationProvider.set(previousDesiredPelvisConfiguration);
 
-         FrameOrientation desiredOrientation = new FrameOrientation(pelvisPositionControlFrame);
-         FrameVector desiredAngularVelocity = new FrameVector(pelvisPositionControlFrame);
-         FrameVector desiredAngularAcceleration = new FrameVector(pelvisPositionControlFrame);
+         desiredPelvisConfigurationProvider.set(pelvisPoseProvider.getDesiredPelvisPose());
+         pelvisTrajectoryStartTime = yoTime.getDoubleValue();
 
-         pelvisOrientationTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
-
-         pelvisController.doPositionControl(desiredPosition, desiredOrientation, desiredVelocity, desiredAngularVelocity, desiredPelvisAcceleration,
-                                            desiredAngularAcceleration, fullRobotModel.getElevator());
-
-         pelvisDesiredsHandler.setDesireds(desiredPosition, desiredVelocity, desiredPelvisAcceleration, desiredOrientation, desiredAngularVelocity,
-               desiredAngularAcceleration);
-
-         SpatialAccelerationVector pelvisSpatialAcceleration = new SpatialAccelerationVector();
-         pelvisController.packAcceleration(pelvisSpatialAcceleration);
-
-         pelvisSpatialAcceleration.changeBodyFrameNoRelativeAcceleration(fullRobotModel.getPelvis().getBodyFixedFrame());
-         pelvisSpatialAcceleration.changeFrameNoRelativeMotion(fullRobotModel.getPelvis().getBodyFixedFrame());
-
-         if (!requestedPelvisLoadBearing.getBooleanValue())
-         {
-            pelvisTaskspaceConstraintData.set(elevator, pelvis);
-            pelvisTaskspaceConstraintData.set(pelvisSpatialAcceleration);
-         }
-         else
-         {
-            DenseMatrix64F selectionMatrix = new DenseMatrix64F(5, SpatialMotionVector.SIZE);
-            for (int i = 0; i < selectionMatrix.getNumRows(); i++)
-            {
-               selectionMatrix.set(i, i, 1.0);
-            }
-            pelvisTaskspaceConstraintData.set(pelvisSpatialAcceleration, pelvisNullspaceMultipliers, selectionMatrix);
-         }
-
-         momentumBasedController.setDesiredSpatialAcceleration(pelvisJacobianId, pelvisTaskspaceConstraintData);
-
-         desiredOrientation.changeFrame(this.desiredPelvisOrientation.getReferenceFrame());
-         desiredAngularVelocity.changeFrame(this.desiredPelvisAngularVelocity.getReferenceFrame());
-         desiredAngularAcceleration.changeFrame(this.desiredPelvisAngularAcceleration.getReferenceFrame());
-
-
-         desiredPelvisOrientation.set(desiredOrientation);
-         desiredPelvisAngularVelocity.set(desiredAngularVelocity);
-         desiredPelvisAngularAcceleration.set(desiredAngularAcceleration);
+         pelvisPositionTrajectoryGenerator.initialize();
+         pelvisOrientationTrajectoryGenerator.initialize();
       }
+
+      double time = yoTime.getDoubleValue() - pelvisTrajectoryStartTime;
+      pelvisPositionTrajectoryGenerator.compute(time);
+      pelvisOrientationTrajectoryGenerator.compute(time);
+
+      FramePoint desiredPosition = new FramePoint(pelvisPositionControlFrame);
+      FrameVector desiredVelocity = new FrameVector(pelvisPositionControlFrame);
+      FrameVector desiredPelvisAcceleration = new FrameVector(pelvisPositionControlFrame);
+
+      pelvisPositionTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredPelvisAcceleration);
+
+      FrameOrientation desiredOrientation = new FrameOrientation(pelvisPositionControlFrame);
+      FrameVector desiredAngularVelocity = new FrameVector(pelvisPositionControlFrame);
+      FrameVector desiredAngularAcceleration = new FrameVector(pelvisPositionControlFrame);
+
+      pelvisOrientationTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+
+      pelvisController.doPositionControl(desiredPosition, desiredOrientation, desiredVelocity, desiredAngularVelocity, desiredPelvisAcceleration,
+            desiredAngularAcceleration, fullRobotModel.getElevator());
+
+      pelvisDesiredsHandler.setDesireds(desiredPosition, desiredVelocity, desiredPelvisAcceleration, desiredOrientation, desiredAngularVelocity,
+            desiredAngularAcceleration);
+
+      SpatialAccelerationVector pelvisSpatialAcceleration = new SpatialAccelerationVector();
+      pelvisController.packAcceleration(pelvisSpatialAcceleration);
+
+      pelvisSpatialAcceleration.changeBodyFrameNoRelativeAcceleration(fullRobotModel.getPelvis().getBodyFixedFrame());
+      pelvisSpatialAcceleration.changeFrameNoRelativeMotion(fullRobotModel.getPelvis().getBodyFixedFrame());
+
+      if (!requestedPelvisLoadBearing.getBooleanValue())
+      {
+         pelvisTaskspaceConstraintData.set(elevator, pelvis);
+         pelvisTaskspaceConstraintData.set(pelvisSpatialAcceleration);
+      }
+      else
+      {
+         DenseMatrix64F selectionMatrix = new DenseMatrix64F(5, SpatialMotionVector.SIZE);
+         for (int i = 0; i < selectionMatrix.getNumRows(); i++)
+         {
+            selectionMatrix.set(i, i, 1.0);
+         }
+         pelvisTaskspaceConstraintData.set(pelvisSpatialAcceleration, pelvisNullspaceMultipliers, selectionMatrix);
+      }
+
+      momentumBasedController.setDesiredSpatialAcceleration(pelvisJacobianId, pelvisTaskspaceConstraintData);
+
+      desiredOrientation.changeFrame(this.desiredPelvisOrientation.getReferenceFrame());
+      desiredAngularVelocity.changeFrame(this.desiredPelvisAngularVelocity.getReferenceFrame());
+      desiredAngularAcceleration.changeFrame(this.desiredPelvisAngularAcceleration.getReferenceFrame());
+
+
+      desiredPelvisOrientation.set(desiredOrientation);
+      desiredPelvisAngularVelocity.set(desiredAngularVelocity);
+      desiredPelvisAngularAcceleration.set(desiredAngularAcceleration);
    }
 
    protected void doChestControl()
@@ -523,6 +536,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
             chestOrientationTrajectoryGenerator.initialize();
          }
+      }
 
          chestOrientationTrajectoryGenerator.compute(yoTime.getDoubleValue() - chestTrajectoryStartTime);
          FrameOrientation desiredOrientation = new FrameOrientation(chestPositionControlFrame);
@@ -535,7 +549,6 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          chestOrientationManager.setDesireds(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
          super.doChestControl();
-      }
    }
 
    protected void doFootControl()
@@ -544,7 +557,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       {
          ContactablePlaneBody foot = feet.get(robotSide);
 
-         if (footPoseProvider.checkForNewPose(robotSide) && !requestedFootLoadBearing.get(robotSide).getBooleanValue())
+         if (footPoseProvider!= null && footPoseProvider.checkForNewPose(robotSide) && !requestedFootLoadBearing.get(robotSide).getBooleanValue())
          {
             FramePose oldFootPose = new FramePose(foot.getBodyFrame());
             desiredFootConfigurationProviders.get(robotSide).get(oldFootPose);
