@@ -1,63 +1,52 @@
 package us.ihmc.darpaRoboticsChallenge.controllers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.atlas.parameters.AtlasJointPDGains;
-import us.ihmc.atlas.visualization.CenterOfPressureVisualizer;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
-import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
-import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
-import us.ihmc.commonWalkingControlModules.controllers.RobotControllerUpdatablesAdapter;
-import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
-import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
-import us.ihmc.commonWalkingControlModules.visualizer.ForceSensorDataVisualizer;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
-import us.ihmc.darpaRoboticsChallenge.sensors.AtlasWristFeetYoVariables;
-import us.ihmc.darpaRoboticsChallenge.sensors.WrenchBasedFootSwitch;
-import us.ihmc.robotSide.RobotSide;
-import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.AtlasWristFeetSensorServer;
-import us.ihmc.sensorProcessing.sensors.ForceSensorData;
-import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
-import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromController;
-import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.TotalMassCalculator;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
-
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import us.ihmc.atlas.parameters.AtlasJointPDGains;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
+import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
+import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
+import us.ihmc.commonWalkingControlModules.controllers.RobotControllerUpdatablesAdapter;
+import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
+import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
+import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
+import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
+import us.ihmc.darpaRoboticsChallenge.sensors.WrenchBasedFootSwitch;
+import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.sensors.ForceSensorData;
+import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromController;
+import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.*;
+
+import javax.vecmath.Point2d;
+import javax.vecmath.Vector3d;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 {
    private final HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory;
    private final double contactTresholdForce;
    private final SideDependentList<String> footSensorNames;
-   
+
    public DRCRobotMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory, double contactTresholdForce, SideDependentList<String> footSensorNames)
    {
       this.highLevelHumanoidControllerFactory = highLevelHumanoidControllerFactory;
       this.contactTresholdForce = DRCConfigParameters.contactTresholdForceForSCS;
       this.footSensorNames = footSensorNames;
    }
-   
+
    public DRCRobotMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory, double contactTresholdForce)
    {
       this.highLevelHumanoidControllerFactory = highLevelHumanoidControllerFactory;
@@ -84,31 +73,33 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
          RigidBody footBody = fullRobotModel.getFoot(robotSide);
          ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
          ListOfPointsContactablePlaneBody foot = new ListOfPointsContactablePlaneBody(footBody, soleFrame, this.createContactPoints(contactPointsArrayList));
-         
+
          bipedFeet.put(robotSide, foot);
       }
 
 
       double gravityZ = Math.abs(gravity);
       double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator()) * gravityZ;
-      
+
       SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(bipedFeet, forceSensorDataHolder, totalRobotWeight, dynamicGraphicObjectsListRegistry, specificRegistry);
-      
+
 
 
 
       Map<OneDoFJoint, Double> initialPositionControlKpGains = new HashMap<OneDoFJoint, Double>();
       Map<OneDoFJoint, Double> initialPositionControlKdGains = new HashMap<OneDoFJoint, Double>();
-      
+
+      // TODO: Generalize setting up the gain maps.  No knowledge of the model at this stage in the game but this shouldn't be Atlas specific
+
       AtlasJointPDGains.createMaps(fullRobotModel, initialPositionControlKpGains, initialPositionControlKdGains);
 
       RobotController highLevelHumanoidController = highLevelHumanoidControllerFactory.create(estimationLink, estimationFrame, fullRobotModel,
-            initialPositionControlKpGains, initialPositionControlKdGains, 
+            initialPositionControlKpGains, initialPositionControlKdGains,
             referenceFrames, null, yoTime, gravityZ, twistCalculator, centerOfMassJacobian, bipedFeet,
             controlDT, footSwitches, lidarControllerInterface, stateEstimationDataFromControllerSink,
             dynamicGraphicObjectsListRegistry, specificRegistry, guiSetterUpperRegistry,
             null, forceSensorDataHolder);
-      
+
       highLevelHumanoidController.getYoVariableRegistry().addChild(specificRegistry);
 
 
@@ -116,17 +107,17 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       {
          RobotControllerUpdatablesAdapter  highLevelHumanoidControllerUpdatables = new RobotControllerUpdatablesAdapter(highLevelHumanoidController);
 
-         
+
          highLevelHumanoidController = highLevelHumanoidControllerUpdatables;
       }
-      return highLevelHumanoidController;      
+      return highLevelHumanoidController;
    }
 
    private SideDependentList<FootSwitchInterface> createFootSwitches(SideDependentList<ContactablePlaneBody> bipedFeet,
          ForceSensorDataHolder forceSensorDataHolder, double totalRobotWeight, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry)
    {
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<FootSwitchInterface>();
-      
+
       for (RobotSide robotSide : RobotSide.values)
       {
          ForceSensorData footForceSensor = forceSensorDataHolder.getByName(footSensorNames.get(robotSide));
@@ -143,7 +134,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
    {
       return DRCConfigParameters.CONTROL_DT;
    }
-   
+
    private List<Point2d> createContactPoints(ArrayList<Vector3d> list)
    {
       ArrayList<Point2d> contactPoints = new ArrayList<Point2d>();
