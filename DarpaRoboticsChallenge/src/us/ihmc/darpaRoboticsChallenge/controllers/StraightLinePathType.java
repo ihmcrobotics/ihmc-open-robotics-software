@@ -1,6 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge.controllers;
 
-public enum StraightLinePathType
+import us.ihmc.commonWalkingControlModules.desiredFootStep.PathTypeStepParameters;
+
+public enum StraightLinePathType implements PathTypeStepParameters
 {
    STRAIGHT, REVERSE, LEFT_SHUFFLE, RIGHT_SHUFFLE;
 
