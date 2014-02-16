@@ -59,13 +59,9 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
                                         CommonWalkingReferenceFrames referenceFrames, double controlDT, double gravity, DoubleYoVariable yoTime,
                                         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, GUISetterUpperRegistry guiSetterUpperRegistry, TwistCalculator twistCalculator,
                                         CenterOfMassJacobian centerOfMassJacobian, ForceSensorDataHolder forceSensorDataHolder, LidarControllerInterface lidarControllerInterface,
-                                        StateEstimationDataFromController stateEstimationDataFromControllerSink, GlobalDataProducer dataProducer)
+                                        StateEstimationDataFromController stateEstimationDataFromControllerSink, GlobalDataProducer dataProducer, ArrayList<Vector3d> contactPointsArrayList)
    {
-
-      ArrayList<Vector3d> contactPointsArrayList = DRCRobotParameters.DRC_ROBOT_GROUND_CONTACT_POINT_OFFSET_FROM_FOOT;
-
       YoVariableRegistry specificRegistry = new YoVariableRegistry("specific");
-
 
       SideDependentList<ContactablePlaneBody> bipedFeet = new SideDependentList<ContactablePlaneBody>();
       for (RobotSide robotSide : RobotSide.values)

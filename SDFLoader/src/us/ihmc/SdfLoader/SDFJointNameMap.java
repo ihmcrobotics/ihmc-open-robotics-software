@@ -1,5 +1,6 @@
 package us.ihmc.SdfLoader;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -38,6 +39,7 @@ public interface SDFJointNameMap extends RobotSpecificJointNames
    public String getJointBeforeFootName(RobotSide robotSide);
    public double getAnkleHeight();
    public List<Pair<String,Vector3d>> getJointNameGroundContactPointMap();
+   public ArrayList<Vector3d> getFootGroundContactPointsForController();
    
    public boolean enableTorqueVelocityLimits();
    
