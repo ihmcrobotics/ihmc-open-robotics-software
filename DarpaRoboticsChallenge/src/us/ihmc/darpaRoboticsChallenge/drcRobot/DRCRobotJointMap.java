@@ -25,8 +25,6 @@ import us.ihmc.utilities.Pair;
 
 public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointNames
 {
-   
-   
    public static final String chestName = "utorso";
    public static final String pelvisName = "pelvis";
    public static final String headName = "head";
@@ -418,5 +416,9 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
       return lastSimulatedJoints;
    }
 
-
+   @Override
+   public ArrayList<Vector3d> getFootGroundContactPointsForController()
+   {
+      return DRCRobotParameters.DRC_ROBOT_GROUND_CONTACT_POINT_OFFSET_FROM_FOOT;
+   }
 }
