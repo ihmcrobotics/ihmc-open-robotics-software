@@ -81,7 +81,7 @@ public class DRCConfigParameters
 
    public static final boolean SHOW_BANDWIDTH_DIALOG = false;
 
-   public static final double ATLAS_INTERFACING_DT = 0.003;
+   public static final double ATLAS_INTERFACING_DT = 0.001;
    public static final double CONTROL_DT = 0.006;
    public static final double ATLAS_ONBOARD_SAMPLINGFREQ = 1000.0;
    public static final double ATLAS_ONBOARD_DT = 1.0 / ATLAS_ONBOARD_SAMPLINGFREQ;
