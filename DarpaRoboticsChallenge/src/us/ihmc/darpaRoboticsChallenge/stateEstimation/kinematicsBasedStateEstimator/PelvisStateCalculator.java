@@ -256,13 +256,13 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
       stateMachine = new StateMachine<PelvisEstimationState>("PelvisEstimationStateMachine", "switchTime", PelvisEstimationState.class, yoTime, registry);
       setupStateMachine();
 
-      alphaGravityEstimation.set(0.99999);
+      alphaGravityEstimation.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(5.3052e-4, estimatorDT)); // alpha = 0.99999 with dt = 0.003
 
       alphaFootToPelvisPosition.set(0.0); 
       alphaFootToPelvisVelocity.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(16.0, estimatorDT)); //0.85);
 
-      alphaPelvisAccelerometerIntegrationToVelocity.set(0.992);
-      alphaPelvisAccelerometerIntegrationToPosition.set(0.8);
+      alphaPelvisAccelerometerIntegrationToVelocity.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.4261, estimatorDT)); // alpha = 0.992 with dt = 0.003
+      alphaPelvisAccelerometerIntegrationToPosition.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(11.7893, estimatorDT)); // alpha = 0.8 with dt = 0.003
 
       alphaCoPFilter.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(4.0, estimatorDT));
       
@@ -277,9 +277,9 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
       imuDriftCompensationActivated.set(false);
       isIMUDriftYawRateEstimated.set(false);
       isIMUDriftYawRateEstimationActivated.set(false);
-      alphaFilterIMUDrift.set(0.99);
-      alphaFilterFootAngularVelocity.set(0.99);
-      alphaFilterFootAngularVelocityAverage.set(0.99);
+      alphaFilterIMUDrift.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.5332, estimatorDT)); // alpha = 0.99 with dt = 0.003
+      alphaFilterFootAngularVelocity.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.5332, estimatorDT)); // alpha = 0.99 with dt = 0.003
+      alphaFilterFootAngularVelocityAverage.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.5332, estimatorDT)); // alpha = 0.99 with dt = 0.003
       imuDriftYawRate.set(0.0);
       imuDriftYawRateFiltered.reset();
       imuDriftYawRateFiltered.update();
