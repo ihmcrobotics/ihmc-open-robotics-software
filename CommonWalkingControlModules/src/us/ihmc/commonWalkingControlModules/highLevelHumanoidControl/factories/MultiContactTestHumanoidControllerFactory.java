@@ -163,7 +163,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       double groundReactionWrenchBreakFrequencyHertz = 7.0;
       oldMomentumControlModule.setGroundReactionWrenchBreakFrequencyHertz(groundReactionWrenchBreakFrequencyHertz);
 
-      MomentumOptimizationSettings momentumOptimizationSettings = null;
+      MomentumOptimizationSettings momentumOptimizationSettings = HighLevelHumanoidControllerFactoryHelper.createMomentumOptimizationSettings(fullRobotModel, lidarControllerInterface, registry);
       
       // The controllers do not extend the MomentumBasedController anymore. Instead, it is passed through the constructor.
       MomentumBasedController momentumBasedController = new MomentumBasedController(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian,
