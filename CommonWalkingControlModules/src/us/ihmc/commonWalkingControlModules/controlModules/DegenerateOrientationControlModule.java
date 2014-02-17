@@ -102,6 +102,7 @@ public abstract class DegenerateOrientationControlModule
       
       rigidBodyOrientationControlModule.setProportionalGains(proportionalGainX, proportionalGainY, proportionalGainZ);
       rigidBodyOrientationControlModule.setDerivativeGains(derivativeGainX, derivativeGainY, derivativeGainZ);
+      rigidBodyOrientationControlModule.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
       
       rigidBodyOrientationControlModules.add(rigidBodyOrientationControlModule);
       
@@ -186,6 +187,19 @@ public abstract class DegenerateOrientationControlModule
       for (RigidBodyOrientationControlModule rigidBodyOrientationControlModule : rigidBodyOrientationControlModules)
       {
          rigidBodyOrientationControlModule.setDerivativeGains(derivativeGainX, derivativeGainY, derivativeGainZ);
+      }
+   }
+
+   private double maxAcceleration = Double.POSITIVE_INFINITY, maxJerk = Double.POSITIVE_INFINITY;
+
+   public void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
+   {
+      this.maxAcceleration = maxAcceleration;
+      this.maxJerk = maxJerk;
+      
+      for (RigidBodyOrientationControlModule rigidBodyOrientationControlModule : rigidBodyOrientationControlModules)
+      {
+         rigidBodyOrientationControlModule.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
       }
    }
 

@@ -144,6 +144,11 @@ public class HeadOrientationManager
       headOrientationControlModule.setProportionalGains(proportionalGainX, proportionalGainY, proportionalGainZ);
       headOrientationControlModule.setDerivativeGains(derivativeGainX, derivativeGainY, derivativeGainZ);
    }
+   
+   public void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
+   {
+      headOrientationControlModule.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
+   }
 
    public void setControlGains(double proportionalGain, double derivativeGain)
    {

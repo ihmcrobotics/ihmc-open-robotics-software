@@ -610,6 +610,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       if (headOrientationManager != null)
       {
          headOrientationManager.setUp(baseForHeadOrientationControl, jacobianIdForHeadOrientationControl);
+         headOrientationManager.setMaxAccelerationAndJerk(walkingControllerParameters.getMaxAccelerationUpperBody(), walkingControllerParameters.getMaxJerkUpperBody());
          walkingHeadOrientationKp.set(walkingControllerParameters.getKpHeadOrientation());
          walkingHeadOrientationZeta.set(walkingControllerParameters.getZetaHeadOrientation());
          VariableChangedListener headGainsChangedListener = createHeadGainsChangedListener();
