@@ -1,10 +1,13 @@
 package us.ihmc.darpaRoboticsChallenge.controllers;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
-import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.vecmath.Point2d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.atlas.parameters.AtlasJointPDGains;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
@@ -16,7 +19,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 import us.ihmc.darpaRoboticsChallenge.sensors.WrenchBasedFootSwitch;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -25,14 +27,17 @@ import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromController;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.*;
+import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.TotalMassCalculator;
+import us.ihmc.utilities.screwTheory.TwistCalculator;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
+import com.yobotics.simulationconstructionset.robotController.RobotController;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 {
@@ -40,18 +45,16 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
    private final double contactTresholdForce;
    private final SideDependentList<String> footSensorNames;
 
+   public DRCRobotMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory, double contactTresholdForce)
+   {
+      this(highLevelHumanoidControllerFactory, contactTresholdForce, new SideDependentList<String>("l_leg_akx", "r_leg_akx"));
+   }
+
    public DRCRobotMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory, double contactTresholdForce, SideDependentList<String> footSensorNames)
    {
       this.highLevelHumanoidControllerFactory = highLevelHumanoidControllerFactory;
-      this.contactTresholdForce = DRCConfigParameters.contactTresholdForceForSCS;
+      this.contactTresholdForce = contactTresholdForce;
       this.footSensorNames = footSensorNames;
-   }
-
-   public DRCRobotMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory, double contactTresholdForce)
-   {
-      this.highLevelHumanoidControllerFactory = highLevelHumanoidControllerFactory;
-      this.contactTresholdForce = DRCConfigParameters.contactTresholdForceForSCS;
-      this.footSensorNames = new SideDependentList<String>("l_leg_akx", "r_leg_akx");
    }
 
    @Override
