@@ -289,7 +289,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
                      }
                      else
                      {
-                        pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 0.0001 * joint.getContactKp(), joint.getContactKd());
+                        pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 0.0001 * joint.getContactKp(), 0.1 * joint.getContactKd());
                      }
                   }
                }
