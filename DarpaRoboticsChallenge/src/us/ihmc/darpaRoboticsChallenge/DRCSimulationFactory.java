@@ -17,8 +17,6 @@ import us.ihmc.darpaRoboticsChallenge.controllers.EstimationLinkHolder;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.BlockingThreadSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotDampingParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandModel;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriterWithAccelerationIntegration;
@@ -28,7 +26,7 @@ import us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSSandiaJointMap;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCSimulatedSensorNoiseParameters;
-import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCStateEstimatorBridge;
+import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCStateEstimatorInterface;
 import us.ihmc.projectM.R2Sim02.initialSetup.GuiInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.ScsInitialSetup;
@@ -37,7 +35,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.GroundContactPointBasedWrenchCa
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
-import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.RunnableRunnerController;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.StateEstimatorErrorCalculatorController;
 import us.ihmc.util.NonRealtimeThreadFactory;
@@ -194,14 +192,14 @@ public class DRCSimulationFactory
       if (scsInitialSetup.getInitializeEstimatorToActual())
       {
          System.err.println("Warning! Initializing Estimator to Actual!");
-         DRCStateEstimatorBridge drcStateEstimator = robotController.getDRCStateEstimator();
+         DRCStateEstimatorInterface drcStateEstimator = robotController.getDRCStateEstimator();
          initializeEstimatorToActual(drcStateEstimator, robotInitialSetup, simulatedRobot);
       }
 
       if (COMPUTE_ESTIMATOR_ERROR && robotController.getDRCStateEstimator() != null)
       {
-         DRCStateEstimatorBridge drcStateEstimator = robotController.getDRCStateEstimator();
-         StateEstimatorWithPorts stateEstimator = drcStateEstimator.getStateEstimator();
+         DRCStateEstimatorInterface drcStateEstimator = robotController.getDRCStateEstimator();
+         StateEstimator stateEstimator = drcStateEstimator.getStateEstimator();
 
          Joint estimationJoint = getEstimationJoint(simulatedRobot);
 
@@ -256,7 +254,7 @@ public class DRCSimulationFactory
       }
    }
 
-   private static void initializeEstimatorToActual(DRCStateEstimatorBridge drcStateEstimator, RobotInitialSetup<SDFRobot> robotInitialSetup, SDFRobot simulatedRobot)
+   private static void initializeEstimatorToActual(DRCStateEstimatorInterface drcStateEstimator, RobotInitialSetup<SDFRobot> robotInitialSetup, SDFRobot simulatedRobot)
    {
       // The following is to get the initial CoM position from the robot. 
       // It is cheating for now, and we need to move to where the 
