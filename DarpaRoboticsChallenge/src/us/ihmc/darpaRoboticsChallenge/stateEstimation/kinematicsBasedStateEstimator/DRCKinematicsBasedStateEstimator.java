@@ -3,7 +3,6 @@ package us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstim
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
@@ -51,11 +50,11 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    
    private final SimplePositionStateCalculatorInterface simplePositionStateRobotModelUpdater;
    
-   public DRCKinematicsBasedStateEstimator(StateEstimationDataFromController stateEstimatorDataFromControllerSource, SDFFullRobotModel estimatorModel,
+   public DRCKinematicsBasedStateEstimator(StateEstimationDataFromController stateEstimatorDataFromControllerSource,
          FullInverseDynamicsStructure inverseDynamicsStructure, AfterJointReferenceFrameNameMap estimatorReferenceFrameMap,
          RigidBodyToIndexMap estimatorRigidBodyToIndexMap, double estimateDT, SensorReaderFactory sensorReaderFactory, double gravitationalAcceleration,
-         SideDependentList<WrenchBasedFootSwitch> footSwitches,
-         SideDependentList<ContactablePlaneBody> bipedFeet, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         SideDependentList<WrenchBasedFootSwitch> footSwitches, SideDependentList<ContactablePlaneBody> bipedFeet,
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       sensorReader = sensorReaderFactory.getSensorReader();
 
@@ -71,8 +70,8 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
             DRCConfigParameters.pointPositionZMeasurementStandardDeviation);
 
       // That thing is ugly, I'm sorry!! (Sylvain)
-      simplePositionStateRobotModelUpdater = new PelvisStateCalculator(estimatorModel, inverseDynamicsStructure, footSwitches, bipedFeet,
-            gravitationalAcceleration, estimateDT, dynamicGraphicObjectsListRegistry, registry);
+      simplePositionStateRobotModelUpdater = new PelvisStateCalculator(inverseDynamicsStructure, footSwitches, bipedFeet, gravitationalAcceleration,
+            estimateDT, dynamicGraphicObjectsListRegistry, registry);
 
       // Make the estimator here.
       sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(stateEstimatorDataFromControllerSource,
