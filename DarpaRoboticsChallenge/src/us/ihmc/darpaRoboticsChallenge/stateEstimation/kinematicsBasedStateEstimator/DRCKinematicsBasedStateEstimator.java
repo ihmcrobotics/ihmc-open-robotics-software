@@ -20,6 +20,7 @@ import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.PointMeasurementNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.SimplePositionStateCalculatorInterface;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromController;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.ControlFlowGraphExecutorController;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
@@ -95,7 +96,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       registry.addChild(controlFlowGraphExecutorController.getYoVariableRegistry());
    }
 
-   public StateEstimatorWithPorts getStateEstimator()
+   public StateEstimator getStateEstimator()
    {
       return stateEstimatorWithPorts;
    }
