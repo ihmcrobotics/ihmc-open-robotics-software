@@ -51,9 +51,10 @@ public class JointStateUpdater
       {
          OneDoFJoint oneDoFJoint = oneDoFJoints[i];
          if (sensorMap.getJointPositionSensorPort(oneDoFJoint) == null)
-         {
             throw new RuntimeException("sensorMap.getJointPositionSensorPort(oneDoFJoint) == null. oneDoFJoint = " + oneDoFJoint);
-         }
+         
+         if (sensorMap.getJointVelocitySensorPort(oneDoFJoint) == null)
+            throw new RuntimeException("sensorMap.getJointVelocitySensorPort(oneDoFJoint) == null. oneDoFJoint = " + oneDoFJoint);
       }
       
       if (DEBUG)
