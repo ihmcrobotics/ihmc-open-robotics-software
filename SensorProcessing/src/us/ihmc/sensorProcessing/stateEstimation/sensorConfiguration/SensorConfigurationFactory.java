@@ -1,7 +1,6 @@
 package us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,7 +29,7 @@ public class SensorConfigurationFactory
       this.sensorNoiseParameters = sensorNoiseParameters;
    }
 
-   public Collection<OrientationSensorConfiguration> createOrientationSensorConfigurations(Map<IMUDefinition,
+   public ArrayList<OrientationSensorConfiguration> createOrientationSensorConfigurations(Map<IMUDefinition,
                      ControlFlowOutputPort<Matrix3d>> orientationSensors)
    {
       ArrayList<OrientationSensorConfiguration> orientationSensorConfigurations = new ArrayList<OrientationSensorConfiguration>();
