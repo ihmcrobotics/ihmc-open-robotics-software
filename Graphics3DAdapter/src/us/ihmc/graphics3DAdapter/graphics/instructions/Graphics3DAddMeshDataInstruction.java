@@ -23,7 +23,7 @@ public class Graphics3DAddMeshDataInstruction extends Graphics3DInstruction
 
    public String toString()
    {
-      return "\t\t\t<MeshDataInstruction>\n";
+      return "\t\t\t<MeshDataInstruction@"+hashCode()+">\n";
    }
 
 
