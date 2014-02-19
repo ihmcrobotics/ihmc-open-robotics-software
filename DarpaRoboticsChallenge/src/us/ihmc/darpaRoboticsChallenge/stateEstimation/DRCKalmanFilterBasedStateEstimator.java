@@ -28,10 +28,9 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.AfterJointReferenceFrameNameMap;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
-public class DRCKalmanFilterBasedStateEstimator implements RobotController
+public class DRCKalmanFilterBasedStateEstimator implements DRCStateEstimatorInterface
 {
    //   private final SensorNoiseParameters sensorNoiseParametersForEstimator =
    private final String name = getClass().getSimpleName();
@@ -145,5 +144,15 @@ public class DRCKalmanFilterBasedStateEstimator implements RobotController
    public void setForceSensorDataHolder(ForceSensorDataHolder forceSensorDataHolderForEstimator)
    {
       sensorReader.setForceSensorDataHolder(forceSensorDataHolderForEstimator);
+   }
+
+   public void startIMUDriftEstimation()
+   {
+      // Not implemented
+   }
+
+   public void startIMUDriftCompensation()
+   {
+      // Not implemented
    }
 }
