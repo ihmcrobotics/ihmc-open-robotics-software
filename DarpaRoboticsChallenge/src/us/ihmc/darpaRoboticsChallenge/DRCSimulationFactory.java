@@ -28,7 +28,7 @@ import us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSSandiaJointMap;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCSimulatedSensorNoiseParameters;
-import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCStateEstimator;
+import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCStateEstimatorBridge;
 import us.ihmc.projectM.R2Sim02.initialSetup.GuiInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.ScsInitialSetup;
@@ -194,13 +194,13 @@ public class DRCSimulationFactory
       if (scsInitialSetup.getInitializeEstimatorToActual())
       {
          System.err.println("Warning! Initializing Estimator to Actual!");
-         DRCStateEstimator drcStateEstimator = robotController.getDRCStateEstimator();
+         DRCStateEstimatorBridge drcStateEstimator = robotController.getDRCStateEstimator();
          initializeEstimatorToActual(drcStateEstimator, robotInitialSetup, simulatedRobot);
       }
 
       if (COMPUTE_ESTIMATOR_ERROR && robotController.getDRCStateEstimator() != null)
       {
-         DRCStateEstimator drcStateEstimator = robotController.getDRCStateEstimator();
+         DRCStateEstimatorBridge drcStateEstimator = robotController.getDRCStateEstimator();
          StateEstimatorWithPorts stateEstimator = drcStateEstimator.getStateEstimator();
 
          Joint estimationJoint = getEstimationJoint(simulatedRobot);
@@ -256,7 +256,7 @@ public class DRCSimulationFactory
       }
    }
 
-   private static void initializeEstimatorToActual(DRCStateEstimator drcStateEstimator, RobotInitialSetup<SDFRobot> robotInitialSetup, SDFRobot simulatedRobot)
+   private static void initializeEstimatorToActual(DRCStateEstimatorBridge drcStateEstimator, RobotInitialSetup<SDFRobot> robotInitialSetup, SDFRobot simulatedRobot)
    {
       // The following is to get the initial CoM position from the robot. 
       // It is cheating for now, and we need to move to where the 
