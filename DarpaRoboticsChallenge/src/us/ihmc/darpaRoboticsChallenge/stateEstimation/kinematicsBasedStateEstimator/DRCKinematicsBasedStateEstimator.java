@@ -70,8 +70,8 @@ public class DRCKinematicsBasedStateEstimator implements RobotController
             DRCConfigParameters.pointPositionZMeasurementStandardDeviation);
 
       // That thing is ugly, I'm sorry!! (Sylvain)
-      simplePositionStateRobotModelUpdater = new PelvisStateCalculator(stateEstimatorDataFromControllerSource, estimatorModel,
-            inverseDynamicsStructure, footSwitches, bipedFeet, gravitationalAcceleration, estimateDT, dynamicGraphicObjectsListRegistry, registry);
+      simplePositionStateRobotModelUpdater = new PelvisStateCalculator(estimatorModel, inverseDynamicsStructure, footSwitches, bipedFeet,
+            gravitationalAcceleration, estimateDT, dynamicGraphicObjectsListRegistry, registry);
 
       // Make the estimator here.
       sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(stateEstimatorDataFromControllerSource,
