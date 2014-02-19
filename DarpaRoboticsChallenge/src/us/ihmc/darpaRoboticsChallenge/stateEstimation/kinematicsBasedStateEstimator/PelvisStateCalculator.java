@@ -7,7 +7,6 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
@@ -193,9 +192,9 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
    
    private final SixDoFJoint rootJoint;
    
-   public PelvisStateCalculator(SDFFullRobotModel estimatorModel, FullInverseDynamicsStructure inverseDynamicsStructure,
-         SideDependentList<WrenchBasedFootSwitch> footSwitches, SideDependentList<ContactablePlaneBody> bipedFeet, double gravitationalAcceleration,
-         final double estimatorDT, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+   public PelvisStateCalculator(FullInverseDynamicsStructure inverseDynamicsStructure, SideDependentList<WrenchBasedFootSwitch> footSwitches,
+         SideDependentList<ContactablePlaneBody> bipedFeet, double gravitationalAcceleration, final double estimatorDT,
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {      
       this.estimatorDT = estimatorDT;
       this.footSwitches = footSwitches;
@@ -211,7 +210,7 @@ public class PelvisStateCalculator implements SimplePositionStateCalculatorInter
       gravityEstimation.reset();
       gravityEstimation.update(Math.abs(gravitationalAcceleration));
       
-      pelvisFrame = estimatorModel.getRootJoint().getFrameAfterJoint();
+      pelvisFrame = inverseDynamicsStructure.getRootJoint().getFrameAfterJoint();
       footFrames = new SideDependentList<ReferenceFrame>();
       
       
