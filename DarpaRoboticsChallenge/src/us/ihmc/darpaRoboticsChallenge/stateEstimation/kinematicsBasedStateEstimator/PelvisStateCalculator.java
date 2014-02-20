@@ -5,7 +5,6 @@ import static com.yobotics.simulationconstructionset.util.math.filter.AlphaFilte
 
 import java.util.Collection;
 
-import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
@@ -17,8 +16,6 @@ import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.geometry.AngleTools;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -26,8 +23,6 @@ import us.ihmc.utilities.screwTheory.CenterOfMassCalculator;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
-import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
 
@@ -38,11 +33,9 @@ import com.yobotics.simulationconstructionset.VariableChangedListener;
 import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFrameVector;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.filter.GlitchFilteredBooleanYoVariable;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameQuaternion;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
@@ -57,8 +50,6 @@ public class PelvisStateCalculator
    private final YoFrameVector imuAccelerationInWorld = new YoFrameVector("imuAccelerationInWorld", worldFrame, registry);
    private final YoFrameVector pelvisVelocityByIntegrating = new YoFrameVector("pelvisVelocityByIntegrating", worldFrame, registry);  
 
-   private final DoubleYoVariable delayTimeBeforeTrustingFoot = new DoubleYoVariable("delayTimeBeforeTrustingFoot", registry);
-
    private final CenterOfMassCalculator centerOfMassCalculator;
    private final CenterOfMassJacobian centerOfMassJacobianBody;
 
@@ -71,48 +62,25 @@ public class PelvisStateCalculator
    private final DoubleYoVariable alphaPelvisAccelerometerIntegrationToVelocity = new DoubleYoVariable("alphaPelvisAccelerometerIntegrationToVelocity", registry);
    private final DoubleYoVariable alphaPelvisAccelerometerIntegrationToPosition = new DoubleYoVariable("alphaPelvisAccelerometerIntegrationToPosition", registry);
    
-   private final SideDependentList<DoubleYoVariable> footForcesZInPercentOfTotalForce = new SideDependentList<DoubleYoVariable>();
-   private final DoubleYoVariable forceZInPercentThresholdToFilterFoot = new DoubleYoVariable("forceZInPercentThresholdToFilterFootUserParameter", registry);
-
    private final DoubleYoVariable feetSpacing = new DoubleYoVariable("estimatedFeetSpacing", registry);
    private final DoubleYoVariable alphaFeetSpacingVelocity = new DoubleYoVariable("alphaFeetSpacingVelocity", registry);
    private final AlphaFilteredYoVariable feetSpacingVelocity = new AlphaFilteredYoVariable("estimatedFeetSpacingVelocity", registry, alphaFeetSpacingVelocity);
    private final DoubleYoVariable footVelocityThreshold = new DoubleYoVariable("footVelocityThresholdToFilterTrustedFoot", registry);
    
-   private final SideDependentList<WrenchBasedFootSwitch> footSwitches;
-   
-   private final SideDependentList<GlitchFilteredBooleanYoVariable> haveFeetHitGroundFiltered = new SideDependentList<GlitchFilteredBooleanYoVariable>();
+   private final SideDependentList<DoubleYoVariable> footForcesZInPercentOfTotalForce = new SideDependentList<DoubleYoVariable>();
+   private final DoubleYoVariable forceZInPercentThresholdToFilterFoot = new DoubleYoVariable("forceZInPercentThresholdToFilterFootUserParameter", registry);
 
+   private final SideDependentList<WrenchBasedFootSwitch> footSwitches;
+   private final SideDependentList<Wrench> footWrenches = new SideDependentList<Wrench>(new Wrench(), new Wrench());
+   private final DoubleYoVariable delayTimeBeforeTrustingFoot = new DoubleYoVariable("delayTimeBeforeTrustingFoot", registry);
+   private final SideDependentList<GlitchFilteredBooleanYoVariable> haveFeetHitGroundFiltered = new SideDependentList<GlitchFilteredBooleanYoVariable>();
    private final SideDependentList<BooleanYoVariable> areFeetTrusted = new SideDependentList<BooleanYoVariable>();
-   
-   private final BooleanYoVariable imuDriftCompensationActivated = new BooleanYoVariable("imuDriftCompensationActivated", registry);
-   private final BooleanYoVariable isIMUDriftYawRateEstimationActivated = new BooleanYoVariable("isIMUDriftYawRateEstimationActivated", registry);
-   private final BooleanYoVariable isIMUDriftYawRateEstimated = new BooleanYoVariable("isIMUDriftYawRateEstimated", registry);
-   private final DoubleYoVariable alphaFilterIMUDrift = new DoubleYoVariable("alphaFilterIMUDrift", registry);
-   private final DoubleYoVariable imuDriftYawRate = new DoubleYoVariable("estimatedIMUDriftYawRate", registry);
-   private final AlphaFilteredYoVariable imuDriftYawRateFiltered = new AlphaFilteredYoVariable("estimatedIMUDriftYawRateFiltered", registry, alphaFilterIMUDrift, imuDriftYawRate);
-   private final DoubleYoVariable imuDriftYawAngle = new DoubleYoVariable("estimatedIMUDriftYawAngle", registry);
-   private final DoubleYoVariable rootJointYawAngleCorrected = new DoubleYoVariable("rootJointYawAngleWithDriftCompensation", registry);
-   private final DoubleYoVariable rootJointYawRateCorrected = new DoubleYoVariable("rootJointYawRateWithDriftCompensation", registry);
-   private final SideDependentList<YoFrameQuaternion> footOrientationsInWorld = new SideDependentList<YoFrameQuaternion>();
-   private final SideDependentList<YoFrameVector> footAxisAnglesInWorld = new SideDependentList<YoFrameVector>();
-   private final DoubleYoVariable alphaFilterFootAngularVelocity = new DoubleYoVariable("alphaFilterFootAngularVelocity", registry);
-   private final SideDependentList<YoFrameVector> footAngularVelocitiesInWorld = new SideDependentList<YoFrameVector>();
-   private final SideDependentList<AlphaFilteredYoVariable> footAngularVelocitiesInWorldFilteredX = new SideDependentList<AlphaFilteredYoVariable>();
-   private final SideDependentList<AlphaFilteredYoVariable> footAngularVelocitiesInWorldFilteredY = new SideDependentList<AlphaFilteredYoVariable>();
-   private final SideDependentList<AlphaFilteredYoVariable> footAngularVelocitiesInWorldFilteredZ = new SideDependentList<AlphaFilteredYoVariable>();
-   private final YoFrameVector footAngularVelocityDifference = new YoFrameVector("footAngularVelocityDifference", worldFrame, registry);
-   private final YoFrameVector footAngularVelocityAverage = new YoFrameVector("footAngularVelocityAverage", worldFrame, registry);
-   private final DoubleYoVariable alphaFilterFootAngularVelocityAverage = new DoubleYoVariable("alphaFilterFootAngularVelocityAverage", registry);
-   private final AlphaFilteredYoFrameVector footAngularVelocityAverageFiltered = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("footAngularVelocityAverageFiltered", "", registry, alphaFilterFootAngularVelocityAverage, footAngularVelocityAverage);
-   private final YoFrameVector footAngularVelocityDifferenceThresholdToEstimateIMUDrift = new YoFrameVector("footAngularVelocityDifferenceThresholdToEstimateIMUDrift", worldFrame, registry);
    
    private final ReferenceFrame pelvisFrame;
    private final SideDependentList<ReferenceFrame> footFrames;
    
    private final RigidBody pelvis;
    
-   private final SideDependentList<Wrench> footWrenches = new SideDependentList<Wrench>(new Wrench(), new Wrench());
    private ControlFlowOutputPort<Vector3d> linearAccelerationPort;
 
    private final double estimatorDT;
@@ -145,9 +113,17 @@ public class PelvisStateCalculator
 
    private final TwistCalculator twistCalculator;
    
-   private final SixDoFJoint rootJoint;
-   
    private final PelvisKinematicsBasedPositionCalculator pelvisKinematicsBasedPositionCalculator;
+   private final IMUDriftCompensator imuDriftCompensator;
+   
+   // Temporary variables
+   private final FrameVector tempIMUAcceleration = new FrameVector();
+   private final FrameVector tempPelvisVelocityIntegrated = new FrameVector();
+   private final FrameVector tempEstimatedVelocityIMUPart = new FrameVector();
+   private final FramePoint tempEstimatedPositionIMUPart = new FramePoint();
+   private final FramePoint tempCenterOfMassPositionWorld = new FramePoint(worldFrame);
+   private final FrameVector tempCenterOfMassVelocityWorld = new FrameVector(worldFrame);
+   private final SideDependentList<Double> accelerationMagnitudeErrors = new SideDependentList<Double>(0.0, 0.0);
    
    public PelvisStateCalculator(FullInverseDynamicsStructure inverseDynamicsStructure, SideDependentList<WrenchBasedFootSwitch> footSwitches,
          SideDependentList<ContactablePlaneBody> bipedFeet, double gravitationalAcceleration, final double estimatorDT,
@@ -161,16 +137,13 @@ public class PelvisStateCalculator
       
       pelvis = inverseDynamicsStructure.getRootJoint().getSuccessor();
 
-      pelvisKinematicsBasedPositionCalculator = new PelvisKinematicsBasedPositionCalculator(twistCalculator, pelvis, pelvisFrame, bipedFeet, estimatorDT, dynamicGraphicObjectsListRegistry, registry);
       
       gravityEstimation.reset();
       gravityEstimation.update(Math.abs(gravitationalAcceleration));
       
       footFrames = new SideDependentList<ReferenceFrame>();
       
-      
       RigidBody elevator = inverseDynamicsStructure.getElevator();
-      rootJoint = inverseDynamicsStructure.getRootJoint();
       this.centerOfMassCalculator = new CenterOfMassCalculator(elevator, pelvisFrame);
       this.centerOfMassJacobianBody = new CenterOfMassJacobian(ScrewTools.computeSupportAndSubtreeSuccessors(elevator),
               ScrewTools.computeSubtreeJoints(pelvis), pelvisFrame);
@@ -200,6 +173,7 @@ public class PelvisStateCalculator
       stateMachine = new StateMachine<PelvisEstimationState>("PelvisEstimationStateMachine", "switchTime", PelvisEstimationState.class, yoTime, registry);
       setupStateMachine();
       
+      pelvisKinematicsBasedPositionCalculator = new PelvisKinematicsBasedPositionCalculator(twistCalculator, pelvis, pelvisFrame, bipedFeet, estimatorDT, dynamicGraphicObjectsListRegistry, registry);
       pelvisKinematicsBasedPositionCalculator.setAlphaPelvisPosition(0.0);
       pelvisKinematicsBasedPositionCalculator.setAlphaPelvisLinearVelocity(computeAlphaGivenBreakFrequencyProperly(16.0, estimatorDT));
       pelvisKinematicsBasedPositionCalculator.setPelvisLinearVelocityBacklashParameters(computeAlphaGivenBreakFrequencyProperly(16.0, estimatorDT),
@@ -218,19 +192,13 @@ public class PelvisStateCalculator
       forceZInPercentThresholdToFilterFoot.set(0.3); 
       
       slippageCompensatorMode.set(SlippageCompensatorMode.LOAD_THRESHOLD);
-      
-      imuDriftCompensationActivated.set(false);
-      isIMUDriftYawRateEstimated.set(false);
-      isIMUDriftYawRateEstimationActivated.set(false);
-      alphaFilterIMUDrift.set(computeAlphaGivenBreakFrequencyProperly(0.5332, estimatorDT)); // alpha = 0.99 with dt = 0.003
-      alphaFilterFootAngularVelocity.set(computeAlphaGivenBreakFrequencyProperly(0.5332, estimatorDT)); // alpha = 0.99 with dt = 0.003
-      alphaFilterFootAngularVelocityAverage.set(computeAlphaGivenBreakFrequencyProperly(0.5332, estimatorDT)); // alpha = 0.99 with dt = 0.003
-      imuDriftYawRate.set(0.0);
-      imuDriftYawRateFiltered.reset();
-      imuDriftYawRateFiltered.update();
-      imuDriftYawAngle.set(0.0);
-      rootJointYawAngleCorrected.set(0.0);
-      footAngularVelocityDifferenceThresholdToEstimateIMUDrift.set(0.03, 0.03, 0.03);
+
+      imuDriftCompensator = new IMUDriftCompensator(footFrames, pelvisFrame, twistCalculator, inverseDynamicsStructure.getRootJoint(), estimatorDT, registry);
+      imuDriftCompensator.activateEstimation(false);
+      imuDriftCompensator.activateCompensation(false);
+      imuDriftCompensator.setAlphaIMUDrift(computeAlphaGivenBreakFrequencyProperly(0.5332, estimatorDT));
+      imuDriftCompensator.setAlphaFootAngularVelocity(computeAlphaGivenBreakFrequencyProperly(0.5332, estimatorDT));
+      imuDriftCompensator.setFootAngularVelocityThreshold(0.03);
       
       parentRegistry.addChild(registry);
    }
@@ -245,24 +213,6 @@ public class PelvisStateCalculator
          footFrames.put(robotSide, footFrame);
          
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         
-         YoFrameQuaternion footOrientationInWorld = new YoFrameQuaternion(sidePrefix + "FootOrientationInWorld", worldFrame, registry);
-         footOrientationsInWorld.put(robotSide, footOrientationInWorld);
-         
-         YoFrameVector footAxisAngleInWorld = new YoFrameVector(sidePrefix + "FootAxisAngleInWorld", worldFrame, registry);
-         footAxisAnglesInWorld.put(robotSide, footAxisAngleInWorld);
-
-         YoFrameVector footAngularVelocityInWorld = new YoFrameVector(sidePrefix + "FootAngularVelocitiesInWorld", worldFrame, registry);
-         footAngularVelocitiesInWorld.put(robotSide, footAngularVelocityInWorld);
-         
-         AlphaFilteredYoVariable footAngularVelocityInWorldX = new AlphaFilteredYoVariable(sidePrefix + "FootAngularVelocityInWorldFilteredX", registry, alphaFilterFootAngularVelocity);
-         footAngularVelocitiesInWorldFilteredX.put(robotSide, footAngularVelocityInWorldX);
-
-         AlphaFilteredYoVariable footAngularVelocityInWorldY = new AlphaFilteredYoVariable(sidePrefix + "FootAngularVelocityInWorldFilteredY", registry, alphaFilterFootAngularVelocity);
-         footAngularVelocitiesInWorldFilteredY.put(robotSide, footAngularVelocityInWorldY);
-
-         AlphaFilteredYoVariable footAngularVelocityInWorldZ = new AlphaFilteredYoVariable(sidePrefix + "FootAngularVelocityInWorldFilteredZ", registry, alphaFilterFootAngularVelocity);
-         footAngularVelocitiesInWorldFilteredZ.put(robotSide, footAngularVelocityInWorldZ);
          
          final GlitchFilteredBooleanYoVariable hasFootHitTheGroundFiltered = new GlitchFilteredBooleanYoVariable("has" + robotSide.getCamelCaseNameForMiddleOfExpression() + "FootHitGroundFiltered", registry, windowSize);
          hasFootHitTheGroundFiltered.set(true);
@@ -288,12 +238,12 @@ public class PelvisStateCalculator
 
    public void startIMUDriftEstimation()
    {
-      isIMUDriftYawRateEstimationActivated.set(true);
+      imuDriftCompensator.activateEstimation(true);
    }
    
    public void startIMUDriftCompensation()
    {
-      imuDriftCompensationActivated.set(true);
+      imuDriftCompensator.activateCompensation(true);
    }
    
    public void initialize()
@@ -305,26 +255,7 @@ public class PelvisStateCalculator
    {
       reinitialize.set(false);
       
-
-      imuDriftYawRate.set(0.0);
-      imuDriftYawRateFiltered.reset();
-      resetFootAngularVelocitiesFiltered();
-      updateFootOrientations();
-      resetFootAngularVelocitiesFiltered();
-      updateFootOrientations();
-      
-      if (isIMUDriftYawRateEstimationActivated.getBooleanValue())
-      {
-         isIMUDriftYawRateEstimated.set(true);
-         estimateIMUDriftYaw();
-      }
-      else
-      {
-         isIMUDriftYawRateEstimated.set(false);
-      }
-      
-      if (imuDriftCompensationActivated.getBooleanValue())
-         compensateIMUDriftYaw();
+      imuDriftCompensator.initialize();
       
       centerOfMassCalculator.compute();
       centerOfMassCalculator.packCenterOfMass(tempPosition);
@@ -369,18 +300,7 @@ public class PelvisStateCalculator
    {
       yoTime.add(estimatorDT); //Hack to have a yoTime for the state machine
       
-      if (!isIMUDriftYawRateEstimationActivated.getBooleanValue())
-      {
-         resetFootAngularVelocitiesFiltered();
-         updateFootOrientations();
-         resetFootAngularVelocitiesFiltered();
-         isIMUDriftYawRateEstimated.set(false);
-      }
-      
-      updateFootOrientations();
-
-      if (imuDriftCompensationActivated.getBooleanValue())
-         compensateIMUDriftYaw();
+      imuDriftCompensator.updateAndCompensateDrift();
       
       pelvisKinematicsBasedPositionCalculator.updateKinematics();
       
@@ -496,8 +416,6 @@ public class PelvisStateCalculator
       return numberOfEndEffectorsTrusted;
    }
 
-   private final SideDependentList<Double> accelerationMagnitudeErrors = new SideDependentList<Double>(0.0, 0.0);
-   
    private int filterTrustedFeetBasedOnMinPelvisAcceleration()
    {
       int numberOfEndEffectorsTrusted = 2;
@@ -562,19 +480,7 @@ public class PelvisStateCalculator
       public void doAction()
       {
          pelvisKinematicsBasedPositionCalculator.updatePelvisPositionForDoubleSupport(footSwitches);
-
-         boolean isAngularVelocityXLowEnough = Math.abs(footAngularVelocityDifference.getX()) < footAngularVelocityDifferenceThresholdToEstimateIMUDrift.getX();
-         boolean isAngularVelocityYLowEnough = Math.abs(footAngularVelocityDifference.getY()) < footAngularVelocityDifferenceThresholdToEstimateIMUDrift.getY();
-         boolean isAngularVelocityZLowEnough = Math.abs(footAngularVelocityDifference.getZ()) < footAngularVelocityDifferenceThresholdToEstimateIMUDrift.getZ();
-         if (isIMUDriftYawRateEstimationActivated.getBooleanValue() && isAngularVelocityXLowEnough && isAngularVelocityYLowEnough && isAngularVelocityZLowEnough)
-         {
-            isIMUDriftYawRateEstimated.set(true);
-            estimateIMUDriftYaw();
-         }
-         else
-         {
-            isIMUDriftYawRateEstimated.set(false);
-         }
+         imuDriftCompensator.esimtateDriftIfPossible(true);
       }
 
       @Override
@@ -602,21 +508,11 @@ public class PelvisStateCalculator
       @Override
       public void doAction()
       {
-         isIMUDriftYawRateEstimated.set(false);
-         doActionForTrustedFoot();
-         doActionForIgnoredFoot();
-      }
-      
-      private void doActionForTrustedFoot()
-      {
+         imuDriftCompensator.esimtateDriftIfPossible(false);
          pelvisPosition.getFramePoint(tempPosition);
          pelvisKinematicsBasedPositionCalculator.updatePelvisPositionForSingleSupport(tempPosition, footSwitches, trustedSide);
       }
       
-      private void doActionForIgnoredFoot()
-      {
-      }
-
       @Override
       public void doTransitionIntoAction()
       {
@@ -629,11 +525,6 @@ public class PelvisStateCalculator
       }
    }
 
-   private final FrameVector tempIMUAcceleration = new FrameVector();
-   private final FrameVector tempPelvisVelocityIntegrated = new FrameVector();
-   private final FrameVector tempEstimatedVelocityIMUPart = new FrameVector();
-   private final FramePoint tempEstimatedPositionIMUPart = new FramePoint();
-   
    public void run()
    {
       defaultActionIntoStates();
@@ -689,9 +580,6 @@ public class PelvisStateCalculator
       pelvisPosition.add(tempEstimatedPositionIMUPart);
    }
 
-   private final FramePoint tempCenterOfMassPositionWorld = new FramePoint(worldFrame);
-   private final FrameVector tempCenterOfMassVelocityWorld = new FrameVector(worldFrame);
-   
    private void updateCoMState()
    {
       centerOfMassCalculator.compute();
@@ -708,107 +596,6 @@ public class PelvisStateCalculator
       centerOfMassVelocity.set(tempCenterOfMassVelocityWorld);
    }
 
-   private void estimateIMUDriftYaw()
-   {
-      imuDriftYawRate.set(footAngularVelocityAverageFiltered.getZ());
-      imuDriftYawRateFiltered.update();
-
-      imuDriftYawAngle.add(imuDriftYawRateFiltered.getDoubleValue() * estimatorDT);
-      imuDriftYawAngle.set(AngleTools.trimAngleMinusPiToPi(imuDriftYawAngle.getDoubleValue()));
-
-      rootJoint.packRotation(rootJointYawPitchRoll);
-      rootJointYawPitchRoll[0] -= imuDriftYawAngle.getDoubleValue();
-      rootJointYawPitchRoll[0] = AngleTools.trimAngleMinusPiToPi(rootJointYawPitchRoll[0]);
-      rootJointYawAngleCorrected.set(rootJointYawPitchRoll[0]);
-
-      rootJoint.packJointTwist(rootJointTwist);
-      rootJointTwist.packAngularPart(rootJointAngularVelocity);
-      rootJointAngularVelocity.changeFrame(worldFrame);
-      rootJointYawRateCorrected.set(rootJointAngularVelocity.getZ() - imuDriftYawRateFiltered.getDoubleValue());
-   }
-   
-   private final double[] rootJointYawPitchRoll = new double[]{0.0, 0.0, 0.0};
-   private final Twist rootJointTwist = new Twist();
-   private final FrameVector rootJointAngularVelocity = new FrameVector();
-   
-   private void compensateIMUDriftYaw()
-   {
-      rootJoint.packRotation(rootJointYawPitchRoll);
-      rootJointYawPitchRoll[0] -= imuDriftYawAngle.getDoubleValue();
-      rootJointYawPitchRoll[0] = AngleTools.trimAngleMinusPiToPi(rootJointYawPitchRoll[0]);
-      rootJointYawAngleCorrected.set(rootJointYawPitchRoll[0]);
-      rootJoint.setRotation(rootJointYawPitchRoll[0], rootJointYawPitchRoll[1], rootJointYawPitchRoll[2]);
-      rootJoint.getFrameAfterJoint().update();
-      
-      rootJoint.packJointTwist(rootJointTwist);
-      rootJointTwist.packAngularPart(rootJointAngularVelocity);
-      rootJointAngularVelocity.changeFrame(worldFrame);
-      rootJointYawRateCorrected.set(rootJointAngularVelocity.getZ() - imuDriftYawRateFiltered.getDoubleValue());
-      rootJointAngularVelocity.setZ(rootJointYawRateCorrected.getDoubleValue());
-      rootJointAngularVelocity.changeFrame(pelvisFrame);
-      rootJointTwist.setAngularPart(rootJointAngularVelocity.getVector());
-      rootJoint.setJointTwist(rootJointTwist);
-      rootJoint.getFrameAfterJoint().update();
-      twistCalculator.compute();
-   }
-   
-   private final SideDependentList<FrameOrientation> footOrientations = new SideDependentList<FrameOrientation>(new FrameOrientation(), new FrameOrientation());
-   private final SideDependentList<FrameOrientation> footOrientationsPrevValue = new SideDependentList<FrameOrientation>(new FrameOrientation(), new FrameOrientation());
-   private final SideDependentList<FrameVector> footAxisAnglesPrevValue = new SideDependentList<FrameVector>(new FrameVector(), new FrameVector());
-   private final AxisAngle4d footAxisAngle = new AxisAngle4d();
-   
-   private void updateFootOrientations()
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         FrameOrientation footOrientation = footOrientations.get(robotSide);
-         footOrientationsPrevValue.get(robotSide).set(footOrientation);
-         
-         footOrientation.setToZero(footFrames.get(robotSide));
-         footOrientation.changeFrame(worldFrame);
-         
-         YoFrameQuaternion footOrientationInWorld = footOrientationsInWorld.get(robotSide);
-         footOrientationInWorld.set(footOrientation);
-         
-         YoFrameVector footAxisAngleInWorld = footAxisAnglesInWorld.get(robotSide);
-         footAxisAngleInWorld.getFrameVector(footAxisAnglesPrevValue.get(robotSide));
-         footOrientationInWorld.get(footAxisAngle);
-         footAxisAngleInWorld.set(footAxisAngle.getX(), footAxisAngle.getY(), footAxisAngle.getZ());
-         footAxisAngleInWorld.scale(footAxisAngle.getAngle());
-         
-
-         YoFrameVector footAngularVelocityInWorld = footAngularVelocitiesInWorld.get(robotSide);
-         footAngularVelocityInWorld.setX(AngleTools.computeAngleDifferenceMinusPiToPi(footAxisAngleInWorld.getX(), footAxisAnglesPrevValue.get(robotSide).getX()));
-         footAngularVelocityInWorld.setY(AngleTools.computeAngleDifferenceMinusPiToPi(footAxisAngleInWorld.getY(), footAxisAnglesPrevValue.get(robotSide).getY()));
-         footAngularVelocityInWorld.setZ(AngleTools.computeAngleDifferenceMinusPiToPi(footAxisAngleInWorld.getZ(), footAxisAnglesPrevValue.get(robotSide).getZ()));
-         footAngularVelocityInWorld.scale(1.0 / estimatorDT);
-
-         footAngularVelocitiesInWorldFilteredX.get(robotSide).update(footAngularVelocityInWorld.getX());
-         footAngularVelocitiesInWorldFilteredY.get(robotSide).update(footAngularVelocityInWorld.getY());
-         footAngularVelocitiesInWorldFilteredZ.get(robotSide).update(footAngularVelocityInWorld.getZ());
-      }
-
-      footAngularVelocityDifference.setX(Math.abs(footAngularVelocitiesInWorldFilteredX.get(RobotSide.LEFT).getDoubleValue() - footAngularVelocitiesInWorldFilteredX.get(RobotSide.RIGHT).getDoubleValue()));
-      footAngularVelocityDifference.setY(Math.abs(footAngularVelocitiesInWorldFilteredY.get(RobotSide.LEFT).getDoubleValue() - footAngularVelocitiesInWorldFilteredY.get(RobotSide.RIGHT).getDoubleValue()));
-      footAngularVelocityDifference.setZ(Math.abs(footAngularVelocitiesInWorldFilteredZ.get(RobotSide.LEFT).getDoubleValue() - footAngularVelocitiesInWorldFilteredZ.get(RobotSide.RIGHT).getDoubleValue()));
-      
-      footAngularVelocityAverage.setX(footAngularVelocitiesInWorldFilteredX.get(RobotSide.LEFT).getDoubleValue() + footAngularVelocitiesInWorldFilteredX.get(RobotSide.RIGHT).getDoubleValue());
-      footAngularVelocityAverage.setY(footAngularVelocitiesInWorldFilteredY.get(RobotSide.LEFT).getDoubleValue() + footAngularVelocitiesInWorldFilteredY.get(RobotSide.RIGHT).getDoubleValue());
-      footAngularVelocityAverage.setZ(footAngularVelocitiesInWorldFilteredZ.get(RobotSide.LEFT).getDoubleValue() + footAngularVelocitiesInWorldFilteredZ.get(RobotSide.RIGHT).getDoubleValue());
-      footAngularVelocityAverage.scale(0.5);
-      footAngularVelocityAverageFiltered.update();
-   }
-   
-   private void resetFootAngularVelocitiesFiltered()
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         footAngularVelocitiesInWorldFilteredX.get(robotSide).reset();
-         footAngularVelocitiesInWorldFilteredY.get(robotSide).reset();
-         footAngularVelocitiesInWorldFilteredZ.get(robotSide).reset();
-      }
-   }
-   
    public void getEstimatedPelvisPosition(FramePoint pelvisPositionToPack)
    {
       pelvisPosition.getFramePointAndChangeFrameOfPackedPoint(pelvisPositionToPack);
