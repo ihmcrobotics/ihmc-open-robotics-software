@@ -14,6 +14,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup;
@@ -109,8 +110,8 @@ public class DRCBumpyAndShallowRampsWalkingTest
 
       if (checkNothingChanged) maximumWalkTime = 3.0;
       
-      DRCRobotWalkingControllerParameters drcControlParameters = new DRCRobotWalkingControllerParameters();
-      ArmControllerParameters armControllerParameters = new DRCRobotArmControllerParameters();
+      WalkingControllerParameters drcControlParameters = DRCLocalConfigParameters.defaultModel.getWalkingControlParamaters();
+      ArmControllerParameters armControllerParameters = DRCLocalConfigParameters.defaultModel.getArmControllerParameters();
       
 //      drcControlParameters.setNominalHeightAboveAnkle(drcControlParameters.nominalHeightAboveAnkle() - 0.03);    // Need to do this or the leg goes straight and the robot falls.
 
@@ -192,8 +193,8 @@ public class DRCBumpyAndShallowRampsWalkingTest
       boolean cheatWithGroundHeightAtForFootstep = true;
       boolean useLoadOfContactPointsForTheFeet = true;
       
-      DRCRobotWalkingControllerParameters drcControlParameters = new DRCRobotWalkingControllerParameters();
-      ArmControllerParameters armControllerParameters = new DRCRobotArmControllerParameters();
+      WalkingControllerParameters drcControlParameters = DRCLocalConfigParameters.defaultModel.getWalkingControlParamaters();
+      ArmControllerParameters armControllerParameters = DRCLocalConfigParameters.defaultModel.getArmControllerParameters();
       
 //      drcControlParameters.setNominalHeightAboveAnkle(drcControlParameters.nominalHeightAboveAnkle() - 0.03);    // Need to do this or the leg goes straight and the robot falls.
 
@@ -322,8 +323,8 @@ public class DRCBumpyAndShallowRampsWalkingTest
       GroundProfile groundProfile = createBumpyGroundProfile();
       boolean drawGroundProfile = true;
       
-      DRCRobotWalkingControllerParameters drcControlParameters = new DRCRobotWalkingControllerParameters();
-      DRCRobotArmControllerParameters armControllerParameters = new DRCRobotArmControllerParameters();
+      WalkingControllerParameters drcControlParameters = DRCLocalConfigParameters.defaultModel.getWalkingControlParamaters();
+      ArmControllerParameters armControllerParameters = DRCLocalConfigParameters.defaultModel.getArmControllerParameters();
       DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, groundProfile, drawGroundProfile,
             useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, useLoadOfContactPointsForTheFeet);
 
@@ -371,7 +372,7 @@ public class DRCBumpyAndShallowRampsWalkingTest
 
    boolean setupForCheatingUsingGroundHeightAtForFootstepProvider = false;
 
-   private DRCFlatGroundWalkingTrack setupSimulationTrack(DRCRobotWalkingControllerParameters drcControlParameters, ArmControllerParameters
+   private DRCFlatGroundWalkingTrack setupSimulationTrack(WalkingControllerParameters drcControlParameters, ArmControllerParameters
          armControllerParameters, GroundProfile groundProfile, boolean drawGroundProfile,
          boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, boolean useLoadOfContactPointsForTheFeet)
    {

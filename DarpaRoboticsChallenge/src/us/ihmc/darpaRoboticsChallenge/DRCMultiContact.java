@@ -78,7 +78,7 @@ public class DRCMultiContact
          handContactPoints.put(robotSide, DRCRobotParameters.invisibleContactablePlaneHandContactPoints.get(robotSide));
       }
 
-      WalkingControllerParameters controllerParameters = new DRCRobotMultiContactControllerParameters(){
+      WalkingControllerParameters controllerParameters = new AtlasRobotMultiContactControllerParameters(){
          public Map<OneDoFJoint, Double> getDefaultArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
          {
             Map<OneDoFJoint, Double> jointPositions = new LinkedHashMap<OneDoFJoint, Double>();
@@ -95,12 +95,12 @@ public class DRCMultiContact
          }
       };
       
-      ArmControllerParameters armControllerParameters = new DRCRobotArmControllerParameters();
+      ArmControllerParameters armControllerParameters = new AtlasArmControllerParameters();
 
 
       MultiContactTestHumanoidControllerFactory highLevelHumanoidControllerFactory = new MultiContactTestHumanoidControllerFactory(namesOfJointsBeforeHands,
             handContactPointTransforms, handContactPoints, footContactSides, handContactSides, controllerParameters, armControllerParameters);
-      ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.contactTresholdForceForSCS);
+      ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.contactTresholdForceForSCS, jointMap.getFeetForceSensorNames());
 
       Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, environment, robotInterface, robotInitialSetup, scsInitialSetup, guiInitialSetup, null, null, dynamicGraphicObjectsListRegistry);
       drcSimulation = humanoidSimulation.first();

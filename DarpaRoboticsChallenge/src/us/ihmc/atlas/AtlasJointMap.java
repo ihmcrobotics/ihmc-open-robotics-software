@@ -484,10 +484,4 @@ public class AtlasJointMap extends DRCRobotJointMap
    {
       return jointBeforeThighNames;
    }
-
-   @Override
-   public String getCameraName()
-   {
-      return "stereo_camera_left";
-   }
 }

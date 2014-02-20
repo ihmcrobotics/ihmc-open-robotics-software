@@ -113,8 +113,8 @@ public class DRCFlatGroundWalkingTest
       GroundProfile groundProfile = new FlatGroundProfile();
       boolean drawGroundProfile = false;
 
-      DRCRobotWalkingControllerParameters drcControlParameters = new DRCRobotWalkingControllerParameters();
-      DRCRobotArmControllerParameters armControllerParameters = new DRCRobotArmControllerParameters();
+      WalkingControllerParameters drcControlParameters = new AtlasWalkingControllerParameters();
+      ArmControllerParameters armControllerParameters = new AtlasArmControllerParameters();
       DRCFlatGroundWalkingTrack track = setupSimulationTrackForAtlas(drcControlParameters, armControllerParameters, groundProfile, drawGroundProfile, useVelocityAndHeadingScript,
             cheatWithGroundHeightAtForFootstep, useLoadOfContactPointsForTheFeet);
 
@@ -259,7 +259,7 @@ public class DRCFlatGroundWalkingTest
 
    boolean setupForCheatingUsingGroundHeightAtForFootstepProvider = false;
 
-   private DRCFlatGroundWalkingTrack setupSimulationTrackForAtlas(DRCRobotWalkingControllerParameters drcControlParameters, ArmControllerParameters
+   private DRCFlatGroundWalkingTrack setupSimulationTrackForAtlas(WalkingControllerParameters drcControlParameters, ArmControllerParameters
          armControllerParameters, GroundProfile groundProfile, boolean drawGroundProfile,
          boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, boolean useLoadOfContactPointsForTheFeet)
    {

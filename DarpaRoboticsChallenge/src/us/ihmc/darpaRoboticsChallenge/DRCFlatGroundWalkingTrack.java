@@ -136,7 +136,8 @@ public class DRCFlatGroundWalkingTrack
 
 //    DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(TerrainType.FLAT_Z_NEGATIVE_TWO);
 //    RobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(-2.0);
-      DRCRobotInterface robotInterface = new PlainDRCRobot(DRCRobotModel.getDefaultRobotModel(), false);
+      DRCRobotModel model = DRCRobotModel.getDefaultRobotModel();
+      DRCRobotInterface robotInterface = new PlainDRCRobot(model, false);
       
       if (DRCConfigParameters.CORRUPT_SIMULATION_MODEL)
       {
@@ -164,8 +165,8 @@ public class DRCFlatGroundWalkingTrack
       boolean useVelocityAndHeadingScript = true;
       boolean cheatWithGroundHeightAtForFootstep = false;
 
-      WalkingControllerParameters drcControlParameters = new DRCRobotWalkingControllerParameters();
-      ArmControllerParameters armControlParameters = new DRCRobotArmControllerParameters();
+      WalkingControllerParameters drcControlParameters = model.getWalkingControlParamaters();
+      ArmControllerParameters armControlParameters = model.getArmControllerParameters();
       
       new DRCFlatGroundWalkingTrack(drcControlParameters, armControlParameters, robotInterface, robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript,
                                     automaticSimulationRunner, DRCConfigParameters.CONTROL_DT, 16000, cheatWithGroundHeightAtForFootstep);

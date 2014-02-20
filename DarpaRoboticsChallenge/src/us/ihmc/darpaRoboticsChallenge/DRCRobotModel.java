@@ -1,14 +1,21 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.Set;
+
 import us.ihmc.atlas.AtlasJointMap;
+import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandModel;
+import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieArmControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieJointMap;
+import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieWalkingControllerParameters;
 
 public enum DRCRobotModel
 {
-   ATLAS_NO_HANDS_ADDED_MASS,
-   ATLAS_SANDIA_HANDS, ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS,
+   ATLAS_NO_HANDS_ADDED_MASS, ATLAS_SANDIA_HANDS, ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS,
    DRC_NO_HANDS, DRC_HANDS, DRC_EXTENDED_HANDS, DRC_HOOKS,  DRC_TASK_HOSE, DRC_EXTENDED_HOOKS, VALKYRIE;
    
    public enum RobotType
@@ -20,13 +27,14 @@ public enum DRCRobotModel
    {
       return DRCLocalConfigParameters.robotModelToUse;
    }
-
-   public DRCRobotJointMap getJointMap(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly)
+   
+   public ArmControllerParameters getArmControllerParameters()
    {
       switch (this)
       {
       case VALKYRIE:
-         return new ValkyrieJointMap(this, addLoadsOfContactPoints, addLoadsOfContactPointsToFeetOnly);
+         return new ValkyrieArmControllerParameters();
+         
       case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS:
       case ATLAS_NO_HANDS_ADDED_MASS:
       case ATLAS_SANDIA_HANDS:
@@ -36,7 +44,54 @@ public enum DRCRobotModel
       case DRC_HOOKS:
       case DRC_NO_HANDS:
       case DRC_TASK_HOSE:
-         return new AtlasJointMap(this, addLoadsOfContactPoints, addLoadsOfContactPointsToFeetOnly);
+         return new AtlasArmControllerParameters(DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
+         
+      default:
+         throw new RuntimeException("Unkown model");
+      }
+   }
+   
+   public WalkingControllerParameters getWalkingControlParamaters()
+   {
+      switch (this)
+      {
+      case VALKYRIE:
+         return new ValkyrieWalkingControllerParameters();
+         
+      case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS:
+      case ATLAS_NO_HANDS_ADDED_MASS:
+      case ATLAS_SANDIA_HANDS:
+      case DRC_EXTENDED_HANDS:
+      case DRC_EXTENDED_HOOKS:
+      case DRC_HANDS:
+      case DRC_HOOKS:
+      case DRC_NO_HANDS:
+      case DRC_TASK_HOSE:
+         return new AtlasWalkingControllerParameters();
+      default:
+         throw new RuntimeException("Unkown model");
+      }
+   }
+
+   public DRCRobotJointMap getJointMap(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly)
+   {
+         System.out.println(this);
+         switch (this)
+         {
+      case VALKYRIE:
+         return new ValkyrieJointMap(this, addLoadsOfContactPoints, addLoadsOfContactPointsToFeetOnly);
+         
+      case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS:
+      case ATLAS_NO_HANDS_ADDED_MASS:
+      case ATLAS_SANDIA_HANDS:
+      case DRC_EXTENDED_HANDS:
+      case DRC_EXTENDED_HOOKS:
+      case DRC_HANDS:
+      case DRC_HOOKS:
+      case DRC_NO_HANDS:
+      case DRC_TASK_HOSE:
+        return new AtlasJointMap(this, addLoadsOfContactPoints, addLoadsOfContactPointsToFeetOnly);
+        
       default:
          throw new RuntimeException("Unkown model");
       }
@@ -118,6 +173,7 @@ public enum DRCRobotModel
       case DRC_TASK_HOSE:
       case DRC_EXTENDED_HOOKS:
          return RobotType.ATLAS;
+         
       case VALKYRIE:
          return RobotType.VALKYRIE;
 
@@ -140,6 +196,7 @@ public enum DRCRobotModel
       case DRC_TASK_HOSE:
       case DRC_EXTENDED_HOOKS:
          return "atlas";
+         
       case VALKYRIE:
          return "V1";
 

@@ -2,7 +2,8 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
-
+import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
@@ -22,7 +23,8 @@ public class DRCDoubleElevationChangeSimulation
       AutomaticSimulationRunner automaticSimulationRunner = null;
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
 
-      DRCRobotInterface robotInterface = new PlainDRCRobot(DRCRobotModel.getDefaultRobotModel(), false);
+      DRCRobotModel robotModel= DRCRobotModel.getDefaultRobotModel();
+      DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel, false);
       final double groundHeight = 0.0;
       double elevationChange = 0.0;
       if(stepUp) elevationChange = Math.abs(stepHeight);
@@ -33,8 +35,8 @@ public class DRCDoubleElevationChangeSimulation
       boolean useVelocityAndHeadingScript = false;
       boolean cheatWithGroundHeightAtForFootstep = false;
 
-      DRCRobotWalkingControllerParameters drcControlParameters = new DRCRobotWalkingControllerParameters();
-      DRCRobotArmControllerParameters armControllerParameters = new DRCRobotArmControllerParameters();
+      WalkingControllerParameters drcControlParameters = robotModel.getWalkingControlParamaters();
+      ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
       
       DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(drcControlParameters, armControllerParameters, robotInterface, 
             robotInitialSetup, guiInitialSetup, scsInitialSetup, 

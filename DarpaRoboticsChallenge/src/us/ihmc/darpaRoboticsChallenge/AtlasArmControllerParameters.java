@@ -2,16 +2,16 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 
-public class DRCRobotArmControllerParameters implements ArmControllerParameters
+public class AtlasArmControllerParameters implements ArmControllerParameters
 {
    private final boolean runningOnRealRobot;
    
-   public DRCRobotArmControllerParameters()
+   public AtlasArmControllerParameters()
    {
       this(false);
    }
    
-   public DRCRobotArmControllerParameters(boolean runningOnRealRobot)
+   public AtlasArmControllerParameters(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
    }

@@ -23,7 +23,7 @@ import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 
-public class DRCRobotWalkingControllerParameters implements WalkingControllerParameters
+public class AtlasWalkingControllerParameters implements WalkingControllerParameters
 {   
    private final boolean runningOnRealRobot;
    
@@ -31,12 +31,12 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    private final SideDependentList<Transform3D> handPosesWithRespectToChestFrame = new SideDependentList<Transform3D>();
    private final double minElbowRollAngle = 0.5;
 
-   public DRCRobotWalkingControllerParameters()
+   public AtlasWalkingControllerParameters()
    {
       this(false);
    }
    
-   public DRCRobotWalkingControllerParameters(boolean runningOnRealRobot)
+   public AtlasWalkingControllerParameters(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
       
