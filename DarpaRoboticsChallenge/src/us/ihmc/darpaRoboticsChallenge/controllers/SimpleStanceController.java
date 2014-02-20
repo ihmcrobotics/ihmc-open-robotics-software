@@ -32,6 +32,7 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationVisualizer;
@@ -381,7 +382,8 @@ public class SimpleStanceController implements RobotController
 
    public static void main(String[] args)
    {
-      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCLocalConfigParameters.robotModelToUse, false);
+      DRCRobotModel robotModel = DRCLocalConfigParameters.robotModelToUse;
+      DRCRobotJointMap jointMap = robotModel.getJointMap(false, false);
       JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       SDFFullRobotModel fullRobotModel = jaxbSDFLoader.createFullRobotModel(jointMap);
       SDFRobot robot = jaxbSDFLoader.createRobot(jointMap, false);

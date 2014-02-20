@@ -84,7 +84,7 @@ public class AtlasSDFVerificationTest
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, false);
+      DRCRobotJointMap jointMap = DRCRobotModel.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS.getJointMap(false, false);
       JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap, false);
       SDFRobot sdfRobot = loader.createRobot(jointMap, true);
 

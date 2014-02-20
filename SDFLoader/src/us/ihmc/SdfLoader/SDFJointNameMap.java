@@ -50,5 +50,7 @@ public interface SDFJointNameMap extends RobotSpecificJointNames
    public String getLidarSensorName();
 
    public String getLeftCameraName();
+   
+   public String[] getForceSensorNames();
 
 }

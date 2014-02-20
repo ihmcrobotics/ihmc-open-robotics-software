@@ -23,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.SemiCircularStepValid
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TurningThenStraightFootstepGenerator;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
+import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -180,7 +181,8 @@ public class DRCRobotBasedFootstepGeneratorTest
 
    private void setupRobotParameters()
    {
-      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.getDefaultRobotModel(), false);
+      DRCRobotModel robotModel = DRCLocalConfigParameters.robotModelToUse;
+      DRCRobotJointMap jointMap = robotModel.getJointMap(false, false);
       JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       fullRobotModel = jaxbSDFLoader.createFullRobotModel(jointMap);
       referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, jointMap.getAnkleHeight());

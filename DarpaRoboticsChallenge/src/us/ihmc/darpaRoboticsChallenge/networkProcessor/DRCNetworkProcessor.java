@@ -166,11 +166,12 @@ public class DRCNetworkProcessor
       robotPoseBuffer = new RobotPoseBuffer(this.fieldComputerClient, 1000, timestampProvider);
       networkingManager = new DRCNetworkProcessorNetworkingManager(this.fieldComputerClient, timestampProvider);
 
-      jointMap = new DRCRobotJointMap(DRCLocalConfigParameters.robotModelToUse, false);
+      DRCRobotModel robotModel = DRCLocalConfigParameters.robotModelToUse;
+      jointMap = robotModel.getJointMap(false, false);
       JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap, true);
       fullRobotModel = loader.createFullRobotModel(jointMap);
       
-      DRCRobotDataReceiver drcRobotDataReceiver = new DRCRobotDataReceiver(DRCLocalConfigParameters.robotModelToUse, fullRobotModel);
+      DRCRobotDataReceiver drcRobotDataReceiver = new DRCRobotDataReceiver(robotModel, fullRobotModel);
       this.fieldComputerClient.attachListener(DRCJointConfigurationData.class, drcRobotDataReceiver);
       robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, fullRobotModel);
 

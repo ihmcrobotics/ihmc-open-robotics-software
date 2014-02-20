@@ -87,7 +87,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       }
       
       //TODO: Clean this up!
-      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.ATLAS_NO_HANDS_ADDED_MASS, false);
+      DRCRobotJointMap jointMap = DRCRobotModel.ATLAS_NO_HANDS_ADDED_MASS.getJointMap(false, false);
       JaxbSDFLoader robotLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       GeneralizedSDFRobotModel generalizedSDFRobotModel = robotLoader.getGeneralizedSDFRobotModel(jointMap.getModelName());
       

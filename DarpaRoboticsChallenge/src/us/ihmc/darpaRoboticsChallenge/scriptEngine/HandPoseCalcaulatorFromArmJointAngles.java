@@ -1,25 +1,24 @@
 package us.ihmc.darpaRoboticsChallenge.scriptEngine;
 
+import java.util.EnumMap;
+
+import javax.media.j3d.Transform3D;
+
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.packets.ArmJointAnglePacket;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotWalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
-import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
-
-import javax.media.j3d.Transform3D;
-import java.util.EnumMap;
 
 /**
  * Created by Peter on 12/5/13.
@@ -33,7 +32,8 @@ public class HandPoseCalcaulatorFromArmJointAngles
 
    public HandPoseCalcaulatorFromArmJointAngles()
    {
-      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCLocalConfigParameters.robotModelToUse, false);
+      DRCRobotModel robotModel = DRCLocalConfigParameters.robotModelToUse;
+      DRCRobotJointMap jointMap = robotModel.getJointMap(false, false);
       JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap, true);
       SDFFullRobotModelFactory fullRobotModelFactory = new SDFFullRobotModelFactory(jaxbSDFLoader.getGeneralizedSDFRobotModel(jointMap.getModelName()),
             jointMap);

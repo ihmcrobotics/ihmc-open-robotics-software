@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.ros;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -171,7 +171,7 @@ public class ROSAtlasJointMap
 
    public static String getBodyIMUName()
    {
-      return DRCRobotJointMap.bodyIMUSensor;
+      return AtlasJointMap.bodyIMUSensor;
    }
 
    public static String getLeftFootForceSensorName()
