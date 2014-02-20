@@ -52,8 +52,7 @@ public class PelvisRotationalStateUpdater
    public PelvisRotationalStateUpdater(List<OrientationSensorConfiguration> orientationSensorConfigurations,
          List<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations, FullInverseDynamicsStructure inverseDynamicsStructure, YoVariableRegistry parentRegistry)
    {
-      if (orientationSensorConfigurations.size() > 1 || angularVelocitySensorConfigurations.size() > 1)
-         throw new RuntimeException("We are assuming there is only 1 IMU for right now.. Got " + orientationSensorConfigurations.size());
+      checkNumberOfSensors(orientationSensorConfigurations, angularVelocitySensorConfigurations);
 
       selectedOrientationSensorConfiguration = orientationSensorConfigurations.get(0);
       selectedAngularVelocitySensorConfiguration = angularVelocitySensorConfigurations.get(0);
@@ -76,8 +75,23 @@ public class PelvisRotationalStateUpdater
       
       parentRegistry.addChild(registry);
       
-      angularVelocityEstimationLinkRelativeToWorld = new FrameVector(estimationFrame);
       angularVelocityRootBodyRelativeToWorld = new FrameVector(frameAfterRootJoint);
+   }
+
+   private void checkNumberOfSensors(List<OrientationSensorConfiguration> orientationSensorConfigurations,
+         List<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations)
+   {
+      if (orientationSensorConfigurations.size() > 1)
+         throw new RuntimeException("We are assuming there is only 1 IMU for right now. Got " + orientationSensorConfigurations.size() + " orientation sensors.");
+      
+      if (angularVelocitySensorConfigurations.size() > 1)
+         throw new RuntimeException("We are assuming there is only 1 IMU for right now. Got " + angularVelocitySensorConfigurations.size() + " sensors for angular velocity.");
+
+      if (orientationSensorConfigurations.size() == 0)
+         throw new RuntimeException("No sensor set up for the orientation.");
+      
+      if (angularVelocitySensorConfigurations.size() == 0)
+         throw new RuntimeException("No sensor set up for the angular velocity.");
    }
 
    public void initialize()
@@ -138,7 +152,7 @@ public class PelvisRotationalStateUpdater
    /**
     * Angular velocity of the estimation link, with respect to world.
     */
-   private final FrameVector angularVelocityEstimationLinkRelativeToWorld;
+   private final FrameVector angularVelocityEstimationLinkRelativeToWorld = new FrameVector();
 
    /**
     * Angular velocity of the root body, with respect to the estimation link.
@@ -179,6 +193,7 @@ public class PelvisRotationalStateUpdater
       angularVelocityMeasurementLinkRelativeToWorld.changeFrame(estimationFrame);
       
       // omega_{estimationLink}^{estimationFrame, world} = omega_{estimationLink}^{estimationFrame, measurementLink} + omega_{measurementLink}^{estimationFrame, world}
+      angularVelocityEstimationLinkRelativeToWorld.setToZero(estimationFrame);
       angularVelocityEstimationLinkRelativeToWorld.add(angularVelocityEstimationLinkRelativeToMeasurementLink, angularVelocityMeasurementLinkRelativeToWorld);
       
       // T_{rootBody}^{rootBodyCoMFrame, estimationLink}
