@@ -17,8 +17,6 @@ import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.JointStateFullRobotModelUpdater;
 import us.ihmc.sensorProcessing.stateEstimation.OrientationStateRobotModelUpdater;
 import us.ihmc.sensorProcessing.stateEstimation.PointMeasurementNoiseParameters;
-import us.ihmc.sensorProcessing.stateEstimation.SimplePelvisStateEstimatorRobotModelUpdater;
-import us.ihmc.sensorProcessing.stateEstimation.SimplePositionStateCalculatorInterface;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromController;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
@@ -46,26 +44,20 @@ public class SensorAndEstimatorAssembler
    @SuppressWarnings("unused")
    private final StateEstimationDataFromController stateEstimatorDataFromControllerSource;
    private final JointStateFullRobotModelUpdater jointStateFullRobotModelUpdater;
-   private final ComposableOrientationAndCoMEstimatorCreator.ComposableOrientationAndCoMEstimator fancyEstimator;
-   private final SimplePelvisStateEstimatorRobotModelUpdater simpleEstimator;
+   private final ComposableOrientationAndCoMEstimatorCreator.ComposableOrientationAndCoMEstimator stateEstimator;
    private final OrientationStateRobotModelUpdater orientationStateRobotModelUpdater;
    private final IMUSelectorAndDataConverter imuSelectorAndDataConverter;
-   
-   private final boolean useSimplePelvisPositionEstimator;
+
    private final boolean assumePerfectIMU;
 
    public SensorAndEstimatorAssembler(StateEstimationDataFromController stateEstimatorDataFromControllerSource,
          StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorNoiseParameters sensorNoiseParametersForEstimator,
-         SensorFilterParameters sensorFilterParameters, PointMeasurementNoiseParameters pointMeasurementNoiseParameters,
-         double gravitationalAcceleration, FullInverseDynamicsStructure inverseDynamicsStructure, AfterJointReferenceFrameNameMap estimatorReferenceFrameMap,
-         RigidBodyToIndexMap estimatorRigidBodyToIndexMap, double estimatorDT, boolean assumePerfectIMU, boolean useSimplePelvisPositionEstimator, SimplePositionStateCalculatorInterface simplePositionStateRobotModelUpdater, YoVariableRegistry parentRegistry)
+         SensorFilterParameters sensorFilterParameters, PointMeasurementNoiseParameters pointMeasurementNoiseParameters, double gravitationalAcceleration,
+         FullInverseDynamicsStructure inverseDynamicsStructure, AfterJointReferenceFrameNameMap estimatorReferenceFrameMap,
+         RigidBodyToIndexMap estimatorRigidBodyToIndexMap, double estimatorDT, boolean assumePerfectIMU, YoVariableRegistry parentRegistry)
    {
-      if (useSimplePelvisPositionEstimator && !assumePerfectIMU)
-         throw new RuntimeException("ASSUME_PERFECT_IMU should be true if USE_SIMPLE_COM_ESTIMATOR is true.");
-      
-      this.useSimplePelvisPositionEstimator = useSimplePelvisPositionEstimator;
       this.assumePerfectIMU = assumePerfectIMU;
-      
+
       this.stateEstimatorDataFromControllerSource = stateEstimatorDataFromControllerSource;
       SensorConfigurationFactory sensorConfigurationFactory = new SensorConfigurationFactory(sensorNoiseParametersForEstimator, gravitationalAcceleration);
 
@@ -78,7 +70,6 @@ public class SensorAndEstimatorAssembler
       Collection<OrientationSensorConfiguration> orientationSensorConfigurations = sensorConfigurationFactory
             .createOrientationSensorConfigurations(jointAndIMUSensorMap.getOrientationSensors());
 
-      
       Collection<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations = sensorConfigurationFactory
             .createAngularVelocitySensorConfigurations(jointAndIMUSensorMap.getAngularVelocitySensors());
 
@@ -89,21 +80,22 @@ public class SensorAndEstimatorAssembler
       jointStateFullRobotModelUpdater = new JointStateFullRobotModelUpdater(controlFlowGraph, jointAndIMUSensorMap, inverseDynamicsStructure);
 
       ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort = null;
-     
+
       if (!assumePerfectIMU)
       {
-    	  imuSelectorAndDataConverter = null;
-    	  orientationStateRobotModelUpdater = null;
-    	  inverseDynamicsStructureOutputPort = jointStateFullRobotModelUpdater.getInverseDynamicsStructureOutputPort();
+         imuSelectorAndDataConverter = null;
+         orientationStateRobotModelUpdater = null;
+         inverseDynamicsStructureOutputPort = jointStateFullRobotModelUpdater.getInverseDynamicsStructureOutputPort();
       }
       else
       {
-         imuSelectorAndDataConverter = new IMUSelectorAndDataConverter(controlFlowGraph, orientationSensorConfigurations, angularVelocitySensorConfigurations, jointStateFullRobotModelUpdater.getInverseDynamicsStructureOutputPort(), estimatorDT, registry);
-       
+         imuSelectorAndDataConverter = new IMUSelectorAndDataConverter(controlFlowGraph, orientationSensorConfigurations, angularVelocitySensorConfigurations,
+               jointStateFullRobotModelUpdater.getInverseDynamicsStructureOutputPort(), estimatorDT, registry);
+
          orientationStateRobotModelUpdater = new OrientationStateRobotModelUpdater(controlFlowGraph,
-        		 imuSelectorAndDataConverter.getInverseDynamicsStructureOutputPort(), imuSelectorAndDataConverter.getOrientationOutputPort(),
-        		 imuSelectorAndDataConverter.getAngularVelocityOutputPort());
-         
+               imuSelectorAndDataConverter.getInverseDynamicsStructureOutputPort(), imuSelectorAndDataConverter.getOrientationOutputPort(),
+               imuSelectorAndDataConverter.getAngularVelocityOutputPort());
+
          inverseDynamicsStructureOutputPort = orientationStateRobotModelUpdater.getInverseDynamicsStructureOutputPort();
       }
 
@@ -115,41 +107,29 @@ public class SensorAndEstimatorAssembler
       double comAccelerationProcessNoiseStandardDeviation = sensorNoiseParametersForEstimator.getComAccelerationProcessNoiseStandardDeviation();
       DenseMatrix64F comAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(comAccelerationProcessNoiseStandardDeviation, 3);
 
-      if (!useSimplePelvisPositionEstimator)
-      {
-         ComposableOrientationAndCoMEstimatorCreator orientationAndCoMEstimatorCreator = new ComposableOrientationAndCoMEstimatorCreator(
-               pointMeasurementNoiseParameters, angularAccelerationNoiseCovariance, comAccelerationNoiseCovariance, estimationLink,
-               inverseDynamicsStructureOutputPort, assumePerfectIMU);
+      ComposableOrientationAndCoMEstimatorCreator orientationAndCoMEstimatorCreator = new ComposableOrientationAndCoMEstimatorCreator(
+            pointMeasurementNoiseParameters, angularAccelerationNoiseCovariance, comAccelerationNoiseCovariance, estimationLink,
+            inverseDynamicsStructureOutputPort, assumePerfectIMU);
 
-         if (!assumePerfectIMU)
-         {
-            orientationAndCoMEstimatorCreator.addOrientationSensorConfigurations(orientationSensorConfigurations);
-            orientationAndCoMEstimatorCreator.addAngularVelocitySensorConfigurations(angularVelocitySensorConfigurations);
-            orientationAndCoMEstimatorCreator.addLinearAccelerationSensorConfigurations(linearAccelerationSensorConfigurations);
-         }
-
-         fancyEstimator = orientationAndCoMEstimatorCreator.createOrientationAndCoMEstimator(controlFlowGraph, estimatorDT, estimationFrame, estimatorReferenceFrameMap,
-               estimatorRigidBodyToIndexMap, registry);
-         stateEstimatorDataFromControllerSource.connectDesiredAccelerationPorts(controlFlowGraph, fancyEstimator);
-         
-         simpleEstimator = null;
-      }
-      else
+      if (!assumePerfectIMU)
       {
-         fancyEstimator = null;
-         simpleEstimator = new SimplePelvisStateEstimatorRobotModelUpdater("simpleCoMEstimator", estimatorDT, estimationFrame, estimatorReferenceFrameMap, estimatorRigidBodyToIndexMap,
-               controlFlowGraph, inverseDynamicsStructureOutputPort, simplePositionStateRobotModelUpdater, registry, assumePerfectIMU);
+         orientationAndCoMEstimatorCreator.addOrientationSensorConfigurations(orientationSensorConfigurations);
+         orientationAndCoMEstimatorCreator.addAngularVelocitySensorConfigurations(angularVelocitySensorConfigurations);
+         orientationAndCoMEstimatorCreator.addLinearAccelerationSensorConfigurations(linearAccelerationSensorConfigurations);
       }
-      
+
+      stateEstimator = orientationAndCoMEstimatorCreator.createOrientationAndCoMEstimator(controlFlowGraph, estimatorDT, estimationFrame,
+            estimatorReferenceFrameMap, estimatorRigidBodyToIndexMap, registry);
+      stateEstimatorDataFromControllerSource.connectDesiredAccelerationPorts(controlFlowGraph, stateEstimator);
+
       parentRegistry.addChild(registry);
 
    }
 
-
    public void initialize()
    {
       controlFlowGraph.initializeAfterConnections();
-      
+
       if (VISUALIZE_CONTROL_FLOW_GRAPH)
       {
          controlFlowGraph.visualize();
@@ -172,10 +152,7 @@ public class SensorAndEstimatorAssembler
 
    public StateEstimatorWithPorts getEstimator()
    {
-      if (!useSimplePelvisPositionEstimator)
-         return fancyEstimator;
-      else
-         return simpleEstimator;
+      return stateEstimator;
    }
 
    public JointAndIMUSensorDataSource getJointAndIMUSensorDataSource()
@@ -185,17 +162,10 @@ public class SensorAndEstimatorAssembler
 
    public void initializeEstimatorToActual(FramePoint initialCoMPosition, FrameOrientation initialEstimationLinkOrientation)
    {
-      if (useSimplePelvisPositionEstimator)
+      stateEstimator.setEstimatedCoMPosition(initialCoMPosition);
+      if (!assumePerfectIMU)
       {
-         simpleEstimator.setEstimatedCoMPosition(initialCoMPosition);
-      }
-      else
-      {
-         fancyEstimator.setEstimatedCoMPosition(initialCoMPosition);
-         if (!assumePerfectIMU)
-         {
-            fancyEstimator.setEstimatedOrientation(initialEstimationLinkOrientation);
-         }
+         stateEstimator.setEstimatedOrientation(initialEstimationLinkOrientation);
       }
    }
 }

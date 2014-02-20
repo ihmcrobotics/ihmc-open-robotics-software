@@ -117,12 +117,10 @@ public class ComposableStateEstimatorEvaluator
             pointPositionXYMeasurementStandardDeviation,
             pointPositionZMeasurementStandardDeviation);
       
-      SensorAndEstimatorAssembler sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(stateEstimatorDataFromControllerSource, simulatedSensorHolderAndReaderFromRobotFactory.getStateEstimatorSensorDefinitions(),
-            sensorNoiseParametersForEstimator, 
-            sensorFilterParameters, pointMeasurementNoiseParameters,
-            gravitationalAcceleration,
-            inverseDynamicsStructure, referenceFrameMap, rigidBodyToIndexMap, controlDT,
-            assumePerfectIMU, useSimpleComEstimator, null, registry);
+      SensorAndEstimatorAssembler sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(stateEstimatorDataFromControllerSource,
+            simulatedSensorHolderAndReaderFromRobotFactory.getStateEstimatorSensorDefinitions(), sensorNoiseParametersForEstimator, sensorFilterParameters,
+            pointMeasurementNoiseParameters, gravitationalAcceleration, inverseDynamicsStructure, referenceFrameMap, rigidBodyToIndexMap, controlDT,
+            assumePerfectIMU, registry);
 
       ControlFlowGraph controlFlowGraph = sensorAndEstimatorAssembler.getControlFlowGraph();
       StateEstimatorWithPorts orientationEstimator = sensorAndEstimatorAssembler.getEstimator();
