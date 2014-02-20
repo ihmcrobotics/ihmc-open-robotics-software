@@ -10,7 +10,7 @@ import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class DRCRobotDrivingControllerParameters extends DRCRobotWalkingControllerParameters
+public class AtlasDrivingControllerParameters extends AtlasWalkingControllerParameters
 {
    @Override
    public Map<OneDoFJoint, Double> getDefaultArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)

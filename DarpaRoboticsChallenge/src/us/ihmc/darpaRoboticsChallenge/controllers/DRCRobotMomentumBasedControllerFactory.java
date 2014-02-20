@@ -45,12 +45,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
    private final double contactTresholdForce;
    private final SideDependentList<String> footSensorNames;
 
-   public DRCRobotMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory, double contactTresholdForce)
-   {
-      this(highLevelHumanoidControllerFactory, contactTresholdForce, new SideDependentList<String>("l_leg_akx", "r_leg_akx"));
-   }
-
-   public DRCRobotMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory, double contactTresholdForce, SideDependentList<String> footSensorNames)
+    public DRCRobotMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory, double contactTresholdForce, SideDependentList<String> footSensorNames)
    {
       this.highLevelHumanoidControllerFactory = highLevelHumanoidControllerFactory;
       this.contactTresholdForce = contactTresholdForce;
@@ -89,8 +84,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       Map<OneDoFJoint, Double> initialPositionControlKdGains = new HashMap<OneDoFJoint, Double>();
 
       // TODO: Generalize setting up the gain maps.  No knowledge of the model at this stage in the game but this shouldn't be Atlas specific
-
-      AtlasJointPDGains.createMaps(fullRobotModel, initialPositionControlKpGains, initialPositionControlKdGains);
+//      AtlasJointPDGains.createMaps(fullRobotModel, initialPositionControlKpGains, initialPositionControlKdGains);
 
       RobotController highLevelHumanoidController = highLevelHumanoidControllerFactory.create(estimationLink, estimationFrame, fullRobotModel,
             initialPositionControlKpGains, initialPositionControlKdGains,

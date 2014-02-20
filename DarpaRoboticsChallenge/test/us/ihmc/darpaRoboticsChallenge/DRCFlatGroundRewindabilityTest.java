@@ -12,6 +12,8 @@ import org.junit.Test;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
+import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile;
@@ -136,13 +138,13 @@ public class DRCFlatGroundRewindabilityTest
 
       GroundProfile groundProfile = new FlatGroundProfile();
 
-      DRCRobotWalkingControllerParameters drcControlParameters = new DRCRobotWalkingControllerParameters();
-      DRCRobotArmControllerParameters armControllerParameters = new DRCRobotArmControllerParameters();
+      DRCRobotModel robotModel = DRCRobotModel.getDefaultRobotModel();
+      WalkingControllerParameters drcControlParameters = robotModel.getWalkingControlParamaters();
+      ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
 
       AutomaticSimulationRunner automaticSimulationRunner = null;
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
 
-      DRCRobotModel robotModel = DRCRobotModel.getDefaultRobotModel();
       double timePerRecordTick = DRCConfigParameters.CONTROL_DT;
       int simulationDataBufferSize = 16000;
 

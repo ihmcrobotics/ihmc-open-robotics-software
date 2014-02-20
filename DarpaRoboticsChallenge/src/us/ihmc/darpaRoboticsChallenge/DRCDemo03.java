@@ -38,10 +38,11 @@ public class DRCDemo03
       DRCSCSInitialSetup scsInitialSetup;
       RobotInitialSetup<SDFRobot> robotInitialSetup = new VRCTask1InVehicleHovering(0.0); // new VRCTask1InVehicleInitialSetup(-0.03); // DrivingDRCRobotInitialSetup();
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
-
+      
       environment = new DRCDemoEnvironmentWithBoxAndSteeringWheel(dynamicGraphicObjectsListRegistry);
       final PlainDRCRobot robotInterface = new PlainDRCRobot(DRCLocalConfigParameters.robotModelToUse, true);
       scsInitialSetup = new DRCSCSInitialSetup(environment, robotInterface.getSimulateDT());
+      
       scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
       scsInitialSetup.setInitializeEstimatorToActual(true);
 
@@ -56,14 +57,14 @@ public class DRCDemo03
       ObjectCommunicator drcNetworkProcessorServer = new LocalObjectCommunicator();
       GlobalDataProducer dataProducer = new GlobalDataProducer(drcNetworkProcessorServer);
 
-      WalkingControllerParameters drivingControllerParameters = new DRCRobotDrivingControllerParameters();
-      ArmControllerParameters armControllerParameters = new DRCRobotArmControllerParameters();
+      WalkingControllerParameters drivingControllerParameters = new AtlasDrivingControllerParameters();
+      ArmControllerParameters armControllerParameters = new AtlasArmControllerParameters();
 //      DRCRobotJointMap jointMap = robotInterface.getJointMap();
       HighLevelState initialBehavior = HighLevelState.DRIVING;
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(drivingControllerParameters);
 
       ControllerFactory controllerFactory = DRCObstacleCourseSimulation.createDRCMultiControllerFactory(null, dataProducer, footstepTimingParameters, drivingControllerParameters, 
-            armControllerParameters, initialBehavior);
+            armControllerParameters, robotInterface.getJointMap(),initialBehavior);
 
       
       Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, environment, robotInterface, robotInitialSetup, scsInitialSetup,

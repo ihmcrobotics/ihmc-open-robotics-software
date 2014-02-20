@@ -5,6 +5,7 @@ import javax.swing.JButton;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.atlas.visualization.SliderBoardFactory;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotModel.RobotType;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.NullGraphics3DAdapter;
@@ -39,8 +40,12 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       this.drawPlaneAtZ0 = drawPlaneAtZeroHeight;
       this.sliderBoardFactory = sliderBoardFactory;
    }
-   
    public void initializeGUI(SimulationConstructionSet scs, Robot robot)
+   {
+      initializeGUI(scs,robot,DRCLocalConfigParameters.defaultModel);
+   }
+   
+   public void initializeGUI(SimulationConstructionSet scs, Robot robot, DRCRobotModel robotModel)
    {
       CameraConfiguration behindPelvis = new CameraConfiguration("BehindPelvis");
       behindPelvis.setCameraTracking(false, true, true, false);
@@ -50,12 +55,13 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       behindPelvis.setCameraTrackingVars("q_x", "q_y", "q_z");
       scs.setupCamera(behindPelvis);
 
-      CameraConfiguration camera5 = new CameraConfiguration("stereo_camera_left");
-      camera5.setCameraMount("stereo_camera_right");
+      DRCRobotJointMap jointMap = robotModel.getJointMap(false, false);
+      CameraConfiguration camera5 = new CameraConfiguration(jointMap.getLeftCameraName());
+      camera5.setCameraMount(jointMap.getLeftCameraName());
       scs.setupCamera(camera5);
       
-      CameraConfiguration camera6 = new CameraConfiguration("stereo_camera_right");
-      camera6.setCameraMount("stereo_camera_right");
+      CameraConfiguration camera6 = new CameraConfiguration(jointMap.getRightCameraName());
+      camera6.setCameraMount(jointMap.getRightCameraName());
       scs.setupCamera(camera6);
       
       scs.setGroundVisible(groundProfileVisible);
@@ -87,11 +93,10 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       }
       
       //TODO: Clean this up!
-      DRCRobotJointMap jointMap = DRCRobotModel.ATLAS_NO_HANDS_ADDED_MASS.getJointMap(false, false);
       JaxbSDFLoader robotLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       GeneralizedSDFRobotModel generalizedSDFRobotModel = robotLoader.getGeneralizedSDFRobotModel(jointMap.getModelName());
       
-      if (DRCLocalConfigParameters.MAKE_SLIDER_BOARD && sliderBoardFactory != null)
+      if (DRCLocalConfigParameters.MAKE_SLIDER_BOARD && sliderBoardFactory != null && robotModel.getType() == RobotType.ATLAS)
          sliderBoardFactory.makeSliderBoard(scs, scs.getRootRegistry(), generalizedSDFRobotModel);
    }
 

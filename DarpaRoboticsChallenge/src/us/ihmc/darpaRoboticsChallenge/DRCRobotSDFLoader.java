@@ -113,7 +113,9 @@ public class DRCRobotSDFLoader
          case DRC_EXTENDED_HOOKS:
             fileInputStream = myClass.getResourceAsStream("models/GFE/drc_extended_hooks.sdf");
             break;
-
+         case VALKYRIE:
+            fileInputStream = myClass.getResourceAsStream("models/V1/sdf/V1_sim.sdf");
+            break;
          default :
             throw new RuntimeException("DRCRobotSDFLoader: Unimplemented enumeration case : " + selectedModel);
       }

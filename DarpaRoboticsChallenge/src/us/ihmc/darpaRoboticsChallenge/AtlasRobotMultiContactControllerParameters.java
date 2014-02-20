@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge;
 import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.*;
 
 
-public class DRCRobotMultiContactControllerParameters extends DRCRobotWalkingControllerParameters
+public class AtlasRobotMultiContactControllerParameters extends AtlasWalkingControllerParameters
 {
    @Override
    public String[] getDefaultHeadOrientationControlJointNames()

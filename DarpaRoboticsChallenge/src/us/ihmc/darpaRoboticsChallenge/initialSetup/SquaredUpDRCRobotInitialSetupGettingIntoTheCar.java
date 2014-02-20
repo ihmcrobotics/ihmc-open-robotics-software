@@ -9,7 +9,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotMultiContactControllerParameters;
+import us.ihmc.darpaRoboticsChallenge.AtlasRobotMultiContactControllerParameters;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -357,7 +357,7 @@ public class SquaredUpDRCRobotInitialSetupGettingIntoTheCar implements RobotInit
       armInitialJointPositions.put(RobotSide.RIGHT, rightArmInitialJointPositions);
    }
 
-   public static class DRCRobotControllerParametersGettingIntoTheCar extends DRCRobotMultiContactControllerParameters
+   public static class DRCRobotControllerParametersGettingIntoTheCar extends AtlasRobotMultiContactControllerParameters
    {
       public Map<OneDoFJoint, Double> getDefaultArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
       {
