@@ -90,7 +90,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 
       // TODO: Generalize setting up the gain maps.  No knowledge of the model at this stage in the game but this shouldn't be Atlas specific
 
-      AtlasJointPDGains.createMaps(fullRobotModel, initialPositionControlKpGains, initialPositionControlKdGains);
+//      AtlasJointPDGains.createMaps(fullRobotModel, initialPositionControlKpGains, initialPositionControlKdGains);
 
       RobotController highLevelHumanoidController = highLevelHumanoidControllerFactory.create(estimationLink, estimationFrame, fullRobotModel,
             initialPositionControlKpGains, initialPositionControlKdGains,

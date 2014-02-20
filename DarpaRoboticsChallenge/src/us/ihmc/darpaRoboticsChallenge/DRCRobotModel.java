@@ -1,38 +1,51 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import us.ihmc.atlas.AtlasJointMap;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandModel;
+import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieJointMap;
 
 public enum DRCRobotModel
 {
-//   ATLAS_NO_HANDS, ATLAS_NO_HANDS_ADDED_MASS, ATLAS_SANDIA_HANDS, ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, ATLAS_IROBOT_HANDS, ATLAS_IROBOT_HANDS_ADDED_MASS, ATLAS_IROBOT_HANDS_WITH_EXTENSION, 
-//   ATLAS_IROBOT_HANDS_WITH_EXTENSION_ROTATED_ADDED_MASS, ATLAS_IROBOT_HANDS_ADDED_MASS_COMXZ, ATLAS_IROBOT_HANDS_ADDED_MASS_COMXYZ, ATLAS_CALIBRATION, ATLAS_RHOOK_HAND, ATLAS_IHMC_PARAMETERS, 
-//   ATLAS_IROBOT_LEFT_HAND_WITH_EXTENSION_ROTATED_RIGHT_HAND_HOOK_ADDED_MASS,ATLAS_V3_IROBOT_HANDS_RIGHT_8_INCH_EXTENSION_LEFT_4_INCH_ROTATED_ADDED_MASS, ATLAS_HOOK_HANDS, DEBRIS_TASK_MODEL,
    ATLAS_NO_HANDS_ADDED_MASS,
    ATLAS_SANDIA_HANDS, ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS,
-   DRC_NO_HANDS, DRC_HANDS, DRC_EXTENDED_HANDS, DRC_HOOKS,  DRC_TASK_HOSE, DRC_EXTENDED_HOOKS;
-
+   DRC_NO_HANDS, DRC_HANDS, DRC_EXTENDED_HANDS, DRC_HOOKS,  DRC_TASK_HOSE, DRC_EXTENDED_HOOKS, VALKYRIE;
+   
+   public enum RobotType
+   {
+      ATLAS,VALKYRIE
+   }
+   
    public static DRCRobotModel getDefaultRobotModel()
    {
       return DRCLocalConfigParameters.robotModelToUse;
    }
 
+   public DRCRobotJointMap getJointMap(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly)
+   {
+      switch (this)
+      {
+      case VALKYRIE:
+         return new ValkyrieJointMap(this, addLoadsOfContactPoints, addLoadsOfContactPointsToFeetOnly);
+      case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS:
+      case ATLAS_NO_HANDS_ADDED_MASS:
+      case ATLAS_SANDIA_HANDS:
+      case DRC_EXTENDED_HANDS:
+      case DRC_EXTENDED_HOOKS:
+      case DRC_HANDS:
+      case DRC_HOOKS:
+      case DRC_NO_HANDS:
+      case DRC_TASK_HOSE:
+         return new AtlasJointMap(this, addLoadsOfContactPoints, addLoadsOfContactPointsToFeetOnly);
+      default:
+         throw new RuntimeException("Unkown model");
+      }
+   }
+   
    public boolean hasIRobotHands()
    {
       switch (this)
       {
-//      case ATLAS_IROBOT_HANDS:
-//      case ATLAS_IROBOT_HANDS_ADDED_MASS:
-//      case ATLAS_IROBOT_HANDS_WITH_EXTENSION:
-//      case ATLAS_IHMC_PARAMETERS:
-//      case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXZ:
-//      case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXYZ:
-//      case ATLAS_CALIBRATION:
-//      case ATLAS_RHOOK_HAND:
-//      case ATLAS_IROBOT_HANDS_WITH_EXTENSION_ROTATED_ADDED_MASS:
-//      case ATLAS_IROBOT_LEFT_HAND_WITH_EXTENSION_ROTATED_RIGHT_HAND_HOOK_ADDED_MASS:
-//      case ATLAS_V3_IROBOT_HANDS_RIGHT_8_INCH_EXTENSION_LEFT_4_INCH_ROTATED_ADDED_MASS:
-//      case DEBRIS_TASK_MODEL:
-         
       case DRC_TASK_HOSE:
       case DRC_HANDS:
       case DRC_EXTENDED_HANDS:
@@ -47,11 +60,6 @@ public enum DRCRobotModel
    {
       switch (this)
       {
-//      case ATLAS_IROBOT_HANDS_WITH_EXTENSION:
-//      case ATLAS_IROBOT_HANDS_WITH_EXTENSION_ROTATED_ADDED_MASS:
-//      case ATLAS_V3_IROBOT_HANDS_RIGHT_8_INCH_EXTENSION_LEFT_4_INCH_ROTATED_ADDED_MASS:
-//      case DEBRIS_TASK_MODEL:
-         
       case DRC_EXTENDED_HANDS:
          return true;
 
@@ -64,9 +72,6 @@ public enum DRCRobotModel
    {
       switch (this)
       {
-//      case ATLAS_RHOOK_HAND:
-//      case ATLAS_HOOK_HANDS:
-         
       case DRC_TASK_HOSE:
       case DRC_HOOKS:
       case DRC_EXTENDED_HOOKS:
@@ -81,19 +86,6 @@ public enum DRCRobotModel
    {
       switch (this)
       {
-//      case ATLAS_IROBOT_HANDS:
-//      case ATLAS_IROBOT_HANDS_ADDED_MASS:
-//      case ATLAS_IROBOT_HANDS_WITH_EXTENSION:
-//      case ATLAS_IHMC_PARAMETERS:
-//      case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXZ:
-//      case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXYZ:
-//      case ATLAS_CALIBRATION:
-//      case ATLAS_RHOOK_HAND:
-//      case ATLAS_IROBOT_HANDS_WITH_EXTENSION_ROTATED_ADDED_MASS:
-//      case ATLAS_IROBOT_LEFT_HAND_WITH_EXTENSION_ROTATED_RIGHT_HAND_HOOK_ADDED_MASS:
-//      case ATLAS_V3_IROBOT_HANDS_RIGHT_8_INCH_EXTENSION_LEFT_4_INCH_ROTATED_ADDED_MASS:
-//      case DEBRIS_TASK_MODEL:
-         
       case DRC_HANDS:
       case DRC_EXTENDED_HANDS:
       case DRC_TASK_HOSE:
@@ -103,9 +95,7 @@ public enum DRCRobotModel
       case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS:
          return DRCHandModel.SANDIA;
 
-//      case ATLAS_NO_HANDS:
       case ATLAS_NO_HANDS_ADDED_MASS:
-         
       case DRC_NO_HANDS:
       case DRC_HOOKS:
       case DRC_EXTENDED_HOOKS:
@@ -114,27 +104,35 @@ public enum DRCRobotModel
       }
    }
 
+   public RobotType getType()
+   {
+      switch (this)
+      {
+      case ATLAS_NO_HANDS_ADDED_MASS:
+      case ATLAS_SANDIA_HANDS:
+      case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS:
+      case DRC_NO_HANDS:
+      case DRC_HANDS:
+      case DRC_EXTENDED_HANDS:
+      case DRC_HOOKS:
+      case DRC_TASK_HOSE:
+      case DRC_EXTENDED_HOOKS:
+         return RobotType.ATLAS;
+      case VALKYRIE:
+         return RobotType.VALKYRIE;
+
+      default:
+         throw new RuntimeException("Unkown model");
+      }
+   }
+   
    public String getModelName()
    {
       switch (this)
       {
-//      case ATLAS_NO_HANDS:
       case ATLAS_NO_HANDS_ADDED_MASS:
-//      case ATLAS_IROBOT_HANDS:
-//      case ATLAS_IROBOT_HANDS_ADDED_MASS:
-//      case ATLAS_IROBOT_HANDS_WITH_EXTENSION:
-//      case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXZ:
-//      case ATLAS_IROBOT_HANDS_ADDED_MASS_COMXYZ:
-//      case ATLAS_IHMC_PARAMETERS:
       case ATLAS_SANDIA_HANDS:
       case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS:
-//      case ATLAS_CALIBRATION:
-//      case ATLAS_RHOOK_HAND:
-//      case ATLAS_IROBOT_HANDS_WITH_EXTENSION_ROTATED_ADDED_MASS:
-//      case ATLAS_V3_IROBOT_HANDS_RIGHT_8_INCH_EXTENSION_LEFT_4_INCH_ROTATED_ADDED_MASS:
-//      case DEBRIS_TASK_MODEL:
-//      case ATLAS_HOOK_HANDS:
-//         
       case DRC_NO_HANDS:
       case DRC_HANDS:
       case DRC_EXTENDED_HANDS:
@@ -142,6 +140,8 @@ public enum DRCRobotModel
       case DRC_TASK_HOSE:
       case DRC_EXTENDED_HOOKS:
          return "atlas";
+      case VALKYRIE:
+         return "V1";
 
       default:
          throw new RuntimeException("Unkown model");

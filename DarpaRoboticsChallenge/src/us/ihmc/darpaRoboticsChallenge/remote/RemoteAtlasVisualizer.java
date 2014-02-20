@@ -25,7 +25,8 @@ public class RemoteAtlasVisualizer
    {
       System.out.println("Connecting to host " + host);
       
-      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCLocalConfigParameters.defaultModel, false);
+      DRCRobotModel robotModel = DRCLocalConfigParameters.robotModelToUse;
+      DRCRobotJointMap jointMap = robotModel.getJointMap(false, false);
       JaxbSDFLoader robotLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
 //      SDFRobot robot = robotLoader.createRobot(jointMap, false);
 //      SliderBoardFactory sliderBoardFactory = GainControllerSliderBoard.getFactory();
