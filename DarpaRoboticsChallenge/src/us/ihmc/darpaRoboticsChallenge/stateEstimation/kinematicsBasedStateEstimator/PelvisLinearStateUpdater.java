@@ -115,7 +115,7 @@ public class PelvisLinearStateUpdater
 
    private final TwistCalculator twistCalculator;
    
-   private final PelvisKinematicsBasedPositionCalculator pelvisKinematicsBasedPositionCalculator;
+   private final PelvisKinematicsBasedLinearStateCalculator pelvisKinematicsBasedLinearStateCalculator;
    private final IMUDriftCompensator imuDriftCompensator;
    
    // Temporary variables
@@ -180,12 +180,12 @@ public class PelvisLinearStateUpdater
       stateMachine = new StateMachine<PelvisEstimationState>("PelvisEstimationStateMachine", "switchTime", PelvisEstimationState.class, yoTime, registry);
       setupStateMachine();
       
-      pelvisKinematicsBasedPositionCalculator = new PelvisKinematicsBasedPositionCalculator(twistCalculator, pelvis, pelvisFrame, bipedFeet, estimatorDT, dynamicGraphicObjectsListRegistry, registry);
-      pelvisKinematicsBasedPositionCalculator.setAlphaPelvisPosition(0.0);
-      pelvisKinematicsBasedPositionCalculator.setAlphaPelvisLinearVelocity(computeAlphaGivenBreakFrequencyProperly(16.0, estimatorDT));
-      pelvisKinematicsBasedPositionCalculator.setPelvisLinearVelocityBacklashParameters(computeAlphaGivenBreakFrequencyProperly(16.0, estimatorDT),
+      pelvisKinematicsBasedLinearStateCalculator = new PelvisKinematicsBasedLinearStateCalculator(twistCalculator, pelvis, pelvisFrame, bipedFeet, estimatorDT, dynamicGraphicObjectsListRegistry, registry);
+      pelvisKinematicsBasedLinearStateCalculator.setAlphaPelvisPosition(0.0);
+      pelvisKinematicsBasedLinearStateCalculator.setAlphaPelvisLinearVelocity(computeAlphaGivenBreakFrequencyProperly(16.0, estimatorDT));
+      pelvisKinematicsBasedLinearStateCalculator.setPelvisLinearVelocityBacklashParameters(computeAlphaGivenBreakFrequencyProperly(16.0, estimatorDT),
             DRCConfigParameters.JOINT_VELOCITY_SLOP_TIME_FOR_BACKLASH_COMPENSATION);
-      pelvisKinematicsBasedPositionCalculator.setAlphaCenterOfPressure(computeAlphaGivenBreakFrequencyProperly(4.0, estimatorDT));
+      pelvisKinematicsBasedLinearStateCalculator.setAlphaCenterOfPressure(computeAlphaGivenBreakFrequencyProperly(4.0, estimatorDT));
 
       alphaGravityEstimation.set(computeAlphaGivenBreakFrequencyProperly(5.3052e-4, estimatorDT)); // alpha = 0.99999 with dt = 0.003
 
@@ -275,7 +275,7 @@ public class PelvisLinearStateUpdater
       pelvisVelocity.setToZero();
 
       pelvisPosition.getFramePointAndChangeFrameOfPackedPoint(tempPosition);
-      pelvisKinematicsBasedPositionCalculator.initialize(tempPosition);
+      pelvisKinematicsBasedLinearStateCalculator.initialize(tempPosition);
    }
 
    public void initializeCoMPositionToActual(Point3d initialCoMPosition)
@@ -327,7 +327,7 @@ public class PelvisLinearStateUpdater
       
       imuDriftCompensator.updateAndCompensateDrift();
       
-      pelvisKinematicsBasedPositionCalculator.updateKinematics();
+      pelvisKinematicsBasedLinearStateCalculator.updateKinematics();
       
       updatePelvisAccelerationWithIMU();
       
@@ -369,11 +369,10 @@ public class PelvisLinearStateUpdater
       if (linearAccelerationPort != null)
       {
          computePelvisStateByIntegratingAccelerometerAndMergeWithKinematics();
-
-      }   
+      }
       else
       {
-         pelvisKinematicsBasedPositionCalculator.getPelvisPositionAndVelocity(tempPosition, tempVelocity);
+         pelvisKinematicsBasedLinearStateCalculator.getPelvisPositionAndVelocity(tempPosition, tempVelocity);
          pelvisPosition.set(tempPosition);
          pelvisVelocity.set(tempVelocity);
       }
@@ -397,10 +396,10 @@ public class PelvisLinearStateUpdater
    {
       if (linearAccelerationPort == null)
          return;
-      
+
       tempIMUAcceleration.set(pelvisFrame, linearAccelerationPort.getData());
       gravityEstimation.update(tempIMUAcceleration.length());
-      
+
       tempIMUAcceleration.changeFrame(worldFrame);
       tempIMUAcceleration.setZ(tempIMUAcceleration.getZ() - gravityEstimation.getDoubleValue());
       imuAccelerationInWorld.set(tempIMUAcceleration);
@@ -409,42 +408,42 @@ public class PelvisLinearStateUpdater
    private int setTrustedFeetUsingFootSwitches()
    {
       int numberOfEndEffectorsTrusted = 0;
-      
-      for(RobotSide robotSide : RobotSide.values)
+
+      for (RobotSide robotSide : RobotSide.values)
       {
          if (footSwitches.get(robotSide).hasFootHitGround())
             haveFeetHitGroundFiltered.get(robotSide).update(true);
          else
             haveFeetHitGroundFiltered.get(robotSide).set(false);
-         
+
          if (haveFeetHitGroundFiltered.get(robotSide).getBooleanValue())
             numberOfEndEffectorsTrusted++;
       }
-      
+
       // Update only if at least one foot hit the ground
       if (numberOfEndEffectorsTrusted > 0)
       {
-         for(RobotSide robotSide : RobotSide.values)
+         for (RobotSide robotSide : RobotSide.values)
             areFeetTrusted.get(robotSide).set(haveFeetHitGroundFiltered.get(robotSide).getBooleanValue());
       }
       // Else keep the old states
       else
       {
          numberOfEndEffectorsTrusted = 0;
-         for(RobotSide robotSide : RobotSide.values)
+         for (RobotSide robotSide : RobotSide.values)
          {
             if (areFeetTrusted.get(robotSide).getBooleanValue())
                numberOfEndEffectorsTrusted++;
          }
       }
-      
+
       return numberOfEndEffectorsTrusted;
    }
    
    private int filterTrustedFeetBasedOnContactForces()
    {
       int numberOfEndEffectorsTrusted = 2;
-      
+
       double totalForceZ = 0.0;
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -452,39 +451,39 @@ public class PelvisLinearStateUpdater
          footSwitches.get(robotSide).computeAndPackFootWrench(footWrench);
          totalForceZ += footWrench.getLinearPartZ();
       }
-      
+
       for (RobotSide robotSide : RobotSide.values)
       {
          Wrench footWrench = footWrenches.get(robotSide);
          footForcesZInPercentOfTotalForce.get(robotSide).set(footWrench.getLinearPartZ() / totalForceZ);
-         
+
          if (footForcesZInPercentOfTotalForce.get(robotSide).getDoubleValue() < forceZInPercentThresholdToFilterFoot.getDoubleValue())
          {
             numberOfEndEffectorsTrusted--;
             areFeetTrusted.get(robotSide).set(false);
-            
+
             return numberOfEndEffectorsTrusted;
          }
       }
-      
+
       return numberOfEndEffectorsTrusted;
    }
 
    private int filterTrustedFeetBasedOnMinPelvisAcceleration()
    {
       int numberOfEndEffectorsTrusted = 2;
-      
+
       if (feetSpacingVelocity.getDoubleValue() < footVelocityThreshold.getDoubleValue())
          return numberOfEndEffectorsTrusted;
-      
+
       for (RobotSide robotSide : RobotSide.values)
       {
          imuAccelerationInWorld.getFrameVector(tempIMUAcceleration);
-         pelvisKinematicsBasedPositionCalculator.getFootToPelvisAcceleration(tempFrameVector, robotSide);
+         pelvisKinematicsBasedLinearStateCalculator.getFootToPelvisAcceleration(tempFrameVector, robotSide);
          tempFrameVector.sub(tempIMUAcceleration);
          accelerationMagnitudeErrors.put(robotSide, tempFrameVector.length());
       }
-      
+
       for (RobotSide robotSide : RobotSide.values)
       {
          if (accelerationMagnitudeErrors.get(robotSide) > accelerationMagnitudeErrors.get(robotSide.getOppositeSide()))
@@ -494,28 +493,28 @@ public class PelvisLinearStateUpdater
             return numberOfEndEffectorsTrusted;
          }
       }
-      
+
       return numberOfEndEffectorsTrusted;
    }
 
    private void computeFeetSpacingLengthAndVelocity()
    {
       tempFrameVector.setToZero(worldFrame);
-      
+
       for (RobotSide robotSide : RobotSide.values)
       {
-         pelvisKinematicsBasedPositionCalculator.getFootToPelvisPosition(tempPosition, robotSide);
+         pelvisKinematicsBasedLinearStateCalculator.getFootToPelvisPosition(tempPosition, robotSide);
          tempPosition.scale(robotSide.negateIfRightSide(1.0));
          tempFrameVector.add(tempPosition);
       }
-      
+
       feetSpacing.set(tempFrameVector.length());
 
       tempFrameVector.setToZero(worldFrame);
-      
+
       for (RobotSide robotSide : RobotSide.values)
       {
-         pelvisKinematicsBasedPositionCalculator.getFootToPelvisVelocity(tempVelocity, robotSide);
+         pelvisKinematicsBasedLinearStateCalculator.getFootToPelvisVelocity(tempVelocity, robotSide);
          tempVelocity.scale(robotSide.negateIfRightSide(1.0));
          tempFrameVector.add(tempVelocity);
       }
@@ -524,7 +523,6 @@ public class PelvisLinearStateUpdater
    
    private class TrustBothFeetState extends State<PelvisEstimationState>
    {
-
       public TrustBothFeetState()
       {
          super(PelvisEstimationState.TRUST_BOTH_FEET);
@@ -533,7 +531,7 @@ public class PelvisLinearStateUpdater
       @Override
       public void doAction()
       {
-         pelvisKinematicsBasedPositionCalculator.updatePelvisPositionForDoubleSupport(footSwitches);
+         pelvisKinematicsBasedLinearStateCalculator.updatePelvisPositionForDoubleSupport(footSwitches);
          imuDriftCompensator.esimtateDriftIfPossible(true);
       }
 
@@ -564,7 +562,7 @@ public class PelvisLinearStateUpdater
       {
          imuDriftCompensator.esimtateDriftIfPossible(false);
          pelvisPosition.getFramePoint(tempPosition);
-         pelvisKinematicsBasedPositionCalculator.updatePelvisPositionForSingleSupport(tempPosition, footSwitches, trustedSide);
+         pelvisKinematicsBasedLinearStateCalculator.updatePelvisPositionForSingleSupport(tempPosition, footSwitches, trustedSide);
       }
       
       @Override
@@ -584,24 +582,24 @@ public class PelvisLinearStateUpdater
       imuAccelerationInWorld.getFrameVector(tempIMUAcceleration);
       tempIMUAcceleration.scale(estimatorDT);
       pelvisVelocityByIntegrating.add(tempIMUAcceleration);
-      
+
       pelvisVelocity.getFrameVectorAndChangeFrameOfPackedVector(tempEstimatedVelocityIMUPart);
       tempEstimatedVelocityIMUPart.add(tempIMUAcceleration);
       tempEstimatedVelocityIMUPart.scale(alphaPelvisAccelerometerIntegrationToVelocity.getDoubleValue());
-      
-      pelvisKinematicsBasedPositionCalculator.getPelvisVelocity(tempVelocity);
+
+      pelvisKinematicsBasedLinearStateCalculator.getPelvisVelocity(tempVelocity);
       pelvisVelocity.set(tempVelocity);
-      
+
       pelvisVelocity.scale(1.0 - alphaPelvisAccelerometerIntegrationToVelocity.getDoubleValue());
       pelvisVelocity.add(tempEstimatedVelocityIMUPart);
-      
+
       pelvisVelocity.getFrameVectorAndChangeFrameOfPackedVector(tempPelvisVelocityIntegrated);
       tempPelvisVelocityIntegrated.scale(estimatorDT);
       pelvisPosition.getFramePointAndChangeFrameOfPackedPoint(tempEstimatedPositionIMUPart);
       tempEstimatedPositionIMUPart.add(tempPelvisVelocityIntegrated);
       tempEstimatedPositionIMUPart.scale(alphaPelvisAccelerometerIntegrationToPosition.getDoubleValue());
 
-      pelvisKinematicsBasedPositionCalculator.getPelvisPosition(tempPosition);
+      pelvisKinematicsBasedLinearStateCalculator.getPelvisPosition(tempPosition);
       pelvisPosition.set(tempPosition);
       pelvisPosition.scale(1.0 - alphaPelvisAccelerometerIntegrationToPosition.getDoubleValue());
       pelvisPosition.add(tempEstimatedPositionIMUPart);
