@@ -36,7 +36,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
  * @author Sylvain
  *
  */
-public class PelvisKinematicsBasedPositionCalculator
+public class PelvisKinematicsBasedLinearStateCalculator
 {
    private static final boolean VISUALIZE = true;
    
@@ -90,7 +90,7 @@ public class PelvisKinematicsBasedPositionCalculator
    private final FrameVector tempCoPOffset = new FrameVector();
    private final SideDependentList<FrameLineSegment2d> tempLineSegments = new SideDependentList<FrameLineSegment2d>();
    
-   public PelvisKinematicsBasedPositionCalculator(TwistCalculator twistCalculator, RigidBody pelvis, ReferenceFrame pelvisFrame,
+   public PelvisKinematicsBasedLinearStateCalculator(TwistCalculator twistCalculator, RigidBody pelvis, ReferenceFrame pelvisFrame,
          SideDependentList<ContactablePlaneBody> bipedFeet, double estimatorDT, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
          YoVariableRegistry parentRegistry)
    {
