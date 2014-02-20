@@ -73,7 +73,7 @@ public class DRCKalmanFilterBasedStateEstimator implements DRCStateEstimatorInte
       sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(stateEstimatorDataFromControllerSource,
             sensorReaderFactory.getStateEstimatorSensorDefinitions(), sensorNoiseParametersForEstimator, sensorFilterParameters,
             pointMeasurementNoiseParameters, gravitationalAcceleration, inverseDynamicsStructure, estimatorReferenceFrameMap, estimatorRigidBodyToIndexMap,
-            estimateDT, assumePerfectIMU, false, null, registry);
+            estimateDT, assumePerfectIMU, registry);
 
       stateEstimatorWithPorts = sensorAndEstimatorAssembler.getEstimator();
 
