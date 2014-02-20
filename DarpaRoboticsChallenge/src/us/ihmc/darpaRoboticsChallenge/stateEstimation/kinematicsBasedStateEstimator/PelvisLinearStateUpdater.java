@@ -5,6 +5,7 @@ import static com.yobotics.simulationconstructionset.util.math.filter.AlphaFilte
 
 import java.util.Collection;
 
+import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
@@ -23,6 +24,7 @@ import us.ihmc.utilities.screwTheory.CenterOfMassCalculator;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
 
@@ -41,7 +43,7 @@ import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachineTools;
 
-public class PelvisStateCalculator
+public class PelvisLinearStateUpdater
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    
@@ -102,7 +104,7 @@ public class PelvisStateCalculator
    
    private enum PelvisEstimationState {TRUST_BOTH_FEET, TRUST_LEFT_FOOT, TRUST_RIGHT_FOOT};
 
-   private final SideDependentList<PelvisEstimationState> robotSideToPelvisEstimationState = new SideDependentList<PelvisStateCalculator.PelvisEstimationState>(
+   private final SideDependentList<PelvisEstimationState> robotSideToPelvisEstimationState = new SideDependentList<PelvisLinearStateUpdater.PelvisEstimationState>(
          PelvisEstimationState.TRUST_LEFT_FOOT, PelvisEstimationState.TRUST_RIGHT_FOOT);
    
    private final DoubleYoVariable yoTime = new DoubleYoVariable("t_pelvisStateEstimator", registry);
@@ -124,8 +126,12 @@ public class PelvisStateCalculator
    private final FramePoint tempCenterOfMassPositionWorld = new FramePoint(worldFrame);
    private final FrameVector tempCenterOfMassVelocityWorld = new FrameVector(worldFrame);
    private final SideDependentList<Double> accelerationMagnitudeErrors = new SideDependentList<Double>(0.0, 0.0);
+   private final Vector3d tempPelvisTranslation = new Vector3d();
+   private final Vector3d tempPelvisLinearVelocity = new Vector3d();
    
-   public PelvisStateCalculator(FullInverseDynamicsStructure inverseDynamicsStructure, SideDependentList<WrenchBasedFootSwitch> footSwitches,
+   private final SixDoFJoint rootJoint;
+   
+   public PelvisLinearStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, SideDependentList<WrenchBasedFootSwitch> footSwitches,
          SideDependentList<ContactablePlaneBody> bipedFeet, double gravitationalAcceleration, final double estimatorDT,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {      
@@ -133,7 +139,8 @@ public class PelvisStateCalculator
       this.footSwitches = footSwitches;
       this.bipedFeet = bipedFeet;
       twistCalculator = inverseDynamicsStructure.getTwistCalculator();
-      pelvisFrame = inverseDynamicsStructure.getRootJoint().getFrameAfterJoint();
+      rootJoint = inverseDynamicsStructure.getRootJoint();
+      pelvisFrame = rootJoint.getFrameAfterJoint();
       
       pelvis = inverseDynamicsStructure.getRootJoint().getSuccessor();
 
@@ -193,7 +200,7 @@ public class PelvisStateCalculator
       
       slippageCompensatorMode.set(SlippageCompensatorMode.LOAD_THRESHOLD);
 
-      imuDriftCompensator = new IMUDriftCompensator(footFrames, pelvisFrame, twistCalculator, inverseDynamicsStructure.getRootJoint(), estimatorDT, registry);
+      imuDriftCompensator = new IMUDriftCompensator(footFrames, pelvisFrame, twistCalculator, rootJoint, estimatorDT, registry);
       imuDriftCompensator.activateEstimation(false);
       imuDriftCompensator.activateCompensation(false);
       imuDriftCompensator.setAlphaIMUDrift(computeAlphaGivenBreakFrequencyProperly(0.5332, estimatorDT));
@@ -249,6 +256,7 @@ public class PelvisStateCalculator
    public void initialize()
    {
       initializeRobotState();
+      updateRootJoint();
    }
 
    public void initializeRobotState()
@@ -270,9 +278,14 @@ public class PelvisStateCalculator
       pelvisKinematicsBasedPositionCalculator.initialize(tempPosition);
    }
 
-   public void initializeCoMPositionToActual(FramePoint estimatedCoMPosition)
+   public void initializeCoMPositionToActual(Point3d initialCoMPosition)
    {
-      centerOfMassPosition.set(estimatedCoMPosition);
+      centerOfMassPosition.set(initialCoMPosition);
+   }
+
+   public void initializeCoMPositionToActual(FramePoint initialCoMPosition)
+   {
+      centerOfMassPosition.set(initialCoMPosition);
    }
    
    @SuppressWarnings("unchecked")
@@ -295,7 +308,19 @@ public class PelvisStateCalculator
       stateMachine.addState(trustLeftFootState);
       stateMachine.addState(trustRightFootState);
    }
-   
+
+   public void updatePelvisPositionAndLinearVelocity()
+   {
+      defaultActionIntoStates();
+      
+      stateMachine.checkTransitionConditions();
+      stateMachine.doAction();
+      
+      defaultActionOutOfStates();
+
+      updateRootJoint();
+   }
+
    private void defaultActionIntoStates()
    {
       yoTime.add(estimatorDT); //Hack to have a yoTime for the state machine
@@ -337,8 +362,37 @@ public class PelvisStateCalculator
 
       if (numberOfEndEffectorsTrusted == 0)
          throw new RuntimeException("No foot trusted!");
-}
+   }
 
+   private void defaultActionOutOfStates()
+   {
+      if (linearAccelerationPort != null)
+      {
+         computePelvisStateByIntegratingAccelerometerAndMergeWithKinematics();
+
+      }   
+      else
+      {
+         pelvisKinematicsBasedPositionCalculator.getPelvisPositionAndVelocity(tempPosition, tempVelocity);
+         pelvisPosition.set(tempPosition);
+         pelvisVelocity.set(tempVelocity);
+      }
+
+      updateCoMState();
+   }
+   
+   private void updateRootJoint()
+   {
+      pelvisPosition.getPoint3d(tempPelvisTranslation);
+      pelvisVelocity.getVector(tempPelvisLinearVelocity);
+
+      rootJoint.setPosition(tempPelvisTranslation);
+      rootJoint.setLinearVelocityInWorld(tempPelvisLinearVelocity);
+
+      pelvisFrame.update();
+      twistCalculator.compute();
+   }
+   
    private void updatePelvisAccelerationWithIMU()
    {
       if (linearAccelerationPort == null)
@@ -525,33 +579,6 @@ public class PelvisStateCalculator
       }
    }
 
-   public void run()
-   {
-      defaultActionIntoStates();
-      
-      stateMachine.checkTransitionConditions();
-      stateMachine.doAction();
-      
-      defaultActionOutOfStates();
-   }
-   
-   private void defaultActionOutOfStates()
-   {
-      if (linearAccelerationPort != null)
-      {
-         computePelvisStateByIntegratingAccelerometerAndMergeWithKinematics();
-      
-      }   
-      else
-      {
-         pelvisKinematicsBasedPositionCalculator.getPelvisPositionAndVelocity(tempPosition, tempVelocity);
-         pelvisPosition.set(tempPosition);
-         pelvisVelocity.set(tempVelocity);
-      }
-      
-      updateCoMState();
-   }
-   
    private void computePelvisStateByIntegratingAccelerometerAndMergeWithKinematics()
    {
       imuAccelerationInWorld.getFrameVector(tempIMUAcceleration);
