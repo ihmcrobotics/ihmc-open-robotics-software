@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MultiContactTestHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotModel.RobotType;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
@@ -77,26 +78,28 @@ public class DRCMultiContact
          handContactPointTransforms.put(robotSide, DRCRobotParameters.invisibleContactablePlaneHandContactPointTransforms.get(robotSide));
          handContactPoints.put(robotSide, DRCRobotParameters.invisibleContactablePlaneHandContactPoints.get(robotSide));
       }
-
-      WalkingControllerParameters controllerParameters = new AtlasRobotMultiContactControllerParameters(){
-         public Map<OneDoFJoint, Double> getDefaultArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
-         {
-            Map<OneDoFJoint, Double> jointPositions = new LinkedHashMap<OneDoFJoint, Double>();
-            EnumMap<ArmJointName, Double> defaultArmPosition = MultiContactDRCRobotInitialSetup.getDefaultArmPositionForMultiContactSimulation().get(robotSide);
-
-            for (ArmJointName armJointName : defaultArmPosition.keySet())
+      WalkingControllerParameters controllerParameters = robotModel.getWalkingControlParamaters();
+      ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
+      if(robotModel.getType() == RobotType.ATLAS)
+      {
+         controllerParameters = new AtlasRobotMultiContactControllerParameters(){
+            public Map<OneDoFJoint, Double> getDefaultArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
             {
-               double position = defaultArmPosition.get(armJointName);
-               OneDoFJoint joint = fullRobotModel.getArmJoint(robotSide, armJointName);
-               jointPositions.put(joint, position);
+               Map<OneDoFJoint, Double> jointPositions = new LinkedHashMap<OneDoFJoint, Double>();
+               EnumMap<ArmJointName, Double> defaultArmPosition = MultiContactDRCRobotInitialSetup.getDefaultArmPositionForMultiContactSimulation().get(robotSide);
+   
+               for (ArmJointName armJointName : defaultArmPosition.keySet())
+               {
+                  double position = defaultArmPosition.get(armJointName);
+                  OneDoFJoint joint = fullRobotModel.getArmJoint(robotSide, armJointName);
+                  jointPositions.put(joint, position);
+               }
+   
+               return jointPositions;
             }
-
-            return jointPositions;
-         }
-      };
-      
-      ArmControllerParameters armControllerParameters = new AtlasArmControllerParameters();
-
+         };
+         armControllerParameters = new AtlasArmControllerParameters();
+      } 
 
       MultiContactTestHumanoidControllerFactory highLevelHumanoidControllerFactory = new MultiContactTestHumanoidControllerFactory(namesOfJointsBeforeHands,
             handContactPointTransforms, handContactPoints, footContactSides, handContactSides, controllerParameters, armControllerParameters);

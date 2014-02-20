@@ -21,7 +21,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 // TODO: Temporary initial setup for testing the grasping control
-public class SquaredUpDRCRobotInitialSetupGettingIntoTheCar implements RobotInitialSetup<SDFRobot>
+public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements RobotInitialSetup<SDFRobot>
 {
    private enum Methods
    {
@@ -35,12 +35,12 @@ public class SquaredUpDRCRobotInitialSetupGettingIntoTheCar implements RobotInit
 
    private final double groundZ;
 
-   public SquaredUpDRCRobotInitialSetupGettingIntoTheCar()
+   public AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar()
    {
       this(0.0);
    }
 
-   public SquaredUpDRCRobotInitialSetupGettingIntoTheCar(double groundZ)
+   public AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar(double groundZ)
    {
       this.groundZ = groundZ;
    }
@@ -357,12 +357,12 @@ public class SquaredUpDRCRobotInitialSetupGettingIntoTheCar implements RobotInit
       armInitialJointPositions.put(RobotSide.RIGHT, rightArmInitialJointPositions);
    }
 
-   public static class DRCRobotControllerParametersGettingIntoTheCar extends AtlasRobotMultiContactControllerParameters
+   public static class AtlasControllerParametersGettingIntoTheCar extends AtlasRobotMultiContactControllerParameters
    {
       public Map<OneDoFJoint, Double> getDefaultArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
       {
          Map<OneDoFJoint, Double> jointPositions = new LinkedHashMap<OneDoFJoint, Double>();
-         Map<ArmJointName, Double> armInitialJointPositions = SquaredUpDRCRobotInitialSetupGettingIntoTheCar.armInitialJointPositions.get(robotSide);
+         Map<ArmJointName, Double> armInitialJointPositions = AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar.armInitialJointPositions.get(robotSide);
          for (ArmJointName armJointName : armInitialJointPositions.keySet())
          {
             jointPositions.put(fullRobotModel.getArmJoint(robotSide, armJointName), armInitialJointPositions.get(armJointName));
