@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
@@ -30,38 +29,29 @@ import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.SensorConfig
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterface, StateEstimator
 {
-   private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final SensorReader sensorReader;
 
-   private final PelvisStateCalculator pelvisStateCalculator;
    private final JointStateUpdater jointStateUpdater;
    private final PelvisRotationalStateUpdater pelvisRotationalStateUpdater;
+   private final PelvisLinearStateUpdater pelvisLinearStateUpdater;
  
    private final SensorNoiseParameters sensorNoiseParametersForEstimator = DRCSimulatedSensorNoiseParameters
          .createNoiseParametersForEstimatorJerryTuningSeptember2013();
    
-   private final FullInverseDynamicsStructure inverseDynamicsStructure;
-
    public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure,
          RigidBodyToIndexMap estimatorRigidBodyToIndexMap, double estimateDT, SensorReaderFactory sensorReaderFactory, double gravitationalAcceleration,
          SideDependentList<WrenchBasedFootSwitch> footSwitches, SideDependentList<ContactablePlaneBody> bipedFeet,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       sensorReader = sensorReaderFactory.getSensorReader();
-      this.inverseDynamicsStructure = inverseDynamicsStructure;
 
       SensorFilterParameters sensorFilterParameters = new SensorFilterParameters(
             DRCConfigParameters.JOINT_POSITION_FILTER_FREQ_HZ, DRCConfigParameters.JOINT_VELOCITY_FILTER_FREQ_HZ, 
@@ -80,14 +70,11 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       
       pelvisRotationalStateUpdater = new PelvisRotationalStateUpdater(orientationSensorConfigurations, angularVelocitySensorConfigurations, inverseDynamicsStructure, registry);
 
-      pelvisStateCalculator = new PelvisStateCalculator(inverseDynamicsStructure, footSwitches, bipedFeet,
+      pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, footSwitches, bipedFeet,
             gravitationalAcceleration, estimateDT, dynamicGraphicObjectsListRegistry, registry);
-      pelvisStateCalculator.setJointAndIMUSensorDataSource(jointAndIMUSensorDataSource);
+      pelvisLinearStateUpdater.setJointAndIMUSensorDataSource(jointAndIMUSensorDataSource);
 
       sensorReader.setJointAndIMUSensorDataSource(jointAndIMUSensorDataSource);
-
-      yoEstimatedPelvisPosition = new YoFramePoint("estimatedPelvisPosition", worldFrame, registry);
-      yoEstimatedPelvisLinearVelocity = new YoFrameVector("estimatedPelvisLinearVelocity", worldFrame, registry);
    }
 
    public StateEstimator getStateEstimator()
@@ -99,62 +86,30 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    {
       jointStateUpdater.initialize();
       pelvisRotationalStateUpdater.initialize();
-      pelvisStateCalculator.initialize();
-      updateRootState();
+      pelvisLinearStateUpdater.initialize();
    }
    
    public void doControl()
    {
       jointStateUpdater.updateJointState();
       pelvisRotationalStateUpdater.updatePelvisOrientationAndAngularVelocity();
-      pelvisStateCalculator.run();
-      updateRootState();
-   }
-
-   private final YoFramePoint yoEstimatedPelvisPosition;
-   private final YoFrameVector yoEstimatedPelvisLinearVelocity;
-   private final FramePoint estimatedPelvisPosition = new FramePoint(worldFrame);
-   private final FrameVector estimatedPelvisLinearVelocity = new FrameVector(worldFrame);
-   private final Vector3d tempPelvisTranslation = new Vector3d();
-   private final Vector3d tempPelvisLinearVelocity = new Vector3d();
-   
-
-   private void updateRootState()
-   {
-      pelvisStateCalculator.getEstimatedPelvisPosition(estimatedPelvisPosition);
-      pelvisStateCalculator.getEstimatedPelvisLinearVelocity(estimatedPelvisLinearVelocity);
-      
-      SixDoFJoint rootJoint = inverseDynamicsStructure.getRootJoint();
-
-      estimatedPelvisPosition.getPoint(tempPelvisTranslation);
-      estimatedPelvisLinearVelocity.getVector(tempPelvisLinearVelocity);
-
-      yoEstimatedPelvisPosition.set(tempPelvisTranslation);
-      yoEstimatedPelvisLinearVelocity.set(tempPelvisLinearVelocity);
-      
-      rootJoint.setPosition(tempPelvisTranslation);
-      rootJoint.setLinearVelocityInWorld(tempPelvisLinearVelocity);
+      pelvisLinearStateUpdater.updatePelvisPositionAndLinearVelocity();
    }
 
    public void startIMUDriftEstimation()
    {
-      pelvisStateCalculator.startIMUDriftEstimation();
+      pelvisLinearStateUpdater.startIMUDriftEstimation();
    }
 
    public void startIMUDriftCompensation()
    {
-      pelvisStateCalculator.startIMUDriftCompensation();
+      pelvisLinearStateUpdater.startIMUDriftCompensation();
    }
    
    public void initializeEstimatorToActual(Point3d initialCoMPosition, Quat4d initialEstimationLinkOrientation)
    {
-      // Setting the initial CoM Position here.
-      FramePoint estimatedCoMPosition = new FramePoint();
-      pelvisStateCalculator.getEstimatedCoMPosition(estimatedCoMPosition);
-      estimatedCoMPosition.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      estimatedCoMPosition.set(initialCoMPosition);
-
-      pelvisStateCalculator.initializeCoMPositionToActual(estimatedCoMPosition);
+      pelvisLinearStateUpdater.initializeCoMPositionToActual(initialCoMPosition);
+      // Do nothing for the orientation since the IMU is trusted
    }
 
    public YoVariableRegistry getYoVariableRegistry()
@@ -199,17 +154,17 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
    public void getEstimatedCoMPosition(FramePoint estimatedCoMPositionToPack)
    {
-      pelvisStateCalculator.getEstimatedCoMPosition(estimatedCoMPositionToPack);
+      pelvisLinearStateUpdater.getEstimatedCoMPosition(estimatedCoMPositionToPack);
    }
 
    public void setEstimatedCoMPosition(FramePoint estimatedCoMPosition)
    {
-      pelvisStateCalculator.initializeCoMPositionToActual(estimatedCoMPosition);
+      pelvisLinearStateUpdater.initializeCoMPositionToActual(estimatedCoMPosition);
    }
 
    public void getEstimatedCoMVelocity(FrameVector estimatedCoMVelocityToPack)
    {
-      pelvisStateCalculator.getEstimatedCoMVelocity(estimatedCoMVelocityToPack);
+      pelvisLinearStateUpdater.getEstimatedCoMVelocity(estimatedCoMVelocityToPack);
    }
 
    public void setEstimatedCoMVelocity(FrameVector estimatedCoMVelocity)
@@ -218,12 +173,12 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
    public void getEstimatedPelvisPosition(FramePoint estimatedPelvisPositionToPack)
    {
-      estimatedPelvisPositionToPack.setAndChangeFrame(estimatedPelvisPosition);
+      pelvisLinearStateUpdater.getEstimatedPelvisPosition(estimatedPelvisPositionToPack);
    }
 
    public void getEstimatedPelvisLinearVelocity(FrameVector estimatedPelvisLinearVelocityToPack)
    {
-      estimatedPelvisLinearVelocityToPack.setAndChangeFrame(estimatedPelvisLinearVelocity);
+      pelvisLinearStateUpdater.getEstimatedPelvisLinearVelocity(estimatedPelvisLinearVelocityToPack);
    }
 
    public DenseMatrix64F getCovariance()
