@@ -20,6 +20,11 @@ import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVa
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameQuaternion;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
+/**
+ * IMUDriftCompensator when activated estimates the IMU drift on the yaw angle and correct the root joint orientation and angular velocity around the vertical axis.
+ * @author Sylvain
+ *
+ */
 public class IMUDriftCompensator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -101,14 +106,14 @@ public class IMUDriftCompensator
       parentRegistry.addChild(registry);
    }
    
-   public void activateCompensation(boolean activate)
-   {
-      isIMUDriftCompensationActivated.set(activate);
-   }
-   
    public void activateEstimation(boolean activate)
    {
       isIMUDriftYawRateEstimationActivated.set(activate);
+   }
+   
+   public void activateCompensation(boolean activate)
+   {
+      isIMUDriftCompensationActivated.set(activate);
    }
    
    public void setAlphaIMUDrift(double alphaFilter)
@@ -228,7 +233,6 @@ public class IMUDriftCompensator
       rootJointAngularVelocity.changeFrame(pelvisFrame);
       rootJointTwist.setAngularPart(rootJointAngularVelocity.getVector());
       rootJoint.setJointTwist(rootJointTwist);
-      rootJoint.getFrameAfterJoint().update();
       twistCalculator.compute();
    }
    
