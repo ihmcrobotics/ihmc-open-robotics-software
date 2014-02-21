@@ -40,12 +40,6 @@ public abstract class DRCRobotJointMap implements SDFJointNameMap
 
    public abstract double getAnkleHeight();
 
-   public abstract List<Pair<String, Vector3d>> getHandContactPoints(RobotSide robotSide);
-
-   public abstract List<Pair<String, Vector3d>> getThighContactPoints(RobotSide robotSide);
-
-   public abstract List<Pair<String, Vector3d>> getFootContactPoints(RobotSide robotSide);
-
    public abstract String getJointBeforeFootName(RobotSide robotSide);
 
    public abstract NeckJointName[] getNeckJointNames();

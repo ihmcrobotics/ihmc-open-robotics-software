@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
@@ -13,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.RobotSpecificJointNames;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
 
 public interface SDFJointNameMap extends RobotSpecificJointNames
@@ -39,7 +42,9 @@ public interface SDFJointNameMap extends RobotSpecificJointNames
    public String getJointBeforeFootName(RobotSide robotSide);
    public double getAnkleHeight();
    public List<Pair<String,Vector3d>> getJointNameGroundContactPointMap();
-   public ArrayList<Vector3d> getFootGroundContactPointsForController();
+   
+   public SideDependentList<Transform3D> getAnkleToSoleFrameTransform();
+   public SideDependentList<ArrayList<Point2d>> getFootGroundContactPointsInSoleFrameForController();
    
    public boolean enableTorqueVelocityLimits();
    
