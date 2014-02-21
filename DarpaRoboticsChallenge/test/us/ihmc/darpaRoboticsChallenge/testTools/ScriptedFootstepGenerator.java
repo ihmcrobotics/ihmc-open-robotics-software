@@ -17,7 +17,7 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.commonWalkingControlModules.trajectories.SimpleTwoWaypointTrajectoryParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.AtlasAndHandRobotParameters;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -123,9 +123,9 @@ public class ScriptedFootstepGenerator
 
       if (DRCConfigParameters.USE_GFE_ROBOT_MODEL)
       {
-         footForward = DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD;
-         footBack = DRCRobotParameters.DRC_ROBOT_FOOT_BACK;
-         footWidth = DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH;
+         footForward = AtlasAndHandRobotParameters.DRC_ROBOT_FOOT_FORWARD;
+         footBack = AtlasAndHandRobotParameters.DRC_ROBOT_FOOT_BACK;
+         footWidth = AtlasAndHandRobotParameters.DRC_ROBOT_FOOT_WIDTH;
       }
       else
       {

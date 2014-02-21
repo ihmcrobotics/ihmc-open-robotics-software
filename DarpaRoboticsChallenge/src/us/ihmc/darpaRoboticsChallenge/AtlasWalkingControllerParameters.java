@@ -16,7 +16,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.AtlasAndHandRobotParameters;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
@@ -232,22 +232,22 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 
    public double getUpperNeckPitchLimit()
    {
-      return DRCRobotParameters.DRC_ROBOT_NECK_PITCH_UPPER_LIMIT;
+      return AtlasAndHandRobotParameters.DRC_ROBOT_NECK_PITCH_UPPER_LIMIT;
    }
 
    public double getLowerNeckPitchLimit()
    {
-      return DRCRobotParameters.DRC_ROBOT_NECK_PITCH_LOWER_LIMIT;
+      return AtlasAndHandRobotParameters.DRC_ROBOT_NECK_PITCH_LOWER_LIMIT;
    }
 
    public double getHeadYawLimit()
    {
-      return DRCRobotParameters.DRC_ROBOT_HEAD_YAW_LIMIT;
+      return AtlasAndHandRobotParameters.DRC_ROBOT_HEAD_YAW_LIMIT;
    }
 
    public double getHeadRollLimit()
    {
-      return DRCRobotParameters.DRC_ROBOT_HEAD_ROLL_LIMIT;
+      return AtlasAndHandRobotParameters.DRC_ROBOT_HEAD_ROLL_LIMIT;
    }
 
    public String getJointNameForExtendedPitchRange()
@@ -268,27 +268,27 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 
    public double getFootForwardOffset()
    {
-      return DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD;
+      return AtlasAndHandRobotParameters.DRC_ROBOT_FOOT_FORWARD;
    }
 
    public double getFootBackwardOffset()
    {
-      return DRCRobotParameters.DRC_ROBOT_FOOT_BACK;
+      return AtlasAndHandRobotParameters.DRC_ROBOT_FOOT_BACK;
    }
    
    public double getAnkleHeight()
    {
-      return DRCRobotParameters.DRC_ROBOT_ANKLE_HEIGHT;
+      return AtlasAndHandRobotParameters.DRC_ROBOT_ANKLE_HEIGHT;
    }
 
    public double getLegLength()
    {
-      return DRCRobotParameters.DRC_ROBOT_SHIN_LENGTH + DRCRobotParameters.DRC_ROBOT_THIGH_LENGTH;
+      return AtlasAndHandRobotParameters.DRC_ROBOT_SHIN_LENGTH + AtlasAndHandRobotParameters.DRC_ROBOT_THIGH_LENGTH;
    }
    
    public double getMinLegLengthBeforeCollapsingSingleSupport()
    {
-      return DRCRobotParameters.DRC_ROBOT_MIN_LEG_LENGTH_BEFORE_COLLAPSING_SINGLE_SUPPORT;
+      return AtlasAndHandRobotParameters.DRC_ROBOT_MIN_LEG_LENGTH_BEFORE_COLLAPSING_SINGLE_SUPPORT;
    }
 
    public double getFinalToeOffPitchAngularVelocity()

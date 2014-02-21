@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.AtlasAndHandRobotParameters;
 
 public class DRCConfigParameters
 {
@@ -245,8 +245,8 @@ public class DRCConfigParameters
    // Footstep Generator
    public static final double BOUNDING_BOX_FOR_FOOTSTEP_HEIGHT_FINDING_SIDE_LENGTH =
       (1 + 0.3) * 2
-      * Math.sqrt(DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD * DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD
-                  + 0.25 * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH);
+      * Math.sqrt(AtlasAndHandRobotParameters.DRC_ROBOT_FOOT_FORWARD * AtlasAndHandRobotParameters.DRC_ROBOT_FOOT_FORWARD
+                  + 0.25 * AtlasAndHandRobotParameters.DRC_ROBOT_FOOT_WIDTH * AtlasAndHandRobotParameters.DRC_ROBOT_FOOT_WIDTH);
 
    public static final int JOINT_CONFIGURATION_RATE_IN_MS = 10;
 

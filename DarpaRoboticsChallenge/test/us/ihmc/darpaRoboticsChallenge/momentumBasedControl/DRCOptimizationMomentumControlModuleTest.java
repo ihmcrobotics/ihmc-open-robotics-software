@@ -41,7 +41,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.AtlasAndHandRobotParameters;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
@@ -327,9 +327,9 @@ public class DRCOptimizationMomentumControlModuleTest
 
    private SideDependentList<ContactablePlaneBody> createFeet(SDFFullRobotModel fullRobotModel, ReferenceFrames referenceFrames)
    {
-      double footForward = DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD;
-      double footBack = DRCRobotParameters.DRC_ROBOT_FOOT_BACK;
-      double footWidth = DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH;
+      double footForward = AtlasAndHandRobotParameters.DRC_ROBOT_FOOT_FORWARD;
+      double footBack = AtlasAndHandRobotParameters.DRC_ROBOT_FOOT_BACK;
+      double footWidth = AtlasAndHandRobotParameters.DRC_ROBOT_FOOT_WIDTH;
 
       SideDependentList<ContactablePlaneBody> bipedFeet = new SideDependentList<ContactablePlaneBody>();
       for (RobotSide robotSide : RobotSide.values)

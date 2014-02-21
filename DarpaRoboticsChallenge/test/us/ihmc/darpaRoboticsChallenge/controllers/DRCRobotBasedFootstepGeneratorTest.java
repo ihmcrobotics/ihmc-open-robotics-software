@@ -27,7 +27,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.AtlasAndHandRobotParameters;
 import us.ihmc.darpaRoboticsChallenge.userInterface.DRCOperatorUserInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -157,7 +157,7 @@ public class DRCRobotBasedFootstepGeneratorTest
    {
       for (Footstep footstep : footSteps)
       {
-         assertEquals(DRCRobotParameters.DRC_ROBOT_ANKLE_HEIGHT, footstep.getPoseCopy().getZ(), eps);
+         assertEquals(AtlasAndHandRobotParameters.DRC_ROBOT_ANKLE_HEIGHT, footstep.getPoseCopy().getZ(), eps);
       }
    }
 
