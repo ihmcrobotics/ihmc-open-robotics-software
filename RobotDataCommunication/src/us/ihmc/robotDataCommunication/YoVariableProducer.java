@@ -18,9 +18,11 @@ public class YoVariableProducer extends Thread
    private final int port;
    private final ConcurrentRingBuffer<FullStateBuffer> variableBuffer;
    private final byte[] buffer;
+   private final byte[][] outputBuffer;
+   private final int outputBufferSize=8; // 0 disables outputBuffer
    private final int jointStateOffset;
    private final LongBuffer longBuffer;
-   private final zmq.Msg msg;
+   private zmq.Msg msg;
 
    private zmq.SocketBase variablePublisher;
    
@@ -34,9 +36,16 @@ public class YoVariableProducer extends Thread
       int numberOfJointStates = FullStateBuffer.getNumberOfJointStates(jointHolders);
       int bufferSize = (1 + jointStateOffset + numberOfJointStates) * 8;
       this.buffer = new byte[bufferSize];
+      
+      this.outputBuffer=new byte[outputBufferSize][];
+      for(int i=0;i<outputBufferSize;i++)
+      {
+         this.outputBuffer[i] = new byte[bufferSize];         
+      }
+      this.msg = new zmq.Msg(buffer);
+      
       ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
       this.longBuffer = byteBuffer.asLongBuffer();
-      this.msg = new zmq.Msg(buffer);
       
       longBuffer.put(0);
       for(int i = 0; i < variables.size(); i++)
@@ -60,6 +69,7 @@ public class YoVariableProducer extends Thread
       {
          variableBuffer.poll();
          FullStateBuffer fullStateBuffer;
+         int outputBufferIndex=0;
          while((fullStateBuffer = variableBuffer.read()) != null)
          {
             longBuffer.put(0, fullStateBuffer.getTimestamp());
@@ -73,10 +83,16 @@ public class YoVariableProducer extends Thread
             
             fullStateBuffer.getJointStatesInBuffer(longBuffer, jointStateOffset + 1);
             
+            if(outputBufferSize>0)
+            {
+               System.arraycopy(buffer, 0, outputBuffer[outputBufferIndex], 0, buffer.length);
+               msg = new zmq.Msg(outputBuffer[outputBufferIndex]);
+               outputBufferIndex = (outputBufferIndex+1)%outputBufferSize;
+            }
+            
             variablePublisher.send(msg, 0);
          }
          variableBuffer.flush();
-         
          
          try
          {
