@@ -4,6 +4,8 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotModel.RobotType;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.*;
 
@@ -63,6 +65,7 @@ public class SquaredUpDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot
       robot.update();
       robot.getRootJointToWorldTransform(rootToWorld);
       rootToWorld.get(offset);
+      
 
 
 //    GroundContactPoint gc1 = robot.getFootGroundContactPoints(RobotSide.LEFT).get(0);
@@ -70,8 +73,17 @@ public class SquaredUpDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot
 //    System.out.println("Footheight: " + pelvisToFoot);
 
       // Hardcoded for gazebo integration
-      double pelvisToFoot = 0.887;
-
+      
+      double pelvisToFoot = 0.0;
+      if(DRCRobotModel.getDefaultRobotModel().getType() == RobotType.ATLAS)
+      {
+         pelvisToFoot = 0.887;
+      } 
+      
+      else if(DRCRobotModel.getDefaultRobotModel().getType() == RobotType.VALKYRIE)
+      {
+         pelvisToFoot = 0.887 + 0.3;
+      }
 
       offset.setZ(groundZ + pelvisToFoot);
 

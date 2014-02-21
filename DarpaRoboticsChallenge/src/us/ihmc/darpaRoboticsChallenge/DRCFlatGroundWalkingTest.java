@@ -280,7 +280,7 @@ public class DRCFlatGroundWalkingTest
 
       DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(drcControlParameters, armControllerParameters, robotInterface, robotInitialSetup, guiInitialSetup,
                                                                scsInitialSetup, useVelocityAndHeadingScript, automaticSimulationRunner, timePerRecordTick,
-                                                               simulationDataBufferSize, cheatWithGroundHeightAtForFootstep);
+                                                               simulationDataBufferSize, cheatWithGroundHeightAtForFootstep,robotModel);
 
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
 
@@ -293,6 +293,7 @@ public class DRCFlatGroundWalkingTest
          armControllerParameters, GroundProfile groundProfile, boolean drawGroundProfile,
          boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, boolean useLoadOfContactPointsForTheFeet)
    {
+      DRCRobotModel robotModel = DRCRobotModel.VALKYRIE;
       AutomaticSimulationRunner automaticSimulationRunner = null;
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
 
@@ -309,7 +310,7 @@ public class DRCFlatGroundWalkingTest
 
       DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(walkingControllerParameters, armControllerParameters, robotInterface, robotInitialSetup, guiInitialSetup,
                                                                scsInitialSetup, useVelocityAndHeadingScript, automaticSimulationRunner, timePerRecordTick,
-                                                               simulationDataBufferSize, cheatWithGroundHeightAtForFootstep);
+                                                               simulationDataBufferSize, cheatWithGroundHeightAtForFootstep,robotModel);
 
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
 

@@ -40,6 +40,7 @@ public class DRCDemo03
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
       
       environment = new DRCDemoEnvironmentWithBoxAndSteeringWheel(dynamicGraphicObjectsListRegistry);
+      DRCRobotModel robotModel = DRCLocalConfigParameters.robotModelToUse;
       final PlainDRCRobot robotInterface = new PlainDRCRobot(DRCLocalConfigParameters.robotModelToUse, true);
       scsInitialSetup = new DRCSCSInitialSetup(environment, robotInterface.getSimulateDT());
       
@@ -68,7 +69,7 @@ public class DRCDemo03
 
       
       Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, environment, robotInterface, robotInitialSetup, scsInitialSetup,
-              guiInitialSetup, dataProducer, null, dynamicGraphicObjectsListRegistry);
+              guiInitialSetup, dataProducer, null, dynamicGraphicObjectsListRegistry,robotModel);
       drcSimulation = humanoidSimulation.first();
 
       SimulationConstructionSet simulationConstructionSet = drcSimulation.getSimulationConstructionSet();

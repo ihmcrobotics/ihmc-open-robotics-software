@@ -83,6 +83,8 @@ public abstract class DRCRobotJointMap implements SDFJointNameMap
    public abstract SideDependentList<String> getFeetForceSensorNames();
 
    public abstract SideDependentList<String> getJointBeforeThighNames();
+   
+   public abstract String[] getOrderedJointNames();
 
    
 }

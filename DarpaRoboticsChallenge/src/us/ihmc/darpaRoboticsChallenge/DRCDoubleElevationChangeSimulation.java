@@ -41,7 +41,7 @@ public class DRCDoubleElevationChangeSimulation
       DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(drcControlParameters, armControllerParameters, robotInterface, 
             robotInitialSetup, guiInitialSetup, scsInitialSetup, 
             useVelocityAndHeadingScript, automaticSimulationRunner, DRCConfigParameters.CONTROL_DT, 16000,
-            cheatWithGroundHeightAtForFootstep);
+            cheatWithGroundHeightAtForFootstep,robotModel);
       
       ((BooleanYoVariable) drcFlatGroundWalkingTrack.getSimulationConstructionSet().getVariable("walk")).set(true);
       ((DoubleYoVariable) drcFlatGroundWalkingTrack.getSimulationConstructionSet().getVariable("desiredVelocityX")).set(1.0);

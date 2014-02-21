@@ -75,7 +75,6 @@ public enum DRCRobotModel
 
    public DRCRobotJointMap getJointMap(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly)
    {
-         System.out.println(this);
          switch (this)
          {
       case VALKYRIE:
