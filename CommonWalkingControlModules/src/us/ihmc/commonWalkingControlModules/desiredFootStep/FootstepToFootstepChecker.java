@@ -27,8 +27,10 @@ public class FootstepToFootstepChecker
    private static double MAXIMUM_DELTA_ROLL = Math.toRadians(15.0);    // 0.26
    private static double MAXIMUM_DELTA_PITCH = Math.toRadians(15.0);    // 0.26
    private static double MAXIMUM_DELTA_YAW = Math.toRadians(90.0);    // 1.57 radians
-
-   public static boolean isFootstepToFootstepChangeLarge(Footstep startingFootstep, Footstep endingFootstep, RobotSide startingFootstepSide)
+   
+   private static final double semiCircleOffset = 0.14; //From RangeOfStepGraphicsManager: Should have a unified source, not just a magic number.
+   
+         public static boolean isFootstepToFootstepChangeLarge(Footstep startingFootstep, Footstep endingFootstep, RobotSide startingFootstepSide)
    {
       startingFootstep.getPose(startingFramePose);
       endingFootstep.getPose(endingFramePose);
@@ -91,6 +93,13 @@ public class FootstepToFootstepChecker
       double deltaPitch = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(endingFramePose.getPitch(), startingFramePose.getPitch()));
       double deltaRoll = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(endingFramePose.getRoll(), startingFramePose.getRoll()));
 
+      startToEnd = new FrameVector(endingFramePose.getPositionCopy());
+      FrameVector offsetStart = new FrameVector(startingFramePose.getPositionCopy());
+      double sideOffset = semiCircleOffset*(startingFootstepSide == RobotSide.LEFT ? -1: 1);
+      double offsetDirAngle = startingFramePose.getYaw() + Math.PI/2;
+      FrameVector offset = new FrameVector(worldFrame,new double[] {Math.cos(offsetDirAngle)*sideOffset,Math.sin(offsetDirAngle)*sideOffset,0});
+      offsetStart.add(offset);
+      startToEnd.sub(offsetStart);
       double stepDirection = Math.atan2(startToEnd.getY(), startToEnd.getX());
       double deltaStepDirection = AngleTools.computeAngleDifferenceMinusPiToPi(stepDirection, startingFramePose.getYaw());
 
