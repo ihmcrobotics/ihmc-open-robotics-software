@@ -155,7 +155,7 @@ public class DRCFlatGroundRewindabilityTest
       DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(drcControlParameters, armControllerParameters, robotInterface, robotInitialSetup,
                                                                guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript, automaticSimulationRunner,
                                                                timePerRecordTick, simulationDataBufferSize,
-            cheatWithGroundHeightAtForFootstep);
+            cheatWithGroundHeightAtForFootstep,robotModel);
 
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
 

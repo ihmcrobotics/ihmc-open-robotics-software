@@ -20,6 +20,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCRobotModel.RobotType;
 import us.ihmc.darpaRoboticsChallenge.IncorrectDrcRobotModelException;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
+import us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap;
 import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.*;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -483,5 +484,11 @@ public class AtlasJointMap extends DRCRobotJointMap
    public SideDependentList<String> getJointBeforeThighNames()
    {
       return jointBeforeThighNames;
+   }
+
+   @Override
+   public String[] getOrderedJointNames()
+   {
+      return ROSAtlasJointMap.jointNames;
    }
 }

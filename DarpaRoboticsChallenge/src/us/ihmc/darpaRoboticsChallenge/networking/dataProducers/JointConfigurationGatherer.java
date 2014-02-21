@@ -4,6 +4,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
@@ -14,7 +15,7 @@ public class JointConfigurationGatherer
 {  
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final OneDoFJoint[] atlasJoints;
+   private final OneDoFJoint[] joints;
 //   private final SideDependentList<FingerJoint[]> handJoints = new SideDependentList<FingerJoint[]>();
 
    private final SixDoFJoint rootJoint;
@@ -23,18 +24,18 @@ public class JointConfigurationGatherer
 
 //   private final SideDependentList<ConcurrentCopier<double[]>> handAngles = new SideDependentList<ConcurrentCopier<double[]>>();
 
-   public JointConfigurationGatherer(SDFFullRobotModel estimatorModel, YoVariableRegistry parentRegistry)
+   public JointConfigurationGatherer(SDFFullRobotModel estimatorModel, YoVariableRegistry parentRegistry, DRCRobotJointMap jointMap)
    {
       parentRegistry.addChild(registry);
       this.rootJoint = estimatorModel.getRootJoint();
-
+      String[] jointNames = jointMap.getOrderedJointNames();
       // Setup Atlas Joints
-      int numberOfAtlasJoints = DRCJointConfigurationData.atlasJointNames.length;
-      this.atlasJoints = new OneDoFJoint[numberOfAtlasJoints];
+      int numberOfJoints = jointNames.length;
+      this.joints = new OneDoFJoint[numberOfJoints];
 
-      for (int i = 0; i < numberOfAtlasJoints; ++i)
+      for (int i = 0; i < numberOfJoints; ++i)
       {
-         atlasJoints[i] = estimatorModel.getOneDoFJointByName(DRCJointConfigurationData.atlasJointNames[i]);
+         joints[i] = estimatorModel.getOneDoFJointByName(jointNames[i]);
       }
 
 //      // Setup hand joints
@@ -78,10 +79,10 @@ public class JointConfigurationGatherer
       rootJoint.packTranslation(rootTranslation);
       rootJoint.packRotation(rootOrientation);
 
-      for (int i = 0; i < atlasJoints.length; i++)
+      for (int i = 0; i < joints.length; i++)
       {
-         jointAngles[i] = atlasJoints[i].getQ();
-         jointOutAngles[i] = atlasJoints[i].getSecondaryQ();
+         jointAngles[i] = joints[i].getQ();
+         jointOutAngles[i] = joints[i].getSecondaryQ();
       }
 
 //      if ((leftHandAngles != null) && (rightHandAngles != null))
