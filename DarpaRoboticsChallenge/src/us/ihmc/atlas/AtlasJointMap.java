@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
+import javax.media.j3d.Transform3D;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -126,16 +127,16 @@ public class AtlasJointMap extends DRCRobotJointMap
          handGroundContactPoints.put(robotSide, new ArrayList<Pair<String, Vector3d>>());
          thighGroundContactPoints.put(robotSide, new ArrayList<Pair<String, Vector3d>>());
 
-         ArrayList<Vector3d> contactPointOffsetList;
+         ArrayList<Point2d> contactPointOffsetList;
          if (addLoadsOfContactPointsForFeetOnly)
             contactPointOffsetList = AtlasAndHandRobotParameters.DRC_ROBOT_GROUND_LOADS_OF_CONTACT_POINT_OFFSET_FROM_FOOT;
          else
             contactPointOffsetList = AtlasAndHandRobotParameters.DRC_ROBOT_GROUND_CONTACT_POINT_OFFSET_FROM_FOOT;
             
-         for (Vector3d footv3d : contactPointOffsetList)
+         for (Point2d footv3d : contactPointOffsetList)
          {
             // add ankle joint contact points on each corner of the foot
-            footGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(forcedSideJointNames[l_leg_akx], footv3d));
+            footGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(forcedSideJointNames[l_leg_akx], new Vector3d(footv3d.getX(), footv3d.getY(), -AtlasAndHandRobotParameters.DRC_ROBOT_ANKLE_HEIGHT)));
          }
 
          if (selectedModel == DRCRobotModel.ATLAS_SANDIA_HANDS && addLoadsOfContactPoints)
@@ -375,19 +376,16 @@ public class AtlasJointMap extends DRCRobotJointMap
       return jointBeforeFeetNames.get(robotSide);
    }
 
-   @Override
    public List<Pair<String, Vector3d>> getFootContactPoints(RobotSide robotSide)
    {
       return footGroundContactPoints.get(robotSide);
    }
 
-   @Override
    public List<Pair<String, Vector3d>> getThighContactPoints(RobotSide robotSide)
    {
       return thighGroundContactPoints.get(robotSide);
    }
 
-   @Override
    public List<Pair<String, Vector3d>> getHandContactPoints(RobotSide robotSide)
    {
       return handGroundContactPoints.get(robotSide);
@@ -462,11 +460,6 @@ public class AtlasJointMap extends DRCRobotJointMap
       return lastSimulatedJoints;
    }
 
-   @Override
-   public ArrayList<Vector3d> getFootGroundContactPointsForController()
-   {
-      return AtlasAndHandRobotParameters.DRC_ROBOT_GROUND_CONTACT_POINT_OFFSET_FROM_FOOT;
-   }
 
    @Override
    public String[] getForceSensorNames()
@@ -490,5 +483,18 @@ public class AtlasJointMap extends DRCRobotJointMap
    public String[] getOrderedJointNames()
    {
       return ROSAtlasJointMap.jointNames;
+   }
+
+   @Override
+   public SideDependentList<Transform3D> getAnkleToSoleFrameTransform()
+   {
+      return new SideDependentList<>(AtlasAndHandRobotParameters.DRC_ROBOT_ANKLE_TO_SOLE_FRAME_TRANFORM,
+            AtlasAndHandRobotParameters.DRC_ROBOT_ANKLE_TO_SOLE_FRAME_TRANFORM);
+   }
+
+   @Override
+   public SideDependentList<ArrayList<Point2d>> getFootGroundContactPointsInSoleFrameForController()
+   {
+      return new SideDependentList<>(AtlasAndHandRobotParameters.DRC_ROBOT_GROUND_CONTACT_POINT_OFFSET_FROM_FOOT, AtlasAndHandRobotParameters.DRC_ROBOT_GROUND_CONTACT_POINT_OFFSET_FROM_FOOT);
    }
 }

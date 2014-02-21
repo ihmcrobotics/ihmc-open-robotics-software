@@ -73,6 +73,8 @@ public class SDFFullRobotModel implements FullRobotModel
    private final HashMap<String, Transform3D> lidarBaseToSensorTransform = new HashMap<String, Transform3D>();
    private final HashMap<String, FrameVector> lidarAxis = new HashMap<String, FrameVector>();
 
+   private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
+   
    public SDFFullRobotModel(SDFLinkHolder rootLink, SDFJointNameMap sdfJointNameMap)
    {
       this.sdfJointNameMap = sdfJointNameMap;
@@ -124,6 +126,13 @@ public class SDFFullRobotModel implements FullRobotModel
       lowerBody = ScrewTools.computeRigidBodiesInOrder(elevator, excludeBodiesForLowerBody);
       upperBody = ScrewTools.computeRigidBodiesInOrder(pelvis, excludeBodiesForUpperBody);
 
+      
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         Transform3D soleToFootTransform = sdfJointNameMap.getAnkleToSoleFrameTransform().get(robotSide);
+         ReferenceFrame soleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(robotSide.getCamelCaseNameForStartOfExpression() + "Sole", getEndEffectorFrame(robotSide, LimbName.LEG), soleToFootTransform);
+         soleFrames.put(robotSide, soleFrame); 
+      }
    }
    
    public String getModelName()
@@ -488,6 +497,12 @@ public class SDFFullRobotModel implements FullRobotModel
    public FrameVector getLidarJointAxis(String name)
    {
       return lidarAxis.get(name);
+   }
+
+   @Override
+   public ReferenceFrame getSoleFrame(RobotSide robotSide)
+   {
+      return soleFrames.get(robotSide);
    }
 
 }

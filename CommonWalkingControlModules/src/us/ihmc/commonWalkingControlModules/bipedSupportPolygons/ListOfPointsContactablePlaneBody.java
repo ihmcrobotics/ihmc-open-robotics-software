@@ -23,7 +23,11 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
    {
       this.rigidBody = rigidBody;
       this.soleFrame = soleFrame;
-      this.contactPoints.addAll(contactPointsInSoleFrame);
+      
+      for(Point2d contactPoint : contactPointsInSoleFrame)
+      {
+         this.contactPoints.add(new Point2d(contactPoint));
+      }
       
       totalNumberOfContactPoints = contactPoints.size();
    }

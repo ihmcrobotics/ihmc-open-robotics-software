@@ -66,7 +66,6 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
    private final ArrayList<String> resourceDirectories;
 
    private final LinkedHashMap<String, OneDegreeOfFreedomJoint> oneDoFJoints = new LinkedHashMap<String, OneDegreeOfFreedomJoint>();
-   private final LinkedHashMap<String, Transform3D> jointTransforms = new LinkedHashMap<String, Transform3D>();
 
    private final FloatingJoint rootJoint;
 
@@ -115,8 +114,6 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
          enableTorqueVelocityLimits = enableTorqueVelocityLimits && sdfJointNameMap.enableTorqueVelocityLimits();
       }
 
-      jointTransforms.put(rootJoint.getName(), new Transform3D());
-
       for (SDFJointHolder child : rootLink.getChildren())
       {
          Set<String> lastSimulatedJoints;
@@ -152,7 +149,6 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
                count = counters.get(jointName);
 
             Vector3d gcOffset = jointContactPoint.second();
-            jointTransforms.get(jointName).transform(gcOffset);
 
             GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + SDFConversionsHelper.sanitizeJointName(jointName) + "_" + count++, gcOffset,
                                                        this);
@@ -256,8 +252,6 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
       
       Transform3D visualTransform = new Transform3D();
       visualTransform.setRotation(joint.getLinkRotation());
-
-      jointTransforms.put(joint.getName(), new Transform3D(visualTransform));
 
       String sanitizedJointName = SDFConversionsHelper.sanitizeJointName(joint.getName());
 
