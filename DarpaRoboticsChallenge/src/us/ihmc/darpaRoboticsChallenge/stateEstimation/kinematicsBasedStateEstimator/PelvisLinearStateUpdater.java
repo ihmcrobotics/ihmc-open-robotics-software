@@ -40,6 +40,12 @@ import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachineTools;
 
+/**
+ * PelvisLinearUpdater estimates the pelvis position and linear velocity using leg kinematics and IMU acceleration data.
+ * If enabled, it also estimates the IMU drift on the estimation of the pelvis yaw angle and velocity.
+ * @author Sylvain
+ *
+ */
 public class PelvisLinearStateUpdater
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -49,11 +55,11 @@ public class PelvisLinearStateUpdater
    private final CenterOfMassCalculator centerOfMassCalculator;
    private final CenterOfMassJacobian centerOfMassJacobianBody;
 
-   private final YoFramePoint pelvisPosition = new YoFramePoint("estimatedPelvisPosition", worldFrame, registry);
-   private final YoFrameVector pelvisVelocity = new YoFrameVector("estimatedPelvisVelocity", worldFrame, registry);
+   private final YoFramePoint yoPelvisPosition = new YoFramePoint("estimatedPelvisPosition", worldFrame, registry);
+   private final YoFrameVector yoPelvisVelocity = new YoFrameVector("estimatedPelvisVelocity", worldFrame, registry);
    
-   private final YoFramePoint centerOfMassPosition = new YoFramePoint("estimatedCenterOfMassPosition", worldFrame, registry);
-   private final YoFrameVector centerOfMassVelocity = new YoFrameVector("estimatedCenterOfMassVelocity", worldFrame, registry);
+   private final YoFramePoint yoCenterOfMassPosition = new YoFramePoint("estimatedCenterOfMassPosition", worldFrame, registry);
+   private final YoFrameVector yoCenterOfMassVelocity = new YoFrameVector("estimatedCenterOfMassVelocity", worldFrame, registry);
 
    private final DoubleYoVariable alphaPelvisAccelerometerIntegrationToVelocity = new DoubleYoVariable("alphaPelvisAccelerometerIntegrationToVelocity", registry);
    private final DoubleYoVariable alphaPelvisAccelerometerIntegrationToPosition = new DoubleYoVariable("alphaPelvisAccelerometerIntegrationToPosition", registry);
@@ -81,11 +87,6 @@ public class PelvisLinearStateUpdater
       
    private final SideDependentList<ContactablePlaneBody> bipedFeet;
    
-   // temporary variables
-   private final FrameVector tempFrameVector = new FrameVector();
-   private final FramePoint tempPosition = new FramePoint();
-   private final FrameVector tempVelocity = new FrameVector();
-
    private final BooleanYoVariable reinitialize = new BooleanYoVariable("reinitialize", registry);
 
    private enum SlippageCompensatorMode {LOAD_THRESHOLD, MIN_PELVIS_ACCEL};
@@ -108,18 +109,20 @@ public class PelvisLinearStateUpdater
    private final PelvisIMUBasedLinearStateCalculator pelvisIMUBasedLinearStateCalculator;
    private final IMUDriftCompensator imuDriftCompensator;
    
+   private final SixDoFJoint rootJoint;
+   
    // Temporary variables
-   private final FramePoint tempCenterOfMassPositionWorld = new FramePoint(worldFrame);
-   private final FrameVector tempCenterOfMassVelocityWorld = new FrameVector(worldFrame);
+   private final FramePoint pelvisPosition = new FramePoint(worldFrame);
+   private final FrameVector pelvisVelocity = new FrameVector(worldFrame);
+   private final FramePoint centerOfMassPosition = new FramePoint(worldFrame);
+   private final FrameVector centerOfMassVelocity = new FrameVector(worldFrame);
    private final SideDependentList<Double> accelerationMagnitudeErrors = new SideDependentList<Double>(0.0, 0.0);
    private final Vector3d tempPelvisTranslation = new Vector3d();
    private final Vector3d tempPelvisLinearVelocity = new Vector3d();
-   private final FrameVector tempIMUAcceleration = new FrameVector();
-   private final FrameVector tempVelocityIMUPart = new FrameVector();
-   private final FramePoint tempPositionIMUPart = new FramePoint();
-   
-   
-   private final SixDoFJoint rootJoint;
+   private final FrameVector pelvisLinearAccelerationFromIMU = new FrameVector();
+   private final FrameVector tempFrameVector = new FrameVector();
+   private final FramePoint tempPosition = new FramePoint();
+   private final FrameVector tempVelocity = new FrameVector();
    
    public PelvisLinearStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, SideDependentList<WrenchBasedFootSwitch> footSwitches,
          SideDependentList<ContactablePlaneBody> bipedFeet, double gravitationalAcceleration, final double estimatorDT,
@@ -246,7 +249,7 @@ public class PelvisLinearStateUpdater
       updateRootJoint();
    }
 
-   public void initializeRobotState()
+   private void initializeRobotState()
    {
       reinitialize.set(false);
       
@@ -259,20 +262,11 @@ public class PelvisLinearStateUpdater
 
       pelvisPosition.set(centerOfMassPosition);
       pelvisPosition.sub(tempFrameVector);
-      pelvisVelocity.setToZero();
+      yoPelvisPosition.set(pelvisPosition);
+      pelvisVelocity.setToZero(worldFrame);
+      yoPelvisVelocity.setToZero();
 
-      pelvisPosition.getFramePointAndChangeFrameOfPackedPoint(tempPosition);
-      pelvisKinematicsBasedLinearStateCalculator.initialize(tempPosition);
-   }
-
-   public void initializeCoMPositionToActual(Point3d initialCoMPosition)
-   {
-      centerOfMassPosition.set(initialCoMPosition);
-   }
-
-   public void initializeCoMPositionToActual(FramePoint initialCoMPosition)
-   {
-      centerOfMassPosition.set(initialCoMPosition);
+      pelvisKinematicsBasedLinearStateCalculator.initialize(pelvisPosition);
    }
    
    @SuppressWarnings("unchecked")
@@ -359,9 +353,9 @@ public class PelvisLinearStateUpdater
       }
       else
       {
-         pelvisKinematicsBasedLinearStateCalculator.getPelvisPositionAndVelocity(tempPosition, tempVelocity);
-         pelvisPosition.set(tempPosition);
-         pelvisVelocity.set(tempVelocity);
+         pelvisKinematicsBasedLinearStateCalculator.getPelvisPositionAndVelocity(pelvisPosition, pelvisVelocity);
+         yoPelvisPosition.set(pelvisPosition);
+         yoPelvisVelocity.set(pelvisVelocity);
       }
 
       updateCoMState();
@@ -369,8 +363,8 @@ public class PelvisLinearStateUpdater
    
    private void updateRootJoint()
    {
-      pelvisPosition.getPoint3d(tempPelvisTranslation);
-      pelvisVelocity.getVector(tempPelvisLinearVelocity);
+      yoPelvisPosition.getPoint3d(tempPelvisTranslation);
+      yoPelvisVelocity.getVector(tempPelvisLinearVelocity);
 
       rootJoint.setPosition(tempPelvisTranslation);
       rootJoint.setLinearVelocityInWorld(tempPelvisLinearVelocity);
@@ -452,9 +446,9 @@ public class PelvisLinearStateUpdater
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         pelvisIMUBasedLinearStateCalculator.getPelvisLinearAcceleration(tempIMUAcceleration);
+         pelvisIMUBasedLinearStateCalculator.getPelvisLinearAcceleration(pelvisLinearAccelerationFromIMU);
          pelvisKinematicsBasedLinearStateCalculator.getFootToPelvisAcceleration(tempFrameVector, robotSide);
-         tempFrameVector.sub(tempIMUAcceleration);
+         tempFrameVector.sub(pelvisLinearAccelerationFromIMU);
          accelerationMagnitudeErrors.put(robotSide, tempFrameVector.length());
       }
 
@@ -505,7 +499,7 @@ public class PelvisLinearStateUpdater
       @Override
       public void doAction()
       {
-         pelvisKinematicsBasedLinearStateCalculator.updatePelvisPositionForDoubleSupport(footSwitches);
+         pelvisKinematicsBasedLinearStateCalculator.estimatePelvisLinearStateForDoubleSupport(footSwitches);
          imuDriftCompensator.esimtateDriftIfPossible(true);
       }
 
@@ -534,9 +528,8 @@ public class PelvisLinearStateUpdater
       @Override
       public void doAction()
       {
+         pelvisKinematicsBasedLinearStateCalculator.estimatePelvisLinearStateForSingleSupport(pelvisPosition, footSwitches, trustedSide);
          imuDriftCompensator.esimtateDriftIfPossible(false);
-         pelvisPosition.getFramePoint(tempPosition);
-         pelvisKinematicsBasedLinearStateCalculator.updatePelvisPositionForSingleSupport(tempPosition, footSwitches, trustedSide);
       }
       
       @Override
@@ -551,63 +544,80 @@ public class PelvisLinearStateUpdater
       }
    }
 
+   private final FrameVector pelvisVelocityIMUPart = new FrameVector();
+   private final FramePoint pelvisPositionIMUPart = new FramePoint();
+
+   private final FrameVector pelvisVelocityKinPart = new FrameVector();
+   private final FramePoint pelvisPositionKinPart = new FramePoint();
+   
    private void computePelvisStateByIntegratingAccelerometerAndMergeWithKinematics()
    {
-      pelvisVelocity.getFrameVectorAndChangeFrameOfPackedVector(tempVelocity);
-      pelvisIMUBasedLinearStateCalculator.updatePelvisLinearVelocity(tempVelocity, tempVelocityIMUPart);
-      pelvisKinematicsBasedLinearStateCalculator.getPelvisVelocity(tempVelocity);
+      pelvisIMUBasedLinearStateCalculator.updatePelvisLinearVelocity(pelvisVelocity, pelvisVelocityIMUPart);
+      pelvisKinematicsBasedLinearStateCalculator.getPelvisVelocity(pelvisVelocityKinPart);
       
-      tempVelocityIMUPart.scale(alphaPelvisAccelerometerIntegrationToVelocity.getDoubleValue());
-      tempVelocity.scale(1.0 - alphaPelvisAccelerometerIntegrationToVelocity.getDoubleValue());
+      pelvisVelocityIMUPart.scale(alphaPelvisAccelerometerIntegrationToVelocity.getDoubleValue());
+      pelvisVelocityKinPart.scale(1.0 - alphaPelvisAccelerometerIntegrationToVelocity.getDoubleValue());
       
-      pelvisVelocity.set(tempVelocityIMUPart);
-      pelvisVelocity.add(tempVelocity);
+      pelvisVelocity.set(pelvisVelocityIMUPart);
+      pelvisVelocity.add(pelvisVelocityKinPart);
+      yoPelvisVelocity.set(pelvisVelocity);
       
-      pelvisPosition.getFramePointAndChangeFrameOfPackedPoint(tempPosition);
-      pelvisIMUBasedLinearStateCalculator.updatePelvisPosition(tempPosition, tempPositionIMUPart);
-      pelvisKinematicsBasedLinearStateCalculator.getPelvisPosition(tempPosition);
+      pelvisIMUBasedLinearStateCalculator.updatePelvisPosition(pelvisPosition, pelvisPositionIMUPart);
+      pelvisKinematicsBasedLinearStateCalculator.getPelvisPosition(pelvisPositionKinPart);
       
-      tempPositionIMUPart.scale(alphaPelvisAccelerometerIntegrationToPosition.getDoubleValue());
-      tempPosition.scale(1.0 - alphaPelvisAccelerometerIntegrationToPosition.getDoubleValue());
+      pelvisPositionIMUPart.scale(alphaPelvisAccelerometerIntegrationToPosition.getDoubleValue());
+      pelvisPositionKinPart.scale(1.0 - alphaPelvisAccelerometerIntegrationToPosition.getDoubleValue());
 
-      pelvisPosition.set(tempPositionIMUPart);
-      pelvisPosition.add(tempPosition);
+      pelvisPosition.set(pelvisPositionIMUPart);
+      pelvisPosition.add(pelvisPositionKinPart);
+      yoPelvisPosition.set(pelvisPosition);
    }
 
    private void updateCoMState()
    {
       centerOfMassCalculator.compute();
-      centerOfMassCalculator.packCenterOfMass(tempCenterOfMassPositionWorld);
-      tempCenterOfMassPositionWorld.changeFrame(worldFrame);
-      centerOfMassPosition.set(tempCenterOfMassPositionWorld);
+      centerOfMassCalculator.packCenterOfMass(centerOfMassPosition);
+      centerOfMassPosition.changeFrame(worldFrame);
+      yoCenterOfMassPosition.set(centerOfMassPosition);
 
       centerOfMassJacobianBody.compute();
-      tempCenterOfMassVelocityWorld.setToZero(pelvisFrame);
-      centerOfMassJacobianBody.packCenterOfMassVelocity(tempCenterOfMassVelocityWorld);
-      tempCenterOfMassVelocityWorld.changeFrame(worldFrame);
-      pelvisVelocity.getFrameVectorAndChangeFrameOfPackedVector(tempFrameVector);
-      tempCenterOfMassVelocityWorld.add(tempFrameVector);
-      centerOfMassVelocity.set(tempCenterOfMassVelocityWorld);
+      centerOfMassVelocity.setToZero(pelvisFrame);
+      centerOfMassJacobianBody.packCenterOfMassVelocity(centerOfMassVelocity);
+      centerOfMassVelocity.changeFrame(worldFrame);
+      centerOfMassVelocity.add(pelvisVelocity);
+      yoCenterOfMassVelocity.set(centerOfMassVelocity);
    }
 
+   public void initializeCoMPositionToActual(Point3d initialCoMPosition)
+   {
+      centerOfMassPosition.set(worldFrame, initialCoMPosition);
+      yoCenterOfMassPosition.set(initialCoMPosition);
+   }
+
+   public void initializeCoMPositionToActual(FramePoint initialCoMPosition)
+   {
+      centerOfMassPosition.set(initialCoMPosition);
+      yoCenterOfMassPosition.set(initialCoMPosition);
+   }
+   
    public void getEstimatedPelvisPosition(FramePoint pelvisPositionToPack)
    {
-      pelvisPosition.getFramePointAndChangeFrameOfPackedPoint(pelvisPositionToPack);
+      yoPelvisPosition.getFramePointAndChangeFrameOfPackedPoint(pelvisPositionToPack);
    }
 
    public void getEstimatedPelvisLinearVelocity(FrameVector pelvisLinearVelocityToPack)
    {
-      pelvisVelocity.getFrameVectorAndChangeFrameOfPackedVector(pelvisLinearVelocityToPack);
+      yoPelvisVelocity.getFrameVectorAndChangeFrameOfPackedVector(pelvisLinearVelocityToPack);
    }
 
    public void getEstimatedCoMPosition(FramePoint comPositionToPack)
    {
-      centerOfMassPosition.getFramePointAndChangeFrameOfPackedPoint(comPositionToPack);
+      yoCenterOfMassPosition.getFramePointAndChangeFrameOfPackedPoint(comPositionToPack);
    }
 
    public void getEstimatedCoMVelocity(FrameVector comVelocityToPack)
    {
-      centerOfMassVelocity.getFrameVectorAndChangeFrameOfPackedVector(comVelocityToPack);
+      yoCenterOfMassVelocity.getFrameVectorAndChangeFrameOfPackedVector(comVelocityToPack);
    }
 
    public void setJointAndIMUSensorDataSource(JointAndIMUSensorDataSource jointAndIMUSensorDataSource)

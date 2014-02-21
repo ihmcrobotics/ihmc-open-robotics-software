@@ -81,6 +81,8 @@ public class PelvisKinematicsBasedLinearStateCalculator
    
    private final SideDependentList<FrameConvexPolygon2d> footPolygons = new SideDependentList<FrameConvexPolygon2d>();
    
+   private final BooleanYoVariable kinematicsIsUpToDate = new BooleanYoVariable("kinematicsIsUpToDate", registry);
+   
    // temporary variables
    private final FramePoint tempFramePoint = new FramePoint();
    private final FrameVector tempFrameVector = new FrameVector();
@@ -196,8 +198,15 @@ public class PelvisKinematicsBasedLinearStateCalculator
       
       for(RobotSide robotSide : RobotSide.values)
          updateFootPosition(robotSide, pelvisPosition);
+      
+      kinematicsIsUpToDate.set(false);
    }
 
+   /**
+    * Estimates the pelvis position and linear velocity using the leg kinematics
+    * @param trustedSide which leg is used to estimates the pelvis state
+    * @param numberOfTrustedSides is only one or both legs used to estimate the pelvis state
+    */
    private void updatePelvisWithKinematics(RobotSide trustedSide, int numberOfTrustedSides)
    {
       double scaleFactor = 1.0 / numberOfTrustedSides;
@@ -223,6 +232,11 @@ public class PelvisKinematicsBasedLinearStateCalculator
       pelvisVelocityTwist.add(tempVelocity);
    }
 
+   /**
+    * updates the position of the swinging foot
+    * @param ignoredSide side of the swinging foot
+    * @param pelvisPosition the current pelvis position
+    */
    private void updateFootPosition(RobotSide ignoredSide, FramePoint pelvisPosition)
    {
       YoFramePoint footPositionInWorld = footPositionsInWorld.get(ignoredSide);
@@ -236,6 +250,11 @@ public class PelvisKinematicsBasedLinearStateCalculator
       copsFilteredInFootFrame.get(ignoredSide).setToZero();
    }
 
+   /**
+    * Compute the foot CoP. The CoP is the point on the support foot trusted to be not slipping.
+    * @param trustedSide
+    * @param footSwitch
+    */
    private void updateCoPPosition(RobotSide trustedSide, WrenchBasedFootSwitch footSwitch)
    {
          AlphaFilteredYoFramePoint2d copFilteredInFootFrame = copsFilteredInFootFrame.get(trustedSide);
@@ -272,6 +291,10 @@ public class PelvisKinematicsBasedLinearStateCalculator
          copPositionsInWorld.get(trustedSide).add(tempCoPOffset);
    }
 
+   /**
+    * Assuming the CoP is not moving, the foot position can be updated. That way we can see if the foot is on the edge.
+    * @param trustedSide
+    */
    private void correctFootPositionsUsingCoP(RobotSide trustedSide)
    {
       AlphaFilteredYoFramePoint2d copFilteredInFootFrame = copsFilteredInFootFrame.get(trustedSide);
@@ -284,6 +307,9 @@ public class PelvisKinematicsBasedLinearStateCalculator
       footPositionIWorld.sub(tempCoPOffset);
    }
 
+   /**
+    * Updates the different kinematics related stuff that is used to estimate the pelvis state
+    */
    public void updateKinematics()
    {
       reset();
@@ -304,21 +330,26 @@ public class PelvisKinematicsBasedLinearStateCalculator
          Twist pelvisToFootTwist = pelvisToFootTwists.get(robotSide);
          twistCalculator.packRelativeTwist(pelvisToFootTwist, pelvis, bipedFeet.get(robotSide).getRigidBody());
       }
+      
+      kinematicsIsUpToDate.set(true);
    }
 
-   public void updatePelvisPositionForDoubleSupport(SideDependentList<WrenchBasedFootSwitch> footSwitches)
+   public void estimatePelvisLinearStateForDoubleSupport(SideDependentList<WrenchBasedFootSwitch> footSwitches)
    {
-      updatePelvisPosition(footSwitches, RobotSide.values());
+      estimatePelvisLinearState(footSwitches, RobotSide.values());
    }
    
-   public void updatePelvisPositionForSingleSupport(FramePoint pelvisPosition, SideDependentList<WrenchBasedFootSwitch> footSwitches, RobotSide trustedSide)
+   public void estimatePelvisLinearStateForSingleSupport(FramePoint pelvisPosition, SideDependentList<WrenchBasedFootSwitch> footSwitches, RobotSide trustedSide)
    {
-      updatePelvisPosition(footSwitches, trustedSide);
+      estimatePelvisLinearState(footSwitches, trustedSide);
       updateFootPosition(trustedSide.getOppositeSide(), pelvisPosition);
    }
    
-   private void updatePelvisPosition(SideDependentList<WrenchBasedFootSwitch> footSwitches, RobotSide...listOfTrustedSides)
+   private void estimatePelvisLinearState(SideDependentList<WrenchBasedFootSwitch> footSwitches, RobotSide...listOfTrustedSides)
    {
+      if (!kinematicsIsUpToDate.getBooleanValue())
+         throw new RuntimeException("Leg kinematics needs to be updated before trying to estimate the pelvis position/linear velocity.");
+      
       for(RobotSide trustedSide : listOfTrustedSides)
       {
          updateCoPPosition(trustedSide, footSwitches.get(trustedSide));
@@ -326,6 +357,8 @@ public class PelvisKinematicsBasedLinearStateCalculator
          updatePelvisWithKinematics(trustedSide, listOfTrustedSides.length);
       }
       pelvisVelocityBacklashKinematics.update();
+
+      kinematicsIsUpToDate.set(false);
    }
 
    public void setPelvisPosition(FramePoint pelvisPosition)
