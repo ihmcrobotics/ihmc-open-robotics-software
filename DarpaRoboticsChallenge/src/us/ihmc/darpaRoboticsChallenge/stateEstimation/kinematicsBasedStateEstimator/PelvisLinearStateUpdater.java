@@ -3,13 +3,10 @@ package us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstim
 
 import static com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly;
 
-import java.util.Collection;
-
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.sensors.WrenchBasedFootSwitch;
 import us.ihmc.robotSide.RobotSide;
@@ -49,9 +46,6 @@ public class PelvisLinearStateUpdater
    
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoFrameVector imuAccelerationInWorld = new YoFrameVector("imuAccelerationInWorld", worldFrame, registry);
-   private final YoFrameVector pelvisVelocityByIntegrating = new YoFrameVector("pelvisVelocityByIntegrating", worldFrame, registry);  
-
    private final CenterOfMassCalculator centerOfMassCalculator;
    private final CenterOfMassJacobian centerOfMassJacobianBody;
 
@@ -83,13 +77,8 @@ public class PelvisLinearStateUpdater
    
    private final RigidBody pelvis;
    
-   private ControlFlowOutputPort<Vector3d> linearAccelerationPort;
-
    private final double estimatorDT;
       
-   private final DoubleYoVariable alphaGravityEstimation = new DoubleYoVariable("alphaGravityEstimation", registry);
-   private final AlphaFilteredYoVariable gravityEstimation = new AlphaFilteredYoVariable("gravityEstimation", registry, alphaGravityEstimation);
-
    private final SideDependentList<ContactablePlaneBody> bipedFeet;
    
    // temporary variables
@@ -104,30 +93,31 @@ public class PelvisLinearStateUpdater
    
    private enum PelvisEstimationState {TRUST_BOTH_FEET, TRUST_LEFT_FOOT, TRUST_RIGHT_FOOT};
 
-   private final SideDependentList<PelvisEstimationState> robotSideToPelvisEstimationState = new SideDependentList<PelvisLinearStateUpdater.PelvisEstimationState>(
+   private final SideDependentList<PelvisEstimationState> robotSideToPelvisEstimationState = new SideDependentList<PelvisEstimationState>(
          PelvisEstimationState.TRUST_LEFT_FOOT, PelvisEstimationState.TRUST_RIGHT_FOOT);
    
    private final DoubleYoVariable yoTime = new DoubleYoVariable("t_pelvisStateEstimator", registry);
    
-   private final EnumYoVariable<PelvisEstimationState> requestedState = new EnumYoVariable<>("requestedPelvisEstimationState", "", registry, PelvisEstimationState.class, true);
+   private final EnumYoVariable<PelvisEstimationState> requestedState = new EnumYoVariable<PelvisEstimationState>("requestedPelvisEstimationState", "", registry, PelvisEstimationState.class, true);
    
    private final StateMachine<PelvisEstimationState> stateMachine;
 
    private final TwistCalculator twistCalculator;
    
    private final PelvisKinematicsBasedLinearStateCalculator pelvisKinematicsBasedLinearStateCalculator;
+   private final PelvisIMUBasedLinearStateCalculator pelvisIMUBasedLinearStateCalculator;
    private final IMUDriftCompensator imuDriftCompensator;
    
    // Temporary variables
-   private final FrameVector tempIMUAcceleration = new FrameVector();
-   private final FrameVector tempPelvisVelocityIntegrated = new FrameVector();
-   private final FrameVector tempEstimatedVelocityIMUPart = new FrameVector();
-   private final FramePoint tempEstimatedPositionIMUPart = new FramePoint();
    private final FramePoint tempCenterOfMassPositionWorld = new FramePoint(worldFrame);
    private final FrameVector tempCenterOfMassVelocityWorld = new FrameVector(worldFrame);
    private final SideDependentList<Double> accelerationMagnitudeErrors = new SideDependentList<Double>(0.0, 0.0);
    private final Vector3d tempPelvisTranslation = new Vector3d();
    private final Vector3d tempPelvisLinearVelocity = new Vector3d();
+   private final FrameVector tempIMUAcceleration = new FrameVector();
+   private final FrameVector tempVelocityIMUPart = new FrameVector();
+   private final FramePoint tempPositionIMUPart = new FramePoint();
+   
    
    private final SixDoFJoint rootJoint;
    
@@ -143,10 +133,6 @@ public class PelvisLinearStateUpdater
       pelvisFrame = rootJoint.getFrameAfterJoint();
       
       pelvis = inverseDynamicsStructure.getRootJoint().getSuccessor();
-
-      
-      gravityEstimation.reset();
-      gravityEstimation.update(Math.abs(gravitationalAcceleration));
       
       footFrames = new SideDependentList<ReferenceFrame>();
       
@@ -187,7 +173,8 @@ public class PelvisLinearStateUpdater
             DRCConfigParameters.JOINT_VELOCITY_SLOP_TIME_FOR_BACKLASH_COMPENSATION);
       pelvisKinematicsBasedLinearStateCalculator.setAlphaCenterOfPressure(computeAlphaGivenBreakFrequencyProperly(4.0, estimatorDT));
 
-      alphaGravityEstimation.set(computeAlphaGivenBreakFrequencyProperly(5.3052e-4, estimatorDT)); // alpha = 0.99999 with dt = 0.003
+      pelvisIMUBasedLinearStateCalculator = new PelvisIMUBasedLinearStateCalculator(pelvisFrame, estimatorDT, gravitationalAcceleration, registry);
+      pelvisIMUBasedLinearStateCalculator.setAlhaGravityEstimation(computeAlphaGivenBreakFrequencyProperly(5.3052e-4, estimatorDT));
 
       alphaPelvisAccelerometerIntegrationToVelocity.set(computeAlphaGivenBreakFrequencyProperly(0.4261, estimatorDT)); // alpha = 0.992 with dt = 0.003
       alphaPelvisAccelerometerIntegrationToPosition.set(computeAlphaGivenBreakFrequencyProperly(11.7893, estimatorDT)); // alpha = 0.8 with dt = 0.003
@@ -329,7 +316,7 @@ public class PelvisLinearStateUpdater
       
       pelvisKinematicsBasedLinearStateCalculator.updateKinematics();
       
-      updatePelvisAccelerationWithIMU();
+      pelvisIMUBasedLinearStateCalculator.updatePelvisLinearAcceleration();
       
       int numberOfEndEffectorsTrusted = setTrustedFeetUsingFootSwitches();
 
@@ -366,7 +353,7 @@ public class PelvisLinearStateUpdater
 
    private void defaultActionOutOfStates()
    {
-      if (linearAccelerationPort != null)
+      if (pelvisIMUBasedLinearStateCalculator.isEstimationEnabled())
       {
          computePelvisStateByIntegratingAccelerometerAndMergeWithKinematics();
       }
@@ -392,19 +379,6 @@ public class PelvisLinearStateUpdater
       twistCalculator.compute();
    }
    
-   private void updatePelvisAccelerationWithIMU()
-   {
-      if (linearAccelerationPort == null)
-         return;
-
-      tempIMUAcceleration.set(pelvisFrame, linearAccelerationPort.getData());
-      gravityEstimation.update(tempIMUAcceleration.length());
-
-      tempIMUAcceleration.changeFrame(worldFrame);
-      tempIMUAcceleration.setZ(tempIMUAcceleration.getZ() - gravityEstimation.getDoubleValue());
-      imuAccelerationInWorld.set(tempIMUAcceleration);
-   }
-
    private int setTrustedFeetUsingFootSwitches()
    {
       int numberOfEndEffectorsTrusted = 0;
@@ -478,7 +452,7 @@ public class PelvisLinearStateUpdater
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         imuAccelerationInWorld.getFrameVector(tempIMUAcceleration);
+         pelvisIMUBasedLinearStateCalculator.getPelvisLinearAcceleration(tempIMUAcceleration);
          pelvisKinematicsBasedLinearStateCalculator.getFootToPelvisAcceleration(tempFrameVector, robotSide);
          tempFrameVector.sub(tempIMUAcceleration);
          accelerationMagnitudeErrors.put(robotSide, tempFrameVector.length());
@@ -579,30 +553,25 @@ public class PelvisLinearStateUpdater
 
    private void computePelvisStateByIntegratingAccelerometerAndMergeWithKinematics()
    {
-      imuAccelerationInWorld.getFrameVector(tempIMUAcceleration);
-      tempIMUAcceleration.scale(estimatorDT);
-      pelvisVelocityByIntegrating.add(tempIMUAcceleration);
-
-      pelvisVelocity.getFrameVectorAndChangeFrameOfPackedVector(tempEstimatedVelocityIMUPart);
-      tempEstimatedVelocityIMUPart.add(tempIMUAcceleration);
-      tempEstimatedVelocityIMUPart.scale(alphaPelvisAccelerometerIntegrationToVelocity.getDoubleValue());
-
+      pelvisVelocity.getFrameVectorAndChangeFrameOfPackedVector(tempVelocity);
+      pelvisIMUBasedLinearStateCalculator.updatePelvisLinearVelocity(tempVelocity, tempVelocityIMUPart);
       pelvisKinematicsBasedLinearStateCalculator.getPelvisVelocity(tempVelocity);
-      pelvisVelocity.set(tempVelocity);
-
-      pelvisVelocity.scale(1.0 - alphaPelvisAccelerometerIntegrationToVelocity.getDoubleValue());
-      pelvisVelocity.add(tempEstimatedVelocityIMUPart);
-
-      pelvisVelocity.getFrameVectorAndChangeFrameOfPackedVector(tempPelvisVelocityIntegrated);
-      tempPelvisVelocityIntegrated.scale(estimatorDT);
-      pelvisPosition.getFramePointAndChangeFrameOfPackedPoint(tempEstimatedPositionIMUPart);
-      tempEstimatedPositionIMUPart.add(tempPelvisVelocityIntegrated);
-      tempEstimatedPositionIMUPart.scale(alphaPelvisAccelerometerIntegrationToPosition.getDoubleValue());
-
+      
+      tempVelocityIMUPart.scale(alphaPelvisAccelerometerIntegrationToVelocity.getDoubleValue());
+      tempVelocity.scale(1.0 - alphaPelvisAccelerometerIntegrationToVelocity.getDoubleValue());
+      
+      pelvisVelocity.set(tempVelocityIMUPart);
+      pelvisVelocity.add(tempVelocity);
+      
+      pelvisPosition.getFramePointAndChangeFrameOfPackedPoint(tempPosition);
+      pelvisIMUBasedLinearStateCalculator.updatePelvisPosition(tempPosition, tempPositionIMUPart);
       pelvisKinematicsBasedLinearStateCalculator.getPelvisPosition(tempPosition);
-      pelvisPosition.set(tempPosition);
-      pelvisPosition.scale(1.0 - alphaPelvisAccelerometerIntegrationToPosition.getDoubleValue());
-      pelvisPosition.add(tempEstimatedPositionIMUPart);
+      
+      tempPositionIMUPart.scale(alphaPelvisAccelerometerIntegrationToPosition.getDoubleValue());
+      tempPosition.scale(1.0 - alphaPelvisAccelerometerIntegrationToPosition.getDoubleValue());
+
+      pelvisPosition.set(tempPositionIMUPart);
+      pelvisPosition.add(tempPosition);
    }
 
    private void updateCoMState()
@@ -643,11 +612,6 @@ public class PelvisLinearStateUpdater
 
    public void setJointAndIMUSensorDataSource(JointAndIMUSensorDataSource jointAndIMUSensorDataSource)
    {
-      Collection<ControlFlowOutputPort<Vector3d>> linearAccelerationOutputPorts = jointAndIMUSensorDataSource.getSensorMap().getLinearAccelerationOutputPorts();
-
-      for (ControlFlowOutputPort<Vector3d> controlFlowOutputPort : linearAccelerationOutputPorts)
-      {
-         linearAccelerationPort = controlFlowOutputPort;
-      }
+      pelvisIMUBasedLinearStateCalculator.setJointAndIMUSensorDataSource(jointAndIMUSensorDataSource);
    }
 }
