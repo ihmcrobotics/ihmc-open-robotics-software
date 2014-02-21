@@ -153,7 +153,7 @@ public class SDFFullRobotModel implements FullRobotModel
                   System.err.println("JAXB loader: No imu section defined for imu sensor " + sensor.getName() + ", ignoring sensor.");
                }
             }
-            else if("multicamera".equals(sensor.getType()))
+            else if("multicamera".equals(sensor.getType()) || "camera".equals(sensor.getType()))
             {
                List<Camera> cameras = sensor.getCamera();
                if(cameras != null)
