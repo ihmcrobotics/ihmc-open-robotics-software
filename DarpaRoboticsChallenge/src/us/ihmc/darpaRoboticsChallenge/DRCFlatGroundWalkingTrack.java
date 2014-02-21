@@ -73,7 +73,7 @@ public class DRCFlatGroundWalkingTrack
 
       if (START_YOVARIABLE_SERVER)
       {
-         robotVisualizer = new YoVariableServer(robotInterface.getRobot().getRobotsYoVariableRegistry(), RemoteAtlasVisualizer.defaultPort, DRCConfigParameters.ATLAS_INTERFACING_DT, dynamicGraphicObjectsListRegistry);
+         robotVisualizer = new YoVariableServer(robotInterface.getRobot().getRobotsYoVariableRegistry(), RemoteAtlasVisualizer.defaultPort, DRCConfigParameters.ESTIMATOR_DT, dynamicGraphicObjectsListRegistry);
       }
       else
       {

@@ -71,7 +71,7 @@ public class DRCSimulationFactory
       DRCRobotJointMap map = drcRobotModel.getJointMap(false, false);
 
 
-      double estimateDT = DRCConfigParameters.ATLAS_INTERFACING_DT;
+      double estimateDT = DRCConfigParameters.ESTIMATOR_DT;
       double simulateDT = robotInterface.getSimulateDT();
       double controlDT = controllerFactory.getControlDT();
       int estimationTicksPerControlTick = (int) (estimateDT / simulateDT);
