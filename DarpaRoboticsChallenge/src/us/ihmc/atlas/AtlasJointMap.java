@@ -19,7 +19,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel.RobotType;
 import us.ihmc.darpaRoboticsChallenge.IncorrectDrcRobotModelException;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.AtlasAndHandRobotParameters;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap;
 import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.*;
 import us.ihmc.robotSide.RobotSide;
@@ -44,7 +44,7 @@ public class AtlasJointMap extends DRCRobotJointMap
    public static final String bodyIMUSensor = "pelvis_imu_sensor";
    public static final String[] imuSensorsToUse = { bodyIMUSensor };
    
-   private final double ankleHeight = DRCRobotParameters.DRC_ROBOT_ANKLE_HEIGHT;
+   private final double ankleHeight = AtlasAndHandRobotParameters.DRC_ROBOT_ANKLE_HEIGHT;
 
    private final LegJointName[] legJoints =
    {
@@ -128,9 +128,9 @@ public class AtlasJointMap extends DRCRobotJointMap
 
          ArrayList<Vector3d> contactPointOffsetList;
          if (addLoadsOfContactPointsForFeetOnly)
-            contactPointOffsetList = DRCRobotParameters.DRC_ROBOT_GROUND_LOADS_OF_CONTACT_POINT_OFFSET_FROM_FOOT;
+            contactPointOffsetList = AtlasAndHandRobotParameters.DRC_ROBOT_GROUND_LOADS_OF_CONTACT_POINT_OFFSET_FROM_FOOT;
          else
-            contactPointOffsetList = DRCRobotParameters.DRC_ROBOT_GROUND_CONTACT_POINT_OFFSET_FROM_FOOT;
+            contactPointOffsetList = AtlasAndHandRobotParameters.DRC_ROBOT_GROUND_CONTACT_POINT_OFFSET_FROM_FOOT;
             
          for (Vector3d footv3d : contactPointOffsetList)
          {
@@ -142,7 +142,7 @@ public class AtlasJointMap extends DRCRobotJointMap
          {
             // add finger joint contact points offset to the middle of palm-facing side of the finger segment
             String longPrefix = (robotSide == RobotSide.LEFT) ? "left_" : "right_";
-            for (double[] fJointContactOffsets : DRCRobotParameters.sandiaFingerContactPointOffsets)
+            for (double[] fJointContactOffsets : AtlasAndHandRobotParameters.sandiaFingerContactPointOffsets)
             {
                if (((robotSide == RobotSide.LEFT) && (int) fJointContactOffsets[0] == 0)
                        || ((robotSide == RobotSide.RIGHT) && (int) fJointContactOffsets[0] == 1))
@@ -154,7 +154,7 @@ public class AtlasJointMap extends DRCRobotJointMap
             }
 
             // add wrist joint contact point on finger-facing side of palm
-            for(Vector3d offset : DRCRobotParameters.sandiaWristContactPointOffsets.get(robotSide))
+            for(Vector3d offset : AtlasAndHandRobotParameters.sandiaWristContactPointOffsets.get(robotSide))
             {
                handGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(getNameOfJointBeforeHand(robotSide), offset));
             }
@@ -163,7 +163,7 @@ public class AtlasJointMap extends DRCRobotJointMap
          {
             // add finger joint contact points offset to the middle of palm-facing side of the finger segment
             String longPrefix = (robotSide == RobotSide.LEFT) ? "left_" : "right_";
-            for (double[] fJointContactOffsets : DRCRobotParameters.irobotFingerContactPointOffsets)
+            for (double[] fJointContactOffsets : AtlasAndHandRobotParameters.irobotFingerContactPointOffsets)
             {
                if (((robotSide == RobotSide.LEFT) && (int) fJointContactOffsets[0] == 0)
                        || ((robotSide == RobotSide.RIGHT) && (int) fJointContactOffsets[0] == 1))
@@ -179,17 +179,17 @@ public class AtlasJointMap extends DRCRobotJointMap
             }
 
             // add wrist joint contact point on finger-facing side of palm
-            for(Vector3d offset : DRCRobotParameters.irobotWristContactPointOffsets.get(robotSide))
+            for(Vector3d offset : AtlasAndHandRobotParameters.irobotWristContactPointOffsets.get(robotSide))
             {
                handGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(getNameOfJointBeforeHand(robotSide), offset));
             }
          }
          else if (selectedModel == DRCRobotModel.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS)
          {
-            for (Point2d point : DRCRobotParameters.invisibleContactablePlaneHandContactPoints.get(robotSide))
+            for (Point2d point : AtlasAndHandRobotParameters.invisibleContactablePlaneHandContactPoints.get(robotSide))
             {
                Point3d point3d = new Point3d(point.getX(), point.getY(), 0.0);
-               DRCRobotParameters.invisibleContactablePlaneHandContactPointTransforms.get(robotSide).transform(point3d);
+               AtlasAndHandRobotParameters.invisibleContactablePlaneHandContactPointTransforms.get(robotSide).transform(point3d);
                handGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(getNameOfJointBeforeHand(robotSide), new Vector3d(point3d)));
             }
          }
@@ -197,10 +197,10 @@ public class AtlasJointMap extends DRCRobotJointMap
          // add butt contact points on back of thighs
          if(addLoadsOfContactPoints)
          {
-            for (Point2d point : DRCRobotParameters.thighContactPoints.get(robotSide))
+            for (Point2d point : AtlasAndHandRobotParameters.thighContactPoints.get(robotSide))
             {
                Point3d point3d = new Point3d(point.getX(), point.getY(), 0.0);
-               DRCRobotParameters.thighContactPointTransforms.get(robotSide).transform(point3d);
+               AtlasAndHandRobotParameters.thighContactPointTransforms.get(robotSide).transform(point3d);
                thighGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(getNameOfJointBeforeThigh(robotSide), new Vector3d(point3d)));
             }
          }
@@ -209,24 +209,24 @@ public class AtlasJointMap extends DRCRobotJointMap
 
       if (addLoadsOfContactPoints)
       {
-         for (Point2d point : DRCRobotParameters.pelvisContactPoints)
+         for (Point2d point : AtlasAndHandRobotParameters.pelvisContactPoints)
          {
             Point3d point3d = new Point3d(point.getX(), point.getY(), 0.0);
-            DRCRobotParameters.pelvisContactPointTransform.transform(point3d);
+            AtlasAndHandRobotParameters.pelvisContactPointTransform.transform(point3d);
             pelvisContactPoints.add(new Pair<String, Vector3d>("pelvis", new Vector3d(point3d)));
          }
 
-         for (Point2d point : DRCRobotParameters.pelvisBackContactPoints)
+         for (Point2d point : AtlasAndHandRobotParameters.pelvisBackContactPoints)
          {
             Point3d point3d = new Point3d(point.getX(), point.getY(), 0.0);
-            DRCRobotParameters.pelvisBackContactPointTransform.transform(point3d);
+            AtlasAndHandRobotParameters.pelvisBackContactPointTransform.transform(point3d);
             pelvisBackContactPoints.add(new Pair<String, Vector3d>("pelvis", new Vector3d(point3d)));
          }
          
-         for (Point2d point : DRCRobotParameters.chestBackContactPoints)
+         for (Point2d point : AtlasAndHandRobotParameters.chestBackContactPoints)
          {
             Point3d point3d = new Point3d(point.getX(), point.getY(), 0.0);
-            DRCRobotParameters.chestBackContactPointTransform.transform(point3d);
+            AtlasAndHandRobotParameters.chestBackContactPointTransform.transform(point3d);
             chestBackContactPoints.add(new Pair<String, Vector3d>(getNameOfJointBeforeChest(), new Vector3d(point3d)));
          }
       }
@@ -426,7 +426,7 @@ public class AtlasJointMap extends DRCRobotJointMap
    @Override
    public boolean enableTorqueVelocityLimits()
    {
-      return DRCRobotParameters.ENABLE_JOINT_VELOCITY_TORQUE_LIMITS;
+      return AtlasAndHandRobotParameters.ENABLE_JOINT_VELOCITY_TORQUE_LIMITS;
    }
 
    @Override
@@ -465,7 +465,7 @@ public class AtlasJointMap extends DRCRobotJointMap
    @Override
    public ArrayList<Vector3d> getFootGroundContactPointsForController()
    {
-      return DRCRobotParameters.DRC_ROBOT_GROUND_CONTACT_POINT_OFFSET_FROM_FOOT;
+      return AtlasAndHandRobotParameters.DRC_ROBOT_GROUND_CONTACT_POINT_OFFSET_FROM_FOOT;
    }
 
    @Override

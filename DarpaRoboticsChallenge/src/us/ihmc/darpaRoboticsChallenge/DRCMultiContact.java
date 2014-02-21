@@ -19,7 +19,7 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel.RobotType;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.AtlasAndHandRobotParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.MultiContactDRCRobotInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
@@ -41,7 +41,7 @@ public class DRCMultiContact
    public DRCMultiContact(DRCRobotModel robotModel, DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner,
                           double timePerRecordTick, int simulationDataBufferSize)
    {
-       DRCRobotParameters.ENABLE_JOINT_VELOCITY_TORQUE_LIMITS = false; // doesn't work with joint torque limits
+       AtlasAndHandRobotParameters.ENABLE_JOINT_VELOCITY_TORQUE_LIMITS = false; // doesn't work with joint torque limits
 
       DRCSCSInitialSetup scsInitialSetup;
 
@@ -75,8 +75,8 @@ public class DRCMultiContact
       for (RobotSide robotSide : RobotSide.values)
       {
          namesOfJointsBeforeHands.put(robotSide, jointMap.getNameOfJointBeforeHand(robotSide));
-         handContactPointTransforms.put(robotSide, DRCRobotParameters.invisibleContactablePlaneHandContactPointTransforms.get(robotSide));
-         handContactPoints.put(robotSide, DRCRobotParameters.invisibleContactablePlaneHandContactPoints.get(robotSide));
+         handContactPointTransforms.put(robotSide, AtlasAndHandRobotParameters.invisibleContactablePlaneHandContactPointTransforms.get(robotSide));
+         handContactPoints.put(robotSide, AtlasAndHandRobotParameters.invisibleContactablePlaneHandContactPoints.get(robotSide));
       }
       WalkingControllerParameters controllerParameters = robotModel.getWalkingControlParamaters();
       ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();

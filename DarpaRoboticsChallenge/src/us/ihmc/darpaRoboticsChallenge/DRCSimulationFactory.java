@@ -17,6 +17,7 @@ import us.ihmc.darpaRoboticsChallenge.controllers.EstimationLinkHolder;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.BlockingThreadSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotDampingParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandModel;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriterWithAccelerationIntegration;
@@ -67,7 +68,7 @@ public class DRCSimulationFactory
       GUISetterUpperRegistry guiSetterUpperRegistry = new GUISetterUpperRegistry();
 
       SDFJointNameMap jointMap = robotInterface.getJointMap();
-            
+      DRCRobotJointMap map = drcRobotModel.getJointMap(false, false);
 
 
       double estimateDT = DRCConfigParameters.ATLAS_INTERFACING_DT;
@@ -77,7 +78,7 @@ public class DRCSimulationFactory
 
       SDFRobot simulatedRobot = robotInterface.getRobot();
       YoVariableRegistry registry = simulatedRobot.getRobotsYoVariableRegistry();
-
+      
       setupJointDamping(simulatedRobot);
 
       DRCOutputWriter drcOutputWriter = new DRCSimulationOutputWriter(simulatedRobot, registry, dynamicGraphicObjectsListRegistry, robotVisualizer);
@@ -133,7 +134,7 @@ public class DRCSimulationFactory
       ArrayList<OneDegreeOfFreedomJoint> forceTorqueSensorJoints = new ArrayList<OneDegreeOfFreedomJoint>();
       // TODO: Get from SDF file
 
-      for (String name : robotInterface.getForceSensorNames())
+      for (String name : map.getForceSensorNames())
       {
          forceTorqueSensorJoints.add(simulatedRobot.getOneDoFJoint(name));
       }

@@ -282,6 +282,7 @@ public class SDFFullRobotModel implements FullRobotModel
       {
          switch (jointRole)
          {
+         //TODO: Should armJointLists use legJoingName.first or armJointName.first?? looks backwards
          case ARM:
             Pair<RobotSide, ArmJointName> legJointName = sdfJointNameMap.getArmJointName(joint.getName());
             armJointLists.get(legJointName.first()).put(legJointName.second(), inverseDynamicsJoint);
