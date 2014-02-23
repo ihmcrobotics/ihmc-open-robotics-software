@@ -23,11 +23,10 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.SemiCircularStepValid
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TurningThenStraightFootstepGenerator;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
-import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.AtlasAndHandRobotParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.userInterface.DRCOperatorUserInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -92,16 +91,17 @@ public class DRCRobotBasedFootstepGeneratorTest
       setupRobotParameters();
       TurnThenStraightOverheadPath pathToDestination = new TurnThenStraightOverheadPath(new FramePose2d(WORLD_FRAME),
                                           new FramePoint2d(WORLD_FRAME, destination.x, destination.y), SIDESTEP ? Math.PI / 2 : 0.0);
-      if (DEBUG_S_PARAM)
-         System.out.println("FootstepGeneratorTest: startPose=" + pathToDestination.getPoseAtS(0.0).toString());
-      if (DEBUG_S_PARAM)
-         System.out.println("FootstepGeneratorTest: start++Pose=" + pathToDestination.getPoseAtS(0.25).toString());
-      if (DEBUG_S_PARAM)
-         System.out.println("FootstepGeneratorTest: intPose=" + pathToDestination.getPoseAtS(0.5).toString());
-      if (DEBUG_S_PARAM)
-         System.out.println("FootstepGeneratorTest: int++Pose=" + pathToDestination.getPoseAtS(0.75).toString());
-      if (DEBUG_S_PARAM)
-         System.out.println("FootstepGeneratorTest: endPose=" + pathToDestination.getPoseAtS(1.0).toString());
+//      if (DEBUG_S_PARAM)
+//         System.out.println("FootstepGeneratorTest: startPose=" + pathToDestination.getPoseAtS(0.0).toString());
+//      if (DEBUG_S_PARAM)
+//         System.out.println("FootstepGeneratorTest: start++Pose=" + pathToDestination.getPoseAtS(0.25).toString());
+//      if (DEBUG_S_PARAM)
+//         System.out.println("FootstepGeneratorTest: intPose=" + pathToDestination.getPoseAtS(0.5).toString());
+//      if (DEBUG_S_PARAM)
+//         System.out.println("FootstepGeneratorTest: int++Pose=" + pathToDestination.getPoseAtS(0.75).toString());
+//      if (DEBUG_S_PARAM)
+//         System.out.println("FootstepGeneratorTest: endPose=" + pathToDestination.getPoseAtS(1.0).toString());
+      //ABOVE looks like path based tests! Can test the path separately!
       generateFootstepsUsingPath(pathToDestination);
       FootstepValidityMetric footstepValidityMetric = new SemiCircularStepValidityMetric(fullRobotModel.getFoot(RobotSide.LEFT), 0.00, 1.2, 1.5);
       assertAllStepsLevelAndZeroHeight();
@@ -115,15 +115,14 @@ public class DRCRobotBasedFootstepGeneratorTest
 
    public void generateFootstepsUsingPath(TurnThenStraightOverheadPath pathToDestination)
    {
-      TurningThenStraightFootstepGenerator footstepGenerator = new TurningThenStraightFootstepGenerator(bipedFeet);
-      footstepGenerator.setFootstepPath(pathToDestination);
+      Footstep stanceStart = FootstepUtils.getCurrentFootstep(RobotSide.RIGHT, referenceFrames, bipedFeet);
+
+      TurningThenStraightFootstepGenerator footstepGenerator = new TurningThenStraightFootstepGenerator(bipedFeet, pathToDestination, stanceStart);
       footstepGenerator.setTurningStepsHipOpeningStepAngle(Math.PI / 6);
       footstepGenerator.setStraightWalkingStepLength(0.4);
       footstepGenerator.setStraightWalkingStepWidth(0.2);
       footstepGenerator.setTurningStepsStepWidth(0.35);
-      Footstep stanceStart = FootstepUtils.getCurrentFootstep(RobotSide.RIGHT, referenceFrames, bipedFeet);
 
-      footstepGenerator.setStanceStart(stanceStart);
       footSteps = footstepGenerator.generateDesiredFootstepList();
    }
 
@@ -181,7 +180,7 @@ public class DRCRobotBasedFootstepGeneratorTest
 
    private void setupRobotParameters()
    {
-      DRCRobotModel robotModel = DRCLocalConfigParameters.robotModelToUse;
+      DRCRobotModel robotModel = DRCRobotModel.ATLAS_NO_HANDS_ADDED_MASS;
       DRCRobotJointMap jointMap = robotModel.getJointMap(false, false);
       JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       fullRobotModel = jaxbSDFLoader.createFullRobotModel(jointMap);
