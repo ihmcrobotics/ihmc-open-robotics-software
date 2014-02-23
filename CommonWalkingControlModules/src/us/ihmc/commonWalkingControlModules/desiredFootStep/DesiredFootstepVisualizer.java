@@ -12,6 +12,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScript;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.ManualDesiredVelocityControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.SimpleDesiredHeadingControlModule;
@@ -287,12 +288,9 @@ public class DesiredFootstepVisualizer
       DesiredFootstepVisualizer desiredFootstepVisualizer = new DesiredFootstepVisualizer(parentRegistry, dynamicGraphicObjectsListRegistry);
 
       SideDependentList<? extends ContactablePlaneBody> bipedFeet = desiredFootstepVisualizer.getBipedFeet();
-      TurningThenStraightFootstepGenerator footstepGenerator = new TurningThenStraightFootstepGenerator(bipedFeet);
 
       TurnThenStraightOverheadPath footstepPath = new TurnThenStraightOverheadPath(new FramePose2d(ReferenceFrame.getWorldFrame()),
                                      new FramePoint2d(ReferenceFrame.getWorldFrame(), 10.0, 0.0), 0.0);
-
-      footstepGenerator.setFootstepPath(footstepPath);
 
       RobotSide initialStanceSide = RobotSide.LEFT;
       RobotSide swingLegSide = initialStanceSide.getOppositeSide();
@@ -307,9 +305,11 @@ public class DesiredFootstepVisualizer
 
       boolean trustHeight = false;
       Footstep initialStanceFootstep = new Footstep(contactablePlaneBody, poseReferenceFrame, soleFrame, expectedContactPoints, trustHeight);
+      
+      TurningThenStraightFootstepGenerator footstepGenerator = new TurningThenStraightFootstepGenerator(bipedFeet, footstepPath, initialStanceFootstep);
       footstepGenerator.setStraightWalkingStepLength(0.2);
       footstepGenerator.setStraightWalkingStepWidth(0.1);
-      footstepGenerator.setStanceStart(initialStanceFootstep);
+
       List<Footstep> footsteps = footstepGenerator.generateDesiredFootstepList();
 
       long dataIdentifier = 1776L;
@@ -317,7 +317,8 @@ public class DesiredFootstepVisualizer
 
       for (Footstep footstep : footsteps)
       {
-         footstepConsumer.consume(dataIdentifier, footstep);
+         FootstepData footStepData = new FootstepData(FootstepUtils.getSideFromFootstep(footstep, bipedFeet), footstep);
+         footstepConsumer.consume(dataIdentifier, footStepData);
       }
 
       desiredFootstepVisualizer.setFootstepProvider(footstepConsumer);

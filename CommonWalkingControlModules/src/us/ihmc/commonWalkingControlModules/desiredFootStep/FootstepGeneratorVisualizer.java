@@ -182,7 +182,6 @@ public class FootstepGeneratorVisualizer
 //      FramePose startSwingFootPose = setupSwingFoot(soleFrames, sixDoFJoints);
 //      PoseReferenceFrame startSwingPoseFrame = new PoseReferenceFrame("startSwingPoseFrame", startSwingFootPose);
 
-      TurningThenStraightFootstepGenerator generator = new TurningThenStraightFootstepGenerator(bipedFeet);
 //      ContactablePlaneBody rightFoot = bipedFeet.get(RobotSide.RIGHT);
 
       boolean trustHeight = false;
@@ -193,13 +192,13 @@ public class FootstepGeneratorVisualizer
 
 //    generator.setSwingStart(startSwingFootstep);
       TurnThenStraightOverheadPath footstepPath = generateSimpleOverheadPath();
-      generator.setFootstepPath(footstepPath);
+
       ContactablePlaneBody leftFoot = bipedFeet.get(RobotSide.LEFT);
       ReferenceFrame startStanceSoleFrame = FootstepUtils.createSoleFrame(startStancePoseFrame, leftFoot);
       List<FramePoint> stanceContactPoints = FootstepUtils.getContactPointsInFrame(leftFoot.getContactPointsCopy(), startStanceSoleFrame);
-
       Footstep startStanceFootstep = new Footstep(leftFoot, startStancePoseFrame, startStanceSoleFrame, stanceContactPoints, trustHeight);
-      generator.setStanceStart(startStanceFootstep);
+
+      TurningThenStraightFootstepGenerator generator = new TurningThenStraightFootstepGenerator(bipedFeet, footstepPath, startStanceFootstep);
       List<Footstep> footsteps = generator.generateDesiredFootstepList();
 
       return footsteps;
