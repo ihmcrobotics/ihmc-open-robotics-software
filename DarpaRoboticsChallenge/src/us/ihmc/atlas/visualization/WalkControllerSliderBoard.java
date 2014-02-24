@@ -1,8 +1,6 @@
 package us.ihmc.atlas.visualization;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.atlas.api.AtlasJointId;
-import us.ihmc.atlas.parameters.AtlasLimits;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.CommonNames;
 
 import com.yobotics.simulationconstructionset.EnumYoVariable;
@@ -87,15 +85,7 @@ public class WalkControllerSliderBoard
       sliderBoardConfigurationManager.clearControls();
       
       
- 
-      final AtlasLimits atlasLimits = AtlasLimits.getHighLevelLimits(generalizedSDFRobotModel);
-
-      final EnumYoVariable<?> testedJoint = ((EnumYoVariable<?>) registry.getVariable("testedJoint"));
-      if (testedJoint != null)
-      {
-         ForceControllerTunerListener.setupSliderBoard(sliderBoardConfigurationManager, testedJoint, atlasLimits, registry);
-      }
-      
+       
       sliderBoardMode.set(SliderBoardMode.WalkingGains);
 
       VariableChangedListener listener = new VariableChangedListener()
@@ -103,15 +93,7 @@ public class WalkControllerSliderBoard
          @Override
          public void variableChanged(YoVariable v)
          {
-            if (sliderBoardMode.getEnumValue() == SliderBoardMode.ForceGains)
-            {
-               sliderBoardConfigurationManager.loadConfiguration(testedJoint.getEnumValue().toString()); 
-            }
-            
-            else
-            {
                sliderBoardConfigurationManager.loadConfiguration(sliderBoardMode.getEnumValue().toString());
-            }
          }
       };
 
@@ -120,7 +102,7 @@ public class WalkControllerSliderBoard
 
    }
 
-   private enum SliderBoardMode {WalkingGains, WalkingDesireds, ForceGains;}
+   private enum SliderBoardMode {WalkingGains, WalkingDesireds };
 
    private static final SliderBoardFactory factory = new SliderBoardFactory()
    {

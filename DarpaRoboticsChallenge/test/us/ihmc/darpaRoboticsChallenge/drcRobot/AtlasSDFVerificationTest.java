@@ -1,4 +1,4 @@
-package us.ihmc.atlas;
+package us.ihmc.darpaRoboticsChallenge.drcRobot;
 
 import com.yobotics.simulationconstructionset.*;
 import com.yobotics.simulationconstructionset.time.GlobalTimer;
