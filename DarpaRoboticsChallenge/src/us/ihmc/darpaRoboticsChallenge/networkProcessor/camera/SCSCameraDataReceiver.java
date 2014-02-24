@@ -4,9 +4,9 @@ import java.awt.image.BufferedImage;
 
 import com.vividsolutions.jts.operation.buffer.validate.BufferResultValidator;
 
-import us.ihmc.atlas.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorControllerStateHandler;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.graphics3DAdapter.camera.CameraInformationPacket;
