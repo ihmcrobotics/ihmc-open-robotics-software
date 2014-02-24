@@ -174,7 +174,7 @@ public class PelvisRotationalStateUpdater
    /**
     * Twist of the root body, with respect to world.
     */
-   private final Twist twitRootBodyRelativeToWorld = new Twist();
+   private final Twist twistRootBodyRelativeToWorld = new Twist();
 
    private void updateRootJointTwistAngularPart()
    {
@@ -210,9 +210,9 @@ public class PelvisRotationalStateUpdater
       // omega_{rootBody}^{rootJointFrame, world} = omega_{estimationLink}^{rootJointFrame, world} + omega_{rootBody}^{rootJointFrame, estimationLink}
       angularVelocityRootBodyRelativeToWorld.add(angularVelocityRootBodyRelativeToEstimationLink, angularVelocityEstimationLinkRelativeToWorld);
 
-      rootJoint.packJointTwist(twitRootBodyRelativeToWorld);
-      twitRootBodyRelativeToWorld.setAngularPart(angularVelocityRootBodyRelativeToWorld.getVector());
-      rootJoint.setJointTwist(twitRootBodyRelativeToWorld);
+      rootJoint.packJointTwist(twistRootBodyRelativeToWorld);
+      twistRootBodyRelativeToWorld.setAngularPart(angularVelocityRootBodyRelativeToWorld.getVector());
+      rootJoint.setJointTwist(twistRootBodyRelativeToWorld);
       twistCalculator.compute();
    }
 
