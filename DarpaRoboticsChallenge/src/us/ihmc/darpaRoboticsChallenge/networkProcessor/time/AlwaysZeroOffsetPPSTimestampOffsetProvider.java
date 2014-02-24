@@ -1,4 +1,4 @@
-package us.ihmc.atlas;
+package us.ihmc.darpaRoboticsChallenge.networkProcessor.time;
 
 
 import us.ihmc.utilities.ros.RosMainNode;
