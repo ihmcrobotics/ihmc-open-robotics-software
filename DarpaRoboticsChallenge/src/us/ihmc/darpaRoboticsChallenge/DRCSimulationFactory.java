@@ -20,15 +20,12 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotDampingParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandModel;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
-import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriterWithAccelerationIntegration;
-import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriterWithTorqueLimits;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCSimulationOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSSandiaJointMap;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCSimulatedSensorNoiseParameters;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCStateEstimatorInterface;
-import us.ihmc.projectM.R2Sim02.initialSetup.GuiInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.ScsInitialSetup;
 import us.ihmc.robotSide.RobotSide;
@@ -85,20 +82,8 @@ public class DRCSimulationFactory
       
       if (DRCConfigParameters.LIMIT_CONTROLLER_OUTPUT_TORQUES)
       {
-         drcOutputWriter = new DRCOutputWriterWithTorqueLimits(drcOutputWriter);
-      }
-      if (DRCLocalConfigParameters.INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
-      {
-         boolean runningOnRealRobot = false;
-         DRCOutputWriterWithAccelerationIntegration drcOutputWriterWithAccelerationIntegration = new DRCOutputWriterWithAccelerationIntegration(drcOutputWriter, controlDT, runningOnRealRobot);
-         
-         drcOutputWriterWithAccelerationIntegration.setAlphaDesiredVelocity(0.0, 0.0);
-         drcOutputWriterWithAccelerationIntegration.setAlphaDesiredPosition(0.0);
-         
-         drcOutputWriterWithAccelerationIntegration.setVelocityGains(0.0, 0.0, 0.0, 0.0);
-         drcOutputWriterWithAccelerationIntegration.setPositionGains(0.0, 0.0, 0.0, 0.0);
-         
-         drcOutputWriter = drcOutputWriterWithAccelerationIntegration;
+//         drcOutputWriter = new DRCOutputWriterWithTorqueLimits(drcOutputWriter);
+         throw new RuntimeException("Atlas torque limits are under NDA");
       }
       
       // TODO: Build LIDAR here
