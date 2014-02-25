@@ -1,4 +1,4 @@
-package us.ihmc.valkyrie.TurboDriver.schedule;
+package us.ihmc.valkyrie.roboNet.schedule;
 
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.AbstractConstruct;
@@ -6,7 +6,8 @@ import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 import org.yaml.snakeyaml.nodes.Tag;
-import us.ihmc.valkyrie.TurboDriver.TurboDriverRoot;
+
+import us.ihmc.valkyrie.roboNet.RobonetRoot;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -66,7 +67,7 @@ public class YamlWithIncludesLoader
    
    public static void main(String[] args) throws IOException
    {
-      System.out.println(YamlWithIncludesLoader.load(TurboDriverRoot.class, "scheduleFiles", "main_sim.yaml"));
+      System.out.println(YamlWithIncludesLoader.load(RobonetRoot.class, "scheduleFiles", "main_sim.yaml"));
    }
 
 }
