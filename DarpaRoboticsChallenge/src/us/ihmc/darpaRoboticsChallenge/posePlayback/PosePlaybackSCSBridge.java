@@ -14,8 +14,8 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.configuration.LocalCloudMachines;
-import us.ihmc.darpaRoboticsChallenge.environment.VRCTask;
-import us.ihmc.darpaRoboticsChallenge.environment.VRCTaskName;
+import us.ihmc.darpaRoboticsChallenge.environment.DRCTask;
+import us.ihmc.darpaRoboticsChallenge.environment.DRCTaskName;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -97,7 +97,7 @@ public class PosePlaybackSCSBridge
       posePlaybackSender = new PosePlaybackSender(posePlaybackController, ipAddress);
       posePlaybackRobotPoseSequence = new PosePlaybackRobotPoseSequence();
 
-      VRCTask vrcTask = new VRCTask(VRCTaskName.ONLY_VEHICLE);
+      DRCTask vrcTask = new DRCTask(DRCTaskName.ONLY_VEHICLE);
       SDFFullRobotModel fullRobotModel = vrcTask.getFullRobotModelFactory().create();
 
       sdfRobot = vrcTask.getRobot();

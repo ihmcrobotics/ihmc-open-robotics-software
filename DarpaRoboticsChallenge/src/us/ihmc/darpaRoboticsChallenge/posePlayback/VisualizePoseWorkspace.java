@@ -7,8 +7,8 @@ import javax.swing.JFileChooser;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.environment.VRCTask;
-import us.ihmc.darpaRoboticsChallenge.environment.VRCTaskName;
+import us.ihmc.darpaRoboticsChallenge.environment.DRCTask;
+import us.ihmc.darpaRoboticsChallenge.environment.DRCTaskName;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.ThreadTools;
 
@@ -45,7 +45,7 @@ public class VisualizePoseWorkspace
       posePlaybackSender = new PosePlaybackSender(posePlaybackController, ipAddress);
       posePlaybackRobotPoseSequence = new PosePlaybackRobotPoseSequence();
 
-      VRCTask vrcTask = new VRCTask(VRCTaskName.ONLY_VEHICLE);
+      DRCTask vrcTask = new DRCTask(DRCTaskName.ONLY_VEHICLE);
       SDFRobot sdfRobot = vrcTask.getRobot();
 
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot);

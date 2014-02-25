@@ -5,8 +5,8 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.darpaRoboticsChallenge.environment.VRCTask;
-import us.ihmc.darpaRoboticsChallenge.environment.VRCTaskName;
+import us.ihmc.darpaRoboticsChallenge.environment.DRCTask;
+import us.ihmc.darpaRoboticsChallenge.environment.DRCTaskName;
 import us.ihmc.utilities.ThreadTools;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -54,7 +54,7 @@ public class PosePlaybackSmoothPoseInterpolatorTest
       SDFRobot sdfRobot = null;
       if (SHOW_GUI)
       {
-         VRCTask vrcTask = new VRCTask(VRCTaskName.ONLY_VEHICLE);
+         DRCTask vrcTask = new DRCTask(DRCTaskName.ONLY_VEHICLE);
          sdfRobot = vrcTask.getRobot();
 
          scs = new SimulationConstructionSet(sdfRobot);
