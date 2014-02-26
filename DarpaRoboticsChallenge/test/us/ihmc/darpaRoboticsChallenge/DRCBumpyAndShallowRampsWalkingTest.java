@@ -314,7 +314,7 @@ public class DRCBumpyAndShallowRampsWalkingTest
       BambooTools.reportTestStartedMessage();
 
       double standingTimeDuration = 1.0;
-      double walkingTimeDuration = 10.0;
+      double walkingTimeDuration = 40.0;
 
       boolean useVelocityAndHeadingScript = true;
       boolean cheatWithGroundHeightAtForFootstep = false;
@@ -334,8 +334,11 @@ public class DRCBumpyAndShallowRampsWalkingTest
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
       BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("walk");
+      DoubleYoVariable stepLength = (DoubleYoVariable) scs.getVariable("maxStepLength");
+      DoubleYoVariable offsetHeightAboveGround = (DoubleYoVariable) scs.getVariable("offsetHeightAboveGround");
       DoubleYoVariable comError = (DoubleYoVariable) scs.getVariable("positionError_comHeight");
-
+      stepLength.set(0.4);
+      offsetHeightAboveGround.set(-0.1);
       initiateMotion(standingTimeDuration, blockingSimulationRunner, walk);
 
       double timeIncrement = 1.0;
@@ -396,7 +399,7 @@ public class DRCBumpyAndShallowRampsWalkingTest
                                                                simulationDataBufferSize, cheatWithGroundHeightAtForFootstep,robotModel);
 
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
-
+      scs.setGroundVisible(false);
       setupCameraForUnitTest(scs);
 
       return drcFlatGroundWalkingTrack;
