@@ -39,10 +39,9 @@ public class DRCFlatGroundWalkingTrack
    private final YoVariableServer robotVisualizer;
 
    public DRCFlatGroundWalkingTrack(WalkingControllerParameters drcControlParameters, ArmControllerParameters armControllerParameters, 
-         DRCRobotInterface robotInterface,
-                                    RobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
-                                    boolean useVelocityAndHeadingScript, AutomaticSimulationRunner automaticSimulationRunner, double timePerRecordTick,
-                                    int simulationDataBufferSize, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model)
+                                    DRCRobotInterface robotInterface, RobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
+                                    DRCSCSInitialSetup scsInitialSetup, boolean useVelocityAndHeadingScript, AutomaticSimulationRunner automaticSimulationRunner,
+                                    double timePerRecordTick, int simulationDataBufferSize, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model)
    {
 //    scsInitialSetup = new DRCSCSInitialSetup(TerrainType.FLAT);
       scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
@@ -88,7 +87,8 @@ public class DRCFlatGroundWalkingTrack
       }
       
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.contactTresholdForceForSCS, footForceSensorNames);
-      Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, null, robotInterface, robotInitialSetup, scsInitialSetup, guiInitialSetup, null, robotVisualizer, dynamicGraphicObjectsListRegistry,model);
+      Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, null,
+            robotInterface, robotInitialSetup, scsInitialSetup, guiInitialSetup, null, robotVisualizer, dynamicGraphicObjectsListRegistry, model);
       drcSimulation = humanoidSimulation.first();
       drcController = humanoidSimulation.second();
 
