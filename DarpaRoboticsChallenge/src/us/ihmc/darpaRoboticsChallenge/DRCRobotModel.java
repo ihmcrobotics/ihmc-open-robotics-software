@@ -1,12 +1,12 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Set;
-
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.darpaRoboticsChallenge.acsell.ACSELLArmControlParameters;
+import us.ihmc.darpaRoboticsChallenge.acsell.ACSELLWalkingControllerParameters;
+import us.ihmc.darpaRoboticsChallenge.acsell.AxlJointMap;
+import us.ihmc.darpaRoboticsChallenge.acsell.BonoJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandModel;
 import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieArmControllerParameters;
@@ -16,11 +16,13 @@ import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieWalkingControllerParamete
 public enum DRCRobotModel
 {
    ATLAS_NO_HANDS_ADDED_MASS, ATLAS_SANDIA_HANDS, ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS,
-   DRC_NO_HANDS, DRC_HANDS, DRC_EXTENDED_HANDS, DRC_HOOKS,  DRC_TASK_HOSE, DRC_EXTENDED_HOOKS, VALKYRIE;
+   DRC_NO_HANDS, DRC_HANDS, DRC_EXTENDED_HANDS, DRC_HOOKS,  DRC_TASK_HOSE, DRC_EXTENDED_HOOKS,
+   VALKYRIE,
+   AXL, BONO;
    
    public enum RobotType
    {
-      ATLAS,VALKYRIE
+      ATLAS, VALKYRIE, ACSELL
    }
    
    public static DRCRobotModel getDefaultRobotModel()
@@ -46,6 +48,10 @@ public enum DRCRobotModel
       case DRC_TASK_HOSE:
          return new AtlasArmControllerParameters(DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
          
+      case AXL:
+      case BONO:
+         return new ACSELLArmControlParameters();
+         
       default:
          throw new RuntimeException("Unkown model");
       }
@@ -68,6 +74,11 @@ public enum DRCRobotModel
       case DRC_NO_HANDS:
       case DRC_TASK_HOSE:
          return new AtlasWalkingControllerParameters();
+         
+      case AXL:
+      case BONO:
+         return new ACSELLWalkingControllerParameters(this);
+         
       default:
          throw new RuntimeException("Unkown model");
       }
@@ -75,11 +86,11 @@ public enum DRCRobotModel
 
    public DRCRobotJointMap getJointMap(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly)
    {
-         switch (this)
-         {
+      switch (this)
+      {
       case VALKYRIE:
          return new ValkyrieJointMap(this, addLoadsOfContactPoints, addLoadsOfContactPointsToFeetOnly);
-         
+
       case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS:
       case ATLAS_NO_HANDS_ADDED_MASS:
       case ATLAS_SANDIA_HANDS:
@@ -89,8 +100,14 @@ public enum DRCRobotModel
       case DRC_HOOKS:
       case DRC_NO_HANDS:
       case DRC_TASK_HOSE:
-        return new AtlasJointMap(this, addLoadsOfContactPoints, addLoadsOfContactPointsToFeetOnly);
-        
+         return new AtlasJointMap(this, addLoadsOfContactPoints, addLoadsOfContactPointsToFeetOnly);
+         
+      case AXL:
+         return new AxlJointMap();
+         
+      case BONO:
+         return new BonoJointMap();
+         
       default:
          throw new RuntimeException("Unkown model");
       }
@@ -175,6 +192,10 @@ public enum DRCRobotModel
          
       case VALKYRIE:
          return RobotType.VALKYRIE;
+         
+      case AXL:
+      case BONO:
+         return RobotType.ACSELL;
 
       default:
          throw new RuntimeException("Unkown model");
@@ -198,6 +219,12 @@ public enum DRCRobotModel
          
       case VALKYRIE:
          return "V1";
+         
+      case AXL:
+         return "axl";
+         
+      case BONO:
+         return "bono";
 
       default:
          throw new RuntimeException("Unkown model");
