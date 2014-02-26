@@ -18,6 +18,7 @@ import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHan
 import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.utilities.math.TimeTools;
 
+import com.yobotics.simulationconstructionset.DataBuffer;
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -156,5 +157,15 @@ public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener
    public boolean populateRegistry()
    {
       return true;
+   }
+   
+   public void closeAndDispose()
+   {
+	   scs.closeAndDispose();
+   }
+   
+   public DataBuffer getDataBuffer()
+   {
+	   return scs.getDataBuffer();
    }
 }
