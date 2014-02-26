@@ -60,7 +60,7 @@ public class DRCSimulationFactory
    public static Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> createSimulation(ControllerFactory controllerFactory,
          CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCRobotInterface robotInterface, RobotInitialSetup<SDFRobot> robotInitialSetup,
          ScsInitialSetup scsInitialSetup, DRCGuiInitialSetup guiInitialSetup, GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,DRCRobotModel drcRobotModel)
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, DRCRobotModel drcRobotModel)
    {
       GUISetterUpperRegistry guiSetterUpperRegistry = new GUISetterUpperRegistry();
 
@@ -167,7 +167,7 @@ public class DRCSimulationFactory
 
       DRCController robotController = new DRCController(robotInterface.getFullRobotModelFactory(), controllerFactory, sensorReaderFactory, drcOutputWriter,
             jointMap, lidarControllerInterface, gravity, estimateDT, controlDT, dataProducer, robotInterface.getTimeStampProvider(),
-            dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, registry, null, threadFactory, threadSynchronizer,drcRobotModel);
+            dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, registry, null, threadFactory, threadSynchronizer, drcRobotModel);
       robotController.initialize();
 
       final HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, controller,
