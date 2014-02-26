@@ -1094,7 +1094,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          desiredICPVelocity.set(0.0, 0.0);
 
-         if (doPrepareManipulationForLocomotion.getBooleanValue())
+         if (manipulationControlModule != null && doPrepareManipulationForLocomotion.getBooleanValue())
             manipulationControlModule.prepareForLocomotion();
       }
    }
