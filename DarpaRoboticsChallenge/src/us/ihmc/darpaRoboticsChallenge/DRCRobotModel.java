@@ -89,7 +89,7 @@ public enum DRCRobotModel
       switch (this)
       {
       case VALKYRIE:
-         return new ValkyrieJointMap(this, addLoadsOfContactPoints, addLoadsOfContactPointsToFeetOnly);
+         return new ValkyrieJointMap();
 
       case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS:
       case ATLAS_NO_HANDS_ADDED_MASS:
