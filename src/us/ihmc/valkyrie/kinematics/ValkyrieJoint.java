@@ -5,6 +5,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class ValkyrieJoint
 {
+   private final String name;
    private final DoubleYoVariable position;
    private final DoubleYoVariable velocity;
    private final DoubleYoVariable effort;
@@ -15,6 +16,7 @@ public class ValkyrieJoint
 
    public ValkyrieJoint(String name, YoVariableRegistry registry)
    {
+      this.name = name;
       position = new DoubleYoVariable(name + "_q", registry);
       velocity = new DoubleYoVariable(name + "_qd", registry);
       effort = new DoubleYoVariable(name + "_tau", registry);
@@ -37,6 +39,11 @@ public class ValkyrieJoint
    public void setEffort(double effort)
    {
       this.effort.set(effort);
+   }
+   
+   public String getName()
+   {
+      return name;
    }
 
    public double getVelocity()
