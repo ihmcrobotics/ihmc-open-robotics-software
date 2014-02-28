@@ -32,7 +32,7 @@ public class RemoteValkyrieVisualizer
       
       SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new SCSYoVariablesUpdatedListener(robot, 16000);
       
-      YoVariableClient client = new YoVariableClient(host, port, scsYoVariablesUpdatedListener, "remote", true);
+      YoVariableClient client = new YoVariableClient(host, port, scsYoVariablesUpdatedListener, "remote", false);
       client.start();
    }
 
