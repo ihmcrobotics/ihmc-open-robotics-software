@@ -15,7 +15,7 @@ import com.martiansoftware.jsap.JSAPResult;
 
 public class RemoteValkyrieVisualizer
 {
-   public static final String defaultHost = ValkyrieNetworkParameters.CONTROLLER_IP;
+   public static final String defaultHost = ValkyrieNetworkParameters.CONTROL_COMPUTER_HOST;
    public static final int defaultPort = ValkyrieNetworkParameters.VARIABLE_SERVER_PORT;
    
    public RemoteValkyrieVisualizer(String host, int port, int bufferSize)
