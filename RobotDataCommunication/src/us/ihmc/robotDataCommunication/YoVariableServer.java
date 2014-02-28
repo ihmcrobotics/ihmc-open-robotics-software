@@ -17,7 +17,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 
 public class YoVariableServer implements RobotVisualizer
 {
-   private static final int VARIABLE_BUFFER_CAPACITY = 16;
+   private static final int VARIABLE_BUFFER_CAPACITY = 2048;
    private static final int CHANGED_BUFFER_CAPACITY = 64;
    
    private final double dt;
