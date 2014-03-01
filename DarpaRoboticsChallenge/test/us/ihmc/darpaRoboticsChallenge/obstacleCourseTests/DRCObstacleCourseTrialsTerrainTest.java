@@ -253,12 +253,11 @@ public class DRCObstacleCourseTrialsTerrainTest
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingOverFlatCinderblockField(simulationConstructionSet);
 
-      ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(25.0);
 
       drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
-
+//ThreadTools.sleepForever();
       assertTrue(success);
 
       BambooTools.reportTestFinishedMessage();

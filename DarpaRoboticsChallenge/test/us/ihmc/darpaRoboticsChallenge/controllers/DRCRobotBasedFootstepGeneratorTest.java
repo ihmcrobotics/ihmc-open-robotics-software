@@ -20,7 +20,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepGeneratorVisu
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepUtils;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepValidityMetric;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.SemiCircularStepValidityMetric;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.TurningThenStraightFootstepGenerator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.TurningThenStraightFootstepGenerator;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
@@ -51,19 +51,19 @@ public class DRCRobotBasedFootstepGeneratorTest
    private ReferenceFrames referenceFrames;
    private SideDependentList<ContactablePlaneBody> bipedFeet;
 
-   
+
    @Before
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
-   
+
    @After
    public void showMemoryUsageAfterTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
+
 
    @Test
    public void testStraightLinePath()
@@ -90,18 +90,7 @@ public class DRCRobotBasedFootstepGeneratorTest
    {
       setupRobotParameters();
       TurnThenStraightOverheadPath pathToDestination = new TurnThenStraightOverheadPath(new FramePose2d(WORLD_FRAME),
-                                          new FramePoint2d(WORLD_FRAME, destination.x, destination.y), SIDESTEP ? Math.PI / 2 : 0.0);
-//      if (DEBUG_S_PARAM)
-//         System.out.println("FootstepGeneratorTest: startPose=" + pathToDestination.getPoseAtS(0.0).toString());
-//      if (DEBUG_S_PARAM)
-//         System.out.println("FootstepGeneratorTest: start++Pose=" + pathToDestination.getPoseAtS(0.25).toString());
-//      if (DEBUG_S_PARAM)
-//         System.out.println("FootstepGeneratorTest: intPose=" + pathToDestination.getPoseAtS(0.5).toString());
-//      if (DEBUG_S_PARAM)
-//         System.out.println("FootstepGeneratorTest: int++Pose=" + pathToDestination.getPoseAtS(0.75).toString());
-//      if (DEBUG_S_PARAM)
-//         System.out.println("FootstepGeneratorTest: endPose=" + pathToDestination.getPoseAtS(1.0).toString());
-      //ABOVE looks like path based tests! Can test the path separately!
+                                                          new FramePoint2d(WORLD_FRAME, destination.x, destination.y), SIDESTEP ? Math.PI / 2 : 0.0);
       generateFootstepsUsingPath(pathToDestination);
       FootstepValidityMetric footstepValidityMetric = new SemiCircularStepValidityMetric(fullRobotModel.getFoot(RobotSide.LEFT), 0.00, 1.2, 1.5);
       assertAllStepsLevelAndZeroHeight();
@@ -136,8 +125,6 @@ public class DRCRobotBasedFootstepGeneratorTest
       assertEquals(pathOrientation.getX(), footstepOrientation.getX(), 1e-1);
       assertEquals(pathOrientation.getY(), footstepOrientation.getY(), 1e-1);
       assertEquals(pathOrientation.getZ(), footstepOrientation.getZ(), 1e-1);
-
-
    }
 
    private void assertAllStepsValid(FootstepValidityMetric footstepValidityMetric)

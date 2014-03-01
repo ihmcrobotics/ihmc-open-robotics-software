@@ -255,9 +255,6 @@ public class DRCConfigParameters
    public static final boolean USE_TABS_IN_UI = true;
    public static final boolean DO_AUTOMATED_STANDPREP = true;
 
-   // Path parameters
-   public static final double DEFAULT_SPINNING_DIAMETER = 0.4;
-
    // Hand Controller
    public static final boolean USE_PURE_POSITION_CONTROL_FOR_HANDS = false;
 
