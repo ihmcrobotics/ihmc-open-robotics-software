@@ -6,6 +6,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -25,7 +26,7 @@ public class PelvisIMUBasedLinearStateCalculator
    private final DoubleYoVariable alphaGravityEstimation = new DoubleYoVariable("alphaGravityEstimation", registry);
    private final AlphaFilteredYoVariable gravityEstimation = new AlphaFilteredYoVariable("gravityEstimation", registry, alphaGravityEstimation);
 
-   private final YoFrameVector pelvisLineaAcceleration = new YoFrameVector("imuAccelerationInWorld", worldFrame, registry);
+   private final YoFrameVector pelvisLinearAcceleration = new YoFrameVector("imuAccelerationInWorld", worldFrame, registry);
    private final YoFrameVector pelvisLinearVelocityFromIMUOnly = new YoFrameVector("imuPelvisLinearVelocityIMUOnly", worldFrame, registry);
    private final YoFrameVector pelvisLinearVelocity = new YoFrameVector("imuPelvisLinearVelocity", worldFrame, registry);
    private final YoFrameVector pelvisPosition = new YoFrameVector("imuPelvisPosition", worldFrame, registry);
@@ -75,12 +76,12 @@ public class PelvisIMUBasedLinearStateCalculator
 
       tempIMUAcceleration.changeFrame(worldFrame);
       tempIMUAcceleration.setZ(tempIMUAcceleration.getZ() - gravityEstimation.getDoubleValue());
-      pelvisLineaAcceleration.set(tempIMUAcceleration);
+      pelvisLinearAcceleration.set(tempIMUAcceleration);
    }
    
    public void updatePelvisLinearVelocity(FrameVector pelvisLinearVelocityPrevValue, FrameVector pelvisLinearVelocityToPack)
    {
-      pelvisLineaAcceleration.getFrameVector(tempIMUAcceleration);
+      pelvisLinearAcceleration.getFrameVector(tempIMUAcceleration);
       tempIMUAcceleration.scale(estimatorDT);
       pelvisLinearVelocityFromIMUOnly.add(tempIMUAcceleration);
       
@@ -94,14 +95,19 @@ public class PelvisIMUBasedLinearStateCalculator
       pelvisLinearVelocity.getFrameVectorAndChangeFrameOfPackedVector(tempPelvisVelocityIntegrated);
       tempPelvisVelocityIntegrated.scale(estimatorDT);
       
+      // first order integration (assume acceleration is constant)
+      pelvisLinearAcceleration.getFrameVector(tempIMUAcceleration);
+      tempIMUAcceleration.scale(-0.5 * MathTools.square(estimatorDT));
+      
       pelvisPosition.set(pelvisPositionPrevValue);
       pelvisPosition.add(tempPelvisVelocityIntegrated);
+      pelvisPosition.add(tempIMUAcceleration);
       pelvisPosition.getFramePointAndChangeFrameOfPackedPoint(pelvisPositionToPack);
    }
 
    public void getPelvisLinearAcceleration(FrameVector linearAccelerationToPack)
    {
-      pelvisLineaAcceleration.getFrameVectorAndChangeFrameOfPackedVector(linearAccelerationToPack);
+      pelvisLinearAcceleration.getFrameVectorAndChangeFrameOfPackedVector(linearAccelerationToPack);
    }
    
    public void setJointAndIMUSensorDataSource(JointAndIMUSensorDataSource jointAndIMUSensorDataSource)
