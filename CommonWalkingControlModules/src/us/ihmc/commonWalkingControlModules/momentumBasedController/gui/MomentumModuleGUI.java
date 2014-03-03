@@ -24,7 +24,7 @@ public class MomentumModuleGUI
    private final DesiredJointAccelerationMultipleJPanel desiredJointAccelerationMultipleJPanel;
    private final DesiredSpatialAccelerationMultipleJPanel desiredSpatialAccelerationMultipleJPanel;
    private final JointAccelerationSolutionJPanel jointAccelerationSolutionJPanel;
-
+   private boolean packed = false;
    public MomentumModuleGUI(YoVariableRegistry parentRegistry)
    {
       jFrame = new JFrame("MomentumModuleGUI");
@@ -39,13 +39,16 @@ public class MomentumModuleGUI
       jFrame.setSize(1400, 942);
       jFrame.setVisible(true);
       jFrame.setLocationRelativeTo(null);
+      
+
       jFrame.setResizable(false);
-      jFrame.setAlwaysOnTop(true);
+      //jFrame.setAlwaysOnTop(true);
 
       int showOnScreenNumber = 1;
       showOnScreen(showOnScreenNumber, jFrame);
 
       parentRegistry.addChild(registry);
+      
    }
 
    //   public void setDesiredsAndSolution(MomentumModuleDataObject momentumModuleDataObject, MomentumModuleSolution momentumModuleSolution)
@@ -70,16 +73,22 @@ public class MomentumModuleGUI
       InverseDynamicsJoint[] jointsToOptimizeFor = allMomentumModuleListener.getJointsToOptimizeFor();
       DenseMatrix64F jointAccelerationsSolution = allMomentumModuleListener.getJointAccelerationsSolution();
       jointAccelerationSolutionJPanel.setJointAccelerationSolution(jointsToOptimizeFor, jointAccelerationsSolution);
+    
+      if(!packed)
+      {
+    	  jFrame.pack();
+    	  packed=true;
+      }
    }
 
    public void reset()
    {
-
+	   packed=false;
    }
 
    public void initialize()
    {
-
+	   packed=false;
    }
 
    public static void showOnScreen(int screen, JFrame frame)
