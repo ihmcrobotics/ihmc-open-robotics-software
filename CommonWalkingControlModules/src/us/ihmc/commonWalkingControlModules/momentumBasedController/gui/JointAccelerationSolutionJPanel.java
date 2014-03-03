@@ -41,13 +41,16 @@ public class JointAccelerationSolutionJPanel extends JPanel
    {
       this.jointsToOptimizeFor.clear();
 
+      int totalDof=0;
       if (jointsToOptimizeFor != null)
       {
          for (InverseDynamicsJoint jointToOptimizeFor : jointsToOptimizeFor)
          {
+        	totalDof+=jointToOptimizeFor.getDegreesOfFreedom();
             this.jointsToOptimizeFor.add(jointToOptimizeFor);
          }
       }
+      setTableSize(totalDof+1); //keep one row for header
 
       int index = 0;
       int counter = 0;
@@ -59,12 +62,21 @@ public class JointAccelerationSolutionJPanel extends JPanel
          for (int j = 0; j < numDofs; j++)
          {
             double acceleration = jointAccelerationsSolution.get(index + j, 0);
-            writeJointInfoToTable(i + j + counter, joint.getName(), numberFormat.format(acceleration));
+            writeJointInfoToTable(i + j + counter, joint.getName()+" - "+j, numberFormat.format(acceleration));
          }
 
          index += numDofs;
          counter += numDofs - 1;
       }
+   }
+   
+   private void setTableSize(int newSize)
+   {
+	   if (newSize > jointTable.getRowCount())
+	   {
+		   tableTools.addRows(newSize-jointTable.getRowCount());
+		   System.out.println(getClass().getSimpleName()+" bumpTableSize to "+newSize);
+	   }
    }
 
    public synchronized void paintComponent(Graphics graphics)

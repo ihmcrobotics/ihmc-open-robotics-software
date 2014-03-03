@@ -283,9 +283,9 @@ public class AllMomentumModuleListener implements MotionConstraintListener, Desi
       jacobianMatrixSmallestSingularValue.set(Double.POSITIVE_INFINITY);
    }
 
-   private final DenseMatrix64F centroidalMomentumAMatrixCopy = new DenseMatrix64F();
-   private final DenseMatrix64F momentumDotEquationRightHandSideCopy = new DenseMatrix64F();
-   private final DenseMatrix64F momentumSubspaceCopy = new DenseMatrix64F();
+   private final DenseMatrix64F centroidalMomentumAMatrixCopy = new DenseMatrix64F(0);
+   private final DenseMatrix64F momentumDotEquationRightHandSideCopy = new DenseMatrix64F(0);
+   private final DenseMatrix64F momentumSubspaceCopy = new DenseMatrix64F(0);
    
    public void setCentroidalMomentumMatrix(DenseMatrix64F centroidalMomentumAMatrix, DenseMatrix64F momentumDotEquationRightHandSide, DenseMatrix64F momentumSubspace)
    { 

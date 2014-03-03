@@ -41,40 +41,60 @@ public class DesiredJointAccelerationMultipleJPanel extends AbstractMultipleReus
          ArrayList<DesiredJointAccelerationCommandAndMotionConstraint> desiredJointAccelerationCommandAndMotionConstraints)
    {
       setTableSize(desiredJointAccelerationCommandAndMotionConstraints.size());
+      DesiredJointAccelerationJPanel desiredJointAccelerationJPanel = new DesiredJointAccelerationJPanel();
+
       for (int i = 0; i < desiredJointAccelerationCommandAndMotionConstraints.size(); i++)
       {
-         DesiredJointAccelerationCommandAndMotionConstraint desiredJointAccelerationCommandAndMotionConstraint = desiredJointAccelerationCommandAndMotionConstraints
-               .get(i);
-
-         DesiredJointAccelerationJPanel desiredJointAccelerationJPanel = new DesiredJointAccelerationJPanel();
+         DesiredJointAccelerationCommandAndMotionConstraint desiredJointAccelerationCommandAndMotionConstraint = 
+        		 desiredJointAccelerationCommandAndMotionConstraints.get(i);
          desiredJointAccelerationJPanel.setDesiredJointAccelerationCommand(desiredJointAccelerationCommandAndMotionConstraint);
          writeDataToJointTable(i, desiredJointAccelerationJPanel);
+      }
+      
+      //clear unsed rows
+      for(int i=desiredJointAccelerationCommandAndMotionConstraints.size();i<jTable.getRowCount()-1;i++)
+      {
+          writeDataToJointTable(i, null);
       }
 
    }
 
    private void setTableSize(int dataSize)
    {
-      if (dataSize > jTable.getRowCount())
+	  int requiredRows = dataSize+1; //reserve one row for header.
+      if (requiredRows > jTable.getRowCount())
       {
-         throw new RuntimeException("TableSize is not right. Please change the size to: " + dataSize + " instead of: " + jTable.getRowCount());
+    	  //tableTools.setRowCount(requiredRows);
+    	  tableTools.addRows(requiredRows-jTable.getRowCount());
+    	  System.out.println(getClass().getSimpleName()+":Reset Table size to " + requiredRows);
+          //jTable = tableTools.createJTableModelForDesiredJointAcceleration(header, requiredRows); //TODO: make table size dynamic
+         //throw new RuntimeException("TableSize is not right. Please change the size to: " + requiredRows + " instead of: " + jTable.getRowCount());
       }
    }
 
    private void writeDataToJointTable(int rowCount, DesiredJointAccelerationJPanel desiredJointAccelerationJPanel)
    {
-      String prefix = "";
-      model.setValueAt(prefix + desiredJointAccelerationJPanel.getJointName(), rowCount + 1, 0);
-      model.setValueAt(prefix + desiredJointAccelerationJPanel.getDesiredAccelerationAsString(), rowCount + 1, 1);
-      model.setValueAt(prefix + desiredJointAccelerationJPanel.getAchievedJointAccelerationAsString(), rowCount + 1, 2);
-      model.setValueAt(prefix + desiredJointAccelerationJPanel.getErrorAccelerationAsString(), rowCount + 1, 3);
-
-      if (model.getValueAt(rowCount + 1, 4) == null
-            || Double.parseDouble((String) model.getValueAt(rowCount + 1, 4)) < Double.parseDouble(desiredJointAccelerationJPanel.getErrorAccelerationAsString()))
-      {
-         model.setValueAt(prefix + desiredJointAccelerationJPanel.getErrorAccelerationAsString(), rowCount + 1, 4);
-
-      }
+	   if (desiredJointAccelerationJPanel!=null)
+	   {
+	      String prefix = "";
+	      model.setValueAt(prefix + desiredJointAccelerationJPanel.getJointName(), rowCount + 1, 0);
+	      model.setValueAt(prefix + desiredJointAccelerationJPanel.getDesiredAccelerationAsString(), rowCount + 1, 1);
+	      model.setValueAt(prefix + desiredJointAccelerationJPanel.getAchievedJointAccelerationAsString(), rowCount + 1, 2);
+	      model.setValueAt(prefix + desiredJointAccelerationJPanel.getErrorAccelerationAsString(), rowCount + 1, 3);
+	
+	      if (model.getValueAt(rowCount + 1, 4) == null
+	            || Double.parseDouble((String) model.getValueAt(rowCount + 1, 4)) < Double.parseDouble(desiredJointAccelerationJPanel.getErrorAccelerationAsString()))
+	      {
+	         model.setValueAt(prefix + desiredJointAccelerationJPanel.getErrorAccelerationAsString(), rowCount + 1, 4);
+	
+	      }
+	   }
+	   else
+	   {
+		   for(int j=0;j<model.getColumnCount();j++)
+			   model.setValueAt(null, rowCount+1, j);
+	   }
+		   
    }
 
    public DesiredJointAccelerationJPanel constructNewJPanel()
