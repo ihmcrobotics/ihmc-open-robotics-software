@@ -101,7 +101,6 @@ public class JointStateUpdater
          
          oneDoFJoint.setQ(positionSensorData);
          oneDoFJoint.setQd(velocitySensorData);
-         oneDoFJoint.setQdd(oneDoFJoint.getQddDesired());
       }
 
       rootBody.updateFramesRecursively();
