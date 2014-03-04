@@ -1,21 +1,19 @@
-package us.ihmc.valkyrie;
+package us.ihmc.valkyrie.visualizer;
 
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.visualization.SliderBoardControllerListener;
 import us.ihmc.atlas.visualization.SliderBoardFactory;
-import us.ihmc.atlas.visualization.WalkControllerSliderBoard;
 import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieJointMap;
 import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieSDFLoader;
 import us.ihmc.robotDataCommunication.YoVariableClient;
-import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesUpdatedListener;
+import us.ihmc.valkyrie.ValkyrieNetworkParameters;
+import us.ihmc.valkyrie.controllers.ValkyrieSliderBoard;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
-import us.ihmc.valkyrie.controllers.ValkyrieSliderBoard;
 
 public class RemoteValkyrieVisualizer
 {
@@ -27,12 +25,10 @@ public class RemoteValkyrieVisualizer
       System.out.println("Connecting to host " + host);
       ValkyrieJointMap jointMap = new ValkyrieJointMap();
       JaxbSDFLoader robotLoader = ValkyrieSDFLoader.loadValkyrieRobot(false);
-      SDFRobot robot = robotLoader.createRobot(jointMap, false);
 
 
       SliderBoardFactory sliderBoardFactory = ValkyrieSliderBoard.getFactory();
-      SliderBoardControllerListener scsYoVariablesUpdatedListener = new SliderBoardControllerListener(robotLoader, jointMap, bufferSize, sliderBoardFactory);
-      scsYoVariablesUpdatedListener.addButton("requestStop", 1.0);
+      SliderBoardControllerListener scsYoVariablesUpdatedListener = new ValkyrieSliderBoardControllerListener(robotLoader, jointMap, bufferSize, sliderBoardFactory);
       
 //      SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new SCSYoVariablesUpdatedListener(robot, 16000);
       
