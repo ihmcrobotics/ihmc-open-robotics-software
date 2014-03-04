@@ -173,7 +173,7 @@ public class DRCNetworkProcessor
       
       DRCRobotDataReceiver drcRobotDataReceiver = new DRCRobotDataReceiver(robotModel, fullRobotModel);
       this.fieldComputerClient.attachListener(DRCJointConfigurationData.class, drcRobotDataReceiver);
-      robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, fullRobotModel);
+      robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, fullRobotModel, robotModel);
 
       this.fieldComputerClient.attachListener(HandJointAnglePacket.class,new ObjectConsumer<HandJointAnglePacket>()
       {

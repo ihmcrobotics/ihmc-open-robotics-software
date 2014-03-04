@@ -1,5 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import java.util.Arrays;
+
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.visualization.SliderBoardFactory;
 import us.ihmc.atlas.visualization.WalkControllerSliderBoard;
@@ -21,7 +23,10 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
 
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
+import com.martiansoftware.jsap.JSAPResult;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
@@ -129,6 +134,34 @@ public class DRCFlatGroundWalkingTrack
 
    public static void main(String[] args) throws JSAPException
    {
+      // Add flag to set robot model
+      JSAP jsap = new JSAP();
+      FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
+      robotModel.setHelp("Robot models: " + Arrays.toString(DRCRobotModel.values()));
+      
+      DRCRobotModel model;
+      try
+      {
+         jsap.registerParameter(robotModel);
+
+         JSAPResult config = jsap.parse(args);
+
+         if (config.success())
+         {
+            model = DRCRobotModel.valueOf(config.getString("robotModel"));
+         }
+         else
+         {
+            System.out.println("Enter a robot model.");
+            return;
+         }
+      }
+      catch (JSAPException e)
+      {
+         e.printStackTrace();
+         return;
+      }
+      
       AutomaticSimulationRunner automaticSimulationRunner = null;
 
       SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
@@ -136,7 +169,6 @@ public class DRCFlatGroundWalkingTrack
 
 //    DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(TerrainType.FLAT_Z_NEGATIVE_TWO);
 //    RobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(-2.0);
-      DRCRobotModel model = DRCRobotModel.getDefaultRobotModel();
       DRCRobotInterface robotInterface = new PlainDRCRobot(model, false);
       
       if (DRCConfigParameters.CORRUPT_SIMULATION_MODEL)

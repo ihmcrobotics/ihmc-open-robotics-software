@@ -172,7 +172,7 @@ public class DRCSimulationFactory
 
       final HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, controller,
             estimationTicksPerControlTick, commonAvatarEnvironmentInterface, simulatedRobot.getAllExternalForcePoints(), robotInitialSetup, scsInitialSetup,
-            guiInitialSetup, guiSetterUpperRegistry, dynamicGraphicObjectsListRegistry);
+            guiInitialSetup, guiSetterUpperRegistry, dynamicGraphicObjectsListRegistry, drcRobotModel);
 
       //TODO: Can only do this if we have a simulation...
       if (scsInitialSetup.getInitializeEstimatorToActual())

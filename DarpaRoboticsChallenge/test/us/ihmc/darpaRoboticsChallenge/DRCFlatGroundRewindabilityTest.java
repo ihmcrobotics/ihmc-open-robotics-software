@@ -36,6 +36,7 @@ public class DRCFlatGroundRewindabilityTest
    private static final double totalTimeToTest = 10.0;
    private static final double timeToTickAhead = 1.5;
    private static final double timePerTick = 0.01;
+   private static final DRCRobotModel robotModel = DRCRobotModel.DRC_NO_HANDS;
 
    @Before
    public void setUp() throws Exception
@@ -138,7 +139,6 @@ public class DRCFlatGroundRewindabilityTest
 
       GroundProfile groundProfile = new FlatGroundProfile();
 
-      DRCRobotModel robotModel = DRCRobotModel.getDefaultRobotModel();
       WalkingControllerParameters drcControlParameters = robotModel.getWalkingControlParamaters();
       ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
 

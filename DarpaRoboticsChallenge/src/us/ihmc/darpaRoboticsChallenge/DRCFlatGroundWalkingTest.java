@@ -100,6 +100,7 @@ public class DRCFlatGroundWalkingTest
 
       double standingTimeDuration = 1.0;
       double walkingTimeDuration = 90.0;
+      DRCRobotModel robotModel = DRCRobotModel.DRC_NO_HANDS;
 
       if (BambooTools.isEveryCommitBuild())
       {
@@ -116,7 +117,7 @@ public class DRCFlatGroundWalkingTest
       WalkingControllerParameters drcControlParameters = new AtlasWalkingControllerParameters();
       ArmControllerParameters armControllerParameters = new AtlasArmControllerParameters();
       DRCFlatGroundWalkingTrack track = setupSimulationTrackForAtlas(drcControlParameters, armControllerParameters, groundProfile, drawGroundProfile, useVelocityAndHeadingScript,
-            cheatWithGroundHeightAtForFootstep, useLoadOfContactPointsForTheFeet);
+            cheatWithGroundHeightAtForFootstep, useLoadOfContactPointsForTheFeet, robotModel);
 
       drcController = track.getDrcController();
       SimulationConstructionSet scs = track.getSimulationConstructionSet();
@@ -261,7 +262,7 @@ public class DRCFlatGroundWalkingTest
 
    private DRCFlatGroundWalkingTrack setupSimulationTrackForAtlas(WalkingControllerParameters drcControlParameters, ArmControllerParameters
          armControllerParameters, GroundProfile groundProfile, boolean drawGroundProfile,
-         boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, boolean useLoadOfContactPointsForTheFeet)
+         boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, boolean useLoadOfContactPointsForTheFeet, DRCRobotModel robotModel)
    {
       AutomaticSimulationRunner automaticSimulationRunner = null;
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
@@ -269,7 +270,7 @@ public class DRCFlatGroundWalkingTest
       double timePerRecordTick = DRCConfigParameters.CONTROL_DT;
       int simulationDataBufferSize = 16000;
 
-      DRCRobotModel robotModel = DRCRobotModel.getDefaultRobotModel();
+      //DRCRobotModel robotModel = DRCRobotModel.getDefaultRobotModel();
       RobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(0.0);
       DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel, false, useLoadOfContactPointsForTheFeet);
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotInterface.getSimulateDT(), useLoadOfContactPointsForTheFeet);
