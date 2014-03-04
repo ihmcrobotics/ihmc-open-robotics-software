@@ -22,6 +22,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.AtlasAndHandRobotParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.MultiContactDRCRobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.initialSetup.PushUpDRCRobotInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -37,26 +38,41 @@ public class DRCMultiContact
 {
    private final HumanoidRobotSimulation<SDFRobot> drcSimulation;
    private final MultiContactTestEnvironment environment;
-
+   private final SimulationConstructionSet simulationConstructionSet;
+   static enum  MultiContactTask {DEFAULT, PUSHUP} ;
+   
+   
    public DRCMultiContact(DRCRobotModel robotModel, DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner,
-                          double timePerRecordTick, int simulationDataBufferSize)
+                          double timePerRecordTick, int simulationDataBufferSize, MultiContactTask task)
    {
        AtlasAndHandRobotParameters.ENABLE_JOINT_VELOCITY_TORQUE_LIMITS = false; // doesn't work with joint torque limits
 
       DRCSCSInitialSetup scsInitialSetup;
 
 
-      RobotSide[] footContactSides = RobotSide.values;
-      RobotSide[] handContactSides = new RobotSide[]{RobotSide.LEFT};
-      RobotInitialSetup<SDFRobot> robotInitialSetup = new MultiContactDRCRobotInitialSetup();
 
-//      RobotSide[] footContactSides = RobotSide.values;
-//      RobotSide[] handContactSides = RobotSide.values;
-//      RobotInitialSetup<SDFRobot> robotInitialSetup = new PushUpDRCRobotInitialSetup();
+      RobotSide[] footContactSides;
+      RobotSide[] handContactSides;
+      RobotInitialSetup<SDFRobot> robotInitialSetup;
+      switch(task)
+      {
+      case 	PUSHUP:      
+	      footContactSides = RobotSide.values;
+	      handContactSides = RobotSide.values;
+	      robotInitialSetup = new PushUpDRCRobotInitialSetup();
+	      break;
+	  default:
+	      footContactSides = RobotSide.values;
+	      handContactSides = new RobotSide[]{RobotSide.LEFT};
+	      robotInitialSetup = new MultiContactDRCRobotInitialSetup();
+	      break;
+
+      }
 
       DRCRobotJointMap jointMap = robotModel.getJointMap(true, false);
 
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      boolean updateInSimulationThread=false; //being updated in DRC-Controller thread, SCS only for display
+      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry(updateInSimulationThread);
 
       environment = new MultiContactTestEnvironment(robotInitialSetup, jointMap, dynamicGraphicObjectsListRegistry, footContactSides, handContactSides);
       final PlainDRCRobot robotInterface = new PlainDRCRobot(robotModel, false);
@@ -105,10 +121,10 @@ public class DRCMultiContact
             handContactPointTransforms, handContactPoints, footContactSides, handContactSides, controllerParameters, armControllerParameters);
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.contactTresholdForceForSCS, jointMap.getFeetForceSensorNames());
 
-      Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, environment, robotInterface, robotInitialSetup, scsInitialSetup, guiInitialSetup, null, null, dynamicGraphicObjectsListRegistry,robotModel);
+      Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, environment, robotInterface, robotInitialSetup, scsInitialSetup, guiInitialSetup, null, null, dynamicGraphicObjectsListRegistry,robotModel);      
       drcSimulation = humanoidSimulation.first();
-
-      SimulationConstructionSet simulationConstructionSet = drcSimulation.getSimulationConstructionSet();
+      
+       simulationConstructionSet = drcSimulation.getSimulationConstructionSet();
 
       
       MidiSliderBoard sliderBoard = new MidiSliderBoard(simulationConstructionSet);
@@ -136,6 +152,11 @@ public class DRCMultiContact
          drcSimulation.start(null);
       }
    }
+   
+   public SimulationConstructionSet getSimulationConstructionSet()
+   {
+	   return simulationConstructionSet;
+   }
 
    public static void main(String[] args) throws JSAPException
    {
@@ -146,11 +167,7 @@ public class DRCMultiContact
       double timePerRecordTick = DRCConfigParameters.CONTROL_DT;
       int simulationDataBufferSize = 16000;
       new DRCMultiContact(DRCRobotModel.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, guiInitialSetup, automaticSimulationRunner, timePerRecordTick,
-                          simulationDataBufferSize);
+                          simulationDataBufferSize, MultiContactTask.DEFAULT);
    }
 
-   public SimulationConstructionSet getSimulationConstructionSet()
-   {
-      return drcSimulation.getSimulationConstructionSet();
-   }
 }
