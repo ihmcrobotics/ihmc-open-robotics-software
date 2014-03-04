@@ -72,8 +72,12 @@ public class DRCMultiContact
 
       DRCRobotJointMap jointMap = robotModel.getJointMap(true, false);
 
+      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
       boolean updateInSimulationThread=false; //being updated in DRC-Controller thread, SCS only for display
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry(updateInSimulationThread);
+      if (guiInitialSetup.isGuiShown())
+          dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry(updateInSimulationThread);
+       else
+          dynamicGraphicObjectsListRegistry = null;
 
       environment = new MultiContactTestEnvironment(robotInitialSetup, jointMap, dynamicGraphicObjectsListRegistry, footContactSides, handContactSides);
       final PlainDRCRobot robotInterface = new PlainDRCRobot(robotModel, false);
