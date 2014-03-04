@@ -39,6 +39,7 @@ public class DRCMultiContact
    private final HumanoidRobotSimulation<SDFRobot> drcSimulation;
    private final MultiContactTestEnvironment environment;
    private final SimulationConstructionSet simulationConstructionSet;
+   private final DRCController drcController;
    static enum  MultiContactTask {DEFAULT, PUSHUP} ;
    
    
@@ -123,6 +124,7 @@ public class DRCMultiContact
 
       Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, environment, robotInterface, robotInitialSetup, scsInitialSetup, guiInitialSetup, null, null, dynamicGraphicObjectsListRegistry,robotModel);      
       drcSimulation = humanoidSimulation.first();
+      drcController = humanoidSimulation.second();
       
        simulationConstructionSet = drcSimulation.getSimulationConstructionSet();
 
@@ -151,6 +153,11 @@ public class DRCMultiContact
       {
          drcSimulation.start(null);
       }
+   }
+   
+   public DRCController getDRCController()
+   {
+	   return drcController;
    }
    
    public SimulationConstructionSet getSimulationConstructionSet()
