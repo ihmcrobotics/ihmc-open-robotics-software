@@ -84,7 +84,7 @@ public class DRCObstacleCourseTrialsWalkingTaskTest
       BambooTools.reportTestFinishedMessage();
    }
    
-   @Test
+   //@Test, we don't need step on/off two layer CinderBlocks anymore
    public void testStepOnAndOffCinderBlocks() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
