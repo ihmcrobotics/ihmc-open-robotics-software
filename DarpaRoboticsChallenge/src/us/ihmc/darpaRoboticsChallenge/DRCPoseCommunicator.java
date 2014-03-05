@@ -40,17 +40,24 @@ public class DRCPoseCommunicator implements RawOutputWriter
    private final ConcurrentRingBuffer<State> stateRingBuffer;
 
    public DRCPoseCommunicator(SDFFullRobotModel estimatorModel, JointConfigurationGatherer jointConfigurationGathererAndProducer,
-         SDFJointNameMap jointMap, ObjectCommunicator networkProcessorCommunicator, TimestampProvider timestampProvider)
+         SDFJointNameMap jointNameMap, ObjectCommunicator networkProcessorCommunicator, TimestampProvider timestampProvider,
+         DRCRobotJointMap jointMap)
    {
       this.networkProcessorCommunicator = networkProcessorCommunicator;
       this.jointConfigurationGathererAndProducer = jointConfigurationGathererAndProducer;
       this.timeProvider = timestampProvider;
 
-      lidarFrame = estimatorModel.getLidarBaseFrame(jointMap.getLidarSensorName());
-      cameraFrame = estimatorModel.getCameraFrame(jointMap.getLeftCameraName());
+      lidarFrame = estimatorModel.getLidarBaseFrame(jointNameMap.getLidarSensorName());
+      cameraFrame = estimatorModel.getCameraFrame(jointNameMap.getLeftCameraName());
       rootFrame = estimatorModel.getRootJoint().getFrameAfterJoint();
 
       stateRingBuffer = new ConcurrentRingBuffer<State>(State.builder, 8);
+      // initialize the jointData to the correct number of joints
+      int length = jointMap.getOrderedJointNames().length;
+      for (int i = 0; i < stateRingBuffer.getCapacity(); i++)
+      {
+         stateRingBuffer.next().jointData.intitJointNumber(length);
+      }
 
       startWriterThread();
    }
