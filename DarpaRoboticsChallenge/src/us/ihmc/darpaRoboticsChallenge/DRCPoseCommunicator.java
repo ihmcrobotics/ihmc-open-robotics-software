@@ -56,7 +56,10 @@ public class DRCPoseCommunicator implements RawOutputWriter
       int length = jointMap.getOrderedJointNames().length;
       for (int i = 0; i < stateRingBuffer.getCapacity(); i++)
       {
-         stateRingBuffer.next().jointData.intitJointNumber(length);
+         if(!(stateRingBuffer.next()==null))
+         {   
+            stateRingBuffer.next().jointData.intitJointNumber(length);
+         }
       }
 
       startWriterThread();
