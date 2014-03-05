@@ -1,19 +1,44 @@
 package us.ihmc.darpaRoboticsChallenge.initialSetup;
 
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.jointNames;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_elx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_ely;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_shx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_shy;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_wrx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_wry;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_akx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_aky;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_hpx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_hpy;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_hpz;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_kny;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_arm_elx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_arm_ely;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_arm_shx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_arm_shy;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_arm_wrx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_arm_wry;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_leg_akx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_leg_aky;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_leg_hpx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_leg_hpy;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_leg_hpz;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_leg_kny;
+
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.*;
 
 import com.yobotics.simulationconstructionset.GroundContactPoint;
 
-public class DRCSimDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot>
+public class DRCSimDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFRobot>
 {
    private final double groundZ;
    private final double initialYaw;
@@ -32,7 +57,7 @@ public class DRCSimDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot>
       this.initialYaw = initialYaw;
    }
 
-   public void initializeRobot(SDFRobot robot)
+   public void initializeRobot(SDFRobot robot, DRCRobotJointMap jointMap)
    {
       // Avoid singularities at startup
            
@@ -101,5 +126,4 @@ public class DRCSimDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot>
    {
       this.offset.set(offset);
    }
-
 }

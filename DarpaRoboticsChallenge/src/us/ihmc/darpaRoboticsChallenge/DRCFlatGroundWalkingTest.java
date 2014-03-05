@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameter
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
+import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieArmControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieInitialSetup;
@@ -23,7 +24,6 @@ import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieRobotInterface;
 import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieWalkingControllerParameters;
 import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
-import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
@@ -271,7 +271,7 @@ public class DRCFlatGroundWalkingTest
       int simulationDataBufferSize = 16000;
 
       //DRCRobotModel robotModel = DRCRobotModel.getDefaultRobotModel();
-      RobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(0.0);
+      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(0.0);
       DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel, false, useLoadOfContactPointsForTheFeet);
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotInterface.getSimulateDT(), useLoadOfContactPointsForTheFeet);
       scsInitialSetup.setDrawGroundProfile(drawGroundProfile);
@@ -301,7 +301,7 @@ public class DRCFlatGroundWalkingTest
       double timePerRecordTick = DRCConfigParameters.CONTROL_DT;
       int simulationDataBufferSize = 16000;
 
-      RobotInitialSetup<SDFRobot> robotInitialSetup = new ValkyrieInitialSetup(0.0, 0.0);
+      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = new ValkyrieInitialSetup(0.0, 0.0);
       DRCRobotInterface robotInterface = new ValkyrieRobotInterface();
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotInterface.getSimulateDT(), useLoadOfContactPointsForTheFeet);
       scsInitialSetup.setDrawGroundProfile(drawGroundProfile);

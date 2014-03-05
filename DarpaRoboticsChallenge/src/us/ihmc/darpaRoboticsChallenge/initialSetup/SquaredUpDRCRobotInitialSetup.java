@@ -1,15 +1,22 @@
 package us.ihmc.darpaRoboticsChallenge.initialSetup;
 
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.jointNames;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_aky;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_hpy;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_kny;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_leg_aky;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_leg_hpy;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_leg_kny;
+
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel.RobotType;
-import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.*;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 
-public class SquaredUpDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot>
+public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFRobot>
 {
    private final double groundZ;
    private final Transform3D rootToWorld = new Transform3D();
@@ -25,11 +32,22 @@ public class SquaredUpDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot
       this.groundZ = groundZ;
    }
 
-   public void initializeRobot(SDFRobot robot)
+   public void initializeRobot(SDFRobot robot, DRCRobotJointMap jointMap)
    {
       setArmJointPositions(robot);
       setLegJointPositions(robot);
-      setPositionInWorld(robot);
+      setPositionInWorld(robot, jointMap);
+   }
+   
+   protected void setPositionInWorld(SDFRobot robot, DRCRobotJointMap jointMap)
+   {
+      robot.update();
+      robot.getRootJointToWorldTransform(rootToWorld);
+      rootToWorld.get(offset);
+      
+      double pelvisToFoot = jointMap.getPelvisToFoot();
+      offset.setZ(groundZ + pelvisToFoot);
+      robot.setPositionInWorld(offset);
    }
 
    protected void setArmJointPositions(SDFRobot robot)
@@ -60,37 +78,6 @@ public class SquaredUpDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot
       }
    }
 
-   protected void setPositionInWorld(SDFRobot robot)
-   {
-      robot.update();
-      robot.getRootJointToWorldTransform(rootToWorld);
-      rootToWorld.get(offset);
-      
-
-
-//    GroundContactPoint gc1 = robot.getFootGroundContactPoints(RobotSide.LEFT).get(0);
-//    double pelvisToFoot = offset.getZ() - gc1.getPositionPoint().getZ();
-//    System.out.println("Footheight: " + pelvisToFoot);
-
-      // Hardcoded for gazebo integration
-      
-      double pelvisToFoot = 0.0;
-      if(DRCRobotModel.getDefaultRobotModel().getType() == RobotType.ATLAS)
-      {
-         pelvisToFoot = 0.887;
-      } 
-      
-      else if(DRCRobotModel.getDefaultRobotModel().getType() == RobotType.VALKYRIE)
-      {
-         pelvisToFoot = 0.887 + 0.3;
-      }
-
-      offset.setZ(groundZ + pelvisToFoot);
-
-//    offset.add(robot.getPositionInWorld());
-      robot.setPositionInWorld(offset);
-   }
-
    public void getOffset(Vector3d offsetToPack)
    {
       offsetToPack.set(offset);
@@ -100,5 +87,4 @@ public class SquaredUpDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot
    {
       this.offset.set(offset);
    }
-
 }

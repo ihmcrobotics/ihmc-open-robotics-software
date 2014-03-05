@@ -1,14 +1,41 @@
 package us.ihmc.darpaRoboticsChallenge.initialSetup;
 
-import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.*;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.back_bkx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.back_bky;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.back_bkz;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.jointNames;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_elx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_ely;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_shx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_shy;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_wrx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_wry;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_akx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_aky;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_hpx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_hpy;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_hpz;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_kny;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_arm_elx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_arm_ely;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_arm_shx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_arm_shy;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_arm_wrx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_arm_wry;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_leg_akx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_leg_aky;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_leg_hpx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_leg_hpy;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_leg_hpz;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_leg_kny;
 
-import javax.media.j3d.Transform3D;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-public class VRCTask1InVehicleHovering implements RobotInitialSetup<SDFRobot>
+import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+
+public class VRCTask1InVehicleHovering implements DRCRobotInitialSetup<SDFRobot>
 {
 
    private final double groundZ;
@@ -18,7 +45,7 @@ public class VRCTask1InVehicleHovering implements RobotInitialSetup<SDFRobot>
       this.groundZ = groundZ;
    }
 
-   public void initializeRobot(SDFRobot robot)
+   public void initializeRobot(SDFRobot robot, DRCRobotJointMap jointMap)
    {
       // Avoid singularities at startup
       robot.getOneDoFJoint(jointNames[l_arm_shy]).setQ(-1.0518);

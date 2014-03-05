@@ -19,6 +19,7 @@ import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotDampingParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandModel;
+import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCSimulationOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap;
@@ -26,7 +27,6 @@ import us.ihmc.darpaRoboticsChallenge.ros.ROSSandiaJointMap;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCSimulatedSensorNoiseParameters;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCStateEstimatorInterface;
-import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.ScsInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.simulatedSensors.GroundContactPointBasedWrenchCalculator;
@@ -58,7 +58,7 @@ public class DRCSimulationFactory
    private static final boolean COMPUTE_ESTIMATOR_ERROR = true;
 
    public static Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> createSimulation(ControllerFactory controllerFactory,
-         CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCRobotInterface robotInterface, RobotInitialSetup<SDFRobot> robotInitialSetup,
+         CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCRobotInterface robotInterface, DRCRobotInitialSetup<SDFRobot> robotInitialSetup,
          ScsInitialSetup scsInitialSetup, DRCGuiInitialSetup guiInitialSetup, GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, DRCRobotModel drcRobotModel)
    {
@@ -179,7 +179,7 @@ public class DRCSimulationFactory
       {
          System.err.println("Warning! Initializing Estimator to Actual!");
          DRCStateEstimatorInterface drcStateEstimator = robotController.getDRCStateEstimator();
-         initializeEstimatorToActual(drcStateEstimator, robotInitialSetup, simulatedRobot);
+         initializeEstimatorToActual(drcStateEstimator, robotInitialSetup, simulatedRobot, drcRobotModel.getJointMap(false, false));
       }
 
       if (COMPUTE_ESTIMATOR_ERROR && robotController.getDRCStateEstimator() != null)
@@ -240,14 +240,14 @@ public class DRCSimulationFactory
       }
    }
 
-   private static void initializeEstimatorToActual(DRCStateEstimatorInterface drcStateEstimator, RobotInitialSetup<SDFRobot> robotInitialSetup, SDFRobot simulatedRobot)
+   private static void initializeEstimatorToActual(DRCStateEstimatorInterface drcStateEstimator, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, SDFRobot simulatedRobot, DRCRobotJointMap jointMap)
    {
       // The following is to get the initial CoM position from the robot. 
       // It is cheating for now, and we need to move to where the 
       // robot itself determines coordinates, and the sensors are all
       // in the robot-determined world coordinates..
       Point3d initialCoMPosition = new Point3d();
-      robotInitialSetup.initializeRobot(simulatedRobot);
+      robotInitialSetup.initializeRobot(simulatedRobot, jointMap);
       updateRobot(simulatedRobot);
 
       simulatedRobot.computeCenterOfMass(initialCoMPosition);

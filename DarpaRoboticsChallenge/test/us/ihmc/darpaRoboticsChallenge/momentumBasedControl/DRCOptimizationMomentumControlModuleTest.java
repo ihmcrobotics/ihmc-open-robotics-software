@@ -40,10 +40,10 @@ import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.AtlasAndHandRobotParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup;
-import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.RandomTools;
@@ -84,8 +84,8 @@ public class DRCOptimizationMomentumControlModuleTest
       SDFRobot robot = jaxbSDFLoader.createRobot(jointMap, false);
       ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, jointMap.getAnkleHeight());
 
-      RobotInitialSetup<SDFRobot> intialSetup = new SquaredUpDRCRobotInitialSetup();
-      initializeRobot(fullRobotModel, robot, referenceFrames, intialSetup);
+      DRCRobotInitialSetup<SDFRobot> intialSetup = new SquaredUpDRCRobotInitialSetup();
+      initializeRobot(fullRobotModel, robot, referenceFrames, intialSetup, jointMap);
 
       SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
 
@@ -169,8 +169,8 @@ public class DRCOptimizationMomentumControlModuleTest
       SDFRobot robot = jaxbSDFLoader.createRobot(jointMap, false);
       ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, jointMap.getAnkleHeight());
 
-      RobotInitialSetup<SDFRobot> intialSetup = new SquaredUpDRCRobotInitialSetup();
-      initializeRobot(fullRobotModel, robot, referenceFrames, intialSetup);
+      DRCRobotInitialSetup<SDFRobot> intialSetup = new SquaredUpDRCRobotInitialSetup();
+      initializeRobot(fullRobotModel, robot, referenceFrames, intialSetup, jointMap);
 
       SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
       RigidBody elevator = fullRobotModel.getElevator();
@@ -303,9 +303,9 @@ public class DRCOptimizationMomentumControlModuleTest
       }
    }
 
-   private void initializeRobot(SDFFullRobotModel fullRobotModel, SDFRobot robot, ReferenceFrames referenceFrames, RobotInitialSetup<SDFRobot> intialSetup)
+   private void initializeRobot(SDFFullRobotModel fullRobotModel, SDFRobot robot, ReferenceFrames referenceFrames, DRCRobotInitialSetup<SDFRobot> intialSetup, DRCRobotJointMap jointMap)
    {
-      intialSetup.initializeRobot(robot);
+      intialSetup.initializeRobot(robot, jointMap);
       SDFPerfectSimulatedSensorReader sensorReader = new SDFPerfectSimulatedSensorReader(robot, fullRobotModel, referenceFrames);
       sensorReader.read();
    }
