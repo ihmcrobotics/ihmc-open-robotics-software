@@ -25,10 +25,10 @@ public enum DRCRobotModel
       ATLAS, VALKYRIE, ACSELL
    }
    
-   public static DRCRobotModel getDefaultRobotModel()
-   {
-      return DRCLocalConfigParameters.robotModelToUse;
-   }
+//   public static DRCRobotModel getDefaultRobotModel()
+//   {
+//      return DRCLocalConfigParameters.robotModelToUse;
+//   }
    
    public ArmControllerParameters getArmControllerParameters()
    {
