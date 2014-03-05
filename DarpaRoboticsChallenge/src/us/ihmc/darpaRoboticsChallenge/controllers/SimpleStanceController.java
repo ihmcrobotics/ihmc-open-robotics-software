@@ -36,10 +36,10 @@ import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationVisualizer;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.AtlasAndHandRobotParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup;
-import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -389,8 +389,8 @@ public class SimpleStanceController implements RobotController
       SDFRobot robot = jaxbSDFLoader.createRobot(jointMap, false);
       ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, jointMap.getAnkleHeight());
 
-      RobotInitialSetup<SDFRobot> intialSetup = new SquaredUpDRCRobotInitialSetup();
-      intialSetup.initializeRobot(robot);
+      DRCRobotInitialSetup<SDFRobot> intialSetup = new SquaredUpDRCRobotInitialSetup();
+      intialSetup.initializeRobot(robot, jointMap);
 
       double footForward = AtlasAndHandRobotParameters.DRC_ROBOT_FOOT_FORWARD;
       double footBack = AtlasAndHandRobotParameters.DRC_ROBOT_FOOT_BACK;

@@ -18,6 +18,8 @@ import us.ihmc.utilities.Pair;
 
 public abstract class DRCRobotJointMap implements SDFJointNameMap
 {
+   public abstract double getPelvisToFoot();
+   
    public abstract Set<String> getLastSimulatedJoints();
 
    public abstract String[] getIMUSensorsToUse();

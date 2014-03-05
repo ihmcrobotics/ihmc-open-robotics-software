@@ -10,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.darpaRoboticsChallenge.AtlasRobotMultiContactControllerParameters;
-import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.FormattingTools;
@@ -21,7 +21,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 // TODO: Temporary initial setup for testing the grasping control
-public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements RobotInitialSetup<SDFRobot>
+public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCRobotInitialSetup<SDFRobot>
 {
    private enum Methods
    {
@@ -45,7 +45,7 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements Robo
       this.groundZ = groundZ;
    }
 
-   public void initializeRobot(SDFRobot robot)
+   public void initializeRobot(SDFRobot robot, DRCRobotJointMap jointMap)
    {
       for (RobotSide robotSide : RobotSide.values)
       {

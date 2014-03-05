@@ -1,11 +1,11 @@
 package us.ihmc.darpaRoboticsChallenge.initialSetup;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 
-public class PushUpDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot>
+public class PushUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFRobot>
 {
-   public void initializeRobot(SDFRobot robot)
+   public void initializeRobot(SDFRobot robot, DRCRobotJointMap jointMap)
    {
       double elbowBend = Math.PI / 2.0;
       double handRotation = Math.PI / 2.0;

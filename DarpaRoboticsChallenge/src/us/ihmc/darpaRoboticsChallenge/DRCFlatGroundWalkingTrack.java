@@ -14,10 +14,10 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Fl
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.SimulatedModelCorruptorDRCRobotInterface;
+import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCSimDRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.remote.RemoteAtlasVisualizer;
 import us.ihmc.graphics3DAdapter.GroundProfile;
-import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -44,7 +44,7 @@ public class DRCFlatGroundWalkingTrack
    private final YoVariableServer robotVisualizer;
 
    public DRCFlatGroundWalkingTrack(WalkingControllerParameters drcControlParameters, ArmControllerParameters armControllerParameters, 
-                                    DRCRobotInterface robotInterface, RobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
+                                    DRCRobotInterface robotInterface, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
                                     DRCSCSInitialSetup scsInitialSetup, boolean useVelocityAndHeadingScript, AutomaticSimulationRunner automaticSimulationRunner,
                                     double timePerRecordTick, int simulationDataBufferSize, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model)
    {
@@ -192,7 +192,7 @@ public class DRCFlatGroundWalkingTrack
       scsInitialSetup.setInitializeEstimatorToActual(true);
       
       double initialYaw = 0.3;
-      RobotInitialSetup<SDFRobot> robotInitialSetup = new DRCSimDRCRobotInitialSetup(groundHeight, initialYaw);
+      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = new DRCSimDRCRobotInitialSetup(groundHeight, initialYaw);
 
       boolean useVelocityAndHeadingScript = true;
       boolean cheatWithGroundHeightAtForFootstep = false;

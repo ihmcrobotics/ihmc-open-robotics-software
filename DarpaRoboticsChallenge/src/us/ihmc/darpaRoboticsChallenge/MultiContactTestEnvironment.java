@@ -15,10 +15,10 @@ import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.AtlasAndHandRobotParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -37,12 +37,12 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
    private final RobotSide[] footContactSides;
    private final RobotSide[] handContactSides;
 
-   public MultiContactTestEnvironment(RobotInitialSetup<SDFRobot> robotInitialSetup, DRCRobotJointMap jointMap,
+   public MultiContactTestEnvironment(DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCRobotJointMap jointMap,
                                       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, RobotSide[] footContactSides, RobotSide[] handContactSides)
    {
       JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       SDFRobot robotForEnvironmentSetup = jaxbSDFLoader.createRobot(jointMap, DRCConfigParameters.USE_COLLISIONS_MESHS_FOR_VISUALIZATION);
-      robotInitialSetup.initializeRobot(robotForEnvironmentSetup);
+      robotInitialSetup.initializeRobot(robotForEnvironmentSetup, jointMap);
       robotForEnvironmentSetup.update();
       FullRobotModel fullRobotModelForEnvironmentSetup = jaxbSDFLoader.createFullRobotModel(jointMap);
 

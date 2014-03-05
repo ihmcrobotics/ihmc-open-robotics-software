@@ -33,6 +33,8 @@ public class AtlasJointMap extends DRCRobotJointMap
    public static final SideDependentList<String> feetForceSensorNames = new SideDependentList<String>("l_leg_akx", "r_leg_akx");
    SideDependentList<String> jointBeforeThighNames = new SideDependentList<String>("l_leg_hpy","r_leg_hpy");
    
+   public static final double pelvisToFoot = 0.887;
+   
    public static final String chestName = "utorso";
    public static final String pelvisName = "pelvis";
    public static final String headName = "head";
@@ -268,6 +270,12 @@ public class AtlasJointMap extends DRCRobotJointMap
       jointNameGroundContactPointMap.addAll(pelvisContactPoints);
       jointNameGroundContactPointMap.addAll(pelvisBackContactPoints);
       jointNameGroundContactPointMap.addAll(chestBackContactPoints);
+   }
+   
+   @Override
+   public double getPelvisToFoot()
+   {
+      return pelvisToFoot;
    }
 
    @Override

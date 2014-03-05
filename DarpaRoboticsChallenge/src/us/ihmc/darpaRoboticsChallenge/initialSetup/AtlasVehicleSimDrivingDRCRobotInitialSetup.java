@@ -1,13 +1,28 @@
 package us.ihmc.darpaRoboticsChallenge.initialSetup;
 
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.jointNames;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_elx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_ely;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_shx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_wry;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_aky;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_hpy;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_kny;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_arm_elx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_arm_ely;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_arm_shx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_arm_wry;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_leg_aky;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_leg_hpy;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_leg_kny;
+
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.*;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 
-public class AtlasVehicleSimDrivingDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot>
+public class AtlasVehicleSimDrivingDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFRobot>
 {
 
    private final double groundZ;
@@ -19,7 +34,7 @@ public class AtlasVehicleSimDrivingDRCRobotInitialSetup implements RobotInitialS
       this.groundZ = groundZ;
    }
 
-   public void initializeRobot(SDFRobot robot)
+   public void initializeRobot(SDFRobot robot, DRCRobotJointMap jointMap)
    {
       double thighPitch = 0.0;
       double forwardLean = 0.0;
