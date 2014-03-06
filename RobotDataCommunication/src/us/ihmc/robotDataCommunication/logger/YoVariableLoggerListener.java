@@ -127,9 +127,10 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       {
          try
          {
-            
-            videoDataLoggers.add(new VideoDataLogger(directory, logProperties, VideoSettings.SONY_720P60_TRIPOD, options));
-            videoDataLoggers.add(new VideoDataLogger(directory, logProperties, VideoSettings.BLACKMAGIC_1080P30_CRANE, options));
+            for(VideoSettings camera : options.getCameras())
+            {
+               videoDataLoggers.add(new VideoDataLogger(directory, logProperties, camera, options));
+            }
          }
          catch (IOException e)
          {

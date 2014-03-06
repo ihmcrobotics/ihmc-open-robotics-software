@@ -1,19 +1,24 @@
 package us.ihmc.robotDataCommunication.logger;
 
+import us.ihmc.robotDataCommunication.logger.util.BMDCapture.VideoIn;
+
 public enum VideoSettings
 {
 /**
  * 
  * Known BlackMagic Mini Recorder modes
  * 
- * mode = 11 -> 1080p59.94Hz
- * mode = 12 -> 1080p60Hz
- * mode = 9 -> 1080p60
+ * mode = 11 -> 1080i59.94Hz
+ * mode = 12 -> 1080i60Hz
+ * mode = 9 -> 1080p30
  * mode = 14 -> 720p59.94Hz
+ * mode = 15 -> 720p60Hz
 */   
    
-   SONY_720P60_TRIPOD("Tripod", 0, 14, false),
-   BLACKMAGIC_1080P30_CRANE("Crane", 1, 9, false);
+   SONY_720P60_TRIPOD("Tripod", 0, 14, false, VideoIn.SDI),
+   BLACKMAGIC_1080P30_CRANE("A-Frame", 1, 9, false, VideoIn.SDI),
+   CANON_XA25_720P("Valkyrie Tripod", 0, 14, false, VideoIn.SDI),
+   MARSHALL_CV330_720P("Valkyrie GorillaPod", 1, 15, false, VideoIn.SDI);
    
    
    
@@ -21,7 +26,7 @@ public enum VideoSettings
    private final int device;
    private final int mode;
    private final boolean interlaced;
-
+   private final VideoIn videoIn;
 
    
    public String getDescription()
@@ -44,12 +49,18 @@ public enum VideoSettings
       return interlaced;
    }
    
-   private VideoSettings(String description, int device, int mode, boolean interlaced)
+   private VideoSettings(String description, int device, int mode, boolean interlaced, VideoIn videoIn)
    {
       this.description = description;
       this.device = device;
       this.mode = mode;
       this.interlaced = interlaced;
+      this.videoIn = videoIn;
+   }
+
+   public VideoIn getVideoIn()
+   {
+      return videoIn;
    }
 
 }

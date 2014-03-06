@@ -33,6 +33,7 @@ public class VideoDataLogger implements TimestampListener
       BMDCapture bmdCapture = new BMDCapture();
       bmdCapture.setCard(settings.getDevice());
       bmdCapture.setMode(settings.getMode());
+      bmdCapture.setVideoIn(settings.getVideoIn());
       bmdCapture.setFormat("nut");
       bmdCapture.setFilename("pipe:1");
       timestampData = logPath.getAbsolutePath() + File.separator + timestampDataFilename;
