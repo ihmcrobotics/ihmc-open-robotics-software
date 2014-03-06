@@ -62,6 +62,10 @@ import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
 
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAP;
+import com.martiansoftware.jsap.JSAPException;
+import com.martiansoftware.jsap.JSAPResult;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -382,8 +386,35 @@ public class SimpleStanceController implements RobotController
 
    public static void main(String[] args)
    {
-      DRCRobotModel robotModel = DRCLocalConfigParameters.robotModelToUse;
-      DRCRobotJointMap jointMap = robotModel.getJointMap(false, false);
+      // Flag to set robot model
+      JSAP jsap = new JSAP();
+      FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
+      robotModel.setHelp("Robot models: " + Arrays.toString(DRCRobotModel.values()));
+      
+      DRCRobotModel model;
+      try
+      {
+         jsap.registerParameter(robotModel);
+
+         JSAPResult config = jsap.parse(args);
+
+         if (config.success())
+         {
+            model = DRCRobotModel.valueOf(config.getString("robotModel"));
+         }
+         else
+         {
+            System.out.println("Enter a robot model.");
+            return;
+         }
+      }
+      catch (JSAPException e)
+      {
+         e.printStackTrace();
+         return;
+      }
+      
+      DRCRobotJointMap jointMap = model.getJointMap(false, false);
       JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       SDFFullRobotModel fullRobotModel = jaxbSDFLoader.createFullRobotModel(jointMap);
       SDFRobot robot = jaxbSDFLoader.createRobot(jointMap, false);
