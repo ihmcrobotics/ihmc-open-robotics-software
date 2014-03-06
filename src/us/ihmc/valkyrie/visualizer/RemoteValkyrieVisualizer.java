@@ -20,7 +20,7 @@ public class RemoteValkyrieVisualizer
    public static final String defaultHost = ValkyrieNetworkParameters.CONTROL_COMPUTER_HOST;
    public static final int defaultPort = ValkyrieNetworkParameters.VARIABLE_SERVER_PORT;
 
-   private static final boolean USE_FORCE_CONTROL = false;
+   private static final boolean USE_FORCE_CONTROL = true;
 
    public RemoteValkyrieVisualizer(String host, int port, int bufferSize)
    {
