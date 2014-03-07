@@ -111,8 +111,8 @@ public class DRCBumpyAndShallowRampsWalkingTest
 
       if (checkNothingChanged) maximumWalkTime = 3.0;
       
-      WalkingControllerParameters drcControlParameters = DRCLocalConfigParameters.defaultModel.getWalkingControlParamaters();
-      ArmControllerParameters armControllerParameters = DRCLocalConfigParameters.defaultModel.getArmControllerParameters();
+      WalkingControllerParameters drcControlParameters = robotModel.getWalkingControlParamaters();
+      ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
       
 //      drcControlParameters.setNominalHeightAboveAnkle(drcControlParameters.nominalHeightAboveAnkle() - 0.03);    // Need to do this or the leg goes straight and the robot falls.
 
@@ -194,8 +194,8 @@ public class DRCBumpyAndShallowRampsWalkingTest
       boolean cheatWithGroundHeightAtForFootstep = true;
       boolean useLoadOfContactPointsForTheFeet = true;
       
-      WalkingControllerParameters drcControlParameters = DRCLocalConfigParameters.defaultModel.getWalkingControlParamaters();
-      ArmControllerParameters armControllerParameters = DRCLocalConfigParameters.defaultModel.getArmControllerParameters();
+      WalkingControllerParameters drcControlParameters = robotModel.getWalkingControlParamaters();
+      ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
       
 //      drcControlParameters.setNominalHeightAboveAnkle(drcControlParameters.nominalHeightAboveAnkle() - 0.03);    // Need to do this or the leg goes straight and the robot falls.
 
@@ -324,8 +324,8 @@ public class DRCBumpyAndShallowRampsWalkingTest
       GroundProfile groundProfile = createBumpyGroundProfile();
       boolean drawGroundProfile = true;
       
-      WalkingControllerParameters drcControlParameters = DRCLocalConfigParameters.defaultModel.getWalkingControlParamaters();
-      ArmControllerParameters armControllerParameters = DRCLocalConfigParameters.defaultModel.getArmControllerParameters();
+      WalkingControllerParameters drcControlParameters = robotModel.getWalkingControlParamaters();
+      ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
       DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, groundProfile, drawGroundProfile,
             useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, useLoadOfContactPointsForTheFeet);
 

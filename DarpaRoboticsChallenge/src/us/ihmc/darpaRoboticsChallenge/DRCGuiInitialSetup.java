@@ -42,7 +42,9 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
    }
    public void initializeGUI(SimulationConstructionSet scs, Robot robot)
    {
-      initializeGUI(scs,robot,DRCLocalConfigParameters.defaultModel);
+      // use
+      // public void initializeGUI(SimulationConstructionSet scs, Robot robot, DRCRobotModel robotModel)
+      throw new RuntimeException("Should not be here. This function is a relict of the GuiInitialSetup interface.");
    }
    
    public void initializeGUI(SimulationConstructionSet scs, Robot robot, DRCRobotModel robotModel)
