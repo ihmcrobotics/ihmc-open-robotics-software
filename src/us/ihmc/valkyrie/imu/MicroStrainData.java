@@ -1,9 +1,9 @@
 package us.ihmc.valkyrie.imu;
 
+import us.ihmc.concurrent.Builder;
+
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
-
-import us.ihmc.concurrent.Builder;
 
 public class MicroStrainData
 {
