@@ -116,6 +116,13 @@ public class DRCRobotSDFLoader
          case VALKYRIE:
             fileInputStream = myClass.getResourceAsStream("models/V1/sdf/V1_sim.sdf");
             break;
+
+         case AXL:
+            fileInputStream = myClass.getResourceAsStream("acsell/models/axl/axl_description/axl/robots/axl.sdf");
+            break;
+         case BONO:
+            fileInputStream = myClass.getResourceAsStream("acsell/models/axl/axl_description/bono/robots/bono.sdf");
+            break;
          default :
             throw new RuntimeException("DRCRobotSDFLoader: Unimplemented enumeration case : " + selectedModel);
       }

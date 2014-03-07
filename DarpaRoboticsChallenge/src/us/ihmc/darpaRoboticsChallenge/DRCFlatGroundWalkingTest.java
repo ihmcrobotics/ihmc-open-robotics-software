@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSi
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
+import us.ihmc.darpaRoboticsChallenge.acsell.ACSELLControllerComponentFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup;
@@ -51,6 +52,14 @@ public class DRCFlatGroundWalkingTest
    private BlockingSimulationRunner blockingSimulationRunner;
    private DRCController drcController;
    private RobotVisualizer robotVisualizer;
+   
+
+   private static final double standingTimeDuration = 1.0;
+   private static final double defaultWalkingTimeDuration = BambooTools.isEveryCommitBuild() ? 45.0 : 90.0;
+   private static final boolean useVelocityAndHeadingScript = true;
+   private static final boolean cheatWithGroundHeightAtForFootstep = false;
+   private static final boolean useLoadOfContactPointsForTheFeet = false;
+   private static final boolean drawGroundProfile = false;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -97,41 +106,30 @@ public class DRCFlatGroundWalkingTest
    public void testAtlasFlatGroundWalking() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-
-      double standingTimeDuration = 1.0;
-      double walkingTimeDuration = 90.0;
-      DRCRobotModel robotModel = DRCRobotModel.DRC_NO_HANDS;
-
-      if (BambooTools.isEveryCommitBuild())
-      {
-         walkingTimeDuration = 45.0;
-      }
       
-      boolean useVelocityAndHeadingScript = true;
-      boolean cheatWithGroundHeightAtForFootstep = false;
-      boolean useLoadOfContactPointsForTheFeet = false;
 
-      GroundProfile groundProfile = new FlatGroundProfile();
-      boolean drawGroundProfile = false;
+      DRCRobotModel robotModel = DRCRobotModel.DRC_NO_HANDS;
+      DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel, false, useLoadOfContactPointsForTheFeet);
+      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(0.0);
 
       WalkingControllerParameters drcControlParameters = new AtlasWalkingControllerParameters();
       ArmControllerParameters armControllerParameters = new AtlasArmControllerParameters();
-      DRCFlatGroundWalkingTrack track = setupSimulationTrackForAtlas(drcControlParameters, armControllerParameters, groundProfile, drawGroundProfile, useVelocityAndHeadingScript,
-            cheatWithGroundHeightAtForFootstep, useLoadOfContactPointsForTheFeet, robotModel);
+      DRCFlatGroundWalkingTrack track = setupFlatGroundSimulationTrack(drcControlParameters, armControllerParameters, robotInterface, robotInitialSetup, robotModel);
 
       drcController = track.getDrcController();
       SimulationConstructionSet scs = track.getSimulationConstructionSet();
 
       NothingChangedVerifier nothingChangedVerifier = null;
+      double walkingTimeDuration;
       if (checkNothingChanged)
       {
          nothingChangedVerifier = new NothingChangedVerifier("AtlasFlatGroundWalkingTest", scs);
          walkingTimeDuration = 7.0;
       }
+      else
+         walkingTimeDuration = defaultWalkingTimeDuration;
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
-
-      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("walk");
 
 //    DoubleYoVariable desiredHeading = (DoubleYoVariable) scs.getVariable("desiredHeading");
 //    DoubleYoVariable pelvisYaw = (DoubleYoVariable) scs.getVariable("q_yaw");
@@ -175,35 +173,88 @@ public class DRCFlatGroundWalkingTest
    {
       BambooTools.reportTestStartedMessage();
 
-      double standingTimeDuration = 1.0;
-      double walkingTimeDuration = 90.0;
-
-      if (BambooTools.isEveryCommitBuild())
-      {
-         walkingTimeDuration = 45.0;
-      }
+      DRCRobotModel robotModel = DRCRobotModel.VALKYRIE;
+      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = new ValkyrieInitialSetup(0.0, 0.0);
+      DRCRobotInterface robotInterface = new ValkyrieRobotInterface();
       
-      boolean useVelocityAndHeadingScript = true;
-      boolean cheatWithGroundHeightAtForFootstep = false;
-      boolean useLoadOfContactPointsForTheFeet = false;
-
-      GroundProfile groundProfile = new FlatGroundProfile();
-      boolean drawGroundProfile = false;
-
-      WalkingControllerParameters drcControlParameters = new ValkyrieWalkingControllerParameters();
+      WalkingControllerParameters walkingControllerParameters = new ValkyrieWalkingControllerParameters();
       ArmControllerParameters armControllerParameters = new ValkyrieArmControllerParameters();
-      DRCFlatGroundWalkingTrack track = setupSimulationTrackForValkyrie(drcControlParameters, armControllerParameters, groundProfile, drawGroundProfile, useVelocityAndHeadingScript,
-            cheatWithGroundHeightAtForFootstep, useLoadOfContactPointsForTheFeet);
+      DRCFlatGroundWalkingTrack track = setupFlatGroundSimulationTrack(walkingControllerParameters, armControllerParameters, robotInterface, robotInitialSetup, robotModel);
 
       drcController = track.getDrcController();
       SimulationConstructionSet scs = track.getSimulationConstructionSet();
 
       NothingChangedVerifier nothingChangedVerifier = null;
+      double walkingTimeDuration;
       if (checkNothingChanged)
       {
          nothingChangedVerifier = new NothingChangedVerifier("ValkyrieFlatGroundWalkingTest", scs);
          walkingTimeDuration = 7.0;
       }
+      else
+         walkingTimeDuration = defaultWalkingTimeDuration;
+
+      blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
+
+      DoubleYoVariable comError = (DoubleYoVariable) scs.getVariable("positionError_comHeight");
+
+      initiateMotion(scs, standingTimeDuration, blockingSimulationRunner);
+
+      double timeIncrement = 1.0;
+
+      while (scs.getTime() - standingTimeDuration < walkingTimeDuration)
+      {
+         blockingSimulationRunner.simulateAndBlock(timeIncrement);
+
+         // TODO: Put test for heading back in here.
+//       if (!MathTools.epsilonEquals(desiredHeading.getDoubleValue(), pelvisYaw.getDoubleValue(), epsilonHeading))
+//       {
+//          fail("Desired Heading too large of error: " + desiredHeading.getDoubleValue());
+//       }
+
+         //TODO: Reduce the error tolerance from 2.5 cm to under 1 cm after we change things so that we are truly 
+         // controlling pelvis height, not CoM height.
+         if (Math.abs(comError.getDoubleValue()) > 0.06)
+         {
+            fail("Math.abs(comError.getDoubleValue()) > 0.06: " + comError.getDoubleValue() + " at t = " + scs.getTime());
+         }
+      }
+
+      if (checkNothingChanged)
+         checkNothingChanged(nothingChangedVerifier);
+
+      createMovie(scs);
+      BambooTools.reportTestFinishedMessage();
+
+   }
+
+
+   @Test
+   public void testBONOFlatGroundWalking() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      DRCRobotModel robotModel = DRCRobotModel.BONO;
+      ACSELLControllerComponentFactory acsellControllerComponentFactory = new ACSELLControllerComponentFactory(robotModel);
+      DRCRobotInterface robotInterface = acsellControllerComponentFactory.getRobotInterface();
+      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = acsellControllerComponentFactory.getRobotInitialSetup(0.0, 0.0);
+      WalkingControllerParameters walkingControllerParameters = acsellControllerComponentFactory.getWalkingControllerParameters();
+      ArmControllerParameters armControllerParameters = acsellControllerComponentFactory.getArmControllerParameters();
+      
+      DRCFlatGroundWalkingTrack track = setupFlatGroundSimulationTrack(walkingControllerParameters, armControllerParameters, robotInterface, robotInitialSetup, robotModel);
+
+      drcController = track.getDrcController();
+      SimulationConstructionSet scs = track.getSimulationConstructionSet();
+
+      NothingChangedVerifier nothingChangedVerifier = null;
+      double walkingTimeDuration;
+      if (checkNothingChanged)
+      {
+         nothingChangedVerifier = new NothingChangedVerifier("BONOFlatGroundWalkingTest", scs);
+         walkingTimeDuration = 7.0;
+      }
+      else
+         walkingTimeDuration = defaultWalkingTimeDuration;
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
@@ -239,7 +290,6 @@ public class DRCFlatGroundWalkingTest
 
    }
    
-   
  
    private void initiateMotion(SimulationConstructionSet scs, double standingTimeDuration, BlockingSimulationRunner runner)
            throws SimulationExceededMaximumTimeException
@@ -260,49 +310,18 @@ public class DRCFlatGroundWalkingTest
 
    boolean setupForCheatingUsingGroundHeightAtForFootstepProvider = false;
 
-   private DRCFlatGroundWalkingTrack setupSimulationTrackForAtlas(WalkingControllerParameters drcControlParameters, ArmControllerParameters
-         armControllerParameters, GroundProfile groundProfile, boolean drawGroundProfile,
-         boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, boolean useLoadOfContactPointsForTheFeet, DRCRobotModel robotModel)
+   private DRCFlatGroundWalkingTrack setupFlatGroundSimulationTrack(WalkingControllerParameters walkingControllerParameters,
+         ArmControllerParameters armControllerParameters, DRCRobotInterface robotInterface, DRCRobotInitialSetup<SDFRobot> robotInitialSetup,
+         DRCRobotModel robotModel)
    {
       AutomaticSimulationRunner automaticSimulationRunner = null;
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
 
       double timePerRecordTick = DRCConfigParameters.CONTROL_DT;
       int simulationDataBufferSize = 16000;
-
-      //DRCRobotModel robotModel = DRCRobotModel.getDefaultRobotModel();
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(0.0);
-      DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel, false, useLoadOfContactPointsForTheFeet);
-      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotInterface.getSimulateDT(), useLoadOfContactPointsForTheFeet);
-      scsInitialSetup.setDrawGroundProfile(drawGroundProfile);
       
-      if (cheatWithGroundHeightAtForFootstep)
-         scsInitialSetup.setInitializeEstimatorToActual(true);
-
-      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(drcControlParameters, armControllerParameters, robotInterface, robotInitialSetup, guiInitialSetup,
-                                                               scsInitialSetup, useVelocityAndHeadingScript, automaticSimulationRunner, timePerRecordTick,
-                                                               simulationDataBufferSize, cheatWithGroundHeightAtForFootstep,robotModel);
-
-      SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
-
-      setupCameraForUnitTest(scs);
-
-      return drcFlatGroundWalkingTrack;
-   }
-
-   private DRCFlatGroundWalkingTrack setupSimulationTrackForValkyrie(WalkingControllerParameters walkingControllerParameters, ArmControllerParameters
-         armControllerParameters, GroundProfile groundProfile, boolean drawGroundProfile,
-         boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, boolean useLoadOfContactPointsForTheFeet)
-   {
-      DRCRobotModel robotModel = DRCRobotModel.VALKYRIE;
-      AutomaticSimulationRunner automaticSimulationRunner = null;
-      DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
-
-      double timePerRecordTick = DRCConfigParameters.CONTROL_DT;
-      int simulationDataBufferSize = 16000;
-
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = new ValkyrieInitialSetup(0.0, 0.0);
-      DRCRobotInterface robotInterface = new ValkyrieRobotInterface();
+      GroundProfile groundProfile = new FlatGroundProfile();
+      
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotInterface.getSimulateDT(), useLoadOfContactPointsForTheFeet);
       scsInitialSetup.setDrawGroundProfile(drawGroundProfile);
       
@@ -311,7 +330,7 @@ public class DRCFlatGroundWalkingTest
 
       DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(walkingControllerParameters, armControllerParameters, robotInterface, robotInitialSetup, guiInitialSetup,
                                                                scsInitialSetup, useVelocityAndHeadingScript, automaticSimulationRunner, timePerRecordTick,
-                                                               simulationDataBufferSize, cheatWithGroundHeightAtForFootstep,robotModel);
+                                                               simulationDataBufferSize, cheatWithGroundHeightAtForFootstep, robotModel);
 
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
 
@@ -319,7 +338,6 @@ public class DRCFlatGroundWalkingTest
 
       return drcFlatGroundWalkingTrack;
    }
-   
 
    private void checkNothingChanged(NothingChangedVerifier nothingChangedVerifier)
    {
