@@ -38,11 +38,13 @@ public class DRCPoseCommunicator implements RawOutputWriter
    private State currentState;
 
    private final ConcurrentRingBuffer<State> stateRingBuffer;
+   private final int numberOfJoints;
 
    public DRCPoseCommunicator(SDFFullRobotModel estimatorModel, JointConfigurationGatherer jointConfigurationGathererAndProducer,
          SDFJointNameMap jointNameMap, ObjectCommunicator networkProcessorCommunicator, TimestampProvider timestampProvider,
          DRCRobotJointMap jointMap)
    {
+      numberOfJoints = jointMap.getOrderedJointNames().length;
       this.networkProcessorCommunicator = networkProcessorCommunicator;
       this.jointConfigurationGathererAndProducer = jointConfigurationGathererAndProducer;
       this.timeProvider = timestampProvider;
@@ -52,15 +54,6 @@ public class DRCPoseCommunicator implements RawOutputWriter
       rootFrame = estimatorModel.getRootJoint().getFrameAfterJoint();
 
       stateRingBuffer = new ConcurrentRingBuffer<State>(State.builder, 8);
-      // initialize the jointData to the correct number of joints
-      int length = jointMap.getOrderedJointNames().length;
-      for (int i = 0; i < stateRingBuffer.getCapacity(); i++)
-      {
-         if(!(stateRingBuffer.next()==null))
-         {   
-            stateRingBuffer.next().jointData.intitJointNumber(length);
-         }
-      }
 
       startWriterThread();
    }
@@ -132,7 +125,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
       }
       
       long timestamp = timeProvider.getTimestamp();
-      jointConfigurationGathererAndProducer.packEstimatorJoints(timestamp, state.jointData);
+      jointConfigurationGathererAndProducer.packEstimatorJoints(timestamp, state.jointData, numberOfJoints);
       state.poseData.setAll(timestamp, rootTransform, cameraTransform, lidarTransform);
 
       stateRingBuffer.commit();
