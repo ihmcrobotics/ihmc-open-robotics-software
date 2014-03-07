@@ -63,11 +63,16 @@ public class JointConfigurationGatherer
 
    // upon receiving new atlas joint data, pulls the latest hand states and fills a
    // DRCJointConfigurationData object on the ConcurrentRingBuffer
-   public void packEstimatorJoints(long timestamp, DRCJointConfigurationData jointConfigurationData)
+   public void packEstimatorJoints(long timestamp, DRCJointConfigurationData jointConfigurationData, int numberOfJoints)
    {
       if (jointConfigurationData == null)
       {
          return;
+      }
+      
+      if(jointConfigurationData.jointAngles == null)
+      {
+         jointConfigurationData.initJointNumber(numberOfJoints);
       }
 
       double[] jointAngles = jointConfigurationData.getJointAngles();
