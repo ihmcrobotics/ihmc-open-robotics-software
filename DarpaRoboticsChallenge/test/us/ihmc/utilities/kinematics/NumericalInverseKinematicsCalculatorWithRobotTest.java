@@ -33,6 +33,7 @@ import us.ihmc.utilities.test.JUnitTools;
 public class NumericalInverseKinematicsCalculatorWithRobotTest
 {
    private static final long seed = 1391092L;
+   private static final DRCRobotModel robotModel = DRCRobotModel.ATLAS_SANDIA_HANDS;
    private static final Random randomNumberGenerator = new Random(seed);
    private static final ArrayList<Double> shoulderRollLimits = new ArrayList<Double>();
    private static final ArrayList<Double> elbowRollLimits = new ArrayList<Double>();
@@ -70,7 +71,6 @@ public class NumericalInverseKinematicsCalculatorWithRobotTest
    public NumericalInverseKinematicsCalculatorWithRobotTest()
    {
       InverseKinematicsSolver inverseKinameticSolverToUse = InverseKinematicsSolver.MAARTEN_SOLVER;
-      DRCRobotModel robotModel = DRCLocalConfigParameters.robotModelToUse;
       DRCRobotJointMap jointMap = robotModel.getJointMap(false, false);
       JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap, true);
       SDFFullRobotModelFactory fullRobotModelFactory = new SDFFullRobotModelFactory(jaxbSDFLoader.getGeneralizedSDFRobotModel(jointMap.getModelName()),

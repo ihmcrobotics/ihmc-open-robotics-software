@@ -1,5 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.remote;
 
+import java.util.Arrays;
+
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.atlas.visualization.SliderBoardControllerListener;
 import us.ihmc.atlas.visualization.SliderBoardFactory;
@@ -21,11 +23,10 @@ public class RemoteAtlasVisualizer
    public static final int defaultPort = 5555;
    private final boolean showOverheadView = DRCLocalConfigParameters.SHOW_OVERHEAD_VIEW;
    
-   public RemoteAtlasVisualizer(String host, int port, int bufferSize)
+   public RemoteAtlasVisualizer(String host, int port, int bufferSize, DRCRobotModel robotModel)
    {
       System.out.println("Connecting to host " + host);
       
-      DRCRobotModel robotModel = DRCLocalConfigParameters.robotModelToUse;
       DRCRobotJointMap jointMap = robotModel.getJointMap(false, false);
       JaxbSDFLoader robotLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
 //      SDFRobot robot = robotLoader.createRobot(jointMap, false);
@@ -51,9 +52,12 @@ public class RemoteAtlasVisualizer
             defaultHost);
       FlaggedOption portOption = new FlaggedOption("port").setStringParser(JSAP.INTEGER_PARSER).setRequired(false).setLongFlag("port").setShortFlag('p')
             .setDefault(String.valueOf(defaultPort));
+      FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
+      robotModel.setHelp("Robot models: " + Arrays.toString(DRCRobotModel.values()));
       
       jsap.registerParameter(hostOption);
       jsap.registerParameter(portOption);
+      jsap.registerParameter(robotModel);
       
       JSAPResult config = jsap.parse(args);
       
@@ -61,8 +65,9 @@ public class RemoteAtlasVisualizer
       {
          String host = config.getString("host");
          int port = config.getInt("port");
+         DRCRobotModel model = DRCRobotModel.valueOf(config.getString("robotModel"));
          
-         new RemoteAtlasVisualizer(host, port, bufferSize);         
+         new RemoteAtlasVisualizer(host, port, bufferSize, model);         
       }
       else
       {
