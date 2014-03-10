@@ -76,7 +76,7 @@ public class DRCSimulationFactory
       SDFRobot simulatedRobot = robotInterface.getRobot();
       YoVariableRegistry registry = simulatedRobot.getRobotsYoVariableRegistry();
       
-      setupJointDamping(simulatedRobot);
+      setupJointDamping(simulatedRobot, drcRobotModel);
 
       DRCOutputWriter drcOutputWriter = new DRCSimulationOutputWriter(simulatedRobot, registry, dynamicGraphicObjectsListRegistry, robotVisualizer);
       
@@ -213,7 +213,7 @@ public class DRCSimulationFactory
       return estimationJoint;
    }
 
-   private static void setupJointDamping(SDFRobot simulatedRobot)
+   private static void setupJointDamping(SDFRobot simulatedRobot, DRCRobotModel robotModel)
    {
 //      for (int i = 0; i < ROSAtlasJointMap.numberOfJoints; i++)
 //      {
@@ -223,7 +223,7 @@ public class DRCSimulationFactory
       for (RobotSide robotSide : RobotSide.values)
       {
     	 {
-    		 if(DRCLocalConfigParameters.robotModelToUse.getHandModel() == DRCHandModel.SANDIA)
+    		 if(robotModel.getHandModel() == DRCHandModel.SANDIA)
 	         for (int i = 0; i < ROSSandiaJointMap.numberOfJointsPerHand; i++)
 	         {
 	            try

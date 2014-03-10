@@ -72,12 +72,13 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
  */
 public class DRCOptimizationMomentumControlModuleTest
 {
+   private static final DRCRobotModel robotModel = DRCRobotModel.ATLAS_NO_HANDS_ADDED_MASS;
+   
    @Test
    public void testAllJointAccelerationsZero() throws IOException, JAXBException
    {
       Random random = new Random(1252515L);
 
-      DRCRobotModel robotModel = DRCLocalConfigParameters.robotModelToUse;
       DRCRobotJointMap jointMap = robotModel.getJointMap(false, false);
       JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       SDFFullRobotModel fullRobotModel = jaxbSDFLoader.createFullRobotModel(jointMap);
@@ -162,7 +163,6 @@ public class DRCOptimizationMomentumControlModuleTest
    {
       Random random = new Random(1252515L);
 
-      DRCRobotModel robotModel = DRCLocalConfigParameters.robotModelToUse;
       DRCRobotJointMap jointMap = robotModel.getJointMap(false, false);
       JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       SDFFullRobotModel fullRobotModel = jaxbSDFLoader.createFullRobotModel(jointMap);
