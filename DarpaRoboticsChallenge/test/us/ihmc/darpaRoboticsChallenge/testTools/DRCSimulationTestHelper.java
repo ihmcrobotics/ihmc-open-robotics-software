@@ -23,6 +23,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCEnvironmentModel;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseSimulation;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.AsyncContinuousExecutor;
@@ -47,12 +48,15 @@ public class DRCSimulationTestHelper
    
    private final boolean createMovie;
 
-   public DRCSimulationTestHelper(String name, String scriptFilename, DRCDemo01StartingLocation selectedLocation, DRCEnvironmentModel selectedEnvironment, boolean checkNothingChanged, boolean showGUI, boolean createMovie)
+   public DRCSimulationTestHelper(String name, String scriptFilename, DRCDemo01StartingLocation selectedLocation, DRCEnvironmentModel selectedEnvironment,
+         boolean checkNothingChanged, boolean showGUI, boolean createMovie, DRCRobotModel robotModel)
    {
-      this(name, scriptFilename, selectedLocation, selectedEnvironment, checkNothingChanged, showGUI, createMovie, false);
+      this(name, scriptFilename, selectedLocation, selectedEnvironment, checkNothingChanged, showGUI, createMovie, false, robotModel);
    }
    
-   public DRCSimulationTestHelper(String name, String scriptFilename, DRCDemo01StartingLocation selectedLocation, DRCEnvironmentModel selectedEnvironment, boolean checkNothingChanged, boolean showGUI, boolean createMovie, boolean createLoadOfContactPointForTheFeet)
+   public DRCSimulationTestHelper(String name, String scriptFilename, DRCDemo01StartingLocation selectedLocation, DRCEnvironmentModel
+         selectedEnvironment, boolean checkNothingChanged, boolean showGUI, boolean createMovie, boolean createLoadOfContactPointForTheFeet,
+         DRCRobotModel robotModel)
    {
       networkObjectCommunicator = new ScriptedFootstepDataListObjectCommunicator("Team");
 
@@ -70,7 +74,7 @@ public class DRCSimulationTestHelper
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, sliderBoardFactory);
       
       drcSimulation = DRCDemo01.startDRCSim(scriptFilename, networkObjectCommunicator, selectedLocation, guiInitialSetup, selectedEnvironment, initializeEstimatorToActual,
-            startOutsidePen, automaticallyStartSimulation, startDRCNetworkProcessor, createLoadOfContactPointForTheFeet);
+            startOutsidePen, automaticallyStartSimulation, startDRCNetworkProcessor, createLoadOfContactPointForTheFeet, robotModel);
       
       blockingSimulationRunner = new BlockingSimulationRunner(drcSimulation.getSimulationConstructionSet(), 60.0 * 10.0);
 
