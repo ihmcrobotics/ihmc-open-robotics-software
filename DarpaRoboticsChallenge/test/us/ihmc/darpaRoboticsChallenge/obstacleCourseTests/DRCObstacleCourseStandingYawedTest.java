@@ -11,6 +11,7 @@ import org.junit.Test;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCEnvironmentModel;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.utilities.MemoryTools;
@@ -22,6 +23,8 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
    public class DRCObstacleCourseStandingYawedTest
    {
       private static final boolean KEEP_SCS_UP = true;
+      private static final DRCRobotModel robotModel = DRCRobotModel.ATLAS_NO_HANDS_ADDED_MASS;
+
 
       private static final boolean createMovie = BambooTools.doMovieCreation();
       private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
@@ -62,7 +65,7 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 
          DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.ROCKS;
          DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-         drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoRocksTest", "", selectedLocation, selectedEnvironment, checkNothingChanged, showGUI, createMovie);
+         drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoRocksTest", "", selectedLocation, selectedEnvironment, checkNothingChanged, showGUI, createMovie, robotModel);
 
          SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
          ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();

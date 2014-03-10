@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepD
 import us.ihmc.commonWalkingControlModules.packets.ComHeightPacket;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCEnvironmentModel;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.robotSide.RobotSide;
@@ -30,6 +31,7 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 public class DRCObstacleCourseFlatTest
 {
    private static final boolean KEEP_SCS_UP = false;
+   private static final DRCRobotModel robotModel = DRCRobotModel.ATLAS_NO_HANDS_ADDED_MASS;
 
    private static final boolean createMovie = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
@@ -80,7 +82,7 @@ public class DRCObstacleCourseFlatTest
 
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", "", selectedLocation, selectedEnvironment, checkNothingChanged, showGUI, createMovie);
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", "", selectedLocation, selectedEnvironment, checkNothingChanged, showGUI, createMovie, robotModel);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingUpToRamp(simulationConstructionSet);
@@ -110,7 +112,7 @@ public class DRCObstacleCourseFlatTest
       String scriptName = "scripts/ExerciseAndJUnitScripts/SimpleFlatGroundScript.xml";
       String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSimpleFlatGroundScriptTest", fileName, selectedLocation, selectedEnvironment,
-              checkNothingChanged, createMovie, false);
+              checkNothingChanged, createMovie, false, robotModel);
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingUpToRamp(simulationConstructionSet);
 
@@ -136,7 +138,7 @@ public class DRCObstacleCourseFlatTest
       String scriptName = "scripts/ExerciseAndJUnitScripts/SimpleFlatGroundScript.xml";
       String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSimpleFlatGroundScriptTest", fileName, selectedLocation, selectedEnvironment,
-              checkNothingChanged, createMovie, false);
+              checkNothingChanged, createMovie, false, robotModel);
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       SDFRobot robot = drcSimulationTestHelper.getRobot();
       setupCameraForWalkingUpToRamp(simulationConstructionSet);
@@ -174,7 +176,7 @@ public class DRCObstacleCourseFlatTest
       String scriptName = "scripts/ExerciseAndJUnitScripts/LongStepsMaxHeightPauseAndRestart_LeftFootTest.xml";
       String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCLongStepsMaxHeightPauseAndRestartTest", fileName, selectedLocation, selectedEnvironment,
-              checkNothingChanged, createMovie, false);
+              checkNothingChanged, createMovie, false, robotModel);
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingUpToRamp(simulationConstructionSet);
 
@@ -201,7 +203,7 @@ public class DRCObstacleCourseFlatTest
       String scriptName = "scripts/ExerciseAndJUnitScripts/LongSideStepsLeft.xml";
       String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSideStepsWithSlippingTest", fileName, selectedLocation, selectedEnvironment,
-              checkNothingChanged, createMovie, false);
+              checkNothingChanged, createMovie, false, robotModel);
 
       SDFRobot robot = drcSimulationTestHelper.getRobot();
 
@@ -240,7 +242,7 @@ public class DRCObstacleCourseFlatTest
       String scriptName = "scripts/ExerciseAndJUnitScripts/LongSideStepsLeft.xml";
       String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSideStepsWithSlippingTest", fileName, selectedLocation, selectedEnvironment,
-              checkNothingChanged, createMovie, false);
+              checkNothingChanged, createMovie, false, robotModel);
 
       SDFRobot robot = drcSimulationTestHelper.getRobot();
 
@@ -279,7 +281,7 @@ public class DRCObstacleCourseFlatTest
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.TOP_OF_SLOPES;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", "", selectedLocation, selectedEnvironment, checkNothingChanged, createMovie,
-              true);
+              true, robotModel);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
 
@@ -325,7 +327,7 @@ public class DRCObstacleCourseFlatTest
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCRotatedStepsInTheAirTest", "", selectedLocation, selectedEnvironment, checkNothingChanged,
-              showGUI, createMovie);
+              showGUI, createMovie, robotModel);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
@@ -356,7 +358,7 @@ public class DRCObstacleCourseFlatTest
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingUpToRampShortStepsTest", "", selectedLocation, selectedEnvironment, checkNothingChanged,
-            showGUI, createMovie);
+            showGUI, createMovie, robotModel);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
@@ -387,7 +389,7 @@ public class DRCObstacleCourseFlatTest
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingUpToRampLongStepsTest", "", selectedLocation, selectedEnvironment, checkNothingChanged,
-            showGUI, createMovie);
+            showGUI, createMovie, robotModel);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
@@ -420,7 +422,7 @@ public class DRCObstacleCourseFlatTest
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOccasionallyStraightKneesTest", "", selectedLocation, selectedEnvironment, checkNothingChanged,
-            showGUI, createMovie);
+            showGUI, createMovie, robotModel);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
@@ -455,7 +457,7 @@ public class DRCObstacleCourseFlatTest
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT_BUT_ALMOST_PI;
       DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCTurningInPlaceAndPassingPITest", "", selectedLocation, selectedEnvironment,
-            checkNothingChanged, showGUI, createMovie);
+            checkNothingChanged, showGUI, createMovie, robotModel);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();

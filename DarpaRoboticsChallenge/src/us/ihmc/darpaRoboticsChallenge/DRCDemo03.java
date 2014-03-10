@@ -81,7 +81,7 @@ public class DRCDemo03
       {
          LocalObjectCommunicator localObjectCommunicator = DRCObstacleCourseSimulation.createLocalObjectCommunicator(drcSimulation, robotInterface);
 
-         new DRCNetworkProcessor(localObjectCommunicator, drcNetworkProcessorServer);
+         new DRCNetworkProcessor(localObjectCommunicator, drcNetworkProcessorServer, robotModel);
 
          try
          {

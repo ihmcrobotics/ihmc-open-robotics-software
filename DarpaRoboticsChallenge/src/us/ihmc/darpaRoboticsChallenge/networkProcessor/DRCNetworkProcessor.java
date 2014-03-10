@@ -68,14 +68,14 @@ public class DRCNetworkProcessor
     * This will become a stand-alone application in the final competition. Do
     * NOT pass in objects shared with the DRC simulation!
     */
-   public DRCNetworkProcessor(URI rosCoreURI)
+   public DRCNetworkProcessor(URI rosCoreURI, DRCRobotModel robotModel)
    {
-      this(rosCoreURI, null);
+      this(rosCoreURI, null, robotModel);
    }
 
-   public DRCNetworkProcessor(URI rosCoreURI, ObjectCommunicator drcNetworkObjectCommunicator)
+   public DRCNetworkProcessor(URI rosCoreURI, ObjectCommunicator drcNetworkObjectCommunicator, DRCRobotModel robotModel)
    {
-      this(drcNetworkObjectCommunicator);
+      this(drcNetworkObjectCommunicator, robotModel);
 
       System.out.println("Connecting to ROS");
 
@@ -133,9 +133,9 @@ public class DRCNetworkProcessor
       connect();
    }
 
-   public DRCNetworkProcessor(LocalObjectCommunicator scsCommunicator, ObjectCommunicator drcNetworkObjectCommunicator)
+   public DRCNetworkProcessor(LocalObjectCommunicator scsCommunicator, ObjectCommunicator drcNetworkObjectCommunicator, DRCRobotModel robotModel)
    {
-      this(drcNetworkObjectCommunicator);
+      this(drcNetworkObjectCommunicator, robotModel);
       SCSCameraDataReceiver cameraReceiver = new SCSCameraDataReceiver(robotPoseBuffer, videoSettings, scsCommunicator, networkingManager,
             ppsTimestampOffsetProvider);
       new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, fullRobotModel, robotBoundingBoxes, jointMap, fieldComputerClient,
@@ -150,7 +150,7 @@ public class DRCNetworkProcessor
 
    }
 
-   private DRCNetworkProcessor(ObjectCommunicator fieldComputerClientL)
+   private DRCNetworkProcessor(ObjectCommunicator fieldComputerClientL, DRCRobotModel robotModel)
    {
       if (fieldComputerClientL == null)
       {
@@ -164,9 +164,9 @@ public class DRCNetworkProcessor
       }
 
       robotPoseBuffer = new RobotPoseBuffer(this.fieldComputerClient, 1000, timestampProvider);
-      networkingManager = new DRCNetworkProcessorNetworkingManager(this.fieldComputerClient, timestampProvider);
+      networkingManager = new DRCNetworkProcessorNetworkingManager(this.fieldComputerClient, timestampProvider, robotModel);
 
-      DRCRobotModel robotModel = DRCLocalConfigParameters.robotModelToUse;
+      //DRCRobotModel robotModel = DRCLocalConfigParameters.robotModelToUse;
       jointMap = robotModel.getJointMap(false, false);
       JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap, true);
       fullRobotModel = loader.createFullRobotModel(jointMap);
@@ -243,10 +243,10 @@ public class DRCNetworkProcessor
             rosMasterURI = config.getString(rosURIFlag.getID());
          }
          
+         DRCRobotModel model;
          try
          {
-            DRCRobotModel model = DRCRobotModel.valueOf(config.getString("robotModel"));
-            DRCLocalConfigParameters.robotModelToUse = model;
+            model = DRCRobotModel.valueOf(config.getString("robotModel"));
          }
          catch(IllegalArgumentException e)
          {
@@ -261,12 +261,12 @@ public class DRCNetworkProcessor
             System.err.println("WARNING WARNING WARNING :: Simulating DRC Controller - WILL NOT WORK ON REAL ROBOT. Do not use -d argument when running on real robot.");
             ObjectCommunicator objectCommunicator = new LocalObjectCommunicator();
 
-            new DummyController(rosMasterURI, objectCommunicator);
-            new DRCNetworkProcessor(new URI(rosMasterURI), objectCommunicator);
+            new DummyController(rosMasterURI, objectCommunicator, model);
+            new DRCNetworkProcessor(new URI(rosMasterURI), objectCommunicator, model);
          }
          else
          {
-            new DRCNetworkProcessor(new URI(rosMasterURI));
+            new DRCNetworkProcessor(new URI(rosMasterURI), model);
          }
       }
       else
