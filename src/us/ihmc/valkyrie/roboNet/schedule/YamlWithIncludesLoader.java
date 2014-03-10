@@ -16,9 +16,9 @@ public class YamlWithIncludesLoader
 {
    public static Object load(Class<?> loader, String subDirectory, String filename)
    {
-      
+
       InputStream inputStream = loader.getResourceAsStream(subDirectory + "/" + filename);
-      
+
       Yaml yaml = new Yaml(new IncludeConstructor(loader, subDirectory));
       Object object = yaml.load(inputStream);
       try
@@ -30,18 +30,18 @@ public class YamlWithIncludesLoader
       }
       return object;
    }
-   
-   
+
+
    static class IncludeConstructor extends SafeConstructor
    {
       private final Class<?> loader;
       private final String subDirectory;
-      
+
       public IncludeConstructor(Class<?> loader, String subDirectory)
       {
          this.loader = loader;
          this.subDirectory = subDirectory;
-         
+
          this.yamlConstructors.put(new Tag("!include"), new IncludeYaml());
       }
 
@@ -64,10 +64,10 @@ public class YamlWithIncludesLoader
          }
       }
    }
-   
+
    public static void main(String[] args) throws IOException
    {
-      System.out.println(YamlWithIncludesLoader.load(ValkyrieConfigurationRoot.class, "schedules", "main_sim.yaml"));
+      System.out.println(YamlWithIncludesLoader.load(ValkyrieConfigurationRoot.class, "schedules", ValkyrieConfigurationRoot.SCHEDULE_FILE));
    }
 
 }
