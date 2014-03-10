@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
@@ -20,7 +21,10 @@ import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
 import us.ihmc.utilities.net.ObjectCommunicator;
 
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
+import com.martiansoftware.jsap.JSAPResult;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
@@ -33,15 +37,14 @@ public class DRCDemo03
    private final DRCDemoEnvironmentWithBoxAndSteeringWheel environment;
 
    public DRCDemo03(DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner, double timePerRecordTick,
-                    int simulationDataBufferSize)
+                    int simulationDataBufferSize, DRCRobotModel robotModel)
    {
       DRCSCSInitialSetup scsInitialSetup;
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = new VRCTask1InVehicleHovering(0.0); // new VRCTask1InVehicleInitialSetup(-0.03); // DrivingDRCRobotInitialSetup();
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
       
       environment = new DRCDemoEnvironmentWithBoxAndSteeringWheel(dynamicGraphicObjectsListRegistry);
-      DRCRobotModel robotModel = DRCLocalConfigParameters.robotModelToUse;
-      final PlainDRCRobot robotInterface = new PlainDRCRobot(DRCLocalConfigParameters.robotModelToUse, true);
+      final PlainDRCRobot robotInterface = new PlainDRCRobot(robotModel, true);
       scsInitialSetup = new DRCSCSInitialSetup(environment, robotInterface.getSimulateDT());
       
       scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
@@ -139,6 +142,35 @@ public class DRCDemo03
 
    public static void main(String[] args) throws JSAPException
    {
+      // Flag to set robot model
+      JSAP jsap = new JSAP();
+      FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
+      robotModel.setHelp("Robot models: " + Arrays.toString(DRCRobotModel.values()));
+      
+      DRCRobotModel model;
+      try
+      {
+         jsap.registerParameter(robotModel);
+
+         JSAPResult config = jsap.parse(args);
+
+         if (config.success())
+         {
+            model = DRCRobotModel.valueOf(config.getString("robotModel"));
+         }
+         else
+         {
+            System.out.println("Enter a robot model.");
+            return;
+         }
+      }
+      catch (Exception e)
+      {
+         System.out.println("Robot model not found");
+         e.printStackTrace();
+         return;
+      }
+      
       AutomaticSimulationRunner automaticSimulationRunner = null;
 
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false);
@@ -147,7 +179,7 @@ public class DRCDemo03
       int simulationDataBufferSize = 16000;
 //      String ipAddress = null;
 //      int portNumber = -1;
-      new DRCDemo03(guiInitialSetup, automaticSimulationRunner, timePerRecordTick, simulationDataBufferSize);
+      new DRCDemo03(guiInitialSetup, automaticSimulationRunner, timePerRecordTick, simulationDataBufferSize, model);
    }
 
    public SimulationConstructionSet getSimulationConstructionSet()
