@@ -19,6 +19,7 @@ import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.utilities.math.TimeTools;
 
 import com.yobotics.simulationconstructionset.DataBuffer;
+import com.yobotics.simulationconstructionset.ExitActionListener;
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -26,14 +27,15 @@ import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
-public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener
+public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener, ExitActionListener
 {
    protected final YoVariableRegistry registry;
    protected final SimulationConstructionSet scs;
 
    private final Robot robot;
    private final ArrayList<JointUpdater> jointUpdaters = new ArrayList<JointUpdater>();
-   private boolean recording = true;
+   private volatile boolean recording = true;
+   private YoVariableClient client;
    
    private final TObjectDoubleHashMap<String> buttons = new TObjectDoubleHashMap<String>();
 
@@ -49,6 +51,7 @@ public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener
       this.registry = scs.getRootRegistry();
       scs.setScrollGraphsEnabled(false);
       scs.setGroundVisible(false);
+      scs.attachExitActionListener(this);
    }
 
 
@@ -79,7 +82,7 @@ public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener
    public void setRegistry(YoVariableRegistry registry)
    {
       this.registry.addChild(registry);
-   }
+   } 
 
    public void receivedUpdate(long timestamp, ByteBuffer buffer)
    {
@@ -130,6 +133,7 @@ public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener
          }
       });
       
+      this.client = client;
       
    }
 
@@ -167,5 +171,15 @@ public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener
    public DataBuffer getDataBuffer()
    {
 	   return scs.getDataBuffer();
+   }
+
+   @Override
+   public void exitActionPerformed()
+   {
+      recording = false;
+      if(client != null)
+      {
+         client.close();
+      }
    }
 }
