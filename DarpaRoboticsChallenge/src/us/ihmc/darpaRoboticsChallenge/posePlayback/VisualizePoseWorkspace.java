@@ -2,17 +2,22 @@ package us.ihmc.darpaRoboticsChallenge.posePlayback;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 import javax.swing.JFileChooser;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCTask;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCTaskName;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.ThreadTools;
 
 import com.bulletphysics.dynamics.RigidBody;
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAP;
+import com.martiansoftware.jsap.JSAPResult;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.VariableChangedListener;
@@ -37,7 +42,7 @@ public class VisualizePoseWorkspace
    
    private final BagOfBalls balls = new BagOfBalls(500, 0.01, YoAppearance.AliceBlue(), registry, dynamicGraphicObjectsListRegistry);
    
-   public VisualizePoseWorkspace() throws IOException
+   public VisualizePoseWorkspace(DRCRobotModel robotModel) throws IOException
    {
       interpolator = new PosePlaybackSmoothPoseInterpolator(registry);
 
@@ -45,7 +50,7 @@ public class VisualizePoseWorkspace
       posePlaybackSender = new PosePlaybackSender(posePlaybackController, ipAddress);
       posePlaybackRobotPoseSequence = new PosePlaybackRobotPoseSequence();
 
-      DRCTask vrcTask = new DRCTask(DRCTaskName.ONLY_VEHICLE);
+      DRCTask vrcTask = new DRCTask(DRCTaskName.ONLY_VEHICLE, robotModel);
       SDFRobot sdfRobot = vrcTask.getRobot();
 
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot);
@@ -222,7 +227,36 @@ public class VisualizePoseWorkspace
 
    public static void main(String[] args) throws IOException
    {
-      new VisualizePoseWorkspace();
+      // Flag to set robot model
+      JSAP jsap = new JSAP();
+      FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
+      robotModel.setHelp("Robot models: " + Arrays.toString(DRCRobotModel.values()));
+      
+      DRCRobotModel model;
+      try
+      {
+         jsap.registerParameter(robotModel);
+
+         JSAPResult config = jsap.parse(args);
+
+         if (config.success())
+         {
+            model = DRCRobotModel.valueOf(config.getString("robotModel"));
+         }
+         else
+         {
+            System.out.println("Enter a robot model.");
+            return;
+         }
+      }
+      catch (Exception e)
+      {
+         System.out.println("Robot model not found");
+         e.printStackTrace();
+         return;
+      }
+      
+      new VisualizePoseWorkspace(model);
 
    }
 
