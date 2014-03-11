@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.posePlayback;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -10,7 +11,11 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAP;
+import com.martiansoftware.jsap.JSAPResult;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class PoseSequenceEditorGUI extends JFrame
@@ -18,11 +23,11 @@ public class PoseSequenceEditorGUI extends JFrame
    private final PoseSequenceSelectorPanel poseSequenceSelectorPanel;
    private final ButtonPanel buttonPanel;
 
-   public PoseSequenceEditorGUI()
+   public PoseSequenceEditorGUI(DRCRobotModel robotModel)
    {
       super("Pose sequence editor");
       setSize(1400, 600);
-      poseSequenceSelectorPanel = new PoseSequenceSelectorPanel();
+      poseSequenceSelectorPanel = new PoseSequenceSelectorPanel(robotModel);
       buttonPanel = new ButtonPanel();
       
       buttonPanelInit();
@@ -143,7 +148,36 @@ public class PoseSequenceEditorGUI extends JFrame
    
    public static void main(String[] args)
    {
-      PoseSequenceEditorGUI scriptedEditorGUI = new PoseSequenceEditorGUI();
+      // Flag to set robot model
+      JSAP jsap = new JSAP();
+      FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
+      robotModel.setHelp("Robot models: " + Arrays.toString(DRCRobotModel.values()));
+      
+      DRCRobotModel model;
+      try
+      {
+         jsap.registerParameter(robotModel);
+
+         JSAPResult config = jsap.parse(args);
+
+         if (config.success())
+         {
+            model = DRCRobotModel.valueOf(config.getString("robotModel"));
+         }
+         else
+         {
+            System.out.println("Enter a robot model.");
+            return;
+         }
+      }
+      catch (Exception e)
+      {
+         System.out.println("Robot model not found");
+         e.printStackTrace();
+         return;
+      }
+      
+      PoseSequenceEditorGUI scriptedEditorGUI = new PoseSequenceEditorGUI(model);
       scriptedEditorGUI.setDefaultCloseOperation(EXIT_ON_CLOSE);
       scriptedEditorGUI.setVisible(true);
    }

@@ -17,6 +17,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCTask;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCTaskName;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap;
@@ -37,13 +38,13 @@ public class PoseSequenceSelectorPanel extends JPanel
    private final DefaultTableModel tableModel;
    private PosePlaybackRobotPoseSequence sequence = new PosePlaybackRobotPoseSequence();
    
-   public PoseSequenceSelectorPanel() 
+   public PoseSequenceSelectorPanel(DRCRobotModel robotModel) 
    {
        super(new GridLayout(1,0));
        registry = new YoVariableRegistry("PoseSequenceGUI");
        
        posePlaybackController = new PosePlaybackAllJointsController(registry);
-       DRCTask vrcTask = new DRCTask(DRCTaskName.ONLY_VEHICLE);
+       DRCTask vrcTask = new DRCTask(DRCTaskName.ONLY_VEHICLE, robotModel);
        SDFFullRobotModel fullRobotModel = vrcTask.getFullRobotModelFactory().create();
        
        sdfRobot = vrcTask.getRobot();       

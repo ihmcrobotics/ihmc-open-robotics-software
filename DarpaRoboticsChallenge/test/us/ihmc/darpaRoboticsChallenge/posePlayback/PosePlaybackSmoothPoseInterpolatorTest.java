@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCTask;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCTaskName;
 import us.ihmc.utilities.ThreadTools;
@@ -15,6 +16,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 public class PosePlaybackSmoothPoseInterpolatorTest
 {
    private static final boolean SHOW_GUI = true;
+   private static final DRCRobotModel robotModel = DRCRobotModel.ATLAS_NO_HANDS_ADDED_MASS;
 
 
    @Test
@@ -54,7 +56,7 @@ public class PosePlaybackSmoothPoseInterpolatorTest
       SDFRobot sdfRobot = null;
       if (SHOW_GUI)
       {
-         DRCTask vrcTask = new DRCTask(DRCTaskName.ONLY_VEHICLE);
+         DRCTask vrcTask = new DRCTask(DRCTaskName.ONLY_VEHICLE, robotModel);
          sdfRobot = vrcTask.getRobot();
 
          scs = new SimulationConstructionSet(sdfRobot);
