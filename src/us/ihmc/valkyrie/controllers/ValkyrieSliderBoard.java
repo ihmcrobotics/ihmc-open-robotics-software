@@ -52,8 +52,8 @@ public class ValkyrieSliderBoard
          // sliders
          sliderBoardConfigurationManager.setSlider(1, pdControllerBaseName + "_q_d", registry,
                  generalizedSDFRobotModel.getJointHolder(jointName).getLowerLimit(), generalizedSDFRobotModel.getJointHolder(jointName).getUpperLimit());
-         sliderBoardConfigurationManager.setSlider(2, "kp_" + pdControllerBaseName, registry, 0.0, 10.0);
-         sliderBoardConfigurationManager.setSlider(3, "kd_" + pdControllerBaseName, registry, 0.0, 10.0);
+         sliderBoardConfigurationManager.setSlider(2, "kp_" + pdControllerBaseName, registry, 0.0, 60.0);
+         sliderBoardConfigurationManager.setSlider(3, "kd_" + pdControllerBaseName, registry, 0.0, 60.0);
 
          sliderBoardConfigurationManager.saveConfiguration(jointId.toString());
       }
