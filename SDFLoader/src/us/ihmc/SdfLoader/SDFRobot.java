@@ -535,7 +535,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
                   }
 
                   LidarScanParameters polarDefinition = new LidarScanParameters(sdfSamples, (float) sdfMinAngle, (float) sdfMaxAngle, 0.0f, 0.0f, 1, 0.0f,
-                                                           0.0f, (float) sdfMinRange, (float) sdfMaxRange, 0.0f, false);
+                                                           0.0f, (float) sdfMinRange, (float) sdfMaxRange, 0.0f, false,false);
                   LIDARScanDefinition lidarScanDefinition = LIDARScanDefinition.PlanarSweep(sdfMaxAngle - sdfMinAngle, sdfSamples);
                   Transform3D transform3d = SDFConversionsHelper.poseToTransform(sensor.getPose());
 

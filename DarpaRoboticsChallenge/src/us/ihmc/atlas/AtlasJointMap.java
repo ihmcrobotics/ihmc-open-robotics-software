@@ -505,4 +505,10 @@ public class AtlasJointMap extends DRCRobotJointMap
    {
       return new SideDependentList<>(AtlasAndHandRobotParameters.DRC_ROBOT_GROUND_CONTACT_POINT_OFFSET_FROM_FOOT, AtlasAndHandRobotParameters.DRC_ROBOT_GROUND_CONTACT_POINT_OFFSET_FROM_FOOT);
    }
+
+   @Override
+   public String getHighestNeckPitchJointName()
+   {
+      return "neck_ry";
+   }
 }
