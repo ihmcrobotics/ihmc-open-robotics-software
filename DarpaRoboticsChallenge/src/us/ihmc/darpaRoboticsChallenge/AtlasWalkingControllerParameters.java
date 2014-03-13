@@ -563,4 +563,10 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    {
       return DRC_ROBOT_PELVIS_PITCH_LOWER_LIMIT;
    }
+
+   @Override
+   public boolean isPelvisPitchReversed()
+   {
+      return false;
+   }
 }
